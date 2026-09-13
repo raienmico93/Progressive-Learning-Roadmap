@@ -13,3 +13,4 @@
 - [**Bootstrap**](Web%20Development/Bootstrap/Bootstrap.md)
 - [**Tailwind CSS**](Web%20Development/TailwindCSS/TailwindCSS.md)
 - [**TypeScript**](Web%20Development/TypeScript/TypeScript.md)
+- [**jQuery**](Web%20Development/JQuery/JQuery.md)
