@@ -6,7 +6,7 @@
 
 # I. HTML Foundations
 
-* **1. Introduction to HTML**
+* [**1. Introduction to HTML**]((Basics/Intro.md))
 
   * Definition of HTML
 
