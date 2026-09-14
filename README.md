@@ -14,3 +14,36 @@
 - [**Tailwind CSS**](Web%20Development/TailwindCSS/TailwindCSS.md)
 - [**TypeScript**](Web%20Development/TypeScript/TypeScript.md)
 - [**jQuery**](Web%20Development/JQuery/JQuery.md)
+
+---
+
+## Programming Languages
+
+- [**Python**](Programming%20Languages/Python/Python.md)
+- [**Java**](Programming%20Languages/Java/Java.md)
+- [**C**](Programming%20Languages/C/CLang.md)
+- [**C++**](Programming%20Languages/CPlusPlus/CPlusPlus.md)
+- [**C#**](Programming%20Languages/CSharp/CSharp.md)
+- [**Dart**](Programming%20Languages/Dart/Dart.md)
+
+---
+
+## Databases
+
+- [**SQL**](Databases/SQL/SQL.md)
+
+---
+
+## Computer Science
+
+- [**DSA**](Computer%20Science/DSA/DSA.md)
+- [**Computer Network**](Computer%20Science/ComputerNetwork/ComputerNetwork.md)
+
+---
+
+## Python Technologies
+
+- [**Matplotlb**](Python%20Technologies/Matplotlib/Matplotlib.md)
+- [**NumPy**](Python%20Technologies/NumPy/NumPy.md)
+- [**Pandas**](Python%20Technologies/Pandas/Pandas.md)
+- [**SciPy**](Python%20Technologies/SciPy/SciPy.md)
