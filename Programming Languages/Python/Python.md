@@ -95,21 +95,21 @@
 
 # II. Core Python Language
 
-* **5. Variables and Object Model**
+* [**5. Variables and Object Model**](/Programming%20Languages/Python/Basics/Variables.md)
 
   * Variable assignment
   * Naming variables
   * Multiple assignment
   * Chained assignment
-  * Object references
+  <!--* Object references
   * Identity versus equality
   * Dynamic typing
   * Strong typing
   * Object lifecycle
   * Garbage collection
-  * Variable scope
+  * Variable scope-->
 
-* **6. Python Data Types**
+* [**6. Python Data Types**](/Programming%20Languages/Python/Basics/DataTypes.md)
 
   * Numeric types
 
