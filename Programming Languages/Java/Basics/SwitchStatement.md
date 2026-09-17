@@ -542,7 +542,7 @@ public class EnumSwitchDemo {
         String activity = switch (current) {
             case SPRING -> "Planting";
             case SUMMER -> "Swimming";
-            case FALL -> "Harvesting";
+            case FALL   -> "Harvesting";
             case WINTER -> "Skiing";
         };
 

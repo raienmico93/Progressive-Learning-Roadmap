@@ -25,6 +25,7 @@
 - [**C++**](Programming%20Languages/CPlusPlus/CPlusPlus.md)
 - [**C#**](Programming%20Languages/CSharp/CSharp.md)
 - [**Dart**](Programming%20Languages/Dart/Dart.md)
+- [**Kotlin**](/Programming%20Languages/Kotlin/Kotlin.md)
 
 ---
 
@@ -47,3 +48,12 @@
 - [**NumPy**](Python%20Technologies/NumPy/NumPy.md)
 - [**Pandas**](Python%20Technologies/Pandas/Pandas.md)
 - [**SciPy**](Python%20Technologies/SciPy/SciPy.md)
+
+## Mobile Development
+
+- [**Flutter**](/Mobile%20Development/Flutter/Flutter.md)
+
+## Microsoft Technologies
+
+- [**ASP.NET Core**](/Microsoft%20Technologies/AspDotNetCore/AspDotNetCore.md)
+- [**ASP.NET MVC**](/Microsoft%20Technologies/AspDotNetMVC/AspDotNetMVC.md)

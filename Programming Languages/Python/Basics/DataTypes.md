@@ -38,8 +38,6 @@ To understand Python data types, you should be familiar with:
 
 ## 🔢 Numeric Types
 
-### Core Definitions
-
 **Core Definition:** Numeric types represent different kinds of numbers that Python can work with mathematically.
 
 **Technical Definition:** Python's numeric tower includes `int` (arbitrary-precision integers), `float` (IEEE 754 double-precision floating-point numbers), and `complex` (numbers with real and imaginary components), with additional support for `Fraction` (rational numbers) and `Decimal` (fixed-point decimal arithmetic) through standard library modules .
@@ -656,8 +654,6 @@ ROUND_DOWN: 7.32
 
 ## 🔤 Text Type (`str`)
 
-### Core Definitions
-
 **Core Definition:** A string is a sequence of characters used to represent text.
 
 **Technical Definition:** The `str` type represents an immutable sequence of Unicode code points, supporting a wide range of text processing operations including searching, formatting, and transformation .
@@ -802,8 +798,6 @@ Pi: 3.14
 - Text Sequence Type — str - https://docs.python.org/3/library/stdtypes.html#string-methods
 
 ## 🔀 Boolean Type (`bool`)
-
-### Core Definitions
 
 **Core Definition:** A boolean represents one of two truth values: `True` or `False`.
 
@@ -1854,8 +1848,6 @@ After modification: bytearray(b'Abc')
 - Buffer Protocol - https://docs.python.org/3/c-api/buffer.html
 
 ## 🛑 Null-Like Type (`NoneType`)
-
-### Core Definitions
 
 **Core Definition:** `None` represents the absence of a value.
 

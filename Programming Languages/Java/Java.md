@@ -146,14 +146,12 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 - **10. Operators**
   - [Arithmetic operators](/Programming%20Languages/Java/Basics/Operators/Arithmetic.md)
   - Assignment operators
-  - Relational operators
-  - Equality operators
-  - Logical operators
-  - Bitwise operators
+  - [Comparison operators](/Programming%20Languages/Java/Basics/Operators/Relational.md)
+  - [Logical operators](/Programming%20Languages/Java/Basics/Operators/Logical.md)
+  - [Bitwise operators](/Programming%20Languages/Java/Basics/Operators/Bitwise.md)
   - Shift operators
-  - Unary operators
+  - [Unary operators](/Programming%20Languages/Java/Basics/Operators/Unary.md)
   - Conditional operator
-  - Increment and decrement operators
   - Operator precedence
   - Operator associativity
 
@@ -197,7 +195,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # IV. Arrays and Strings
 
-- **15. Arrays**
+- [**15. Arrays**](/Programming%20Languages/Java/Basics/Arrays.md)
   - One-dimensional arrays
   - Multidimensional arrays
   - Array declaration
@@ -218,7 +216,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Array comparison
   - Array copying
 
-- **17. Strings**
+- [**17. Strings**](/Programming%20Languages/Java/Basics/String.md)
   - `String`
   - String literals
   - String immutability
