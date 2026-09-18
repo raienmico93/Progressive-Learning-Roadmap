@@ -377,7 +377,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # VIII. Packages, Access Control, and Organization
 
-- **36. Packages**
+- [**36. Packages**](/Programming%20Languages/Java/Advanced/Package.md)
   - Package declarations
   - Package naming
   - Import statements
@@ -409,7 +409,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Checked exceptions
   - Unchecked exceptions
 
-- **40. Exception Handling**
+- [**40. Exception Handling**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/ExceptionHandling.md)
   - `try`
   - `catch`
   - `finally`
@@ -453,7 +453,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - `Deque`
   - `Map`
 
-- **46. Lists**
+- [**46. Lists**](/Programming%20Languages/Java/Data%20Structures/Lists.md)
   - `ArrayList`
   - `LinkedList`
   - List traversal
@@ -461,7 +461,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - List removal
   - List searching
 
-- **47. Sets**
+- [**47. Sets**](/Programming%20Languages/Java/Data%20Structures/Sets.md)
   - `HashSet`
   - `LinkedHashSet`
   - `TreeSet`
@@ -469,7 +469,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Ordering
   - Hashing versus sorting
 
-- **48. Maps**
+- [**48. Maps**](/Programming%20Languages/Java/Data%20Structures/Maps.md)
   - `HashMap`
   - `LinkedHashMap`
   - `TreeMap`
@@ -477,20 +477,20 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Key uniqueness
   - Map traversal
 
-- **49. Queues and Deques**
+- [**49. Queues and Deques**](/Programming%20Languages/Java/Data%20Structures/QueueAndDequeue.md)
   - `Queue`
   - `Deque`
   - `PriorityQueue`
   - `ArrayDeque`
 
-- **50. Iteration**
+- [**50. Iteration**](/Programming%20Languages/Java/Data%20Structures/Iterators.md)
   - `Iterator`
   - `ListIterator`
   - Enhanced `for`
   - Collection traversal
   - Safe modification
 
-- **51. Utility Algorithms**
+- [**51. Utility Algorithms**](/Programming%20Languages/Java/Data%20Structures/UtilityAlgorithms.md)
   - `Collections`
   - Sorting
   - Searching
@@ -503,21 +503,18 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XI. Generics
 
-- **52. Generic Programming**
+- [**52. Generic Programming**](/Programming%20Languages/Java/Generics/Generics.md)
   - Generic classes
   - Generic methods
   - Type parameters
   - Type safety
   - Compile-time checking
 
-- **53. Generic Bounds**
+- [**53. Generic Bounded type parameters**](/Programming%20Languages/Java/Generics/BoundedTypeParameters.md)
   - Upper bounds
-  - `extends`
   - Lower bounds
-  - `super`
-  - Bounded type parameters
 
-- **54. Wildcards**
+- [**54. Wildcards**](/Programming%20Languages/Java/Generics/BoundedWildcards.md)
   - Unbounded wildcard
   - Upper-bounded wildcard
   - Lower-bounded wildcard
@@ -534,7 +531,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XII. Enums, Records, and Modern Java Data Modeling
 
-- **56. Enumerations**
+- [**56. Enumerations**](/Programming%20Languages/Java/Advanced/Enums.md)
   - `enum`
   - Enum constants
   - Enum fields
@@ -542,7 +539,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Enum constructors
   - Enum-based state modeling
 
-- **57. Records**
+- [**57. Records**](/Programming%20Languages/Java/Advanced/Records.md)
   - Record declaration
   - Components
   - Generated accessors
@@ -550,7 +547,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Compact constructors
   - Immutable data modeling
 
-- **58. Sealed Types**
+- [**58. Sealed Types**](/Programming%20Languages/Java/Advanced/SealedClasses.md)
   - Sealed classes
   - Sealed interfaces
   - `permits`
@@ -568,23 +565,24 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Declarative programming
   - Side-effect management
 
-- **60. Lambda Expressions**
+- [**60. Lambda Expressions**](/Programming%20Languages/Java/Functional/LambdaExpressions.md)
   - Lambda syntax
   - Parameters
   - Expression lambdas
   - Statement lambdas
   - Captured variables
 
-- **61. Functional Interfaces**
+- [**61. Functional Interfaces**](/Programming%20Languages/Java/Functional/FunctionalInterface.md)
   - `Predicate`
   - `Function`
   - `Consumer`
   - `Supplier`
   - `UnaryOperator`
   - `BinaryOperator`
+  - [Primitive Specializations](/Programming%20Languages/Java/Functional/PrimitiveSpecializations.md)
   - Custom functional interfaces
 
-- **62. Method References**
+- [**62. Method References**](/Programming%20Languages/Java/Functional/MethodReferences.md)
   - Static method references
   - Instance method references
   - Constructor references
@@ -594,14 +592,14 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XIV. Stream API
 
-- **63. Stream Fundamentals**
+- [**63. Stream Fundamentals**](/Programming%20Languages/Java/Functional/StreamAPI.md)
   - Stream creation
   - Intermediate operations
   - Terminal operations
   - Lazy evaluation
   - Pipeline composition
 
-- **64. Intermediate Operations**
+- [**64. Intermediate Operations**](/Programming%20Languages/Java/Functional/StreamIntermediateOperations.md)
   - `filter`
   - `map`
   - `flatMap`
@@ -611,7 +609,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - `limit`
   - `skip`
 
-- **65. Terminal Operations**
+- [**65. Terminal Operations**](/Programming%20Languages/Java/Functional/StreamTerminalOperations.md)
   - `forEach`
   - `collect`
   - `reduce`
@@ -624,7 +622,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - `allMatch`
   - `noneMatch`
 
-- **66. Collectors**
+- [**66. Collectors**](/Programming%20Languages/Java/Functional/Collectors.md)
   - `Collectors.toList`
   - `toSet`
   - `toMap`
@@ -634,14 +632,14 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - `summarizing`
   - Nested grouping
 
-- **67. Advanced Stream Processing**
+- [**67. Advanced Stream Processing**](/Programming%20Languages/Java/Functional/AdvancedStreamProcessing.md)
   - Primitive streams
   - Stream flattening
   - Complex reductions
   - Parallel streams
   - Stream performance considerations
 
-- **68. Optional**
+- [**68. Optional**](/Programming%20Languages/Java/Functional/Optional.md)
   - `Optional`
   - `of`
   - `ofNullable`
