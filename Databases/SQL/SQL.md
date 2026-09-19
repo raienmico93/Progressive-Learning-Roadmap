@@ -230,7 +230,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Removing defaults
   * Schema modifications in production
 
-* **12. Table Constraints**
+* [**12. Table Constraints**](/Databases/SQL/DDL/Constraints.md)
 
   * `PRIMARY KEY`
   * `FOREIGN KEY`
@@ -261,20 +261,18 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # IV. SQL Data Manipulation Language (DML)
 
-* **14. INSERT Operations**
+* [**14. INSERT Operations**](/Databases/SQL/DML/Insert.md)
 
   * `INSERT`
   * Inserting a single row
   * Inserting multiple rows
   * Explicit column lists
   * Inserting default values
-  * Inserting from another query
-
-    * `INSERT ... SELECT`
+  * Inserting from another query (`INSERT ... SELECT`)
   * Handling generated identifiers
   * Handling constraint violations
 
-* **15. SELECT Operations**
+* [**15. SELECT Operations**](/Databases/SQL/DML/Select.md)
 
   * `SELECT`
   * Selecting specific columns
@@ -283,12 +281,10 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Expressions
   * Calculated columns
   * Literal values
-  * Distinct results
-
-    * `DISTINCT`
+  * Distinct results (`DISTINCT`)
   * Query readability and formatting
 
-* **16. UPDATE Operations**
+* [**16. UPDATE Operations**](/Databases/SQL/DML/Update.md)
 
   * `UPDATE`
   * Updating a single row
@@ -298,7 +294,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Updating from related data
   * Safe update practices
 
-* **17. DELETE Operations**
+* [**17. DELETE Operations**](/Databases/SQL/DML/Delete.md)
 
   * `DELETE`
   * Deleting selected rows
@@ -311,7 +307,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # V. Querying Fundamentals
 
-* **18. Filtering Data**
+* [**18. Filtering Data**](/Databases/SQL/DQL/FilteringData.md)
 
   * `WHERE`
   * Comparison operators
@@ -332,7 +328,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Parentheses
   * Boolean expressions
 
-* **19. NULL Handling**
+* [**19. NULL Handling**](/Databases/SQL/DQL/NullHandling.md)
 
   * Meaning of `NULL`
   * Difference between `NULL` and zero
@@ -348,7 +344,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * `NULLIF`
   * NULL propagation
 
-* **20. Pattern Matching**
+* [**20. Pattern Matching**](/Databases/SQL/DQL/PatternMatching.md)
 
   * `LIKE`
   * Wildcards
@@ -361,9 +357,8 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 * **21. Range and Membership Filtering**
 
-  * `BETWEEN`
-  * `IN`
-  * `NOT IN`
+  * [`BETWEEN`](/Databases/SQL/DQL/Range.md)
+  * [Membership Filtering (`IN` and `NOT IN`)](/Databases/SQL/DQL/Membership.md)
   * Subquery-based membership
   * NULL behavior with `NOT IN`
 
@@ -371,21 +366,17 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # VI. Sorting, Limiting, and Result Formatting
 
-* **22. Sorting Results**
+* [**22. Sorting Results**](/Databases/SQL/DQL/SortingResult.md)
 
   * `ORDER BY`
-  * Ascending order
-
-    * `ASC`
-  * Descending order
-
-    * `DESC`
+  * Ascending order (`ASC`)
+  * Descending order (`DESC`)
   * Multi-column sorting
   * Sorting by expressions
   * Sorting by aliases
   * NULL ordering
 
-* **23. Limiting Results**
+* [**23. Limiting Results**](/Databases/SQL/DQL/LimitingResults.md)
 
   * `LIMIT`
   * `OFFSET`

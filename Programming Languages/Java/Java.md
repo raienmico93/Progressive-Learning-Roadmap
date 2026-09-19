@@ -416,25 +416,25 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Multiple catch blocks
   - Multi-catch
 
-- **41. Exception Propagation**
+- [**41. Exception Propagation**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/ExceptionPropagation.md)
   - `throws`
   - Stack unwinding
   - Caller responsibility
   - Exception chaining
 
-- **42. Creating Exceptions**
+- [**42. Creating Exceptions**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/ExceptionCreation.md)
   - Custom checked exceptions
   - Custom unchecked exceptions
   - Exception constructors
   - Contextual error information
 
-- **43. Try-with-Resources**
+- [**43. Try-with-Resources**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/TryWithResources.md)
   - `AutoCloseable`
   - Resource management
   - Automatic closing
   - Suppressed exceptions
 
-- **44. Exception Design**
+- [**44. Exception Design**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/ExceptionDesign.md)
   - Meaningful exception types
   - Avoiding overly broad catches
   - Fail-fast behavior
@@ -655,28 +655,28 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XV. Date and Time API
 
-- **69. Modern Date/Time API**
+- [**69. Modern Date/Time API**](/Programming%20Languages/Java/DateAndTimeAPI/ModernDateTimeAPI.md)
   - `LocalDate`
   - `LocalTime`
   - `LocalDateTime`
   - `ZonedDateTime`
   - `Instant`
 
-- **70. Date Calculations**
+- [**70. Date Calculations**](/Programming%20Languages/Java/DateAndTimeAPI/DataCalculations.md)
   - `Period`
   - `Duration`
   - Date arithmetic
   - Time differences
   - Date comparison
 
-- **71. Formatting and Parsing**
+- [**71. Formatting and Parsing**](/Programming%20Languages/Java/DateAndTimeAPI/FormattingAndParsing.md)
   - `DateTimeFormatter`
   - Custom formats
   - Parsing strings
   - Formatting dates
   - Locale considerations
 
-- **72. Time Zones**
+- [**72. Time Zones**](/Programming%20Languages/Java/DateAndTimeAPI/TimeZones.md)
   - Zone IDs
   - UTC
   - Offset-based time

@@ -4,7 +4,7 @@
 
 * **I. Python Foundations**
 
-  * **1. Introduction to Python**
+  * [**1. Introduction to Python**](/Programming%20Languages/Python/Basics/Intro.md)
 
     * Python definition and purpose
     * History and evolution of Python
@@ -37,7 +37,7 @@
       * Testing
       * DevOps
 
-  * **2. Python Installation and Environment**
+  * [**2. Python Installation and Environment**](/Programming%20Languages/Python/Basics/Installation.md)
 
     * Installing Python
     * Python interpreter
@@ -58,7 +58,7 @@
     * Running modules
     * Executing code interactively
 
-  * **3. Python Syntax Fundamentals**
+  * [**3. Python Syntax Fundamentals**](/Programming%20Languages/Python/Basics/Syntax.md)
 
     * Statements
     * Expressions
@@ -78,7 +78,7 @@
     * Multiple statements
     * Pythonic formatting
 
-  * **4. Python Execution Model**
+  * [**4. Python Execution Model**](/Programming%20Languages/Python/Basics/ExecutionModel.md)
 
     * Source code
     * Parsing
@@ -140,38 +140,13 @@
 
 * **7. Operators**
 
-  * Arithmetic operators
-
-    * `+`
-    * `-`
-    * `*`
-    * `/`
-    * `//`
-    * `%`
-    * `**`
-  * Comparison operators
-  * Assignment operators
-  * Logical operators
-
-    * `and`
-    * `or`
-    * `not`
-  * Identity operators
-
-    * `is`
-    * `is not`
-  * Membership operators
-
-    * `in`
-    * `not in`
-  * Bitwise operators
-
-    * `&`
-    * `|`
-    * `^`
-    * `~`
-    * `<<`
-    * `>>`
+  * [Arithmetic operators](/Programming%20Languages/Python/Operators/Arithmetic.md)
+  * [Comparison operators](/Programming%20Languages/Python/Operators/Comparison.md)
+  * [Logical operators](/Programming%20Languages/Python/Operators/Logical.md)
+  * [Bitwise operators](/Programming%20Languages/Python/Operators/Bitwise.md)
+  * [Assignment operators](/Programming%20Languages/Python/Operators/Assignment.md)
+  * [Identity operators (`is` and `is not`)](/Programming%20Languages/Python/Operators/Identity.md)
+  * [Membership operators (`in` and `not in`)](/Programming%20Languages/Python/Operators/Membership.md)
   * Operator precedence
   * Associativity
 
@@ -195,7 +170,7 @@
 
 # III. Control Flow
 
-* **9. Conditional Statements**
+* [**9. Conditional Statements**](/Programming%20Languages/Python/ControlFlow/ConditionalStatements.md)
 
   * `if`
   * `elif`
@@ -203,12 +178,10 @@
   * Nested conditions
   * Compound conditions
   * Conditional expressions
-
-    * Ternary expression
   * Truthiness and falsiness
   * Short-circuit evaluation
 
-* **10. Loops**
+* [**10. Loops**](/Programming%20Languages/Python/ControlFlow/Loops.md)
 
   * `for`
   * `while`
@@ -219,7 +192,7 @@
 
     * `range()`
 
-* **11. Loop Control**
+* [**11. Loop Control**](/Programming%20Languages/Python/ControlFlow/LoopControls.md)
 
   * `break`
   * `continue`
@@ -228,7 +201,7 @@
   * Early termination
   * Sentinel-controlled loops
 
-* **12. Structural Pattern Matching**
+* [**12. Structural Pattern Matching**](/Programming%20Languages/Python/ControlFlow/MatchStatement.md)
 
   * `match`
   * `case`
@@ -306,7 +279,7 @@
 
 # V. Python Collections
 
-* **18. Lists**
+* [**18. Lists**](/Programming%20Languages/Python/Collections/Lists.md)
 
   * Creating lists
   * Indexing
@@ -320,7 +293,7 @@
   * Nested lists
   * List methods
 
-* **19. Tuples**
+* [**19. Tuples**](/Programming%20Languages/Python/Collections/Tuples.md)
 
   * Tuple creation
   * Immutability
@@ -328,7 +301,7 @@
   * Nested tuples
   * Named tuples
 
-* **20. Sets**
+* [**20. Sets**](/Programming%20Languages/Python/Collections/Sets.md)
 
   * Set creation
   * Membership testing
@@ -339,7 +312,7 @@
   * Set comprehensions
   * Immutable sets
 
-* **21. Dictionaries**
+* [**21. Dictionaries**](/Programming%20Languages/Python/Collections/Dictionaries.md)
 
   * Key-value structures
   * Creating dictionaries
@@ -353,17 +326,20 @@
 
 * **22. Collection Utilities**
 
-  * `collections`
+   * `collections` module
+      * `Counter`
+      * `defaultdict`
+      * `deque`
+      * `namedtuple`
+      * `ChainMap`
+      * `OrderedDict`
+      * `UserDict`
+      * `UserList`
+      * `UserString`
+   * `collections.abc` (Abstract Base Classes for custom collections)
+   * array module (Efficient numeric arrays)
+   * Selecting the correct collection type (Time & space complexity considerations)
 
-    * `Counter`
-    * `defaultdict`
-    * `deque`
-    * `namedtuple`
-    * `ChainMap`
-    * `UserDict`
-    * `UserList`
-  * `collections.abc`
-  * Selecting the correct collection type
 
 ---
 
@@ -428,7 +404,7 @@
 
 # VII. Comprehensions and Iteration
 
-* **28. Comprehensions**
+* [**28. Comprehensions**](/Programming%20Languages/Python/Collections/Comprehensions.md)
 
   * List comprehensions
   * Set comprehensions
@@ -437,7 +413,7 @@
   * Nested comprehensions
   * Readability considerations
 
-* **29. Iterators**
+* [**29. Iterators**](/Programming%20Languages/Python/Functional/Iterators.md)
 
   * Iterable versus iterator
   * `iter()`
@@ -446,7 +422,7 @@
   * Custom iterators
   * Lazy evaluation
 
-* **30. Generators**
+* [**30. Generators**](/Programming%20Languages/Python/Functional/Generators.md)
 
   * `yield`
   * Generator functions
@@ -456,7 +432,7 @@
   * Memory-efficient iteration
   * `yield from`
 
-* **31. `itertools`**
+* [**31. `itertools`**](/Programming%20Languages/Python/Functional/Iterations.md)
 
   * Infinite iterators
   * Combinatoric iterators
@@ -465,6 +441,7 @@
   * Chaining
   * Cartesian products
   * Sliding-window patterns
+  * [Asynchronous Iterations](/Programming%20Languages/Python/Functional/AsynchronousIterations.md)
 
 ---
 
@@ -643,7 +620,7 @@
 
 # XI. Modules, Packages, and Dependency Management
 
-* **47. Modules**
+* [**47. Modules**](/Programming%20Languages/Python/Modules/Modules.md)
 
   * Module creation
   * Importing modules
@@ -653,7 +630,7 @@
   * `__name__`
   * `__main__`
 
-* **48. Packages**
+* [**48. Packages**](/Programming%20Languages/Python/Modules/Packages.md)
 
   * Package structure
   * `__init__.py`
@@ -663,25 +640,18 @@
 
 * **49. Standard Library**
 
-  * `math`
-  * `statistics`
-  * `datetime`
-  * `os`
-  * `sys`
-  * `pathlib`
-  * `json`
-  * `csv`
-  * `re`
-  * `random`
-  * `logging`
-  * `subprocess`
-  * `argparse`
-  * `sqlite3`
-  * `itertools`
-  * `functools`
-  * `collections`
+   * Data & Math: math, statistics, random, decimal (Added decimal for financial accuracy)
+   * Date & Time: `datetime`
+   * File System & Formats: os, sys, pathlib, json, csv
+   * Text Processing: re (Regular Expressions)
+   * System & Concurrency: logging, subprocess, argparse
+   * Databases: sqlite3
+   * Functional Utilities: itertools, functools, collections
+   * Structural Utilities: shutil (High-level file operations), copy (Deep/shallow copies) (Added)
+   * Modern Additions: zoneinfo (IANA time zone support), tomllib (Native TOML parsing) (Added: tomllib is standard since 3.11)
 
-* **50. Virtual Environments**
+
+* [**50. Virtual Environments**](/Programming%20Languages/Python/Modules/Venv.md)
 
   * `venv`
   * Environment isolation
@@ -689,7 +659,7 @@
   * Deactivation
   * Dependency isolation
 
-* **51. Package Management**
+* [**51. Package Management**](/Programming%20Languages/Python/Modules/PackageManagement.md)
 
   * `pip`
   * Installing packages
