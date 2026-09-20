@@ -240,7 +240,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # V. Routing
 
-* **15. Basic Routing**
+* [**15. Basic Routing**](/Web%20Development/Laravel/Routing/BasicRouting.md)
 
   * Route definitions
   * HTTP verbs
@@ -249,7 +249,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Route parameters
   * Optional parameters
 
-* **16. Advanced Routing**
+* [**16. Advanced Routing**](/Web%20Development/Laravel/Routing/AdvancedRouting.md)
 
   * Route groups
   * Prefixes
@@ -258,9 +258,8 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Subdomain routing
   * Domain routing
   * Route constraints
-  * Route model binding
 
-* **17. Route Model Binding**
+* [**17. Route Model Binding**](/Web%20Development/Laravel/Routing/RouteModelBinding.md)
 
   * Implicit binding
   * Explicit binding
@@ -268,7 +267,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Nested bindings
   * Missing-model handling
 
-* **18. Resource Routing**
+* [**18. Resource Routing**](/Web%20Development/Laravel/Routing/ResourceRouting.md)
 
   * Resource controllers
   * CRUD routes
@@ -276,7 +275,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Partial resource routes
   * Route inspection
 
-* **19. Routing Architecture**
+* [**19. Routing Architecture**](/Web%20Development/Laravel/Routing/Architecture.md)
 
   * Web routes
   * API routes
@@ -289,7 +288,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # VI. Controllers
 
-* **20. Controller Fundamentals**
+* [**20. Controller Fundamentals**](/Web%20Development/Laravel/Controller/BasicController.md)
 
   * Controller purpose
   * Controller generation
@@ -297,7 +296,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Dependency injection
   * Returning responses
 
-* **21. Controller Types**
+* [**21. Controller Types**](/Web%20Development/Laravel/Controller/ControllerTypes.md)
 
   * Standard controllers
   * Resource controllers
@@ -305,7 +304,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Invokable controllers
   * Single-action controllers
 
-* **22. Controller Design**
+* [**22. Controller Design**](/Web%20Development/Laravel/Controller/ControllerDesign.md)
 
   * Separation of concerns
   * Thin controllers
@@ -318,7 +317,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # VII. Requests and Responses
 
-* **23. HTTP Requests**
+* [**23. HTTP Requests**](/Web%20Development/Laravel/Requests%20and%20Responses/HTTPRequests.md)
 
   * Request objects
   * Input retrieval
@@ -329,7 +328,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Cookies
   * Uploaded files
 
-* **24. HTTP Responses**
+* [**24. HTTP Responses**](/Web%20Development/Laravel/Requests%20and%20Responses/HTTPResponses.md)
 
   * Strings
   * Views
@@ -340,7 +339,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Custom status codes
   * Custom headers
 
-* **25. Response Design**
+* [**25. Response Design**](/Web%20Development/Laravel/Requests%20and%20Responses/ResponseDesign.md)
 
   * API response structures
   * Error responses

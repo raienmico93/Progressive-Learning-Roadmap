@@ -402,7 +402,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # VII. SQL Functions and Expressions
 
-* **25. String Functions**
+* [**25. String Functions**](/Databases/SQL/Functions/String.md)
 
   * Length functions
   * Case conversion
@@ -421,7 +421,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Padding
   * String splitting where supported
 
-* **26. Numeric Functions**
+* [**26. Numeric Functions**](/Databases/SQL/Functions/Numeric.md)
 
   * Absolute value
   * Rounding
@@ -432,7 +432,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Square root
   * Random number generation where supported
 
-* **27. Date and Time Functions**
+* [**27. Date and Time Functions**](/Databases/SQL/Functions/DateAndTime.md)
 
   * Current date
   * Current time
@@ -458,18 +458,15 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # VIII. Aggregate Functions and Analytical Queries
 
-* **29. Aggregate Functions**
+* [**29. Aggregate Functions**](/Databases/SQL/Functions/Aggregate.md)
 
   * `COUNT`
   * `SUM`
   * `AVG`
   * `MIN`
   * `MAX`
-  * `COUNT(*)`
-  * `COUNT(column)`
-  * `COUNT(DISTINCT column)`
 
-* **30. GROUP BY**
+* [**30. GROUP BY**](/Databases/SQL/DQL/GroupBy.md)
 
   * Grouping records
   * Single-column grouping
@@ -477,14 +474,14 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Grouping expressions
   * Aggregate calculations
 
-* **31. HAVING**
+* [**31. HAVING**](/Databases/SQL/DQL/Having.md)
 
   * Difference between `WHERE` and `HAVING`
   * Filtering groups
   * Aggregate conditions
   * Multi-condition group filters
 
-* **32. Advanced Aggregation**
+* [**32. Advanced Aggregation**](/Databases/SQL/DQL/AdvancedAggregation.md)
 
   * Conditional aggregation
   * Multiple aggregates
@@ -498,12 +495,13 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # IX. Relational Joins
 
-* **33. Join Fundamentals**
+* [**33. Join Fundamentals**](/Databases/SQL/JOINS/Joins.md)
 
   * Purpose of joins
   * Join conditions
   * Primary-key/foreign-key relationships
   * Inner versus outer joins
+  * [Syntax and Operators](/Databases/SQL/JOINS/JoinsSyntaxAndOperators.md)
 
 * **34. INNER JOIN**
 
@@ -547,7 +545,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # X. Subqueries and Nested Queries
 
-* **39. Subquery Fundamentals**
+* [**39. Subquery Fundamentals**](/Databases/SQL/Nested%20Queries/Subqueries.md)
 
   * Definition
   * Scalar subqueries
@@ -555,7 +553,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Multi-row subqueries
   * Correlated subqueries
 
-* **40. Subqueries with Operators**
+* [**40. Subqueries with Operators**](/Databases/SQL/Nested%20Queries/WithOperators.md)
 
   * `IN`
   * `EXISTS`
@@ -563,20 +561,20 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * `ALL`
   * Comparison operators
 
-* **41. Correlated Subqueries**
+* [**41. Correlated Subqueries**](/Databases/SQL/Nested%20Queries/CorrelatedSubqueries.md)
 
   * Outer-query references
   * Row-by-row logical evaluation
   * Appropriate use cases
   * Performance considerations
 
-* **42. Derived Tables**
+* [**42. Derived Tables**](/Databases/SQL/Nested%20Queries/DerivedTables.md)
 
   * Subqueries in `FROM`
   * Named derived tables
   * Multi-stage query construction
 
-* **43. Common Table Expressions**
+* [**43. Common Table Expressions**](/Databases/SQL/Nested%20Queries/CTE.md)
 
   * `WITH`
   * Non-recursive CTEs
@@ -589,7 +587,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XI. Set Operations
 
-* **44. Combining Result Sets**
+* [**44. Combining Result Sets**](/Databases/SQL/JOINS/Sets.md)
 
   * `UNION`
   * `UNION ALL`
@@ -701,11 +699,9 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XIV. Views and Abstraction
 
-* **54. Views**
+* [**54. Views**](/Databases/SQL/Views/Views.md)
 
-  * Creating views
-
-    * `CREATE VIEW`
+  * Creating views (`CREATE VIEW`)
   * Querying views
   * Updating views
   * Dropping views
@@ -808,7 +804,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XVI. Transactions and Concurrency Control
 
-* **63. Transaction Fundamentals**
+* [**63. Transaction Fundamentals**](/Databases/SQL/TCL/Transaction.md)
 
   * Transaction definition
   * Atomic unit of work
@@ -824,7 +820,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Isolation
   * Durability
 
-* **65. Transaction Isolation**
+* [**65. Transaction Isolation**](/Databases/SQL/TCL/Transaction.md)
 
   * Read Uncommitted
   * Read Committed

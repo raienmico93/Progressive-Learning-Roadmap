@@ -427,7 +427,7 @@ PHP is best learned progressively: first the language itself, then web programmi
 
 # IX. Files, Directories, and Input/Output
 
-* **36. File Handling**
+* [**36. File Handling**](/Web%20Development/PHP/Files/FileHandling.md)
 
   * Reading files
   * Writing files
@@ -436,14 +436,14 @@ PHP is best learned progressively: first the language itself, then web programmi
   * File metadata
   * File permissions
 
-* **37. Directory Operations**
+* [**37. Directory Operations**](/Web%20Development/PHP/Files/DirectoryOperations.md)
 
   * Directory creation
   * Directory traversal
   * File discovery
   * Temporary directories
 
-* **38. File Uploads**
+* [**38. File Uploads**](/Web%20Development/PHP/Files/FileManagement.md)
 
   * Multipart forms
   * Upload handling
@@ -453,7 +453,7 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Secure storage
   * Filename handling
 
-* **39. Serialization**
+* [**39. Serialization**](/Web%20Development/PHP/Files/Serialization.md)
 
   * JSON
   * PHP serialization
@@ -464,7 +464,7 @@ PHP is best learned progressively: first the language itself, then web programmi
 
 # X. Forms and HTTP Data
 
-* **40. HTML Forms**
+* [**40. HTML Forms**](/Web%20Development/PHP/Forms/HTMLForms.md)
 
   * GET forms
   * POST forms
@@ -472,7 +472,7 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Validation
   * Form processing
 
-* **41. PHP Superglobals**
+* [**41. PHP Superglobals**](/Web%20Development/PHP/Forms/Superglobals.md)
 
   * `$_GET`
   * `$_POST`
@@ -483,7 +483,7 @@ PHP is best learned progressively: first the language itself, then web programmi
   * `$_ENV`
   * `$_REQUEST`
 
-* **42. Input Validation**
+* [**42. Input Validation**](/Web%20Development/PHP/Forms/InputDefense.md)
 
   * Required fields
   * Type validation
@@ -492,7 +492,7 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Format validation
   * Sanitization versus validation
 
-* **43. Sessions**
+* [**43. Sessions**](/Web%20Development/PHP/Forms/Sessions.md)
 
   * Session initialization
   * Session storage
@@ -501,7 +501,7 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Session expiration
   * Session security
 
-* **44. Cookies**
+* [**44. Cookies**](/Web%20Development/PHP/Forms/Cookies.md)
 
   * Creating cookies
   * Reading cookies
@@ -593,7 +593,7 @@ PHP is best learned progressively: first the language itself, then web programmi
 
 # XIII. Namespaces and Code Organization
 
-* **54. Namespaces**
+* [**54. Namespaces**](/Web%20Development/PHP/Advanced/Namespace.md)
 
   * Namespace declaration
   * Namespace imports
