@@ -351,14 +351,14 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # VIII. Middleware
 
-* **26. Middleware Fundamentals**
+* [**26. Middleware Fundamentals**](/Web%20Development/Laravel/Middleware/Middleware.md)
 
   * Middleware definition
   * Request filtering
   * Request preprocessing
   * Response postprocessing
 
-* **27. Middleware Types**
+* [**27. Middleware Types**](/Web%20Development/Laravel/Middleware/MiddlewareTypes.md)
 
   * Authentication
   * Authorization
@@ -368,7 +368,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Logging
   * Custom application middleware
 
-* **28. Middleware Architecture**
+* [**28. Middleware Architecture**](/Web%20Development/Laravel/Middleware/MiddlewareArchitecture.md)
 
   * Global middleware
   * Route middleware
@@ -376,7 +376,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Middleware parameters
   * Middleware ordering
 
-* **29. Custom Middleware**
+* [**29. Custom Middleware**](/Web%20Development/Laravel/Middleware/CustomMiddleware.md)
 
   * Creating middleware
   * Dependency injection
@@ -388,7 +388,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # IX. Blade Templating
 
-* **30. Blade Fundamentals**
+* [**30. Blade Fundamentals**](/Web%20Development/Laravel/BladeTemplating/Blade.md)
 
   * Blade syntax
   * Expressions
@@ -396,7 +396,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Raw output
   * Comments
 
-* **31. Blade Layouts**
+* [**31. Blade Layouts**](/Web%20Development/Laravel/BladeTemplating/BladeLayouts.md)
 
   * Layout inheritance
   * Sections
@@ -404,7 +404,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Components
   * Slots
 
-* **32. Blade Control Structures**
+* [**32. Blade Control Structures**](/Web%20Development/Laravel/BladeTemplating/BladeControlStructures.md)
 
   * Conditional directives
   * Loops
@@ -412,7 +412,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Authorization directives
   * Environment directives
 
-* **33. Blade Components**
+* [**33. Blade Components**](/Web%20Development/Laravel/BladeTemplating/BladeComponents.md)
 
   * Anonymous components
   * Class-based components
@@ -421,7 +421,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Nested components
   * Reusable UI design
 
-* **34. Blade Advanced Features**
+* [**34. Blade Advanced Features**](/Web%20Development/Laravel/BladeTemplating/BladeAdvanced.md)
 
   * Custom directives
   * Stacks
@@ -429,6 +429,13 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Subviews
   * View composers
   * Dynamic components
+
+  [**Performance & Modern Rendering**](/Web%20Development/Laravel/BladeTemplating/Performance.md)
+
+  * Blade Fragments
+  * View Caching
+  * In-line Blade Views
+
 
 ---
 
@@ -463,14 +470,14 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XI. Database Fundamentals
 
-* **38. Database Configuration**
+* [**38. Database Configuration**](/Web%20Development/Laravel/Database/DatabseConfig.md)
 
   * Database connections
   * Environment variables
   * Connection testing
   * Multiple database connections
 
-* **39. Query Builder**
+* [**39. Query Builder**](/Web%20Development/Laravel/Database/QueryBuilder.md)
 
   * Basic queries
   * Select queries
@@ -482,7 +489,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Grouping
   * Aggregation
 
-* **40. Advanced Query Builder**
+* [**40. Advanced Query Builder**](/Web%20Development/Laravel/Database/AdvacnedQueryBuilder.md)
 
   * Joins
   * Subqueries
@@ -496,7 +503,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XII. Migrations
 
-* **41. Migration Fundamentals**
+* [**41. Migration Fundamentals**](/Web%20Development/Laravel/Migrations/Migrations.md)
 
   * Migration purpose
   * Creating migrations
@@ -505,7 +512,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Running migrations
   * Rolling back migrations
 
-* **42. Schema Design**
+* [**42. Schema Design**](/Web%20Development/Laravel/Migrations/SchemaDesign.md)
 
   * Tables
   * Columns
@@ -516,7 +523,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Nullable columns
   * Default values
 
-* **43. Migration Management**
+* [**43. Migration Management**](/Web%20Development/Laravel/Migrations/MigrationManagement.md)
 
   * Migration status
   * Rollbacks
@@ -525,11 +532,13 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Migration ordering
   * Production migration practices
 
+  [**Advanced Migration and Production Management**](/Web%20Development/Laravel/Migrations/Advanced.md)
+
 ---
 
 # XIII. Eloquent ORM
 
-* **44. Eloquent Fundamentals**
+* [**44. Eloquent Fundamentals**](/Web%20Development/Laravel/EloquentORM/Eloquent.md)
 
   * Models
   * Records
@@ -538,7 +547,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Querying models
   * Model lifecycle
 
-* **45. Eloquent CRUD**
+* [**45. Eloquent CRUD**](/Web%20Development/Laravel/EloquentORM/EloquentCRUD.md)
 
   * Creating records
   * Reading records
@@ -546,7 +555,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Deleting records
   * Soft deletion
 
-* **46. Eloquent Relationships**
+* [**46. Eloquent Relationships**](/Web%20Development/Laravel/EloquentORM/EloquentRelationships.md)
 
   * One-to-one
   * One-to-many
@@ -555,7 +564,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Has-one-through
   * Polymorphic relationships
 
-* **47. Relationship Management**
+* [**47. Relationship Management**](/Web%20Development/Laravel/EloquentORM/EloquentRelationships.md)
 
   * Loading relationships
   * Lazy loading
@@ -565,7 +574,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Relationship counts
   * Synchronization
 
-* **48. Eloquent Advanced Features**
+* [**48. Eloquent Advanced Features**](/Web%20Development/Laravel/EloquentORM/EloquentAdvancedFeatures.md)
 
   * Accessors
   * Mutators

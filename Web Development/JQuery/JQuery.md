@@ -89,7 +89,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # II. jQuery Syntax and Core Concepts
 
-* **4. jQuery Object Model**
+* [**4. jQuery Object Model**](/Web%20Development/JQuery/Basics/ObjectModel.md)
 
   * `$` function
   * jQuery object
@@ -99,11 +99,9 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Native DOM element versus jQuery object
   * Converting between native DOM and jQuery objects
 
-* **5. Basic jQuery Syntax**
+* [**5. Basic jQuery Syntax**](/Web%20Development/JQuery/Basics/BasicSyntax.md)
 
-  * General pattern
-
-    * `$(selector).method()`
+  * General pattern (`$(selector).method()`)
   * Selector expression
   * Method invocation
   * Arguments
@@ -111,7 +109,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Chaining
   * Callback functions
 
-* **6. Document Ready**
+* [**6. Document Ready**](/Web%20Development/JQuery/Basics/DocumentReady.md)
 
   * Purpose of DOM readiness
   * `$(document).ready()`
@@ -121,7 +119,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Avoiding premature DOM access
   * Modern alternatives using native JavaScript
 
-* **7. Method Chaining**
+* [**7. Method Chaining**](/Web%20Development/JQuery/Basics/MethodChaining.md)
 
   * Chaining multiple operations
   * Readability
@@ -133,7 +131,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # III. jQuery Selectors
 
-* **8. Basic Selectors**
+* [**8. Basic Selectors**](/Web%20Development/JQuery/Selectors/BasicSelectors.md)
 
   * Element selectors
   * ID selectors
@@ -141,7 +139,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Universal selector
   * Multiple selectors
 
-* **9. Attribute Selectors**
+* [**9. Attribute Selectors**](/Web%20Development/JQuery/Selectors/AttributeSelectors.md)
 
   * `[attribute]`
   * `[attribute=value]`
@@ -152,7 +150,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `[attribute~=value]`
   * `[attribute|=value]`
 
-* **10. Hierarchical Selectors**
+* [**10. Hierarchical Selectors**](/Web%20Development/JQuery/Selectors/HierarchicalSelectors.md)
 
   * Descendant selector
   * Child selector
@@ -160,7 +158,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * General sibling selector
   * Combining selector expressions
 
-* **11. Positional and Filtering Selectors**
+* [**11. Positional and Filtering Selectors**](/Web%20Development/JQuery/Selectors/PositionalAndFilteringSelectors.md)
 
   * `:first`
   * `:last`
@@ -173,7 +171,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `:last-child`
   * `:nth-child()`
 
-* **12. Form Selectors**
+* [**12. Form Selectors**](/Web%20Development/JQuery/Selectors/FormSelectors.md)
 
   * `:input`
   * `:text`

@@ -32,6 +32,8 @@
 ## Databases
 
 - [**SQL**](Databases/SQL/SQL.md)
+- [**MySQL**](Databases/MySQL/MySQL.md)
+- [**PostgreSQL**](Databases/PostgreSQL/PostgreSQL.md)
 
 ---
 
