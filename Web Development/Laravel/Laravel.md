@@ -564,7 +564,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Has-one-through
   * Polymorphic relationships
 
-* [**47. Relationship Management**](/Web%20Development/Laravel/EloquentORM/EloquentRelationships.md)
+* [**47. Relationship Management**](/Web%20Development/Laravel/EloquentORM/RelationshipManagement.md)
 
   * Loading relationships
   * Lazy loading

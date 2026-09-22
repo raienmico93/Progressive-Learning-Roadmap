@@ -333,6 +333,15 @@ VALUES
 **Example 1: Multi-Row Insert**
 
 ```sql
+-- Create Table
+CREATE TABLE employees (
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    department VARCHAR(255),
+    salary DECIMAL(2)
+)
+
+
 -- Insert three rows in one statement
 INSERT INTO employees (first_name, last_name, department, salary)
 VALUES

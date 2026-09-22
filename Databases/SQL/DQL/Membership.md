@@ -653,6 +653,7 @@ WHERE salary > ALL (
 ```sql
 -- ALL is equivalent to NOT IN for inequality
 SELECT emp_name FROM employees WHERE department_id <> ALL (SELECT dept_id FROM departments WHERE dept_id IS NOT NULL);
+
 -- Same as:
 SELECT emp_name FROM employees WHERE department_id NOT IN (SELECT dept_id FROM departments WHERE dept_id IS NOT NULL);
 ```

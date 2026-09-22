@@ -191,19 +191,19 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # IV. Traversing the DOM
 
-* **13. Parent Traversal**
+* [**13. Parent Traversal**](/Web%20Development/JQuery/Traversing/Parent.md)
 
   * `.parent()`
   * `.parents()`
   * `.parentsUntil()`
 
-* **14. Child Traversal**
+* [**14. Child Traversal**](/Web%20Development/JQuery/Traversing/Child.md)
 
   * `.children()`
   * `.find()`
   * `.contents()`
 
-* **15. Sibling Traversal**
+* [**15. Sibling Traversal**](/Web%20Development/JQuery/Traversing/Sibling.md)
 
   * `.siblings()`
   * `.next()`
@@ -213,7 +213,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `.prevAll()`
   * `.prevUntil()`
 
-* **16. Filtering Collections**
+* [**16. Filtering Collections**](/Web%20Development/JQuery/Traversing/Filtering.md)
 
   * `.first()`
   * `.last()`
@@ -224,7 +224,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `.is()`
   * `.slice()`
 
-* **17. Traversal Strategy**
+* [**17. Traversal Strategy**](/Web%20Development/JQuery/Traversing/TraversalStrategy.md)
 
   * Starting from a known element
   * Narrowing a collection
@@ -232,11 +232,13 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Combining traversal methods
   * Performance implications
 
+  [**Stack Management**](/Web%20Development/JQuery/Traversing/StackManagement.md)
+
 ---
 
 # V. DOM Manipulation
 
-* **18. Reading and Modifying Content**
+* [**18. Reading and Modifying Content**](/Web%20Development/JQuery/DOM%20Manipulation/ReadingModifyingContent.md)
 
   * `.text()`
   * `.html()`
@@ -245,18 +247,16 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Replacing element content
   * Security considerations of `.html()`
 
-* **19. Attributes**
+* [**19. Attributes**](/Web%20Development/JQuery/DOM%20Manipulation/Attributes.md)
 
   * `.attr()`
   * Reading attributes
   * Setting attributes
-  * Removing attributes
-
-    * `.removeAttr()`
+  * Removing attributes (`.removeAttr()`)
   * Boolean attributes
   * `data-*` attributes
 
-* **20. Properties**
+* [**20. Properties**](/Web%20Development/JQuery/DOM%20Manipulation/Properties.md)
 
   * `.prop()`
   * Properties versus attributes
@@ -264,7 +264,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Form control state
   * `.removeProp()`
 
-* **21. CSS Manipulation**
+* [**21. CSS Manipulation**](/Web%20Development/JQuery/DOM%20Manipulation/CSSManipulation.md)
 
   * `.css()`
   * Reading computed styles
@@ -276,14 +276,28 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `.toggleClass()`
   * `.hasClass()`
 
-* **22. Creating Elements**
+  [**Dimensions and Positioning**]
+  * Dimension Methods:
+    * .width()
+    * .height()
+    * .innerWidth()
+    * .innerHeight()
+    * .outerWidth()
+    * .outerHeight()
+  * Positioning Methods:
+    * .offset()
+    * .position()
+    * .scrollLeft()
+    * .scrollTop()
+
+* [**22. Creating Elements**](/Web%20Development/JQuery/DOM%20Manipulation/CreatingElements.md)
 
   * Creating elements with `$()`
   * Creating text nodes
   * Creating HTML fragments
   * Attribute assignment during creation
 
-* **23. Inserting Elements**
+* [**23. Inserting Elements**](/Web%20Development/JQuery/DOM%20Manipulation/InsertingElements.md)
 
   * `.append()`
   * `.prepend()`
@@ -294,7 +308,13 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `.insertBefore()`
   * `.insertAfter()`
 
-* **24. Removing and Replacing Elements**
+  [**Wrapping Elements**](/Web%20Development/JQuery/DOM%20Manipulation/WrappingElements.md)
+  * .wrap()
+  * .unwrap()
+  * .wrapAll() 
+  * .wrapInner() 
+
+* [**24. Removing and Replacing Elements**](/Web%20Development/JQuery/DOM%20Manipulation/RemovingReplacingElements.md)
 
   * `.remove()`
   * `.detach()`
@@ -307,7 +327,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # VI. Event Handling
 
-* **25. Event Fundamentals**
+* [**25. Event Fundamentals**](/Web%20Development/JQuery/Event%20Handling/Event.md)
 
   * Browser events
   * Event targets
@@ -316,7 +336,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Event handlers
   * Callback functions
 
-* **26. Binding Events**
+* [**26. Binding Events**](/Web%20Development/JQuery/Event%20Handling/BindingEvents.md)
 
   * `.on()`
   * Event types
@@ -326,26 +346,34 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 * **27. Common Events**
 
-  * `click`
-  * `dblclick`
-  * `mouseenter`
-  * `mouseleave`
-  * `mouseover`
-  * `mouseout`
-  * `mousemove`
-  * `mousedown`
-  * `mouseup`
-  * `keydown`
-  * `keyup`
-  * `input`
-  * `change`
-  * `focus`
-  * `blur`
-  * `submit`
-  * `resize`
-  * `scroll`
+  * [Mouse & Pointer:](/Web%20Development/JQuery/Event%20Handling/CommomEvents/MouseAndPointer.md)
+    * click
+    * dblclick
+    * mouseenter
+    * mouseleave
+    * mouseover
+    * mouseout
+    * mousemove
+    * mousedown
+    * mouseup
+  * [Keyboard:](/Web%20Development/JQuery/Event%20Handling/CommomEvents/Keyboard.md)
+    * keydown
+    * keyup
+    * keypress (legacy awareness).
+  * [Form Controls:](/Web%20Development/JQuery/Event%20Handling/CommomEvents/FormControls.md)
+    * input
+    * change
+    * focus
+    * blur
+    * submit
+  * [Window/Document:](/Web%20Development/JQuery/Event%20Handling/CommomEvents/WindowDocument.md)
+    * resize
+    * scroll
+    * ready (and modern alternatives).
+  * Mobile & Touch: 
+    * Brief overview of how jQuery handles touch interactions versus standard mouse pointers.
 
-* **28. Event Object**
+* [**28. Event Object**](/Web%20Development/JQuery/Event%20Handling/EventObject.md)
 
   * `event.target`
   * `event.currentTarget`
@@ -355,7 +383,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `event.stopPropagation()`
   * `event.stopImmediatePropagation()`
 
-* **29. Event Delegation**
+* [**29. Event Delegation**](/Web%20Development/JQuery/Event%20Handling/EventDelegation.md)
 
   * Delegated events
   * Parent-level handlers
@@ -365,7 +393,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Delegation syntax
   * When delegation is preferable
 
-* **30. Event Management**
+* [**30. Event Management**](/Web%20Development/JQuery/Event%20Handling/EventManagement.md)
 
   * `.off()`
   * `.one()`
