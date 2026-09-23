@@ -590,7 +590,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XIV. Factories and Seeders
 
-* **49. Database Factories**
+* [**49. Database Factories**](/Web%20Development/Laravel/EloquentORM/Factories.md)
 
   * Factory definitions
   * Fake data generation
@@ -598,14 +598,14 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Relationships
   * Nested factory creation
 
-* **50. Database Seeders**
+* [**50. Database Seeders**](/Web%20Development/Laravel/EloquentORM/Seeders.md)
 
   * Seeder classes
   * Calling seeders
   * Production-safe seed strategies
   * Development datasets
 
-* **51. Test Data Architecture**
+* [**51. Test Data Architecture**](/Web%20Development/Laravel/EloquentORM/TestDataArchitecture.md)
 
   * Deterministic data
   * Realistic test data
@@ -616,7 +616,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XV. Validation
 
-* **52. Validation Fundamentals**
+* [**52. Validation Fundamentals**](/Web%20Development/Laravel/Validation/Validation.md)
 
   * Validation rules
   * Required fields
@@ -625,7 +625,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Numeric constraints
   * Array validation
 
-* **53. Form Request Validation**
+* [**53. Form Request Validation**](/Web%20Development/Laravel/Validation/FormRequestValidation.md)
 
   * Form request classes
   * Authorization
@@ -633,7 +633,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Custom messages
   * Custom attributes
 
-* **54. Advanced Validation**
+* [**54. Advanced Validation**](/Web%20Development/Laravel/Validation/AdvancedValidation.md)
 
   * Conditional rules
   * Nested input
@@ -646,7 +646,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XVI. Authentication
 
-* **55. Authentication Fundamentals**
+* [**55. Authentication Fundamentals**](/Web%20Development/Laravel/Authentication/Authentication.md)
 
   * Users
   * Credentials
@@ -654,7 +654,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Authentication guards
   * Providers
 
-* **56. Authentication Workflows**
+* [**56. Authentication Workflows**](/Web%20Development/Laravel/Authentication/AuthenticationWorkflows.md)
 
   * Registration
   * Login
@@ -663,7 +663,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Email verification
   * Remember-me functionality
 
-* **57. Authentication Architecture**
+* [**57. Authentication Architecture**](/Web%20Development/Laravel/Authentication/AuthenticationArchitecture.md)
 
   * Guards
   * Providers
@@ -671,7 +671,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Session-based authentication
   * Token-based authentication
 
-* **58. Modern Authentication Integration**
+* [**58. Modern Authentication Integration**](/Web%20Development/Laravel/Authentication/AuthenticationIntegration.md)
 
   * Laravel starter kits
   * API authentication
@@ -682,27 +682,27 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XVII. Authorization
 
-* **59. Authorization Fundamentals**
+* [**59. Authorization Fundamentals**](/Web%20Development/Laravel/Authorization/Autorization.md)
 
   * Authentication versus authorization
   * Permissions
   * Policies
   * Gates
 
-* **60. Gates**
+* [**60. Gates**](/Web%20Development/Laravel/Authorization/Gates.md)
 
   * Gate definitions
   * Gate checks
   * Before/after authorization hooks
 
-* **61. Policies**
+* [**61. Policies**](/Web%20Development/Laravel/Authorization/Policies.md)
 
   * Policy classes
   * Policy methods
   * Model authorization
   * Resource authorization
 
-* **62. Role and Permission Architecture**
+* [**62. Role and Permission Architecture**](/Web%20Development/Laravel/Authorization/RoleAndPermission.md)
 
   * Roles
   * Permissions
@@ -714,7 +714,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XVIII. Sessions, Cache, and State Management
 
-* **63. Sessions**
+* [**63. Sessions**](/Web%20Development/Laravel/Miscellaneous/Sessions.md)
 
   * Session storage
   * Session retrieval
@@ -722,7 +722,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Session regeneration
   * Session security
 
-* **64. Cache**
+* [**64. Cache**](/Web%20Development/Laravel/Miscellaneous/Cache.md)
 
   * Cache fundamentals
   * Cache drivers
@@ -731,7 +731,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Cache invalidation
   * Tagged caching where supported
 
-* **65. Cache Strategies**
+* [**65. Cache Strategies**](/Web%20Development/Laravel/Miscellaneous/CacheStrategies.md)
 
   * Query caching
   * Fragment caching

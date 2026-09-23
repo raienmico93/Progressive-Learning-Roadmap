@@ -238,7 +238,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # V. Methods and Modular Programming
 
-- **19. Methods**
+- [**19. Methods**](/Programming%20Languages/Java/Methods/Methods.md)
   - Method declaration
   - Method invocation
   - Parameters
@@ -247,20 +247,20 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Method signatures
   - Method scope
 
-- **20. Method Overloading**
+- [**20. Method Overloading**](/Programming%20Languages/Java/Methods/MethodOverloading.md)
   - Overloaded methods
   - Parameter differences
   - Compile-time method selection
   - Overloading rules
 
-- **21. Parameter Passing**
+- [**21. Parameter Passing**](/Programming%20Languages/Java/Methods/ParameterPassing.md)
   - Java pass-by-value semantics
   - Primitive arguments
   - Object references as values
   - Effect of mutations
   - Immutable objects and method calls
 
-- **22. Recursion**
+- [**22. Recursion**](/Programming%20Languages/Java/Methods/Recursion.md)
   - Recursive methods
   - Base cases
   - Recursive cases
@@ -268,14 +268,14 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Recursive problem solving
   - Tail-recursion considerations
 
-- **23. Variable Scope**
+- [**23. Variable Scope**](/Programming%20Languages/Java/Methods/VariableScope.md)
   - Local scope
   - Block scope
   - Parameter scope
   - Instance scope
   - Static scope
 
-- **24. Varargs**
+- [**24. Varargs**](/Programming%20Languages/Java/Methods/Varargs.md)
   - Variable-length parameters
   - `...`
   - Varargs method invocation
@@ -285,7 +285,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # VI. Object-Oriented Programming Fundamentals
 
-- **25. Classes and Objects**
+- [**25. Classes and Objects**](/Programming%20Languages/Java/OOP/ClassesAndObjects.md)
   - Class definition
   - Object creation
   - Object references
@@ -295,7 +295,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Object state
   - Object behavior
 
-- **26. Constructors**
+- [**26. Constructors**](/Programming%20Languages/Java/OOP/Constructors.md)
   - Default constructor
   - No-argument constructor
   - Parameterized constructors
@@ -303,7 +303,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Constructor chaining
   - `this()`
 
-- **27. Encapsulation**
+- [**27. Encapsulation**](/Programming%20Languages/Java/OOP/Encapsulation.md)
   - Private fields
   - Public methods
   - Getters
@@ -312,13 +312,13 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Data hiding
   - Invariant protection
 
-- **28. `this` Keyword**
+- [**28. `this` Keyword**](/Programming%20Languages/Java/OOP/ThisKeyword.md)
   - Current-object reference
   - Field/parameter disambiguation
   - Constructor chaining
   - Method invocation
 
-- **29. `static`**
+- [**29. `static`**](/Programming%20Languages/Java/OOP/Static.md)
   - Static fields
   - Static methods
   - Static initialization blocks
@@ -329,7 +329,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # VII. Inheritance, Polymorphism, and Abstraction
 
-- **30. Inheritance**
+- [**30. Inheritance**](/Programming%20Languages/Java/OOP/Inheritance.md)
   - `extends`
   - Parent class
   - Child class
@@ -337,28 +337,28 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Constructor behavior
   - `super`
 
-- **31. Method Overriding**
+- [**31. Method Overriding**](/Programming%20Languages/Java/OOP/Overriding.md)
   - Runtime method dispatch
   - Override rules
   - `@Override`
   - Covariant return types
   - Access-level constraints
 
-- **32. Polymorphism**
+- [**32. Polymorphism**](/Programming%20Languages/Java/OOP/Polymorphism.md)
   - Compile-time polymorphism
   - Runtime polymorphism
   - Upcasting
   - Downcasting
   - Dynamic dispatch
 
-- **33. Abstract Classes**
+- [**33. Abstract Classes**](/Programming%20Languages/Java/OOP/Abstraction.md)
   - `abstract`
   - Abstract methods
   - Concrete methods
   - Abstract class design
   - Template-style abstractions
 
-- **34. Interfaces**
+- [**34. Interfaces**](/Programming%20Languages/Java/OOP/Interfaces.md)
   - Interface declaration
   - Interface implementation
   - Multiple interface implementation
@@ -367,7 +367,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Private interface methods
   - Functional interfaces
 
-- **35. Composition**
+- [**35. Composition**](/Programming%20Languages/Java/OOP/Composition.md)
   - Has-a relationships
   - Delegation
   - Composition versus inheritance
@@ -687,7 +687,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XVI. Input/Output and File Processing
 
-- **73. I/O Fundamentals**
+- [**73. I/O Fundamentals**](/Programming%20Languages/Java/IO%20and%20File%20Processing/IO.md)
   - Input streams
   - Output streams
   - Reader
@@ -695,7 +695,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Byte-oriented I/O
   - Character-oriented I/O
 
-- **74. File Processing**
+- [**74. File Processing**](/Programming%20Languages/Java/IO%20and%20File%20Processing/FileProcessing.md)
   - `File`
   - `Path`
   - `Files`
@@ -705,19 +705,19 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - File moving
   - Directory operations
 
-- **75. Buffered I/O**
+- [**75. Buffered I/O**](/Programming%20Languages/Java/IO%20and%20File%20Processing/BufferedIO.md)
   - Buffered input
   - Buffered output
   - Efficient file processing
 
-- **76. Serialization Concepts**
+- [**76. Serialization Concepts**](/Programming%20Languages/Java/IO%20and%20File%20Processing/Serialization.md)
   - Object serialization
   - Deserialization
   - `Serializable`
   - Serialization risks
   - Versioning
 
-- **77. NIO**
+- [**77. NIO**](/Programming%20Languages/Java/IO%20and%20File%20Processing/NIO.md)
   - `java.nio`
   - Channels
   - Buffers
@@ -728,34 +728,33 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XVII. Networking
 
-- **78. Network Programming Fundamentals**
-  - IP addressing
-  - Ports
-  - TCP
-  - UDP
-  - Client-server communication
+- [**78. Network Programming Fundamentals**](/Programming%20Languages/Java/Networking/Networking.md)
+  - IP addressing (IPv4 vs. IPv6)
+  - Ports and protocol assignments
+  - TCP (connection-oriented, reliable) vs. UDP (connectionless, fast)
+  - Client-server communication models
+  - Network timeouts (connection timeouts vs. read timeouts)
 
-- **79. Java Networking APIs**
+- [**79. Java Networking APIs**](/Programming%20Languages/Java/Networking/NetworkingAPIs.md)
   - Sockets
   - Server sockets
   - `URI`
   - `URL`
   - HTTP clients
 
-- **80. HTTP Communication**
+- [**80. HTTP Communication**](/Programming%20Languages/Java/Networking/HTTPCom.md)
   - HTTP methods
     - GET
     - POST
     - PUT
     - PATCH
     - DELETE
-
   - Headers
   - Status codes
   - Request bodies
   - Response bodies
 
-- **81. Modern HTTP Client**
+- [**81. Modern HTTP Client**](/Programming%20Languages/Java/Networking/ModernHTTPClient.md)
   - `HttpClient`
   - `HttpRequest`
   - `HttpResponse`
@@ -766,7 +765,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XVIII. Multithreading and Concurrency
 
-- **82. Concurrency Fundamentals**
+- [**82. Concurrency Fundamentals**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/Concurrency.md)
   - Process versus thread
   - Concurrency
   - Parallelism

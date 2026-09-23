@@ -405,26 +405,26 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # VII. Effects and Animation
 
-* **31. Basic Effects**
+* [**31. Basic Effects**](/Web%20Development/JQuery/Effects%20and%20Animation/BasicEffects.md)
 
   * `.show()`
   * `.hide()`
   * `.toggle()`
 
-* **32. Fading Effects**
+* [**32. Fading Effects**](/Web%20Development/JQuery/Effects%20and%20Animation/FadingEffects.md)
 
   * `.fadeIn()`
   * `.fadeOut()`
   * `.fadeToggle()`
   * `.fadeTo()`
 
-* **33. Sliding Effects**
+* [**33. Sliding Effects**](/Web%20Development/JQuery/Effects%20and%20Animation/SlidingEffects.md)
 
   * `.slideDown()`
   * `.slideUp()`
   * `.slideToggle()`
 
-* **34. Custom Animation**
+* [**34. Custom Animation**](/Web%20Development/JQuery/Effects%20and%20Animation/CustomAnimation.md)
 
   * `.animate()`
   * CSS property animation
@@ -432,7 +432,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Easing
   * Completion callbacks
 
-* **35. Animation Control**
+* [**35. Animation Control**](/Web%20Development/JQuery/Effects%20and%20Animation/AnimationControl.md)
 
   * `.stop()`
   * `.finish()`
@@ -440,7 +440,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Animation queues
   * Preventing animation buildup
 
-* **36. Modern Animation Considerations**
+* [**36. Modern Animation Considerations**](/Web%20Development/JQuery/Effects%20and%20Animation/ModernAnimation.md)
 
   * CSS transitions
   * CSS animations
@@ -452,7 +452,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # VIII. Forms and User Input
 
-* **37. Form Value Management**
+* [**37. Form Value Management**](/Web%20Development/JQuery/Forms%20and%20User%20Input/FormValueManagement.md)
 
   * `.val()`
   * Reading input values
@@ -461,7 +461,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Checkbox values
   * Radio-button values
 
-* **38. Form Events**
+* [**38. Form Events**](/Web%20Development/JQuery/Forms%20and%20User%20Input/FormEvents.md)
 
   * `submit`
   * `change`
@@ -469,7 +469,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `focus`
   * `blur`
 
-* **39. Form Validation**
+* [**39. Form Validation**](/Web%20Development/JQuery/Forms%20and%20User%20Input/FormValidation.md)
 
   * Required fields
   * Input constraints
@@ -478,14 +478,14 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Error messages
   * Validation state
 
-* **40. Form Serialization**
+* [**40. Form Serialization**](/Web%20Development/JQuery/Forms%20and%20User%20Input/FormSerialization.md)
 
   * `.serialize()`
   * `.serializeArray()`
   * Query-string generation
   * Form submission payloads
 
-* **41. File Inputs**
+* [**41. File Inputs**](/Web%20Development/JQuery/Forms%20and%20User%20Input/FormInputs.md)
 
   * Accessing file metadata
   * `File` objects
@@ -497,7 +497,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # IX. AJAX and Asynchronous Communication
 
-* **42. AJAX Fundamentals**
+* [**42. AJAX Fundamentals**](/Web%20Development/JQuery/AJAX/AJAX.md)
 
   * Asynchronous communication
   * HTTP requests
@@ -506,7 +506,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * XML responses
   * Request lifecycle
 
-* **43. `$.ajax()`**
+* [**43. `$.ajax()`**](/Web%20Development/JQuery/AJAX/AJAXMethod.md)
 
   * URL
   * HTTP method
@@ -518,7 +518,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Timeout
   * Error handling
 
-* **44. HTTP Methods**
+* [**44. HTTP Methods**](/Web%20Development/JQuery/AJAX/HTTPMethods.md)
 
   * `GET`
   * `POST`
@@ -526,14 +526,14 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `PATCH`
   * `DELETE`
 
-* **45. AJAX Shortcut Methods**
+* [**45. AJAX Shortcut Methods**](/Web%20Development/JQuery/AJAX/AJAXShortcutMethods.md)
 
   * `$.get()`
   * `$.post()`
   * `$.getJSON()`
   * Differences from `$.ajax()`
 
-* **46. AJAX Promise-Based Handling**
+* [**46. AJAX Promise-Based Handling**](/Web%20Development/JQuery/AJAX/AJAXPromiseBased.md)
 
   * jqXHR
   * `.done()`
@@ -541,7 +541,9 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `.always()`
   * Chaining asynchronous operations
 
-* **47. AJAX Error Handling**
+  [**Global AJAX Event Handlers**](/Web%20Development/JQuery/AJAX/GlobalAJAXEventHandlers.md)
+
+* [**47. AJAX Error Handling**](/Web%20Development/JQuery/AJAX/AJAXErrorHandling.md)
 
   * HTTP errors
   * Network errors
@@ -550,7 +552,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Retry strategies
   * User-facing error states
 
-* **48. AJAX and Security**
+* [**48. AJAX and Security**](/Web%20Development/JQuery/AJAX/AJAXandSecurity.md)
 
   * Same-origin policy
   * CORS
@@ -563,7 +565,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # X. JSON and Data Processing
 
-* **49. JSON Fundamentals**
+* [**49. JSON Fundamentals**](/Web%20Development/JQuery/JSON/JSON.md)
 
   * Objects
   * Arrays
@@ -572,14 +574,18 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Boolean values
   * Null
 
-* **50. JSON Processing**
+* [**50. Serialization, Parsing, and Transformation**](/Web%20Development/JQuery/JSON/JSONProcessing.md)
+   * `JSON.parse()`
+   * Defensive programming
+   * `JSON.stringify()`
+   * Manipulating JSON structures before rendering
 
-  * `JSON.parse()`
-  * `JSON.stringify()`
-  * Processing AJAX responses
-  * Iterating JSON structures
+* [**Iteration and Data Processing**](/Web%20Development/JQuery/JSON/IterationAndDataProcessing.md)
+   * Iterating through array collections using jQuery $.each() and native arrays (.forEach())
+   * Accessing deeply nested object properties safely (Avoiding "cannot read property of undefined" errors)
+   * Working with dynamic key-value pairs using Object.keys() and Object.entries()
 
-* **51. Rendering JSON into the DOM**
+* [**51. Rendering JSON into the DOM**](/Web%20Development/JQuery/JSON/RenderingJSON.md)
 
   * Dynamic lists
   * Tables
@@ -591,28 +597,28 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # XI. jQuery Utilities
 
-* **52. Iteration Utilities**
+* [**52. Iteration Utilities**](/Web%20Development/JQuery/Utilities/Iteration.md)
 
   * `$.each()`
   * `.each()`
   * Collection iteration
   * Object iteration
 
-* **53. Array Utilities**
+* [**53. Array Utilities**](/Web%20Development/JQuery/Utilities/ArrayUtilities.md)
 
   * `$.map()`
   * `$.grep()`
   * `$.inArray()`
   * `$.merge()`
 
-* **54. Object Utilities**
+* [**54. Object Utilities**](/Web%20Development/JQuery/Utilities/ObjectUtilities.md)
 
   * `$.extend()`
   * Object merging
   * Shallow copying
   * Deep-copy considerations
 
-* **55. Type and Value Utilities**
+* [**55. Type and Value Utilities**](/Web%20Development/JQuery/Utilities/TypeAndValueUtilities.md)
 
   * `$.isArray()`
   * `$.isFunction()`
