@@ -406,7 +406,7 @@ Slicing lets you grab a portion of a list. `my_list[1:4]` gives you elements fro
 
 **Complete General Syntax**
 
-```
+```py
 list[start:stop]          # basic slice
 list[start:stop:step]     # slice with step
 list[:stop]               # start defaults to 0
@@ -575,7 +575,7 @@ When you modify a list "in place," you're changing the same list object—not ma
 
 **Complete General Syntax**
 
-```
+```py
 list[index] = value          # replace element
 del list[index]              # delete element
 del list[start:stop]         # delete slice
@@ -739,7 +739,7 @@ You can add items to a list in different ways. `append()` adds one item to the e
 
 **Complete General Syntax**
 
-```
+```py
 list.append(x)           # add single item to end
 list.extend(iterable)    # add all items from iterable
 list.insert(i, x)        # insert x before index i

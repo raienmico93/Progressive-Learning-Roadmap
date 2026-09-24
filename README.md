@@ -26,6 +26,7 @@
 - [**C#**](Programming%20Languages/CSharp/CSharp.md)
 - [**Dart**](Programming%20Languages/Dart/Dart.md)
 - [**Kotlin**](/Programming%20Languages/Kotlin/Kotlin.md)
+- [**Go**](/Programming%20Languages/Go/Go.md)
 
 ---
 
@@ -52,6 +53,9 @@
 - [**Pandas**](Python%20Technologies/Pandas/Pandas.md)
 - [**SciPy**](Python%20Technologies/SciPy/SciPy.md)
 - [**PyGame**](/Python%20Technologies/PyGame/PyGame.md)
+- [**Scikit-learn**](/Python%20Technologies/SciKit/SciKit.md)
+- [**PyTorch**](/Python%20Technologies/PyTorch/PyTorch.md)
+- [**TensorFlow**](/Python%20Technologies/TensorFlow/TensorFlow.md)
 
 ---
 
@@ -73,3 +77,9 @@
 
 - [**ASP.NET Core**](/Microsoft%20Technologies/AspDotNetCore/AspDotNetCore.md)
 - [**ASP.NET MVC**](/Microsoft%20Technologies/AspDotNetMVC/AspDotNetMVC.md)
+
+---
+
+## Version Control
+- [**Git**](/Version%20Control/Git/Git.md)
+- [**GitHub**](/Version%20Control/GitHub/GitHub.md)

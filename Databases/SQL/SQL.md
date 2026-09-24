@@ -336,7 +336,6 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * `IS NULL`
   * `IS NOT NULL`
   * Three-valued logic
-
     * TRUE
     * FALSE
     * UNKNOWN
@@ -348,7 +347,6 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
   * `LIKE`
   * Wildcards
-
     * `%`
     * `_`
   * Escaping pattern characters
@@ -661,21 +659,16 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 * **51. Normal Forms**
 
   * First Normal Form
-
     * Atomic attributes
     * Elimination of repeating groups
   * Second Normal Form
-
     * Removal of partial dependencies
   * Third Normal Form
-
     * Removal of transitive dependencies
   * Boyce-Codd Normal Form
   * Fourth Normal Form
-
     * Multivalued dependencies
   * Fifth Normal Form
-
     * Join dependencies
 
 * **52. Denormalization**
@@ -730,7 +723,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XV. Indexing and Query Performance
 
-* **57. Index Fundamentals**
+* [**57. Index Fundamentals**](/Databases/SQL/IndexingAndQueryPerformance/Index.md)
 
   * Purpose of indexes
   * Index lookup
@@ -739,7 +732,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Index selectivity
   * Index maintenance cost
 
-* **58. Common Index Structures**
+* [**58. Common Index Structures**](/Databases/SQL/IndexingAndQueryPerformance/CommonIndex.md)
 
   * B-tree indexes
   * Hash indexes
@@ -751,7 +744,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
     * JSON
     * Expression-based indexes
 
-* **59. Index Design**
+* [**59. Index Design**](/Databases/SQL/IndexingAndQueryPerformance/IndexDesign.md)
 
   * Single-column indexes
   * Composite indexes
@@ -761,7 +754,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Partial or filtered indexes
   * Functional indexes
 
-* **60. Query Execution**
+* [**60. Query Execution**](/Databases/SQL/IndexingAndQueryPerformance/QueryExtension.md)
 
   * Query parsing
   * Query planning
@@ -775,7 +768,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
     * Hash join
     * Merge join
 
-* **61. Execution Plan Analysis**
+* [**61. Execution Plan Analysis**](/Databases/SQL/IndexingAndQueryPerformance/ExecutionPlan.md)
 
   * `EXPLAIN`
   * `EXPLAIN ANALYZE`
@@ -787,7 +780,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Aggregation operations
   * Join strategies
 
-* **62. SQL Performance Optimization**
+* [**62. SQL Performance Optimization**](/Databases/SQL/IndexingAndQueryPerformance/PerformanceOpt.md)
 
   * Avoiding unnecessary columns
   * Reducing unnecessary rows
@@ -828,7 +821,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Serializable
   * Snapshot-based isolation where supported
 
-* **66. Concurrency Problems**
+* [**66. Concurrency Problems**](/Databases/SQL/TCL/ConcurrencyProblems.md)
 
   * Dirty reads
   * Non-repeatable reads
@@ -836,7 +829,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Lost updates
   * Write conflicts
 
-* **67. Locking**
+* [**67. Locking**](/Databases/SQL/TCL/Locking.md)
 
   * Shared locks
   * Exclusive locks
@@ -848,7 +841,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Deadlock detection
   * Deadlock prevention
 
-* **68. Transaction Design**
+* [**68. Transaction Design**](/Databases/SQL/TCL/TransactionDesign.md)
 
   * Short transactions
   * Atomic business operations
@@ -857,11 +850,19 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Idempotent operations
   * Transaction boundaries
 
+* [**Monitoring, Diagnostics & Troubleshooting**](/Databases/SQL/TCL/MonitoringDiagnosticsTroubleshooting.md)
+
+  * Identifying blockers
+  * Analyzing block chains
+  * Deadlock logging
+  * Under the hood sizing
+
+
 ---
 
 # XVII. Stored Procedures, Functions, and Programmability
 
-* **69. Stored Procedures**
+* [**69. Stored Procedures**](/Databases/SQL/Miscellaneous/StoredProcedures.md)
 
   * Creating procedures
   * Parameters
@@ -872,7 +873,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Loops
   * Exception handling
 
-* **70. User-Defined Functions**
+* [**70. User-Defined Functions**](/Databases/SQL/Miscellaneous/UDF.md)
 
   * Scalar functions
   * Table-valued functions
@@ -880,7 +881,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Deterministic functions
   * Function limitations
 
-* **71. SQL Procedural Extensions**
+* [**71. SQL Procedural Extensions**](/Databases/SQL/Miscellaneous/ProceduralExtensions.md)
 
   * Variables
   * Conditional statements
@@ -889,7 +890,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Exception handling
   * Dynamic SQL
 
-* **72. Dynamic SQL**
+* [**72. Dynamic SQL**](/Databases/SQL/Miscellaneous/DynamicSQL.md)
 
   * Dynamic statement construction
   * Parameterized dynamic SQL
@@ -897,11 +898,19 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * SQL injection risks
   * Metadata-driven queries
 
+  [**Optimization, Security & Advanced Programmability**](/Databases/SQL/Miscellaneous/OptimizationSecurityAndAdvancedProgrammability.md)
+
+  * Performance Tuning
+  * Security & Permissions
+  * Debugging & Testing
+  * Platform Variations
+
+
 ---
 
 # XVIII. Triggers and Event-Driven Database Logic
 
-* **73. Trigger Fundamentals**
+* [**73. Trigger Fundamentals**](/Databases/SQL/Trigger/Trigger.md)
 
   * Trigger definition
   * Row-level triggers
@@ -910,7 +919,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * `AFTER` triggers
   * `INSTEAD OF` triggers where supported
 
-* **74. Trigger Applications**
+* [**74. Trigger Applications**](/Databases/SQL/Trigger/TriggerApp.md)
 
   * Auditing
   * Automatic timestamps
@@ -918,7 +927,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Business-rule enforcement
   * Change tracking
 
-* **75. Trigger Risks**
+* [**75. Trigger Risks**](/Databases/SQL/Trigger/TriggerRisks.md)
 
   * Hidden side effects
   * Recursive triggers
@@ -931,21 +940,21 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XIX. Advanced SQL Querying
 
-* **76. Window Functions**
+* [**76. Window Functions**](/Databases/SQL/Advanced/WindowFunctions.md)
 
   * Window-function fundamentals
   * `OVER`
   * `PARTITION BY`
   * `ORDER BY`
 
-* **77. Ranking Functions**
+* [**77. Ranking Functions**](/Databases/SQL/Advanced/RankingFunctions.md)
 
   * `ROW_NUMBER`
   * `RANK`
   * `DENSE_RANK`
   * `NTILE`
 
-* **78. Analytic Functions**
+* [**78. Analytic Functions**](/Databases/SQL/Advanced/AnalyticFunctions.md)
 
   * `LAG`
   * `LEAD`
@@ -955,7 +964,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Moving averages
   * Cumulative calculations
 
-* **79. Advanced Window Frames**
+* [**79. Advanced Window Frames**](/Databases/SQL/Advanced/AdvancedWindowFrames.md)
 
   * `ROWS`
   * `RANGE`
@@ -963,7 +972,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Current row
   * Preceding and following rows
 
-* **80. Advanced Analytical Queries**
+* [**80. Advanced Analytical Queries**](/Databases/SQL/Advanced/AdvancedAnalyticalQueries.md)
 
   * Top-N-per-group
   * Sequential event analysis
@@ -973,6 +982,8 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Cohort analysis
   * Retention calculations
   * Running aggregates
+
+  [**Window Function Optimization**](/Databases/SQL/Advanced/WindowFunctionOpt.md)
 
 ---
 
