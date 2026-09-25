@@ -124,49 +124,167 @@ DELIMITER ;
 
 ### Annotated Complete Code Examples
 
-**Example 1: Creating a Simple Procedure (SQL Server)**
+**Setup: Sample Database Structure**
+Run this initial script to create the tables and sample data used in the examples below.
+```sql
+-- Create a sample Customers table
+CREATE TABLE Customers (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(100),
+    Status VARCHAR(20)
+);
+
+-- Create a sample Orders table
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID INT,
+    OrderAmount DECIMAL(10, 2),
+    OrderDate DATE,
+    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID)
+);
+
+-- Insert sample data
+INSERT INTO Customers VALUES (1, 'Alice Smith', 'Active');
+INSERT INTO Customers VALUES (2, 'Bob Jones', 'Inactive');
+
+INSERT INTO Orders VALUES (101, 1, 150.00, '2026-09-01');
+INSERT INTO Orders VALUES (102, 1, 250.00, '2026-09-15');
+INSERT INTO Orders VALUES (103, 2, 50.00, '2026-09-20');
+```
+
+**Example 1: Active Customers Summary**
+This procedure filters and displays all active customers from the database.
 
 ```sql
--- Create a procedure that selects employees by department
-CREATE PROCEDURE dbo.GetEmployeesByDepartment
-    @DepartmentName NVARCHAR(50)
+-- Step 1: Create the Stored Procedure
+CREATE PROCEDURE GetActiveCustomers
 AS
 BEGIN
-    SET NOCOUNT ON;  -- Suppress "rows affected" messages
-    SELECT emp_id, emp_name, salary
-    FROM employees
-    WHERE department = @DepartmentName;
+    -- Set NOCOUNT ON to prevent extra network traffic from "rows affected" messages
+    SET NOCOUNT ON;
+
+    -- Query to fetch customers whose account status is 'Active'
+    SELECT CustomerID, CustomerName, Status
+    FROM Customers
+    WHERE Status = 'Active';
 END;
 GO
-
--- Execute the procedure
-EXEC dbo.GetEmployeesByDepartment @DepartmentName = 'Engineering';
+-- Step 2: Execute the Stored Procedure
+EXEC GetActiveCustomers;
 ```
 
-**Why this output occurs:** The procedure accepts a department name and returns all employees in that department. `SET NOCOUNT ON` suppresses the row count messages that would otherwise be returned.
+**Expected Output**
 
-**Example 2: Creating a Procedure (MySQL)**
+| CustomerID | CustomerName | Status |
+|---|---|---|
+| 1 | Alice Smith | Active |
 
+**Code Breakdown & Logic**
+* `CREATE PROCEDURE GetActiveCustomers`: Defines a new reusable block named GetActiveCustomers with no parameter block following it.
+* `SET NOCOUNT ON;`: Stops SQL Server from returning the count of how many rows were affected, improving execution performance.
+* Why this result?: The Customers table contains two rows. Alice Smith is marked as 'Active', while Bob Jones is marked as 'Inactive'. The WHERE Status = 'Active' clause isolates and returns only Alice's record.
+
+**Example 2: Complete Order Details Matrix**
+This procedure joins the Customers and Orders tables together to provide a comprehensive look at what each customer spent.
 ```sql
--- Change delimiter to allow semicolons inside the procedure
-DELIMITER //
-
-CREATE PROCEDURE GetEmployeeCount (IN dept_name VARCHAR(50), OUT emp_count INT)
+-- Step 1: Create the Stored Procedure
+CREATE PROCEDURE GetAllOrderDetails
+AS
 BEGIN
-    SELECT COUNT(*) INTO emp_count
-    FROM employees
-    WHERE department = dept_name;
-END //
+    SET NOCOUNT ON;
 
--- Restore the default delimiter
-DELIMITER ;
-
--- Call the procedure
-CALL GetEmployeeCount('Engineering', @count);
-SELECT @count;
+    -- Query combining both tables to match orders to their respective customers
+    SELECT 
+        o.OrderID,
+        c.CustomerName,
+        o.OrderAmount,
+        o.OrderDate
+    FROM 
+        Orders o
+    INNER JOIN 
+        Customers c ON o.CustomerID = c.CustomerID;
+END;
+GO
+-- Step 2: Execute the Stored Procedure
+EXEC GetAllOrderDetails;
 ```
 
-**Why this output occurs:** The `DELIMITER //` command tells the MySQL client to treat `//` as the statement terminator, allowing the semicolon inside the procedure body to be passed to the server . The procedure counts employees in a department and returns the count via the `OUT` parameter.
+**Expected Output**
+| OrderID | CustomerName | OrderAmount | OrderDate |
+|---|---|---|---|
+| 101 | Alice Smith | 150.00 | 2026-09-01 |
+| 102 | Alice Smith | 250.00 | 2026-09-15 |
+| 103 | Bob Jones | 50.00 | 2026-09-20 |
+
+**Code Breakdown & Logic**
+* INNER JOIN: Dynamically pairs data across tables using the common identifier (CustomerID).
+* Why this result?: The query processes every row from the Orders table. It matches CustomerID 1 back to "Alice Smith" for orders 101 and 102, and CustomerID 2 back to "Bob Jones" for order 103.
+
+**Example 3: Total Sales Metrics**
+This procedure evaluates the financial summary of all processed orders, generating aggregate analytics on historical revenue.
+```sql
+-- Step 1: Create the Stored Procedure
+CREATE PROCEDURE GetOrderFinancialSummary
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Aggregating financial statistics across the entire Orders table
+    SELECT 
+        COUNT(OrderID)   AS TotalOrdersPlaced,
+        SUM(OrderAmount) AS TotalRevenueGenerated,
+        AVG(OrderAmount) AS AverageOrderValue
+    FROM 
+        Orders;
+END;
+GO
+-- Step 2: Execute the Stored Procedure
+EXEC GetOrderFinancialSummary;
+```
+
+**Expected Output**
+| TotalOrdersPlaced | TotalRevenueGenerated | AverageOrderValue |
+|---|---|---|
+| 3 | 450.00 | 150.0000 |
+
+**Code Breakdown & Logic**
+* COUNT(), SUM(), AVG(): These are standard SQL aggregation functions that summarize numbers across whole tables.
+* Why this result?:
+* Total Orders: There are exactly 3 unique rows in the Orders table (101, 102, 103).
+   * Total Revenue: Calculations execute as $150.00 + 250.00 + 50.00 = \mathbf{450.00}$.
+   * Average Value: Total Revenue ($450.00) divided by Total Orders ($3) yields exactly $\mathbf{150.00}$.
+
+**4. Reporting Procedure - Read-Only / Notice (PostgreSQL)**
+This procedure counts all records in the Customers table and prints a message using RAISE NOTICE.sql-- Create a procedure with no parameters
+```sql
+-- Step 1: Create a Stored Procedures
+CREATE OR REPLACE PROCEDURE log_customer_count()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_count INT; -- Declare a local variable for the count
+BEGIN
+    -- Query the total number of customers
+    SELECT COUNT(*) INTO v_count FROM Customers;
+    
+    -- Print the result to the server log / console
+    RAISE NOTICE 'Total number of customers: %', v_count;
+END;
+$$;
+
+-- Step 2: Execute It
+CALL log_customer_count();
+```
+
+Expected Output
+```
+NOTICE:  Total number of customers: 2
+CALL
+```
+
+**Breakdown of Results**:
+- SELECT COUNT(*) INTO v_count: Counts rows in Customers (Alice and Bob), storing the value 2 into the local variable v_count.
+- RAISE NOTICE: Outputs the formatted text containing the integer value 2 back to the client interface.
 
 ### Real-World Cases
 

@@ -104,7 +104,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
 
 # III. Arrays and Basic Linear Structures
 
-* **9. Arrays**
+* [**9. Arrays**](/Computer%20Science/DSA/Arrays/Arrays.md)
 
   * Static arrays
   * Dynamic arrays
@@ -119,7 +119,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Updating
   * Resizing
 
-* **10. Dynamic Arrays**
+* [**10. Dynamic Arrays**](/Computer%20Science/DSA/Arrays/DynamicArrays.md)
 
   * Capacity versus size
   * Automatic resizing
@@ -127,7 +127,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Amortized insertion
   * Memory overhead
 
-* **11. Array-Based Problem Solving**
+* [**11. Array-Based Problem Solving**](/Computer%20Science/DSA/Arrays/ArrayBasedProblemSolving.md)
 
   * Prefix sums
   * Suffix sums
@@ -138,7 +138,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Rearrangement
   * Duplicate detection
 
-* **12. Matrix and 2D Array Techniques**
+* [**12. Matrix and 2D Array Techniques**](/Computer%20Science/DSA/Arrays/MatrixAnd2DArray.md)
 
   * Matrix traversal
   * Row/column operations
@@ -152,7 +152,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
 
 # IV. Strings
 
-* **13. String Fundamentals**
+* [**13. String Fundamentals**](/Computer%20Science/DSA/Strings/String.md)
 
   * Character sequences
   * String representation
@@ -160,7 +160,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * String indexing
   * Character manipulation
 
-* **14. Basic String Operations**
+* [**14. Basic String Operations**](/Computer%20Science/DSA/Strings/StringOperations.md)
 
   * Traversal
   * Concatenation
@@ -171,7 +171,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Splitting
   * Character counting
 
-* **15. String Algorithms**
+* [**15. String Algorithms**](/Computer%20Science/DSA/Strings/StringAlgorithms.md)
 
   * Frequency analysis
   * Palindrome detection
@@ -180,7 +180,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Pattern matching
   * Prefix/suffix analysis
 
-* **16. Advanced String Processing**
+* [**16. Advanced String Processing**](/Computer%20Science/DSA/Strings/AdvancedStringProcessing.md)
 
   * KMP algorithm
   * Z algorithm
@@ -195,7 +195,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
 
 # V. Linked Lists
 
-* **17. Singly Linked Lists**
+* [**17. Singly Linked Lists**](/Computer%20Science/DSA/Linked%20Lists/SinglyLinkedLists.md)
 
   * Node structure
   * Head pointer/reference
@@ -205,7 +205,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Searching
   * Updating
 
-* **18. Doubly Linked Lists**
+* [**18. Doubly Linked Lists**](/Computer%20Science/DSA/Linked%20Lists/DoublyLinkedLists.md)
 
   * Previous references
   * Next references
@@ -213,14 +213,14 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Insertion
   * Deletion
 
-* **19. Circular Linked Lists**
+* [**19. Circular Linked Lists**](/Computer%20Science/DSA/Linked%20Lists/CircularLinkedLists.md)
 
   * Circular singly linked lists
   * Circular doubly linked lists
   * Traversal techniques
   * Application scenarios
 
-* **20. Linked List Algorithms**
+* [**20. Linked List Algorithms**](/Computer%20Science/DSA/Linked%20Lists/LinkedListAlgorithms.md)
 
   * Reverse a linked list
   * Detect cycles
@@ -232,7 +232,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Intersection detection
   * Palindrome checking
 
-* **21. Fast and Slow Pointer Technique**
+* [**21. Fast and Slow Pointer Technique**](/Computer%20Science/DSA/Linked%20Lists/FastAndSlowPointerTechnique.md)
 
   * Tortoise-and-hare method
   * Middle-element detection
@@ -243,7 +243,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
 
 # VI. Stacks and Queues
 
-* **22. Stack**
+* [**22. Stack**](/Computer%20Science/DSA/Stacks%20and%20Queues/Stack.md)
 
   * LIFO principle
   * Push
@@ -251,7 +251,6 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Peek/top
   * Is-empty
   * Stack implementations
-
     * Array
     * Linked list
 
@@ -264,7 +263,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Function call management
   * Backtracking
 
-* **24. Queue**
+* [**24. Queue**](/Computer%20Science/DSA/Stacks%20and%20Queues/Queue.md)
 
   * FIFO principle
   * Enqueue
@@ -273,7 +272,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Rear
   * Queue implementation
 
-* **25. Queue Variants**
+* [**25. Queue Variants**](/Computer%20Science/DSA/Stacks%20and%20Queues/QueueVariants.md)
 
   * Circular queue
   * Deque
@@ -293,7 +292,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
 
 # VII. Hashing and Hash Tables
 
-* **27. Hashing Fundamentals**
+* [**27. Hashing Fundamentals**](/Computer%20Science/DSA/Hashing%20and%20Hash%20Tables/Hashing.md)
 
   * Hash functions
   * Keys
@@ -301,7 +300,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Hash tables
   * Direct addressing
 
-* **28. Collision Handling**
+* [**28. Collision Handling**](/Computer%20Science/DSA/Hashing%20and%20Hash%20Tables/CollisionHashing.md)
 
   * Separate chaining
   * Open addressing
@@ -309,7 +308,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Quadratic probing
   * Double hashing
 
-* **29. Hash Table Design**
+* [**29. Hash Table Design**](/Computer%20Science/DSA/Hashing%20and%20Hash%20Tables/HashTableDesign.md)
 
   * Load factor
   * Resizing
@@ -317,7 +316,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Collision distribution
   * Hash-function quality
 
-* **30. Hash-Based Techniques**
+* [**30. Hash-Based Techniques**](/Computer%20Science/DSA/Hashing%20and%20Hash%20Tables/HashBasedTechniques.md)
 
   * Frequency counting
   * Duplicate detection
@@ -330,7 +329,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
 
 # VIII. Recursion and Backtracking
 
-* **31. Recursion Fundamentals**
+* [**31. Recursion Fundamentals**](/Computer%20Science/DSA/Recursion/Recursion.md)
 
   * Base case
   * Recursive case
@@ -338,7 +337,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Recursive state
   * Termination
 
-* **32. Recursive Problem Patterns**
+* [**32. Recursive Problem Patterns**](/Computer%20Science/DSA/Recursion/ProblemPatterns.md)
 
   * Factorial
   * Fibonacci
@@ -346,7 +345,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Divide-and-conquer problems
   * Recursive search
 
-* **33. Recurrence Relations**
+* [**33. Recurrence Relations**](/Computer%20Science/DSA/Recursion/Recurrence.md)
 
   * Formulating recurrences
   * Solving recurrences
@@ -354,7 +353,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Substitution method
   * Master theorem
 
-* **34. Backtracking**
+* [**34. Backtracking**](/Computer%20Science/DSA/Recursion/Backtracking.md)
 
   * State-space search
   * Decision trees
@@ -364,7 +363,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Exploring
   * Undoing choices
 
-* **35. Classic Backtracking Problems**
+* [**35. Classic Backtracking Problems**](/Computer%20Science/DSA/Recursion/BacktrackingProblems.md)
 
   * N-Queens
   * Subsets
@@ -378,13 +377,13 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
 
 # IX. Searching Algorithms
 
-* **36. Linear Search**
+* [**36. Linear Search**](/Computer%20Science/DSA/Searching%20Algorithms/Linear.md)
 
   * Sequential search
   * Complexity analysis
   * Ordered versus unordered data
 
-* **37. Binary Search**
+* [**37. Binary Search**](/Computer%20Science/DSA/Searching%20Algorithms/Binary.md)
 
   * Sorted-array requirement
   * Search interval
@@ -392,7 +391,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Iterative implementation
   * Recursive implementation
 
-* **38. Binary Search Variants**
+* [**38. Binary Search Variants**](/Computer%20Science/DSA/Searching%20Algorithms/BinarySearchVariants.md)
 
   * First occurrence
   * Last occurrence
@@ -401,7 +400,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Frequency counting
   * Search insertion position
 
-* **39. Binary Search on Answer**
+* [**39. Binary Search on Answer**](/Computer%20Science/DSA/Searching%20Algorithms/BinarySearchForAnswer.md)
 
   * Feasibility function
   * Monotonic search space
@@ -409,7 +408,7 @@ This roadmap provides a **systematic Data Structures and Algorithms (DSA) curric
   * Maximum feasible value
   * Optimization problems
 
-* **40. Advanced Searching**
+* [**40. Advanced Searching**](/Computer%20Science/DSA/Searching%20Algorithms/Advanced.md)
 
   * Interpolation search
   * Exponential search

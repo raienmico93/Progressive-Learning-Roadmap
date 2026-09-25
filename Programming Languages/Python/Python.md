@@ -345,7 +345,7 @@
 
 # VI. Functions and Modular Programming
 
-* **23. Function Fundamentals**
+* [**23. Function Fundamentals**](/Programming%20Languages/Python/Functions/Function.md)
 
   * Defining functions
   * Calling functions
@@ -354,7 +354,7 @@
   * Return values
   * Function documentation
 
-* **24. Function Parameters**
+* [**24. Function Parameters**](/Programming%20Languages/Python/Functions/FunctionParams.md)
 
   * Positional arguments
   * Keyword arguments
@@ -367,7 +367,7 @@
   * Keyword-only parameters
   * Parameter unpacking
 
-* **25. Scope and Namespaces**
+* [**25. Scope and Namespaces**](/Programming%20Languages/Python/Functions/ScoreAndNamespaces.md)
 
   * Local scope
   * Global scope
@@ -377,7 +377,7 @@
   * `global`
   * `nonlocal`
 
-* **26. Advanced Functions**
+* [**26. Advanced Functions**](/Programming%20Languages/Python/Functions/AdvancedFunctions.md)
 
   * First-class functions
   * Higher-order functions
@@ -388,7 +388,7 @@
   * Recursion
   * Callable objects
 
-* **27. Functional Programming Tools**
+* [**27. Functional Programming Tools**](/Programming%20Languages/Python/Functions/FunctionalProgrammingTools.md)
 
   * `map()`
   * `filter()`
@@ -447,7 +447,7 @@
 
 # VIII. File Handling and Data Serialization
 
-* **32. File I/O**
+* [**32. File I/O**](/Programming%20Languages/Python/File%20Handling/FileIO.md)
 
   * Opening files
   * Reading files
@@ -459,7 +459,7 @@
   * File pointers
   * Closing resources
 
-* **33. Context Managers**
+* [**33. Context Managers**](/Programming%20Languages/Python/File%20Handling/ContextManagers.md)
 
   * `with`
   * Resource management
@@ -468,8 +468,7 @@
   * `__exit__`
   * `contextlib`
 
-* **34. File and Directory Management**
-
+* [**34. File and Directory Management**](/Programming%20Languages/Python/File%20Handling/FileAndDirectoryManagement.md)
   * `os`
   * `pathlib`
   * Paths
@@ -481,7 +480,7 @@
   * File deletion
   * Temporary files
 
-* **35. Data Serialization**
+* [**35. Data Serialization**](/Programming%20Languages/Python/File%20Handling/Serialization.md)
 
   * JSON
   * CSV
@@ -494,7 +493,7 @@
 
 # IX. Exception Handling and Error Management
 
-* **36. Python Errors**
+* [**36. Python Errors**](/Programming%20Languages/Python/ExceptionError/Errors.md)
 
   * Syntax errors
   * Runtime errors
@@ -507,7 +506,7 @@
   * Attribute errors
   * Import errors
 
-* **37. Exception Handling**
+* [**37. Exception Handling**](/Programming%20Languages/Python/ExceptionError/ExceptionHandling.md)
 
   * `try`
   * `except`
@@ -516,7 +515,7 @@
   * Multiple exception types
   * Exception hierarchies
 
-* **38. Raising Exceptions**
+* [**38. Raising Exceptions**](/Programming%20Languages/Python/ExceptionError/ExceptionHandling.md)
 
   * `raise`
   * Re-raising
@@ -525,13 +524,13 @@
     * `from`
   * Custom error messages
 
-* **39. Custom Exceptions**
+* [**39. Custom Exceptions**](/Programming%20Languages/Python/ExceptionError/CustomExceptions.md)
 
   * Defining exception classes
   * Domain-specific errors
   * Exception hierarchy design
 
-* **40. Debugging**
+* [**40. Debugging**](/Programming%20Languages/Python/ExceptionError/Debugging.md)
 
   * Tracebacks
   * Stack frames

@@ -124,7 +124,8 @@ INSERT INTO sales (product, city, amount) VALUES
     ('Phone',  'Cebu',      750.00),
     ('Laptop', 'Manila',   1300.00),
     ('Phone',  'Manila',    900.00);
-
+```
+```sql
 -- Query: Collapse individual sales into product-city summaries
 SELECT product,
        city,
@@ -133,17 +134,20 @@ SELECT product,
 FROM sales
 GROUP BY product, city
 ORDER BY product, city;
-
--- Expected Output:
---  product | city   | num_sales | total_sales
--- ---------+--------+-----------+-------------
---  Laptop  | Cebu   |         1 |     1100.00
---  Laptop  | Manila |         2 |     2500.00
---  Phone   | Cebu   |         1 |      750.00
---  Phone   | Manila |         2 |     1700.00
 ```
 
-**Why this output occurs:** The `GROUP BY product, city` clause partitions the six individual sales rows into four groups based on unique product-city combinations. Each group is collapsed into one summary row. The `COUNT(*)` counts the number of sales in each group, and `SUM(amount)` totals the sales amount per group. The `ORDER BY` sorts the summary rows alphabetically.
+Expected Output:
+ product | city   | num_sales | total_sales
+---------|--------|-----------|-------------
+ Laptop  | Cebu   |         1 |     1100.00
+ Laptop  | Manila |         2 |     2500.00
+ Phone   | Cebu   |         1 |      750.00
+ Phone   | Manila |         2 |     1700.00
+
+
+**Why this output occurs:** 
+- The `GROUP BY product, city` clause partitions the six individual sales rows into four groups based on unique product-city combinations. 
+- Each group is collapsed into one summary row. The `COUNT(*)` counts the number of sales in each group, and `SUM(amount)` totals the sales amount per group. The `ORDER BY` sorts the summary rows alphabetically.
 
 ### Real-World Cases
 
@@ -231,7 +235,9 @@ INSERT INTO employees (first_name, department, salary) VALUES
     ('Carol', 'Engineering', 105000.00),
     ('David', 'Sales',       68000.00),
     ('Eve',   'Engineering', 88000.00);
+```
 
+```sql
 -- Query: Summary statistics per department
 SELECT department,
        COUNT(*)    AS headcount,
@@ -240,14 +246,15 @@ SELECT department,
 FROM employees
 GROUP BY department
 ORDER BY department;
-
--- Expected Output:
---  department  | headcount |     avg_salary     | total_salary
--- -------------+-----------+--------------------+--------------
---  Engineering |         3 | 96000.000000000000 |    288000.00
---  Marketing   |         1 | 72000.000000000000 |     72000.00
---  Sales       |         1 | 68000.000000000000 |     68000.00
 ```
+
+Expected Output:
+ department  | headcount |     avg_salary     | total_salary
+-------------|-----------|--------------------|--------------
+ Engineering |         3 | 96000.000000000000 |    288000.00
+ Marketing   |         1 | 72000.000000000000 |     72000.00
+ Sales       |         1 | 68000.000000000000 |     68000.00
+
 
 **Why this output occurs:** The `GROUP BY department` clause creates three groups: Engineering, Marketing, and Sales. For each group, `COUNT(*)` returns the number of employees, `AVG(salary)` computes the average salary, and `SUM(salary)` totals the salaries. Engineering has three employees; Marketing and Sales each have one.
 
@@ -257,7 +264,9 @@ ORDER BY department;
 -- Insert a row with NULL department
 INSERT INTO employees (first_name, department, salary)
 VALUES ('Frank', NULL, 75000.00);
+```
 
+```sql
 -- Query: Group by department including NULL
 SELECT department,
        COUNT(*) AS headcount
@@ -366,7 +375,9 @@ INSERT INTO sales (product, city, amount) VALUES
     ('Phone',  'Manila',    900.00),
     ('Tablet', 'Manila',    600.00),
     ('Tablet', 'Cebu',      550.00);
+```
 
+```sql
 -- Query: Total sales per product per city
 SELECT product,
        city,
@@ -398,7 +409,9 @@ UPDATE sales SET sales_rep = 'Alice' WHERE product = 'Laptop' AND city = 'Manila
 UPDATE sales SET sales_rep = 'Bob'   WHERE product = 'Laptop' AND city = 'Cebu';
 UPDATE sales SET sales_rep = 'Carol' WHERE product = 'Phone';
 UPDATE sales SET sales_rep = 'David' WHERE product = 'Tablet';
+```
 
+```sql
 -- Query: Group by product, city, and sales_rep
 SELECT product, city, sales_rep,
        SUM(amount) AS total_sales
@@ -506,7 +519,9 @@ INSERT INTO orders (order_date, total) VALUES
     ('2025-02-05', 300.00),
     ('2025-04-18', 250.00),
     ('2025-07-30', 400.00);
+```
 
+```sql
 -- Query: Total sales per year
 SELECT EXTRACT(YEAR FROM order_date) AS order_year,
        COUNT(*)    AS num_orders,
@@ -541,7 +556,9 @@ INSERT INTO employees (first_name, salary) VALUES
     ('David', 68000.00),
     ('Eve', 88000.00),
     ('Frank', 55000.00);
+```
 
+```sql
 -- Query: Group by salary band (using a CASE expression)
 SELECT CASE
            WHEN salary >= 100000 THEN 'High'

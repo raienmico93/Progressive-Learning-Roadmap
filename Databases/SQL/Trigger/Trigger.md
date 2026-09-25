@@ -123,21 +123,140 @@ EXECUTE FUNCTION trigger_function();
 
 ### Annotated Complete Code Examples
 
-**Example 1: Simple BEFORE INSERT Trigger (MySQL)**
-
+Setup: Creating the Base Tables: To run these examples, first create these two simple tables: an employees table and an audit_log table.sql-- Create the main employees table
 ```sql
--- Create a trigger that accumulates inserted amounts
-CREATE TRIGGER ins_sum BEFORE INSERT ON account
-FOR EACH ROW SET @sum = @sum + NEW.amount;
+CREATE TABLE employees (
+    employee_id INT PRIMARY KEY,
+    name VARCHAR(50),
+    salary DECIMAL(10, 2),
+    department VARCHAR(50)
+);
 
--- Usage
-SET @sum = 0;
-INSERT INTO account VALUES(137,14.98),(141,1937.50),(97,-100.00);
-SELECT @sum AS 'Total amount inserted';
--- Output: 1852.48
+-- Create a table to track changes automatically
+CREATE TABLE audit_log (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    action_type VARCHAR(50),
+    description VARCHAR(255),
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-**Why this output occurs:** The `BEFORE INSERT` trigger fires once for each row inserted, adding `NEW.amount` to the `@sum` variable. After inserting three rows (14.98 + 1937.50 + (-100.00)), `@sum` equals 1852.48 .
+**Example 1: AFTER INSERT Trigger (Auditing New Rows):**
+This trigger automatically creates a record in the audit_log table whenever a new employee is added.The Code
+
+```sql 
+DELIMITER //
+
+CREATE TRIGGER after_employee_insert
+AFTER INSERT ON employees
+FOR EACH ROW
+BEGIN
+    -- 'NEW' refers to the row that was just inserted
+    INSERT INTO audit_log (action_type, description)
+    VALUES ('INSERT', CONCAT('New employee added: ', NEW.name, ' with salary $', NEW.salary));
+END //
+
+DELIMITER ;
+```
+
+Execution & Testing: Run this statement to add a new employee:
+```sql 
+INSERT INTO employees (employee_id, name, salary, department) 
+VALUES (1, 'Alice Smith', 75000.00, 'Engineering');
+```
+
+Expected Output: If you query the audit_log table:
+```sql
+SELECT action_type, description FROM audit_log;
+```
+
+action_type | description
+-------|------
+INSERT| New employee added: Alice Smith with salary $75000.00
+
+Why this output happens
+1. The INSERT INTO employees statement activates the trigger.
+2. The trigger captures the data from the newly inserted row using the NEW keyword (NEW.name and NEW.salary).
+3. It executes the inner statement, generating a fresh row inside audit_log without requiring a separate manual insert query.
+
+**Example 2: BEFORE UPDATE Trigger (Data Validation & Modification):**
+This trigger automatically forces employee names to uppercase before saving them to the database, ensuring clean and uniform data formatting.The Code
+
+```sql
+DELIMITER //
+
+CREATE TRIGGER before_employee_update
+BEFORE UPDATE ON employees
+FOR EACH ROW
+BEGIN
+    -- 'NEW' allows you to modify values BEFORE they hit the database
+    SET NEW.name = UPPER(NEW.name);
+END //
+
+DELIMITER ;
+```
+Execution & Testing: Run this statement to update Alice's department and change her name format to lowercase:
+```sql
+UPDATE employees 
+SET name = 'alice smith', department = 'IT' 
+WHERE employee_id = 1;
+```
+
+Expected Output: If you query the employees table:
+```sql
+SELECT employee_id, name, department FROM employees WHERE employee_id = 1;
+```
+
+employee_id | name | department
+-|-|-
+1 | ALICE SMITH | IT 
+
+**Why this output happens**: 
+1. The UPDATE statement triggers the logic before writing the change to disk.
+2. The code intercepts the incoming lowercase value (alice smith) inside NEW.name.
+3. The UPPER() function modifies the value directly in the buffer, forcing it to save as ALICE SMITH.
+
+**Example 3: AFTER UPDATE Trigger (Tracking Historical Changes)**
+This trigger records both the old salary and the new salary whenever an employee gets a raise.The Code
+```sql
+DELIMITER //
+
+CREATE TRIGGER after_salary_update
+AFTER UPDATE ON employees
+FOR EACH ROW
+BEGIN
+    -- Only log if the salary actually changed
+    IF OLD.salary <> NEW.salary THEN
+        INSERT INTO audit_log (action_type, description)
+        VALUES (
+            'SALARY_CHANGE', 
+            CONCAT('Employee ID ', NEW.employee_id, ' salary changed from $', OLD.salary, ' to $', NEW.salary)
+        );
+    END IF;
+END //
+
+DELIMITER ;
+```
+Execution & Testing: Give Alice a salary raise:
+```sql
+UPDATE employees 
+SET salary = 82000.00 
+WHERE employee_id = 1;
+```
+
+Expected Output: If you query the audit_log table:
+```sql
+SELECT action_type, description FROM audit_log WHERE action_type = 'SALARY_CHANGE';
+```
+
+action_type | description | 
+-|-
+SALARY_CHANGE | Employee ID 1 salary changed from $75000.00 to $82000.00
+
+**Why this output happens:** 
+1. The UPDATE statement alters the salary value.
+2. The trigger checks if OLD.salary (75000.00) is different from NEW.
+3. salary (82000.00).Because the evaluation is true, it inserts a descriptive string summarizing the specific financial transformation into the history log.
 
 ### Real-World Cases
 

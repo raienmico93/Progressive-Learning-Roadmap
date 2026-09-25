@@ -701,7 +701,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Renaming views
   * View dependencies
 
-* **55. Advanced Views**
+* [**55. Advanced Views**](/Databases/SQL/Views/AdvancedViews.md)
 
   * Updatable views
   * Read-only views
@@ -710,7 +710,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Nested views
   * Materialized views where supported
 
-* **56. Materialized Views**
+* [**56. Materialized Views**](/Databases/SQL/Views/MaterializedViews.md)
 
   * Physical result storage
   * Refresh strategies
@@ -989,7 +989,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XX. Recursive and Hierarchical SQL
 
-* **81. Hierarchical Data**
+* [**81. Hierarchical Data**](/Databases/SQL/RecursiveHierarchical/HierarchicalData.md)
 
   * Parent-child relationships
   * Organizational structures
@@ -997,7 +997,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Folder structures
   * Bill-of-materials structures
 
-* **82. Recursive CTEs**
+* [**82. Recursive CTEs**](/Databases/SQL/RecursiveHierarchical/RecursiveCTEs.md)
 
   * Anchor member
   * Recursive member
@@ -1005,7 +1005,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Depth tracking
   * Path construction
 
-* **83. Hierarchical Query Techniques**
+* [**83. Hierarchical Query Techniques**](/Databases/SQL/RecursiveHierarchical/HierarchicalQueryTechniques.md)
 
   * Traversing downward
   * Traversing upward
@@ -1014,11 +1014,31 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Descendant identification
   * Cycle detection
 
+  **Alternative Hierarchical Models (Non-Recursive)**
+  * Adjacency List Model (Your current baseline)
+  * Nested Set Model (Left and Right values)
+  * Path Enumeration Model (Materialized Path / PostgreSQL ltree)
+  * Closure Table Model (Bridge tables for all relationships)
+
+  **Database-Specific Hierarchical Extensions**
+  * Oracle's CONNECT BY, START WITH, and PRIOR syntax
+  * Oracle's SYS_CONNECT_BY_PATH and CONNECT_BY_ISLEAF
+  
+  **Hierarchical Data Modification (DML)**
+  * Inserting a new node into a specific position
+  * Deleting a leaf node vs. deleting a subtree (Cascading deletes)
+  * Moving a subtree to a different parent (Reparenting)
+  
+  **Performance & Optimization**
+  * Indexing strategies for hierarchical queries (Foreign key + Primary key composite indexes)
+  * Avoiding infinite loops in poorly structured data
+  * Max recursion depth configuration (e.g., OPTION (MAXRECURSION) in SQL Server)
+
 ---
 
 # XXI. JSON, XML, and Semi-Structured Data
 
-* **84. JSON in SQL**
+* [**84. JSON in SQL**](/Databases/SQL/Miscellaneous/JSON.md)
 
   * JSON data types
   * JSON document structure
@@ -1028,7 +1048,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * JSON aggregation
   * JSON indexing
 
-* **85. XML in SQL**
+* [**85. XML in SQL**](/Databases/SQL/Miscellaneous/XML.md)
 
   * XML storage
   * XML querying
@@ -1036,7 +1056,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * XML transformation
   * XML indexing where supported
 
-* **86. Semi-Structured Data Modeling**
+* [**86. Semi-Structured Data Modeling**](/Databases/SQL/Miscellaneous/SemiStructuredDataModeling.md)
 
   * Relational versus document-style storage
   * Hybrid schemas
@@ -1044,6 +1064,18 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Flexible attributes
   * Trade-offs in schema flexibility
 
+* **Enterprise JSON/XML Storage & Query Performance**
+  
+  * Storage overhead of semi-structured formats (Textual parsing overhead vs. binary formats)
+  * Partial updates vs. full document rewrites in transactional logs (WAL)
+  * Inline vs. Out-of-line storage for large documents (e.g., TOAST in PostgreSQL, LOB pointers)
+  * Query optimization: Pushdown predicates into JSON documents
+
+* **Modern Big Data Semi-Structured Formats**
+  
+  * Binary JSON variants (BSON in MongoDB, Protocol Buffers integration)
+  * Row-based vs. Columnar semi-structured data (Avro vs. Parquet / ORC maps and arrays)
+  * External tables and Object Storage querying (Querying JSON/Parquet files directly in S3/Blob storage via SQL)
 ---
 
 # XXII. Data Import, Export, and Transformation
