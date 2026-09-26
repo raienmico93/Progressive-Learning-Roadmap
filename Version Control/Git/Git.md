@@ -63,7 +63,7 @@
 
 # II. Git Repository Fundamentals
 
-* **4. Creating Repositories**
+* [**4. Creating Repositories**](/Version%20Control/Git/Basics/CreatingRepositories.md)
 
   * `git init`
   * `.git` directory
@@ -72,25 +72,23 @@
   * `git clone`
   * Cloning from remote repositories
 
-* **5. Understanding Repository State**
+* [**5. Understanding Repository State**](/Version%20Control/Git/Basics/UnderstandingRepository.md)
 
   * Working tree
   * Staging area
   * Commit history
   * `git status`
   * File states
-
     * Untracked
     * Unmodified
     * Modified
     * Staged
   * Understanding the difference between:
-
     * Working tree
     * Index
     * HEAD
 
-* **6. Inspecting Repository Information**
+* [**6. Inspecting Repository Information**](/Version%20Control/Git/Basics/InspectingRepositoryInfo.md)
 
   * `git status`
   * `git log`
@@ -105,7 +103,7 @@
 
 # III. Basic Git Workflow
 
-* **7. Tracking Files**
+* [**7. Tracking Files**](/Version%20Control/Git/Basic%20WorkFlow/TrackingFiles.md)
 
   * `git add`
   * Adding individual files
@@ -114,7 +112,7 @@
   * Understanding staging
   * Unstaging files
 
-* **8. Creating Commits**
+* [**8. Creating Commits**](/Version%20Control/Git/Basic%20WorkFlow/CreatingCommits.md)
 
   * `git commit`
   * Commit messages
@@ -123,7 +121,7 @@
   * Atomic commits
   * Commit granularity
 
-* **9. Viewing History**
+* [**9. Viewing History**](/Version%20Control/Git/Basic%20WorkFlow/History.md)
 
   * `git log`
   * One-line history
@@ -137,7 +135,7 @@
     * By message
   * `git show`
 
-* **10. Comparing Changes**
+* [**10. Comparing Changes**](/Version%20Control/Git/Basic%20WorkFlow/ComparingChanges.md)
 
   * `git diff`
   * Working-tree changes
@@ -150,34 +148,34 @@
 
 # IV. Undoing and Correcting Changes
 
-* **11. Undoing Working-Tree Changes**
+* [**11. Undoing Working-Tree Changes**](/Version%20Control/Git/UndoingAndCorrecting/UndoingWorkingTree.md)
 
   * `git restore`
   * Restoring individual files
   * Restoring multiple files
   * Understanding destructive operations
 
-* **12. Managing the Staging Area**
+* [**12. Managing the Staging Area**](/Version%20Control/Git/UndoingAndCorrecting/ManagingAndStagingAreas.md)
 
   * `git restore --staged`
   * Unstaging changes
   * Moving changes between working tree and index
 
-* **13. Amending Commits**
+* [**13. Amending Commits**](/Version%20Control/Git/UndoingAndCorrecting/AmendingCommits.md)
 
   * `git commit --amend`
   * Fixing commit messages
   * Adding forgotten files
   * Understanding when amendment is safe
 
-* **14. Reverting Commits**
+* [**14. Reverting Commits**](/Version%20Control/Git/UndoingAndCorrecting/RevertingCommits.md)
 
   * `git revert`
   * Reverting public history
   * Reverting merge commits
   * Revert versus reset
 
-* **15. Resetting History**
+* [**15. Resetting History**](/Version%20Control/Git/UndoingAndCorrecting/RessetingHistory.md)
 
   * `git reset`
   * `--soft`
@@ -192,7 +190,7 @@
 
 # V. `.gitignore` and Repository Hygiene
 
-* **16. Ignoring Files**
+* [**16. Ignoring Files**](/Version%20Control/Git/GitIgnore/IgnoringFiles.md)
 
   * `.gitignore`
   * Ignore patterns
@@ -200,7 +198,7 @@
   * Wildcards
   * Negation patterns
 
-* **17. Common Ignored Content**
+* [**17. Common Ignored Content**](/Version%20Control/Git/GitIgnore/CommonIgnoredContent.md)
 
   * Build artifacts
   * Dependency directories
@@ -211,7 +209,7 @@
   * Environment files
   * Secrets
 
-* **18. Git Repository Hygiene**
+* [**18. Git Repository Hygiene**](/Version%20Control/Git/GitIgnore/RepositoryHygiene.md)
 
   * Keeping repositories clean
   * Avoiding generated artifacts
@@ -223,7 +221,7 @@
 
 # VI. Branching Fundamentals
 
-* **19. Branch Concepts**
+* [**19. Branch Concepts**](/Version%20Control/Git/Branching/Branch.md)
 
   * What a branch represents
   * Branch pointers
@@ -231,8 +229,7 @@
   * Branch creation
   * Branch switching
 
-* **20. Branch Commands**
-
+* [**20. Branch Commands**](/Version%20Control/Git/Branching/BranchCommands.md)
   * `git branch`
   * `git switch`
   * `git checkout`
@@ -241,7 +238,7 @@
   * Deleting branches
   * Listing branches
 
-* **21. Branch-Based Development**
+* [**21. Branch-Based Development**](/Version%20Control/Git/Branching/BranchBasedDev.md)
 
   * Feature branches
   * Bug-fix branches

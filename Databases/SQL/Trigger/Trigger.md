@@ -142,7 +142,7 @@ CREATE TABLE audit_log (
 ```
 
 **Example 1: AFTER INSERT Trigger (Auditing New Rows):**
-This trigger automatically creates a record in the audit_log table whenever a new employee is added.The Code
+This trigger automatically creates a record in the audit_log table whenever a new employee is added.
 
 ```sql 
 DELIMITER //
@@ -180,7 +180,7 @@ Why this output happens
 3. It executes the inner statement, generating a fresh row inside audit_log without requiring a separate manual insert query.
 
 **Example 2: BEFORE UPDATE Trigger (Data Validation & Modification):**
-This trigger automatically forces employee names to uppercase before saving them to the database, ensuring clean and uniform data formatting.The Code
+This trigger automatically forces employee names to uppercase before saving them to the database, ensuring clean and uniform data formatting.
 
 ```sql
 DELIMITER //
@@ -217,7 +217,8 @@ employee_id | name | department
 3. The UPPER() function modifies the value directly in the buffer, forcing it to save as ALICE SMITH.
 
 **Example 3: AFTER UPDATE Trigger (Tracking Historical Changes)**
-This trigger records both the old salary and the new salary whenever an employee gets a raise.The Code
+This trigger records both the old salary and the new salary whenever an employee gets a raise.
+
 ```sql
 DELIMITER //
 

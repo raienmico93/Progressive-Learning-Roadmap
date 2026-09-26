@@ -519,9 +519,7 @@
 
   * `raise`
   * Re-raising
-  * Exception chaining
-
-    * `from`
+  * Exception chaining (`from`)
   * Custom error messages
 
 * [**39. Custom Exceptions**](/Programming%20Languages/Python/ExceptionError/CustomExceptions.md)
@@ -545,7 +543,7 @@
 
 # X. Object-Oriented Programming
 
-* **41. OOP Fundamentals**
+* [**41. OOP Fundamentals**](/Programming%20Languages/Python/OOP/OOP.md)
 
   * Objects
   * Classes
@@ -557,30 +555,22 @@
   * Inheritance
   * Polymorphism
 
-* **42. Defining Classes**
+* [**42. Defining Classes**](/Programming%20Languages/Python/OOP/Classes.md)
 
   * `class`
-  * Constructor
-
-    * `__init__`
+  * Constructor (`__init__`)
   * Instance attributes
   * Instance methods
   * Class attributes
 
-* **43. Method Types**
+* [**43. Method Types**](/Programming%20Languages/Python/OOP/MethodTypes.md)
 
   * Instance methods
-  * Class methods
+  * Class methods (`@classmethod`)
+  * Static methods (`@staticmethod`)
+  * Properties (`@property`)
 
-    * `@classmethod`
-  * Static methods
-
-    * `@staticmethod`
-  * Properties
-
-    * `@property`
-
-* **44. Special Methods**
+* [**44. Special Methods**](/Programming%20Languages/Python/OOP/SpecialMethods.md)
 
   * `__str__`
   * `__repr__`
@@ -593,18 +583,16 @@
   * Arithmetic dunder methods
   * Context-manager dunder methods
 
-* **45. Inheritance**
+* [**45. Inheritance**](/Programming%20Languages/Python/OOP/Inheritance.md)
 
   * Single inheritance
   * Multiple inheritance
   * Multilevel inheritance
   * Method overriding
   * `super()`
-  * Method Resolution Order
+  * Method Resolution Order (MRO)
 
-    * MRO
-
-* **46. Advanced Object-Oriented Design**
+* [**46. Advanced Object-Oriented Design**](/Programming%20Languages/Python/OOP/AdvancedOOP.md)
 
   * Abstract base classes
   * Interfaces through protocols
@@ -673,14 +661,14 @@
 
 # XII. Type Hints and Static Analysis
 
-* **52. Type Hint Fundamentals**
+* [**52. Type Hint Fundamentals**](/Programming%20Languages/Python/TypeHintsAndStaticAnalysis/TypeHint.md)
 
   * Variable annotations
   * Function annotations
   * Return annotations
   * Built-in generic types
 
-* **53. Advanced Typing**
+* [**53. Advanced Typing**](/Programming%20Languages/Python/TypeHintsAndStaticAnalysis/AdvancedTyping.md)
 
   * `Optional`
   * `Union`
@@ -696,7 +684,7 @@
   * `ClassVar`
   * `Self`
 
-* **54. Static Type Checking**
+* [**54. Static Type Checking**](/Programming%20Languages/Python/TypeHintsAndStaticAnalysis/StaticTypeChecking.md)
 
   * mypy
   * Pyright
@@ -704,7 +692,7 @@
   * Gradual typing
   * Type-safe API design
 
-* **55. Type-Oriented Design**
+* [**55. Type-Oriented Design**](/Programming%20Languages/Python/TypeHintsAndStaticAnalysis/TypeOrientedDesign.md)
 
   * Interfaces
   * Generic algorithms

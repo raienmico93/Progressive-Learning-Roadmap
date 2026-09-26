@@ -743,14 +743,14 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XIX. Files and Storage
 
-* **66. File Storage**
+* [**66. File Storage**](/Web%20Development/Laravel/Files%20and%20Storage/FileStorage.md)
 
   * Local storage
   * Public storage
   * Cloud storage
   * Storage disks
 
-* **67. File Uploads**
+* [**67. File Uploads**](/Web%20Development/Laravel/Files%20and%20Storage/FileUploads.md)
 
   * Validation
   * File naming
@@ -759,7 +759,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Retrieval
   * Temporary files
 
-* **68. File Management**
+* [**68. File Management**](/Web%20Development/Laravel/Files%20and%20Storage/FileManagement.md)
 
   * Upload
   * Download

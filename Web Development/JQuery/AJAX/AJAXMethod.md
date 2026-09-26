@@ -72,10 +72,10 @@ You tell `$.ajax()` three things: where to send the request (URL), how to send i
 
 ```javascript
 $.ajax({
-  url: "/api/endpoint",      // Required: target URL
-  type: "POST",              // Optional: HTTP method (default: "GET")
-  data: { key: "value" },    // Optional: request payload
-  dataType: "json"           // Optional: expected response type
+    url: "/api/endpoint",      // Required: target URL
+    type: "POST",              // Optional: HTTP method (default: "GET")
+    data: { key: "value" },    // Optional: request payload
+    dataType: "json"           // Optional: expected response type
 });
 ```
 
@@ -107,33 +107,35 @@ $.ajax({
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ajax — GET Request</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <meta charset="UTF-8">
+    <title>ajax — GET Request</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <button id="loadBtn">Load User</button>
-  <div id="output"></div>
-
-  <script>
-    $(function () {
-      $("#loadBtn").on("click", function () {
-        // Step 1: Send GET request with query parameters
-        $.ajax({
-          url: "/api/user",
-          type: "GET",
-          data: { id: 123, fields: "name,email" },
-          dataType: "json"
-        }).done(function (response) {
-          // Step 2: Handle successful response
-          $("#output").text("User: " + response.name);
-        }).fail(function (xhr, status, error) {
-          // Step 3: Handle errors
-          $("#output").text("Error: " + error);
+    <button id="loadBtn">Load User</button>
+    <div id="output"></div>
+  
+    <script>
+        $(function () {
+            $("#loadBtn").on("click", function () {
+                // Step 1: Send GET request with query parameters
+                $.ajax({
+                    url: "/api/user",
+                    type: "GET",
+                    data: { id: 123, fields: "name,email" },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    // Step 2: Handle successful response
+                    $("#output").text("User: " + response.name);
+                })
+                .fail(function (xhr, status, error) {
+                    // Step 3: Handle errors
+                    $("#output").text("Error: " + error);
+                });
+            });
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```
@@ -154,35 +156,37 @@ jQuery serializes the `data` object into a query string and appends it to the UR
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ajax — POST Request</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <meta charset="UTF-8">
+    <title>ajax — POST Request</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <button id="saveBtn">Save Data</button>
-  <div id="output"></div>
-
-  <script>
-    $(function () {
-      $("#saveBtn").on("click", function () {
-        // Step 1: Send POST request with data object
-        $.ajax({
-          url: "/api/save",
-          type: "POST",
-          data: {
-            title: "Hello World",
-            body: "This is a test.",
-            userId: 456
-          },
-          dataType: "json"
-        }).done(function (response) {
-          $("#output").text("Saved with ID: " + response.id);
-        }).fail(function (xhr, status, error) {
-          $("#output").text("Save failed: " + error);
+    <button id="saveBtn">Save Data</button>
+    <div id="output"></div>
+  
+    <script>
+        $(function () {
+            $("#saveBtn").on("click", function () {
+                // Step 1: Send POST request with data object
+                $.ajax({
+                    url: "/api/save",
+                    type: "POST",
+                    data: {
+                        title: "Hello World",
+                        body: "This is a test.",
+                        userId: 456
+                    },
+                    dataType: "json"
+                })
+                .done(function (response) {
+                    $("#output").text("Saved with ID: " + response.id);
+                })
+                .fail(function (xhr, status, error) {
+                    $("#output").text("Save failed: " + error);
+                });
+            });
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```

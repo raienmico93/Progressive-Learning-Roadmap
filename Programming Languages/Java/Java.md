@@ -384,14 +384,14 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Package organization
   - Namespace management
 
-- **37. Access Modifiers**
+- [**37. Access Modifiers**](/Programming%20Languages/Java/OOP/AccessModifiers.md)
   - `public`
   - `private`
   - `protected`
   - Package-private
   - Visibility rules
 
-- **38. Nested Types**
+- [**38. Nested Types**](/Programming%20Languages/Java/OOP/NestedTypes.md)
   - Static nested classes
   - Inner classes
   - Local classes

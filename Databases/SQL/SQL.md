@@ -115,29 +115,21 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # II. Database and Schema Management
 
-* **6. Database Management**
+* [**6. Database Management**](/Databases/SQL/DDL/Database.md)
 
-  * Creating databases
-
-    * `CREATE DATABASE`
-  * Selecting databases
-
-    * Vendor-specific database selection mechanisms
+  * Creating databases (`CREATE DATABASE`)
+  * Selecting databases (Vendor-specific database selection mechanisms)
   * Listing databases
   * Renaming databases
-  * Dropping databases
-
-    * `DROP DATABASE`
+  * Dropping databases (`DROP DATABASE`)
   * Database ownership
   * Database configuration
   * Database-level permissions
 
-* **7. Schema Management**
+* [**7. Schema Management**](/Databases/SQL/DDL/Schema.md)
 
   * Schema definition
-  * Creating schemas
-
-    * `CREATE SCHEMA`
+  * Creating schemas (`CREATE SCHEMA`)
   * Altering schemas
   * Dropping schemas
   * Schema ownership
@@ -145,29 +137,22 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Organizing objects by schema
   * Multi-schema application design
 
-* **8. Table Fundamentals**
+* [**8. Table Fundamentals**](/Databases/SQL/DDL/Table.md)
 
-  * Creating tables
-
-    * `CREATE TABLE`
+  * Creating tables (`CREATE TABLE`)
   * Viewing table definitions
   * Listing tables
   * Renaming tables
-  * Truncating tables
-
-    * `TRUNCATE TABLE`
-  * Dropping tables
-
-    * `DROP TABLE`
+  * Truncating tables (`TRUNCATE TABLE`)
+  * Dropping tables (`DROP TABLE`)
   * Temporary tables
   * Table cloning
   * Derived tables
   * Table metadata
 
-* **9. SQL Data Types**
+* [**9. SQL Data Types**](/Databases/SQL/DDL/DataTypes.md)
 
   * Numeric data types
-
     * Integer
     * Small integer
     * Big integer
@@ -175,12 +160,10 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
     * Numeric
     * Floating-point types
   * Character data types
-
     * `CHAR`
     * `VARCHAR`
     * `TEXT`
   * Date and time data types
-
     * `DATE`
     * `TIME`
     * `TIMESTAMP`
@@ -189,7 +172,6 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Boolean data types
   * Binary data types
   * Large object types
-
     * BLOB
     * CLOB
   * JSON-related types
@@ -203,7 +185,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # III. Data Definition Language (DDL)
 
-* **10. Creating Database Objects**
+* [**10. Creating Database Objects**](/Databases/SQL/DDL/CreatingDBObj.md)
 
   * Tables
   * Schemas
@@ -215,7 +197,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Stored procedures
   * Functions
 
-* **11. Altering Database Structures**
+* [**11. Altering Database Structures**](/Databases/SQL/DDL/AlteringDatabase.md)
 
   * `ALTER TABLE`
 
@@ -243,7 +225,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Constraint enforcement
   * Constraint dependency
 
-* **13. Referential Integrity**
+* [**13. Referential Integrity**](/Databases/SQL/DDL/ReferentialIntegrity.md)
 
   * Parent and child tables
   * Foreign key relationships
@@ -311,7 +293,6 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
   * `WHERE`
   * Comparison operators
-
     * `=`
     * `<>`
     * `!=`
@@ -404,11 +385,9 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
   * Length functions
   * Case conversion
-
     * `UPPER`
     * `LOWER`
   * Trimming
-
     * `TRIM`
     * `LTRIM`
     * `RTRIM`
@@ -442,7 +421,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Formatting
   * Time-zone conversion
 
-* **28. Conditional Expressions**
+* [**28. Conditional Expressions**](/Databases/SQL/Functions/ConditionalExp.md)
 
   * `CASE`
   * Simple `CASE`
@@ -1080,7 +1059,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XXII. Data Import, Export, and Transformation
 
-* **87. Data Loading**
+* [**87. Data Loading**](/Databases/SQL/ImportExportTransform/DataLoading.md)
 
   * Bulk inserts
   * Batch inserts
@@ -1088,7 +1067,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * External data loading
   * Bulk-loading utilities
 
-* **88. Data Export**
+* [**88. Data Export**](/Databases/SQL/ImportExportTransform/DataExporting.md)
 
   * Query result export
   * CSV
@@ -1096,7 +1075,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * SQL dump
   * Database backup export
 
-* **89. Data Transformation**
+* [**89. Data Transformation**](/Databases/SQL/ImportExportTransform/DataTransformation.md)
 
   * Type conversion
   * String transformation
@@ -1105,7 +1084,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Standardization
   * Data validation
 
-* **90. ETL-Oriented SQL**
+* [**90. ETL-Oriented SQL**](/Databases/SQL/ImportExportTransform/ETL.md)
 
   * Extract
   * Transform

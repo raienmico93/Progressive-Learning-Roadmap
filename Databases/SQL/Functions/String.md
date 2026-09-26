@@ -80,8 +80,8 @@ CHAR_LENGTH(string)  -- MySQL synonym for CHARACTER_LENGTH
 
 ```sql
 -- Measure the length of a string
-SELECT LENGTH('Hello World') AS char_length;        -- 11 (PostgreSQL, MySQL)
-SELECT LEN('Hello World') AS char_length;            -- 11 (SQL Server)
+SELECT LENGTH('Hello World') AS char_length;           -- 11 (PostgreSQL, MySQL)
+SELECT LEN('Hello World') AS char_length;              -- 11 (SQL Server)
 SELECT CHARACTER_LENGTH('Hello World') AS char_length; -- 11 (standard)
 
 -- Measure with trailing spaces

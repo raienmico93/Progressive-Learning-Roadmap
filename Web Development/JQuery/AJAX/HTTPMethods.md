@@ -70,11 +70,11 @@ GET is for reading data. You ask the server "give me this information," and the 
 
 ```javascript
 $.ajax({
-  url: "/api/resource",
-  type: "GET",           // Default method
-  data: { key: "value" }, // Appended as query string
-  cache: true,           // Default: true (browser caching allowed)
-  dataType: "json"
+    url: "/api/resource",
+    type: "GET",            // Default method
+    data: { key: "value" }, // Appended as query string
+    cache: true,            // Default: true (browser caching allowed)
+    dataType: "json"
 });
 ```
 
@@ -107,32 +107,34 @@ $.ajax({
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>GET — Basic Retrieval</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <meta charset="UTF-8">
+    <title>GET — Basic Retrieval</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <button id="loadBtn">Load Data</button>
-  <div id="output"></div>
-
-  <script>
-    $(function () {
-      $("#loadBtn").on("click", function () {
-        // Step 1: Send GET request with query parameters
-        $.ajax({
-          url: "/api/users",
-          type: "GET",  // Default, but explicit
-          data: { role: "admin", limit: 10 },
-          dataType: "json"
-        }).done(function (users) {
-          // Step 2: Handle response
-          $("#output").text("Loaded " + users.length + " admin users.");
-        }).fail(function (xhr, status, error) {
-          $("#output").text("Error: " + error);
+    <button id="loadBtn">Load Data</button>
+    <div id="output"></div>
+  
+    <script>
+        $(function () {
+            $("#loadBtn").on("click", function () {
+                // Step 1: Send GET request with query parameters
+                $.ajax({
+                    url: "/api/users",
+                    type: "GET",  // Default, but explicit
+                    data: { role: "admin", limit: 10 },
+                    dataType: "json"
+                })
+                .done(function (users) {
+                    // Step 2: Handle response
+                    $("#output").text("Loaded " + users.length + " admin users.");
+                })
+                .fail(function (xhr, status, error) {
+                    $("#output").text("Error: " + error);
+                });
+            });
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```
@@ -152,29 +154,29 @@ The `data` object is serialized into a query string and appended to the URL for 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>GET — Cache Control</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <meta charset="UTF-8">
+    <title>GET — Cache Control</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <button id="freshBtn">Load Fresh Data</button>
-  <div id="output"></div>
-
-  <script>
-    $(function () {
-      $("#freshBtn").on("click", function () {
-        // Step 1: Force fresh request by disabling cache
-        $.ajax({
-          url: "/api/current-time",
-          type: "GET",
-          cache: false,  // Appends _={timestamp} to URL
-          dataType: "text"
-        }).done(function (time) {
-          $("#output").text("Server time: " + time);
+    <button id="freshBtn">Load Fresh Data</button>
+    <div id="output"></div>
+  
+    <script>
+        $(function () {
+            $("#freshBtn").on("click", function () {
+                // Step 1: Force fresh request by disabling cache
+                $.ajax({
+                    url: "/api/current-time",
+                    type: "GET",
+                    cache: false,  // Appends _={timestamp} to URL
+                    dataType: "text"
+                }).done(function (time) {
+                    $("#output").text("Server time: " + time);
+                });
+            });
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```

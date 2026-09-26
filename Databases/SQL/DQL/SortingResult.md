@@ -98,11 +98,13 @@ CREATE TABLE employees (
     salary DECIMAL(10,2)
 );
 
-INSERT INTO employees VALUES (1, 'Alice', 'Engineering', 85000);
-INSERT INTO employees VALUES (2, 'Bob', 'Marketing', 62000);
-INSERT INTO employees VALUES (3, 'Charlie', 'Engineering', 95000);
-INSERT INTO employees VALUES (4, 'Diana', 'Sales', 48000);
-INSERT INTO employees VALUES (5, 'Eve', 'Engineering', 110000);
+INSERT INTO employees 
+VALUES 
+    (1, 'Alice', 'Engineering', 85000),
+    (2, 'Bob', 'Marketing', 62000),
+    (3, 'Charlie', 'Engineering', 95000),
+    (4, 'Diana', 'Sales', 48000),
+    (5, 'Eve', 'Engineering', 110000)
 
 -- Basic ORDER BY
 SELECT emp_name, salary

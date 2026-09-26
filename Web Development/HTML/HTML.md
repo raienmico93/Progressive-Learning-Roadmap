@@ -6,7 +6,7 @@
 
 # I. HTML Foundations
 
-- [**1. Introduction to HTML**](Basics/Intro.md)
+- [**1. Introduction to HTML**](/Web%20Development/HTML/Basics/Intro.md)
   - Definition of HTML
     - HyperText Markup Language
     - Standard markup language for structuring documents on the Web
@@ -34,7 +34,7 @@
     - Browser implementation
     - Standards compliance
 
-- [**2. Web Fundamentals Prerequisites**](Basics/WebEssentials.md)
+- [**2. Web Fundamentals Prerequisites**](/Web%20Development/HTML/Basics/WebEssentials.md)
   - Internet and World Wide Web concepts
   - Client-server architecture
   - Web browsers
@@ -46,7 +46,7 @@
   - Request-response lifecycle
   - Browser rendering fundamentals
 
-- [**3. HTML Development Environment**](Basics/DevEnvironment.md)
+- [**3. HTML Development Environment**](/Web%20Development/HTML/Basics/DevEnvironment.md)
   - Code editors
     - Visual Studio Code
     - Other HTML-capable editors
@@ -62,7 +62,7 @@
 
 # II. HTML Document Structure
 
-- [**4. Basic HTML Document**](Basics/Document.md)
+- [**4. Basic HTML Document**](/Web%20Development/HTML/Basics/Document.md)
   - `<!DOCTYPE html>`
   - `<html>`
   - `<head>`
@@ -72,7 +72,7 @@
   - Metadata section
   - Document content section
 
-- [**5. HTML Elements**](Basics/Elements.md)
+- [**5. HTML Elements**](/Web%20Development/HTML/Basics/Elements.md)
   - Opening tags
   - Closing tags
   - Start tags
@@ -83,7 +83,7 @@
   - Sibling elements
   - Void elements
 
-- **6. HTML Attributes**
+- [**6. HTML Attributes**](/Web%20Development/HTML/Basics/Attributes.md)
   - Attribute syntax
   - Attribute values
   - Global attributes
@@ -93,7 +93,7 @@
   - Multiple attributes
   - Valid attribute usage
 
-- **7. HTML Comments**
+- [**7. HTML Comments**](/Web%20Development/HTML/Basics/Comments.md)
   - Comment syntax
   - When to use comments
   - Documentation
@@ -104,7 +104,7 @@
 
 # III. Text and Content Structure
 
-- **8. Headings**
+- [**8. Headings**](/Web%20Development/HTML/Basics/Headings.md)
   - `<h1>`
   - `<h2>`
   - `<h3>`
@@ -115,7 +115,7 @@
   - Document outline concepts
   - Meaningful heading structure
 
-- **9. Paragraphs and Text Blocks**
+- [**9. Paragraphs and Text Blocks**](/Web%20Development/HTML/Basics/ParagraphsAndTextBlocks.md)
   - `<p>`
   - `<br>`
   - `<hr>`
@@ -123,7 +123,7 @@
   - Whitespace behavior
   - Line breaks versus paragraph breaks
 
-- **10. Text Semantics**
+- [**10. Text Semantics**](/Web%20Development/HTML/Basics/TextFormatting.md)
   - `<strong>`
   - `<em>`
   - `<b>`
@@ -138,7 +138,7 @@
   - `<sup>`
   - Choosing semantic elements rather than purely visual elements
 
-- **11. Quotations and References**
+- [**11. Quotations and References**](/Web%20Development/HTML/Basics/QuotationsAndReferences.md)
   - `<blockquote>`
   - `<q>`
   - `<cite>`
@@ -147,7 +147,7 @@
   - `<address>`
   - `<time>`
 
-- **12. Code and Technical Text**
+- [**12. Code and Technical Text**](/Web%20Development/HTML/Basics/CodeAndTechnicalText.md)
   - `<code>`
   - `<pre>`
   - `<kbd>`
@@ -161,26 +161,26 @@
 
 # IV. HTML Lists
 
-- **13. Unordered Lists**
+- [**13. Unordered Lists**](/Web%20Development/HTML/Lists/UnorderedLists.md)
   - `<ul>`
   - `<li>`
   - Nested unordered lists
 
-- **14. Ordered Lists**
+- [**14. Ordered Lists**](/Web%20Development/HTML/Lists/OrderedLists.md)
   - `<ol>`
   - `<li>`
   - `start`
   - `reversed`
   - `type`
 
-- **15. Description Lists**
+- [**15. Description Lists**](/Web%20Development/HTML/Lists/DescriptionLists.md)
   - `<dl>`
   - `<dt>`
   - `<dd>`
   - Terms and definitions
   - Metadata-style lists
 
-- **16. Nested and Complex Lists**
+- [**16. Nested and Complex Lists**](/Web%20Development/HTML/Lists/NestedAndComplexLists.md)
   - Multi-level structures
   - Mixed list types
   - Semantic list usage
@@ -191,7 +191,7 @@
 
 # V. Hyperlinks and Navigation
 
-- **17. Links**
+- [**17. Links**](/Web%20Development/HTML/Hyperlinks%20and%20Navigation/Links.md)
   - `<a>`
   - `href`
   - Link text
@@ -199,7 +199,7 @@
   - Relative URLs
   - Root-relative URLs
 
-- **18. Link Targets**
+- [**18. Link Targets**](/Web%20Development/HTML/Hyperlinks%20and%20Navigation/LinkTargets.md)
   - Same-page navigation
   - New browsing context
   - External websites
@@ -207,13 +207,13 @@
   - Email links
   - Telephone links
 
-- **19. Fragment Navigation**
+- [**19. Fragment Navigation**](/Web%20Development/HTML/Hyperlinks%20and%20Navigation/FragmentNavigation.md)
   - `id`
   - Fragment identifiers
   - In-page navigation
   - Table-of-contents systems
 
-- **20. Link Security and Accessibility**
+- [**20. Link Security and Accessibility**](/Web%20Development/HTML/Hyperlinks%20and%20Navigation/LinkSecAndAccess.md)
   - Secure external links
   - `rel`
   - Descriptive link text
@@ -224,7 +224,7 @@
 
 # VI. Images and Responsive Media
 
-- **21. Images**
+- [**21. Images**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/Images.md)
   - `<img>`
   - `src`
   - `alt`
@@ -238,21 +238,21 @@
     - WebP
     - AVIF
 
-- **22. Image Accessibility**
+- [**22. Image Accessibility**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/ImageAccess.md)
   - Alternative text
   - Decorative images
   - Informative images
   - Functional images
   - Complex-image descriptions
 
-- **23. Responsive Images**
+- [**23. Responsive Images**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/ResponsiveImg.md)
   - `srcset`
   - `sizes`
   - Resolution switching
   - Art direction
   - `<picture>`
 
-- **24. Figure Content**
+- [**24. Figure Content**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/FigureContent.md)
   - `<figure>`
   - `<figcaption>`
   - Images with captions
@@ -335,7 +335,7 @@
 
 # IX. HTML Tables
 
-- **33. Table Fundamentals**
+- [**33. Table Fundamentals**](/Web%20Development/HTML/Tables/Table.md)
   - `<table>`
   - `<tr>`
   - `<th>`
@@ -344,14 +344,14 @@
   - Header cells
   - Data cells
 
-- **34. Table Structure**
+- [**34. Table Structure**](/Web%20Development/HTML/Tables/TableStructure.md)
   - `<caption>`
   - `<thead>`
   - `<tbody>`
   - `<tfoot>`
   - Table sections
 
-- **35. Table Relationships**
+- [**35. Table Relationships**](/Web%20Development/HTML/Tables/TableRelationship.md)
   - `scope`
   - Row headers
   - Column headers
@@ -359,7 +359,7 @@
   - `colspan`
   - `rowspan`
 
-- **36. Accessible Data Tables**
+- [**36. Accessible Data Tables**](/Web%20Development/HTML/Tables/AccessibleDataTables.md)
   - Proper header association
   - Table captions
   - Avoiding tables for layout
