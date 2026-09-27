@@ -68,9 +68,10 @@ import java.util.Optional;
 public class EmptyExample {
     public static void main(String[] args) {
         Optional<String> empty = Optional.empty();
-        System.out.println("Is present: " + empty.isPresent());
-        System.out.println("Is empty: " + empty.isEmpty());
-        System.out.println("orElse: " + empty.orElse("fallback"));
+
+        System.out.println("Is present : " + empty.isPresent());
+        System.out.println("Is empty   : " + empty.isEmpty());
+        System.out.println("orElse     : " + empty.orElse("fallback"));
     }
 }
 ```
@@ -78,9 +79,9 @@ public class EmptyExample {
 Expected Output:
 
 ```
-Is present: false
-Is empty: true
-orElse: fallback
+Is present : false
+Is empty   : true
+orElse     : fallback
 ```
 
 **Why the code produces this result:** `Optional.empty()` creates an empty container. `isPresent()` returns `false`, `isEmpty()` returns `true`, and `orElse` returns the fallback value because no value is present.
@@ -205,6 +206,7 @@ import java.util.Optional;
 public class OfNullableExample {
     public static void main(String[] args) {
         String value = "Hello";
+        
         Optional<String> opt = Optional.ofNullable(value);
         System.out.println(opt.orElse("default"));
     }
@@ -226,6 +228,7 @@ public class OfNullableNullExample {
     public static void main(String[] args) {
         String value = null;
         Optional<String> opt = Optional.ofNullable(value);
+
         System.out.println("Is present: " + opt.isPresent());
         System.out.println("orElse: " + opt.orElse("default"));
     }

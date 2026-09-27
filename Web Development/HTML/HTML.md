@@ -264,7 +264,7 @@
 
 # VII. Audio, Video, and Embedded Content
 
-- **25. Audio**
+- [**25. Audio**](/Web%20Development/HTML/Multimedia/Audio.md)
   - `<audio>`
   - `controls`
   - `autoplay`
@@ -272,7 +272,7 @@
   - `muted`
   - Multiple `<source>` elements
 
-- **26. Video**
+- [**26. Video**](/Web%20Development/HTML/Multimedia/Video.md)
   - `<video>`
   - Controls
   - Poster images
@@ -280,14 +280,14 @@
   - Multiple formats
   - Captions
 
-- **27. Media Accessibility**
+- [**27. Media Accessibility**](/Web%20Development/HTML/Multimedia/MediaAccess.md)
   - `<track>`
   - Captions
   - Subtitles
   - Audio descriptions
   - Transcripts
 
-- **28. Embedded Content**
+- [**28. Embedded Content**](/Web%20Development/HTML/Multimedia/EmbeddedContent.md)
   - `<iframe>`
   - External documents
   - Embedded media
@@ -299,14 +299,14 @@
 
 # VIII. Semantic HTML
 
-- **29. Semantic HTML Fundamentals**
+- [**29. Semantic HTML Fundamentals**](/Web%20Development/HTML/Semantic/Semantic.md)
   - Meaningful document structure
   - Machine-readable content
   - Accessibility benefits
   - Search-engine understanding
   - Maintainability
 
-- **30. Semantic Structural Elements**
+- [**30. Semantic Structural Elements**](/Web%20Development/HTML/Semantic/SemanticStructuralElements.md)
   - `<header>`
   - `<nav>`
   - `<main>`
@@ -315,7 +315,7 @@
   - `<aside>`
   - `<footer>`
 
-- **31. Other Semantic Elements**
+- [**31. Other Semantic Elements**](/Web%20Development/HTML/Semantic/OtherSemanticElements.md)
   - `<figure>`
   - `<details>`
   - `<summary>`
@@ -324,7 +324,7 @@
   - `<address>`
   - `<search>`
 
-- **32. Semantic Versus Generic Elements**
+- [**32. Semantic Versus Generic Elements**](/Web%20Development/HTML/Semantic/SemanticVSGeneric.md)
   - `<div>`
   - `<span>`
   - Appropriate use of generic containers
@@ -369,7 +369,7 @@
 
 # X. HTML Forms
 
-- **37. Form Fundamentals**
+- [**37. Form Fundamentals**](/Web%20Development/HTML/Forms/Form.md)
   - `<form>`
   - `action`
   - `method`
@@ -377,7 +377,7 @@
   - POST requests
   - Form submission lifecycle
 
-- **38. Input Elements**
+- [**38. Input Elements**](/Web%20Development/HTML/Forms/InputElements.md)
   - `<input>`
   - Text
   - Password
@@ -394,7 +394,7 @@
   - Submit
   - Button
 
-- **39. Form Controls**
+- [**39. Form Controls**](/Web%20Development/HTML/Forms/FormControls.md)
   - `<label>`
   - `<textarea>`
   - `<select>`
@@ -406,7 +406,7 @@
   - `<meter>`
   - `<progress>`
 
-- **40. Form Attributes**
+- [**40. Form Attributes**](/Web%20Development/HTML/Forms/FormAttributes.md)
   - `name`
   - `value`
   - `placeholder`
@@ -426,7 +426,7 @@
 
 # XI. Form Validation
 
-- **41. Client-Side Validation**
+- [**41. Client-Side Validation**](/Web%20Development/HTML/Forms/ClientSideValidation.md)
   - Required fields
   - Type validation
   - Length constraints
@@ -434,7 +434,7 @@
   - Pattern validation
   - Browser validation UI
 
-- **42. Constraint Validation**
+- [**42. Constraint Validation**](/Web%20Development/HTML/Forms/ConstraintValidation.md)
   - Validity states
   - `required`
   - `minlength`
@@ -445,7 +445,7 @@
   - `pattern`
   - `type`
 
-- **43. Accessible Forms**
+- [**43. Accessible Forms**](/Web%20Development/HTML/Forms/AccessibleForms.md)
   - Explicit labels
   - Field grouping
   - `<fieldset>`
@@ -454,7 +454,7 @@
   - Instructions
   - Keyboard accessibility
 
-- **44. Server-Side Validation**
+- [**44. Server-Side Validation**](/Web%20Development/HTML/Forms/ServerSideValidation.md)
   - Difference between client and server validation
   - Trust boundaries
   - Input validation
@@ -465,7 +465,7 @@
 
 # XII. HTML Metadata and the `<head>`
 
-- **45. Document Metadata**
+- [**45. Document Metadata**](/Web%20Development/HTML/Metadata%20and%20the%20Head/DocMetadata.md)
   - `<title>`
   - `<meta>`
   - `<link>`
@@ -473,18 +473,18 @@
   - `<script>`
   - `<base>`
 
-- **46. Character Encoding**
+- [**46. Character Encoding**](/Web%20Development/HTML/Metadata%20and%20the%20Head/CharacterEncoding.md)
   - UTF-8
   - `<meta charset="UTF-8">`
   - Character encoding problems
   - International text
 
-- **47. Viewport Metadata**
+- [**47. Viewport Metadata**](/Web%20Development/HTML/Metadata%20and%20the%20Head/ViewportMetadata.md)
   - Responsive viewport
   - Mobile rendering
   - Device-width considerations
 
-- **48. Resource Linking**
+- [**48. Resource Linking**](/Web%20Development/HTML/Metadata%20and%20the%20Head/ResourceLinking.md)
   - External stylesheets
   - Favicons
   - Web manifests
@@ -496,20 +496,20 @@
 
 # XIII. CSS Integration
 
-- **49. Applying CSS**
+- [**49. Applying CSS**](/Web%20Development/HTML/CSS%20Integration/CSSIntegration.md)
   - Inline CSS
   - Internal CSS
   - External CSS
   - `<link rel="stylesheet">`
 
-- **50. HTML-CSS Relationship**
+- [**50. HTML-CSS Relationship**](/Web%20Development/HTML/CSS%20Integration/HTMLAndCSS.md)
   - HTML as structure
   - CSS as presentation
   - Separation of concerns
   - Class-based styling
   - ID-based targeting
 
-- **51. CSS-Oriented HTML Design**
+- [**51. CSS-Oriented HTML Design**](/Web%20Development/HTML/CSS%20Integration/CSSOriented.md)
   - Reusable classes
   - Semantic class naming
   - Component-oriented markup
@@ -519,7 +519,7 @@
 
 # XIV. JavaScript Integration
 
-- **52. JavaScript Integration**
+- [**52. JavaScript Integration**](/Web%20Development/HTML/JS%20Integration/JSIntegration.md)
   - `<script>`
   - External JavaScript files
   - Inline scripts
@@ -527,14 +527,14 @@
   - `async`
   - Module scripts
 
-- **53. DOM Fundamentals**
+- [**53. DOM Fundamentals**](/Web%20Development/HTML/JS%20Integration/DOM.md)
   - Document Object Model
   - Element selection
   - Event handling
   - Attribute manipulation
   - Content manipulation
 
-- **54. HTML Event Integration**
+- [**54. HTML Event Integration**](/Web%20Development/HTML/JS%20Integration/HTMLEvent.md)
   - User interactions
   - Form events
   - Mouse events
@@ -542,7 +542,7 @@
   - Input events
   - Event-driven programming
 
-- **55. Progressive Enhancement**
+- [**55. Progressive Enhancement**](/Web%20Development/HTML/JS%20Integration/ProgressiveEnhancement.md)
   - Functional HTML without JavaScript
   - Enhancement with JavaScript
   - Graceful degradation
@@ -552,27 +552,27 @@
 
 # XV. Accessibility and Inclusive HTML
 
-- **56. Web Accessibility Fundamentals**
+- [**56. Web Accessibility Fundamentals**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/WebAccessibility.md)
   - Accessibility definition
   - Assistive technologies
   - Keyboard access
   - Screen readers
   - Semantic structure
 
-- **57. Accessible Structure**
+- [**57. Accessible Structure**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/AccessibleStructure.md)
   - Proper heading hierarchy
   - Landmark elements
   - Semantic controls
   - Meaningful link text
 
-- **58. Accessible Forms**
+- [**58. Accessible Forms**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/AccessibleForms.md)
   - Labels
   - Instructions
   - Error identification
   - Focus management
   - Grouping controls
 
-- **59. ARIA Fundamentals**
+- [**59. ARIA Fundamentals**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/ARIA.md)
   - Accessible Rich Internet Applications
   - Roles
   - States
@@ -581,7 +581,7 @@
   - Native HTML versus ARIA
   - Avoiding unnecessary ARIA
 
-- **60. Accessibility Standards**
+- [**60. Accessibility Standards**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/AccessibilityStandards.md)
   - WCAG concepts
   - Perceivable content
   - Operable interfaces

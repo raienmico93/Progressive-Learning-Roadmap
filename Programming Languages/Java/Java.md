@@ -771,26 +771,26 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Parallelism
   - Thread lifecycle
 
-- **83. Thread Creation**
+- [**83. Thread Creation**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ThreadCreation.md)
   - Extending `Thread`
   - Implementing `Runnable`
   - Callable tasks
   - Thread management
 
-- **84. Synchronization**
+- [**84. Synchronization**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/Synchronization.md)
   - `synchronized`
   - Intrinsic locks
   - Critical sections
   - Mutual exclusion
 
-- **85. Java Memory Model**
+- [**85. Java Memory Model**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/MemoryModel.md)
   - Visibility
   - Atomicity
   - Ordering
   - Happens-before relationships
   - Shared mutable state
 
-- **86. Concurrency Utilities**
+- [**86. Concurrency Utilities**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ConcurrencyUtilities.md)
   - `Executor`
   - `ExecutorService`
   - Thread pools
@@ -798,13 +798,13 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - `Callable`
   - `CompletableFuture`
 
-- **87. Concurrent Collections**
+- [**87. Concurrent Collections**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ConcurrencyUtilities.md)
   - `ConcurrentHashMap`
   - `CopyOnWriteArrayList`
   - Blocking queues
   - Concurrent queues
 
-- **88. Synchronization Utilities**
+- [**88. Synchronization Utilities**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/SynchronizationUtilities.md)
   - Locks
   - `ReentrantLock`
   - Read/write locks
@@ -813,14 +813,14 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Barriers
   - Atomic variables
 
-- **89. Concurrency Problems**
+- [**89. Concurrency Problems**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ConcurrencyProblems.md)
   - Race conditions
   - Deadlocks
   - Starvation
   - Livelocks
   - Thread contention
 
-- **90. Modern Concurrency**
+- [**90. Modern Concurrency**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ModernConcurrency.md)
   - Virtual threads
   - Structured concurrency concepts
   - High-throughput task execution

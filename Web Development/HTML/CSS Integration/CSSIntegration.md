@@ -1,0 +1,944 @@
+# HTML Applying CSS: Comprehensive Programming Cheat Sheet
+
+---
+
+## Topic Overview
+
+### Definitions
+
+**Core Definition**
+
+Applying CSS in HTML is the process of connecting Cascading Style Sheets to an HTML document through one of three methods — inline, internal, or external — to control the visual presentation of the page.
+
+**Technical Definition**
+
+CSS can be applied to an HTML document through three distinct mechanisms defined by the WHATWG HTML Living Standard and the CSS Cascading and Inheritance specification. Inline CSS uses the `style` global attribute on individual elements. Internal CSS uses the `<style>` element, a metadata content element placed within the `<head>`. External CSS uses the `<link>` element with `rel="stylesheet"`, referencing an independent `.css` file. Each method contributes to the CSS cascade, where declarations are resolved by origin, specificity, and source order. The `<link>` element's `media` attribute, the `<style>` element's `media` attribute, and the `@import` at-rule within CSS provide additional scoping mechanisms.
+
+**Beginner-Friendly Explanation**
+
+CSS is what makes your web page look good — colours, fonts, spacing, layout. But you have to connect the CSS to your HTML somehow. There are three ways to do it: write the styles directly on an element (inline), put them in a `<style>` block in the page's head (internal), or link to a separate `.css` file (external). Most professional websites use external CSS because it keeps things organised and reusable. But you'll encounter all three, and it's important to understand how they interact when they conflict.
+
+---
+
+### Key Characteristics
+
+| Characteristic | Description |
+|---|---|
+| **Three methods** | Inline, internal, and external CSS |
+| **Cascade priority** | Inline CSS has the highest specificity by default, followed by internal and external (which are equal and resolved by source order) |
+| **Reusability** | External CSS is reusable across all pages; internal CSS is scoped to one page; inline CSS is scoped to one element |
+| **Caching** | External CSS files are cached by browsers; internal and inline CSS are re-downloaded with the HTML |
+| **Maintainability** | External > Internal > Inline (from easiest to hardest to maintain) |
+| **Specificity** | Inline styles have a specificity of 1-0-0-0 (highest), while internal and external styles have specificity based on selectors |
+| **`!important`** | Can override normal declarations from any origin (with caveats) |
+| **CSSOM** | All three methods contribute to the CSS Object Model (CSSOM) |
+
+---
+
+### Prerequisites
+
+- Basic familiarity with HTML document structure (`<html>`, `<head>`, `<body>`)
+- Understanding of HTML elements, tags, and attributes
+- Basic knowledge of CSS syntax (selectors, properties, values)
+- Awareness of the cascade and inheritance concepts
+
+---
+
+### Related Programming Areas
+
+- **CSS Cascade and Specificity** – Determines which styles win when conflicts occur
+- **Web Performance** – External CSS is cached; internal and inline CSS block rendering
+- **Separation of Concerns** – External CSS keeps content and presentation separate
+- **CSS Architecture** – Methodologies like BEM, SMACSS, and OOCSS rely on external stylesheets
+- **Component-Based Development** – Modern frameworks use scoped styles (CSS-in-JS, SFC styles)
+- **Email Templates** – Often require inline CSS due to email client limitations
+
+---
+
+## Core Concepts / Features
+
+---
+
+### 1. Inline CSS (`style` Attribute)
+
+#### Definitions
+
+**Core Definition**
+
+Inline CSS applies style declarations directly to a single HTML element using the `style` global attribute, affecting only that element.
+
+**Technical Definition**
+
+The `style` global attribute contains CSS declaration blocks to be applied to the element. The attribute's value follows the CSS syntax for a declaration list (property-value pairs separated by semicolons). The `style` attribute is a global attribute, valid on all HTML elements. It contributes to the CSS cascade at the highest specificity level (1-0-0-0) for author styles, meaning it overrides external and internal styles with the same importance unless `!important` is used. The attribute is parsed as CSS and is subject to the same error-handling rules as any CSS declaration block.
+
+**Beginner-Friendly Explanation**
+
+Inline CSS is when you write styles right inside an HTML tag using the `style` attribute. For example: `<p style="color: red;">Hello</p>`. It only affects that one element. It's quick and easy for small changes, but if you need to style 50 paragraphs the same way, you'd have to copy-paste 50 times — which is why it's usually better to use internal or external CSS.
+
+#### Purposes
+
+- To apply styles to a single element without affecting others
+- To override other styles for a specific element (due to high specificity)
+- To style HTML emails where external stylesheets are unreliable
+- To apply dynamic styles generated by JavaScript (e.g., animation, positioning)
+- To prototype styles quickly during development
+
+#### Syntax Rules and Structure
+
+**General Syntax**
+
+```html
+<element style="property1: value1; property2: value2;">Content</element>
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|---|---|
+| `style` | Global attribute; contains CSS declarations |
+| `property1: value1` | A CSS declaration (property, colon, value) |
+| `;` | Separates multiple declarations |
+| `element` | Any HTML element |
+
+**Syntax Rules**
+
+- The `style` attribute accepts a declaration list (no selectors, no braces)
+- Declarations are separated by semicolons
+- The last semicolon is optional but recommended
+- Values may contain whitespace but not unescaped semicolons
+- CSS custom properties (`--var`) can be set inline and used in stylesheets
+- The `style` attribute is parsed as CSS; invalid declarations are ignored
+
+**Constraints and Limitations**
+
+- Inline styles cannot use pseudo-classes (`:hover`) or pseudo-elements (`::before`)
+- Inline styles cannot define media queries or `@`-rules
+- Inline styles are hard to maintain and cannot be cached separately
+- Inline styles have the highest specificity, which can make overrides difficult
+- CSP (Content Security Policy) may block inline styles unless `'unsafe-inline'` is allowed
+
+#### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Basic Inline CSS**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Inline CSS Demo</title>
+</head>
+<body>
+    <!-- Inline style applied directly to the element -->
+    <h1 style="color: #4a6cf7; font-family: Arial, sans-serif;">
+        Inline Styled Heading
+    </h1>
+
+    <p style="font-size: 18px; line-height: 1.6; color: #333;">
+        This paragraph has inline styles applied to it. Only this
+        element is affected.
+    </p>
+
+    <!-- A different paragraph without inline styles -->
+    <p>This paragraph uses the browser's default styles.</p>
+</body>
+</html>
+```
+
+**Expected Output**
+
+The heading appears in blue with Arial font. The first paragraph has a larger font size, increased line height, and dark grey colour. The second paragraph uses default styling.
+
+**Why This Output Occurs**
+
+The `style` attribute applies CSS declarations directly to the element. Because no other styles are defined, there is no conflict, and the inline styles take effect.
+
+---
+
+**Example 2: Inline CSS with CSS Custom Properties**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Inline Custom Properties</title>
+    <style>
+        .card {
+            /* Use custom properties set inline */
+            background-color: var(--card-bg, #fff);
+            color: var(--card-color, #000);
+            padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Set custom properties inline -->
+    <div class="card" style="--card-bg: #4a6cf7; --card-color: #fff;">
+        <h2>Blue Card</h2>
+        <p>This card uses inline custom properties.</p>
+    </div>
+
+    <div class="card" style="--card-bg: #f0f0f0; --card-color: #333;">
+        <h2>Grey Card</h2>
+        <p>This card also uses inline custom properties.</p>
+    </div>
+</body>
+</html>
+```
+
+**Expected Output**
+
+Two cards with different background and text colours, both using the same CSS class but with custom properties set inline.
+
+**Why This Output Occurs**
+
+The `--card-bg` and `--card-color` custom properties are set on each element via the `style` attribute. The `.card` class uses `var()` to read those properties, falling back to defaults if not set.
+
+---
+
+**Example 3: Inline CSS for JavaScript-Generated Styles**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Dynamic Inline Styles</title>
+    <style>
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #4a6cf7;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <!-- Width is set dynamically via JavaScript -->
+        <div class="progress-fill" id="progress" style="width: 0%;"></div>
+    </div>
+
+    <button onclick="document.getElementById('progress').style.width = '75%';">
+        Set Progress to 75%
+    </button>
+</body>
+</html>
+```
+
+**Expected Output**
+
+Clicking the button animates the progress bar to 75%.
+
+**Why This Output Occurs**
+
+The `style` attribute is set dynamically by JavaScript. This is the most common use case for inline styles in modern web development — dynamic, per-element values that cannot be expressed in a static stylesheet.
+
+#### Real-World Cases
+
+**Case 1: HTML Email**
+
+Email clients often strip `<style>` blocks and external stylesheets, so email templates use inline CSS for reliability.
+
+**Case 2: JavaScript Animations**
+
+Frameworks like React and Vue use inline styles for dynamic values (opacity, transform, width).
+
+**Case 3: CSS Custom Property Theming**
+
+Design systems use inline `style` attributes to set CSS custom properties per component instance.
+
+---
+
+### 2. Internal CSS (`<style>` Element)
+
+#### Definitions
+
+**Core Definition**
+
+Internal CSS places styles inside a `<style>` element within the HTML document's `<head>`, applying them to the entire document.
+
+**Technical Definition**
+
+The `<style>` element contains style information for a document or part of a document. It contains CSS that is applied to the contents of the document containing the element. It is categorised as metadata content when in `<head>`, or flow content and phrasing content when in `<body>` (with scoped attribute, deprecated). Its permitted content is text that matches the CSS grammar. It supports `media`, `blocking`, `nonce`, and `title` attributes. Its DOM interface is `HTMLStyleElement`. The element's rules participate in the CSS cascade at the author origin, with specificity determined by the selectors used.
+
+**Beginner-Friendly Explanation**
+
+Internal CSS is when you write your CSS inside a `<style>` tag in the `<head>` of your HTML file. It applies to the whole page, so you can style all your paragraphs with one rule instead of writing inline styles on each one. It's a step up from inline CSS because it's more organised, but it's still tied to that one HTML file.
+
+#### Purposes
+
+- To apply styles to an entire document without an external file
+- To scope styles to a specific media query using the `media` attribute
+- To define page-specific styles that are not needed elsewhere
+- To embed critical above-the-fold CSS for faster first render
+- To prototype styles during development
+
+#### Syntax Rules and Structure
+
+**General Syntax**
+
+```html
+<head>
+    <style>
+        selector {
+            property: value;
+        }
+    </style>
+</head>
+```
+
+**With Media Attribute**
+
+```html
+<style media="print">
+    /* These rules apply only when printing */
+</style>
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|---|---|
+| `<style>` | Metadata content element |
+| `selector` | CSS selector (element, class, id, attribute, etc.) |
+| `property: value` | CSS declaration |
+| `media` | Optional; media query for when the styles apply |
+
+**Syntax Rules**
+
+- The `<style>` element must be placed inside `<head>` (or `<body>` in legacy HTML)
+- Multiple `<style>` elements are allowed
+- The `media` attribute restricts when the styles apply
+- The `type` attribute is no longer required (`text/css` is the default)
+- The `<style>` element's content is parsed as CSS, not HTML
+- Rules cascade according to specificity and source order
+
+**Constraints and Limitations**
+
+- Internal CSS is not cached separately; it is re-downloaded with every page load
+- It cannot be shared across pages (each page needs its own copy)
+- Large `<style>` blocks increase HTML file size
+- CSP may block inline `<style>` unless `'unsafe-inline'` is allowed
+
+#### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Basic Internal CSS**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Internal CSS Demo</title>
+
+    <style>
+        /* Applies to all paragraphs in the document */
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Applies to elements with class "highlight" */
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0.25em 0.5em;
+            border-radius: 4px;
+        }
+
+        /* Applies to the element with id "main-heading" */
+        #main-heading {
+            color: #4a6cf7;
+            border-bottom: 2px solid #4a6cf7;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="main-heading">Internal CSS</h1>
+    <p>This paragraph is styled by the internal stylesheet.</p>
+    <p>This paragraph has <span class="highlight">highlighted text</span>.</p>
+</body>
+</html>
+```
+
+**Expected Output**
+
+The heading is blue with a blue underline. All paragraphs have larger font size and dark grey colour. The highlighted text has a yellow background.
+
+**Why This Output Occurs**
+
+The rules inside the `<style>` element apply to the entire document. Element, class, and ID selectors target different elements.
+
+---
+
+**Example 2: Internal CSS with Media Query**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Media-Specific Internal CSS</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2em;
+        }
+
+        .sidebar {
+            float: left;
+            width: 30%;
+        }
+
+        .main {
+            float: right;
+            width: 65%;
+        }
+
+        /* Applies only on screens 768px or narrower */
+        @media (max-width: 768px) {
+            .sidebar,
+            .main {
+                float: none;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Sidebar</h2>
+        <p>Sidebar content.</p>
+    </div>
+    <div class="main">
+        <h2>Main Content</h2>
+        <p>Main content.</p>
+    </div>
+</body>
+</html>
+```
+
+**Expected Output**
+
+On desktop, the sidebar and main content sit side by side. On screens 768px or narrower, they stack vertically.
+
+**Why This Output Occurs**
+
+The `@media` at-rule inside the `<style>` element applies the responsive rules only when the condition matches.
+
+---
+
+**Example 3: Critical Above-the-Fold CSS**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Critical CSS Demo</title>
+
+    <!-- Critical above-the-fold styles inlined for fast first paint -->
+    <style>
+        /* Critical: header, hero, and above-the-fold layout */
+        body { margin: 0; font-family: system-ui, sans-serif; }
+        .header { background: #1a1a1a; color: white; padding: 1rem; }
+        .hero { min-height: 60vh; display: flex; align-items: center;
+                justify-content: center; background: #f0f4ff; }
+        .hero h1 { font-size: 3rem; color: #1a1a1a; }
+    </style>
+
+    <!-- Non-critical styles loaded asynchronously -->
+    <link rel="stylesheet" href="/css/non-critical.css" media="print"
+          onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="/css/non-critical.css">
+    </noscript>
+</head>
+<body>
+    <header class="header">
+        <h1>Site Title</h1>
+    </header>
+    <section class="hero">
+        <h1>Welcome</h1>
+    </section>
+</body>
+</html>
+```
+
+**Expected Output**
+
+The header and hero section render immediately with critical styles. Non-critical styles load asynchronously and apply once loaded.
+
+**Why This Output Occurs**
+
+Critical CSS is inlined in the `<style>` element to avoid a render-blocking request. Non-critical CSS is loaded with a media query trick (`media="print"` then switched to `all` on load), which makes it non-blocking.
+
+#### Real-World Cases
+
+**Case 1: Critical CSS for Performance**
+
+Performance-focused sites inline critical CSS in `<style>` tags and defer non-critical CSS.
+
+**Case 2: Single-Page Demos**
+
+CodePen and JSFiddle use internal CSS for self-contained demos.
+
+**Case 3: Email Templates**
+
+Email templates use `<style>` blocks (with inline fallbacks) for clients that support them.
+
+---
+
+### 3. External CSS (`<link>` Element)
+
+#### Definitions
+
+**Core Definition**
+
+External CSS links an independent `.css` file to an HTML document using the `<link rel="stylesheet">` element, providing global reuse and caching.
+
+**Technical Definition**
+
+The `<link>` element with `rel="stylesheet"` establishes an external resource link to a CSS file. The browser fetches the resource specified by the `href` attribute and applies its CSS rules to the document. The `media` attribute can scope the stylesheet to a media query. The `type` attribute (defaulting to `text/css`) specifies the MIME type. The `title` attribute creates an alternate stylesheet set. External stylesheets are cached by browsers and shared across pages, making them the most efficient method for multi-page sites. External CSS is the recommended approach for production websites.
+
+**Beginner-Friendly Explanation**
+
+External CSS means writing your styles in a separate `.css` file and linking to it with `<link rel="stylesheet" href="styles.css">`. This is how professional websites do it. You write the CSS once, link to it from every page, and the browser caches it so pages load faster. It keeps your HTML clean and your styles organised.
+
+#### Purposes
+
+- To separate content (HTML) from presentation (CSS)
+- To share CSS rules across multiple pages
+- To leverage browser caching for faster page loads
+- To improve maintainability and team collaboration
+- To support media-specific stylesheets
+- To enable alternate stylesheets (themes)
+
+#### Syntax Rules and Structure
+
+**General Syntax**
+
+```html
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="print.css" media="print">
+<link rel="stylesheet" href="theme-dark.css" title="Dark Theme">
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|---|---|
+| `rel="stylesheet"` | Indicates the resource is a stylesheet |
+| `href` | URL of the CSS file |
+| `media` | Optional; media query for when to apply |
+| `type` | Optional; MIME type (`text/css` by default) |
+| `title` | Optional; creates an alternate stylesheet set |
+| `disabled` | Optional; disables the stylesheet |
+
+**Syntax Rules**
+
+- The `href` attribute is required
+- The `rel` attribute must contain `stylesheet`
+- Multiple stylesheets are allowed; they cascade in document order
+- The `media` attribute accepts media types and media queries
+- External stylesheets are render-blocking by default
+- The `integrity` attribute can be used for Subresource Integrity (SRI)
+
+**Constraints and Limitations**
+
+- External stylesheets require an additional HTTP request
+- Render-blocking: the browser pauses rendering until the CSS is loaded
+- `@import` inside CSS files creates sequential (waterfall) loading, which is slower than multiple `<link>` elements
+- Cross-origin stylesheets require CORS headers if `crossorigin` is used
+
+#### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Basic External Stylesheet**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Main stylesheet for all media -->
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <title>External CSS Demo</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>This page is styled by an external CSS file.</p>
+</body>
+</html>
+```
+
+**styles.css**
+
+```css
+body {
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 2em;
+    background-color: #f9f9f9;
+}
+
+h1 {
+    color: #4a6cf7;
+    border-bottom: 2px solid #4a6cf7;
+    padding-bottom: 0.5em;
+}
+```
+
+**Expected Output**
+
+The page renders with system font, padding, light grey background, and a blue heading with a blue underline.
+
+**Why This Output Occurs**
+
+The `<link rel="stylesheet">` element tells the browser to fetch `/css/styles.css` and apply its rules. The browser caches the CSS file for subsequent page loads.
+
+---
+
+**Example 2: Multiple Stylesheets with Media Queries**
+
+```html
+<head>
+    <meta charset="utf-8">
+
+    <!-- Base styles for all devices -->
+    <link rel="stylesheet" href="/css/base.css">
+
+    <!-- Tablet and desktop styles -->
+    <link rel="stylesheet" href="/css/desktop.css" media="(min-width: 768px)">
+
+    <!-- Print-specific styles -->
+    <link rel="stylesheet" href="/css/print.css" media="print">
+
+    <title>Media-Specific Stylesheets</title>
+</head>
+```
+
+**Expected Output**
+
+The base styles apply everywhere; desktop styles apply on screens 768px and wider; print styles apply only when printing.
+
+**Why This Output Occurs**
+
+The `media` attribute on each `<link>` restricts when the stylesheet's rules are applied. Browsers may still download all stylesheets but only apply the matching ones.
+
+---
+
+**Example 3: External CSS with Subresource Integrity**
+
+```html
+<head>
+    <!-- External CSS from a CDN with SRI hash -->
+    <link rel="stylesheet"
+          href="https://cdn.example.com/bootstrap.min.css"
+          integrity="sha384-abc123..."
+          crossorigin="anonymous">
+</head>
+```
+
+**Expected Output**
+
+The browser verifies the file's integrity before applying it. If the hash does not match, the stylesheet is rejected.
+
+**Why This Output Occurs**
+
+The `integrity` attribute provides a cryptographic hash of the expected file. The `crossorigin` attribute enables CORS for the integrity check.
+
+#### Real-World Cases
+
+**Case 1: Corporate Websites**
+
+Large sites use a shared `main.css` across all pages, with page-specific stylesheets for unique sections.
+
+**Case 2: CSS Frameworks**
+
+Frameworks like Bootstrap and Tailwind are distributed as external stylesheets.
+
+**Case 3: Print-Friendly Pages**
+
+News and recipe sites use `media="print"` stylesheets to hide navigation and optimize content for printing.
+
+---
+
+### 4. Cascade Priority (How Conflicts Are Resolved)
+
+#### Definitions
+
+**Core Definition**
+
+Cascade priority is the algorithm the browser uses to determine which CSS declaration wins when multiple declarations apply to the same element and property.
+
+**Technical Definition**
+
+The CSS cascade is defined by the CSS Cascading and Inheritance specification. It resolves conflicts by considering, in order: (1) origin and importance (user agent < user < author < author !important < user !important < user agent !important); (2) encapsulation context; (3) specificity (inline styles have specificity 1-0-0-0, ID selectors 0-1-0-0, classes/attributes/pseudo-classes 0-0-1-0, elements/pseudo-elements 0-0-0-1); (4) scope proximity; and (5) order of appearance (later declarations win). Inline styles are treated as author-origin declarations with the highest specificity, meaning they beat internal and external styles with the same importance. However, `!important` declarations in external or internal stylesheets can override inline styles.
+
+**Beginner-Friendly Explanation**
+
+When two styles try to set the same property on the same element, the browser has to decide which one wins. The rules are: inline styles beat internal and external styles (unless the other style uses `!important`). Between internal and external styles, whichever comes last in the document wins (if specificity is equal). And more specific selectors (like IDs) beat less specific ones (like element selectors). This is called the cascade — it's how CSS decides what to apply.
+
+#### Purposes
+
+- To understand which style wins when conflicts occur
+- To debug unexpected styling issues
+- To write maintainable CSS with predictable outcomes
+- To know when to use (and avoid) inline styles
+- To use `!important` judiciously
+
+#### Cascade Priority Order
+
+| Priority | Source | Specificity | Example |
+|---|---|---|---|
+| 1 (highest) | User Agent `!important` | — | Browser accessibility overrides |
+| 2 | User `!important` | — | User stylesheet with `!important` |
+| 3 | Author `!important` | — | `color: red !important;` |
+| 4 | **Inline styles** | 1-0-0-0 | `style="color: red;"` |
+| 5 | Author styles (internal/external) | Based on selector | `#id`, `.class`, `element` |
+| 6 | User agent styles | — | Browser defaults |
+
+**Specificity Calculation**
+
+| Selector Type | Specificity |
+|---|---|
+| Inline style | 1-0-0-0 |
+| ID (`#id`) | 0-1-0-0 |
+| Class (`.class`), attribute (`[attr]`), pseudo-class (`:hover`) | 0-0-1-0 |
+| Element (`div`), pseudo-element (`::before`) | 0-0-0-1 |
+| Universal (`*`), combinators (`>`, `+`, `~`) | 0-0-0-0 |
+
+**Syntax Rules**
+
+- Later declarations of equal specificity and origin win
+- `!important` reverses the origin order (author `!important` beats inline)
+- Inline styles have the highest specificity among normal author declarations
+- Specificity is calculated per selector, not per declaration
+
+**Constraints and Limitations**
+
+- `!important` should be avoided; it makes debugging difficult
+- Inline styles are hard to override without `!important`
+- CSS custom properties and `@layer` can affect cascade order
+
+#### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Inline vs. Internal CSS**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Cascade Priority Demo</title>
+    <style>
+        /* Internal CSS: specificity 0-0-0-1 (element selector) */
+        p {
+            color: blue;
+        }
+
+        /* Internal CSS with class: specificity 0-0-1-0 */
+        .highlight {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <!-- Inline style: specificity 1-0-0-0 -->
+    <p style="color: red;">This text is red (inline wins).</p>
+
+    <!-- Class beats element, but inline beats both -->
+    <p class="highlight" style="color: red;">
+        This text is red (inline beats class).
+    </p>
+
+    <!-- Class beats element -->
+    <p class="highlight">This text is green (class beats element).</p>
+
+    <!-- Element selector only -->
+    <p>This text is blue (element selector).</p>
+</body>
+</html>
+```
+
+**Expected Output**
+
+- First paragraph: red (inline wins)
+- Second paragraph: red (inline beats class)
+- Third paragraph: green (class beats element)
+- Fourth paragraph: blue (element selector)
+
+**Why This Output Occurs**
+
+Inline styles have specificity 1-0-0-0, which beats class (0-0-1-0) and element (0-0-0-1) selectors. Between internal and external styles, specificity and source order determine the winner.
+
+---
+
+**Example 2: `!important` Overriding Inline Styles**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>!important Override Demo</title>
+    <style>
+        /* !important in internal CSS beats inline styles */
+        p {
+            color: purple !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Inline style cannot override !important -->
+    <p style="color: red;">
+        This text is purple, not red, because of !important.
+    </p>
+</body>
+</html>
+```
+
+**Expected Output**
+
+The paragraph is purple, not red.
+
+**Why This Output Occurs**
+
+The `!important` flag in the internal stylesheet reverses the normal cascade order, making it beat the inline style.
+
+---
+
+**Example 3: Source Order Between Internal and External**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Source Order Demo</title>
+
+    <!-- External stylesheet loaded first -->
+    <link rel="stylesheet" href="/css/styles.css">
+
+    <!-- Internal styles loaded after -->
+    <style>
+        /* Same specificity as external, but later in source order */
+        p {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <p>This text is green (internal wins by source order).</p>
+</body>
+</html>
+```
+
+**styles.css**
+
+```css
+p {
+    color: blue;
+}
+```
+
+**Expected Output**
+
+The paragraph is green.
+
+**Why This Output Occurs**
+
+Both the external and internal styles have the same specificity (0-0-0-1). The internal style comes later in the source order, so it wins.
+
+#### Real-World Cases
+
+**Case 1: Debugging Unexpected Styles**
+
+Developers use browser DevTools to inspect which rule is winning and why.
+
+**Case 2: Third-Party Widgets**
+
+Third-party widgets use inline styles or `!important` to avoid being overridden by host page styles.
+
+**Case 3: Design Systems**
+
+Design systems use CSS custom properties and `@layer` to control cascade order predictably.
+
+---
+
+### 5. Choosing the Right Method
+
+#### Definitions
+
+**Core Definition**
+
+Choosing the right CSS method means selecting inline, internal, or external CSS based on the project's scope, maintainability, and performance requirements.
+
+**Technical Definition**
+
+The choice depends on the project's architecture. External CSS is the standard for production websites because it separates concerns, enables caching, and supports team collaboration. Internal CSS is useful for critical CSS, single-page demos, and email templates. Inline CSS is reserved for dynamic values, email clients, and overrides. Modern approaches include CSS-in-JS (scoped styles), CSS Modules, and utility-first frameworks (Tailwind), which generate external stylesheets or scoped styles.
+
+**Beginner-Friendly Explanation**
+
+For most websites, use external CSS. It's the cleanest, fastest, and most maintainable approach. Use internal CSS for critical above-the-fold styles or one-off pages. Use inline CSS only when you have no other choice — like in emails or for dynamic values set by JavaScript.
+
+#### Decision Guide
+
+| Scenario | Recommended Method |
+|---|---|
+| **Multi-page website** | External CSS |
+| **Single-page demo** | Internal CSS |
+| **HTML email** | Inline CSS (with `<style>` fallback) |
+| **Critical above-the-fold CSS** | Internal CSS (inlined) |
+| **Dynamic styles (JS)** | Inline CSS or CSS custom properties |
+| **Theme switching** | External CSS with alternate stylesheets |
+| **Component library** | External CSS with scoped classes or CSS Modules |
+| **Print styles** | External CSS with `media="print"` |
+
+#### Comparison Table
+
+| Aspect | Inline | Internal | External |
+|---|---|---|---|
+| **Scope** | One element | One document | Multiple documents |
+| **Reusability** | None | Low | High |
+| **Caching** | No | No | Yes |
+| **Maintainability** | Low | Medium | High |
+| **Specificity** | Highest (1-0-0-0) | Based on selector | Based on selector |
+| **Performance** | Worst (no cache) | Medium | Best (cached) |
+| **Best for** | Dynamic values, email | Critical CSS, demos | Production sites |
+
+---
+
+## References
+
+- MDN Web Docs – How CSS is structured – https://developer.mozilla.org/en-US/docs/Learn/CSS/First_steps/How_CSS_is_structured
+- MDN Web Docs – CSS: Cascading Style Sheets – https://developer.mozilla.org/en-US/docs/Web/CSS
+- MDN Web Docs – Cascade, specificity, and inheritance – https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Cascade_and_inheritance
+- MDN Web Docs – Specificity – https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
+- MDN Web Docs – `style` global attribute – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/style
+- MDN Web Docs – `<style>`: The Style Information element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/style
+- MDN Web Docs – `<link>`: The External Resource Link element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/link
+- WHATWG HTML Living Standard – The style element – https://html.spec.whatwg.org/multipage/semantics.html#the-style-element
+- WHATWG HTML Living Standard – The link element – https://html.spec.whatwg.org/multipage/semantics.html#the-link-element
+- W3C – CSS Cascading and Inheritance Level 5 – https://www.w3.org/TR/css-cascade-5/
+- W3C – CSS Cascading and Inheritance Level 4 – https://www.w3.org/TR/css-cascade-4/
+- W3C – CSS Snapshot 2023 – https://www.w3.org/TR/css-2023/
+- web.dev – CSS performance optimization – https://web.dev/articles/css-performance
+- web.dev – Extract critical CSS – https://web.dev/articles/extract-critical-css
+- CSS-Tricks – Specifics on CSS Specificity – https://css-tricks.com/specifics-on-css-specificity/
+- Smashing Magazine – CSS Architecture – https://www.smashingmagazine.com/2011/12/an-introduction-to-object-oriented-css-oocss/

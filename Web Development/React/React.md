@@ -150,7 +150,7 @@
   * Object and array props
   * Children prop
 
-* **9. Component Composition**
+* [**9. Component Composition**](/Web%20Development/React/Basics/ComponentComposition.md)
 
   * Parent-child relationships
   * Nested components
@@ -159,7 +159,7 @@
   * Composition versus inheritance
   * Compound components
 
-* **10. Component Reusability**
+* [**10. Component Reusability**](/Web%20Development/React/Basics/ComponentReusability.md)
 
   * Configurable components
   * Generic UI components
@@ -330,7 +330,7 @@
 
 # VII. React Effects and External Systems
 
-* **25. Side-Effect Management**
+* [**25. Side-Effect Management**](/Web%20Development/React/Effects%20And%20External%20Systems/SideEffect.md)
 
   * API communication
   * Browser APIs
@@ -340,7 +340,7 @@
   * Third-party libraries
   * Cleanup responsibilities
 
-* **26. Effect Design**
+* [**26. Effect Design**](/Web%20Development/React/Effects%20And%20External%20Systems/EffectDesign.md)
 
   * Synchronization versus event handling
   * Avoiding unnecessary effects
@@ -350,7 +350,7 @@
   * Race conditions
   * Request cancellation
 
-* **27. Asynchronous Rendering Concerns**
+* [**27. Asynchronous Rendering Concerns**](/Web%20Development/React/Effects%20And%20External%20Systems/AsyncRenderingConcerns.md)
 
   * Loading states
   * Race conditions
@@ -363,27 +363,27 @@
 
 # VIII. Component Communication
 
-* **28. Parent-to-Child Communication**
+* [**28. Parent-to-Child Communication**](/Web%20Development/React/ComponentComm.md/ParentChild.md)
 
   * Props
   * Callback functions
   * Configuration objects
   * Render props
 
-* **29. Child-to-Parent Communication**
+* [**29. Child-to-Parent Communication**](/Web%20Development/React/ComponentComm.md/ChildParent.md)
 
   * Callback props
   * Event lifting
   * State ownership
 
-* **30. Sibling Communication**
+* [**30. Sibling Communication**](/Web%20Development/React/ComponentComm.md/Sibling.md)
 
   * Lifted state
   * Shared parent state
   * Context
   * External state stores
 
-* **31. Deep Component Communication**
+* [**31. Deep Component Communication**](/Web%20Development/React/ComponentComm.md/DeepComm.md)
 
   * Context API
   * State-management libraries
@@ -394,7 +394,7 @@
 
 # IX. State Management
 
-* **32. State Architecture**
+* [**32. State Architecture**](/Web%20Development/React/State%20Management/StateArch.md)
 
   * Local state
   * Shared state
@@ -404,21 +404,21 @@
   * Derived state
   * Persistent state
 
-* **33. State Lifting**
+* [**33. State Lifting**](/Web%20Development/React/State%20Management/StateLift.md)
 
   * Identifying common state
   * Moving state upward
   * Avoiding duplicated sources of truth
   * Designing state ownership
 
-* **34. Context-Based State Management**
+* [**34. Context-Based State Management**](/Web%20Development/React/State%20Management/ContextBasedState.md)
 
   * Providers
   * Context values
   * Provider composition
   * Context performance considerations
 
-* **35. External State Management**
+* [**35. External State Management**](/Web%20Development/React/State%20Management/ExternalState.md)
 
   * Redux
   * Redux Toolkit
@@ -428,7 +428,7 @@
   * Other state-management approaches
   * Choosing an appropriate solution
 
-* **36. Server State**
+* [**36. Server State**](/Web%20Development/React/State%20Management/ServerState.md)
 
   * Query state
   * Cache state
@@ -443,7 +443,7 @@
 
 # X. Routing and Navigation
 
-* **37. Client-Side Routing**
+* [**37. Client-Side Routing**](/Web%20Development/React/Routing/ClientSideRouting.md)
 
   * Routing concepts
   * URL-based application state
@@ -451,7 +451,7 @@
   * Navigation
   * Links
 
-* **38. React Router**
+* [**38. React Router**](/Web%20Development/React/Routing/ReactRouter.md)
 
   * Installation and setup
   * Routes
@@ -463,7 +463,7 @@
   * Redirects
   * Route layouts
 
-* **39. Advanced Routing**
+* [**39. Advanced Routing**](/Web%20Development/React/Routing/AdvancedRouting.md)
 
   * Protected routes
   * Authentication-aware navigation
@@ -477,7 +477,7 @@
 
 # XI. Forms and Validation
 
-* **40. Form Architecture**
+* [**40. Form Architecture**](/Web%20Development/React/Forms%20and%20Validation/FormArch.md)
 
   * Controlled inputs
   * Uncontrolled inputs
@@ -485,7 +485,7 @@
   * Validation state
   * Submission state
 
-* **41. Validation**
+* [**41. Validation**](/Web%20Development/React/Forms%20and%20Validation/Validation.md)
 
   * Required fields
   * Type validation
@@ -494,18 +494,17 @@
   * Cross-field validation
   * Server-side validation integration
 
-* **42. Form Libraries**
+* [**42. Form Libraries**](/Web%20Development/React/Forms%20and%20Validation/FormLibraries.md)
 
   * React Hook Form
   * Formik
   * Schema validation
-
     * Zod
     * Yup
   * Form performance
   * Reusable validation schemas
 
-* **43. Advanced Form Features**
+* [**43. Advanced Form Features**](/Web%20Development/React/Forms%20and%20Validation/AdvancedFormFeatures.md)
 
   * Dynamic fields
   * Multi-step forms
@@ -518,7 +517,7 @@
 
 # XII. Data Fetching and APIs
 
-* **44. HTTP Fundamentals for React**
+* [**44. HTTP Fundamentals for React**](/Web%20Development/React/Data%20Fetching%20and%20APIs/HTTP.md)
 
   * GET
   * POST
@@ -529,7 +528,7 @@
   * Headers
   * JSON
 
-* **45. Fetching Data**
+* [**45. Fetching Data**](/Web%20Development/React/Data%20Fetching%20and%20APIs/FetchingData.md)
 
   * `fetch`
   * Axios
@@ -539,7 +538,7 @@
   * Loading state
   * Empty state
 
-* **46. API Integration**
+* [**46. API Integration**](/Web%20Development/React/Data%20Fetching%20and%20APIs/APIIntegration.md)
 
   * REST APIs
   * GraphQL
@@ -548,7 +547,7 @@
   * Response transformation
   * Error normalization
 
-* **47. Advanced Data Management**
+* [**47. Advanced Data Management**](/Web%20Development/React/Data%20Fetching%20and%20APIs/AdvancedDataManagement.md)
 
   * Caching
   * Deduplication
@@ -563,7 +562,7 @@
 
 # XIII. Styling and UI Engineering
 
-* **48. CSS with React**
+* [**48. CSS with React**](/Web%20Development/React/Styling/CSS.md)
 
   * Global CSS
   * Component-level styles
@@ -571,13 +570,13 @@
   * CSS naming strategies
   * Responsive styling
 
-* **49. CSS-in-JS**
+* [**49. CSS-in-JS**](/Web%20Development/React/Styling/CSSinJS.md)
 
   * Styled-components
   * Emotion
   * Runtime versus build-time styling considerations
 
-* **50. Utility-First Styling**
+* [**50. Utility-First Styling**](/Web%20Development/React/Styling/UtilityFirst.md)
 
   * Tailwind CSS
   * Utility classes
@@ -585,7 +584,7 @@
   * State variants
   * Design-token integration
 
-* **51. UI Component Systems**
+* [**51. UI Component Systems**](/Web%20Development/React/Styling/UIComponent.md)
 
   * Component libraries
   * Design systems

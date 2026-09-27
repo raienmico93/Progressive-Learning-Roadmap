@@ -116,11 +116,8 @@ Think of an interface as a job description. It lists the tasks a person in that 
  * Demonstrates interface declaration and implementation.
  */
 interface Drawable {
-    // Abstract method (implicitly public abstract)
-    void draw();
-
-    // Constant (implicitly public static final)
-    int MAX_SIZE = 100;
+    void draw();          // Abstract method (implicitly public abstract)
+    int MAX_SIZE = 100;   // Constant (implicitly public static final)
 }
 
 class Circle implements Drawable {
@@ -151,10 +148,15 @@ class Square implements Drawable {
 
 public class InterfaceDemo {
     public static void main(String[] args) {
-        Drawable[] shapes = { new Circle(5), new Square(4) };
+        Drawable[] shapes = { 
+            new Circle(5), 
+            new Square(4) 
+        };
+
         for (Drawable d : shapes) {
             d.draw(); // Polymorphic dispatch
         }
+
         System.out.println("Max size: " + Drawable.MAX_SIZE);
     }
 }
@@ -423,13 +425,13 @@ class AdvancedCalculator implements Calculator {
 public class DefaultMethodDemo {
     public static void main(String[] args) {
         Calculator simple = new SimpleCalculator();
-        System.out.println("Simple add: " + simple.add(5, 3));
-        System.out.println("Simple subtract: " + simple.subtract(10, 4));
+        System.out.println("Simple add        : " + simple.add(5, 3));
+        System.out.println("Simple subtract   : " + simple.subtract(10, 4));
 
         Calculator advanced = new AdvancedCalculator();
-        System.out.println("Advanced subtract: " + advanced.subtract(10, 4));
+        System.out.println("Advanced subtract : " + advanced.subtract(10, 4));
 
-        System.out.println("Static multiply: " + Calculator.multiply(6, 7));
+        System.out.println("Static multiply   : " + Calculator.multiply(6, 7));
     }
 }
 ```
@@ -437,10 +439,10 @@ public class DefaultMethodDemo {
 **Expected Output:**
 
 ```
-Simple add: 8
-Simple subtract: 6
-Advanced subtract: 6
-Static multiply: 42
+Simple add        : 8
+Simple subtract   : 6
+Advanced subtract : 6
+Static multiply   : 42
 ```
 
 **Why This Output Occurs:**
@@ -565,9 +567,10 @@ class NameValidator implements Validator {
 public class PrivateInterfaceDemo {
     public static void main(String[] args) {
         NameValidator validator = new NameValidator();
-        System.out.println("isValidOrEmpty(null): " + validator.isValidOrEmpty(null));
-        System.out.println("isValidStrict(null): " + validator.isValidStrict(null));
-        System.out.println("isValidOrEmpty(\"Hello\"): " + validator.isValidOrEmpty("Hello"));
+        
+        System.out.println("isValidOrEmpty(null)      : " + validator.isValidOrEmpty(null));
+        System.out.println("isValidStrict(null)       : " + validator.isValidStrict(null));
+        System.out.println("isValidOrEmpty(\"Hello\") : " + validator.isValidOrEmpty("Hello"));
     }
 }
 ```
@@ -575,9 +578,9 @@ public class PrivateInterfaceDemo {
 **Expected Output:**
 
 ```
-isValidOrEmpty(null): true
-isValidStrict(null): false
-isValidOrEmpty("Hello"): true
+isValidOrEmpty(null)    : true
+isValidStrict(null)     : false
+isValidOrEmpty("Hello") : true
 ```
 
 **Why This Output Occurs:**
