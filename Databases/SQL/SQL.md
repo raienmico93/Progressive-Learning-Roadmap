@@ -8,7 +8,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # I. SQL Foundations and Database Fundamentals
 
-* **1. Introduction to SQL**
+* [**1. Introduction to SQL**](/Databases/SQL/Basics/Intro.md)
 
   * SQL definition and purpose
 
@@ -41,7 +41,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
     * Dialects
     * Vendor extensions
 
-* **2. Database Fundamentals**
+* [**2. Database Fundamentals**](/Databases/SQL/Basics/Database.md)
 
   * Data, information, and metadata
   * Database definition
@@ -59,7 +59,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Views
   * Stored programs
 
-* **3. Relational Database Concepts**
+* [**3. Relational Database Concepts**](/Databases/SQL/Basics/RDB.md)
 
   * Relational model
   * Relations
@@ -75,7 +75,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Referential integrity
   * Entity integrity
 
-* **4. SQL Environment and Tooling**
+* [**4. SQL Environment and Tooling**](/Databases/SQL/Basics/Environment.md)
 
   * SQL command-line interfaces
   * Database management interfaces
@@ -93,7 +93,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Executing SQL scripts
   * Importing and exporting SQL files
 
-* **5. SQL Syntax Fundamentals**
+* [**5. SQL Syntax Fundamentals**](/Databases/SQL/Basics/Syntax.md)
 
   * SQL statement structure
   * Keywords
@@ -104,7 +104,6 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Clauses
   * Statements
   * Comments
-
     * Single-line comments
     * Multi-line comments
   * Statement terminators
@@ -472,13 +471,13 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # IX. Relational Joins
 
-* [**33. Join Fundamentals**](/Databases/SQL/JOINS/Joins.md)
+* [**33. Join Fundamentals**](/Databases/SQL/Joins%20and%20Sets/Joins.md)
 
   * Purpose of joins
   * Join conditions
   * Primary-key/foreign-key relationships
   * Inner versus outer joins
-  * [Syntax and Operators](/Databases/SQL/JOINS/JoinsSyntaxAndOperators.md)
+  * [Syntax and Operators](/Databases/SQL/Joins%20and%20Sets/JoinsSyntaxAndOperators.md)
 
 * **34. INNER JOIN**
 
@@ -564,7 +563,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XI. Set Operations
 
-* [**44. Combining Result Sets**](/Databases/SQL/JOINS/Sets.md)
+* [**44. Combining Result Sets**](/Databases/SQL/Joins%20and%20Sets/Sets.md)
 
   * `UNION`
   * `UNION ALL`
@@ -576,7 +575,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Data-type compatibility
   * Duplicate handling
 
-* **45. Set-Based Thinking**
+* [**45. Set-Based Thinking**](/Databases/SQL/Joins%20and%20Sets/SetBasedThinking.md)
 
   * Relational operations
   * Difference between row-wise and set-wise logic
@@ -1098,7 +1097,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XXIII. SQL for Data Analytics
 
-* **91. Analytical Query Design**
+* [**91. Analytical Query Design**](/Databases/SQL/Data%20Analytics/AnalyticalQuery.md)
 
   * Exploratory queries
   * Descriptive statistics
@@ -1106,7 +1105,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Segmentation
   * Trend analysis
 
-* **92. Business Metrics**
+* [**92. Business Metrics**](/Databases/SQL/Data%20Analytics/BusinessMetrics.md)
 
   * Revenue
   * Profit
@@ -1117,7 +1116,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Churn
   * Growth rates
 
-* **93. Time-Series Analysis**
+* [**93. Time-Series Analysis**](/Databases/SQL/Data%20Analytics/TimeSeries.md)
 
   * Daily aggregation
   * Weekly aggregation
@@ -1127,7 +1126,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Rolling averages
   * Cumulative totals
 
-* **94. Advanced Analytics**
+* [**94. Advanced Analytics**](/Databases/SQL/Data%20Analytics/AdvancedAnalytics.md)
 
   * Cohort analysis
   * Funnel analysis
@@ -1142,7 +1141,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XXIV. SQL Security
 
-* **95. Database Security Fundamentals**
+* [**95. Database Security Fundamentals**](/Databases/SQL/Security/Security.md)
 
   * Authentication
   * Authorization
@@ -1151,7 +1150,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Database users
   * Roles
 
-* **96. Privileges**
+* [**96. Privileges**](/Databases/SQL/Security/Privileges.md)
 
   * `GRANT`
   * `REVOKE`
@@ -1160,7 +1159,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Database privileges
   * Role-based access control
 
-* **97. SQL Injection Prevention**
+* [**97. SQL Injection Prevention**](/Databases/SQL/Security/InjectionPrevention.md)
 
   * Injection fundamentals
   * Unsafe string concatenation
@@ -1169,7 +1168,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Input validation
   * Stored procedure considerations
 
-* **98. Data Protection**
+* [**98. Data Protection**](/Databases/SQL/Security/DataProtection.md)
 
   * Sensitive-data handling
   * Encryption at rest
@@ -1178,7 +1177,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Auditing
   * Access logging
 
-* **99. Row-Level Security**
+* [**99. Row-Level Security**](/Databases/SQL/Security/RowLevelSecurity.md)
 
   * User-specific visibility
   * Tenant isolation

@@ -830,39 +830,39 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XIX. JVM Architecture and Runtime Internals
 
-- **91. JVM Fundamentals**
+- [**91. JVM Fundamentals**](/Programming%20Languages/Java/JVM/JVM.md)
   - JVM architecture
   - Class loading
   - Bytecode execution
   - Runtime memory areas
 
-- **92. JVM Memory**
+- [**92. JVM Memory**](/Programming%20Languages/Java/JVM/JVMMemory.md)
   - Heap
   - Stack
   - Method/class metadata areas
   - Program counter
   - Native method stacks
 
-- **93. Class Loading**
+- [**93. Class Loading**](/Programming%20Languages/Java/JVM/ClassLoading.md)
   - Class loaders
   - Bootstrap loading
   - Platform/system loading
   - Class-loading lifecycle
   - Dynamic loading
 
-- **94. Bytecode**
+- [**94. Bytecode**](/Programming%20Languages/Java/JVM/ByteCode.md)
   - Bytecode instructions
   - `.class` files
   - Bytecode verification
   - Disassembly concepts
 
-- **95. JIT Compilation**
+- [**95. JIT Compilation**](/Programming%20Languages/Java/JVM/JITCompilation.md)
   - Interpretation
   - Just-in-time compilation
   - Hot code detection
   - Runtime optimization
 
-- **96. Garbage Collection**
+- [**96. Garbage Collection**](/Programming%20Languages/Java/JVM/GarbageCollection.md)
   - Automatic memory management
   - Object reachability
   - Generational concepts
@@ -874,21 +874,21 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XX. Java Memory Management
 
-- **97. Object Lifecycle**
+- [**97. Object Lifecycle**](/Programming%20Languages/Java/Memory%20Management/ObjectLifecycle.md)
   - Object allocation
   - Initialization
   - Reachability
   - Garbage collection
   - Object reclamation
 
-- **98. Memory Leaks**
+- [**98. Memory Leaks**](/Programming%20Languages/Java/Memory%20Management/MemoryLeaks.md)
   - Unintended object retention
   - Static references
   - Listener references
   - Caches
   - Thread-local retention
 
-- **99. Memory Optimization**
+- [**99. Memory Optimization**](/Programming%20Languages/Java/Memory%20Management/MemoryOptimization.md)
   - Object allocation patterns
   - Primitive versus wrapper types
   - Collection sizing
@@ -899,7 +899,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XXI. Reflection and Metadata
 
-- **100. Reflection API**
+- [**100. Reflection API**](/Programming%20Languages/Java/Reflection%20and%20Metadata/)
   - Class inspection
   - Fields
   - Methods
@@ -907,7 +907,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Modifiers
   - Dynamic invocation
 
-- **101. Annotations**
+- [**101. Annotations**](/Programming%20Languages/Java/Reflection%20and%20Metadata/Annotations.md)
   - Annotation declaration
   - Built-in annotations
   - Custom annotations
@@ -915,7 +915,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Targets
   - Annotation processing
 
-- **102. Reflection Use Cases**
+- [**102. Reflection Use Cases**](/Programming%20Languages/Java/Reflection%20and%20Metadata/ReflectionUseCases.md)
   - Dependency injection
   - Serialization frameworks
   - Testing frameworks
@@ -926,7 +926,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XXII. Modules and Modern Java Platform Organization
 
-- **103. Java Platform Module System**
+- [**103. Java Platform Module System**](/Programming%20Languages/Java/Miscellaneous/JPMS.md)
   - Modules
   - `module-info.java`
   - `requires`
@@ -935,7 +935,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - `uses`
   - `provides`
 
-- **104. Module Design**
+- [**104. Module Design**](/Programming%20Languages/Java/Miscellaneous/ModuleDesign.md)
   - Strong encapsulation
   - Dependency boundaries
   - Modular architecture

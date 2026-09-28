@@ -114,8 +114,10 @@ INSERT INTO sales_data VALUES
     ('USA', 200.00),
     ('Canada', 150.00),
     ('Canada', 250.00);
-
--- Aggregate query: one row per country
+```
+\
+**Aggregate query**: one row per country
+```sql
 SELECT country, SUM(sales) AS total_sales
 FROM sales_data
 GROUP BY country;
@@ -125,8 +127,10 @@ GROUP BY country;
 -- ---------+-------------
 --  USA     |      300.00
 --  Canada  |      400.00
-
--- Window function query: one row per original row
+```
+\
+**Window function query**: one row per original row
+```sql
 SELECT country, sales,
        SUM(sales) OVER (PARTITION BY country) AS country_total
 FROM sales_data;

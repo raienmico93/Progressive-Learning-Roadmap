@@ -112,26 +112,20 @@
 * [**6. Python Data Types**](/Programming%20Languages/Python/Basics/DataTypes.md)
 
   * Numeric types
-
     * `int`
     * `float`
     * `complex`
   * Boolean
-
     * `bool`
   * Text
-
     * `str`
   * Null-like value
-
     * `None`
   * Binary types
-
     * `bytes`
     * `bytearray`
     * `memoryview`
   * Collection types
-
     * `list`
     * `tuple`
     * `set`
@@ -150,7 +144,7 @@
   * Operator precedence
   * Associativity
 
-* **8. Type Conversion and Type Checking**
+* [**8. Type Conversion and Type Checking**](/Programming%20Languages/Python/Basics/TypeConversionAndChecking.md)
 
   * `int()`
   * `float()`
@@ -217,7 +211,7 @@
 
 # IV. Strings and Text Processing
 
-* **13. String Fundamentals**
+* [**13. String Fundamentals**](/Programming%20Languages/Python/Strings/String.md)
 
   * String literals
   * Single quotes
@@ -228,7 +222,7 @@
   * Raw strings
   * Unicode
 
-* **14. String Operations**
+* [**14. String Operations**](/Programming%20Languages/Python/Strings/StringOperations.md)
 
   * Indexing
   * Slicing
@@ -237,7 +231,7 @@
   * Membership
   * Comparison
 
-* **15. String Methods**
+* [**15. String Methods**](/Programming%20Languages/Python/Strings/StringMethods.md)
 
   * Case conversion
   * Searching
@@ -249,7 +243,7 @@
   * Prefix/suffix operations
   * Validation methods
 
-* **16. String Formatting**
+* [**16. String Formatting**](/Programming%20Languages/Python/Strings/StringFormatting.md)
 
   * `%` formatting
   * `str.format()`
@@ -260,7 +254,7 @@
   * Numeric formatting
   * Date/time formatting
 
-* **17. Regular Expressions**
+* [**17. Regular Expressions**](/Programming%20Languages/Python/Strings/RegEx.md)
 
   * `re` module
   * Patterns
@@ -625,7 +619,7 @@
   * Relative imports
   * Absolute imports
 
-* **49. Standard Library**
+* [**49. Standard Library**](/Programming%20Languages/Python/Modules/StandardLibrary.md)
 
    * Data & Math: math, statistics, random, decimal (Added decimal for financial accuracy)
    * Date & Time: `datetime`
@@ -704,7 +698,7 @@
 
 # XIII. Pythonic Programming and Code Quality
 
-* **56. Pythonic Style**
+* [**56. Pythonic Style**](/Programming%20Languages/Python/PythonicProgramming/PythonicStyle.md)
 
   * Readability
   * Explicitness
@@ -713,7 +707,7 @@
   * EAFP versus LBYL
   * Duck typing
 
-* **57. PEP Standards**
+* [**57. PEP Standards**](/Programming%20Languages/Python/PythonicProgramming/PEPStandards.md)
 
   * PEP 8
   * PEP 257
@@ -721,7 +715,7 @@
   * PEP 526
   * Relevant language enhancement proposals
 
-* **58. Documentation**
+* [**58. Documentation**](/Programming%20Languages/Python/PythonicProgramming/Documentation.md)
 
   * Docstrings
   * Module documentation
@@ -730,7 +724,7 @@
   * API documentation
   * Documentation generation
 
-* **59. Code Formatting and Linting**
+* [**59. Code Formatting and Linting**](/Programming%20Languages/Python/PythonicProgramming/CodeFormattingAndLinting.md)
 
   * Black
   * Ruff
@@ -743,7 +737,7 @@
 
 # XIV. Testing and Quality Assurance
 
-* **60. Testing Fundamentals**
+* [**60. Testing Fundamentals**](/Programming%20Languages/Python/Testing%20and%20Quality%20Assurance/TestingFundamentals.md)
 
   * Unit testing
   * Integration testing
@@ -751,7 +745,7 @@
   * Regression testing
   * End-to-end testing
 
-* **61. `unittest`**
+* [**61. `unittest`**](/Programming%20Languages/Python/Testing%20and%20Quality%20Assurance/unittest.md)
 
   * Test cases
   * Assertions
@@ -759,7 +753,7 @@
   * Test suites
   * Setup and teardown
 
-* **62. Pytest**
+* [**62. Pytest**](/Programming%20Languages/Python/Testing%20and%20Quality%20Assurance/Pytest.md)
 
   * Test functions
   * Fixtures
@@ -769,7 +763,7 @@
   * Plugins
   * Test discovery
 
-* **63. Mocking**
+* [**63. Mocking**](/Programming%20Languages/Python/Testing%20and%20Quality%20Assurance/Mocking.md)
 
   * `unittest.mock`
   * Mock objects
@@ -777,7 +771,7 @@
   * Mock side effects
   * Dependency isolation
 
-* **64. Test Coverage**
+* [**64. Test Coverage**](/Programming%20Languages/Python/Testing%20and%20Quality%20Assurance/TestCoverage.md)
 
   * Code coverage
   * Branch coverage

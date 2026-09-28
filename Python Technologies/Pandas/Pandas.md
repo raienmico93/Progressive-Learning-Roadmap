@@ -111,7 +111,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # III. Series
 
-* **7. Creating Series**
+* [**7. Creating Series**](/Python%20Technologies/Pandas/Series/CreatingSeries.md)
 
   * From lists
   * From dictionaries
@@ -119,7 +119,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * From scalar values
   * Custom indexes
 
-* **8. Series Indexing**
+* [**8. Series Indexing**](/Python%20Technologies/Pandas/Series/Indexing.md)
 
   * Positional indexing
   * Label-based indexing
@@ -128,7 +128,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * `.loc`
   * `.iloc`
 
-* **9. Series Operations**
+* [**9. Series Operations**](/Python%20Technologies/Pandas/Series/Operations.md)
 
   * Arithmetic
   * Comparisons
@@ -138,7 +138,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Sorting
   * Ranking
 
-* **10. Series Inspection**
+* [**10. Series Inspection**](/Python%20Technologies/Pandas/Series/Inspection.md)
 
   * `head()`
   * `tail()`
@@ -152,7 +152,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # IV. DataFrames
 
-* **11. Creating DataFrames**
+* [**11. Creating DataFrames**](/Python%20Technologies/Pandas/DataFrames/CreatingDataFrames.md)
 
   * From dictionaries
   * From lists
@@ -162,7 +162,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * From external files
   * From SQL queries
 
-* **12. DataFrame Structure**
+* [**12. DataFrame Structure**](/Python%20Technologies/Pandas/DataFrames/Structure.md)
 
   * Rows
   * Columns
@@ -171,7 +171,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Shape
   * Dimensions
 
-* **13. DataFrame Inspection**
+* [**13. DataFrame Inspection**](/Python%20Technologies/Pandas/DataFrames/Inspection.md)
 
   * `head()`
   * `tail()`
@@ -183,7 +183,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * `describe()`
   * `memory_usage()`
 
-* **14. Selecting Columns**
+* [**14. Selecting Columns**](/Python%20Technologies/Pandas/DataFrames/SelectingColumns.md)
 
   * Single-column selection
   * Multiple-column selection
@@ -192,7 +192,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Attribute-style access
   * Why bracket notation is generally safer
 
-* **15. Selecting Rows**
+* [**15. Selecting Rows**](/Python%20Technologies/Pandas/DataFrames/SelectingRows.md)
 
   * `.loc`
   * `.iloc`
@@ -204,7 +204,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # V. Indexing and Selection
 
-* **16. `.loc`**
+* [**16. `.loc`**](/Python%20Technologies/Pandas/Indexing%20and%20Selection/loc.md)
 
   * Label-based selection
   * Row selection
@@ -212,19 +212,19 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Conditional selection
   * Multiple conditions
 
-* **17. `.iloc`**
+* [**17. `.iloc`**](/Python%20Technologies/Pandas/Indexing%20and%20Selection/iloc.md)
 
   * Position-based selection
   * Row ranges
   * Column ranges
   * Scalar access
 
-* **18. Fast Scalar Access**
+* [**18. Fast Scalar Access**](/Python%20Technologies/Pandas/Indexing%20and%20Selection/FastScalarAccess.md)
 
   * `.at`
   * `.iat`
 
-* **19. Boolean Indexing**
+* [**19. Boolean Indexing**](/Python%20Technologies/Pandas/Indexing%20and%20Selection/BooleanIndexing.md)
 
   * Single conditions
   * Multiple conditions
@@ -233,13 +233,11 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
     * `|`
     * `~`
   * Parentheses
-  * Membership testing
-
-    * `.isin()`
+  * Membership testing (`.isin()`)
   * Range filtering
   * String-based filtering
 
-* **20. Conditional Selection**
+* [**20. Conditional Selection**](/Python%20Technologies/Pandas/Indexing%20and%20Selection/ConditionalSelection.md)
 
   * `.where()`
   * `.mask()`
@@ -250,26 +248,22 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # VI. Index Management
 
-* **21. Understanding the Index**
+* [**21. Understanding the Index**](/Python%20Technologies/Pandas/Index%20Management/Index.md)
 
   * Purpose
   * Labels
   * Positional versus label semantics
   * Index uniqueness
 
-* **22. Index Operations**
+* [**22. Index Operations**](/Python%20Technologies/Pandas/Index%20Management/Operations.md)
 
-  * Setting index
-
-    * `set_index()`
-  * Resetting index
-
-    * `reset_index()`
+  * Setting index (`set_index()`)
+  * Resetting index (`reset_index()`)
   * Renaming index
   * Sorting index
   * Reordering index
 
-* **23. MultiIndex**
+* [**23. MultiIndex**](/Python%20Technologies/Pandas/Index%20Management/MultiIndex.md)
 
   * Multi-level indexes
   * Creating MultiIndexes

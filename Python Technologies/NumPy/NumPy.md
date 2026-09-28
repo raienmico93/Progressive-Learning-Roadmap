@@ -59,7 +59,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # II. NumPy Array Fundamentals
 
-* **3. The NumPy ndarray**
+* [**3. The NumPy ndarray**](/Python%20Technologies/NumPy/Arrays/ndarray.md)
 
   * What an `ndarray` is
   * Array dimensions
@@ -75,7 +75,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Data type
   * Memory layout
 
-* **4. Creating Arrays**
+* [**4. Creating Arrays**](/Python%20Technologies/NumPy/Arrays/CreatingArrays.md)
 
   * From Python lists
 
@@ -103,7 +103,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
     * `np.repeat()`
     * `np.tile()`
 
-* **5. Array Attributes**
+* [**5. Array Attributes**](/Python%20Technologies/NumPy/Arrays/ArrayAttributes.md)
 
   * `ndim`
   * `shape`
@@ -118,7 +118,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # III. NumPy Data Types
 
-* **6. NumPy dtypes**
+* [**6. NumPy dtypes**](/Python%20Technologies/NumPy/Data%20Types/dtypes.md)
 
   * Integer types
 
@@ -135,7 +135,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Object dtype
   * Datetime types
 
-* **7. Type Conversion**
+* [**7. Type Conversion**](/Python%20Technologies/NumPy/Data%20Types/TypeConversion.md)
 
   * `astype()`
   * Converting integer to float
@@ -146,7 +146,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Underflow
   * Loss of information
 
-* **8. Choosing Appropriate dtypes**
+* [**8. Choosing Appropriate dtypes**](/Python%20Technologies/NumPy/Data%20Types/ChoosingAppropriate.md)
 
   * Memory considerations
   * Numerical precision
@@ -158,7 +158,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # IV. Array Indexing and Slicing
 
-* **9. Basic Indexing**
+* [**9. Basic Indexing**](/Python%20Technologies/NumPy/Arrays/Indexing.md)
 
   * Single-element indexing
   * Positive indices
@@ -167,7 +167,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Row selection
   * Column selection
 
-* **10. Slicing**
+* [**10. Slicing**](/Python%20Technologies/NumPy/Arrays/Slicing.md)
 
   * `start`
   * `stop`
@@ -176,7 +176,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Omitting slice parameters
   * Multidimensional slices
 
-* **11. Advanced Indexing**
+* [**11. Advanced Indexing**](/Python%20Technologies/NumPy/Arrays/AdvancedIndexing.md)
 
   * Integer-array indexing
   * Boolean indexing
@@ -184,7 +184,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Combining indexing techniques
   * Conditional selection
 
-* **12. Views versus Copies**
+* [**12. Views versus Copies**](/Python%20Technologies/NumPy/Arrays/ViewsVsCopy.md)
 
   * Array views
   * Array copies
@@ -197,7 +197,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # V. Array Manipulation
 
-* **13. Reshaping**
+* [**13. Reshaping**](/Python%20Technologies/NumPy/Arrays/Reshaping.md)
 
   * `reshape()`
   * Shape compatibility
@@ -208,21 +208,21 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Reshaping without copying where possible
   * Automatic dimension inference
 
-* **14. Transposing**
+* [**14. Transposing**](/Python%20Technologies/NumPy/Arrays/Transposing.md)
 
   * `.T`
   * `transpose()`
   * Axis permutation
   * Transposing higher-dimensional arrays
 
-* **15. Adding and Removing Dimensions**
+* [**15. Adding and Removing Dimensions**](/Python%20Technologies/NumPy/Arrays/AddingAndRemoving.md)
 
   * `expand_dims()`
   * `squeeze()`
   * `newaxis`
   * Singleton dimensions
 
-* **16. Combining Arrays**
+* [**16. Combining Arrays**](/Python%20Technologies/NumPy/Arrays/Combining.md)
 
   * `concatenate()`
   * `stack()`
@@ -231,7 +231,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * `dstack()`
   * `column_stack()`
 
-* **17. Splitting Arrays**
+* [**17. Splitting Arrays**](/Python%20Technologies/NumPy/Arrays/Splitting.md)
 
   * `split()`
   * `array_split()`
@@ -243,7 +243,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # VI. Core Array Operations
 
-* **18. Element-Wise Arithmetic**
+* [**18. Element-Wise Arithmetic**](/Python%20Technologies/NumPy/Operations/Arithmetic.md)
 
   * Addition
   * Subtraction
@@ -252,7 +252,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Exponentiation
   * Modulo
 
-* **19. Comparison Operations**
+* [**19. Comparison Operations**](/Python%20Technologies/NumPy/Operations/Comparison.md)
 
   * Equality
   * Inequality
@@ -261,7 +261,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Greater than or equal
   * Less than or equal
 
-* **20. Boolean Operations**
+* [**20. Boolean Operations**](/Python%20Technologies/NumPy/Operations/Boolean.md)
 
   * `logical_and`
   * `logical_or`
@@ -269,7 +269,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * `logical_xor`
   * Combining boolean masks
 
-* **21. Universal Functions**
+* [**21. Universal Functions**](/Python%20Technologies/NumPy/Operations/UniversalFunc.md)
 
   * Concept of ufuncs
   * Element-wise execution
@@ -281,21 +281,21 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # VII. Vectorization
 
-* **22. Vectorized Computation**
+* [**22. Vectorized Computation**](/Python%20Technologies/NumPy/Vectorization/Vectorization.md)
 
   * Vectorization concepts
   * Replacing explicit Python loops
   * Element-wise operations
   * Vectorized conditional operations
 
-* **23. Why Vectorization Matters**
+* [**23. Why Vectorization Matters**](/Python%20Technologies/NumPy/Vectorization/Why.md)
 
   * Reduced Python overhead
   * Efficient low-level implementation
   * Cleaner numerical code
   * Better scalability
 
-* **24. Vectorized Conditional Logic**
+* [**24. Vectorized Conditional Logic**](/Python%20Technologies/NumPy/Vectorization/ConditionalLogic.md)
 
   * `np.where()`
   * Nested conditions
@@ -306,21 +306,21 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # VIII. Broadcasting
 
-* **25. Broadcasting Fundamentals**
+* [**25. Broadcasting Fundamentals**](/Python%20Technologies/NumPy/Broadcasting/Broadcasting.md)
 
   * Broadcasting concept
   * Compatible dimensions
   * Singleton dimensions
   * Dimension alignment
 
-* **26. Broadcasting Rules**
+* [**26. Broadcasting Rules**](/Python%20Technologies/NumPy/Broadcasting/Broadcasting.md)
 
   * Equal dimensions
   * Dimensions of size 1
   * Missing leading dimensions
   * Incompatible dimensions
 
-* **27. Broadcasting Applications**
+* [**27. Broadcasting Applications**](/Python%20Technologies/NumPy/Broadcasting/Application.md)
 
   * Row-wise operations
   * Column-wise operations
@@ -329,7 +329,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Distance calculations
   * Matrix operations
 
-* **28. Broadcasting Debugging**
+* [**28. Broadcasting Debugging**](/Python%20Technologies/NumPy/Broadcasting/Debugging.md)
 
   * Shape inspection
   * Identifying incompatible dimensions
@@ -340,7 +340,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # IX. Universal Mathematical Functions
 
-* **29. Mathematical Functions**
+* [**29. Mathematical Functions**](/Python%20Technologies/NumPy/Math%20Functions/MathFunc.md)
 
   * Absolute values
   * Square roots
@@ -351,14 +351,14 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Inverse trigonometric functions
   * Hyperbolic functions
 
-* **30. Rounding Functions**
+* [**30. Rounding Functions**](/Python%20Technologies/NumPy/Math%20Functions/RoundingFunc.md)
 
   * `round`
   * `floor`
   * `ceil`
   * `trunc`
 
-* **31. Special Numerical Functions**
+* [**31. Special Numerical Functions**](/Python%20Technologies/NumPy/Math%20Functions/SpecialNumericalFunc.md)
 
   * Sign functions
   * Clipping
