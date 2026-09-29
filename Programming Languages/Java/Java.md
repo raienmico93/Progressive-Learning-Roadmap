@@ -899,7 +899,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XXI. Reflection and Metadata
 
-- [**100. Reflection API**](/Programming%20Languages/Java/Reflection%20and%20Metadata/)
+- [**100. Reflection API**](/Programming%20Languages/Java/Reflection%20and%20Metadata/Reflection.md)
   - Class inspection
   - Fields
   - Methods

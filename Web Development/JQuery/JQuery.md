@@ -8,7 +8,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # I. jQuery Foundations
 
-* **1. Introduction to jQuery**
+* [**1. Introduction to jQuery**](/Web%20Development/JQuery/Basics/Intro.md)
 
   * Definition of jQuery
 

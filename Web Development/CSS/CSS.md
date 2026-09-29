@@ -593,7 +593,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
 
 # XII. Modern CSS Layout
 
-* **51. Logical Properties**
+* [**51. Logical Properties**](/Web%20Development/CSS/Modern%20Layout/LogicalProperties.md)
 
   * `margin-inline`
   * `padding-inline`
@@ -602,7 +602,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * Block-axis properties
   * Writing-mode-aware layouts
 
-* **52. Intrinsic and Extrinsic Sizing**
+* [**52. Intrinsic and Extrinsic Sizing**](/Web%20Development/CSS/Modern%20Layout/IntristicAndExtristic.md)
 
   * `min-content`
   * `max-content`
@@ -611,13 +611,13 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * Available space
   * Content-based sizing
 
-* **53. Aspect Ratio**
+* [**53. Aspect Ratio**](/Web%20Development/CSS/Modern%20Layout/AspectRatio.md)
 
   * `aspect-ratio`
   * Responsive media containers
   * Preventing layout shifts
 
-* **54. Advanced Alignment**
+* [**54. Advanced Alignment**](/Web%20Development/CSS/Modern%20Layout/AdvancedAlignment.md)
 
   * `align-content`
   * `align-items`
@@ -669,7 +669,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
 
 # XIV. CSS Transforms
 
-* **59. 2D Transforms**
+* [**59. 2D Transforms**](/Web%20Development/CSS/Transforms/2D.md)
 
   * `translate`
   * `scale`
@@ -677,7 +677,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * `skew`
   * `transform-origin`
 
-* **60. 3D Transforms**
+* [**60. 3D Transforms**](/Web%20Development/CSS/Transforms/3D.md)
 
   * `translateZ`
   * `rotateX`
@@ -686,7 +686,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * `perspective`
   * 3D transform contexts
 
-* **61. Transform Design**
+* [**61. Transform Design**](/Web%20Development/CSS/Transforms/TransformDesign.md)
 
   * Hover effects
   * Card interactions
@@ -697,7 +697,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
 
 # XV. CSS Transitions and Animation
 
-* **62. Transitions**
+* [**62. Transitions**](/Web%20Development/CSS/Transitions%20and%20Animation/Transitions.md)
 
   * `transition-property`
   * `transition-duration`
@@ -705,7 +705,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * `transition-delay`
   * Transition shorthand
 
-* **63. Timing Functions**
+* [**63. Timing Functions**](/Web%20Development/CSS/Transitions%20and%20Animation/TimingFunctions.md)
 
   * `ease`
   * `linear`
@@ -715,7 +715,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * `cubic-bezier()`
   * `steps()`
 
-* **64. Keyframe Animations**
+* [**64. Keyframe Animations**](/Web%20Development/CSS/Transitions%20and%20Animation/Animation.md)
 
   * `@keyframes`
   * Animation name
@@ -726,7 +726,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * Fill mode
   * Play state
 
-* **65. Advanced Motion**
+* [**65. Advanced Motion**](/Web%20Development/CSS/Transitions%20and%20Animation/AdvancedMotion.md)
 
   * Motion sequencing
   * Staggered animations
@@ -738,14 +738,14 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
 
 # XVI. CSS Custom Properties
 
-* **66. Custom Properties**
+* [**66. Custom Properties**](/Web%20Development/CSS/Custom%20Properties/CustomProperties.md)
 
   * Defining variables
   * `--variable-name`
   * Using `var()`
   * Fallback values
 
-* **67. Design Tokens**
+* [**67. Design Tokens**](/Web%20Development/CSS/Custom%20Properties/DesignTokens.md)
 
   * Color tokens
   * Spacing tokens
@@ -754,14 +754,14 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * Shadow tokens
   * Breakpoint tokens
 
-* **68. Dynamic Theming**
+* [**68. Dynamic Theming**](/Web%20Development/CSS/Custom%20Properties/DynamicTheming.md)
 
   * Light themes
   * Dark themes
   * Component themes
   * Runtime variable changes
 
-* **69. Variable Scope**
+* [**69. Variable Scope**](/Web%20Development/CSS/Custom%20Properties/VariableScope.md)
 
   * Global variables
   * Component-level variables
@@ -915,14 +915,14 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
 
 # XXI. Advanced CSS Features
 
-* **84. Cascade Layers**
+* [**84. Cascade Layers**](/Web%20Development/CSS/Advanced%20Features/CascadeLayers.md)
 
   * `@layer`
   * Layer ordering
   * Third-party CSS isolation
   * Architecture through layers
 
-* **85. Modern Selectors**
+* [**85. Modern Selectors**](/Web%20Development/CSS/Advanced%20Features/ModernSelectors.md)
 
   * `:is()`
   * `:where()`
@@ -930,14 +930,14 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * Advanced `:not()`
   * Complex relational selection
 
-* **86. Nesting**
+* [**86. Nesting**](/Web%20Development/CSS/Advanced%20Features/Nesting.md)
 
   * Native CSS nesting
   * Nesting syntax
   * Specificity considerations
   * Maintainability implications
 
-* **87. CSS Scope Concepts**
+* [**87. CSS Scope Concepts**](/Web%20Development/CSS/Advanced%20Features/ScopeConcepts.md)
 
   * Style scoping
   * Component boundaries
@@ -948,27 +948,27 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
 
 # XXII. Advanced Visual CSS
 
-* **88. Clipping**
+* [**88. Clipping**](/Web%20Development/CSS/Advanced%20Visual/Clipping.md)
 
   * `clip-path`
   * Basic shapes
   * Polygon clipping
   * Circular clipping
 
-* **89. Masking**
+* [**89. Masking**](/Web%20Development/CSS/Advanced%20Visual/Masking.md)
 
   * `mask`
   * Mask images
   * Mask gradients
   * Transparency effects
 
-* **90. Blend Modes**
+* [**90. Blend Modes**](/Web%20Development/CSS/Advanced%20Visual/BlendModes.md)
 
   * `mix-blend-mode`
   * `background-blend-mode`
   * Layer interactions
 
-* **91. Advanced Gradients**
+* [**91. Advanced Gradients**](/Web%20Development/CSS/Advanced%20Visual/AdvancedGradient.md)
 
   * Gradient composition
   * Repeating gradients

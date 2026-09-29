@@ -233,7 +233,7 @@
   * Avoiding inappropriate array indexes as keys
   * Nested collections
 
-* **16. Dynamic UI Patterns**
+* [**16. Dynamic UI Patterns**](/Web%20Development/React/Basics/DynamicUI.md)
 
   * Tabs
   * Accordions
@@ -306,7 +306,7 @@
   * Complex state transitions
   * Reducer composition
 
-* **23. Performance Hooks**
+* [**23. Performance Hooks**](/Web%20Development/React/Hooks/PerformanceHooks.md)
 
   * `useMemo`
   * `useCallback`
@@ -315,7 +315,7 @@
   * Avoiding premature optimization
   * Dependency management
 
-* **24. Advanced Hooks**
+* [**24. Advanced Hooks**](/Web%20Development/React/Hooks/AdvancedHooks.md)
 
   * `useLayoutEffect`
   * `useImperativeHandle`
@@ -363,27 +363,27 @@
 
 # VIII. Component Communication
 
-* [**28. Parent-to-Child Communication**](/Web%20Development/React/ComponentComm.md/ParentChild.md)
+* [**28. Parent-to-Child Communication**](/Web%20Development/React/ComponentComm/ParentChild.md)
 
   * Props
   * Callback functions
   * Configuration objects
   * Render props
 
-* [**29. Child-to-Parent Communication**](/Web%20Development/React/ComponentComm.md/ChildParent.md)
+* [**29. Child-to-Parent Communication**](/Web%20Development/React/ComponentComm/ChildParent.md)
 
   * Callback props
   * Event lifting
   * State ownership
 
-* [**30. Sibling Communication**](/Web%20Development/React/ComponentComm.md/Sibling.md)
+* [**30. Sibling Communication**](/Web%20Development/React/ComponentComm/Sibling.md)
 
   * Lifted state
   * Shared parent state
   * Context
   * External state stores
 
-* [**31. Deep Component Communication**](/Web%20Development/React/ComponentComm.md/DeepComm.md)
+* [**31. Deep Component Communication**](/Web%20Development/React/ComponentComm/DeepComm.md)
 
   * Context API
   * State-management libraries
@@ -599,7 +599,7 @@
 
 # XIV. Accessibility
 
-* **52. Accessible React**
+* [**52. Accessible React**](/Web%20Development/React/Accessibility/AccessibilityReact.md)
 
   * Semantic HTML
   * Accessible labels
@@ -610,7 +610,7 @@
   * Error announcements
   * Screen-reader compatibility
 
-* **53. Accessibility Testing**
+* [**53. Accessibility Testing**](/Web%20Development/React/Accessibility/Testing.md)
 
   * Automated accessibility testing
   * Keyboard testing
@@ -622,7 +622,7 @@
 
 # XV. React Performance Optimization
 
-* **54. Rendering Performance**
+* [**54. Rendering Performance**](/Web%20Development/React/PerformanceOpt/RenderingPerformance.md)
 
   * Re-render causes
   * Component boundaries
@@ -630,7 +630,7 @@
   * Reconciliation
   * Rendering costs
 
-* **55. Memoization**
+* [**55. Memoization**](/Web%20Development/React/PerformanceOpt/Memoization.md)
 
   * `React.memo`
   * `useMemo`
@@ -638,7 +638,7 @@
   * When memoization helps
   * When memoization creates unnecessary complexity
 
-* **56. Code Splitting**
+* [**56. Code Splitting**](/Web%20Development/React/PerformanceOpt/CodeSpitting.md)
 
   * Dynamic imports
   * Lazy loading
@@ -646,7 +646,7 @@
   * Suspense boundaries
   * Route-based splitting
 
-* **57. Large-Application Performance**
+* [**57. Large-Application Performance**](/Web%20Development/React/PerformanceOpt/LargeAppPerformance.md)
 
   * Virtualization
   * Large-list optimization
@@ -655,7 +655,7 @@
   * Asset optimization
   * Bundle analysis
 
-* **58. Performance Measurement**
+* [**58. Performance Measurement**](/Web%20Development/React/PerformanceOpt/Management.md)
 
   * React Profiler
   * Browser performance tools
@@ -668,28 +668,28 @@
 
 # XVI. React Suspense and Concurrent UI
 
-* **59. Suspense Concepts**
+* [**59. Suspense Concepts**](/Web%20Development/React/Suspense%20and%20Concurrent%20UI/Suspense.md)
 
   * Suspense boundaries
   * Loading fallbacks
   * Component-level loading
   * Route-level loading
 
-* **60. Concurrent Rendering Concepts**
+* [**60. Concurrent Rendering Concepts**](/Web%20Development/React/Suspense%20and%20Concurrent%20UI/ConcurrentRendering.md)
 
   * Rendering priorities
   * Interruptible rendering
   * Transitions
   * Responsive user interfaces
 
-* **61. Transition APIs**
+* [**61. Transition APIs**](/Web%20Development/React/Suspense%20and%20Concurrent%20UI/TransitionAPIs.md)
 
   * `startTransition`
   * `useTransition`
   * Non-urgent updates
   * Keeping interactions responsive
 
-* **62. Deferred Rendering**
+* [**62. Deferred Rendering**](/Web%20Development/React/Suspense%20and%20Concurrent%20UI/TransitionAPIs.md)
 
   * `useDeferredValue`
   * Expensive rendering
