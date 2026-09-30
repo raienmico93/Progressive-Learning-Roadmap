@@ -700,14 +700,14 @@
 
 # XVII. Error Handling
 
-* **63. UI Error Management**
+* [**63. UI Error Management**](/Web%20Development/React/Error%20Handling/UIError.md)
 
   * Error boundaries
   * Fallback interfaces
   * Component failure isolation
   * Logging
 
-* **64. API Errors**
+* [**64. API Errors**](/Web%20Development/React/Error%20Handling/APIErrors.md)
 
   * HTTP failures
   * Validation errors
@@ -715,7 +715,7 @@
   * Authorization errors
   * Retry behavior
 
-* **65. Resilience**
+* [**65. Resilience**](/Web%20Development/React/Error%20Handling/Resilience.md)
 
   * Graceful degradation
   * Retry strategies
@@ -727,7 +727,7 @@
 
 # XVIII. Authentication and Authorization
 
-* **66. Authentication**
+* [**66. Authentication**](/Web%20Development/React/Miscellaneous/Authentication.md)
 
   * Login
   * Logout
@@ -736,7 +736,7 @@
   * Cookie-based authentication
   * Authentication state
 
-* **67. Authorization**
+* [**67. Authorization**](/Web%20Development/React/Miscellaneous/Authorization.md)
 
   * Role-based access
   * Permission-based access
@@ -744,7 +744,7 @@
   * Protected routes
   * UI authorization versus server authorization
 
-* **68. Secure Client Architecture**
+* [**68. Secure Client Architecture**](/Web%20Development/React/Miscellaneous/SecureClient.md)
 
   * Credential handling
   * Token storage considerations
@@ -757,7 +757,7 @@
 
 # XIX. Testing React Applications
 
-* **69. Testing Fundamentals**
+* [**69. Testing Fundamentals**](/Web%20Development/React/Testing%20App/Testing.md)
 
   * Unit testing
   * Integration testing
@@ -765,7 +765,7 @@
   * Test pyramid concepts
   * Test isolation
 
-* **70. Component Testing**
+* [**70. Component Testing**](/Web%20Development/React/Testing%20App/ComponentTesting.md)
 
   * React Testing Library
   * Rendering components
@@ -774,7 +774,7 @@
   * Assertions
   * Mocking dependencies
 
-* **71. Interaction Testing**
+* [**71. Interaction Testing**](/Web%20Development/React/Testing%20App/InteractionTesting.md)
 
   * Forms
   * Buttons
@@ -783,7 +783,7 @@
   * Loading states
   * Error states
 
-* **72. End-to-End Testing**
+* [**72. End-to-End Testing**](/Web%20Development/React/Testing%20App/EndToEndTesting.md)
 
   * Playwright
   * Cypress
@@ -791,7 +791,7 @@
   * Browser automation
   * API interactions
 
-* **73. Advanced Testing**
+* [**73. Advanced Testing**](/Web%20Development/React/Testing%20App/AdvancedTesting.md)
 
   * Mock service workers
   * API mocking

@@ -256,7 +256,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # V. Node.js Core Modules
 
-* **21. File System**
+* [**21. File System**](/Web%20Development/NodeJS/Core%20Modules/FileSystem.md)
 
   * `fs`
   * File creation
@@ -268,7 +268,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Directory operations
   * Synchronous versus asynchronous APIs
 
-* **22. Path Management**
+* [**22. Path Management**](/Web%20Development/NodeJS/Core%20Modules/PathManagement.md)
 
   * `path`
   * Joining paths
@@ -277,7 +277,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Directory names
   * Platform differences
 
-* **23. Operating System**
+* [**23. Operating System**](/Web%20Development/NodeJS/Core%20Modules/OperatingSystem.md)
 
   * `os`
   * CPU information
@@ -285,7 +285,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Platform information
   * Host information
 
-* **24. Events**
+* [**24. Events**](/Web%20Development/NodeJS/Core%20Modules/Events.md)
 
   * `EventEmitter`
   * Events
@@ -293,7 +293,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Event-driven patterns
   * Custom events
 
-* **25. Utilities**
+* [**25. Utilities**](/Web%20Development/NodeJS/Core%20Modules/Utilities.md)
 
   * `util`
   * Promisification
@@ -301,7 +301,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Formatting
   * Debugging helpers
 
-* **26. Process Management**
+* [**26. Process Management**](/Web%20Development/NodeJS/Core%20Modules/ProcessManagement.md)
 
   * Environment variables
   * Exit codes
