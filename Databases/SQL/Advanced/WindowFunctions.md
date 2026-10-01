@@ -121,28 +121,28 @@ INSERT INTO sales_data VALUES
 SELECT country, SUM(sales) AS total_sales
 FROM sales_data
 GROUP BY country;
-
--- Expected Output:
---  country | total_sales
--- ---------+-------------
---  USA     |      300.00
---  Canada  |      400.00
 ```
+Expected Output:
+ country | total_sales
+---------|-------------
+ USA     |      300.00
+ Canada  |      400.00
+
 \
 **Window function query**: one row per original row
 ```sql
 SELECT country, sales,
        SUM(sales) OVER (PARTITION BY country) AS country_total
 FROM sales_data;
-
--- Expected Output:
---  country | sales  | country_total
--- ---------+--------+---------------
---  USA     | 100.00 |        300.00
---  USA     | 200.00 |        300.00
---  Canada  | 150.00 |        400.00
---  Canada  | 250.00 |        400.00
 ```
+
+Expected Output:
+ country | sales  | country_total
+---------|--------|---------------
+ USA     | 100.00 |        300.00
+ USA     | 200.00 |        300.00
+ Canada  | 150.00 |        400.00
+ Canada  | 250.00 |        400.00
 
 **Why this output occurs:** The aggregate query collapses each country's rows into one. The window function retains all four rows while attaching the country-level total to each row, enabling per-row comparison with the group total .
 
@@ -232,39 +232,151 @@ WINDOW w AS (PARTITION BY country ORDER BY sales DESC);
 
 ### Annotated Complete Code Examples
 
-**Example 1: Empty OVER vs. PARTITION BY**
-
+#### Setup: Sample Database Structure
+To run these examples, copy and execute this setup script in your SQL environment (SQL Server, PostgreSQL, MySQL 8.0+, or Oracle).
 ```sql
--- Using the sales_data table from above
-
--- Empty OVER: global total on every row
-SELECT country, sales,
-       SUM(sales) OVER () AS global_total
-FROM sales_data;
-
--- Expected Output:
---  country | sales  | global_total
--- ---------+--------+-------------
---  USA     | 100.00 |       700.00
---  USA     | 200.00 |       700.00
---  Canada  | 150.00 |       700.00
---  Canada  | 250.00 |       700.00
-
--- PARTITION BY: per-country total on every row
-SELECT country, sales,
-       SUM(sales) OVER (PARTITION BY country) AS country_total
-FROM sales_data;
-
--- Expected Output:
---  country | sales  | country_total
--- ---------+--------+---------------
---  USA     | 100.00 |        300.00
---  USA     | 200.00 |        300.00
---  Canada  | 150.00 |        400.00
---  Canada  | 250.00 |        400.00
+-- Step 1: Create a sample sales tableCREATE TABLE employee_sales (
+    employee_id INT,
+    employee_name VARCHAR(50),
+    department VARCHAR(50),
+    sale_amount DECIMAL(10, 2),
+    sale_date DATE
+);
+-- Step 2: Insert realistic sample data
+INSERT INTO employee_sales (employee_id, employee_name, department, sale_amount, sale_date) VALUES
+(1, 'Alice', 'Electronics', 1500.00, '2026-01-10'),
+(2, 'Bob', 'Electronics', 1000.00, '2026-01-11'),
+(1, 'Alice', 'Electronics', 2000.00, '2026-01-12'),
+(3, 'Charlie', 'Furniture', 3000.00, '2026-01-10'),
+(4, 'David', 'Furniture', 1200.00, '2026-01-11'),
+(3, 'Charlie', 'Furniture', 1500.00, '2026-01-13');
 ```
+------------------------------
+#### Example 1: Basic Grand Total (OVER ())
+This example calculates a global metric alongside every individual record without filtering or grouping.
+```sql
+SELECT 
+    employee_name,
+    department,
+    sale_amount,
+    -- The empty OVER() clause calculates the total across the entire dataset
+    SUM(sale_amount) OVER() AS total_company_sales
+FROM employee_sales;
+```
+**Expected Output**
 
-**Why this output occurs:** `OVER ()` treats all rows as one window, so the global total (700.00) appears on every row. `OVER (PARTITION BY country)` creates separate windows for USA and Canada, so the total differs per partition .
+| employee_name | department | sale_amount | total_company_sales |
+|---|---|---|---|
+| Alice | Electronics | 1500.00 | 10200.00 |
+| Bob | Electronics | 1000.00 | 10200.00 |
+| Alice | Electronics | 2000.00 | 10200.00 |
+| Charlie | Furniture | 3000.00 | 10200.00 |
+| David | Furniture | 1200.00 | 10200.00 |
+| Charlie | Furniture | 1500.00 | 10200.00 |
+
+**Why it works**
+The OVER() keyword tells the database engine to treat the entire result set as a single window frame. It calculates the sum of all sale_amount values ($1500 + 1000 + 2000 + 3000 + 1200 + 1500 = 10200$) and repeats this exact evaluation on every row.
+
+#### Example 2: Grouped Aggregates (PARTITION BY)
+This example isolates calculations to distinct subsets of your data using the PARTITION BY sub-clause.
+```sql
+SELECT 
+    employee_name,
+    department,
+    sale_amount,
+    -- PARTITION BY resets the sum calculation for each unique department
+    SUM(sale_amount) OVER(PARTITION BY department) AS department_total_sales
+FROM employee_sales;
+```
+**Expected Output**
+| employee_name | department | sale_amount | department_total_sales |
+|---|---|---|---|
+| Alice | Electronics | 1500.00 | 4500.00 |
+| Bob | Electronics | 1000.00 | 4500.00 |
+| Alice | Electronics | 2000.00 | 4500.00 |
+| Charlie | Furniture | 3000.00 | 5700.00 |
+| David | Furniture | 1200.00 | 5700.00 |
+| Charlie | Furniture | 1500.00 | 5700.00 |
+
+**Why it works**
+The execution engine groups rows sharing identical values in the department column. For rows marked "Electronics", it computes $1500 + 1000 + 2000 = 4500$. When transitioning to "Furniture", the context clears and calculates a new window sum ($3000 + 1200 + 1500 = 5700$).
+
+#### Example 3: Running Totals (ORDER BY)
+Adding an ORDER BY clause inside your window dynamically shifts the calculation boundaries row by row.
+```sql
+SELECT 
+    department,
+    sale_date,
+    sale_amount,
+    -- ORDER BY forces a cumulative running sum ordered chronologically
+    SUM(sale_amount) OVER(PARTITION BY department ORDER BY sale_date) AS running_dept_total
+FROM employee_sales;
+```
+**Expected Output**
+
+| department | sale_date | sale_amount | running_dept_total |
+|---|---|---|---|
+| Electronics | 2026-01-10 | 1500.00 | 1500.00 |
+| Electronics | 2026-01-11 | 1000.00 | 2500.00 |
+| Electronics | 2026-01-12 | 2000.00 | 4500.00 |
+| Furniture | 2026-01-10 | 3000.00 | 3000.00 |
+| Furniture | 2026-01-11 | 1200.00 | 4200.00 |
+| Furniture | 2026-01-13 | 1500.00 | 5700.00 |
+
+**Why it works**
+An explicit ORDER BY statement inside an analytical clause automatically implies a sliding window boundary framework (RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW). Instead of aggregating the entire partition at once, the engine aggregates records up to and including the current chronological date row.
+
+#### Example 4: Ranking Elements (DENSE_RANK())
+This query demonstrates how to evaluate and rank values sequentially inside independent departments.
+```sql
+SELECT 
+    department,
+    employee_name,
+    sale_amount,
+    -- DENSE_RANK assigns a position score without skipping rank numbers on ties
+    DENSE_RANK() OVER(PARTITION BY department ORDER BY sale_amount DESC) AS sales_rank
+FROM employee_sales;
+```
+**Expected Output**
+| department | employee_name | sale_amount | sales_rank |
+|---|---|---|---|
+| Electronics | Alice | 2000.00 | 1 |
+| Electronics | Alice | 1500.00 | 2 |
+| Electronics | Bob | 1000.00 | 3 |
+| Furniture | Charlie | 3000.00 | 1 |
+| Furniture | Charlie | 1500.00 | 2 |
+| Furniture | David | 1200.00 | 3 |
+
+**Why it works**
+The OVER statement arranges rows by descending sale_amount within each department partition. The DENSE_RANK() function evaluates the row positions sequentially. Alice claims rank 1 in Electronics with $2000, while Charlie ranks 1 in Furniture with $3000.
+
+#### Example 5: Comparative Delta Analysis (LAG())
+This advanced pattern pulls metrics from previous adjacent rows to perform transactional sequence comparisons.
+```sql
+SELECT 
+    department,
+    sale_date,
+    sale_amount,
+    -- LAG captures the sale_amount from the immediate preceding row sequence
+    LAG(sale_amount, 1) OVER(PARTITION BY department ORDER BY sale_date) AS previous_sale_amount,
+    -- Computes the direct financial difference between current and past records
+    sale_amount - LAG(sale_amount, 1) OVER(PARTITION BY department ORDER BY sale_date) AS net_change
+FROM employee_sales;
+```
+**Expected Output**
+
+| department | sale_date | sale_amount | previous_sale_amount | net_change |
+|---|---|---|---|---|
+| Electronics | 2026-01-10 | 1500.00 | NULL | NULL |
+| Electronics | 2026-01-11 | 1000.00 | 1500.00 | -500.00 |
+| Electronics | 2026-01-12 | 2000.00 | 1000.00 | 1000.00 |
+| Furniture | 2026-01-10 | 3000.00 | NULL | NULL |
+| Furniture | 2026-01-11 | 1200.00 | 3000.00 | -1800.00 |
+| Furniture | 2026-01-13 | 1500.00 | 1200.00 | 3000.00 |
+
+**Why it works**
+LAG(sale_amount, 1) uses the window ordering to look exactly one position backward. Because the first records within Electronics (Jan 10) and Furniture (Jan 10) have no preceding timeline rows to index against, the calculation engine safely defaults their comparison outputs to NULL.
+
 
 ### Real-World Cases
 
@@ -356,22 +468,17 @@ INSERT INTO employees VALUES
     ('Carol', 'Marketing',   72000.00),
     ('David', 'Marketing',   88000.00),
     ('Eve',   'Sales',       68000.00);
-
+```
+```sql
 -- Query: Each employee's salary and their department's average
 SELECT emp_name, department, salary,
        AVG(salary) OVER (PARTITION BY department) AS dept_avg
 FROM employees
 ORDER BY department, salary;
-
--- Expected Output:
---  emp_name | department  |  salary  |     dept_avg
--- ----------+-------------+----------+--------------------
---  Alice    | Engineering | 95000.00 | 100000.000000000000
---  Bob      | Engineering |105000.00 | 100000.000000000000
---  Carol    | Marketing   | 72000.00 |  80000.000000000000
---  David    | Marketing   | 88000.00 |  80000.000000000000
---  Eve      | Sales       | 68000.00 |  68000.000000000000
 ```
+Expected Output:
+
+
 
 **Why this output occurs:** `PARTITION BY department` creates three independent windows. The `AVG` is computed within each department separately. Every row retains its detail while showing the department average .
 
@@ -397,16 +504,16 @@ SELECT region, year, sales,
        SUM(sales) OVER (PARTITION BY region, year) AS region_year_total
 FROM regional_sales
 ORDER BY region, year;
-
--- Expected Output:
---  region | year | sales  | region_year_total
--- --------+------+--------+-------------------
---  North  | 2024 | 100.00 |            300.00
---  North  | 2024 | 200.00 |            300.00
---  North  | 2025 | 150.00 |            150.00
---  South  | 2024 | 120.00 |            120.00
---  South  | 2025 | 180.00 |            180.00
 ```
+Expected Output:
+ region | year | sales  | region_year_total
+--------|------|--------|-------------------
+ North  | 2024 | 100.00 |            300.00
+ North  | 2024 | 200.00 |            300.00
+ North  | 2025 | 150.00 |            150.00
+ South  | 2024 | 120.00 |            120.00
+ South  | 2025 | 180.00 |            180.00
+
 
 **Why this output occurs:** `PARTITION BY region, year` creates four partitions: (North, 2024), (North, 2025), (South, 2024), (South, 2025). The sum is computed independently within each unique combination .
 
@@ -504,15 +611,16 @@ SELECT country, sales,
        SUM(sales) OVER (ORDER BY sales) AS running_total
 FROM sales_data
 ORDER BY sales;
-
--- Expected Output:
---  country | sales  | running_total
--- ---------+--------+---------------
---  USA     | 100.00 |        100.00
---  Canada  | 150.00 |        250.00
---  USA     | 200.00 |        450.00
---  Canada  | 250.00 |        700.00
 ```
+
+Expected Output:
+ country | sales  | running_total
+---------|--------|---------------
+ USA     | 100.00 |        100.00
+ Canada  | 150.00 |        250.00
+ USA     | 200.00 |        450.00
+ Canada  | 250.00 |        700.00
+
 
 **Why this output occurs:** With `ORDER BY sales` and no explicit frame, the default frame is `RANGE UNBOUNDED PRECEDING AND CURRENT ROW`. The sum accumulates from the first row (lowest sales) through the current row .
 
@@ -521,20 +629,25 @@ ORDER BY sales;
 ```sql
 -- Query: 2-row moving average (current and previous row)
 SELECT country, sales,
-       AVG(sales) OVER (ORDER BY sales ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) AS moving_avg
+       AVG(sales) OVER (
+           ORDER BY sales 
+           ROWS BETWEEN 1 PRECEDING AND CURRENT ROW
+       ) AS moving_avg
 FROM sales_data
 ORDER BY sales;
-
--- Expected Output:
---  country | sales  |     moving_avg
--- ---------+--------+--------------------
---  USA     | 100.00 | 100.000000000000000
---  Canada  | 150.00 | 125.000000000000000
---  USA     | 200.00 | 175.000000000000000
---  Canada  | 250.00 | 225.000000000000000
 ```
+Expected Output:
+ country | sales  |     moving_avg
+---------|--------|--------------------
+ USA     | 100.00 | 100.000000000000000
+ Canada  | 150.00 | 125.000000000000000
+ USA     | 200.00 | 175.000000000000000
+ Canada  | 250.00 | 225.000000000000000
 
-**Why this output occurs:** `ROWS BETWEEN 1 PRECEDING AND CURRENT ROW` defines a window of exactly 2 rows (previous + current). The first row has no preceding row, so its average is just itself. The second row averages 100 and 150, and so on .
+**Why this output occurs:** 
+- `ROWS BETWEEN 1 PRECEDING AND CURRENT ROW` defines a window of exactly 2 rows (previous + current). 
+- The first row has no preceding row, so its average is just itself. 
+- The second row averages 100 and 150, and so on .
 
 ### Real-World Cases
 

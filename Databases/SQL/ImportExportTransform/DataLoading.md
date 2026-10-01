@@ -146,9 +146,11 @@ import java.sql.*;
 public class BulkInsertExample {
     public static void main(String[] args) throws SQLException {
         String url = "jdbc:postgresql://localhost:5432/mydb";
+        
         try (Connection conn = DriverManager.getConnection(url, "user", "pass")) {
             // Prepare a statement for repeated execution
             String sql = "INSERT INTO products (name, price) VALUES (?, ?)";
+
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 // Batch multiple rows
                 pstmt.setString(1, "Thingamajig");

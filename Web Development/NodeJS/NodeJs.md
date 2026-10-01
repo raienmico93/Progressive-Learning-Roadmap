@@ -313,7 +313,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # VI. Streams and Buffers
 
-* **27. Buffers**
+* [**27. Buffers**](/Web%20Development/NodeJS/Streams%20and%20Buffers/Buffers.md)
 
   * Binary data
   * Buffer creation
@@ -322,7 +322,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Buffer manipulation
   * Binary protocols
 
-* **28. Streams**
+* [**28. Streams**](/Web%20Development/NodeJS/Streams%20and%20Buffers/Streams.md)
 
   * Readable streams
   * Writable streams
@@ -331,7 +331,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Stream events
   * Backpressure
 
-* **29. Stream Composition**
+* [**29. Stream Composition**](/Web%20Development/NodeJS/Streams%20and%20Buffers/StreamComposition.md)
 
   * `pipe`
   * `pipeline`
@@ -339,7 +339,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Streaming files
   * Streaming HTTP responses
 
-* **30. Practical Stream Applications**
+* [**30. Practical Stream Applications**](/Web%20Development/NodeJS/Streams%20and%20Buffers/PracticalStreamApps.md)
 
   * Large file processing
   * File uploads
@@ -352,7 +352,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # VII. HTTP and Networking
 
-* **31. HTTP Fundamentals**
+* [**31. HTTP Fundamentals**](/Web%20Development/NodeJS/HTTP%20and%20Networking/HTTP.md)
 
   * Request
   * Response
@@ -368,7 +368,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Body
   * Cookies
 
-* **32. HTTP Client**
+* [**32. HTTP Client**](/Web%20Development/NodeJS/HTTP%20and%20Networking/Client.md)
 
   * Making HTTP requests
   * Request headers
@@ -378,7 +378,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Retries
   * Error handling
 
-* **33. HTTP Server**
+* [**33. HTTP Server**](/Web%20Development/NodeJS/HTTP%20and%20Networking/Server.md)
 
   * Creating servers
   * Request handling
@@ -388,7 +388,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Status codes
   * Content types
 
-* **34. URL Handling**
+* [**34. URL Handling**](/Web%20Development/NodeJS/HTTP%20and%20Networking/URLHandling.md)
 
   * URL parsing
   * URL construction
@@ -396,7 +396,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Path parameters
   * URL encoding
 
-* **35. Network Concepts**
+* [**35. Network Concepts**](/Web%20Development/NodeJS/HTTP%20and%20Networking/NetworkConcepts.md)
 
   * TCP/IP fundamentals
   * DNS
@@ -410,7 +410,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # VIII. Web Server Frameworks
 
-* **36. Express**
+* [**36. Express**](/Web%20Development/NodeJS/Web%20Server%20Frameworks/Express.md)
 
   * Application setup
   * Routing
@@ -419,7 +419,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Error-handling middleware
   * Static assets
 
-* **37. Fastify**
+* [**37. Fastify**](/Web%20Development/NodeJS/Web%20Server%20Frameworks/Fastify.md)
 
   * Plugin architecture
   * Routing
@@ -427,7 +427,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Serialization
   * Performance considerations
 
-* **38. NestJS**
+* [**38. NestJS**](/Web%20Development/NodeJS/Web%20Server%20Frameworks/NestJS.md)
 
   * Modules
   * Controllers
@@ -438,7 +438,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Interceptors
   * Decorators
 
-* **39. Framework Selection**
+* [**39. Framework Selection**](/Web%20Development/NodeJS/Web%20Server%20Frameworks/FrameworkSelection.md)
 
   * Minimal frameworks
   * Opinionated frameworks
@@ -451,7 +451,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # IX. REST API Development
 
-* **40. REST Fundamentals**
+* [**40. REST Fundamentals**](/Web%20Development/NodeJS/REST%20API/REST.md)
 
   * Resources
   * Endpoints
@@ -459,7 +459,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Statelessness
   * Representations
 
-* **41. API Design**
+* [**41. API Design**](/Web%20Development/NodeJS/REST%20API/APIDesign.md)
 
   * Resource naming
   * URL structures
@@ -468,7 +468,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Status codes
   * Error responses
 
-* **42. CRUD APIs**
+* [**42. CRUD APIs**](/Web%20Development/NodeJS/REST%20API/CRUDAPI.md)
 
   * Create
   * Read
@@ -479,7 +479,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Sorting
   * Searching
 
-* **43. API Validation**
+* [**43. API Validation**](/Web%20Development/NodeJS/REST%20API/APIValidation.md)
 
   * Request-body validation
   * Query validation
@@ -487,7 +487,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Schema validation
   * Error messages
 
-* **44. API Versioning**
+* [**44. API Versioning**](/Web%20Development/NodeJS/REST%20API/APIVersioning.md)
 
   * URI versioning
   * Header versioning
@@ -498,7 +498,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # X. Middleware and Request Lifecycle
 
-* **45. Middleware Fundamentals**
+* [**45. Middleware Fundamentals**](/Web%20Development/NodeJS/Middleware%20and%20Request%20Lifecycle/Middleware.md)
 
   * Request preprocessing
   * Authentication
@@ -506,14 +506,14 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Validation
   * Transformation
 
-* **46. Middleware Composition**
+* [**46. Middleware Composition**](/Web%20Development/NodeJS/Middleware%20and%20Request%20Lifecycle/MiddlewareComposition.md)
 
   * Middleware order
   * Conditional middleware
   * Route-specific middleware
   * Global middleware
 
-* **47. Error Handling**
+* [**47. Error Handling**](/Web%20Development/NodeJS/Middleware%20and%20Request%20Lifecycle/ErrorHandling.md)
 
   * Error propagation
   * Centralized handlers
@@ -526,14 +526,14 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # XI. Databases with Node.js
 
-* **48. Relational Databases**
+* [**48. Relational Databases**](/Web%20Development/NodeJS/Databases/Relational.md)
 
   * PostgreSQL
   * MySQL
   * MariaDB
   * SQL Server
 
-* **49. Node.js Database Connectivity**
+* [**49. Node.js Database Connectivity**](/Web%20Development/NodeJS/Databases/DBConnectivity.md)
 
   * Database drivers
   * Connection configuration
@@ -541,7 +541,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Prepared statements
   * Parameterized queries
 
-* **50. SQL Integration**
+* [**50. SQL Integration**](/Web%20Development/NodeJS/Databases/SQLIntegration.md)
 
   * CRUD from Node.js
   * Transactions
@@ -549,7 +549,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Query builders
   * Raw SQL
 
-* **51. ORMs**
+* [**51. ORMs**](/Web%20Development/NodeJS/Databases/ORMs.md)
 
   * Prisma
   * Sequelize
@@ -559,7 +559,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Relations
   * Migrations
 
-* **52. NoSQL Databases**
+* [**52. NoSQL Databases**](/Web%20Development/NodeJS/Databases/NoSQL.md)
 
   * MongoDB
   * Redis

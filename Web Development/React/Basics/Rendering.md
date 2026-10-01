@@ -110,7 +110,7 @@ function Component() {
 
 ```jsx
 function Greeting() {
-  // This function IS the render. React calls it during rendering.
+  // This function is the render. React calls it during rendering.
   return <h1>Hello, React!</h1>;
 }
 

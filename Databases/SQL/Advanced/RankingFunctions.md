@@ -105,7 +105,8 @@ INSERT INTO sales VALUES
     ('David', 'North', 300.00),
     ('Eve',   'North', 300.00),  -- Tie with David
     ('Frank', 'North', 500.00);
-
+```
+```sql
 -- Query: All three ranking functions
 SELECT salesperson, sales_amt,
        ROW_NUMBER() OVER (ORDER BY sales_amt) AS row_num,
@@ -113,19 +114,24 @@ SELECT salesperson, sales_amt,
        DENSE_RANK() OVER (ORDER BY sales_amt) AS dense_rank
 FROM sales
 ORDER BY sales_amt;
-
--- Expected Output:
---  salesperson | sales_amt | row_num | rank | dense_rank
--- -------------+-----------+---------+------+------------
---  Alice       | 100.00    |       1 |    1 |          1
---  Bob         | 200.00    |       2 |    2 |          2
---  Carol       | 200.00    |       3 |    2 |          2
---  David       | 300.00    |       4 |    4 |          3
---  Eve         | 300.00    |       5 |    4 |          3
---  Frank       | 500.00    |       6 |    6 |          4
 ```
 
-**Why this output occurs:** Bob and Carol tie at 200. `ROW_NUMBER` assigns 2 and 3 arbitrarily. `RANK` assigns both rank 2, then skips to 4 for David. `DENSE_RANK` assigns both rank 2, then assigns 3 to David (no gap) .
+Expected Output:
+ salesperson | sales_amt | row_num | rank | dense_rank
+-------------|-----------|---------|------|------------
+ Alice       | 100.00    |       1 |    1 |          1
+ Bob         | 200.00    |       2 |    2 |          2
+ Carol       | 200.00    |       3 |    2 |          2
+ David       | 300.00    |       4 |    4 |          3
+ Eve         | 300.00    |       5 |    4 |          3
+ Frank       | 500.00    |       6 |    6 |          4
+
+
+**Why this output occurs:** 
+- Bob and Carol tie at 200. 
+- `ROW_NUMBER` assigns 2 and 3 arbitrarily. 
+- `RANK` assigns both rank 2, then skips to 4 for David. 
+- `DENSE_RANK` assigns both rank 2, then assigns 3 to David (no gap) .
 
 **Example 2: Top-N Per Group**
 
@@ -133,18 +139,20 @@ ORDER BY sales_amt;
 -- Query: Top 2 sales per region (using ROW_NUMBER)
 SELECT salesperson, region, sales_amt
 FROM (
-    SELECT salesperson, region, sales_amt,
-           ROW_NUMBER() OVER (PARTITION BY region ORDER BY sales_amt DESC) AS rn
+    SELECT 
+        salesperson, 
+        region, 
+        sales_amt,
+        ROW_NUMBER() OVER (PARTITION BY region ORDER BY sales_amt DESC) AS rn
     FROM sales
 ) ranked
 WHERE rn <= 2;
-
--- Expected Output (assuming single region for simplicity):
---  salesperson | region | sales_amt
--- -------------+--------+-----------
---  Frank       | North  | 500.00
---  David       | North  | 300.00
 ```
+Expected Output (assuming single region for simplicity):
+ salesperson | region | sales_amt
+-------------|--------|-----------
+ Frank       | North  | 500.00
+ David       | North  | 300.00
 
 **Why this output occurs:** `ROW_NUMBER` assigns unique numbers within each region. The outer query filters to the top 2. If ties existed at the boundary, `ROW_NUMBER` would arbitrarily pick one .
 
@@ -220,17 +228,18 @@ SELECT salesperson, sales_amt,
        NTILE(4) OVER (ORDER BY sales_amt) AS quartile
 FROM sales
 ORDER BY sales_amt;
-
--- Expected Output:
---  salesperson | sales_amt | quartile
--- -------------+-----------+----------
---  Alice       | 100.00    |        1
---  Bob         | 200.00    |        1
---  Carol       | 200.00    |        2
---  David       | 300.00    |        2
---  Eve         | 300.00    |        3
---  Frank       | 500.00    |        4
 ```
+
+Expected Output:
+ salesperson | sales_amt | quartile
+-------------|-----------|----------
+ Alice       | 100.00    |        1
+ Bob         | 200.00    |        1
+ Carol       | 200.00    |        2
+ David       | 300.00    |        2
+ Eve         | 300.00    |        3
+ Frank       | 500.00    |        4
+
 
 **Why this output occurs:** 6 rows into 4 buckets: the first 2 buckets get 2 rows each, and the last 2 get 1 row each. The larger buckets come first . Note that Carol and Bob tie but are split across buckets 1 and 2 — this is the non-determinism .
 
@@ -317,17 +326,18 @@ SELECT salesperson, sales_amt,
        CUME_DIST()    OVER (ORDER BY sales_amt) AS cume_dist
 FROM sales
 ORDER BY sales_amt;
-
--- Expected Output:
---  salesperson | sales_amt | pct_rank | cume_dist
--- -------------+-----------+----------+-----------
---  Alice       | 100.00    | 0.0000   | 0.1667
---  Bob         | 200.00    | 0.2000   | 0.5000
---  Carol       | 200.00    | 0.2000   | 0.5000
---  David       | 300.00    | 0.6000   | 0.8333
---  Eve         | 300.00    | 0.6000   | 0.8333
---  Frank       | 500.00    | 1.0000   | 1.0000
 ```
+
+Expected Output:
+ salesperson | sales_amt | pct_rank | cume_dist
+-------------|-----------|----------|-----------
+ Alice       | 100.00    | 0.0000   | 0.1667
+ Bob         | 200.00    | 0.2000   | 0.5000
+ Carol       | 200.00    | 0.2000   | 0.5000
+ David       | 300.00    | 0.6000   | 0.8333
+ Eve         | 300.00    | 0.6000   | 0.8333
+ Frank       | 500.00    | 1.0000   | 1.0000
+
 
 **Why this output occurs:** Alice has the lowest salary: `PERCENT_RANK = 0`, `CUME_DIST = 1/6 = 0.1667`. Bob and Carol tie: `PERCENT_RANK = (2-1)/(6-1) = 0.2`, `CUME_DIST = 3/6 = 0.5` (3 rows ≤ 200). Frank has the highest: both return 1 .
 

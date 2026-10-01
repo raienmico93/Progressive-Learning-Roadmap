@@ -250,9 +250,14 @@ CREATE TABLE employees (
 );
 
 INSERT INTO departments VALUES
-    (1, 'Engineering'), (2, 'Marketing'), (3, 'Sales');
+    (1, 'Engineering'), 
+    (2, 'Marketing'), 
+    (3, 'Sales');
+
 INSERT INTO employees VALUES
-    (10, 'Alice', 1), (11, 'Bob', 2), (12, 'Carol', 1);
+    (10, 'Alice', 1), 
+    (11, 'Bob', 2), 
+    (12, 'Carol', 1);
 
 -- Query: JOIN USING department_id
 SELECT department_name, employee_name
@@ -277,8 +282,7 @@ ORDER BY department_name, employee_name;
 -- Query: FULL OUTER JOIN USING department_id
 SELECT department_id, department_name, employee_name
 FROM departments
-FULL OUTER JOIN employees
-    USING (department_id)
+FULL OUTER JOIN employees USING (department_id)
 ORDER BY department_id;
 
 -- Expected Output:
@@ -402,10 +406,18 @@ CREATE TABLE employees (
     dept_id  INTEGER
 );
 
-INSERT INTO departments VALUES (1, 'Engineering'), (2, 'Marketing');
-INSERT INTO employees VALUES (10, 'Alice', 1), (11, 'Bob', 2), (12, 'Carol', 1);
+INSERT INTO departments VALUES 
+    (1, 'Engineering'), 
+    (2, 'Marketing');
 
--- Query: Equi-join on dept_id
+INSERT INTO employees VALUES 
+    (10, 'Alice', 1), 
+    (11, 'Bob',   2), 
+    (12, 'Carol', 1);
+```
+\
+Query: Equi-join on dept_id
+```sql
 SELECT e.emp_name, d.dept_name
 FROM employees e
 JOIN departments d
@@ -443,9 +455,13 @@ CREATE TABLE employees (
 );
 
 INSERT INTO employees VALUES
-    ('Alice', 95000), ('Bob', 65000), ('Carol', 85000);
-
--- Query: Non-equi-join using BETWEEN
+    ('Alice', 95000), 
+    ('Bob',   65000), 
+    ('Carol', 85000);
+```
+\
+Query: Non-equi-join using BETWEEN
+```sql 
 SELECT e.emp_name, e.salary, g.grade
 FROM employees e
 JOIN salary_grades g
@@ -453,11 +469,11 @@ JOIN salary_grades g
 ORDER BY e.emp_name;
 
 -- Expected Output:
---  emp_name | salary  | grade
--- ----------+---------+-------
---  Alice    | 95000.00| C
---  Bob      | 65000.00| A
---  Carol    | 85000.00| B
+--  emp_name | salary   | grade
+-- ----------+----------+-------
+--  Alice    | 95000.00 | C
+--  Bob      | 65000.00 | A
+--  Carol    | 85000.00 | B
 ```
 
 **Why this output occurs:** The `ON e.salary BETWEEN g.min_sal AND g.max_sal` condition matches each employee to the salary grade whose range contains their salary. Alice (95,000) is in grade C (90,001–120,000); Bob (65,000) is in grade A (50,000–70,000); Carol (85,000) is in grade B (70,001–90,000).
@@ -561,11 +577,18 @@ CREATE TABLE employees (
     dept_id       INTEGER
 );
 
-INSERT INTO locations VALUES (1, 'Manila'), (2, 'Cebu');
+INSERT INTO locations VALUES 
+    (1, 'Manila'), 
+    (2, 'Cebu');
+
 INSERT INTO departments VALUES
-    (10, 'Engineering', 1), (20, 'Marketing', 2);
+    (10, 'Engineering', 1), 
+    (20, 'Marketing', 2);
+
 INSERT INTO employees VALUES
-    (100, 'Alice', 10), (101, 'Bob', 20), (102, 'Carol', 10);
+    (100, 'Alice', 10), 
+    (101, 'Bob', 20), 
+    (102, 'Carol', 10);
 
 -- Query: Join employees → departments → locations
 SELECT e.emp_name, d.dept_name, l.city

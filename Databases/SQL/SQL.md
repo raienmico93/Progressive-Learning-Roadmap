@@ -992,26 +992,6 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Descendant identification
   * Cycle detection
 
-  **Alternative Hierarchical Models (Non-Recursive)**
-  * Adjacency List Model (Your current baseline)
-  * Nested Set Model (Left and Right values)
-  * Path Enumeration Model (Materialized Path / PostgreSQL ltree)
-  * Closure Table Model (Bridge tables for all relationships)
-
-  **Database-Specific Hierarchical Extensions**
-  * Oracle's CONNECT BY, START WITH, and PRIOR syntax
-  * Oracle's SYS_CONNECT_BY_PATH and CONNECT_BY_ISLEAF
-  
-  **Hierarchical Data Modification (DML)**
-  * Inserting a new node into a specific position
-  * Deleting a leaf node vs. deleting a subtree (Cascading deletes)
-  * Moving a subtree to a different parent (Reparenting)
-  
-  **Performance & Optimization**
-  * Indexing strategies for hierarchical queries (Foreign key + Primary key composite indexes)
-  * Avoiding infinite loops in poorly structured data
-  * Max recursion depth configuration (e.g., OPTION (MAXRECURSION) in SQL Server)
-
 ---
 
 # XXI. JSON, XML, and Semi-Structured Data

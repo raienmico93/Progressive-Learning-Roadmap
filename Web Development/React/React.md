@@ -223,7 +223,7 @@
   * Error states
   * Permission-based rendering
 
-* [**15. Rendering Lists**](/Web%20Development/React/Basics/Rendering.md)
+* [**15. Rendering Lists**](/Web%20Development/React/Basics/RenderingLists.md)
 
   * Arrays and `.map()`
   * Dynamic component generation

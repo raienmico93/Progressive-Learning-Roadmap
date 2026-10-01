@@ -82,7 +82,7 @@
 
 # II. Express.js Fundamentals
 
-* **1. Introduction to Express.js**
+* [**1. Introduction to Express.js**](/Web%20Development/ExpressJS/Basics/Intro.md)
 
   * What Express.js is
   * Express as a Node.js web framework
@@ -95,7 +95,7 @@
     * Backend services
     * Microservices
 
-* **2. Project Setup**
+* [**2. Project Setup**](/Web%20Development/ExpressJS/Basics/Project.md)
 
   * Initialize a Node.js project
   * Install Express
@@ -110,7 +110,7 @@
     * Linters
     * Formatters
 
-* **3. First Express Application**
+* [**3. First Express Application**](/Web%20Development/ExpressJS/Basics/FirstApp.md)
 
   * Create an Express application
   * Start an HTTP server
@@ -119,7 +119,7 @@
   * Understand request and response objects
   * Understand application lifecycle
 
-* **4. Express Application Object**
+* [**4. Express Application Object**](/Web%20Development/ExpressJS/Basics/AppObject.md)
 
   * `express()`
   * `app.listen()`
@@ -132,7 +132,7 @@
 
 # III. Routing
 
-* **5. Basic Routing**
+* [**5. Basic Routing**](/Web%20Development/ExpressJS/Routing/Routing.md)
 
   * Route definitions
   * HTTP methods
@@ -141,7 +141,7 @@
   * Route parameters
   * Query parameters
 
-* **6. Route Parameters**
+* [**6. Route Parameters**](/Web%20Development/ExpressJS/Routing/RouteParameters.md)
 
   * `req.params`
   * Dynamic route segments
@@ -149,7 +149,7 @@
   * Parameter validation
   * Optional parameters where supported
 
-* **7. Query Parameters**
+* [**7. Query Parameters**](/Web%20Development/ExpressJS/Routing/QueryParameters.md)
 
   * `req.query`
   * Filtering
@@ -158,7 +158,7 @@
   * Search parameters
   * Validation and sanitization
 
-* **8. Routers**
+* [**8. Routers**](/Web%20Development/ExpressJS/Routing/Routers.md)
 
   * `express.Router()`
   * Modular routes
@@ -167,7 +167,7 @@
   * Router-level middleware
   * Separating routes by resource
 
-* **9. Route Organization**
+* [**9. Route Organization**](/Web%20Development/ExpressJS/Routing/RouteOrganization.md)
 
   * User routes
   * Authentication routes
@@ -183,7 +183,7 @@
 
 # IV. Request and Response Handling
 
-* **10. Request Object**
+* [**10. Request Object**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/Request.md)
 
   * `req.params`
   * `req.query`
@@ -193,7 +193,7 @@
   * `req.ip`
   * Request metadata
 
-* **11. Response Object**
+* [**11. Response Object**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/Response.md)
 
   * `res.send()`
   * `res.json()`
@@ -204,7 +204,7 @@
   * `res.cookie()`
   * `res.clearCookie()`
 
-* **12. HTTP Responses**
+* [**12. HTTP Responses**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/HTTPResponses.md)
 
   * Success responses
 
@@ -225,7 +225,7 @@
     * `502`
     * `503`
 
-* **13. Response Design**
+* [**13. Response Design**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/ResponseDesign.md)
 
   * Consistent JSON structures
   * Resource representation
@@ -238,7 +238,7 @@
 
 # V. Middleware
 
-* **14. Middleware Fundamentals**
+* [**14. Middleware Fundamentals**](/Web%20Development/ExpressJS/Middleware/Middleware.md)
 
   * What middleware is
   * Middleware execution flow
@@ -247,13 +247,13 @@
   * `next`
   * Middleware chaining
 
-* **15. Built-in Middleware**
+* [**15. Built-in Middleware**](/Web%20Development/ExpressJS/Middleware/Built-in.md)
 
   * `express.json()`
   * `express.urlencoded()`
   * `express.static()`
 
-* **16. Custom Middleware**
+* [**16. Custom Middleware**](/Web%20Development/ExpressJS/Middleware/Custom.md)
 
   * Request logging
   * Authentication checks
@@ -262,7 +262,7 @@
   * Request transformation
   * Response processing
 
-* **17. Middleware Types**
+* [**17. Middleware Types**](/Web%20Development/ExpressJS/Middleware/Types.md)
 
   * Application-level middleware
   * Router-level middleware
@@ -270,7 +270,7 @@
   * Built-in middleware
   * Third-party middleware
 
-* **18. Middleware Order**
+* [**18. Middleware Order**](/Web%20Development/ExpressJS/Middleware/Order.md)
 
   * Request parsing
   * Logging
@@ -284,7 +284,7 @@
 
 # VI. REST API Development
 
-* **19. REST Fundamentals**
+* [**19. REST Fundamentals**](/Web%20Development/NodeJS/REST%20API/REST.md)
 
   * Resources
   * Resource-oriented URLs
@@ -293,23 +293,14 @@
   * Representation
   * Idempotency
 
-* **20. CRUD APIs**
+* [**20. CRUD APIs**](/Web%20Development/NodeJS/REST%20API/CRUDAPI.md)
 
-  * Create resource
+  * Create resource (`POST`)
+  * Read resource (`GET`)
+  * Update resource (`PUT` and `PATCH`)
+  * Delete resource (`DELETE`)
 
-    * `POST`
-  * Read resource
-
-    * `GET`
-  * Update resource
-
-    * `PUT`
-    * `PATCH`
-  * Delete resource
-
-    * `DELETE`
-
-* **21. API Design**
+* [**21. API Design**](/Web%20Development/NodeJS/REST%20API/APIDesign.md)
 
   * URL naming
   * Resource nesting
@@ -318,7 +309,7 @@
   * Response consistency
   * Error conventions
 
-* **22. API Pagination**
+* [**22. API Pagination**](/Web%20Development/ExpressJS/Miscellaneous/APIPagination.md)
 
   * Offset pagination
   * Limit/offset
@@ -327,7 +318,7 @@
   * Sorting
   * Filtering
 
-* **23. API Filtering and Searching**
+* [**23. API Filtering and Searching**](/Web%20Development/ExpressJS/Miscellaneous/APIFilteringAndSearching.md)
 
   * Exact filters
   * Range filters
@@ -340,7 +331,7 @@
 
 # VII. Express and Databases
 
-* **24. Database Integration**
+* [**24. Database Integration**](/Web%20Development/NodeJS/Databases/DBConnectivity.md)
 
   * Database drivers
   * Connection management
@@ -348,7 +339,7 @@
   * Query execution
   * Transactions
 
-* **25. SQL Integration**
+* [**25. SQL Integration**](/Web%20Development/NodeJS/Databases/SQLIntegration.md)
 
   * PostgreSQL
   * MySQL
@@ -366,7 +357,7 @@
   * Population
   * Middleware
 
-* **27. ORM and ODM Concepts**
+* [**27. ORM and ODM Concepts**](/Web%20Development/NodeJS/Databases/ORMs.md)
 
   * ORM
   * ODM
@@ -388,14 +379,14 @@
 
 # VIII. Application Architecture
 
-* **29. MVC Architecture**
+* [**29. MVC Architecture**](/Web%20Development/ExpressJS/App%20Architecture/MVC.md)
 
   * Models
   * Views
   * Controllers
   * Request flow
 
-* **30. Layered Architecture**
+* [**30. Layered Architecture**](/Web%20Development/ExpressJS/App%20Architecture/Layered.md)
 
   * Routes
   * Controllers
@@ -403,14 +394,14 @@
   * Repositories
   * Database
 
-* **31. Modular Architecture**
+* [**31. Modular Architecture**](/Web%20Development/ExpressJS/App%20Architecture/Modular.md)
 
   * Feature modules
   * Domain modules
   * Shared utilities
   * Configuration modules
 
-* **32. Separation of Concerns**
+* [**32. Separation of Concerns**](/Web%20Development/ExpressJS/App%20Architecture/SeparationOfConcerns.md)
 
   * Routing logic
   * Business logic
@@ -419,7 +410,7 @@
   * Authentication
   * Error handling
 
-* **33. Dependency Management**
+* [**33. Dependency Management**](/Web%20Development/ExpressJS/App%20Architecture/DependencyManagement.md)
 
   * Dependency injection concepts
   * Service dependencies
@@ -430,7 +421,7 @@
 
 # IX. Validation and Error Handling
 
-* **34. Input Validation**
+* [**34. Input Validation**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/InputValidation.md)
 
   * Request-body validation
   * Query validation
@@ -440,14 +431,14 @@
   * Length constraints
   * Range constraints
 
-* **35. Validation Libraries**
+* [**35. Validation Libraries**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/Libraries.md)
 
   * Zod
   * Joi
   * express-validator
   * Schema-driven validation
 
-* **36. Error Handling**
+* [**36. Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorHandling.md)
 
   * Synchronous errors
   * Asynchronous errors
@@ -455,7 +446,7 @@
   * Centralized error middleware
   * Error propagation
 
-* **37. Error Design**
+* [**37. Error Design**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorDesign.md)
 
   * Error codes
   * Human-readable messages
@@ -465,7 +456,7 @@
   * Authorization errors
   * Database errors
 
-* **38. Production Error Handling**
+* [**38. Production Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ProductionError.md)
 
   * Avoiding stack-trace leakage
   * Structured logging
@@ -477,21 +468,21 @@
 
 # X. Asynchronous Express Programming
 
-* **39. Async/Await**
+* [**39. Async/Await**](/Web%20Development/ExpressJS/Async/AsyncAwait.md)
 
   * Promise fundamentals
   * Async route handlers
   * `try/catch`
   * Error propagation
 
-* **40. Async Middleware**
+* [**40. Async Middleware**](/Web%20Development/ExpressJS/Async/AsyncMiddleware.md)
 
   * Database operations
   * External API calls
   * File operations
   * Background processing
 
-* **41. Concurrency**
+* [**41. Concurrency**](/Web%20Development/ExpressJS/Async/Concurrency.md)
 
   * Sequential versus parallel async operations
   * `Promise.all()`
@@ -499,7 +490,7 @@
   * Race conditions
   * Resource contention
 
-* **42. Event Loop Awareness**
+* [**42. Event Loop Awareness**](/Web%20Development/ExpressJS/Async/EventLoopAwareness.md)
 
   * Blocking operations
   * CPU-bound workloads
@@ -511,7 +502,7 @@
 
 # XI. Authentication
 
-* **43. Authentication Fundamentals**
+* [**43. Authentication Fundamentals**](/Web%20Development/ExpressJS/Authentication/Authentication.md)
 
   * Identity
   * Login
@@ -519,7 +510,7 @@
   * Sessions
   * Tokens
 
-* **44. Password Authentication**
+* [**44. Password Authentication**](/Web%20Development/ExpressJS/Authentication/Password.md)
 
   * Password hashing
   * Salt
@@ -527,7 +518,7 @@
   * Password policies
   * Password reset flows
 
-* **45. Session-Based Authentication**
+* [**45. Session-Based Authentication**](/Web%20Development/ExpressJS/Authentication/SessionBased.md)
 
   * Sessions
   * Session stores
@@ -535,7 +526,7 @@
   * Session expiration
   * Secure session configuration
 
-* **46. JWT Authentication**
+* [**46. JWT Authentication**](/Web%20Development/ExpressJS/Authentication/JWT.md)
 
   * Access tokens
   * Refresh tokens
@@ -548,26 +539,26 @@
 
 # XII. Authorization
 
-* **47. Authorization Fundamentals**
+* [**47. Authorization Fundamentals**](/Web%20Development/ExpressJS/Authorization/Authorization.md)
 
   * Authentication versus authorization
   * Permission checks
   * Resource ownership
 
-* **48. Role-Based Access Control**
+* [**48. Role-Based Access Control**](/Web%20Development/ExpressJS/Authorization/RoleBasedAccessControl.md)
 
   * Roles
   * Permissions
   * Role middleware
   * Admin privileges
 
-* **49. Attribute-Based Access Control**
+* [**49. Attribute-Based Access Control**](/Web%20Development/ExpressJS/Authorization/AttributeBased.md)
 
   * User attributes
   * Resource attributes
   * Contextual authorization
 
-* **50. Multi-Tenant Authorization**
+* [**50. Multi-Tenant Authorization**](/Web%20Development/ExpressJS/Authorization/MultiTenant.md)
 
   * Tenant identification
   * Tenant-scoped queries

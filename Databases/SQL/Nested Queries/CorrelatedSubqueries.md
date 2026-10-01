@@ -140,7 +140,7 @@ WHERE column operator (
 -- Setup: Create employees table
 CREATE TABLE employees (
     emp_id        INTEGER PRIMARY KEY,
-    last_name     VARCHAR(50),
+    emp_name      VARCHAR(50),
     department_id INTEGER,
     salary        NUMERIC(10, 2)
 );
@@ -153,7 +153,7 @@ INSERT INTO employees VALUES
     (5, 'Eve',     20, 88000.00);
 
 -- Query: Find employees earning more than their department's average
-SELECT department_id, last_name, salary
+SELECT department_id, emp_name, salary
 FROM employees x
 WHERE salary > (
     SELECT AVG(salary)
@@ -161,14 +161,14 @@ WHERE salary > (
     WHERE x.department_id = department_id
 )
 ORDER BY department_id;
-
--- Expected Output:
---  department_id | last_name |  salary
--- ---------------+-----------+----------
---             10 | Alice     | 95000.00
---             10 | Carol     |105000.00
---             20 | Eve       | 88000.00
 ```
+
+Expected Output:
+ department_id | emp_name  |   salary
+----|-----------|-----------
+ 10 | Alice     |  95000.00
+ 10 | Carol     | 105000.00
+ 20 | Eve       |  88000.00
 
 **Why this output occurs:** For each row in the `employees` table (aliased as `x`), the correlated subquery computes the average salary for that employee's department by matching `x.department_id` with `department_id` in the subquery. Alice and Carol both earn above the Engineering average (100,000); Eve earns above the Marketing average (80,000). Bob and David do not exceed their department averages.
 
@@ -187,15 +187,22 @@ CREATE TABLE orders (
     order_total NUMERIC(10, 2)
 );
 
-INSERT INTO customers VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Carol'), (4, 'David');
-INSERT INTO orders VALUES (101, 1, 250.00), (102, 1, 300.00), (103, 2, 150.00), (104, 3, 400.00);
+INSERT INTO customers VALUES 
+    (1, 'Alice'), 
+    (2, 'Bob'), 
+    (3, 'Carol'), 
+    (4, 'David');
+
+INSERT INTO orders VALUES 
+    (101, 1, 250.00), 
+    (102, 1, 300.00), 
+    (103, 2, 150.00), 
+    (104, 3, 400.00);
 
 -- Query: Find customers who have placed at least one order
-SELECT customer_name
-FROM customers c
+SELECT customer_name FROM customers c
 WHERE EXISTS (
-    SELECT 1
-    FROM orders o
+    SELECT 1 FROM orders o
     WHERE o.customer_id = c.customer_id
 );
 

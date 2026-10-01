@@ -127,14 +127,16 @@ CREATE TABLE employees (
 
 -- Insert sample data (CEO has NULL manager)
 INSERT INTO employees VALUES
-    (1, 'Alice', NULL),      -- CEO (root)
-    (2, 'Bob', 1),          -- VP Engineering
+    (1, 'Alice', NULL),     -- CEO (root)
+    (2, 'Bob',   1),        -- VP Engineering
     (3, 'Carol', 1),        -- VP Sales
-    (4, 'Dave', 2),         -- Engineer (reports to Bob)
-    (5, 'Eve', 2),          -- Engineer (reports to Bob)
+    (4, 'Dave',  2),        -- Engineer (reports to Bob)
+    (5, 'Eve',   2),        -- Engineer (reports to Bob)
     (6, 'Frank', 3),        -- Sales Rep (reports to Carol)
     (7, 'Grace', 3);        -- Sales Rep (reports to Carol)
+```
 
+```sql
 -- Top-down traversal: find all employees and their level
 WITH RECURSIVE org_chart AS (
     -- Anchor: start with the CEO (no manager)
@@ -154,18 +156,18 @@ WITH RECURSIVE org_chart AS (
 SELECT id, name, level, path
 FROM org_chart
 ORDER BY path;
-
--- Expected Output:
---  id | name  | level | path
--- ----+-------+-------+-------------------------
---   1 | Alice |     0 | Alice
---   2 | Bob   |     1 | Alice > Bob
---   4 | Dave  |     2 | Alice > Bob > Dave
---   5 | Eve   |     2 | Alice > Bob > Eve
---   3 | Carol |     1 | Alice > Carol
---   6 | Frank |     2 | Alice > Carol > Frank
---   7 | Grace |     2 | Alice > Carol > Grace
 ```
+Expected Output:
+ id | name  | level | path
+----|-------|-------|-------------------------
+  1 | Alice |     0 | Alice
+  2 | Bob   |     1 | Alice > Bob
+  4 | Dave  |     2 | Alice > Bob > Dave
+  5 | Eve   |     2 | Alice > Bob > Eve
+  3 | Carol |     1 | Alice > Carol
+  6 | Frank |     2 | Alice > Carol > Frank
+  7 | Grace |     2 | Alice > Carol > Grace
+
 
 **Why this output occurs:** The anchor member selects Alice (the CEO) because `manager_id IS NULL`. The recursive member joins employees whose `manager_id` matches the CTE's `id`, finding direct reports. The `level` column increments with each recursion, and `path` builds a breadcrumb trail. The recursion stops when no more employees match .
 
