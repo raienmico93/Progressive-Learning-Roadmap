@@ -8,7 +8,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
 
 # I. CSS Foundations
 
-* **1. Introduction to CSS**
+* [**1. Introduction to CSS**](/Web%20Development/CSS/Basics/Intro.md)
 
   * CSS definition
 
@@ -39,7 +39,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
     * Browser engines
     * Compatibility considerations
 
-* **2. CSS Syntax**
+* [**2. CSS Syntax**](/Web%20Development/CSS/Basics/Syntax.md)
 
   * Rule sets
   * Selectors
@@ -53,22 +53,16 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * Invalid declarations
   * Multiple declarations
 
-* **3. Applying CSS**
+* [**3. Applying CSS**](/Web%20Development/CSS/Basics/ApplyingCSS.md)
 
-  * Inline CSS
-
-    * `style` attribute
-  * Internal CSS
-
-    * `<style>`
-  * External CSS
-
-    * `<link>`
+  * Inline CSS (`style` attribute)
+  * Internal CSS (`<style>`)
+  * External CSS (`<link>`)
   * CSS `@import`
   * Advantages and limitations of each approach
   * Separation of concerns
 
-* **4. CSS Cascade**
+* [**4. CSS Cascade**](/Web%20Development/CSS/Basics/Cascade.md)
 
   * Meaning of cascading
   * Source order
@@ -79,9 +73,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * Author styles
   * User styles
   * `!important`
-  * Cascade layers
-
-    * `@layer`
+  * Cascade layers (`@layer`)
 
 ---
 
@@ -181,7 +173,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
 
 # III. CSS Values and Units
 
-* **11. Numeric Values**
+* [**11. Numeric Values**](/Web%20Development/CSS/Values%20and%20Units/NumericValues.md)
 
   * Integers
   * Decimals
@@ -189,7 +181,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * Ratios
   * Calculated values
 
-* **12. Absolute Units**
+* [**12. Absolute Units**](/Web%20Development/CSS/Values%20and%20Units/Absolute.md)
 
   * `px`
   * `cm`
@@ -198,7 +190,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * `pt`
   * `pc`
 
-* **13. Relative Units**
+* [**13. Relative Units**](/Web%20Development/CSS/Values%20and%20Units/Relative.md)
 
   * Font-relative
 
@@ -219,7 +211,7 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
     * `cqh`
     * Related container units
 
-* **14. Functional Notations**
+* [**14. Functional Notations**](/Web%20Development/CSS/Values%20and%20Units/FunctionalNotations.md)
 
   * `calc()`
   * `min()`
@@ -229,7 +221,6 @@ This roadmap presents CSS as a progressive learning system, beginning with styli
   * `var()`
   * `env()`
   * Color functions
-
     * `rgb()`
     * `hsl()`
     * `lab()`

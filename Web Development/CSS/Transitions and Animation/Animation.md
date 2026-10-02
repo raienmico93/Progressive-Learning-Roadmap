@@ -148,7 +148,7 @@ Before studying CSS keyframe animations, you should understand:
 </head>
 <body>
     <!-- Element with a pulse animation -->
-    <div class="pulse-box">Pulse</div>
+    <div class="pulse-box"></div>
 </body>
 </html>
 ```
@@ -163,6 +163,19 @@ body {
     background-color: #f5f5f5;
     display: flex;
     justify-content: center;
+}
+
+.pulse-box {
+    width: 150px;
+    height: 150px;
+    border-radius: 16px;
+    background-color: #3498db;
+
+    /* Apply the animation */
+    animation-name: pulse;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
 }
 
 /* Define the keyframes animation */
@@ -184,24 +197,6 @@ body {
     }
 }
 
-.pulse-box {
-    width: 150px;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 1.2rem;
-    border-radius: 16px;
-    background-color: #3498db;
-
-    /* Apply the animation */
-    animation-name: pulse;
-    animation-duration: 1.5s;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-in-out;
-}
 ```
 
 **Step-by-Step Setup Guide:**
@@ -232,7 +227,7 @@ body {
     <link rel="stylesheet" href="keyframes-from-to.css">
 </head>
 <body>
-    <div class="slide-box">Slide</div>
+    <div class="slide-box"></div>
 </body>
 </html>
 ```
@@ -240,51 +235,30 @@ body {
 **CSS File (`keyframes-from-to.css`):**
 
 ```css
-body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 60px;
-    background-color: #f5f5f5;
-}
-
-@keyframes slide-in {
-    /* from = 0% */
-    from {
-        opacity: 0;
-        transform: translateX(-100px);
-    }
-    /* to = 100% */
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes color-shift {
-    /* Comma-separated selectors apply the same styles */
-    0%, 100% {
-        background-color: #3498db;
-    }
-    50% {
-        background-color: #e67e22;
-    }
-}
-
 .slide-box {
     width: 200px;
     padding: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: white;
-    font-weight: bold;
-    font-size: 1.5rem;
     border-radius: 12px;
     text-align: center;
 
     /* Two animations applied with comma separation */
     animation: slide-in 800ms ease-out forwards,
                color-shift 2s ease-in-out infinite;
+}
+
+@keyframes slide-in {
+    /* from = 0% */
+    from { opacity: 0; transform: translateX(-100px); }
+
+    /* to = 100% */
+    to   { opacity: 1; transform: translateX(0);      }
+}
+
+@keyframes color-shift {
+    /* Comma-separated selectors apply the same styles */
+    0%, 100% { background-color: #3498db; }
+    50%      { background-color: #e67e22; }
 }
 ```
 
@@ -407,6 +381,7 @@ The `animation` shorthand uses a flexible ordering system, but with two importan
     <script>
         const spinner = document.querySelector('.spinner');
         const btn = document.querySelector('.toggle-btn');
+
         btn.addEventListener('click', () => {
             const current = getComputedStyle(spinner).animationPlayState;
             spinner.style.animationPlayState = current === 'running' ? 'paused' : 'running';
@@ -419,19 +394,10 @@ The `animation` shorthand uses a flexible ordering system, but with two importan
 **CSS File (`animation-shorthand.css`):**
 
 ```css
-body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 60px;
-    background-color: #f5f5f5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-}
-
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to { 
+        transform: rotate(360deg); 
+    }
 }
 
 .spinner {
@@ -446,8 +412,8 @@ body {
 }
 
 .toggle-btn {
-    padding: 12px 28px;
-    font-size: 1rem;
+    margin-top: 15px;
+    padding: 10px 15px;
     background-color: #006064;
     color: white;
     border: none;
@@ -580,18 +546,6 @@ selector {
 **CSS File (`fill-modes.css`):**
 
 ```css
-body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 60px;
-    background-color: #f5f5f5;
-}
-
-.container {
-    display: flex;
-    gap: 30px;
-    justify-content: center;
-}
 
 @keyframes slide-and-color {
     from {
@@ -611,8 +565,6 @@ body {
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: bold;
-    font-size: 0.8rem;
     border-radius: 12px;
     background-color: #3498db;
 
@@ -679,33 +631,18 @@ body {
 **CSS File (`direction.css`):**
 
 ```css
-body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 60px;
-    background-color: #f5f5f5;
-}
-
-.container {
-    display: flex;
-    gap: 40px;
-    justify-content: center;
-}
-
 @keyframes slide {
     from { transform: translateX(0); }
-    to { transform: translateX(150px); }
+    to   { transform: translateX(150px); }
 }
 
 .box {
-    width: 100px;
+    width: 150px;
     height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: bold;
-    font-size: 0.7rem;
     border-radius: 12px;
     background-color: #3498db;
 

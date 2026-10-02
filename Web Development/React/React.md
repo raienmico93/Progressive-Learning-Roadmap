@@ -223,7 +223,7 @@
   * Error states
   * Permission-based rendering
 
-* [**15. Rendering Lists**](/Web%20Development/React/Basics/RenderingLists.md)
+* [**15. Rendering Lists**](/Web%20Development/React/Basics/)
 
   * Arrays and `.map()`
   * Dynamic component generation
@@ -804,7 +804,7 @@
 
 # XX. TypeScript with React
 
-* **74. TypeScript Fundamentals for React**
+* [**74. TypeScript Fundamentals for React**](/Web%20Development/React/TypeScript/TypeScript.md)
 
   * Basic types
   * Interfaces
@@ -813,7 +813,7 @@
   * Generics
   * Narrowing
 
-* **75. Typing React Components**
+* [**75. Typing React Components**](/Web%20Development/React/TypeScript/TypingComponents.md)
 
   * Props
   * Children
@@ -822,7 +822,7 @@
   * Refs
   * Context
 
-* **76. Advanced React TypeScript**
+* [**76. Advanced React TypeScript**](/Web%20Development/React/TypeScript/Advanced.md)
 
   * Generic components
   * Discriminated unions
@@ -831,7 +831,7 @@
   * Custom hook typing
   * API response types
 
-* **77. Type-Safe Application Architecture**
+* [**77. Type-Safe Application Architecture**](/Web%20Development/React/TypeScript/TypeSafe.md)
 
   * Shared types
   * Domain models
@@ -843,14 +843,14 @@
 
 # XXI. Custom Hooks
 
-* **78. Custom Hook Fundamentals**
+* [**78. Custom Hook Fundamentals**](/Web%20Development/React/Hooks/CustomHooks.md)
 
   * Hook extraction
   * Reusable stateful logic
   * Hook naming conventions
   * Hook composition
 
-* **79. Common Custom Hooks**
+* [**79. Common Custom Hooks**](/Web%20Development/React/Hooks/CommonCustomHooks.md)
 
   * Data fetching
   * Debouncing
@@ -860,7 +860,7 @@
   * Online/offline detection
   * Form logic
 
-* **80. Advanced Custom Hooks**
+* [**80. Advanced Custom Hooks**](/Web%20Development/React/Hooks/AdvancedCustomHooks.md)
 
   * Generic hooks
   * Composable hooks

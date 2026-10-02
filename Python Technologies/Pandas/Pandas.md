@@ -276,7 +276,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # VII. Data Types
 
-* **24. Understanding Dtypes**
+* [**24. Understanding Dtypes**](/Python%20Technologies/Pandas/Data%20Types/DTypes.md)
 
   * Numeric
   * Boolean
@@ -286,14 +286,14 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Timedelta
   * Categorical
 
-* **25. Type Conversion**
+* [**25. Type Conversion**](/Python%20Technologies/Pandas/Data%20Types/TypeConversion.md)
 
   * `astype()`
   * `to_numeric()`
   * `to_datetime()`
   * `to_timedelta()`
 
-* **26. Nullable Data Types**
+* [**26. Nullable Data Types**](/Python%20Technologies/Pandas/Data%20Types/NullableDTypes.md)
 
   * Nullable integers
   * Nullable booleans
@@ -301,7 +301,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * `pd.NA`
   * Differences between `None`, `NaN`, and `pd.NA`
 
-* **27. Categorical Data**
+* [**27. Categorical Data**](/Python%20Technologies/Pandas/Data%20Types/CategoricalData.md)
 
   * Creating categoricals
   * Ordered categories
@@ -313,7 +313,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # VIII. Data Cleaning
 
-* **28. Missing Data**
+* [**28. Missing Data**](/Python%20Technologies/Pandas/Data%20Cleaning/MissingData.md)
 
   * Detecting missing values
 
@@ -324,7 +324,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Missing values by column
   * Missing values by row
 
-* **29. Handling Missing Data**
+* [**29. Handling Missing Data**](/Python%20Technologies/Pandas/Data%20Cleaning/HandlingMissingData.md)
 
   * `dropna()`
   * `fillna()`
@@ -334,7 +334,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Conditional imputation
   * Interpolation
 
-* **30. Duplicate Data**
+* [**30. Duplicate Data**](/Python%20Technologies/Pandas/Data%20Cleaning/DuplicateData.md)
 
   * `duplicated()`
   * `drop_duplicates()`
@@ -342,7 +342,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Keeping first occurrence
   * Keeping last occurrence
 
-* **31. Data Validation**
+* [**31. Data Validation**](/Python%20Technologies/Pandas/Data%20Cleaning/DataValidation.md)
 
   * Type validation
   * Range validation
@@ -355,21 +355,21 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # IX. Data Transformation
 
-* **32. Creating Columns**
+* [**32. Creating Columns**](/Python%20Technologies/Pandas/Data%20Transformation/CreatingColumns.md)
 
   * Arithmetic expressions
   * Conditional columns
   * Derived features
   * Column assignment
 
-* **33. Renaming**
+* [**33. Renaming**](/Python%20Technologies/Pandas/Data%20Transformation/Renaming.md)
 
   * Columns
   * Index
   * Mapping-based renaming
   * Standardizing column names
 
-* **34. Applying Functions**
+* [**34. Applying Functions**](/Python%20Technologies/Pandas/Data%20Transformation/ApplyingFunc.md)
 
   * `map()`
   * `apply()`
@@ -378,14 +378,14 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Lambda expressions
   * When not to use row-wise `apply()`
 
-* **35. Replacing Values**
+* [**35. Replacing Values**](/Python%20Technologies/Pandas/Data%20Transformation/ReplacingValues.md)
 
   * `replace()`
   * Dictionary mappings
   * Conditional replacement
   * Regex-based replacement where appropriate
 
-* **36. Sorting**
+* [**36. Sorting**](/Python%20Technologies/Pandas/Data%20Transformation/Sorting.md)
 
   * `sort_values()`
   * `sort_index()`
@@ -397,7 +397,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # X. String Data Processing
 
-* **37. Pandas String Accessor**
+* [**37. Pandas String Accessor**](/Python%20Technologies/Pandas/Data%20Processing/StringAccessor.md)
 
   * `.str`
   * String length
@@ -406,7 +406,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Splitting
   * Concatenation
 
-* **38. String Cleaning**
+* [**38. String Cleaning**](/Python%20Technologies/Pandas/Data%20Processing/StringCleaning.md)
 
   * Whitespace removal
   * Standardizing case
@@ -414,7 +414,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Normalizing text
   * Handling empty strings
 
-* **39. Pattern Matching**
+* [**39. Pattern Matching**](/Python%20Technologies/Pandas/Data%20Processing/PatternMatching.md)
 
   * `.str.contains()`
   * `.str.startswith()`
@@ -422,7 +422,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * `.str.match()`
   * Regular expressions
 
-* **40. String Extraction**
+* [**40. String Extraction**](/Python%20Technologies/Pandas/Data%20Processing/StringExtraction.md)
 
   * `.str.extract()`
   * `.str.extractall()`
@@ -433,7 +433,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
 
 # XI. Numerical Data Processing
 
-* **41. Numeric Operations**
+* [**41. Numeric Operations**](/Python%20Technologies/Pandas/Numerical%20Data%20Processing/Numeric.md)
 
   * Addition
   * Subtraction
@@ -442,7 +442,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Modulo
   * Powers
 
-* **42. Statistical Operations**
+* [**42. Statistical Operations**](/Python%20Technologies/Pandas/Numerical%20Data%20Processing/Statistical.md)
 
   * Mean
   * Median
@@ -454,7 +454,7 @@ Pandas is best learned progressively: **Python/data structures → Series/DataFr
   * Quantiles
   * Percentiles
 
-* **43. Numerical Transformations**
+* [**43. Numerical Transformations**](/Python%20Technologies/Pandas/Numerical%20Data%20Processing/NumericalTransofrmation.md)
 
   * Scaling
   * Normalization

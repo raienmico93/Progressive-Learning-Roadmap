@@ -4,7 +4,7 @@
 
 * **I. C# Language Foundations**
 
-  * **1. Introduction to C#**
+  * [**1. Introduction to C#**](/Programming%20Languages/CSharp/Basics/Intro.md)
 
     * C# definition and purpose
     * History and evolution of C#
@@ -19,7 +19,8 @@
     * Compiled and intermediate-language execution model
     * C# language specifications and version evolution
     * C# application domains and common application types
-  * **2. Development Environment**
+
+  * [**2. Development Environment**](/Programming%20Languages/CSharp/Basics/DevEnv.md)
 
     * .NET SDK installation
     * .NET Runtime installation
@@ -40,7 +41,8 @@
       * Solution files
       * `.sln`
     * NuGet package management
-  * **3. First C# Program**
+
+  * [**3. First C# Program**](/Programming%20Languages/CSharp/Basics/FirstProgram.md)
 
     * Program structure
     * Top-level statements

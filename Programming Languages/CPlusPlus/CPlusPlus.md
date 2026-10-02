@@ -8,7 +8,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
 
 # I. C++ Foundations and Programming Fundamentals
 
-* **1. Introduction to C++**
+* [**1. Introduction to C++**](/Programming%20Languages/CPlusPlus/Basics/Intro.md)
 
   * C++ definition
 
@@ -42,7 +42,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
     * Networking
     * Robotics
 
-* **2. C++ Development Environment**
+* [**2. C++ Development Environment**](/Programming%20Languages/CPlusPlus/Basics/DevEnv.md)
 
   * Compiler
 
@@ -65,7 +65,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Compiler flags
   * Linking concepts
 
-* **3. First C++ Program**
+* [**3. First C++ Program**](/Programming%20Languages/CPlusPlus/Basics/FirstProgram.md)
 
   * Program structure
   * Header inclusion
@@ -577,7 +577,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
 
 # X. Operator Overloading and Advanced Class Design
 
-* **53. Operator Overloading**
+* [**53. Operator Overloading**](/Programming%20Languages/CPlusPlus/OOP/OperatorOverloading.md)
 
   * Arithmetic operators
   * Comparison operators
@@ -587,34 +587,39 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Function-call operator
   * Subscript operator
 
-* **54. Member Versus Non-Member Operators**
+* [**54. Member Versus Non-Member Operators**](/Programming%20Languages/CPlusPlus/OOP/MemberVsNonMember.md)
 
-  * Member overloads
-  * Friend overloads
-  * Non-member overloads
-  * Symmetric operators
+  * Member overloads (Left-hand operand must be the class type)
+  * Non-member overloads (Handling fundamental types on the left-hand side)
+  * Friend overloads (Granting private access to non-member operators)
+  * Symmetric operators (Why binary arithmetic and comparisons should be non-members)
+  * The Overload Resolution Process (How the compiler matches arguments)
+  * Perfect forwarding in operators (Advanced forwarding references)
 
-* **55. Special Member Functions**
+* [**55. Special Member Functions**](/Programming%20Languages/CPlusPlus/OOP/SpecialMemberFunc.md)
 
-  * Default constructor
-  * Destructor
-  * Copy constructor
-  * Copy assignment
-  * Move constructor
-  * Move assignment
+  * Default constructor (Implicit generation vs. = default vs. = delete)
+  * Destructor (Virtual destructors for polymorphic base classes)
+  * Copy constructor and Copy assignment operator (Deep vs. Shallow copy)
+  * Move constructor and Move assignment operator (Rvalue references and std::move)
+  * The Rule of Zero, Rule of Three, and Rule of Five
+  * The Copy-and-Swap Idiom (Achieving exceptionally strong exception safety)
+  * Ref-qualifiers for member functions (& and && to restrict calls based on lvalue/rvalue state)
 
-* **56. `friend`**
+* [**56. `friend`**](/Programming%20Languages/CPlusPlus/OOP/friend.md)
 
-  * Friend functions
-  * Friend classes
-  * Controlled access
-  * Encapsulation trade-offs
+  * Friend functions (Non-member functions with private access)
+  * Friend classes (Granting access to coupled subsystem classes)
+  * Controlled access vs. tight coupling
+  * Encapsulation trade-offs and alternatives (e.g., public API getters vs. friendship)
+  * Hidden Friends Idiom (Improving compilation times and optimizing Argument-Dependent Lookup / ADL)
+
 
 ---
 
 # XI. Namespaces, Headers, and Modular Programming
 
-* **57. Namespaces**
+* [**57. Namespaces**](/Programming%20Languages/CPlusPlus/Miscellaneous/Namespaces.md)
 
   * Namespace declaration
   * Nested namespaces
@@ -623,7 +628,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * `using` declarations
   * Avoiding namespace pollution
 
-* **58. Header Files**
+* [**58. Header Files**](/Programming%20Languages/CPlusPlus/Miscellaneous/HeaderFiles.md)
 
   * Header declarations
   * Include guards
@@ -631,14 +636,14 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Header dependencies
   * Interface separation
 
-* **59. Source Files**
+* [**59. Source Files**](/Programming%20Languages/CPlusPlus/Miscellaneous/SourceFiles.md)
 
   * `.cpp` files
   * Declaration versus definition
   * Separate compilation
   * Linking
 
-* **60. Compilation Model**
+* [**60. Compilation Model**](/Programming%20Languages/CPlusPlus/Miscellaneous/CompilationModel.md)
 
   * Preprocessing
   * Compilation
@@ -647,7 +652,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Translation units
   * One Definition Rule
 
-* **61. C++ Modules**
+* [**61. C++ Modules**](/Programming%20Languages/CPlusPlus/Miscellaneous/CPPModules.md)
 
   * Module interfaces
   * Module implementation units
@@ -659,7 +664,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
 
 # XII. Preprocessor and Compilation Control
 
-* **62. Preprocessor Directives**
+* [**62. Preprocessor Directives**](/Programming%20Languages/CPlusPlus/Preprocessor%20and%20Compilation%20Control/Preprocessor.md)
 
   * `#include`
   * `#define`
@@ -669,7 +674,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * `#elif`
   * `#endif`
 
-* **63. Macros**
+* [**63. Macros**](/Programming%20Languages/CPlusPlus/Preprocessor%20and%20Compilation%20Control/Macros.md)
 
   * Object-like macros
   * Function-like macros
@@ -677,7 +682,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Safer alternatives
   * Macro hygiene
 
-* **64. Conditional Compilation**
+* [**64. Conditional Compilation**](/Programming%20Languages/CPlusPlus/Preprocessor%20and%20Compilation%20Control/ConditionalCompilation.md)
 
   * Platform-specific code
   * Build configuration
@@ -688,40 +693,40 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
 
 # XIII. Templates and Generic Programming
 
-* **65. Function Templates**
+* [**65. Function Templates**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/FunctionTemplates.md)
 
   * Template parameters
   * Template argument deduction
   * Multiple template parameters
   * Default template parameters
 
-* **66. Class Templates**
+* [**66. Class Templates**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/ClassTemplates.md)
 
   * Generic classes
   * Template members
   * Template specialization
 
-* **67. Template Specialization**
+* [**67. Template Specialization**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/TemplateSpec.md)
 
   * Full specialization
   * Partial specialization
   * Specialization rules
 
-* **68. Non-Type Template Parameters**
+* [**68. Non-Type Template Parameters**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/NonTypeTemplateParam.md)
 
   * Integral parameters
   * Compile-time values
   * `auto` parameters
   * Structural types in newer C++
 
-* **69. Variadic Templates**
+* [**69. Variadic Templates**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/Variadic.md)
 
   * Parameter packs
   * Pack expansion
   * Fold expressions
   * Variadic generic interfaces
 
-* **70. Concepts**
+* [**70. Concepts**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/Concepts.md)
 
   * Concept definition
   * `requires`
@@ -729,7 +734,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Constrained templates
   * Improving template diagnostics
 
-* **71. Generic Programming**
+* [**71. Generic Programming**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/GenericProgramming.md)
 
   * Type-independent algorithms
   * Constraints

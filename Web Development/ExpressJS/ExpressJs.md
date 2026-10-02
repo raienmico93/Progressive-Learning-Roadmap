@@ -206,24 +206,11 @@
 
 * [**12. HTTP Responses**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/HTTPResponses.md)
 
-  * Success responses
-
-    * `200`
-    * `201`
-    * `204`
-  * Client errors
-
-    * `400`
-    * `401`
-    * `403`
-    * `404`
-    * `409`
-    * `422`
-  * Server errors
-
-    * `500`
-    * `502`
-    * `503`
+  * 1xx
+  * 2xx Success responses
+  * 3xx
+  * 4xx Client errors
+  * 5xx Server errors
 
 * [**13. Response Design**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/ResponseDesign.md)
 
@@ -282,9 +269,49 @@
 
 ---
 
-# VI. REST API Development
+# VI. Templating Engines
 
-* [**19. REST Fundamentals**](/Web%20Development/NodeJS/REST%20API/REST.md)
+* [**19. Template Engine Fundamentals**](/Web%20Development/ExpressJS/Templating%20Engines/TemplateEngine.md)
+
+  * Template engine architecture
+  * Core layout patterns
+  * Data binding & Context interpolation 
+  * Control structures
+  * Custom helper functions 
+
+* [**20. Popular Express Engines**](/Web%20Development/ExpressJS/Templating%20Engines/ExpressEngines.md)
+
+  * EJS (Embedded JavaScript) 
+  * Pug (formerly Jade)
+  * Handlebars / Mustache 
+  * Alternative engines 
+
+* [**21. Security in Template Rendering**](/Web%20Development/ExpressJS/Templating%20Engines/Security.md)
+
+  * Auto-escaping & XSS prevention 
+  * Contextual sanitization
+  * Content Security Policy (CSP) integration 
+  * Preventing Prototype Pollution in views 
+
+* [**22. Performance & Production Optimization**](/Web%20Development/ExpressJS/Templating%20Engines/PerformanceAndProduction.md)
+
+  * View caching
+  * Stream-based rendering 
+  * File system structuring
+  * Minification & Asset pipelines
+
+
+* [**23. Modern Context & SSR Transitions**](/Web%20Development/ExpressJS/Templating%20Engines/ModernContext.md)
+
+  * Server-Side Rendering (SSR) limits
+  * Hybrid rendering 
+  * Isomorphic validation handling 
+
+---
+
+# VII. REST API Development
+
+* [**24. REST Fundamentals**](/Web%20Development/NodeJS/REST%20API/REST.md)
 
   * Resources
   * Resource-oriented URLs
@@ -293,14 +320,14 @@
   * Representation
   * Idempotency
 
-* [**20. CRUD APIs**](/Web%20Development/NodeJS/REST%20API/CRUDAPI.md)
+* [**25. CRUD APIs**](/Web%20Development/NodeJS/REST%20API/CRUDAPI.md)
 
   * Create resource (`POST`)
   * Read resource (`GET`)
   * Update resource (`PUT` and `PATCH`)
   * Delete resource (`DELETE`)
 
-* [**21. API Design**](/Web%20Development/NodeJS/REST%20API/APIDesign.md)
+* [**26. API Design**](/Web%20Development/NodeJS/REST%20API/APIDesign.md)
 
   * URL naming
   * Resource nesting
@@ -309,7 +336,7 @@
   * Response consistency
   * Error conventions
 
-* [**22. API Pagination**](/Web%20Development/ExpressJS/Miscellaneous/APIPagination.md)
+* [**27. API Pagination**](/Web%20Development/ExpressJS/Miscellaneous/APIPagination.md)
 
   * Offset pagination
   * Limit/offset
@@ -318,7 +345,7 @@
   * Sorting
   * Filtering
 
-* [**23. API Filtering and Searching**](/Web%20Development/ExpressJS/Miscellaneous/APIFilteringAndSearching.md)
+* [**28. API Filtering and Searching**](/Web%20Development/ExpressJS/Miscellaneous/APIFilteringAndSearching.md)
 
   * Exact filters
   * Range filters
@@ -329,9 +356,9 @@
 
 ---
 
-# VII. Express and Databases
+# VIII. Express and Databases
 
-* [**24. Database Integration**](/Web%20Development/NodeJS/Databases/DBConnectivity.md)
+* [**29. Database Integration**](/Web%20Development/NodeJS/Databases/DBConnectivity.md)
 
   * Database drivers
   * Connection management
@@ -339,7 +366,7 @@
   * Query execution
   * Transactions
 
-* [**25. SQL Integration**](/Web%20Development/NodeJS/Databases/SQLIntegration.md)
+* [**30. SQL Integration**](/Web%20Development/NodeJS/Databases/SQLIntegration.md)
 
   * PostgreSQL
   * MySQL
@@ -347,7 +374,7 @@
   * Parameterized queries
   * Preventing SQL injection
 
-* **26. MongoDB Integration**
+* **31. MongoDB Integration**
 
   * MongoDB drivers
   * Mongoose
@@ -357,7 +384,7 @@
   * Population
   * Middleware
 
-* [**27. ORM and ODM Concepts**](/Web%20Development/NodeJS/Databases/ORMs.md)
+* [**32. ORM and ODM Concepts**](/Web%20Development/NodeJS/Databases/ORMs.md)
 
   * ORM
   * ODM
@@ -367,7 +394,7 @@
   * Query abstraction
   * N+1 query problem
 
-* **28. Database Architecture**
+* **33. Database Architecture**
 
   * Database layer
   * Repository layer
@@ -377,16 +404,16 @@
 
 ---
 
-# VIII. Application Architecture
+# IX. Application Architecture
 
-* [**29. MVC Architecture**](/Web%20Development/ExpressJS/App%20Architecture/MVC.md)
+* [**34. MVC Architecture**](/Web%20Development/ExpressJS/App%20Architecture/MVC.md)
 
   * Models
   * Views
   * Controllers
   * Request flow
 
-* [**30. Layered Architecture**](/Web%20Development/ExpressJS/App%20Architecture/Layered.md)
+* [**35. Layered Architecture**](/Web%20Development/ExpressJS/App%20Architecture/Layered.md)
 
   * Routes
   * Controllers
@@ -394,14 +421,14 @@
   * Repositories
   * Database
 
-* [**31. Modular Architecture**](/Web%20Development/ExpressJS/App%20Architecture/Modular.md)
+* [**36. Modular Architecture**](/Web%20Development/ExpressJS/App%20Architecture/Modular.md)
 
   * Feature modules
   * Domain modules
   * Shared utilities
   * Configuration modules
 
-* [**32. Separation of Concerns**](/Web%20Development/ExpressJS/App%20Architecture/SeparationOfConcerns.md)
+* [**37. Separation of Concerns**](/Web%20Development/ExpressJS/App%20Architecture/SeparationOfConcerns.md)
 
   * Routing logic
   * Business logic
@@ -410,7 +437,7 @@
   * Authentication
   * Error handling
 
-* [**33. Dependency Management**](/Web%20Development/ExpressJS/App%20Architecture/DependencyManagement.md)
+* [**38. Dependency Management**](/Web%20Development/ExpressJS/App%20Architecture/DependencyManagement.md)
 
   * Dependency injection concepts
   * Service dependencies
@@ -419,9 +446,9 @@
 
 ---
 
-# IX. Validation and Error Handling
+# X. Validation and Error Handling
 
-* [**34. Input Validation**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/InputValidation.md)
+* [**39. Input Validation**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/InputValidation.md)
 
   * Request-body validation
   * Query validation
@@ -431,14 +458,14 @@
   * Length constraints
   * Range constraints
 
-* [**35. Validation Libraries**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/Libraries.md)
+* [**40. Validation Libraries**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/Libraries.md)
 
   * Zod
   * Joi
   * express-validator
   * Schema-driven validation
 
-* [**36. Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorHandling.md)
+* [**41. Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorHandling.md)
 
   * Synchronous errors
   * Asynchronous errors
@@ -446,7 +473,7 @@
   * Centralized error middleware
   * Error propagation
 
-* [**37. Error Design**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorDesign.md)
+* [**42. Error Design**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorDesign.md)
 
   * Error codes
   * Human-readable messages
@@ -456,7 +483,7 @@
   * Authorization errors
   * Database errors
 
-* [**38. Production Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ProductionError.md)
+* [**43. Production Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ProductionError.md)
 
   * Avoiding stack-trace leakage
   * Structured logging
@@ -466,23 +493,23 @@
 
 ---
 
-# X. Asynchronous Express Programming
+# XI. Asynchronous Express Programming
 
-* [**39. Async/Await**](/Web%20Development/ExpressJS/Async/AsyncAwait.md)
+* [**44. Async/Await**](/Web%20Development/ExpressJS/Async/AsyncAwait.md)
 
   * Promise fundamentals
   * Async route handlers
   * `try/catch`
   * Error propagation
 
-* [**40. Async Middleware**](/Web%20Development/ExpressJS/Async/AsyncMiddleware.md)
+* [**45. Async Middleware**](/Web%20Development/ExpressJS/Async/AsyncMiddleware.md)
 
   * Database operations
   * External API calls
   * File operations
   * Background processing
 
-* [**41. Concurrency**](/Web%20Development/ExpressJS/Async/Concurrency.md)
+* [**46. Concurrency**](/Web%20Development/ExpressJS/Async/Concurrency.md)
 
   * Sequential versus parallel async operations
   * `Promise.all()`
@@ -490,7 +517,7 @@
   * Race conditions
   * Resource contention
 
-* [**42. Event Loop Awareness**](/Web%20Development/ExpressJS/Async/EventLoopAwareness.md)
+* [**47. Event Loop Awareness**](/Web%20Development/ExpressJS/Async/EventLoopAwareness.md)
 
   * Blocking operations
   * CPU-bound workloads
@@ -500,9 +527,9 @@
 
 ---
 
-# XI. Authentication
+# XII. Authentication
 
-* [**43. Authentication Fundamentals**](/Web%20Development/ExpressJS/Authentication/Authentication.md)
+* [**48. Authentication Fundamentals**](/Web%20Development/ExpressJS/Authentication/Authentication.md)
 
   * Identity
   * Login
@@ -510,7 +537,7 @@
   * Sessions
   * Tokens
 
-* [**44. Password Authentication**](/Web%20Development/ExpressJS/Authentication/Password.md)
+* [**49. Password Authentication**](/Web%20Development/ExpressJS/Authentication/Password.md)
 
   * Password hashing
   * Salt
@@ -518,7 +545,7 @@
   * Password policies
   * Password reset flows
 
-* [**45. Session-Based Authentication**](/Web%20Development/ExpressJS/Authentication/SessionBased.md)
+* [**50. Session-Based Authentication**](/Web%20Development/ExpressJS/Authentication/SessionBased.md)
 
   * Sessions
   * Session stores
@@ -526,7 +553,7 @@
   * Session expiration
   * Secure session configuration
 
-* [**46. JWT Authentication**](/Web%20Development/ExpressJS/Authentication/JWT.md)
+* [**51. JWT Authentication**](/Web%20Development/ExpressJS/Authentication/JWT.md)
 
   * Access tokens
   * Refresh tokens
@@ -537,28 +564,28 @@
 
 ---
 
-# XII. Authorization
+# XIII. Authorization
 
-* [**47. Authorization Fundamentals**](/Web%20Development/ExpressJS/Authorization/Authorization.md)
+* [**52. Authorization Fundamentals**](/Web%20Development/ExpressJS/Authorization/Authorization.md)
 
   * Authentication versus authorization
   * Permission checks
   * Resource ownership
 
-* [**48. Role-Based Access Control**](/Web%20Development/ExpressJS/Authorization/RoleBasedAccessControl.md)
+* [**53. Role-Based Access Control**](/Web%20Development/ExpressJS/Authorization/RoleBasedAccessControl.md)
 
   * Roles
   * Permissions
   * Role middleware
   * Admin privileges
 
-* [**49. Attribute-Based Access Control**](/Web%20Development/ExpressJS/Authorization/AttributeBased.md)
+* [**54. Attribute-Based Access Control**](/Web%20Development/ExpressJS/Authorization/AttributeBased.md)
 
   * User attributes
   * Resource attributes
   * Contextual authorization
 
-* [**50. Multi-Tenant Authorization**](/Web%20Development/ExpressJS/Authorization/MultiTenant.md)
+* [**55. Multi-Tenant Authorization**](/Web%20Development/ExpressJS/Authorization/MultiTenant.md)
 
   * Tenant identification
   * Tenant-scoped queries
@@ -567,15 +594,15 @@
 
 ---
 
-# XIII. Security
+# XIV. Security
 
-* **51. Express Security Fundamentals**
+* [**56. Express Security Fundamentals**](/Web%20Development/ExpressJS/Security/Security.md)
 
   * Secure defaults
   * Attack surfaces
   * Dependency management
 
-* **52. Common Web Attacks**
+* [**57. Common Web Attacks**](/Web%20Development/ExpressJS/Security/CommonWebAttacks.md)
 
   * SQL injection
   * Cross-site scripting
@@ -584,14 +611,14 @@
   * Credential attacks
   * Session attacks
 
-* **53. Security Middleware**
+* [**58. Security Middleware**](/Web%20Development/ExpressJS/Security/SecurityMiddleware.md)
 
   * Helmet
   * CORS
   * Rate limiting
   * Request-size limits
 
-* **54. Secure HTTP Configuration**
+* [**59. Secure HTTP Configuration**](/Web%20Development/ExpressJS/Security/SecureHTTPConfig.md)
 
   * HTTPS
   * Secure cookies
@@ -599,7 +626,7 @@
   * SameSite cookies
   * Security headers
 
-* **55. Secrets Management**
+* [**60. Secrets Management**](/Web%20Development/ExpressJS/Security/SecretsManagement.md)
 
   * Environment variables
   * Secret managers
@@ -610,9 +637,9 @@
 
 ---
 
-# XIV. Authentication and Third-Party Services
+# XV. Authentication and Third-Party Services
 
-* **56. OAuth**
+* **61. OAuth**
 
   * OAuth concepts
   * Authorization flow
@@ -620,20 +647,20 @@
   * Refresh tokens
   * Redirect URIs
 
-* **57. OpenID Connect**
+* **62. OpenID Connect**
 
   * Identity providers
   * ID tokens
   * User identity
 
-* **58. Social Login**
+* **63. Social Login**
 
   * Google
   * GitHub
   * Microsoft
   * Other identity providers
 
-* **59. External APIs**
+* **64. External APIs**
 
   * REST clients
   * API authentication
@@ -644,9 +671,9 @@
 
 ---
 
-# XV. File Handling
+# XVI. File Handling
 
-* **60. File Uploads**
+* **65. File Uploads**
 
   * Multipart forms
   * `multipart/form-data`
@@ -654,7 +681,7 @@
   * File validation
   * File-size limits
 
-* **61. File Storage**
+* **66. File Storage**
 
   * Local storage
   * Object storage
@@ -663,7 +690,7 @@
     * Cloud storage services
   * File metadata
 
-* **62. Secure File Handling**
+* **67. Secure File Handling**
 
   * File type validation
   * Filename sanitization
@@ -671,7 +698,7 @@
   * Access control
   * Signed URLs
 
-* **63. File Downloads**
+* **68. File Downloads**
 
   * Static files
   * Streaming
@@ -680,9 +707,9 @@
 
 ---
 
-# XVI. API Documentation
+# XVII. API Documentation
 
-* **64. OpenAPI**
+* **69. OpenAPI**
 
   * API specification
   * Paths
@@ -691,13 +718,13 @@
   * Responses
   * Authentication definitions
 
-* **65. Swagger**
+* **70. Swagger**
 
   * Swagger UI
   * Interactive documentation
   * API exploration
 
-* **66. API Documentation Quality**
+* **71. API Documentation Quality**
 
   * Request examples
   * Response examples
@@ -707,29 +734,29 @@
 
 ---
 
-# XVII. Testing Express Applications
+# XVIII. Testing Express Applications
 
-* **67. Unit Testing**
+* **72. Unit Testing**
 
   * Testing services
   * Testing utilities
   * Mocking dependencies
 
-* **68. Integration Testing**
+* **73. Integration Testing**
 
   * Testing routes
   * Testing middleware
   * Testing databases
   * Testing authentication flows
 
-* **69. HTTP Testing**
+* **74. HTTP Testing**
 
   * Supertest
   * Request assertions
   * Response assertions
   * Status-code assertions
 
-* **70. Test Databases**
+* **75. Test Databases**
 
   * Isolated databases
   * Test fixtures
@@ -737,7 +764,7 @@
   * Database cleanup
   * Transactions in tests
 
-* **71. Test Strategy**
+* **76. Test Strategy**
 
   * Unit tests
   * Integration tests
@@ -748,9 +775,9 @@
 
 ---
 
-# XVIII. Logging and Observability
+# XIX. Logging and Observability
 
-* **72. Logging**
+* **77. Logging**
 
   * Console logging
   * Structured logging
@@ -761,7 +788,7 @@
     * Warn
     * Error
 
-* **73. Production Logging**
+* **78. Production Logging**
 
   * Request IDs
   * Correlation IDs
@@ -769,7 +796,7 @@
   * Centralized log collection
   * Sensitive-data redaction
 
-* **74. Metrics**
+* **79. Metrics**
 
   * Request count
   * Request latency
@@ -777,7 +804,7 @@
   * Throughput
   * Database latency
 
-* **75. Distributed Tracing**
+* **80. Distributed Tracing**
 
   * Trace IDs
   * Spans
@@ -786,9 +813,9 @@
 
 ---
 
-# XIX. Performance Optimization
+# XX. Performance Optimization
 
-* **76. Express Performance**
+* **81. Express Performance**
 
   * Middleware overhead
   * JSON serialization
@@ -796,14 +823,14 @@
   * Response caching
   * Connection pooling
 
-* **77. Database Performance**
+* **82. Database Performance**
 
   * Query optimization
   * Indexes
   * Query profiling
   * Connection pool sizing
 
-* **78. HTTP Performance**
+* **83. HTTP Performance**
 
   * Keep-alive
   * Compression
@@ -811,7 +838,7 @@
   * ETags
   * Conditional requests
 
-* **79. Application Performance**
+* **84. Application Performance**
 
   * Avoid blocking the event loop
   * Efficient algorithms
@@ -821,29 +848,29 @@
 
 ---
 
-# XX. Caching
+# XXI. Caching
 
-* **80. Caching Fundamentals**
+* **85. Caching Fundamentals**
 
   * Why cache
   * Cache invalidation
   * TTL
   * Cache keys
 
-* **81. HTTP Caching**
+* **86. HTTP Caching**
 
   * `Cache-Control`
   * ETags
   * Conditional requests
 
-* **82. Application Caching**
+* **87. Application Caching**
 
   * In-memory caching
   * Redis
   * Distributed caching
   * Cache-aside pattern
 
-* **83. Advanced Caching**
+* **88. Advanced Caching**
 
   * Cache stampede
   * Cache warming
@@ -852,15 +879,15 @@
 
 ---
 
-# XXI. Background Jobs and Messaging
+# XXII. Background Jobs and Messaging
 
-* **84. Background Processing**
+* **89. Background Processing**
 
   * Why use jobs
   * Long-running work
   * Deferred processing
 
-* **85. Job Queues**
+* **90. Job Queues**
 
   * BullMQ
   * Redis-backed queues
@@ -868,7 +895,7 @@
   * Scheduling
   * Dead-letter handling
 
-* **86. Message Brokers**
+* **91. Message Brokers**
 
   * RabbitMQ
   * Kafka
@@ -876,7 +903,7 @@
   * Producers
   * Consumers
 
-* **87. Reliability**
+* **92. Reliability**
 
   * Idempotency
   * Retry policies
@@ -886,15 +913,15 @@
 
 ---
 
-# XXII. Real-Time Applications
+# XXIII. Real-Time Applications
 
-* **88. WebSockets**
+* **93. WebSockets**
 
   * Persistent connections
   * Bidirectional communication
   * Connection management
 
-* **89. Socket.IO**
+* **94. Socket.IO**
 
   * Events
   * Rooms
@@ -902,7 +929,7 @@
   * Broadcasting
   * Authentication
 
-* **90. Real-Time Use Cases**
+* **95. Real-Time Use Cases**
 
   * Chat
   * Notifications
@@ -912,22 +939,22 @@
 
 ---
 
-# XXIII. API Versioning and Compatibility
+# XXIV. API Versioning and Compatibility
 
-* **91. Versioning Strategies**
+* **96. Versioning Strategies**
 
   * URL versioning
   * Header versioning
   * Content negotiation
 
-* **92. Backward Compatibility**
+* **97. Backward Compatibility**
 
   * API evolution
   * Deprecation
   * Schema changes
   * Compatibility testing
 
-* **93. API Lifecycle**
+* **98. API Lifecycle**
 
   * Introduction
   * Maintenance
@@ -936,15 +963,15 @@
 
 ---
 
-# XXIV. Advanced API Architecture
+# XXV. Advanced API Architecture
 
-* **94. REST Architecture**
+* **99. REST Architecture**
 
   * Resource modeling
   * Hypermedia concepts
   * Stateless architecture
 
-* **95. GraphQL Integration**
+* **100. GraphQL Integration**
 
   * GraphQL fundamentals
   * Resolvers
@@ -952,13 +979,13 @@
   * Queries
   * Mutations
 
-* **96. gRPC and Service APIs**
+* **101. gRPC and Service APIs**
 
   * RPC concepts
   * Protobuf
   * Service-to-service communication
 
-* **97. Microservices**
+* **102. Microservices**
 
   * Service boundaries
   * API gateways
@@ -969,23 +996,23 @@
 
 ---
 
-# XXV. Configuration and Environment Management
+# XXVI. Configuration and Environment Management
 
-* **98. Environment Configuration**
+* **103. Environment Configuration**
 
   * Development
   * Testing
   * Staging
   * Production
 
-* **99. Environment Variables**
+* **104. Environment Variables**
 
   * `process.env`
   * Configuration validation
   * Required variables
   * Defaults
 
-* **100. Configuration Architecture**
+* **105. Configuration Architecture**
 
   * Central configuration
   * Typed configuration
@@ -994,37 +1021,37 @@
 
 ---
 
-# XXVI. Deployment
+# XXVII. Deployment
 
-* **101. Production Build**
+* **106. Production Build**
 
   * Environment configuration
   * Dependency installation
   * Process startup
   * Logging configuration
 
-* **102. Process Management**
+* **107. Process Management**
 
   * PM2
   * Node.js processes
   * Graceful shutdown
   * Process signals
 
-* **103. Reverse Proxies**
+* **108. Reverse Proxies**
 
   * Nginx
   * Load balancers
   * TLS termination
   * Static assets
 
-* **104. Cloud Deployment**
+* **109. Cloud Deployment**
 
   * VPS
   * Container platforms
   * Managed application services
   * Serverless considerations
 
-* **105. Docker**
+* **110. Docker**
 
   * Dockerfile
   * Images
@@ -1035,16 +1062,16 @@
 
 ---
 
-# XXVII. CI/CD
+# XXVIII. CI/CD
 
-* **106. Version Control**
+* **111. Version Control**
 
   * Git
   * Branches
   * Pull requests
   * Code review
 
-* **107. Continuous Integration**
+* **112. Continuous Integration**
 
   * Install dependencies
   * Lint
@@ -1052,14 +1079,14 @@
   * Build
   * Security checks
 
-* **108. Continuous Deployment**
+* **113. Continuous Deployment**
 
   * Deployment pipelines
   * Environment promotion
   * Database migrations
   * Rollbacks
 
-* **109. Deployment Strategies**
+* **114. Deployment Strategies**
 
   * Rolling deployment
   * Blue-green deployment
@@ -1067,22 +1094,22 @@
 
 ---
 
-# XXVIII. Reliability and Production Operations
+# XXIX. Reliability and Production Operations
 
-* **110. Graceful Shutdown**
+* **115. Graceful Shutdown**
 
   * Stop accepting requests
   * Complete active requests
   * Close database connections
   * Close message queues
 
-* **111. Health Checks**
+* **116. Health Checks**
 
   * Liveness
   * Readiness
   * Dependency health
 
-* **112. Reliability Patterns**
+* **117. Reliability Patterns**
 
   * Timeouts
   * Retries
@@ -1090,7 +1117,7 @@
   * Bulkheads
   * Idempotency
 
-* **113. Incident Handling**
+* **118. Incident Handling**
 
   * Error diagnosis
   * Logs
@@ -1100,9 +1127,9 @@
 
 ---
 
-# XXIX. TypeScript with Express
+# XXX. TypeScript with Express
 
-* **114. TypeScript Fundamentals**
+* **119. TypeScript Fundamentals**
 
   * Types
   * Interfaces
@@ -1110,21 +1137,21 @@
   * Unions
   * Type narrowing
 
-* **115. Express Type Safety**
+* **120. Express Type Safety**
 
   * Typed requests
   * Typed responses
   * Typed middleware
   * Typed route parameters
 
-* **116. API Contract Types**
+* **121. API Contract Types**
 
   * Request schemas
   * Response schemas
   * Database types
   * DTOs
 
-* **117. Advanced TypeScript Architecture**
+* **122. Advanced TypeScript Architecture**
 
   * Generic services
   * Type-safe repositories
@@ -1133,22 +1160,22 @@
 
 ---
 
-# XXX. Advanced Express.js Architecture
+# XXXI. Advanced Express.js Architecture
 
-* **118. Clean Architecture**
+* **123. Clean Architecture**
 
   * Domain
   * Application
   * Infrastructure
   * Interface layers
 
-* **119. Hexagonal Architecture**
+* **124. Hexagonal Architecture**
 
   * Ports
   * Adapters
   * Domain isolation
 
-* **120. Domain-Driven Design Concepts**
+* **125. Domain-Driven Design Concepts**
 
   * Entities
   * Value objects
@@ -1157,7 +1184,7 @@
   * Domain services
   * Bounded contexts
 
-* **121. Event-Driven Architecture**
+* **126. Event-Driven Architecture**
 
   * Domain events
   * Integration events
@@ -1167,30 +1194,30 @@
 
 ---
 
-# XXXI. Advanced Security Engineering
+# XXXII. Advanced Security Engineering
 
-* **122. API Security**
+* **127. API Security**
 
   * Authentication
   * Authorization
   * Rate limiting
   * Abuse prevention
 
-* **123. Threat Modeling**
+* **128. Threat Modeling**
 
   * Assets
   * Threat actors
   * Attack surfaces
   * Mitigations
 
-* **124. Secure API Design**
+* **129. Secure API Design**
 
   * Least privilege
   * Input validation
   * Output encoding
   * Secure defaults
 
-* **125. Operational Security**
+* **130. Operational Security**
 
   * Secret rotation
   * Dependency scanning
@@ -1199,7 +1226,7 @@
 
 ---
 
-# XXXII. Express.js Projects by Difficulty
+# XXXIII. Express.js Projects by Difficulty
 
 ## Beginner
 
@@ -1279,7 +1306,7 @@
 
 ---
 
-# XXXIII. Progressive Learning Levels
+# XXXIV. Progressive Learning Levels
 
 ## Level 1 — Beginner
 
@@ -1375,7 +1402,7 @@
 
 ---
 
-# XXXIV. Final Express.js Competency Map
+# XXXV. Final Express.js Competency Map
 
 * **JavaScript & Node.js**
 

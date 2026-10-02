@@ -8,7 +8,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # I. NumPy Foundations
 
-* **1. Introduction to NumPy**
+* [**1. Introduction to NumPy**](/Python%20Technologies/NumPy/Basics/Intro.md)
 
   * What NumPy is
 
@@ -37,7 +37,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
     * PyTorch
     * TensorFlow
 
-* **2. Installation and Environment**
+* [**2. Installation and Environment**](/Python%20Technologies/NumPy/Basics/InstallationAndEnv.md)
 
   * Installing NumPy
 
@@ -370,8 +370,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # X. Aggregation and Reduction
 
-* **32. Basic Reductions**
-
+* [**32. Basic Reductions**](/Python%20Technologies/NumPy/Aggregation%20and%20Reduction/BasicReductions.md)
   * `sum()`
   * `prod()`
   * `mean()`
@@ -380,14 +379,14 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * `std()`
   * `var()`
 
-* **33. Axis-Based Aggregation**
+* [**33. Axis-Based Aggregation**](/Python%20Technologies/NumPy/Aggregation%20and%20Reduction/AxisBased.md)
 
   * Reducing along rows
   * Reducing along columns
   * Reducing across multiple axes
   * Understanding `axis`
 
-* **34. Conditional Aggregation**
+* [**34. Conditional Aggregation**](/Python%20Technologies/NumPy/Aggregation%20and%20Reduction/Conditional.md)
 
   * `any()`
   * `all()`
@@ -395,7 +394,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Conditional sums
   * Conditional counts
 
-* **35. Cumulative Operations**
+* [**35. Cumulative Operations**](/Python%20Technologies/NumPy/Aggregation%20and%20Reduction/Cumulative.md)
 
   * `cumsum()`
   * `cumprod()`
@@ -406,7 +405,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # XI. Searching, Sorting, and Selection
 
-* **36. Searching**
+* [**36. Searching**](/Python%20Technologies/NumPy/Miscellaneous/Searching.md)
 
   * `argmax()`
   * `argmin()`
@@ -414,7 +413,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * `nonzero()`
   * Finding matching elements
 
-* **37. Sorting**
+* [**37. Sorting**](/Python%20Technologies/NumPy/Miscellaneous/Sorting.md)
 
   * `sort()`
   * `argsort()`
@@ -422,14 +421,14 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Stable sorting
   * Sorting structured arrays
 
-* **38. Selection**
+* [**38. Selection**](/Python%20Technologies/NumPy/Miscellaneous/Selection.md)
 
   * `select()`
   * `choose()`
   * Boolean filtering
   * Top-k selection concepts
 
-* **39. Uniqueness and Set Operations**
+* [**39. Uniqueness and Set Operations**](/Python%20Technologies/NumPy/Miscellaneous/Uniqueness.md)
 
   * `unique()`
   * Set intersection
@@ -441,7 +440,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # XII. Missing and Special Numerical Values
 
-* **40. NaN**
+* [**40. NaN**](/Python%20Technologies/NumPy/Miscellaneous/NaN.md)
 
   * Meaning of `NaN`
   * Detecting NaN
@@ -453,7 +452,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
     * `np.nansum()`
     * `np.nanmin()`
 
-* **41. Infinity**
+* [**41. Infinity**](/Python%20Technologies/NumPy/Miscellaneous/Infinity.md)
 
   * Positive infinity
   * Negative infinity
@@ -462,7 +461,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
     * `np.isinf()`
     * `np.isfinite()`
 
-* **42. Numerical Validity**
+* [**42. Numerical Validity**](/Python%20Technologies/NumPy/Miscellaneous/NumericalValidity.md)
 
   * Detecting invalid values
   * Replacing invalid values
@@ -473,20 +472,20 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # XIII. Random Number Generation
 
-* **43. Random Number Fundamentals**
+* [**43. Random Number Fundamentals**](/Python%20Technologies/NumPy/RNG/RandomNumber.md)
 
   * Random sampling
   * Pseudo-random number generation
   * Seeds
   * Reproducibility
 
-* **44. Modern Random API**
+* [**44. Modern Random API**](/Python%20Technologies/NumPy/RNG/ModernRandomAPI.md)
 
   * Random generators
   * Generator objects
   * Independent random streams
 
-* **45. Probability Distributions**
+* [**45. Probability Distributions**](/Python%20Technologies/NumPy/RNG/Probability.md)
 
   * Uniform
   * Normal
@@ -497,7 +496,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Beta
   * Multivariate normal
 
-* **46. Random Sampling**
+* [**46. Random Sampling**](/Python%20Technologies/NumPy/RNG/Probability.md)
 
   * Random integers
   * Random choices
@@ -510,14 +509,14 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # XIV. Linear Algebra
 
-* **47. Vector Operations**
+* [**47. Vector Operations**](/Python%20Technologies/NumPy/Linear%20Algebra/Vector.md)
 
   * Dot product
   * Inner product
   * Vector norms
   * Vector projections
 
-* **48. Matrix Operations**
+* [**48. Matrix Operations**](/Python%20Technologies/NumPy/Linear%20Algebra/Matrix.md)
 
   * Matrix multiplication
   * Transpose
@@ -526,7 +525,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Trace
   * Diagonal extraction
 
-* **49. `numpy.linalg`**
+* [**49. `numpy.linalg`**](/Python%20Technologies/NumPy/Linear%20Algebra/Linalg.md)
 
   * `dot()`
   * `matmul()`
@@ -538,7 +537,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * `eigh()`
   * `svd()`
 
-* **50. Systems of Linear Equations**
+* [**50. Systems of Linear Equations**](/Python%20Technologies/NumPy/Linear%20Algebra/SoLE.md)
 
   * Matrix representation
   * Solving linear systems
@@ -546,14 +545,14 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Singular matrices
   * Least-squares solutions
 
-* **51. Eigenvalues and Eigenvectors**
+* [**51. Eigenvalues and Eigenvectors**](/Python%20Technologies/NumPy/Linear%20Algebra/EaE.md)
 
   * Eigenvalue concept
   * Eigenvectors
   * Matrix decomposition
   * Applications
 
-* **52. Singular Value Decomposition**
+* [**52. Singular Value Decomposition**](/Python%20Technologies/NumPy/Linear%20Algebra/SVD.md)
 
   * SVD concept
   * Low-rank approximation
@@ -564,7 +563,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # XV. Statistics with NumPy
 
-* **53. Descriptive Statistics**
+* [**53. Descriptive Statistics**](/Python%20Technologies/NumPy/Statistics/Descriptive.md)
 
   * Mean
   * Median
@@ -574,7 +573,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Maximum
   * Percentiles
 
-* **54. Statistical Aggregation**
+* [**54. Statistical Aggregation**](/Python%20Technologies/NumPy/Statistics/Statistical.md)
 
   * Quantiles
   * Percentiles
@@ -582,7 +581,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Correlation
   * Covariance
 
-* **55. Distribution Analysis**
+* [**55. Distribution Analysis**](/Python%20Technologies/NumPy/Statistics/Distirbution.md)
 
   * Frequency analysis
   * Histograms
