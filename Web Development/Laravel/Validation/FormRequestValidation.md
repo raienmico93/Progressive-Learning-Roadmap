@@ -130,8 +130,8 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|unique:posts|max:255',
-            'body' => 'required|min:10',
+            'title'        => 'required|unique:posts|max:255',
+            'body'         => 'required|min:10',
             'published_at' => 'nullable|date',
         ];
     }
@@ -313,14 +313,14 @@ public function messages(): array
 {
     return [
         'email.required' => 'We need your email address!',
-        'title.max' => 'The title must not exceed 255 characters.',
+        'title.max'      => 'The title must not exceed 255 characters.',
     ];
 }
 
 public function attributes(): array
 {
     return [
-        'email' => 'email address',
+        'email'      => 'email address',
         'first_name' => 'first name',
     ];
 }
@@ -347,21 +347,64 @@ public function attributes(): array
 **Example 1: Custom Messages and Attributes**
 
 ```php
-public function messages(): array
-{
-    return [
-        'email.required' => 'We need your email address!',
-        'email.email' => 'Please provide a valid email address.',
-        'title.max' => 'The title is too long (max 255 characters).',
-    ];
-}
+<?php
 
-public function attributes(): array
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StorePostRequest extends FormRequest
 {
-    return [
-        'email' => 'email address',
-        'title' => 'post title',
-    ];
+    // 1. Determine if the user is authorized to make this request
+    public function authorize(): bool
+    {
+        return true; 
+    }
+
+    // 2. Define your validation rules
+    public function rules(): array
+    {
+        return [
+            'email' => 'required|email',
+            // Note: 'required' is added here to show how attributes work
+            'title' => 'required|max:255', 
+        ];
+    }
+
+    // 3. Customize specific rule error messages
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'We need your email address!',
+            'email.email'    => 'Please provide a valid email address.',
+            'title.max'      => 'The title is too long (max 255 characters).',
+        ];
+    }
+
+    // 4. Define friendly names for fields
+    public function attributes(): array
+    {
+        return [
+            'email' => 'email address',
+            'title' => 'post title',
+        ];
+    }
+}
+```
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StorePostRequest;
+
+class PostController extends Controller
+{
+    public function store(StorePostRequest $request)
+    {
+        // If code reaches here, validation passed!
+        return response()->json(['message' => 'Validation passed!']);
+    }
 }
 ```
 
@@ -448,12 +491,26 @@ protected function passedValidation(): void
 **Example 1: `prepareForValidation()` — Normalising Input**
 
 ```php
+/**
+ * Modify data BEFORE validation runs.
+ */
 protected function prepareForValidation(): void
 {
     $this->merge([
-        'slug' => Str::slug($this->title),
-        'email' => strtolower($this->email),
+        'slug'  => Str::slug($this->title),   // Converts "My First Post" to "my-first-post"
+        'email' => strtolower($this->email), // Converts "USER@Example.com" to "user@example.com"
     ]);
+}
+/**
+ * Get the validation rules that apply to the request.
+ */
+public function rules(): array
+{
+    return [
+        'title' => 'required|string|max:255',
+        'slug'  => 'required|string|unique:posts,slug', // Validates the generated slug
+        'email' => 'required|email|unique:users,email', // Validates the lowercase email
+    ];
 }
 ```
 
@@ -466,13 +523,33 @@ protected function prepareForValidation(): void
 **Example 2: `prepareForValidation()` — Converting String to Array**
 
 ```php
+/**
+ * Sanitize or transform input before validation runs.
+ */
 protected function prepareForValidation(): void
 {
     if (is_string($this->roles)) {
+        // Split by comma and trim whitespace
+        $array = array_map('trim', explode(',', $this->roles));
+        
+        // Remove empty values (e.g., if they typed "admin,,editor")
+        $filteredArray = array_filter($array);
+
         $this->merge([
-            'roles' => array_map('trim', explode(',', $this->roles)),
+            'roles' => $filteredArray,
         ]);
     }
+}
+
+/**
+ * Define the validation rules against the transformed data.
+ */
+public function rules(): array
+{
+    return [
+        'roles'   => ['required', 'array'],
+        'roles.*' => ['string', 'in:admin,editor,subscriber'],
+    ];
 }
 ```
 
@@ -502,11 +579,23 @@ protected function passedValidation(): void
 **Example 4: `passedValidation()` — Adding Computed Fields**
 
 ```php
+public function rules(): array
+{
+    return [
+        'coupon_code' => 'nullable|string',
+        'subtotal'    => 'required|numeric',
+        
+        // Add these so Laravel includes them in $request->validated()
+        'total_discount_amount' => ['sometimes'],
+        'processed_at'          => ['sometimes'],
+    ];
+}
+
 protected function passedValidation(): void
 {
     $this->merge([
         'total_discount_amount' => $this->calculateDiscount(),
-        'processed_at' => now(),
+        'processed_at'          => now(),
     ]);
 }
 ```

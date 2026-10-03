@@ -123,15 +123,17 @@ use Illuminate\Validation\Rule;
 
 public function rules(): array
 {
+    // Run the bulletproof unique check
     return [
         'email' => [
             'required',
             'email',
             'max:255',
-            Rule::unique('users', 'email')->ignore($this->user()->id),
+            Rule::unique('users', 'email')->ignore($this->user()?->id),
         ],
     ];
 }
+
 ```
 
 **Expected Output:** On update, the email is checked for uniqueness, but the current user's own email is excluded. If another user has the email, validation fails.
@@ -276,10 +278,10 @@ $validator = Validator::make($input, [
 ```php
 <?php
 $validated = $request->validate([
-    'products' => 'required|array|min:1',
-    'products.*.id' => 'required|integer|exists:products,id',
+    'products'            => 'required|array|min:1',
+    'products.*.id'       => 'required|integer|exists:products,id',
     'products.*.quantity' => 'required|integer|min:1|max:100',
-    'products.*.notes' => 'nullable|string|max:500',
+    'products.*.notes'    => 'nullable|string|max:500',
 ]);
 ```
 
@@ -364,16 +366,57 @@ class OrderController extends Controller
 <?php
 use Illuminate\Support\Facades\Validator;
 
-$validator = Validator::make($request->all(), [
-    'photos.*.description' => 'required|string',
+$validator = Validator::make($data, [
+    'photos.*.description'        => 'required|string',
     'photos.*.attributes.*.value' => 'required',
 ], [
-    'photos.*.description.required' => 'Please describe photo #:position.',
+    'photos.*.description.required'        => 'Please describe photo #:position.',
     'photos.*.attributes.*.value.required' => 'Missing value for attribute #:second-position on photo #:position.',
 ]);
+
+if ($validator->fails()) {
+    $errors = $validator->errors()->all();
+    dump($errors);
+}
 ```
 
-**Expected Output:** Missing descriptions produce: "Please describe photo #2." Missing attribute values produce: "Missing value for attribute #1 on photo #3."
+**Expected Output:** 
+
+If you call $validator->errors()->all(), the output is:
+- Missing descriptions produce: "Please describe photo #2." 
+- Missing attribute values produce: "Missing value for attribute #1 on photo #3."
+```php
+[
+    "Please describe photo #2.",
+    "Missing value for attribute #2 on photo #2."
+]
+```
+
+If you call $validator->errors()->toArray(), the associative output grouped by field keys is:
+```php
+[
+    "photos.1.description" => [
+        "Please describe photo #2."
+    ],
+    "photos.1.attributes.1.value" => [
+        "Missing value for attribute #2 on photo #2."
+    ]
+]
+```
+In a standard JSON API response (HTTP 422 Unprocessable Entity), Laravel formats this as:
+```json
+{
+    "message": "Please describe photo #2. (and 1 more error)",
+    "errors": {
+        "photos.1.description": [
+            "Please describe photo #2."
+        ],
+        "photos.1.attributes.1.value": [
+            "Missing value for attribute #2 on photo #2."
+        ]
+    }
+}
+```
 
 **Why:** The `:position` placeholder is replaced with the 1-based index of the failing element .
 

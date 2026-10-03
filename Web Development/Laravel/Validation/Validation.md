@@ -112,8 +112,8 @@ class PostController extends Controller
     {
         // Validate the request data
         $validated = $request->validate([
-            'title' => 'required|unique:posts|max:255',
-            'body' => 'required',
+            'title'        => 'required|unique:posts|max:255',
+            'body'         => 'required',
             'published_at' => 'nullable|date',
         ]);
 
@@ -141,8 +141,8 @@ class PostController extends Controller
 public function update(Request $request, Post $post)
 {
     $validated = $request->validate([
-        'title' => ['required', 'max:255', Rule::unique('posts')->ignore($post->id)],
-        'body' => ['required'],
+        'title'  => ['required', 'max:255', Rule::unique('posts')->ignore($post->id)],
+        'body'   => ['required'],
         'status' => ['required', Rule::in(['draft', 'published', 'archived'])],
     ]);
 
@@ -193,8 +193,8 @@ public function update(Request $request, Post $post)
 
 ```php
 $request->validate([
-    'name' => 'required|string|max:255',
-    'bio' => 'nullable|string',
+    'name'       => 'required|string|max:255',
+    'bio'        => 'nullable|string',
     'newsletter' => 'sometimes|boolean',
 ]);
 ```
@@ -203,9 +203,9 @@ $request->validate([
 
 ```php
 $request->validate([
-    'age' => 'required|integer|min:18',
-    'price' => 'required|numeric|between:0,9999.99',
-    'is_active' => 'required|boolean',
+    'age'        => 'required|integer|min:18',
+    'price'      => 'required|numeric|between:0,9999.99',
+    'is_active'  => 'required|boolean',
     'birth_date' => 'required|date',
 ]);
 ```
@@ -243,9 +243,9 @@ $request->validate([
 ```php
 <?php
 $request->validate([
-    'name' => 'required|string|max:255',      // Must be present
-    'bio' => 'nullable|string|max:1000',      // May be null
-    'newsletter' => 'sometimes|boolean',      // Validated only if present
+    'name'       => 'required|string|max:255',     // Must be present
+    'bio'        => 'nullable|string|max:1000',    // May be null
+    'newsletter' => 'sometimes|boolean',           // Validated only if present
 ]);
 ```
 
@@ -264,11 +264,11 @@ $request->validate([
 ```php
 <?php
 $request->validate([
-    'age' => 'required|integer|min:18|max:120',
-    'price' => 'required|numeric|min:0',
-    'is_admin' => 'required|boolean',
+    'age'        => 'required|integer|min:18|max:120',
+    'price'      => 'required|numeric|min:0',
+    'is_admin'   => 'required|boolean',
     'birth_date' => 'required|date',
-    'tags' => 'nullable|array',
+    'tags'       => 'nullable|array',
 ]);
 ```
 
@@ -320,8 +320,8 @@ $request->validate([
 ```php
 $request->validate([
     'username' => 'required|string|min:3|max:20',
-    'bio' => 'nullable|string|max:500',
-    'pin' => 'required|digits:4',
+    'bio'      => 'nullable|string|max:500',
+    'pin'      => 'required|digits:4',
     'quantity' => 'required|integer|between:1,100',
 ]);
 ```
@@ -330,10 +330,10 @@ $request->validate([
 
 ```php
 $request->validate([
-    'email' => 'required|email|max:255',
+    'email'   => 'required|email|max:255',
     'website' => 'nullable|url',
-    'slug' => 'required|alpha_dash',
-    'code' => ['required', 'regex:/^[A-Z]{2}-\d{4}$/'],
+    'slug'    => 'required|alpha_dash',
+    'code'    => ['required', 'regex:/^[A-Z]{2}-\d{4}$/'],
 ]);
 ```
 
@@ -373,9 +373,9 @@ $request->validate([
 <?php
 $request->validate([
     'username' => 'required|string|min:3|max:20',
-    'bio' => 'nullable|string|max:500',
-    'cv_code' => 'required|digits:3',
-    'rating' => 'required|integer|between:1,5',
+    'bio'      => 'nullable|string|max:500',
+    'cv_code'  => 'required|digits:3',
+    'rating'   => 'required|integer|between:1,5',
 ]);
 ```
 
@@ -395,9 +395,9 @@ $request->validate([
 ```php
 <?php
 $request->validate([
-    'email' => 'required|email|max:255',
-    'website' => 'nullable|url|max:255',
-    'slug' => 'required|alpha_dash|max:100',
+    'email'        => 'required|email|max:255',
+    'website'      => 'nullable|url|max:255',
+    'slug'         => 'required|alpha_dash|max:100',
     'product_code' => ['required', 'regex:/^[A-Z]{3}-\d{4}$/'],
 ]);
 ```
@@ -715,7 +715,7 @@ public function store(Request $request)
 }
 ```
 
-```blade
+```html
 <!-- Blade form -->
 <form action="{{ route('posts.store') }}" method="POST">
     @csrf

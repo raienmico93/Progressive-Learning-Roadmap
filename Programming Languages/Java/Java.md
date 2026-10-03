@@ -945,7 +945,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
 
 # XXIII. Database Programming with Java
 
-- **105. JDBC Fundamentals**
+- [**105. JDBC Fundamentals**](/Programming%20Languages/Java/Database%20Programming/JDBC.md)
   - JDBC architecture
   - Drivers
   - Connections
@@ -953,37 +953,42 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Prepared statements
   - Result sets
 
-- **106. JDBC Operations**
+- [**106. JDBC Operations**](/Programming%20Languages/Java/Database%20Programming/JDBCOperations.md)
   - `SELECT`
   - `INSERT`
   - `UPDATE`
   - `DELETE`
   - Batch operations
 
-- **107. Transactions with JDBC**
+- [**107. Transactions with JDBC**](/Programming%20Languages/Java/Database%20Programming/Transactions.md)
   - Auto-commit
   - `commit`
   - `rollback`
   - Savepoints
   - Transaction boundaries
 
-- **108. Database Security**
+- [**108. Database Security**](/Programming%20Languages/Java/Database%20Programming/DatabaseSecurity.md)
   - Parameterized queries
   - SQL injection prevention
   - Credential handling
   - Connection security
 
-- **109. Connection Pooling**
+- [**109. Connection Pooling**](/Programming%20Languages/Java/Database%20Programming/Pooling.md)
   - Connection pools
   - Pool sizing
   - Connection lifecycle
   - Resource efficiency
 
+- [**Modern Abstractions (Beyond Raw JDBC)**](/Programming%20Languages/Java/Database%20Programming/ModernAbstraction.md)
+  - The friction of raw JDBC
+  - Fluent database libraries
+  - Spring JDBC ecosystem 
+
 ---
 
 # XXIV. Java and JSON/XML
 
-- **110. JSON Processing**
+- [**110. JSON Processing**](/Programming%20Languages/Java/Miscellaneous/JSON.md)
   - JSON structure
   - Serialization
   - Deserialization
@@ -991,14 +996,14 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Nested objects
   - Collections
 
-- **111. XML Processing**
+- [**111. XML Processing**](/Programming%20Languages/Java/Miscellaneous/XML.md)
   - XML documents
   - Parsing
   - DOM
   - SAX/StAX concepts
   - XML transformation
 
-- **112. Data Interchange**
+- [**112. Data Interchange**](/Programming%20Languages/Java/Miscellaneous/DataInterchange.md)
   - DTOs
   - Schema validation
   - API payload models

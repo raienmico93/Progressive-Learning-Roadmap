@@ -202,7 +202,7 @@ int Calculator::multiply(int a, int b) const {
 int main() {
     // Step 7: Use the class through its interface
     Calculator calc;
-    std::cout << "5 + 3 = " << calc.add(5, 3) << std::endl;
+    std::cout << "5 + 3 = " << calc.add(5, 3)      << std::endl;
     std::cout << "5 - 3 = " << calc.subtract(5, 3) << std::endl;
     std::cout << "5 * 3 = " << calc.multiply(5, 3) << std::endl;
     return 0;
@@ -427,6 +427,23 @@ double calculate_velocity(double distance, double time);
 ```
 
 ```cpp
+// File: math_utils.cpp
+#include "math_utils.h"
+
+int add(int a, int b) { return a + b; }
+int subtract(int a, int b) { return a - b; }
+```
+
+```cpp
+// File: physics_utils.cpp
+#include "physics_utils.h"
+
+double calculate_velocity(double distance, double time) {
+    return distance / time;
+}
+```
+
+```cpp
 // File: main.cpp
 #include "math_utils.h"      // First inclusion — contents processed
 #include "physics_utils.h"   // Includes math_utils.h again
@@ -435,24 +452,8 @@ double calculate_velocity(double distance, double time);
 
 int main() {
     std::cout << "add(2, 3) = " << add(2, 3) << std::endl;
-    std::cout << "velocity = "
-              << calculate_velocity(100.0, 10.0) << std::endl;
+    std::cout << "velocity  = " << calculate_velocity(100.0, 10.0) << std::endl;
     return 0;
-}
-```
-
-```cpp
-// File: math_utils.cpp
-#include "math_utils.h"
-int add(int a, int b) { return a + b; }
-int subtract(int a, int b) { return a - b; }
-```
-
-```cpp
-// File: physics_utils.cpp
-#include "physics_utils.h"
-double calculate_velocity(double distance, double time) {
-    return distance / time;
 }
 ```
 
@@ -465,7 +466,7 @@ g++ -std=c++17 math_utils.cpp physics_utils.cpp main.cpp -o app
 **Expected Output:**
 ```
 add(2, 3) = 5
-velocity = 10
+velocity  = 10
 ```
 
 **Why this output:** The include guard `MATH_UTILS_H` is defined the first time `math_utils.h` is included. When `physics_utils.h` includes it again, the preprocessor sees that `MATH_UTILS_H` is already defined and skips the contents. The third inclusion in `main.cpp` is also skipped. Without the guard, `add` and `subtract` would be declared multiple times, causing a redefinition error.

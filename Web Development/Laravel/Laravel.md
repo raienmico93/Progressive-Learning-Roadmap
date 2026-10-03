@@ -103,7 +103,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # II. Laravel Introduction and Framework Architecture
 
-* **4. Laravel Fundamentals**
+* [**4. Laravel Fundamentals**](/Web%20Development/Laravel/Basics/Intro.md)
 
   * Laravel definition
   * Laravel's role in web application development
@@ -113,7 +113,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Developer productivity
   * Ecosystem approach
 
-* **5. Laravel Application Architecture**
+* [**5. Laravel Application Architecture**](/Web%20Development/Laravel/Basics/AppArchitecture.md)
 
   * MVC architecture
 
@@ -130,7 +130,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Jobs
   * Queues
 
-* **6. Laravel Installation**
+* [**6. Laravel Installation**](/Web%20Development/Laravel/Basics/Installation.md)
 
   * Composer installation
   * Laravel installer
@@ -141,7 +141,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Development server
   * Application startup
 
-* **7. Laravel Directory Structure**
+* [**7. Laravel Directory Structure**](/Web%20Development/Laravel/Basics/DirectoryStructure.md)
 
   * `app/`
   * `bootstrap/`
@@ -160,7 +160,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # III. Artisan Console
 
-* **8. Artisan Fundamentals**
+* [**8. Artisan Fundamentals**](/Web%20Development/Laravel/Artisan%20Console/Artisan.md)
 
   * Artisan definition
   * Command-line workflow
@@ -169,7 +169,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Command options
   * Command arguments
 
-* **9. Essential Artisan Commands**
+* [**9. Essential Artisan Commands**](/Web%20Development/Laravel/Artisan%20Console/EssentialCommands.md)
 
   * Application information
   * Development server
@@ -180,7 +180,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Database commands
   * Queue commands
 
-* **10. Code Generation**
+* [**10. Code Generation**](/Web%20Development/Laravel/Artisan%20Console/CodeGeneration.md)
 
   * Controllers
   * Models
@@ -196,7 +196,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Policies
   * Resources
 
-* **11. Custom Artisan Commands**
+* [**11. Custom Artisan Commands**](/Web%20Development/Laravel/Artisan%20Console/CustomCommands.md)
 
   * Command classes
   * Arguments
@@ -206,11 +206,17 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Progress indicators
   * Scheduling commands
 
+* [**Task Scheduling & Advanced Artisan**](/Web%20Development/Laravel/Artisan%20Console/TSAndAdvArtisan.md)
+  * The Scheduler
+  * Frequency options
+  * Task outputs
+  * Maintenance & Control
+
 ---
 
 # IV. Configuration and Environment Management
 
-* **12. Configuration System**
+* [**12. Configuration System**](/Web%20Development/Laravel/Basics/ConfigSystem.md)
 
   * Configuration files
   * Configuration values
@@ -218,7 +224,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Configuration caching
   * Environment-specific settings
 
-* **13. Environment Configuration**
+* [**13. Environment Configuration**](/Web%20Development/Laravel/Basics/Env.md)
 
   * `.env`
   * Application URL
@@ -228,7 +234,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Queue settings
   * External service credentials
 
-* **14. Application Configuration Practices**
+* [**14. Application Configuration Practices**](/Web%20Development/Laravel/Basics/AppConfig.md)
 
   * Configuration separation
   * Secret management
@@ -773,7 +779,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XX. Mail and Notifications
 
-* **69. Email**
+* [**69. Email**](/Web%20Development/Laravel/Mail%20and%20Notifications/Email.md)
 
   * Mail configuration
   * Mailables
@@ -781,7 +787,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Email templates
   * Attachments
 
-* **70. Notifications**
+* [**70. Notifications**](/Web%20Development/Laravel/Mail%20and%20Notifications/Notifications.md)
 
   * Notification classes
   * Mail notifications
@@ -789,7 +795,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Broadcast notifications
   * Notification channels
 
-* **71. Notification Architecture**
+* [**71. Notification Architecture**](/Web%20Development/Laravel/Mail%20and%20Notifications/NotificationArch.md)
 
   * User notification preferences
   * Queued notifications
@@ -800,19 +806,19 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXI. Events and Listeners
 
-* **72. Events**
+* [**72. Events**](/Web%20Development/Laravel/Events%20and%20Listeners/Event.md)
 
   * Event classes
   * Event dispatching
   * Event payloads
 
-* **73. Listeners**
+* [**73. Listeners**](/Web%20Development/Laravel/Events%20and%20Listeners/Listeners.md)
 
   * Listener classes
   * Synchronous listeners
   * Queued listeners
 
-* **74. Event-Driven Architecture**
+* [**74. Event-Driven Architecture**](/Web%20Development/Laravel/Events%20and%20Listeners/EDA.md)
 
   * Loose coupling
   * Domain events
@@ -824,14 +830,14 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXII. Queues and Background Processing
 
-* **75. Queue Fundamentals**
+* [**75. Queue Fundamentals**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/Queue.md)
 
   * Jobs
   * Queue connections
   * Queue drivers
   * Dispatching jobs
 
-* **76. Jobs**
+* [**76. Jobs**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/Jobs.md)
 
   * Job classes
   * Job payloads
@@ -839,7 +845,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Job chaining
   * Job batching
 
-* **77. Queue Workers**
+* [**77. Queue Workers**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/QueueWorkers.md)
 
   * Worker processes
   * Queue priorities
@@ -847,7 +853,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   * Worker lifecycle
   * Failed jobs
 
-* **78. Advanced Queue Engineering**
+* [**78. Advanced Queue Engineering**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/AdvancedQueue.md)
 
   * Retries
   * Backoff
@@ -860,20 +866,27 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXIII. Task Scheduling
 
-* **79. Scheduler Fundamentals**
+* [**79. Scheduler Fundamentals**](/Web%20Development/Laravel/Miscellaneous/Scheduler.md)
 
   * Scheduled tasks
   * Frequency definitions
   * Command scheduling
   * Job scheduling
 
-* **80. Advanced Scheduling**
+* [**80. Advanced Scheduling**](/Web%20Development/Laravel/Miscellaneous/AdvancedScheduling.md)
 
   * Conditional execution
   * Maintenance windows
   * Task overlap prevention
   * Background execution
   * Monitoring scheduled work
+
+* [**Observability, Metrics & Resiliency**](/Web%20Development/Laravel/Miscellaneous/Observability.md)
+
+  * Output capturing
+  * Lifecycle hooks
+  * Deadman switches & monitoring
+  * Sub-second execution (Tick scheduling)
 
 ---
 

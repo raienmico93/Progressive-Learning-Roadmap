@@ -542,6 +542,10 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Chaining asynchronous operations
 
   [**Global AJAX Event Handlers**](/Web%20Development/JQuery/AJAX/GlobalAJAXEventHandlers.md)
+  * Differentiating Error Categories
+  * Graceful Degradation and User-Facing Error States
+  * Basic Retry Strategies for Transient Failures
+
 
 * [**47. AJAX Error Handling**](/Web%20Development/JQuery/AJAX/AJAXErrorHandling.md)
 

@@ -589,30 +589,30 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
 
 * [**54. Member Versus Non-Member Operators**](/Programming%20Languages/CPlusPlus/OOP/MemberVsNonMember.md)
 
-  * Member overloads (Left-hand operand must be the class type)
-  * Non-member overloads (Handling fundamental types on the left-hand side)
-  * Friend overloads (Granting private access to non-member operators)
-  * Symmetric operators (Why binary arithmetic and comparisons should be non-members)
-  * The Overload Resolution Process (How the compiler matches arguments)
-  * Perfect forwarding in operators (Advanced forwarding references)
+  * Member overloads
+  * Non-member overloads 
+  * Friend overloads
+  * Symmetric operators
+  * The Overload Resolution Process
+  * Perfect forwarding in operators 
 
 * [**55. Special Member Functions**](/Programming%20Languages/CPlusPlus/OOP/SpecialMemberFunc.md)
 
-  * Default constructor (Implicit generation vs. = default vs. = delete)
-  * Destructor (Virtual destructors for polymorphic base classes)
-  * Copy constructor and Copy assignment operator (Deep vs. Shallow copy)
-  * Move constructor and Move assignment operator (Rvalue references and std::move)
+  * Default constructor
+  * Destructor
+  * Copy constructor and Copy assignment operator
+  * Move constructor and Move assignment operator
   * The Rule of Zero, Rule of Three, and Rule of Five
-  * The Copy-and-Swap Idiom (Achieving exceptionally strong exception safety)
-  * Ref-qualifiers for member functions (& and && to restrict calls based on lvalue/rvalue state)
+  * The Copy-and-Swap Idiom
+  * Ref-qualifiers for member functions 
 
 * [**56. `friend`**](/Programming%20Languages/CPlusPlus/OOP/friend.md)
 
-  * Friend functions (Non-member functions with private access)
-  * Friend classes (Granting access to coupled subsystem classes)
+  * Friend functions
+  * Friend classes
   * Controlled access vs. tight coupling
-  * Encapsulation trade-offs and alternatives (e.g., public API getters vs. friendship)
-  * Hidden Friends Idiom (Improving compilation times and optimizing Argument-Dependent Lookup / ADL)
+  * Encapsulation trade-offs and alternatives
+  * Hidden Friends Idiom
 
 
 ---
@@ -745,7 +745,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
 
 # XIV. Standard Template Library
 
-* **72. STL Architecture**
+* [**72. STL Architecture**](/Programming%20Languages/CPlusPlus/STL/STL.md)
 
   * Containers
   * Iterators
@@ -754,7 +754,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Allocators
   * Ranges
 
-* **73. Sequence Containers**
+* [**73. Sequence Containers**](/Programming%20Languages/CPlusPlus/STL/Sequence.md)
 
   * `std::array`
   * `std::vector`
@@ -762,27 +762,24 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * `std::list`
   * `std::forward_list`
 
-* **74. Associative Containers**
+* [**74. Associative and Unordered Containers**](/Programming%20Languages/CPlusPlus/STL/Associative.md)
 
   * `std::set`
   * `std::multiset`
   * `std::map`
   * `std::multimap`
-
-* **75. Unordered Containers**
-
   * `std::unordered_set`
   * `std::unordered_multiset`
   * `std::unordered_map`
   * `std::unordered_multimap`
 
-* **76. Container Adaptors**
+* [**75. Container Adaptors**](/Programming%20Languages/CPlusPlus/STL/ContainerAdaptors.md)
 
   * `std::stack`
   * `std::queue`
   * `std::priority_queue`
 
-* **77. Iterators**
+* [**76. Iterators**](/Programming%20Languages/CPlusPlus/STL/Iterators.md)
 
   * Input iterators
   * Output iterators
@@ -792,7 +789,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Contiguous iterators
   * Iterator invalidation
 
-* **78. Algorithms**
+* [**77. Algorithms**](/Programming%20Languages/CPlusPlus/STL/Algorithms.md)
 
   * Searching
   * Sorting
@@ -803,11 +800,16 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Heap operations
   * Min/max operations
 
+* [**The Ranges & Views Revolution (C++20 / C++23)**](/Programming%20Languages/CPlusPlus/STL/RangeViews.md)
+  * Views vs. Containers
+  * The Pipe Operator (|)
+  * Key Modern Views
+
 ---
 
 # XV. Standard Library Utilities
 
-* **79. Utility Types**
+* [**79. Utility Types**](/Programming%20Languages/CPlusPlus/STU/Utility.md)
 
   * `std::pair`
   * `std::tuple`
@@ -816,7 +818,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * `std::any`
   * `std::reference_wrapper`
 
-* **80. Smart Ownership Utilities**
+* [**80. Smart Ownership Utilities**](/Programming%20Languages/CPlusPlus/STU/SmartOwnership.md)
 
   * `std::unique_ptr`
   * `std::shared_ptr`
@@ -824,13 +826,19 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * `std::make_unique`
   * `std::make_shared`
 
-* **81. Utility Operations**
+* [**81. Utility Operations**](/Programming%20Languages/CPlusPlus/STU/UtilityOperations.md)
 
   * `std::move`
   * `std::forward`
   * `std::swap`
   * `std::exchange`
   * `std::as_const`
+
+* [**Advanced Primitives & Functional Utilities (C++20 / C++23 / C++26)**](/Programming%20Languages/CPlusPlus/STU/Advanced.md)
+   * Modern Functional Wrappers
+   * Safe Integer Math
+   * Compiler Optimization Hints 
+   * Bit Manipulation Utilities 
 
 ---
 

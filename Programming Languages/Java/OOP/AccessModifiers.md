@@ -138,6 +138,7 @@ import com.example.shapes.Circle;         // Import public class from another pa
 public class Main {
     public static void main(String[] args) {
         Circle c = new Circle(5.0);      // Access public constructor
+
         System.out.println(c.radius);    // Access public field
         System.out.println(c.calculateArea()); // Call public method
     }
@@ -198,6 +199,7 @@ import com.example.impl.BasicCalculator;
 public class CalculatorDemo {
     public static void main(String[] args) {
         Calculator calc = new BasicCalculator();
+
         System.out.println(calc.add(10, 5));      // 15
         System.out.println(calc.subtract(10, 5)); // 5
     }
@@ -286,19 +288,21 @@ private class NestedClassName { }
 package com.example.account;
 
 public class Account {
-    private String accountNumber;        // Private: hidden from all other classes
-    private double balance;              // Private: hidden from all other classes
+    private String accountNumber;      // Private: hidden from all other classes
+    private double balance;            // Private: hidden from all other classes
 
     public Account(String accountNumber, double initialBalance) {
         this.accountNumber = accountNumber;
         this.balance = initialBalance;
     }
 
-    public double getBalance() {         // Public getter
+    // Public getter
+    public double getBalance() {         
         return balance;
     }
-
-    public void deposit(double amount) { // Public method controls modification
+    
+    // Public method controls modification
+    public void deposit(double amount) { 
         if (amount > 0) {
             balance += amount;
         }
@@ -344,13 +348,16 @@ The `balance` field is `private`, so `BankApp` cannot modify it directly. The on
 package com.example.config;
 
 public class AppConfig {
-    private static AppConfig instance;   // Single instance held statically
-
-    private AppConfig() {                // Private constructor: no external instantiation
+    // Single instance held statically
+    private static AppConfig instance;   
+    
+    // Private constructor: no external instantiation
+    private AppConfig() {                
         System.out.println("AppConfig created");
     }
 
-    public static AppConfig getInstance() { // Public factory method
+    // Public factory method
+    public static AppConfig getInstance() { 
         if (instance == null) {
             instance = new AppConfig();
         }
@@ -374,6 +381,7 @@ public class ConfigDemo {
         // AppConfig c = new AppConfig();  // COMPILE ERROR: constructor is private
         AppConfig c1 = AppConfig.getInstance();
         AppConfig c2 = AppConfig.getInstance();
+
         System.out.println(c1 == c2);      // true: same instance
         c1.showConfig();
     }
@@ -462,8 +470,8 @@ protected class NestedClassName { }
 package com.example.vehicle;
 
 public class Vehicle {
-    protected int speed;                 // Protected: accessible in same package
-                                         // and by subclasses anywhere
+    protected int speed;                 
+    // Protected: accessible in same package and by subclasses anywhere
 
     protected void accelerate(int amount) {
         speed += amount;
@@ -497,6 +505,7 @@ public class VehicleDemo {
     public static void main(String[] args) {
         Car car = new Car();
         car.drive();
+
         // car.accelerate(10);           // COMPILE ERROR: not a subclass, different package
     }
 }
@@ -536,16 +545,17 @@ public class Point3d extends Point {
     protected int z;
 
     public void delta(Point p) {
-        // p.x += this.x;  // COMPILE ERROR: cannot access p.x
-        // p.y += this.y;  // COMPILE ERROR: cannot access p.y
+        // p.x += this.x;    // COMPILE ERROR: cannot access p.x
+        // p.y += this.y;    // COMPILE ERROR: cannot access p.y
+
         // Reason: p is of type Point, not Point3d.
         // Point3d is not "responsible for the implementation" of a Point.
     }
 
     public void delta3d(Point3d q) {
-        q.x += this.x;                    // LEGAL: q is Point3d, responsible
-        q.y += this.y;                    // LEGAL
-        q.z += this.z;                    // LEGAL
+        q.x += this.x;              // LEGAL: q is Point3d, responsible
+        q.y += this.y;              // LEGAL
+        q.z += this.z;              // LEGAL
     }
 }
 ```

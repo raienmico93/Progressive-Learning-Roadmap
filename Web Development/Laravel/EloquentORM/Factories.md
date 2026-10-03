@@ -117,6 +117,16 @@ class UserFactory extends Factory
 
 **Example 1: Basic User Factory**
 
+Step 1: Create the Model, Migration, and Factory
+```bash
+php artisan make:model User -mf
+```
+Explanation
+- -m creates the database migration file.
+- -f creates the factory class file.
+
+\
+Step 2: Define Dummy Data in the Factory
 ```php
 <?php
 // database/factories/UserFactory.php
@@ -212,7 +222,8 @@ class User extends Model
 {
     use HasFactory;
 }
-
+```
+```php
 // Usage
 $user = User::factory()->create();
 ```
@@ -323,17 +334,17 @@ protected static function newFactory(): UserFactory
 **Complete General Syntax — `create()`:**
 
 ```php
-$user = User::factory()->create();
+$user  = User::factory()->create();
 $users = User::factory()->count(3)->create();
-$user = User::factory()->create(['name' => 'Abigail']);
+$user  = User::factory()->create(['name' => 'Abigail']);
 ```
 
 **Complete General Syntax — `make()`:**
 
 ```php
-$user = User::factory()->make();
+$user  = User::factory()->make();
 $users = User::factory()->count(3)->make();
-$user = User::factory()->make(['name' => 'Abigail']);
+$user  = User::factory()->make(['name' => 'Abigail']);
 ```
 
 **Component Breakdown:**

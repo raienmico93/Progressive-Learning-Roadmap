@@ -52,7 +52,9 @@ Think of Java I/O as a system of pipes. When you want to bring data into your pr
 
 **Core Definition**: `InputStream` and `OutputStream` are the abstract base classes for reading and writing **binary data** (8-bit bytes) in Java.
 
-**Technical Definition**: `InputStream` is the abstract superclass for all byte-input streams. It defines methods for reading bytes and byte arrays, skipping input, and marking positions . `OutputStream` is the abstract superclass for all byte-output streams, defining methods for writing bytes and byte arrays . These classes are intended for binary data (images, audio, serialized objects) where byte-level manipulation is appropriate .
+**Technical Definition**: 
+- `InputStream` is the abstract superclass for all byte-input streams. It defines methods for reading bytes and byte arrays, skipping input, and marking positions.
+- `OutputStream` is the abstract superclass for all byte-output streams, defining methods for writing bytes and byte arrays . These classes are intended for binary data (images, audio, serialized objects) where byte-level manipulation is appropriate.
 
 **Beginner-Friendly Explanation**: Byte streams are like pipes that carry tiny Lego bricks. They don't know or care what the bricks represent—they just move them one at a time. If you're dealing with images, music files, or any non-text data, you use byte streams.
 
@@ -125,6 +127,7 @@ public class ByteStreamDemo {
             out.write(65);  // ASCII 'A'
             out.write(66);  // ASCII 'B'
             out.write(67);  // ASCII 'C'
+
             System.out.println("Bytes written.");
         } catch (IOException e) {
             System.err.println("Write error: " + e.getMessage());
@@ -133,10 +136,12 @@ public class ByteStreamDemo {
         // Reading bytes from the file
         try (InputStream in = new FileInputStream("bytes.bin")) {
             int byteValue;
+
             System.out.print("Bytes read: ");
             while ((byteValue = in.read()) != -1) {
                 System.out.print((char) byteValue + " ");
             }
+
             System.out.println();
         } catch (IOException e) {
             System.err.println("Read error: " + e.getMessage());
@@ -150,6 +155,11 @@ public class ByteStreamDemo {
 ```
 Bytes written.
 Bytes read: A B C
+```
+
+**bytes.bin**
+```
+ABC
 ```
 
 **Why This Output Occurs:**
@@ -248,6 +258,7 @@ public class CharStreamDemo {
         try (Writer writer = new FileWriter("text.txt")) {
             writer.write("Hello, Character Streams!");
             writer.write("\nSecond line");
+
             System.out.println("Text written.");
         } catch (IOException e) {
             System.err.println("Write error: " + e.getMessage());
@@ -256,6 +267,7 @@ public class CharStreamDemo {
         // Reading text with BufferedReader for line-by-line access
         try (BufferedReader reader = new BufferedReader(new FileReader("text.txt"))) {
             String line;
+            
             System.out.println("File contents:");
             while ((line = reader.readLine()) != null) {
                 System.out.println("  " + line);
@@ -274,6 +286,12 @@ Text written.
 File contents:
   Hello, Character Streams!
   Second line
+```
+
+**text.txt**
+```
+Hello, Character Streams!
+Second line
 ```
 
 **Why This Output Occurs:**
@@ -372,24 +390,30 @@ public class EncodingDemo {
         // Write UTF-8 text using OutputStreamWriter
         try (Writer writer = new OutputStreamWriter(
                 new FileOutputStream("utf8.txt"),
-                StandardCharsets.UTF_8)) {
+                StandardCharsets.UTF_8
+            )) {
             writer.write("Hello, 世界! ¡Hola!");
             System.out.println("UTF-8 file written.");
-        } catch (IOException e) {
+        } 
+        catch (IOException e) {
             System.err.println("Write error: " + e.getMessage());
         }
 
         // Read with explicit UTF-8 decoding
         try (Reader reader = new InputStreamReader(
                 new FileInputStream("utf8.txt"),
-                StandardCharsets.UTF_8)) {
+                StandardCharsets.UTF_8
+            )) {
             int ch;
+
             System.out.print("Read: ");
             while ((ch = reader.read()) != -1) {
                 System.out.print((char) ch);
             }
+
             System.out.println();
-        } catch (IOException e) {
+        } 
+        catch (IOException e) {
             System.err.println("Read error: " + e.getMessage());
         }
     }

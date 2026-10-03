@@ -162,14 +162,18 @@ public class BasicAnnotationDemo {
         // Read annotation from class
         Class<?> clazz = Document.class;
         Author classAuthor = clazz.getAnnotation(Author.class);
-        System.out.println("Class author: " + classAuthor.name());
-        System.out.println("Class date: " + classAuthor.date());
+        System.out.println("Class author : " + classAuthor.name());
+        System.out.println("Class date   : " + classAuthor.date());
+        // Class author : Alice
+        // Class date   : 2026-09-28
         
         // Read annotation from method
         Author methodAuthor = clazz.getMethod("method")
             .getAnnotation(Author.class);
-        System.out.println("\nMethod author: " + methodAuthor.name());
-        System.out.println("Method date (default): " + methodAuthor.date());
+        System.out.println("\nMethod author       : " + methodAuthor.name());
+        System.out.println("Method date (default) : " + methodAuthor.date());
+        // Method author: Bob
+        // Method date (default): unknown
     }
 }
 ```
@@ -178,11 +182,11 @@ public class BasicAnnotationDemo {
 ```
 === Basic Annotation Declaration ===
 
-Class author: Alice
-Class date: 2026-09-28
+Class author : Alice
+Class date   : 2026-09-28
 
-Method author: Bob
-Method date (default): unknown
+Method author         : Bob
+Method date (default) : unknown
 ```
 
 **Why This Output**: The `@Author` annotation is declared with `@interface`. The `name` element is required; `date` has a default value. The annotation is applied to both the class and a method. At runtime, `getAnnotation()` retrieves the annotation, and `name()` and `date()` access the element values. The method's `date` uses the default `"unknown"` because it was not specified.
