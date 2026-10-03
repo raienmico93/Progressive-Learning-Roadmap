@@ -714,7 +714,7 @@ class SystemAlert extends Notification
 use App\Notifications\SystemAlert;
 use Illuminate\Support\Facades\Notification;
 
-Notification::route('slack', 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX')
+Notification::route('slack', 'https: //hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX')
     ->notify(new SystemAlert(
         'Database Connection Lost',
         'The primary database connection has been lost. Failover initiated.',
