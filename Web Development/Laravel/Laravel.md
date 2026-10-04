@@ -807,40 +807,40 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXIV. Laravel API Development
 
-- **81. API Fundamentals**
+- [**81. API Fundamentals**](/Web%20Development/Laravel/API%20Development/API.md)
   - REST architecture
   - Resource-oriented endpoints
   - HTTP methods
   - HTTP status codes
   - JSON
 
-- **82. API Routing**
+- [**82. API Routing**](/Web%20Development/Laravel/API%20Development/APIRouting.md)
   - API routes
   - Route prefixes
   - Versioning
   - Authentication middleware
   - Rate limiting
 
-- **83. API Controllers**
+- [**83. API Controllers**](/Web%20Development/Laravel/API%20Development/APIControllers.md)
   - CRUD endpoints
   - Request validation
   - Resource responses
   - Error handling
 
-- **84. API Resources**
+- [**84. API Resources**](/Web%20Development/Laravel/API%20Development/APIResources.md)
   - Resource classes
   - Collection resources
   - Conditional attributes
   - Relationship serialization
   - Response consistency
 
-- **85. API Authentication**
+- [**85. API Authentication**](/Web%20Development/Laravel/API%20Development/APIAuth.md)
   - Token authentication
   - SPA authentication
   - Personal access tokens
   - OAuth-related concepts
 
-- **86. API Design**
+- [**86. API Design**](/Web%20Development/Laravel/API%20Development/APIDesign.md)
   - Pagination
   - Filtering
   - Sorting
@@ -854,13 +854,13 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXV. Laravel Sanctum and API Security
 
-- **87. Sanctum Fundamentals**
+- [**87. Sanctum Fundamentals**](/Web%20Development/Laravel/API%20Development/Sanctum.md)
   - SPA authentication
   - API token authentication
   - Token abilities
   - Authentication middleware
 
-- **88. API Security**
+- [**88. API Security**](/Web%20Development/Laravel/API%20Development/APISecurity.md)
   - Authentication
   - Authorization
   - Token management
@@ -868,7 +868,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   - Rate limiting
   - Input validation
 
-- **89. Secure API Design**
+- [**89. Secure API Design**](/Web%20Development/Laravel/API%20Development/SecureAPIDesign.md)
   - Least privilege
   - Secure error responses
   - Sensitive-data protection

@@ -132,15 +132,15 @@ const data = await readFile(path, options);
 ```bash
 echo "Hello, Node.js!" > greeting.txt
 ```
-
+\
+**sync-read.js**
 ```js
-// sync-read.js
 const fs = require('node:fs');
 
 // Synchronous: blocks until the file is fully read.
 try {
   const data = fs.readFileSync('greeting.txt', 'utf8');   // Blocking read
-  console.log('[Sync]', data);                             // Output: Hello, Node.js!
+  console.log('[Sync]', data);                            // Output: Hello, Node.js!
 } catch (err) {
   console.error('[Sync] Error:', err.message);
 }
@@ -152,17 +152,17 @@ try {
 ```
 
 **Why this output:** `readFileSync` reads the entire file into memory and returns the string immediately. Because the operation is synchronous, the `console.log` runs only after the read completes. Any error (e.g., missing file) would throw an exception caught by `try/catch`.
-
+\
+**callback-read.js**
 ```js
-// callback-read.js
 const fs = require('node:fs');
 
 // Callback: non-blocking; error is the first callback argument.
 fs.readFile('greeting.txt', 'utf8', (err, data) => {
-  if (err) throw err;                                     // Handle error first
-  console.log('[Callback]', data);                        // Output: Hello, Node.js!
+  if (err) throw err;                                 // Handle error first
+  console.log('[Callback]', data);                    // Output: Hello, Node.js!
 });
-console.log('[Callback] Reading started...');              // Runs BEFORE the file read finishes
+console.log('[Callback] Reading started...');         // Runs BEFORE the file read finishes
 ```
 
 **Expected Output:**
@@ -173,8 +173,9 @@ console.log('[Callback] Reading started...');              // Runs BEFORE the fi
 
 **Why this output:** `fs.readFile` is asynchronous. The callback is scheduled to run later, after the file read completes, while the subsequent `console.log` executes immediately. The order demonstrates the non-blocking nature of callback-based I/O.
 
+\
+**promise-read.js**
 ```js
-// promise-read.js
 const fs = require('node:fs/promises');
 
 (async () => {
@@ -198,8 +199,8 @@ const fs = require('node:fs/promises');
 
 #### Example 2: Copying a File — Performance-Conscious Choice
 
+**copy-callback.js** — callback version for maximum performance
 ```js
-// copy-callback.js — callback version for maximum performance
 const fs = require('node:fs');
 
 fs.readFile('source.txt', (err, data) => {
@@ -211,8 +212,8 @@ fs.readFile('source.txt', (err, data) => {
 });
 ```
 
+**copy-promise.js** — readable async/await version
 ```js
-// copy-promise.js — readable async/await version
 const fs = require('node:fs/promises');
 
 (async () => {
@@ -309,6 +310,12 @@ const fs = require('node:fs/promises');
 })();
 ```
 
+**notes.txt**
+```
+First line
+
+```
+
 **Expected Output:**
 ```
 File created successfully.
@@ -375,6 +382,14 @@ const fs = require('node:fs/promises');
   console.log('Buffer length:', buf.length);
   console.log('Buffer toString:', buf.toString('utf8'));
 })();
+```
+
+**data.json**
+```json
+{
+  "name":"Alice",
+  "age":30
+}
 ```
 
 **Expected Output:**

@@ -181,7 +181,7 @@ $flight = Flight::create([
     'price' => 200,
 ]);
 
-echo $flight->id; // e.g., 2
+echo $flight->id;    // e.g., 2
 ```
 
 **Expected Output:** A new row is inserted. The `Flight` instance is returned with its `id` populated.
@@ -197,8 +197,15 @@ echo $flight->id; // e.g., 2
 use App\Models\Flight;
 
 Flight::insert([
-    ['name' => 'NY to LA', 'destination' => 'Los Angeles', 'price' => 300],
-    ['name' => 'Chicago to Miami', 'destination' => 'Miami', 'price' => 250],
+    [
+        'name' => 'NY to LA', 
+        'destination' => 'Los Angeles', 
+        'price' => 300
+    ], [
+        'name' => 'Chicago to Miami', 
+        'destination' => 'Miami', 
+        'price' => 250
+    ],
 ]);
 ```
 
@@ -628,9 +635,9 @@ $flight->delete(); // DELETE FROM flights WHERE id = 1
 <?php
 use App\Models\Flight;
 
-Flight::destroy(1);              // Delete ID 1
-Flight::destroy(1, 2, 3);        // Delete IDs 1, 2, 3
-Flight::destroy([4, 5]);         // Delete IDs 4, 5
+Flight::destroy(1);               // Delete ID 1
+Flight::destroy(1, 2, 3);         // Delete IDs 1, 2, 3
+Flight::destroy([4, 5]);          // Delete IDs 4, 5
 Flight::destroy(collect([6, 7])); // Delete IDs 6, 7
 ```
 

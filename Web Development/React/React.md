@@ -872,14 +872,14 @@
 
 # XXII. React Architecture and Design Patterns
 
-* **81. Component Architecture**
+* [**81. Component Architecture**](/Web%20Development/React/Architecture%20and%20Design%20Patterns/Component.md)
 
   * Atomic design
   * Feature-based architecture
   * Layered architecture
   * Domain-oriented organization
 
-* **82. React Design Patterns**
+* [**82. React Design Patterns**](/Web%20Development/React/Architecture%20and%20Design%20Patterns/DesignPatterns.md)
 
   * Container/presentational pattern
   * Compound components
@@ -888,7 +888,7 @@
   * Custom hooks
   * Controlled/uncontrolled patterns
 
-* **83. State Architecture Patterns**
+* [**83. State Architecture Patterns**](/Web%20Development/React/Architecture%20and%20Design%20Patterns/StateArchPatterns.md)
 
   * Local-first state
   * Context-based state
@@ -896,7 +896,7 @@
   * Server-state separation
   * Event-driven state
 
-* **84. Scalable Application Architecture**
+* [**84. Scalable Application Architecture**](/Web%20Development/React/Architecture%20and%20Design%20Patterns/ScalableAppArch.md)
 
   * Feature modules
   * Shared UI
@@ -909,14 +909,14 @@
 
 # XXIII. Advanced React and Framework Ecosystem
 
-* **85. React Frameworks**
+* [**85. React Frameworks**](/Web%20Development/React/Advanced%20and%20Framework%20Ecosystem/Frameworks.md)
 
   * Next.js
   * Remix
   * React Router-based application frameworks
   * Framework-specific rendering models
 
-* **86. Server-Side Rendering**
+* [**86. Server-Side Rendering**](/Web%20Development/React/Advanced%20and%20Framework%20Ecosystem/SSRendering.md)
 
   * SSR concepts
   * Hydration
@@ -924,13 +924,13 @@
   * Client hydration
   * Rendering trade-offs
 
-* **87. Static Rendering**
+* [**87. Static Rendering**](/Web%20Development/React/Advanced%20and%20Framework%20Ecosystem/StaticRendering.md)
 
   * Static generation
   * Pre-rendering
   * Incremental regeneration concepts
 
-* **88. React Server Components**
+* [**88. React Server Components**](/Web%20Development/React/Advanced%20and%20Framework%20Ecosystem/ServerComponents.md)
 
   * Server/client component boundaries
   * Server-only code
@@ -938,7 +938,7 @@
   * Data-access patterns
   * Serialization constraints
 
-* **89. Full-Stack React**
+* [**89. Full-Stack React**](/Web%20Development/React/Advanced%20and%20Framework%20Ecosystem/FullStack.md)
 
   * Frontend/backend integration
   * API routes
@@ -951,7 +951,7 @@
 
 # XXIV. Networking and Real-Time Applications
 
-* **90. WebSocket Integration**
+* [**90. WebSocket Integration**](/Web%20Development/React/Networking%20and%20Real-Time%20App/WebSocket.md)
 
   * WebSocket lifecycle
   * Connection state
@@ -959,7 +959,7 @@
   * Event handling
   * Cleanup
 
-* **91. Real-Time UI**
+* [**91. Real-Time UI**](/Web%20Development/React/Networking%20and%20Real-Time%20App/RealTimeUI.md)
 
   * Notifications
   * Chat interfaces
@@ -967,7 +967,7 @@
   * Presence indicators
   * Collaborative interfaces
 
-* **92. Server-Sent Events**
+* [**92. Server-Sent Events**](/Web%20Development/React/Networking%20and%20Real-Time%20App/ServerSentEvents.md)
 
   * Event streams
   * Long-lived connections

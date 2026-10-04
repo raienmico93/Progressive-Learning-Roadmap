@@ -571,35 +571,35 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # XII. Database-Backed Application Architecture
 
-* **53. Repository Layer**
+* [**53. Repository Layer**](/Web%20Development/NodeJS/DB%20Backed%20App%20Architecture/RepositoryLayer.md)
 
   * Database abstraction
   * Query organization
   * Repository interfaces
   * Transaction handling
 
-* **54. Service Layer**
+* [**54. Service Layer**](/Web%20Development/NodeJS/DB%20Backed%20App%20Architecture/ServiceLayer.md)
 
   * Business logic
   * Validation
   * Transaction boundaries
   * Domain operations
 
-* **55. Controller Layer**
+* [**55. Controller Layer**](/Web%20Development/NodeJS/DB%20Backed%20App%20Architecture/ControllerLayer.md)
 
   * Request parsing
   * Service invocation
   * Response formatting
   * HTTP-specific concerns
 
-* **56. Layered Architecture**
+* [**56. Layered Architecture**](/Web%20Development/NodeJS/DB%20Backed%20App%20Architecture/LayeredArch.md)
 
   * Controller
   * Service
   * Repository
   * Database
 
-* **57. Alternative Architectural Patterns**
+* [**57. Alternative Architectural Patterns**](/Web%20Development/NodeJS/DB%20Backed%20App%20Architecture/AltArchPatterns.md)
 
   * MVC
   * Clean Architecture

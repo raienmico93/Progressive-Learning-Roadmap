@@ -136,13 +136,19 @@ test('should filter results when the user types a query', async () => {
 
 **Example 1: Unit Test vs. Integration Test for a Shopping Cart**
 
+**cart-utils.js**
+Contains the pure mathematical logic for calculating totals.
 ```jsx
-// cart-utils.js — pure logic (unit-testable)
+// Pure logic (unit-testable)
 export function calculateTotal(items) {
   return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 }
+```
 
-// cart-utils.test.js — unit test (fast, isolated)
+**cart-utils.test.js**
+The isolated unit test for verifying the total calculation.
+```jsx
+// Unit test (fast, isolated)
 import { calculateTotal } from './cart-utils';
 
 test('calculateTotal sums item prices with quantities', () => {
@@ -152,8 +158,12 @@ test('calculateTotal sums item prices with quantities', () => {
   ];
   expect(calculateTotal(items)).toBe(35);
 });
+```
 
-// Cart.jsx — component with state and rendering (integration-testable)
+**Cart.jsx**
+The UI component that manages the shopping cart state.
+```jsx
+// Component with state and rendering (integration-testable)
 import React, { useState } from 'react';
 import { calculateTotal } from './cart-utils';
 
@@ -171,8 +181,14 @@ export function Cart() {
     </div>
   );
 }
+```
 
-// Cart.test.jsx — integration test (real component, real state)
+**Cart.test.jsx**
+The integration test to ensure the UI component correctly responds to user interactions and updates the state.
+```jsx
+// Integration test (real component, real state)
+import React from 'react';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Cart } from './Cart';

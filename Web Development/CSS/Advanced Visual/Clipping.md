@@ -160,8 +160,10 @@ clip-path: xywh( <length-percentage>{2} <length-percentage>{2} [ round <border-r
     <div class="container">
         <!-- Circular avatar -->
         <div class="avatar circle-clip"></div>
+
         <!-- Elliptical clip -->
         <div class="avatar ellipse-clip"></div>
+        
         <!-- Inset rectangle with rounded corners -->
         <div class="avatar inset-clip"></div>
     </div>
@@ -172,13 +174,6 @@ clip-path: xywh( <length-percentage>{2} <length-percentage>{2} [ round <border-r
 **CSS File (`circle-ellipse.css`):**
 
 ```css
-body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 40px;
-    background-color: #f5f5f5;
-}
-
 .container {
     display: flex;
     gap: 30px;
@@ -188,7 +183,7 @@ body {
 .avatar {
     width: 150px;
     height: 150px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: black;
 }
 
 .circle-clip {
@@ -262,9 +257,9 @@ clip-path: polygon( [ <fill-rule> , ]? [ <length-percentage> <length-percentage>
 
 /* Examples */
 polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); /* Diamond */
-polygon(0 0, 100% 0, 100% 100%, 0 100%); /* Rectangle */
+polygon(0 0, 100% 0, 100% 100%, 0 100%);     /* Rectangle */
 polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); /* Star */
-polygon(nonzero, 0% 0%, 50% 50%, 0% 100%); /* With fill rule */
+polygon(nonzero, 0% 0%, 50% 50%, 0% 100%);   /* With fill rule */
 ```
 
 #### Component Breakdown
@@ -323,8 +318,10 @@ polygon(nonzero, 0% 0%, 50% 50%, 0% 100%); /* With fill rule */
     <div class="container">
         <!-- Diamond -->
         <div class="shape diamond"></div>
+
         <!-- Star -->
         <div class="shape star"></div>
+        
         <!-- Hexagon -->
         <div class="shape hexagon"></div>
     </div>
@@ -335,13 +332,6 @@ polygon(nonzero, 0% 0%, 50% 50%, 0% 100%); /* With fill rule */
 **CSS File (`polygon.css`):**
 
 ```css
-body {
-    font-family: system-ui, sans-serif;
-    margin: 0;
-    padding: 40px;
-    background-color: #f5f5f5;
-}
-
 .container {
     display: flex;
     gap: 30px;
@@ -351,7 +341,7 @@ body {
 .shape {
     width: 150px;
     height: 150px;
-    background: linear-gradient(135deg, #3498db, #e74c3c);
+    background: black;
 }
 
 .diamond {

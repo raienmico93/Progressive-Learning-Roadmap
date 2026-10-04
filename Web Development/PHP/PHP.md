@@ -514,7 +514,7 @@ PHP is best learned progressively: first the language itself, then web programmi
 
 # XI. PHP and SQL Database Programming
 
-* **45. Database Fundamentals**
+* [**45. Database Fundamentals**](/Web%20Development/PHP/PHP%20and%20SQL/Database.md)
 
   * Relational databases
   * Tables
@@ -523,7 +523,7 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Transactions
   * SQL fundamentals
 
-* **46. PHP Database Connectivity**
+* [**46. PHP Database Connectivity**](/Web%20Development/PHP/PHP%20and%20SQL/PHPDBCon.md)
 
   * PDO
   * Database drivers
@@ -531,7 +531,7 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Connection lifecycle
   * Error modes
 
-* **47. CRUD with PHP**
+* [**47. CRUD with PHP**](/Web%20Development/PHP/PHP%20and%20SQL/CRUD.md)
 
   * Create records
   * Read records
@@ -539,14 +539,14 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Delete records
   * Parameterized queries
 
-* **48. Prepared Statements**
+* [**48. Prepared Statements**](/Web%20Development/PHP/PHP%20and%20SQL/PreparedStatements.md)
 
   * Parameter binding
   * Named parameters
   * Positional parameters
   * SQL injection prevention
 
-* **49. PHP Transactions**
+* [**49. PHP Transactions**](/Web%20Development/PHP/PHP%20and%20SQL/Transactions.md)
 
   * Begin transaction
   * Commit
@@ -554,18 +554,30 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Savepoints
   * Error handling
 
-* **50. Database Abstraction**
+* [**50. Database Abstraction**](/Web%20Development/PHP/PHP%20and%20SQL/DBAbstraction.md)
 
   * Repository pattern
   * Data-access classes
   * Query objects
   * Service-layer interaction
 
+  [**Object-Relational Mapping (ORM) Paradigms**](/Web%20Development/PHP/PHP%20and%20SQL/ORM.md)
+
+  * The Impedance Mismatch
+  * Active Record Pattern (Laravel Eloquent style)
+  * Data Mapper Pattern (Symfony Doctrine style)
+  
+  [**Advanced Query Patterns & Performance Optimization**](/Web%20Development/PHP/PHP%20and%20SQL/Advanced.md)
+
+  * Data Pagination
+  * The N+1 Query Problem
+  * Database Seeding & Factories
+
 ---
 
 # XII. Composer and PHP Ecosystem
 
-* **51. Composer**
+* [**51. Composer**](/Web%20Development/PHP/Composer%20and%20PHP%20Ecosystem/Composer.md)
 
   * Dependency management
   * `composer.json`
@@ -574,20 +586,32 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Updating packages
   * Version constraints
 
-* **52. Autoloading**
+* [**52. Autoloading**](/Web%20Development/PHP/Composer%20and%20PHP%20Ecosystem/Autoloading.md)
 
   * PSR-4
   * Composer autoloading
   * Namespace-based loading
   * Avoiding manual includes
 
-* **53. Package Management**
+  [**Package Lifecycle, Scripting, & Automation**](/Web%20Development/PHP/Composer%20and%20PHP%20Ecosystem/PachageLifecycle.md)
+
+  * Development vs. Production Separation
+  * Composer Scripts & Hooks
+  * Custom Binaries Orchestrating
+
+* [**53. Package Management**](/Web%20Development/PHP/Composer%20and%20PHP%20Ecosystem/PackageManagement.md)
 
   * Third-party packages
   * Development dependencies
   * Semantic versioning
   * Dependency auditing
   * Package maintenance
+
+  [**Ecosystem Security, Auditing, & Compliance**](/Web%20Development/PHP/Composer%20and%20PHP%20Ecosystem/EcosystemSec.md)
+
+  * Vulnerability Analysis
+  * License Compliance Checking
+  * Lockfile Integrity & Freshness
 
 ---
 
