@@ -241,53 +241,61 @@ app.use('/products', productRouter);
 
 ### Annotated Code Example
 
-#### Step 1: Create the route file
+**Folder Structure**
+```
+project/
+├── app.js                  # Main application entry point
+└── routes/
+    └── users.js            # User routes
+```
+
+**Step 1: Create the route file (routes/users.js)**
 
 ```js
-// routes/users.js
 const express = require('express');
 const router = express.Router();
 
 // Simulated database
 const users = [
-  { id: 1, name: 'Alice' },
-  { id: 2, name: 'Bob' }
+    { id: 1, name: 'Alice' },
+    { id: 2, name: 'Bob' }
 ];
 
 // GET /users — list all users
 router.get('/', (req, res) => {
-  res.json(users);
+    res.json(users);
 });
 
 // GET /users/:id — get one user
 router.get('/:id', (req, res) => {
-  const user = users.find(u => u.id === parseInt(req.params.id));
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  res.json(user);
+    const user = users.find(u => u.id === parseInt(req.params.id));
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' })
+    };
+    res.json(user);
 });
 
 // POST /users — create a user
 router.post('/', (req, res) => {
-  const newUser = { id: users.length + 1, name: req.body.name };
-  users.push(newUser);
-  res.status(201).json(newUser);
+    const newUser = { id: users.length + 1, name: req.body.name };
+    users.push(newUser);
+    res.status(201).json(newUser);
 });
 
 module.exports = router;
 ```
 
-#### Step 2: Create the main application file
+**Step 2: Create the main application file (app.js)**
 
 ```js
-// app.js
 const express = require('express');
 const app = express();
 
 // Import the modular router
 const userRouter = require('./routes/users');
 
-app.use(express.json());                  // Parse JSON request bodies
-app.use('/users', userRouter);            // Mount at /users
+app.use(express.json());             // Parse JSON request bodies
+app.use('/users', userRouter);       // Mount at /users
 
 app.listen(3000, () => console.log('Server on port 3000'));
 ```
@@ -398,22 +406,54 @@ app.use('/prefix', router);
 
 ### Annotated Code Example
 
+**routes/users.js**
+This file handles all routing logic specific to users.
 ```js
-// route-prefix.js
+const express = require('express');
+const router = express.Router();
+
+// Defined relative to the router root: GET /users/
+router.get('/', (req, res) => {
+    res.send('User list');
+});
+
+// Defined relative to the router root: GET /users/:id
+router.get('/:id', (req, res) => {
+    res.send(`User ${req.params.id}`);
+});
+
+module.exports = router;
+```
+\
+**routes/products.js**
+This file handles all routing logic specific to products.
+```js
+const express = require('express');
+const router = express.Router();
+
+// Defined relative to the router root: GET /api/products/
+router.get('/', (req, res) => {
+    res.send('Product list');
+});
+// Defined relative to the router root: GET /api/products/:id
+router.get('/:id', (req, res) => {
+    res.send(`Product ${req.params.id}`);
+});
+
+module.exports = router;
+```
+\
+**app.js**
+This is your main entry point file where you initialize Express, import your modular routers, and mount them with their respective path prefixes.
+```js
 const express = require('express');
 const app = express();
 
-// User router — routes defined relative to the router root
-const userRouter = express.Router();
-userRouter.get('/', (req, res) => res.send('User list'));
-userRouter.get('/:id', (req, res) => res.send(`User ${req.params.id}`));
+// Import the separated router modules
+const userRouter = require('./routes/users');
+const productRouter = require('./routes/products');
 
-// Product router
-const productRouter = express.Router();
-productRouter.get('/', (req, res) => res.send('Product list'));
-productRouter.get('/:id', (req, res) => res.send(`Product ${req.params.id}`));
-
-// Mount with prefixes
+// Mount the routers with prefixes
 app.use('/users', userRouter);              // All user routes under /users
 app.use('/api/products', productRouter);    // All product routes under /api/products
 

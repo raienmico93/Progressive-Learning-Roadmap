@@ -639,7 +639,7 @@
 
 # XV. Authentication and Third-Party Services
 
-* **61. OAuth**
+* [**61. OAuth**](/Web%20Development/ExpressJS/Authentication/OAuth.md)
 
   * OAuth concepts
   * Authorization flow
@@ -647,20 +647,25 @@
   * Refresh tokens
   * Redirect URIs
 
-* **62. OpenID Connect**
+* [**62. OpenID Connect**](/Web%20Development/ExpressJS/Authentication/OpenID.md)
 
   * Identity providers
   * ID tokens
   * User identity
 
-* **63. Social Login**
+* [**63. Social Login**](/Web%20Development/ExpressJS/Authentication/SocialLogin.md)
 
   * Google
   * GitHub
   * Microsoft
   * Other identity providers
 
-* **64. External APIs**
+  [**64. Biometrics & Next-Gen Auth**](/Web%20Development/ExpressJS/Authentication/Biometrics.md)
+
+  * WebAuthn & Passkeys
+  * Passwordless Email/SMS
+
+* [**65. External APIs**](/Web%20Development/ExpressJS/Authentication/ExternalAPI.md)
 
   * REST clients
   * API authentication
@@ -669,11 +674,17 @@
   * Rate limits
   * Circuit-breaker concepts
 
+* [**66. Security & Token Storage Best Practices**](/Web%20Development/ExpressJS/Authentication/SecAndToken.md)
+
+  * Secure Storage
+  * Token Validation
+  * Security Headers
+
 ---
 
 # XVI. File Handling
 
-* **65. File Uploads**
+* [**67. File Uploads**](/Web%20Development/ExpressJS/)
 
   * Multipart forms
   * `multipart/form-data`
@@ -681,7 +692,7 @@
   * File validation
   * File-size limits
 
-* **66. File Storage**
+* [**68. File Storage**](/Web%20Development/ExpressJS/File%20Handling/FileStorage.md)
 
   * Local storage
   * Object storage
@@ -690,7 +701,7 @@
     * Cloud storage services
   * File metadata
 
-* **67. Secure File Handling**
+* [**69. Secure File Handling**](/Web%20Development/ExpressJS/File%20Handling/SecureFileHandling.md)
 
   * File type validation
   * Filename sanitization
@@ -698,65 +709,82 @@
   * Access control
   * Signed URLs
 
-* **68. File Downloads**
+* [**70. File Downloads**](/Web%20Development/ExpressJS/File%20Handling/FileDownloads.md)
 
   * Static files
   * Streaming
   * Content disposition
   * Range requests
 
+  [**Advanced Concepts & Maintenance**](/Web%20Development/ExpressJS/File%20Handling/Advanced.md)
+
+  * Resumable & Chunked uploads
+  * Garbage collection & Cleanup
+  * Rate limiting file endpoints
+  * Monitoring & Logs
+
 ---
 
 # XVII. API Documentation
 
-* **69. OpenAPI**
+* [**71. OpenAPI (Swagger) Specification & Fundamentals**](/Web%20Development/ExpressJS/API/OpenAPI.md)
+   * OpenAPI 3.0/3.1 Standard vs. Swagger 2.0
+   * Paths, HTTP Methods, and Operations
+   * Parameters
+   * Request Bodies and Media Types
+   * Data Schemas
+   * HTTP Responses and Status Codes
+   * Security Schemes
 
-  * API specification
-  * Paths
-  * Parameters
-  * Schemas
-  * Responses
-  * Authentication definitions
+* [**72. Interactive Documentation & UI Tooling**](/Web%20Development/ExpressJS/API/InteractiveDoc.md)
+   * swagger-ui-express
+   * redoc-express
+   * API Exploration and Sandboxing
+   * Customizing UI Themes and Branding
 
-* **70. Swagger**
+* [**73. Express-Specific Code-First Documentation Tools**](/Web%20Development/ExpressJS/API/ExpressSpec.md)
+   * swagger-jsdoc
+   * express-openapi-validator
+   * Auto-generating specs from Express routes
 
-  * Swagger UI
-  * Interactive documentation
-  * API exploration
+* [**74. API Documentation Quality & SDKs**](/Web%20Development/ExpressJS/API/APIDoc.md)
+   * Request and Response Body Examples
+   * Comprehensive Error Documentation
+   * Authentication and Authorization Guides
+   * API Versioning Strategies
+   * Code Snippets for Consumers
+   * SDK Generation
 
-* **71. API Documentation Quality**
-
-  * Request examples
-  * Response examples
-  * Error documentation
-  * Authentication instructions
-  * Versioning
+* [**75. Environments & Postman/Insomnia Integration**](/Web%20Development/ExpressJS/API/Env.md)
+   * Environment Management
+   * Exporting OpenAPI specs to Postman Collections and Insomnia
+   * Mocking Express APIs using documentation
 
 ---
 
 # XVIII. Testing Express Applications
 
-* **72. Unit Testing**
+* **76. Unit Testing**
 
   * Testing services
   * Testing utilities
   * Mocking dependencies
 
-* **73. Integration Testing**
+* **77. Integration Testing**
 
   * Testing routes
   * Testing middleware
   * Testing databases
   * Testing authentication flows
 
-* **74. HTTP Testing**
+* **78. HTTP Testing**
 
   * Supertest
   * Request assertions
   * Response assertions
   * Status-code assertions
 
-* **75. Test Databases**
+* **79. Test Databases**
 
   * Isolated databases
   * Test fixtures
@@ -764,7 +792,7 @@
   * Database cleanup
   * Transactions in tests
 
-* **76. Test Strategy**
+* **80. Test Strategy**
 
   * Unit tests
   * Integration tests
@@ -777,7 +805,7 @@
 
 # XIX. Logging and Observability
 
-* **77. Logging**
+* **81. Logging**
 
   * Console logging
   * Structured logging
@@ -788,7 +816,7 @@
     * Warn
     * Error
 
-* **78. Production Logging**
+* **82. Production Logging**
 
   * Request IDs
   * Correlation IDs
@@ -796,7 +824,7 @@
   * Centralized log collection
   * Sensitive-data redaction
 
-* **79. Metrics**
+* **83. Metrics**
 
   * Request count
   * Request latency
@@ -804,7 +832,7 @@
   * Throughput
   * Database latency
 
-* **80. Distributed Tracing**
+* **84. Distributed Tracing**
 
   * Trace IDs
   * Spans
@@ -815,7 +843,7 @@
 
 # XX. Performance Optimization
 
-* **81. Express Performance**
+* **85. Express Performance**
 
   * Middleware overhead
   * JSON serialization
@@ -823,14 +851,14 @@
   * Response caching
   * Connection pooling
 
-* **82. Database Performance**
+* **86. Database Performance**
 
   * Query optimization
   * Indexes
   * Query profiling
   * Connection pool sizing
 
-* **83. HTTP Performance**
+* **87. HTTP Performance**
 
   * Keep-alive
   * Compression
@@ -838,7 +866,7 @@
   * ETags
   * Conditional requests
 
-* **84. Application Performance**
+* **88. Application Performance**
 
   * Avoid blocking the event loop
   * Efficient algorithms
@@ -850,27 +878,27 @@
 
 # XXI. Caching
 
-* **85. Caching Fundamentals**
+* **89. Caching Fundamentals**
 
   * Why cache
   * Cache invalidation
   * TTL
   * Cache keys
 
-* **86. HTTP Caching**
+* **90. HTTP Caching**
 
   * `Cache-Control`
   * ETags
   * Conditional requests
 
-* **87. Application Caching**
+* **91. Application Caching**
 
   * In-memory caching
   * Redis
   * Distributed caching
   * Cache-aside pattern
 
-* **88. Advanced Caching**
+* **92. Advanced Caching**
 
   * Cache stampede
   * Cache warming
@@ -881,13 +909,13 @@
 
 # XXII. Background Jobs and Messaging
 
-* **89. Background Processing**
+* **93. Background Processing**
 
   * Why use jobs
   * Long-running work
   * Deferred processing
 
-* **90. Job Queues**
+* **94. Job Queues**
 
   * BullMQ
   * Redis-backed queues
@@ -895,7 +923,7 @@
   * Scheduling
   * Dead-letter handling
 
-* **91. Message Brokers**
+* **95. Message Brokers**
 
   * RabbitMQ
   * Kafka
@@ -903,7 +931,7 @@
   * Producers
   * Consumers
 
-* **92. Reliability**
+* **96. Reliability**
 
   * Idempotency
   * Retry policies
@@ -915,13 +943,13 @@
 
 # XXIII. Real-Time Applications
 
-* **93. WebSockets**
+* **97. WebSockets**
 
   * Persistent connections
   * Bidirectional communication
   * Connection management
 
-* **94. Socket.IO**
+* **98. Socket.IO**
 
   * Events
   * Rooms
@@ -929,7 +957,7 @@
   * Broadcasting
   * Authentication
 
-* **95. Real-Time Use Cases**
+* **99. Real-Time Use Cases**
 
   * Chat
   * Notifications
@@ -941,20 +969,20 @@
 
 # XXIV. API Versioning and Compatibility
 
-* **96. Versioning Strategies**
+* **100. Versioning Strategies**
 
   * URL versioning
   * Header versioning
   * Content negotiation
 
-* **97. Backward Compatibility**
+* **101. Backward Compatibility**
 
   * API evolution
   * Deprecation
   * Schema changes
   * Compatibility testing
 
-* **98. API Lifecycle**
+* **102. API Lifecycle**
 
   * Introduction
   * Maintenance
@@ -965,13 +993,13 @@
 
 # XXV. Advanced API Architecture
 
-* **99. REST Architecture**
+* **103. REST Architecture**
 
   * Resource modeling
   * Hypermedia concepts
   * Stateless architecture
 
-* **100. GraphQL Integration**
+* **104. GraphQL Integration**
 
   * GraphQL fundamentals
   * Resolvers
@@ -979,13 +1007,13 @@
   * Queries
   * Mutations
 
-* **101. gRPC and Service APIs**
+* **105. gRPC and Service APIs**
 
   * RPC concepts
   * Protobuf
   * Service-to-service communication
 
-* **102. Microservices**
+* **106. Microservices**
 
   * Service boundaries
   * API gateways
@@ -998,21 +1026,21 @@
 
 # XXVI. Configuration and Environment Management
 
-* **103. Environment Configuration**
+* **107. Environment Configuration**
 
   * Development
   * Testing
   * Staging
   * Production
 
-* **104. Environment Variables**
+* **108. Environment Variables**
 
   * `process.env`
   * Configuration validation
   * Required variables
   * Defaults
 
-* **105. Configuration Architecture**
+* **109. Configuration Architecture**
 
   * Central configuration
   * Typed configuration
@@ -1023,35 +1051,35 @@
 
 # XXVII. Deployment
 
-* **106. Production Build**
+* **110. Production Build**
 
   * Environment configuration
   * Dependency installation
   * Process startup
   * Logging configuration
 
-* **107. Process Management**
+* **111. Process Management**
 
   * PM2
   * Node.js processes
   * Graceful shutdown
   * Process signals
 
-* **108. Reverse Proxies**
+* **112. Reverse Proxies**
 
   * Nginx
   * Load balancers
   * TLS termination
   * Static assets
 
-* **109. Cloud Deployment**
+* **113. Cloud Deployment**
 
   * VPS
   * Container platforms
   * Managed application services
   * Serverless considerations
 
-* **110. Docker**
+* **114. Docker**
 
   * Dockerfile
   * Images
@@ -1064,14 +1092,14 @@
 
 # XXVIII. CI/CD
 
-* **111. Version Control**
+* **115. Version Control**
 
   * Git
   * Branches
   * Pull requests
   * Code review
 
-* **112. Continuous Integration**
+* **116. Continuous Integration**
 
   * Install dependencies
   * Lint
@@ -1079,14 +1107,14 @@
   * Build
   * Security checks
 
-* **113. Continuous Deployment**
+* **117. Continuous Deployment**
 
   * Deployment pipelines
   * Environment promotion
   * Database migrations
   * Rollbacks
 
-* **114. Deployment Strategies**
+* **118. Deployment Strategies**
 
   * Rolling deployment
   * Blue-green deployment
@@ -1096,20 +1124,20 @@
 
 # XXIX. Reliability and Production Operations
 
-* **115. Graceful Shutdown**
+* **119. Graceful Shutdown**
 
   * Stop accepting requests
   * Complete active requests
   * Close database connections
   * Close message queues
 
-* **116. Health Checks**
+* **120. Health Checks**
 
   * Liveness
   * Readiness
   * Dependency health
 
-* **117. Reliability Patterns**
+* **121. Reliability Patterns**
 
   * Timeouts
   * Retries
@@ -1117,7 +1145,7 @@
   * Bulkheads
   * Idempotency
 
-* **118. Incident Handling**
+* **122. Incident Handling**
 
   * Error diagnosis
   * Logs
@@ -1129,7 +1157,7 @@
 
 # XXX. TypeScript with Express
 
-* **119. TypeScript Fundamentals**
+* **123. TypeScript Fundamentals**
 
   * Types
   * Interfaces
@@ -1137,21 +1165,21 @@
   * Unions
   * Type narrowing
 
-* **120. Express Type Safety**
+* **124. Express Type Safety**
 
   * Typed requests
   * Typed responses
   * Typed middleware
   * Typed route parameters
 
-* **121. API Contract Types**
+* **125. API Contract Types**
 
   * Request schemas
   * Response schemas
   * Database types
   * DTOs
 
-* **122. Advanced TypeScript Architecture**
+* **126. Advanced TypeScript Architecture**
 
   * Generic services
   * Type-safe repositories
@@ -1162,20 +1190,20 @@
 
 # XXXI. Advanced Express.js Architecture
 
-* **123. Clean Architecture**
+* **127. Clean Architecture**
 
   * Domain
   * Application
   * Infrastructure
   * Interface layers
 
-* **124. Hexagonal Architecture**
+* **128. Hexagonal Architecture**
 
   * Ports
   * Adapters
   * Domain isolation
 
-* **125. Domain-Driven Design Concepts**
+* **129. Domain-Driven Design Concepts**
 
   * Entities
   * Value objects
@@ -1184,7 +1212,7 @@
   * Domain services
   * Bounded contexts
 
-* **126. Event-Driven Architecture**
+* **130. Event-Driven Architecture**
 
   * Domain events
   * Integration events
@@ -1196,28 +1224,28 @@
 
 # XXXII. Advanced Security Engineering
 
-* **127. API Security**
+* **131. API Security**
 
   * Authentication
   * Authorization
   * Rate limiting
   * Abuse prevention
 
-* **128. Threat Modeling**
+* **132. Threat Modeling**
 
   * Assets
   * Threat actors
   * Attack surfaces
   * Mitigations
 
-* **129. Secure API Design**
+* **133. Secure API Design**
 
   * Least privilege
   * Input validation
   * Output encoding
   * Secure defaults
 
-* **130. Operational Security**
+* **134. Operational Security**
 
   * Secret rotation
   * Dependency scanning

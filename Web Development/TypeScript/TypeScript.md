@@ -120,7 +120,7 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # III. Core Type System
 
-* **8. Type Inference**
+* [**8. Type Inference**](/Web%20Development/TypeScript/Core%20Type%20System/TypeInference.md)
 
   * Literal inference
   * Contextual typing
@@ -129,7 +129,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Inference limitations
   * When explicit annotations improve maintainability
 
-* **9. Special Types**
+* [**9. Special Types**](/Web%20Development/TypeScript/Core%20Type%20System/SpecialTypes.md)
 
   * `any`
   * `unknown`
@@ -141,7 +141,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Differences among special types
   * Appropriate and inappropriate use cases
 
-* **10. Arrays**
+* [**10. Arrays**](/Web%20Development/TypeScript/Core%20Type%20System/Arrays.md)
 
   * Array type syntax
 
@@ -153,7 +153,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Readonly arrays
   * Array inference
 
-* **11. Tuples**
+* [**11. Tuples**](/Web%20Development/TypeScript/Core%20Type%20System/Tuples.md)
 
   * Tuple definitions
   * Fixed-length structures
@@ -163,7 +163,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Readonly tuples
   * Tuples versus arrays
 
-* **12. Enums**
+* [**12. Enums**](/Web%20Development/TypeScript/Core%20Type%20System/Enums.md)
 
   * Numeric enums
   * String enums
@@ -226,7 +226,7 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # V. Object-Oriented TypeScript
 
-* **18. Objects**
+* [**18. Objects**](/Web%20Development/TypeScript/Object%20Oriented/Objects.md)
 
   * Object type inference
   * Object type annotations
@@ -235,7 +235,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Readonly properties
   * Index signatures
 
-* **19. Type Aliases**
+* [**19. Type Aliases**](/Web%20Development/TypeScript/Object%20Oriented/TypeAliases.md)
 
   * Primitive aliases
   * Object aliases
@@ -244,7 +244,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Function aliases
   * Recursive aliases
 
-* **20. Interfaces**
+* [**20. Interfaces**](/Web%20Development/TypeScript/Object%20Oriented/Interfaces.md)
 
   * Interface declaration
   * Interface properties
@@ -255,7 +255,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Interface extension
   * Interface merging
 
-* **21. Classes**
+* [**21. Classes**](/Web%20Development/TypeScript/Object%20Oriented/Classes.md)
 
   * Class syntax
   * Properties
@@ -270,7 +270,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * `readonly`
   * Static members
 
-* **22. Inheritance**
+* [**22. Inheritance**](/Web%20Development/TypeScript/Object%20Oriented/Inheritance.md)
 
   * `extends`
   * Parent and child classes
@@ -279,7 +279,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Abstract classes
   * Protected members
 
-* **23. Encapsulation and Abstraction**
+* [**23. Encapsulation and Abstraction**](/Web%20Development/TypeScript/Object%20Oriented/Encapsulation.md)
 
   * Encapsulation
   * Access control
@@ -288,7 +288,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Interface-based abstraction
   * Composition versus inheritance
 
-* **24. Polymorphism**
+* [**24. Polymorphism**](/Web%20Development/TypeScript/Object%20Oriented/Polymorphism.md)
 
   * Structural polymorphism
   * Method overriding
@@ -300,7 +300,7 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # VI. Type Composition
 
-* **25. Union Types**
+* [**25. Union Types**](/Web%20Development/TypeScript/Type%20Composition/Union.md)
 
   * Union syntax
   * Multiple possible types
@@ -308,7 +308,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Union-compatible operations
   * Narrowing unions
 
-* **26. Intersection Types**
+* [**26. Intersection Types**](/Web%20Development/TypeScript/Type%20Composition/Intersection.md)
 
   * Intersection syntax
   * Combining object types
@@ -316,7 +316,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Conflicting properties
   * Practical use cases
 
-* **27. Literal Types**
+* [**27. Literal Types**](/Web%20Development/TypeScript/Type%20Composition/Literal.md)
 
   * String literals
   * Numeric literals
@@ -324,7 +324,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Literal unions
   * Configuration modeling
 
-* **28. Type Aliases versus Interfaces**
+* [**28. Type Aliases versus Interfaces**](/Web%20Development/TypeScript/Type%20Composition/TypeAliasesVsInterfaces.md)
 
   * Similarities
   * Differences
@@ -336,13 +336,13 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # VII. Type Narrowing and Control Flow
 
-* **29. Narrowing Fundamentals**
+* [**29. Narrowing Fundamentals**](/Web%20Development/TypeScript/Type%20Narrowing%20and%20Control%20Flow/Narrowing.md)
 
   * Control-flow analysis
   * Type guards
   * Type predicates
 
-* **30. Built-In Narrowing**
+* [**30. Built-In Narrowing**](/Web%20Development/TypeScript/Type%20Narrowing%20and%20Control%20Flow/BuiltInNarrowing.md)
 
   * `typeof`
   * `instanceof`
@@ -350,20 +350,20 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Equality checks
   * Truthiness checks
 
-* **31. User-Defined Type Guards**
+* [**31. User-Defined Type Guards**](/Web%20Development/TypeScript/Type%20Narrowing%20and%20Control%20Flow/TypeGuards.md)
 
   * Type predicates
   * Custom validation functions
   * Reusable narrowing logic
 
-* **32. Discriminated Unions**
+* [**32. Discriminated Unions**](/Web%20Development/TypeScript/Type%20Narrowing%20and%20Control%20Flow/DiscriminatedUnions.md)
 
   * Discriminant properties
   * Exhaustive switching
   * State modeling
   * Finite-state representations
 
-* **33. Exhaustiveness Checking**
+* [**33. Exhaustiveness Checking**](/Web%20Development/TypeScript/Type%20Narrowing%20and%20Control%20Flow/Exhaustiveness.md)
 
   * `never`
   * Exhaustive `switch`
@@ -374,7 +374,7 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # VIII. Generics
 
-* **34. Generic Fundamentals**
+* [**34. Generic Fundamentals**](/Web%20Development/TypeScript/Generics/Generics.md)
 
   * Generic type parameters
   * Generic functions
@@ -382,27 +382,27 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Generic classes
   * Generic type aliases
 
-* **35. Generic Constraints**
+* [**35. Generic Constraints**](/Web%20Development/TypeScript/Generics/Constraints.md)
 
   * `extends`
   * Constraining type parameters
   * Key-based constraints
   * Structural constraints
 
-* **36. Generic Defaults**
+* [**36. Generic Defaults**](/Web%20Development/TypeScript/Generics/Defaults.md)
 
   * Default type parameters
   * Optional generic arguments
   * Generic API design
 
-* **37. Generic Relationships**
+* [**37. Generic Relationships**](/Web%20Development/TypeScript/Generics/Relationships.md)
 
   * Multiple type parameters
   * Type relationships
   * Generic callbacks
   * Generic factories
 
-* **38. Advanced Generic Design**
+* [**38. Advanced Generic Design**](/Web%20Development/TypeScript/Generics/AdvancedDesign.md)
 
   * Generic inference
   * Higher-order generic functions
@@ -413,32 +413,32 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # IX. Advanced Type System
 
-* **39. `keyof`**
+* [**39. `keyof`**](/Web%20Development/TypeScript/Advanced%20Type%20System/keyof.md)
 
   * Key extraction
   * Key-safe property access
   * Generic property utilities
 
-* **40. `typeof` in Type Positions**
+* [**40. `typeof` in Type Positions**](/Web%20Development/TypeScript/Advanced%20Type%20System/typeof.md)
 
   * Deriving types from values
   * Reusing variable and function types
   * Configuration type extraction
 
-* **41. Indexed Access Types**
+* [**41. Indexed Access Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/IndexedAccessTypes.md)
 
   * Property lookup types
   * Array element types
   * Nested indexed access
 
-* **42. Conditional Types**
+* [**42. Conditional Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/ConditionalTypes.md)
 
   * Conditional type syntax
   * Type relationships
   * Branching at the type level
   * `infer`
 
-* **43. Mapped Types**
+* [**43. Mapped Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/MappedTypes.md)
 
   * Iterating over keys
   * Property transformation
@@ -448,7 +448,7 @@ This roadmap follows the same progressive structure: **language foundations → 
     * Optionality
   * Key remapping
 
-* **44. Template Literal Types**
+* [**44. Template Literal Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/TemplateLiteralTypes.md)
 
   * Template literal type syntax
   * String composition
@@ -456,7 +456,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Event-name types
   * Route and API-path types
 
-* **45. Utility Types**
+* [**45. Utility Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/UtilityTypes.md)
 
   * `Partial`
   * `Required`
@@ -473,7 +473,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * `InstanceType`
   * `Awaited`
 
-* **46. Recursive Types**
+* [**46. Recursive Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/RecursiveTypes.md)
 
   * Recursive aliases
   * Tree structures
@@ -484,7 +484,7 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # X. Modules and Code Organization
 
-* **47. ES Modules**
+* [**47. ES Modules**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ESModule.md)
 
   * `export`
   * `import`
@@ -492,7 +492,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Default exports
   * Re-exporting
 
-* **48. Module Organization**
+* [**48. Module Organization**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ModuleOrg.md)
 
   * File-based modules
   * Feature-based structure
@@ -500,7 +500,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Public API boundaries
   * Barrel exports
 
-* **49. Module Resolution**
+* [**49. Module Resolution**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ModuleResolution.md)
 
   * Module resolution strategies
   * Relative imports
@@ -509,7 +509,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * `baseUrl`
   * `paths`
 
-* **50. Declaration Files**
+* [**50. Declaration Files**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/DeclarationFiles.md)
 
   * `.d.ts`
   * Declaring external libraries
@@ -517,7 +517,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Global declarations
   * Module declarations
 
-* **51. Third-Party Type Definitions**
+* [**51. Third-Party Type Definitions**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ThirdPartyTypeDef.md)
 
   * Built-in library types
   * Community-maintained typings

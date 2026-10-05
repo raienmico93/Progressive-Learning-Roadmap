@@ -359,42 +359,159 @@ prefix("api", [
 
 ### Annotated Code Example: Nested Routes with Layout
 
-```tsx
-// app/routes.ts
+Based on your React Router (v7) route configuration, here is the exact folder structure you need to create:
+```
+app/
+├── routes.ts
+└── routes/
+    ├── home.tsx
+    ├── dashboard-layout.tsx
+    └── dashboard/
+        ├── overview.tsx
+        ├── settings.tsx
+        └── user-detail.tsx
+```
+\
+**Step 1: Install Dependencies**
+Ensure you have the latest packages installed for React Router v7 (formerly Remix).
+```bash
+npm install react-router
+npm install -D @react-router/dev
+```
+\
+**Step 2: Configure Your Routes**
+Update your main routing configuration file to define the hierarchy. The layout function wraps a set of routes, and nested route functions define child pages.
+\
+`app/routes.ts`
+```jsx
 import { type RouteConfig } from "@react-router/dev/routes";
 import { index, route, layout } from "@react-router/dev/routes";
 
 export default [
-  index("routes/home.tsx"),
-  layout("routes/dashboard-layout.tsx", [
-    route("dashboard", "routes/dashboard.tsx", [
-      index("routes/dashboard/overview.tsx"),
-      route("settings", "routes/dashboard/settings.tsx"),
-      route("users/:userId", "routes/dashboard/user-detail.tsx"),
+    // 1. Root landing page
+    index("routes/home.tsx"),
+  
+    // 2. Dashboard layout wrapper
+    layout("routes/dashboard-layout.tsx", [
+        // 3. Parent dashboard route matching "/dashboard"
+        route("dashboard", "routes/dashboard.tsx", [
+            // 4. Nested child matching "/dashboard" exactly
+            index("routes/dashboard/overview.tsx"),
+            
+            // 5. Nested child matching "/dashboard/settings"
+            route("settings", "routes/dashboard/settings.tsx"),
+            
+            // 6. Nested dynamic child matching "/dashboard/users/:userId"
+            route("users/:userId", "routes/dashboard/user-detail.tsx"),
+        ]),
     ]),
-  ]),
 ] satisfies RouteConfig;
 ```
-
-```tsx
-// routes/dashboard-layout.tsx
-import { Outlet } from "react-router";
+\
+**Step 3: Create the Dashboard Layout**
+The layout acts as a permanent shell for your dashboard interface. It includes the header, sidebar, or navigation menu, and uses <Outlet /> to specify exactly where the child content should appear.
+\
+`app/routes/dashboard-layout.tsx`
+```jsx
+import { Outlet, Link } from "react-router";
 
 export default function DashboardLayout() {
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      <nav>
-        <a href="/dashboard">Overview</a>
-        <a href="/dashboard/settings">Settings</a>
-      </nav>
-      <Outlet /> {/* Child routes render here */}
-    </div>
-  );
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px", padding: "20px" }}>
+            <header style={{ borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
+                <h1>Global Dashboard Shell</h1>
+                <nav style={{ display: "flex", gap: "15px" }}>
+                    {/* Using Link instead of <a> avoids full page reloads */}
+                    <Link to="/dashboard">Overview</Link>
+                    <Link to="/dashboard/settings">Settings</Link>
+                </nav>
+            </header>
+            
+            <main>
+                {/* Active child routes (dashboard.tsx and its sub-routes) render here */}
+                <Outlet /> 
+            </main>
+        </div>
+    );
+}
+```
+\
+**Step 4: Create the Dashboard Parent View**
+The dashboard route wraps the deep sub-routes (overview, settings, users). Like the layout, it needs its own <Outlet /> so its grandchildren can render inside it.
+\
+`app/routes/dashboard.tsx`
+```jsx
+import { Outlet } from "react-router";
+
+export default function DashboardIndex() {
+    return (
+        <div style={{ padding: "10px", background: "#f9f9f9", borderRadius: "5px" }}>
+            <h2>Dashboard Section Container</h2>
+            {/* Sub-children like overview, settings, or user-detail render here */}
+            <Outlet />
+        </div>
+    );
+}
+```
+\
+**Step 5: Create the Child Views**
+Now, build the specific pages that will Swap in and out depending on the URL path.
+\
+Overview Page (Renders at /dashboard)
+`app/routes/dashboard/overview.tsx`
+```jsx
+export default function Overview() {
+    return (
+        <div>
+            <h3>📊 Overview Metrics</h3>
+            <p>Welcome back! Here is a summary of your performance today.</p>
+        </div>
+    );
+}
+```
+\
+Settings Page (Renders at /dashboard/settings)
+`app/routes/dashboard/settings.tsx`
+```jsx
+export default function Settings() {
+    return (
+        <div>
+            <h3>⚙️ Account Settings</h3>
+            <p>Manage your profile updates and security configurations here.</p>
+        </div>
+    );
+}
+```
+\
+User Detail Page (Renders at paths like /dashboard/users/123)
+`app/routes/dashboard/user-detail.tsx`
+```jsx
+import { useParams } from "react-router";
+
+export default function UserDetail() {
+    const { userId } = useParams();
+  
+    return (
+        <div>
+            <h3>👤 User Profile</h3>
+            <p>Viewing account details for User ID: <strong>{userId}</strong></p>
+        </div>
+    );
 }
 ```
 
-**Expected Output:** Navigating to `/dashboard` renders the dashboard layout with the overview child. Navigating to `/dashboard/settings` renders the same layout with the settings child. The layout persists across child route changes, and only the `<Outlet />` content swaps.
+**How the Hierarchy Renders**
+When a user visits /dashboard/settings, React Router builds the tree from the top down:
+
+   1. It renders DashboardLayout (Root UI framework)
+   2. Inside DashboardLayout's <Outlet />, it renders DashboardIndex (Dashboard container)
+   3. Inside DashboardIndex's <Outlet />, it renders the final target: Settings page.
+
+\
+**Expected Output:** 
+- Navigating to `/dashboard` renders the dashboard layout with the overview child. 
+- Navigating to `/dashboard/settings` renders the same layout with the settings child. 
+- The layout persists across child route changes, and only the `<Outlet />` content swaps.
 
 **Why This Output Occurs:** The `layout()` helper wraps all dashboard children in `dashboard-layout.tsx`, which renders an `<Outlet />` where child routes appear. React Router matches the URL depth-first: for `/dashboard/settings`, it matches the `layout` route, then the `dashboard` route, then the `settings` route. The layout is rendered once, and the `Outlet` swaps the child content.
 

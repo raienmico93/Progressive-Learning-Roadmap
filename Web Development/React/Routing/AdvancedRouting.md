@@ -331,25 +331,47 @@ function useAuthSync() {
 
 ### Annotated Code Example: Login/Logout with Auth-Aware Navigation
 
+Folder Structure
+```
+src/
+├── context/
+│   └── AuthContext.jsx
+├── components/
+│   └── Navbar.jsx
+├── layouts/
+│   └── RootLayout.jsx
+├── pages/
+│   ├── Home.jsx
+│   ├── Login.jsx
+│   └── Dashboard.jsx
+├── router.jsx
+└── App.jsx
+```
+\
+1. `src/context/AuthContext.jsx`
 ```jsx
-import { useState, createContext, useContext, useMemo, useEffect } from "react";
-import { createBrowserRouter, RouterProvider, Link, Outlet, useNavigate, useRevalidator, redirect } from "react-router";
+import { createContext, useContext, useState, useMemo } from "react";
 
-// Auth Context
 const AuthContext = createContext(null);
 
-function AuthProvider({ children }) {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const value = useMemo(() => ({ user, setUser }), [user]);
+  
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-function useAuth() {
+export function useAuth() {
   return useContext(AuthContext);
 }
+```
+\
+2. `src/components/Navbar.jsx`
+```jsx
+import { Link, useNavigate, useRevalidator } from "react-router";
+import { useAuth } from "../context/AuthContext";
 
-// Auth-aware navigation
-function Navbar() {
+export function Navbar() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
@@ -375,8 +397,21 @@ function Navbar() {
     </nav>
   );
 }
+```
+\
+3. `src/pages/Home.jsx`
+```jsx
+export default function Home() {
+  return <h1>Home</h1>;
+}
+```
+\
+4. `src/pages/Login.jsx`
+```jsx
+import { useNavigate, useRevalidator } from "react-router";
+import { useAuth } from "../context/AuthContext";
 
-function Login() {
+export default function Login() {
   const { setUser } = useAuth();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
@@ -394,33 +429,61 @@ function Login() {
     </div>
   );
 }
+```
+\
+5. `src/pages/Dashboard.jsx`
+```jsx
+import { useAuth } from "../context/AuthContext";
 
-function Dashboard() {
+export default function Dashboard() {
   const { user } = useAuth();
   return <h1>Dashboard for {user?.name}</h1>;
 }
+```
+\
+6. `src/layouts/RootLayout.jsx`
+```jsx
+import { Outlet } from "react-router";
+import { AuthProvider } from "../context/AuthContext";
+import { Navbar } from "../components/Navbar";
 
-// Layout with navbar
-function RootLayout() {
+export default function RootLayout() {
   return (
     <AuthProvider>
       <Navbar />
-      <main><Outlet /></main>
+      <main>
+        <Outlet />
+      </main>
     </AuthProvider>
   );
 }
+```
+\
+7. `src/router.jsx`
+```jsx
+import { createBrowserRouter } from "react-router";
+import RootLayout from "./layouts/RootLayout";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
-const router = createBrowserRouter([
+export const router = createBrowserRouter([
   {
     path: "/",
     element: <RootLayout />,
     children: [
-      { index: true, element: <h1>Home</h1> },
+      { index: true, element: <Home /> },
       { path: "login", element: <Login /> },
       { path: "dashboard", element: <Dashboard /> },
     ],
   },
 ]);
+```
+\
+8. `src/App.jsx`
+```jsx
+import { RouterProvider } from "react-router";
+import { router } from "./router";
 
 export default function App() {
   return <RouterProvider router={router} />;
