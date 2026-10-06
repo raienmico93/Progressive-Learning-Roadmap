@@ -119,34 +119,34 @@ import { useReducer } from 'react';
 
 // Reducer function: pure, no mutations
 function counterReducer(state, action) {
-  switch (action.type) {
-    case 'increment': {
-      // Return a new object, do not mutate state
-      return { count: state.count + 1 };
+    switch (action.type) {
+        case 'increment': {
+            // Return a new object, do not mutate state
+            return { count: state.count + 1 };
+        }
+        case 'decrement': {
+            return { count: state.count - 1 };
+        }
+        case 'reset': {
+            return { count: 0 };
+        }
+        default: {
+            throw Error('Unknown action: ' + action.type);
+        }
     }
-    case 'decrement': {
-      return { count: state.count - 1 };
-    }
-    case 'reset': {
-      return { count: 0 };
-    }
-    default: {
-      throw Error('Unknown action: ' + action.type);
-    }
-  }
 }
 
 function Counter() {
-  const [state, dispatch] = useReducer(counterReducer, { count: 0 });
-
-  return (
-    <div>
-      <p>Count: {state.count}</p>
-      <button onClick={() => dispatch({ type: 'increment' })}>+</button>
-      <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
-      <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>
-    </div>
-  );
+    const [state, dispatch] = useReducer(counterReducer, { count: 0 });
+  
+    return (
+        <div>
+            <p>Count: {state.count}</p>
+            <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+            <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+            <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>
+        </div>
+    );
 }
 ```
 
@@ -203,9 +203,9 @@ An action is like a note that says "this happened." It has a label (the type) an
 
 ```javascript
 dispatch({
-  type: 'action_type',
-  // optional additional fields
-  payload: data
+    type: 'action_type',
+    // optional additional fields
+    payload: data
 });
 ```
 
@@ -230,25 +230,28 @@ dispatch({
 ### Annotated Complete Code Example
 
 **Example: Task Actions**
-
-```javascript
-// Action for adding a task
+Action for adding a task
+```js
 dispatch({
-  type: 'added',
-  id: nextId++,
-  text: text
+    type: 'added',
+    id: nextId++,
+    text: text
 });
-
-// Action for changing a task
+```
+\
+Action for changing a task
+```js
 dispatch({
-  type: 'changed',
-  task: updatedTask
+    type: 'changed',
+    task: updatedTask
 });
-
-// Action for deleting a task
+```
+\
+Action for deleting a task
+```js
 dispatch({
-  type: 'deleted',
-  id: taskId
+    type: 'deleted',
+    id: taskId
 });
 ```
 
@@ -318,14 +321,44 @@ dispatch({ type: 'action_type' });
 **Example: Dispatching from Event Handlers**
 
 ```jsx
-function Counter() {
-  const [state, dispatch] = useReducer(counterReducer, { count: 0 });
+import React, { useReducer } from 'react';
 
-  function handleIncrement() {
-    dispatch({ type: 'increment' });
-  }
+// 1. Define the initial state
+const initialState = { count: 0 };
 
-  return <button onClick={handleIncrement}>+</button>;
+// 2. Define the reducer function to handle state actions
+function counterReducer(state, action) {
+    switch (action.type) {
+        case 'increment':
+            return { count: state.count + 1 };
+        case 'decrement':
+            return { count: state.count - 1 };
+        case 'reset':
+            return { count: 0 };
+        default:
+            throw new Error(`Unhandled action type: ${action.type}`);
+    }
+}
+
+// 3. Your Counter component
+export default function Counter() {
+    const [state, dispatch] = useReducer(counterReducer, initialState);
+  
+    function handleIncrement() { dispatch({ type: 'increment' }); }
+  
+    function handleDecrement() { dispatch({ type: 'decrement' }); }
+  
+    function handleReset() { dispatch({ type: 'reset' }); }
+  
+    return (
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <h2>Count: {state.count}</h2>
+
+            <button onClick={handleDecrement}>-</button>
+            <button onClick={handleIncrement} style={{ margin: '0 10px' }}>+</button>
+            <button onClick={handleReset}>Reset</button>
+        </div>
+    );
 }
 ```
 
@@ -397,30 +430,59 @@ const [state, dispatch] = useReducer(reducer, props, createInitialState);
 **Example: Lazy Initialization**
 
 ```jsx
-function createInitialState(username) {
-  const initialTodos = [];
-  for (let i = 0; i < 50; i++) {
-    initialTodos.push({
-      id: i,
-      text: username + "'s task #" + (i + 1)
-    });
-  }
-  return { draft: '', todos: initialTodos };
+import React, { useReducer } from 'react';
+
+// Step 1: The initialization function. It only runs ONCE on initial mount.
+function init(initialCount) {
+    // Line-by-line: Takes the argument, multiplies it by 10, 
+    // and returns the actual initial state object.
+    return { count: initialCount * 10 };
 }
 
-function TodoList({ username }) {
-  const [state, dispatch] = useReducer(
-    reducer,
-    username,
-    createInitialState
-  );
-  // createInitialState runs only once during initialization
+// Step 2: Standard reducer logic to handle actions
+function reducer(state, action) {
+    switch (action.type) {
+        case 'increment':
+            return { count: state.count + 1 };
+        case 'decrement':
+            return { count: state.count - 1 };
+        case 'reset':
+            // Uses the init function to reset state back to original setup
+            return init(action.payload);
+        default:
+            throw new Error();
+    }
+}
+
+export default function Counter({ initialCount = 5 }) {
+    // Step 3: useReducer with 3 arguments enabling lazy initialization.
+    // 'initialCount' is passed as the argument to 'init'.
+    const [state, dispatch] = useReducer(reducer, initialCount, init);
+  
+    return (
+        <div>
+            <p>Count: {state.count}</p>
+            <button onClick={() => dispatch({ type: 'increment' })}>+</button>
+            <button onClick={() => dispatch({ type: 'decrement' })}>-</button>
+            <button onClick={() => dispatch({ type: 'reset', payload: initialCount })}>Reset</button>
+        </div>
+    );
 }
 ```
+**Step-by-Step Setup**
+1. Define the init function: Create a pure function outside the component that accepts an initial argument and returns the initial state object.
+2. Define the reducer function: Create the state transition logic based on action types.
+3. Call useReducer: Pass three arguments: reducer, the initial argument (props.initialCount), and the init function.
 
-**Explanation**
+**Definitive Output**
+• On Mount: Screen displays Count: 50.
+• Click + button once: Screen displays Count: 51.
+• Click Reset button: Screen displays Count: 50.
 
-Passing `createInitialState` (the function) as the third argument means it only runs during initialization. If you passed `createInitialState(username)`, it would run on every render .
+**Why it produces this result**
+When the component mounts, React evaluates useReducer. Instead of using initialCount (which is 5) directly as the state, it passes 5 into init(5). The init function calculates 5 * 10, returning { count: 50 }. When you click increment, the reducer takes { count: 50 } and returns { count: 51 }.
+
+
 
 ### Real-World Cases
 
@@ -487,34 +549,34 @@ function reducer(state, action) {
 ```jsx
 // Define possible states as a discriminated union (TypeScript)
 type WizardState = {
-  currentStep: number;
-  completedSteps: Set<number>;
+    currentStep: number;
+    completedSteps: Set<number>;
 } & (
-  | { status: "idle"; error: null }
-  | { status: "submitting"; error: null }
-  | { status: "error"; error: string }
-  | { status: "success"; error: null }
+    | { status: "idle";       error: null }
+    | { status: "submitting"; error: null }
+    | { status: "error";      error: string }
+    | { status: "success";    error: null }
 );
 
 function wizardReducer(state, action) {
-  switch (action.type) {
-    case "SUBMIT_STEP":
-      return { ...state, status: "submitting", error: null };
-    case "STEP_VALIDATED":
-      return {
-        ...state,
-        status: "idle",
-        error: null,
-        currentStep: state.currentStep + 1,
-        completedSteps: new Set(state.completedSteps).add(state.currentStep)
-      };
-    case "STEP_FAILED":
-      return { ...state, status: "error", error: action.error };
-    case "GO_BACK":
-      return { ...state, status: "idle", error: null, currentStep: Math.max(0, state.currentStep - 1) };
-    default:
-      throw Error('Unknown action');
-  }
+    switch (action.type) {
+        case "SUBMIT_STEP":
+            return { ...state, status: "submitting", error: null };
+        case "STEP_VALIDATED":
+            return {
+                ...state,
+                status: "idle",
+                error: null,
+                currentStep: state.currentStep + 1,
+                completedSteps: new Set(state.completedSteps).add(state.currentStep)
+            };
+        case "STEP_FAILED":
+            return { ...state, status: "error", error: action.error };
+        case "GO_BACK":
+            return { ...state, status: "idle", error: null, currentStep: Math.max(0, state.currentStep - 1) };
+        default:
+            throw Error('Unknown action');
+    }
 }
 ```
 
@@ -598,9 +660,8 @@ function useAppDispatch() {
 ### Annotated Complete Code Example
 
 **Example: Task App with Reducer + Context**
-
+`TasksContext.js`
 ```jsx
-// TasksContext.js
 import { createContext, useContext, useReducer } from 'react';
 
 const TasksContext = createContext(null);
@@ -626,9 +687,9 @@ export function useTasksDispatch() {
   return useContext(TasksDispatchContext);
 }
 ```
-
+\
+`TaskApp.jsx`
 ```jsx
-// TaskApp.jsx
 import { TasksProvider, useTasks, useTasksDispatch } from './TasksContext';
 
 function TaskApp() {

@@ -879,20 +879,20 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXVI. Broadcasting and Real-Time Applications
 
-- **90. Broadcasting Fundamentals**
+- [**90. Broadcasting Fundamentals**](/Web%20Development/Laravel/Miscellaneous/Broadcasting.md)
   - Events
   - Broadcast channels
   - Public channels
   - Private channels
   - Presence channels
 
-- **91. Real-Time Features**
+- [**91. Real-Time Features**](/Web%20Development/Laravel/Miscellaneous/RealTime.md)
   - Notifications
   - Chat systems
   - Live dashboards
   - Real-time status updates
 
-- **92. WebSocket Architecture**
+- [**92. WebSocket Architecture**](/Web%20Development/Laravel/Miscellaneous/WebSocket.md)
   - Event broadcasting
   - Client subscriptions
   - Authentication
@@ -902,20 +902,20 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXVII. Service Container and Dependency Injection
 
-- **93. Service Container**
+- [**93. Service Container**](/Web%20Development/Laravel/Services/ServiceContainer.md)
   - Dependency resolution
   - Bindings
   - Singletons
   - Contextual bindings
   - Automatic resolution
 
-- **94. Dependency Injection**
+- [**94. Dependency Injection**](/Web%20Development/Laravel/Services/DependencyInj.md)
   - Constructor injection
   - Method injection
   - Interface-based dependencies
   - Dependency inversion
 
-- **95. Practical Container Architecture**
+- [**95. Practical Container Architecture**](/Web%20Development/Laravel/Services/PracticalContainerArch.md)
   - Service classes
   - Repositories
   - External integrations
@@ -926,20 +926,20 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXVIII. Service Providers and Contracts
 
-- **96. Service Providers**
+- [**96. Service Providers**](/Web%20Development/Laravel/Services/ServiceProviders.md)
   - Registration
   - Bootstrapping
   - Container bindings
   - Event registration
   - Application initialization
 
-- **97. Laravel Contracts**
+- [**97. Laravel Contracts**](/Web%20Development/Laravel/Services/Contracts.md)
   - Interfaces
   - Abstraction
   - Dependency inversion
   - Framework contracts
 
-- **98. Extending Laravel**
+- [**98. Extending Laravel**](/Web%20Development/Laravel/Services/Extending.md)
   - Custom services
   - Package integration
   - Custom providers
@@ -949,17 +949,19 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXIX. Facades and Laravel Abstractions
 
-- **99. Facades**
+- [**99. Facades**](/Web%20Development/Laravel/Miscellaneous/Facades.md)
   - Facade concept
   - Static-looking interfaces
   - Underlying container resolution
   - Common Laravel facades
 
-- **100. Facades versus Dependency Injection**
+- [**100. Facades versus Dependency Injection**](/Web%20Development/Laravel/Miscellaneous/FacadesVSInj.md)
   - Convenience
   - Testability
   - Coupling
   - Architectural considerations
+  - Enhanced: Hidden Dependencies
+  - Enhanced: Static Analysis Integration
 
 ---
 
