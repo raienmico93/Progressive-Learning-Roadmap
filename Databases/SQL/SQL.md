@@ -1168,7 +1168,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XXV. Backup, Recovery, and High Availability
 
-* **100. Backup Fundamentals**
+* [**100. Backup Fundamentals**](/Databases/SQL/Miscellaneous/Backup.md)
 
   * Full backups
   * Incremental backups
@@ -1176,7 +1176,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Logical backups
   * Physical backups
 
-* **101. Recovery**
+* [**101. Recovery**](/Databases/SQL/Miscellaneous/Recovery.md)
 
   * Restore operations
   * Point-in-time recovery
@@ -1186,7 +1186,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
     * RTO
   * Disaster recovery planning
 
-* **102. High Availability**
+* [**102. High Availability**](/Databases/SQL/Miscellaneous/HighAdapt.md)
 
   * Replication
   * Primary-replica architectures
@@ -1194,7 +1194,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Redundancy
   * Automatic recovery
 
-* **103. Database Maintenance**
+* [**103. Database Maintenance**](/Databases/SQL/Miscellaneous/DatabaseMaintenance.md)
 
   * Statistics updates
   * Index maintenance
@@ -1207,7 +1207,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XXVI. Replication, Partitioning, and Scalability
 
-* **104. Database Replication**
+* [**104. Database Replication**](/Databases/SQL/Miscellaneous/DBReplication.md)
 
   * Synchronous replication
   * Asynchronous replication
@@ -1215,7 +1215,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Replication lag
   * Failover strategies
 
-* **105. Table Partitioning**
+* [**105. Table Partitioning**](/Databases/SQL/Miscellaneous/TablePartitioning.md)
 
   * Range partitioning
   * List partitioning
@@ -1223,7 +1223,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Composite partitioning
   * Partition pruning
 
-* **106. Horizontal and Vertical Scaling**
+* [**106. Horizontal and Vertical Scaling**](/Databases/SQL/Miscellaneous/HVScaling.md)
 
   * Vertical scaling
   * Horizontal scaling
@@ -1232,7 +1232,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Sharding concepts
   * Distributed SQL considerations
 
-* **107. Scalability Engineering**
+* [**107. Scalability Engineering**](/Databases/SQL/Miscellaneous/ScalabilityEng.md)
 
   * Workload analysis
   * Connection management
@@ -1245,7 +1245,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XXVII. Application Integration
 
-* **108. SQL and Application Programming**
+* [**108. SQL and Application Programming**](/Databases/SQL/App%20Integration/SQLAppProgramming.md)
 
   * Database connectivity
   * Connection strings
@@ -1253,7 +1253,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Transactions from applications
   * Parameterized queries
 
-* **109. Database APIs**
+* [**109. Database APIs**](/Databases/SQL/App%20Integration/DatabaseAPIs.md)
 
   * JDBC
   * ODBC
@@ -1261,7 +1261,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Python database drivers
   * ORM database integrations
 
-* **110. Object-Relational Mapping**
+* [**110. Object-Relational Mapping**](/Databases/SQL/App%20Integration/ObjectRelationalMapping.md)
 
   * ORM fundamentals
   * Entity mapping
@@ -1271,7 +1271,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * N+1 query problem
   * ORM-generated SQL
 
-* **111. Application-Level Data Access**
+* [**111. Application-Level Data Access**](/Databases/SQL/App%20Integration/AppLevelDataAccess.md)
 
   * Repository patterns
   * Data-access layers
