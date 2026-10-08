@@ -328,7 +328,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
 
 # VI. Templates and Jinja
 
-* **25. Template Fundamentals**
+* [**25. Template Fundamentals**](/Python%20Technologies/Flask/Templates/Template.md)
 
   * Jinja templates
   * `render_template()`
@@ -336,7 +336,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Template variables
   * Template inheritance
 
-* **26. Jinja Syntax**
+* [**26. Jinja Syntax**](/Python%20Technologies/Flask/Templates/Jinja.md)
 
   * Expressions
   * Statements
@@ -345,7 +345,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Tests
   * Comments
 
-* **27. Template Control Structures**
+* [**27. Template Control Structures**](/Python%20Technologies/Flask/Templates/ControlStructures.md)
 
   * `if`
   * `elif`
@@ -354,7 +354,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Loop metadata
   * Conditional rendering
 
-* **28. Template Inheritance**
+* [**28. Template Inheritance**](/Python%20Technologies/Flask/Templates/Inheritance.md)
 
   * Base templates
   * Blocks
@@ -362,21 +362,21 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Reusable layouts
   * Nested inheritance
 
-* **29. Template Reuse**
+* [**29. Template Reuse**](/Python%20Technologies/Flask/Templates/Reuse.md)
 
   * Includes
   * Macros
   * Reusable components
   * Custom filters
 
-* **30. Template Context**
+* [**30. Template Context**](/Python%20Technologies/Flask/Templates/Context.md)
 
   * Passing variables
   * Context processors
   * Global template variables
   * Request-aware rendering
 
-* **31. Template Security**
+* [**31. Template Security**](/Python%20Technologies/Flask/Templates/Security.md)
 
   * Automatic escaping
   * XSS concepts
@@ -388,7 +388,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
 
 # VII. Static Files and Frontend Integration
 
-* **32. Static Assets**
+* [**32. Static Assets**](/Python%20Technologies/Flask/Static%20Files%20and%20Frontend/StaticAssets.md)
 
   * CSS
   * JavaScript
@@ -396,13 +396,13 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Fonts
   * Static directory organization
 
-* **33. Static URLs**
+* [**33. Static URLs**](/Python%20Technologies/Flask/Static%20Files%20and%20Frontend/URLs.md)
 
   * `url_for('static', ...)`
   * Cache-busting approaches
   * Asset organization
 
-* **34. Flask + JavaScript**
+* [**34. Flask + JavaScript**](/Python%20Technologies/Flask/Static%20Files%20and%20Frontend/JS.md)
 
   * `fetch()`
   * JSON requests
@@ -410,7 +410,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * AJAX-style interactions
   * Frontend/backend boundaries
 
-* **35. Progressive Web Integration**
+* [**35. Progressive Web Integration**](/Python%20Technologies/Flask/Static%20Files%20and%20Frontend/PorgressiveWebApp.md)
 
   * Server-rendered HTML
   * Server-rendered pages + JavaScript
@@ -421,7 +421,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
 
 # VIII. Sessions and User State
 
-* **36. Session Fundamentals**
+* [**36. Session Fundamentals**](/Python%20Technologies/Flask/Session%20and%20User%20State/Session.md)
 
   * What sessions are
   * Flask `session`
@@ -429,7 +429,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Session lifetime
   * Secret keys
 
-* **37. Session Management**
+* [**37. Session Management**](/Python%20Technologies/Flask/Session%20and%20User%20State/Management.md)
 
   * Login state
   * User preferences
@@ -437,7 +437,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Session clearing
   * Session expiration
 
-* **38. Session Security**
+* [**38. Session Security**](/Python%20Technologies/Flask/Session%20and%20User%20State/Security.md)
 
   * Secret-key management
   * Cookie security
@@ -450,14 +450,14 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
 
 # IX. Flask Configuration
 
-* **39. Configuration Fundamentals**
+* [**39. Configuration Fundamentals**](/Python%20Technologies/Flask/Configuration/Config.md)
 
   * `app.config`
   * Configuration objects
   * Default configuration
   * Environment-specific configuration
 
-* **40. Configuration Sources**
+* [**40. Configuration Sources**](/Python%20Technologies/Flask/Configuration/Sources.md)
 
   * Python configuration files
   * Environment variables
@@ -465,14 +465,14 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * `.env` integration
   * Secrets management
 
-* **41. Environment Separation**
+* [**41. Environment Separation**](/Python%20Technologies/Flask/Configuration/EnvSeparation.md)
 
   * Development
   * Testing
   * Staging
   * Production
 
-* **42. Configuration Best Practices**
+* [**42. Configuration Best Practices**](/Python%20Technologies/Flask/Configuration/BestPractices.md)
 
   * Never hard-code secrets
   * Separate configuration from code
@@ -484,7 +484,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
 
 # X. Application and Request Contexts
 
-* **43. Application Context**
+* [**43. Application Context**](/Python%20Technologies/Flask/App%20and%20Request%20Contexts/AppContext.md)
 
   * `current_app`
   * `g`
@@ -492,7 +492,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Why application context exists
   * Manual context management
 
-* **44. Request Context**
+* [**44. Request Context**](/Python%20Technologies/Flask/App%20and%20Request%20Contexts/RequestContext.md)
 
   * `request`
   * `session`
@@ -500,7 +500,7 @@ The roadmap below follows Flask’s current documentation structure and emphasiz
   * Context-local objects
   * Context management
 
-* **45. Context-Aware Programming**
+* [**45. Context-Aware Programming**](/Python%20Technologies/Flask/App%20and%20Request%20Contexts/ContentAware.md)
 
   * Accessing application configuration
   * Database connections
@@ -514,7 +514,7 @@ Flask’s official architecture documentation treats application and request con
 
 # XI. Error Handling and Debugging
 
-* **46. Error Handling**
+* [**46. Error Handling**](/Python%20Technologies/Flask/Error%20Handling%20and%20Debugging/ErrorHandling.md)
 
   * `404`
   * `403`
@@ -523,13 +523,13 @@ Flask’s official architecture documentation treats application and request con
   * Custom error handlers
   * Error handler registration
 
-* **47. Custom Error Pages**
+* [**47. Custom Error Pages**](/Python%20Technologies/Flask/Error%20Handling%20and%20Debugging/CustomError.md)
 
   * HTML error pages
   * JSON error responses
   * Blueprint-specific error handling
 
-* **48. Debugging**
+* [**48. Debugging**](/Python%20Technologies/Flask/Error%20Handling%20and%20Debugging/Debugging.md)
 
   * Debug mode
   * Interactive debugger
@@ -537,7 +537,7 @@ Flask’s official architecture documentation treats application and request con
   * Development reloader
   * External debuggers
 
-* **49. Logging**
+* [**49. Logging**](/Python%20Technologies/Flask/Error%20Handling%20and%20Debugging/Logging.md)
 
   * Python logging
   * Log levels
@@ -552,14 +552,14 @@ Flask explicitly warns that its development server is for local development rath
 
 # XII. Flask Project Structure
 
-* **50. Small Application Structure**
+* [**50. Small Application Structure**](/Python%20Technologies/Flask/Project%20Structure/SmaalApp.md)
 
   * Single-file applications
   * Basic package structure
   * Templates
   * Static files
 
-* **51. Growing Application Structure**
+* [**51. Growing Application Structure**](/Python%20Technologies/Flask/Project%20Structure/GrowingApp.md)
 
   * Application package
   * Configuration module
@@ -569,7 +569,7 @@ Flask explicitly warns that its development server is for local development rath
   * Templates
   * Static assets
 
-* **52. Package-Based Architecture**
+* [**52. Package-Based Architecture**](/Python%20Technologies/Flask/Project%20Structure/PackageBasedArch.md)
 
   * Python packages
   * `__init__.py`
@@ -577,7 +577,7 @@ Flask explicitly warns that its development server is for local development rath
   * Import organization
   * Avoiding circular imports
 
-* **53. Separation of Concerns**
+* [**53. Separation of Concerns**](/Python%20Technologies/Flask/Project%20Structure/SeparationOfConcerns.md)
 
   * Routes
   * Business logic
@@ -590,7 +590,7 @@ Flask explicitly warns that its development server is for local development rath
 
 # XIII. Application Factory Pattern
 
-* **54. Application Factories**
+* [**54. Application Factories**](/Python%20Technologies/Flask/App%20Factory%20Pattern/AppFactories.md)
 
   * `create_app()`
   * Creating Flask instances inside a function
@@ -599,7 +599,7 @@ Flask explicitly warns that its development server is for local development rath
   * Registering routes
   * Returning the application
 
-* **55. Factory Advantages**
+* [**55. Factory Advantages**](/Python%20Technologies/Flask/App%20Factory%20Pattern/Advantages.md)
 
   * Multiple application instances
   * Easier testing
@@ -607,7 +607,7 @@ Flask explicitly warns that its development server is for local development rath
   * Reduced global state
   * Better modularity
 
-* **56. Factory-Based Testing**
+* [**56. Factory-Based Testing**](/Python%20Technologies/Flask/App%20Factory%20Pattern/FactoryBasedTesting.md)
 
   * Test configuration
   * Application initialization

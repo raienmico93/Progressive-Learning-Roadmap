@@ -593,7 +593,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # XVI. Memory and Array Internals
 
-* **56. NumPy Memory Model**
+* [**56. NumPy Memory Model**](/Python%20Technologies/NumPy/Memory%20and%20Array%20Internals/MemoryModel.md)
 
   * Contiguous memory
   * Strides
@@ -601,14 +601,14 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Data buffer
   * dtype interpretation
 
-* **57. C-Order and Fortran-Order**
+* [**57. C-Order and Fortran-Order**](/Python%20Technologies/NumPy/Memory%20and%20Array%20Internals/CAndFortran.md)
 
   * Row-major layout
   * Column-major layout
   * Memory access patterns
   * Performance implications
 
-* **58. Views and Memory Sharing**
+* [**58. Views and Memory Sharing**](/Python%20Technologies/NumPy/Memory%20and%20Array%20Internals/ViewsAndMemorySharing.md)
 
   * View creation
   * Stride manipulation
@@ -616,7 +616,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * `np.shares_memory()`
   * `np.may_share_memory()`
 
-* **59. Memory Optimization**
+* [**59. Memory Optimization**](/Python%20Technologies/NumPy/Memory%20and%20Array%20Internals/MemoryOpt.md)
 
   * Appropriate dtypes
   * Avoiding unnecessary copies
@@ -628,19 +628,19 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
 # XVII. Performance Optimization
 
-* **60. Vectorization versus Python Loops**
+* [**60. Vectorization versus Python Loops**](/Python%20Technologies/NumPy/PerformanceOpt/VectorizationVSLoops.md)
 
   * Performance benchmarking
   * Python overhead
   * Vectorized execution
 
-* **61. Benchmarking**
+* [**61. Benchmarking**](/Python%20Technologies/NumPy/PerformanceOpt/Benchmarking.md)
 
   * `timeit`
   * Profiling concepts
   * Measuring realistic workloads
 
-* **62. Efficient Array Operations**
+* [**62. Efficient Array Operations**](/Python%20Technologies/NumPy/PerformanceOpt/EfficientArrayOperations.md)
 
   * Avoid temporary arrays
   * Reuse allocated memory
@@ -648,7 +648,7 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Minimize copying
   * Favor vectorized operations
 
-* **63. Advanced Performance**
+* [**63. Advanced Performance**](/Python%20Technologies/NumPy/PerformanceOpt/AdvancedPerformance.md)
 
   * Broadcasting efficiency
   * Memory bandwidth
@@ -664,8 +664,10 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
 
   * `.npy`
   * `.npz`
-  * Saving arrays
-  * Loading arrays
+  * Saving arrays (e.g., np.save())
+  * Loading arrays (e.g., np.load())
+  * Uncompressed vs. Compressed storage trade-offs
+  * Cross-platform endianness and byte-ordering
 
 * **65. Text-Based Data**
 
@@ -673,6 +675,8 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * `loadtxt()`
   * `savetxt()`
   * `genfromtxt()`
+  * Structural performance limitations of text parsing
+  * Handling missing data, converters, and custom delimiters
 
 * **66. Memory-Mapped Arrays**
 
@@ -680,6 +684,8 @@ NumPy should be learned progressively: **Python numerical basics → arrays → 
   * Large datasets
   * Disk-backed arrays
   * Partial access
+  * Write modes and disk flushing 
+  * Shared-memory concurrency 
 
 ---
 
