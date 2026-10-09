@@ -120,9 +120,8 @@ src/
 - Over-modularisation (too many tiny modules) can increase complexity without benefit.
 
 ### Annotated Code Example
-
+`modules/users/users.routes.ts`
 ```typescript
-// modules/users/users.routes.ts
 import { Router } from 'express';
 import { UserController } from './users.controller';
 import { validate } from '../../middleware/validate';
@@ -137,9 +136,9 @@ router.post('/', validate(createUserSchema), controller.create);
 
 export default router;
 ```
-
+\
+`modules/users/users.controller.ts`
 ```typescript
-// modules/users/users.controller.ts
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from './users.service';
 
@@ -175,9 +174,9 @@ export class UserController {
   };
 }
 ```
-
+\
+`modules/users/users.service.ts`
 ```typescript
-// modules/users/users.service.ts
 import { UserRepository } from './users.repository';
 import { hashPassword } from '../../shared/crypto';
 

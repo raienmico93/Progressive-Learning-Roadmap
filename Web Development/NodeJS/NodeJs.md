@@ -611,14 +611,14 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # XIII. Authentication and Authorization
 
-* **58. Authentication Fundamentals**
+* [**58. Authentication Fundamentals**](/Web%20Development/NodeJS/Auth%20and%20Auto/Authentication.md)
 
   * Identity
   * Credentials
   * Sessions
   * Tokens
 
-* **59. Password Security**
+* [**59. Password Security**](/Web%20Development/NodeJS/Auth%20and%20Auto/PasswordSec.md)
 
   * Password hashing
   * Salt
@@ -626,7 +626,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Password reset flows
   * Credential validation
 
-* **60. Session Authentication**
+* [**60. Session Authentication**](/Web%20Development/NodeJS/Auth%20and%20Auto/SessionAuth.md)
 
   * Sessions
   * Cookies
@@ -634,7 +634,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Session expiration
   * Session revocation
 
-* **61. Token Authentication**
+* [**61. Token Authentication**](/Web%20Development/NodeJS/Auth%20and%20Auto/TokenAuth.md)
 
   * JWT concepts
   * Access tokens
@@ -643,7 +643,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Token rotation
   * Token revocation
 
-* **62. Authorization**
+* [**62. Authorization**](/Web%20Development/NodeJS/Auth%20and%20Auto/Authorization.md)
 
   * Roles
   * Permissions
@@ -651,7 +651,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Resource-based authorization
   * Tenant-based authorization
 
-* **63. OAuth and OpenID Connect**
+* [**63. OAuth and OpenID Connect**](/Web%20Development/NodeJS/Auth%20and%20Auto/OAuthAndOpenID.md)
 
   * Authorization flows
   * Identity providers
@@ -664,14 +664,14 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # XIV. Node.js Security
 
-* **64. Web Security Fundamentals**
+* [**64. Web Security Fundamentals**](/Web%20Development/NodeJS/Security/WebSecurity.md)
 
   * Authentication security
   * Authorization security
   * Session security
   * Transport security
 
-* **65. Common Web Vulnerabilities**
+* [**65. Common Web Vulnerabilities**](/Web%20Development/NodeJS/Security/CommonWebVuln.md)
 
   * SQL injection
   * Cross-site scripting
@@ -681,7 +681,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Broken access control
   * Insecure deserialization
 
-* **66. Node.js-Specific Security**
+* [**66. Node.js-Specific Security**](/Web%20Development/NodeJS/Security/CommonWebVuln.md)
 
   * Unsafe dependency usage
   * Prototype pollution
@@ -689,7 +689,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Malicious packages
   * Environment-secret exposure
 
-* **67. Security Controls**
+* [**67. Security Controls**](/Web%20Development/NodeJS/Security/SecurityControls.md)
 
   * Input validation
   * Output encoding
@@ -700,7 +700,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Secure cookies
   * Secret management
 
-* **68. Dependency Security**
+* [**68. Dependency Security**](/Web%20Development/NodeJS/Security/DependencySecurity.md)
 
   * Dependency auditing
   * Lock files
@@ -712,7 +712,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
 
 # XV. TypeScript with Node.js
 
-* **69. TypeScript Fundamentals**
+* [**69. TypeScript Fundamentals**](/Web%20Development/NodeJS/TypeScript/TypeScript.md)
 
   * Types
   * Interfaces
@@ -721,7 +721,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Intersections
   * Generics
 
-* **70. TypeScript for Backend Development**
+* [**70. TypeScript for Backend Development**](/Web%20Development/NodeJS/TypeScript/BackendTS.md)
 
   * Typed request objects
   * Typed database models
@@ -729,7 +729,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Service interfaces
   * Error types
 
-* **71. Advanced TypeScript**
+* [**71. Advanced TypeScript**](/Web%20Development/NodeJS/TypeScript/Advanced.md)
 
   * Conditional types
   * Mapped types
@@ -738,7 +738,7 @@ Node.js is best learned as more than “JavaScript on the server.” The progres
   * Generics
   * Decorators where applicable
 
-* **72. Node.js TypeScript Tooling**
+* [**72. Node.js TypeScript Tooling**](/Web%20Development/NodeJS/TypeScript/TSTooling.md)
 
   * Compiler configuration
   * Build systems

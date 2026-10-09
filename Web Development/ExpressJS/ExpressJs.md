@@ -764,27 +764,27 @@
 
 # XVIII. Testing Express Applications
 
-* **76. Unit Testing**
+* [**76. Unit Testing**](/Web%20Development/ExpressJS/Testing%20App/Unit.md)
 
   * Testing services
   * Testing utilities
   * Mocking dependencies
 
-* **77. Integration Testing**
+* [**77. Integration Testing**](/Web%20Development/ExpressJS/Testing%20App/Integration.md)
 
   * Testing routes
   * Testing middleware
   * Testing databases
   * Testing authentication flows
 
-* **78. HTTP Testing**
+* [**78. HTTP Testing**](/Web%20Development/ExpressJS/Testing%20App/HTTP.md)
 
   * Supertest
   * Request assertions
   * Response assertions
   * Status-code assertions
 
-* **79. Test Databases**
+* [**79. Test Databases**](/Web%20Development/ExpressJS/Testing%20App/Databases.md)
 
   * Isolated databases
   * Test fixtures
@@ -792,7 +792,7 @@
   * Database cleanup
   * Transactions in tests
 
-* **80. Test Strategy**
+* [**80. Test Strategy**](/Web%20Development/ExpressJS/Testing%20App/Strategy.md)
 
   * Unit tests
   * Integration tests
@@ -805,7 +805,7 @@
 
 # XIX. Logging and Observability
 
-* **81. Logging**
+* [**81. Logging**](/Web%20Development/ExpressJS/Logging%20and%20Observability/Logging.md)
 
   * Console logging
   * Structured logging
@@ -816,7 +816,7 @@
     * Warn
     * Error
 
-* **82. Production Logging**
+* [**82. Production Logging**](/Web%20Development/ExpressJS/Logging%20and%20Observability/ProductionLoading.md)
 
   * Request IDs
   * Correlation IDs
@@ -824,7 +824,7 @@
   * Centralized log collection
   * Sensitive-data redaction
 
-* **83. Metrics**
+* [**83. Metrics**](/Web%20Development/ExpressJS/Logging%20and%20Observability/Metrics.md)
 
   * Request count
   * Request latency
@@ -832,7 +832,7 @@
   * Throughput
   * Database latency
 
-* **84. Distributed Tracing**
+* [**84. Distributed Tracing**](/Web%20Development/ExpressJS/Logging%20and%20Observability/DistributedTracing.md)
 
   * Trace IDs
   * Spans
@@ -843,7 +843,7 @@
 
 # XX. Performance Optimization
 
-* **85. Express Performance**
+* [**85. Express Performance**](/Web%20Development/ExpressJS/Performance%20Optimization/Express.md)
 
   * Middleware overhead
   * JSON serialization
@@ -851,14 +851,14 @@
   * Response caching
   * Connection pooling
 
-* **86. Database Performance**
+* [**86. Database Performance**](/Web%20Development/ExpressJS/Performance%20Optimization/Database.md)
 
   * Query optimization
   * Indexes
   * Query profiling
   * Connection pool sizing
 
-* **87. HTTP Performance**
+* [**87. HTTP Performance**](/Web%20Development/ExpressJS/Performance%20Optimization/HTTP.md)
 
   * Keep-alive
   * Compression
@@ -866,7 +866,7 @@
   * ETags
   * Conditional requests
 
-* **88. Application Performance**
+* [**88. Application Performance**](/Web%20Development/ExpressJS/Performance%20Optimization/Application.md)
 
   * Avoid blocking the event loop
   * Efficient algorithms

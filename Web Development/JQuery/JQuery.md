@@ -862,7 +862,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # XIX. Debugging and Troubleshooting
 
-* **82. Browser Developer Tools**
+* [**82. Browser Developer Tools**](/Web%20Development/JQuery/Debugging%20and%20Troubleshooting/BrowserDeveloperTools.md)
 
   * Console
   * Elements inspector
@@ -870,7 +870,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Sources/debugger
   * Performance tools
 
-* **83. Common jQuery Errors**
+* [**83. Common jQuery Errors**](/Web%20Development/JQuery/Debugging%20and%20Troubleshooting/CommonErrors.md)
 
   * `$ is not defined`
   * Incorrect selector
@@ -880,7 +880,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * AJAX request failure
   * Plugin initialization failure
 
-* **84. Debugging Techniques**
+* [**84. Debugging Techniques**](/Web%20Development/JQuery/Debugging%20and%20Troubleshooting/DebuggingTechniques.md)
 
   * `console.log()`
   * Breakpoints
@@ -889,7 +889,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Verifying element existence
   * Isolating event logic
 
-* **85. Dynamic DOM Debugging**
+* [**85. Dynamic DOM Debugging**](/Web%20Development/JQuery/Debugging%20and%20Troubleshooting/DynamicDebugging.md)
 
   * Delegated events
   * Content inserted after page load
@@ -900,7 +900,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # XX. jQuery Architecture and Code Organization
 
-* **86. Modular Organization**
+* [**86. Modular Organization**](/Web%20Development/JQuery/Architecture%20and%20Code%20Organization/ModularOrg.md)
 
   * Separate concerns
   * UI logic
@@ -908,21 +908,21 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Validation logic
   * Utility functions
 
-* **87. Encapsulation**
+* [**87. Encapsulation**](/Web%20Development/JQuery/Architecture%20and%20Code%20Organization/Encapsulation.md)
 
   * Closures
   * Namespace patterns
   * Module patterns
   * Avoiding global variables
 
-* **88. Reusable Components**
+* [**88. Reusable Components**](/Web%20Development/JQuery/Architecture%20and%20Code%20Organization/ReusableComponents.md)
 
   * Reusable functions
   * UI widgets
   * Plugin-based components
   * Shared AJAX utilities
 
-* **89. Maintainable jQuery Code**
+* [**89. Maintainable jQuery Code**](/Web%20Development/JQuery/Architecture%20and%20Code%20Organization/MaintainableCode.md)
 
   * Consistent naming
   * Small functions
@@ -935,14 +935,14 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # XXI. jQuery with Backend Technologies
 
-* **90. jQuery with PHP**
+* [**90. jQuery with PHP**](/Web%20Development/JQuery/Backend%20Tech/PHP.md)
 
   * AJAX requests
   * Form submission
   * JSON responses
   * CRUD interfaces
 
-* **91. jQuery with Laravel**
+* [**91. jQuery with Laravel**](/Web%20Development/JQuery/Backend%20Tech/Laravel.md)
 
   * CSRF handling
   * AJAX routes
@@ -950,14 +950,14 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Validation responses
   * Dynamic CRUD interfaces
 
-* **92. jQuery with ASP.NET**
+* [**92. jQuery with ASP.NET**](/Web%20Development/JQuery/Backend%20Tech/ASPDotNet.md)
 
   * AJAX endpoints
   * JSON
   * Form processing
   * Server-side validation
 
-* **93. jQuery with Node.js**
+* [**93. jQuery with Node.js**](/Web%20Development/JQuery/Backend%20Tech/NodeJS.md)
 
   * REST API interaction
   * JSON requests
@@ -968,7 +968,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # XXII. REST API Integration
 
-* **94. REST Fundamentals**
+* [**94. REST Fundamentals**](/Web%20Development/JQuery/REST%20API%20Integration/REST.md)
 
   * Resources
   * Endpoints
@@ -976,14 +976,14 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Status codes
   * JSON representations
 
-* **95. CRUD through AJAX**
+* [**95. CRUD through AJAX**](/Web%20Development/JQuery/REST%20API%20Integration/CRUDThroughAJAX.md)
 
   * Create
   * Read
   * Update
   * Delete
 
-* **96. API Error Handling**
+* [**96. API Error Handling**](/Web%20Development/JQuery/REST%20API%20Integration/APIErrorHandling.md)
 
   * `400` errors
   * `401` errors
@@ -992,7 +992,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * `422` errors
   * `500` errors
 
-* **97. Advanced API Interfaces**
+* [**97. Advanced API Interfaces**](/Web%20Development/JQuery/REST%20API%20Integration/AdvancedAPIInterfaces.md)
 
   * Pagination
   * Filtering

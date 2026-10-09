@@ -1284,7 +1284,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XXVIII. SQL Debugging and Troubleshooting
 
-* **112. Syntax Debugging**
+* [**112. Syntax Debugging**](/Databases/SQL/Debugging%20and%20Troubleshooting/Syntax.md)
 
   * Missing keywords
   * Invalid identifiers
@@ -1292,8 +1292,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Parentheses mismatches
   * Incorrect statement structure
 
-* **113. Logical Debugging**
-
+* [**113. Logical Debugging**](/Databases/SQL/Debugging%20and%20Troubleshooting/Logical.md)
   * Incorrect joins
   * Duplicate rows
   * Incorrect filters
@@ -1302,7 +1301,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Wrong grouping
   * Incorrect subquery logic
 
-* **114. Performance Debugging**
+* [**114. Performance Debugging**](/Databases/SQL/Debugging%20and%20Troubleshooting/Performance.md)
 
   * Slow queries
   * Full table scans
@@ -1312,7 +1311,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Excessive sorting
   * Inefficient pagination
 
-* **115. Transaction Debugging**
+* [**115. Transaction Debugging**](/Databases/SQL/Debugging%20and%20Troubleshooting/Transaction.md)
 
   * Lock contention
   * Deadlocks
@@ -1320,7 +1319,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Isolation-related anomalies
   * Uncommitted transactions
 
-* **116. Data Debugging**
+* [**116. Data Debugging**](/Databases/SQL/Debugging%20and%20Troubleshooting/Data.md)
 
   * Duplicate data
   * Orphaned records
@@ -1333,7 +1332,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XXIX. SQL Testing and Quality Assurance
 
-* **117. Query Testing**
+* [**117. Query Testing**](/Databases/SQL/Testing/Query.md)
 
   * Positive test cases
   * Negative test cases
@@ -1342,7 +1341,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Empty-result testing
   * Duplicate-data testing
 
-* **118. Database Testing**
+* [**118. Database Testing**](/Databases/SQL/Testing/Database.md)
 
   * Constraint testing
   * Referential-integrity testing
@@ -1351,7 +1350,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Function testing
   * Transaction testing
 
-* **119. Performance Testing**
+* [**119. Performance Testing**](/Databases/SQL/Testing/Performance.md)
 
   * Benchmarking
   * Load testing
@@ -1359,7 +1358,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Concurrency testing
   * Execution-plan comparison
 
-* **120. Data Quality Testing**
+* [**120. Data Quality Testing**](/Databases/SQL/Testing/DataQuality.md)
 
   * Completeness
   * Accuracy

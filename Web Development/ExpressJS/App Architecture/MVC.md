@@ -125,33 +125,107 @@ module.exports = User;
 
 ### Annotated Code Example
 
+Based on your annotated code example, here is a step-by-step implementation guide to setting up, creating, and handling validation for your Mongoose Post model.
+
+**Step 1: Install Dependencies**
+Ensure you have Mongoose installed in your Node.js project. If you haven't already, run this command in your terminal:
+```bash
+npm install mongoose
+```
+\
+**Step 2: Create the Post Model**
+Create a file named Post.js inside your models directory. Paste your schema and model definition here.
+
+`models/Post.js`
 ```js
-// models/Post.js
 const mongoose = require('mongoose');
 
+// Define the blueprint for a Post document
 const postSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: [true, 'Title is required'],
-    trim: true,
-    maxlength: [200, 'Title cannot exceed 200 characters']
+  title: { 
+    type: String, 
+    required: [true, 'Title is required'], 
+    trim: true, 
+    maxlength: [200, 'Title cannot exceed 200 characters'] 
   },
-  body: {
-    type: String,
-    required: [true, 'Body is required']
+  body: { 
+    type: String, 
+    required: [true, 'Body is required'] 
   },
-  author: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+  author: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
   },
-  published: {
-    type: Boolean,
-    default: false
+  published: { 
+    type: Boolean, 
+    default: false 
   }
-}, { timestamps: true });
-
+}, { 
+  // Automatically manages createdAt and updatedAt fields
+  timestamps: true 
+});
+// Compile and export the model
 module.exports = mongoose.model('Post', postSchema);
+```
+\
+**Step 3: Create a Valid Post (Success Case)**
+When you pass all the required and valid fields to Post.create(), Mongoose will successfully write the document to MongoDB and return the created object (including generated fields like _id, published, createdAt, and updatedAt).
+```js
+const Post = require('./models/Post');
+
+async function createValidPost(userId) {
+  try {
+    const post = await Post.create({
+      title: 'MVC Guide',
+      body: 'This is a complete guide to the MVC architecture.',
+      author: userId // Must be a valid MongoDB ObjectId
+    });
+
+    console.log('Success:', post);
+    /* 
+    Expected Output:
+    {
+      _id: '6523f8c2b...',
+      title: 'MVC Guide',
+      body: 'This is a complete guide to the MVC architecture.',
+      author: '6523f890a...',
+      published: false,
+      createdAt: '2026-10-09T...',
+      updatedAt: '2026-10-09T...',
+      __v: 0
+    }
+    */
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+\
+**Step 4: Handle an Invalid Post (Error / Validation Case)**
+If you attempt to create a post without a title (or if it violates any other schema constraints), Mongoose intercepts the request before sending it to MongoDB and throws a ValidationError. Wrap your execution in a try...catch block to handle this safely.
+```js
+const Post = require('./models/Post');
+
+async function createInvalidPost(userId) {
+  try {
+    // Missing the required 'title' field
+    await Post.create({
+      body: 'An interesting body without a headline...',
+      author: userId
+    });
+  } catch (err) {
+    // Catching the validation error thrown by the model layer
+    console.log('Error Message:', err.message);
+    // Expected Output: "Post validation failed: title: Title is required"
+    
+    // Optional: Access specific field error details
+    if (err.name === 'ValidationError') {
+      console.log('Field specific error:', err.errors.title.message);
+      // Expected Output: "Title is required"
+    }
+  }
+}
 ```
 
 **Expected Output (when creating a valid post):**
@@ -267,7 +341,10 @@ const express = require('express');
 const app = express();
 app.set('view engine', 'ejs');
 
-const users = [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }];
+const users = [
+  { id: 1, name: 'Alice' }, 
+  { id: 2, name: 'Bob' }
+];
 
 // Server-side rendered view
 app.get('/users/ssr', (req, res) => {
@@ -285,12 +362,20 @@ app.listen(3000, () => console.log('Server on 3000'));
 **Expected Output (for `GET /users/ssr`):**
 ```html
 <h1>Users</h1>
-<ul><li>Alice</li><li>Bob</li></ul>
+<ul>
+  <li>Alice</li>
+  <li>Bob</li>
+</ul>
 ```
 
 **Expected Output (for `GET /api/users`):**
 ```json
-{"data":[{"id":1,"name":"Alice"},{"id":2,"name":"Bob"}]}
+{
+  "data":[
+    { "id":1, "name":"Alice" },
+    { "id":2, "name":"Bob" }
+  ]
+}
 ```
 
 **Why this output:** The SSR route renders an EJS template with the user data, producing HTML. The API route returns the same data as JSON, which a React/Vue frontend would consume and render. The Model and Controller logic are identical; only the View differs.
@@ -380,9 +465,8 @@ exports.createUser = async (req, res) => {
 - Controllers should not contain domain logic (e.g., calculating discounts, validating business rules).
 
 ### Annotated Code Example
-
+`controllers/postController.js`
 ```js
-// controllers/postController.js
 const Post = require('../models/Post');
 
 // GET /posts — list all posts
@@ -403,9 +487,9 @@ exports.show = async (req, res) => {
 // POST /posts — create a new post
 exports.create = async (req, res) => {
   const post = await Post.create({
-    title: req.body.title,
-    body: req.body.body,
-    author: req.user.id
+    title  : req.body.title,
+    body   : req.body.body,
+    author : req.user.id
   });
   res.status(201).json({ data: post });
 };
@@ -419,12 +503,52 @@ exports.destroy = async (req, res) => {
   res.sendStatus(204);
 };
 ```
+\
+`routes/postRoutes.js`
+Create a file at routes/postRoutes.js:
+```js
+const express = require('express');
+const router = express.Router();
+const postController = require('../controllers/postController');
+// const auth = require('../middleware/auth'); // Optional: Add auth middleware for creating posts
+
+// Map routes to controller actions
+router.get('/', postController.index);
+router.get('/:id', postController.show);
+router.post('/', postController.create); // Typically protected by authentication middleware
+router.delete('/:id', postController.destroy);
+
+module.exports = router;
+```
+\
+`server.js`
+Finally, link your new routes file to your main Express server file.
+Update your server.js or app.js:
+```js
+const express = require('express');
+const app = express();
+const postRoutes = require('./routes/postRoutes');
+
+// Middleware to parse incoming JSON payloads
+app.use(express.json());
+
+// Use the post routes
+app.use('/posts', postRoutes);
+
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+```
 
 **Expected Output (for `GET /posts`):**
 ```json
 {
   "data": [
-    { "_id": "...", "title": "MVC Guide", "author": { "name": "Alice" } }
+    { 
+      "_id": "...", 
+      "title": "MVC Guide", 
+      "author": { "name": "Alice" } 
+    }
   ]
 }
 ```
@@ -523,7 +647,12 @@ app.listen(3000, () => console.log('Server on 3000'));
 
 **Expected Output (for `GET /api/users/1`):**
 ```json
-{"data":{"id":1,"name":"Alice"}}
+{
+  "data": {
+    "id":1,
+    "name":"Alice"
+  }
+}
 ```
 
 **Why this output:** The request flows through each stage: the client sends `GET /api/users/1`; the router matches it to `userController.getUser`; the controller calls `User.findByPk(1)`; the model returns the user data; the controller sends the JSON response; the client receives it.
@@ -573,9 +702,9 @@ In modern applications, the frontend is often a separate React, Vue, or Angular 
 Recent industry shifts, including growing adoption of async architectures, prove challenging to accommodate in an MVC application. Middleware architectures, by contrast, support asynchronous execution for concurrent requests while reducing resource consumption per request.
 
 ### Annotated Code Example
+`mvc-limitations.js`
 
 ```js
-// mvc-limitations.js
 // ❌ ANTI-PATTERN: Fat controller doing too much
 app.post('/orders', async (req, res) => {
   // Authorization

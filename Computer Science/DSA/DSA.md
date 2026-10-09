@@ -1,1799 +1,2511 @@
-# DSA Comprehensive, Structured, and Progressive Learning Roadmap
+# DSA (Data Structures and Algorithms) Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Concepts to Advanced Algorithmic Mastery
+## From Foundational Concepts to Advanced Algorithmic Mastery and Production-Scale Problem Solving
 
-This roadmap provides a **systematic Data Structures and Algorithms (DSA) curriculum** that progresses from computational foundations and complexity analysis to advanced data structures, algorithmic paradigms, graph theory, optimization, and competitive/problem-solving mastery.
-
----
-
-# I. DSA Foundations
-
-* **1. Introduction to Data Structures and Algorithms**
-
-  * Definition of Data Structures
-  * Definition of Algorithms
-  * Relationship between data structures and algorithms
-  * Abstract Data Types (ADT)
-  * Data organization
-  * Data processing
-  * Problem-solving through algorithms
-  * Algorithmic thinking
-  * Computational problem solving
-
-* **2. Importance of DSA**
-
-  * Efficiency
-  * Scalability
-  * Memory utilization
-  * Program performance
-  * Maintainability
-  * Problem-solving capability
-  * Software engineering applications
-
-* **3. Fundamental Programming Prerequisites**
-
-  * Variables
-  * Data types
-  * Operators
-  * Conditional statements
-  * Loops
-  * Functions
-  * Recursion
-  * Arrays
-  * Strings
-  * Pointers/references
-  * Object-oriented programming fundamentals
-
-* **4. Algorithm Representation**
-
-  * Natural-language descriptions
-  * Pseudocode
-  * Flowcharts
-  * Structured algorithms
-  * Input/output specification
-  * Preconditions
-  * Postconditions
-  * Algorithm correctness
+DSA is best learned as more than "memorizing algorithms for interviews." The progression should cover **complexity analysis → arrays → strings → linked lists → stacks → queues → hashing → trees → heaps → graphs → sorting → searching → recursion → dynamic programming → greedy algorithms → advanced data structures → algorithmic paradigms → competitive programming → system design → production engineering**.
 
 ---
 
-# II. Algorithm Analysis
+# I. Foundations of DSA
 
-* **5. Complexity Analysis**
+- **1. What DSA Is**
+  - Data structures
+  - Algorithms
+  - Abstract data types
+  - Concrete data types
+  - Why DSA matters
+  - DSA in computer science
+  - DSA in software engineering
+  - DSA in interviews
+  - DSA in production systems
+  - DSA vs programming
+  - DSA vs system design
+  - DSA vs mathematics
 
-  * Time complexity
-  * Space complexity
-  * Best-case analysis
-  * Average-case analysis
-  * Worst-case analysis
-  * Amortized analysis
+- **2. Prerequisites**
+  - Programming fundamentals
+  - Variables
+  - Data types
+  - Operators
+  - Control flow
+  - Functions
+  - Recursion basics
+  - Pointers and references
+  - Memory model
+  - Object-oriented programming
+  - Functional programming basics
+  - Mathematics fundamentals
+    - Algebra
+    - Set theory
+    - Logic
+    - Combinatorics
+    - Probability
+    - Number theory
+    - Graph theory basics
 
-* **6. Asymptotic Notation**
+- **3. Problem-Solving Fundamentals**
+  - Problem understanding
+  - Input/output analysis
+  - Constraints analysis
+  - Edge cases
+  - Brute force thinking
+  - Optimization thinking
+  - Pattern recognition
+  - Abstraction
+  - Decomposition
+  - Pseudocode
+  - Flowcharts
+  - Algorithm design
+  - Algorithm analysis
+  - Algorithm correctness
+  - Algorithm efficiency
+  - Trade-offs
 
-  * Big-O notation
-  * Big-Ω notation
-  * Big-Θ notation
-  * Little-o notation
-  * Little-ω notation
-  * Comparing growth rates
-
-* **7. Common Complexity Classes**
-
-  * O(1)
-  * O(log n)
-  * O(n)
-  * O(n log n)
-  * O(n²)
-  * O(n³)
-  * O(2ⁿ)
-  * O(n!)
-  * Practical implications of each complexity class
-
-* **8. Complexity Analysis Techniques**
-
-  * Counting operations
-  * Loop analysis
-  * Nested-loop analysis
-  * Conditional complexity
-  * Recursive complexity
-  * Recurrence relations
-  * Auxiliary space analysis
-  * Input-size modeling
-
----
-
-# III. Arrays and Basic Linear Structures
-
-* [**9. Arrays**](/Computer%20Science/DSA/Arrays/Arrays.md)
-
-  * Static arrays
-  * Dynamic arrays
-  * One-dimensional arrays
-  * Multidimensional arrays
-  * Array indexing
-  * Memory layout
-  * Traversal
-  * Insertion
-  * Deletion
-  * Searching
-  * Updating
-  * Resizing
-
-* [**10. Dynamic Arrays**](/Computer%20Science/DSA/Arrays/DynamicArrays.md)
-
-  * Capacity versus size
-  * Automatic resizing
-  * Geometric growth
-  * Amortized insertion
-  * Memory overhead
-
-* [**11. Array-Based Problem Solving**](/Computer%20Science/DSA/Arrays/ArrayBasedProblemSolving.md)
-
-  * Prefix sums
-  * Suffix sums
-  * Frequency arrays
-  * Difference arrays
-  * Array rotation
-  * Array reversal
-  * Rearrangement
-  * Duplicate detection
-
-* [**12. Matrix and 2D Array Techniques**](/Computer%20Science/DSA/Arrays/MatrixAnd2DArray.md)
-
-  * Matrix traversal
-  * Row/column operations
-  * Diagonal traversal
-  * Matrix rotation
-  * Spiral traversal
-  * Prefix-sum matrices
-  * Grid-based problems
+- **4. Computational Thinking**
+  - Decomposition
+  - Pattern recognition
+  - Abstraction
+  - Algorithm design
+  - Automation
+  - Modeling
+  - Simulation
+  - Reasoning
+  - Generalization
+  - Evaluation
 
 ---
 
-# IV. Strings
+# II. Complexity Analysis
 
-* [**13. String Fundamentals**](/Computer%20Science/DSA/Strings/String.md)
+- **5. Time Complexity**
+  - Running time
+  - Input size
+  - Growth rates
+  - Best case
+  - Average case
+  - Worst case
+  - Amortized analysis
+  - Asymptotic analysis
+  - Constant time
+  - Linear time
+  - Logarithmic time
+  - Linearithmic time
+  - Quadratic time
+  - Cubic time
+  - Exponential time
+  - Factorial time
 
-  * Character sequences
-  * String representation
-  * Mutable versus immutable strings
-  * String indexing
-  * Character manipulation
+- **6. Space Complexity**
+  - Memory usage
+  - Auxiliary space
+  - In-place algorithms
+  - Out-of-place algorithms
+  - Stack space
+  - Heap space
+  - Recursion depth
+  - Memory trade-offs
+  - Space-time trade-offs
 
-* [**14. Basic String Operations**](/Computer%20Science/DSA/Strings/StringOperations.md)
+- **7. Asymptotic Notation**
+  - Big-O notation
+  - Big-Omega notation
+  - Big-Theta notation
+  - Little-o notation
+  - Little-omega notation
+  - Properties
+  - Comparisons
+  - Common growth functions
+  - Growth rate hierarchy
 
-  * Traversal
-  * Concatenation
-  * Comparison
-  * Searching
-  * Substrings
-  * Replacement
-  * Splitting
-  * Character counting
+- **8. Recurrence Relations**
+  - Recurrences
+  - Linear recurrences
+  - Divide-and-conquer recurrences
+  - Substitution method
+  - Recursion tree method
+  - Master theorem
+  - Master theorem cases
+  - Akra-Bazzi method
+  - Generating functions
+  - Solving recurrences
+  - Recurrence examples
 
-* [**15. String Algorithms**](/Computer%20Science/DSA/Strings/StringAlgorithms.md)
+- **9. Amortized Analysis**
+  - Amortized analysis
+  - Aggregate method
+  - Accounting method
+  - Potential method
+  - Dynamic arrays
+  - Hash tables
+  - Union-Find
+  - Splay trees
+  - Amortized vs average case
 
-  * Frequency analysis
-  * Palindrome detection
-  * Anagram detection
-  * String reversal
-  * Pattern matching
-  * Prefix/suffix analysis
-
-* [**16. Advanced String Processing**](/Computer%20Science/DSA/Strings/AdvancedStringProcessing.md)
-
-  * KMP algorithm
-  * Z algorithm
-  * Rabin-Karp
-  * Rolling hash
-  * Trie-based matching
-  * Suffix arrays
-  * Suffix trees
-  * String hashing
-
----
-
-# V. Linked Lists
-
-* [**17. Singly Linked Lists**](/Computer%20Science/DSA/Linked%20Lists/SinglyLinkedLists.md)
-
-  * Node structure
-  * Head pointer/reference
-  * Traversal
-  * Insertion
-  * Deletion
-  * Searching
-  * Updating
-
-* [**18. Doubly Linked Lists**](/Computer%20Science/DSA/Linked%20Lists/DoublyLinkedLists.md)
-
-  * Previous references
-  * Next references
-  * Bidirectional traversal
-  * Insertion
-  * Deletion
-
-* [**19. Circular Linked Lists**](/Computer%20Science/DSA/Linked%20Lists/CircularLinkedLists.md)
-
-  * Circular singly linked lists
-  * Circular doubly linked lists
-  * Traversal techniques
-  * Application scenarios
-
-* [**20. Linked List Algorithms**](/Computer%20Science/DSA/Linked%20Lists/LinkedListAlgorithms.md)
-
-  * Reverse a linked list
-  * Detect cycles
-  * Find cycle entry
-  * Find middle node
-  * Merge linked lists
-  * Remove duplicates
-  * Find nth node
-  * Intersection detection
-  * Palindrome checking
-
-* [**21. Fast and Slow Pointer Technique**](/Computer%20Science/DSA/Linked%20Lists/FastAndSlowPointerTechnique.md)
-
-  * Tortoise-and-hare method
-  * Middle-element detection
-  * Cycle detection
-  * Cycle-related problems
+- **10. Complexity Classes**
+  - P
+  - NP
+  - co-NP
+  - NP-complete
+  - NP-hard
+  - PSPACE
+  - EXPTIME
+  - Reductions
+  - Polynomial-time reductions
+  - Cook-Levin theorem
+  - Approximation algorithms
+  - Randomized complexity
 
 ---
 
-# VI. Stacks and Queues
+# III. Arrays and Strings
 
-* [**22. Stack**](/Computer%20Science/DSA/Stacks%20and%20Queues/Stack.md)
+- **11. Array Fundamentals**
+  - Arrays
+  - Static arrays
+  - Dynamic arrays
+  - Array indexing
+  - Array traversal
+  - Array insertion
+  - Array deletion
+  - Array searching
+  - Array sorting
+  - Array rotation
+  - Array reversal
+  - Array merging
+  - Array partitioning
+  - Array slicing
+  - Array copying
+  - Array memory layout
+  - Cache locality
+  - Array performance
 
-  * LIFO principle
-  * Push
-  * Pop
-  * Peek/top
-  * Is-empty
-  * Stack implementations
-    * Array
-    * Linked list
+- **12. Array Techniques**
+  - Two pointers
+  - Sliding window
+  - Prefix sums
+  - Suffix sums
+  - Difference arrays
+  - Kadane's algorithm
+  - Dutch national flag
+  - Boyer-Moore voting
+  - Moore's voting algorithm
+  - Binary search on arrays
+  - Matrix operations
+  - Spiral traversal
+  - Rotate matrix
+  - Transpose matrix
+  - Set matrix zeroes
+  - Merge intervals
+  - Insert interval
+  - Meeting rooms
+  - Container with most water
+  - Trapping rain water
+  - Product of array except self
+  - Maximum subarray
+  - Subarray sum equals K
+  - Longest consecutive sequence
+  - Find missing number
+  - Find duplicate number
+  - Majority element
+  - Move zeroes
+  - Sort colors
+  - Next permutation
 
-* **23. Stack Applications**
+- **13. String Fundamentals**
+  - Strings
+  - Character arrays
+  - String immutability
+  - String mutability
+  - String concatenation
+  - String comparison
+  - String searching
+  - String matching
+  - String manipulation
+  - String encoding
+  - Unicode
+  - ASCII
+  - UTF-8
+  - String memory
+  - String performance
 
-  * Parentheses matching
-  * Expression parsing
-  * Expression evaluation
-  * Undo operations
-  * Function call management
-  * Backtracking
+- **14. String Algorithms**
+  - Naive pattern matching
+  - KMP algorithm
+  - Rabin-Karp algorithm
+  - Z algorithm
+  - Boyer-Moore algorithm
+  - Aho-Corasick algorithm
+  - Manacher's algorithm
+  - Suffix arrays
+  - Suffix trees
+  - Tries
+  - String hashing
+  - Rolling hash
+  - Palindromes
+  - Anagrams
+  - String permutations
+  - String combinations
+  - String compression
+  - String decoding
+  - String encoding
+  - Longest common prefix
+  - Longest common subsequence
+  - Longest palindromic substring
+  - Longest substring without repeating characters
+  - Minimum window substring
+  - Valid parentheses
+  - Valid palindrome
+  - Group anagrams
+  - Word break
+  - Word ladder
+  - Regular expression matching
+  - Wildcard matching
+  - Edit distance
+  - String to integer
+  - Integer to string
 
-* [**24. Queue**](/Computer%20Science/DSA/Stacks%20and%20Queues/Queue.md)
+- **15. Two Pointers**
+  - Two pointers technique
+  - Opposite direction
+  - Same direction
+  - Fast and slow pointers
+  - Three pointers
+  - N-sum problems
+  - Two-sum
+  - Three-sum
+  - Four-sum
+  - Remove duplicates
+  - Remove element
+  - Sort array by parity
+  - Squares of sorted array
+  - Backspace string compare
+  - Merge sorted arrays
+  - Intersection of arrays
+  - Two pointers on strings
+  - Two pointers on linked lists
+  - Two pointers on matrices
 
-  * FIFO principle
-  * Enqueue
-  * Dequeue
-  * Front
-  * Rear
-  * Queue implementation
+- **16. Sliding Window**
+  - Sliding window
+  - Fixed window
+  - Variable window
+  - Window expansion
+  - Window contraction
+  - Window optimization
+  - Maximum sum subarray
+  - Minimum size subarray sum
+  - Longest substring without repeating characters
+  - Longest repeating character replacement
+  - Permutation in string
+  - Find all anagrams
+  - Minimum window substring
+  - Sliding window maximum
+  - Sliding window median
+  - Fruit into baskets
+  - Max consecutive ones
+  - Subarrays with K different integers
 
-* [**25. Queue Variants**](/Computer%20Science/DSA/Stacks%20and%20Queues/QueueVariants.md)
-
-  * Circular queue
-  * Deque
-  * Priority queue
-  * Input-restricted deque
-  * Output-restricted deque
-
-* **26. Queue Applications**
-
-  * Scheduling
-  * Buffering
-  * Breadth-first search
-  * Task processing
-  * Simulation systems
+- **17. Prefix Sums**
+  - Prefix sums
+  - Suffix sums
+  - Prefix products
+  - Difference arrays
+  - 2D prefix sums
+  - Range sum queries
+  - Range update queries
+  - Subarray sum equals K
+  - Continuous subarray sum
+  - Matrix block sum
+  - Range addition
 
 ---
 
-# VII. Hashing and Hash Tables
+# IV. Linked Lists
 
-* [**27. Hashing Fundamentals**](/Computer%20Science/DSA/Hashing%20and%20Hash%20Tables/Hashing.md)
+- **18. Linked List Fundamentals**
+  - Linked lists
+  - Singly linked lists
+  - Doubly linked lists
+  - Circular linked lists
+  - Doubly circular linked lists
+  - Nodes
+  - Head
+  - Tail
+  - Pointers
+  - References
+  - Traversal
+  - Insertion
+  - Deletion
+  - Searching
+  - Length
+  - Reversal
+  - Memory layout
+  - Cache locality
+  - Linked list vs array
 
-  * Hash functions
-  * Keys
-  * Hash values
-  * Hash tables
-  * Direct addressing
-
-* [**28. Collision Handling**](/Computer%20Science/DSA/Hashing%20and%20Hash%20Tables/CollisionHashing.md)
-
-  * Separate chaining
-  * Open addressing
-  * Linear probing
-  * Quadratic probing
-  * Double hashing
-
-* [**29. Hash Table Design**](/Computer%20Science/DSA/Hashing%20and%20Hash%20Tables/HashTableDesign.md)
-
-  * Load factor
-  * Resizing
-  * Rehashing
-  * Collision distribution
-  * Hash-function quality
-
-* [**30. Hash-Based Techniques**](/Computer%20Science/DSA/Hashing%20and%20Hash%20Tables/HashBasedTechniques.md)
-
-  * Frequency counting
-  * Duplicate detection
-  * Two-sum pattern
-  * Grouping
-  * Membership testing
-  * Caching
-
----
-
-# VIII. Recursion and Backtracking
-
-* [**31. Recursion Fundamentals**](/Computer%20Science/DSA/Recursion/Recursion.md)
-
-  * Base case
-  * Recursive case
-  * Call stack
-  * Recursive state
-  * Termination
-
-* [**32. Recursive Problem Patterns**](/Computer%20Science/DSA/Recursion/ProblemPatterns.md)
-
-  * Factorial
-  * Fibonacci
-  * Tree traversal
-  * Divide-and-conquer problems
-  * Recursive search
-
-* [**33. Recurrence Relations**](/Computer%20Science/DSA/Recursion/Recurrence.md)
-
-  * Formulating recurrences
-  * Solving recurrences
-  * Recursion trees
-  * Substitution method
-  * Master theorem
-
-* [**34. Backtracking**](/Computer%20Science/DSA/Recursion/Backtracking.md)
-
-  * State-space search
-  * Decision trees
-  * Constraint satisfaction
-  * Pruning
-  * Choosing
-  * Exploring
-  * Undoing choices
-
-* [**35. Classic Backtracking Problems**](/Computer%20Science/DSA/Recursion/BacktrackingProblems.md)
-
-  * N-Queens
-  * Subsets
-  * Permutations
-  * Combinations
-  * Maze solving
-  * Sudoku
-  * Word search
+- **19. Linked List Techniques**
+  - Fast and slow pointers
+  - Cycle detection
+  - Floyd's cycle detection
+  - Cycle start detection
+  - Middle of linked list
+  - Nth node from end
+  - Remove Nth node from end
+  - Reverse linked list
+  - Reverse in groups
+  - Reverse between positions
+  - Palindrome linked list
+  - Merge two sorted lists
+  - Merge K sorted lists
+  - Add two numbers
+  - Intersection of two lists
+  - Remove duplicates
+  - Partition list
+  - Rotate list
+  - Reorder list
+  - Copy list with random pointer
+  - Flatten multilevel list
+  - LRU cache
+  - LFU cache
+  - Skip list
+  - Unrolled linked list
+  - XOR linked list
 
 ---
 
-# IX. Searching Algorithms
+# V. Stacks and Queues
 
-* [**36. Linear Search**](/Computer%20Science/DSA/Searching%20Algorithms/Linear.md)
+- **20. Stack Fundamentals**
+  - Stacks
+  - LIFO
+  - Push
+  - Pop
+  - Peek
+  - Top
+  - Empty
+  - Size
+  - Stack implementation
+    - Array-based
+    - Linked-list-based
+  - Stack operations
+  - Stack overflow
+  - Stack underflow
+  - Stack memory
+  - Call stack
+  - Stack frames
+  - Stack applications
 
-  * Sequential search
-  * Complexity analysis
-  * Ordered versus unordered data
+- **21. Stack Techniques**
+  - Balanced parentheses
+  - Valid parentheses
+  - Min stack
+  - Max stack
+  - Stack using queues
+  - Queue using stacks
+  - Next greater element
+  - Next smaller element
+  - Previous greater element
+  - Previous smaller element
+  - Daily temperatures
+  - Largest rectangle in histogram
+  - Maximal rectangle
+  - Trapping rain water
+  - Asteroid collision
+  - Remove k digits
+  - Decode string
+  - Simplify path
+  - Evaluate reverse Polish notation
+  - Basic calculator
+  - Basic calculator II
+  - Basic calculator III
+  - Implement stack using arrays
+  - Implement stack using linked lists
+  - Design browser history
+  - Design min stack
 
-* [**37. Binary Search**](/Computer%20Science/DSA/Searching%20Algorithms/Binary.md)
+- **22. Monotonic Stack**
+  - Monotonic stack
+  - Increasing stack
+  - Decreasing stack
+  - Next greater element
+  - Next smaller element
+  - Previous greater element
+  - Previous smaller element
+  - Largest rectangle in histogram
+  - Maximal rectangle
+  - Trapping rain water
+  - Sum of subarray minimums
+  - Sum of subarray ranges
+  - Stock span problem
+  - Remove duplicate letters
+  - Remove k digits
+  - Monotonic stack patterns
 
-  * Sorted-array requirement
-  * Search interval
-  * Middle element
-  * Iterative implementation
-  * Recursive implementation
+- **23. Queue Fundamentals**
+  - Queues
+  - FIFO
+  - Enqueue
+  - Dequeue
+  - Front
+  - Rear
+  - Empty
+  - Size
+  - Queue implementation
+    - Array-based
+    - Linked-list-based
+    - Circular queue
+  - Queue operations
+  - Queue overflow
+  - Queue underflow
+  - Queue applications
 
-* [**38. Binary Search Variants**](/Computer%20Science/DSA/Searching%20Algorithms/BinarySearchVariants.md)
+- **24. Queue Techniques**
+  - Circular queue
+  - Deque
+  - Double-ended queue
+  - Priority queue
+  - Sliding window maximum
+  - Sliding window minimum
+  - First non-repeating character
+  - Generate binary numbers
+  - Rotten oranges
+  - Walls and gates
+  - 01 matrix
+  - Open the lock
+  - Perfect squares
+  - Word ladder
+  - Queue using stacks
+  - Stack using queues
+  - Implement deque
+  - Design circular queue
+  - Design hit counter
+  - Moving average
+  - Recent counter
 
-  * First occurrence
-  * Last occurrence
-  * Lower bound
-  * Upper bound
-  * Frequency counting
-  * Search insertion position
+- **25. Monotonic Queue**
+  - Monotonic queue
+  - Sliding window maximum
+  - Sliding window minimum
+  - Constrained subsequence sum
+  - Shortest subarray with sum at least K
+  - Maximum of minimum for every window size
+  - Monotonic queue patterns
 
-* [**39. Binary Search on Answer**](/Computer%20Science/DSA/Searching%20Algorithms/BinarySearchForAnswer.md)
+---
 
-  * Feasibility function
-  * Monotonic search space
-  * Minimum feasible value
-  * Maximum feasible value
-  * Optimization problems
+# VI. Hashing
 
-* [**40. Advanced Searching**](/Computer%20Science/DSA/Searching%20Algorithms/Advanced.md)
+- **26. Hashing Fundamentals**
+  - Hashing
+  - Hash functions
+  - Hash tables
+  - Hash maps
+  - Hash sets
+  - Keys
+  - Values
+  - Buckets
+  - Collisions
+  - Collision resolution
+    - Chaining
+    - Open addressing
+    - Linear probing
+    - Quadratic probing
+    - Double hashing
+  - Load factor
+  - Rehashing
+  - Resizing
+  - Hash function properties
+  - Hash function design
+  - Universal hashing
+  - Perfect hashing
+  - Consistent hashing
+  - Hashing performance
+  - Hashing applications
 
-  * Interpolation search
-  * Exponential search
-  * Ternary search
-  * Search in rotated arrays
-  * Search in two-dimensional matrices
+- **27. Hashing Techniques**
+  - Two-sum
+  - Three-sum
+  - Four-sum
+  - Group anagrams
+  - Valid anagram
+  - Contains duplicate
+  - Contains duplicate II
+  - Contains duplicate III
+  - Longest consecutive sequence
+  - Subarray sum equals K
+  - Continuous subarray sum
+  - Longest substring without repeating characters
+  - Minimum window substring
+  - LRU cache
+  - LFU cache
+  - Insert delete getrandom
+  - Design hashmap
+  - Design hashset
+  - First unique character
+  - Word pattern
+  - Isomorphic strings
+  - Happy number
+  - Jewels and stones
+  - Top K frequent elements
+  - Sort characters by frequency
+
+- **28. Hash-Based Data Structures**
+  - Hash maps
+  - Hash sets
+  - Multi-maps
+  - Multi-sets
+  - Bloom filters
+  - Counting Bloom filters
+  - Cuckoo filters
+  - Count-min sketch
+  - HyperLogLog
+  - MinHash
+  - Locality-sensitive hashing
+  - Consistent hashing
+  - Rendezvous hashing
+  - Jump consistent hash
+  - Hash-based indexes
+
+---
+
+# VII. Trees
+
+- **29. Tree Fundamentals**
+  - Trees
+  - Root
+  - Parent
+  - Child
+  - Sibling
+  - Ancestor
+  - Descendant
+  - Leaf
+  - Internal node
+  - Subtree
+  - Depth
+  - Height
+  - Level
+  - Degree
+  - Path
+  - Edge
+  - Forest
+  - Binary trees
+  - N-ary trees
+  - Complete binary trees
+  - Full binary trees
+  - Perfect binary trees
+  - Balanced binary trees
+  - Degenerate trees
+  - Tree representations
+    - Node-based
+    - Array-based
+  - Tree traversal
+    - Preorder
+    - Inorder
+    - Postorder
+    - Level order
+    - Morris traversal
+    - Iterative traversal
+    - Recursive traversal
+  - Tree properties
+  - Tree height
+  - Tree diameter
+  - Tree width
+  - Tree balance
+
+- **30. Binary Search Trees**
+  - Binary search trees
+  - BST properties
+  - BST search
+  - BST insertion
+  - BST deletion
+  - BST traversal
+  - BST validation
+  - BST height
+  - BST balance
+  - BST rotation
+  - BST operations
+  - BST vs sorted array
+  - BST vs hash table
+  - BST applications
+
+- **31. Balanced Trees**
+  - AVL trees
+  - Red-black trees
+  - Splay trees
+  - Treaps
+  - Weight-balanced trees
+  - Scapegoat trees
+  - B-trees
+  - B+ trees
+  - 2-3 trees
+  - 2-3-4 trees
+  - Skip lists
+  - Balanced tree operations
+  - Rotations
+  - Rebalancing
+  - Balanced tree applications
+  - Database indexes
+  - File systems
+
+- **32. Tree Techniques**
+  - Tree traversal
+  - Tree recursion
+  - Tree DP
+  - Tree divide and conquer
+  - Lowest common ancestor
+  - Binary lifting
+  - Euler tour
+  - Heavy-light decomposition
+  - Centroid decomposition
+  - Tree isomorphism
+  - Tree hashing
+  - Tree serialization
+  - Tree deserialization
+  - Tree copying
+  - Tree mirroring
+  - Tree inversion
+  - Symmetric tree
+  - Same tree
+  - Subtree of another tree
+  - Maximum depth
+  - Minimum depth
+  - Balanced binary tree
+  - Diameter of binary tree
+  - Path sum
+  - Path sum II
+  - Path sum III
+  - Binary tree maximum path sum
+  - Binary tree level order traversal
+  - Binary tree zigzag level order traversal
+  - Binary tree right side view
+  - Binary tree vertical order traversal
+  - Binary tree boundary traversal
+  - Binary tree cameras
+  - House robber III
+  - Count good nodes
+  - Kth smallest element in BST
+  - Validate BST
+  - Recover BST
+  - Convert sorted array to BST
+  - Convert BST to sorted array
+  - Flatten binary tree to linked list
+  - Construct binary tree from preorder and inorder
+  - Construct binary tree from inorder and postorder
+  - Serialize and deserialize binary tree
+
+- **33. Tries**
+  - Tries
+  - Prefix trees
+  - Trie nodes
+  - Trie insertion
+  - Trie search
+  - Trie deletion
+  - Trie traversal
+  - Trie applications
+  - Autocomplete
+  - Spell checker
+  - IP routing
+  - Word search
+  - Word search II
+  - Implement trie
+  - Add and search word
+  - Replace words
+  - Longest common prefix
+  - Maximum XOR
+  - Palindrome pairs
+  - Design search autocomplete system
+  - Compressed tries
+  - Suffix tries
+  - Ternary search trees
+  - Radix trees
+
+- **34. Segment Trees**
+  - Segment trees
+  - Segment tree construction
+  - Segment tree query
+  - Segment tree update
+  - Range sum query
+  - Range minimum query
+  - Range maximum query
+  - Lazy propagation
+  - Range updates
+  - Point updates
+  - Segment tree applications
+  - Segment tree vs Fenwick tree
+  - Segment tree implementation
+  - Segment tree problems
+  - Merge sort tree
+  - Persistent segment tree
+  - Dynamic segment tree
+  - 2D segment tree
+
+- **35. Fenwick Trees**
+  - Fenwick trees
+  - Binary indexed trees
+  - Fenwick tree construction
+  - Fenwick tree query
+  - Fenwick tree update
+  - Prefix sums
+  - Range sums
+  - Point updates
+  - Range updates
+  - Fenwick tree applications
+  - Fenwick tree vs segment tree
+  - Fenwick tree implementation
+  - 2D Fenwick tree
+
+---
+
+# VIII. Heaps and Priority Queues
+
+- **36. Heap Fundamentals**
+  - Heaps
+  - Min-heaps
+  - Max-heaps
+  - Binary heaps
+  - Heap properties
+  - Heap operations
+    - Insert
+    - Extract
+    - Peek
+    - Heapify
+    - Build heap
+    - Decrease key
+    - Increase key
+    - Delete
+  - Heap implementation
+    - Array-based
+    - Node-based
+  - Heap sort
+  - Heap applications
+  - Priority queues
+
+- **37. Heap Techniques**
+  - Kth largest element
+  - Kth smallest element
+  - Top K frequent elements
+  - Merge K sorted lists
+  - Merge K sorted arrays
+  - Find median from data stream
+  - Sliding window median
+  - Task scheduler
+  - Meeting rooms II
+  - Reorganize string
+  - Rearrange string k distance apart
+  - K closest points to origin
+  - Kth smallest element in sorted matrix
+  - Smallest range covering K lists
+  - Ugly number II
+  - Super ugly number
+  - Design Twitter
+  - IPO
+  - Furthest building you can reach
+  - Minimum cost to connect sticks
+  - Huffman coding
+
+- **38. Advanced Heaps**
+  - Fibonacci heaps
+  - Binomial heaps
+  - Pairing heaps
+  - Leftist heaps
+  - Skew heaps
+  - D-ary heaps
+  - Indexed heaps
+  - Meldable heaps
+  - Heap applications
+  - Heap performance
+
+---
+
+# IX. Graphs
+
+- **39. Graph Fundamentals**
+  - Graphs
+  - Vertices
+  - Edges
+  - Directed graphs
+  - Undirected graphs
+  - Weighted graphs
+  - Unweighted graphs
+  - Simple graphs
+  - Multigraphs
+  - Pseudographs
+  - Complete graphs
+  - Bipartite graphs
+  - Planar graphs
+  - Trees as graphs
+  - DAGs
+  - Cyclic graphs
+  - Acyclic graphs
+  - Connected graphs
+  - Disconnected graphs
+  - Strongly connected
+  - Weakly connected
+  - Graph representations
+    - Adjacency matrix
+    - Adjacency list
+    - Edge list
+    - Incidence matrix
+  - Graph properties
+  - Degree
+  - In-degree
+  - Out-degree
+  - Path
+  - Cycle
+  - Connected components
+  - Graph density
+  - Graph diameter
+  - Graph isomorphism
+
+- **40. Graph Traversal**
+  - Breadth-first search
+  - Depth-first search
+  - BFS vs DFS
+  - BFS applications
+  - DFS applications
+  - Iterative BFS
+  - Iterative DFS
+  - Recursive DFS
+  - Traversal order
+  - Visited tracking
+  - Parent tracking
+  - Distance tracking
+  - Path reconstruction
+  - Connected components
+  - Cycle detection
+  - Bipartite checking
+  - Topological sorting
+  - Kahn's algorithm
+  - DFS-based topological sort
+  - Strongly connected components
+  - Tarjan's algorithm
+  - Kosaraju's algorithm
+  - Bridges
+  - Articulation points
+  - Biconnected components
+
+- **41. Shortest Paths**
+  - Shortest path problems
+  - Unweighted shortest paths
+    - BFS
+  - Weighted shortest paths
+    - Dijkstra's algorithm
+    - Bellman-Ford algorithm
+    - Floyd-Warshall algorithm
+    - Johnson's algorithm
+    - A* search
+    - 0-1 BFS
+    - SPFA
+  - Negative weights
+  - Negative cycles
+  - All-pairs shortest paths
+  - Single-source shortest paths
+  - Shortest path in DAG
+  - Shortest path with obstacles
+  - Shortest path in grid
+  - Shortest path with state
+  - Shortest path with constraints
+  - K shortest paths
+  - Shortest path applications
+  - Network routing
+  - Map navigation
+  - Game AI
+
+- **42. Minimum Spanning Trees**
+  - Minimum spanning trees
+  - MST properties
+  - Kruskal's algorithm
+  - Prim's algorithm
+  - Boruvka's algorithm
+  - Union-Find
+  - Disjoint sets
+  - Path compression
+  - Union by rank
+  - Union by size
+  - MST applications
+  - Network design
+  - Clustering
+  - Approximation algorithms
+  - MST vs shortest path
+  - Second minimum spanning tree
+  - Minimum bottleneck spanning tree
+
+- **43. Network Flow**
+  - Flow networks
+  - Maximum flow
+  - Minimum cut
+  - Max-flow min-cut theorem
+  - Ford-Fulkerson algorithm
+  - Edmonds-Karp algorithm
+  - Dinic's algorithm
+  - Push-relabel algorithm
+  - Bipartite matching
+  - Hungarian algorithm
+  - Hopcroft-Karp algorithm
+  - Min-cost max-flow
+  - Circulation problems
+  - Flow with lower bounds
+  - Flow applications
+  - Assignment problems
+  - Scheduling
+  - Image segmentation
+  - Network reliability
+
+- **44. Graph Algorithms Advanced**
+  - Topological sorting
+  - Strongly connected components
+  - 2-SAT
+  - Eulerian paths
+  - Eulerian circuits
+  - Hamiltonian paths
+  - Hamiltonian cycles
+  - Traveling salesman problem
+  - Graph coloring
+  - Graph isomorphism
+  - Graph matching
+  - Graph partitioning
+  - Graph clustering
+  - PageRank
+  - Community detection
+  - Betweenness centrality
+  - Closeness centrality
+  - Eigenvector centrality
+  - Graph neural networks
+  - Graph embeddings
+
+- **45. Union-Find**
+  - Union-Find
+  - Disjoint sets
+  - Make set
+  - Find
+  - Union
+  - Path compression
+  - Union by rank
+  - Union by size
+  - Union-Find applications
+  - Connected components
+  - Cycle detection
+  - Kruskal's algorithm
+  - Dynamic connectivity
+  - Number of islands
+  - Accounts merge
+  - Redundant connection
+  - Graph valid tree
+  - Most stones removed
+  - Satisfiability of equality equations
+  - Union-Find implementation
+  - Union-Find performance
 
 ---
 
 # X. Sorting Algorithms
 
-* **41. Elementary Sorting**
+- **46. Sorting Fundamentals**
+  - Sorting
+  - Stability
+  - In-place sorting
+  - Out-of-place sorting
+  - Comparison-based sorting
+  - Non-comparison-based sorting
+  - Adaptive sorting
+  - Online sorting
+  - External sorting
+  - Internal sorting
+  - Sorting performance
+  - Sorting trade-offs
 
-  * Bubble sort
-  * Selection sort
-  * Insertion sort
-  * Stability
-  * In-place sorting
-  * Complexity comparison
+- **47. Comparison-Based Sorting**
+  - Bubble sort
+  - Selection sort
+  - Insertion sort
+  - Merge sort
+  - Quick sort
+  - Heap sort
+  - Shell sort
+  - Tim sort
+  - Intro sort
+  - Cocktail sort
+  - Gnome sort
+  - Comb sort
+  - Odd-even sort
+  - Cycle sort
+  - Pancake sort
+  - Bitonic sort
+  - Sorting network
 
-* **42. Divide-and-Conquer Sorting**
+- **48. Non-Comparison-Based Sorting**
+  - Counting sort
+  - Radix sort
+  - Bucket sort
+  - Pigeonhole sort
+  - Spread sort
+  - American flag sort
+  - Bead sort
+  - Sorting with constraints
 
-  * Merge sort
-  * Quick sort
-  * Partitioning
-  * Pivot selection
-  * Worst-case quicksort behavior
+- **49. Sorting Techniques**
+  - Quick select
+  - Median of medians
+  - nth element
+  - Partial sorting
+  - Top K elements
+  - Kth largest element
+  - Kth smallest element
+  - Sort colors
+  - Merge intervals
+  - Largest number
+  - Custom comparators
+  - Sorting stability
+  - Sorting by multiple keys
+  - Sorting objects
+  - Sorting strings
+  - Sorting dates
+  - Sorting with constraints
 
-* **43. Heap-Based Sorting**
-
-  * Heap sort
-  * Heap construction
-  * Heapify
-
-* **44. Non-Comparison Sorting**
-
-  * Counting sort
-  * Radix sort
-  * Bucket sort
-
-* **45. Sorting Properties**
-
-  * Stable sorting
-  * Unstable sorting
-  * In-place sorting
-  * Adaptive sorting
-  * Comparison-based sorting
-  * Non-comparison sorting
-
-* **46. Sorting Problem Patterns**
-
-  * Sort-and-scan
-  * Custom comparators
-  * Sorting intervals
-  * Coordinate compression
-  * Sorting by multiple criteria
-
----
-
-# XI. Trees
-
-* **47. Tree Fundamentals**
-
-  * Root
-  * Node
-  * Edge
-  * Parent
-  * Child
-  * Sibling
-  * Leaf
-  * Internal node
-  * Depth
-  * Height
-  * Subtree
-
-* **48. Binary Trees**
-
-  * Binary-tree structure
-  * Full binary tree
-  * Complete binary tree
-  * Perfect binary tree
-  * Balanced binary tree
-  * Degenerate tree
-
-* **49. Tree Traversals**
-
-  * Preorder
-  * Inorder
-  * Postorder
-  * Level-order
-  * Recursive traversal
-  * Iterative traversal
-
-* **50. Binary Tree Algorithms**
-
-  * Tree height
-  * Node counting
-  * Leaf counting
-  * Tree equality
-  * Tree inversion
-  * Diameter
-  * Maximum depth
-  * Path sums
-  * Lowest common ancestor
+- **50. External Sorting**
+  - External sorting
+  - Merge sort for external data
+  - K-way merge
+  - Replacement selection
+  - Polyphase merge
+  - External sorting applications
+  - Database sorting
+  - Big data sorting
 
 ---
 
-# XII. Binary Search Trees
+# XI. Searching Algorithms
 
-* **51. BST Fundamentals**
+- **51. Linear Search**
+  - Linear search
+  - Sequential search
+  - Linear search complexity
+  - Linear search applications
+  - Linear search optimizations
 
-  * Ordering property
-  * Search
-  * Insertion
-  * Deletion
-  * Minimum
-  * Maximum
-  * Successor
-  * Predecessor
+- **52. Binary Search**
+  - Binary search
+  - Binary search on sorted arrays
+  - Binary search on answer
+  - Binary search variations
+  - Lower bound
+  - Upper bound
+  - First occurrence
+  - Last occurrence
+  - Rotated sorted array
+  - Find minimum in rotated sorted array
+  - Search in rotated sorted array
+  - Search in 2D matrix
+  - Search in 2D matrix II
+  - Median of two sorted arrays
+  - Kth element of two sorted arrays
+  - Sqrt(x)
+  - Valid perfect square
+  - Guess number
+  - First bad version
+  - Peak element
+  - Find peak element
+  - Find minimum in rotated sorted array II
+  - Binary search on monotonic functions
+  - Binary search on bitonic arrays
+  - Binary search on real numbers
+  - Binary search applications
 
-* **52. BST Algorithms**
+- **53. Ternary Search**
+  - Ternary search
+  - Ternary search on unimodal functions
+  - Ternary search vs binary search
+  - Ternary search applications
 
-  * Validate BST
-  * Range queries
-  * Kth-smallest element
-  * Kth-largest element
-  * Ordered traversal
+- **54. Interpolation Search**
+  - Interpolation search
+  - Interpolation search complexity
+  - Interpolation search applications
 
-* **53. BST Complexity**
+- **55. Exponential Search**
+  - Exponential search
+  - Exponential search complexity
+  - Exponential search applications
 
-  * Balanced BST
-  * Unbalanced BST
-  * Average-case complexity
-  * Worst-case degeneration
-
----
-
-# XIII. Balanced Search Trees
-
-* **54. AVL Trees**
-
-  * Balance factor
-  * Rotations
-
-    * Left rotation
-    * Right rotation
-    * Left-right rotation
-    * Right-left rotation
-  * Rebalancing
-
-* **55. Red-Black Trees**
-
-  * Coloring rules
-  * Rotations
-  * Recoloring
-  * Balancing
-  * Complexity guarantees
-
-* **56. Multiway Search Trees**
-
-  * B-trees
-  * B+ trees
-  * Node capacity
-  * Splitting
-  * Merging
-  * Database indexing applications
+- **56. Fibonacci Search**
+  - Fibonacci search
+  - Fibonacci search complexity
+  - Fibonacci search applications
 
 ---
 
-# XIV. Heaps and Priority Queues
+# XII. Recursion and Backtracking
 
-* **57. Heap Fundamentals**
+- **57. Recursion Fundamentals**
+  - Recursion
+  - Base case
+  - Recursive case
+  - Recursion depth
+  - Stack overflow
+  - Tail recursion
+  - Tail call optimization
+  - Recursion vs iteration
+  - Recursion tree
+  - Recursion complexity
+  - Recursion patterns
+  - Recursion best practices
 
-  * Min heap
-  * Max heap
-  * Heap property
-  * Complete-tree representation
+- **58. Recursion Techniques**
+  - Factorial
+  - Fibonacci
+  - Tower of Hanoi
+  - Binary search
+  - Merge sort
+  - Quick sort
+  - Tree traversal
+  - Graph traversal
+  - Permutations
+  - Combinations
+  - Subsets
+  - Power set
+  - N-Queens
+  - Sudoku solver
+  - Word search
+  - Palindrome partitioning
+  - Generate parentheses
+  - Letter combinations
+  - Combination sum
+  - Combination sum II
+  - Combination sum III
+  - Permutations II
+  - Subsets II
+  - Restore IP addresses
+  - Expression add operators
+  - Remove invalid parentheses
+  - Partition to K equal sum subsets
+  - Matchsticks to square
 
-* **58. Heap Operations**
+- **59. Backtracking**
+  - Backtracking
+  - Decision tree
+  - State space
+  - Pruning
+  - Constraint propagation
+  - Forward checking
+  - Backtracking templates
+  - Backtracking complexity
+  - Backtracking applications
+  - N-Queens
+  - Sudoku solver
+  - Word search
+  - Crossword puzzle
+  - Graph coloring
+  - Hamiltonian path
+  - Knight's tour
+  - Rat in a maze
+  - M-coloring problem
+  - Palindrome partitioning
+  - Combination sum
+  - Permutations
+  - Subsets
+  - Generate parentheses
+  - Restore IP addresses
+  - Expression add operators
+  - Remove invalid parentheses
+  - Partition to K equal sum subsets
+  - Matchsticks to square
+  - Unique paths III
 
-  * Insert
-  * Extract minimum
-  * Extract maximum
-  * Peek
-  * Heapify
-  * Build heap
-
-* **59. Priority Queues**
-
-  * Priority-based retrieval
-  * Heap-based implementation
-  * Scheduling applications
-  * Event simulation
-
-* **60. Heap Applications**
-
-  * Top-K problems
-  * Kth-largest/smallest elements
-  * Merge sorted sequences
-  * Median maintenance
-  * Scheduling
-
----
-
-# XV. Tries and Prefix Trees
-
-* **61. Trie Fundamentals**
-
-  * Prefix tree structure
-  * Character-based branching
-  * Word termination
-
-* **62. Trie Operations**
-
-  * Insert
-  * Search
-  * Prefix search
-  * Delete
-  * Autocomplete
-
-* **63. Trie Applications**
-
-  * Dictionary lookup
-  * Autocomplete
-  * Spell checking
-  * Prefix matching
-  * Contact search
-
-* **64. Advanced Tries**
-
-  * Compressed trie
-  * Radix tree
-  * Bitwise trie
-
----
-
-# XVI. Graph Fundamentals
-
-* **65. Graph Terminology**
-
-  * Vertex
-  * Edge
-  * Degree
-  * Path
-  * Cycle
-  * Connectedness
-  * Component
-  * Weight
-  * Direction
-
-* **66. Graph Types**
-
-  * Directed graph
-  * Undirected graph
-  * Weighted graph
-  * Unweighted graph
-  * Simple graph
-  * Multigraph
-  * Cyclic graph
-  * Acyclic graph
-  * Bipartite graph
-  * Dense graph
-  * Sparse graph
-
-* **67. Graph Representations**
-
-  * Adjacency matrix
-  * Adjacency list
-  * Edge list
-  * Incidence representation
-  * Representation trade-offs
+- **60. Divide and Conquer**
+  - Divide and conquer
+  - Divide
+  - Conquer
+  - Combine
+  - Merge sort
+  - Quick sort
+  - Binary search
+  - Strassen's matrix multiplication
+  - Closest pair of points
+  - Maximum subarray
+  - Karatsuba algorithm
+  - Fast Fourier transform
+  - Divide and conquer on trees
+  - Divide and conquer optimization
+  - Divide and conquer complexity
+  - Divide and conquer applications
 
 ---
 
-# XVII. Graph Traversal
+# XIII. Dynamic Programming
 
-* **68. Breadth-First Search**
+- **61. Dynamic Programming Fundamentals**
+  - Dynamic programming
+  - Optimal substructure
+  - Overlapping subproblems
+  - Memoization
+  - Tabulation
+  - Top-down DP
+  - Bottom-up DP
+  - State definition
+  - State transition
+  - Base cases
+  - DP table
+  - DP dimensions
+  - DP optimization
+  - DP complexity
+  - DP vs recursion
+  - DP vs greedy
+  - DP applications
 
-  * Queue-based traversal
-  * Level exploration
-  * Visited tracking
-  * Shortest path in unweighted graphs
+- **62. DP Patterns**
+  - 1D DP
+  - 2D DP
+  - 3D DP
+  - Interval DP
+  - Tree DP
+  - Bitmask DP
+  - Digit DP
+  - DP on strings
+  - DP on arrays
+  - DP on graphs
+  - DP on trees
+  - DP with state compression
+  - DP with memoization
+  - DP with tabulation
+  - DP with rolling arrays
+  - DP with prefix sums
+  - DP with divide and conquer
+  - DP with convex hull trick
+  - DP with Li Chao tree
+  - DP with Knuth optimization
+  - DP with monotonic queue
 
-* **69. Depth-First Search**
+- **63. Classic DP Problems**
+  - Fibonacci
+  - Climbing stairs
+  - House robber
+  - House robber II
+  - House robber III
+  - Coin change
+  - Coin change II
+  - Knapsack problem
+    - 0/1 knapsack
+    - Unbounded knapsack
+    - Fractional knapsack
+    - Bounded knapsack
+  - Subset sum
+  - Partition equal subset sum
+  - Target sum
+  - Longest increasing subsequence
+  - Longest common subsequence
+  - Longest palindromic subsequence
+  - Longest palindromic substring
+  - Edit distance
+  - Wildcard matching
+  - Regular expression matching
+  - Word break
+  - Word break II
+  - Interleaving string
+  - Distinct subsequences
+  - Palindrome partitioning
+  - Palindrome partitioning II
+  - Burst balloons
+  - Matrix chain multiplication
+  - Optimal binary search tree
+  - Egg dropping
+  - Minimum cost to cut a stick
+  - Minimum path sum
+  - Unique paths
+  - Unique paths II
+  - Triangle
+  - Maximum product subarray
+  - Maximum subarray
+  - Best time to buy and sell stock
+  - Best time to buy and sell stock II
+  - Best time to buy and sell stock III
+  - Best time to buy and sell stock IV
+  - Best time to buy and sell stock with cooldown
+  - Best time to buy and sell stock with transaction fee
+  - Decode ways
+  - Decode ways II
+  - Perfect squares
+  - Integer break
+  - Counting bits
+  - Number of 1 bits
+  - Maximum length of pair chain
+  - Russian doll envelopes
+  - Longest arithmetic subsequence
+  - Longest arithmetic subsequence of given difference
+  - Longest string chain
+  - Number of longest increasing subsequence
+  - Minimum number of taps
+  - Video stitching
+  - Jump game
+  - Jump game II
+  - Jump game III
+  - Jump game IV
+  - Jump game V
+  - Jump game VI
+  - Jump game VII
+  - Frog jump
+  - Minimum cost for tickets
+  - Paint house
+  - Paint house II
+  - Paint fence
+  - Cherry pickup
+  - Cherry pickup II
+  - Dungeon game
+  - Minimum falling path sum
+  - Minimum falling path sum II
+  - Maximum sum of 3 non-overlapping subarrays
+  - Maximum sum circular subarray
+  - Partition array for maximum sum
+  - Stone game
+  - Stone game II
+  - Stone game III
+  - Stone game IV
+  - Stone game V
+  - Stone game VI
+  - Stone game VII
+  - Stone game VIII
+  - Stone game IX
+  - Predict the winner
+  - Can I win
+  - Nim game
+  - Flip game
+  - Flip game II
+  - Guess number higher or lower II
+  - Super egg drop
+  - Minimum cost to merge stones
 
-  * Recursive DFS
-  * Iterative DFS
-  * Stack-based traversal
-  * Visited tracking
-
-* **70. Graph Traversal Applications**
-
-  * Connected components
-  * Cycle detection
-  * Path existence
-  * Maze solving
-  * Bipartite testing
-  * Grid traversal
-
----
-
-# XVIII. Shortest Path Algorithms
-
-* **71. Single-Source Shortest Path**
-
-  * Dijkstra's algorithm
-  * Non-negative edge requirement
-  * Priority-queue optimization
-
-* **72. Bellman-Ford**
-
-  * Negative edge weights
-  * Relaxation
-  * Negative-cycle detection
-
-* **73. All-Pairs Shortest Path**
-
-  * Floyd-Warshall
-  * Dynamic-programming formulation
-  * Negative-cycle considerations
-
-* **74. Advanced Shortest Paths**
-
-  * Bidirectional search
-  * 0-1 BFS
-  * A* search
-  * State-space shortest paths
-
----
-
-# XIX. Minimum Spanning Trees
-
-* **75. MST Fundamentals**
-
-  * Spanning tree
-  * Minimum spanning tree
-  * Cut property
-  * Cycle property
-
-* **76. Prim's Algorithm**
-
-  * Greedy expansion
-  * Priority queue
-  * Complexity analysis
-
-* **77. Kruskal's Algorithm**
-
-  * Edge sorting
-  * Greedy selection
-  * Cycle prevention
-  * Disjoint Set Union
-
-* **78. MST Applications**
-
-  * Network design
-  * Infrastructure planning
-  * Clustering
-  * Minimum-cost connectivity
-
----
-
-# XX. Disjoint Set Union
-
-* **79. Union-Find Fundamentals**
-
-  * Disjoint sets
-  * Parent representation
-  * Find
-  * Union
-
-* **80. Optimization**
-
-  * Path compression
-  * Union by rank
-  * Union by size
-
-* **81. Applications**
-
-  * Cycle detection
-  * Kruskal's algorithm
-  * Connected components
-  * Dynamic connectivity
-  * Grid connectivity problems
-
----
-
-# XXI. Topological Sorting
-
-* **82. Directed Acyclic Graphs**
-
-  * DAG definition
-  * Dependency relationships
-  * Directed cycles
-
-* **83. Topological Sort**
-
-  * DFS-based method
-  * Kahn's algorithm
-  * In-degree
-  * Queue processing
-
-* **84. Applications**
-
-  * Course scheduling
-  * Build systems
-  * Dependency resolution
-  * Task scheduling
-  * Package management
-
----
-
-# XXII. Advanced Graph Algorithms
-
-* **85. Strongly Connected Components**
-
-  * Kosaraju's algorithm
-  * Tarjan's algorithm
-  * Component condensation
-
-* **86. Bridges and Articulation Points**
-
-  * Critical edges
-  * Critical vertices
-  * DFS low-link concepts
-
-* **87. Eulerian Structures**
-
-  * Eulerian path
-  * Eulerian circuit
-  * Degree conditions
-
-* **88. Hamiltonian Structures**
-
-  * Hamiltonian path
-  * Hamiltonian cycle
-  * Computational difficulty
-
-* **89. Graph Coloring**
-
-  * Vertex coloring
-  * Bipartite coloring
-  * Greedy coloring
-  * Coloring constraints
-
-* **90. Network Flow**
-
-  * Flow networks
-  * Capacity
-  * Residual graph
-  * Augmenting paths
-  * Maximum flow
-  * Minimum cut
-
-* **91. Maximum Flow Algorithms**
-
-  * Ford-Fulkerson
-  * Edmonds-Karp
-  * Dinic's algorithm
-
-* **92. Bipartite Matching**
-
-  * Maximum bipartite matching
-  * Flow-based formulation
-  * Matching applications
+- **64. Advanced DP**
+  - Bitmask DP
+  - Digit DP
+  - Tree DP
+  - Interval DP
+  - DP on DAG
+  - DP with state compression
+  - DP with matrix exponentiation
+  - DP with convex hull trick
+  - DP with Li Chao tree
+  - DP with divide and conquer
+  - DP with Knuth optimization
+  - DP with monotonic queue
+  - DP with segment tree
+  - DP with Fenwick tree
+  - DP with sqrt decomposition
+  - DP with persistent data structures
+  - DP with sparse table
+  - DP with binary lifting
+  - DP with heavy-light decomposition
+  - DP with centroid decomposition
+  - DP with Mo's algorithm
+  - DP with SOS DP
+  - DP with subset convolution
+  - DP with fast zeta transform
+  - DP with fast Möbius transform
 
 ---
 
-# XXIII. Greedy Algorithms
+# XIV. Greedy Algorithms
 
-* **93. Greedy Method**
+- **65. Greedy Fundamentals**
+  - Greedy algorithms
+  - Greedy choice property
+  - Optimal substructure
+  - Greedy vs DP
+  - Greedy vs backtracking
+  - Greedy correctness
+  - Greedy exchange argument
+  - Greedy matroids
+  - Greedy applications
 
-  * Local optimal choice
-  * Greedy-choice property
-  * Optimal substructure
+- **66. Greedy Techniques**
+  - Activity selection
+  - Interval scheduling
+  - Interval partitioning
+  - Merge intervals
+  - Insert interval
+  - Meeting rooms
+  - Meeting rooms II
+  - Non-overlapping intervals
+  - Minimum number of arrows
+  - Jump game
+  - Jump game II
+  - Gas station
+  - Candy
+  - Task scheduler
+  - Partition labels
+  - Queue reconstruction by height
+  - Two city scheduling
+  - Best time to buy and sell stock II
+  - Assign cookies
+  - Lemonade change
+  - Boats to save people
+  - Minimum number of platforms
+  - Huffman coding
+  - Fractional knapsack
+  - Job sequencing with deadlines
+  - Minimum spanning trees
+  - Dijkstra's algorithm
+  - Prim's algorithm
+  - Kruskal's algorithm
+  - Greedy coloring
+  - Egyptian fraction
+  - Minimum coins
+  - Maximum trains stoppage
+  - Minimum cost to cut a board
+  - Police and thieves
+  - Chocolate distribution
+  - Minimum swaps
+  - Maximum product subset
+  - Rearrange characters
+  - Smallest number with given sum
+  - Largest number possible
+  - Minimum sum of two numbers
+  - Maximum sum of absolute difference
+  - Minimum number of coins
+  - Minimum number of jumps
+  - Minimum number of refueling stops
+  - Minimum number of taps
+  - Maximum length of chain
+  - Minimum number of deletions
+  - Minimum number of insertions
+  - Minimum number of operations
+  - Minimum number of platforms
 
-* **94. Classic Greedy Algorithms**
-
-  * Activity selection
-  * Fractional knapsack
-  * Interval scheduling
-  * Huffman coding
-  * Job sequencing
-  * Minimum spanning trees
-
-* **95. Greedy Proof Techniques**
-
-  * Exchange argument
-  * Cut-and-paste reasoning
-  * Staying-ahead argument
-  * Counterexample analysis
-
----
-
-# XXIV. Divide and Conquer
-
-* **96. Divide-and-Conquer Paradigm**
-
-  * Divide
-  * Conquer
-  * Combine
-
-* **97. Classic Algorithms**
-
-  * Merge sort
-  * Quick sort
-  * Binary search
-  * Fast exponentiation
-  * Closest-pair algorithms
-
-* **98. Divide-and-Conquer Analysis**
-
-  * Recurrence formulation
-  * Recursion tree
-  * Master theorem
-  * Complexity optimization
-
----
-
-# XXV. Dynamic Programming
-
-* **99. DP Fundamentals**
-
-  * Overlapping subproblems
-  * Optimal substructure
-  * State definition
-  * Transition
-  * Base cases
-
-* **100. Memoization**
-
-  * Top-down dynamic programming
-  * Caching subproblem results
-  * Recursive state management
-
-* **101. Tabulation**
-
-  * Bottom-up dynamic programming
-  * Iterative state computation
-  * Table ordering
-
-* **102. Classic DP Problems**
-
-  * Fibonacci
-  * Climbing stairs
-  * House robber
-  * 0/1 knapsack
-  * Coin change
-  * Longest common subsequence
-  * Longest increasing subsequence
-  * Edit distance
-
-* **103. Advanced DP**
-
-  * Interval DP
-  * Tree DP
-  * Bitmask DP
-  * Digit DP
-  * State-compression DP
-  * DP on DAGs
-  * Multi-dimensional DP
-
-* **104. DP Optimization**
-
-  * Space optimization
-  * State reduction
-  * Transition optimization
-  * Monotonic queue optimization
-  * Convex hull optimization
-  * Divide-and-conquer optimization
+- **67. Greedy Proofs**
+  - Greedy choice property
+  - Exchange argument
+  - Induction proof
+  - Contradiction proof
+  - Matroid theory
+  - Greedy correctness
+  - Greedy pitfalls
+  - When greedy fails
+  - Greedy vs optimal
 
 ---
 
-# XXVI. Bit Manipulation
+# XV. Advanced Algorithms
 
-* **105. Binary Representation**
+- **68. Bit Manipulation**
+  - Bits
+  - Bitwise operators
+    - `&`
+    - `|`
+    - `^`
+    - `~`
+    - `<<`
+    - `>>`
+    - `>>>`
+  - Bit masks
+  - Bit manipulation techniques
+  - Set bit
+  - Clear bit
+  - Toggle bit
+  - Check bit
+  - Count bits
+  - Brian Kernighan's algorithm
+  - Power of two
+  - Power of four
+  - Single number
+  - Single number II
+  - Single number III
+  - Missing number
+  - Number of 1 bits
+  - Reverse bits
+  - Bitwise AND of numbers range
+  - Maximum XOR of two numbers
+  - Maximum XOR of two numbers in array
+  - Subsets using bitmask
+  - Gray code
+  - Bit manipulation applications
+  - Bit tricks
+  - Bit manipulation best practices
 
-  * Bits
-  * Binary numbers
-  * Two's complement
-  * Bit positions
+- **69. Mathematical Algorithms**
+  - GCD
+  - LCM
+  - Euclidean algorithm
+  - Extended Euclidean algorithm
+  - Modular arithmetic
+  - Modular exponentiation
+  - Modular inverse
+  - Fermat's little theorem
+  - Euler's theorem
+  - Chinese remainder theorem
+  - Prime numbers
+  - Sieve of Eratosthenes
+  - Segmented sieve
+  - Prime factorization
+  - Trial division
+  - Pollard's rho algorithm
+  - Miller-Rabin primality test
+  - Fermat primality test
+  - Deterministic primality test
+  - Carmichael numbers
+  - Number of divisors
+  - Sum of divisors
+  - Euler's totient function
+  - Möbius function
+  - Combinatorics
+  - Permutations
+  - Combinations
+  - Binomial coefficients
+  - Pascal's triangle
+  - Catalan numbers
+  - Stirling numbers
+  - Bell numbers
+  - Partition numbers
+  - Fibonacci numbers
+  - Lucas numbers
+  - Matrix exponentiation
+  - Fast Fibonacci
+  - Fast doubling
+  - Pisano period
+  - Josephus problem
+  - Game theory
+  - Nim game
+  - Sprague-Grundy theorem
+  - Grundy numbers
+  - Winning and losing positions
+  - Minimax
+  - Alpha-beta pruning
+  - Mathematical algorithms applications
 
-* **106. Bitwise Operators**
+- **70. Randomized Algorithms**
+  - Randomized algorithms
+  - Las Vegas algorithms
+  - Monte Carlo algorithms
+  - Atlantic City algorithms
+  - Random number generation
+  - Pseudo-random number generators
+  - True random number generators
+  - Reservoir sampling
+  - Fisher-Yates shuffle
+  - Randomized quick sort
+  - Randomized quick select
+  - Randomized binary search
+  - Randomized primality testing
+  - Miller-Rabin
+  - Fermat test
+  - Randomized min-cut
+  - Karger's algorithm
+  - Randomized data structures
+  - Skip lists
+  - Treaps
+  - Bloom filters
+  - Count-min sketch
+  - HyperLogLog
+  - MinHash
+  - Locality-sensitive hashing
+  - Randomized algorithms applications
 
-  * AND
-  * OR
-  * XOR
-  * NOT
-  * Left shift
-  * Right shift
+- **71. Approximation Algorithms**
+  - Approximation algorithms
+  - Approximation ratio
+  - Performance guarantee
+  - Vertex cover
+  - Set cover
+  - Traveling salesman problem
+  - Metric TSP
+  - Christofides algorithm
+  - Knapsack problem
+  - Bin packing
+  - Scheduling
+  - Facility location
+  - Max-cut
+  - Approximation schemes
+  - PTAS
+  - FPTAS
+  - Hardness of approximation
+  - Approximation algorithms applications
 
-* **107. Bit Techniques**
+- **72. Online Algorithms**
+  - Online algorithms
+  - Competitive analysis
+  - Competitive ratio
+  - Ski rental problem
+  - Online paging
+  - Online scheduling
+  - Online matching
+  - Online bin packing
+  - Secretary problem
+  - Online algorithms applications
 
-  * Check odd/even
-  * Set a bit
-  * Clear a bit
-  * Toggle a bit
-  * Test a bit
-  * Count set bits
-  * Lowest set bit
-  * Power-of-two detection
+- **73. Streaming Algorithms**
+  - Streaming algorithms
+  - Data streams
+  - Single-pass algorithms
+  - Multi-pass algorithms
+  - Space complexity
+  - Approximation
+  - Reservoir sampling
+  - Count-min sketch
+  - HyperLogLog
+  - Bloom filters
+  - Frequent items
+  - Heavy hitters
+  - Distinct elements
+  - Order statistics
+  - Streaming algorithms applications
 
-* **108. Advanced Bitmasking**
+- **74. Parallel and Distributed Algorithms**
+  - Parallel algorithms
+  - Parallel models
+  - PRAM
+  - Work-depth model
+  - Parallel prefix
+  - Parallel sorting
+  - Parallel search
+  - Parallel graph algorithms
+  - Distributed algorithms
+  - Distributed models
+  - Consensus
+  - Leader election
+  - Distributed sorting
+  - Distributed graph algorithms
+  - MapReduce
+  - Distributed algorithms applications
 
-  * Subset enumeration
-  * State compression
-  * Bitmask DP
-  * XOR-based problems
+- **75. Geometric Algorithms**
+  - Computational geometry
+  - Points
+  - Lines
+  - Segments
+  - Polygons
+  - Convex hull
+  - Graham scan
+  - Jarvis march
+  - Andrew's monotone chain
+  - Line intersection
+  - Segment intersection
+  - Point in polygon
+  - Closest pair of points
+  - Sweep line algorithms
+  - Range searching
+  - KD-trees
+  - Quadtrees
+  - Voronoi diagrams
+  - Delaunay triangulation
+  - Geometric algorithms applications
+
+- **76. String Algorithms Advanced**
+  - Suffix arrays
+  - Suffix trees
+  - Suffix automata
+  - Aho-Corasick
+  - Manacher's algorithm
+  - Z algorithm
+  - KMP
+  - Rabin-Karp
+  - Boyer-Moore
+  - Rolling hash
+  - Double hashing
+  - String hashing
+  - Palindromic tree
+  - Eertree
+  - Lyndon factorization
+  - Burrows-Wheeler transform
+  - FM-index
+  - String algorithms applications
+
+- **77. Advanced Data Structures**
+  - Segment trees
+  - Fenwick trees
+  - Sparse tables
+  - Disjoint sparse tables
+  - Binary lifting
+  - Heavy-light decomposition
+  - Centroid decomposition
+  - Link-cut trees
+  - Euler tour trees
+  - Persistent data structures
+  - Functional data structures
+  - Implicit treaps
+  - Splay trees
+  - Skip lists
+  - B-trees
+  - B+ trees
+  - R-trees
+  - Quad trees
+  - KD-trees
+  - Range trees
+  - Interval trees
+  - Priority search trees
+  - Fusion trees
+  - Van Emde Boas trees
+  - X-fast tries
+  - Y-fast tries
+  - Suffix arrays
+  - Suffix trees
+  - Suffix automata
+  - Wavelet trees
+  - Merge sort trees
+  - Persistent segment trees
+  - Dynamic segment trees
+  - Li Chao trees
+  - Convex hull trick
+  - Monotonic queues
+  - Monotonic stacks
+  - Sliding window
+  - Two pointers
+  - Mo's algorithm
+  - Mo's algorithm with updates
+  - Sqrt decomposition
+  - Heavy-light decomposition
+  - Centroid decomposition
+  - Small-to-large merging
+  - DSU on trees
+  - Tree flattening
+  - Euler tour
+  - Binary lifting
+  - LCA
+  - Sparse table
+  - RMQ
+  - Range queries
+  - Point updates
+  - Range updates
+  - Lazy propagation
+  - Persistent data structures
+  - Functional data structures
+  - Advanced data structures applications
 
 ---
 
-# XXVII. Mathematical Algorithms
+# XVI. Algorithmic Paradigms
 
-* **109. Number Theory Fundamentals**
+- **78. Brute Force**
+  - Brute force
+  - Exhaustive search
+  - Generate and test
+  - Brute force complexity
+  - Brute force optimization
+  - Brute force applications
 
-  * Prime numbers
-  * Divisibility
-  * Factors
-  * Greatest common divisor
-  * Least common multiple
+- **79. Divide and Conquer**
+  - Divide and conquer
+  - Divide
+  - Conquer
+  - Combine
+  - Merge sort
+  - Quick sort
+  - Binary search
+  - Strassen's algorithm
+  - Closest pair of points
+  - Maximum subarray
+  - Karatsuba algorithm
+  - Fast Fourier transform
+  - Divide and conquer optimization
+  - Divide and conquer applications
 
-* **110. Number-Theoretic Algorithms**
+- **80. Dynamic Programming**
+  - Dynamic programming
+  - Optimal substructure
+  - Overlapping subproblems
+  - Memoization
+  - Tabulation
+  - State definition
+  - State transition
+  - DP optimization
+  - DP applications
 
-  * Euclidean algorithm
-  * Extended Euclidean algorithm
-  * Sieve of Eratosthenes
-  * Prime factorization
+- **81. Greedy Algorithms**
+  - Greedy algorithms
+  - Greedy choice property
+  - Optimal substructure
+  - Greedy correctness
+  - Greedy applications
 
-* **111. Modular Arithmetic**
+- **82. Backtracking**
+  - Backtracking
+  - Decision tree
+  - State space
+  - Pruning
+  - Constraint propagation
+  - Backtracking applications
 
-  * Modular addition
-  * Modular multiplication
-  * Modular exponentiation
-  * Modular inverse
+- **83. Branch and Bound**
+  - Branch and bound
+  - Bounding
+  - Pruning
+  - Search tree
+  - Branch and bound applications
+  - Traveling salesman problem
+  - Knapsack problem
+  - Assignment problem
+  - Job scheduling
 
-* **112. Combinatorics**
+- **84. Randomized Algorithms**
+  - Randomized algorithms
+  - Las Vegas algorithms
+  - Monte Carlo algorithms
+  - Randomized data structures
+  - Randomized algorithms applications
 
-  * Permutations
-  * Combinations
-  * Factorials
-  * Binomial coefficients
-  * Pascal's triangle
+- **85. Approximation Algorithms**
+  - Approximation algorithms
+  - Approximation ratio
+  - Performance guarantee
+  - Approximation schemes
+  - Approximation algorithms applications
 
-* **113. Advanced Mathematical Algorithms**
+- **86. Online Algorithms**
+  - Online algorithms
+  - Competitive analysis
+  - Competitive ratio
+  - Online algorithms applications
 
-  * Fast exponentiation
-  * Matrix exponentiation
-  * Chinese remainder theorem
-  * Fermat's little theorem
-  * Euler's totient function
-
----
-
-# XXVIII. Computational Geometry
-
-* **114. Geometry Fundamentals**
-
-  * Points
-  * Lines
-  * Segments
-  * Vectors
-  * Distance
-  * Angles
-
-* **115. Geometric Tests**
-
-  * Orientation
-  * Collinearity
-  * Segment intersection
-  * Point-in-polygon
-
-* **116. Advanced Geometry**
-
-  * Convex hull
-  * Graham scan
-  * Monotonic chain
-  * Closest pair of points
-  * Line sweep
-  * Computational geometry optimization
-
----
-
-# XXIX. Advanced Data Structures
-
-* **117. Segment Trees**
-
-  * Range queries
-  * Point updates
-  * Range updates
-  * Lazy propagation
-
-* **118. Fenwick Trees**
-
-  * Binary Indexed Tree
-  * Prefix sums
-  * Point updates
-  * Range-query techniques
-
-* **119. Sparse Tables**
-
-  * Static range queries
-  * Idempotent operations
-  * Range minimum query
-
-* **120. Advanced Trees**
-
-  * Treaps
-  * Splay trees
-  * Interval trees
-  * Order-statistics trees
-
-* **121. Advanced Graph Structures**
-
-  * Heavy-light decomposition
-  * Centroid decomposition
-  * Binary lifting
-  * Lowest Common Ancestor structures
+- **87. Metaheuristics**
+  - Metaheuristics
+  - Simulated annealing
+  - Genetic algorithms
+  - Tabu search
+  - Ant colony optimization
+  - Particle swarm optimization
+  - Hill climbing
+  - Local search
+  - Metaheuristics applications
 
 ---
 
-# XXX. Advanced Searching and Query Techniques
+# XVII. Competitive Programming
 
-* **122. Two-Pointer Technique**
+- **88. Competitive Programming Fundamentals**
+  - Competitive programming
+  - Online judges
+  - Codeforces
+  - LeetCode
+  - HackerRank
+  - HackerEarth
+  - CodeChef
+  - AtCoder
+  - TopCoder
+  - ICPC
+  - IOI
+  - Problem solving
+  - Time management
+  - Strategy
+  - Practice
+  - Rating
+  - Contest participation
 
-  * Opposite-direction pointers
-  * Same-direction pointers
-  * Sorted-array applications
-  * Subarray problems
+- **89. Competitive Programming Techniques**
+  - Fast input/output
+  - Fast I/O in C++
+  - Fast I/O in Java
+  - Fast I/O in Python
+  - Template code
+  - Snippets
+  - Macros
+  - Debugging
+  - Testing
+  - Stress testing
+  - Random testing
+  - Brute force testing
+  - Time complexity analysis
+  - Space complexity analysis
+  - Edge cases
+  - Corner cases
+  - Problem patterns
+  - Problem categories
+  - Problem-solving strategies
 
-* **123. Sliding Window**
+- **90. Competitive Programming Topics**
+  - Arrays
+  - Strings
+  - Linked lists
+  - Stacks
+  - Queues
+  - Hashing
+  - Trees
+  - Heaps
+  - Graphs
+  - Sorting
+  - Searching
+  - Recursion
+  - Backtracking
+  - Dynamic programming
+  - Greedy algorithms
+  - Bit manipulation
+  - Number theory
+  - Combinatorics
+  - Geometry
+  - Advanced data structures
+  - Advanced algorithms
+  - Game theory
+  - Probability
+  - Randomized algorithms
+  - Approximation algorithms
+  - Online algorithms
+  - Streaming algorithms
 
-  * Fixed-size window
-  * Variable-size window
-  * Frequency tracking
-  * Maximum/minimum window problems
-
-* **124. Prefix and Difference Techniques**
-
-  * Prefix sums
-  * Prefix XOR
-  * Difference arrays
-  * 2D prefix sums
-
-* **125. Monotonic Data Structures**
-
-  * Monotonic stack
-  * Monotonic queue
-  * Next greater element
-  * Largest rectangle
-  * Sliding-window maximum
-
----
-
-# XXXI. Algorithmic Problem-Solving Patterns
-
-* **126. Frequency Counting**
-
-  * Hash maps
-  * Frequency arrays
-  * Character frequencies
-  * Duplicate detection
-
-* **127. Sorting-Based Techniques**
-
-  * Sort-and-scan
-  * Pair matching
-  * Interval processing
-  * Greedy ordering
-
-* **128. Prefix/Suffix Patterns**
-
-  * Prefix sums
-  * Prefix maxima
-  * Suffix minima
-  * Precomputed aggregates
-
-* **129. Invariant-Based Reasoning**
-
-  * Loop invariants
-  * Data-structure invariants
-  * State invariants
-  * Correctness preservation
-
-* **130. State-Space Search**
-
-  * BFS state search
-  * DFS state search
-  * Backtracking
-  * Memoized state search
-
----
-
-# XXXII. Algorithm Correctness
-
-* **131. Correctness Concepts**
-
-  * Partial correctness
-  * Total correctness
-  * Termination
-  * Preconditions
-  * Postconditions
-
-* **132. Proof Techniques**
-
-  * Mathematical induction
-  * Loop invariants
-  * Contradiction
-  * Direct proof
-  * Exchange arguments
-
-* **133. Correctness Verification**
-
-  * Edge cases
-  * Boundary conditions
-  * Counterexamples
-  * Invariant validation
-  * Complexity validation
+- **91. Competitive Programming Resources**
+  - Books
+    - CLRS
+    - Algorithm Design Manual
+    - Competitive Programming
+    - CP3
+    - CP4
+    - Introduction to Algorithms
+    - Elements of Programming Interviews
+    - Cracking the Coding Interview
+  - Online courses
+  - YouTube channels
+  - Blogs
+  - Forums
+  - Discord servers
+  - GitHub repositories
+  - Problem sets
+  - Editorial reading
+  - Upsolving
+  - Virtual contests
 
 ---
 
-# XXXIII. Advanced Algorithmic Paradigms
+# XVIII. DSA in Production Systems
 
-* **134. Randomized Algorithms**
+- **92. DSA in Software Engineering**
+  - DSA in production
+  - DSA vs system design
+  - DSA in backend
+  - DSA in frontend
+  - DSA in databases
+  - DSA in networking
+  - DSA in operating systems
+  - DSA in compilers
+  - DSA in distributed systems
+  - DSA in machine learning
+  - DSA in data engineering
+  - DSA in security
+  - DSA in game development
+  - DSA in mobile development
+  - DSA in embedded systems
 
-  * Randomized selection
-  * Randomized quicksort
-  * Probability-based analysis
+- **93. Data Structures in Production**
+  - Arrays
+  - Dynamic arrays
+  - Strings
+  - Linked lists
+  - Stacks
+  - Queues
+  - Deques
+  - Hash tables
+  - Trees
+  - Balanced trees
+  - B-trees
+  - Heaps
+  - Graphs
+  - Tries
+  - Segment trees
+  - Fenwick trees
+  - Union-Find
+  - Bloom filters
+  - Count-min sketch
+  - HyperLogLog
+  - Skip lists
+  - LRU cache
+  - LFU cache
+  - Consistent hashing
+  - Merkle trees
+  - CRDTs
+  - Ropes
+  - Gap buffers
+  - Piece tables
 
-* **135. Online Algorithms**
+- **94. Algorithms in Production**
+  - Sorting
+  - Searching
+  - Hashing
+  - Graph algorithms
+  - Dynamic programming
+  - Greedy algorithms
+  - String algorithms
+  - Compression algorithms
+  - Encryption algorithms
+  - Scheduling algorithms
+  - Load balancing
+  - Rate limiting
+  - Caching
+  - Indexing
+  - Query optimization
+  - Recommendation algorithms
+  - Ranking algorithms
+  - Search algorithms
+  - Machine learning algorithms
+  - Distributed algorithms
 
-  * Incremental input
-  * Online decisions
-  * Competitive analysis
+- **95. System Design and DSA**
+  - System design
+  - Scalability
+  - Availability
+  - Reliability
+  - Performance
+  - Latency
+  - Throughput
+  - Consistency
+  - Partition tolerance
+  - CAP theorem
+  - Load balancing
+  - Caching
+  - Sharding
+  - Replication
+  - Consensus
+  - Distributed transactions
+  - Message queues
+  - Event-driven architecture
+  - Microservices
+  - API design
+  - Database design
+  - DSA in system design
 
-* **136. Approximation Algorithms**
-
-  * Optimization problems
-  * Approximation ratio
-  * Trade-offs
-  * NP-hard problem approximations
-
-* **137. Amortized Algorithms**
-
-  * Aggregate method
-  * Accounting method
-  * Potential method
-  * Dynamic-array analysis
-
----
-
-# XXXIV. Complexity Theory
-
-* **138. Computational Complexity**
-
-  * Polynomial time
-  * Exponential time
-  * Decision problems
-  * Optimization problems
-
-* **139. Complexity Classes**
-
-  * P
-  * NP
-  * NP-hard
-  * NP-complete
-
-* **140. Reductions**
-
-  * Polynomial-time reductions
-  * Problem transformation
-  * Establishing NP-completeness
-
-* **141. Classic Difficult Problems**
-
-  * Traveling Salesperson Problem
-  * Knapsack
-  * Subset Sum
-  * Vertex Cover
-  * Hamiltonian Cycle
-  * SAT
-
----
-
-# XXXV. DSA for Competitive Programming
-
-* **142. Problem-Solving Workflow**
-
-  * Understand the problem
-  * Identify constraints
-  * Derive observations
-  * Select a technique
-  * Analyze complexity
-  * Implement
-  * Test edge cases
-
-* **143. Common Competitive Techniques**
-
-  * Two pointers
-  * Sliding window
-  * Binary search
-  * Greedy
-  * Prefix sums
-  * Difference arrays
-  * DSU
-  * BFS/DFS
-  * Dynamic programming
-  * Bitmasking
-
-* **144. Optimization Strategies**
-
-  * Reduce time complexity
-  * Reduce auxiliary memory
-  * Avoid repeated work
-  * Precompute reusable information
-  * Replace brute force with structural reasoning
-
-* **145. Contest-Level Topics**
-
-  * Segment trees
-  * Fenwick trees
-  * Sparse tables
-  * LCA
-  * Heavy-light decomposition
-  * Advanced graph algorithms
-  * Advanced DP
-  * Computational geometry
-
----
-
-# XXXVI. DSA in Software Engineering
-
-* **146. DSA in Application Development**
-
-  * Searching
-  * Caching
-  * Scheduling
-  * Indexing
-  * Routing
-  * Data processing
-
-* **147. DSA in Databases**
-
-  * B-trees
-  * B+ trees
-  * Hash indexes
-  * Query optimization
-  * External sorting
-
-* **148. DSA in Operating Systems**
-
-  * Scheduling queues
-  * Priority queues
-  * Memory management
-  * Graph-based resource allocation
-
-* **149. DSA in Networking**
-
-  * Routing algorithms
-  * Graph models
-  * Queues
-  * Packet scheduling
-  * Congestion management
-
-* **150. DSA in Artificial Intelligence**
-
-  * Graph search
-  * Priority queues
-  * State-space search
-  * Dynamic programming
-  * Heuristic algorithms
+- **96. Interview Preparation**
+  - Interview preparation
+  - Coding interviews
+  - System design interviews
+  - Behavioral interviews
+  - Problem-solving
+  - Communication
+  - Whiteboarding
+  - Mock interviews
+  - Practice problems
+  - LeetCode
+  - HackerRank
+  - Cracking the Coding Interview
+  - Elements of Programming Interviews
+  - Interview patterns
+  - Interview strategies
+  - Interview best practices
 
 ---
 
-# XXXVII. DSA Testing and Debugging
+# XIX. DSA Projects by Difficulty
 
-* **151. Correctness Testing**
+## Beginner Projects
 
-  * Normal cases
-  * Boundary cases
-  * Empty inputs
-  * Single-element inputs
-  * Duplicate values
-  * Maximum-size inputs
+- **1. Array Operations Library**
+  - Array creation
+  - Array traversal
+  - Array insertion
+  - Array deletion
+  - Array searching
+  - Array sorting
 
-* **152. Algorithm Debugging**
+- **2. Linked List Implementation**
+  - Singly linked list
+  - Doubly linked list
+  - Circular linked list
+  - Basic operations
+  - Traversal
 
-  * Off-by-one errors
-  * Incorrect loop bounds
-  * Incorrect recursion base cases
-  * Pointer/reference errors
-  * State-reset errors
-  * Overflow problems
+- **3. Stack and Queue Implementation**
+  - Stack using array
+  - Stack using linked list
+  - Queue using array
+  - Queue using linked list
+  - Circular queue
 
-* **153. Performance Debugging**
+- **4. Sorting Algorithms Visualizer**
+  - Bubble sort
+  - Selection sort
+  - Insertion sort
+  - Merge sort
+  - Quick sort
+  - Visualization
 
-  * Time-limit failures
-  * Memory-limit failures
-  * Excessive recursion
-  * Repeated computation
-  * Inefficient data structures
-
-* **154. Testing Strategies**
-
-  * Unit testing
-  * Property-based testing
-  * Randomized testing
-  * Stress testing
-  * Differential testing
-
----
-
-# XXXVIII. Progressive DSA Project Development
-
-* **155. Beginner Projects**
-
-  * Contact management system
-
-    * Arrays
-    * Linked lists
-    * Searching
-  * Browser history simulator
-
-    * Stacks
-    * Linked lists
-  * Task scheduler
-
-    * Queues
-    * Priority queues
-
-* **156. Intermediate Projects**
-
-  * Autocomplete system
-
-    * Trie
-    * String algorithms
-  * File-system tree explorer
-
-    * Trees
-    * DFS
-    * BFS
-  * Route finder
-
-    * Graphs
-    * BFS
-    * Dijkstra
-
-* **157. Advanced Projects**
-
-  * Social-network graph analyzer
-
-    * Graph traversal
-    * Shortest paths
-    * Connected components
-  * Search engine prototype
-
-    * Hashing
-    * Trie
-    * Ranking structures
-  * Calendar scheduling engine
-
-    * Heaps
-    * Interval algorithms
-    * Greedy algorithms
-
-* **158. Expert Projects**
-
-  * Distributed task scheduler
-
-    * Priority queues
-    * Graph dependencies
-    * Scheduling algorithms
-  * Network optimization engine
-
-    * Shortest paths
-    * MST
-    * Max flow
-  * Large-scale query system
-
-    * Segment trees
-    * Fenwick trees
-    * Caching
-    * Indexing
+- **5. Searching Algorithms Visualizer**
+  - Linear search
+  - Binary search
+  - Visualization
+  - Performance comparison
 
 ---
 
-# XXXIX. Progressive DSA Learning Levels
+## Intermediate Projects
 
-## Level 1 — Computational Foundations
+- **6. Binary Search Tree Implementation**
+  - BST operations
+  - Insertion
+  - Deletion
+  - Searching
+  - Traversal
+  - Validation
 
-* Learn:
+- **7. Graph Algorithms Library**
+  - Graph representation
+  - BFS
+  - DFS
+  - Dijkstra
+  - Bellman-Ford
+  - Floyd-Warshall
+  - MST
 
-  * Programming fundamentals
-  * Variables
-  * Functions
-  * Loops
-  * Arrays
-  * Strings
-  * Recursion
-* Master:
+- **8. Hash Table Implementation**
+  - Hash functions
+  - Collision resolution
+  - Chaining
+  - Open addressing
+  - Resizing
+  - Performance
 
-  * Basic problem decomposition
-  * Simple algorithm implementation
-  * Basic complexity analysis
+- **9. Heap Implementation**
+  - Min-heap
+  - Max-heap
+  - Heap operations
+  - Heap sort
+  - Priority queue
 
-## Level 2 — Core Data Structures
-
-* Learn:
-
-  * Arrays
-  * Linked lists
-  * Stacks
-  * Queues
-  * Hash tables
-* Master:
-
-  * CRUD operations
-  * Traversal
-  * Searching
-  * Basic implementation from scratch
-
-## Level 3 — Fundamental Algorithms
-
-* Learn:
-
-  * Linear search
-  * Binary search
-  * Elementary sorting
-  * Merge sort
-  * Quick sort
-  * Recursion
-* Master:
-
-  * Complexity comparison
-  * Algorithm selection
-  * Basic optimization
-
-## Level 4 — Trees and Heaps
-
-* Learn:
-
-  * Binary trees
-  * BSTs
-  * Heaps
-  * Priority queues
-  * Tries
-* Master:
-
-  * Tree traversal
-  * Tree manipulation
-  * Heap-based optimization
-
-## Level 5 — Graph Algorithms
-
-* Learn:
-
-  * Graph representations
-  * BFS
-  * DFS
-  * Shortest paths
-  * MST
-  * Topological sorting
-  * DSU
-* Master:
-
-  * Graph modeling
-  * Connectivity
-  * Pathfinding
-  * Dependency problems
-
-## Level 6 — Advanced Problem Solving
-
-* Learn:
-
-  * Greedy algorithms
-  * Divide and conquer
-  * Dynamic programming
-  * Backtracking
-  * Bit manipulation
-* Master:
-
-  * Pattern recognition
-  * State modeling
-  * Recurrence analysis
-  * Optimization
-
-## Level 7 — Advanced Data Structures
-
-* Learn:
-
-  * Segment trees
-  * Fenwick trees
-  * Sparse tables
-  * Advanced trees
-  * LCA
-  * Heavy-light decomposition
-* Master:
-
-  * Efficient range queries
-  * Dynamic updates
-  * Tree-query optimization
-
-## Level 8 — Expert Algorithms
-
-* Learn:
-
-  * Network flow
-  * SCC
-  * Bridges
-  * Articulation points
-  * Advanced DP
-  * String algorithms
-  * Computational geometry
-* Master:
-
-  * Complex algorithm composition
-  * Advanced complexity analysis
-  * Proof-driven algorithm design
-
-## Level 9 — Algorithmic Mastery
-
-* Learn:
-
-  * Randomized algorithms
-  * Approximation
-  * Amortized analysis
-  * Complexity theory
-  * NP-completeness
-* Master:
-
-  * Algorithmic trade-offs
-  * Formal reasoning
-  * Research-level problem decomposition
-  * Architecture-level data-structure selection
+- **10. Dynamic Programming Problems**
+  - Knapsack
+  - LCS
+  - LIS
+  - Edit distance
+  - Coin change
+  - Matrix chain multiplication
 
 ---
 
-# XL. DSA Problem-Solving Progression
+## Advanced Projects
 
-## Stage 1 — Basic Problems
+- **11. Advanced Data Structures Library**
+  - Segment tree
+  - Fenwick tree
+  - Trie
+  - Union-Find
+  - Sparse table
+  - Binary lifting
 
-* Array traversal
-* String manipulation
-* Counting
-* Searching
-* Basic sorting
-* Simple recursion
+- **12. Pathfinding Visualizer**
+  - BFS
+  - DFS
+  - Dijkstra
+  - A*
+  - Visualization
+  - Performance comparison
 
-## Stage 2 — Pattern Recognition
+- **13. Compression Algorithms**
+  - Huffman coding
+  - LZW
+  - Run-length encoding
+  - Arithmetic coding
+  - Performance comparison
 
-* Two pointers
-* Sliding window
-* Prefix sums
-* Hash maps
-* Stack patterns
-* Queue patterns
+- **14. Cryptography Algorithms**
+  - Caesar cipher
+  - Vigenère cipher
+  - RSA
+  - Diffie-Hellman
+  - AES
+  - Hashing
 
-## Stage 3 — Structural Problems
-
-* Linked-list manipulation
-* Tree traversal
-* BST operations
-* Heap problems
-* Trie problems
-
-## Stage 4 — Graph Problems
-
-* BFS
-* DFS
-* Components
-* Cycles
-* Shortest paths
-* Topological sorting
-* MST
-
-## Stage 5 — Optimization Problems
-
-* Greedy
-* Divide and conquer
-* Dynamic programming
-* Binary search on answer
-
-## Stage 6 — Advanced Queries
-
-* Segment trees
-* Fenwick trees
-* Sparse tables
-* LCA
-* Tree decomposition
-
-## Stage 7 — Expert Problem Solving
-
-* Network flow
-* Advanced string algorithms
-* Computational geometry
-* Advanced DP
-* Randomized algorithms
-* Approximation algorithms
+- **15. Recommendation System**
+  - Collaborative filtering
+  - Content-based filtering
+  - Matrix factorization
+  - Similarity metrics
+  - Evaluation
 
 ---
 
-# XLI. Final DSA Competency Map
+## Expert Projects
 
-* **Programming Foundations**
+- **16. Competitive Programming Library**
+  - Templates
+  - Data structures
+  - Algorithms
+  - Utilities
+  - Testing
+  - Documentation
 
-  * Basic programming
-  * Recursion
-  * Mathematical reasoning
+- **17. Distributed Algorithms Implementation**
+  - Consensus
+  - Leader election
+  - Distributed sorting
+  - Distributed graph algorithms
+  - MapReduce
 
-* **Linear Data Structures**
+- **18. Machine Learning Algorithms from Scratch**
+  - Linear regression
+  - Logistic regression
+  - Decision trees
+  - Random forests
+  - Neural networks
+  - Gradient descent
 
-  * Arrays
-  * Linked lists
-  * Stacks
-  * Queues
-  * Hash tables
+- **19. Database Engine**
+  - Storage engine
+  - B-trees
+  - Query parser
+  - Query planner
+  - Query executor
+  - Transactions
 
-* **Nonlinear Data Structures**
-
-  * Trees
-  * Heaps
-  * Tries
-  * Graphs
-
-* **Fundamental Algorithms**
-
-  * Searching
-  * Sorting
-  * Traversal
-
-* **Algorithmic Paradigms**
-
-  * Brute force
-  * Divide and conquer
-  * Greedy
-  * Backtracking
-  * Dynamic programming
-
-* **Graph Algorithms**
-
-  * BFS
-  * DFS
-  * Shortest paths
-  * MST
-  * Topological sorting
-  * SCC
-  * Network flow
-
-* **Advanced Data Structures**
-
-  * Segment trees
-  * Fenwick trees
-  * Sparse tables
-  * Balanced trees
-  * DSU
-  * Advanced tree decompositions
-
-* **Mathematical and Specialized Algorithms**
-
-  * Number theory
-  * Bit manipulation
-  * String algorithms
-  * Computational geometry
-
-* **Algorithm Engineering**
-
-  * Complexity analysis
-  * Correctness proofs
-  * Optimization
-  * Testing
-  * Performance analysis
-
-* **Expert-Level Theory**
-
-  * Amortized analysis
-  * Randomization
-  * Approximation
-  * P/NP
-  * NP-hardness
-  * NP-completeness
+- **20. Search Engine**
+  - Crawler
+  - Indexer
+  - Inverted index
+  - Ranking
+  - Query processing
+  - PageRank
 
 ---
 
-## Recommended DSA Mastery Sequence
+# XX. Progressive DSA Learning Sequence
 
-**Programming Fundamentals → Complexity Analysis → Arrays → Strings → Linked Lists → Stacks → Queues → Hashing → Recursion → Searching → Sorting → Trees → BST → Heaps → Tries → Graphs → BFS/DFS → Shortest Paths → MST → DSU → Topological Sorting → Greedy → Divide and Conquer → Backtracking → Dynamic Programming → Bit Manipulation → Advanced Graphs → Segment Trees/Fenwick Trees → Advanced Strings → Computational Geometry → Network Flow → Complexity Theory → Expert Algorithm Engineering.**
+## Level 1 — Foundations
 
-The central progression is:
+- Master:
+  - Complexity analysis
+  - Big-O notation
+  - Arrays
+  - Strings
+  - Basic recursion
+  - Basic sorting
+  - Basic searching
 
-**Understand the data → represent the data efficiently → operate on the data → analyze complexity → recognize algorithmic patterns → optimize the solution → prove correctness → engineer for scale.**
+## Level 2 — Linear Data Structures
+
+- Master:
+  - Linked lists
+  - Stacks
+  - Queues
+  - Deques
+  - Hashing
+  - Hash maps
+  - Hash sets
+
+## Level 3 — Trees and Heaps
+
+- Master:
+  - Binary trees
+  - Binary search trees
+  - Tree traversal
+  - Heaps
+  - Priority queues
+  - Balanced trees
+  - Tries
+
+## Level 4 — Graphs
+
+- Master:
+  - Graph representation
+  - BFS
+  - DFS
+  - Topological sorting
+  - Shortest paths
+  - Minimum spanning trees
+  - Union-Find
+
+## Level 5 — Sorting and Searching
+
+- Master:
+  - Comparison-based sorting
+  - Non-comparison-based sorting
+  - Binary search
+  - Binary search variations
+  - Quick select
+  - External sorting
+
+## Level 6 — Recursion and Backtracking
+
+- Master:
+  - Recursion
+  - Backtracking
+  - Divide and conquer
+  - Permutations
+  - Combinations
+  - N-Queens
+  - Sudoku solver
+
+## Level 7 — Dynamic Programming
+
+- Master:
+  - Memoization
+  - Tabulation
+  - 1D DP
+  - 2D DP
+  - Interval DP
+  - Tree DP
+  - Bitmask DP
+  - DP optimization
+
+## Level 8 — Advanced Algorithms
+
+- Master:
+  - Greedy algorithms
+  - Bit manipulation
+  - Number theory
+  - Combinatorics
+  - Game theory
+  - Randomized algorithms
+  - Approximation algorithms
+  - Advanced data structures
+
+## Level 9 — Competitive Programming
+
+- Master:
+  - Fast I/O
+  - Problem patterns
+  - Contest strategy
+  - Stress testing
+  - Advanced data structures
+  - Advanced algorithms
+  - Problem-solving
+
+## Level 10 — Production and System Design
+
+- Master:
+  - DSA in production
+  - System design
+  - Scalability
+  - Distributed algorithms
+  - Database internals
+  - Search engines
+  - Machine learning algorithms
+  - Interview preparation
+
+---
+
+# XXI. Final DSA Competency Map
+
+- **Foundations**
+
+  - Complexity analysis
+  - Asymptotic notation
+  - Recurrence relations
+  - Amortized analysis
+  - Complexity classes
+
+- **Arrays and Strings**
+
+  - Arrays
+  - Strings
+  - Two pointers
+  - Sliding window
+  - Prefix sums
+  - String algorithms
+
+- **Linked Lists**
+
+  - Singly linked lists
+  - Doubly linked lists
+  - Circular linked lists
+  - Fast and slow pointers
+  - Cycle detection
+
+- **Stacks and Queues**
+
+  - Stacks
+  - Queues
+  - Deques
+  - Monotonic stack
+  - Monotonic queue
+  - Priority queues
+
+- **Hashing**
+
+  - Hash functions
+  - Hash tables
+  - Collision resolution
+  - Hash-based data structures
+
+- **Trees**
+
+  - Binary trees
+  - Binary search trees
+  - Balanced trees
+  - Tries
+  - Segment trees
+  - Fenwick trees
+  - Tree algorithms
+
+- **Heaps**
+
+  - Min-heaps
+  - Max-heaps
+  - Heap operations
+  - Heap sort
+  - Advanced heaps
+
+- **Graphs**
+
+  - Graph representation
+  - BFS
+  - DFS
+  - Shortest paths
+  - Minimum spanning trees
+  - Network flow
+  - Union-Find
+  - Advanced graph algorithms
+
+- **Sorting**
+
+  - Comparison-based sorting
+  - Non-comparison-based sorting
+  - Sorting techniques
+  - External sorting
+
+- **Searching**
+
+  - Linear search
+  - Binary search
+  - Ternary search
+  - Interpolation search
+  - Exponential search
+  - Fibonacci search
+
+- **Recursion and Backtracking**
+
+  - Recursion
+  - Backtracking
+  - Divide and conquer
+  - Recursion techniques
+
+- **Dynamic Programming**
+
+  - Memoization
+  - Tabulation
+  - DP patterns
+  - Classic DP problems
+  - Advanced DP
+
+- **Greedy Algorithms**
+
+  - Greedy fundamentals
+  - Greedy techniques
+  - Greedy proofs
+
+- **Advanced Algorithms**
+
+  - Bit manipulation
+  - Mathematical algorithms
+  - Randomized algorithms
+  - Approximation algorithms
+  - Online algorithms
+  - Streaming algorithms
+  - Parallel and distributed algorithms
+  - Geometric algorithms
+  - Advanced data structures
+
+- **Competitive Programming**
+
+  - Fast I/O
+  - Problem patterns
+  - Contest strategy
+  - Advanced topics
+
+- **Production**
+
+  - DSA in production
+  - System design
+  - Scalability
+  - Database internals
+  - Search engines
+  - Machine learning algorithms
+  - Interview preparation
+
+---
+
+## Recommended Overall Progression
+
+**Complexity Analysis → Arrays → Strings → Linked Lists → Stacks → Queues → Hashing → Trees → Heaps → Graphs → Sorting → Searching → Recursion → Backtracking → Dynamic Programming → Greedy Algorithms → Advanced Algorithms → Advanced Data Structures → Competitive Programming → Production Systems → System Design → Interview Mastery**
+
+For maximum practical mastery, combine this DSA roadmap with the Discrete Mathematics, JavaScript, Node.js, REST API, SQL, and Jupyter roadmaps above so the progression becomes:
+
+**Discrete Mathematics → JavaScript Fundamentals → DSA Foundations → Arrays → Strings → Linked Lists → Stacks → Queues → Hashing → Trees → Heaps → Graphs → Sorting → Searching → Recursion → Backtracking → Dynamic Programming → Greedy Algorithms → Advanced Algorithms → Advanced Data Structures → Competitive Programming → Node.js → REST API Design → SQL → Database Design → System Design → Distributed Systems → Production Engineering → Interview Mastery.**

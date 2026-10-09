@@ -148,7 +148,11 @@ module.exports = router;
 ```json
 {
   "data": [
-    { "_id": "1", "title": "MVC Guide", "author": { "name": "Alice" } }
+    { 
+      "_id": "1", 
+      "title": "MVC Guide", 
+      "author": { "name": "Alice" } 
+    }
   ]
 }
 ```
@@ -443,12 +447,15 @@ class OrderService {
     let total = 0;
     for (const item of items) {
       const product = await this.productRepository.findById(item.productId);
+
       if (!product) {
         throw new AppError(`Product ${item.productId} not found`, 404);
       }
+      
       if (product.stock < item.quantity) {
         throw new AppError(`Insufficient stock for ${product.name}`, 409);
       }
+      
       total += product.price * item.quantity;
     }
 
