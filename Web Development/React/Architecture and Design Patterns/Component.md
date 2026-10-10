@@ -597,7 +597,7 @@ src/
 
 **General Syntax for the Dependency Rule:**
 
-```typescript
+```ts
 // domain/entities/Game.ts — Pure business logic, no imports
 export class Game {
   constructor(
@@ -612,7 +612,8 @@ export class Game {
     return this.addedAt > thirtyDaysAgo;
   }
 }
-
+```
+```ts
 // domain/repositories/IGameRepository.ts — Interface defined by domain
 import type { Game } from '../entities/Game';
 
@@ -621,7 +622,8 @@ export interface IGameRepository {
   save(game: Game): Promise<void>;
   search(query: string): Promise<Game[]>;
 }
-
+```
+```ts
 // application/use-cases/AddGame.ts — Use case depends on domain interface
 import type { IGameRepository } from '../../domain/repositories/IGameRepository';
 import { Game } from '../../domain/entities/Game';
@@ -635,7 +637,8 @@ export class AddGame {
     return game;
   }
 }
-
+```
+```ts
 // infrastructure/persistence/IndexedDBGameRepository.ts — Implements domain interface
 import type { IGameRepository } from '../../domain/repositories/IGameRepository';
 import type { Game } from '../../domain/entities/Game';

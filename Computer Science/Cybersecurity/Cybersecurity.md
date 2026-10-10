@@ -1,1679 +1,1522 @@
 # Cybersecurity Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Concepts to Advanced Practical Mastery
+## From Security Foundations to Advanced Offensive/Defensive Operations, Cloud Security, and Production Security Engineering
 
-This roadmap organizes cybersecurity as a progressive learning path: **fundamentals → defensive security → networking → system security → application security → identity → cryptography → security operations → incident response → cloud and DevSecOps → advanced security engineering and governance**.
+Cybersecurity is best learned as more than "hacking and firewalls." The progression should cover **networking → operating systems → programming → security fundamentals → cryptography → authentication → web security → network security → system security → offensive security → defensive security → cloud security → application security → incident response → governance → compliance → production security engineering**.
 
 ---
 
 # I. Cybersecurity Foundations
 
-* **1. Introduction to Cybersecurity**
+- **1. What Cybersecurity Is**
+  - Cybersecurity
+  - Information security
+  - CIA triad
+    - Confidentiality
+    - Integrity
+    - Availability
+  - Security goals
+  - Threat
+  - Vulnerability
+  - Risk
+  - Exploit
+  - Attack surface
+  - Defense in depth
+  - Least privilege
+  - Zero trust
+  - Security by design
+  - Security by obscurity
+  - Security posture
+  - Security controls
+    - Preventive
+    - Detective
+    - Corrective
+    - Compensating
+  - Cybersecurity domains
+    - Network security
+    - Application security
+    - Cloud security
+    - Endpoint security
+    - Identity security
+    - Data security
+    - Operational security
+    - Physical security
+  - Cybersecurity roles
+    - Security analyst
+    - Security engineer
+    - Penetration tester
+    - Red teamer
+    - Blue teamer
+    - Purple teamer
+    - Security architect
+    - CISO
+    - SOC analyst
+    - Incident responder
+    - Threat hunter
+    - Malware analyst
+    - Forensics analyst
+    - GRC analyst
+  - Cybersecurity frameworks
+    - NIST
+    - ISO 27001
+    - CIS Controls
+    - OWASP
+    - MITRE ATT&CK
+    - Cyber Kill Chain
+    - PCI DSS
+    - HIPAA
+    - GDPR
+    - SOC 2
 
-  * Definition of cybersecurity
-  * Information security versus cybersecurity
-  * Cyber defense
-  * Cyber resilience
-  * Information assurance
-  * Security engineering
-  * Cyber risk
-  * Security operations
-  * Offensive versus defensive security
-  * Ethical security research
+- **2. Prerequisites**
+  - Computer fundamentals
+  - Hardware
+  - Software
+  - Operating systems
+  - Windows
+  - Linux
+  - macOS
+  - Networking
+  - TCP/IP
+  - HTTP
+  - DNS
+  - Programming
+  - Python
+  - JavaScript
+  - Bash
+  - PowerShell
+  - C
+  - C++
+  - Databases
+  - SQL
+  - NoSQL
+  - Web technologies
+  - HTML
+  - CSS
+  - JavaScript
+  - Cloud computing
+  - AWS
+  - Azure
+  - Google Cloud
+  - Virtualization
+  - Containers
+  - Virtual machines
+  - Prerequisite best practices
 
-* **2. Core Security Objectives**
+- **3. Networking Fundamentals**
+  - OSI model
+    - Layer 1: Physical
+    - Layer 2: Data Link
+    - Layer 3: Network
+    - Layer 4: Transport
+    - Layer 5: Session
+    - Layer 6: Presentation
+    - Layer 7: Application
+  - TCP/IP model
+  - IP addressing
+    - IPv4
+    - IPv6
+    - Subnetting
+    - CIDR
+  - TCP
+    - Three-way handshake
+    - Flags
+    - Ports
+  - UDP
+  - ICMP
+  - DNS
+  - DHCP
+  - ARP
+  - HTTP
+  - HTTPS
+  - TLS
+  - SSH
+  - FTP
+  - SMTP
+  - POP3
+  - IMAP
+  - SNMP
+  - SMB
+  - NFS
+  - LDAP
+  - Kerberos
+  - Routing
+  - Switching
+  - VLANs
+  - Firewalls
+  - Proxies
+  - Load balancers
+  - VPNs
+  - NAT
+  - Network tools
+    - Wireshark
+    - tcpdump
+    - nmap
+    - netstat
+    - ss
+    - ping
+    - traceroute
+    - dig
+    - nslookup
+    - whois
+    - curl
+    - wget
+    - netcat
+    - socat
+  - Networking best practices
 
-  * Confidentiality
+- **4. Operating Systems Fundamentals**
+  - Windows
+    - Architecture
+    - Registry
+    - File system
+    - Permissions
+    - Users and groups
+    - Active Directory
+    - Group Policy
+    - PowerShell
+    - Windows security
+  - Linux
+    - Architecture
+    - Kernel
+    - File system
+    - Permissions
+    - Users and groups
+    - Processes
+    - Services
+    - Package management
+    - Bash
+    - Linux security
+  - macOS
+    - Architecture
+    - File system
+    - Permissions
+    - Users and groups
+    - macOS security
+  - Operating system best practices
 
-    * Prevent unauthorized disclosure
-  * Integrity
+- **5. Programming for Security**
+  - Python
+    - Scripting
+    - Automation
+    - Networking
+    - Security libraries
+  - Bash
+    - Scripting
+    - Automation
+    - System administration
+  - PowerShell
+    - Scripting
+    - Automation
+    - Windows administration
+  - JavaScript
+    - Web security
+    - Node.js
+  - C
+    - Memory
+    - Exploitation
+    - Reverse engineering
+  - C++
+    - Memory
+    - Exploitation
+  - Go
+    - Security tools
+  - Rust
+    - Secure systems
+  - SQL
+    - Database security
+  - Programming best practices
 
-    * Prevent unauthorized modification
-  * Availability
-
-    * Maintain reliable access
-  * Authenticity
-
-    * Verify identities and sources
-  * Accountability
-
-    * Attribute actions to responsible entities
-  * Non-repudiation
-
-    * Provide evidence that an action or communication occurred
-
-* **3. Fundamental Security Principles**
-
-  * Least privilege
-  * Defense in depth
-  * Separation of duties
-  * Fail-safe defaults
-  * Zero trust
-  * Secure by design
-  * Secure by default
-  * Attack-surface reduction
-  * Assume breach
-  * Continuous verification
-  * Risk-based security
-
-* **4. Cybersecurity Terminology**
-
-  * Asset
-  * Threat
-  * Vulnerability
-  * Exploit
-  * Threat actor
-  * Attack vector
-  * Attack surface
-  * Risk
-  * Exposure
-  * Control
-  * Safeguard
-  * Incident
-  * Breach
-  * Event
-  * Indicator of compromise
-  * Security control
-
----
-
-# II. Computer and Operating-System Fundamentals
-
-* **5. Computer Architecture**
-
-  * CPU
-  * Memory
-  * Storage
-  * Input/output
-  * Firmware
-  * Boot process
-  * Hardware interfaces
-  * Privileged versus unprivileged execution
-
-* **6. Operating-System Fundamentals**
-
-  * Processes
-  * Threads
-  * Memory management
-  * File systems
-  * Users
-  * Groups
-  * Permissions
-  * Services
-  * System calls
-  * Kernel
-  * Drivers
-
-* **7. Windows Security Fundamentals**
-
-  * Windows architecture
-  * Local accounts
-  * Groups
-  * NTFS permissions
-  * Windows services
-  * Registry
-  * Event logs
-  * PowerShell
-  * Windows Defender
-  * Windows security policies
-  * Active Directory foundations
-
-* **8. Linux Security Fundamentals**
-
-  * Linux architecture
-  * Users and groups
-  * File permissions
-  * Ownership
-  * `sudo`
-  * Processes
-  * Services
-  * System logs
-  * Package management
-  * Shell fundamentals
-  * Security configuration
-
-* **9. System Hardening**
-
-  * Secure configuration
-  * Patch management
-  * Service minimization
-  * Permission minimization
-  * Application allowlisting
-  * Host-based firewalls
-  * Endpoint protection
-  * Configuration baselines
-  * Secure boot concepts
-
----
-
-# III. Networking Fundamentals for Cybersecurity
-
-* **10. Networking Essentials**
-
-  * Network models
-
-    * OSI
-    * TCP/IP
-  * LAN
-  * WAN
-  * Internet
-  * Intranet
-  * Network interfaces
-  * MAC addresses
-  * IP addresses
-  * Ports
-  * Protocols
-
-* **11. IP Networking**
-
-  * IPv4
-  * IPv6
-  * Subnetting
-  * CIDR
-  * Private addresses
-  * Public addresses
-  * Default gateways
-  * Routing
-  * NAT
-
-* **12. Core Network Protocols**
-
-  * ARP
-  * ICMP
-  * TCP
-  * UDP
-  * DNS
-  * DHCP
-  * HTTP
-  * HTTPS
-  * SSH
-  * SMTP
-  * FTP
-  * SFTP
-
-* **13. Network Security Devices**
-
-  * Firewalls
-  * Web application firewalls
-  * IDS
-  * IPS
-  * Proxies
-  * VPN gateways
-  * Network access control
-  * Security gateways
-
-* **14. Network Segmentation**
-
-  * VLANs
-  * Subnets
-  * DMZ
-  * Microsegmentation
-  * Network zoning
-  * East-west traffic
-  * North-south traffic
-
----
-
-# IV. Security Governance and Risk Management
-
-* **15. Security Governance**
-
-  * Security policies
-  * Standards
-  * Procedures
-  * Guidelines
-  * Baselines
-  * Roles and responsibilities
-  * Security ownership
-
-* **16. Risk Management**
-
-  * Asset identification
-  * Threat identification
-  * Vulnerability identification
-  * Risk assessment
-  * Likelihood
-  * Impact
-  * Risk treatment
-
-    * Avoid
-    * Mitigate
-    * Transfer
-    * Accept
-
-* **17. Security Controls**
-
-  * Preventive controls
-  * Detective controls
-  * Corrective controls
-  * Deterrent controls
-  * Compensating controls
-  * Physical controls
-  * Technical controls
-  * Administrative controls
-
-* **18. Security Frameworks**
-
-  * NIST Cybersecurity Framework
-  * NIST security guidance
-  * ISO/IEC 27001 concepts
-  * CIS Controls
-  * Security maturity models
-  * Control mapping
-
-* **19. Security Policies**
-
-  * Acceptable-use policy
-  * Password policy
-  * Access-control policy
-  * Incident-response policy
-  * Data-classification policy
-  * Remote-access policy
-  * Backup policy
-  * Third-party security policy
+- **6. Security Fundamentals**
+  - Security principles
+  - Risk management
+  - Threat modeling
+  - Attack vectors
+  - Attack surfaces
+  - Security controls
+  - Security policies
+  - Security procedures
+  - Security standards
+  - Security guidelines
+  - Security best practices
 
 ---
 
-# V. Asset, Data, and Information Security
+# II. Cryptography
 
-* **20. Asset Management**
+- **7. Cryptography Fundamentals**
+  - Cryptography
+  - Encryption
+  - Decryption
+  - Plaintext
+  - Ciphertext
+  - Cipher
+  - Key
+  - Cryptanalysis
+  - Cryptology
+  - Cryptography best practices
 
-  * Hardware inventory
-  * Software inventory
-  * Cloud-resource inventory
-  * Identity inventory
-  * Data inventory
-  * Asset ownership
-  * Asset classification
-  * Asset lifecycle
+- **8. Symmetric Cryptography**
+  - Symmetric encryption
+  - AES
+  - DES
+  - 3DES
+  - Blowfish
+  - Twofish
+  - ChaCha20
+  - RC4
+  - Block ciphers
+  - Stream ciphers
+  - Modes of operation
+    - ECB
+    - CBC
+    - CFB
+    - OFB
+    - CTR
+    - GCM
+  - Key management
+  - Symmetric best practices
 
-* **21. Data Classification**
+- **9. Asymmetric Cryptography**
+  - Asymmetric encryption
+  - RSA
+  - ECC
+  - Diffie-Hellman
+  - DSA
+  - ElGamal
+  - Key pairs
+  - Public key
+  - Private key
+  - Key exchange
+  - Asymmetric best practices
 
-  * Public data
-  * Internal data
-  * Confidential data
-  * Restricted data
-  * Sensitive information
+- **10. Hash Functions**
+  - Hash functions
+  - MD5
+  - SHA-1
+  - SHA-256
+  - SHA-512
+  - SHA-3
+  - BLAKE2
+  - BLAKE3
+  - HMAC
+  - Password hashing
+    - bcrypt
+    - scrypt
+    - Argon2
+    - PBKDF2
+  - Salt
+  - Pepper
+  - Hash best practices
 
-* **22. Data Protection**
+- **11. Digital Signatures**
+  - Digital signatures
+  - Signing
+  - Verification
+  - RSA signatures
+  - ECDSA
+  - EdDSA
+  - Digital signature best practices
 
-  * Data at rest
-  * Data in transit
-  * Data in use
-  * Encryption
-  * Tokenization
-  * Masking
-  * Data-loss prevention
+- **12. Certificates**
+  - X.509 certificates
+  - Certificate authorities
+  - Certificate chains
+  - Certificate revocation
+  - CRL
+  - OCSP
+  - Certificate pinning
+  - Let's Encrypt
+  - Certificate best practices
 
-* **23. Data Security Lifecycle**
+- **13. TLS/SSL**
+  - TLS
+  - SSL
+  - Handshake
+  - Cipher suites
+  - TLS versions
+    - TLS 1.2
+    - TLS 1.3
+  - Perfect forward secrecy
+  - HSTS
+  - TLS best practices
 
-  * Creation
-  * Storage
-  * Processing
-  * Transmission
-  * Sharing
-  * Archiving
-  * Secure destruction
+- **14. PKI**
+  - Public Key Infrastructure
+  - PKI components
+  - PKI best practices
 
----
-
-# VI. Identity and Access Management
-
-* **24. Identity Fundamentals**
-
-  * Digital identity
-  * Identification
-  * Authentication
-  * Authorization
-  * Accounting
-  * Identity lifecycle
-
-* **25. Authentication**
-
-  * Password authentication
-  * Multi-factor authentication
-  * Hardware security keys
-  * Biometrics
-  * Certificates
-  * Single sign-on
-
-* **26. Password Security**
-
-  * Password policies
-  * Password hashing
-  * Salt
-  * Password managers
-  * Credential protection
-  * Password-reset security
-
-* **27. Authorization**
-
-  * Access-control models
-
-    * DAC
-    * MAC
-    * RBAC
-    * ABAC
-  * Permissions
-  * Roles
-  * Policies
-  * Privileged access
-
-* **28. Privileged Access Management**
-
-  * Administrative accounts
-  * Just-in-time access
-  * Just-enough access
-  * Privileged session monitoring
-  * Credential rotation
-  * Break-glass accounts
-
-* **29. Directory Services**
-
-  * LDAP
-  * Active Directory
-  * Organizational units
-  * Groups
-  * Group Policy
-  * Identity federation
-
----
-
-# VII. Cryptography
-
-* **30. Cryptography Fundamentals**
-
-  * Plaintext
-  * Ciphertext
-  * Encryption
-  * Decryption
-  * Key
-  * Cryptographic algorithm
-  * Key management
-
-* **31. Symmetric Cryptography**
-
-  * Block ciphers
-  * Stream ciphers
-  * Encryption keys
-  * Initialization vectors
-  * Authenticated encryption
-  * Key rotation
-
-* **32. Asymmetric Cryptography**
-
-  * Public keys
-  * Private keys
-  * Key pairs
-  * Encryption
-  * Digital signatures
-  * Key exchange
-
-* **33. Hashing**
-
-  * Hash functions
-  * Collision resistance
-  * Password hashing
-  * Integrity verification
-  * Cryptographic checksums
-
-* **34. Digital Signatures**
-
-  * Signing
-  * Verification
-  * Authentication
-  * Integrity
-  * Non-repudiation
-
-* **35. Public-Key Infrastructure**
-
-  * Certificates
-  * Certificate authorities
-  * Certificate chains
-  * Certificate validation
-  * Certificate revocation
-  * TLS certificates
-
-* **36. Key Management**
-
-  * Key generation
-  * Key storage
-  * Key distribution
-  * Key rotation
-  * Key revocation
-  * Key destruction
-  * Hardware security modules
+- **15. Cryptography Tools**
+  - OpenSSL
+  - GnuPG
+  - GPG
+  - Keybase
+  - age
+  - Cryptography tools best practices
 
 ---
 
-# VIII. Network Security
+# III. Authentication and Authorization
 
-* **37. Firewall Security**
+- **16. Authentication Fundamentals**
+  - Authentication
+  - Identity
+  - Credentials
+  - Factors
+    - Something you know
+    - Something you have
+    - Something you are
+    - Somewhere you are
+    - Something you do
+  - Authentication best practices
 
-  * Packet filtering
-  * Stateful inspection
-  * Application-aware filtering
-  * Egress filtering
-  * Ingress filtering
-  * Firewall rules
-  * Rule ordering
+- **17. Password Security**
+  - Password policies
+  - Password hashing
+  - Password storage
+  - Password managers
+  - Password attacks
+    - Brute force
+    - Dictionary
+    - Rainbow tables
+    - Credential stuffing
+    - Password spraying
+  - Password best practices
 
-* **38. Intrusion Detection and Prevention**
+- **18. Multi-Factor Authentication**
+  - MFA
+  - 2FA
+  - TOTP
+  - HOTP
+  - SMS
+  - Email
+  - Hardware tokens
+  - FIDO2
+  - WebAuthn
+  - Passkeys
+  - MFA best practices
 
-  * Network IDS
-  * Network IPS
-  * Host-based detection
-  * Signature-based detection
-  * Behavior-based detection
-  * Alert analysis
+- **19. Single Sign-On**
+  - SSO
+  - SAML
+  - OAuth
+  - OpenID Connect
+  - Kerberos
+  - SSO best practices
 
-* **39. Secure Network Protocols**
+- **20. Authorization**
+  - Authorization
+  - Access control
+  - RBAC
+  - ABAC
+  - MAC
+  - DAC
+  - ReBAC
+  - Permissions
+  - Roles
+  - Policies
+  - Authorization best practices
 
-  * TLS
-  * SSH
-  * IPsec
-  * Secure DNS concepts
-  * Secure email protocols
-  * VPN protocols
+- **21. Identity and Access Management**
+  - IAM
+  - Identity management
+  - Access management
+  - Identity lifecycle
+  - Provisioning
+  - Deprovisioning
+  - IAM best practices
 
-* **40. Wireless Security**
-
-  * Wi-Fi architecture
-  * WPA2
-  * WPA3
-  * Wireless authentication
-  * Rogue access points
-  * Wireless monitoring
-  * Guest networks
-
-* **41. Network Monitoring**
-
-  * Packet analysis
-  * Flow data
-  * DNS monitoring
-  * Connection monitoring
-  * Network telemetry
-  * Baseline analysis
-
----
-
-# IX. Web and Application Security
-
-* **42. Web Security Fundamentals**
-
-  * HTTP request/response cycle
-  * Cookies
-  * Sessions
-  * Authentication
-  * Authorization
-  * Browser security model
-  * Same-origin policy
-
-* **43. Common Web Application Risks**
-
-  * Injection
-  * Cross-site scripting
-  * Cross-site request forgery
-  * Broken access control
-  * Authentication weaknesses
-  * Security misconfiguration
-  * Insecure design
-  * Vulnerable dependencies
-  * SSRF concepts
-  * Cryptographic failures
-
-* **44. Secure Application Design**
-
-  * Input validation
-  * Output encoding
-  * Parameterized queries
-  * Session security
-  * Access-control enforcement
-  * Error handling
-  * Secure defaults
-
-* **45. API Security**
-
-  * REST security
-  * Authentication
-  * Authorization
-  * API keys
-  * Tokens
-  * OAuth concepts
-  * Rate limiting
-  * Input validation
-  * API gateways
-
-* **46. Secure Software Development**
-
-  * Security requirements
-  * Threat modeling
-  * Secure coding
-  * Code review
-  * Security testing
-  * Dependency management
-  * Security release processes
+- **22. Privileged Access Management**
+  - PAM
+  - Privileged accounts
+  - Just-in-time access
+  - Session recording
+  - PAM best practices
 
 ---
 
-# X. Vulnerability Management
+# IV. Web Security
 
-* **47. Vulnerability Fundamentals**
+- **23. Web Security Fundamentals**
+  - Web security
+  - Web architecture
+  - HTTP
+  - HTTPS
+  - Cookies
+  - Sessions
+  - Same-origin policy
+  - CORS
+  - Web security best practices
 
-  * Vulnerability identification
-  * Vulnerability validation
-  * Severity
-  * Exploitability
-  * Exposure
-  * Risk prioritization
+- **24. OWASP Top 10**
+  - Broken Access Control
+  - Cryptographic Failures
+  - Injection
+  - Insecure Design
+  - Security Misconfiguration
+  - Vulnerable and Outdated Components
+  - Identification and Authentication Failures
+  - Software and Data Integrity Failures
+  - Security Logging and Monitoring Failures
+  - Server-Side Request Forgery
+  - OWASP best practices
 
-* **48. Vulnerability Scanning**
+- **25. Injection Attacks**
+  - SQL injection
+  - NoSQL injection
+  - Command injection
+  - LDAP injection
+  - XPath injection
+  - Template injection
+  - Injection prevention best practices
 
-  * Host scanning
-  * Network scanning
-  * Web application scanning
-  * Configuration scanning
-  * Dependency scanning
-  * Cloud security scanning
+- **26. Cross-Site Scripting**
+  - XSS
+  - Reflected XSS
+  - Stored XSS
+  - DOM-based XSS
+  - XSS prevention
+  - CSP
+  - XSS best practices
 
-* **49. Vulnerability Assessment**
+- **27. Cross-Site Request Forgery**
+  - CSRF
+  - CSRF tokens
+  - SameSite cookies
+  - CSRF prevention best practices
 
-  * Asset context
-  * Vulnerability severity
-  * Business impact
-  * Compensating controls
-  * Risk scoring
+- **28. Server-Side Request Forgery**
+  - SSRF
+  - SSRF prevention
+  - SSRF best practices
 
-* **50. Patch Management**
+- **29. Insecure Deserialization**
+  - Deserialization
+  - Insecure deserialization
+  - Deserialization prevention
+  - Deserialization best practices
 
-  * Patch discovery
-  * Patch testing
-  * Patch deployment
-  * Emergency patching
-  * Verification
-  * Exception management
+- **30. XML External Entities**
+  - XXE
+  - XXE prevention
+  - XXE best practices
 
-* **51. Exposure Management**
+- **31. Security Misconfiguration**
+  - Security misconfiguration
+  - Default configurations
+  - Error handling
+  - Security misconfiguration prevention
+  - Misconfiguration best practices
 
-  * External attack surface
-  * Internal attack surface
-  * Misconfiguration exposure
-  * Identity exposure
-  * Vulnerability prioritization
+- **32. Sensitive Data Exposure**
+  - Sensitive data
+  - Data exposure
+  - Encryption
+  - Data protection
+  - Data exposure prevention
+  - Data exposure best practices
 
----
+- **33. Broken Access Control**
+  - Access control
+  - IDOR
+  - Broken access control prevention
+  - Access control best practices
 
-# XI. Security Operations
-
-* **52. Security Operations Center**
-
-  * SOC functions
-  * Monitoring
-  * Detection
-  * Investigation
-  * Response
-  * Escalation
-  * Reporting
-
-* **53. Security Logging**
-
-  * System logs
-  * Application logs
-  * Authentication logs
-  * Network logs
-  * Firewall logs
-  * Endpoint telemetry
-  * Cloud logs
-
-* **54. Security Information and Event Management**
-
-  * Log collection
-  * Event normalization
-  * Correlation
-  * Alert generation
-  * Detection rules
-  * Dashboards
-  * Retention
-
-* **55. Security Orchestration and Automation**
-
-  * Security automation
-  * Playbooks
-  * Automated enrichment
-  * Alert triage
-  * Workflow automation
-  * Response orchestration
-
-* **56. Security Monitoring**
-
-  * Baseline behavior
-  * Anomaly detection
-  * Authentication monitoring
-  * Privileged-account monitoring
-  * Network anomaly monitoring
-
----
-
-# XII. Endpoint Security
-
-* **57. Endpoint Protection**
-
-  * Antivirus
-  * Endpoint detection and response
-  * Host firewalls
-  * Application controls
-  * Device control
-  * Endpoint isolation
-
-* **58. Endpoint Hardening**
-
-  * Secure configuration
-  * Software minimization
-  * Patch management
-  * Privilege reduction
-  * Security policies
-  * Logging
-
-* **59. Endpoint Detection**
-
-  * Process telemetry
-  * Command execution
-  * Persistence indicators
-  * Network connections
-  * File activity
-  * User activity
-
-* **60. Mobile Security**
-
-  * Mobile-device management
-  * Device encryption
-  * Application controls
-  * Mobile authentication
-  * Remote wipe
-  * BYOD security
+- **34. Web Security Tools**
+  - Burp Suite
+  - OWASP ZAP
+  - Nikto
+  - sqlmap
+  - WPScan
+  - Gobuster
+  - ffuf
+  - Web security tools best practices
 
 ---
 
-# XIII. Incident Response
+# V. Network Security
 
-* **61. Incident-Response Fundamentals**
+- **35. Network Security Fundamentals**
+  - Network security
+  - Network architecture
+  - Network protocols
+  - Network attacks
+  - Network security best practices
 
-  * Security incident definition
-  * Incident classification
-  * Incident severity
-  * Incident ownership
-  * Escalation
+- **36. Firewalls**
+  - Firewalls
+  - Packet filtering
+  - Stateful inspection
+  - Application firewalls
+  - Next-generation firewalls
+  - WAF
+  - Firewall rules
+  - Firewall best practices
 
-* **62. Incident-Response Lifecycle**
+- **37. Intrusion Detection and Prevention**
+  - IDS
+  - IPS
+  - Signature-based
+  - Anomaly-based
+  - Host-based
+  - Network-based
+  - Snort
+  - Suricata
+  - Zeek
+  - IDS/IPS best practices
 
-  * Preparation
-  * Detection
-  * Analysis
-  * Containment
-  * Eradication
-  * Recovery
-  * Lessons learned
+- **38. VPNs**
+  - VPN
+  - IPsec
+  - OpenVPN
+  - WireGuard
+  - SSL VPN
+  - Site-to-site VPN
+  - Remote access VPN
+  - VPN best practices
 
-* **63. Incident Investigation**
+- **39. Network Attacks**
+  - Man-in-the-middle
+  - ARP spoofing
+  - DNS spoofing
+  - DHCP starvation
+  - VLAN hopping
+  - DoS
+  - DDoS
+  - Port scanning
+  - Network attacks best practices
 
-  * Evidence collection
-  * Timeline construction
-  * Log analysis
-  * Event correlation
-  * Root-cause analysis
-  * Scope determination
+- **40. Network Monitoring**
+  - Network monitoring
+  - Traffic analysis
+  - Packet capture
+  - NetFlow
+  - sFlow
+  - IPFIX
+  - Network monitoring best practices
 
-* **64. Incident Containment**
+- **41. Wireless Security**
+  - Wireless security
+  - WEP
+  - WPA
+  - WPA2
+  - WPA3
+  - WPS
+  - Wireless attacks
+  - Wireless security best practices
 
-  * Account isolation
-  * Host isolation
-  * Network containment
-  * Credential resets
-  * Blocking indicators
-  * Service containment
-
-* **65. Incident Recovery**
-
-  * System restoration
-  * Validation
-  * Monitoring
-  * Business resumption
-  * Post-incident review
-
----
-
-# XIV. Digital Forensics
-
-* **66. Digital Forensics Fundamentals**
-
-  * Evidence
-  * Forensic integrity
-  * Chain of custody
-  * Evidence acquisition
-  * Evidence preservation
-
-* **67. Disk Forensics**
-
-  * File systems
-  * Deleted-file concepts
-  * Metadata
-  * Disk images
-  * File-system analysis
-
-* **68. Memory Forensics**
-
-  * Volatile memory
-  * Process analysis
-  * Network connections
-  * Loaded modules
-  * Memory artifacts
-
-* **69. Network Forensics**
-
-  * Packet captures
-  * Network sessions
-  * DNS evidence
-  * HTTP evidence
-  * Traffic timelines
-
-* **70. Forensic Reporting**
-
-  * Evidence documentation
-  * Findings
-  * Timelines
-  * Technical conclusions
-  * Reproducibility
+- **42. Network Security Tools**
+  - Nmap
+  - Wireshark
+  - tcpdump
+  - Netcat
+  - Metasploit
+  - Responder
+  - Bettercap
+  - Aircrack-ng
+  - Network security tools best practices
 
 ---
 
-# XV. Threat Intelligence
+# VI. System Security
 
-* **71. Threat Intelligence Fundamentals**
+- **43. System Security Fundamentals**
+  - System security
+  - Endpoint security
+  - Host security
+  - System hardening
+  - System security best practices
 
-  * Threat actors
-  * Threat campaigns
-  * Indicators
-  * Tactics
-  * Techniques
-  * Procedures
+- **44. Operating System Hardening**
+  - Windows hardening
+  - Linux hardening
+  - macOS hardening
+  - CIS benchmarks
+  - STIG
+  - Hardening best practices
 
-* **72. Intelligence Types**
+- **45. Malware**
+  - Malware
+  - Viruses
+  - Worms
+  - Trojans
+  - Ransomware
+  - Spyware
+  - Adware
+  - Rootkits
+  - Keyloggers
+  - Botnets
+  - Malware analysis
+  - Malware best practices
 
-  * Strategic intelligence
-  * Operational intelligence
-  * Tactical intelligence
-  * Technical intelligence
+- **46. Endpoint Detection and Response**
+  - EDR
+  - XDR
+  - MDR
+  - Endpoint protection
+  - EDR best practices
 
-* **73. Threat Intelligence Lifecycle**
+- **47. Antivirus**
+  - Antivirus
+  - Signature-based
+  - Heuristic-based
+  - Behavioral-based
+  - Antivirus best practices
 
-  * Planning
-  * Collection
-  * Processing
-  * Analysis
-  * Dissemination
-  * Feedback
+- **48. Patch Management**
+  - Patch management
+  - Vulnerability management
+  - Patch deployment
+  - Patch best practices
 
-* **74. Threat Intelligence Sources**
-
-  * Internal telemetry
-  * Security reports
-  * Vulnerability information
-  * Public intelligence
-  * Industry sharing communities
-
-* **75. Threat Modeling Frameworks**
-
-  * MITRE ATT&CK
-  * Cyber Kill Chain
-  * Attack trees
-  * STRIDE
-  * Diamond Model
-
----
-
-# XVI. Penetration Testing and Ethical Security Testing
-
-* **76. Penetration Testing Fundamentals**
-
-  * Authorization
-  * Scope
-  * Rules of engagement
-  * Testing methodology
-  * Risk management
-  * Reporting
-
-* **77. Reconnaissance**
-
-  * Asset discovery
-  * Service identification
-  * Technology identification
-  * Public information gathering
-  * Attack-surface mapping
-
-* **78. Security Testing**
-
-  * Network testing
-  * Web application testing
-  * API testing
-  * Configuration testing
-  * Authentication testing
-  * Authorization testing
-
-* **79. Exploitation Concepts**
-
-  * Vulnerability validation
-  * Controlled exploitation
-  * Proof-of-concept validation
-  * Impact assessment
-  * Safe testing boundaries
-
-* **80. Penetration-Test Reporting**
-
-  * Executive summary
-  * Technical findings
-  * Risk rating
-  * Evidence
-  * Remediation recommendations
-  * Retesting
+- **49. System Security Tools**
+  - Sysinternals
+  - Process Explorer
+  - Process Monitor
+  - Autoruns
+  - Regshot
+  - Volatility
+  - System security tools best practices
 
 ---
 
-# XVII. Malware and Malicious-Code Analysis
+# VII. Offensive Security
 
-* **81. Malware Fundamentals**
+- **50. Offensive Security Fundamentals**
+  - Offensive security
+  - Ethical hacking
+  - Penetration testing
+  - Red teaming
+  - Vulnerability assessment
+  - Offensive security best practices
 
-  * Malware categories
-  * Persistence concepts
-  * Command-and-control concepts
-  * Payloads
-  * Propagation
+- **51. Reconnaissance**
+  - Reconnaissance
+  - Passive reconnaissance
+  - Active reconnaissance
+  - OSINT
+  - Footprinting
+  - Reconnaissance best practices
 
-* **82. Malware Types**
+- **52. Scanning**
+  - Scanning
+  - Port scanning
+  - Service scanning
+  - Vulnerability scanning
+  - Nmap
+  - Scanning best practices
 
-  * Viruses
-  * Worms
-  * Trojans
-  * Ransomware
-  * Spyware
-  * Rootkits
-  * Botnets
+- **53. Enumeration**
+  - Enumeration
+  - Service enumeration
+  - User enumeration
+  - Share enumeration
+  - Enumeration best practices
 
-* **83. Malware Analysis**
+- **54. Exploitation**
+  - Exploitation
+  - Vulnerabilities
+  - Exploits
+  - Payloads
+  - Metasploit
+  - Exploitation best practices
 
-  * Static analysis
-  * Dynamic analysis
-  * Behavioral analysis
-  * Indicators
-  * Sandbox concepts
+- **55. Post-Exploitation**
+  - Post-exploitation
+  - Privilege escalation
+  - Persistence
+  - Lateral movement
+  - Data exfiltration
+  - Post-exploitation best practices
 
-* **84. Defensive Malware Analysis**
+- **56. Password Attacks**
+  - Password attacks
+  - Brute force
+  - Dictionary attacks
+  - Rainbow tables
+  - Hashcat
+  - John the Ripper
+  - Password attack best practices
 
-  * Detection
-  * Containment
-  * Indicator extraction
-  * Signature development
-  * Behavioral detection
+- **57. Social Engineering**
+  - Social engineering
+  - Phishing
+  - Spear phishing
+  - Vishing
+  - Smishing
+  - Pretexting
+  - Baiting
+  - Social engineering best practices
 
----
+- **58. Penetration Testing**
+  - Penetration testing
+  - Scope
+  - Rules of engagement
+  - Methodology
+  - Reporting
+  - Penetration testing best practices
 
-# XVIII. Cloud Security
+- **59. Red Teaming**
+  - Red teaming
+  - Adversary simulation
+  - MITRE ATT&CK
+  - Red teaming best practices
 
-* **85. Cloud Fundamentals**
+- **60. Offensive Security Tools**
+  - Kali Linux
+  - Parrot OS
+  - Metasploit
+  - Burp Suite
+  - Nmap
+  - Wireshark
+  - Hashcat
+  - John the Ripper
+  - Mimikatz
+  - BloodHound
+  - Cobalt Strike
+  - Offensive security tools best practices
 
-  * IaaS
-  * PaaS
-  * SaaS
-  * Shared-responsibility model
-  * Cloud regions
-  * Availability zones
-
-* **86. Cloud Identity Security**
-
-  * Cloud IAM
-  * Roles
-  * Policies
-  * Service identities
-  * Temporary credentials
-  * Privileged access
-
-* **87. Cloud Network Security**
-
-  * Virtual networks
-  * Security groups
-  * Network ACLs
-  * Private endpoints
-  * Segmentation
-  * Cloud firewalls
-
-* **88. Cloud Data Security**
-
-  * Encryption
-  * Key management
-  * Secrets management
-  * Storage permissions
-  * Data classification
-
-* **89. Cloud Monitoring**
-
-  * Cloud audit logs
-  * Configuration monitoring
-  * Identity monitoring
-  * Threat detection
-  * Security posture management
-
----
-
-# XIX. Container and Kubernetes Security
-
-* **90. Container Security**
-
-  * Container architecture
-  * Images
-  * Registries
-  * Container isolation
-  * Runtime security
-
-* **91. Container Image Security**
-
-  * Image scanning
-  * Dependency analysis
-  * Minimal base images
-  * Image signing
-  * Vulnerability management
-
-* **92. Kubernetes Security**
-
-  * Cluster architecture
-  * RBAC
-  * Namespaces
-  * Network policies
-  * Secrets
-  * Pod security
-  * Admission controls
-
-* **93. Container Runtime Security**
-
-  * Runtime monitoring
-  * Process controls
-  * Resource constraints
-  * Runtime detection
+- **61. Offensive Security Certifications**
+  - OSCP
+  - OSEP
+  - OSWE
+  - OSED
+  - GPEN
+  - GXPN
+  - CEH
+  - Offensive security certifications best practices
 
 ---
 
-# XX. DevSecOps and Software Supply-Chain Security
+# VIII. Defensive Security
 
-* **94. DevSecOps Fundamentals**
+- **62. Defensive Security Fundamentals**
+  - Defensive security
+  - Blue teaming
+  - Security operations
+  - Defense in depth
+  - Defensive security best practices
 
-  * Security integration into development
-  * Continuous security
-  * Shift-left security
-  * Security automation
-  * Security gates
+- **63. Security Operations Center**
+  - SOC
+  - SOC tiers
+  - SOC processes
+  - SOC tools
+  - SOC best practices
 
-* **95. Secure CI/CD**
+- **64. SIEM**
+  - SIEM
+  - Log collection
+  - Log correlation
+  - Alerting
+  - Splunk
+  - ELK Stack
+  - Wazuh
+  - IBM QRadar
+  - SIEM best practices
 
-  * Source-code security
-  * Dependency scanning
-  * Static analysis
-  * Dynamic analysis
-  * Secret scanning
-  * Artifact security
+- **65. Threat Intelligence**
+  - Threat intelligence
+  - CTI
+  - Threat feeds
+  - IOC
+  - TTP
+  - MITRE ATT&CK
+  - Threat intelligence best practices
 
-* **96. Software Supply Chain**
+- **66. Threat Hunting**
+  - Threat hunting
+  - Hypothesis-driven
+  - IOC-based
+  - TTP-based
+  - Threat hunting best practices
 
-  * Dependencies
-  * Package repositories
-  * Build systems
-  * Artifact repositories
-  * Software provenance
-  * Dependency risks
+- **67. Incident Response**
+  - Incident response
+  - IR lifecycle
+    - Preparation
+    - Identification
+    - Containment
+    - Eradication
+    - Recovery
+    - Lessons learned
+  - Incident response best practices
 
-* **97. Infrastructure as Code Security**
+- **68. Digital Forensics**
+  - Digital forensics
+  - Disk forensics
+  - Memory forensics
+  - Network forensics
+  - Mobile forensics
+  - Cloud forensics
+  - Chain of custody
+  - Forensics tools
+    - Autopsy
+    - Volatility
+    - FTK
+    - EnCase
+    - Sleuth Kit
+  - Forensics best practices
 
-  * Configuration scanning
-  * Secure templates
-  * Policy as code
-  * Deployment controls
+- **69. Malware Analysis**
+  - Malware analysis
+  - Static analysis
+  - Dynamic analysis
+  - Sandboxing
+  - Reverse engineering
+  - Malware analysis best practices
 
----
-
-# XXI. Application and API Security Engineering
-
-* **98. Secure Architecture**
-
-  * Trust boundaries
-  * Security zones
-  * Authentication boundaries
-  * Authorization boundaries
-  * Data-flow analysis
-
-* **99. Threat Modeling**
-
-  * Asset identification
-  * Trust-boundary analysis
-  * Threat identification
-  * Mitigation design
-  * Residual risk
-
-* **100. Secure Coding**
-
-  * Memory safety concepts
-  * Input validation
-  * Output encoding
-  * Error handling
-  * Secrets management
-  * Secure dependencies
-  * Logging without sensitive-data leakage
-
-* **101. Security Testing in Development**
-
-  * SAST
-  * DAST
-  * SCA
-  * IAST concepts
-  * Fuzz testing
-  * Security unit tests
-
----
-
-# XXII. Security Architecture
-
-* **102. Enterprise Security Architecture**
-
-  * Business requirements
-  * Security requirements
-  * Trust boundaries
-  * Security zones
-  * Control architecture
-
-* **103. Zero Trust Architecture**
-
-  * Identity-centric security
-  * Continuous verification
-  * Device trust
-  * Least privilege
-  * Microsegmentation
-  * Policy enforcement
-
-* **104. Defense-in-Depth Architecture**
-
-  * Physical controls
-  * Network controls
-  * Endpoint controls
-  * Application controls
-  * Data controls
-  * Identity controls
-  * Monitoring controls
-
-* **105. Security Architecture Patterns**
-
-  * DMZ architecture
-  * Segmented enterprise networks
-  * Zero-trust architecture
-  * Secure cloud architecture
-  * Hybrid enterprise architecture
+- **70. Defensive Security Tools**
+  - Wazuh
+  - OSSEC
+  - Suricata
+  - Zeek
+  - Snort
+  - ELK Stack
+  - Splunk
+  - Velociraptor
+  - Defensive security tools best practices
 
 ---
 
-# XXIII. Privacy, Compliance, and Legal Foundations
+# IX. Cloud Security
 
-* **106. Privacy Fundamentals**
+- **71. Cloud Security Fundamentals**
+  - Cloud security
+  - Shared responsibility model
+  - Cloud service models
+    - IaaS
+    - PaaS
+    - SaaS
+  - Cloud deployment models
+    - Public
+    - Private
+    - Hybrid
+    - Multi-cloud
+  - Cloud security best practices
 
-  * Personal data
-  * Sensitive data
-  * Data minimization
-  * Purpose limitation
-  * Retention
-  * Consent concepts
+- **72. AWS Security**
+  - AWS security
+  - IAM
+  - VPC
+  - Security groups
+  - NACLs
+  - KMS
+  - CloudTrail
+  - GuardDuty
+  - Security Hub
+  - Inspector
+  - Macie
+  - WAF
+  - Shield
+  - AWS security best practices
 
-* **107. Security Compliance**
+- **73. Azure Security**
+  - Azure security
+  - Azure AD
+  - Azure Security Center
+  - Azure Sentinel
+  - Azure Key Vault
+  - Azure Firewall
+  - Azure DDoS Protection
+  - Azure security best practices
 
-  * Regulatory requirements
-  * Industry standards
-  * Security assessments
-  * Compliance evidence
-  * Control testing
+- **74. Google Cloud Security**
+  - Google Cloud security
+  - Cloud IAM
+  - Cloud Armor
+  - Security Command Center
+  - Cloud KMS
+  - Google Cloud security best practices
 
-* **108. Audit and Assurance**
+- **75. Container Security**
+  - Container security
+  - Docker security
+  - Kubernetes security
+  - Image scanning
+  - Runtime security
+  - Container security best practices
 
-  * Internal audits
-  * External assessments
-  * Control effectiveness
-  * Audit evidence
-  * Remediation tracking
+- **76. Serverless Security**
+  - Serverless security
+  - Function security
+  - Event security
+  - Serverless security best practices
 
-* **109. Third-Party Risk**
-
-  * Vendor assessment
-  * Security questionnaires
-  * Contractual controls
-  * Supply-chain risk
-  * Continuous vendor monitoring
-
----
-
-# XXIV. Business Continuity and Cyber Resilience
-
-* **110. Business Continuity**
-
-  * Critical business functions
-  * Business impact analysis
-  * Recovery priorities
-  * Continuity planning
-
-* **111. Disaster Recovery**
-
-  * Recovery strategies
-  * Backup architecture
-  * Recovery procedures
-  * Failover
-  * Restoration testing
-
-* **112. Cyber Resilience**
-
-  * Resistance
-  * Absorption
-  * Recovery
-  * Adaptation
-  * Continuous improvement
-
----
-
-# XXV. Security Automation and Engineering
-
-* **113. Security Automation**
-
-  * Automated detection
-  * Automated enrichment
-  * Alert classification
-  * Automated remediation
-  * Workflow orchestration
-
-* **114. Security Scripting**
-
-  * Python for security automation
-  * PowerShell for security administration
-  * Bash for Linux security
-  * API-based automation
-  * Log processing
-
-* **115. Security Data Analysis**
-
-  * Log parsing
-  * Pattern detection
-  * Statistical baselines
-  * Event correlation
-  * Security metrics
-
-* **116. Security Engineering**
-
-  * Security requirements
-  * Control design
-  * Architecture validation
-  * Security testing
-  * Operational integration
+- **77. Cloud Security Tools**
+  - ScoutSuite
+  - Prowler
+  - CloudSploit
+  - Checkov
+  - Terrascan
+  - tfsec
+  - Cloud security tools best practices
 
 ---
 
-# XXVI. Advanced Detection Engineering
+# X. Application Security
 
-* **117. Detection Engineering**
+- **78. Application Security Fundamentals**
+  - Application security
+  - Secure SDLC
+  - Threat modeling
+  - Security requirements
+  - Security design
+  - Secure coding
+  - Security testing
+  - Application security best practices
 
-  * Detection requirements
-  * Telemetry selection
-  * Detection logic
-  * Detection validation
-  * False-positive reduction
+- **79. Secure Coding**
+  - Input validation
+  - Output encoding
+  - Parameterized queries
+  - Least privilege
+  - Secure defaults
+  - Error handling
+  - Logging
+  - Secret management
+  - Secure coding best practices
 
-* **118. Behavioral Detection**
+- **80. Security Testing**
+  - SAST
+  - DAST
+  - IAST
+  - RASP
+  - SCA
+  - Security testing best practices
 
-  * Baseline behavior
-  * Anomalies
-  * Identity behavior
-  * Endpoint behavior
-  * Network behavior
+- **81. DevSecOps**
+  - DevSecOps
+  - Security automation
+  - Security as code
+  - CI/CD security
+  - DevSecOps best practices
 
-* **119. Detection-as-Code**
+- **82. API Security**
+  - API security
+  - API authentication
+  - API authorization
+  - API rate limiting
+  - API security best practices
 
-  * Version-controlled detections
-  * Automated testing
-  * Deployment pipelines
-  * Detection lifecycle
+- **83. Mobile Security**
+  - Mobile security
+  - Android security
+  - iOS security
+  - Mobile app security
+  - Mobile security best practices
 
-* **120. Threat Hunting**
-
-  * Hypothesis development
-  * Data collection
-  * Search
-  * Investigation
-  * Validation
-  * Reporting
-
----
-
-# XXVII. Advanced Identity Security
-
-* **121. Modern Identity Architecture**
-
-  * Federation
-  * Single sign-on
-  * Identity providers
-  * Service identities
-  * Workload identities
-
-* **122. Identity Threat Detection**
-
-  * Suspicious authentication
-  * Credential misuse
-  * Privilege escalation
-  * Account takeover indicators
-  * Impossible-travel-style anomalies
-
-* **123. Passwordless Security**
-
-  * Security keys
-  * Passkeys
-  * Certificate-based authentication
-  * Modern authentication protocols
-
----
-
-# XXVIII. Advanced Security Data and Detection Analytics
-
-* **124. Security Data Engineering**
-
-  * Log pipelines
-  * Data normalization
-  * Data enrichment
-  * Event schemas
-  * Retention strategies
-
-* **125. Security Analytics**
-
-  * Correlation
-  * Baseline modeling
-  * Risk scoring
-  * Entity behavior analytics
-  * Anomaly analysis
-
-* **126. Security Metrics**
-
-  * Mean time to detect
-  * Mean time to respond
-  * Mean time to recover
-  * Vulnerability remediation time
-  * Incident volume
-  * Control effectiveness
+- **84. Application Security Tools**
+  - SonarQube
+  - Snyk
+  - Veracode
+  - Checkmarx
+  - Fortify
+  - Burp Suite
+  - OWASP ZAP
+  - Application security tools best practices
 
 ---
 
-# XXIX. Specialized Cybersecurity Domains
+# XI. Governance, Risk, and Compliance
 
-* **127. Mobile Security**
-* **128. IoT Security**
-* **129. Operational Technology Security**
-* **130. Industrial Control System Security**
-* **131. Automotive Security**
-* **132. Embedded-System Security**
-* **133. Hardware Security**
-* **134. Satellite and Space-System Security**
-* **135. Artificial Intelligence Security**
+- **85. Governance Fundamentals**
+  - Governance
+  - Security governance
+  - IT governance
+  - Governance frameworks
+  - Governance best practices
 
-  * AI system threats
-  * Model security
-  * Data poisoning
-  * Prompt-related risks
-  * AI supply-chain security
+- **86. Risk Management**
+  - Risk management
+  - Risk assessment
+  - Risk analysis
+  - Risk treatment
+  - Risk monitoring
+  - Risk management best practices
 
----
+- **87. Compliance**
+  - Compliance
+  - GDPR
+  - HIPAA
+  - PCI DSS
+  - SOX
+  - ISO 27001
+  - NIST
+  - SOC 2
+  - Compliance best practices
 
-# XXX. Cybersecurity Leadership and Strategy
+- **88. Security Policies**
+  - Security policies
+  - Acceptable use policy
+  - Access control policy
+  - Incident response policy
+  - Security policy best practices
 
-* **136. Security Program Management**
+- **89. Security Awareness**
+  - Security awareness
+  - Security training
+  - Phishing simulations
+  - Security culture
+  - Security awareness best practices
 
-  * Security strategy
-  * Program roadmaps
-  * Budgeting
-  * Resource planning
-  * Security maturity
-
-* **137. Security Governance**
-
-  * Executive reporting
-  * Risk acceptance
-  * Control ownership
-  * Policy governance
-  * Security accountability
-
-* **138. Security Operations Leadership**
-
-  * SOC maturity
-  * Incident metrics
-  * Detection coverage
-  * Workforce planning
-  * Operational resilience
-
-* **139. Cyber Risk Communication**
-
-  * Risk statements
-  * Executive briefings
-  * Business impact
-  * Risk prioritization
-  * Security investment decisions
+- **90. Business Continuity**
+  - Business continuity
+  - Disaster recovery
+  - BCP
+  - DRP
+  - RTO
+  - RPO
+  - Business continuity best practices
 
 ---
 
-# XXXI. Progressive Cybersecurity Laboratory Path
+# XII. Cybersecurity Projects by Difficulty
 
-## Level 1 — Foundational Labs
+## Beginner Projects
 
-* Set up a safe cybersecurity learning environment
-* Study:
+- **1. Password Strength Checker**
+  - Python
+  - Regex
+  - Entropy
+  - Strength evaluation
 
-  * Networking fundamentals
-  * Linux
-  * Windows
-  * Basic security concepts
-* Practice:
+- **2. Port Scanner**
+  - Python
+  - Sockets
+  - Port scanning
+  - Service detection
 
-  * User and permission management
-  * Basic network configuration
-  * System logging
-  * Secure configuration
+- **3. Hash Cracker**
+  - Python
+  - Hashing
+  - Dictionary attacks
+  - Hashcat
 
-## Level 2 — Defensive Security Labs
+- **4. Log Analyzer**
+  - Python
+  - Log parsing
+  - Pattern matching
+  - Reporting
 
-* Practice:
-
-  * Host hardening
-  * Firewall configuration
-  * Log collection
-  * Authentication monitoring
-  * Vulnerability assessment
-* Build:
-
-  * Basic home security-monitoring environment
-  * Centralized logging system
-  * Basic detection rules
-
-## Level 3 — Security Analysis Labs
-
-* Practice:
-
-  * Packet analysis
-  * Log analysis
-  * Event correlation
-  * IOC investigation
-  * Incident triage
-* Build:
-
-  * Incident investigation workflows
-  * Detection dashboards
-
-## Level 4 — Application Security Labs
-
-* Study:
-
-  * Secure coding
-  * Authentication
-  * Authorization
-  * Input validation
-  * API security
-* Practice only in:
-
-  * Purpose-built training applications
-  * Authorized lab environments
-  * Capture-the-flag platforms
-
-## Level 5 — Incident Response and Forensics
-
-* Practice:
-
-  * Evidence preservation
-  * Timeline creation
-  * Log analysis
-  * Host investigation
-  * Network investigation
-* Build:
-
-  * Incident-response playbooks
-  * Forensic investigation reports
-
-## Level 6 — Cloud and DevSecOps
-
-* Practice:
-
-  * Cloud IAM
-  * Secure networking
-  * Secrets management
-  * Infrastructure-as-code security
-  * CI/CD security
-  * Container security
-
-## Level 7 — Advanced Security Engineering
-
-* Build:
-
-  * Detection engineering pipelines
-  * Threat-hunting workflows
-  * Security automation
-  * Zero-trust architectures
-  * Production-grade security monitoring
+- **5. Vulnerability Scanner**
+  - Python
+  - Nmap
+  - Vulnerability detection
+  - Reporting
 
 ---
 
-# XXXII. Recommended Cybersecurity Learning Sequence
+## Intermediate Projects
 
-## Stage 1 — Computer Foundations
+- **6. Web Vulnerability Scanner**
+  - Python
+  - Web scraping
+  - SQL injection
+  - XSS detection
 
-* Computer architecture
-* Operating systems
-* Linux
-* Windows
-* Command-line fundamentals
+- **7. Network Sniffer**
+  - Python
+  - Scapy
+  - Packet capture
+  - Analysis
 
-## Stage 2 — Networking
+- **8. Keylogger Detection**
+  - Python
+  - Process monitoring
+  - File monitoring
+  - Detection
 
-* TCP/IP
-* DNS
-* HTTP/HTTPS
-* Routing
-* Firewalls
-* Network segmentation
+- **9. Honeypot**
+  - Python
+  - Networking
+  - Logging
+  - Analysis
 
-## Stage 3 — Security Fundamentals
-
-* CIA triad
-* Security principles
-* Threats
-* Vulnerabilities
-* Risk
-* Security controls
-
-## Stage 4 — Defensive Security
-
-* Hardening
-* Endpoint security
-* Network security
-* Logging
-* Monitoring
-
-## Stage 5 — Identity and Cryptography
-
-* Authentication
-* Authorization
-* IAM
-* Cryptographic primitives
-* Certificates
-* Key management
-
-## Stage 6 — Application Security
-
-* Secure coding
-* Web security
-* API security
-* Threat modeling
-* Security testing
-
-## Stage 7 — Security Operations
-
-* SOC
-* SIEM
-* Detection
-* Threat intelligence
-* Threat hunting
-
-## Stage 8 — Incident Response
-
-* Detection
-* Investigation
-* Containment
-* Eradication
-* Recovery
-* Forensics
-
-## Stage 9 — Cloud and DevSecOps
-
-* Cloud security
-* Containers
-* Kubernetes
-* CI/CD security
-* Supply-chain security
-
-## Stage 10 — Advanced Engineering
-
-* Security architecture
-* Zero trust
-* Detection engineering
-* Automation
-* Security analytics
-* Scalability
-
-## Stage 11 — Enterprise Mastery
-
-* Governance
-* Risk
-* Compliance
-* Resilience
-* Security program management
-* Enterprise architecture
+- **10. SIEM Dashboard**
+  - ELK Stack
+  - Log collection
+  - Correlation
+  - Visualization
 
 ---
 
-# XXXIII. Cybersecurity Competency Map
+## Advanced Projects
 
-* **Computer Security**
+- **11. Penetration Testing Lab**
+  - Virtual machines
+  - Vulnerable applications
+  - Exploitation
+  - Reporting
 
-  * Operating systems
-  * Host hardening
-  * Endpoint detection
+- **12. Malware Analysis Lab**
+  - Sandboxing
+  - Static analysis
+  - Dynamic analysis
+  - Reporting
 
-* **Network Security**
+- **13. Incident Response Platform**
+  - IR lifecycle
+  - Automation
+  - Orchestration
+  - Reporting
 
-  * TCP/IP
-  * Firewalls
-  * IDS/IPS
-  * Segmentation
+- **14. Cloud Security Posture Management**
+  - AWS
+  - Azure
+  - GCP
+  - Compliance
+  - Reporting
 
-* **Application Security**
-
-  * Secure coding
-  * Web security
-  * API security
-  * DevSecOps
-
-* **Identity Security**
-
-  * IAM
-  * MFA
-  * RBAC
-  * PAM
-  * Federation
-
-* **Cryptographic Security**
-
-  * Encryption
-  * Hashing
-  * Digital signatures
-  * PKI
-  * Key management
-
-* **Security Operations**
-
-  * SOC
-  * SIEM
-  * Detection
-  * Monitoring
-  * Threat hunting
-
-* **Incident Response**
-
-  * Investigation
-  * Containment
-  * Recovery
-  * Forensics
-
-* **Cloud Security**
-
-  * IAM
-  * Cloud networking
-  * Data security
-  * Containers
-  * Kubernetes
-
-* **Governance**
-
-  * Risk
-  * Policies
-  * Compliance
-  * Auditing
-
-* **Advanced Security Engineering**
-
-  * Architecture
-  * Automation
-  * Detection engineering
-  * Zero trust
-  * Resilience
+- **15. Threat Intelligence Platform**
+  - Threat feeds
+  - IOC
+  - TTP
+  - MITRE ATT&CK
+  - Visualization
 
 ---
 
-# XXXIV. Final Mastery Progression
+## Expert Projects
 
-**Computer Fundamentals**
-↓
-**Operating Systems**
-↓
-**Networking**
-↓
-**Cybersecurity Fundamentals**
-↓
-**System & Network Defense**
-↓
-**Identity & Access Management**
-↓
-**Cryptography**
-↓
-**Web & Application Security**
-↓
-**Vulnerability Management**
-↓
-**Security Operations & SIEM**
-↓
-**Threat Intelligence & Threat Hunting**
-↓
-**Incident Response & Digital Forensics**
-↓
-**Cloud, Containers & DevSecOps**
-↓
-**Security Architecture & Zero Trust**
-↓
-**Security Automation & Detection Engineering**
-↓
-**Governance, Risk, Compliance & Resilience**
-↓
-**Advanced Cybersecurity Engineering**
-↓
-**Enterprise Security Architecture & Leadership**
+- **16. Red Team Infrastructure**
+  - C2 infrastructure
+  - Redirectors
+  - Payloads
+  - Evasion
+  - Operations
 
-The strongest learning strategy is to develop **both defensive and analytical competence**: understand how systems are attacked at a conceptual and authorized-lab level, while becoming equally proficient at hardening, monitoring, detecting, investigating, and recovering those systems.
+- **17. Blue Team Detection Engineering**
+  - Detection rules
+  - SIEM
+  - Threat hunting
+  - Automation
+  - Reporting
+
+- **18. Zero Trust Architecture**
+  - Identity
+  - Devices
+  - Network
+  - Applications
+  - Data
+  - Zero trust implementation
+
+- **19. Security Operations Center**
+  - SOC design
+  - SIEM
+  - EDR
+  - Threat intelligence
+  - Incident response
+  - Automation
+
+- **20. Enterprise Security Platform**
+  - Governance
+  - Risk
+  - Compliance
+  - Security operations
+  - Automation
+  - Reporting
+  - Production best practices
+
+---
+
+# XIII. Progressive Cybersecurity Learning Sequence
+
+## Level 1 — Cybersecurity Foundations
+
+- Master:
+  - What cybersecurity is
+  - CIA triad
+  - Security principles
+  - Threat modeling
+  - Risk management
+
+## Level 2 — Prerequisites
+
+- Master:
+  - Computer fundamentals
+  - Operating systems
+  - Networking
+  - Programming
+  - Databases
+  - Web technologies
+  - Cloud computing
+
+## Level 3 — Cryptography
+
+- Master:
+  - Cryptography fundamentals
+  - Symmetric cryptography
+  - Asymmetric cryptography
+  - Hash functions
+  - Digital signatures
+  - Certificates
+  - TLS/SSL
+  - PKI
+
+## Level 4 — Authentication and Authorization
+
+- Master:
+  - Authentication fundamentals
+  - Password security
+  - Multi-factor authentication
+  - Single sign-on
+  - Authorization
+  - Identity and access management
+  - Privileged access management
+
+## Level 5 — Web Security
+
+- Master:
+  - Web security fundamentals
+  - OWASP Top 10
+  - Injection attacks
+  - Cross-site scripting
+  - Cross-site request forgery
+  - Server-side request forgery
+  - Insecure deserialization
+  - XML external entities
+  - Security misconfiguration
+  - Sensitive data exposure
+  - Broken access control
+  - Web security tools
+
+## Level 6 — Network Security
+
+- Master:
+  - Network security fundamentals
+  - Firewalls
+  - Intrusion detection and prevention
+  - VPNs
+  - Network attacks
+  - Network monitoring
+  - Wireless security
+  - Network security tools
+
+## Level 7 — System Security
+
+- Master:
+  - System security fundamentals
+  - Operating system hardening
+  - Malware
+  - Endpoint detection and response
+  - Antivirus
+  - Patch management
+  - System security tools
+
+## Level 8 — Offensive Security
+
+- Master:
+  - Offensive security fundamentals
+  - Reconnaissance
+  - Scanning
+  - Enumeration
+  - Exploitation
+  - Post-exploitation
+  - Password attacks
+  - Social engineering
+  - Penetration testing
+  - Red teaming
+  - Offensive security tools
+
+## Level 9 — Defensive Security
+
+- Master:
+  - Defensive security fundamentals
+  - Security operations center
+  - SIEM
+  - Threat intelligence
+  - Threat hunting
+  - Incident response
+  - Digital forensics
+  - Malware analysis
+  - Defensive security tools
+
+## Level 10 — Cloud Security
+
+- Master:
+  - Cloud security fundamentals
+  - AWS security
+  - Azure security
+  - Google Cloud security
+  - Container security
+  - Serverless security
+  - Cloud security tools
+
+## Level 11 — Application Security
+
+- Master:
+  - Application security fundamentals
+  - Secure coding
+  - Security testing
+  - DevSecOps
+  - API security
+  - Mobile security
+  - Application security tools
+
+## Level 12 — Governance, Risk, and Compliance
+
+- Master:
+  - Governance fundamentals
+  - Risk management
+  - Compliance
+  - Security policies
+  - Security awareness
+  - Business continuity
+
+## Level 13 — Production Engineering
+
+- Master:
+  - Security architecture
+  - Security operations
+  - Incident response
+  - Threat intelligence
+  - Security automation
+  - Security monitoring
+  - Production best practices
+
+---
+
+# XIV. Final Cybersecurity Competency Map
+
+- **Foundations**
+
+  - Cybersecurity
+  - CIA triad
+  - Security principles
+  - Threat modeling
+  - Risk management
+  - Frameworks
+
+- **Prerequisites**
+
+  - Computer fundamentals
+  - Operating systems
+  - Networking
+  - Programming
+  - Databases
+  - Web technologies
+  - Cloud computing
+
+- **Cryptography**
+
+  - Symmetric cryptography
+  - Asymmetric cryptography
+  - Hash functions
+  - Digital signatures
+  - Certificates
+  - TLS/SSL
+  - PKI
+
+- **Authentication**
+
+  - Authentication fundamentals
+  - Password security
+  - MFA
+  - SSO
+  - Authorization
+  - IAM
+  - PAM
+
+- **Web Security**
+
+  - OWASP Top 10
+  - Injection
+  - XSS
+  - CSRF
+  - SSRF
+  - Deserialization
+  - XXE
+  - Misconfiguration
+  - Data exposure
+  - Access control
+  - Web security tools
+
+- **Network Security**
+
+  - Network security fundamentals
+  - Firewalls
+  - IDS/IPS
+  - VPNs
+  - Network attacks
+  - Network monitoring
+  - Wireless security
+  - Network security tools
+
+- **System Security**
+
+  - System security fundamentals
+  - OS hardening
+  - Malware
+  - EDR
+  - Antivirus
+  - Patch management
+  - System security tools
+
+- **Offensive Security**
+
+  - Reconnaissance
+  - Scanning
+  - Enumeration
+  - Exploitation
+  - Post-exploitation
+  - Password attacks
+  - Social engineering
+  - Penetration testing
+  - Red teaming
+  - Offensive security tools
+
+- **Defensive Security**
+
+  - SOC
+  - SIEM
+  - Threat intelligence
+  - Threat hunting
+  - Incident response
+  - Digital forensics
+  - Malware analysis
+  - Defensive security tools
+
+- **Cloud Security**
+
+  - Cloud security fundamentals
+  - AWS security
+  - Azure security
+  - Google Cloud security
+  - Container security
+  - Serverless security
+  - Cloud security tools
+
+- **Application Security**
+
+  - Application security fundamentals
+  - Secure coding
+  - Security testing
+  - DevSecOps
+  - API security
+  - Mobile security
+  - Application security tools
+
+- **GRC**
+
+  - Governance
+  - Risk management
+  - Compliance
+  - Security policies
+  - Security awareness
+  - Business continuity
+
+- **Production**
+
+  - Security architecture
+  - Security operations
+  - Incident response
+  - Threat intelligence
+  - Security automation
+  - Security monitoring
+
+---
+
+## Recommended Overall Progression
+
+**Cybersecurity Foundations → Prerequisites → Cryptography → Authentication and Authorization → Web Security → Network Security → System Security → Offensive Security → Defensive Security → Cloud Security → Application Security → Governance, Risk, and Compliance → Production Engineering**

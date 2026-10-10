@@ -1,1369 +1,1420 @@
 # OpenCV Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Computer Vision Foundations to Advanced Practical Mastery
+## From Image Processing Foundations to Advanced Computer Vision, Deep Learning Integration, and Production Vision Engineering
 
-OpenCV is best learned progressively: first understand image operations, then classical computer vision, followed by video processing, feature extraction, object detection, camera geometry, deep-learning integration, and finally production-grade vision systems.
-
----
-
-# I. Prerequisites
-
-* **1. Python Fundamentals**
-
-  * Syntax and control flow
-
-    * Variables
-    * Conditions
-    * Loops
-    * Functions
-  * Data structures
-
-    * Lists
-    * Tuples
-    * Dictionaries
-    * Sets
-  * File handling
-  * Exception handling
-  * Modules and packages
-  * Object-oriented programming
-  * Virtual environments
-  * Package management
-
-* **2. NumPy Fundamentals**
-
-  * Arrays
-  * Dimensions and shapes
-  * Data types
-  * Indexing
-  * Slicing
-  * Reshaping
-  * Broadcasting
-  * Vectorized operations
-  * Boolean masking
-  * Matrix operations
-  * Linear algebra basics
-
-* **3. Mathematical Foundations**
-
-  * Coordinate systems
-  * Vectors
-  * Matrices
-  * Matrix multiplication
-  * Transformations
-  * Basic probability
-  * Statistics
-  * Geometry
-
-    * Angles
-    * Distances
-    * Lines
-    * Planes
-  * Calculus fundamentals for later computer-vision/deep-learning work
+OpenCV is best learned as more than "a library for reading images." The progression should cover **image fundamentals → NumPy prerequisites → OpenCV core → image I/O → color spaces → image transformations → filtering → edges → contours → feature detection → matching → video processing → object detection → deep learning → tracking → 3D vision → camera calibration → stereo vision → augmented reality → performance → deployment → production computer vision engineering**.
 
 ---
 
-# II. Computer Vision Fundamentals
+# I. OpenCV Foundations
 
-* **4. What Is Computer Vision?**
+- **1. What OpenCV Is**
+  - OpenCV
+  - Open Source Computer Vision Library
+  - OpenCV history
+  - Intel
+  - Willow Garage
+  - Itseez
+  - OpenCV 1.0
+  - OpenCV 2.x
+  - OpenCV 3.x
+  - OpenCV 4.x
+  - OpenCV 5.x
+  - OpenCV philosophy
+    - Open source
+    - Cross-platform
+    - Real-time
+    - Production-ready
+    - Multi-language
+    - Extensive
+  - OpenCV vs scikit-image
+  - OpenCV vs Pillow
+  - OpenCV vs PyTorch
+  - OpenCV vs TensorFlow
+  - OpenCV vs MATLAB
+  - OpenCV use cases
+    - Image processing
+    - Computer vision
+    - Object detection
+    - Face recognition
+    - Video analysis
+    - Robotics
+    - Autonomous vehicles
+    - Medical imaging
+    - Industrial inspection
+    - Augmented reality
+    - Gesture recognition
+    - Motion tracking
+    - Image stitching
+    - 3D reconstruction
+  - OpenCV in modern computer vision
+  - OpenCV ecosystem
+  - OpenCV modules
+    - Core
+    - Imgproc
+    - Highgui
+    - Videoio
+    - Calib3d
+    - Features2d
+    - Objdetect
+    - Dnn
+    - Ml
+    - Flann
+    - Photo
+    - Stitching
+    - Video
+    - Gapi
+    - Imgcodecs
+    - Imgproc
+    - Photo
+    - Shape
+    - Superres
+    - Tracking
+    - Xfeatures2d
+    - Ximgproc
+    - Xphoto
+    - Xobjdetect
+  - OpenCV languages
+    - Python
+    - C++
+    - Java
+    - JavaScript
+    - MATLAB
+    - C#
+    - Ruby
+    - Go
+    - Rust
 
-  * Image understanding
-  * Image analysis
-  * Object recognition
-  * Image classification
-  * Object detection
-  * Image segmentation
-  * Tracking
-  * 3D vision
-  * Human-computer interaction
+- **2. Prerequisites**
+  - Python fundamentals
+  - Variables
+  - Data types
+  - Control flow
+  - Functions
+  - Classes
+  - Modules
+  - NumPy
+    - ndarray
+    - Indexing
+    - Slicing
+    - Broadcasting
+    - Universal functions
+    - Aggregation
+    - Linear algebra
+    - Random
+  - Matplotlib
+    - Plotting
+    - Subplots
+    - Image display
+  - SciPy
+    - Linear algebra
+    - Statistics
+    - Signal processing
+  - Jupyter
+    - Notebooks
+    - Cells
+  - Image fundamentals
+    - Pixels
+    - Resolution
+    - Color depth
+    - Channels
+    - Color spaces
+  - Computer vision concepts
+  - Prerequisite best practices
 
-* **5. Digital Images**
+- **3. Image Fundamentals**
+  - Images
+  - Pixels
+  - Resolution
+  - DPI
+  - Color depth
+  - Bit depth
+  - Channels
+    - Grayscale
+    - RGB
+    - RGBA
+    - BGR
+    - HSV
+    - HLS
+    - LAB
+    - YCrCb
+  - Color spaces
+  - Image formats
+    - JPEG
+    - PNG
+    - GIF
+    - BMP
+    - TIFF
+    - WebP
+    - AVIF
+    - HEIC
+  - Image compression
+  - Image quality
+  - Image metadata
+  - Image fundamentals best practices
 
-  * Pixels
-  * Image dimensions
-  * Resolution
-  * Channels
-  * Color depth
-  * Bit depth
-  * Grayscale images
-  * Color images
-  * Alpha channels
+- **4. Installing OpenCV**
+  - Installation
+    - pip
+    - conda
+    - mamba
+    - uv
+  - `pip install opencv-python`
+  - `pip install opencv-contrib-python`
+  - `pip install opencv-python-headless`
+  - `pip install opencv-contrib-python-headless`
+  - Version checking
+  - `cv2.__version__`
+  - Dependencies
+    - NumPy
+  - Optional dependencies
+    - Matplotlib
+    - SciPy
+    - Pillow
+  - Build from source
+  - Pre-built wheels
+  - Platform-specific installation
+  - GPU support
+  - CUDA support
+  - Installation best practices
 
-* **6. Image Representation**
+- **5. Importing OpenCV**
+  - `import cv2`
+  - `import numpy as np`
+  - `import matplotlib.pyplot as plt`
+  - Import best practices
+  - Namespace conventions
 
-  * Images as matrices
-  * Pixel coordinates
-  * Row-column indexing
-  * Channel ordering
-  * Integer versus floating-point representations
-  * Image memory layout
+- **6. OpenCV API**
+  - OpenCV API
+  - Python API
+  - C++ API
+  - API naming
+  - API consistency
+  - API best practices
 
-* **7. Color Spaces**
-
-  * RGB
-  * BGR
-  * Grayscale
-  * HSV
-  * HLS
-  * LAB
-  * YCrCb
-  * Color-space conversion
-  * Choosing the appropriate color space
-
----
-
-# III. OpenCV Environment and Core API
-
-* **8. Installing OpenCV**
-
-  * Python package ecosystem
-  * Development environment
-  * Jupyter notebooks
-  * IDE integration
-  * Camera access
-  * Video support
-
-* **9. OpenCV Architecture**
-
-  * Core image-processing functionality
-  * Image/video processing
-  * Computer vision algorithms
-  * Feature detection
-  * Object detection
-  * Camera calibration
-  * DNN functionality
-  * Contrib modules
-
-* **10. Basic OpenCV Operations**
-
-  * Reading images
-
-    * `cv2.imread()`
-  * Displaying images
-
-    * `cv2.imshow()`
-  * Saving images
-
-    * `cv2.imwrite()`
-  * Inspecting image properties
-
-    * Shape
-    * Size
-    * Number of channels
-    * Data type
-
----
-
-# IV. Basic Image Manipulation
-
-* **11. Pixel-Level Operations**
-
-  * Accessing pixels
-  * Modifying pixels
-  * Channel manipulation
-  * Pixel arithmetic
-  * Thresholding pixels
-  * Masking
-
-* **12. Region of Interest**
-
-  * Cropping
-  * Region selection
-  * ROI masks
-  * Copying regions
-  * Combining regions
-
-* **13. Resizing**
-
-  * Scaling images
-  * Interpolation
-
-    * Nearest neighbor
-    * Bilinear
-    * Bicubic
-    * Area-based interpolation
-  * Maintaining aspect ratio
-  * Downsampling
-  * Upsampling
-
-* **14. Geometric Transformations**
-
-  * Translation
-  * Rotation
-  * Scaling
-  * Affine transformation
-  * Perspective transformation
-  * Flipping
-  * Image warping
-
----
-
-# V. Drawing and Annotation
-
-* **15. Primitive Drawing**
-
-  * Lines
-  * Circles
-  * Rectangles
-  * Ellipses
-  * Polygons
-
-* **16. Text Rendering**
-
-  * Text placement
-  * Font selection
-  * Font size
-  * Thickness
-  * Text overlays
-
-* **17. Visualization**
-
-  * Bounding boxes
-  * Labels
-  * Confidence scores
-  * Keypoints
-  * Masks
-  * Guides
-  * Crosshairs
-  * Debug overlays
-
----
-
-# VI. Image Filtering and Enhancement
-
-* **18. Image Noise**
-
-  * Gaussian noise
-  * Salt-and-pepper noise
-  * Sensor noise
-  * Compression artifacts
-
-* **19. Blurring**
-
-  * Box filtering
-  * Gaussian blur
-  * Median blur
-  * Bilateral filtering
-
-* **20. Sharpening**
-
-  * Kernel-based sharpening
-  * High-pass filtering
-  * Unsharp masking
-
-* **21. Image Enhancement**
-
-  * Brightness adjustment
-  * Contrast adjustment
-  * Histogram analysis
-  * Histogram equalization
-  * CLAHE
-  * Gamma correction
-
-* **22. Morphological Operations**
-
-  * Structuring elements
-  * Erosion
-  * Dilation
-  * Opening
-  * Closing
-  * Morphological gradient
-  * Top-hat
-  * Black-hat
+- **7. First OpenCV Program**
+  - Image loading
+  - Image display
+  - Image saving
+  - First program best practices
 
 ---
 
-# VII. Thresholding and Segmentation
+# II. Image I/O
 
-* **23. Basic Thresholding**
+- **8. Reading Images**
+  - `cv2.imread()`
+  - Image flags
+    - `cv2.IMREAD_COLOR`
+    - `cv2.IMREAD_GRAYSCALE`
+    - `cv2.IMREAD_UNCHANGED`
+    - `cv2.IMREAD_ANYCOLOR`
+    - `cv2.IMREAD_ANYDEPTH`
+    - `cv2.IMREAD_LOAD_GDAL`
+    - `cv2.IMREAD_REDUCED_COLOR_2`
+    - `cv2.IMREAD_REDUCED_COLOR_4`
+    - `cv2.IMREAD_REDUCED_COLOR_8`
+    - `cv2.IMREAD_REDUCED_GRAYSCALE_2`
+    - `cv2.IMREAD_REDUCED_GRAYSCALE_4`
+    - `cv2.IMREAD_REDUCED_GRAYSCALE_8`
+    - `cv2.IMREAD_IGNORE_ORIENTATION`
+  - Image data
+  - Image shape
+  - Image dtype
+  - Image reading best practices
 
-  * Binary thresholding
-  * Inverse thresholding
-  * Truncation
-  * Threshold-to-zero
-  * Threshold-to-zero inverse
+- **9. Displaying Images**
+  - `cv2.imshow()`
+  - `cv2.waitKey()`
+  - `cv2.destroyAllWindows()`
+  - `cv2.destroyWindow()`
+  - `cv2.namedWindow()`
+  - `cv2.resizeWindow()`
+  - `cv2.moveWindow()`
+  - `cv2.setWindowTitle()`
+  - `cv2.setWindowProperty()`
+  - Display best practices
+  - Jupyter display
+  - Matplotlib display
+  - PIL display
 
-* **24. Adaptive Thresholding**
+- **10. Saving Images**
+  - `cv2.imwrite()`
+  - Image format
+  - Image quality
+  - Image compression
+  - Saving best practices
 
-  * Mean adaptive thresholding
-  * Gaussian adaptive thresholding
-  * Local thresholding
+- **11. Video I/O**
+  - `cv2.VideoCapture()`
+  - Video reading
+  - Frame reading
+  - `cap.read()`
+  - `cap.release()`
+  - `cv2.VideoWriter()`
+  - Video writing
+  - `writer.write()`
+  - `writer.release()`
+  - Video properties
+    - `cv2.CAP_PROP_FRAME_WIDTH`
+    - `cv2.CAP_PROP_FRAME_HEIGHT`
+    - `cv2.CAP_PROP_FPS`
+    - `cv2.CAP_PROP_FRAME_COUNT`
+    - `cv2.CAP_PROP_POS_FRAMES`
+    - `cv2.CAP_PROP_POS_MSEC`
+    - `cv2.CAP_PROP_FOURCC`
+  - Video codecs
+    - `MJPG`
+    - `XVID`
+    - `MP4V`
+    - `H264`
+    - `H265`
+  - Video I/O best practices
 
-* **25. Otsu Thresholding**
-
-  * Automatic threshold selection
-  * Histogram-based segmentation
-
-* **26. Color-Based Segmentation**
-
-  * HSV masking
-  * LAB masking
-  * Range thresholding
-  * Multi-range masks
-
-* **27. Segmentation Strategies**
-
-  * Foreground/background separation
-  * Connected regions
-  * Mask refinement
-  * Morphological cleanup
-
----
-
-# VIII. Edges, Contours, and Shapes
-
-* **28. Edge Detection**
-
-  * Image gradients
-  * Sobel operator
-  * Scharr operator
-  * Laplacian operator
-  * Canny edge detector
-
-* **29. Contours**
-
-  * Contour extraction
-  * Contour hierarchy
-  * Contour retrieval modes
-  * Contour approximation
-
-* **30. Contour Features**
-
-  * Area
-  * Perimeter
-  * Bounding rectangle
-  * Rotated rectangle
-  * Convex hull
-  * Convexity defects
-  * Centroid
-  * Aspect ratio
-  * Extent
-  * Solidity
-
-* **31. Shape Analysis**
-
-  * Polygon approximation
-  * Shape matching
-  * Geometric classification
-  * Circle detection
-  * Line detection
-
-* **32. Hough Transform**
-
-  * Hough line transform
-  * Probabilistic Hough transform
-  * Hough circle transform
-  * Parameter tuning
+- **12. Camera I/O**
+  - Camera capture
+  - `cv2.VideoCapture(0)`
+  - Camera properties
+  - Camera settings
+  - Camera I/O best practices
 
 ---
 
-# IX. Histograms and Image Statistics
+# III. Color Spaces
 
-* **33. Histograms**
+- **13. Color Space Fundamentals**
+  - Color spaces
+  - RGB
+  - BGR
+  - Grayscale
+  - HSV
+  - HLS
+  - LAB
+  - LUV
+  - YCrCb
+  - XYZ
+  - Color space best practices
 
-  * Intensity histograms
-  * Color histograms
-  * Histogram comparison
-  * Histogram normalization
+- **14. Color Conversion**
+  - `cv2.cvtColor()`
+  - Conversion codes
+    - `cv2.COLOR_BGR2GRAY`
+    - `cv2.COLOR_BGR2RGB`
+    - `cv2.COLOR_BGR2HSV`
+    - `cv2.COLOR_BGR2HLS`
+    - `cv2.COLOR_BGR2LAB`
+    - `cv2.COLOR_BGR2LUV`
+    - `cv2.COLOR_BGR2YCrCb`
+    - `cv2.COLOR_BGR2XYZ`
+    - `cv2.COLOR_GRAY2BGR`
+    - `cv2.COLOR_RGB2BGR`
+    - `cv2.COLOR_RGB2GRAY`
+    - `cv2.COLOR_RGB2HSV`
+    - `cv2.COLOR_HSV2BGR`
+    - `cv2.COLOR_HSV2RGB`
+    - `cv2.COLOR_LAB2BGR`
+    - `cv2.COLOR_YCrCb2BGR`
+  - Color conversion best practices
 
-* **34. Histogram-Based Techniques**
+- **15. Color Detection**
+  - Color detection
+  - HSV color detection
+  - Color range
+  - `cv2.inRange()`
+  - Color detection best practices
 
-  * Equalization
-  * Contrast enhancement
-  * Backprojection
-  * Histogram-based object analysis
+- **16. Color Manipulation**
+  - Color channels
+  - Channel splitting
+    - `cv2.split()`
+  - Channel merging
+    - `cv2.merge()`
+  - Channel indexing
+  - Channel manipulation
+  - Color manipulation best practices
 
-* **35. Image Statistics**
-
-  * Mean
-  * Variance
-  * Standard deviation
-  * Min/max intensity
-  * Pixel distributions
-
----
-
-# X. Feature Detection and Description
-
-* **36. Feature Concepts**
-
-  * Keypoints
-  * Local descriptors
-  * Invariance
-
-    * Scale
-    * Rotation
-    * Illumination
-
-* **37. Corner Detection**
-
-  * Harris corners
-  * Shi-Tomasi corners
-
-* **38. Local Feature Detectors**
-
-  * SIFT
-  * ORB
-  * FAST
-  * AKAZE
-  * BRISK
-
-* **39. Feature Descriptors**
-
-  * Descriptor vectors
-  * Binary descriptors
-  * Floating-point descriptors
-
-* **40. Feature Matching**
-
-  * Brute-force matching
-  * Descriptor distance
-  * Ratio test
-  * Cross-checking
-  * Feature correspondence
-
-* **41. Applications**
-
-  * Image matching
-  * Object recognition
-  * Panorama construction
-  * Tracking
-  * Localization
+- **17. Histograms**
+  - Histograms
+  - `cv2.calcHist()`
+  - Histogram plotting
+  - Histogram equalization
+    - `cv2.equalizeHist()`
+  - CLAHE
+    - `cv2.createCLAHE()`
+  - Histogram comparison
+    - `cv2.compareHist()`
+  - Histogram backprojection
+    - `cv2.calcBackProject()`
+  - Histogram best practices
 
 ---
 
-# XI. Image Registration and Panorama Construction
+# IV. Image Transformations
 
-* **42. Image Alignment**
+- **18. Geometric Transformations**
+  - Geometric transformations
+  - Translation
+  - Rotation
+  - Scaling
+  - Shearing
+  - Affine transformation
+  - Perspective transformation
+  - Transformation best practices
 
-  * Point correspondences
-  * Transformation estimation
-  * Homography
+- **19. Resizing**
+  - `cv2.resize()`
+  - Interpolation methods
+    - `cv2.INTER_NEAREST`
+    - `cv2.INTER_LINEAR`
+    - `cv2.INTER_CUBIC`
+    - `cv2.INTER_AREA`
+    - `cv2.INTER_LANCZOS4`
+    - `cv2.INTER_LINEAR_EXACT`
+    - `cv2.INTER_NEAREST_EXACT`
+  - Aspect ratio
+  - Resizing best practices
 
-* **43. Homography**
+- **20. Translation**
+  - Translation
+  - `cv2.warpAffine()`
+  - Translation matrix
+  - Translation best practices
 
-  * Perspective mapping
-  * Planar transformations
-  * Transformation matrices
+- **21. Rotation**
+  - Rotation
+  - `cv2.getRotationMatrix2D()`
+  - `cv2.warpAffine()`
+  - Rotation center
+  - Rotation angle
+  - Rotation scale
+  - Rotation best practices
 
-* **44. RANSAC**
+- **22. Affine Transformation**
+  - Affine transformation
+  - `cv2.getAffineTransform()`
+  - `cv2.warpAffine()`
+  - Affine matrix
+  - Affine best practices
 
-  * Outlier rejection
-  * Robust model estimation
-  * Inlier detection
+- **23. Perspective Transformation**
+  - Perspective transformation
+  - `cv2.getPerspectiveTransform()`
+  - `cv2.warpPerspective()`
+  - Perspective matrix
+  - Perspective best practices
 
-* **45. Panorama Stitching**
+- **24. Cropping**
+  - Cropping
+  - Array slicing
+  - Crop ROI
+  - Crop best practices
 
-  * Feature detection
-  * Feature matching
-  * Homography estimation
-  * Warping
-  * Image blending
-  * Seam handling
+- **25. Flipping**
+  - Flipping
+  - `cv2.flip()`
+  - Flip codes
+    - `0` (vertical)
+    - `1` (horizontal)
+    - `-1` (both)
+  - Flip best practices
 
----
+- **26. Padding**
+  - Padding
+  - `cv2.copyMakeBorder()`
+  - Border types
+    - `cv2.BORDER_CONSTANT`
+    - `cv2.BORDER_REPLICATE`
+    - `cv2.BORDER_REFLECT`
+    - `cv2.BORDER_WRAP`
+    - `cv2.BORDER_REFLECT_101`
+    - `cv2.BORDER_TRANSPARENT`
+    - `cv2.BORDER_REFLECT101`
+    - `cv2.BORDER_DEFAULT`
+    - `cv2.BORDER_ISOLATED`
+  - Padding best practices
 
-# XII. Video Processing
-
-* **46. Video Fundamentals**
-
-  * Frames
-  * Frame rate
-  * Resolution
-  * Codecs
-  * Containers
-
-* **47. Reading Video**
-
-  * `VideoCapture`
-  * Camera streams
-  * Video files
-  * Network streams
-
-* **48. Writing Video**
-
-  * `VideoWriter`
-  * Codecs
-  * Frame encoding
-  * Output formats
-
-* **49. Real-Time Processing**
-
-  * Frame-by-frame processing
-  * Keyboard interaction
-  * FPS measurement
-  * Latency measurement
-  * Real-time visualization
-
-* **50. Camera Input**
-
-  * Webcam capture
-  * Camera properties
-  * Exposure
-  * Resolution
-  * Frame rate
-  * Camera selection
-
----
-
-# XIII. Motion Detection and Tracking
-
-* **51. Background Modeling**
-
-  * Static background assumptions
-  * Background subtraction
-  * Foreground masks
-
-* **52. Motion Detection**
-
-  * Frame differencing
-  * Background subtraction
-  * Motion regions
-  * Motion filtering
-
-* **53. Object Tracking**
-
-  * Tracking fundamentals
-  * Bounding-box tracking
-  * Template matching
-
-* **54. Classical Trackers**
-
-  * MOSSE
-  * KCF
-  * CSRT
-  * Tracker selection
-  * Tracking failure
-
-* **55. Optical Flow**
-
-  * Motion vectors
-  * Lucas-Kanade optical flow
-  * Dense optical flow
-  * Motion estimation
+- **27. Image Pyramids**
+  - Image pyramids
+  - Gaussian pyramid
+    - `cv2.pyrDown()`
+    - `cv2.pyrUp()`
+  - Laplacian pyramid
+  - Pyramid best practices
 
 ---
 
-# XIV. Camera Calibration and Geometry
+# V. Image Filtering
 
-* **56. Camera Models**
+- **28. Filtering Fundamentals**
+  - Filtering
+  - Convolution
+  - Correlation
+  - Kernels
+  - Filters
+  - Filtering best practices
 
-  * Pinhole camera model
-  * Intrinsic parameters
-  * Extrinsic parameters
-  * Projection
+- **29. Convolution**
+  - Convolution
+  - `cv2.filter2D()`
+  - Kernel definition
+  - Kernel normalization
+  - Convolution best practices
 
-* **57. Camera Calibration**
+- **30. Blurring**
+  - Blurring
+  - Averaging
+    - `cv2.blur()`
+  - Gaussian blur
+    - `cv2.GaussianBlur()`
+  - Median blur
+    - `cv2.medianBlur()`
+  - Bilateral filter
+    - `cv2.bilateralFilter()`
+  - Box filter
+    - `cv2.boxFilter()`
+  - Blurring best practices
 
-  * Calibration patterns
-  * Chessboard detection
-  * Object points
-  * Image points
-  * Calibration matrix
-  * Distortion coefficients
+- **31. Sharpening**
+  - Sharpening
+  - Sharpening kernels
+  - Unsharp masking
+  - Sharpening best practices
 
-* **58. Lens Distortion**
+- **32. Edge Detection**
+  - Edge detection
+  - Sobel
+    - `cv2.Sobel()`
+  - Scharr
+    - `cv2.Scharr()`
+  - Laplacian
+    - `cv2.Laplacian()`
+  - Canny
+    - `cv2.Canny()`
+  - Edge detection best practices
 
-  * Radial distortion
-  * Tangential distortion
-  * Distortion correction
-  * Undistortion
+- **33. Morphological Operations**
+  - Morphology
+  - Erosion
+    - `cv2.erode()`
+  - Dilation
+    - `cv2.dilate()`
+  - Opening
+    - `cv2.morphologyEx(cv2.MORPH_OPEN)`
+  - Closing
+    - `cv2.morphologyEx(cv2.MORPH_CLOSE)`
+  - Morphological gradient
+    - `cv2.morphologyEx(cv2.MORPH_GRADIENT)`
+  - Top hat
+    - `cv2.morphologyEx(cv2.MORPH_TOPHAT)`
+  - Black hat
+    - `cv2.morphologyEx(cv2.MORPH_BLACKHAT)`
+  - Hit or miss
+    - `cv2.morphologyEx(cv2.MORPH_HITMISS)`
+  - Structuring elements
+    - `cv2.getStructuringElement()`
+  - Morphology best practices
 
-* **59. Perspective Geometry**
-
-  * Homogeneous coordinates
-  * Projection matrices
-  * Perspective transformation
-
-* **60. Stereo Vision**
-
-  * Stereo cameras
-  * Correspondence
-  * Disparity
-  * Depth estimation
-  * Rectification
-
-* **61. 3D Reconstruction**
-
-  * Triangulation
-  * Depth maps
-  * Point clouds
-  * Structure from motion concepts
-
----
-
-# XV. Object Detection
-
-* **62. Classical Object Detection**
-
-  * Haar cascades
-  * Cascade classifiers
-  * HOG descriptors
-  * HOG + SVM
-
-* **63. Haar Cascade Applications**
-
-  * Face detection
-  * Eye detection
-  * Custom cascade concepts
-
-* **64. Modern Object Detection**
-
-  * CNN-based detection
-  * One-stage detectors
-  * Two-stage detectors
-  * Bounding boxes
-  * Class probabilities
-  * Non-maximum suppression
-
-* **65. OpenCV DNN**
-
-  * Loading pretrained models
-  * Blob creation
-  * Network inference
-  * Output decoding
-  * Non-maximum suppression
-
----
-
-# XVI. Deep Learning with OpenCV
-
-* **66. Deep Learning Prerequisites**
-
-  * Neural-network fundamentals
-  * CNN architecture
-  * Convolution
-  * Pooling
-  * Activation functions
-  * Classification versus detection
-
-* **67. OpenCV DNN Module**
-
-  * Model loading
-  * Input preprocessing
-  * Forward passes
-  * Output interpretation
-  * CPU inference
-  * Accelerator support where available
-
-* **68. Model Formats**
-
-  * ONNX
-  * TensorFlow-related models
-  * Caffe models
-  * Darknet-family formats
-  * Model conversion concepts
-
-* **69. Deep-Learning Tasks**
-
-  * Image classification
-  * Object detection
-  * Semantic segmentation
-  * Instance segmentation
-  * Pose estimation
-
-* **70. Practical Inference Pipeline**
-
-  * Image preprocessing
-  * Normalization
-  * Resizing
-  * Batching
-  * Inference
-  * Postprocessing
-  * Confidence filtering
-  * Visualization
+- **34. Thresholding**
+  - Thresholding
+  - Simple thresholding
+    - `cv2.threshold()`
+  - Adaptive thresholding
+    - `cv2.adaptiveThreshold()`
+  - Otsu's method
+  - Threshold types
+    - `cv2.THRESH_BINARY`
+    - `cv2.THRESH_BINARY_INV`
+    - `cv2.THRESH_TRUNC`
+    - `cv2.THRESH_TOZERO`
+    - `cv2.THRESH_TOZERO_INV`
+    - `cv2.THRESH_OTSU`
+    - `cv2.THRESH_TRIANGLE`
+  - Thresholding best practices
 
 ---
 
-# XVII. Image Segmentation
+# VI. Contours and Shapes
 
-* **71. Classical Segmentation**
+- **35. Contour Fundamentals**
+  - Contours
+  - `cv2.findContours()`
+  - Contour retrieval modes
+    - `cv2.RETR_EXTERNAL`
+    - `cv2.RETR_LIST`
+    - `cv2.RETR_CCOMP`
+    - `cv2.RETR_TREE`
+  - Contour approximation methods
+    - `cv2.CHAIN_APPROX_NONE`
+    - `cv2.CHAIN_APPROX_SIMPLE`
+    - `cv2.CHAIN_APPROX_TC89_L1`
+    - `cv2.CHAIN_APPROX_TC89_KCOS`
+  - Contour best practices
 
-  * Thresholding
-  * Contours
-  * Connected components
-  * Watershed
+- **36. Contour Properties**
+  - Contour area
+    - `cv2.contourArea()`
+  - Contour perimeter
+    - `cv2.arcLength()`
+  - Contour bounding box
+    - `cv2.boundingRect()`
+  - Contour minimum area rectangle
+    - `cv2.minAreaRect()`
+  - Contour minimum enclosing circle
+    - `cv2.minEnclosingCircle()`
+  - Contour convex hull
+    - `cv2.convexHull()`
+  - Contour convexity defects
+    - `cv2.convexityDefects()`
+  - Contour approximation
+    - `cv2.approxPolyDP()`
+  - Contour best practices
 
-* **72. Watershed**
+- **37. Contour Drawing**
+  - `cv2.drawContours()`
+  - Contour drawing options
+  - Contour drawing best practices
 
-  * Distance transforms
-  * Marker-based segmentation
-  * Touching objects
+- **38. Shape Detection**
+  - Shape detection
+  - Polygon detection
+  - Circle detection
+  - Line detection
+  - Shape detection best practices
 
-* **73. Connected Components**
+- **39. Hough Transform**
+  - Hough transform
+  - Hough lines
+    - `cv2.HoughLines()`
+    - `cv2.HoughLinesP()`
+  - Hough circles
+    - `cv2.HoughCircles()`
+  - Hough best practices
 
-  * Labeling
-  * Component statistics
-  * Region extraction
+- **40. Line Detection**
+  - Line detection
+  - Hough lines
+  - Probabilistic Hough lines
+  - Line detection best practices
 
-* **74. Deep Segmentation**
-
-  * Semantic segmentation
-  * Instance segmentation
-  * Pixel masks
-  * Mask postprocessing
-
----
-
-# XVIII. Face and Human-Centric Computer Vision
-
-* **75. Face Detection**
-
-  * Haar cascades
-  * DNN-based face detectors
-  * Bounding boxes
-
-* **76. Facial Landmarks**
-
-  * Eye locations
-  * Nose
-  * Mouth
-  * Face geometry
-
-* **77. Face Recognition Concepts**
-
-  * Feature embeddings
-  * Similarity
-  * Identity matching
-  * Threshold selection
-  * Dataset considerations
-
-* **78. Human Pose**
-
-  * Keypoints
-  * Skeleton representation
-  * Pose estimation
-  * Joint tracking
-
-* **79. Applications**
-
-  * Attendance systems
-  * Gesture interfaces
-  * Fitness analysis
-  * Human activity analysis
-
----
-
-# XIX. OCR and Document Vision
-
-* **80. Document Preprocessing**
-
-  * Grayscale conversion
-  * Noise removal
-  * Thresholding
-  * Deskewing
-  * Perspective correction
-
-* **81. Text Region Detection**
-
-  * Edge-based approaches
-  * Contour-based approaches
-  * Deep text detectors
-
-* **82. OCR Integration**
-
-  * OCR engines
-  * Text extraction
-  * Bounding boxes
-  * Confidence scores
-  * Postprocessing
-
-* **83. Document Understanding**
-
-  * Forms
-  * Receipts
-  * ID-like layouts
-  * Tables
-  * Structured document extraction
+- **41. Circle Detection**
+  - Circle detection
+  - Hough circles
+  - Circle detection best practices
 
 ---
 
-# XX. Advanced Image Processing
+# VII. Feature Detection and Matching
 
-* **84. Frequency-Domain Processing**
+- **42. Feature Detection Fundamentals**
+  - Features
+  - Keypoints
+  - Descriptors
+  - Feature detection
+  - Feature matching
+  - Feature detection best practices
 
-  * Fourier transform
-  * Frequency spectrum
-  * Low-pass filtering
-  * High-pass filtering
-  * Frequency-domain noise reduction
+- **43. Corner Detection**
+  - Harris corner
+    - `cv2.cornerHarris()`
+  - Shi-Tomasi
+    - `cv2.goodFeaturesToTrack()`
+  - FAST
+    - `cv2.FastFeatureDetector_create()`
+  - Corner detection best practices
 
-* **85. Image Restoration**
+- **44. Feature Detectors**
+  - SIFT
+    - `cv2.SIFT_create()`
+  - SURF
+    - `cv2.xfeatures2d.SURF_create()`
+  - ORB
+    - `cv2.ORB_create()`
+  - BRISK
+    - `cv2.BRISK_create()`
+  - KAZE
+    - `cv2.KAZE_create()`
+  - AKAZE
+    - `cv2.AKAZE_create()`
+  - Feature detector best practices
 
-  * Denoising
-  * Deblurring concepts
-  * Inpainting
-  * Missing-region reconstruction
+- **45. Feature Descriptors**
+  - SIFT descriptors
+  - SURF descriptors
+  - ORB descriptors
+  - BRISK descriptors
+  - Binary descriptors
+  - Descriptor best practices
 
-* **86. Image Pyramids**
+- **46. Feature Matching**
+  - Brute-force matcher
+    - `cv2.BFMatcher()`
+  - FLANN matcher
+    - `cv2.FlannBasedMatcher()`
+  - Matching methods
+    - `match()`
+    - `knnMatch()`
+    - `radiusMatch()`
+  - Matching best practices
 
-  * Gaussian pyramids
-  * Laplacian pyramids
-  * Multi-scale processing
+- **47. Matching Filters**
+  - Ratio test
+  - Cross-check test
+  - RANSAC
+  - Homography
+  - Matching filter best practices
 
-* **87. Multi-Scale Vision**
+- **48. Homography**
+  - Homography
+  - `cv2.findHomography()`
+  - RANSAC
+  - Homography best practices
 
-  * Image pyramids
-  * Scale-space
-  * Multi-resolution analysis
-  * Object detection across scales
+- **49. Image Stitching**
+  - Image stitching
+  - `cv2.Stitcher`
+  - Panorama
+  - Image stitching best practices
 
----
-
-# XXI. Advanced Feature and Geometry Methods
-
-* **88. Homogeneous Geometry**
-
-  * Homogeneous coordinates
-  * Projective transformations
-  * Camera projection
-
-* **89. Epipolar Geometry**
-
-  * Fundamental matrix
-  * Essential matrix
-  * Epipolar lines
-  * Stereo correspondence
-
-* **90. Pose Estimation**
-
-  * Perspective-n-point
-  * `solvePnP`
-  * Camera pose
-  * Rotation vectors
-  * Translation vectors
-
-* **91. 3D Vision**
-
-  * Depth estimation
-  * Stereo reconstruction
-  * Point clouds
-  * Camera pose estimation
-
----
-
-# XXII. Performance Optimization
-
-* **92. Computational Efficiency**
-
-  * NumPy vectorization
-  * Avoiding unnecessary Python loops
-  * Efficient memory usage
-  * ROI-based processing
-
-* **93. Real-Time Optimization**
-
-  * FPS optimization
-  * Pipeline optimization
-  * Frame skipping
-  * Resolution trade-offs
-  * Asynchronous processing
-
-* **94. Hardware Acceleration**
-
-  * CPU optimization
-  * OpenCV acceleration mechanisms
-  * GPU concepts
-  * CUDA-enabled workflows where supported
-  * OpenCL concepts
-
-* **95. Profiling**
-
-  * Measuring execution time
-  * Identifying bottlenecks
-  * Memory profiling
-  * End-to-end latency analysis
+- **50. Object Detection with Features**
+  - Feature-based object detection
+  - Template matching
+    - `cv2.matchTemplate()`
+  - Feature-based detection best practices
 
 ---
 
-# XXIII. OpenCV with Other Python Tools
+# VIII. Video Processing
 
-* **96. NumPy**
+- **51. Video Processing Fundamentals**
+  - Video processing
+  - Frames
+  - Frame rate
+  - Video codecs
+  - Video processing best practices
 
-  * Array manipulation
-  * Mathematical operations
-  * Mask processing
+- **52. Video Reading**
+  - `cv2.VideoCapture()`
+  - Frame reading
+  - Frame properties
+  - Video reading best practices
 
-* **97. Matplotlib**
+- **53. Video Writing**
+  - `cv2.VideoWriter()`
+  - Video codecs
+  - Video writing best practices
 
-  * Visualization
-  * Histogram plotting
-  * Debugging image transformations
+- **54. Video Effects**
+  - Video effects
+  - Frame processing
+  - Video effects best practices
 
-* **98. SciPy**
+- **55. Motion Detection**
+  - Motion detection
+  - Frame differencing
+  - Background subtraction
+    - `cv2.createBackgroundSubtractorMOG2()`
+    - `cv2.createBackgroundSubtractorKNN()`
+  - Motion detection best practices
 
-  * Scientific computations
-  * Optimization
-  * Signal/image processing
+- **56. Optical Flow**
+  - Optical flow
+  - Lucas-Kanade
+    - `cv2.calcOpticalFlowPyrLK()`
+  - Farneback
+    - `cv2.calcOpticalFlowFarneback()`
+  - Dense optical flow
+  - Sparse optical flow
+  - Optical flow best practices
 
-* **99. Pandas**
+- **57. Object Tracking**
+  - Object tracking
+  - `cv2.Tracker`
+  - `cv2.TrackerMIL`
+  - `cv2.TrackerKCF`
+  - `cv2.TrackerCSRT`
+  - `cv2.TrackerBoosting`
+  - `cv2.TrackerMedianFlow`
+  - `cv2.TrackerMOSSE`
+  - `cv2.TrackerTLD`
+  - `cv2.TrackerGOTURN`
+  - Tracking best practices
 
-  * Annotation metadata
-  * Detection results
-  * Experimental analysis
-
-* **100. PIL/Pillow**
-
-  * Image-format operations
-  * Interoperability
-  * Image conversion
-
-* **101. Machine-Learning Frameworks**
-
-  * PyTorch
-  * TensorFlow
-  * ONNX Runtime
-  * Model interoperability
-
----
-
-# XXIV. Production Computer Vision
-
-* **102. Vision Pipeline Architecture**
-
-  * Input
-  * Preprocessing
-  * Detection
-  * Tracking
-  * Postprocessing
-  * Output
-
-* **103. Robustness**
-
-  * Lighting variation
-  * Motion blur
-  * Occlusion
-  * Camera movement
-  * Noise
-  * Resolution changes
-
-* **104. Error Handling**
-
-  * Camera failures
-  * Invalid frames
-  * Corrupt files
-  * Model failures
-  * Memory issues
-
-* **105. Deployment**
-
-  * Desktop applications
-  * Web applications
-  * REST APIs
-  * Edge devices
-  * Embedded systems
-  * Cloud inference
-
-* **106. Model Optimization**
-
-  * Quantization
-  * Model compression
-  * ONNX optimization
-  * Inference acceleration
+- **58. Multi-Object Tracking**
+  - Multi-object tracking
+  - `cv2.MultiTracker`
+  - Multi-object tracking best practices
 
 ---
 
-# XXV. Computer Vision System Design
+# IX. Object Detection
 
-* **107. Pipeline Design**
+- **59. Object Detection Fundamentals**
+  - Object detection
+  - Classification
+  - Localization
+  - Detection
+  - Object detection best practices
 
-  * Single-stage versus multi-stage processing
-  * Preprocessing pipelines
-  * Detection/tracking pipelines
-  * Event-driven processing
+- **60. Haar Cascades**
+  - Haar cascades
+  - `cv2.CascadeClassifier()`
+  - Face detection
+  - Eye detection
+  - Smile detection
+  - Haar cascade best practices
 
-* **108. Real-Time Architecture**
+- **61. HOG Descriptor**
+  - HOG
+  - Histogram of Oriented Gradients
+  - `cv2.HOGDescriptor()`
+  - People detection
+  - HOG best practices
 
-  * Capture thread
-  * Processing thread
-  * Inference thread
-  * Output thread
-  * Queues
-  * Backpressure
+- **62. DNN Module**
+  - DNN module
+  - `cv2.dnn`
+  - Model loading
+    - `cv2.dnn.readNet()`
+    - `cv2.dnn.readNetFromCaffe()`
+    - `cv2.dnn.readNetFromTensorflow()`
+    - `cv2.dnn.readNetFromDarknet()`
+    - `cv2.dnn.readNetFromONNX()`
+  - Blob creation
+    - `cv2.dnn.blobFromImage()`
+  - Forward pass
+  - DNN best practices
 
-* **109. Multi-Camera Systems**
+- **63. Pre-trained Models**
+  - Pre-trained models
+  - YOLO
+  - SSD
+  - Faster R-CNN
+  - Mask R-CNN
+  - EfficientNet
+  - MobileNet
+  - Pre-trained model best practices
 
-  * Camera synchronization
-  * Stream management
-  * Shared processing
-  * Camera calibration
-  * Cross-camera tracking
+- **64. Face Detection**
+  - Face detection
+  - Haar cascades
+  - DNN face detection
+  - Face detection best practices
 
-* **110. Edge Vision**
+- **65. Face Recognition**
+  - Face recognition
+  - Face embedding
+  - Face matching
+  - Face recognition best practices
 
-  * Resource limitations
-  * Power consumption
-  * Latency
-  * On-device inference
-  * Hardware acceleration
-
----
-
-# XXVI. Testing and Debugging
-
-* **111. Image-Processing Tests**
-
-  * Known input/output pairs
-  * Boundary conditions
-  * Different resolutions
-  * Different color spaces
-
-* **112. Vision-System Tests**
-
-  * Detection accuracy
-  * False positives
-  * False negatives
-  * Tracking failures
-  * Robustness testing
-
-* **113. Performance Tests**
-
-  * Frames per second
-  * Latency
-  * Memory consumption
-  * CPU/GPU utilization
-
-* **114. Dataset Testing**
-
-  * Train/test separation
-  * Representative samples
-  * Edge cases
-  * Distribution shifts
-
----
-
-# XXVII. Practical OpenCV Projects
-
-## Beginner
-
-* **115. Image Manipulation Projects**
-
-  * Image resizer
-  * Image cropper
-  * Image format converter
-  * Color-space explorer
-  * Basic photo editor
-
-* **116. Basic Vision Projects**
-
-  * Edge detector
-  * Color detector
-  * Shape detector
-  * Document scanner
-  * Motion detector
-
-## Intermediate
-
-* **117. Detection Projects**
-
-  * Face detector
-  * People counter
-  * Object counter
-  * Shape classifier
-  * Webcam motion tracker
-
-* **118. Feature-Based Projects**
-
-  * Image matcher
-  * Panorama stitcher
-  * Object matching system
-  * Feature-based localization
-
-* **119. Video Projects**
-
-  * Real-time motion detector
-  * Object tracker
-  * Speed estimation
-  * Virtual line counter
-  * Traffic counter
-
-## Advanced
-
-* **120. Camera Projects**
-
-  * Camera calibration system
-  * Stereo depth estimation
-  * Perspective measurement system
-  * Camera pose estimator
-
-* **121. Deep-Learning Projects**
-
-  * Real-time object detector
-  * Semantic segmentation application
-  * Pose estimation system
-  * OCR pipeline
-  * Multi-object tracking application
-
-## Expert
-
-* **122. Complete Vision Systems**
-
-  * Smart surveillance pipeline
-  * Industrial defect inspection
-  * Automated document-processing system
-  * Multi-camera analytics system
-  * Real-time retail analytics
-  * Autonomous navigation prototype
-  * Robotics perception pipeline
+- **66. Object Detection Best Practices**
+  - Model selection
+  - Preprocessing
+  - Postprocessing
+  - NMS
+  - Object detection best practices
 
 ---
 
-# XXVIII. Progressive Learning Levels
+# X. Deep Learning Integration
 
-## Level 1 — Image Processing Beginner
+- **67. OpenCV DNN**
+  - OpenCV DNN
+  - Model loading
+  - Inference
+  - DNN best practices
 
-* Learn:
+- **68. TensorFlow Integration**
+  - TensorFlow models
+  - `cv2.dnn.readNetFromTensorflow()`
+  - TensorFlow integration best practices
 
-  * Images as arrays
-  * NumPy
-  * Reading/writing images
-  * Resizing
-  * Cropping
-  * Color spaces
-  * Drawing
-* Build:
+- **69. PyTorch Integration**
+  - PyTorch models
+  - ONNX export
+  - `cv2.dnn.readNetFromONNX()`
+  - PyTorch integration best practices
 
-  * Image editor
-  * Color detector
-  * Basic image-processing scripts
+- **70. ONNX Integration**
+  - ONNX
+  - ONNX models
+  - `cv2.dnn.readNetFromONNX()`
+  - ONNX integration best practices
 
-## Level 2 — Classical Computer Vision
+- **71. Caffe Integration**
+  - Caffe
+  - Caffe models
+  - `cv2.dnn.readNetFromCaffe()`
+  - Caffe integration best practices
 
-* Learn:
+- **72. Darknet Integration**
+  - Darknet
+  - YOLO models
+  - `cv2.dnn.readNetFromDarknet()`
+  - Darknet integration best practices
 
-  * Filtering
-  * Thresholding
-  * Morphology
-  * Edges
-  * Contours
-  * Hough transforms
-* Build:
-
-  * Shape detector
-  * Coin counter
-  * Document scanner
-  * Lane detector
-
-## Level 3 — Video and Tracking
-
-* Learn:
-
-  * VideoCapture
-  * Real-time processing
-  * Background subtraction
-  * Optical flow
-  * Object tracking
-* Build:
-
-  * Motion detector
-  * People counter
-  * Object tracker
-  * Speed estimator
-
-## Level 4 — Feature-Based Vision
-
-* Learn:
-
-  * Corners
-  * SIFT/ORB
-  * Descriptors
-  * Feature matching
-  * Homography
-  * RANSAC
-* Build:
-
-  * Panorama stitcher
-  * Image matching system
-  * Object localization system
-
-## Level 5 — Camera Geometry
-
-* Learn:
-
-  * Camera models
-  * Calibration
-  * Distortion
-  * Stereo vision
-  * Pose estimation
-  * 3D reconstruction
-* Build:
-
-  * Calibration tool
-  * Stereo depth system
-  * AR-style pose tracker
-
-## Level 6 — Deep-Learning Vision
-
-* Learn:
-
-  * CNNs
-  * Object detection
-  * Segmentation
-  * Pose estimation
-  * OpenCV DNN
-  * ONNX
-* Build:
-
-  * Real-time object detector
-  * Segmentation system
-  * Pose estimation application
-
-## Level 7 — Production Vision Engineering
-
-* Learn:
-
-  * Performance optimization
-  * GPU acceleration
-  * Multi-threaded pipelines
-  * Deployment
-  * Monitoring
-  * Model optimization
-* Build:
-
-  * Real-time production-grade vision pipeline
-
-## Level 8 — Computer Vision Architect
-
-* Master:
-
-  * Classical vision
-  * Deep learning
-  * 2D geometry
-  * 3D geometry
-  * Tracking
-  * Camera systems
-  * Distributed vision pipelines
-  * Edge deployment
-  * Performance engineering
-  * System architecture
+- **73. OpenVINO Integration**
+  - OpenVINO
+  - OpenVINO models
+  - `cv2.dnn.readNetFromModelOptimizer()`
+  - OpenVINO integration best practices
 
 ---
 
-# XXIX. Recommended Study Order
+# XI. Camera Calibration and 3D Vision
 
-```text
-Python
-  ↓
-NumPy
-  ↓
-Image & Computer Vision Fundamentals
-  ↓
-OpenCV Basics
-  ↓
-Image Manipulation
-  ↓
-Filtering & Enhancement
-  ↓
-Thresholding & Segmentation
-  ↓
-Contours & Shape Analysis
-  ↓
-Video Processing
-  ↓
-Motion Detection
-  ↓
-Tracking & Optical Flow
-  ↓
-Feature Detection & Matching
-  ↓
-Homography & Panorama
-  ↓
-Camera Calibration
-  ↓
-Stereo & 3D Vision
-  ↓
-Object Detection
-  ↓
-OpenCV DNN
-  ↓
-Segmentation & Pose Estimation
-  ↓
-OCR & Document Vision
-  ↓
-Performance Optimization
-  ↓
-Deployment
-  ↓
-Production Computer Vision
-  ↓
-Advanced Vision Architecture
-```
+- **74. Camera Calibration Fundamentals**
+  - Camera calibration
+  - Intrinsic parameters
+  - Extrinsic parameters
+  - Distortion coefficients
+  - Camera calibration best practices
 
-# XXX. Final OpenCV Competency Map
+- **75. Calibration Process**
+  - Calibration pattern
+  - Chessboard
+  - Circle grid
+  - Calibration images
+  - `cv2.findChessboardCorners()`
+  - `cv2.cornerSubPix()`
+  - `cv2.calibrateCamera()`
+  - Calibration best practices
 
-* **Foundation**
+- **76. Distortion Correction**
+  - Distortion correction
+  - `cv2.undistort()`
+  - `cv2.initUndistortRectifyMap()`
+  - Distortion correction best practices
 
-  * Python
-  * NumPy
-  * Linear algebra
-  * Image representation
+- **77. Pose Estimation**
+  - Pose estimation
+  - `cv2.solvePnP()`
+  - `cv2.solvePnPRansac()`
+  - Pose estimation best practices
 
-* **Core OpenCV**
+- **78. Stereo Vision**
+  - Stereo vision
+  - Stereo calibration
+  - `cv2.stereoCalibrate()`
+  - Stereo rectification
+  - `cv2.stereoRectify()`
+  - Disparity map
+  - `cv2.StereoBM`
+  - `cv2.StereoSGBM`
+  - Depth map
+  - Stereo vision best practices
 
-  * Reading/writing
-  * Resizing
-  * Cropping
-  * Drawing
-  * Color spaces
+- **79. 3D Reconstruction**
+  - 3D reconstruction
+  - Point cloud
+  - `cv2.reprojectImageTo3D()`
+  - 3D reconstruction best practices
 
-* **Classical Vision**
+- **80. Depth Estimation**
+  - Depth estimation
+  - Stereo depth
+  - Monocular depth
+  - Depth estimation best practices
 
-  * Filtering
-  * Thresholding
-  * Morphology
-  * Edges
-  * Contours
-  * Hough transforms
+---
 
-* **Video Vision**
+# XII. Augmented Reality
 
-  * Cameras
-  * Video streams
-  * Motion detection
-  * Optical flow
-  * Tracking
+- **81. Augmented Reality Fundamentals**
+  - Augmented reality
+  - AR
+  - Marker-based AR
+  - Markerless AR
+  - AR best practices
 
-* **Feature-Based Vision**
+- **82. ArUco Markers**
+  - ArUco markers
+  - `cv2.aruco`
+  - Marker detection
+  - `cv2.aruco.detectMarkers()`
+  - Pose estimation
+  - ArUco best practices
 
-  * SIFT
-  * ORB
-  * Feature matching
-  * Homography
-  * RANSAC
+- **83. AR Applications**
+  - AR applications
+  - Virtual object overlay
+  - Homography
+  - Pose estimation
+  - AR application best practices
 
-* **Geometric Vision**
+---
 
-  * Calibration
-  * Distortion correction
-  * Pose estimation
-  * Stereo vision
-  * 3D reconstruction
+# XIII. Performance Optimization
 
-* **AI-Powered Vision**
+- **84. Performance Fundamentals**
+  - Performance
+  - Latency
+  - Throughput
+  - Real-time processing
+  - Performance metrics
+  - Performance best practices
 
-  * OpenCV DNN
-  * ONNX
-  * Object detection
-  * Segmentation
-  * Pose estimation
-  * OCR
+- **85. Optimization Techniques**
+  - Optimization techniques
+  - Avoid loops
+  - Use NumPy
+  - Use vectorization
+  - Use ROI
+  - Reduce resolution
+  - Use grayscale
+  - Use appropriate data types
+  - Optimization best practices
 
-* **Engineering**
+- **86. Multi-threading**
+  - Multi-threading
+  - `cv2.setNumThreads()`
+  - `cv2.getNumThreads()`
+  - Multi-threading best practices
 
-  * Optimization
-  * GPU acceleration
-  * Parallel processing
-  * Deployment
-  * Reliability
+- **87. GPU Acceleration**
+  - GPU acceleration
+  - CUDA
+  - OpenCL
+  - `cv2.cuda`
+  - `cv2.UMat`
+  - GPU best practices
 
-* **Mastery**
+- **88. Profiling**
+  - Profiling
+  - `cv2.getTickCount()`
+  - `cv2.getTickFrequency()`
+  - `time.time()`
+  - `cProfile`
+  - `line_profiler`
+  - Profiling best practices
 
-  * End-to-end computer vision systems
-  * Real-time perception
-  * Multi-camera processing
-  * Edge AI
-  * 3D perception
-  * Production architecture
+- **89. Benchmarking**
+  - Benchmarking
+  - `timeit`
+  - `%timeit`
+  - Benchmarking best practices
 
-### The progression to aim for
+---
 
-**Image Processing → Classical Computer Vision → Video Processing → Tracking → Feature-Based Vision → Camera Geometry → 3D Vision → Deep-Learning Vision → Real-Time Optimization → Production Computer Vision.**
+# XIV. OpenCV Projects by Difficulty
+
+## Beginner Projects
+
+- **1. Image Loading and Display**
+  - Image reading
+  - Image display
+  - Image saving
+  - Image properties
+
+- **2. Image Color Conversion**
+  - Color conversion
+  - Grayscale
+  - HSV
+  - Color channels
+
+- **3. Image Resizing**
+  - Resizing
+  - Interpolation
+  - Aspect ratio
+  - Cropping
+
+- **4. Image Filtering**
+  - Blurring
+  - Sharpening
+  - Edge detection
+  - Thresholding
+
+- **5. Drawing on Images**
+  - Lines
+  - Rectangles
+  - Circles
+  - Text
+
+---
+
+## Intermediate Projects
+
+- **6. Face Detection**
+  - Haar cascades
+  - Face detection
+  - Face tracking
+  - Visualization
+
+- **7. Object Detection**
+  - DNN
+  - Pre-trained models
+  - Detection
+  - Visualization
+
+- **8. Motion Detection**
+  - Background subtraction
+  - Motion detection
+  - Tracking
+  - Visualization
+
+- **9. Optical Flow**
+  - Lucas-Kanade
+  - Farneback
+  - Optical flow
+  - Visualization
+
+- **10. Image Stitching**
+  - Feature detection
+  - Feature matching
+  - Homography
+  - Panorama
+
+---
+
+## Advanced Projects
+
+- **11. Object Tracking**
+  - Tracking algorithms
+  - Multi-object tracking
+  - Tracking
+  - Visualization
+
+- **12. Camera Calibration**
+  - Calibration
+  - Distortion correction
+  - Pose estimation
+  - 3D reconstruction
+
+- **13. Stereo Vision**
+  - Stereo calibration
+  - Disparity map
+  - Depth map
+  - 3D reconstruction
+
+- **14. Augmented Reality**
+  - ArUco markers
+  - Pose estimation
+  - Virtual object overlay
+  - AR application
+
+- **15. Real-Time Object Detection**
+  - YOLO
+  - DNN
+  - Real-time detection
+  - Visualization
+
+---
+
+## Expert Projects
+
+- **16. Production Computer Vision System**
+  - Image processing
+  - Object detection
+  - Tracking
+  - Deployment
+  - Monitoring
+
+- **17. Autonomous Vehicle Vision**
+  - Lane detection
+  - Object detection
+  - Depth estimation
+  - Real-time processing
+
+- **18. Medical Imaging System**
+  - Image processing
+  - Segmentation
+  - Classification
+  - Visualization
+
+- **19. Industrial Inspection**
+  - Defect detection
+  - Quality control
+  - Real-time processing
+  - Reporting
+
+- **20. End-to-End Computer Vision Pipeline**
+  - Data collection
+  - Preprocessing
+  - Model training
+  - Deployment
+  - Monitoring
+  - MLOps
+
+---
+
+# XV. Progressive OpenCV Learning Sequence
+
+## Level 1 — OpenCV Fundamentals
+
+- Master:
+  - Installation
+  - Import
+  - Image I/O
+  - Image display
+  - Image saving
+
+## Level 2 — Color Spaces
+
+- Master:
+  - Color space fundamentals
+  - Color conversion
+  - Color detection
+  - Color manipulation
+  - Histograms
+
+## Level 3 — Image Transformations
+
+- Master:
+  - Geometric transformations
+  - Resizing
+  - Translation
+  - Rotation
+  - Affine transformation
+  - Perspective transformation
+  - Cropping
+  - Flipping
+  - Padding
+  - Image pyramids
+
+## Level 4 — Image Filtering
+
+- Master:
+  - Filtering fundamentals
+  - Convolution
+  - Blurring
+  - Sharpening
+  - Edge detection
+  - Morphological operations
+  - Thresholding
+
+## Level 5 — Contours and Shapes
+
+- Master:
+  - Contour fundamentals
+  - Contour properties
+  - Contour drawing
+  - Shape detection
+  - Hough transform
+  - Line detection
+  - Circle detection
+
+## Level 6 — Feature Detection and Matching
+
+- Master:
+  - Feature detection fundamentals
+  - Corner detection
+  - Feature detectors
+  - Feature descriptors
+  - Feature matching
+  - Matching filters
+  - Homography
+  - Image stitching
+  - Object detection with features
+
+## Level 7 — Video Processing
+
+- Master:
+  - Video processing fundamentals
+  - Video reading
+  - Video writing
+  - Video effects
+  - Motion detection
+  - Optical flow
+  - Object tracking
+  - Multi-object tracking
+
+## Level 8 — Object Detection
+
+- Master:
+  - Object detection fundamentals
+  - Haar cascades
+  - HOG descriptor
+  - DNN module
+  - Pre-trained models
+  - Face detection
+  - Face recognition
+  - Object detection best practices
+
+## Level 9 — Deep Learning Integration
+
+- Master:
+  - OpenCV DNN
+  - TensorFlow integration
+  - PyTorch integration
+  - ONNX integration
+  - Caffe integration
+  - Darknet integration
+  - OpenVINO integration
+
+## Level 10 — Camera Calibration and 3D Vision
+
+- Master:
+  - Camera calibration fundamentals
+  - Calibration process
+  - Distortion correction
+  - Pose estimation
+  - Stereo vision
+  - 3D reconstruction
+  - Depth estimation
+
+## Level 11 — Augmented Reality
+
+- Master:
+  - AR fundamentals
+  - ArUco markers
+  - AR applications
+
+## Level 12 — Performance
+
+- Master:
+  - Performance fundamentals
+  - Optimization techniques
+  - Multi-threading
+  - GPU acceleration
+  - Profiling
+  - Benchmarking
+
+## Level 13 — Production Engineering
+
+- Master:
+  - Computer vision pipelines
+  - Deployment
+  - Monitoring
+  - MLOps
+  - Production best practices
+
+---
+
+# XVI. Final OpenCV Competency Map
+
+- **Foundations**
+
+  - Installation
+  - Import
+  - API
+  - Image fundamentals
+
+- **Image I/O**
+
+  - Reading images
+  - Displaying images
+  - Saving images
+  - Video I/O
+  - Camera I/O
+
+- **Color Spaces**
+
+  - Color space fundamentals
+  - Color conversion
+  - Color detection
+  - Color manipulation
+  - Histograms
+
+- **Image Transformations**
+
+  - Geometric transformations
+  - Resizing
+  - Translation
+  - Rotation
+  - Affine transformation
+  - Perspective transformation
+  - Cropping
+  - Flipping
+  - Padding
+  - Image pyramids
+
+- **Image Filtering**
+
+  - Filtering fundamentals
+  - Convolution
+  - Blurring
+  - Sharpening
+  - Edge detection
+  - Morphological operations
+  - Thresholding
+
+- **Contours and Shapes**
+
+  - Contour fundamentals
+  - Contour properties
+  - Contour drawing
+  - Shape detection
+  - Hough transform
+  - Line detection
+  - Circle detection
+
+- **Feature Detection and Matching**
+
+  - Feature detection fundamentals
+  - Corner detection
+  - Feature detectors
+  - Feature descriptors
+  - Feature matching
+  - Matching filters
+  - Homography
+  - Image stitching
+  - Object detection with features
+
+- **Video Processing**
+
+  - Video processing fundamentals
+  - Video reading
+  - Video writing
+  - Video effects
+  - Motion detection
+  - Optical flow
+  - Object tracking
+  - Multi-object tracking
+
+- **Object Detection**
+
+  - Object detection fundamentals
+  - Haar cascades
+  - HOG descriptor
+  - DNN module
+  - Pre-trained models
+  - Face detection
+  - Face recognition
+
+- **Deep Learning Integration**
+
+  - OpenCV DNN
+  - TensorFlow integration
+  - PyTorch integration
+  - ONNX integration
+  - Caffe integration
+  - Darknet integration
+  - OpenVINO integration
+
+- **Camera Calibration and 3D Vision**
+
+  - Camera calibration fundamentals
+  - Calibration process
+  - Distortion correction
+  - Pose estimation
+  - Stereo vision
+  - 3D reconstruction
+  - Depth estimation
+
+- **Augmented Reality**
+
+  - AR fundamentals
+  - ArUco markers
+  - AR applications
+
+- **Performance**
+
+  - Performance fundamentals
+  - Optimization techniques
+  - Multi-threading
+  - GPU acceleration
+  - Profiling
+  - Benchmarking
+
+- **Production**
+
+  - Computer vision pipelines
+  - Deployment
+  - Monitoring
+  - MLOps
+
+---
+
+## Recommended Overall Progression
+
+**OpenCV Fundamentals → Image I/O → Color Spaces → Image Transformations → Image Filtering → Contours and Shapes → Feature Detection and Matching → Video Processing → Object Detection → Deep Learning Integration → Camera Calibration and 3D Vision → Augmented Reality → Performance → Production Engineering**

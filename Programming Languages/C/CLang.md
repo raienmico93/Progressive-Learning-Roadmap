@@ -1,2170 +1,2943 @@
 # C Language Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Programming Concepts to Advanced Systems-Level Mastery
+## From Language Foundations to Advanced Systems Programming, Embedded Development, and Production C Engineering
 
-This roadmap is structured as a **progressive C programming curriculum**, beginning with programming fundamentals and gradually advancing into pointers, dynamic memory, data structures, file systems, compilation, operating-system interfaces, concurrency, optimization, and systems programming.
+C is best learned as more than "a language for pointers." The progression should cover **syntax → types → operators → control flow → functions → pointers → arrays → strings → structs → unions → enums → preprocessor → memory management → file I/O → systems programming → concurrency → embedded → performance → security → architecture → production engineering**.
 
 ---
 
 # I. C Language Foundations
 
-* **1. Introduction to C**
+- **1. What C Is**
+  - C
+  - C history
+  - Dennis Ritchie
+  - Bell Labs
+  - Unix
+  - C standards
+    - K&R C
+    - C89 / ANSI C
+    - C90
+    - C99
+    - C11
+    - C17 / C18
+    - C23
+    - C2y (next)
+  - C philosophy
+    - Procedural programming
+    - Structured programming
+    - Low-level access
+    - Portability
+    - Efficiency
+    - Trust the programmer
+  - C vs C++
+  - C vs Rust
+  - C vs Go
+  - C vs Assembly
+  - C use cases
+    - Operating systems
+    - Embedded systems
+    - Firmware
+    - Device drivers
+    - Compilers
+    - Interpreters
+    - Databases
+    - Networking
+    - Game engines
+    - Scientific computing
+    - Cryptography
+    - Real-time systems
+    - Microcontrollers
+    - IoT
+    - High-performance computing
+  - C in modern software
+  - C in Linux kernel
+  - C in Windows kernel
+  - C in macOS kernel
+  - C in embedded systems
+  - C in databases
+  - C in programming languages
 
-  * Definition and purpose of C
+- **2. Compilation Model**
+  - Source files
+  - Header files
+  - Translation units
+  - Preprocessing
+  - Compilation
+  - Assembly
+  - Linking
+  - Static linking
+  - Dynamic linking
+  - Object files
+  - Executables
+  - Libraries
+    - Static libraries
+    - Shared libraries
+    - Dynamic libraries
+  - Compilers
+    - GCC
+    - Clang
+    - MSVC
+    - Intel C Compiler
+    - Tiny C Compiler (TCC)
+    - MinGW
+    - Watcom
+  - Linkers
+  - Build tools
+    - Make
+    - CMake
+    - Meson
+    - Ninja
+    - Autotools
+    - Bazel
+  - Compiler flags
+  - Optimization levels
+    - `-O0`
+    - `-O1`
+    - `-O2`
+    - `-O3`
+    - `-Os`
+    - `-Ofast`
+  - Debug vs release builds
+  - Cross-compilation
+  - Compilation best practices
 
-    * General-purpose programming language
-    * Procedural and structured programming language
-    * Compiled programming language
-    * Systems-oriented programming language
-  * Historical background
+- **3. Setting Up C**
+  - Compiler installation
+    - Windows
+      - MinGW
+      - MSVC
+      - Clang
+      - TCC
+    - macOS
+      - Xcode Command Line Tools
+      - Clang
+      - GCC via Homebrew
+    - Linux
+      - GCC
+      - Clang
+      - TCC
+  - IDEs
+    - Visual Studio
+    - CLion
+    - VS Code
+    - Code::Blocks
+    - Dev-C++
+    - Eclipse CDT
+    - Xcode
+    - KDevelop
+    - Sublime Text
+    - Vim
+    - Neovim
+    - Emacs
+  - Build systems
+    - Make
+    - CMake
+    - Meson
+    - Ninja
+    - Autotools
+  - Package managers
+    - vcpkg
+    - Conan
+    - pkg-config
+  - Debuggers
+    - GDB
+    - LLDB
+    - Visual Studio Debugger
+    - WinDbg
+  - Profilers
+    - perf
+    - Valgrind
+    - gprof
+    - VTune
+  - Static analysis
+    - Clang-Tidy
+    - Cppcheck
+    - PVS-Studio
+    - Splint
+    - Coverity
+  - Formatting
+    - clang-format
+    - indent
+  - Editor configuration
+    - `.clang-format`
+    - `.clang-tidy`
+    - `.editorconfig`
 
-    * Development of C
-    * Influence of BCPL and B
-    * Dennis Ritchie and UNIX
-    * Standardization of C
-  * Major characteristics
-
-    * Low-level memory access
-    * Deterministic execution model
-    * Static typing
-    * Manual memory management
-    * Portability
-    * Small core language
-    * Extensive standard library
-  * Major applications
-
-    * Operating systems
-    * Embedded systems
-    * Device drivers
-    * Compilers
-    * Networking software
-    * Databases
-    * Firmware
-    * High-performance applications
-    * Systems utilities
-
-* **2. C Standards and Language Versions**
-
-  * ANSI C
-  * ISO C
-  * C89/C90
-  * C99
-  * C11
-  * C17
-  * C23
-  * Standard-library evolution
-  * Compiler support differences
-  * Portable C versus compiler-specific extensions
-
-* **3. C Programming Environment**
-
-  * Compiler
-
-    * GCC
-    * Clang
-    * Microsoft Visual C
-  * Linker
-  * Assembler
-  * Debugger
-  * Build systems
-
-    * Make
-    * CMake
-  * Integrated development environments
-  * Command-line development
-  * Source-code editors
-  * Terminal usage
-
----
-
-# II. Programming Fundamentals
-
-* **4. Basic C Program Structure**
-
-  * Source files
-
-    * `.c`
-  * Header files
-
-    * `.h`
-  * `main()` function
-  * Statements
-  * Blocks
-  * Expressions
-  * Comments
-  * Preprocessor directives
-  * Function declarations
-  * Function definitions
-
-* **5. First C Program**
-
-  * `#include`
-  * `main`
-  * `return`
-  * `printf`
-  * Standard output
-  * Compilation
-  * Linking
-  * Program execution
-
-* **6. C Syntax Fundamentals**
-
-  * Keywords
-  * Identifiers
-  * Constants
-  * Literals
-  * Operators
-  * Separators
-  * Punctuation
-  * Semicolons
-  * Braces
-  * Parentheses
-  * Whitespace
-  * Naming conventions
-
-* **7. Variables and Constants**
-
-  * Variable declaration
-  * Variable initialization
-  * Variable assignment
-  * Variable scope
-  * Variable lifetime
-  * Constants
-  * `const`
-  * Enumeration constants
-  * Preprocessor constants
-
----
-
-# III. Data Types
-
-* **8. Fundamental Data Types**
-
-  * Integer types
-
-    * `char`
-    * `short`
-    * `int`
-    * `long`
-    * `long long`
-  * Floating-point types
-
-    * `float`
-    * `double`
-    * `long double`
-  * Boolean type
-
-    * `_Bool`
-    * `bool` through `<stdbool.h>` where applicable
-  * `void`
-
-* **9. Signed and Unsigned Types**
-
-  * `signed`
-  * `unsigned`
-  * Signed ranges
-  * Unsigned ranges
-  * Integer representation
-  * Integer overflow considerations
-
-* **10. Data-Type Modifiers**
-
-  * `short`
-  * `long`
-  * `signed`
-  * `unsigned`
-  * Type compatibility
-  * Implementation-defined type widths
-
-* **11. Type Conversion**
-
-  * Implicit conversion
-  * Explicit conversion
-
-    * Cast operator
-  * Integer promotion
-  * Usual arithmetic conversions
-  * Narrowing conversions
-  * Conversion-related data loss
-
-* **12. Size and Representation**
-
-  * `sizeof`
-  * `sizeof` types
-  * `sizeof` expressions
-  * Object representation
-  * Byte-oriented memory model
-  * `<stdint.h>`
-
-    * Fixed-width integer types
-    * `int8_t`
-    * `int16_t`
-    * `int32_t`
-    * `int64_t`
+- **4. First C Program**
+  - Hello World
+  - `#include <stdio.h>`
+  - `int main(void)`
+  - `printf()`
+  - `return 0`
+  - Compilation
+  - Execution
+  - Program structure
+  - Header files
+  - Standard library
+  - Program entry point
+  - `argc` and `argv`
+  - `int main(int argc, char *argv[])`
+  - Return values
+  - Exit codes
 
 ---
 
-# IV. Operators and Expressions
+# II. Variables and Data Types
 
-* **13. Arithmetic Operators**
+- **5. Variables**
+  - Variables
+  - Variable declaration
+  - Variable definition
+  - Variable initialization
+  - Variable assignment
+  - Variable scope
+    - Block scope
+    - Function scope
+    - File scope
+    - Global scope
+  - Variable lifetime
+    - Automatic storage
+    - Static storage
+    - Dynamic storage
+    - Thread storage
+  - Storage classes
+    - `auto`
+    - `register`
+    - `static`
+    - `extern`
+    - `typedef`
+    - `_Thread_local` (C11)
+  - Variable naming
+  - Variable initialization
+  - Tentative definitions
+  - Declaration vs definition
+  - Linkage
+    - Internal linkage
+    - External linkage
+    - No linkage
+  - Variable best practices
 
-  * `+`
-  * `-`
-  * `*`
-  * `/`
-  * `%`
-  * Integer arithmetic
-  * Floating-point arithmetic
+- **6. Fundamental Data Types**
+  - Integer types
+    - `char`
+    - `short`
+    - `int`
+    - `long`
+    - `long long`
+    - `signed`
+    - `unsigned`
+    - `_Bool` (C99)
+    - Fixed-width integers (C99)
+      - `int8_t`
+      - `int16_t`
+      - `int32_t`
+      - `int64_t`
+      - `uint8_t`
+      - `uint16_t`
+      - `uint32_t`
+      - `uint64_t`
+    - `intptr_t`
+    - `uintptr_t`
+    - `intmax_t`
+    - `uintmax_t`
+  - Floating-point types
+    - `float`
+    - `double`
+    - `long double`
+    - `_Float32` (C23)
+    - `_Float64` (C23)
+    - `_Float128` (C23)
+    - `_Decimal32` (C23)
+    - `_Decimal64` (C23)
+    - `_Decimal128` (C23)
+  - Character types
+    - `char`
+    - `signed char`
+    - `unsigned char`
+    - `wchar_t`
+    - `char8_t` (C23)
+    - `char16_t` (C11)
+    - `char32_t` (C11)
+  - Boolean type
+    - `_Bool` (C99)
+    - `bool` (C23)
+    - `true` / `false` (C23)
+  - Void type
+    - `void`
+  - `nullptr_t` (C23)
+  - Type sizes
+  - Type ranges
+  - Numeric limits
+    - `<limits.h>`
+    - `<float.h>`
+    - `<stdint.h>`
+    - `<inttypes.h>`
+  - Type qualifiers
+    - `const`
+    - `volatile`
+    - `restrict` (C99)
+    - `_Atomic` (C11)
+  - Type specifiers
+    - `_Complex` (C99)
+    - `_Imaginary` (C99)
+  - Type conversion
+    - Implicit conversion
+    - Explicit conversion
+    - Casting
+    - Integer promotion
+    - Usual arithmetic conversions
+    - Truncation
+    - Sign extension
 
-* **14. Assignment Operators**
+- **7. Literals**
+  - Integer literals
+    - Decimal
+    - Octal
+    - Hexadecimal
+    - Binary (C23)
+    - Suffixes
+      - `U`
+      - `L`
+      - `UL`
+      - `LL`
+      - `ULL`
+    - Digit separators (C23)
+  - Floating-point literals
+    - Decimal
+    - Scientific
+    - Hexadecimal
+    - Suffixes
+      - `F`
+      - `L`
+  - Character literals
+    - Character constants
+    - Escape sequences
+    - Wide character literals
+    - Multi-character constants
+  - String literals
+    - String constants
+    - Escape sequences
+    - Raw strings (C23)
+    - Unicode strings (C11)
+    - Wide strings
+  - Boolean literals (C23)
+  - Compound literals (C99)
+  - Designated initializers (C99)
 
-  * `=`
-  * `+=`
-  * `-=`
-  * `*=`
-  * `/=`
-  * `%=`
-  * Bitwise compound assignments
+- **8. Constants**
+  - `const` keyword
+  - `#define` constants
+  - `enum` constants
+  - `constexpr` (C23)
+  - `static const`
+  - Constant expressions
+  - Compile-time constants
+  - Runtime constants
+  - Constants best practices
 
-* **15. Relational Operators**
+- **9. Strings**
+  - C strings
+  - Null-terminated strings
+  - String literals
+  - String arrays
+  - String pointers
+  - String functions
+    - `strlen()`
+    - `strcpy()`
+    - `strncpy()`
+    - `strcat()`
+    - `strncat()`
+    - `strcmp()`
+    - `strncmp()`
+    - `strchr()`
+    - `strrchr()`
+    - `strstr()`
+    - `strtok()`
+    - `strtok_r()`
+    - `strdup()`
+    - `strndup()`
+    - `strspn()`
+    - `strcspn()`
+    - `strpbrk()`
+    - `strerror()`
+    - `strcoll()`
+    - `strxfrm()`
+    - `memcpy()`
+    - `memmove()`
+    - `memset()`
+    - `memcmp()`
+    - `memchr()`
+  - String safety
+    - Buffer overflows
+    - Bounds checking
+    - Safe string functions
+    - `strlcpy()`
+    - `strlcat()`
+    - `snprintf()`
+  - String best practices
 
-  * `==`
-  * `!=`
-  * `<`
-  * `>`
-  * `<=`
-  * `>=`
+- **10. Arrays**
+  - Arrays
+  - Array declaration
+  - Array initialization
+  - Array indexing
+  - Array bounds
+  - Array decay
+  - Multi-dimensional arrays
+  - Variable-length arrays (C99)
+  - Compound literals (C99)
+  - Designated initializers (C99)
+  - Array of pointers
+  - Pointer to array
+  - Array best practices
 
-* **16. Logical Operators**
+- **11. Enumerations**
+  - Enums
+  - Enum declaration
+  - Enum constants
+  - Enum values
+  - Enum scope
+  - Enum vs `#define`
+  - Enum best practices
 
-  * `&&`
-  * `||`
-  * `!`
-  * Short-circuit evaluation
-  * Boolean expressions
+- **12. Structures**
+  - Structs
+  - Struct declaration
+  - Struct definition
+  - Struct initialization
+  - Struct members
+  - Struct access
+  - Nested structs
+  - Anonymous structs
+  - Bit fields
+  - Struct alignment
+  - Struct padding
+  - `offsetof()`
+  - Struct best practices
 
-* **17. Increment and Decrement**
+- **13. Unions**
+  - Unions
+  - Union declaration
+  - Union members
+  - Union access
+  - Union initialization
+  - Union use cases
+  - Type punning
+  - Union best practices
 
-  * Prefix increment
-  * Postfix increment
-  * Prefix decrement
-  * Postfix decrement
-  * Evaluation considerations
+- **14. Bit Fields**
+  - Bit fields
+  - Bit field declaration
+  - Bit field layout
+  - Bit field access
+  - Bit field portability
+  - Bit field best practices
 
-* **18. Conditional Operator**
-
-  * `?:`
-  * Conditional expressions
-  * Nested conditional expressions
-
-* **19. Operator Precedence and Associativity**
-
-  * Precedence levels
-  * Associativity
-  * Parenthesization
-  * Expression evaluation
-  * Avoiding ambiguous expressions
+- **15. typedef**
+  - `typedef`
+  - Type aliases
+  - typedef struct
+  - typedef enum
+  - typedef function pointers
+  - typedef best practices
 
 ---
 
-# V. Input and Output
+# III. Operators
 
-* **20. Standard Input and Output**
+- **16. Arithmetic Operators**
+  - `+`
+  - `-`
+  - `*`
+  - `/`
+  - `%`
+  - `++`
+  - `--`
+  - Prefix vs postfix
+  - Unary operators
+  - Operator precedence
+  - Operator associativity
+  - Integer division
+  - Floating-point division
+  - Overflow
+  - Underflow
 
-  * `stdin`
-  * `stdout`
-  * `stderr`
-  * `<stdio.h>`
+- **17. Assignment Operators**
+  - `=`
+  - `+=`
+  - `-=`
+  - `*=`
+  - `/=`
+  - `%=`
+  - `&=`
+  - `|=`
+  - `^=`
+  - `<<=`
+  - `>>=`
+  - Chained assignment
+  - Compound assignment
 
-* **21. Output Functions**
+- **18. Comparison Operators**
+  - `==`
+  - `!=`
+  - `<`
+  - `>`
+  - `<=`
+  - `>=`
+  - Comparison of integers
+  - Comparison of floats
+  - Comparison of pointers
+  - Comparison best practices
 
-  * `printf`
-  * `puts`
-  * `putchar`
-  * Format specifiers
+- **19. Logical Operators**
+  - `&&`
+  - `||`
+  - `!`
+  - Short-circuit evaluation
+  - Logical vs bitwise
+  - Boolean operators
+  - Truth tables
 
-    * `%d`
-    * `%u`
-    * `%f`
-    * `%lf`
-    * `%c`
-    * `%s`
-    * `%x`
-    * `%p`
+- **20. Bitwise Operators**
+  - `&`
+  - `|`
+  - `^`
+  - `~`
+  - `<<`
+  - `>>`
+  - Bit manipulation
+  - Bit masks
+  - Bit shifting
+  - Bitwise applications
+  - Bit tricks
+  - Bit manipulation best practices
 
-* **22. Input Functions**
+- **21. Pointer Operators**
+  - `&` (address-of)
+  - `*` (dereference)
+  - `->` (member access)
+  - `.` (member access)
+  - Pointer arithmetic
+  - Pointer comparison
+  - Null pointers
+  - `NULL`
+  - `nullptr` (C23)
+  - Pointer best practices
 
-  * `scanf`
-  * `fgets`
-  * `getchar`
-  * Input-buffer considerations
-  * Format-string safety
-  * Input validation
+- **22. Other Operators**
+  - `sizeof`
+  - `_Alignof` (C11)
+  - `alignof` (C23)
+  - `_Generic` (C11)
+  - `,` (comma)
+  - `?:` (ternary)
+  - `(type)` (cast)
+  - `[]` (array subscript)
+  - `()` (function call)
+  - `.` (member access)
+  - `->` (member access)
+  - `_Static_assert` (C11)
+  - `static_assert` (C23)
+  - `_Noreturn` (C11)
+  - `_Thread_local` (C11)
+  - `_Atomic` (C11)
+  - `_BitInt` (C23)
 
-* **23. Formatted I/O**
-
-  * Width
-  * Precision
-  * Flags
-  * Alignment
-  * Integer formatting
-  * Floating-point formatting
-  * Character and string formatting
-
----
-
-# VI. Control Flow
-
-* **24. Sequential Execution**
-
-  * Statement ordering
-  * Block execution
-  * Expression evaluation
-
-* **25. Conditional Statements**
-
-  * `if`
-  * `if...else`
-  * Nested `if`
-  * `else if`
-  * Conditional logic
-
-* **26. `switch` Statements**
-
-  * `switch`
-  * `case`
-  * `default`
-  * `break`
-  * Fall-through behavior
-  * Enumeration-based switching
-
-* **27. Loops**
-
-  * `while`
-  * `do...while`
-  * `for`
-  * Nested loops
-  * Loop initialization
-  * Loop condition
-  * Loop update
-
-* **28. Loop Control**
-
-  * `break`
-  * `continue`
-  * Nested-loop behavior
-  * Infinite loops
-  * Termination conditions
-
-* **29. Program Control Transfer**
-
-  * `return`
-  * `goto`
-  * Appropriate and inappropriate uses
-  * Structured alternatives to `goto`
-
----
-
-# VII. Functions and Modular Programming
-
-* **30. Function Fundamentals**
-
-  * Function declaration
-  * Function prototype
-  * Function definition
-  * Function call
-  * Return values
-  * Parameters
-  * Arguments
-
-* **31. Function Parameters**
-
-  * Pass-by-value
-  * Pointer parameters
-  * Array parameters
-  * Structure parameters
-  * Variable-length arguments
-
-* **32. Function Scope and Lifetime**
-
-  * Local variables
-  * Global variables
-  * Static local variables
-  * External linkage
-  * Automatic storage duration
-  * Static storage duration
-
-* **33. Function Design**
-
-  * Single-responsibility functions
-  * Reusable functions
-  * Modular decomposition
-  * Interface design
-  * Function contracts
-  * Error-return conventions
-
-* **34. Recursion**
-
-  * Base case
-  * Recursive case
-  * Recursive calls
-  * Stack behavior
-  * Recursive algorithms
-  * Tail-recursion considerations
+- **23. Operator Precedence**
+  - Precedence table
+  - Associativity
+  - Evaluation order
+  - Sequence points
+  - Undefined behavior
+  - Operator precedence best practices
 
 ---
 
-# VIII. Scope, Storage Duration, and Linkage
+# IV. Control Flow
 
-* **35. Scope**
+- **24. Conditional Statements**
+  - `if`
+  - `else if`
+  - `else`
+  - Nested conditionals
+  - Ternary operator
+  - `if` with braces
+  - Dangling else
+  - Conditional best practices
 
-  * Block scope
-  * Function scope
-  * File scope
-  * Function-prototype scope
+- **25. Switch Statements**
+  - `switch`
+  - `case`
+  - `break`
+  - `default`
+  - Fall-through
+  - Switch on integers
+  - Switch on enums
+  - Switch best practices
+  - Switch vs if-else
 
-* **36. Storage Duration**
+- **26. Loops**
+  - `for`
+  - `while`
+  - `do...while`
+  - Loop control
+    - `break`
+    - `continue`
+    - `goto`
+  - Infinite loops
+  - Nested loops
+  - Loop optimization
+  - Loop best practices
 
-  * Automatic
-  * Static
-  * Allocated
-  * Thread storage duration
-
-* **37. Linkage**
-
-  * No linkage
-  * Internal linkage
-  * External linkage
-
-* **38. Storage-Class Specifiers**
-
-  * `auto`
-  * `static`
-  * `extern`
-  * `register`
-  * Their practical implications
-
----
-
-# IX. Arrays
-
-* **39. One-Dimensional Arrays**
-
-  * Declaration
-  * Initialization
-  * Indexing
-  * Iteration
-  * Bounds considerations
-
-* **40. Multidimensional Arrays**
-
-  * Two-dimensional arrays
-  * Three-dimensional arrays
-  * Row-major storage
-  * Nested iteration
-
-* **41. Array Initialization**
-
-  * Complete initialization
-  * Partial initialization
-  * Designated initializers
-  * Zero initialization
-
-* **42. Arrays and Functions**
-
-  * Passing arrays to functions
-  * Array parameter adjustment
-  * Array size considerations
-  * Pointer relationships
-
-* **43. Variable-Length Arrays**
-
-  * VLA fundamentals
-  * Runtime dimensions
-  * Limitations
-  * Portability considerations
+- **27. Jump Statements**
+  - `break`
+  - `continue`
+  - `return`
+  - `goto`
+  - `goto` best practices
+  - `goto` pitfalls
+  - `goto` use cases
+  - Error handling with `goto`
+  - Cleanup with `goto`
 
 ---
 
-# X. Strings and Character Processing
+# V. Functions
 
-* **44. C Strings**
+- **28. Function Fundamentals**
+  - Functions
+  - Function declaration
+  - Function prototype
+  - Function definition
+  - Function signature
+  - Function parameters
+  - Function arguments
+  - Return types
+  - `void` return
+  - Function body
+  - Function call
+  - Function overloading (not in C)
+  - Function pointers
+  - Variadic functions
+  - Inline functions (C99)
+  - `_Noreturn` functions (C11)
+  - Function best practices
 
-  * Null-terminated character sequences
-  * String literals
-  * Character arrays
-  * String length
+- **29. Parameter Passing**
+  - Pass by value
+  - Pass by pointer
+  - Pass by reference (simulated)
+  - Array parameters
+  - Struct parameters
+  - Const parameters
+  - Parameter passing best practices
 
-* **45. Standard String Functions**
+- **30. Return Values**
+  - Return by value
+  - Return by pointer
+  - Returning structs
+  - Returning pointers to local variables
+  - Dangling pointers
+  - Return value best practices
 
-  * `<string.h>`
-  * `strlen`
-  * `strcpy`
-  * `strncpy`
-  * `strcat`
-  * `strncat`
-  * `strcmp`
-  * `strncmp`
-  * `strchr`
-  * `strstr`
-  * `memcpy`
-  * `memmove`
-  * `memset`
-  * `memcmp`
+- **31. Function Pointers**
+  - Function pointers
+  - Function pointer declaration
+  - Function pointer initialization
+  - Function pointer invocation
+  - Function pointer as parameter
+  - Function pointer as return value
+  - Callback functions
+  - Function pointer arrays
+  - `typedef` for function pointers
+  - Function pointer best practices
 
-* **46. Character Functions**
+- **32. Variadic Functions**
+  - Variadic functions
+  - `...`
+  - `<stdarg.h>`
+  - `va_list`
+  - `va_start`
+  - `va_arg`
+  - `va_end`
+  - `va_copy`
+  - Variadic function examples
+  - `printf` family
+  - Variadic function best practices
 
-  * `<ctype.h>`
-  * Character classification
+- **33. Recursion**
+  - Recursion
+  - Base case
+  - Recursive case
+  - Tail recursion
+  - Tail call optimization
+  - Recursion depth
+  - Stack overflow
+  - Recursion vs iteration
+  - Recursion examples
+  - Recursion best practices
 
-    * `isalpha`
-    * `isdigit`
-    * `isalnum`
-    * `isspace`
-  * Character conversion
+- **34. Inline Functions**
+  - `inline` keyword
+  - Inline expansion
+  - Inline functions vs macros
+  - Inline function limitations
+  - Inline function best practices
 
-    * `toupper`
-    * `tolower`
+- **35. Static Functions**
+  - `static` functions
+  - Internal linkage
+  - File scope
+  - Static function best practices
 
-* **47. Safe String Handling**
-
-  * Buffer capacity
-  * Null termination
-  * Bounds checking
-  * Buffer overflow prevention
-  * Safer input strategies
-
----
-
-# XI. Pointers — Core Advanced Foundation
-
-* **48. Pointer Fundamentals**
-
-  * Pointer definition
-  * Address operator
-
-    * `&`
-  * Dereference operator
-
-    * `*`
-  * Pointer declaration
-  * Pointer initialization
-  * Pointer assignment
-
-* **49. Pointer Types**
-
-  * `int *`
-  * `char *`
-  * `float *`
-  * `void *`
-  * Pointer compatibility
-  * Pointer conversion
-
-* **50. Pointer Arithmetic**
-
-  * Incrementing pointers
-  * Decrementing pointers
-  * Pointer addition
-  * Pointer subtraction
-  * Pointer comparison
-  * Array-pointer relationship
-
-* **51. Pointers and Functions**
-
-  * Passing addresses
-  * Modifying caller variables
-  * Output parameters
-  * Pointer-based APIs
-
-* **52. Pointers to Pointers**
-
-  * `int **`
-  * Multiple indirection
-  * Dynamic 2D structures
-  * Modifying pointer values through functions
-
-* **53. `void *`**
-
-  * Generic object pointers
-  * Generic data structures
-  * Explicit conversion requirements
-  * Restrictions
-
-* **54. `const` and Pointers**
-
-  * Pointer to constant
-  * Constant pointer
-  * Constant pointer to constant
-  * API safety
+- **36. Function Design**
+  - Function naming
+  - Function length
+  - Function cohesion
+  - Function coupling
+  - Pure functions
+  - Side effects
+  - Error handling
+  - Function design best practices
 
 ---
 
-# XII. Structures, Unions, and Enumerations
+# VI. Pointers
 
-* **55. Structures**
+- **37. Pointer Fundamentals**
+  - Pointers
+  - Pointer declaration
+  - Pointer initialization
+  - Pointer dereference
+  - Pointer arithmetic
+  - Pointer comparison
+  - Null pointers
+  - `NULL`
+  - `nullptr` (C23)
+  - Dangling pointers
+  - Wild pointers
+  - Void pointers
+  - `void *`
+  - Pointer to pointer
+  - Pointer to function
+  - Pointer to struct
+  - Pointer to array
+  - Pointer best practices
+  - Pointer pitfalls
 
-  * `struct`
-  * Structure declaration
-  * Structure initialization
-  * Structure members
-  * Member access
+- **38. Pointer Arithmetic**
+  - Pointer addition
+  - Pointer subtraction
+  - Pointer increment
+  - Pointer decrement
+  - Pointer difference
+  - Pointer comparison
+  - Pointer arithmetic on arrays
+  - Pointer arithmetic on structs
+  - Pointer arithmetic best practices
 
-    * `.`
-    * `->`
+- **39. Pointers and Arrays**
+  - Array name as pointer
+  - Array decay
+  - Pointer to array
+  - Array of pointers
+  - Pointer arithmetic on arrays
+  - Array indexing
+  - Pointer indexing
+  - Array vs pointer
+  - Array and pointer best practices
 
-* **56. Structures and Functions**
+- **40. Pointers and Strings**
+  - String literals
+  - String pointers
+  - String arrays
+  - String manipulation
+  - String best practices
 
-  * Passing structures by value
-  * Passing structure pointers
-  * Returning structures
-  * Structure arrays
+- **41. Pointers and Functions**
+  - Function pointers
+  - Callback functions
+  - Function pointer arrays
+  - Function pointer typedefs
+  - Function pointer best practices
 
-* **57. Nested Structures**
+- **42. Const Pointers**
+  - Pointer to const
+  - `const int *`
+  - Const pointer
+  - `int * const`
+  - Const pointer to const
+  - `const int * const`
+  - Const correctness
+  - Const pointer best practices
 
-  * Structures containing structures
-  * Complex records
-  * Hierarchical data modeling
+- **43. Pointers and Memory**
+  - Stack vs heap
+  - Pointer to stack
+  - Pointer to heap
+  - Pointer to static
+  - Pointer lifetime
+  - Dangling pointers
+  - Memory leaks
+  - Pointer best practices
 
-* **58. Typedef**
-
-  * Type aliases
-  * `typedef struct`
-  * Improving readability
-  * API abstraction
-
-* **59. Unions**
-
-  * `union`
-  * Shared storage
-  * Memory layout
-  * Variant-like data representation
-  * Appropriate use cases
-
-* **60. Enumerations**
-
-  * `enum`
-  * Named integer constants
-  * State representation
-  * Switch-based logic
-
----
-
-# XIII. Dynamic Memory Management
-
-* **61. Dynamic Allocation Concepts**
-
-  * Stack memory
-  * Static storage
-  * Heap memory
-  * Lifetime management
-
-* **62. Allocation Functions**
-
-  * `malloc`
-  * `calloc`
-  * `realloc`
-  * `free`
-
-* **63. Dynamic Memory Patterns**
-
-  * Dynamic arrays
-  * Resizable buffers
-  * Dynamic structures
-  * Linked data structures
-
-* **64. Memory Ownership**
-
-  * Allocation ownership
-  * Transfer of ownership
-  * Responsibility for deallocation
-  * Ownership documentation
-
-* **65. Memory-Management Errors**
-
-  * Memory leaks
-  * Double free
-  * Use-after-free
-  * Invalid free
-  * Dangling pointers
-  * Buffer overflow
-  * Uninitialized memory
-
-* **66. Memory Debugging**
-
-  * Compiler diagnostics
-  * Debuggers
-  * AddressSanitizer
-  * UndefinedBehaviorSanitizer
-  * Memory-analysis tools
+- **44. Advanced Pointers**
+  - Pointer to pointer
+  - Triple pointers
+  - Pointer to array
+  - Array of pointers
+  - Pointer to function
+  - Array of function pointers
+  - Pointer to struct
+  - Pointer to union
+  - Pointer to enum
+  - Pointer to void
+  - Pointer casting
+  - `restrict` qualifier
+  - Strict aliasing
+  - Pointer best practices
 
 ---
 
-# XIV. Preprocessor and Header Files
+# VII. Memory Management
 
-* **67. Preprocessor Fundamentals**
+- **45. Memory Model**
+  - Memory layout
+    - Text segment
+    - Data segment
+    - BSS segment
+    - Heap
+    - Stack
+  - Memory allocation
+  - Memory deallocation
+  - Memory alignment
+  - Memory padding
+  - Memory model best practices
 
-  * Translation phases
-  * Macro expansion
-  * Conditional compilation
-  * File inclusion
+- **46. Stack Memory**
+  - Stack
+  - Stack frames
+  - Stack allocation
+  - Stack deallocation
+  - Stack overflow
+  - Stack size
+  - Stack best practices
 
-* **68. `#include`**
+- **47. Heap Memory**
+  - Heap
+  - Heap allocation
+  - Heap deallocation
+  - Heap fragmentation
+  - Heap management
+  - Heap best practices
 
-  * System headers
-  * Local headers
-  * Include paths
-  * Header dependencies
+- **48. Dynamic Memory Allocation**
+  - `malloc()`
+  - `calloc()`
+  - `realloc()`
+  - `free()`
+  - `aligned_alloc()` (C11)
+  - `posix_memalign()`
+  - `alloca()`
+  - Memory allocation size
+  - Memory allocation failure
+  - Memory allocation best practices
+  - Memory allocation pitfalls
 
-* **69. Macros**
+- **49. Memory Leaks**
+  - Memory leaks
+  - Detecting memory leaks
+  - Valgrind
+  - AddressSanitizer
+  - LeakSanitizer
+  - Memory leak prevention
+  - Memory leak best practices
 
-  * Object-like macros
-  * Function-like macros
-  * Macro parameters
-  * Macro pitfalls
-  * Parenthesization
+- **50. Memory Safety**
+  - Buffer overflows
+  - Stack overflows
+  - Heap overflows
+  - Use-after-free
+  - Double-free
+  - Null pointer dereference
+  - Uninitialized memory
+  - Memory safety best practices
 
-* **70. Conditional Compilation**
+- **51. Memory Optimization**
+  - Memory pools
+  - Arena allocators
+  - Custom allocators
+  - Memory alignment
+  - Cache-friendly data
+  - Memory optimization best practices
 
-  * `#if`
-  * `#ifdef`
-  * `#ifndef`
-  * `#elif`
-  * `#else`
-  * `#endif`
-
-* **71. Header Guards**
-
-  * Preventing duplicate inclusion
-  * Include guards
-  * `#pragma once` as a non-standard but widely supported extension
-
-* **72. Predefined Macros**
-
-  * `__FILE__`
-  * `__LINE__`
-  * `__DATE__`
-  * `__TIME__`
-  * `__func__`
-
----
-
-# XV. Bitwise Programming
-
-* **73. Bitwise Operators**
-
-  * `&`
-  * `|`
-  * `^`
-  * `~`
-  * `<<`
-  * `>>`
-
-* **74. Bit Manipulation**
-
-  * Setting bits
-  * Clearing bits
-  * Toggling bits
-  * Testing bits
-  * Bit masks
-
-* **75. Bit Fields**
-
-  * Structure bit fields
-  * Compact representation
-  * Hardware-oriented programming
-  * Implementation considerations
-
-* **76. Bitwise Applications**
-
-  * Flags
-  * Permissions
-  * Hardware registers
-  * Protocol fields
-  * Compact state representation
+- **52. Memory Debugging**
+  - GDB
+  - Valgrind
+  - AddressSanitizer
+  - MemorySanitizer
+  - Electric Fence
+  - DMalloc
+  - Memory debugging best practices
 
 ---
 
-# XVI. File Handling
+# VIII. Preprocessor
 
-* **77. File I/O Fundamentals**
+- **53. Preprocessor Fundamentals**
+  - Preprocessor
+  - Preprocessing directives
+  - `#`
+  - Preprocessing phases
+  - Macro expansion
+  - Conditional compilation
+  - File inclusion
+  - Preprocessor best practices
 
-  * `FILE`
-  * File streams
-  * Opening files
-  * Closing files
+- **54. Macros**
+  - Object-like macros
+  - Function-like macros
+  - Macro arguments
+  - Macro expansion
+  - Macro pitfalls
+  - Parentheses in macros
+  - `do { } while (0)`
+  - Variadic macros (C99)
+  - `__VA_ARGS__`
+  - `##` (token pasting)
+  - `#` (stringizing)
+  - Predefined macros
+    - `__FILE__`
+    - `__LINE__`
+    - `__DATE__`
+    - `__TIME__`
+    - `__func__` (C99)
+    - `__STDC__`
+    - `__STDC_VERSION__`
+    - `__STDC_HOSTED__`
+  - Macro best practices
+  - Macro pitfalls
 
-* **78. File Opening and Closing**
+- **55. File Inclusion**
+  - `#include`
+  - `#include <...>`
+  - `#include "..."`
+  - Include paths
+  - Include guards
+  - `#pragma once`
+  - Header files
+  - Header organization
+  - Header best practices
 
-  * `fopen`
-  * `fclose`
-  * File modes
+- **56. Conditional Compilation**
+  - `#if`
+  - `#ifdef`
+  - `#ifndef`
+  - `#else`
+  - `#elif`
+  - `#endif`
+  - `#if defined()`
+  - `defined` operator
+  - Conditional compilation best practices
+  - Debug vs release
+  - Platform-specific code
+  - Feature detection
 
-    * Read
-    * Write
-    * Append
-    * Binary modes
+- **57. Other Directives**
+  - `#define`
+  - `#undef`
+  - `#pragma`
+  - `#error`
+  - `#warning`
+  - `#line`
+  - `_Pragma`
+  - Preprocessor best practices
 
-* **79. Text File Processing**
-
-  * `fprintf`
-  * `fscanf`
-  * `fgets`
-  * `fputs`
-  * `fgetc`
-  * `fputc`
-
-* **80. Binary File Processing**
-
-  * `fread`
-  * `fwrite`
-  * Binary representation
-  * Serialization considerations
-
-* **81. File Positioning**
-
-  * `fseek`
-  * `ftell`
-  * `rewind`
-  * Random-access files
-
-* **82. File Errors**
-
-  * `feof`
-  * `ferror`
-  * `perror`
-  * Error handling strategies
-
----
-
-# XVII. Error Handling
-
-* **83. Error Concepts**
-
-  * Compile-time errors
-  * Linker errors
-  * Runtime errors
-  * Logical errors
-  * Undefined behavior
-
-* **84. Error Reporting**
-
-  * Return codes
-  * `errno`
-  * `perror`
-  * `strerror`
-
-* **85. Defensive Programming**
-
-  * Input validation
-  * Pointer validation
-  * Bounds validation
-  * Resource cleanup
-  * Failure-path design
-
-* **86. Error-Handling Patterns**
-
-  * Early returns
-  * Cleanup blocks
-  * Status codes
-  * Error propagation
-  * Resource ownership
+- **58. Preprocessor Metaprogramming**
+  - Preprocessor metaprogramming
+  - Macro recursion
+  - X-macros
+  - Token pasting
+  - Stringizing
+  - Conditional macros
+  - Preprocessor metaprogramming best practices
 
 ---
 
-# XVIII. Data Structures in C
+# IX. Input/Output
 
-* **87. Linked Lists**
+- **59. I/O Fundamentals**
+  - I/O
+  - Streams
+  - Standard streams
+    - `stdin`
+    - `stdout`
+    - `stderr`
+  - File streams
+  - Stream operations
+  - Stream errors
+  - I/O best practices
 
-  * Singly linked lists
-  * Doubly linked lists
-  * Circular linked lists
-  * Node allocation
-  * Insertion
-  * Deletion
-  * Traversal
+- **60. Formatted I/O**
+  - `printf()`
+  - `fprintf()`
+  - `sprintf()`
+  - `snprintf()`
+  - `scanf()`
+  - `fscanf()`
+  - `sscanf()`
+  - Format specifiers
+    - `%d`
+    - `%i`
+    - `%u`
+    - `%o`
+    - `%x`
+    - `%X`
+    - `%f`
+    - `%e`
+    - `%g`
+    - `%c`
+    - `%s`
+    - `%p`
+    - `%n`
+    - `%%`
+  - Width and precision
+  - Flags
+  - Length modifiers
+  - `printf` pitfalls
+  - Format string vulnerabilities
+  - I/O best practices
 
-* **88. Stacks**
+- **61. Character I/O**
+  - `getchar()`
+  - `putchar()`
+  - `fgetc()`
+  - `fputc()`
+  - `getc()`
+  - `putc()`
+  - `ungetc()`
+  - Character I/O best practices
 
-  * Array-based stack
-  * Linked-list stack
-  * Push
-  * Pop
-  * Peek
+- **62. String I/O**
+  - `fgets()`
+  - `fputs()`
+  - `gets()` (removed in C11)
+  - `puts()`
+  - String I/O best practices
 
-* **89. Queues**
+- **63. Block I/O**
+  - `fread()`
+  - `fwrite()`
+  - Block I/O best practices
 
-  * Linear queue
-  * Circular queue
-  * Linked queue
-  * Enqueue
-  * Dequeue
+- **64. File I/O**
+  - `fopen()`
+  - `fclose()`
+  - `fseek()`
+  - `ftell()`
+  - `rewind()`
+  - `fflush()`
+  - `feof()`
+  - `ferror()`
+  - `perror()`
+  - File modes
+    - `"r"`
+    - `"w"`
+    - `"a"`
+    - `"r+"`
+    - `"w+"`
+    - `"a+"`
+    - `"rb"`
+    - `"wb"`
+    - `"ab"`
+  - Binary files
+  - Text files
+  - File I/O best practices
 
-* **90. Trees**
+- **65. Low-Level I/O**
+  - File descriptors
+  - `open()`
+  - `close()`
+  - `read()`
+  - `write()`
+  - `lseek()`
+  - `fcntl()`
+  - `ioctl()`
+  - `stat()`
+  - `fstat()`
+  - `mmap()`
+  - `munmap()`
+  - Low-level I/O best practices
 
-  * Binary trees
-  * Binary search trees
-  * Tree traversal
+- **66. Directory Operations**
+  - `<dirent.h>`
+  - `opendir()`
+  - `readdir()`
+  - `closedir()`
+  - `mkdir()`
+  - `rmdir()`
+  - `chdir()`
+  - `getcwd()`
+  - Directory operations best practices
 
-    * Preorder
-    * Inorder
-    * Postorder
-  * Balanced-tree concepts
-
-* **91. Graphs**
-
-  * Adjacency matrix
-  * Adjacency list
-  * Directed graphs
-  * Undirected graphs
-  * Graph traversal
-
-* **92. Hash Tables**
-
-  * Hash functions
-  * Buckets
-  * Collision handling
-  * Chaining
-  * Open addressing
-
----
-
-# XIX. Algorithms in C
-
-* **93. Searching**
-
-  * Linear search
-  * Binary search
-  * Search complexity
-
-* **94. Sorting**
-
-  * Bubble sort
-  * Selection sort
-  * Insertion sort
-  * Merge sort
-  * Quick sort
-  * Heap sort
-  * Stability considerations
-  * Complexity analysis
-
-* **95. Recursion-Based Algorithms**
-
-  * Divide and conquer
-  * Backtracking
-  * Recursive tree processing
-
-* **96. Graph Algorithms**
-
-  * Breadth-first search
-  * Depth-first search
-  * Shortest path concepts
-  * Minimum spanning tree concepts
-
-* **97. Complexity Analysis**
-
-  * Time complexity
-  * Space complexity
-  * Big-O notation
-  * Best-case analysis
-  * Average-case analysis
-  * Worst-case analysis
-
----
-
-# XX. Function Pointers and Callbacks
-
-* **98. Function Pointers**
-
-  * Function-pointer syntax
-  * Assigning function addresses
-  * Calling through function pointers
-
-* **99. Callback Functions**
-
-  * Callback concept
-  * Event-driven programming
-  * Library callbacks
-  * Generic algorithms
-
-* **100. Function-Pointer Arrays**
-
-  * Dispatch tables
-  * State machines
-  * Command handlers
-
-* **101. Higher-Level Abstraction**
-
-  * Generic interfaces
-  * Strategy patterns
-  * Comparator functions
-  * `qsort`
-  * Callback-based APIs
+- **67. Other I/O**
+  - `tmpfile()`
+  - `tmpnam()`
+  - `setvbuf()`
+  - `setbuf()`
+  - `freopen()`
+  - `fileno()`
+  - `fdopen()`
+  - I/O best practices
 
 ---
 
-# XXI. Advanced Declarations and Type System
+# X. Standard Library
 
-* **102. Complex Declarators**
+- **68. Standard Library Overview**
+  - C standard library
+  - Headers
+    - `<assert.h>`
+    - `<complex.h>` (C99)
+    - `<ctype.h>`
+    - `<errno.h>`
+    - `<fenv.h>` (C99)
+    - `<float.h>`
+    - `<inttypes.h>` (C99)
+    - `<iso646.h>`
+    - `<limits.h>`
+    - `<locale.h>`
+    - `<math.h>`
+    - `<setjmp.h>`
+    - `<signal.h>`
+    - `<stdalign.h>` (C11)
+    - `<stdarg.h>`
+    - `<stdatomic.h>` (C11)
+    - `<stdbool.h>` (C99)
+    - `<stddef.h>`
+    - `<stdint.h>` (C99)
+    - `<stdio.h>`
+    - `<stdlib.h>`
+    - `<stdnoreturn.h>` (C11)
+    - `<string.h>`
+    - `<tgmath.h>` (C99)
+    - `<threads.h>` (C11)
+    - `<time.h>`
+    - `<uchar.h>` (C11)
+    - `<wchar.h>`
+    - `<wctype.h>`
+  - Standard library best practices
 
-  * Pointer declarations
-  * Arrays of pointers
-  * Pointers to arrays
-  * Functions returning pointers
-  * Pointers to functions
+- **69. stdlib.h**
+  - `malloc()`
+  - `calloc()`
+  - `realloc()`
+  - `free()`
+  - `aligned_alloc()`
+  - `atoi()`
+  - `atol()`
+  - `atoll()`
+  - `atof()`
+  - `strtol()`
+  - `strtoll()`
+  - `strtoul()`
+  - `strtoull()`
+  - `strtof()`
+  - `strtod()`
+  - `strtold()`
+  - `rand()`
+  - `srand()`
+  - `rand_r()`
+  - `qsort()`
+  - `bsearch()`
+  - `abs()`
+  - `labs()`
+  - `llabs()`
+  - `div()`
+  - `ldiv()`
+  - `lldiv()`
+  - `exit()`
+  - `_Exit()`
+  - `atexit()`
+  - `at_quick_exit()` (C11)
+  - `quick_exit()` (C11)
+  - `abort()`
+  - `getenv()`
+  - `setenv()`
+  - `unsetenv()`
+  - `putenv()`
+  - `system()`
+  - `mblen()`
+  - `mbtowc()`
+  - `wctomb()`
+  - `mbstowcs()`
+  - `wcstombs()`
+  - `stdlib.h` best practices
 
-* **103. Qualifiers**
+- **70. string.h**
+  - `memcpy()`
+  - `memmove()`
+  - `memset()`
+  - `memcmp()`
+  - `memchr()`
+  - `strcpy()`
+  - `strncpy()`
+  - `strcat()`
+  - `strncat()`
+  - `strcmp()`
+  - `strncmp()`
+  - `strcoll()`
+  - `strxfrm()`
+  - `strchr()`
+  - `strrchr()`
+  - `strspn()`
+  - `strcspn()`
+  - `strpbrk()`
+  - `strstr()`
+  - `strtok()`
+  - `strtok_s()` (C11)
+  - `strerror()`
+  - `strlen()`
+  - `strdup()`
+  - `strndup()`
+  - `string.h` best practices
 
-  * `const`
-  * `volatile`
-  * `restrict`
-  * `_Atomic`
+- **71. math.h**
+  - Trigonometric functions
+    - `sin()`
+    - `cos()`
+    - `tan()`
+    - `asin()`
+    - `acos()`
+    - `atan()`
+    - `atan2()`
+  - Hyperbolic functions
+    - `sinh()`
+    - `cosh()`
+    - `tanh()`
+    - `asinh()`
+    - `acosh()`
+    - `atanh()`
+  - Exponential functions
+    - `exp()`
+    - `exp2()`
+    - `expm1()`
+    - `log()`
+    - `log2()`
+    - `log10()`
+    - `log1p()`
+  - Power functions
+    - `pow()`
+    - `sqrt()`
+    - `cbrt()`
+    - `hypot()`
+  - Error functions
+    - `erf()`
+    - `erfc()`
+    - `tgamma()`
+    - `lgamma()`
+  - Rounding functions
+    - `ceil()`
+    - `floor()`
+    - `trunc()`
+    - `round()`
+    - `lround()`
+    - `llround()`
+    - `nearbyint()`
+    - `rint()`
+    - `lrint()`
+    - `llrint()`
+  - Remainder functions
+    - `fmod()`
+    - `remainder()`
+    - `remquo()`
+  - Manipulation functions
+    - `copysign()`
+    - `nextafter()`
+    - `nexttoward()`
+  - Classification functions
+    - `fpclassify()`
+    - `isfinite()`
+    - `isinf()`
+    - `isnan()`
+    - `isnormal()`
+    - `signbit()`
+  - Comparison functions
+    - `isgreater()`
+    - `isgreaterequal()`
+    - `isless()`
+    - `islessequal()`
+    - `islessgreater()`
+    - `isunordered()`
+  - Constants
+    - `M_PI`
+    - `M_E`
+    - `M_LOG2E`
+    - `M_LOG10E`
+    - `M_LN2`
+    - `M_LN10`
+    - `M_PI_2`
+    - `M_PI_4`
+    - `M_1_PI`
+    - `M_2_PI`
+    - `M_2_SQRTPI`
+    - `M_SQRT2`
+    - `M_SQRT1_2`
+  - `math.h` best practices
 
-* **104. `volatile`**
+- **72. ctype.h**
+  - `isalnum()`
+  - `isalpha()`
+  - `isblank()`
+  - `iscntrl()`
+  - `isdigit()`
+  - `isgraph()`
+  - `islower()`
+  - `isprint()`
+  - `ispunct()`
+  - `isspace()`
+  - `isupper()`
+  - `isxdigit()`
+  - `tolower()`
+  - `toupper()`
+  - `ctype.h` best practices
 
-  * Hardware registers
-  * Memory-mapped I/O
-  * Signal-related considerations
-  * Limitations of `volatile`
+- **73. time.h**
+  - `time()`
+  - `clock()`
+  - `difftime()`
+  - `mktime()`
+  - `timegm()`
+  - `localtime()`
+  - `gmtime()`
+  - `localtime_r()`
+  - `gmtime_r()`
+  - `asctime()`
+  - `ctime()`
+  - `strftime()`
+  - `strptime()`
+  - `timespec_get()` (C11)
+  - `struct tm`
+  - `time_t`
+  - `clock_t`
+  - `struct timespec`
+  - Time zones
+  - `time.h` best practices
 
-* **105. `restrict`**
+- **74. signal.h**
+  - `signal()`
+  - `raise()`
+  - `sigaction()`
+  - `sigemptyset()`
+  - `sigfillset()`
+  - `sigaddset()`
+  - `sigdelset()`
+  - `sigismember()`
+  - Signal handlers
+  - Signal types
+    - `SIGINT`
+    - `SIGTERM`
+    - `SIGKILL`
+    - `SIGSEGV`
+    - `SIGABRT`
+    - `SIGFPE`
+    - `SIGILL`
+    - `SIGALRM`
+    - `SIGUSR1`
+    - `SIGUSR2`
+  - `signal.h` best practices
 
-  * Pointer aliasing assumptions
-  * Optimization implications
-  * Correct usage
+- **75. setjmp.h**
+  - `setjmp()`
+  - `longjmp()`
+  - `jmp_buf`
+  - Non-local jumps
+  - Error handling with setjmp/longjmp
+  - setjmp/longjmp best practices
+  - setjmp/longjmp pitfalls
 
-* **106. `_Atomic`**
+- **76. assert.h**
+  - `assert()`
+  - `static_assert` (C11)
+  - `_Static_assert` (C11)
+  - `NDEBUG`
+  - Assertions
+  - Assertion best practices
 
-  * Atomic objects
-  * Lock-free concepts
-  * Memory-ordering fundamentals
+- **77. errno.h**
+  - `errno`
+  - Error codes
+  - `perror()`
+  - `strerror()`
+  - Error handling best practices
+
+- **78. locale.h**
+  - `setlocale()`
+  - `localeconv()`
+  - Locales
+  - `LC_ALL`
+  - `LC_COLLATE`
+  - `LC_CTYPE`
+  - `LC_MONETARY`
+  - `LC_NUMERIC`
+  - `LC_TIME`
+  - Locale best practices
+
+- **79. stddef.h**
+  - `size_t`
+  - `ptrdiff_t`
+  - `wchar_t`
+  - `NULL`
+  - `offsetof()`
+  - `max_align_t` (C11)
+  - `stddef.h` best practices
+
+- **80. stdbool.h (C99)**
+  - `bool`
+  - `true`
+  - `false`
+  - `__bool_true_false_are_defined`
+  - Boolean best practices
+
+- **81. stdint.h (C99)**
+  - Fixed-width integers
+  - Minimum-width integers
+  - Fastest-width integers
+  - `intptr_t`
+  - `uintptr_t`
+  - `intmax_t`
+  - `uintmax_t`
+  - Integer limits
+  - Integer macros
+  - `stdint.h` best practices
+
+- **82. inttypes.h (C99)**
+  - Format macros
+    - `PRId8`
+    - `PRId16`
+    - `PRId32`
+    - `PRId64`
+    - `PRIu8`
+    - `PRIu16`
+    - `PRIu32`
+    - `PRIu64`
+    - `PRIx8`
+    - `PRIx16`
+    - `PRIx32`
+    - `PRIx64`
+  - `imaxdiv()`
+  - `imaxabs()`
+  - `inttypes.h` best practices
+
+- **83. stdatomic.h (C11)**
+  - `_Atomic`
+  - `atomic_int`
+  - `atomic_load()`
+  - `atomic_store()`
+  - `atomic_exchange()`
+  - `atomic_compare_exchange()`
+  - `atomic_fetch_add()`
+  - `atomic_fetch_sub()`
+  - Memory ordering
+    - `memory_order_relaxed`
+    - `memory_order_consume`
+    - `memory_order_acquire`
+    - `memory_order_release`
+    - `memory_order_acq_rel`
+    - `memory_order_seq_cst`
+  - Atomic operations best practices
+
+- **84. threads.h (C11)**
+  - `thrd_create()`
+  - `thrd_join()`
+  - `thrd_detach()`
+  - `thrd_exit()`
+  - `thrd_current()`
+  - `thrd_sleep()`
+  - `thrd_yield()`
+  - `mtx_init()`
+  - `mtx_lock()`
+  - `mtx_unlock()`
+  - `mtx_destroy()`
+  - `cnd_init()`
+  - `cnd_wait()`
+  - `cnd_signal()`
+  - `cnd_broadcast()`
+  - `cnd_destroy()`
+  - `tss_create()`
+  - `tss_get()`
+  - `tss_set()`
+  - `tss_delete()`
+  - `threads.h` best practices
+
+- **85. complex.h (C99)**
+  - Complex numbers
+  - `complex`
+  - `_Complex_I`
+  - `I`
+  - Complex functions
+  - Complex best practices
+
+- **86. fenv.h (C99)**
+  - Floating-point environment
+  - `fenv_t`
+  - `fexcept_t`
+  - `fegetenv()`
+  - `fesetenv()`
+  - `feholdexcept()`
+  - `feupdateenv()`
+  - `fegetround()`
+  - `fesetround()`
+  - Floating-point exceptions
+  - fenv best practices
+
+- **87. tgmath.h (C99)**
+  - Type-generic math
+  - Type-generic macros
+  - tgmath best practices
+
+- **88. iso646.h**
+  - Alternative operators
+  - `and`
+  - `or`
+  - `not`
+  - `bitand`
+  - `bitor`
+  - `xor`
+  - `compl`
+  - `and_eq`
+  - `or_eq`
+  - `xor_eq`
+  - `not_eq`
+  - iso646 best practices
+
+- **89. uchar.h (C11)**
+  - `char16_t`
+  - `char32_t`
+  - `mbrtoc16()`
+  - `c16rtomb()`
+  - `mbrtoc32()`
+  - `c32rtomb()`
+  - Unicode best practices
+
+- **90. wchar.h**
+  - Wide characters
+  - `wchar_t`
+  - Wide string functions
+  - Wide I/O functions
+  - Wide character classification
+  - Wide character conversion
+  - wchar best practices
+
+- **91. wctype.h**
+  - Wide character classification
+  - Wide character conversion
+  - wctype best practices
 
 ---
 
-# XXII. Compilation and Linking
+# XI. Data Structures in C
 
-* **107. C Build Pipeline**
+- **92. Arrays**
+  - Static arrays
+  - Dynamic arrays
+  - Multi-dimensional arrays
+  - Array operations
+  - Array best practices
 
-  * Preprocessing
-  * Compilation
-  * Assembly
-  * Linking
-  * Executable generation
+- **93. Linked Lists**
+  - Singly linked lists
+  - Doubly linked lists
+  - Circular linked lists
+  - Linked list operations
+  - Linked list best practices
 
-* **108. Preprocessing Stage**
+- **94. Stacks**
+  - Stacks
+  - Array-based stacks
+  - Linked-list-based stacks
+  - Stack operations
+  - Stack applications
+  - Stack best practices
 
-  * Macro expansion
-  * Include processing
-  * Conditional compilation
+- **95. Queues**
+  - Queues
+  - Array-based queues
+  - Linked-list-based queues
+  - Circular queues
+  - Queue operations
+  - Queue applications
+  - Queue best practices
 
-* **109. Compilation Stage**
+- **96. Trees**
+  - Binary trees
+  - Binary search trees
+  - AVL trees
+  - Red-black trees
+  - B-trees
+  - Tree traversal
+  - Tree operations
+  - Tree best practices
 
-  * Lexical analysis
-  * Parsing
-  * Semantic analysis
-  * Optimization
-  * Code generation
+- **97. Heaps**
+  - Min-heaps
+  - Max-heaps
+  - Heap operations
+  - Heap sort
+  - Priority queues
+  - Heap best practices
 
-* **110. Assembly Stage**
+- **98. Hash Tables**
+  - Hash tables
+  - Hash functions
+  - Collision resolution
+  - Chaining
+  - Open addressing
+  - Hash table operations
+  - Hash table best practices
 
-  * Assembly source
-  * Object files
-  * Machine instructions
+- **99. Graphs**
+  - Graph representation
+  - Adjacency matrix
+  - Adjacency list
+  - Graph traversal
+  - BFS
+  - DFS
+  - Graph algorithms
+  - Graph best practices
 
-* **111. Linking Stage**
-
-  * Static linking
-  * Dynamic linking
-  * Symbol resolution
-  * Relocation
-  * Libraries
-
----
-
-# XXIII. Separate Compilation and Modular Architecture
-
-* **112. Multi-File C Programs**
-
-  * Header files
-  * Source files
-  * External declarations
-  * Function interfaces
-
-* **113. `extern`**
-
-  * External variables
-  * External functions
-  * Symbol visibility
-
-* **114. Static Module Members**
-
-  * File-local functions
-  * File-local variables
-  * Encapsulation through internal linkage
-
-* **115. Library Design**
-
-  * Public API
-  * Private implementation
-  * Header organization
-  * ABI considerations
-  * Versioning
-
----
-
-# XXIV. Standard Library Mastery
-
-* **116. Input/Output**
-
-  * `<stdio.h>`
-
-* **117. String and Memory**
-
-  * `<string.h>`
-
-* **118. Character Handling**
-
-  * `<ctype.h>`
-
-* **119. Mathematical Functions**
-
-  * `<math.h>`
-
-* **120. General Utilities**
-
-  * `<stdlib.h>`
-
-    * Dynamic allocation
-    * Conversion
-    * Sorting
-    * Searching
-
-* **121. Time and Date**
-
-  * `<time.h>`
-
-* **122. Assertions**
-
-  * `<assert.h>`
-  * `assert`
-
-* **123. Integer Types**
-
-  * `<stdint.h>`
-  * `<inttypes.h>`
-
-* **124. Limits**
-
-  * `<limits.h>`
-  * `<float.h>`
+- **100. Advanced Data Structures**
+  - Tries
+  - Segment trees
+  - Fenwick trees
+  - Union-Find
+  - Skip lists
+  - Bloom filters
+  - Advanced data structure best practices
 
 ---
 
-# XXV. Debugging and Development Tools
+# XII. Concurrency and Multithreading
 
-* **125. Compiler Diagnostics**
+- **101. Concurrency Fundamentals**
+  - Concurrency
+  - Parallelism
+  - Threads
+  - Processes
+  - Thread lifecycle
+  - Thread scheduling
+  - Context switching
+  - Concurrency best practices
 
-  * Warning levels
-  * Treat warnings as errors
-  * Static diagnostics
+- **102. POSIX Threads**
+  - pthreads
+  - `pthread_create()`
+  - `pthread_join()`
+  - `pthread_detach()`
+  - `pthread_exit()`
+  - `pthread_self()`
+  - `pthread_equal()`
+  - Thread attributes
+  - Thread best practices
 
-* **126. Debuggers**
+- **103. Thread Synchronization**
+  - Mutexes
+    - `pthread_mutex_t`
+    - `pthread_mutex_init()`
+    - `pthread_mutex_lock()`
+    - `pthread_mutex_unlock()`
+    - `pthread_mutex_destroy()`
+    - `pthread_mutex_trylock()`
+  - Condition variables
+    - `pthread_cond_t`
+    - `pthread_cond_init()`
+    - `pthread_cond_wait()`
+    - `pthread_cond_signal()`
+    - `pthread_cond_broadcast()`
+    - `pthread_cond_destroy()`
+  - Read-write locks
+    - `pthread_rwlock_t`
+    - `pthread_rwlock_init()`
+    - `pthread_rwlock_rdlock()`
+    - `pthread_rwlock_wrlock()`
+    - `pthread_rwlock_unlock()`
+    - `pthread_rwlock_destroy()`
+  - Spinlocks
+    - `pthread_spinlock_t`
+    - `pthread_spin_init()`
+    - `pthread_spin_lock()`
+    - `pthread_spin_unlock()`
+    - `pthread_spin_destroy()`
+  - Barriers
+    - `pthread_barrier_t`
+    - `pthread_barrier_init()`
+    - `pthread_barrier_wait()`
+    - `pthread_barrier_destroy()`
+  - Synchronization best practices
 
-  * GDB
-  * Breakpoints
-  * Watchpoints
-  * Call stack
-  * Variable inspection
-  * Memory inspection
-  * Stepping
+- **104. Thread-Local Storage**
+  - Thread-local storage
+  - `_Thread_local`
+  - `__thread`
+  - `pthread_key_t`
+  - `pthread_setspecific()`
+  - `pthread_getspecific()`
+  - `pthread_key_create()`
+  - `pthread_key_delete()`
+  - TLS best practices
 
-* **127. Runtime Analysis**
+- **105. Atomic Operations**
+  - `_Atomic`
+  - Atomic types
+  - `atomic_load()`
+  - `atomic_store()`
+  - `atomic_exchange()`
+  - `atomic_compare_exchange()`
+  - `atomic_fetch_add()`
+  - Memory ordering
+  - Atomic operations best practices
 
-  * Sanitizers
-  * Memory checkers
-  * Profilers
-  * Tracing tools
+- **106. Memory Model**
+  - C11 memory model
+  - Memory ordering
+  - Happens-before
+  - Synchronizes-with
+  - Data races
+  - Memory model best practices
 
-* **128. Static Analysis**
+- **107. Thread Pools**
+  - Thread pools
+  - Thread pool design
+  - Thread pool implementation
+  - Thread pool best practices
 
-  * Code analyzers
-  * Undefined-behavior detection
-  * API misuse detection
-  * Style and quality checks
+- **108. Concurrency Patterns**
+  - Producer-consumer
+  - Reader-writer
+  - Worker pool
+  - Future
+  - Promise
+  - Actor model
+  - Concurrency best practices
 
----
-
-# XXVI. Undefined Behavior and Low-Level Correctness
-
-* **129. Undefined Behavior**
-
-  * Definition
-  * Why it matters
-  * Compiler optimization implications
-  * Common sources
-
-* **130. Common Undefined-Behavior Patterns**
-
-  * Out-of-bounds access
-  * Use-after-free
-  * Invalid pointer dereference
-  * Signed integer overflow
-  * Uninitialized reads
-  * Invalid shifts
-  * Incorrect aliasing assumptions
-
-* **131. Implementation-Defined Behavior**
-
-  * Compiler/platform-dependent decisions
-  * Signedness of `char`
-  * Integer representation details
-  * Portability considerations
-
-* **132. Unspecified Behavior**
-
-  * Multiple permitted implementation outcomes
-  * Avoiding assumptions about evaluation order
-
----
-
-# XXVII. Memory Model and Data Representation
-
-* **133. C Object Model**
-
-  * Objects
-  * Values
-  * Object representation
-  * Storage locations
-
-* **134. Memory Layout**
-
-  * Stack
-  * Heap
-  * Static storage
-  * Code/text segment
-  * Read-only data
-
-* **135. Alignment**
-
-  * Alignment requirements
-  * `_Alignof`
-  * `_Alignas`
-  * Padding
-
-* **136. Structure Layout**
-
-  * Member ordering
-  * Padding
-  * Alignment
-  * Structure size
-
-* **137. Endianness**
-
-  * Little-endian
-  * Big-endian
-  * Byte ordering
-  * Portable serialization
-
----
-
-# XXVIII. Systems Programming
-
-* **138. Operating-System Interaction**
-
-  * Processes
-  * Files
-  * Signals
-  * Memory
-  * System calls
-
-* **139. POSIX Programming**
-
-  * POSIX APIs
-  * File descriptors
-  * `open`
-  * `read`
-  * `write`
-  * `close`
-
-* **140. Process Management**
-
-  * Process creation
-  * Process termination
-  * Process identifiers
-  * Parent-child processes
-
-* **141. Inter-Process Communication**
-
-  * Pipes
-  * Shared memory
-  * Message queues
-  * Signals
-  * Sockets
+- **109. Concurrency Debugging**
+  - Race conditions
+  - Deadlocks
+  - Livelocks
+  - Starvation
+  - ThreadSanitizer
+  - Helgrind
+  - DRD
+  - Concurrency debugging best practices
 
 ---
 
-# XXIX. Concurrency and Multithreading
+# XIII. Systems Programming
 
-* **142. Concurrency Fundamentals**
+- **110. Operating System Interfaces**
+  - POSIX
+  - Windows API
+  - System calls
+  - File descriptors
+  - Process management
+  - Signal handling
+  - Inter-process communication
+  - Shared memory
+  - Pipes
+  - Sockets
+  - System programming best practices
 
-  * Processes versus threads
-  * Parallel execution
-  * Race conditions
-  * Shared state
+- **111. Process Management**
+  - `fork()`
+  - `exec()`
+  - `wait()`
+  - `waitpid()`
+  - `exit()`
+  - `_exit()`
+  - `getpid()`
+  - `getppid()`
+  - `kill()`
+  - Process groups
+  - Sessions
+  - Daemons
+  - Process best practices
 
-* **143. C Threads**
+- **112. Signals**
+  - Signals
+  - Signal handling
+  - `signal()`
+  - `sigaction()`
+  - `kill()`
+  - `raise()`
+  - `alarm()`
+  - `pause()`
+  - `sigprocmask()`
+  - Signal sets
+  - Signal best practices
 
-  * C11 threads where supported
-  * POSIX threads
-  * Thread creation
-  * Thread termination
-  * Thread joining
+- **113. Inter-Process Communication**
+  - Pipes
+    - `pipe()`
+    - `mkfifo()`
+  - FIFOs
+  - Message queues
+  - Semaphores
+  - Shared memory
+  - Sockets
+  - IPC best practices
 
-* **144. Synchronization**
+- **114. Networking**
+  - Sockets
+  - TCP
+  - UDP
+  - IPv4
+  - IPv6
+  - Socket programming
+  - `socket()`
+  - `bind()`
+  - `listen()`
+  - `accept()`
+  - `connect()`
+  - `send()`
+  - `recv()`
+  - `close()`
+  - `getaddrinfo()`
+  - `gethostbyname()`
+  - Socket options
+  - Non-blocking sockets
+  - `select()`
+  - `poll()`
+  - `epoll()`
+  - `kqueue()`
+  - Networking best practices
 
-  * Mutexes
-  * Condition variables
-  * Semaphores
-  * Read-write locks
+- **115. File Systems**
+  - File systems
+  - Inodes
+  - Directories
+  - Links
+  - `stat()`
+  - `fstat()`
+  - `lstat()`
+  - `chmod()`
+  - `chown()`
+  - `link()`
+  - `symlink()`
+  - `unlink()`
+  - `rename()`
+  - `truncate()`
+  - File system best practices
 
-* **145. Atomic Operations**
+- **116. Memory Mapping**
+  - `mmap()`
+  - `munmap()`
+  - `mprotect()`
+  - `msync()`
+  - Memory-mapped files
+  - Shared memory
+  - Memory mapping best practices
 
-  * Atomic types
-  * Atomic loads
-  * Atomic stores
-  * Compare-and-swap concepts
-  * Memory ordering
+- **117. System Information**
+  - `uname()`
+  - `sysinfo()`
+  - `getrusage()`
+  - `gettimeofday()`
+  - `clock_gettime()`
+  - System information best practices
 
-* **146. Concurrency Problems**
+- **118. Embedded Systems**
+  - Embedded C
+  - Bare metal
+  - RTOS
+  - FreeRTOS
+  - Zephyr
+  - Memory constraints
+  - Real-time constraints
+  - Interrupts
+  - Volatile
+  - Memory-mapped I/O
+  - Embedded best practices
 
-  * Race conditions
-  * Deadlocks
-  * Livelocks
-  * Starvation
-  * Data races
+- **119. Device Drivers**
+  - Device drivers
+  - Linux kernel modules
+  - Character devices
+  - Block devices
+  - Network devices
+  - Driver development
+  - Driver best practices
 
----
-
-# XXX. Networking in C
-
-* **147. Networking Fundamentals**
-
-  * IP
-  * TCP
-  * UDP
-  * Ports
-  * Client-server architecture
-
-* **148. Socket Programming**
-
-  * Socket creation
-  * Binding
-  * Listening
-  * Accepting
-  * Connecting
-  * Sending
-  * Receiving
-  * Closing sockets
-
-* **149. Network Applications**
-
-  * TCP clients
-  * TCP servers
-  * UDP applications
-  * Concurrent servers
-  * Protocol parsing
-
-* **150. Network Security Considerations**
-
-  * Input validation
-  * Buffer safety
-  * Protocol validation
-  * Resource exhaustion
-  * Secure memory handling
-
----
-
-# XXXI. Embedded C and Hardware-Oriented Programming
-
-* **151. Embedded C Fundamentals**
-
-  * Microcontrollers
-  * Firmware
-  * Hardware constraints
-  * Real-time considerations
-
-* **152. Hardware Access**
-
-  * Memory-mapped registers
-  * Bit manipulation
-  * Peripheral control
-  * `volatile`
-
-* **153. Interrupts**
-
-  * Interrupt handlers
-  * Interrupt-safe programming
-  * Shared state
-  * Atomic access
-
-* **154. Real-Time Constraints**
-
-  * Deterministic execution
-  * Timing requirements
-  * Resource constraints
-  * Scheduling concepts
-
-* **155. Embedded Memory Management**
-
-  * Static allocation
-  * Stack limitations
-  * Heap limitations
-  * Memory pools
-
----
-
-# XXXII. Performance Optimization
-
-* **156. Performance Fundamentals**
-
-  * CPU usage
-  * Memory usage
-  * Cache behavior
-  * I/O costs
-
-* **157. Compiler Optimization**
-
-  * Optimization levels
-  * Inlining
-  * Dead-code elimination
-  * Constant propagation
-  * Loop optimization
-
-* **158. Data-Oriented Optimization**
-
-  * Cache locality
-  * Data layout
-  * Structure of Arrays
-  * Array of Structures
-
-* **159. Algorithmic Optimization**
-
-  * Complexity reduction
-  * Data-structure selection
-  * Avoiding unnecessary computation
-
-* **160. Profiling**
-
-  * Hotspot identification
-  * CPU profiling
-  * Memory profiling
-  * Benchmarking
-
-* **161. Optimization Discipline**
-
-  * Measure first
-  * Identify bottlenecks
-  * Optimize
-  * Re-measure
-  * Preserve correctness
+- **120. Linux System Programming**
+  - Linux system calls
+  - `/proc` filesystem
+  - `/sys` filesystem
+  - `ioctl()`
+  - `epoll()`
+  - `io_uring`
+  - `eventfd`
+  - `signalfd`
+  - `timerfd`
+  - `inotify`
+  - Linux programming best practices
 
 ---
 
-# XXXIII. Secure C Programming
+# XIV. Build Systems and Tooling
 
-* **162. Memory-Safety Risks**
+- **121. Make**
+  - Make
+  - Makefile
+  - Rules
+  - Targets
+  - Prerequisites
+  - Recipes
+  - Variables
+  - Pattern rules
+  - Automatic variables
+    - `$@`
+    - `$<`
+    - `$^`
+    - `$?`
+    - `$*`
+  - Functions
+  - Conditionals
+  - Includes
+  - Phony targets
+  - Parallel builds
+  - Make best practices
 
-  * Buffer overflows
-  * Out-of-bounds access
-  * Use-after-free
-  * Double-free
-  * Null-pointer dereference
+- **122. CMake**
+  - CMake
+  - `CMakeLists.txt`
+  - CMake commands
+  - Targets
+  - Libraries
+  - Executables
+  - Dependencies
+  - `find_package`
+  - `target_link_libraries`
+  - `target_include_directories`
+  - `target_compile_options`
+  - Generator expressions
+  - CMake presets
+  - CMake best practices
 
-* **163. Secure Input Handling**
+- **123. Meson**
+  - Meson
+  - `meson.build`
+  - Meson commands
+  - Targets
+  - Dependencies
+  - Meson best practices
 
-  * Input-length validation
-  * Buffer-size validation
-  * Format-string safety
-  * Parsing untrusted input
+- **124. Autotools**
+  - Autotools
+  - `configure.ac`
+  - `Makefile.am`
+  - `autoconf`
+  - `automake`
+  - `libtool`
+  - Autotools best practices
 
-* **164. Integer Safety**
+- **125. Compiler Flags**
+  - Warning flags
+    - `-Wall`
+    - `-Wextra`
+    - `-Wpedantic`
+    - `-Werror`
+    - `-Wconversion`
+    - `-Wsign-conversion`
+    - `-Wshadow`
+    - `-Wcast-align`
+    - `-Wstrict-prototypes`
+    - `-Wmissing-prototypes`
+    - `-Wold-style-definition`
+    - `-Wredundant-decls`
+    - `-Wnull-dereference`
+    - `-Wdouble-promotion`
+    - `-Wformat=2`
+    - `-Wundef`
+    - `-Wwrite-strings`
+    - `-Wcast-qual`
+    - `-Wswitch-default`
+    - `-Wswitch-enum`
+    - `-Wunused`
+    - `-Wunreachable-code`
+  - Optimization flags
+    - `-O0`
+    - `-O1`
+    - `-O2`
+    - `-O3`
+    - `-Os`
+    - `-Ofast`
+    - `-march=native`
+    - `-mtune=native`
+  - Debug flags
+    - `-g`
+    - `-ggdb`
+    - `-fno-omit-frame-pointer`
+  - Sanitizer flags
+    - `-fsanitize=address`
+    - `-fsanitize=thread`
+    - `-fsanitize=undefined`
+    - `-fsanitize=memory`
+    - `-fsanitize=leak`
+  - LTO
+    - `-flto`
+  - PGO
+    - `-fprofile-generate`
+    - `-fprofile-use`
+  - Standards
+    - `-std=c89`
+    - `-std=c99`
+    - `-std=c11`
+    - `-std=c17`
+    - `-std=c23`
+    - `-std=gnu11`
+    - `-std=gnu17`
+  - Compiler flag best practices
 
-  * Integer overflow
-  * Integer underflow
-  * Signed/unsigned conversion
-  * Size calculations
+- **126. Static Analysis**
+  - Clang-Tidy
+  - Cppcheck
+  - PVS-Studio
+  - Splint
+  - Coverity
+  - SonarQube
+  - Frama-C
+  - Static analysis best practices
 
-* **165. Secure API Design**
+- **127. Formatting**
+  - clang-format
+  - indent
+  - AStyle
+  - Uncrustify
+  - Formatting configuration
+  - Formatting best practices
 
-  * Explicit ownership
-  * Explicit buffer lengths
-  * Error propagation
-  * Defensive interfaces
+- **128. Documentation**
+  - Doxygen
+  - Sphinx
+  - MkDocs
+  - Documentation best practices
 
-* **166. Secure Development Practices**
+- **129. Debugging**
+  - GDB
+  - LLDB
+  - Visual Studio Debugger
+  - WinDbg
+  - Debugging techniques
+  - Breakpoints
+  - Watchpoints
+  - Conditional breakpoints
+  - Reverse debugging
+  - Core dumps
+  - Debugging best practices
 
-  * Compiler warnings
-  * Static analysis
-  * Sanitizers
-  * Fuzz testing
-  * Code review
+- **130. Profiling**
+  - perf
+  - Valgrind
+    - Callgrind
+    - Massif
+    - Cachegrind
+    - Helgrind
+    - DRD
+  - gprof
+  - VTune
+  - Profiling best practices
+
+- **131. Sanitizers**
+  - AddressSanitizer
+  - ASan
+  - ThreadSanitizer
+  - TSan
+  - UndefinedBehaviorSanitizer
+  - UBSan
+  - MemorySanitizer
+  - MSan
+  - LeakSanitizer
+  - LSan
+  - Sanitizer best practices
 
 ---
 
-# XXXIV. Testing in C
+# XV. Testing
 
-* **167. Unit Testing**
+- **132. Testing Fundamentals**
+  - Testing
+  - Test types
+    - Unit tests
+    - Integration tests
+    - End-to-end tests
+    - Functional tests
+    - Performance tests
+  - Test pyramid
+  - Test-driven development
+  - Test coverage
+  - Test isolation
+  - Test doubles
+    - Mocks
+    - Stubs
+    - Spies
+    - Fakes
+  - Testing best practices
 
-  * Function-level tests
-  * Test fixtures
-  * Assertions
-  * Boundary cases
+- **133. Unit Testing**
+  - Unit testing
+  - Unity
+  - CMock
+  - Ceedling
+  - Check
+  - CuTest
+  - Greatest
+  - MinUnit
+  - Test cases
+  - Test fixtures
+  - Assertions
+  - Test organization
+  - Unit testing best practices
 
-* **168. Integration Testing**
+- **134. Unity**
+  - Unity
+  - `TEST_ASSERT_*`
+  - `RUN_TEST()`
+  - Test setup
+  - Test teardown
+  - Unity best practices
 
-  * Module interaction
-  * File handling
-  * Networking
-  * Hardware interfaces
+- **135. CMock**
+  - CMock
+  - Mock generation
+  - Mock functions
+  - Mock expectations
+  - CMock best practices
 
-* **169. System Testing**
+- **136. Ceedling**
+  - Ceedling
+  - Ceedling project
+  - Ceedling configuration
+  - Ceedling tasks
+  - Ceedling best practices
 
-  * End-to-end behavior
-  * Resource usage
-  * Failure scenarios
+- **137. Integration Testing**
+  - Integration testing
+  - Database testing
+  - API testing
+  - External service testing
+  - Integration testing best practices
 
-* **170. Fuzz Testing**
+- **138. Test Automation**
+  - CI integration
+  - Test pipelines
+  - Parallel testing
+  - Test reporting
+  - Code coverage
+  - gcov
+  - lcov
+  - gcovr
+  - Mutation testing
+  - Fuzz testing
+  - Testing best practices
 
-  * Random input generation
-  * Parser testing
-  * Crash discovery
-  * Memory-safety validation
-
-* **171. Regression Testing**
-
-  * Test suites
-  * Automated builds
-  * Continuous integration
-  * Defect prevention
-
----
-
-# XXXV. Build Systems and Software Engineering
-
-* **172. Make**
-
-  * Makefiles
-  * Targets
-  * Dependencies
-  * Variables
-  * Automatic variables
-  * Pattern rules
-
-* **173. CMake**
-
-  * Project configuration
-  * Targets
-  * Libraries
-  * Executables
-  * Build configurations
-
-* **174. Compiler Flags**
-
-  * Warning flags
-  * Optimization flags
-  * Debugging flags
-  * Sanitizer flags
-  * Language-standard flags
-
-* **175. Version Control**
-
-  * Git
-  * Source-code history
-  * Branching
-  * Collaboration
-  * Release management
-
-* **176. Continuous Integration**
-
-  * Automated compilation
-  * Automated testing
-  * Static analysis
-  * Cross-platform builds
-
----
-
-# XXXVI. Advanced Libraries and APIs
-
-* **177. Dynamic Libraries**
-
-  * Shared objects
-  * Dynamic linking
-  * Symbol visibility
-  * Runtime loading
-
-* **178. Static Libraries**
-
-  * Archive files
-  * Library creation
-  * Linking static libraries
-
-* **179. API Design**
-
-  * Opaque structures
-  * Encapsulation
-  * Version compatibility
-  * Error interfaces
-
-* **180. ABI Concepts**
-
-  * Calling conventions
-  * Binary compatibility
-  * Structure layout
-  * Symbol compatibility
+- **139. Fuzz Testing**
+  - Fuzz testing
+  - libFuzzer
+  - AFL
+  - AFL++
+  - Honggfuzz
+  - OSS-Fuzz
+  - Fuzz testing best practices
 
 ---
 
-# XXXVII. C Interoperability
+# XVI. Performance Optimization
 
-* **181. C and Assembly**
+- **140. Performance Fundamentals**
+  - Performance
+  - Latency
+  - Throughput
+  - Resource utilization
+  - Performance metrics
+  - Performance budgets
+  - Performance best practices
 
-  * Inline assembly
-  * Calling conventions
-  * Register-level interaction
-  * Architecture-specific code
+- **141. Profiling**
+  - Profiling
+  - CPU profiling
+  - Memory profiling
+  - Cache profiling
+  - I/O profiling
+  - Profiling tools
+  - Profiling best practices
 
-* **182. C and C++**
+- **142. Compiler Optimizations**
+  - Compiler optimizations
+  - `-O` levels
+  - LTO
+  - PGO
+  - Inlining
+  - Loop optimization
+  - Vectorization
+  - Auto-vectorization
+  - Dead code elimination
+  - Constant folding
+  - Compiler optimization best practices
 
-  * `extern "C"`
-  * ABI considerations
-  * C-compatible APIs
-  * Interoperability boundaries
+- **143. Cache Optimization**
+  - Cache hierarchy
+  - Cache lines
+  - Cache misses
+  - Cache locality
+  - Spatial locality
+  - Temporal locality
+  - Cache-friendly data structures
+  - Data-oriented design
+  - Cache optimization best practices
 
-* **183. C and Other Languages**
+- **144. Memory Optimization**
+  - Memory allocation
+  - Memory pools
+  - Arena allocators
+  - Custom allocators
+  - Memory alignment
+  - False sharing
+  - Memory optimization best practices
 
-  * Python extensions
-  * Java native interfaces
-  * Rust FFI
-  * Foreign-function interfaces
+- **145. Branch Optimization**
+  - Branch prediction
+  - Branch misprediction
+  - Branchless programming
+  - Branch optimization best practices
 
----
+- **146. SIMD**
+  - SIMD
+  - SSE
+  - AVX
+  - AVX2
+  - AVX-512
+  - NEON
+  - Intrinsics
+  - Auto-vectorization
+  - SIMD best practices
 
-# XXXVIII. Advanced Architecture and Systems Design
+- **147. Multithreading Performance**
+  - Thread pools
+  - Work stealing
+  - Lock-free data structures
+  - False sharing
+  - Thread affinity
+  - Multithreading performance best practices
 
-* **184. Modular Systems**
+- **148. Benchmarking**
+  - Benchmarking
+  - Microbenchmarking
+  - Benchmarking best practices
+  - Benchmarking pitfalls
 
-  * Layered architecture
-  * Component boundaries
-  * API contracts
-  * Dependency management
-
-* **185. Resource Management**
-
-  * Memory
-  * File handles
-  * Sockets
-  * Locks
-  * Device resources
-
-* **186. State Machines**
-
-  * State representation
-  * Transition tables
-  * Function-pointer dispatch
-
-* **187. Event-Driven Systems**
-
-  * Event loops
-  * Callbacks
-  * File descriptors
-  * Asynchronous architecture
-
-* **188. Portable Systems Design**
-
-  * Platform abstraction
-  * Conditional compilation
-  * Standard-compliant code
-  * Architecture independence
-
----
-
-# XXXIX. Advanced C Language Mastery
-
-* **189. Translation and Execution Model**
-
-  * Translation units
-  * Translation phases
-  * Object files
-  * Linkage
-  * Program startup
-
-* **190. Advanced Type Semantics**
-
-  * Effective type
-  * Aliasing
-  * Qualifiers
-  * Compatible types
-  * Composite types
-
-* **191. Advanced Pointer Semantics**
-
-  * Pointer provenance considerations
-  * Object lifetime
-  * Pointer arithmetic rules
-  * One-past-the-end pointers
-
-* **192. Advanced Memory Semantics**
-
-  * Object lifetime
-  * Alignment
-  * Representation bytes
-  * Atomic memory operations
-  * Memory ordering
-
-* **193. Portability Engineering**
-
-  * Implementation-defined behavior
-  * Undefined behavior
-  * Endianness
-  * Integer widths
-  * Compiler extensions
-  * Platform abstractions
+- **149. Low-Latency Programming**
+  - Low-latency programming
+  - Cache warming
+  - Memory pinning
+  - Huge pages
+  - Real-time systems
+  - Low-latency best practices
 
 ---
 
-# XL. Progressive C Programming Projects
+# XVII. Security
 
-* **194. Beginner Projects**
+- **150. Security Fundamentals**
+  - Security
+  - Threat modeling
+  - Attack surface
+  - Defense in depth
+  - Least privilege
+  - Secure defaults
+  - Security best practices
 
-  * Calculator
+- **151. Common Vulnerabilities**
+  - Buffer overflows
+  - Stack overflows
+  - Heap overflows
+  - Integer overflows
+  - Format string vulnerabilities
+  - Use-after-free
+  - Double-free
+  - Null pointer dereference
+  - Race conditions
+  - TOCTOU
+  - Uninitialized memory
+  - Memory leaks
+  - Type confusion
+  - Injection attacks
+  - OWASP Top 10
+  - CWE Top 25
 
-    * Variables
-    * Operators
-    * Input/output
-    * Conditional logic
-  * Number-guessing program
+- **152. Secure Coding**
+  - Input validation
+  - Bounds checking
+  - Safe string handling
+  - Safe integer arithmetic
+  - Memory safety
+  - RAII-like patterns
+  - Secure coding best practices
 
-    * Loops
-    * Conditions
-    * Random numbers
-  * Student-grade calculator
+- **153. Cryptography**
+  - Cryptography
+  - OpenSSL
+  - libsodium
+  - mbedTLS
+  - wolfSSL
+  - Hashing
+  - Encryption
+  - Digital signatures
+  - Key management
+  - Cryptography best practices
 
-    * Arrays
-    * Functions
-    * Aggregation
-  * Unit-conversion utility
+- **154. Static Analysis**
+  - Clang-Tidy
+  - Cppcheck
+  - PVS-Studio
+  - Splint
+  - Coverity
+  - Frama-C
+  - Static analysis best practices
 
-    * Functions
-    * Floating-point calculations
+- **155. Dynamic Analysis**
+  - AddressSanitizer
+  - ThreadSanitizer
+  - UndefinedBehaviorSanitizer
+  - MemorySanitizer
+  - Valgrind
+  - Dynamic analysis best practices
 
-* **195. Intermediate Projects**
+- **156. Fuzz Testing**
+  - Fuzz testing
+  - libFuzzer
+  - AFL
+  - AFL++
+  - Honggfuzz
+  - OSS-Fuzz
+  - Fuzz testing best practices
 
-  * Student management system
-
-    * Structures
-    * Arrays
-    * Functions
-    * File storage
-  * Contact management system
-
-    * Structures
-    * Strings
-    * Searching
-    * Sorting
-  * Inventory management system
-
-    * Dynamic memory
-    * File handling
-    * CRUD operations
-  * Text-processing utility
-
-    * Strings
-    * Files
-    * Character processing
-
-* **196. Advanced Projects**
-
-  * Custom dynamic-array library
-
-    * `malloc`
-    * `realloc`
-    * Generic pointers
-    * Memory ownership
-  * Linked-list library
-
-    * Nodes
-    * Dynamic allocation
-    * Function pointers
-  * Hash-table implementation
-
-    * Hashing
-    * Collision handling
-    * Dynamic memory
-  * Expression evaluator
-
-    * Stacks
-    * Parsing
-    * Recursion
-
-* **197. Systems Projects**
-
-  * Mini shell
-
-    * Process creation
-    * Pipes
-    * Signals
-    * File descriptors
-  * TCP client/server
-
-    * Sockets
-    * Networking
-    * Concurrent processing
-  * Custom memory allocator
-
-    * Heap organization
-    * Free lists
-    * Alignment
-  * File compression utility
-
-    * Binary I/O
-    * Algorithms
-    * Bit manipulation
-
-* **198. Expert Projects**
-
-  * Embedded firmware
-
-    * Hardware registers
-    * Interrupts
-    * State machines
-  * Multithreaded server
-
-    * Threads
-    * Synchronization
-    * Networking
-  * Database engine prototype
-
-    * File storage
-    * Indexes
-    * Buffer management
-    * Query processing
-  * Compiler/interpreter
-
-    * Lexing
-    * Parsing
-    * Abstract syntax trees
-    * Code generation
+- **157. Secure Development Lifecycle**
+  - Secure development
+  - Threat modeling
+  - Security requirements
+  - Security design
+  - Security implementation
+  - Security testing
+  - Security deployment
+  - Security maintenance
+  - Secure development best practices
 
 ---
 
-# XLI. Progressive Learning Levels
+# XVIII. Design Patterns and Architecture
 
-## Level 1 — Absolute Beginner
+- **159. Design Patterns**
+  - Creational patterns
+    - Singleton
+    - Factory Method
+    - Abstract Factory
+    - Builder
+    - Prototype
+    - Object Pool
+  - Structural patterns
+    - Adapter
+    - Bridge
+    - Composite
+    - Decorator
+    - Facade
+    - Flyweight
+    - Proxy
+  - Behavioral patterns
+    - Chain of Responsibility
+    - Command
+    - Interpreter
+    - Iterator
+    - Mediator
+    - Memento
+    - Observer
+    - State
+    - Strategy
+    - Template Method
+    - Visitor
+  - Concurrency patterns
+  - Design pattern best practices
 
-* Learn:
+- **160. C Idioms**
+  - Opaque pointers
+  - Handle-based APIs
+  - Object-oriented C
+  - Function pointers
+  - Callbacks
+  - Error codes
+  - `goto` cleanup
+  - Flexible array members
+  - Compound literals
+  - Designated initializers
+  - X-macros
+  - `container_of`
+  - Intrusive data structures
+  - Reference counting
+  - Memory pools
+  - C idiom best practices
 
-  * C syntax
-  * Variables
-  * Data types
-  * Operators
-  * Input/output
-* Master:
+- **161. Architectural Patterns**
+  - Layered architecture
+  - Modular architecture
+  - Event-driven architecture
+  - State machines
+  - Publish-subscribe
+  - Producer-consumer
+  - Client-server
+  - Architectural pattern best practices
 
-  * Basic programs
-  * Arithmetic
-  * Conditions
-  * Simple loops
+- **162. API Design**
+  - API design
+  - Naming conventions
+  - Function signatures
+  - Error handling
+  - Memory ownership
+  - Thread safety
+  - Versioning
+  - Documentation
+  - API design best practices
 
-## Level 2 — Core Programming
-
-* Learn:
-
-  * Functions
-  * Arrays
-  * Strings
-  * Structures
-  * File handling
-* Master:
-
-  * Modular programs
-  * Record-oriented programs
-  * Basic file persistence
-
-## Level 3 — Pointer and Memory Proficiency
-
-* Learn:
-
-  * Pointers
-  * Pointer arithmetic
-  * Dynamic memory
-  * Function pointers
-* Master:
-
-  * Dynamic arrays
-  * Linked lists
-  * Memory ownership
-  * Safe allocation/deallocation
-
-## Level 4 — Data Structures and Algorithms
-
-* Learn:
-
-  * Lists
-  * Stacks
-  * Queues
-  * Trees
-  * Hash tables
-  * Sorting
-  * Searching
-* Master:
-
-  * Complexity analysis
-  * Implementation from scratch
-  * Algorithm selection
-
-## Level 5 — Advanced C
-
-* Learn:
-
-  * Preprocessor
-  * Complex declarations
-  * Type qualifiers
-  * Memory representation
-  * Undefined behavior
-  * Compilation and linking
-* Master:
-
-  * Multi-file architectures
-  * Generic programming patterns
-  * Portable and standards-aware C
-
-## Level 6 — Systems Programming
-
-* Learn:
-
-  * Processes
-  * Threads
-  * IPC
-  * Sockets
-  * POSIX
-  * System-level APIs
-* Master:
-
-  * Concurrent applications
-  * Network programs
-  * OS-oriented utilities
-
-## Level 7 — Performance and Security
-
-* Learn:
-
-  * Profiling
-  * Cache behavior
-  * Compiler optimization
-  * Memory sanitization
-  * Secure programming
-* Master:
-
-  * Performance analysis
-  * Memory-safe design within C's model
-  * Low-level optimization
-
-## Level 8 — Embedded and Hardware Programming
-
-* Learn:
-
-  * Microcontrollers
-  * Registers
-  * Interrupts
-  * Real-time constraints
-  * Memory-mapped I/O
-* Master:
-
-  * Firmware architecture
-  * Deterministic resource management
-  * Hardware-aware programming
-
-## Level 9 — Expert Systems Engineering
-
-* Learn:
-
-  * ABI/API design
-  * Linkers and loaders
-  * Concurrency memory models
-  * Advanced portability
-  * Compiler internals
-* Master:
-
-  * Operating-system components
-  * Runtime systems
-  * Compilers
-  * Embedded platforms
-  * High-performance systems
+- **163. Modular Programming**
+  - Modular programming
+  - Modules
+  - Headers
+  - Implementation files
+  - Encapsulation
+  - Information hiding
+  - Modular programming best practices
 
 ---
 
-# XLII. Recommended C Mastery Progression
+# XIX. C Projects by Difficulty
 
-* **Stage 1 — Understand**
+## Beginner Projects
 
-  * Programming concepts
-  * C syntax
-  * Data types
-  * Control structures
+- **1. Calculator**
+  - Functions
+  - User input
+  - Arithmetic operations
+  - Error handling
 
-* **Stage 2 — Implement**
+- **2. To-Do List CLI**
+  - Arrays
+  - Strings
+  - File I/O
+  - CRUD operations
 
-  * Functions
-  * Arrays
-  * Strings
-  * Structures
-  * File operations
+- **3. Bank Account System**
+  - Structs
+  - Functions
+  - File I/O
+  - Error handling
 
-* **Stage 3 — Manipulate Memory**
+- **4. Student Management System**
+  - Structs
+  - Arrays
+  - File I/O
+  - CRUD operations
 
-  * Pointers
-  * Dynamic allocation
-  * Memory ownership
-  * Pointer-based data structures
-
-* **Stage 4 — Engineer Algorithms**
-
-  * Data structures
-  * Searching
-  * Sorting
-  * Complexity analysis
-
-* **Stage 5 — Understand the Language Internals**
-
-  * Compilation
-  * Linking
-  * Storage duration
-  * Scope
-  * Linkage
-  * Undefined behavior
-  * Object representation
-
-* **Stage 6 — Build Systems**
-
-  * Multi-file projects
-  * Libraries
-  * Build automation
-  * Testing
-  * Debugging
-
-* **Stage 7 — Program at the System Level**
-
-  * Processes
-  * Threads
-  * Networking
-  * POSIX
-  * IPC
-  * Hardware interfaces
-
-* **Stage 8 — Optimize and Secure**
-
-  * Profiling
-  * Cache behavior
-  * Compiler optimization
-  * Memory safety
-  * Secure coding
-
-* **Stage 9 — Architect**
-
-  * Systems architecture
-  * APIs
-  * ABIs
-  * Portability
-  * Concurrency
-  * Performance
-  * Reliability
+- **5. Quiz Application**
+  - Structs
+  - Arrays
+  - Loops
+  - User input
 
 ---
 
-# XLIII. Final C Competency Map
+## Intermediate Projects
 
-* **C Fundamentals**
+- **6. Library Management System**
+  - Structs
+  - Linked lists
+  - File I/O
+  - Error handling
 
-  * Syntax
-  * Variables
-  * Types
-  * Operators
-  * Control flow
+- **7. Chat Application**
+  - Sockets
+  - pthreads
+  - Mutexes
+  - Networking
 
-* **Procedural Programming**
+- **8. Matrix Library**
+  - Dynamic memory
+  - Pointers
+  - Linear algebra
+  - Performance optimization
 
-  * Functions
-  * Scope
-  * Storage duration
-  * Modular design
+- **9. JSON Parser**
+  - Recursive descent parser
+  - Dynamic memory
+  - Strings
+  - Error handling
 
-* **Data Processing**
+- **10. HTTP Server**
+  - Sockets
+  - pthreads
+  - HTTP protocol
+  - Routing
+  - Request/response handling
 
-  * Arrays
-  * Strings
-  * Structures
-  * Unions
-  * Enumerations
+---
 
-* **Memory Management**
+## Advanced Projects
 
-  * Pointers
-  * Dynamic allocation
-  * Ownership
-  * Memory layout
+- **11. Shell**
+  - Process management
+  - `fork()`
+  - `exec()`
+  - Pipes
+  - Redirection
+  - Job control
 
-* **Algorithmic Programming**
+- **12. Database Engine**
+  - Storage engine
+  - B-trees
+  - Query parser
+  - Query executor
+  - Transactions
+  - Concurrency control
 
-  * Data structures
-  * Algorithms
-  * Complexity analysis
+- **13. Compiler**
+  - Lexer
+  - Parser
+  - AST
+  - Semantic analysis
+  - Code generation
+  - Optimization
 
-* **C Language Engineering**
+- **14. High-Performance HTTP Server**
+  - epoll
+  - io_uring
+  - Thread pools
+  - Lock-free data structures
+  - Memory pools
+  - Performance tuning
 
-  * Preprocessor
-  * Header files
-  * Compilation
-  * Linking
-  * Libraries
+- **15. Real-Time Trading System**
+  - Low-latency
+  - Lock-free programming
+  - Memory pools
+  - Cache optimization
+  - Network programming
+  - Performance tuning
 
-* **Low-Level Programming**
+---
 
-  * Bitwise operations
-  * Object representation
-  * Alignment
-  * Endianness
-  * Hardware interaction
+## Expert Projects
 
-* **Systems Programming**
+- **16. Operating System Kernel**
+  - Bootloader
+  - Memory management
+  - Process scheduling
+  - File system
+  - Device drivers
+  - System calls
 
-  * Processes
-  * Threads
-  * IPC
-  * POSIX
-  * Networking
+- **17. Distributed Database**
+  - Distributed consensus
+  - Replication
+  - Sharding
+  - Transactions
+  - Fault tolerance
+  - Performance
 
-* **Performance Engineering**
+- **18. Compiler with LLVM**
+  - Lexer
+  - Parser
+  - AST
+  - LLVM IR
+  - Optimization passes
+  - Code generation
+  - JIT compilation
 
-  * Profiling
-  * Cache optimization
-  * Compiler optimization
-  * Memory efficiency
+- **19. Embedded RTOS**
+  - Scheduler
+  - Tasks
+  - Semaphores
+  - Message queues
+  - Timers
+  - Interrupt handling
 
-* **Security Engineering**
+- **20. Network Protocol Stack**
+  - Ethernet
+  - IP
+  - TCP
+  - UDP
+  - Sockets
+  - Performance
+  - Security
 
-  * Memory-safety practices
-  * Input validation
-  * Integer safety
-  * Defensive programming
+---
 
-* **Advanced Systems Mastery**
+# XX. Progressive C Learning Sequence
 
-  * Embedded systems
-  * Operating-system components
-  * Compilers
-  * Runtime systems
-  * High-performance computing
-  * Systems architecture
+## Level 1 — C Fundamentals
 
-### Complete Learning Progression
+- Master:
+  - Compilation model
+  - Basic syntax
+  - Variables
+  - Data types
+  - Operators
+  - Control flow
+  - Functions
+  - Arrays
+  - Strings
 
-**C Fundamentals → Syntax → Variables & Types → Operators → Control Flow → Functions → Arrays → Strings → Structures → Pointers → Dynamic Memory → File Handling → Preprocessor → Function Pointers → Data Structures → Algorithms → Compilation & Linking → Debugging → Undefined Behavior → Memory Model → Systems Programming → Concurrency → Networking → Embedded C → Performance Optimization → Secure C → Advanced Architecture → Expert Systems Engineering.**
+## Level 2 — Pointers and Memory
+
+- Master:
+  - Pointers
+  - Pointer arithmetic
+  - Pointers and arrays
+  - Pointers and strings
+  - Pointers and functions
+  - Dynamic memory
+  - Memory management
+  - Memory safety
+
+## Level 3 — Structs and Data Types
+
+- Master:
+  - Structs
+  - Unions
+  - Enums
+  - Bit fields
+  - typedef
+  - Compound literals
+  - Designated initializers
+  - Flexible array members
+
+## Level 4 — Preprocessor
+
+- Master:
+  - Macros
+  - File inclusion
+  - Conditional compilation
+  - Include guards
+  - Preprocessor metaprogramming
+  - X-macros
+
+## Level 5 — Standard Library
+
+- Master:
+  - stdio.h
+  - stdlib.h
+  - string.h
+  - math.h
+  - ctype.h
+  - time.h
+  - signal.h
+  - setjmp.h
+  - assert.h
+  - errno.h
+  - locale.h
+  - stddef.h
+  - stdbool.h
+  - stdint.h
+  - inttypes.h
+  - stdatomic.h
+  - threads.h
+
+## Level 6 — Data Structures
+
+- Master:
+  - Arrays
+  - Linked lists
+  - Stacks
+  - Queues
+  - Trees
+  - Heaps
+  - Hash tables
+  - Graphs
+  - Advanced data structures
+
+## Level 7 — Concurrency
+
+- Master:
+  - Threads
+  - Mutexes
+  - Condition variables
+  - Read-write locks
+  - Spinlocks
+  - Barriers
+  - Thread-local storage
+  - Atomic operations
+  - Memory model
+  - Thread pools
+  - Concurrency patterns
+  - Concurrency debugging
+
+## Level 8 — Systems Programming
+
+- Master:
+  - Operating system interfaces
+  - Process management
+  - Signals
+  - IPC
+  - Networking
+  - File systems
+  - Memory mapping
+  - System information
+  - Embedded systems
+  - Device drivers
+  - Linux system programming
+
+## Level 9 — Build Systems and Tooling
+
+- Master:
+  - Make
+  - CMake
+  - Meson
+  - Autotools
+  - Compiler flags
+  - Static analysis
+  - Formatting
+  - Documentation
+  - Debugging
+  - Profiling
+  - Sanitizers
+
+## Level 10 — Testing
+
+- Master:
+  - Unit testing
+  - Unity
+  - CMock
+  - Ceedling
+  - Integration testing
+  - Test automation
+  - Fuzz testing
+
+## Level 11 — Performance Optimization
+
+- Master:
+  - Profiling
+  - Compiler optimizations
+  - Cache optimization
+  - Memory optimization
+  - Branch optimization
+  - SIMD
+  - Multithreading performance
+  - Benchmarking
+  - Low-latency programming
+
+## Level 12 — Security
+
+- Master:
+  - Security fundamentals
+  - Common vulnerabilities
+  - Secure coding
+  - Cryptography
+  - Static analysis
+  - Dynamic analysis
+  - Fuzz testing
+  - Secure development lifecycle
+
+## Level 13 — Architecture and Design
+
+- Master:
+  - Design patterns
+  - C idioms
+  - Architectural patterns
+  - API design
+  - Modular programming
+
+## Level 14 — Production Engineering
+
+- Master:
+  - Build systems
+  - CI/CD
+  - Deployment
+  - Monitoring
+  - Profiling
+  - Performance tuning
+  - Code review
+  - Documentation
+  - Maintenance
+  - Legacy modernization
+
+---
+
+# XXI. Final C Competency Map
+
+- **Foundations**
+
+  - Compilation model
+  - Syntax
+  - Variables
+  - Data types
+  - Operators
+  - Control flow
+  - Functions
+  - Arrays
+  - Strings
+
+- **Pointers**
+
+  - Pointers
+  - Pointer arithmetic
+  - Pointers and arrays
+  - Pointers and strings
+  - Pointers and functions
+  - Const pointers
+  - Advanced pointers
+
+- **Memory**
+
+  - Memory model
+  - Stack
+  - Heap
+  - Dynamic memory
+  - Memory leaks
+  - Memory safety
+  - Memory optimization
+  - Memory debugging
+
+- **Data Types**
+
+  - Structs
+  - Unions
+  - Enums
+  - Bit fields
+  - typedef
+  - Compound literals
+  - Designated initializers
+
+- **Preprocessor**
+
+  - Macros
+  - File inclusion
+  - Conditional compilation
+  - Include guards
+  - Preprocessor metaprogramming
+
+- **Standard Library**
+
+  - stdio.h
+  - stdlib.h
+  - string.h
+  - math.h
+  - ctype.h
+  - time.h
+  - signal.h
+  - setjmp.h
+  - assert.h
+  - errno.h
+  - locale.h
+  - stddef.h
+  - stdbool.h
+  - stdint.h
+  - inttypes.h
+  - stdatomic.h
+  - threads.h
+
+- **Data Structures**
+
+  - Arrays
+  - Linked lists
+  - Stacks
+  - Queues
+  - Trees
+  - Heaps
+  - Hash tables
+  - Graphs
+  - Advanced data structures
+
+- **Concurrency**
+
+  - Threads
+  - Mutexes
+  - Condition variables
+  - Read-write locks
+  - Spinlocks
+  - Barriers
+  - Thread-local storage
+  - Atomic operations
+  - Memory model
+  - Thread pools
+  - Concurrency patterns
+
+- **Systems Programming**
+
+  - Operating system interfaces
+  - Process management
+  - Signals
+  - IPC
+  - Networking
+  - File systems
+  - Memory mapping
+  - Embedded systems
+  - Device drivers
+  - Linux system programming
+
+- **Build Systems**
+
+  - Make
+  - CMake
+  - Meson
+  - Autotools
+  - Compiler flags
+  - Static analysis
+  - Formatting
+  - Documentation
+
+- **Testing**
+
+  - Unit testing
+  - Unity
+  - CMock
+  - Ceedling
+  - Integration testing
+  - Test automation
+  - Fuzz testing
+
+- **Performance**
+
+  - Profiling
+  - Compiler optimizations
+  - Cache optimization
+  - Memory optimization
+  - Branch optimization
+  - SIMD
+  - Multithreading performance
+  - Benchmarking
+  - Low-latency programming
+
+- **Security**
+
+  - Security fundamentals
+  - Common vulnerabilities
+  - Secure coding
+  - Cryptography
+  - Static analysis
+  - Dynamic analysis
+  - Fuzz testing
+  - Secure development lifecycle
+
+- **Architecture**
+
+  - Design patterns
+  - C idioms
+  - Architectural patterns
+  - API design
+  - Modular programming
+
+---
+
+## Recommended Overall Progression
+
+**C Fundamentals → Pointers and Memory → Structs and Data Types → Preprocessor → Standard Library → Data Structures → Concurrency → Systems Programming → Build Systems → Testing → Performance Optimization → Security → Design Patterns → Architecture → Production Engineering**
+
+For maximum practical mastery, combine this C roadmap with the C++, DSA, Java, Python, JavaScript, Node.js, REST API, SQL, Discrete Mathematics, React, Laravel, jQuery, and Jupyter roadmaps above so the progression becomes:
+
+**Discrete Mathematics → DSA Foundations → C Fundamentals → Pointers → Memory Management → Structs → Preprocessor → Standard Library → Data Structures → Concurrency → Systems Programming → Build Systems → Testing → Performance Optimization → Security → Design Patterns → Architecture → Operating Systems → Compilers → Database Internals → Embedded Systems → Network Programming → Kernel Development → Production C Engineering → Enterprise Systems → Low-Latency Systems → Systems Architecture.**

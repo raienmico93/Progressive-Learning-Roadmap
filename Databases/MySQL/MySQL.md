@@ -1,1559 +1,1558 @@
 # MySQL Comprehensive, Structured, and Progressive Learning Roadmap
 
-The roadmap should be **MySQL-specific**, rather than generic SQL. The progression below focuses on MySQL syntax, MySQL 8.x capabilities, InnoDB, indexing, transactions, optimization, security, administration, and production use.
+## From Relational Database Foundations to Advanced Query Optimization, Replication, Cloud Deployment, and Production MySQL Engineering
 
-## I. MySQL Foundations
-
-* **1. Database Fundamentals**
-
-  * What databases are
-  * Relational databases
-  * RDBMS concepts
-  * Tables, rows, columns
-  * Primary keys and foreign keys
-  * Relationships
-
-    * One-to-one
-    * One-to-many
-    * Many-to-many
-  * Schemas and databases in MySQL
-  * Database server versus database client
-
-* **2. MySQL Architecture**
-
-  * MySQL Server
-  * MySQL client
-  * Connection process
-  * SQL parser
-  * Query optimizer
-  * Storage engines
-  * InnoDB
-  * Binary log
-  * Redo log
-  * Undo log
-  * Buffer pool
-  * MySQL data dictionary
-
-* **3. Installing and Using MySQL**
-
-  * MySQL Server installation
-  * MySQL Shell
-  * `mysql` command-line client
-  * MySQL Workbench
-  * Connecting to a server
-  * Creating users
-  * Selecting databases
-  * Running `.sql` files
-  * Importing and exporting data
+MySQL is best learned as more than "a database for storing data." The progression should cover **database fundamentals → relational theory → installation → data types → DDL → DML → queries → joins → subqueries → aggregation → window functions → indexes → transactions → stored procedures → triggers → views → users → security → backup → replication → performance → scaling → cloud → production engineering**.
 
 ---
 
-# II. MySQL SQL Syntax
+# I. MySQL Foundations
 
-* **4. SQL Statement Categories**
+- **1. What MySQL Is**
+  - MySQL
+  - MySQL history
+  - MySQL AB
+  - Michael Widenius
+  - David Axmark
+  - MySQL 1.0
+  - MySQL 3.x
+  - MySQL 4.x
+  - MySQL 5.x
+  - MySQL 5.7
+  - MySQL 8.0
+  - MySQL 8.1
+  - MySQL 8.2
+  - MySQL 8.3
+  - MySQL 8.4
+  - MySQL 9.0
+  - MySQL 9.1
+  - MySQL 9.2
+  - MySQL 9.3 (current)
+  - MySQL philosophy
+    - Relational database
+    - Open source
+    - Cross-platform
+    - Performance
+    - Reliability
+    - Scalability
+  - MySQL vs PostgreSQL
+  - MySQL vs MariaDB
+  - MySQL vs SQLite
+  - MySQL vs SQL Server
+  - MySQL vs Oracle
+  - MySQL use cases
+    - Web applications
+    - E-commerce
+    - Content management
+    - SaaS
+    - Analytics
+    - Data warehousing
+    - Embedded systems
+  - MySQL in modern software
+  - MySQL ecosystem
+  - MySQL editions
+    - MySQL Community
+    - MySQL Enterprise
+    - MySQL Cluster
+    - MySQL HeatWave
 
-  * DDL
+- **2. Prerequisites**
+  - Computer fundamentals
+  - Command line
+  - Programming
+  - SQL basics
+  - Data types
+  - Database concepts
+  - Tables
+  - Rows
+  - Columns
+  - Prerequisite best practices
 
-    * `CREATE`
-    * `ALTER`
-    * `DROP`
-    * `TRUNCATE`
-  * DML
+- **3. Database Fundamentals**
+  - Databases
+  - Database management systems
+  - Relational databases
+  - NoSQL databases
+  - Tables
+  - Rows
+  - Columns
+  - Schemas
+  - Catalogs
+  - Primary keys
+  - Foreign keys
+  - Indexes
+  - Transactions
+  - ACID
+  - Database best practices
 
-    * `INSERT`
-    * `UPDATE`
-    * `DELETE`
-  * DQL
+- **4. Relational Theory**
+  - Relational model
+  - Relations
+  - Tuples
+  - Attributes
+  - Domains
+  - Keys
+  - Referential integrity
+  - Entity integrity
+  - Normalization
+  - Normal forms
+    - 1NF
+    - 2NF
+    - 3NF
+    - BCNF
+    - 4NF
+    - 5NF
+  - Denormalization
+  - Relational theory best practices
 
-    * `SELECT`
-  * TCL
+- **5. Installing MySQL**
+  - Installation
+    - Windows
+    - macOS
+    - Linux
+  - Package managers
+    - apt
+    - yum
+    - dnf
+    - Homebrew
+    - Chocolatey
+    - Scoop
+  - MySQL Installer
+  - MySQL Server
+  - MySQL Client
+  - MySQL Workbench
+  - MySQL Shell
+  - Docker installation
+  - Configuration
+  - `my.cnf`
+  - `my.ini`
+  - MySQL verification
+  - `mysql --version`
+  - Installation best practices
 
-    * `START TRANSACTION`
-    * `COMMIT`
-    * `ROLLBACK`
-    * `SAVEPOINT`
-  * DCL
+- **6. MySQL Architecture**
+  - MySQL architecture
+  - Storage engines
+    - InnoDB
+    - MyISAM
+    - Memory
+    - Archive
+    - CSV
+    - Federated
+    - NDB
+    - Merge
+    - Blackhole
+  - InnoDB
+  - Buffer pool
+  - Redo log
+  - Undo log
+  - Binary log
+  - Relay log
+  - Error log
+  - Slow query log
+  - General query log
+  - Architecture best practices
 
-    * `GRANT`
-    * `REVOKE`
+- **7. MySQL Client**
+  - MySQL client
+  - `mysql` command
+  - Connection
+  - `mysql -u root -p`
+  - `mysql -h host -u user -p`
+  - Client options
+  - Client commands
+  - Client best practices
 
-* **5. Naming and Syntax**
+- **8. MySQL Shell**
+  - MySQL Shell
+  - `mysqlsh`
+  - JavaScript mode
+  - Python mode
+  - SQL mode
+  - Shell commands
+  - Shell best practices
 
-  * Identifiers
-  * Reserved words
-  * Backticks
-  * String literals
-  * Numeric literals
-  * Comments
-  * Statement terminators
-  * SQL formatting conventions
-
----
-
-# III. MySQL Data Types
-
-* **6. Numeric Types**
-
-  * `TINYINT`
-  * `SMALLINT`
-  * `MEDIUMINT`
-  * `INT`
-  * `BIGINT`
-  * `DECIMAL`
-  * `FLOAT`
-  * `DOUBLE`
-  * Signed versus unsigned
-  * Precision and scale
-
-* **7. String Types**
-
-  * `CHAR`
-  * `VARCHAR`
-  * `TEXT`
-
-    * `TINYTEXT`
-    * `TEXT`
-    * `MEDIUMTEXT`
-    * `LONGTEXT`
-  * `BINARY`
-  * `VARBINARY`
-  * `BLOB`
-
-    * `TINYBLOB`
-    * `BLOB`
-    * `MEDIUMBLOB`
-    * `LONGBLOB`
-
-* **8. Date and Time**
-
-  * `DATE`
-  * `DATETIME`
-  * `TIMESTAMP`
-  * `TIME`
-  * `YEAR`
-  * Time-zone considerations
-  * Date arithmetic
-
-* **9. Other MySQL Types**
-
-  * `BOOLEAN`
-  * `ENUM`
-  * `SET`
-  * `JSON`
-  * Spatial types
-  * UUID storage strategies
-
----
-
-# IV. Creating MySQL Databases and Tables
-
-* **10. Database Operations**
-
-  * `CREATE DATABASE`
-  * `DROP DATABASE`
-  * `USE`
-  * `SHOW DATABASES`
-  * `SHOW CREATE DATABASE`
-
-* **11. Table Operations**
-
-  * `CREATE TABLE`
-  * `SHOW TABLES`
-  * `DESCRIBE`
-  * `SHOW CREATE TABLE`
-  * `ALTER TABLE`
-  * `RENAME TABLE`
-  * `TRUNCATE TABLE`
-  * `DROP TABLE`
-
-* **12. Column Definition**
-
-  * Data types
-  * `NOT NULL`
-  * `DEFAULT`
-  * `AUTO_INCREMENT`
-  * Generated columns
-  * Column comments
-  * Character sets
-  * Collations
-
----
-
-# V. MySQL Constraints
-
-* **13. Primary Keys**
-
-  * Single-column primary keys
-  * Composite primary keys
-  * Surrogate keys
-  * Auto-increment identifiers
-
-* **14. Unique Constraints**
-
-  * `UNIQUE`
-  * Multiple unique constraints
-  * Composite unique constraints
-
-* **15. Foreign Keys**
-
-  * Parent-child relationships
-  * Referential integrity
-  * Foreign-key naming
-  * `ON DELETE`
-  * `ON UPDATE`
-
-    * `CASCADE`
-    * `SET NULL`
-    * `RESTRICT`
-    * `NO ACTION`
-
-* **16. CHECK Constraints**
-
-  * Basic `CHECK`
-  * Conditional validation
-  * Constraint enforcement
-
----
-
-# VI. CRUD in MySQL
-
-* **17. INSERT**
-
-  * Single-row insert
-  * Multi-row insert
-  * `INSERT ... SELECT`
-  * Default values
-  * `INSERT ... ON DUPLICATE KEY UPDATE`
-
-* **18. SELECT**
-
-  * Selecting columns
-  * Aliases
-  * Expressions
-  * `DISTINCT`
-  * Calculated columns
-
-* **19. UPDATE**
-
-  * Conditional updates
-  * Multi-column updates
-  * Updating from related data
-  * Safe update practices
-
-* **20. DELETE**
-
-  * Conditional deletion
-  * Multi-table deletion
-  * Cascading deletion
-  * Safe deletion practices
+- **9. MySQL Workbench**
+  - MySQL Workbench
+  - Connection
+  - SQL editor
+  - Schema editor
+  - Data modeling
+  - Data migration
+  - Administration
+  - Workbench best practices
 
 ---
 
-# VII. MySQL Querying Fundamentals
+# II. Data Types
 
-* **21. Filtering**
+- **10. Data Type Fundamentals**
+  - Data types
+  - Type categories
+  - Type selection
+  - Data type best practices
 
-  * `WHERE`
-  * Comparison operators
-  * `AND`
-  * `OR`
-  * `NOT`
-  * Operator precedence
+- **11. Numeric Types**
+  - `TINYINT`
+  - `SMALLINT`
+  - `MEDIUMINT`
+  - `INT`
+  - `INTEGER`
+  - `BIGINT`
+  - `DECIMAL`
+  - `NUMERIC`
+  - `FLOAT`
+  - `DOUBLE`
+  - `BIT`
+  - `UNSIGNED`
+  - `ZEROFILL`
+  - `AUTO_INCREMENT`
+  - Numeric type best practices
 
-* **22. NULL**
+- **12. String Types**
+  - `CHAR`
+  - `VARCHAR`
+  - `BINARY`
+  - `VARBINARY`
+  - `BLOB`
+  - `TINYBLOB`
+  - `MEDIUMBLOB`
+  - `LONGBLOB`
+  - `TEXT`
+  - `TINYTEXT`
+  - `MEDIUMTEXT`
+  - `LONGTEXT`
+  - `ENUM`
+  - `SET`
+  - String type best practices
 
-  * `IS NULL`
-  * `IS NOT NULL`
-  * `COALESCE`
-  * `NULLIF`
-  * Three-valued logic
+- **13. Date and Time Types**
+  - `DATE`
+  - `TIME`
+  - `DATETIME`
+  - `TIMESTAMP`
+  - `YEAR`
+  - Date and time best practices
 
-* **23. Pattern Matching**
+- **14. JSON Types**
+  - `JSON`
+  - JSON operations
+  - JSON functions
+  - JSON best practices
 
-  * `LIKE`
-  * `%`
-  * `_`
-  * Escaping
-  * Case-sensitivity and collations
-  * MySQL regular expressions
+- **15. Spatial Types**
+  - `GEOMETRY`
+  - `POINT`
+  - `LINESTRING`
+  - `POLYGON`
+  - `MULTIPOINT`
+  - `MULTILINESTRING`
+  - `MULTIPOLYGON`
+  - `GEOMETRYCOLLECTION`
+  - Spatial best practices
 
-    * `REGEXP`
-    * `REGEXP_LIKE()`
-
-* **24. Membership and Ranges**
-
-  * `IN`
-  * `NOT IN`
-  * `BETWEEN`
-  * `EXISTS`
-  * NULL behavior
-
----
-
-# VIII. Sorting, Pagination, and Result Control
-
-* **25. Sorting**
-
-  * `ORDER BY`
-  * `ASC`
-  * `DESC`
-  * Multiple sort columns
-  * Expression-based sorting
-  * NULL ordering
-
-* **26. Limiting**
-
-  * `LIMIT`
-  * `OFFSET`
-  * Pagination
-  * Offset pagination
-  * Keyset pagination
-
-* **27. Result Formatting**
-
-  * Column aliases
-  * String concatenation
-  * Conditional expressions
-  * Type conversion
-  * `CAST()`
-  * `CONVERT()`
-
----
-
-# IX. MySQL Built-In Functions
-
-* **28. String Functions**
-
-  * `CONCAT()`
-  * `CONCAT_WS()`
-  * `LENGTH()`
-  * `CHAR_LENGTH()`
-  * `LOWER()`
-  * `UPPER()`
-  * `TRIM()`
-  * `SUBSTRING()`
-  * `LEFT()`
-  * `RIGHT()`
-  * `REPLACE()`
-  * `LOCATE()`
-
-* **29. Numeric Functions**
-
-  * `ROUND()`
-  * `CEIL()`
-  * `FLOOR()`
-  * `ABS()`
-  * `MOD()`
-  * `POWER()`
-  * `SQRT()`
-
-* **30. Date Functions**
-
-  * `CURDATE()`
-  * `CURTIME()`
-  * `NOW()`
-  * `DATE()`
-  * `YEAR()`
-  * `MONTH()`
-  * `DAY()`
-  * `DATE_ADD()`
-  * `DATE_SUB()`
-  * `DATEDIFF()`
-  * `TIMESTAMPDIFF()`
-  * `LAST_DAY()`
-
-* **31. Conditional Functions**
-
-  * `CASE`
-  * `IF()`
-  * `IFNULL()`
-  * `NULLIF()`
-  * `COALESCE()`
+- **16. Other Types**
+  - `BOOLEAN`
+  - `BOOL`
+  - `NULL`
+  - Other type best practices
 
 ---
 
-# X. Aggregation and Reporting
+# III. DDL (Data Definition Language)
 
-* **32. Aggregate Functions**
+- **17. Database Operations**
+  - `CREATE DATABASE`
+  - `DROP DATABASE`
+  - `ALTER DATABASE`
+  - `USE`
+  - `SHOW DATABASES`
+  - Database operation best practices
 
-  * `COUNT()`
-  * `SUM()`
-  * `AVG()`
-  * `MIN()`
-  * `MAX()`
-  * `COUNT(DISTINCT ...)`
+- **18. Table Operations**
+  - `CREATE TABLE`
+  - `DROP TABLE`
+  - `ALTER TABLE`
+  - `TRUNCATE TABLE`
+  - `RENAME TABLE`
+  - `SHOW TABLES`
+  - `DESCRIBE`
+  - `SHOW CREATE TABLE`
+  - Table operation best practices
 
-* **33. GROUP BY**
+- **19. Column Operations**
+  - `ADD COLUMN`
+  - `DROP COLUMN`
+  - `MODIFY COLUMN`
+  - `CHANGE COLUMN`
+  - `RENAME COLUMN`
+  - Column operation best practices
 
-  * Single-column grouping
-  * Multi-column grouping
-  * Aggregation expressions
-  * Grouping behavior
+- **20. Constraints**
+  - `PRIMARY KEY`
+  - `FOREIGN KEY`
+  - `UNIQUE`
+  - `NOT NULL`
+  - `CHECK`
+  - `DEFAULT`
+  - `AUTO_INCREMENT`
+  - Constraint best practices
 
-* **34. HAVING**
+- **21. Indexes**
+  - `CREATE INDEX`
+  - `DROP INDEX`
+  - `CREATE UNIQUE INDEX`
+  - `CREATE FULLTEXT INDEX`
+  - `CREATE SPATIAL INDEX`
+  - Index types
+    - B-tree
+    - Hash
+    - Full-text
+    - Spatial
+  - Index best practices
 
-  * Filtering groups
-  * Difference between `WHERE` and `HAVING`
-  * Aggregate conditions
+- **22. Views**
+  - `CREATE VIEW`
+  - `DROP VIEW`
+  - `ALTER VIEW`
+  - `SHOW CREATE VIEW`
+  - View best practices
 
-* **35. Advanced Aggregation**
+- **23. Schemas**
+  - Schemas
+  - Schema operations
+  - Schema best practices
 
-  * Conditional aggregation
-  * Multi-level summaries
-  * `WITH ROLLUP`
-  * Grouped reporting
-
----
-
-# XI. Joins in MySQL
-
-* **36. INNER JOIN**
-
-  * Basic joins
-  * Multiple joins
-  * Join predicates
-  * Composite join conditions
-
-* **37. LEFT JOIN**
-
-  * Preserving unmatched left-side rows
-  * Finding missing relationships
-
-* **38. RIGHT JOIN**
-
-  * Syntax
-  * When to rewrite as `LEFT JOIN`
-
-* **39. CROSS JOIN**
-
-  * Cartesian products
-  * Generating combinations
-
-* **40. SELF JOIN**
-
-  * Employee-manager structures
-  * Hierarchies
-  * Parent-child records
-
-* **41. Advanced Join Patterns**
-
-  * Anti-joins
-  * Semi-joins
-  * Range joins
-  * Conditional joins
-  * Many-to-many joins
-  * Avoiding accidental row multiplication
-
----
-
-# XII. Subqueries
-
-* **42. Basic Subqueries**
-
-  * Scalar subqueries
-  * Single-row subqueries
-  * Multi-row subqueries
-
-* **43. Correlated Subqueries**
-
-  * Correlated references
-  * Per-row logical evaluation
-  * Performance considerations
-
-* **44. Subqueries with**
-
-  * `IN`
-  * `EXISTS`
-  * `ANY`
-  * `ALL`
-
-* **45. Derived Tables**
-
-  * Subqueries in `FROM`
-  * Aliasing derived tables
-  * Multi-stage transformations
+- **24. Storage Engines**
+  - Storage engines
+  - InnoDB
+  - MyISAM
+  - Memory
+  - Archive
+  - CSV
+  - Federated
+  - NDB
+  - Storage engine best practices
 
 ---
 
-# XIII. Common Table Expressions
+# IV. DML (Data Manipulation Language)
 
-* **46. CTE Fundamentals**
+- **25. Insert**
+  - `INSERT INTO`
+  - `INSERT INTO ... VALUES`
+  - `INSERT INTO ... SELECT`
+  - `INSERT INTO ... SET`
+  - `INSERT IGNORE`
+  - `INSERT ... ON DUPLICATE KEY UPDATE`
+  - `REPLACE INTO`
+  - Insert best practices
 
-  * `WITH`
-  * Single CTE
-  * Multiple CTEs
-  * CTE chaining
+- **26. Update**
+  - `UPDATE`
+  - `UPDATE ... SET`
+  - `UPDATE ... WHERE`
+  - `UPDATE ... JOIN`
+  - `UPDATE ... ORDER BY`
+  - `UPDATE ... LIMIT`
+  - Update best practices
 
-* **47. Recursive CTEs**
+- **27. Delete**
+  - `DELETE FROM`
+  - `DELETE FROM ... WHERE`
+  - `DELETE FROM ... JOIN`
+  - `DELETE FROM ... ORDER BY`
+  - `DELETE FROM ... LIMIT`
+  - `TRUNCATE TABLE`
+  - Delete best practices
 
-  * Anchor query
-  * Recursive query
-  * Termination
-  * Hierarchical traversal
-  * Tree structures
-  * Organizational structures
+- **28. Select**
+  - `SELECT`
+  - `SELECT *`
+  - `SELECT column`
+  - `SELECT DISTINCT`
+  - `SELECT ... AS`
+  - `SELECT ... INTO`
+  - Select best practices
 
-* **48. CTE Design**
+- **29. Where Clause**
+  - `WHERE`
+  - Comparison operators
+  - Logical operators
+  - `BETWEEN`
+  - `IN`
+  - `LIKE`
+  - `IS NULL`
+  - `IS NOT NULL`
+  - `REGEXP`
+  - Where clause best practices
 
-  * Breaking complex queries into stages
-  * Readability
-  * Reusability within a statement
-  * Performance considerations
+- **30. Order By**
+  - `ORDER BY`
+  - `ASC`
+  - `DESC`
+  - Multiple columns
+  - Order by best practices
 
----
+- **31. Limit**
+  - `LIMIT`
+  - `OFFSET`
+  - Pagination
+  - Limit best practices
 
-# XIV. Set Operations in Modern MySQL
+- **32. Group By**
+  - `GROUP BY`
+  - Aggregation
+  - `HAVING`
+  - Group by best practices
 
-* **49. Set-Based Queries**
+- **33. Joins**
+  - `INNER JOIN`
+  - `LEFT JOIN`
+  - `RIGHT JOIN`
+  - `CROSS JOIN`
+  - `SELF JOIN`
+  - `NATURAL JOIN`
+  - `USING`
+  - Join best practices
 
-  * `UNION`
-  * `UNION ALL`
-  * `INTERSECT`
-  * `EXCEPT`
-  * Duplicate handling
-  * Column compatibility
+- **34. Subqueries**
+  - Subqueries
+  - Scalar subqueries
+  - Correlated subqueries
+  - `EXISTS`
+  - `NOT EXISTS`
+  - `IN`
+  - `ANY`
+  - `ALL`
+  - Subquery best practices
 
-* **50. Set Thinking**
+- **35. Union**
+  - `UNION`
+  - `UNION ALL`
+  - `INTERSECT` (MySQL 8.0.31+)
+  - `EXCEPT` (MySQL 8.0.31+)
+  - Union best practices
 
-  * Combining independent result sets
-  * Difference between join and set operation
-  * Replacing procedural processing with relational operations
+- **36. CTEs**
+  - Common Table Expressions
+  - `WITH`
+  - Recursive CTEs
+  - `WITH RECURSIVE`
+  - CTE best practices
 
----
+- **37. Window Functions**
+  - Window functions
+  - `OVER`
+  - `PARTITION BY`
+  - `ORDER BY`
+  - Window functions
+    - `ROW_NUMBER`
+    - `RANK`
+    - `DENSE_RANK`
+    - `PERCENT_RANK`
+    - `CUME_DIST`
+    - `NTILE`
+    - `LAG`
+    - `LEAD`
+    - `FIRST_VALUE`
+    - `LAST_VALUE`
+    - `NTH_VALUE`
+  - Window function best practices
 
-# XV. Window Functions
-
-* **51. Window Fundamentals**
-
-  * `OVER()`
-  * `PARTITION BY`
-  * Window ordering
-
-* **52. Ranking**
-
-  * `ROW_NUMBER()`
-  * `RANK()`
-  * `DENSE_RANK()`
-  * `NTILE()`
-
-* **53. Offset Functions**
-
-  * `LAG()`
-  * `LEAD()`
-
-* **54. Value Functions**
-
-  * `FIRST_VALUE()`
-  * `LAST_VALUE()`
-  * `NTH_VALUE()`
-
-* **55. Analytical Patterns**
-
-  * Running totals
-  * Moving averages
-  * Top-N per group
-  * Previous-row comparisons
-  * Growth rates
-  * Period-over-period analysis
-  * Gaps and islands
-
-* **56. Window Frames**
-
-  * `ROWS`
-  * `RANGE`
-  * Frame boundaries
-  * Current row
-  * Preceding/following rows
-
----
-
-# XVI. MySQL JSON
-
-* **57. JSON Fundamentals**
-
-  * JSON documents
-  * Objects
-  * Arrays
-  * Nested structures
-  * JSON columns
-
-* **58. JSON Extraction**
-
-  * JSON path expressions
-  * `JSON_EXTRACT()`
-  * `->`
-  * `->>`
-
-* **59. JSON Construction**
-
-  * `JSON_OBJECT()`
-  * `JSON_ARRAY()`
-  * JSON aggregation
-
-* **60. JSON Modification**
-
-  * `JSON_SET()`
-  * `JSON_INSERT()`
-  * `JSON_REPLACE()`
-  * `JSON_REMOVE()`
-
-* **61. JSON Performance**
-
-  * Generated columns
-  * Indexing JSON-derived values
-  * Choosing JSON versus relational columns
-
----
-
-# XVII. Views
-
-* **62. Standard Views**
-
-  * `CREATE VIEW`
-  * Querying views
-  * Altering views
-  * Dropping views
-
-* **63. View Design**
-
-  * Abstraction
-  * Simplifying reporting queries
-  * Security-oriented views
-  * Updatable views
-  * View dependencies
+- **38. Aggregate Functions**
+  - `COUNT`
+  - `SUM`
+  - `AVG`
+  - `MIN`
+  - `MAX`
+  - `GROUP_CONCAT`
+  - `JSON_ARRAYAGG`
+  - `JSON_OBJECTAGG`
+  - `STD`
+  - `STDDEV`
+  - `VARIANCE`
+  - Aggregate function best practices
 
 ---
 
-# XVIII. MySQL Indexing
+# V. Advanced Queries
 
-* **64. Index Fundamentals**
+- **39. Query Optimization**
+  - Query optimization
+  - Query execution plan
+  - `EXPLAIN`
+  - `EXPLAIN ANALYZE`
+  - `EXPLAIN FORMAT=JSON`
+  - Query optimization best practices
 
-  * Why indexes exist
-  * Search acceleration
-  * Index overhead
-  * Selectivity
-  * Cardinality
+- **40. Index Optimization**
+  - Index optimization
+  - Index types
+  - Index selection
+  - Composite indexes
+  - Covering indexes
+  - Index statistics
+  - Index optimization best practices
 
-* **65. B-Tree Indexes**
+- **41. Query Cache**
+  - Query cache
+  - Query cache configuration
+  - Query cache best practices
+  - Query cache deprecation (MySQL 8.0)
 
-  * Primary indexes
-  * Secondary indexes
-  * Unique indexes
-  * Composite indexes
+- **42. Full-Text Search**
+  - Full-text search
+  - `MATCH ... AGAINST`
+  - Full-text indexes
+  - Natural language mode
+  - Boolean mode
+  - Query expansion
+  - Full-text search best practices
 
-* **66. Composite Indexes**
+- **43. JSON Queries**
+  - JSON queries
+  - `JSON_EXTRACT`
+  - `->`
+  - `->>`
+  - `JSON_UNQUOTE`
+  - `JSON_SET`
+  - `JSON_INSERT`
+  - `JSON_REPLACE`
+  - `JSON_REMOVE`
+  - `JSON_CONTAINS`
+  - `JSON_CONTAINS_PATH`
+  - `JSON_ARRAY`
+  - `JSON_OBJECT`
+  - `JSON_TABLE`
+  - JSON query best practices
 
-  * Column order
-  * Leftmost-prefix behavior
-  * Equality predicates
-  * Range predicates
-  * Sorting with indexes
-  * Covering indexes
+- **44. Spatial Queries**
+  - Spatial queries
+  - Spatial functions
+  - Spatial indexes
+  - Spatial query best practices
 
-* **67. Specialized Indexing**
-
-  * Functional indexes
-  * Prefix indexes
-  * Full-text indexes
-  * Spatial indexes
-  * Multi-valued indexes for suitable JSON use cases
-
-* **68. Index Management**
-
-  * `CREATE INDEX`
-  * `DROP INDEX`
-  * `SHOW INDEX`
-  * Index monitoring
-  * Identifying redundant indexes
-
----
-
-# XIX. MySQL Query Optimization
-
-* **69. Query Execution**
-
-  * SQL parsing
-  * Optimization
-  * Execution
-  * Result production
-
-* **70. EXPLAIN**
-
-  * `EXPLAIN`
-  * Access types
-  * Possible keys
-  * Chosen key
-  * Key length
-  * Estimated rows
-  * Filtering
-  * Extra information
-
-* **71. EXPLAIN ANALYZE**
-
-  * Actual execution statistics
-  * Estimated versus actual rows
-  * Timing information
-  * Diagnosing optimizer estimates
-
-* **72. Query Optimization Techniques**
-
-  * Appropriate indexes
-  * SARGable predicates
-  * Avoiding unnecessary columns
-  * Reducing intermediate result sets
-  * Join optimization
-  * Predicate placement
-  * Avoiding unnecessary functions on indexed columns
-  * Efficient pagination
-
-* **73. MySQL Optimizer Concepts**
-
-  * Cost-based optimization
-  * Statistics
-  * Histograms
-  * Join ordering
-  * Access path selection
-  * Optimizer hints
+- **45. Regular Expressions**
+  - Regular expressions
+  - `REGEXP`
+  - `REGEXP_LIKE`
+  - `REGEXP_REPLACE`
+  - `REGEXP_SUBSTR`
+  - `REGEXP_INSTR`
+  - Regular expression best practices
 
 ---
 
-# XX. InnoDB Deep Dive
+# VI. Transactions
 
-* **74. InnoDB Fundamentals**
+- **46. Transaction Fundamentals**
+  - Transactions
+  - ACID
+    - Atomicity
+    - Consistency
+    - Isolation
+    - Durability
+  - Transaction statements
+    - `START TRANSACTION`
+    - `BEGIN`
+    - `COMMIT`
+    - `ROLLBACK`
+    - `SAVEPOINT`
+    - `ROLLBACK TO SAVEPOINT`
+    - `RELEASE SAVEPOINT`
+  - Transaction best practices
 
-  * Default transactional storage engine
-  * ACID support
-  * Foreign keys
-  * Row-level locking
+- **47. Isolation Levels**
+  - Isolation levels
+    - `READ UNCOMMITTED`
+    - `READ COMMITTED`
+    - `REPEATABLE READ`
+    - `SERIALIZABLE`
+  - Isolation level selection
+  - Isolation level best practices
 
-* **75. InnoDB Internals**
+- **48. Locking**
+  - Locking
+  - Row locks
+  - Table locks
+  - Shared locks
+  - Exclusive locks
+  - Intention locks
+  - `SELECT ... FOR UPDATE`
+  - `SELECT ... LOCK IN SHARE MODE`
+  - Locking best practices
 
-  * Buffer pool
-  * Redo log
-  * Undo log
-  * Doublewrite buffer
-  * Change buffer
-  * Adaptive hash index
-  * Clustered indexes
+- **49. Deadlocks**
+  - Deadlocks
+  - Deadlock detection
+  - Deadlock prevention
+  - Deadlock best practices
 
-* **76. Clustered Index**
-
-  * Primary-key organization
-  * Secondary-index relationship to primary keys
-  * Primary-key design implications
-
-* **77. InnoDB Storage Behavior**
-
-  * Pages
-  * Extents
-  * Tablespaces
-  * Row formats
-  * Data and index storage
-
----
-
-# XXI. Transactions
-
-* **78. Transaction Control**
-
-  * `START TRANSACTION`
-  * `COMMIT`
-  * `ROLLBACK`
-  * `SAVEPOINT`
-  * `ROLLBACK TO SAVEPOINT`
-
-* **79. ACID**
-
-  * Atomicity
-  * Consistency
-  * Isolation
-  * Durability
-
-* **80. Autocommit**
-
-  * `autocommit`
-  * Implicit commits
-  * Explicit transactions
-
-* **81. Transaction Design**
-
-  * Transaction boundaries
-  * Short transactions
-  * Error handling
-  * Retry logic
-  * Idempotency
+- **50. MVCC**
+  - MVCC
+  - Multi-Version Concurrency Control
+  - Read views
+  - Undo log
+  - MVCC best practices
 
 ---
 
-# XXII. Concurrency and Locking
+# VII. Stored Programs
 
-* **82. Isolation Levels**
+- **51. Stored Procedures**
+  - Stored procedures
+  - `CREATE PROCEDURE`
+  - `DROP PROCEDURE`
+  - `CALL`
+  - Parameters
+    - `IN`
+    - `OUT`
+    - `INOUT`
+  - Procedure body
+  - Stored procedure best practices
 
-  * `READ UNCOMMITTED`
-  * `READ COMMITTED`
-  * `REPEATABLE READ`
-  * `SERIALIZABLE`
+- **52. Functions**
+  - Functions
+  - `CREATE FUNCTION`
+  - `DROP FUNCTION`
+  - Function parameters
+  - Function return
+  - Function best practices
 
-* **83. Concurrency Anomalies**
+- **53. Triggers**
+  - Triggers
+  - `CREATE TRIGGER`
+  - `DROP TRIGGER`
+  - Trigger types
+    - `BEFORE INSERT`
+    - `AFTER INSERT`
+    - `BEFORE UPDATE`
+    - `AFTER UPDATE`
+    - `BEFORE DELETE`
+    - `AFTER DELETE`
+  - Trigger body
+  - `NEW`
+  - `OLD`
+  - Trigger best practices
 
-  * Dirty reads
-  * Non-repeatable reads
-  * Phantom reads
-  * Lost updates
+- **54. Events**
+  - Events
+  - `CREATE EVENT`
+  - `DROP EVENT`
+  - `ALTER EVENT`
+  - Event scheduler
+  - Event best practices
 
-* **84. InnoDB Locking**
+- **55. Control Flow**
+  - `IF`
+  - `CASE`
+  - `LOOP`
+  - `WHILE`
+  - `REPEAT`
+  - `LEAVE`
+  - `ITERATE`
+  - Control flow best practices
 
-  * Record locks
-  * Gap locks
-  * Next-key locks
-  * Intention locks
-  * Shared locks
-  * Exclusive locks
+- **56. Cursors**
+  - Cursors
+  - `DECLARE CURSOR`
+  - `OPEN`
+  - `FETCH`
+  - `CLOSE`
+  - Cursor best practices
 
-* **85. Deadlocks**
-
-  * Causes
-  * Detection
-  * Diagnosis
-  * Prevention
-  * Retry strategies
-
----
-
-# XXIII. Stored Programs
-
-* **86. Stored Procedures**
-
-  * `CREATE PROCEDURE`
-  * Parameters
-
-    * `IN`
-    * `OUT`
-    * `INOUT`
-  * Local variables
-  * Conditional logic
-  * Loops
-
-* **87. Stored Functions**
-
-  * `CREATE FUNCTION`
-  * Parameters
-  * Return values
-  * Determinism
-  * Use in queries
-
-* **88. Cursors**
-
-  * Cursor declaration
-  * Opening
-  * Fetching
-  * Closing
-  * When cursor-based processing is appropriate
-
-* **89. Error Handling**
-
-  * `DECLARE ... HANDLER`
-  * Conditions
-  * Exceptions
-  * Transaction rollback patterns
-
----
-
-# XXIV. MySQL Triggers and Events
-
-* **90. Triggers**
-
-  * `BEFORE INSERT`
-  * `AFTER INSERT`
-  * `BEFORE UPDATE`
-  * `AFTER UPDATE`
-  * `BEFORE DELETE`
-  * `AFTER DELETE`
-
-* **91. Trigger Applications**
-
-  * Auditing
-  * Validation
-  * Automatic derived values
-  * Change tracking
-
-* **92. Trigger Risks**
-
-  * Hidden side effects
-  * Recursive interactions
-  * Performance overhead
-  * Difficult debugging
-  * Business logic becoming distributed across layers
-
-* **93. Event Scheduler**
-
-  * MySQL events
-  * Scheduled SQL execution
-  * Recurring jobs
-  * Event monitoring
+- **57. Handlers**
+  - Handlers
+  - `DECLARE ... HANDLER`
+  - `CONTINUE`
+  - `EXIT`
+  - `UNDO`
+  - Handler best practices
 
 ---
 
-# XXV. MySQL Security
+# VIII. Users and Security
 
-* **94. Users**
+- **58. User Management**
+  - Users
+  - `CREATE USER`
+  - `DROP USER`
+  - `ALTER USER`
+  - `RENAME USER`
+  - `SET PASSWORD`
+  - User management best practices
 
-  * `CREATE USER`
-  * Password authentication
-  * User accounts
-  * Host matching
+- **59. Privileges**
+  - Privileges
+  - `GRANT`
+  - `REVOKE`
+  - Privilege types
+    - Global
+    - Database
+    - Table
+    - Column
+    - Routine
+  - Privilege best practices
 
-* **95. Privileges**
+- **60. Roles**
+  - Roles
+  - `CREATE ROLE`
+  - `DROP ROLE`
+  - `GRANT ROLE`
+  - `SET ROLE`
+  - Role best practices
 
-  * `GRANT`
-  * `REVOKE`
-  * Database privileges
-  * Table privileges
-  * Column privileges
-  * Routine privileges
+- **61. Authentication**
+  - Authentication
+  - `mysql_native_password`
+  - `caching_sha2_password`
+  - `sha256_password`
+  - Authentication plugins
+  - Authentication best practices
 
-* **96. Roles**
+- **62. Security**
+  - Security
+  - SQL injection prevention
+  - Prepared statements
+  - Parameterized queries
+  - SSL/TLS
+  - Encryption
+  - Security best practices
 
-  * `CREATE ROLE`
-  * Assigning roles
-  * Role activation
-  * Role-based privilege management
-
-* **97. Security Practices**
-
-  * Principle of least privilege
-  * Application-specific accounts
-  * Avoiding administrative accounts in applications
-  * Credential management
-  * TLS
-  * Auditing
-
-* **98. SQL Injection**
-
-  * Injection mechanics
-  * Unsafe string concatenation
-  * Prepared statements
-  * Parameter binding
-  * Safe dynamic SQL
-
----
-
-# XXVI. MySQL Character Sets and Collations
-
-* **99. Character Sets**
-
-  * `utf8mb4`
-  * Database character set
-  * Table character set
-  * Column character set
-
-* **100. Collations**
-
-  * Sorting rules
-  * Comparison rules
-  * Case sensitivity
-  * Accent sensitivity
-  * Collation mismatches
-
-* **101. Internationalization**
-
-  * Unicode
-  * Multilingual data
-  * Emoji support
-  * Index implications
+- **63. Audit**
+  - Audit
+  - Audit log
+  - Audit plugins
+  - Audit best practices
 
 ---
 
-# XXVII. Data Import and Export
+# IX. Backup and Recovery
 
-* **102. CSV**
+- **64. Backup Fundamentals**
+  - Backup
+  - Backup types
+    - Logical
+    - Physical
+    - Full
+    - Incremental
+    - Differential
+  - Backup strategies
+  - Backup best practices
 
-  * `LOAD DATA`
-  * CSV validation
-  * Field delimiters
-  * Line terminators
+- **65. mysqldump**
+  - `mysqldump`
+  - Dump options
+  - Dump databases
+  - Dump tables
+  - Restore
+  - mysqldump best practices
 
-* **103. SQL Dumps**
+- **66. MySQL Shell Utilities**
+  - `mysqlsh`
+  - `util.dumpInstance()`
+  - `util.dumpSchemas()`
+  - `util.dumpTables()`
+  - `util.loadDump()`
+  - Shell utility best practices
 
-  * `mysqldump`
-  * Logical backups
-  * Restore procedures
+- **67. Physical Backup**
+  - Physical backup
+  - `mysqlbackup`
+  - Percona XtraBackup
+  - Physical backup best practices
 
-* **104. MySQL Shell**
+- **68. Point-in-Time Recovery**
+  - Point-in-Time Recovery
+  - PITR
+  - Binary log
+  - Recovery process
+  - PITR best practices
 
-  * MySQL Shell utilities
-  * Dumping
-  * Loading
-  * Data migration
-
-* **105. Bulk Loading**
-
-  * Batch inserts
-  * Transaction sizing
-  * Disabling unnecessary overhead where appropriate
-  * Load-performance optimization
-
----
-
-# XXVIII. Backup and Recovery
-
-* **106. Backup Types**
-
-  * Logical backups
-  * Physical backups
-  * Full backups
-  * Incremental backups
-
-* **107. Recovery**
-
-  * Restore testing
-  * Point-in-time recovery
-  * Binary logs
-  * Recovery procedures
-
-* **108. Disaster Recovery**
-
-  * RPO
-  * RTO
-  * Backup verification
-  * Recovery drills
-  * Failover planning
+- **69. Replication for Backup**
+  - Replication for backup
+  - Replica for backup
+  - Backup from replica
+  - Replication backup best practices
 
 ---
 
-# XXIX. MySQL Binary Logging and Replication
+# X. Replication
 
-* **109. Binary Log**
+- **70. Replication Fundamentals**
+  - Replication
+  - Master-replica
+  - Source-replica
+  - Replication types
+    - Asynchronous
+    - Semi-synchronous
+    - Synchronous
+  - Replication best practices
 
-  * Purpose
-  * Binary log formats
-  * Statement-based logging
-  * Row-based logging
-  * Mixed logging
+- **71. Binary Log**
+  - Binary log
+  - `log_bin`
+  - Binary log format
+    - `STATEMENT`
+    - `ROW`
+    - `MIXED`
+  - Binary log events
+  - Binary log best practices
 
-* **110. Replication**
+- **72. Replication Setup**
+  - Replication setup
+  - Source configuration
+  - Replica configuration
+  - `CHANGE REPLICATION SOURCE TO`
+  - `START REPLICA`
+  - `STOP REPLICA`
+  - `SHOW REPLICA STATUS`
+  - Replication setup best practices
 
-  * Source/replica architecture
-  * Asynchronous replication
-  * Replica lag
-  * Replication monitoring
-  * Replication errors
+- **73. GTID Replication**
+  - GTID
+  - Global Transaction Identifier
+  - GTID replication
+  - GTID best practices
 
-* **111. Advanced Replication**
+- **74. Group Replication**
+  - Group Replication
+  - Group Replication setup
+  - Group Replication best practices
 
-  * GTIDs
-  * Multi-source replication
-  * Replication filtering
-  * Failover considerations
-  * Semi-synchronous replication
+- **75. InnoDB Cluster**
+  - InnoDB Cluster
+  - MySQL Shell
+  - Cluster setup
+  - Cluster management
+  - InnoDB Cluster best practices
 
----
+- **76. Replication Topologies**
+  - Replication topologies
+  - Chain replication
+  - Multi-source replication
+  - Ring replication
+  - Replication topology best practices
 
-# XXX. Partitioning
-
-* **112. Partitioning Fundamentals**
-
-  * Why partition
-  * Partition pruning
-  * Partition maintenance
-
-* **113. Partition Types**
-
-  * `RANGE`
-  * `LIST`
-  * `HASH`
-  * `KEY`
-
-* **114. Partition Design**
-
-  * Time-based partitioning
-  * Large table management
-  * Partition elimination
-  * Partitioning limitations
-  * Partition-key selection
-
----
-
-# XXXI. MySQL High Availability and Scaling
-
-* **115. Scaling Strategies**
-
-  * Vertical scaling
-  * Read scaling
-  * Write scaling
-  * Connection scaling
-
-* **116. High Availability**
-
-  * MySQL InnoDB Cluster
-  * Group Replication
-  * MySQL Router
-  * Automatic failover
-  * Cluster topology
-
-* **117. Distributed Architecture**
-
-  * Read/write separation
-  * Replication architecture
-  * Sharding concepts
-  * Application-level partitioning
-  * Distributed transaction challenges
+- **77. Failover**
+  - Failover
+  - Manual failover
+  - Automatic failover
+  - MySQL Router
+  - Failover best practices
 
 ---
 
-# XXXII. MySQL Monitoring and Administration
+# XI. Performance Optimization
 
-* **118. Server Monitoring**
+- **78. Performance Fundamentals**
+  - Performance
+  - Latency
+  - Throughput
+  - Resource utilization
+  - Performance metrics
+  - Performance best practices
 
-  * CPU
-  * Memory
-  * Disk I/O
-  * Connections
-  * Threads
-  * Temporary tables
-  * Query throughput
+- **79. Configuration Tuning**
+  - Configuration tuning
+  - `my.cnf`
+  - `innodb_buffer_pool_size`
+  - `innodb_log_file_size`
+  - `innodb_flush_log_at_trx_commit`
+  - `innodb_flush_method`
+  - `innodb_io_capacity`
+  - `max_connections`
+  - `table_open_cache`
+  - `thread_cache_size`
+  - `query_cache_size` (deprecated)
+  - Configuration tuning best practices
 
-* **119. MySQL Performance Schema**
+- **80. Query Optimization**
+  - Query optimization
+  - `EXPLAIN`
+  - `EXPLAIN ANALYZE`
+  - Query profiling
+  - Slow query log
+  - Query optimization best practices
 
-  * Instrumentation
-  * Statement monitoring
-  * Wait events
-  * Lock monitoring
+- **81. Index Optimization**
+  - Index optimization
+  - Index types
+  - Index statistics
+  - Composite indexes
+  - Covering indexes
+  - Index optimization best practices
 
-* **120. Information Schema**
+- **82. Schema Optimization**
+  - Schema optimization
+  - Data types
+  - Normalization
+  - Denormalization
+  - Partitioning
+  - Schema optimization best practices
 
-  * Metadata
-  * Tables
-  * Columns
-  * Indexes
-  * Constraints
-  * Statistics
+- **83. Partitioning**
+  - Partitioning
+  - Partition types
+    - RANGE
+    - LIST
+    - HASH
+    - KEY
+    - COLUMNS
+  - Partition management
+  - Partitioning best practices
 
-* **121. sys Schema**
+- **84. Caching**
+  - Caching
+  - InnoDB buffer pool
+  - Query cache (deprecated)
+  - Application caching
+  - Redis
+  - Memcached
+  - Caching best practices
 
-  * Performance-oriented views
-  * Diagnostic queries
-  * Query analysis
-  * Index analysis
+- **85. Performance Schema**
+  - Performance Schema
+  - Performance Schema tables
+  - Performance Schema instrumentation
+  - Performance Schema best practices
 
----
+- **86. sys Schema**
+  - sys schema
+  - sys schema views
+  - sys schema functions
+  - sys schema best practices
 
-# XXXIII. Production Troubleshooting
+- **87. Profiling**
+  - Profiling
+  - `SHOW PROFILE`
+  - `performance_schema`
+  - `EXPLAIN ANALYZE`
+  - Profiling best practices
 
-* **122. Slow Queries**
-
-  * Slow query log
-  * Identifying expensive statements
-  * Query aggregation
-  * Execution-plan analysis
-
-* **123. Lock Problems**
-
-  * Blocking transactions
-  * Lock waits
-  * Deadlocks
-  * Long-running transactions
-
-* **124. Resource Problems**
-
-  * Memory pressure
-  * CPU saturation
-  * Disk saturation
-  * Connection exhaustion
-  * Temporary-table problems
-
-* **125. Data Problems**
-
-  * Duplicate records
-  * Referential-integrity violations
-  * Unexpected NULLs
-  * Incorrect aggregates
-  * Character-set corruption
-
----
-
-# XXXIV. MySQL Data Modeling
-
-* **126. Relational Modeling**
-
-  * Entities
-  * Attributes
-  * Relationships
-  * Cardinality
-  * Optionality
-
-* **127. Normalization**
-
-  * 1NF
-  * 2NF
-  * 3NF
-  * BCNF
-  * When normalization is appropriate
-
-* **128. Denormalization**
-
-  * Read-performance optimization
-  * Redundant data
-  * Summary tables
-  * Trade-offs
-
-* **129. MySQL-Specific Design Decisions**
-
-  * Primary-key width
-  * Auto-increment versus generated identifiers
-  * `VARCHAR` sizing
-  * `DATETIME` versus `TIMESTAMP`
-  * JSON versus normalized tables
-  * Index-friendly schema design
+- **88. Benchmarking**
+  - Benchmarking
+  - `mysqlslap`
+  - `sysbench`
+  - Benchmarking best practices
 
 ---
 
-# XXXV. MySQL for Analytics and Data Engineering
+# XII. Scaling
 
-* **130. Analytical SQL**
+- **89. Scaling Fundamentals**
+  - Scaling
+  - Vertical scaling
+  - Horizontal scaling
+  - Scaling best practices
 
-  * KPI calculations
-  * Time-series analysis
-  * Cohort analysis
-  * Retention
-  * Conversion
-  * Ranking
+- **90. Read Scaling**
+  - Read scaling
+  - Read replicas
+  - Load balancing
+  - ProxySQL
+  - MySQL Router
+  - Read scaling best practices
 
-* **131. ETL with MySQL**
+- **91. Write Scaling**
+  - Write scaling
+  - Sharding
+  - Partitioning
+  - Group Replication
+  - Write scaling best practices
 
-  * Staging tables
-  * Data cleansing
-  * Deduplication
-  * Incremental loads
-  * Upserts
-  * Validation
+- **92. Sharding**
+  - Sharding
+  - Sharding strategies
+  - Sharding tools
+  - Vitess
+  - Sharding best practices
 
-* **132. Data Warehouse Concepts**
+- **93. Connection Pooling**
+  - Connection pooling
+  - Connection pool configuration
+  - ProxySQL
+  - MySQL Router
+  - Connection pooling best practices
 
-  * Fact tables
-  * Dimension tables
-  * Star schema
-  * Snowflake schema
-  * Slowly changing dimensions
-
----
-
-# XXXVI. Application Integration
-
-* **133. MySQL from Programming Languages**
-
-  * Python
-  * Java
-  * C#
-  * JavaScript/Node.js
-  * PHP
-  * Go
-
-* **134. Connection Management**
-
-  * Connection pools
-  * Connection limits
-  * Timeouts
-  * Reconnection strategies
-
-* **135. Application Transactions**
-
-  * Begin/commit/rollback
-  * Transaction boundaries
-  * Error handling
-  * Retry logic
-
-* **136. ORM Interaction**
-
-  * ORM-generated SQL
-  * N+1 queries
-  * Eager loading
-  * Lazy loading
-  * Transaction management
-  * Query inspection
+- **94. Caching Layers**
+  - Caching layers
+  - Redis
+  - Memcached
+  - Application caching
+  - Caching layer best practices
 
 ---
 
-# XXXVII. Expert-Level MySQL Performance Engineering
+# XIII. MySQL in Production
 
-* **137. Query Plan Analysis**
+- **95. Production Fundamentals**
+  - Production
+  - Environments
+    - Development
+    - Staging
+    - Production
+  - Production best practices
 
-  * Access paths
-  * Join algorithms
-  * Cardinality estimates
-  * Cost estimates
-  * Temporary tables
-  * Filesorts
-  * Covering indexes
+- **96. Deployment**
+  - Deployment
+  - Installation
+  - Configuration
+  - Automation
+  - Deployment best practices
 
-* **138. Index Engineering**
+- **97. Monitoring**
+  - Monitoring
+  - MySQL Enterprise Monitor
+  - Percona Monitoring and Management
+  - Prometheus
+  - Grafana
+  - Monitoring best practices
 
-  * Composite-index design
-  * Prefix indexes
-  * Functional indexes
-  * Redundant-index detection
-  * Write amplification
+- **98. Logging**
+  - Logging
+  - Error log
+  - Slow query log
+  - General query log
+  - Binary log
+  - Logging best practices
 
-* **139. InnoDB Performance**
+- **99. Alerting**
+  - Alerting
+  - Alert rules
+  - Alert routing
+  - Alerting best practices
 
-  * Buffer-pool sizing
-  * Redo-log configuration
-  * Flush behavior
-  * Checkpointing
-  * I/O patterns
+- **100. High Availability**
+  - High availability
+  - InnoDB Cluster
+  - Group Replication
+  - MySQL Router
+  - HA best practices
 
-* **140. Workload Optimization**
-
-  * OLTP workloads
-  * Read-heavy workloads
-  * Write-heavy workloads
-  * Mixed workloads
-  * High-concurrency systems
-
----
-
-# XXXVIII. Progressive MySQL Projects
-
-## Level 1 — Beginner
-
-* **Project: Student Management System**
-
-  * Students
-  * Courses
-  * Enrollments
-  * Grades
-  * Practice:
-
-    * CRUD
-    * Primary keys
-    * Foreign keys
-    * Basic joins
-    * Aggregation
-
-## Level 2 — Intermediate
-
-* **Project: E-Commerce Database**
-
-  * Customers
-  * Products
-  * Categories
-  * Orders
-  * Order items
-  * Payments
-  * Inventory
-  * Practice:
-
-    * Joins
-    * Subqueries
-    * CTEs
-    * Constraints
-    * Transactions
-
-## Level 3 — Advanced
-
-* **Project: Business Analytics Platform**
-
-  * Sales
-  * Customers
-  * Products
-  * Dates
-  * Regions
-  * Practice:
-
-    * Window functions
-    * CTEs
-    * Time-series analysis
-    * Cohort analysis
-    * Complex aggregation
-
-## Level 4 — Database Engineering
-
-* **Project: Financial Transaction System**
-
-  * Accounts
-  * Transactions
-  * Transfers
-  * Audit records
-  * Practice:
-
-    * ACID
-    * Isolation levels
-    * Locking
-    * Deadlocks
-    * Security
-
-## Level 5 — Production Engineering
-
-* **Project: High-Volume SaaS Backend**
-
-  * Multi-tenant schema
-  * Tenant isolation
-  * Authentication tables
-  * Audit logs
-  * Large event tables
-  * Practice:
-
-    * Index optimization
-    * Partitioning
-    * Replication
-    * Monitoring
-    * Backup/recovery
+- **101. Disaster Recovery**
+  - Disaster recovery
+  - DR planning
+  - DR testing
+  - DR best practices
 
 ---
 
-# XXXIX. Recommended Learning Order
+# XIV. Cloud MySQL
 
-### Phase 1 — SQL Fundamentals
+- **102. Cloud MySQL Fundamentals**
+  - Cloud MySQL
+  - Managed MySQL
+  - Cloud providers
+    - AWS RDS
+    - Azure Database for MySQL
+    - Google Cloud SQL
+    - Amazon Aurora
+    - MySQL HeatWave
+  - Cloud MySQL best practices
 
-* MySQL installation
-* Databases
-* Tables
-* Data types
-* Constraints
-* CRUD
-* Basic `SELECT`
+- **103. AWS RDS MySQL**
+  - AWS RDS MySQL
+  - RDS setup
+  - RDS configuration
+  - RDS monitoring
+  - RDS best practices
 
-### Phase 2 — Core Querying
+- **104. Azure Database for MySQL**
+  - Azure Database for MySQL
+  - Azure setup
+  - Azure configuration
+  - Azure monitoring
+  - Azure best practices
 
-* `WHERE`
-* `ORDER BY`
-* `LIMIT`
-* Functions
-* `GROUP BY`
-* `HAVING`
-* Joins
+- **105. Google Cloud SQL**
+  - Google Cloud SQL
+  - Cloud SQL setup
+  - Cloud SQL configuration
+  - Cloud SQL monitoring
+  - Cloud SQL best practices
 
-### Phase 3 — Intermediate SQL
-
-* Subqueries
-* CTEs
-* Set operations
-* Views
-* Advanced aggregation
-* Data modeling
-* Normalization
-
-### Phase 4 — Advanced SQL
-
-* Window functions
-* Recursive CTEs
-* JSON
-* Complex analytical queries
-* Advanced date/time processing
-
-### Phase 5 — MySQL Database Engineering
-
-* InnoDB
-* Transactions
-* Isolation
-* Locking
-* Deadlocks
-* Stored procedures
-* Functions
-* Triggers
-
-### Phase 6 — Performance Engineering
-
-* Indexes
-* Composite indexes
-* `EXPLAIN`
-* `EXPLAIN ANALYZE`
-* Optimizer
-* Statistics
-* Slow-query analysis
-
-### Phase 7 — Production MySQL
-
-* Security
-* Backup
-* Recovery
-* Binary logging
-* Replication
-* Partitioning
-* Monitoring
-* High availability
-
-### Phase 8 — Expert Mastery
-
-* InnoDB internals
-* Advanced optimizer behavior
-* Large-scale indexing
-* Replication architecture
-* Cluster architecture
-* Capacity planning
-* Production troubleshooting
-* Database architecture
+- **106. MySQL HeatWave**
+  - MySQL HeatWave
+  - HeatWave setup
+  - HeatWave configuration
+  - HeatWave best practices
 
 ---
 
-# XL. MySQL Mastery Checklist
+# XV. MySQL Projects by Difficulty
 
-* **Beginner**
+## Beginner Projects
 
-  * [ ] Understand relational databases
-  * [ ] Install and connect to MySQL
-  * [ ] Create databases and tables
-  * [ ] Understand MySQL data types
-  * [ ] Write CRUD statements
-  * [ ] Use filtering and sorting
+- **1. Student Database**
+  - Database creation
+  - Tables
+  - CRUD operations
+  - Queries
 
-* **Intermediate**
+- **2. Library Database**
+  - Tables
+  - Relationships
+  - CRUD operations
+  - Queries
 
-  * [ ] Write complex joins
-  * [ ] Use aggregation
-  * [ ] Write subqueries
-  * [ ] Use CTEs
-  * [ ] Design normalized schemas
-  * [ ] Use constraints correctly
+- **3. Blog Database**
+  - Tables
+  - Relationships
+  - CRUD operations
+  - Queries
 
-* **Advanced**
+- **4. Inventory Database**
+  - Tables
+  - Relationships
+  - CRUD operations
+  - Reports
 
-  * [ ] Write window-function queries
-  * [ ] Use recursive CTEs
-  * [ ] Work with JSON
-  * [ ] Create stored procedures/functions
-  * [ ] Understand triggers
-  * [ ] Design transaction boundaries
+- **5. Employee Database**
+  - Tables
+  - Relationships
+  - CRUD operations
+  - Reports
 
-* **Performance**
+---
 
-  * [ ] Design composite indexes
-  * [ ] Read `EXPLAIN`
-  * [ ] Use `EXPLAIN ANALYZE`
-  * [ ] Identify inefficient joins
-  * [ ] Diagnose slow queries
-  * [ ] Understand InnoDB indexes
+## Intermediate Projects
 
-* **Concurrency**
+- **6. E-Commerce Database**
+  - Products
+  - Categories
+  - Customers
+  - Orders
+  - Payments
+  - Reports
 
-  * [ ] Understand ACID
-  * [ ] Understand isolation levels
-  * [ ] Understand row/gap/next-key locks
-  * [ ] Diagnose deadlocks
-  * [ ] Design safe concurrent transactions
+- **7. Social Media Database**
+  - Users
+  - Posts
+  - Comments
+  - Likes
+  - Follows
 
-* **Production**
+- **8. Analytics Database**
+  - Events
+  - Users
+  - Sessions
+  - Aggregations
+  - Reports
 
-  * [ ] Configure users and roles
-  * [ ] Apply least privilege
-  * [ ] Perform backups
-  * [ ] Restore databases
-  * [ ] Understand binary logging
-  * [ ] Configure replication
-  * [ ] Monitor MySQL
-  * [ ] Troubleshoot production workloads
+- **9. Multi-Tenant Database**
+  - Tenant isolation
+  - Shared tables
+  - Tenant schemas
+  - Security
 
-* **Expert**
+- **10. Data Warehouse**
+  - Star schema
+  - Snowflake schema
+  - ETL
+  - Aggregations
+  - Reports
 
-  * [ ] Understand InnoDB internals
-  * [ ] Engineer high-performance indexes
-  * [ ] Optimize complex execution plans
-  * [ ] Design scalable schemas
-  * [ ] Engineer replication/HA architectures
-  * [ ] Perform capacity planning
-  * [ ] Diagnose production incidents
-  * [ ] Make database architecture decisions
+---
 
-### Core progression
+## Advanced Projects
 
-**MySQL Basics → SQL Syntax → CRUD → Filtering → Functions → Aggregation → Joins → Subqueries → CTEs → Set Operations → Views → Window Functions → JSON → Data Modeling → Normalization → InnoDB → Transactions → Locking → Stored Programs → Indexing → EXPLAIN → Query Optimization → Security → Backup/Recovery → Replication → Partitioning → High Availability → Production Operations → MySQL Architecture Mastery**
+- **11. High-Availability Cluster**
+  - InnoDB Cluster
+  - Group Replication
+  - MySQL Router
+  - Failover
+
+- **12. Sharded Database**
+  - Sharding
+  - Vitess
+  - Partitioning
+  - Scaling
+
+- **13. Real-Time Analytics**
+  - Performance Schema
+  - Triggers
+  - Events
+  - Aggregations
+
+- **14. API Backend**
+  - Database design
+  - Stored procedures
+  - Security
+  - Performance
+
+- **15. Data Migration**
+  - Schema migration
+  - Data migration
+  - Validation
+  - Cutover
+
+---
+
+## Expert Projects
+
+- **16. Production Database Platform**
+  - HA
+  - Monitoring
+  - Backup
+  - Security
+  - Scaling
+
+- **17. Multi-Region Deployment**
+  - Replication
+  - Failover
+  - Consistency
+  - Latency
+
+- **18. High-Traffic Application**
+  - Scaling
+  - Caching
+  - Sharding
+  - Performance
+
+- **19. Data Warehouse**
+  - Star schema
+  - ETL
+  - Aggregations
+  - Analytics
+
+- **20. Cloud MySQL Platform**
+  - AWS RDS
+  - Azure Database
+  - Google Cloud SQL
+  - HeatWave
+
+---
+
+# XVI. Progressive MySQL Learning Sequence
+
+## Level 1 — MySQL Fundamentals
+
+- Master:
+  - What MySQL is
+  - Database fundamentals
+  - Relational theory
+  - Installation
+  - MySQL architecture
+  - MySQL client
+  - MySQL Shell
+  - MySQL Workbench
+
+## Level 2 — Data Types
+
+- Master:
+  - Data type fundamentals
+  - Numeric types
+  - String types
+  - Date and time types
+  - JSON types
+  - Spatial types
+  - Other types
+
+## Level 3 — DDL
+
+- Master:
+  - Database operations
+  - Table operations
+  - Column operations
+  - Constraints
+  - Indexes
+  - Views
+  - Schemas
+  - Storage engines
+
+## Level 4 — DML
+
+- Master:
+  - Insert
+  - Update
+  - Delete
+  - Select
+  - Where clause
+  - Order by
+  - Limit
+  - Group by
+  - Joins
+  - Subqueries
+  - Union
+  - CTEs
+  - Window functions
+  - Aggregate functions
+
+## Level 5 — Advanced Queries
+
+- Master:
+  - Query optimization
+  - Index optimization
+  - Query cache
+  - Full-text search
+  - JSON queries
+  - Spatial queries
+  - Regular expressions
+
+## Level 6 — Transactions
+
+- Master:
+  - Transaction fundamentals
+  - Isolation levels
+  - Locking
+  - Deadlocks
+  - MVCC
+
+## Level 7 — Stored Programs
+
+- Master:
+  - Stored procedures
+  - Functions
+  - Triggers
+  - Events
+  - Control flow
+  - Cursors
+  - Handlers
+
+## Level 8 — Users and Security
+
+- Master:
+  - User management
+  - Privileges
+  - Roles
+  - Authentication
+  - Security
+  - Audit
+
+## Level 9 — Backup and Recovery
+
+- Master:
+  - Backup fundamentals
+  - mysqldump
+  - MySQL Shell utilities
+  - Physical backup
+  - Point-in-time recovery
+  - Replication for backup
+
+## Level 10 — Replication
+
+- Master:
+  - Replication fundamentals
+  - Binary log
+  - Replication setup
+  - GTID replication
+  - Group replication
+  - InnoDB Cluster
+  - Replication topologies
+  - Failover
+
+## Level 11 — Performance Optimization
+
+- Master:
+  - Performance fundamentals
+  - Configuration tuning
+  - Query optimization
+  - Index optimization
+  - Schema optimization
+  - Partitioning
+  - Caching
+  - Performance Schema
+  - sys schema
+  - Profiling
+  - Benchmarking
+
+## Level 12 — Scaling
+
+- Master:
+  - Scaling fundamentals
+  - Read scaling
+  - Write scaling
+  - Sharding
+  - Connection pooling
+  - Caching layers
+
+## Level 13 — Production
+
+- Master:
+  - Production fundamentals
+  - Deployment
+  - Monitoring
+  - Logging
+  - Alerting
+  - High availability
+  - Disaster recovery
+
+## Level 14 — Cloud MySQL
+
+- Master:
+  - Cloud MySQL fundamentals
+  - AWS RDS MySQL
+  - Azure Database for MySQL
+  - Google Cloud SQL
+  - MySQL HeatWave
+
+## Level 15 — Production Engineering
+
+- Master:
+  - Database architecture
+  - Security
+  - Performance
+  - Scaling
+  - Monitoring
+  - Backup
+  - Recovery
+  - Production best practices
+
+---
+
+# XVII. Final MySQL Competency Map
+
+- **Foundations**
+
+  - What MySQL is
+  - Database fundamentals
+  - Relational theory
+  - Installation
+  - MySQL architecture
+  - MySQL client
+  - MySQL Shell
+  - MySQL Workbench
+
+- **Data Types**
+
+  - Data type fundamentals
+  - Numeric types
+  - String types
+  - Date and time types
+  - JSON types
+  - Spatial types
+  - Other types
+
+- **DDL**
+
+  - Database operations
+  - Table operations
+  - Column operations
+  - Constraints
+  - Indexes
+  - Views
+  - Schemas
+  - Storage engines
+
+- **DML**
+
+  - Insert
+  - Update
+  - Delete
+  - Select
+  - Where clause
+  - Order by
+  - Limit
+  - Group by
+  - Joins
+  - Subqueries
+  - Union
+  - CTEs
+  - Window functions
+  - Aggregate functions
+
+- **Advanced Queries**
+
+  - Query optimization
+  - Index optimization
+  - Query cache
+  - Full-text search
+  - JSON queries
+  - Spatial queries
+  - Regular expressions
+
+- **Transactions**
+
+  - Transaction fundamentals
+  - Isolation levels
+  - Locking
+  - Deadlocks
+  - MVCC
+
+- **Stored Programs**
+
+  - Stored procedures
+  - Functions
+  - Triggers
+  - Events
+  - Control flow
+  - Cursors
+  - Handlers
+
+- **Users and Security**
+
+  - User management
+  - Privileges
+  - Roles
+  - Authentication
+  - Security
+  - Audit
+
+- **Backup and Recovery**
+
+  - Backup fundamentals
+  - mysqldump
+  - MySQL Shell utilities
+  - Physical backup
+  - Point-in-time recovery
+  - Replication for backup
+
+- **Replication**
+
+  - Replication fundamentals
+  - Binary log
+  - Replication setup
+  - GTID replication
+  - Group replication
+  - InnoDB Cluster
+  - Replication topologies
+  - Failover
+
+- **Performance**
+
+  - Performance fundamentals
+  - Configuration tuning
+  - Query optimization
+  - Index optimization
+  - Schema optimization
+  - Partitioning
+  - Caching
+  - Performance Schema
+  - sys schema
+  - Profiling
+  - Benchmarking
+
+- **Scaling**
+
+  - Scaling fundamentals
+  - Read scaling
+  - Write scaling
+  - Sharding
+  - Connection pooling
+  - Caching layers
+
+- **Production**
+
+  - Production fundamentals
+  - Deployment
+  - Monitoring
+  - Logging
+  - Alerting
+  - High availability
+  - Disaster recovery
+
+- **Cloud**
+
+  - Cloud MySQL fundamentals
+  - AWS RDS MySQL
+  - Azure Database for MySQL
+  - Google Cloud SQL
+  - MySQL HeatWave
+
+---
+
+## Recommended Overall Progression
+
+**MySQL Fundamentals → Data Types → DDL → DML → Advanced Queries → Transactions → Stored Programs → Users and Security → Backup and Recovery → Replication → Performance Optimization → Scaling → Production → Cloud MySQL → Production Engineering**

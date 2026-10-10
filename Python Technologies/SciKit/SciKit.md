@@ -1,1699 +1,1422 @@
 # Scikit-learn Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Machine Learning Concepts to Advanced Practical Mastery
+## From Machine Learning Foundations to Advanced Modeling, Pipelines, Model Selection, and Production ML Engineering
 
-The roadmap below is designed around the core Scikit-learn workflow: **estimators → preprocessing → pipelines → supervised/unsupervised learning → model evaluation → hyperparameter optimization → inspection → production practices**. The current stable Scikit-learn release is **1.9.1**, released in September 2026. ([Scikit-learn][1])
-
----
-
-# I. Python and Mathematical Foundations
-
-* **1. Python Prerequisites**
-
-  * Python syntax
-
-    * Variables
-    * Data types
-    * Operators
-    * Conditional statements
-    * Loops
-  * Functions
-
-    * Parameters
-    * Return values
-    * Lambda functions
-  * Core data structures
-
-    * Lists
-    * Tuples
-    * Dictionaries
-    * Sets
-  * Object-oriented basics
-
-    * Classes
-    * Objects
-    * Methods
-    * Attributes
-  * Modules and packages
-  * Exceptions
-  * Virtual environments
-  * Package management
-
-* **2. NumPy Foundations**
-
-  * Arrays
-  * Dimensions
-  * Shapes
-  * Data types
-  * Indexing
-  * Slicing
-  * Boolean masking
-  * Broadcasting
-  * Vectorized operations
-  * Linear algebra
-
-    * Dot products
-    * Matrix multiplication
-    * Norms
-
-* **3. Pandas Foundations**
-
-  * Series
-  * DataFrames
-  * Indexes
-  * Loading datasets
-  * Selecting columns
-  * Filtering rows
-  * Sorting
-  * Grouping
-  * Aggregation
-  * Missing values
-  * Merging
-  * Joining
-  * Concatenation
-  * Reshaping
-  * Data-type handling
-
-* **4. Mathematical Foundations**
-
-  * Linear algebra
-
-    * Vectors
-    * Matrices
-    * Matrix operations
-    * Eigenvalues
-    * Eigenvectors
-  * Probability
-
-    * Random variables
-    * Probability distributions
-    * Conditional probability
-    * Bayes' theorem
-  * Statistics
-
-    * Mean
-    * Median
-    * Variance
-    * Standard deviation
-    * Covariance
-    * Correlation
-  * Calculus
-
-    * Derivatives
-    * Partial derivatives
-    * Gradients
-    * Optimization
-  * Optimization concepts
-
-    * Objective functions
-    * Loss functions
-    * Regularization
+Scikit-learn is best learned as more than "a library for machine learning models." The progression should cover **Python prerequisites → NumPy/Pandas prerequisites → ML fundamentals → estimators → data preprocessing → feature engineering → supervised learning → unsupervised learning → model evaluation → model selection → pipelines → ensembles → dimensionality reduction → text processing → time series → model persistence → deployment → production ML engineering**.
 
 ---
 
-# II. Machine Learning Foundations
+# I. Scikit-learn Foundations
 
-* **5. Introduction to Machine Learning**
+- **1. What Scikit-learn Is**
+  - Scikit-learn
+  - Scikit-learn history
+  - David Cournapeau
+  - Google Summer of Code
+  - Scikit-learn 0.x
+  - Scikit-learn 1.0
+  - Scikit-learn 1.3
+  - Scikit-learn 1.4
+  - Scikit-learn 1.5
+  - Scikit-learn 1.6 (current)
+  - Scikit-learn philosophy
+    - Simple and efficient
+    - Built on NumPy, SciPy, Matplotlib
+    - Open source
+    - Consistent API
+    - Well documented
+    - Production-ready
+  - Scikit-learn vs TensorFlow
+  - Scikit-learn vs PyTorch
+  - Scikit-learn vs XGBoost
+  - Scikit-learn vs LightGBM
+  - Scikit-learn vs CatBoost
+  - Scikit-learn vs statsmodels
+  - Scikit-learn use cases
+    - Classification
+    - Regression
+    - Clustering
+    - Dimensionality reduction
+    - Model selection
+    - Preprocessing
+    - Feature extraction
+    - Pipeline construction
+    - Anomaly detection
+  - Scikit-learn in modern ML
+  - Scikit-learn ecosystem
+  - Scikit-learn API
+  - Scikit-learn best practices
 
-  * Machine learning definition
-  * AI versus machine learning
-  * Supervised learning
-  * Unsupervised learning
-  * Semi-supervised learning
-  * Reinforcement learning
-  * Features
-  * Targets
-  * Samples
-  * Labels
-  * Training data
-  * Validation data
-  * Test data
+- **2. Prerequisites**
+  - Python fundamentals
+  - Variables
+  - Data types
+  - Control flow
+  - Functions
+  - Classes
+  - Modules
+  - NumPy
+    - ndarray
+    - Indexing
+    - Slicing
+    - Broadcasting
+    - Universal functions
+    - Aggregation
+    - Linear algebra
+    - Random
+  - Pandas
+    - Series
+    - DataFrame
+    - Index
+    - Selection
+    - Cleaning
+    - Transformation
+    - Grouping
+    - Merging
+    - Reshaping
+  - Matplotlib
+    - Plotting
+    - Subplots
+    - Styling
+  - SciPy
+    - Linear algebra
+    - Statistics
+    - Optimization
+  - Jupyter
+    - Notebooks
+    - Cells
+    - Markdown
+  - Machine learning concepts
+  - Prerequisite best practices
 
-* **6. Core ML Concepts**
+- **3. Machine Learning Foundations**
+  - Machine learning
+  - Supervised learning
+  - Unsupervised learning
+  - Semi-supervised learning
+  - Reinforcement learning
+  - Classification
+  - Regression
+  - Clustering
+  - Dimensionality reduction
+  - Anomaly detection
+  - Features
+  - Labels
+  - Targets
+  - Training data
+  - Validation data
+  - Test data
+  - Overfitting
+  - Underfitting
+  - Bias-variance tradeoff
+  - Regularization
+  - Cross-validation
+  - Model evaluation
+  - Model selection
+  - Hyperparameter tuning
+  - ML workflow
+  - ML best practices
 
-  * Model
-  * Parameters
-  * Hyperparameters
-  * Training
-  * Prediction
-  * Generalization
-  * Bias
-  * Variance
-  * Overfitting
-  * Underfitting
-  * Model complexity
+- **4. Installing Scikit-learn**
+  - Installation
+    - pip
+    - conda
+    - mamba
+    - uv
+    - Poetry
+  - `pip install scikit-learn`
+  - `conda install scikit-learn`
+  - Version checking
+  - `sklearn.__version__`
+  - Dependencies
+    - NumPy
+    - SciPy
+    - joblib
+    - threadpoolctl
+  - Optional dependencies
+    - Matplotlib
+    - Pandas
+    - Seaborn
+    - Plotly
+  - Pre-built wheels
+  - Platform-specific installation
+  - Installation best practices
 
-* **7. The Standard ML Workflow**
+- **5. Importing Scikit-learn**
+  - `import sklearn`
+  - Subpackage imports
+    - `from sklearn import ...`
+    - `from sklearn.linear_model import ...`
+    - `from sklearn.tree import ...`
+    - `from sklearn.ensemble import ...`
+    - `from sklearn.cluster import ...`
+    - `from sklearn.preprocessing import ...`
+    - `from sklearn.model_selection import ...`
+    - `from sklearn.metrics import ...`
+    - `from sklearn.pipeline import ...`
+    - `from sklearn.decomposition import ...`
+    - `from sklearn.feature_selection import ...`
+    - `from sklearn.feature_extraction import ...`
+    - `from sklearn.svm import ...`
+    - `from sklearn.neighbors import ...`
+    - `from sklearn.naive_bayes import ...`
+    - `from sklearn.neural_network import ...`
+  - Import best practices
+  - Namespace conventions
 
-  * Define the problem
-  * Acquire data
-  * Explore data
-  * Clean data
-  * Split data
-  * Preprocess features
-  * Select baseline model
-  * Train
-  * Validate
-  * Tune
-  * Evaluate
-  * Interpret
-  * Deploy
+- **6. Scikit-learn API**
+  - Estimator API
+  - `fit()`
+  - `predict()`
+  - `transform()`
+  - `fit_transform()`
+  - `predict_proba()`
+  - `predict_log_proba()`
+  - `decision_function()`
+  - `score()`
+  - `get_params()`
+  - `set_params()`
+  - Estimator types
+    - Estimators
+    - Transformers
+    - Predictors
+    - Meta-estimators
+  - Consistency
+  - API best practices
 
----
-
-# III. Scikit-learn Fundamentals
-
-Scikit-learn uses a consistent estimator-oriented API, where estimators commonly expose methods such as `fit`, `predict`, and, where appropriate, `transform` and `fit_transform`. Its current documentation organizes functionality around supervised learning, unsupervised learning, model selection/evaluation, inspection, preprocessing, computational utilities, model persistence, and common pitfalls. ([Scikit-learn][1])
-
-* **8. Installation and Environment**
-
-  * Installing Scikit-learn
-  * Virtual environments
-  * Dependency management
-  * Version management
-  * Importing modules
-  * Checking installed versions
-
-* **9. Estimator API**
-
-  * Estimators
-  * Transformers
-  * Predictors
-  * `fit()`
-  * `predict()`
-  * `transform()`
-  * `fit_transform()`
-  * `fit_predict()`
-  * Model attributes
-  * Hyperparameters
-
-    * `get_params()`
-    * `set_params()`
-
-* **10. Dataset Handling**
-
-  * NumPy arrays
-  * Pandas DataFrames
-  * Sparse matrices
-  * Feature matrices `X`
-  * Target vectors `y`
-  * Dataset shape
-  * Feature names
-  * Target encoding
-
-* **11. Built-in Dataset Utilities**
-
-  * Toy datasets
-  * Real-world datasets
-  * Synthetic datasets
-  * Train/test splitting
-  * Dataset generation
-
----
-
-# IV. Exploratory Data Analysis for ML
-
-* **12. Understanding the Dataset**
-
-  * Dataset dimensions
-  * Feature distributions
-  * Target distribution
-  * Feature types
-  * Missing values
-  * Duplicate observations
-  * Outliers
-
-* **13. Statistical Exploration**
-
-  * Descriptive statistics
-  * Distribution analysis
-  * Correlation
-  * Covariance
-  * Group-level statistics
-  * Class balance
-
-* **14. Visualization**
-
-  * Histograms
-  * Box plots
-  * Scatter plots
-  * Pairwise relationships
-  * Classification boundaries
-  * Residual plots
-  * Learning curves
-  * Validation curves
-
----
-
-# V. Data Preprocessing
-
-Scikit-learn's transformers implement learned preprocessing through `fit` and apply it through `transform`; preprocessing can be composed through pipelines and column-wise transformations. ([Scikit-learn][2])
-
-* **15. Feature Scaling**
-
-  * Standardization
-
-    * `StandardScaler`
-  * Min-max scaling
-
-    * `MinMaxScaler`
-  * Robust scaling
-
-    * `RobustScaler`
-  * Maximum-absolute scaling
-
-    * `MaxAbsScaler`
-  * When scaling matters
-
-    * Distance-based models
-    * Linear models
-    * Neural networks
-    * Kernel methods
-
-* **16. Categorical Encoding**
-
-  * One-hot encoding
-
-    * `OneHotEncoder`
-  * Ordinal encoding
-
-    * `OrdinalEncoder`
-  * Encoding unknown categories
-  * Handling high-cardinality features
-  * Choosing appropriate encoding strategies
-
-* **17. Missing-Value Handling**
-
-  * Detecting missing data
-  * Simple imputation
-
-    * Mean
-    * Median
-    * Most frequent
-    * Constant
-  * Iterative imputation
-  * Nearest-neighbor imputation
-  * Missing indicators
-  * Avoiding leakage during imputation
-
-* **18. Feature Transformation**
-
-  * Power transformations
-  * Quantile transformations
-  * Polynomial features
-  * Function transformers
-  * Distribution normalization
-
-* **19. Outlier Handling**
-
-  * Outlier detection
-  * Robust scaling
-  * Quantile-based approaches
-  * Isolation-based approaches
-  * Domain-specific treatment
+- **7. First Scikit-learn Model**
+  - Dataset loading
+  - Train-test split
+  - Model creation
+  - Model training
+  - Model prediction
+  - Model evaluation
+  - First model best practices
 
 ---
 
-# VI. Feature Engineering
+# II. Data Preprocessing
 
-* **20. Numerical Feature Engineering**
+- **8. Preprocessing Fundamentals**
+  - Preprocessing
+  - Data cleaning
+  - Data transformation
+  - Data scaling
+  - Data encoding
+  - Preprocessing best practices
 
-  * Ratios
-  * Differences
-  * Aggregates
-  * Log transformations
-  * Polynomial interactions
-  * Binning
-  * Ranking
+- **9. Scaling**
+  - Standardization
+    - `StandardScaler`
+  - Normalization
+    - `MinMaxScaler`
+    - `MaxAbsScaler`
+  - Robust scaling
+    - `RobustScaler`
+  - Normalizer
+    - `Normalizer`
+  - Scaling best practices
 
-* **21. Categorical Feature Engineering**
+- **10. Encoding Categorical Variables**
+  - Label encoding
+    - `LabelEncoder`
+  - Ordinal encoding
+    - `OrdinalEncoder`
+  - One-hot encoding
+    - `OneHotEncoder`
+  - Target encoding
+  - Binary encoding
+  - Frequency encoding
+  - Encoding best practices
 
-  * Category consolidation
-  * Rare-category handling
-  * Interaction features
-  * Frequency-based representations
+- **11. Discretization**
+  - Discretization
+  - `KBinsDiscretizer`
+  - Binning strategies
+    - `uniform`
+    - `quantile`
+    - `kmeans`
+  - Discretization best practices
 
-* **22. Date and Time Features**
+- **12. Imputation**
+  - Missing data
+  - `SimpleImputer`
+  - Imputation strategies
+    - `mean`
+    - `median`
+    - `most_frequent`
+    - `constant`
+  - `KNNImputer`
+  - `IterativeImputer`
+  - Imputation best practices
 
-  * Year
-  * Month
-  * Day
-  * Week
-  * Day of week
-  * Time intervals
-  * Cyclical representations
+- **13. Polynomial Features**
+  - Polynomial features
+  - `PolynomialFeatures`
+  - Degree
+  - Interaction terms
+  - Polynomial feature best practices
 
-* **23. Feature Interaction**
-
-  * Polynomial interaction terms
-  * Domain-driven interactions
-  * Interaction discovery
-  * Feature crosses
-
----
-
-# VII. Feature Selection
-
-* **24. Why Feature Selection Matters**
-
-  * Reduce dimensionality
-  * Reduce noise
-  * Improve interpretability
-  * Reduce computational cost
-  * Potentially improve generalization
-
-* **25. Filter Methods**
-
-  * Variance threshold
-  * Univariate statistical tests
-  * Correlation-based selection
-
-* **26. Wrapper Methods**
-
-  * Recursive feature elimination
-  * Recursive feature elimination with cross-validation
-
-* **27. Embedded Methods**
-
-  * L1 regularization
-  * Tree-based importance
-  * Model-based selection
-
-* **28. Selection Pitfalls**
-
-  * Data leakage
-  * Selection before splitting
-  * Selection using test data
-  * Unstable feature importance
+- **14. Custom Transformers**
+  - Custom transformers
+  - `FunctionTransformer`
+  - `TransformerMixin`
+  - Custom transformer best practices
 
 ---
 
-# VIII. Pipelines and Composite Estimators
+# III. Feature Engineering and Selection
 
-Pipelines are central to robust Scikit-learn workflows because preprocessing and estimation can be combined into a single composite estimator. `ColumnTransformer` is particularly useful when different feature columns require different transformations. ([Scikit-learn][2])
+- **15. Feature Engineering Fundamentals**
+  - Feature engineering
+  - Feature creation
+  - Feature transformation
+  - Feature interaction
+  - Feature extraction
+  - Feature engineering best practices
 
-* **29. Pipeline Fundamentals**
+- **16. Feature Selection**
+  - Feature selection
+  - Filter methods
+    - `VarianceThreshold`
+    - `SelectKBest`
+    - `SelectPercentile`
+    - `SelectFpr`
+    - `SelectFdr`
+    - `SelectFwe`
+    - `GenericUnivariateSelect`
+  - Wrapper methods
+    - `RFE`
+    - `RFECV`
+    - `SequentialFeatureSelector`
+  - Embedded methods
+    - `SelectFromModel`
+  - Feature selection best practices
 
-  * `Pipeline`
-  * Sequential transformations
-  * Transformer → estimator
-  * `fit`
-  * `predict`
-  * Accessing pipeline steps
+- **17. Feature Extraction**
+  - Feature extraction
+  - `PCA`
+  - `TruncatedSVD`
+  - `NMF`
+  - `FastICA`
+  - `FactorAnalysis`
+  - `DictionaryLearning`
+  - `LatentDirichletAllocation`
+  - `MiniBatchDictionaryLearning`
+  - `SparsePCA`
+  - `MiniBatchSparsePCA`
+  - `KernelPCA`
+  - `IncrementalPCA`
+  - Feature extraction best practices
 
-* **30. ColumnTransformer**
-
-  * Numerical preprocessing
-  * Categorical preprocessing
-  * Different transformations by column
-  * Combining multiple preprocessing branches
-
-* **31. FeatureUnion and Feature Composition**
-
-  * Parallel feature transformations
-  * Combining feature spaces
-  * Complex preprocessing architectures
-
-* **32. Pipeline Hyperparameters**
-
-  * Nested parameter names
-  * Tuning preprocessing
-  * Tuning the final estimator
-  * Pipeline-aware cross-validation
-
-* **33. Pipeline Best Practices**
-
-  * Preventing leakage
-  * Reproducibility
-  * Consistent training/inference transformations
-  * Encapsulating preprocessing
-  * Building reusable workflows
-
----
-
-# IX. Regression
-
-* **34. Linear Regression**
-
-  * Ordinary least squares
-  * Assumptions
-  * Coefficients
-  * Predictions
-  * Residuals
-
-* **35. Regularized Linear Regression**
-
-  * Ridge
-  * Lasso
-  * Elastic Net
-  * Regularization strength
-  * Feature shrinkage
-  * Sparse coefficients
-
-* **36. Polynomial Regression**
-
-  * Polynomial features
-  * Nonlinear relationships
-  * Degree selection
-  * Overfitting
-
-* **37. Robust Regression**
-
-  * Handling outliers
-  * RANSAC
-  * Huber regression
-  * Theil-Sen regression
-
-* **38. Generalized Linear Models**
-
-  * Link functions
-  * Distribution assumptions
-  * Poisson-style regression
-  * Gamma-style regression
-  * Tweedie models
-
-* **39. Regression Evaluation**
-
-  * MAE
-  * MSE
-  * RMSE
-  * R²
-  * Adjusted-analysis concepts
-  * Explained variance
-  * Quantile-based metrics
+- **18. Feature Importance**
+  - Feature importance
+  - Tree-based importance
+  - Permutation importance
+  - `permutation_importance`
+  - SHAP
+  - Feature importance best practices
 
 ---
 
-# X. Classification
+# IV. Supervised Learning
 
-* **40. Logistic Regression**
+- **19. Supervised Learning Fundamentals**
+  - Supervised learning
+  - Classification
+  - Regression
+  - Supervised learning best practices
 
-  * Binary classification
-  * Multiclass classification
-  * Decision scores
-  * Probabilities
-  * Regularization
+- **20. Linear Models**
+  - Linear regression
+    - `LinearRegression`
+  - Ridge regression
+    - `Ridge`
+    - `RidgeCV`
+  - Lasso regression
+    - `Lasso`
+    - `LassoCV`
+    - `LassoLars`
+    - `LassoLarsCV`
+    - `LassoLarsIC`
+  - Elastic Net
+    - `ElasticNet`
+    - `ElasticNetCV`
+  - Orthogonal matching pursuit
+    - `OrthogonalMatchingPursuit`
+    - `OrthogonalMatchingPursuitCV`
+  - Bayesian regression
+    - `BayesianRidge`
+    - `ARDRegression`
+  - Logistic regression
+    - `LogisticRegression`
+    - `LogisticRegressionCV`
+  - Perceptron
+    - `Perceptron`
+  - Passive aggressive
+    - `PassiveAggressiveClassifier`
+    - `PassiveAggressiveRegressor`
+  - SGD
+    - `SGDClassifier`
+    - `SGDRegressor`
+  - Huber regression
+    - `HuberRegressor`
+  - Quantile regression
+    - `QuantileRegressor`
+  - RANSAC
+    - `RANSACRegressor`
+  - Theil-Sen
+    - `TheilSenRegressor`
+  - Polynomial regression
+  - Linear model best practices
 
-* **41. Nearest Neighbors**
+- **21. Support Vector Machines**
+  - SVM
+  - `SVC`
+  - `SVR`
+  - `NuSVC`
+  - `NuSVR`
+  - `LinearSVC`
+  - `LinearSVR`
+  - `OneClassSVM`
+  - Kernels
+    - `linear`
+    - `poly`
+    - `rbf`
+    - `sigmoid`
+    - `precomputed`
+  - SVM best practices
 
-  * K-nearest neighbors
-  * Distance metrics
-  * Choosing `k`
-  * Classification versus regression
+- **22. Nearest Neighbors**
+  - KNN
+  - `KNeighborsClassifier`
+  - `KNeighborsRegressor`
+  - `RadiusNeighborsClassifier`
+  - `RadiusNeighborsRegressor`
+  - `NearestCentroid`
+  - `NearestNeighbors`
+  - `KNeighborsTransformer`
+  - `RadiusNeighborsTransformer`
+  - `LocalOutlierFactor`
+  - KNN best practices
 
-* **42. Naive Bayes**
+- **23. Naive Bayes**
+  - Naive Bayes
+  - `GaussianNB`
+  - `MultinomialNB`
+  - `ComplementNB`
+  - `BernoulliNB`
+  - `CategoricalNB`
+  - Naive Bayes best practices
 
-  * Gaussian Naive Bayes
-  * Multinomial Naive Bayes
-  * Bernoulli Naive Bayes
-  * Probabilistic assumptions
+- **24. Decision Trees**
+  - Decision trees
+  - `DecisionTreeClassifier`
+  - `DecisionTreeRegressor`
+  - `ExtraTreeClassifier`
+  - `ExtraTreeRegressor`
+  - Tree parameters
+    - `criterion`
+    - `splitter`
+    - `max_depth`
+    - `min_samples_split`
+    - `min_samples_leaf`
+    - `min_weight_fraction_leaf`
+    - `max_features`
+    - `random_state`
+    - `max_leaf_nodes`
+    - `min_impurity_decrease`
+    - `class_weight`
+    - `ccp_alpha`
+  - Decision tree best practices
 
-* **43. Decision Trees**
+- **25. Ensemble Methods**
+  - Ensembles
+  - Bagging
+    - `BaggingClassifier`
+    - `BaggingRegressor`
+  - Random forests
+    - `RandomForestClassifier`
+    - `RandomForestRegressor`
+  - Extra trees
+    - `ExtraTreesClassifier`
+    - `ExtraTreesRegressor`
+  - Boosting
+    - `AdaBoostClassifier`
+    - `AdaBoostRegressor`
+    - `GradientBoostingClassifier`
+    - `GradientBoostingRegressor`
+    - `HistGradientBoostingClassifier`
+    - `HistGradientBoostingRegressor`
+  - Voting
+    - `VotingClassifier`
+    - `VotingRegressor`
+  - Stacking
+    - `StackingClassifier`
+    - `StackingRegressor`
+  - Ensemble best practices
 
-  * Tree construction
-  * Splits
-  * Impurity
+- **26. Neural Networks**
+  - Neural networks
+  - `MLPClassifier`
+  - `MLPRegressor`
+  - `BernoulliRBM`
+  - `MLPClassifier` parameters
+  - `MLPRegressor` parameters
+  - Neural network best practices
 
-    * Gini
-    * Entropy
-  * Tree depth
-  * Pruning concepts
-  * Feature importance
+- **27. Gaussian Processes**
+  - Gaussian processes
+  - `GaussianProcessClassifier`
+  - `GaussianProcessRegressor`
+  - Kernels
+  - Gaussian process best practices
 
-* **44. Support Vector Machines**
-
-  * Linear SVM
-  * Kernel SVM
-  * Margin
-  * Support vectors
-  * Kernel functions
-  * Regularization
-  * Parameter tuning
-
----
-
-# XI. Tree Ensembles
-
-* **45. Random Forests**
-
-  * Bagging
-  * Random feature selection
-  * Ensemble averaging
-  * Classification
-  * Regression
-  * Feature importance
-
-* **46. Extremely Randomized Trees**
-
-  * Extra Trees
-  * Randomized splits
-  * Bias/variance behavior
-
-* **47. Gradient Boosting**
-
-  * Sequential learning
-  * Weak learners
-  * Learning rate
-  * Number of estimators
-  * Tree depth
-
-* **48. HistGradientBoosting**
-
-  * Histogram-based learning
-  * Computational efficiency
-  * Large tabular datasets
-  * Classification
-  * Regression
-
-* **49. Ensemble Strategy**
-
-  * Bagging versus boosting
-  * Bias/variance trade-offs
-  * Diversity among estimators
-  * Ensemble interpretability
-
----
-
-# XII. Model Evaluation
-
-Scikit-learn provides dedicated model-selection and evaluation facilities covering cross-validation, hyperparameter tuning, metrics/scoring, and validation/learning curves. ([Scikit-learn][3])
-
-* **50. Train/Validation/Test Splits**
-
-  * Training set
-  * Validation set
-  * Test set
-  * Holdout evaluation
-  * Repeated evaluation
-
-* **51. Cross-Validation**
-
-  * K-fold cross-validation
-  * Stratified K-fold
-  * Repeated cross-validation
-  * Leave-one-out
-  * Group-based CV
-  * Time-series-aware splitting
-
-* **52. Classification Metrics**
-
-  * Accuracy
-  * Precision
-  * Recall
-  * F1
-  * ROC-AUC
-  * PR-AUC
-  * Log loss
-  * Confusion matrix
-  * Balanced accuracy
-  * Matthews correlation coefficient
-
-* **53. Regression Metrics**
-
-  * MAE
-  * MSE
-  * RMSE
-  * R²
-  * Mean absolute percentage concepts
-  * Median absolute error
-  * Quantile-related metrics
-
-* **54. Metric Selection**
-
-  * Matching metric to business objective
-  * Imbalanced classification
-  * Cost-sensitive evaluation
-  * Ranking metrics
-  * Probability-quality evaluation
-
----
-
-# XIII. Hyperparameter Optimization
-
-* **55. Hyperparameter Fundamentals**
-
-  * Parameters versus hyperparameters
-  * Manual tuning
-  * Search spaces
-  * Validation strategy
-
-* **56. Grid Search**
-
-  * `GridSearchCV`
-  * Parameter grids
-  * Cross-validation
-  * Best estimator
-  * Best score
-
-* **57. Randomized Search**
-
-  * `RandomizedSearchCV`
-  * Probability distributions
-  * Search-budget control
-  * Large hyperparameter spaces
-
-* **58. Advanced Search Concepts**
-
-  * Successive halving
-  * Resource allocation
-  * Multi-metric scoring
-  * Custom scoring
-  * Nested cross-validation
-
-* **59. Hyperparameter Tuning Strategy**
-
-  * Establish baseline
-  * Tune high-impact parameters
-  * Avoid unnecessary search
-  * Compare models fairly
-  * Preserve a final untouched test set
+- **28. Linear Discriminant Analysis**
+  - LDA
+  - `LinearDiscriminantAnalysis`
+  - `QuadraticDiscriminantAnalysis`
+  - LDA best practices
 
 ---
 
-# XIV. Imbalanced Learning
+# V. Unsupervised Learning
 
-* **60. Class Imbalance**
+- **29. Unsupervised Learning Fundamentals**
+  - Unsupervised learning
+  - Clustering
+  - Dimensionality reduction
+  - Anomaly detection
+  - Unsupervised learning best practices
 
-  * Imbalanced targets
-  * Rare-event classification
-  * Majority/minority classes
-  * Accuracy pitfalls
+- **30. Clustering**
+  - K-Means
+    - `KMeans`
+    - `MiniBatchKMeans`
+  - Affinity Propagation
+    - `AffinityPropagation`
+  - Mean Shift
+    - `MeanShift`
+  - Spectral Clustering
+    - `SpectralClustering`
+  - Hierarchical Clustering
+    - `AgglomerativeClustering`
+    - `FeatureAgglomeration`
+  - DBSCAN
+    - `DBSCAN`
+  - HDBSCAN
+  - OPTICS
+    - `OPTICS`
+  - Birch
+    - `Birch`
+  - Gaussian Mixture Models
+    - `GaussianMixture`
+    - `BayesianGaussianMixture`
+  - Clustering best practices
 
-* **61. Evaluation**
+- **31. Dimensionality Reduction**
+  - PCA
+    - `PCA`
+    - `IncrementalPCA`
+    - `KernelPCA`
+    - `SparsePCA`
+    - `MiniBatchSparsePCA`
+  - Truncated SVD
+    - `TruncatedSVD`
+  - NMF
+    - `NMF`
+  - ICA
+    - `FastICA`
+  - Factor Analysis
+    - `FactorAnalysis`
+  - Dictionary Learning
+    - `DictionaryLearning`
+    - `MiniBatchDictionaryLearning`
+  - LDA
+    - `LatentDirichletAllocation`
+  - Manifold learning
+    - `TSNE`
+    - `Isomap`
+    - `LocallyLinearEmbedding`
+    - `SpectralEmbedding`
+    - `MDS`
+  - Dimensionality reduction best practices
 
-  * Precision
-  * Recall
-  * F1
-  * PR-AUC
-  * ROC-AUC
-  * Confusion matrices
+- **32. Anomaly Detection**
+  - Anomaly detection
+  - `IsolationForest`
+  - `LocalOutlierFactor`
+  - `OneClassSVM`
+  - `EllipticEnvelope`
+  - `Covariance`
+  - Anomaly detection best practices
 
-* **62. Model-Level Strategies**
-
-  * Class weights
-  * Threshold adjustment
-  * Cost-sensitive learning
-
-* **63. Sampling Concepts**
-
-  * Oversampling
-  * Undersampling
-  * Synthetic sampling concepts
-  * Leakage-aware resampling
-
----
-
-# XV. Model Calibration and Decision Thresholds
-
-* **64. Probability Calibration**
-
-  * Predicted probabilities
-  * Calibration concepts
-  * Reliability diagrams
-  * Calibration curves
-
-* **65. Calibration Methods**
-
-  * Sigmoid calibration
-  * Isotonic calibration
-  * Cross-validation-aware calibration
-
-* **66. Threshold Optimization**
-
-  * Default threshold
-  * Precision/recall trade-offs
-  * Cost-based threshold selection
-  * Business-rule thresholds
-
----
-
-# XVI. Unsupervised Learning
-
-* **67. Clustering**
-
-  * K-means
-  * Mini-batch K-means
-  * Hierarchical clustering
-  * Agglomerative clustering
-  * DBSCAN
-  * OPTICS
-  * Spectral clustering
-  * Gaussian mixture models
-
-* **68. Clustering Concepts**
-
-  * Distance metrics
-  * Cluster initialization
-  * Number of clusters
-  * Density-based clustering
-  * Cluster validation
-
-* **69. Clustering Evaluation**
-
-  * Silhouette score
-  * Calinski-Harabasz concepts
-  * Davies-Bouldin concepts
-  * External validation when labels exist
+- **33. Novelty Detection**
+  - Novelty detection
+  - `OneClassSVM`
+  - `LocalOutlierFactor` with `novelty=True`
+  - `IsolationForest` with `novelty=True`
+  - Novelty detection best practices
 
 ---
 
-# XVII. Dimensionality Reduction
+# VI. Model Evaluation
 
-* **70. Principal Component Analysis**
+- **34. Model Evaluation Fundamentals**
+  - Model evaluation
+  - Evaluation metrics
+  - Cross-validation
+  - Holdout validation
+  - Evaluation best practices
 
-  * PCA fundamentals
-  * Variance maximization
-  * Components
-  * Explained variance
-  * Whitening
+- **35. Classification Metrics**
+  - Accuracy
+    - `accuracy_score`
+  - Precision
+    - `precision_score`
+  - Recall
+    - `recall_score`
+  - F1 score
+    - `f1_score`
+  - F-beta score
+    - `fbeta_score`
+  - ROC AUC
+    - `roc_auc_score`
+    - `roc_curve`
+  - Precision-Recall AUC
+    - `precision_recall_curve`
+    - `auc`
+  - Confusion matrix
+    - `confusion_matrix`
+    - `ConfusionMatrixDisplay`
+  - Classification report
+    - `classification_report`
+  - Balanced accuracy
+    - `balanced_accuracy_score`
+  - Matthews correlation
+    - `matthews_corrcoef`
+  - Cohen's kappa
+    - `cohen_kappa_score`
+  - Jaccard similarity
+    - `jaccard_score`
+  - Hamming loss
+    - `hamming_loss`
+  - Log loss
+    - `log_loss`
+  - Brier score
+    - `brier_score_loss`
+  - Classification metric best practices
 
-* **71. Truncated SVD**
+- **36. Regression Metrics**
+  - Mean squared error
+    - `mean_squared_error`
+  - Root mean squared error
+    - `root_mean_squared_error`
+  - Mean absolute error
+    - `mean_absolute_error`
+  - Mean absolute percentage error
+    - `mean_absolute_percentage_error`
+  - R² score
+    - `r2_score`
+  - Adjusted R²
+  - Explained variance
+    - `explained_variance_score`
+  - Median absolute error
+    - `median_absolute_error`
+  - Max error
+    - `max_error`
+  - Mean squared log error
+    - `mean_squared_log_error`
+  - Regression metric best practices
 
-  * Sparse matrices
-  * Latent representations
-  * Text feature reduction
+- **37. Clustering Metrics**
+  - Adjusted Rand Index
+    - `adjusted_rand_score`
+  - Rand Index
+    - `rand_score`
+  - Adjusted Mutual Information
+    - `adjusted_mutual_info_score`
+  - Normalized Mutual Information
+    - `normalized_mutual_info_score`
+  - Mutual Information
+    - `mutual_info_score`
+  - Homogeneity
+    - `homogeneity_score`
+  - Completeness
+    - `completeness_score`
+  - V-measure
+    - `v_measure_score`
+  - Fowlkes-Mallows
+    - `fowlkes_mallows_score`
+  - Silhouette coefficient
+    - `silhouette_score`
+    - `silhouette_samples`
+  - Calinski-Harabasz
+    - `calinski_harabasz_score`
+  - Davies-Bouldin
+    - `davies_bouldin_score`
+  - Clustering metric best practices
 
-* **72. Other Dimensionality Reduction Methods**
+- **38. Cross-Validation**
+  - Cross-validation
+  - `cross_val_score`
+  - `cross_validate`
+  - `cross_val_predict`
+  - K-Fold
+    - `KFold`
+  - Stratified K-Fold
+    - `StratifiedKFold`
+  - Group K-Fold
+    - `GroupKFold`
+  - Stratified Group K-Fold
+    - `StratifiedGroupKFold`
+  - Leave-One-Out
+    - `LeaveOneOut`
+  - Leave-P-Out
+    - `LeavePOut`
+  - Shuffle Split
+    - `ShuffleSplit`
+  - Stratified Shuffle Split
+    - `StratifiedShuffleSplit`
+  - Group Shuffle Split
+    - `GroupShuffleSplit`
+  - Time Series Split
+    - `TimeSeriesSplit`
+  - Repeated K-Fold
+    - `RepeatedKFold`
+  - Repeated Stratified K-Fold
+    - `RepeatedStratifiedKFold`
+  - Cross-validation best practices
 
-  * Random projection
-  * Non-negative matrix factorization
-  * Manifold learning
+- **39. Learning Curves**
+  - Learning curves
+  - `learning_curve`
+  - Validation curves
+  - `validation_curve`
+  - Learning curve best practices
 
-    * Isomap
-    * Locally Linear Embedding
-    * Spectral Embedding
-    * t-SNE
-
-* **73. Practical Applications**
-
-  * Visualization
-  * Noise reduction
-  * Compression
-  * Feature preprocessing
-
----
-
-# XVIII. Mixture Models and Probabilistic Learning
-
-* **74. Gaussian Mixture Models**
-
-  * Mixture components
-  * Covariance structures
-  * Soft clustering
-  * Density estimation
-
-* **75. Expectation-Maximization**
-
-  * Latent variables
-  * E-step
-  * M-step
-  * Convergence
-
-* **76. Density Estimation**
-
-  * Kernel density estimation
-  * Probability density modeling
-  * Anomaly-oriented applications
-
----
-
-# XIX. Anomaly and Novelty Detection
-
-* **77. Outlier Detection**
-
-  * Statistical outliers
-  * Distribution-based approaches
-  * Model-based approaches
-
-* **78. Scikit-learn Methods**
-
-  * Isolation Forest
-  * Local Outlier Factor
-  * One-Class SVM
-  * Elliptic Envelope
-
-* **79. Practical Considerations**
-
-  * Contamination assumptions
-  * Novelty detection
-  * Outlier scoring
-  * Threshold selection
-
----
-
-# XX. Semi-Supervised Learning
-
-* **80. Semi-Supervised Fundamentals**
-
-  * Labeled data
-  * Unlabeled data
-  * Mixed training sets
-  * Why semi-supervised learning is useful
-
-* **81. Algorithms**
-
-  * Label propagation
-  * Label spreading
-  * Self-training concepts
-
-* **82. Practical Considerations**
-
-  * Quality of pseudo-labels
-  * Label noise
-  * Validation strategies
-
----
-
-# XXI. Feature Extraction
-
-* **83. Text Feature Extraction**
-
-  * Bag of words
-  * `CountVectorizer`
-  * TF-IDF
-  * `TfidfVectorizer`
-  * N-grams
-  * Vocabulary management
-
-* **84. Text Classification**
-
-  * Sparse matrices
-  * Naive Bayes
-  * Logistic regression
-  * Linear SVM
-  * Text pipelines
-
-* **85. Feature Hashing**
-
-  * Hashing trick
-  * Memory efficiency
-  * Streaming-style feature construction
-
-* **86. Dictionary-Based Features**
-
-  * Feature extraction from mappings
-  * Mixed structured inputs
-
----
-
-# XXII. Multiclass and Multioutput Learning
-
-* **87. Multiclass Classification**
-
-  * One-vs-rest
-  * One-vs-one
-  * Native multiclass estimators
-
-* **88. Multioutput Learning**
-
-  * Multioutput regression
-  * Multi-label classification
-  * Multiple targets
-
-* **89. Problem Transformation**
-
-  * Binary decomposition
-  * Label powerset concepts
-  * Independent estimators
+- **40. Evaluation Visualization**
+  - `ConfusionMatrixDisplay`
+  - `RocCurveDisplay`
+  - `PrecisionRecallDisplay`
+  - `DetCurveDisplay`
+  - `PredictionErrorDisplay`
+  - `LearningCurveDisplay`
+  - `ValidationCurveDisplay`
+  - Evaluation visualization best practices
 
 ---
 
-# XXIII. Ensemble Learning
+# VII. Model Selection and Hyperparameter Tuning
 
-* **90. Voting**
+- **41. Model Selection Fundamentals**
+  - Model selection
+  - Hyperparameter tuning
+  - Grid search
+  - Random search
+  - Bayesian optimization
+  - Model selection best practices
 
-  * Hard voting
-  * Soft voting
-  * Regression voting
+- **42. Grid Search**
+  - `GridSearchCV`
+  - Parameter grid
+  - Cross-validation
+  - Scoring
+  - Grid search best practices
 
-* **91. Bagging**
+- **43. Random Search**
+  - `RandomizedSearchCV`
+  - Parameter distributions
+  - Number of iterations
+  - Random search best practices
 
-  * Bootstrap aggregation
-  * Base estimator diversity
+- **44. Halving Search**
+  - `HalvingGridSearchCV`
+  - `HalvingRandomSearchCV`
+  - Halving search best practices
 
-* **92. Randomized Ensembles**
+- **45. Bayesian Optimization**
+  - Bayesian optimization
+  - `BayesSearchCV` (scikit-optimize)
+  - Optuna
+  - Hyperopt
+  - Bayesian optimization best practices
 
-  * Random forests
-  * Extra trees
+- **46. Model Selection Utilities**
+  - `cross_val_score`
+  - `cross_validate`
+  - `cross_val_predict`
+  - `learning_curve`
+  - `validation_curve`
+  - `permutation_test_score`
+  - Model selection utility best practices
 
-* **93. Boosting**
-
-  * AdaBoost
-  * Gradient boosting
-  * Histogram gradient boosting
-
-* **94. Stacking**
-
-  * Base estimators
-  * Meta-estimator
-  * Cross-validated stacking
-  * Avoiding leakage
-
----
-
-# XXIV. Model Inspection and Interpretability
-
-Scikit-learn provides inspection functionality for understanding how trained models use features, including tools such as permutation importance and partial-dependence-style analysis. ([Scikit-learn][4])
-
-* **95. Feature Importance**
-
-  * Tree-based importance
-  * Permutation importance
-  * Importance instability
-  * Correlated-feature problems
-
-* **96. Partial Dependence**
-
-  * Partial dependence plots
-  * Marginal effects
-  * Feature interactions
-
-* **97. Individual Conditional Expectation**
-
-  * Per-sample prediction behavior
-  * Heterogeneous effects
-
-* **98. Model Inspection**
-
-  * Decision boundaries
-  * Residual analysis
-  * Prediction errors
-  * Calibration
-  * Error segmentation
-
-* **99. Explainability Limitations**
-
-  * Correlation versus causation
-  * Feature leakage
-  * Extrapolation
-  * Model-specific versus model-agnostic interpretation
+- **47. Model Persistence**
+  - Model persistence
+  - `joblib.dump`
+  - `joblib.load`
+  - `pickle`
+  - ONNX
+  - Model persistence best practices
 
 ---
 
-# XXV. Statistical Learning and Regularization
+# VIII. Pipelines
 
-* **100. Bias-Variance Trade-off**
+- **48. Pipeline Fundamentals**
+  - Pipeline
+  - `Pipeline`
+  - `make_pipeline`
+  - Pipeline steps
+  - Pipeline naming
+  - Pipeline best practices
 
-  * High bias
-  * High variance
-  * Model complexity
-  * Generalization
+- **49. FeatureUnion**
+  - `FeatureUnion`
+  - Feature composition
+  - Feature union best practices
 
-* **101. Regularization**
+- **50. ColumnTransformer**
+  - `ColumnTransformer`
+  - Column selection
+  - Column transformation
+  - Column transformer best practices
 
-  * L1
-  * L2
-  * Elastic Net
-  * Complexity control
+- **51. Pipeline with Preprocessing**
+  - Preprocessing pipeline
+  - Scaling
+  - Encoding
+  - Imputation
+  - Pipeline preprocessing best practices
 
-* **102. Feature Selection Through Regularization**
+- **52. Pipeline with Model**
+  - Model pipeline
+  - Preprocessing + model
+  - Pipeline model best practices
 
-  * Sparse solutions
-  * Coefficient shrinkage
-  * Interpretability
+- **53. Pipeline with Cross-Validation**
+  - Pipeline cross-validation
+  - Grid search with pipeline
+  - Pipeline cross-validation best practices
 
-* **103. Resampling-Based Reasoning**
+- **54. Pipeline Persistence**
+  - Pipeline persistence
+  - `joblib.dump`
+  - `joblib.load`
+  - Pipeline persistence best practices
 
-  * Cross-validation
-  * Bootstrap concepts
-  * Stability analysis
-
----
-
-# XXVI. Advanced Preprocessing
-
-* **104. Heterogeneous Data**
-
-  * Numeric columns
-  * Categorical columns
-  * Text columns
-  * Sparse features
-  * Multiple transformation branches
-
-* **105. Custom Transformers**
-
-  * Transformer API
-  * `fit`
-  * `transform`
-  * Custom feature logic
-  * Reusable preprocessing
-
-* **106. Target Transformation**
-
-  * Transforming regression targets
-  * Log-scale targets
-  * Inverse transformations
-  * Prediction interpretation
+- **55. Advanced Pipelines**
+  - Nested pipelines
+  - Pipeline caching
+  - Pipeline memory
+  - Pipeline visualization
+  - `set_config(display='diagram')`
+  - Advanced pipeline best practices
 
 ---
 
-# XXVII. Advanced Model Selection
+# IX. Text Processing
 
-* **107. Nested Cross-Validation**
+- **56. Text Processing Fundamentals**
+  - Text processing
+  - Text preprocessing
+  - Tokenization
+  - Vectorization
+  - Text processing best practices
 
-  * Inner loop
-  * Outer loop
-  * Hyperparameter selection
-  * Unbiased performance estimation
+- **57. Count Vectorization**
+  - `CountVectorizer`
+  - Tokenization
+  - N-grams
+  - Stop words
+  - Vocabulary
+  - Count vectorization best practices
 
-* **108. Group-Aware Validation**
+- **58. TF-IDF Vectorization**
+  - `TfidfVectorizer`
+  - TF-IDF
+  - `TfidfTransformer`
+  - TF-IDF best practices
 
-  * Group K-fold
-  * Related observations
-  * Patient/customer/entity-level leakage prevention
+- **59. Hashing Vectorization**
+  - `HashingVectorizer`
+  - Feature hashing
+  - Hashing vectorization best practices
 
-* **109. Time-Aware Validation**
+- **60. Text Classification**
+  - Text classification
+  - Pipelines with text
+  - Text classification best practices
 
-  * Temporal ordering
-  * Rolling evaluation
-  * Time-series splits
-  * Future-information leakage
+- **61. Topic Modeling**
+  - Topic modeling
+  - `LatentDirichletAllocation`
+  - `NMF`
+  - Topic modeling best practices
 
-* **110. Validation Strategy Design**
-
-  * Match split strategy to deployment
-  * Preserve independence
-  * Avoid preprocessing leakage
-  * Avoid target leakage
-
----
-
-# XXVIII. Computational Efficiency
-
-* **111. Dataset Size Considerations**
-
-  * Small datasets
-  * Medium datasets
-  * Large datasets
-  * Sparse datasets
-
-* **112. Efficiency Techniques**
-
-  * Efficient feature representations
-  * Sparse matrices
-  * Batching
-  * Parallel processing
-  * Caching
-  * Appropriate algorithm choice
-
-* **113. Randomness and Reproducibility**
-
-  * `random_state`
-  * Deterministic experimentation
-  * Seed management
-  * Reproducible benchmarks
+- **62. Text Similarity**
+  - Text similarity
+  - Cosine similarity
+  - `cosine_similarity`
+  - Text similarity best practices
 
 ---
 
-# XXIX. Advanced Scikit-learn API Concepts
+# X. Advanced Topics
 
-* **114. Estimator Conventions**
+- **63. Multiclass and Multioutput**
+  - Multiclass classification
+  - Multioutput classification
+  - Multioutput regression
+  - `OneVsRestClassifier`
+  - `OneVsOneClassifier`
+  - `OutputCodeClassifier`
+  - `MultiOutputClassifier`
+  - `MultiOutputRegressor`
+  - `RegressorChain`
+  - `ClassifierChain`
+  - Multiclass and multioutput best practices
 
-  * Constructor parameters
-  * `fit`
-  * Learned attributes
-  * Parameter introspection
+- **64. Imbalanced Data**
+  - Imbalanced data
+  - Class weights
+  - Resampling
+  - SMOTE (imbalanced-learn)
+  - ADASYN
+  - Random undersampling
+  - Random oversampling
+  - Imbalanced data best practices
 
-* **115. Tags and Metadata**
+- **65. Calibration**
+  - Probability calibration
+  - `CalibratedClassifierCV`
+  - `calibration_curve`
+  - Calibration best practices
 
-  * Estimator capabilities
-  * Metadata-aware workflows
-  * Routing of auxiliary data
-  * Advanced estimator composition
+- **66. Partial Dependence**
+  - Partial dependence
+  - `partial_dependence`
+  - `PartialDependenceDisplay`
+  - `permutation_importance`
+  - Partial dependence best practices
 
-* **116. Custom Estimator Development**
+- **67. Incremental Learning**
+  - Incremental learning
+  - `partial_fit`
+  - `MiniBatchKMeans`
+  - `SGDClassifier`
+  - `SGDRegressor`
+  - `IncrementalPCA`
+  - Incremental learning best practices
 
-  * Building estimators
-  * Building transformers
-  * Parameter validation
-  * Compatibility with model-selection tools
-  * Estimator testing
+- **68. Out-of-Core Learning**
+  - Out-of-core learning
+  - Streaming data
+  - Chunked processing
+  - Out-of-core learning best practices
 
-Recent Scikit-learn development has continued expanding metadata-routing capabilities and array-API support, so these are useful advanced topics once the core estimator/pipeline model is well understood. ([scikit-learn Blog][5])
+- **69. Random State and Reproducibility**
+  - Random state
+  - Reproducibility
+  - `random_state`
+  - `np.random.seed`
+  - Reproducibility best practices
 
----
+- **70. Custom Estimators**
+  - Custom estimators
+  - `BaseEstimator`
+  - `ClassifierMixin`
+  - `RegressorMixin`
+  - `TransformerMixin`
+  - Custom estimator best practices
 
-# XXX. Model Persistence and Deployment
-
-* **117. Saving Models**
-
-  * Model serialization
-  * Pipeline serialization
-  * Version compatibility
-  * Security considerations
-
-* **118. Deployment Pipeline**
-
-  * Train
-  * Validate
-  * Serialize
-  * Load
-  * Predict
-
-* **119. Production Preprocessing**
-
-  * Same transformations during training and inference
-  * Schema validation
-  * Feature-order consistency
-  * Missing-feature handling
-
-* **120. Model Lifecycle**
-
-  * Model versioning
-  * Dataset versioning
-  * Experiment tracking
-  * Retraining
-  * Rollback
-
----
-
-# XXXI. Machine Learning Production Engineering
-
-* **121. Reproducibility**
-
-  * Fixed seeds
-  * Environment specification
-  * Dependency locking
-  * Dataset versioning
-  * Configuration management
-
-* **122. Data Validation**
-
-  * Schema checks
-  * Range checks
-  * Category checks
-  * Missing-value checks
-  * Distribution checks
-
-* **123. Training Pipelines**
-
-  * Data ingestion
-  * Validation
-  * Preprocessing
-  * Training
-  * Evaluation
-  * Serialization
-
-* **124. Inference**
-
-  * Batch inference
-  * Online inference
-  * Latency considerations
-  * Throughput
-  * Error handling
-
-* **125. Monitoring**
-
-  * Prediction distributions
-  * Input drift
-  * Concept drift
-  * Performance degradation
-  * Calibration drift
+- **71. Metadata Routing**
+  - Metadata routing
+  - `set_config(enable_metadata_routing=True)`
+  - Metadata routing best practices
 
 ---
 
-# XXXII. ML System Design with Scikit-learn
+# XI. Scikit-learn Ecosystem
 
-* **126. Problem Definition**
+- **72. Scikit-learn and NumPy**
+  - NumPy arrays
+  - NumPy operations
+  - NumPy integration best practices
 
-  * Business objective
-  * ML objective
-  * Prediction unit
-  * Prediction horizon
-  * Success criteria
+- **73. Scikit-learn and Pandas**
+  - Pandas DataFrames
+  - Pandas Series
+  - Pandas integration best practices
 
-* **127. Dataset Design**
+- **74. Scikit-learn and Matplotlib**
+  - Matplotlib
+  - Visualization
+  - Matplotlib integration best practices
 
-  * Training examples
-  * Label generation
-  * Sampling
-  * Leakage prevention
-  * Temporal consistency
+- **75. Scikit-learn and Seaborn**
+  - Seaborn
+  - Statistical visualization
+  - Seaborn integration best practices
 
-* **128. Model Architecture**
+- **76. Scikit-learn and XGBoost**
+  - XGBoost
+  - XGBoost integration
+  - XGBoost best practices
 
-  * Baseline
-  * Candidate models
-  * Ensemble options
-  * Preprocessing architecture
+- **77. Scikit-learn and LightGBM**
+  - LightGBM
+  - LightGBM integration
+  - LightGBM best practices
 
-* **129. Evaluation Architecture**
+- **78. Scikit-learn and CatBoost**
+  - CatBoost
+  - CatBoost integration
+  - CatBoost best practices
 
-  * Offline metrics
-  * Validation design
-  * Test methodology
-  * Error analysis
+- **79. Scikit-learn and imbalanced-learn**
+  - imbalanced-learn
+  - Resampling
+  - Imbalanced learn best practices
 
-* **130. Deployment Architecture**
+- **80. Scikit-learn and scikit-optimize**
+  - scikit-optimize
+  - Bayesian optimization
+  - scikit-optimize best practices
 
-  * Batch
-  * Online
-  * Hybrid
-  * Retraining schedule
-  * Monitoring
+- **81. Scikit-learn and Optuna**
+  - Optuna
+  - Hyperparameter optimization
+  - Optuna best practices
 
----
+- **82. Scikit-learn and MLflow**
+  - MLflow
+  - Experiment tracking
+  - Model registry
+  - MLflow best practices
 
-# XXXIII. End-to-End Projects
+- **83. Scikit-learn and FastAPI**
+  - FastAPI
+  - Model serving
+  - FastAPI best practices
 
-* **131. Beginner Projects**
-
-  * Iris classification
-
-    * Train/test split
-    * Scaling
-    * Logistic regression
-    * Accuracy
-  * House-price regression
-
-    * Missing values
-    * Numerical features
-    * Linear regression
-    * RMSE
-
-* **132. Intermediate Projects**
-
-  * Customer churn prediction
-
-    * Mixed feature types
-    * `ColumnTransformer`
-    * Classification pipeline
-    * Cross-validation
-    * ROC-AUC
-  * Credit-risk-style classification
-
-    * Imbalanced data
-    * Class weighting
-    * Precision/recall
-    * Threshold analysis
-  * Customer segmentation
-
-    * Scaling
-    * K-means
-    * Cluster evaluation
-    * Visualization
-
-* **133. Advanced Projects**
-
-  * Fraud/anomaly detection
-
-    * Imbalanced classification
-    * Anomaly detection
-    * Precision-recall analysis
-    * Threshold selection
-  * Text classification system
-
-    * TF-IDF
-    * Linear model
-    * Pipeline
-    * Hyperparameter search
-  * Recommendation-oriented clustering
-
-    * Feature engineering
-    * Dimensionality reduction
-    * Clustering
-
-* **134. Expert Projects**
-
-  * Production-grade tabular ML system
-
-    * Data validation
-    * Feature engineering
-    * `ColumnTransformer`
-    * Multiple candidate models
-    * Cross-validation
-    * Hyperparameter optimization
-    * Model inspection
-    * Persistence
-    * Monitoring design
-  * End-to-end forecasting-style system
-
-    * Time-aware validation
-    * Feature generation
-    * Regression
-    * Error analysis
-  * Enterprise classification platform
-
-    * Group-aware validation
-    * Imbalance handling
-    * Calibration
-    * Explainability
-    * Deployment architecture
+- **84. Scikit-learn and ONNX**
+  - ONNX
+  - Model export
+  - ONNX best practices
 
 ---
 
-# XXXIV. Progressive Learning Sequence
+# XII. Scikit-learn Projects by Difficulty
 
-## Level 1 — Python + ML Foundations
+## Beginner Projects
 
-* Learn:
+- **1. Iris Classification**
+  - Dataset loading
+  - Train-test split
+  - Model training
+  - Model evaluation
 
-  * Python
-  * NumPy
-  * Pandas
-  * Statistics
-  * Basic linear algebra
-  * ML terminology
-* Master:
+- **2. Boston Housing Regression**
+  - Dataset loading
+  - Linear regression
+  - Model evaluation
+  - Visualization
 
-  * `X`
-  * `y`
-  * train/test split
-  * `fit`
-  * `predict`
+- **3. Wine Classification**
+  - Dataset loading
+  - Preprocessing
+  - Classification
+  - Evaluation
 
-## Level 2 — Core Scikit-learn
+- **4. Customer Segmentation**
+  - K-Means
+  - Elbow method
+  - Visualization
+  - Interpretation
 
-* Learn:
-
-  * Estimator API
-  * Preprocessing
-  * Regression
-  * Classification
-  * Metrics
-* Master:
-
-  * `StandardScaler`
-  * `OneHotEncoder`
-  * `LogisticRegression`
-  * `LinearRegression`
-  * `DecisionTreeClassifier`
-  * `RandomForestClassifier`
-
-## Level 3 — Practical ML
-
-* Learn:
-
-  * Feature engineering
-  * Feature selection
-  * Pipelines
-  * `ColumnTransformer`
-  * Cross-validation
-* Master:
-
-  * Leakage-free preprocessing
-  * Reproducible experiments
-  * End-to-end pipelines
-
-## Level 4 — Model Selection
-
-* Learn:
-
-  * Hyperparameters
-  * Grid search
-  * Randomized search
-  * Custom metrics
-  * Validation strategies
-* Master:
-
-  * `GridSearchCV`
-  * `RandomizedSearchCV`
-  * Stratified CV
-  * Group-aware CV
-  * Time-aware CV
-
-## Level 5 — Advanced ML
-
-* Learn:
-
-  * Ensemble methods
-  * Gradient boosting
-  * Clustering
-  * Dimensionality reduction
-  * Anomaly detection
-  * Text processing
-* Master:
-
-  * End-to-end modeling workflows
-  * Model comparison
-  * Advanced feature representations
-
-## Level 6 — Interpretability and Reliability
-
-* Learn:
-
-  * Permutation importance
-  * Partial dependence
-  * Calibration
-  * Error analysis
-  * Imbalanced classification
-* Master:
-
-  * Understanding model behavior
-  * Diagnosing failure modes
-  * Selecting decision thresholds
-
-## Level 7 — Production ML
-
-* Learn:
-
-  * Model persistence
-  * Reproducibility
-  * Validation
-  * Monitoring
-  * Deployment
-* Master:
-
-  * Training/inference consistency
-  * Model lifecycle management
-  * Production-ready pipelines
-
-## Level 8 — Expert Scikit-learn Engineering
-
-* Learn:
-
-  * Custom transformers
-  * Custom estimators
-  * Advanced composition
-  * Metadata routing
-  * Computational optimization
-* Master:
-
-  * Designing reusable ML systems
-  * Building estimator-compatible components
-  * Engineering robust, maintainable pipelines
+- **5. Titanic Survival Prediction**
+  - Data cleaning
+  - Feature engineering
+  - Classification
+  - Evaluation
 
 ---
 
-# XXXV. What to Master at Each Stage
+## Intermediate Projects
 
-* **Beginner**
+- **6. End-to-End ML Pipeline**
+  - Data preprocessing
+  - Pipeline
+  - Model training
+  - Cross-validation
+  - Evaluation
 
-  * Understand:
+- **7. Text Classification**
+  - Text preprocessing
+  - TF-IDF
+  - Classification
+  - Evaluation
 
-    * What features and targets are
-    * How estimators work
-    * How `fit()` and `predict()` work
-  * Build:
+- **8. House Price Prediction**
+  - Feature engineering
+  - Regression
+  - Ensemble methods
+  - Evaluation
 
-    * Simple regression models
-    * Simple classification models
+- **9. Image Classification**
+  - Feature extraction
+  - Classification
+  - Evaluation
+  - Visualization
 
-* **Intermediate**
-
-  * Understand:
-
-    * Preprocessing
-    * Cross-validation
-    * Bias/variance
-    * Overfitting
-  * Build:
-
-    * Pipelines
-    * Mixed-type preprocessing
-    * Tuned models
-
-* **Advanced**
-
-  * Understand:
-
-    * Ensembles
-    * Feature selection
-    * Model inspection
-    * Calibration
-    * Unsupervised learning
-  * Build:
-
-    * Complete modeling systems
-    * Robust evaluation workflows
-
-* **Expert**
-
-  * Understand:
-
-    * Validation design
-    * Production constraints
-    * Model lifecycle
-    * Computational trade-offs
-    * Estimator architecture
-  * Build:
-
-    * Reusable Scikit-learn components
-    * Production-grade pipelines
-    * Large-scale tabular ML systems
+- **10. Fraud Detection**
+  - Imbalanced data
+  - Resampling
+  - Classification
+  - Evaluation
 
 ---
 
-# XXXVI. Essential Scikit-learn API Map
+## Advanced Projects
 
-* **Data preprocessing**
+- **11. Automated ML Pipeline**
+  - Pipeline
+  - Grid search
+  - Cross-validation
+  - Model selection
+  - Persistence
 
-  * `sklearn.preprocessing`
-  * `sklearn.impute`
-  * `sklearn.feature_extraction`
+- **12. Recommendation System**
+  - Collaborative filtering
+  - Content-based filtering
+  - Evaluation
+  - Deployment
 
-* **Feature selection**
+- **13. Anomaly Detection System**
+  - Anomaly detection
+  - Isolation Forest
+  - Evaluation
+  - Visualization
 
-  * `sklearn.feature_selection`
+- **14. Time Series Forecasting**
+  - Time series
+  - Feature engineering
+  - Regression
+  - Evaluation
 
-* **Pipelines**
-
-  * `sklearn.pipeline`
-  * `sklearn.compose`
-
-* **Regression**
-
-  * `sklearn.linear_model`
-  * `sklearn.tree`
-  * `sklearn.ensemble`
-  * `sklearn.neighbors`
-  * `sklearn.svm`
-
-* **Classification**
-
-  * `sklearn.linear_model`
-  * `sklearn.naive_bayes`
-  * `sklearn.neighbors`
-  * `sklearn.svm`
-  * `sklearn.tree`
-  * `sklearn.ensemble`
-
-* **Clustering**
-
-  * `sklearn.cluster`
-
-* **Dimensionality reduction**
-
-  * `sklearn.decomposition`
-  * `sklearn.manifold`
-  * `sklearn.random_projection`
-
-* **Model evaluation**
-
-  * `sklearn.metrics`
-
-* **Model selection**
-
-  * `sklearn.model_selection`
-
-* **Inspection**
-
-  * `sklearn.inspection`
-
-* **Datasets**
-
-  * `sklearn.datasets`
-
-* **Model persistence**
-
-  * Scikit-learn persistence mechanisms and compatible serialization workflows
+- **15. Model Deployment**
+  - Model training
+  - Model persistence
+  - FastAPI
+  - Docker
+  - Monitoring
 
 ---
 
-# XXXVII. Final Scikit-learn Mastery Map
+## Expert Projects
 
-* **Foundations**
+- **16. Production ML Platform**
+  - Data pipelines
+  - Feature store
+  - Model training
+  - Model serving
+  - Monitoring
+  - MLOps
 
-  * Python
-  * NumPy
-  * Pandas
-  * Statistics
-  * Linear algebra
+- **17. AutoML System**
+  - Automated preprocessing
+  - Automated feature engineering
+  - Automated model selection
+  - Automated hyperparameter tuning
+  - Deployment
 
-* **Core Scikit-learn**
+- **18. Real-Time ML System**
+  - Streaming data
+  - Incremental learning
+  - Real-time predictions
+  - Monitoring
 
-  * Estimators
-  * Transformers
-  * Predictors
-  * `fit`
-  * `predict`
-  * `transform`
+- **19. Multi-Model Ensemble System**
+  - Multiple models
+  - Stacking
+  - Voting
+  - Blending
+  - Deployment
 
-* **Data Preparation**
+- **20. End-to-End MLOps Pipeline**
+  - Data versioning
+  - Experiment tracking
+  - Model registry
+  - CI/CD
+  - Monitoring
+  - Governance
 
-  * Imputation
-  * Scaling
-  * Encoding
-  * Feature engineering
-  * Feature selection
+---
 
-* **Core Machine Learning**
+# XIII. Progressive Scikit-learn Learning Sequence
 
-  * Regression
-  * Classification
-  * Trees
-  * Nearest neighbors
-  * SVM
-  * Naive Bayes
+## Level 1 — Scikit-learn Fundamentals
 
-* **Advanced Machine Learning**
+- Master:
+  - Installation
+  - Import
+  - API
+  - First model
+  - Estimators
 
-  * Random forests
-  * Gradient boosting
-  * Ensembles
-  * Clustering
-  * Dimensionality reduction
-  * Anomaly detection
-  * Semi-supervised learning
+## Level 2 — Data Preprocessing
 
-* **ML Evaluation**
+- Master:
+  - Scaling
+  - Encoding
+  - Discretization
+  - Imputation
+  - Polynomial features
+  - Custom transformers
 
-  * Metrics
-  * Cross-validation
-  * Hyperparameter tuning
-  * Threshold selection
-  * Calibration
+## Level 3 — Feature Engineering
 
-* **ML Engineering**
+- Master:
+  - Feature engineering fundamentals
+  - Feature selection
+  - Feature extraction
+  - Feature importance
 
-  * Pipelines
-  * `ColumnTransformer`
-  * Custom transformers
-  * Reproducibility
-  * Persistence
+## Level 4 — Supervised Learning
 
-* **ML Interpretability**
+- Master:
+  - Linear models
+  - SVM
+  - Nearest neighbors
+  - Naive Bayes
+  - Decision trees
+  - Ensemble methods
+  - Neural networks
+  - Gaussian processes
+  - LDA
 
-  * Feature importance
-  * Permutation importance
-  * Partial dependence
-  * Error analysis
+## Level 5 — Unsupervised Learning
 
-* **Production**
+- Master:
+  - Clustering
+  - Dimensionality reduction
+  - Anomaly detection
+  - Novelty detection
 
-  * Validation
-  * Deployment
-  * Monitoring
-  * Drift
-  * Retraining
-  * Lifecycle management
+## Level 6 — Model Evaluation
 
-* **Expert Mastery**
+- Master:
+  - Classification metrics
+  - Regression metrics
+  - Clustering metrics
+  - Cross-validation
+  - Learning curves
+  - Evaluation visualization
 
-  * Estimator architecture
-  * Metadata routing
-  * Advanced composition
-  * Computational optimization
-  * Production ML system design
+## Level 7 — Model Selection
 
-### The overall progression
+- Master:
+  - Model selection fundamentals
+  - Grid search
+  - Random search
+  - Halving search
+  - Bayesian optimization
+  - Model selection utilities
+  - Model persistence
 
-**Python → NumPy → Pandas → Statistics/Linear Algebra → ML Fundamentals → Scikit-learn Estimator API → Preprocessing → Feature Engineering → Pipelines → Regression → Classification → Tree Ensembles → Cross-Validation → Hyperparameter Tuning → Imbalanced Learning → Calibration → Clustering → Dimensionality Reduction → Anomaly Detection → Text ML → Model Inspection → Custom Transformers → Model Persistence → Production ML → Advanced Scikit-learn Engineering.**
+## Level 8 — Pipelines
 
-This sequence aligns closely with Scikit-learn's current organization around supervised/unsupervised learning, preprocessing and feature transformations, model selection/evaluation, inspection, and production-oriented utilities. ([Scikit-learn][1])
+- Master:
+  - Pipeline fundamentals
+  - FeatureUnion
+  - ColumnTransformer
+  - Pipeline with preprocessing
+  - Pipeline with model
+  - Pipeline with cross-validation
+  - Pipeline persistence
+  - Advanced pipelines
 
-[1]: https://scikit-learn.org/?utm_source=chatgpt.com "scikit-learn: machine learning in Python — scikit-learn 1.9.1 documentation"
-[2]: https://scikit-learn.org/stable/data_transforms.html?utm_source=chatgpt.com "8. Dataset transformations — scikit-learn 1.9.1 documentation"
-[3]: https://scikit-learn.org/1.4/model_selection.html?utm_source=chatgpt.com "3. Model selection and evaluation — scikit-learn 1.4.2 documentation"
-[4]: https://scikit-learn.org/1.0/user_guide.html?utm_source=chatgpt.com "User guide: contents — scikit-learn 1.0.2 documentation"
-[5]: https://blog.scikit-learn.org/year/2026?utm_source=chatgpt.com "2026 - scikit-learn Blog"
+## Level 9 — Text Processing
+
+- Master:
+  - Text processing fundamentals
+  - Count vectorization
+  - TF-IDF vectorization
+  - Hashing vectorization
+  - Text classification
+  - Topic modeling
+  - Text similarity
+
+## Level 10 — Advanced Topics
+
+- Master:
+  - Multiclass and multioutput
+  - Imbalanced data
+  - Calibration
+  - Partial dependence
+  - Incremental learning
+  - Out-of-core learning
+  - Random state and reproducibility
+  - Custom estimators
+  - Metadata routing
+
+## Level 11 — Ecosystem
+
+- Master:
+  - NumPy
+  - Pandas
+  - Matplotlib
+  - Seaborn
+  - XGBoost
+  - LightGBM
+  - CatBoost
+  - imbalanced-learn
+  - scikit-optimize
+  - Optuna
+  - MLflow
+  - FastAPI
+  - ONNX
+
+## Level 12 — Production Engineering
+
+- Master:
+  - Data pipelines
+  - Feature engineering
+  - Model training
+  - Model evaluation
+  - Model selection
+  - Model deployment
+  - Monitoring
+  - MLOps
+  - Production best practices
+
+---
+
+# XIV. Final Scikit-learn Competency Map
+
+- **Foundations**
+
+  - Installation
+  - Import
+  - API
+  - Estimators
+  - First model
+
+- **Preprocessing**
+
+  - Scaling
+  - Encoding
+  - Discretization
+  - Imputation
+  - Polynomial features
+  - Custom transformers
+
+- **Feature Engineering**
+
+  - Feature engineering fundamentals
+  - Feature selection
+  - Feature extraction
+  - Feature importance
+
+- **Supervised Learning**
+
+  - Linear models
+  - SVM
+  - Nearest neighbors
+  - Naive Bayes
+  - Decision trees
+  - Ensemble methods
+  - Neural networks
+  - Gaussian processes
+  - LDA
+
+- **Unsupervised Learning**
+
+  - Clustering
+  - Dimensionality reduction
+  - Anomaly detection
+  - Novelty detection
+
+- **Model Evaluation**
+
+  - Classification metrics
+  - Regression metrics
+  - Clustering metrics
+  - Cross-validation
+  - Learning curves
+  - Evaluation visualization
+
+- **Model Selection**
+
+  - Grid search
+  - Random search
+  - Halving search
+  - Bayesian optimization
+  - Model selection utilities
+  - Model persistence
+
+- **Pipelines**
+
+  - Pipeline fundamentals
+  - FeatureUnion
+  - ColumnTransformer
+  - Pipeline with preprocessing
+  - Pipeline with model
+  - Pipeline with cross-validation
+  - Pipeline persistence
+  - Advanced pipelines
+
+- **Text Processing**
+
+  - Count vectorization
+  - TF-IDF vectorization
+  - Hashing vectorization
+  - Text classification
+  - Topic modeling
+  - Text similarity
+
+- **Advanced Topics**
+
+  - Multiclass and multioutput
+  - Imbalanced data
+  - Calibration
+  - Partial dependence
+  - Incremental learning
+  - Out-of-core learning
+  - Random state and reproducibility
+  - Custom estimators
+  - Metadata routing
+
+- **Ecosystem**
+
+  - NumPy
+  - Pandas
+  - Matplotlib
+  - Seaborn
+  - XGBoost
+  - LightGBM
+  - CatBoost
+  - imbalanced-learn
+  - scikit-optimize
+  - Optuna
+  - MLflow
+  - FastAPI
+  - ONNX
+
+- **Production**
+
+  - Data pipelines
+  - Feature engineering
+  - Model training
+  - Model evaluation
+  - Model selection
+  - Model deployment
+  - Monitoring
+  - MLOps
+
+---
+
+## Recommended Overall Progression
+
+**Scikit-learn Fundamentals → Data Preprocessing → Feature Engineering → Supervised Learning → Unsupervised Learning → Model Evaluation → Model Selection → Pipelines → Text Processing → Advanced Topics → Ecosystem → Production Engineering**

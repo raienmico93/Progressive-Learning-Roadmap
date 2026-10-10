@@ -1,1633 +1,1850 @@
 # PyTorch Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Concepts to Advanced Practical Mastery
+## From Tensor Foundations to Advanced Deep Learning, Distributed Training, Generative AI, and Production ML Engineering
 
-This roadmap follows the same progressive structure as the SQL roadmap, but for **PyTorch and deep-learning engineering**. The sequence moves from Python and tensor fundamentals to automatic differentiation, neural networks, training systems, optimization, transformers, distributed training, compilation, and production deployment.
-
-The current PyTorch documentation describes PyTorch as a tensor library for deep learning on CPUs and GPUs, with major areas including tensors, `autograd`, `torch.nn`, compilation, and distributed training. ([PyTorch Documentation][1])
+PyTorch is best learned as more than "a deep learning library." The progression should cover **Python prerequisites → NumPy prerequisites → ML fundamentals → tensors → autograd → neural networks → training loops → datasets → data loaders → CNNs → RNNs → Transformers → NLP → computer vision → generative models → custom training → distributed training → optimization → deployment → TorchScript → ONNX → quantization → MLOps → production engineering**.
 
 ---
 
-# I. Prerequisites and Machine Learning Foundations
+# I. PyTorch Foundations
 
-* **1. Python Fundamentals**
+- **1. What PyTorch Is**
+  - PyTorch
+  - PyTorch history
+  - Meta AI
+  - PyTorch 0.x
+  - PyTorch 1.0
+  - PyTorch 1.13
+  - PyTorch 2.0
+  - PyTorch 2.1
+  - PyTorch 2.2
+  - PyTorch 2.3
+  - PyTorch 2.4
+  - PyTorch 2.5
+  - PyTorch 2.6
+  - PyTorch 2.7
+  - PyTorch 2.8 (current)
+  - PyTorch philosophy
+    - Dynamic computation graphs
+    - Pythonic
+    - Flexible
+    - Fast
+    - Research-friendly
+    - Production-ready
+  - PyTorch vs TensorFlow
+  - PyTorch vs JAX
+  - PyTorch vs Keras
+  - PyTorch vs scikit-learn
+  - PyTorch use cases
+    - Deep learning
+    - Neural networks
+    - Computer vision
+    - Natural language processing
+    - Speech recognition
+    - Recommendation systems
+    - Time series
+    - Reinforcement learning
+    - Generative AI
+    - Large language models
+    - Diffusion models
+    - Production ML
+  - PyTorch in modern ML
+  - PyTorch ecosystem
+  - PyTorch components
+    - PyTorch Core
+    - TorchVision
+    - TorchText
+    - TorchAudio
+    - TorchServe
+    - TorchScript
+    - TorchTune
+    - TorchRec
+    - TorchRL
+    - TorchGeo
+    - PyTorch Lightning
+    - PyTorch Geometric
+    - Captum
+    - TorchMetrics
+    - Ignite
+    - FastAI
+    - Hugging Face Transformers
+    - Accelerate
+    - DeepSpeed
+    - FairScale
+    - Optuna
+    - Weights & Biases
+    - MLflow
 
-  * Variables
-  * Data types
+- **2. Prerequisites**
+  - Python fundamentals
+  - Variables
+  - Data types
+  - Control flow
+  - Functions
+  - Classes
+  - Modules
+  - NumPy
+    - ndarray
+    - Indexing
+    - Slicing
+    - Broadcasting
+    - Universal functions
+    - Aggregation
+    - Linear algebra
+    - Random
+  - Pandas
+    - Series
+    - DataFrame
+    - Index
+    - Selection
+    - Cleaning
+    - Transformation
+  - Matplotlib
+    - Plotting
+    - Subplots
+  - SciPy
+    - Linear algebra
+    - Statistics
+  - Jupyter
+    - Notebooks
+    - Cells
+  - Machine learning concepts
+  - Deep learning concepts
+  - Prerequisite best practices
 
-    * Integers
-    * Floats
-    * Strings
-    * Booleans
-    * Lists
-    * Tuples
-    * Dictionaries
-    * Sets
-  * Control flow
+- **3. Machine Learning Foundations**
+  - Machine learning
+  - Supervised learning
+  - Unsupervised learning
+  - Reinforcement learning
+  - Classification
+  - Regression
+  - Clustering
+  - Features
+  - Labels
+  - Training data
+  - Validation data
+  - Test data
+  - Overfitting
+  - Underfitting
+  - Bias-variance tradeoff
+  - Regularization
+  - Cross-validation
+  - Model evaluation
+  - Model selection
+  - Hyperparameter tuning
+  - ML workflow
+  - ML best practices
 
-    * `if`
-    * `for`
-    * `while`
-  * Functions
+- **4. Deep Learning Foundations**
+  - Deep learning
+  - Neural networks
+  - Neurons
+  - Layers
+  - Weights
+  - Biases
+  - Activations
+  - Loss functions
+  - Optimizers
+  - Backpropagation
+  - Gradient descent
+  - Forward propagation
+  - Backward propagation
+  - Epochs
+  - Batches
+  - Iterations
+  - Learning rate
+  - Regularization
+  - Dropout
+  - Batch normalization
+  - Deep learning best practices
 
-    * Parameters
-    * Return values
-    * Default arguments
-    * `*args`
-    * `**kwargs`
-  * Object-oriented programming
+- **5. Installing PyTorch**
+  - Installation
+    - pip
+    - conda
+    - mamba
+    - uv
+  - `pip install torch`
+  - `pip install torch torchvision torchaudio`
+  - CPU-only installation
+  - CUDA installation
+  - ROCm installation
+  - Apple Silicon (MPS) installation
+  - Version checking
+  - `torch.__version__`
+  - Dependencies
+    - NumPy
+    - filelock
+    - typing-extensions
+    - sympy
+    - networkx
+    - jinja2
+    - fsspec
+  - Optional dependencies
+    - CUDA
+    - cuDNN
+    - GPU support
+  - Pre-built wheels
+  - Platform-specific installation
+  - Installation best practices
 
-    * Classes
-    * Objects
-    * Inheritance
-    * Composition
-  * Modules and packages
-  * Exceptions
-  * Context managers
-  * Iterators and generators
-  * Type hints
-  * Virtual environments
-  * Package management
+- **6. Importing PyTorch**
+  - `import torch`
+  - `import torch.nn as nn`
+  - `import torch.optim as optim`
+  - `import torch.nn.functional as F`
+  - `from torch import tensor`
+  - `from torch.utils.data import Dataset, DataLoader`
+  - `import torchvision`
+  - `import torchvision.transforms as transforms`
+  - `import torchaudio`
+  - `import torchtext`
+  - Import best practices
+  - Namespace conventions
 
-* **2. Scientific Python**
-
-  * NumPy
-
-    * Arrays
-    * Shapes
-    * Broadcasting
-    * Vectorization
-    * Indexing
-    * Masking
-  * pandas
-
-    * DataFrames
-    * Data cleaning
-    * Aggregation
-    * Feature preparation
-  * Matplotlib
-
-    * Plots
-    * Histograms
-    * Training curves
-    * Evaluation visualizations
-
-* **3. Mathematics for Deep Learning**
-
-  * Linear algebra
-
-    * Scalars
-    * Vectors
-    * Matrices
-    * Tensors
-    * Dot products
-    * Matrix multiplication
-    * Transpose
-    * Norms
-    * Eigenvalues
-    * Eigenvectors
-  * Calculus
-
-    * Derivatives
-    * Partial derivatives
-    * Gradients
-    * Jacobians
-    * Chain rule
-  * Probability
-
-    * Random variables
-    * Probability distributions
-    * Expectation
-    * Variance
-    * Conditional probability
-  * Statistics
-
-    * Mean
-    * Variance
-    * Standard deviation
-    * Covariance
-    * Correlation
-  * Optimization
-
-    * Objective functions
-    * Loss functions
-    * Gradient descent
-
-* **4. Machine Learning Fundamentals**
-
-  * Supervised learning
-  * Unsupervised learning
-  * Training data
-  * Validation data
-  * Test data
-  * Features
-  * Labels
-  * Parameters
-  * Hyperparameters
-  * Overfitting
-  * Underfitting
-  * Generalization
-  * Bias-variance concepts
-  * Evaluation metrics
-
----
-
-# II. PyTorch Environment and Ecosystem
-
-* **5. Installing PyTorch**
-
-  * CPU installation
-  * GPU-enabled installation
-  * CUDA considerations
-  * Package management
-  * Version compatibility
-  * Verifying installation
-
-* **6. PyTorch Ecosystem**
-
-  * `torch`
-  * `torch.nn`
-  * `torch.optim`
-  * `torch.utils.data`
-  * `torch.autograd`
-  * `torch.distributed`
-  * `torchvision`
-  * `torchaudio`
-  * `torch.compile`
-  * `torch.export`
-
-* **7. Development Environment**
-
-  * Jupyter
-  * VS Code
-  * Command-line workflows
-  * Python scripts
-  * Virtual environments
-  * Reproducible environments
-  * Configuration management
-  * Logging
-  * Experiment organization
-
----
-
-# III. Tensor Fundamentals
-
-* **8. PyTorch Tensors**
-
-  * Creating tensors
-
-    * `torch.tensor`
-    * `torch.zeros`
-    * `torch.ones`
-    * `torch.empty`
-    * `torch.arange`
-    * `torch.linspace`
-    * Random tensors
-  * Tensor properties
-
-    * Shape
-    * Rank
-    * Device
-    * Data type
-    * Stride
-    * Memory layout
-
-* **9. Tensor Data Types**
-
-  * Integer types
-  * Floating-point types
-
-    * `float32`
-    * `float64`
-    * `float16`
-    * `bfloat16`
-  * Boolean tensors
-  * Complex tensors
-  * Type conversion
-
-    * `.to()`
-    * `.float()`
-    * `.double()`
-    * `.long()`
-
-* **10. Tensor Operations**
-
-  * Arithmetic
-
-    * Addition
-    * Subtraction
-    * Multiplication
-    * Division
-  * Matrix multiplication
-
-    * `matmul`
-    * `@`
-  * Reductions
-
-    * `sum`
-    * `mean`
-    * `max`
-    * `min`
-  * Comparisons
-  * Logical operations
-  * Element-wise operations
-
-* **11. Tensor Indexing and Slicing**
-
-  * Basic indexing
-  * Slicing
-  * Advanced indexing
-  * Boolean masking
-  * Selecting dimensions
-  * Gathering
-  * Scattering
-
-* **12. Tensor Reshaping**
-
-  * `reshape`
-  * `view`
-  * `flatten`
-  * `squeeze`
-  * `unsqueeze`
-  * `transpose`
-  * `permute`
-  * Contiguous tensors
-  * Strides
-
-* **13. Broadcasting**
-
-  * Broadcasting rules
-  * Compatible shapes
-  * Common broadcasting patterns
-  * Broadcasting pitfalls
-  * Memory implications
+- **7. PyTorch API**
+  - PyTorch API
+  - High-level API
+    - `torch.nn`
+    - `torch.optim`
+    - `torch.utils.data`
+  - Mid-level API
+    - `torch.nn.Module`
+    - `torch.autograd`
+  - Low-level API
+    - Tensors
+    - Autograd
+    - Operations
+  - API best practices
 
 ---
 
-# IV. Devices and Hardware Acceleration
+# II. Tensors
 
-* **14. CPU Computation**
+- **8. Tensor Fundamentals**
+  - Tensors
+  - Tensor creation
+    - `torch.tensor()`
+    - `torch.zeros()`
+    - `torch.ones()`
+    - `torch.full()`
+    - `torch.empty()`
+    - `torch.rand()`
+    - `torch.randn()`
+    - `torch.randint()`
+    - `torch.randperm()`
+    - `torch.arange()`
+    - `torch.linspace()`
+    - `torch.eye()`
+    - `torch.from_numpy()`
+  - Tensor attributes
+    - `shape`
+    - `size()`
+    - `dtype`
+    - `device`
+    - `requires_grad`
+    - `grad`
+    - `grad_fn`
+    - `is_leaf`
+    - `T`
+    - `ndim`
+    - `numel()`
+    - `itemsize`
+    - `layout`
+    - `is_cuda`
+    - `is_sparse`
+    - `is_quantized`
+    - `is_meta`
+    - `is_nested`
+  - Tensor types
+    - Float tensors
+      - `torch.float32`
+      - `torch.float64`
+      - `torch.float16`
+      - `torch.bfloat16`
+    - Integer tensors
+      - `torch.int8`
+      - `torch.int16`
+      - `torch.int32`
+      - `torch.int64`
+      - `torch.uint8`
+    - Boolean tensors
+      - `torch.bool`
+    - Complex tensors
+      - `torch.complex64`
+      - `torch.complex128`
+    - Quantized tensors
+  - Tensor best practices
 
-  * CPU tensors
-  * CPU operations
-  * CPU threading
+- **9. Tensor Operations**
+  - Arithmetic operations
+    - `torch.add()`
+    - `torch.sub()`
+    - `torch.mul()`
+    - `torch.div()`
+    - `torch.pow()`
+    - `torch.sqrt()`
+    - `torch.exp()`
+    - `torch.log()`
+    - `torch.abs()`
+    - `torch.neg()`
+    - `torch.reciprocal()`
+  - Comparison operations
+    - `torch.eq()`
+    - `torch.ne()`
+    - `torch.lt()`
+    - `torch.le()`
+    - `torch.gt()`
+    - `torch.ge()`
+  - Logical operations
+    - `torch.logical_and()`
+    - `torch.logical_or()`
+    - `torch.logical_not()`
+    - `torch.logical_xor()`
+  - Reduction operations
+    - `torch.sum()`
+    - `torch.mean()`
+    - `torch.max()`
+    - `torch.min()`
+    - `torch.prod()`
+    - `torch.std()`
+    - `torch.var()`
+    - `torch.argmax()`
+    - `torch.argmin()`
+    - `torch.all()`
+    - `torch.any()`
+    - `torch.count_nonzero()`
+  - Matrix operations
+    - `torch.matmul()`
+    - `torch.mm()`
+    - `torch.bmm()`
+    - `torch.einsum()`
+    - `torch.tensordot()`
+    - `torch.dot()`
+    - `torch.outer()`
+    - `torch.kron()`
+  - Shape operations
+    - `torch.reshape()`
+    - `torch.view()`
+    - `torch.squeeze()`
+    - `torch.unsqueeze()`
+    - `torch.flatten()`
+    - `torch.transpose()`
+    - `torch.permute()`
+    - `torch.cat()`
+    - `torch.stack()`
+    - `torch.split()`
+    - `torch.chunk()`
+    - `torch.unbind()`
+    - `torch.expand()`
+    - `torch.repeat()`
+    - `torch.tile()`
+  - Indexing and slicing
+    - Basic indexing
+    - Advanced indexing
+    - Boolean masking
+    - `torch.gather()`
+    - `torch.scatter()`
+    - `torch.index_select()`
+    - `torch.masked_select()`
+    - `torch.where()`
+    - `torch.take()`
+  - Operation best practices
 
-* **15. GPU Computing**
+- **10. Tensor Broadcasting**
+  - Broadcasting
+  - Broadcasting rules
+  - Broadcasting examples
+  - Broadcasting best practices
 
-  * CUDA concepts
-  * GPU tensors
-  * Device selection
-  * `.cuda()`
-  * `.to(device)`
-  * GPU memory
+- **11. Tensor Devices**
+  - Devices
+  - CPU
+  - CUDA
+  - MPS
+  - `torch.device()`
+  - `.to(device)`
+  - `.cuda()`
+  - `.cpu()`
+  - Device detection
+    - `torch.cuda.is_available()`
+    - `torch.cuda.device_count()`
+    - `torch.cuda.current_device()`
+    - `torch.cuda.get_device_name()`
+    - `torch.backends.mps.is_available()`
+  - Device best practices
 
-* **16. Device Management**
+- **12. Tensor Data Types**
+  - Data types
+  - Type conversion
+    - `.to(dtype)`
+    - `.float()`
+    - `.double()`
+    - `.half()`
+    - `.bfloat16()`
+    - `.int()`
+    - `.long()`
+    - `.bool()`
+  - Type promotion
+  - Type inference
+  - Data type best practices
 
-  * CPU/GPU transfers
-  * Avoiding unnecessary transfers
-  * Device-aware code
-  * Multiple GPUs
-  * Device synchronization
+- **13. Tensor Memory**
+  - Tensor memory
+  - Memory layout
+  - Contiguous tensors
+  - Non-contiguous tensors
+  - `.contiguous()`
+  - Memory views
+  - Memory sharing
+  - Memory best practices
 
-* **17. Hardware-Aware Programming**
-
-  * GPU parallelism
-  * Kernel execution
-  * Host/device interaction
-  * Memory bandwidth
-  * Compute versus memory bottlenecks
-
----
-
-# V. Autograd and Automatic Differentiation
-
-* **18. Gradient Fundamentals**
-
-  * Derivatives
-  * Computational graphs
-  * Gradient propagation
-  * Chain rule
-  * Backpropagation
-
-* **19. PyTorch Autograd**
-
-  * `requires_grad`
-  * `grad`
-  * `backward`
-  * `.grad`
-  * `grad_fn`
-  * Gradient accumulation
-  * Dynamic computation graphs
-
-PyTorch's current documentation describes `autograd` as its automatic-differentiation system and explains that operations are recorded so gradients can be computed through the resulting computation graph. ([PyTorch Documentation][2])
-
-* **20. Gradient Control**
-
-  * `torch.no_grad()`
-  * `torch.inference_mode()`
-  * Detaching tensors
-
-    * `.detach()`
-  * Stopping gradient flow
-  * Training versus inference behavior
-
-* **21. Custom Differentiation**
-
-  * Custom autograd functions
-  * Forward computation
-  * Backward computation
-  * Gradient checking
-  * Numerical gradient verification
-
----
-
-# VI. Neural Network Fundamentals
-
-* **22. `torch.nn`**
-
-  * `nn.Module`
-  * Parameters
-  * Buffers
-  * Submodules
-  * `state_dict`
-
-* **23. Basic Layers**
-
-  * Linear layers
-  * Convolutional layers
-  * Pooling layers
-  * Embedding layers
-  * Normalization layers
-  * Dropout
-  * Activation functions
-
-* **24. Activation Functions**
-
-  * ReLU
-  * Sigmoid
-  * Tanh
-  * GELU
-  * Softmax
-  * LogSoftmax
-  * When different activations are appropriate
-
-* **25. Building Custom Models**
-
-  * Defining `__init__`
-  * Defining `forward`
-  * Registering parameters
-  * Nesting modules
-  * Reusable model components
-
----
-
-# VII. Training Fundamentals
-
-* **26. The Training Loop**
-
-  * Forward pass
-  * Loss computation
-  * Backward pass
-  * Optimizer step
-  * Gradient reset
-  * Epochs
-  * Batches
-
-* **27. Loss Functions**
-
-  * Mean squared error
-  * Cross entropy
-  * Binary cross entropy
-  * Negative log likelihood
-  * Classification losses
-  * Regression losses
-  * Contrastive and metric-learning losses
-
-* **28. Optimizers**
-
-  * SGD
-  * Momentum
-  * Adam
-  * AdamW
-  * Learning-rate configuration
-  * Weight decay
-  * Optimizer state
-
-* **29. Training Modes**
-
-  * `model.train()`
-  * `model.eval()`
-  * Training-only layers
-
-    * Dropout
-    * Batch normalization
-  * Inference mode
-
-* **30. Learning Rate**
-
-  * Initial learning rate
-  * Learning-rate schedules
-  * Warmup
-  * Decay
-  * Cosine schedules
-  * One-cycle strategies
-  * Adaptive scheduling
-
----
-
-# VIII. Data Pipelines
-
-* **31. Dataset Fundamentals**
-
-  * `Dataset`
-  * `__len__`
-  * `__getitem__`
-  * Map-style datasets
-  * Iterable datasets
-
-* **32. DataLoader**
-
-  * Batching
-  * Shuffling
-  * Workers
-  * `pin_memory`
-  * `drop_last`
-  * Prefetching
-  * Persistent workers
-
-* **33. Data Preprocessing**
-
-  * Normalization
-  * Standardization
-  * Resizing
-  * Tokenization
-  * Encoding
-  * Feature scaling
-
-* **34. Data Augmentation**
-
-  * Image augmentation
-  * Random transformations
-  * Cropping
-  * Flipping
-  * Rotation
-  * Color transformations
-  * Text augmentation
-  * Audio augmentation
-
-* **35. Efficient Data Loading**
-
-  * Parallel workers
-  * CPU/GPU pipeline overlap
-  * Prefetching
-  * Memory pinning
-  * Caching
-  * Streaming datasets
+- **14. Tensor Serialization**
+  - Tensor serialization
+  - `torch.save()`
+  - `torch.load()`
+  - State dict
+  - Serialization best practices
 
 ---
 
-# IX. Computer Vision with PyTorch
+# III. Autograd
 
-* **36. Image Fundamentals**
+- **15. Autograd Fundamentals**
+  - Autograd
+  - Automatic differentiation
+  - Computation graph
+  - Dynamic graph
+  - Gradients
+  - Backpropagation
+  - Autograd best practices
 
-  * Image tensors
-  * Channels
-  * Height
-  * Width
-  * Batch dimension
-  * Normalization
+- **16. `requires_grad`**
+  - `requires_grad`
+  - Gradient tracking
+  - `requires_grad_(True)`
+  - `requires_grad_(False)`
+  - `detach()`
+  - `torch.no_grad()`
+  - `torch.enable_grad()`
+  - `torch.set_grad_enabled()`
+  - `requires_grad` best practices
 
-* **37. Convolutional Neural Networks**
+- **17. Backward Pass**
+  - Backward pass
+  - `.backward()`
+  - Gradient computation
+  - Gradient accumulation
+  - Gradient clearing
+  - `optimizer.zero_grad()`
+  - Backward best practices
 
-  * Convolution
-  * Kernels
-  * Stride
-  * Padding
-  * Receptive fields
-  * Pooling
+- **18. Gradient Access**
+  - Gradient access
+  - `.grad`
+  - `torch.autograd.grad()`
+  - Gradient best practices
 
-* **38. CNN Architectures**
+- **19. Custom Autograd**
+  - Custom autograd
+  - `torch.autograd.Function`
+  - `forward()`
+  - `backward()`
+  - `ctx.save_for_backward()`
+  - Custom autograd best practices
 
-  * LeNet-style networks
-  * AlexNet concepts
-  * VGG-style networks
-  * ResNet
-  * Dense connections
-  * Efficient architectures
+- **20. Gradient Checking**
+  - Gradient checking
+  - `torch.autograd.gradcheck()`
+  - `torch.autograd.gradgradcheck()`
+  - Gradient checking best practices
 
-* **39. Computer Vision Tasks**
-
-  * Image classification
-  * Object detection
-  * Semantic segmentation
-  * Instance segmentation
-  * Image generation
-  * Image embeddings
-
-* **40. Transfer Learning**
-
-  * Pretrained models
-  * Feature extraction
-  * Fine-tuning
-  * Freezing layers
-  * Differential learning rates
-
----
-
-# X. Natural Language Processing
-
-* **41. Text Representation**
-
-  * Tokens
-  * Vocabulary
-  * Token IDs
-  * Embeddings
-  * Positional representations
-
-* **42. Sequence Models**
-
-  * RNNs
-  * LSTMs
-  * GRUs
-  * Sequence-to-sequence models
-
-* **43. Attention**
-
-  * Query
-  * Key
-  * Value
-  * Attention scores
-  * Scaled dot-product attention
-  * Masking
-
-* **44. Transformers**
-
-  * Self-attention
-  * Multi-head attention
-  * Feed-forward blocks
-  * Residual connections
-  * Layer normalization
-  * Positional encoding
-  * Encoder
-  * Decoder
-  * Encoder-decoder architectures
-
-* **45. NLP Tasks**
-
-  * Text classification
-  * Named entity recognition
-  * Language modeling
-  * Sequence generation
-  * Question answering
-  * Text embeddings
+- **21. Higher-Order Gradients**
+  - Higher-order gradients
+  - Double backward
+  - `create_graph=True`
+  - Hessian
+  - Higher-order gradient best practices
 
 ---
 
-# XI. Transformer Engineering and Modern Deep Learning
+# IV. Neural Networks
 
-* **46. Transformer Implementation**
+- **22. Neural Network Fundamentals**
+  - Neural networks
+  - Layers
+  - Modules
+  - `torch.nn`
+  - Neural network best practices
 
-  * Implement attention from scratch
-  * Build a transformer block
-  * Build an encoder
-  * Build a decoder
-  * Build a miniature language model
+- **23. `nn.Module`**
+  - `nn.Module`
+  - Module definition
+  - `__init__()`
+  - `forward()`
+  - Module parameters
+  - Module buffers
+  - Module children
+  - Module training mode
+  - `.train()`
+  - `.eval()`
+  - Module best practices
 
-* **47. Large Language Model Fundamentals**
+- **24. Layers**
+  - Linear layers
+    - `nn.Linear`
+    - `nn.Bilinear`
+  - Convolutional layers
+    - `nn.Conv1d`
+    - `nn.Conv2d`
+    - `nn.Conv3d`
+    - `nn.ConvTranspose1d`
+    - `nn.ConvTranspose2d`
+    - `nn.ConvTranspose3d`
+    - `nn.Unfold`
+    - `nn.Fold`
+  - Pooling layers
+    - `nn.MaxPool1d`
+    - `nn.MaxPool2d`
+    - `nn.MaxPool3d`
+    - `nn.AvgPool1d`
+    - `nn.AvgPool2d`
+    - `nn.AvgPool3d`
+    - `nn.AdaptiveMaxPool1d`
+    - `nn.AdaptiveMaxPool2d`
+    - `nn.AdaptiveMaxPool3d`
+    - `nn.AdaptiveAvgPool1d`
+    - `nn.AdaptiveAvgPool2d`
+    - `nn.AdaptiveAvgPool3d`
+    - `nn.MaxUnpool1d`
+    - `nn.MaxUnpool2d`
+    - `nn.MaxUnpool3d`
+  - Recurrent layers
+    - `nn.RNN`
+    - `nn.LSTM`
+    - `nn.GRU`
+    - `nn.RNNCell`
+    - `nn.LSTMCell`
+    - `nn.GRUCell`
+  - Transformer layers
+    - `nn.Transformer`
+    - `nn.TransformerEncoder`
+    - `nn.TransformerDecoder`
+    - `nn.TransformerEncoderLayer`
+    - `nn.TransformerDecoderLayer`
+    - `nn.MultiheadAttention`
+  - Normalization layers
+    - `nn.BatchNorm1d`
+    - `nn.BatchNorm2d`
+    - `nn.BatchNorm3d`
+    - `nn.LayerNorm`
+    - `nn.GroupNorm`
+    - `nn.InstanceNorm1d`
+    - `nn.InstanceNorm2d`
+    - `nn.InstanceNorm3d`
+    - `nn.LocalResponseNorm`
+    - `nn.SyncBatchNorm`
+  - Dropout layers
+    - `nn.Dropout`
+    - `nn.Dropout1d`
+    - `nn.Dropout2d`
+    - `nn.Dropout3d`
+    - `nn.AlphaDropout`
+  - Embedding layers
+    - `nn.Embedding`
+    - `nn.EmbeddingBag`
+  - Activation layers
+    - `nn.ReLU`
+    - `nn.LeakyReLU`
+    - `nn.PReLU`
+    - `nn.RReLU`
+    - `nn.ELU`
+    - `nn.SELU`
+    - `nn.GELU`
+    - `nn.SiLU`
+    - `nn.Mish`
+    - `nn.Sigmoid`
+    - `nn.Tanh`
+    - `nn.Softmax`
+    - `nn.LogSoftmax`
+    - `nn.Softplus`
+    - `nn.Softsign`
+    - `nn.Hardtanh`
+    - `nn.Hardsigmoid`
+    - `nn.Hardswish`
+    - `nn.Hardswish`
+    - `nn.LogSigmoid`
+    - `nn.Softmin`
+    - `nn.Softmax2d`
+  - Loss layers
+    - `nn.MSELoss`
+    - `nn.L1Loss`
+    - `nn.CrossEntropyLoss`
+    - `nn.NLLLoss`
+    - `nn.BCELoss`
+    - `nn.BCEWithLogitsLoss`
+    - `nn.KLDivLoss`
+    - `nn.HuberLoss`
+    - `nn.SmoothL1Loss`
+    - `nn.CosineEmbeddingLoss`
+    - `nn.MarginRankingLoss`
+    - `nn.TripletMarginLoss`
+    - `nn.TripletMarginWithDistanceLoss`
+    - `nn.CTCLoss`
+    - `nn.PoissonNLLLoss`
+    - `nn.GaussianNLLLoss`
+    - `nn.MultiLabelMarginLoss`
+    - `nn.MultiLabelSoftMarginLoss`
+    - `nn.SoftMarginLoss`
+    - `nn.HingeEmbeddingLoss`
+  - Container layers
+    - `nn.Sequential`
+    - `nn.ModuleList`
+    - `nn.ModuleDict`
+    - `nn.ParameterList`
+    - `nn.ParameterDict`
+  - Padding layers
+    - `nn.ReflectionPad1d`
+    - `nn.ReflectionPad2d`
+    - `nn.ReflectionPad3d`
+    - `nn.ReplicationPad1d`
+    - `nn.ReplicationPad2d`
+    - `nn.ReplicationPad3d`
+    - `nn.ZeroPad1d`
+    - `nn.ZeroPad2d`
+    - `nn.ZeroPad3d`
+    - `nn.ConstantPad1d`
+    - `nn.ConstantPad2d`
+    - `nn.ConstantPad3d`
+  - Upsampling layers
+    - `nn.Upsample`
+    - `nn.UpsamplingNearest2d`
+    - `nn.UpsamplingBilinear2d`
+  - Sparse layers
+    - `nn.Embedding`
+    - `nn.EmbeddingBag`
+  - Distance layers
+    - `nn.PairwiseDistance`
+    - `nn.CosineSimilarity`
+  - Vision layers
+    - `nn.PixelShuffle`
+    - `nn.PixelUnshuffle`
+    - `nn.Upsample`
+    - `nn.GridSample`
+  - Layer best practices
 
-  * Tokenization
-  * Embedding layers
-  * Causal masking
-  * Next-token prediction
-  * Context windows
-  * Parameter counts
+- **25. Loss Functions**
+  - Loss functions
+  - Regression losses
+    - `nn.MSELoss`
+    - `nn.L1Loss`
+    - `nn.SmoothL1Loss`
+    - `nn.HuberLoss`
+    - `nn.PoissonNLLLoss`
+    - `nn.GaussianNLLLoss`
+  - Classification losses
+    - `nn.CrossEntropyLoss`
+    - `nn.NLLLoss`
+    - `nn.BCELoss`
+    - `nn.BCEWithLogitsLoss`
+    - `nn.MultiLabelMarginLoss`
+    - `nn.MultiLabelSoftMarginLoss`
+    - `nn.SoftMarginLoss`
+    - `nn.HingeEmbeddingLoss`
+  - Ranking losses
+    - `nn.MarginRankingLoss`
+    - `nn.TripletMarginLoss`
+    - `nn.TripletMarginWithDistanceLoss`
+  - Similarity losses
+    - `nn.CosineEmbeddingLoss`
+  - Sequence losses
+    - `nn.CTCLoss`
+  - Custom losses
+  - Loss function best practices
 
-* **48. Transformer Training**
+- **26. Optimizers**
+  - Optimizers
+  - `torch.optim`
+  - `SGD`
+  - `Adam`
+  - `AdamW`
+  - `Adadelta`
+  - `Adagrad`
+  - `Adamax`
+  - `ASGD`
+  - `LBFGS`
+  - `NAdam`
+  - `RAdam`
+  - `RMSprop`
+  - `Rprop`
+  - `SparseAdam`
+  - Optimizer parameters
+  - Learning rate
+  - Weight decay
+  - Momentum
+  - Optimizer best practices
 
-  * Teacher forcing
-  * Cross entropy
-  * Learning-rate schedules
-  * Gradient accumulation
-  * Mixed precision
-  * Checkpointing
+- **27. Learning Rate Schedulers**
+  - Learning rate schedulers
+  - `torch.optim.lr_scheduler`
+  - `StepLR`
+  - `MultiStepLR`
+  - `ExponentialLR`
+  - `CosineAnnealingLR`
+  - `CosineAnnealingWarmRestarts`
+  - `CyclicLR`
+  - `OneCycleLR`
+  - `ReduceLROnPlateau`
+  - `LambdaLR`
+  - `MultiplicativeLR`
+  - `LinearLR`
+  - `ConstantLR`
+  - `PolynomialLR`
+  - `SequentialLR`
+  - `ChainedScheduler`
+  - Scheduler best practices
 
-* **49. Fine-Tuning**
-
-  * Full fine-tuning
-  * Parameter-efficient fine-tuning concepts
-  * Freezing parameters
-  * Adapter-style methods
-  * Instruction-oriented fine-tuning
+- **28. Initialization**
+  - Weight initialization
+  - `torch.nn.init`
+  - `uniform_()`
+  - `normal_()`
+  - `constant_()`
+  - `ones_()`
+  - `zeros_()`
+  - `eye_()`
+  - `dirac_()`
+  - `xavier_uniform_()`
+  - `xavier_normal_()`
+  - `kaiming_uniform_()`
+  - `kaiming_normal_()`
+  - `orthogonal_()`
+  - `sparse_()`
+  - Initialization best practices
 
 ---
 
-# XII. Model Evaluation and Experimentation
+# V. Training
 
-* **50. Evaluation**
+- **29. Training Fundamentals**
+  - Training
+  - Training loop
+  - Epochs
+  - Batches
+  - Iterations
+  - Training best practices
 
-  * Training metrics
-  * Validation metrics
-  * Test metrics
-  * Accuracy
-  * Precision
-  * Recall
-  * F1
-  * ROC-AUC
-  * Mean squared error
-  * Mean absolute error
+- **30. Training Loop**
+  - Training loop
+  - Forward pass
+  - Loss computation
+  - Backward pass
+  - Optimizer step
+  - Gradient zeroing
+  - Training loop best practices
 
-* **51. Model Diagnostics**
+- **31. Validation**
+  - Validation
+  - Validation loop
+  - Validation loss
+  - Validation metrics
+  - Validation best practices
 
-  * Learning curves
-  * Loss curves
-  * Confusion matrices
-  * Error analysis
-  * Calibration
-  * Class imbalance
+- **32. Testing**
+  - Testing
+  - Test loop
+  - Test metrics
+  - Test best practices
 
-* **52. Reproducibility**
+- **33. Model Evaluation**
+  - Model evaluation
+  - Metrics
+  - Evaluation best practices
 
-  * Random seeds
-  * Deterministic operations
-  * Environment recording
-  * Configuration files
-  * Dataset versioning
-  * Experiment tracking
+- **34. Model Saving and Loading**
+  - Model saving
+    - `torch.save()`
+    - State dict
+    - Full model
+  - Model loading
+    - `torch.load()`
+    - State dict loading
+    - `load_state_dict()`
+  - Checkpointing
+    - Saving checkpoints
+    - Loading checkpoints
+    - Resuming training
+  - Model saving best practices
 
-* **53. Hyperparameter Optimization**
+- **35. Transfer Learning**
+  - Transfer learning
+  - Pre-trained models
+  - Feature extraction
+  - Fine-tuning
+  - Freezing layers
+  - Unfreezing layers
+  - Transfer learning best practices
 
-  * Learning rate
-  * Batch size
-  * Weight decay
-  * Architecture parameters
-  * Scheduler parameters
-  * Search strategies
-
----
-
-# XIII. Model Initialization and Optimization
-
-* **54. Weight Initialization**
-
-  * Zero initialization
-  * Random initialization
-  * Xavier/Glorot
-  * He/Kaiming initialization
-  * Initialization by layer type
-
-* **55. Optimization Theory**
-
-  * Gradient descent
-  * Stochastic gradient descent
-  * Momentum
-  * Adaptive optimization
-  * Adam
-  * AdamW
-  * Learning-rate scheduling
-
-* **56. Training Stability**
-
-  * Vanishing gradients
-  * Exploding gradients
-  * Gradient clipping
-  * Normalization
-  * Initialization
-  * Numerical stability
-
-* **57. Regularization**
-
-  * Weight decay
-  * Dropout
-  * Data augmentation
-  * Early stopping
-  * Label smoothing
-  * Noise injection
+- **36. Custom Training Loops**
+  - Custom training loops
+  - `torch.autograd`
+  - Gradient accumulation
+  - Gradient clipping
+  - Mixed precision
+  - Custom training best practices
 
 ---
 
-# XIV. Advanced Autograd and Functional Programming
+# VI. Data Handling
 
-* **58. Functional Model Design**
+- **37. Dataset**
+  - Dataset
+  - `torch.utils.data.Dataset`
+  - Custom Dataset
+  - `__len__()`
+  - `__getitem__()`
+  - `IterableDataset`
+  - Dataset best practices
 
-  * Functional operations
-  * Stateless computation
-  * Parameter passing
-  * Functional transformations
+- **38. DataLoader**
+  - DataLoader
+  - `torch.utils.data.DataLoader`
+  - Batching
+  - Shuffling
+  - `num_workers`
+  - `collate_fn`
+  - `pin_memory`
+  - `drop_last`
+  - `persistent_workers`
+  - `prefetch_factor`
+  - DataLoader best practices
 
-* **59. Higher-Order Differentiation**
+- **39. Samplers**
+  - Samplers
+  - `torch.utils.data.Sampler`
+  - `SequentialSampler`
+  - `RandomSampler`
+  - `SubsetRandomSampler`
+  - `WeightedRandomSampler`
+  - `BatchSampler`
+  - `DistributedSampler`
+  - Sampler best practices
 
-  * Gradients of gradients
-  * Jacobians
-  * Hessians
-  * Meta-learning applications
-  * Optimization through optimization
+- **40. Transforms**
+  - Transforms
+  - `torchvision.transforms`
+  - Composition
+    - `transforms.Compose`
+  - Image transforms
+    - `Resize`
+    - `CenterCrop`
+    - `RandomCrop`
+    - `RandomResizedCrop`
+    - `RandomHorizontalFlip`
+    - `RandomVerticalFlip`
+    - `RandomRotation`
+    - `RandomAffine`
+    - `ColorJitter`
+    - `RandomGrayscale`
+    - `RandomErasing`
+    - `GaussianBlur`
+    - `Normalize`
+    - `ToTensor`
+    - `PILToTensor`
+    - `ConvertImageDtype`
+    - `ToPILImage`
+  - Tensor transforms
+  - Custom transforms
+  - Transform best practices
 
-* **60. Forward-Mode and Reverse-Mode AD**
+- **41. Datasets**
+  - Built-in datasets
+    - MNIST
+    - FashionMNIST
+    - CIFAR10
+    - CIFAR100
+    - ImageNet
+    - COCO
+    - VOC
+    - Places365
+    - CelebA
+    - SVHN
+    - STL10
+    - KMNIST
+    - QMNIST
+    - Omniglot
+    - PhotoTour
+    - SBD
+    - Cityscapes
+    - Kinetics
+    - HMDB51
+    - UCF101
+  - Dataset loading
+  - Dataset download
+  - Dataset best practices
 
-  * Reverse-mode differentiation
-  * Forward-mode differentiation
-  * Choosing an appropriate differentiation strategy
-  * Combined differentiation
-
-* **61. Gradient Debugging**
-
-  * Checking `.grad`
-  * Detecting NaNs
-  * Detecting infinities
-  * Gradient norms
-  * Anomaly detection
-  * Numerical verification
-
----
-
-# XV. Model Serialization and Checkpointing
-
-* **62. Saving Models**
-
-  * `state_dict`
-  * Saving model parameters
-  * Saving optimizer state
-  * Saving training state
-
-* **63. Loading Models**
-
-  * Restoring parameters
-  * Restoring optimizer state
-  * Device-aware loading
-  * Compatibility considerations
-
-* **64. Checkpointing**
-
-  * Periodic checkpoints
-  * Best-model checkpoints
-  * Resume training
-  * Partial checkpoint restoration
-  * Fault tolerance
-
-* **65. Reproducible Checkpoints**
-
-  * Model state
-  * Optimizer state
-  * Scheduler state
-  * Random states
-  * Configuration
-  * Training metadata
-
----
-
-# XVI. Mixed Precision and Memory Optimization
-
-* **66. Numeric Precision**
-
-  * FP32
-  * FP16
-  * BF16
-  * Precision versus memory trade-offs
-
-* **67. Automatic Mixed Precision**
-
-  * Autocasting
-  * Gradient scaling
-  * Mixed-precision training
-  * Mixed-precision inference
-
-* **68. GPU Memory Management**
-
-  * Allocation
-  * Deallocation
-  * Memory fragmentation
-  * Peak-memory analysis
-  * Activation memory
-  * Parameter memory
-  * Optimizer-state memory
-
-* **69. Memory Optimization Techniques**
-
-  * Gradient accumulation
-  * Activation checkpointing
-  * Smaller batches
-  * Reduced precision
-  * Parameter sharding
-  * Efficient tensor layouts
+- **42. Data Augmentation**
+  - Data augmentation
+  - Image augmentation
+  - Text augmentation
+  - Audio augmentation
+  - Mixup
+  - Cutmix
+  - Cutout
+  - RandAugment
+  - AutoAugment
+  - TrivialAugment
+  - Data augmentation best practices
 
 ---
 
-# XVII. PyTorch Performance Engineering
+# VII. Computer Vision
 
-* **70. Performance Fundamentals**
+- **43. Image Classification**
+  - Image classification
+  - Dataset loading
+  - Data augmentation
+  - Model building
+  - Model training
+  - Model evaluation
+  - Image classification best practices
 
-  * Compute-bound workloads
-  * Memory-bound workloads
-  * CPU bottlenecks
-  * GPU bottlenecks
-  * Input pipeline bottlenecks
+- **44. Convolutional Neural Networks**
+  - CNNs
+  - Convolutional layers
+  - Pooling layers
+  - Padding
+  - Strides
+  - Filters
+  - Kernels
+  - Feature maps
+  - Receptive field
+  - CNN architecture
+  - CNN best practices
 
-* **71. Profiling**
+- **45. Transfer Learning**
+  - Transfer learning
+  - Pre-trained models
+    - `torchvision.models`
+    - ResNet
+    - VGG
+    - DenseNet
+    - Inception
+    - GoogLeNet
+    - MobileNet
+    - ShuffleNet
+    - EfficientNet
+    - ConvNeXt
+    - Vision Transformer (ViT)
+    - Swin Transformer
+    - RegNet
+    - MNASNet
+    - SqueezeNet
+    - AlexNet
+  - Feature extraction
+  - Fine-tuning
+  - Transfer learning best practices
 
-  * PyTorch profiler
-  * CPU profiling
-  * GPU profiling
-  * Operator-level analysis
-  * Memory profiling
-  * Trace analysis
+- **46. Object Detection**
+  - Object detection
+  - `torchvision.models.detection`
+  - Faster R-CNN
+  - Mask R-CNN
+  - RetinaNet
+  - SSD
+  - FCOS
+  - YOLO (via external libraries)
+  - Object detection best practices
 
-* **72. Performance Optimization**
+- **47. Image Segmentation**
+  - Image segmentation
+  - Semantic segmentation
+  - Instance segmentation
+  - Panoptic segmentation
+  - U-Net
+  - DeepLab
+  - FCN
+  - Mask R-CNN
+  - Image segmentation best practices
 
-  * Vectorization
-  * Avoiding Python loops
-  * Efficient tensor operations
-  * Kernel efficiency
-  * Data-loader optimization
-  * Memory transfers
+- **48. Vision Transformers**
+  - Vision Transformers
+  - ViT
+  - DeiT
+  - Swin
+  - BeiT
+  - Vision Transformer best practices
 
-* **73. Benchmarking**
-
-  * Warm-up iterations
-  * Synchronization
-  * Throughput
-  * Latency
-  * Memory usage
-  * Reproducible benchmarks
-
----
-
-# XVIII. PyTorch Compilation
-
-* **74. `torch.compile`**
-
-  * Compilation fundamentals
-  * Compiling models
-  * Compiling functions
-  * Backend concepts
-  * Compilation modes
-  * Dynamic shapes
-
-* **75. Graph Capture**
-
-  * Graph breaks
-  * Guards
-  * Unsupported operations
-  * Compilation caching
-  * Debugging compiled code
-
-* **76. Compiled Autograd**
-
-  * Backward-graph capture
-  * Integration with `torch.compile`
-  * Compilation limitations
-  * Debugging compilation behavior
-
-* **77. `torch.export`**
-
-  * Exporting models
-  * Graph representations
-  * Shape constraints
-  * AOT workflows
-  * Python-independent execution concepts
-
-Current PyTorch documentation emphasizes `torch.compile` as the main compilation path and notes that TorchScript is no longer under active development; `torch.export` provides an ahead-of-time model representation for supported workloads. ([PyTorch Documentation][3])
-
----
-
-# XIX. Distributed Training
-
-* **78. Distributed Computing Concepts**
-
-  * Processes
-  * Ranks
-  * World size
-  * Communication
-  * Collective operations
-  * Synchronization
-
-* **79. Distributed Data Parallel**
-
-  * DDP fundamentals
-  * Process initialization
-  * Distributed samplers
-  * Gradient synchronization
-  * Multi-GPU training
-  * Multi-node training
-
-* **80. Distributed Communication**
-
-  * Broadcast
-  * Reduce
-  * All-reduce
-  * All-gather
-  * Reduce-scatter
-  * Process groups
-
-PyTorch's distributed stack currently includes DDP, FSDP2, tensor parallelism, device mesh, and related distributed mechanisms. ([PyTorch Documentation][4])
-
-* **81. Fully Sharded Data Parallel**
-
-  * Parameter sharding
-  * Gradient sharding
-  * Optimizer-state sharding
-  * Memory reduction
-  * FSDP2 concepts
-  * Checkpointing under sharding
-
-FSDP reduces per-device memory by sharding parameters, gradients, and optimizer states, making models that do not fit on one GPU more feasible to train. ([PyTorch Documentation][5])
-
-* **82. Large-Scale Parallelism**
-
-  * Tensor parallelism
-  * Pipeline parallelism
-  * Data parallelism
-  * Multidimensional parallelism
-  * Device meshes
+- **49. Generative Models**
+  - Generative models
+  - GANs
+  - DCGAN
+  - CycleGAN
+  - StyleGAN
+  - Pix2Pix
+  - VAEs
+  - Diffusion models
+  - Stable Diffusion
+  - Generative model best practices
 
 ---
 
-# XX. Advanced Model Architectures
+# VIII. Natural Language Processing
 
-* **83. CNN Architectures**
+- **50. Text Processing**
+  - Text processing
+  - Tokenization
+  - `torchtext`
+  - Tokenizers
+  - Vocabulary
+  - Text processing best practices
 
-  * Residual networks
-  * Dense networks
-  * Efficient networks
-  * Modern convolutional blocks
+- **51. Word Embeddings**
+  - Word embeddings
+  - `nn.Embedding`
+  - Pre-trained embeddings
+    - Word2Vec
+    - GloVe
+    - FastText
+  - Embedding best practices
 
-* **84. Sequence Architectures**
+- **52. Recurrent Neural Networks**
+  - RNNs
+  - `nn.RNN`
+  - `nn.LSTM`
+  - `nn.GRU`
+  - Bidirectional RNNs
+  - Sequence processing
+  - Sequence prediction
+  - RNN best practices
 
-  * RNN
-  * LSTM
-  * GRU
-  * Bidirectional architectures
+- **53. Sequence-to-Sequence**
+  - Sequence-to-sequence
+  - Encoder-decoder
+  - Attention
+  - `nn.MultiheadAttention`
+  - Seq2seq best practices
 
-* **85. Transformer Architectures**
+- **54. Transformers**
+  - Transformers
+  - Self-attention
+  - Multi-head attention
+  - Positional encoding
+  - Encoder
+  - Decoder
+  - Transformer architecture
+  - Transformer best practices
 
-  * Encoder-only
-  * Decoder-only
-  * Encoder-decoder
-  * Vision transformers
-  * Multimodal transformers
+- **55. Hugging Face Transformers**
+  - Hugging Face
+  - Transformers library
+  - Pre-trained models
+    - BERT
+    - GPT
+    - RoBERTa
+    - DistilBERT
+    - T5
+    - BART
+    - ELECTRA
+    - XLNet
+    - ALBERT
+    - DeBERTa
+    - LLaMA
+    - Mistral
+    - Gemma
+  - Tokenizers
+  - Fine-tuning
+  - Hugging Face best practices
 
-* **86. Generative Models**
+- **56. Text Classification**
+  - Text classification
+  - Sentiment analysis
+  - Spam detection
+  - Topic classification
+  - Text classification best practices
 
-  * Autoencoders
-  * Variational autoencoders
-  * GANs
-  * Diffusion-model concepts
+- **57. Named Entity Recognition**
+  - NER
+  - NER models
+  - NER best practices
 
-* **87. Representation Learning**
+- **58. Machine Translation**
+  - Machine translation
+  - Seq2seq
+  - Transformers
+  - Machine translation best practices
 
-  * Embeddings
-  * Contrastive learning
-  * Self-supervised learning
-  * Metric learning
+- **59. Text Generation**
+  - Text generation
+  - Language models
+  - GPT
+  - Text generation best practices
 
----
-
-# XXI. Specialized PyTorch Domains
-
-* **88. Computer Vision**
-
-  * Classification
-  * Detection
-  * Segmentation
-  * Generative vision
-  * Vision transformers
-
-* **89. NLP**
-
-  * Classification
-  * Embeddings
-  * Language modeling
-  * Transformers
-  * Fine-tuning
-
-* **90. Speech and Audio**
-
-  * Spectrograms
-  * Audio preprocessing
-  * Sequence modeling
-  * Speech recognition
-  * Audio classification
-
-* **91. Time Series**
-
-  * Sequential forecasting
-  * Temporal convolution
-  * Recurrent models
-  * Transformer forecasting
-
-* **92. Graph Neural Networks**
-
-  * Graph representation
-  * Nodes
-  * Edges
-  * Message passing
-  * Graph convolution
-  * Graph attention
-
----
-
-# XXII. Custom PyTorch Components
-
-* **93. Custom Layers**
-
-  * Custom `nn.Module`
-  * Parameter registration
-  * Buffers
-  * Shape management
-
-* **94. Custom Loss Functions**
-
-  * Differentiable losses
-  * Composite losses
-  * Task-specific objectives
-
-* **95. Custom Optimizers**
-
-  * Optimizer structure
-  * Parameter groups
-  * State management
-  * Custom update rules
-
-* **96. Custom Operators**
-
-  * Operator definitions
-  * Autograd integration
-  * Custom kernels
-  * C++ extensions
-  * CUDA extensions
+- **60. Question Answering**
+  - Question answering
+  - QA models
+  - QA best practices
 
 ---
 
-# XXIII. Numerical and Systems Engineering
+# IX. Custom Training
 
-* **97. Numerical Stability**
+- **61. Custom Layers**
+  - Custom layers
+  - `nn.Module`
+  - `forward()`
+  - Custom layer best practices
 
-  * Floating-point precision
-  * Overflow
-  * Underflow
-  * Stable softmax
-  * Stable logarithms
-  * Gradient instability
+- **62. Custom Models**
+  - Custom models
+  - `nn.Module`
+  - `forward()`
+  - Custom model best practices
 
-* **98. Memory Layout**
+- **63. Custom Losses**
+  - Custom losses
+  - Loss function
+  - Loss implementation
+  - Custom loss best practices
 
-  * Strides
-  * Contiguity
-  * Views
-  * Copies
-  * Transposes
-  * Layout-sensitive performance
+- **64. Custom Optimizers**
+  - Custom optimizers
+  - `torch.optim.Optimizer`
+  - `step()`
+  - Custom optimizer best practices
 
-* **99. Kernel-Level Concepts**
+- **65. Custom Schedulers**
+  - Custom schedulers
+  - `torch.optim.lr_scheduler.LRScheduler`
+  - `get_lr()`
+  - Custom scheduler best practices
 
-  * GPU kernels
-  * Kernel launches
-  * Fusion
-  * Kernel overhead
-  * Memory bandwidth
-  * Compute utilization
+- **66. Gradient Accumulation**
+  - Gradient accumulation
+  - Accumulation steps
+  - Effective batch size
+  - Gradient accumulation best practices
 
-* **100. Hardware-Aware Deep Learning**
+- **67. Gradient Clipping**
+  - Gradient clipping
+  - `torch.nn.utils.clip_grad_norm_()`
+  - `torch.nn.utils.clip_grad_value_()`
+  - Gradient clipping best practices
 
-  * GPU architecture fundamentals
-  * Tensor cores
-  * Precision modes
-  * Host-device communication
-  * Memory hierarchy
+- **68. Mixed Precision**
+  - Mixed precision
+  - `torch.cuda.amp`
+  - `torch.amp`
+  - `autocast`
+  - `GradScaler`
+  - Mixed precision best practices
 
----
-
-# XXIV. Model Compression and Efficiency
-
-* **101. Quantization**
-
-  * Quantization concepts
-  * Calibration
-  * Dynamic quantization
-  * Static quantization
-  * Weight-only approaches
-  * Lower-precision inference
-
-* **102. Pruning**
-
-  * Unstructured pruning
-  * Structured pruning
-  * Sparsity
-  * Magnitude-based pruning
-
-* **103. Knowledge Distillation**
-
-  * Teacher models
-  * Student models
-  * Distillation losses
-  * Logit matching
-
-* **104. Efficient Architectures**
-
-  * Parameter-efficient architectures
-  * Reduced-width models
-  * Low-rank methods
-  * Sparse computation
+- **69. Gradient Checkpointing**
+  - Gradient checkpointing
+  - `torch.utils.checkpoint`
+  - Memory optimization
+  - Gradient checkpointing best practices
 
 ---
 
-# XXV. Production Model Deployment
+# X. Distributed Training
 
-* **105. Inference Fundamentals**
+- **70. Distributed Training Fundamentals**
+  - Distributed training
+  - Data parallelism
+  - Model parallelism
+  - Pipeline parallelism
+  - Hybrid parallelism
+  - Distributed training best practices
 
-  * Evaluation mode
-  * Inference mode
-  * Batch inference
-  * Online inference
-  * Latency
-  * Throughput
+- **71. DataParallel**
+  - `nn.DataParallel`
+  - Single-machine multi-GPU
+  - DataParallel limitations
+  - DataParallel best practices
 
-* **106. Model Serving**
+- **72. DistributedDataParallel**
+  - `nn.parallel.DistributedDataParallel`
+  - DDP
+  - Multi-GPU
+  - Multi-node
+  - Process groups
+  - `torch.distributed.init_process_group()`
+  - `DistributedSampler`
+  - DDP best practices
 
-  * Python services
-  * REST APIs
-  * gRPC concepts
-  * Batch-serving architectures
-  * Model-server architectures
+- **73. Fully Sharded Data Parallel**
+  - FSDP
+  - `torch.distributed.fsdp`
+  - Sharding
+  - Memory optimization
+  - FSDP best practices
 
-* **107. Model Export**
+- **74. Tensor Parallelism**
+  - Tensor parallelism
+  - `torch.distributed.tensor.parallel`
+  - Column parallelism
+  - Row parallelism
+  - Tensor parallelism best practices
 
-  * `state_dict`
-  * `torch.export`
-  * Deployment-oriented representations
-  * Runtime compatibility
+- **75. Pipeline Parallelism**
+  - Pipeline parallelism
+  - `torch.distributed.pipeline.sync`
+  - Pipeline stages
+  - Micro-batching
+  - Pipeline parallelism best practices
 
-* **108. Production Optimization**
+- **76. Distributed Launch**
+  - `torchrun`
+  - `torch.distributed.launch`
+  - Launch configuration
+  - Environment variables
+  - Distributed launch best practices
 
-  * Quantization
-  * Compilation
-  * Batching
-  * Caching
-  * CPU/GPU selection
-  * Memory optimization
+- **77. DeepSpeed**
+  - DeepSpeed
+  - ZeRO optimization
+  - ZeRO stages
+  - Offloading
+  - DeepSpeed best practices
 
----
+- **78. FairScale**
+  - FairScale
+  - Sharded data parallel
+  - Model parallelism
+  - FairScale best practices
 
-# XXVI. MLOps with PyTorch
-
-* **109. Experiment Tracking**
-
-  * Hyperparameters
-  * Metrics
-  * Artifacts
-  * Checkpoints
-  * Run metadata
-
-* **110. Data Versioning**
-
-  * Dataset versions
-  * Feature versions
-  * Training-data lineage
-
-* **111. Model Versioning**
-
-  * Model artifacts
-  * Model metadata
-  * Configuration
-  * Reproducibility
-
-* **112. Continuous Integration**
-
-  * Unit tests
-  * Integration tests
-  * Model tests
-  * Shape tests
-  * Numerical tests
-
-* **113. Continuous Deployment**
-
-  * Model packaging
-  * Deployment pipelines
-  * Rollbacks
-  * Canary releases
-  * Monitoring
-
-* **114. Production Monitoring**
-
-  * Latency
-  * Throughput
-  * Memory
-  * Error rates
-  * Data drift
-  * Model performance
+- **79. Accelerate**
+  - Hugging Face Accelerate
+  - Distributed training
+  - Mixed precision
+  - Accelerate best practices
 
 ---
 
-# XXVII. PyTorch Debugging
+# XI. Model Optimization
 
-* **115. Tensor Debugging**
+- **80. Model Optimization Fundamentals**
+  - Model optimization
+  - Quantization
+  - Pruning
+  - Distillation
+  - Optimization best practices
 
-  * Shape mismatches
-  * Device mismatches
-  * Data-type mismatches
-  * Broadcasting mistakes
-  * NaN detection
+- **81. Quantization**
+  - Quantization
+  - Post-training quantization
+  - Dynamic quantization
+  - Static quantization
+  - Quantization-aware training
+  - `torch.quantization`
+  - Quantization best practices
 
-* **116. Model Debugging**
+- **82. Pruning**
+  - Pruning
+  - Unstructured pruning
+  - Structured pruning
+  - `torch.nn.utils.prune`
+  - Pruning best practices
 
-  * Incorrect forward pass
-  * Missing parameters
-  * Frozen parameters
-  * Incorrect train/eval mode
-  * Incorrect tensor dimensions
+- **83. Knowledge Distillation**
+  - Knowledge distillation
+  - Teacher-student
+  - Distillation loss
+  - Distillation best practices
 
-* **117. Training Debugging**
-
-  * Loss not decreasing
-  * Exploding gradients
-  * Vanishing gradients
-  * Learning-rate problems
-  * Data leakage
-  * Label errors
-
-* **118. Performance Debugging**
-
-  * CPU bottlenecks
-  * GPU underutilization
-  * Data-loader bottlenecks
-  * Memory spikes
-  * Compilation graph breaks
-
----
-
-# XXVIII. Testing PyTorch Systems
-
-* **119. Unit Testing**
-
-  * Tensor operations
-  * Custom layers
-  * Loss functions
-  * Utility functions
-
-* **120. Model Testing**
-
-  * Input/output shapes
-  * Forward pass
-  * Backward pass
-  * Parameter updates
-
-* **121. Numerical Testing**
-
-  * Gradient checks
-  * Tolerance-based comparisons
-  * Precision comparisons
-  * Deterministic tests
-
-* **122. Integration Testing**
-
-  * Dataset → DataLoader → model
-  * Model → optimizer
-  * Training → checkpointing
-  * Export → inference
+- **84. Model Compression**
+  - Model compression
+  - Low-rank factorization
+  - Weight sharing
+  - Model compression best practices
 
 ---
 
-# XXIX. Security and Safe Model Engineering
+# XII. Deployment
 
-* **123. Model Artifact Safety**
+- **85. Deployment Fundamentals**
+  - Deployment
+  - Model serving
+  - Production ML
+  - Deployment best practices
 
-  * Trusted checkpoints
-  * Artifact provenance
-  * Model integrity
-  * Dependency management
+- **86. TorchScript**
+  - TorchScript
+  - `torch.jit.script`
+  - `torch.jit.trace`
+  - Scripted models
+  - Traced models
+  - TorchScript best practices
 
-* **124. Data Security**
+- **87. ONNX**
+  - ONNX
+  - `torch.onnx.export()`
+  - ONNX Runtime
+  - ONNX best practices
 
-  * Training-data access
-  * Sensitive datasets
-  * Access controls
-  * Data minimization
+- **88. TorchServe**
+  - TorchServe
+  - Model serving
+  - REST API
+  - gRPC API
+  - TorchServe best practices
 
-* **125. Deployment Security**
+- **89. TorchScript Deployment**
+  - TorchScript deployment
+  - C++ deployment
+  - LibTorch
+  - TorchScript deployment best practices
 
-  * API authentication
-  * Input validation
-  * Resource limits
-  * Dependency scanning
-  * Secure model serving
+- **90. ONNX Runtime Deployment**
+  - ONNX Runtime
+  - Cross-platform
+  - ONNX Runtime best practices
 
----
+- **91. TensorRT**
+  - TensorRT
+  - NVIDIA inference
+  - TensorRT best practices
 
-# XXX. Progressive PyTorch Projects
-
-* **126. Beginner Projects**
-
-  * Tensor calculator
-
-    * Tensor creation
-    * Arithmetic
-    * Reshaping
-  * Linear regression
-
-    * Dataset
-    * Model
-    * Loss
-    * Optimizer
-  * Binary classifier
-
-    * `nn.Module`
-    * Training loop
-    * Evaluation
-
-* **127. Intermediate Projects**
-
-  * MNIST classifier
-
-    * DataLoader
-    * CNN
-    * Validation
-    * Checkpointing
-  * CIFAR image classifier
-
-    * Data augmentation
-    * CNN architecture
-    * Learning-rate scheduling
-  * Sentiment classifier
-
-    * Tokenization
-    * Embeddings
-    * Sequence model
-
-* **128. Advanced Projects**
-
-  * Image segmentation system
-
-    * Encoder-decoder architecture
-    * Custom loss
-    * Evaluation metrics
-  * Transformer language model
-
-    * Token embeddings
-    * Attention
-    * Causal masking
-    * Training
-  * Time-series forecasting model
-
-    * Sequence generation
-    * Temporal model
-    * Evaluation
-
-* **129. Expert Projects**
-
-  * Distributed transformer training
-
-    * DDP
-    * Mixed precision
-    * Checkpointing
-  * Large-model training system
-
-    * FSDP2
-    * Gradient accumulation
-    * Memory optimization
-  * High-performance inference service
-
-    * `torch.compile`
-    * Model export
-    * Batching
-    * Profiling
-    * Monitoring
+- **92. Deployment Platforms**
+  - Docker
+  - Kubernetes
+  - AWS SageMaker
+  - Azure ML
+  - Google Vertex AI
+  - Hugging Face Spaces
+  - Deployment platform best practices
 
 ---
 
-# XXXI. Progressive Learning Sequence
+# XIII. PyTorch Ecosystem
 
-## Level 1 — Python + Machine Learning Foundations
+- **93. TorchVision**
+  - TorchVision
+  - Datasets
+  - Models
+  - Transforms
+  - Utils
+  - TorchVision best practices
 
-* Learn:
+- **94. TorchText**
+  - TorchText
+  - Datasets
+  - Vocab
+  - Transforms
+  - TorchText best practices
 
-  * Python
-  * NumPy
-  * Linear algebra
-  * Calculus
-  * Basic machine learning
-* Master:
+- **95. TorchAudio**
+  - TorchAudio
+  - Datasets
+  - Transforms
+  - Models
+  - TorchAudio best practices
 
-  * Arrays
-  * Matrix operations
-  * Derivatives
-  * Gradient descent
+- **96. PyTorch Lightning**
+  - PyTorch Lightning
+  - LightningModule
+  - Trainer
+  - Callbacks
+  - Loggers
+  - PyTorch Lightning best practices
 
-## Level 2 — PyTorch Fundamentals
+- **97. PyTorch Geometric**
+  - PyTorch Geometric
+  - Graph neural networks
+  - Graph datasets
+  - Message passing
+  - PyTorch Geometric best practices
 
-* Learn:
+- **98. TorchMetrics**
+  - TorchMetrics
+  - Metrics
+  - Distributed metrics
+  - TorchMetrics best practices
 
-  * Tensors
-  * Devices
-  * Tensor operations
-  * Autograd
-* Master:
+- **99. Captum**
+  - Captum
+  - Model interpretability
+  - Attribution
+  - Captum best practices
 
-  * Tensor manipulation
-  * GPU movement
-  * `requires_grad`
-  * `backward()`
+- **100. Hugging Face**
+  - Hugging Face
+  - Transformers
+  - Datasets
+  - Tokenizers
+  - Accelerate
+  - PEFT
+  - TRL
+  - Diffusers
+  - Hugging Face best practices
 
-## Level 3 — Neural Network Development
+- **101. Weights & Biases**
+  - Weights & Biases
+  - Experiment tracking
+  - Hyperparameter tuning
+  - Model registry
+  - W&B best practices
 
-* Learn:
+- **102. MLflow**
+  - MLflow
+  - Experiment tracking
+  - Model registry
+  - MLflow best practices
 
-  * `nn.Module`
-  * Layers
-  * Activations
-  * Loss functions
-  * Optimizers
-* Master:
-
-  * Writing custom models
-  * Training loops
-  * Validation loops
-
-## Level 4 — Data and Real Models
-
-* Learn:
-
-  * Dataset
-  * DataLoader
-  * Preprocessing
-  * Augmentation
-  * Transfer learning
-* Master:
-
-  * End-to-end supervised-learning pipelines
-
-## Level 5 — Advanced Deep Learning
-
-* Learn:
-
-  * CNNs
-  * RNNs
-  * Attention
-  * Transformers
-  * Generative models
-* Master:
-
-  * Implementing architectures rather than merely importing them
-
-## Level 6 — Performance Engineering
-
-* Learn:
-
-  * Mixed precision
-  * Profiling
-  * Memory optimization
-  * Compilation
-* Master:
-
-  * Diagnosing and removing computational bottlenecks
-
-## Level 7 — Distributed Deep Learning
-
-* Learn:
-
-  * DDP
-  * FSDP2
-  * Tensor parallelism
-  * Pipeline parallelism
-* Master:
-
-  * Multi-GPU and multi-node training
-
-## Level 8 — Production PyTorch
-
-* Learn:
-
-  * Export
-  * Serving
-  * Monitoring
-  * Model optimization
-  * MLOps
-* Master:
-
-  * Deploying reliable models outside the notebook environment
-
-## Level 9 — Expert PyTorch Engineering
-
-* Learn:
-
-  * Custom operators
-  * Compiler behavior
-  * Distributed internals
-  * GPU performance
-  * Numerical optimization
-* Master:
-
-  * Designing and optimizing PyTorch systems at the framework and infrastructure level
+- **103. Optuna**
+  - Optuna
+  - Hyperparameter optimization
+  - Optuna best practices
 
 ---
 
-# XXXII. Final PyTorch Competency Map
+# XIV. PyTorch Projects by Difficulty
 
-* **Python & Scientific Computing**
+## Beginner Projects
 
-  * Python
-  * NumPy
-  * pandas
-  * Visualization
+- **1. MNIST Classification**
+  - Dataset loading
+  - Model building
+  - Model training
+  - Model evaluation
 
-* **Mathematical Foundations**
+- **2. Fashion MNIST Classification**
+  - Dataset loading
+  - CNN
+  - Model training
+  - Model evaluation
 
-  * Linear algebra
-  * Calculus
-  * Probability
-  * Optimization
+- **3. House Price Prediction**
+  - Regression
+  - Model building
+  - Model training
+  - Model evaluation
 
-* **PyTorch Core**
+- **4. Sentiment Analysis**
+  - Text preprocessing
+  - Embedding
+  - Model training
+  - Model evaluation
 
-  * Tensors
-  * Devices
-  * Autograd
-  * `nn.Module`
-  * `state_dict`
+- **5. Image Classification**
+  - Data augmentation
+  - CNN
+  - Model training
+  - Model evaluation
 
-* **Deep Learning**
+---
 
-  * Neural networks
-  * CNNs
-  * RNNs
-  * Transformers
-  * Generative models
+## Intermediate Projects
 
-* **Data Engineering**
+- **6. Transfer Learning**
+  - Pre-trained model
+  - Feature extraction
+  - Fine-tuning
+  - Model evaluation
 
-  * Dataset
-  * DataLoader
-  * Preprocessing
-  * Augmentation
-  * Efficient loading
+- **7. Text Classification**
+  - Text vectorization
+  - Embedding
+  - LSTM
+  - Model evaluation
 
-* **Training Engineering**
+- **8. Object Detection**
+  - Pre-trained model
+  - Fine-tuning
+  - Inference
+  - Visualization
 
-  * Loss functions
-  * Optimizers
-  * Scheduling
-  * Regularization
-  * Checkpointing
+- **9. Image Segmentation**
+  - U-Net
+  - Model training
+  - Model evaluation
+  - Visualization
 
-* **Advanced Differentiation**
+- **10. Generative Model**
+  - GAN
+  - Model training
+  - Image generation
+  - Evaluation
 
-  * Autograd
-  * Jacobians
-  * Hessians
-  * Custom backward functions
+---
 
-* **Performance Engineering**
+## Advanced Projects
 
-  * Profiling
-  * Mixed precision
-  * Memory optimization
-  * Kernel efficiency
+- **11. Custom Training Loop**
+  - Autograd
+  - Custom training
+  - Metrics
+  - Callbacks
 
-* **Compilation**
+- **12. Distributed Training**
+  - DDP
+  - Multi-GPU
+  - Mixed precision
+  - Performance
 
-  * `torch.compile`
-  * Graph capture
-  * Compiled autograd
-  * `torch.export`
+- **13. Transformer Model**
+  - Self-attention
+  - Encoder
+  - Decoder
+  - Training
 
-* **Distributed Training**
+- **14. Diffusion Model**
+  - Diffusion
+  - U-Net
+  - Training
+  - Generation
 
-  * DDP
-  * FSDP2
-  * Tensor parallelism
-  * Pipeline parallelism
-  * Device mesh
+- **15. TorchScript Deployment**
+  - TorchScript
+  - Model export
+  - Serving
+  - Deployment
 
-* **Model Optimization**
+---
 
-  * Quantization
-  * Pruning
-  * Distillation
-  * Efficient architectures
+## Expert Projects
 
-* **Production**
+- **16. Production ML Platform**
+  - PyTorch
+  - TorchServe
+  - Pipelines
+  - Serving
+  - Monitoring
+  - MLOps
 
-  * Model export
-  * Serving
-  * Monitoring
-  * MLOps
-  * Reliability
+- **17. Real-Time ML System**
+  - Streaming data
+  - Online learning
+  - Real-time predictions
+  - Monitoring
 
-* **Expert Systems**
+- **18. Multi-Modal Model**
+  - Image + text
+  - Fusion
+  - Training
+  - Deployment
 
-  * Custom operators
-  * CUDA/C++ extensions
-  * Distributed systems
-  * Compiler internals
-  * Hardware-aware optimization
+- **19. Large Language Model**
+  - Transformers
+  - Pre-training
+  - Fine-tuning
+  - Deployment
 
-The overall progression is:
+- **20. End-to-End MLOps Pipeline**
+  - Data versioning
+  - Experiment tracking
+  - Model registry
+  - CI/CD
+  - Monitoring
+  - Governance
 
-**Python → Mathematics → NumPy → Tensors → Devices → Autograd → `nn.Module` → Training Loops → DataLoaders → CNNs → Transfer Learning → RNNs → Attention → Transformers → Advanced Training → Mixed Precision → Profiling → `torch.compile` → `torch.export` → DDP → FSDP2 → Parallelism → Custom Operators → Model Optimization → Deployment → MLOps → Expert PyTorch Engineering.**
+---
 
-For current PyTorch, the compiler and distributed portions are especially important: the official documentation currently centers `torch.compile` for compilation, while distributed training covers DDP, FSDP2, tensor parallelism, and device-mesh approaches. ([PyTorch Documentation][6])
+# XV. Progressive PyTorch Learning Sequence
 
-[1]: https://docs.pytorch.org/docs/main/?utm_source=chatgpt.com "PyTorch documentation — PyTorch main documentation"
-[2]: https://docs.pytorch.org/docs/stable/notes/autograd?utm_source=chatgpt.com "Autograd mechanics — PyTorch 2.14 documentation"
-[3]: https://docs.pytorch.org/tutorials/intermediate/torch_compile_tutorial?utm_source=chatgpt.com "Introduction to torch.compile — PyTorch Tutorials 2.14.0+cu130 documentation"
-[4]: https://docs.pytorch.org/tutorials/distributed.html?utm_source=chatgpt.com "Distributed — PyTorch Tutorials 2.14.0+cu130 documentation"
-[5]: https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html?utm_source=chatgpt.com "Getting Started with Fully Sharded Data Parallel (FSDP2) — PyTorch Tutorials 2.14.0+cu130 documentation"
-[6]: https://docs.pytorch.org/tutorials/compilers_index.html?utm_source=chatgpt.com "Compilers — PyTorch Tutorials 2.14.0+cu130 documentation"
+## Level 1 — PyTorch Fundamentals
+
+- Master:
+  - Installation
+  - Import
+  - Tensors
+  - Tensor operations
+  - Broadcasting
+  - Devices
+
+## Level 2 — Autograd
+
+- Master:
+  - Autograd fundamentals
+  - `requires_grad`
+  - Backward pass
+  - Gradient access
+  - Custom autograd
+  - Gradient checking
+  - Higher-order gradients
+
+## Level 3 — Neural Networks
+
+- Master:
+  - Neural network fundamentals
+  - `nn.Module`
+  - Layers
+  - Loss functions
+  - Optimizers
+  - Learning rate schedulers
+  - Initialization
+
+## Level 4 — Training
+
+- Master:
+  - Training fundamentals
+  - Training loop
+  - Validation
+  - Testing
+  - Model evaluation
+  - Model saving and loading
+  - Transfer learning
+  - Custom training loops
+
+## Level 5 — Data Handling
+
+- Master:
+  - Dataset
+  - DataLoader
+  - Samplers
+  - Transforms
+  - Datasets
+  - Data augmentation
+
+## Level 6 — Computer Vision
+
+- Master:
+  - Image classification
+  - CNNs
+  - Transfer learning
+  - Object detection
+  - Image segmentation
+  - Vision Transformers
+  - Generative models
+
+## Level 7 — Natural Language Processing
+
+- Master:
+  - Text processing
+  - Word embeddings
+  - RNNs
+  - Sequence-to-sequence
+  - Transformers
+  - Hugging Face Transformers
+  - Text classification
+  - NER
+  - Machine translation
+  - Text generation
+  - Question answering
+
+## Level 8 — Custom Training
+
+- Master:
+  - Custom layers
+  - Custom models
+  - Custom losses
+  - Custom optimizers
+  - Custom schedulers
+  - Gradient accumulation
+  - Gradient clipping
+  - Mixed precision
+  - Gradient checkpointing
+
+## Level 9 — Distributed Training
+
+- Master:
+  - Distributed training fundamentals
+  - DataParallel
+  - DistributedDataParallel
+  - FSDP
+  - Tensor parallelism
+  - Pipeline parallelism
+  - Distributed launch
+  - DeepSpeed
+  - FairScale
+  - Accelerate
+
+## Level 10 — Model Optimization
+
+- Master:
+  - Model optimization fundamentals
+  - Quantization
+  - Pruning
+  - Knowledge distillation
+  - Model compression
+
+## Level 11 — Deployment
+
+- Master:
+  - Deployment fundamentals
+  - TorchScript
+  - ONNX
+  - TorchServe
+  - TorchScript deployment
+  - ONNX Runtime deployment
+  - TensorRT
+  - Deployment platforms
+
+## Level 12 — Ecosystem
+
+- Master:
+  - TorchVision
+  - TorchText
+  - TorchAudio
+  - PyTorch Lightning
+  - PyTorch Geometric
+  - TorchMetrics
+  - Captum
+  - Hugging Face
+  - Weights & Biases
+  - MLflow
+  - Optuna
+
+## Level 13 — Production Engineering
+
+- Master:
+  - Data pipelines
+  - Feature engineering
+  - Model training
+  - Model evaluation
+  - Model deployment
+  - Monitoring
+  - MLOps
+  - Production best practices
+
+---
+
+# XVI. Final PyTorch Competency Map
+
+- **Foundations**
+
+  - Installation
+  - Import
+  - API
+  - Tensors
+  - Tensor operations
+  - Broadcasting
+  - Devices
+
+- **Autograd**
+
+  - Autograd fundamentals
+  - `requires_grad`
+  - Backward pass
+  - Gradient access
+  - Custom autograd
+  - Gradient checking
+  - Higher-order gradients
+
+- **Neural Networks**
+
+  - Neural network fundamentals
+  - `nn.Module`
+  - Layers
+  - Loss functions
+  - Optimizers
+  - Learning rate schedulers
+  - Initialization
+
+- **Training**
+
+  - Training fundamentals
+  - Training loop
+  - Validation
+  - Testing
+  - Model evaluation
+  - Model saving and loading
+  - Transfer learning
+  - Custom training loops
+
+- **Data Handling**
+
+  - Dataset
+  - DataLoader
+  - Samplers
+  - Transforms
+  - Datasets
+  - Data augmentation
+
+- **Computer Vision**
+
+  - Image classification
+  - CNNs
+  - Transfer learning
+  - Object detection
+  - Image segmentation
+  - Vision Transformers
+  - Generative models
+
+- **NLP**
+
+  - Text processing
+  - Word embeddings
+  - RNNs
+  - Sequence-to-sequence
+  - Transformers
+  - Hugging Face Transformers
+  - Text classification
+  - NER
+  - Machine translation
+  - Text generation
+  - Question answering
+
+- **Custom Training**
+
+  - Custom layers
+  - Custom models
+  - Custom losses
+  - Custom optimizers
+  - Custom schedulers
+  - Gradient accumulation
+  - Gradient clipping
+  - Mixed precision
+  - Gradient checkpointing
+
+- **Distributed Training**
+
+  - Distributed training fundamentals
+  - DataParallel
+  - DistributedDataParallel
+  - FSDP
+  - Tensor parallelism
+  - Pipeline parallelism
+  - Distributed launch
+  - DeepSpeed
+  - FairScale
+  - Accelerate
+
+- **Model Optimization**
+
+  - Quantization
+  - Pruning
+  - Knowledge distillation
+  - Model compression
+
+- **Deployment**
+
+  - TorchScript
+  - ONNX
+  - TorchServe
+  - TorchScript deployment
+  - ONNX Runtime deployment
+  - TensorRT
+  - Deployment platforms
+
+- **Ecosystem**
+
+  - TorchVision
+  - TorchText
+  - TorchAudio
+  - PyTorch Lightning
+  - PyTorch Geometric
+  - TorchMetrics
+  - Captum
+  - Hugging Face
+  - Weights & Biases
+  - MLflow
+  - Optuna
+
+- **Production**
+
+  - Data pipelines
+  - Feature engineering
+  - Model training
+  - Model evaluation
+  - Model deployment
+  - Monitoring
+  - MLOps
+
+---
+
+## Recommended Overall Progression
+
+**PyTorch Fundamentals → Autograd → Neural Networks → Training → Data Handling → Computer Vision → Natural Language Processing → Custom Training → Distributed Training → Model Optimization → Deployment → Ecosystem → Production Engineering**

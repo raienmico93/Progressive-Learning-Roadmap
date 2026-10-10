@@ -1,1461 +1,1433 @@
 # Docker Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Concepts to Advanced Practical Mastery
+## From Container Foundations to Advanced Orchestration, Security, CI/CD, and Production Container Engineering
 
-This roadmap takes Docker from **first principles and basic containers** through **image engineering, networking, storage, Compose, security, CI/CD, orchestration, observability, and production container platforms**.
-
----
-
-# I. Containerization Fundamentals
-
-* **1. Introduction to Docker**
-
-  * What Docker is
-
-    * Container platform
-    * Container runtime ecosystem
-    * Application packaging and deployment technology
-  * Problems Docker solves
-
-    * Environment inconsistencies
-    * Dependency conflicts
-    * Deployment reproducibility
-    * Application isolation
-  * Containers versus traditional deployment
-
-    * Bare-metal applications
-    * Virtual machines
-    * Containers
-  * Docker use cases
-
-    * Local development
-    * Testing
-    * CI/CD
-    * Microservices
-    * Application packaging
-    * Reproducible environments
-
-* **2. Core Container Concepts**
-
-  * Containers
-  * Images
-  * Registries
-  * Docker Engine
-  * Docker CLI
-  * Docker daemon
-  * Docker API
-  * Docker host
-  * Container lifecycle
-  * Container isolation
-  * Container portability
-
-* **3. Docker Architecture**
-
-  * Docker client
-  * Docker daemon
-  * Docker Engine
-  * Docker Desktop
-  * Docker API
-  * Images
-  * Containers
-  * Networks
-  * Volumes
-  * Registries
-  * Client-server architecture
-  * Remote Docker environments
-
-* **4. Containers versus Virtual Machines**
-
-  * VM architecture
-  * Container architecture
-  * Kernel sharing
-  * Startup time
-  * Resource consumption
-  * Isolation characteristics
-  * Security implications
-  * When to use VMs
-  * When to use containers
+Docker is best learned as more than "a tool for running containers." The progression should cover **virtualization fundamentals → container fundamentals → Docker architecture → installation → images → containers → Dockerfiles → volumes → networks → Docker Compose → registries → security → CI/CD → orchestration → Kubernetes → performance → troubleshooting → production engineering**.
 
 ---
 
-# II. Docker Installation and Environment
+# I. Docker Foundations
 
-* **5. Installing Docker**
+- **1. What Docker Is**
+  - Docker
+  - Docker history
+  - Solomon Hykes
+  - dotCloud
+  - Docker Inc.
+  - Docker 1.0
+  - Docker 19.03
+  - Docker 20.10
+  - Docker 23.0
+  - Docker 24.0
+  - Docker 25.0
+  - Docker 26.0
+  - Docker 27.0
+  - Docker 28.0 (current)
+  - Docker philosophy
+    - Build once, run anywhere
+    - Containers
+    - Images
+    - Portability
+    - Isolation
+    - Efficiency
+  - Docker vs virtual machines
+  - Docker vs Podman
+  - Docker vs containerd
+  - Docker vs LXC
+  - Docker vs Kubernetes
+  - Docker use cases
+    - Application packaging
+    - Microservices
+    - CI/CD
+    - Development environments
+    - Testing
+    - Deployment
+    - Legacy application modernization
+  - Docker in modern software
+  - Docker ecosystem
+  - Docker components
+    - Docker Engine
+    - Docker CLI
+    - Docker Desktop
+    - Docker Compose
+    - Docker Swarm
+    - Docker BuildKit
+    - Docker Hub
+    - Docker Registry
+    - Docker Scout
+    - Docker Context
+    - Docker Buildx
+    - Docker Dev Environments
+    - Docker Extensions
 
-  * Docker Desktop
-  * Docker Engine
+- **2. Prerequisites**
+  - Operating systems
+  - Linux fundamentals
+  - Linux kernel
+  - Namespaces
+  - Cgroups
+  - Union filesystems
+  - Command line
+  - Bash
+  - Networking fundamentals
+  - TCP/IP
+  - DNS
+  - HTTP
+  - Programming
+  - Python
+  - Node.js
+  - Java
+  - Go
+  - Version control
+  - Git
+  - Prerequisite best practices
 
-    * Linux environments
-  * Docker CLI
-  * Docker Compose
-  * Installation verification
-  * Version inspection
+- **3. Virtualization Fundamentals**
+  - Virtualization
+  - Hypervisors
+    - Type 1
+    - Type 2
+  - Virtual machines
+  - Guest OS
+  - Host OS
+  - Virtualization benefits
+  - Virtualization limitations
+  - Virtualization best practices
 
-* **6. Docker Development Environment**
+- **4. Container Fundamentals**
+  - Containers
+  - Containerization
+  - Container vs VM
+  - Container benefits
+  - Container limitations
+  - Container use cases
+  - Container best practices
 
-  * Terminal usage
-  * Docker Desktop interface
-  * Local image storage
-  * Local container management
-  * Configuration files
-  * Environment variables
-  * Shell integration
+- **5. Linux Kernel Features**
+  - Namespaces
+    - PID
+    - Network
+    - Mount
+    - UTS
+    - IPC
+    - User
+    - Cgroup
+  - Cgroups
+    - CPU
+    - Memory
+    - I/O
+    - Network
+  - Union filesystems
+    - OverlayFS
+    - AUFS
+    - Btrfs
+    - ZFS
+  - Capabilities
+  - Seccomp
+  - AppArmor
+  - SELinux
+  - Linux kernel features best practices
 
-* **7. First Docker Commands**
+- **6. Docker Architecture**
+  - Docker architecture
+  - Docker client
+  - Docker daemon
+  - Docker registry
+  - Docker objects
+    - Images
+    - Containers
+    - Networks
+    - Volumes
+    - Plugins
+  - Docker Engine
+  - containerd
+  - runc
+  - Docker architecture best practices
 
-  * `docker version`
-  * `docker info`
-  * `docker help`
-  * `docker run`
-  * `docker ps`
-  * `docker images`
-  * `docker pull`
-  * `docker stop`
-  * `docker start`
-  * `docker restart`
-  * `docker rm`
+- **7. Installing Docker**
+  - Docker Desktop
+    - Windows
+    - macOS
+    - Linux
+  - Docker Engine
+    - Ubuntu
+    - Debian
+    - CentOS
+    - Fedora
+    - RHEL
+  - Package managers
+    - apt
+    - yum
+    - dnf
+    - Homebrew
+    - Chocolatey
+    - Scoop
+  - Docker installation
+    - `docker --version`
+    - `docker info`
+    - `docker version`
+  - Post-installation
+    - Docker group
+    - Rootless mode
+    - Docker daemon configuration
+  - Docker Desktop features
+  - Installation best practices
 
----
-
-# III. Container Lifecycle and Management
-
-* **8. Running Containers**
-
-  * Foreground containers
-  * Detached containers
-
-    * `-d`
-  * Interactive containers
-
-    * `-it`
-  * Naming containers
-
-    * `--name`
-  * Port publishing
-
-    * `-p`
-  * Environment variables
-
-    * `-e`
-  * Restart policies
-
-* **9. Inspecting Containers**
-
-  * `docker ps`
-  * `docker ps -a`
-  * `docker inspect`
-  * `docker logs`
-  * `docker stats`
-  * `docker top`
-  * `docker port`
-
-* **10. Managing Container State**
-
-  * Created
-  * Running
-  * Paused
-  * Stopped
-  * Restarted
-  * Removed
-  * Exit codes
-
-* **11. Executing Commands Inside Containers**
-
-  * `docker exec`
-  * Interactive shell access
-  * Executing administrative commands
-  * Inspecting processes
-  * Inspecting filesystems
-  * Debugging running applications
-
-* **12. Container Cleanup**
-
-  * Removing individual containers
-  * Removing stopped containers
-  * Pruning containers
-  * Cleaning unused resources
-  * Understanding cleanup risks
-
----
-
-# IV. Docker Images
-
-* **13. Image Fundamentals**
-
-  * What an image is
-  * Immutable image concept
-  * Image layers
-  * Image metadata
-  * Image IDs
-  * Image tags
-  * Image digests
-
-* **14. Working with Images**
-
-  * `docker pull`
-  * `docker images`
-  * `docker image ls`
-  * `docker image inspect`
-  * `docker image history`
-  * `docker tag`
-  * `docker push`
-  * `docker rmi`
-  * `docker image prune`
-
-* **15. Image Naming**
-
-  * Registry
-  * Repository
-  * Namespace
-  * Image name
-  * Tag
-  * Digest
-  * Image references
-
-* **16. Image Layers**
-
-  * Layered filesystems
-  * Copy-on-write
-  * Layer caching
-  * Shared layers
-  * Image size
-  * Layer reuse
-  * Layer optimization
-
----
-
-# V. Dockerfiles
-
-* **17. Dockerfile Fundamentals**
-
-  * Purpose of Dockerfiles
-  * Build context
-  * Dockerfile syntax
-  * Dockerfile instructions
-  * Build process
-
-* **18. Essential Dockerfile Instructions**
-
-  * `FROM`
-  * `RUN`
-  * `COPY`
-  * `ADD`
-  * `WORKDIR`
-  * `ENV`
-  * `ARG`
-  * `EXPOSE`
-  * `CMD`
-  * `ENTRYPOINT`
-  * `USER`
-  * `LABEL`
-
-* **19. Docker Build Process**
-
-  * `docker build`
-  * Build context
-  * Image tagging
-  * Build output
-  * Build cache
-  * Build failures
-  * Reproducible builds
-
-* **20. CMD versus ENTRYPOINT**
-
-  * Default command
-  * Executable definition
-  * Runtime arguments
-  * Shell form
-  * Exec form
-  * Combining `ENTRYPOINT` and `CMD`
-
-* **21. Dockerfile Best Practices**
-
-  * Small images
-  * Minimal base images
-  * Layer reduction
-  * Cache optimization
-  * Explicit versions
-  * Non-root execution
-  * Avoiding unnecessary packages
-  * `.dockerignore`
+- **8. Docker CLI**
+  - Docker CLI
+  - `docker` command
+  - Command structure
+  - `docker help`
+  - `docker <command> --help`
+  - CLI best practices
 
 ---
 
-# VI. Building Production-Quality Images
+# II. Images
 
-* **22. Image Optimization**
+- **9. Image Fundamentals**
+  - Images
+  - Docker images
+  - Image layers
+  - Image history
+  - Image tags
+  - Image IDs
+  - Image digests
+  - Image best practices
 
-  * Reducing image size
-  * Minimizing layers
-  * Dependency cleanup
-  * Build-cache optimization
-  * Separating build and runtime dependencies
+- **10. Image Management**
+  - `docker images`
+  - `docker image ls`
+  - `docker pull`
+  - `docker push`
+  - `docker tag`
+  - `docker rmi`
+  - `docker image rm`
+  - `docker image prune`
+  - `docker inspect`
+  - `docker history`
+  - Image management best practices
 
-* **23. Multi-Stage Builds**
+- **11. Image Layers**
+  - Image layers
+  - Layer caching
+  - Layer sharing
+  - Union filesystem
+  - Copy-on-write
+  - Layer best practices
 
-  * Build stage
-  * Runtime stage
-  * Compiler environments
-  * Artifact extraction
-  * Smaller production images
-  * Multi-stage patterns for:
+- **12. Image Registries**
+  - Docker Hub
+  - Docker Registry
+  - GitHub Container Registry
+  - GitLab Container Registry
+  - AWS ECR
+  - Azure ACR
+  - Google GCR
+  - Quay
+  - Harbor
+  - Registry best practices
 
-    * Node.js
-    * Python
-    * Go
-    * Java
-    * .NET
+- **13. Image Tags**
+  - Image tags
+  - Tag naming
+  - Semantic versioning
+  - `latest` tag
+  - Tag best practices
 
-* **24. Base Image Selection**
+- **14. Image Digests**
+  - Image digests
+  - Content-addressable
+  - Immutable references
+  - Digest best practices
 
-  * General-purpose Linux images
-  * Minimal images
-  * Alpine-based images
-  * Debian-based images
-  * Distroless approaches
-  * Security versus compatibility trade-offs
-
-* **25. Immutable Image Design**
-
-  * Avoiding runtime mutation
-  * Configuration injection
-  * Externalized state
-  * Versioned images
-  * Reproducible image builds
-
----
-
-# VII. Docker Registry Fundamentals
-
-* **26. Container Registries**
-
-  * Public registries
-  * Private registries
-  * Registry repositories
-  * Authentication
-  * Image storage
-
-* **27. Docker Hub**
-
-  * Repositories
-  * Tags
-  * Pulling images
-  * Pushing images
-  * Access control
-
-* **28. Private Registries**
-
-  * Self-hosted registries
-  * Cloud registries
-  * Authentication
-  * Access permissions
-  * Repository organization
-
-* **29. Image Versioning**
-
-  * Semantic versioning
-  * Release tags
-  * Immutable digests
-  * Latest-tag risks
-  * Release promotion
+- **15. Multi-Architecture Images**
+  - Multi-arch images
+  - Buildx
+  - `--platform`
+  - Manifest lists
+  - Multi-arch best practices
 
 ---
 
-# VIII. Docker Networking
+# III. Containers
 
-* **30. Networking Fundamentals**
+- **16. Container Fundamentals**
+  - Containers
+  - Container lifecycle
+  - Container states
+    - Created
+    - Running
+    - Paused
+    - Stopped
+    - Exited
+    - Dead
+  - Container best practices
 
-  * Network namespaces
-  * Container IP addresses
-  * Virtual Ethernet interfaces
-  * Port publishing
-  * NAT concepts
-  * DNS-based service discovery
+- **17. Container Management**
+  - `docker run`
+  - `docker create`
+  - `docker start`
+  - `docker stop`
+  - `docker restart`
+  - `docker pause`
+  - `docker unpause`
+  - `docker kill`
+  - `docker rm`
+  - `docker ps`
+  - `docker ps -a`
+  - `docker inspect`
+  - `docker logs`
+  - `docker stats`
+  - `docker top`
+  - `docker exec`
+  - `docker attach`
+  - `docker cp`
+  - `docker diff`
+  - `docker commit`
+  - Container management best practices
 
-* **31. Docker Network Types**
+- **18. Container Run**
+  - `docker run`
+  - Run options
+    - `-d`
+    - `-it`
+    - `--rm`
+    - `--name`
+    - `-p`
+    - `-v`
+    - `-e`
+    - `--env-file`
+    - `--network`
+    - `--restart`
+    - `--memory`
+    - `--cpus`
+    - `--user`
+    - `--workdir`
+    - `--entrypoint`
+    - `--health-cmd`
+    - `--label`
+    - `--hostname`
+    - `--add-host`
+    - `--dns`
+    - `--cap-add`
+    - `--cap-drop`
+    - `--security-opt`
+    - `--read-only`
+    - `--tmpfs`
+    - `--ulimit`
+    - `--platform`
+    - `--pull`
+  - Run best practices
 
-  * Bridge networks
-  * Host networking
-  * None networking
-  * Overlay networks
-  * Macvlan
-  * IPvlan
+- **19. Container Lifecycle**
+  - Container lifecycle
+  - Entrypoint
+  - Command
+  - PID 1
+  - Signal handling
+  - Graceful shutdown
+  - Container lifecycle best practices
 
-* **32. Bridge Networking**
+- **20. Container Logs**
+  - Container logs
+  - `docker logs`
+  - Log drivers
+    - `json-file`
+    - `syslog`
+    - `journald`
+    - `gelf`
+    - `fluentd`
+    - `awslogs`
+    - `gcplogs`
+    - `splunk`
+    - `etwlogs`
+    - `none`
+  - Log configuration
+  - Log best practices
 
-  * Default bridge
-  * User-defined bridge networks
-  * Container-to-container communication
-  * Network aliases
-  * DNS resolution
+- **21. Container Exec**
+  - `docker exec`
+  - Exec options
+    - `-it`
+    - `-d`
+    - `-e`
+    - `-u`
+    - `-w`
+  - Exec best practices
 
-* **33. Container Port Management**
+- **22. Container Health Checks**
+  - Health checks
+  - `HEALTHCHECK`
+  - `--health-cmd`
+  - `--health-interval`
+  - `--health-timeout`
+  - `--health-retries`
+  - `--health-start-period`
+  - Health check best practices
 
-  * `EXPOSE`
-  * `-p`
-  * `-P`
-  * Host port
-  * Container port
-  * Binding interfaces
+- **23. Container Resource Limits**
+  - Resource limits
+  - Memory limits
+    - `--memory`
+    - `--memory-swap`
+    - `--memory-reservation`
+    - `--kernel-memory`
+  - CPU limits
+    - `--cpus`
+    - `--cpu-shares`
+    - `--cpu-period`
+    - `--cpu-quota`
+    - `--cpuset-cpus`
+  - I/O limits
+    - `--device-read-bps`
+    - `--device-write-bps`
+    - `--device-read-iops`
+    - `--device-write-iops`
+  - Resource limit best practices
 
-* **34. Advanced Networking**
-
-  * Network isolation
-  * Multiple networks
-  * Multi-network containers
-  * Subnets
-  * Gateways
-  * Static addressing considerations
-  * Service discovery
-
----
-
-# IX. Docker Storage
-
-* **35. Container Filesystems**
-
-  * Ephemeral container filesystem
-  * Writable container layer
-  * Persistence limitations
-  * Container replacement
-
-* **36. Volumes**
-
-  * Named volumes
-  * Anonymous volumes
-  * Volume lifecycle
-  * `docker volume`
-  * Persistent data
-
-* **37. Bind Mounts**
-
-  * Host-directory mounts
-  * Development workflows
-  * File synchronization
-  * Permissions
-  * Mount modes
-
-* **38. tmpfs Mounts**
-
-  * In-memory storage
-  * Temporary data
-  * Sensitive ephemeral data
-
-* **39. Persistent Application Data**
-
-  * Databases
-  * Uploaded files
-  * Logs
-  * Shared application data
-  * Backup considerations
-
----
-
-# X. Docker Compose
-
-* **40. Compose Fundamentals**
-
-  * Multi-container applications
-  * `compose.yaml`
-  * Services
-  * Networks
-  * Volumes
-  * Environment configuration
-
-* **41. Compose Services**
-
-  * Application containers
-  * Database containers
-  * Cache containers
-  * Reverse proxies
-  * Supporting services
-
-* **42. Compose Configuration**
-
-  * `services`
-  * `ports`
-  * `environment`
-  * `env_file`
-  * `volumes`
-  * `networks`
-  * `depends_on`
-  * `command`
-  * `entrypoint`
-
-* **43. Compose Commands**
-
-  * `docker compose up`
-  * `docker compose down`
-  * `docker compose ps`
-  * `docker compose logs`
-  * `docker compose exec`
-  * `docker compose build`
-  * `docker compose pull`
-  * `docker compose restart`
-
-* **44. Advanced Compose**
-
-  * Health checks
-  * Service dependencies
-  * Multiple Compose files
-  * Development overrides
-  * Production configurations
-  * Profiles
-  * Secrets
-  * Configs
-  * Resource constraints
-
----
-
-# XI. Environment and Configuration Management
-
-* **45. Environment Variables**
-
-  * Container environment variables
-  * Build arguments
-  * Runtime configuration
-  * `.env` files
-  * Environment precedence
-
-* **46. Configuration Separation**
-
-  * Application code
-  * Configuration
-  * Secrets
-  * Environment-specific settings
-
-* **47. Secrets**
-
-  * Secret management
-  * Avoiding credentials in images
-  * Avoiding credentials in Git
-  * Runtime secret injection
-  * Secret rotation
-
-* **48. Configuration Patterns**
-
-  * Development
-  * Testing
-  * Staging
-  * Production
-  * Configuration validation
+- **24. Container Restart Policies**
+  - Restart policies
+    - `no`
+    - `on-failure`
+    - `always`
+    - `unless-stopped`
+  - Restart policy best practices
 
 ---
 
-# XII. Docker Security
+# IV. Dockerfiles
 
-* **49. Container Security Fundamentals**
+- **25. Dockerfile Fundamentals**
+  - Dockerfile
+  - Dockerfile syntax
+  - Instructions
+  - Build context
+  - Build cache
+  - Dockerfile best practices
 
-  * Isolation
-  * Attack surface
-  * Least privilege
-  * Minimal images
-  * Trusted base images
+- **26. Dockerfile Instructions**
+  - `FROM`
+  - `RUN`
+  - `CMD`
+  - `ENTRYPOINT`
+  - `LABEL`
+  - `EXPOSE`
+  - `ENV`
+  - `ADD`
+  - `COPY`
+  - `VOLUME`
+  - `USER`
+  - `WORKDIR`
+  - `ARG`
+  - `ONBUILD`
+  - `STOPSIGNAL`
+  - `HEALTHCHECK`
+  - `SHELL`
+  - `MAINTAINER` (deprecated)
+  - Instruction best practices
 
-* **50. Non-Root Containers**
+- **27. Dockerfile Best Practices**
+  - Base image selection
+  - Layer optimization
+  - Multi-stage builds
+  - Cache optimization
+  - Image size reduction
+  - Security
+  - Dockerfile best practices
 
-  * `USER`
-  * Dedicated application users
-  * File ownership
-  * Permission management
+- **28. Multi-Stage Builds**
+  - Multi-stage builds
+  - Build stages
+  - `AS`
+  - `COPY --from`
+  - Multi-stage best practices
 
-* **51. Linux Security Mechanisms**
+- **29. Build Context**
+  - Build context
+  - `.dockerignore`
+  - Context size
+  - Context optimization
+  - Context best practices
 
-  * Linux namespaces
-  * cgroups
-  * Capabilities
-  * Seccomp
-  * AppArmor
-  * SELinux
+- **30. Build Arguments**
+  - `ARG`
+  - Build arguments
+  - Default values
+  - Build argument best practices
 
-* **52. Image Security**
+- **31. Environment Variables**
+  - `ENV`
+  - Environment variables
+  - Runtime variables
+  - Environment variable best practices
 
-  * Vulnerability scanning
-  * Dependency vulnerabilities
-  * Base image vulnerabilities
-  * Image signing
-  * Provenance
-  * Trusted image sources
+- **32. Labels**
+  - `LABEL`
+  - Label metadata
+  - OCI labels
+  - Label best practices
 
-* **53. Container Runtime Security**
+- **33. Exposed Ports**
+  - `EXPOSE`
+  - Port exposure
+  - Port documentation
+  - Port best practices
 
-  * Read-only filesystems
-  * Dropping capabilities
-  * Resource limits
-  * Restricted privileges
-  * Security profiles
-  * Avoiding privileged containers
+- **34. Volumes in Dockerfile**
+  - `VOLUME`
+  - Volume declaration
+  - Volume best practices
 
-* **54. Supply Chain Security**
+- **35. User and Permissions**
+  - `USER`
+  - Non-root user
+  - Permission management
+  - Security best practices
 
-  * Dependency integrity
-  * SBOM
-  * Image provenance
-  * Build attestation
-  * Signed artifacts
-  * Registry access control
+- **36. Workdir**
+  - `WORKDIR`
+  - Working directory
+  - Workdir best practices
 
----
+- **37. Entrypoint and CMD**
+  - `ENTRYPOINT`
+  - `CMD`
+  - Exec form
+  - Shell form
+  - Entrypoint vs CMD
+  - Entrypoint best practices
 
-# XIII. Docker Resource Management
+- **38. BuildKit**
+  - BuildKit
+  - BuildKit features
+  - BuildKit cache
+  - BuildKit secrets
+  - BuildKit mounts
+  - BuildKit best practices
 
-* **55. Resource Limits**
-
-  * CPU limits
-  * CPU shares
-  * Memory limits
-  * Memory reservations
-  * Process limits
-  * Storage considerations
-
-* **56. Linux cgroups**
-
-  * Resource accounting
-  * Resource isolation
-  * CPU control
-  * Memory control
-  * Process constraints
-
-* **57. Resource Monitoring**
-
-  * `docker stats`
-  * CPU utilization
-  * Memory usage
-  * Network usage
-  * Block I/O
-  * Container health
-
----
-
-# XIV. Logging and Observability
-
-* **58. Container Logging**
-
-  * Standard output
-  * Standard error
-  * `docker logs`
-  * Log drivers
-  * Log rotation
-
-* **59. Application Observability**
-
-  * Logs
-  * Metrics
-  * Traces
-  * Health checks
-  * Application probes
-
-* **60. Health Checks**
-
-  * `HEALTHCHECK`
-  * Service health
-  * Startup detection
-  * Failure detection
-  * Dependency health
-
-* **61. Monitoring Systems**
-
-  * Prometheus
-  * Grafana
-  * OpenTelemetry
-  * Centralized logging
-  * Alerting
+- **39. Buildx**
+  - Buildx
+  - Buildx builders
+  - Multi-platform builds
+  - Buildx best practices
 
 ---
 
-# XV. Docker Debugging and Troubleshooting
+# V. Volumes
 
-* **62. Container Debugging**
+- **40. Volume Fundamentals**
+  - Volumes
+  - Data persistence
+  - Volume types
+    - Named volumes
+    - Anonymous volumes
+    - Bind mounts
+    - tmpfs mounts
+  - Volume best practices
 
-  * `docker logs`
-  * `docker inspect`
-  * `docker exec`
-  * Process inspection
-  * Filesystem inspection
-  * Environment inspection
+- **41. Named Volumes**
+  - Named volumes
+  - Volume creation
+  - `docker volume create`
+  - `docker volume ls`
+  - `docker volume inspect`
+  - `docker volume rm`
+  - `docker volume prune`
+  - Named volume best practices
 
-* **63. Networking Troubleshooting**
+- **42. Bind Mounts**
+  - Bind mounts
+  - Host directory
+  - Container directory
+  - Read-only mounts
+  - Bind mount best practices
 
-  * Port binding issues
-  * DNS issues
-  * Network connectivity
-  * Firewall interactions
-  * Service discovery
+- **43. tmpfs Mounts**
+  - tmpfs mounts
+  - Memory-backed storage
+  - tmpfs best practices
 
-* **64. Storage Troubleshooting**
+- **44. Volume Drivers**
+  - Volume drivers
+  - Local driver
+  - NFS
+  - CIFS
+  - AWS EBS
+  - Azure Disk
+  - GCE PD
+  - Volume driver best practices
 
-  * Permission errors
-  * Missing volumes
-  * Mount failures
-  * Disk usage
-  * Data persistence failures
-
-* **65. Image Troubleshooting**
-
-  * Build failures
-  * Missing dependencies
-  * Incorrect paths
-  * Entrypoint errors
-  * Architecture incompatibility
-
-* **66. Performance Troubleshooting**
-
-  * CPU saturation
-  * Memory pressure
-  * Disk I/O
-  * Network bottlenecks
-  * Slow application startup
-
----
-
-# XVI. Docker and Software Development
-
-* **67. Local Development**
-
-  * Containerized development environments
-  * Hot reload
-  * Bind mounts
-  * Development dependencies
-  * Local databases
-
-* **68. Development Databases**
-
-  * PostgreSQL
-  * MySQL
-  * MariaDB
-  * MongoDB
-  * Redis
-  * Elasticsearch/OpenSearch
-
-* **69. Application Containers**
-
-  * Node.js applications
-  * Python applications
-  * Java applications
-  * Go applications
-  * .NET applications
-  * PHP applications
-
-* **70. Development Workflow**
-
-  * Code change
-  * Image rebuild
-  * Container restart
-  * Automated tests
-  * Dependency management
-  * Environment consistency
+- **45. Volume Backup and Restore**
+  - Volume backup
+  - Volume restore
+  - Backup strategies
+  - Backup best practices
 
 ---
 
-# XVII. Docker in CI/CD
+# VI. Networks
 
-* **71. Continuous Integration**
+- **46. Network Fundamentals**
+  - Docker networks
+  - Network drivers
+    - Bridge
+    - Host
+    - Overlay
+    - Macvlan
+    - IPvlan
+    - None
+  - Network best practices
 
-  * Building images
-  * Running tests
-  * Static analysis
-  * Security scanning
-  * Artifact generation
+- **47. Bridge Networks**
+  - Bridge networks
+  - Default bridge
+  - Custom bridge
+  - Network creation
+  - `docker network create`
+  - `docker network ls`
+  - `docker network inspect`
+  - `docker network rm`
+  - `docker network prune`
+  - Bridge network best practices
 
-* **72. Continuous Delivery**
+- **48. Host Networks**
+  - Host network
+  - `--network host`
+  - Host network best practices
 
-  * Tagging releases
-  * Registry publishing
-  * Environment promotion
-  * Deployment automation
+- **49. Overlay Networks**
+  - Overlay networks
+  - Multi-host networking
+  - Overlay network best practices
 
-* **73. CI/CD Platforms**
+- **50. Macvlan Networks**
+  - Macvlan networks
+  - Macvlan best practices
 
-  * GitHub Actions
-  * GitLab CI/CD
-  * Jenkins
-  * Azure Pipelines
-  * Other automation systems
+- **51. Container DNS**
+  - Container DNS
+  - Service discovery
+  - DNS resolution
+  - DNS best practices
 
-* **74. Container Build Pipelines**
+- **52. Port Publishing**
+  - Port publishing
+  - `-p`
+  - `-P`
+  - Port mapping
+  - Port best practices
 
-  * Source code
-  * Dockerfile
-  * Build
-  * Test
-  * Scan
-  * Sign
-  * Push
-  * Deploy
-
----
-
-# XVIII. Advanced Image Building
-
-* **75. BuildKit**
-
-  * Modern build engine
-  * Parallel build stages
-  * Advanced cache mechanisms
-  * Secret mounts
-  * SSH mounts
-
-* **76. Build Cache**
-
-  * Layer caching
-  * Cache invalidation
-  * Remote cache
-  * Dependency caching
-  * Build performance
-
-* **77. Multi-Platform Builds**
-
-  * `amd64`
-  * `arm64`
-  * Cross-platform builds
-  * Buildx
-  * Platform-aware base images
-
-* **78. Reproducible Builds**
-
-  * Deterministic dependencies
-  * Pinned versions
-  * Immutable references
-  * Build metadata
-  * Supply-chain verification
+- **53. Network Security**
+  - Network security
+  - Network isolation
+  - Network policies
+  - Network security best practices
 
 ---
 
-# XIX. Docker Architecture Patterns
+# VII. Docker Compose
 
-* **79. Single-Container Applications**
+- **54. Docker Compose Fundamentals**
+  - Docker Compose
+  - Compose file
+  - `docker-compose.yml`
+  - `compose.yaml`
+  - Compose V2
+  - Compose best practices
 
-  * Simple services
-  * Stateless applications
-  * CLI tools
+- **55. Compose File Structure**
+  - `version`
+  - `services`
+  - `networks`
+  - `volumes`
+  - `configs`
+  - `secrets`
+  - Compose file best practices
 
-* **80. Multi-Container Applications**
+- **56. Services**
+  - Services
+  - Service definition
+  - `image`
+  - `build`
+  - `ports`
+  - `volumes`
+  - `environment`
+  - `env_file`
+  - `depends_on`
+  - `networks`
+  - `command`
+  - `entrypoint`
+  - `healthcheck`
+  - `restart`
+  - `deploy`
+  - Service best practices
 
-  * Application + database
-  * Application + cache
-  * Reverse proxy + application
-  * Worker architectures
+- **57. Compose Commands**
+  - `docker compose up`
+  - `docker compose down`
+  - `docker compose start`
+  - `docker compose stop`
+  - `docker compose restart`
+  - `docker compose build`
+  - `docker compose pull`
+  - `docker compose push`
+  - `docker compose ps`
+  - `docker compose logs`
+  - `docker compose exec`
+  - `docker compose run`
+  - `docker compose config`
+  - `docker compose top`
+  - `docker compose events`
+  - Compose command best practices
 
-* **81. Microservices**
+- **58. Compose Overrides**
+  - Compose overrides
+  - `docker-compose.override.yml`
+  - Multiple compose files
+  - `-f` flag
+  - Override best practices
 
-  * Service isolation
-  * Service discovery
-  * Independent deployment
-  * Container lifecycle
-  * Inter-service networking
+- **59. Compose Profiles**
+  - Compose profiles
+  - `profiles`
+  - Profile activation
+  - Profile best practices
 
-* **82. Twelve-Factor Applications**
-
-  * Configuration
-  * Statelessness
-  * Logging
-  * Port binding
-  * Environment separation
-  * Disposable processes
-
----
-
-# XX. Docker Orchestration Concepts
-
-* **83. Why Orchestration Exists**
-
-  * Large container fleets
-  * Scheduling
-  * Scaling
-  * Service discovery
-  * Self-healing
-  * Rolling deployments
-
-* **84. Docker Swarm**
-
-  * Nodes
-  * Managers
-  * Workers
-  * Services
-  * Stacks
-  * Overlay networking
-  * Scaling
-  * Rolling updates
-
-* **85. Swarm Concepts**
-
-  * Desired state
-  * Service replicas
-  * Secrets
-  * Configs
-  * Routing mesh
-  * Health and scheduling
-
----
-
-# XXI. Kubernetes as the Next Step Beyond Docker
-
-* **86. Kubernetes Fundamentals**
-
-  * Containers
-  * Pods
-  * Nodes
-  * Clusters
-  * Deployments
-  * Services
-  * Namespaces
-
-* **87. Docker and Kubernetes Relationship**
-
-  * Container images
-  * OCI standards
-  * Container runtimes
-  * Image registries
-  * Runtime abstraction
-
-* **88. Kubernetes Workloads**
-
-  * Deployments
-  * ReplicaSets
-  * StatefulSets
-  * DaemonSets
-  * Jobs
-  * CronJobs
-
-* **89. Kubernetes Networking**
-
-  * Services
-  * Cluster networking
-  * Ingress
-  * Network policies
-  * Service discovery
-
-* **90. Kubernetes Storage**
-
-  * Volumes
-  * PersistentVolumes
-  * PersistentVolumeClaims
-  * Storage classes
-
-* **91. Kubernetes Security**
-
-  * Service accounts
-  * RBAC
-  * Security contexts
-  * Secrets
-  * Network policies
+- **60. Compose Best Practices**
+  - Service naming
+  - Volume management
+  - Network management
+  - Environment variables
+  - Secrets
+  - Compose best practices
 
 ---
 
-# XXII. Docker with Cloud Platforms
+# VIII. Security
 
-* **92. Cloud Container Services**
+- **61. Security Fundamentals**
+  - Docker security
+  - Threat modeling
+  - Attack surface
+  - Defense in depth
+  - Least privilege
+  - Secure defaults
+  - Security best practices
 
-  * Managed container registries
-  * Managed container platforms
-  * Container orchestration services
-  * Serverless containers
+- **62. Image Security**
+  - Image security
+  - Base image selection
+  - Minimal images
+  - Distroless
+  - Alpine
+  - Scratch
+  - Image scanning
+  - Image security best practices
 
-* **93. AWS**
+- **63. Container Security**
+  - Container security
+  - Non-root user
+  - Read-only filesystem
+  - Capabilities
+  - Seccomp
+  - AppArmor
+  - SELinux
+  - Container security best practices
 
-  * Amazon ECR
-  * ECS
-  * EKS
-  * Fargate
+- **64. Secrets Management**
+  - Secrets
+  - Docker secrets
+  - BuildKit secrets
+  - Environment variables
+  - Secret managers
+  - Vault
+  - AWS Secrets Manager
+  - Secret best practices
 
-* **94. Microsoft Azure**
+- **65. Image Scanning**
+  - Image scanning
+  - Docker Scout
+  - Trivy
+  - Clair
+  - Snyk
+  - Grype
+  - Image scanning best practices
 
-  * Azure Container Registry
-  * Azure Container Apps
-  * Azure Kubernetes Service
+- **66. Runtime Security**
+  - Runtime security
+  - Falco
+  - Sysdig
+  - Aqua Security
+  - Twistlock
+  - Runtime security best practices
 
-* **95. Google Cloud**
+- **67. Supply Chain Security**
+  - Supply chain security
+  - SBOM
+  - Software Bill of Materials
+  - Sigstore
+  - Cosign
+  - Notary
+  - Image signing
+  - Supply chain best practices
 
-  * Artifact Registry
-  * Cloud Run
-  * Google Kubernetes Engine
-
----
-
-# XXIII. Production Deployment
-
-* **96. Containerized Production Architecture**
-
-  * Reverse proxy
-  * Application containers
-  * Database
-  * Cache
-  * Message broker
-  * Monitoring
-
-* **97. Deployment Strategies**
-
-  * Recreate
-  * Rolling deployment
-  * Blue-green deployment
-  * Canary deployment
-
-* **98. Production Configuration**
-
-  * Environment variables
-  * Secrets
-  * Persistent storage
-  * Resource limits
-  * Health checks
-  * Logging
-
-* **99. Reliability**
-
-  * Restart policies
-  * Health checks
-  * Redundancy
-  * Failover
-  * Backup
-  * Disaster recovery
-
----
-
-# XXIV. Docker Performance Engineering
-
-* **100. Image Performance**
-
-  * Smaller images
-  * Faster pulls
-  * Efficient layers
-  * Build caching
-
-* **101. Container Performance**
-
-  * CPU allocation
-  * Memory allocation
-  * I/O
-  * Networking
-  * Process management
-
-* **102. Application Performance**
-
-  * Startup time
-  * Connection pooling
-  * Dependency initialization
-  * Caching
-  * Resource utilization
-
-* **103. Build Performance**
-
-  * Build context reduction
-  * `.dockerignore`
-  * Cache ordering
-  * BuildKit
-  * Parallel stages
-  * Remote caching
+- **68. Network Security**
+  - Network security
+  - Network isolation
+  - Network policies
+  - Network security best practices
 
 ---
 
-# XXV. Docker Internals
+# IX. CI/CD with Docker
 
-* **104. Linux Namespaces**
+- **69. CI/CD Fundamentals**
+  - CI/CD
+  - Continuous integration
+  - Continuous delivery
+  - Continuous deployment
+  - CI/CD best practices
 
-  * PID namespaces
-  * Network namespaces
-  * Mount namespaces
-  * IPC namespaces
-  * UTS namespaces
-  * User namespaces
+- **70. Docker in CI**
+  - Docker in CI
+  - Building images
+  - Testing images
+  - Pushing images
+  - CI best practices
 
-* **105. Control Groups**
+- **71. Docker in CD**
+  - Docker in CD
+  - Deploying containers
+  - Rolling updates
+  - Blue-green deployments
+  - Canary deployments
+  - CD best practices
 
-  * CPU
-  * Memory
-  * Processes
-  * Resource accounting
+- **72. GitHub Actions**
+  - GitHub Actions
+  - Docker actions
+  - Building images
+  - Pushing images
+  - GitHub Actions best practices
 
-* **106. Union Filesystems**
+- **73. GitLab CI**
+  - GitLab CI
+  - Docker-in-Docker
+  - Building images
+  - Pushing images
+  - GitLab CI best practices
 
-  * Layered filesystems
-  * Overlay concepts
-  * Copy-on-write
-  * Image versus container layers
-
-* **107. OCI**
-
-  * Open Container Initiative
-  * Image specification
-  * Runtime specification
-  * Container interoperability
-
-* **108. Container Runtime Architecture**
-
-  * Docker Engine
-  * containerd
-  * OCI runtimes
-  * Runtime lifecycle
-
----
-
-# XXVI. Advanced Security and Supply Chain
-
-* **109. Container Hardening**
-
-  * Minimal privileges
-  * Non-root execution
-  * Read-only root filesystem
-  * Capability reduction
-  * System-call restriction
-
-* **110. Vulnerability Management**
-
-  * Image scanning
-  * Dependency scanning
-  * Base-image scanning
-  * Continuous scanning
-  * Vulnerability remediation
-
-* **111. Software Bill of Materials**
-
-  * SBOM generation
-  * Dependency visibility
-  * Package provenance
-  * Compliance
-
-* **112. Image Signing and Verification**
-
-  * Artifact signatures
-  * Trust policies
-  * Provenance
-  * Verification during deployment
+- **74. Jenkins**
+  - Jenkins
+  - Docker plugin
+  - Building images
+  - Pushing images
+  - Jenkins best practices
 
 ---
 
-# XXVII. Enterprise Docker
+# X. Orchestration
 
-* **113. Organization-Level Registry Management**
+- **75. Orchestration Fundamentals**
+  - Orchestration
+  - Container orchestration
+  - Orchestration tools
+  - Orchestration best practices
 
-  * Repository strategy
-  * Access control
-  * Image retention
-  * Artifact lifecycle
-  * Registry replication
+- **76. Docker Swarm**
+  - Docker Swarm
+  - Swarm mode
+  - Swarm initialization
+  - Services
+  - Tasks
+  - Nodes
+  - Stacks
+  - Swarm best practices
 
-* **114. Governance**
+- **77. Kubernetes**
+  - Kubernetes
+  - Kubernetes architecture
+  - Pods
+  - Services
+  - Deployments
+  - ConfigMaps
+  - Secrets
+  - Ingress
+  - Helm
+  - Kubernetes best practices
 
-  * Approved base images
-  * Dockerfile standards
-  * Security policies
-  * Resource policies
-  * Compliance
+- **78. Docker Compose to Kubernetes**
+  - Kompose
+  - Compose to Kubernetes
+  - Migration best practices
 
-* **115. Platform Engineering**
-
-  * Internal developer platforms
-  * Golden images
-  * Standardized container templates
-  * Deployment automation
-  * Self-service infrastructure
-
-* **116. Multi-Environment Architecture**
-
-  * Development
-  * Testing
-  * Staging
-  * Production
-  * Environment promotion
+- **79. Service Mesh**
+  - Service mesh
+  - Istio
+  - Linkerd
+  - Consul Connect
+  - Service mesh best practices
 
 ---
 
-# XXVIII. Docker Project Progression
+# XI. Performance
+
+- **80. Performance Fundamentals**
+  - Performance
+  - Image size
+  - Build time
+  - Startup time
+  - Runtime performance
+  - Performance metrics
+  - Performance best practices
+
+- **81. Image Optimization**
+  - Image optimization
+  - Minimal base images
+  - Multi-stage builds
+  - Layer optimization
+  - Image size reduction
+  - Image optimization best practices
+
+- **82. Build Performance**
+  - Build performance
+  - Build cache
+  - BuildKit cache
+  - Parallel builds
+  - Build performance best practices
+
+- **83. Container Performance**
+  - Container performance
+  - Resource limits
+  - CPU allocation
+  - Memory allocation
+  - I/O performance
+  - Container performance best practices
+
+- **84. Storage Performance**
+  - Storage performance
+  - Volume drivers
+  - Storage drivers
+  - OverlayFS
+  - Storage performance best practices
+
+- **85. Network Performance**
+  - Network performance
+  - Network drivers
+  - Network optimization
+  - Network performance best practices
+
+- **86. Profiling**
+  - Profiling
+  - `docker stats`
+  - cAdvisor
+  - Prometheus
+  - Grafana
+  - Profiling best practices
+
+---
+
+# XII. Troubleshooting
+
+- **87. Troubleshooting Fundamentals**
+  - Troubleshooting
+  - Troubleshooting methodology
+  - Troubleshooting tools
+  - Troubleshooting best practices
+
+- **88. Container Troubleshooting**
+  - Container troubleshooting
+  - Container logs
+  - Container inspect
+  - Container exec
+  - Container events
+  - Container troubleshooting best practices
+
+- **89. Image Troubleshooting**
+  - Image troubleshooting
+  - Image history
+  - Image inspect
+  - Image layers
+  - Image troubleshooting best practices
+
+- **90. Network Troubleshooting**
+  - Network troubleshooting
+  - Network inspect
+  - Network connectivity
+  - DNS resolution
+  - Network troubleshooting best practices
+
+- **91. Volume Troubleshooting**
+  - Volume troubleshooting
+  - Volume inspect
+  - Volume permissions
+  - Volume troubleshooting best practices
+
+- **92. Docker Daemon Troubleshooting**
+  - Docker daemon troubleshooting
+  - Daemon logs
+  - Daemon configuration
+  - Daemon troubleshooting best practices
+
+- **93. Common Issues**
+  - Port conflicts
+  - Permission issues
+  - Network issues
+  - Storage issues
+  - Memory issues
+  - CPU issues
+  - Common issues best practices
+
+---
+
+# XIII. Docker Projects by Difficulty
 
 ## Beginner Projects
 
-* **117. Static Website**
+- **1. Hello World Container**
+  - Docker installation
+  - Docker run
+  - Container management
+  - Image management
 
-  * Basic Dockerfile
-  * Nginx
-  * Port mapping
-  * Image building
+- **2. Static Website**
+  - Nginx
+  - Dockerfile
+  - Image building
+  - Container running
 
-* **118. Simple API**
+- **3. Python Application**
+  - Python
+  - Dockerfile
+  - Dependencies
+  - Container running
 
-  * Python/Node.js API
-  * Environment variables
-  * Container logs
-  * Health check
+- **4. Node.js Application**
+  - Node.js
+  - Dockerfile
+  - Dependencies
+  - Container running
 
-* **119. Containerized Database**
-
-  * PostgreSQL/MySQL
-  * Volume persistence
-  * Database initialization
+- **5. Database Container**
+  - PostgreSQL
+  - MySQL
+  - MongoDB
+  - Volume persistence
 
 ---
 
 ## Intermediate Projects
 
-* **120. Full-Stack Application**
+- **6. Multi-Container Application**
+  - Docker Compose
+  - Web application
+  - Database
+  - Redis
+  - Networking
 
-  * Frontend
-  * Backend
-  * Database
-  * Docker Compose
-  * Custom network
+- **7. Multi-Stage Build**
+  - Multi-stage builds
+  - Build optimization
+  - Image size reduction
+  - Best practices
 
-* **121. API + Redis**
+- **8. CI/CD Pipeline**
+  - GitHub Actions
+  - Docker build
+  - Docker push
+  - Deployment
 
-  * Backend service
-  * Redis cache
-  * Environment configuration
-  * Service discovery
+- **9. Development Environment**
+  - Docker Compose
+  - Development containers
+  - Volume mounts
+  - Hot reload
 
-* **122. Reverse Proxy Architecture**
-
-  * Nginx
-  * Multiple backend containers
-  * Port routing
-  * Networking
+- **10. Microservices**
+  - Multiple services
+  - Docker Compose
+  - Networking
+  - Service discovery
 
 ---
 
 ## Advanced Projects
 
-* **123. Production-Style Microservices**
+- **11. Production Application**
+  - Multi-stage builds
+  - Security
+  - Optimization
+  - Monitoring
 
-  * Multiple services
-  * Docker Compose
-  * Service-to-service networking
-  * Health checks
-  * Centralized configuration
+- **12. Kubernetes Deployment**
+  - Docker images
+  - Kubernetes
+  - Deployments
+  - Services
+  - Ingress
 
-* **124. CI/CD Container Pipeline**
+- **13. Container Security**
+  - Image scanning
+  - Runtime security
+  - Secrets management
+  - Best practices
 
-  * Git repository
-  * Automated Docker build
-  * Automated tests
-  * Vulnerability scanning
-  * Registry publishing
-  * Deployment
+- **14. CI/CD Pipeline**
+  - GitHub Actions
+  - GitLab CI
+  - Jenkins
+  - Multi-stage builds
+  - Deployment
 
-* **125. Multi-Stage Production Build**
-
-  * Separate build environment
-  * Minimal runtime image
-  * Non-root user
-  * Security scanning
+- **15. Monitoring Stack**
+  - Prometheus
+  - Grafana
+  - cAdvisor
+  - Logging
+  - Alerting
 
 ---
 
 ## Expert Projects
 
-* **126. Container Platform**
+- **16. Container Platform**
+  - Docker
+  - Kubernetes
+  - Service mesh
+  - Observability
+  - Security
 
-  * Private registry
-  * CI/CD
-  * Image signing
-  * Vulnerability scanning
-  * Monitoring
-  * Automated deployment
+- **17. Multi-Cloud Deployment**
+  - AWS
+  - Azure
+  - GCP
+  - Kubernetes
+  - Terraform
 
-* **127. Kubernetes Deployment**
+- **18. High-Traffic Application**
+  - Horizontal scaling
+  - Load balancing
+  - Caching
+  - Database optimization
+  - Observability
 
-  * Containerized application
-  * Kubernetes manifests
-  * Deployment
-  * Service
-  * Ingress
-  * Persistent storage
-  * Secrets
+- **19. Container Security Platform**
+  - Image scanning
+  - Runtime security
+  - Supply chain security
+  - Policy enforcement
+  - Compliance
 
-* **128. Production Microservices Platform**
-
-  * Multiple independently deployable services
-  * Observability
-  * Autoscaling
-  * Secure networking
-  * CI/CD
-  * Rollback
-  * Disaster recovery
-
----
-
-# XXIX. Progressive Docker Learning Levels
-
-## Level 1 — Docker Beginner
-
-* Learn:
-
-  * Containers
-  * Images
-  * Docker CLI
-  * Dockerfiles
-* Master:
-
-  * `docker run`
-  * `docker ps`
-  * `docker exec`
-  * `docker logs`
-  * `docker build`
-  * `docker stop`
-  * `docker rm`
-
-## Level 2 — Docker Developer
-
-* Learn:
-
-  * Custom images
-  * Volumes
-  * Networks
-  * Environment variables
-  * Compose
-* Master:
-
-  * Containerized application development
-  * Multi-container local environments
-
-## Level 3 — Intermediate Docker Engineer
-
-* Learn:
-
-  * Multi-stage builds
-  * Image optimization
-  * Advanced networking
-  * Resource limits
-  * Health checks
-  * Debugging
-* Master:
-
-  * Production-quality Dockerfiles
-  * Efficient container architectures
-
-## Level 4 — Advanced Docker Engineer
-
-* Learn:
-
-  * BuildKit
-  * Buildx
-  * Multi-platform builds
-  * Security hardening
-  * CI/CD
-  * Registries
-  * Observability
-* Master:
-
-  * Secure and reproducible image pipelines
-
-## Level 5 — Container Platform Engineer
-
-* Learn:
-
-  * Orchestration
-  * Kubernetes
-  * Cloud container platforms
-  * Deployment strategies
-  * Platform engineering
-* Master:
-
-  * Operating container platforms at scale
-
-## Level 6 — Production / Enterprise Expert
-
-* Learn:
-
-  * Container security
-  * Supply-chain security
-  * Distributed systems
-  * High availability
-  * Disaster recovery
-  * Observability
-  * Governance
-* Master:
-
-  * Designing reliable, secure, scalable container platforms
+- **20. Production Container Platform**
+  - Docker
+  - Kubernetes
+  - CI/CD
+  - Monitoring
+  - Security
+  - Scalability
+  - Production best practices
 
 ---
 
-# XXX. Docker Mastery Checklist
+# XIV. Progressive Docker Learning Sequence
 
-* **Fundamentals**
+## Level 1 — Docker Fundamentals
 
-  * [ ] Understand containers versus VMs
-  * [ ] Understand Docker architecture
-  * [ ] Understand images and containers
-  * [ ] Understand the container lifecycle
+- Master:
+  - What Docker is
+  - Virtualization fundamentals
+  - Container fundamentals
+  - Linux kernel features
+  - Docker architecture
+  - Installation
+  - Docker CLI
 
-* **CLI**
+## Level 2 — Images
 
-  * [ ] Run containers
-  * [ ] Inspect containers
-  * [ ] Execute commands
-  * [ ] Manage images
-  * [ ] Manage networks
-  * [ ] Manage volumes
+- Master:
+  - Image fundamentals
+  - Image management
+  - Image layers
+  - Image registries
+  - Image tags
+  - Image digests
+  - Multi-architecture images
 
-* **Dockerfiles**
+## Level 3 — Containers
 
-  * [ ] Write Dockerfiles
-  * [ ] Use `CMD`
-  * [ ] Use `ENTRYPOINT`
-  * [ ] Optimize layers
-  * [ ] Use `.dockerignore`
-  * [ ] Build multi-stage images
+- Master:
+  - Container fundamentals
+  - Container management
+  - Container run
+  - Container lifecycle
+  - Container logs
+  - Container exec
+  - Container health checks
+  - Container resource limits
+  - Container restart policies
 
-* **Networking**
+## Level 4 — Dockerfiles
 
-  * [ ] Create custom networks
-  * [ ] Understand port publishing
-  * [ ] Configure service discovery
-  * [ ] Troubleshoot connectivity
+- Master:
+  - Dockerfile fundamentals
+  - Dockerfile instructions
+  - Dockerfile best practices
+  - Multi-stage builds
+  - Build context
+  - Build arguments
+  - Environment variables
+  - Labels
+  - Exposed ports
+  - Volumes in Dockerfile
+  - User and permissions
+  - Workdir
+  - Entrypoint and CMD
+  - BuildKit
+  - Buildx
 
-* **Storage**
+## Level 5 — Volumes
 
-  * [ ] Use volumes
-  * [ ] Use bind mounts
-  * [ ] Understand ephemeral storage
-  * [ ] Design persistent-data strategies
+- Master:
+  - Volume fundamentals
+  - Named volumes
+  - Bind mounts
+  - tmpfs mounts
+  - Volume drivers
+  - Volume backup and restore
 
-* **Compose**
+## Level 6 — Networks
 
-  * [ ] Create multi-container applications
-  * [ ] Configure services
-  * [ ] Configure networks
-  * [ ] Configure volumes
-  * [ ] Add health checks
-  * [ ] Manage environments
+- Master:
+  - Network fundamentals
+  - Bridge networks
+  - Host networks
+  - Overlay networks
+  - Macvlan networks
+  - Container DNS
+  - Port publishing
+  - Network security
 
-* **Security**
+## Level 7 — Docker Compose
 
-  * [ ] Run containers as non-root
-  * [ ] Minimize image attack surface
-  * [ ] Scan images
-  * [ ] Manage secrets safely
-  * [ ] Understand capabilities and seccomp
-  * [ ] Understand supply-chain risks
+- Master:
+  - Docker Compose fundamentals
+  - Compose file structure
+  - Services
+  - Compose commands
+  - Compose overrides
+  - Compose profiles
+  - Compose best practices
 
-* **CI/CD**
+## Level 8 — Security
 
-  * [ ] Automate image builds
-  * [ ] Run containerized tests
-  * [ ] Publish images
-  * [ ] Scan images
-  * [ ] Sign artifacts
-  * [ ] Deploy automatically
+- Master:
+  - Security fundamentals
+  - Image security
+  - Container security
+  - Secrets management
+  - Image scanning
+  - Runtime security
+  - Supply chain security
+  - Network security
 
-* **Operations**
+## Level 9 — CI/CD
 
-  * [ ] Monitor resource usage
-  * [ ] Analyze logs
-  * [ ] Debug containers
-  * [ ] Configure health checks
-  * [ ] Plan backups and recovery
+- Master:
+  - CI/CD fundamentals
+  - Docker in CI
+  - Docker in CD
+  - GitHub Actions
+  - GitLab CI
+  - Jenkins
 
-* **Advanced**
+## Level 10 — Orchestration
 
-  * [ ] Understand BuildKit
-  * [ ] Build multi-platform images
-  * [ ] Understand OCI
-  * [ ] Understand container runtimes
-  * [ ] Use orchestration
-  * [ ] Understand Kubernetes
-  * [ ] Design production container platforms
+- Master:
+  - Orchestration fundamentals
+  - Docker Swarm
+  - Kubernetes
+  - Docker Compose to Kubernetes
+  - Service mesh
+
+## Level 11 — Performance
+
+- Master:
+  - Performance fundamentals
+  - Image optimization
+  - Build performance
+  - Container performance
+  - Storage performance
+  - Network performance
+  - Profiling
+
+## Level 12 — Troubleshooting
+
+- Master:
+  - Troubleshooting fundamentals
+  - Container troubleshooting
+  - Image troubleshooting
+  - Network troubleshooting
+  - Volume troubleshooting
+  - Docker daemon troubleshooting
+  - Common issues
+
+## Level 13 — Production Engineering
+
+- Master:
+  - Production deployments
+  - Security
+  - Monitoring
+  - Logging
+  - Scaling
+  - High availability
+  - Disaster recovery
+  - Production best practices
 
 ---
 
-# XXXI. Recommended Learning Order
+# XV. Final Docker Competency Map
 
-**Docker Fundamentals → CLI → Containers → Images → Dockerfiles → Volumes → Networking → Compose → Application Containerization → Image Optimization → Multi-Stage Builds → Security → Registries → CI/CD → BuildKit → Observability → Performance → Orchestration → Kubernetes → Cloud Containers → Production Architecture → Enterprise Container Platform Engineering**
+- **Foundations**
 
-A practical progression is:
+  - What Docker is
+  - Virtualization fundamentals
+  - Container fundamentals
+  - Linux kernel features
+  - Docker architecture
+  - Installation
+  - Docker CLI
 
-**Learn the command → build the container → understand the image → connect multiple containers → persist data → secure the container → automate the build → deploy the image → monitor it → scale it → orchestrate it → operate it in production.**
+- **Images**
+
+  - Image fundamentals
+  - Image management
+  - Image layers
+  - Image registries
+  - Image tags
+  - Image digests
+  - Multi-architecture images
+
+- **Containers**
+
+  - Container fundamentals
+  - Container management
+  - Container run
+  - Container lifecycle
+  - Container logs
+  - Container exec
+  - Container health checks
+  - Container resource limits
+  - Container restart policies
+
+- **Dockerfiles**
+
+  - Dockerfile fundamentals
+  - Dockerfile instructions
+  - Dockerfile best practices
+  - Multi-stage builds
+  - Build context
+  - Build arguments
+  - Environment variables
+  - Labels
+  - Exposed ports
+  - Volumes in Dockerfile
+  - User and permissions
+  - Workdir
+  - Entrypoint and CMD
+  - BuildKit
+  - Buildx
+
+- **Volumes**
+
+  - Volume fundamentals
+  - Named volumes
+  - Bind mounts
+  - tmpfs mounts
+  - Volume drivers
+  - Volume backup and restore
+
+- **Networks**
+
+  - Network fundamentals
+  - Bridge networks
+  - Host networks
+  - Overlay networks
+  - Macvlan networks
+  - Container DNS
+  - Port publishing
+  - Network security
+
+- **Docker Compose**
+
+  - Docker Compose fundamentals
+  - Compose file structure
+  - Services
+  - Compose commands
+  - Compose overrides
+  - Compose profiles
+  - Compose best practices
+
+- **Security**
+
+  - Security fundamentals
+  - Image security
+  - Container security
+  - Secrets management
+  - Image scanning
+  - Runtime security
+  - Supply chain security
+  - Network security
+
+- **CI/CD**
+
+  - CI/CD fundamentals
+  - Docker in CI
+  - Docker in CD
+  - GitHub Actions
+  - GitLab CI
+  - Jenkins
+
+- **Orchestration**
+
+  - Orchestration fundamentals
+  - Docker Swarm
+  - Kubernetes
+  - Docker Compose to Kubernetes
+  - Service mesh
+
+- **Performance**
+
+  - Performance fundamentals
+  - Image optimization
+  - Build performance
+  - Container performance
+  - Storage performance
+  - Network performance
+  - Profiling
+
+- **Troubleshooting**
+
+  - Troubleshooting fundamentals
+  - Container troubleshooting
+  - Image troubleshooting
+  - Network troubleshooting
+  - Volume troubleshooting
+  - Docker daemon troubleshooting
+  - Common issues
+
+- **Production**
+
+  - Production deployments
+  - Security
+  - Monitoring
+  - Logging
+  - Scaling
+  - High availability
+  - Disaster recovery
+
+---
+
+## Recommended Overall Progression
+
+**Docker Fundamentals → Images → Containers → Dockerfiles → Volumes → Networks → Docker Compose → Security → CI/CD → Orchestration → Performance → Troubleshooting → Production Engineering**

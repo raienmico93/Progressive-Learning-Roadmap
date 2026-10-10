@@ -1,1147 +1,2073 @@
 # SciPy Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Scientific-Python Foundations to Advanced Numerical Computing and Scientific Engineering
+## From Scientific Computing Foundations to Advanced Optimization, Signal Processing, Statistics, and Production Research Engineering
 
-### I. Scientific Python Foundations
-
-* **1. Python foundations required for SciPy**
-
-  * Variables and data types
-  * Functions
-  * Classes and objects
-  * Iterators and generators
-  * Exception handling
-  * Modules and packages
-  * Virtual environments
-  * Package management
-  * Numerical programming concepts
-
-* **2. Core scientific-Python ecosystem**
-
-  * NumPy
-
-    * Arrays
-    * Vectorization
-    * Broadcasting
-    * Linear algebra
-    * Random-number generation
-  * Matplotlib
-
-    * Plotting numerical results
-    * Scientific visualization
-  * Pandas
-
-    * Tabular data processing
-    * Data cleaning
-  * Jupyter
-
-    * Notebooks
-    * Interactive experimentation
-
-* **3. Mathematical foundations**
-
-  * Algebra
-  * Functions
-  * Calculus
-
-    * Derivatives
-    * Integrals
-    * Partial derivatives
-  * Linear algebra
-
-    * Vectors
-    * Matrices
-    * Eigenvalues
-    * Eigenvectors
-  * Probability
-  * Statistics
-  * Numerical methods
-  * Optimization concepts
+SciPy is best learned as more than "a collection of scientific functions." The progression should cover **NumPy foundations → scipy subpackages → linear algebra → optimization → integration → interpolation → statistics → signal processing → image processing → spatial algorithms → sparse matrices → FFT → special functions → I/O → performance → research workflows → production scientific computing**.
 
 ---
 
-# II. Introduction to SciPy
+# I. SciPy Foundations
 
-* **4. Understanding SciPy**
+- **1. What SciPy Is**
+  - SciPy
+  - SciPy history
+  - SciPy 0.x
+  - SciPy 1.0
+  - SciPy 1.5
+  - SciPy 1.8
+  - SciPy 1.11
+  - SciPy 1.13
+  - SciPy 1.14
+  - SciPy 1.15 (current)
+  - SciPy philosophy
+    - Scientific computing
+    - NumPy-based
+    - Open source
+    - Community-driven
+    - Comprehensive
+    - Performant
+  - SciPy vs NumPy
+  - SciPy vs Pandas
+  - SciPy vs scikit-learn
+  - SciPy vs statsmodels
+  - SciPy vs SymPy
+  - SciPy vs MATLAB
+  - SciPy use cases
+    - Scientific computing
+    - Engineering
+    - Physics
+    - Chemistry
+    - Biology
+    - Finance
+    - Signal processing
+    - Image processing
+    - Optimization
+    - Statistics
+    - Machine learning
+    - Research
+  - SciPy in modern science
+  - SciPy in industry
+  - SciPy ecosystem
 
-  * Purpose of SciPy
-  * Relationship between SciPy and NumPy
-  * SciPy package architecture
-  * Scientific-computing use cases
-  * Deterministic numerical computation
-  * Scientific research applications
-  * Engineering applications
-  * Data-science applications
+- **2. SciPy Architecture**
+  - SciPy architecture
+  - NumPy foundation
+  - Subpackages
+  - C/Fortran/Cython implementations
+  - BLAS
+  - LAPACK
+  - ARPACK
+  - SuperLU
+  - Qhull
+  - FITPACK
+  - ODEPACK
+  - MINPACK
+  - FFTPACK
+  - Architecture best practices
+  - Performance architecture
 
-* **5. Installing and importing SciPy**
+- **3. Installing SciPy**
+  - Installation
+    - pip
+    - conda
+    - mamba
+    - uv
+    - Poetry
+  - `pip install scipy`
+  - `conda install scipy`
+  - Version checking
+  - `scipy.__version__`
+  - Dependencies
+    - NumPy
+  - Optional dependencies
+    - matplotlib
+    - pandas
+    - sympy
+    - scikit-learn
+    - h5py
+    - Pillow
+    - pywavelets
+    - pydata-sphinx-theme
+  - Build from source
+  - Pre-built wheels
+  - Platform-specific installation
+  - Installation best practices
 
-  * Installation with `pip`
-  * Installation with Conda
-  * Virtual environments
-  * Importing SciPy
-  * Importing individual subpackages
-  * Checking installed versions
-  * Understanding API documentation
+- **4. Importing SciPy**
+  - `import scipy as sp`
+  - `from scipy import ...`
+  - Subpackage imports
+    - `from scipy import linalg`
+    - `from scipy import optimize`
+    - `from scipy import integrate`
+    - `from scipy import interpolate`
+    - `from scipy import stats`
+    - `from scipy import signal`
+    - `from scipy import ndimage`
+    - `from scipy import sparse`
+    - `from scipy import spatial`
+    - `from scipy import special`
+    - `from scipy import fft`
+    - `from scipy import constants`
+    - `from scipy import io`
+    - `from scipy import cluster`
+    - `from scipy import odr`
+    - `from scipy import datasets`
+  - Import best practices
+  - Namespace conventions
+  - Import performance
 
-* **6. SciPy conventions**
+- **5. NumPy Prerequisites**
+  - ndarray
+  - Array creation
+  - Indexing
+  - Slicing
+  - Broadcasting
+  - Universal functions
+  - Aggregation
+  - Linear algebra basics
+  - Random number generation
+  - I/O
+  - Performance
+  - NumPy best practices
+  - NumPy prerequisites for SciPy
 
-  * NumPy-array inputs
-  * Scalar versus vector outputs
-  * Numerical precision
-  * Floating-point limitations
-  * `dtype`
-  * Shape conventions
-  * Tolerances
-  * Error handling
-  * Convergence criteria
-
----
-
-# III. NumPy Prerequisite Mastery
-
-* **7. NumPy arrays**
-
-  * One-dimensional arrays
-  * Multidimensional arrays
-  * Shape
-  * Size
-  * Dimensions
-  * Data types
-  * Memory layout
-
-* **8. Array operations**
-
-  * Element-wise arithmetic
-  * Vectorization
-  * Broadcasting
-  * Boolean indexing
-  * Fancy indexing
-  * Slicing
-  * Reshaping
-  * Transposition
-
-* **9. NumPy linear algebra**
-
-  * Matrix multiplication
-  * Dot products
-  * Norms
-  * Solving linear systems
-  * Matrix decompositions
-  * Eigenvalue problems
-
-* **10. NumPy numerical foundations**
-
-  * Floating-point representation
-  * Numerical precision
-  * Overflow
-  * Underflow
-  * NaN
-  * Infinity
-  * Conditioning
-
----
-
-# IV. SciPy Subpackage Architecture
-
-* **11. Core SciPy modules**
-
-  * `scipy.constants`
-  * `scipy.special`
-  * `scipy.linalg`
-  * `scipy.integrate`
-  * `scipy.optimize`
-  * `scipy.interpolate`
-  * `scipy.stats`
-  * `scipy.signal`
-  * `scipy.sparse`
-  * `scipy.spatial`
-  * `scipy.fft`
-  * `scipy.ndimage`
-  * `scipy.io`
-
-* **12. Specialized modules**
-
-  * `scipy.cluster`
-  * `scipy.spatial`
-  * `scipy.odr`
-  * `scipy.fft`
-  * `scipy.datasets`
-  * Other domain-oriented functionality
-
----
-
-# V. Mathematical Constants and Special Functions
-
-* **13. Physical and mathematical constants**
-
-  * `scipy.constants`
-  * Mathematical constants
-  * Physical constants
-  * Unit-related values
-  * Conversion factors
-
-* **14. Special functions**
-
-  * `scipy.special`
-  * Gamma functions
-  * Beta functions
-  * Error functions
-  * Bessel functions
-  * Orthogonal polynomials
-  * Statistical special functions
-  * Probability-related functions
-
-* **15. Special-function applications**
-
-  * Physics
-  * Engineering
-  * Probability distributions
-  * Differential equations
-  * Mathematical modeling
+- **6. First Steps**
+  - First SciPy script
+  - Basic operations
+  - Quick examples
+  - Learning resources
+  - Documentation
+  - Community
+  - First steps best practices
 
 ---
 
-# VI. Linear Algebra with `scipy.linalg`
+# II. Linear Algebra (scipy.linalg)
 
-* **16. Linear systems**
+- **7. Linear Algebra Fundamentals**
+  - `scipy.linalg`
+  - Linear algebra
+  - Matrix operations
+  - Vector operations
+  - Linear algebra best practices
 
-  * `solve`
-  * Solving \(Ax=b\)
-  * Square systems
-  * Singular systems
-  * Overdetermined systems
+- **8. Basic Operations**
+  - `inv()`
+  - `pinv()`
+  - `det()`
+  - `norm()`
+  - `solve()`
+  - `solve_triangular()`
+  - `solve_banded()`
+  - `solveh_banded()`
+  - `solve_toeplitz()`
+  - `solve_circulant()`
+  - `lstsq()`
+  - `matrix_balance()`
+  - `matrix_rank()`
+  - Basic operations best practices
 
-* **17. Matrix factorization**
+- **9. Matrix Decompositions**
+  - `lu()`
+  - `lu_factor()`
+  - `lu_solve()`
+  - `cholesky()`
+  - `cho_factor()`
+  - `cho_solve()`
+  - `qr()`
+  - `svd()`
+  - `svdvals()`
+  - `diagsvd()`
+  - `orth()`
+  - `null_space()`
+  - `schur()`
+  - `rsf2csf()`
+  - `hessenberg()`
+  - `cdf2rdf()`
+  - Decomposition best practices
 
-  * LU decomposition
-  * QR decomposition
-  * Cholesky decomposition
-  * Schur decomposition
+- **10. Eigenvalues and Eigenvectors**
+  - `eig()`
+  - `eigh()`
+  - `eigvals()`
+  - `eigvalsh()`
+  - `eig_banded()`
+  - `eigvals_banded()`
+  - `eigh_tridiagonal()`
+  - `eigvalsh_tridiagonal()`
+  - Eigenvalue best practices
 
-* **18. Eigenvalue problems**
+- **11. Matrix Functions**
+  - `expm()`
+  - `logm()`
+  - `sqrtm()`
+  - `funm()`
+  - `expm_frechet()`
+  - `expm_cond()`
+  - `cosm()`
+  - `sinm()`
+  - `tanm()`
+  - `coshm()`
+  - `sinhm()`
+  - `tanhm()`
+  - Matrix function best practices
 
-  * Eigenvalues
-  * Eigenvectors
-  * Standard eigenvalue problems
-  * Generalized eigenvalue problems
-  * Symmetric/Hermitian systems
+- **12. Special Matrices**
+  - `toeplitz()`
+  - `circulant()`
+  - `hankel()`
+  - `companion()`
+  - `hadamard()`
+  - `leslie()`
+  - `block_diag()`
+  - `kron()`
+  - `tri()`
+  - `helmert()`
+  - Special matrix best practices
 
-* **19. Matrix properties**
-
-  * Determinant
-  * Inverse
-  * Rank
-  * Condition number
-  * Norms
-  * Positive definiteness
-
-* **20. Matrix functions**
-
-  * Matrix exponential
-  * Matrix logarithm
-  * Matrix square root
-  * Other matrix functions
-
-* **21. Advanced linear algebra**
-
-  * Singular Value Decomposition
-  * Generalized Schur decomposition
-  * Least-squares problems
-  * Pseudoinverse
-  * Low-rank approximations
-
----
-
-# VII. Numerical Integration with `scipy.integrate`
-
-* **22. One-dimensional integration**
-
-  * Definite integrals
-  * `quad`
-  * Numerical quadrature
-  * Absolute tolerance
-  * Relative tolerance
-
-* **23. Multidimensional integration**
-
-  * `dblquad`
-  * `tplquad`
-  * `nquad`
-  * Nested integration
-
-* **24. Integration techniques**
-
-  * Adaptive quadrature
-  * Improper integrals
-  * Infinite limits
-  * Singularities
-  * Oscillatory functions
-
-* **25. Numerical solutions of differential equations**
-
-  * Ordinary differential equations
-  * Initial-value problems
-  * Boundary-value problems
-  * `solve_ivp`
-  * Step-size control
-  * Event detection
-
-* **26. Advanced ODE concepts**
-
-  * Stiff systems
-  * Explicit methods
-  * Implicit methods
-  * Error estimation
-  * Adaptive solvers
-  * Dense output
-
-* **27. Boundary-value problems**
-
-  * `solve_bvp`
-  * Boundary conditions
-  * Shooting methods
-  * Collocation
+- **13. Advanced Linear Algebra**
+  - `interpolative`
+  - `eigsh()`
+  - `svds()`
+  - `lobpcg()`
+  - `expm_multiply()`
+  - `fractional_matrix_power()`
+  - `sqrtm()`
+  - `signm()`
+  - Advanced linear algebra best practices
 
 ---
 
-# VIII. Optimization with `scipy.optimize`
+# III. Optimization (scipy.optimize)
 
-* **28. Root finding**
+- **14. Optimization Fundamentals**
+  - `scipy.optimize`
+  - Optimization
+  - Objective functions
+  - Constraints
+  - Bounds
+  - Optimization best practices
 
-  * Scalar roots
-  * `brentq`
-  * `bisect`
-  * `newton`
-  * Secant methods
-  * Multidimensional roots
+- **15. Unconstrained Optimization**
+  - `minimize()`
+  - Methods
+    - `Nelder-Mead`
+    - `Powell`
+    - `CG`
+    - `BFGS`
+    - `Newton-CG`
+    - `L-BFGS-B`
+    - `TNC`
+    - `COBYLA`
+    - `SLSQP`
+    - `trust-constr`
+    - `dogleg`
+    - `trust-ncg`
+    - `trust-exact`
+    - `trust-krylov`
+  - `minimize_scalar()`
+  - Methods
+    - `brent`
+    - `bounded`
+    - `golden`
+  - Unconstrained optimization best practices
 
-* **29. Unconstrained optimization**
+- **16. Constrained Optimization**
+  - Constraints
+  - Equality constraints
+  - Inequality constraints
+  - Bounds
+  - `minimize()` with constraints
+  - `linprog()`
+  - `milp()`
+  - Constrained optimization best practices
 
-  * Minimization
-  * Maximization through transformation
-  * `minimize`
-  * Gradient-based methods
-  * Derivative-free methods
+- **17. Least Squares**
+  - `least_squares()`
+  - `leastsq()`
+  - `curve_fit()`
+  - Methods
+    - `trf`
+    - `dogbox`
+    - `lm`
+  - Least squares best practices
 
-* **30. Constrained optimization**
+- **18. Root Finding**
+  - `root()`
+  - `root_scalar()`
+  - Methods
+    - `hybr`
+    - `lm`
+    - `broyden1`
+    - `broyden2`
+    - `anderson`
+    - `Krylov`
+    - `diagbroyden`
+    - `linearmixing`
+    - `excitingmixing`
+  - `brentq()`
+  - `brenth()`
+  - `ridder()`
+  - `bisect()`
+  - `newton()`
+  - `secant()`
+  - `halley()`
+  - Root finding best practices
 
-  * Bounds
-  * Equality constraints
-  * Inequality constraints
-  * Nonlinear constraints
-  * Constraint handling
+- **19. Linear Programming**
+  - `linprog()`
+  - Linear programming
+  - Methods
+    - `highs`
+    - `highs-ds`
+    - `highs-ipm`
+    - `interior-point`
+    - `revised simplex`
+    - `simplex`
+  - Linear programming best practices
 
-* **31. Least-squares optimization**
+- **20. Mixed-Integer Linear Programming**
+  - `milp()`
+  - Mixed-integer programming
+  - MILP best practices
 
-  * `least_squares`
-  * Curve fitting
-  * Residual minimization
-  * Robust loss functions
-  * Parameter estimation
+- **21. Global Optimization**
+  - `basinhopping()`
+  - `brute()`
+  - `differential_evolution()`
+  - `shgo()`
+  - `dual_annealing()`
+  - `direct()`
+  - Global optimization best practices
 
-* **32. Linear programming**
+- **22. Assignment and Transportation**
+  - `linear_sum_assignment()`
+  - Assignment problem
+  - Transportation problem
+  - Assignment best practices
 
-  * `linprog`
-  * Objective functions
-  * Linear constraints
-  * Feasible regions
-  * Optimization models
-
-* **33. Global optimization**
-
-  * Differential evolution
-  * Basin hopping
-  * Dual annealing
-  * Global versus local minima
-
-* **34. Optimization diagnostics**
-
-  * Convergence
-  * Gradient norms
-  * Function evaluations
-  * Iteration limits
-  * Numerical stability
-  * Initialization sensitivity
-
----
-
-# IX. Interpolation with `scipy.interpolate`
-
-* **35. One-dimensional interpolation**
-
-  * Linear interpolation
-  * Nearest-neighbor interpolation
-  * Polynomial interpolation
-  * Spline interpolation
-
-* **36. Spline methods**
-
-  * Cubic splines
-  * B-splines
-  * Univariate splines
-  * Smoothing splines
-
-* **37. Multidimensional interpolation**
-
-  * Regular grids
-  * Scattered data
-  * Grid interpolation
-  * Nearest-neighbor methods
-  * Linear interpolation
-
-* **38. Interpolation applications**
-
-  * Missing measurements
-  * Sensor data
-  * Numerical simulation
-  * Scientific visualization
-  * Resampling
-
----
-
-# X. Probability and Statistics with `scipy.stats`
-
-* **39. Probability distributions**
-
-  * Continuous distributions
-  * Discrete distributions
-  * Probability density functions
-  * Probability mass functions
-  * Cumulative distribution functions
-  * Percent-point functions
-
-* **40. Random variables**
-
-  * Sampling
-  * Probability calculations
-  * Moments
-  * Expectations
-  * Variance
-
-* **41. Descriptive statistics**
-
-  * Mean
-  * Median
-  * Mode
-  * Variance
-  * Standard deviation
-  * Quantiles
-  * Moments
-
-* **42. Statistical tests**
-
-  * t-tests
-  * Chi-square tests
-  * ANOVA
-  * Nonparametric tests
-  * Correlation tests
-  * Goodness-of-fit tests
-
-* **43. Correlation and dependence**
-
-  * Pearson correlation
-  * Spearman correlation
-  * Kendall correlation
-  * Rank-based analysis
-
-* **44. Hypothesis testing**
-
-  * Null hypothesis
-  * Alternative hypothesis
-  * p-values
-  * Confidence intervals
-  * Test statistics
-  * Statistical power
-
-* **45. Distribution fitting**
-
-  * Parameter estimation
-  * Maximum-likelihood estimation
-  * Distribution fitting
-  * Goodness-of-fit analysis
-
-* **46. Advanced statistics**
-
-  * Resampling
-  * Bootstrap concepts
-  * Permutation testing
-  * Kernel density estimation
-  * Contingency tables
+- **23. Advanced Optimization**
+  - `minimize` options
+  - Jacobian
+  - Hessian
+  - Callbacks
+  - Convergence
+  - Advanced optimization best practices
 
 ---
 
-# XI. Signal Processing with `scipy.signal`
+# IV. Integration (scipy.integrate)
 
-* **47. Signal fundamentals**
+- **24. Integration Fundamentals**
+  - `scipy.integrate`
+  - Numerical integration
+  - Quadrature
+  - Differential equations
+  - Integration best practices
 
-  * Continuous versus discrete signals
-  * Sampling
-  * Sampling frequency
-  * Aliasing
-  * Noise
-  * Frequency-domain representations
+- **25. Single Integration**
+  - `quad()`
+  - `quad_vec()`
+  - `fixed_quad()`
+  - `quadrature()`
+  - `romberg()`
+  - `trapz()`
+  - `cumulative_trapezoid()`
+  - `simpson()`
+  - `cumulative_simpson()`
+  - `newton_cotes()`
+  - Single integration best practices
 
-* **48. Filtering**
+- **26. Multiple Integration**
+  - `dblquad()`
+  - `tplquad()`
+  - `nquad()`
+  - `qmc_quad()`
+  - Multiple integration best practices
 
-  * Low-pass filters
-  * High-pass filters
-  * Band-pass filters
-  * Band-stop filters
-  * FIR filters
-  * IIR filters
+- **27. Ordinary Differential Equations**
+  - `solve_ivp()`
+  - ODE solvers
+    - `RK45`
+    - `RK23`
+    - `DOP853`
+    - `Radau`
+    - `BDF`
+    - `LSODA`
+  - `odeint()`
+  - `ode()` (legacy)
+  - Stiff equations
+  - Events
+  - Dense output
+  - ODE best practices
 
-* **49. Filter design**
+- **28. Boundary Value Problems**
+  - `solve_bvp()`
+  - Boundary value problems
+  - BVP best practices
 
-  * Butterworth filters
-  * Chebyshev filters
-  * Elliptic filters
-  * Filter coefficients
-  * Frequency response
+- **29. Delay Differential Equations**
+  - `solve_dde()`
+  - Delay differential equations
+  - DDE best practices
 
-* **50. Signal analysis**
-
-  * Convolution
-  * Cross-correlation
-  * Peak detection
-  * Spectral analysis
-  * Frequency response
-
-* **51. Advanced signal processing**
-
-  * Digital filtering
-  * Filter stability
-  * Zero-phase filtering
-  * Time-frequency analysis
-  * Resampling
-  * Decimation
-
-* **52. Applications**
-
-  * Audio
-  * Biomedical signals
-  * Sensor systems
-  * Telecommunications
-  * Industrial monitoring
-
----
-
-# XII. Fourier Analysis with `scipy.fft`
-
-* **53. Fourier-transform fundamentals**
-
-  * Fourier series
-  * Fourier transform
-  * Discrete Fourier transform
-  * Fast Fourier transform
-
-* **54. FFT operations**
-
-  * Forward FFT
-  * Inverse FFT
-  * Real FFT
-  * Frequency bins
-  * Spectrum interpretation
-
-* **55. Multidimensional FFT**
-
-  * 2D FFT
-  * 3D FFT
-  * Image processing
-  * Scientific simulations
-
-* **56. FFT-based applications**
-
-  * Signal filtering
-  * Frequency-domain analysis
-  * Convolution acceleration
-  * Spectral estimation
+- **30. Advanced Integration**
+  - `IntegrationWarning`
+  - Integration options
+  - Tolerance
+  - Error estimation
+  - Advanced integration best practices
 
 ---
 
-# XIII. Sparse Matrices with `scipy.sparse`
+# V. Interpolation (scipy.interpolate)
 
-* **57. Sparse-matrix concepts**
+- **31. Interpolation Fundamentals**
+  - `scipy.interpolate`
+  - Interpolation
+  - Extrapolation
+  - Interpolation best practices
 
-  * Sparse versus dense matrices
-  * Sparsity
-  * Memory savings
-  * Computational savings
+- **32. Univariate Interpolation**
+  - `interp1d()`
+  - `InterpolatedUnivariateSpline()`
+  - `UnivariateSpline()`
+  - `LSQUnivariateSpline()`
+  - `BarycentricInterpolator()`
+  - `KroghInterpolator()`
+  - `PchipInterpolator()`
+  - `Akima1DInterpolator()`
+  - `CubicSpline()`
+  - `CubicHermiteSpline()`
+  - `PchipInterpolator()`
+  - `make_interp_spline()`
+  - Interpolation methods
+    - `linear`
+    - `nearest`
+    - `zero`
+    - `slinear`
+    - `quadratic`
+    - `cubic`
+    - `previous`
+    - `next`
+  - Univariate interpolation best practices
 
-* **58. Sparse formats**
+- **33. Multivariate Interpolation**
+  - `griddata()`
+  - `LinearNDInterpolator()`
+  - `NearestNDInterpolator()`
+  - `CloughTocher2DInterpolator()`
+  - `RBFInterpolator()`
+  - `interpn()`
+  - `RegularGridInterpolator()`
+  - Multivariate interpolation best practices
 
-  * CSR
-  * CSC
-  * COO
-  * DIA
-  * LIL
-  * DOK
+- **34. Spline Interpolation**
+  - `splprep()`
+  - `splev()`
+  - `splint()`
+  - `sproot()`
+  - `spalde()`
+  - `BSpline()`
+  - `make_interp_spline()`
+  - `make_lsq_spline()`
+  - Spline best practices
 
-* **59. Sparse operations**
+- **35. Smoothing**
+  - `UnivariateSpline()`
+  - `LSQUnivariateSpline()`
+  - `splprep()`
+  - `make_smoothing_spline()`
+  - Smoothing best practices
 
-  * Matrix multiplication
-  * Sparse slicing
-  * Sparse arithmetic
-  * Conversion between formats
-
-* **60. Sparse linear algebra**
-
-  * `scipy.sparse.linalg`
-  * Sparse linear systems
-  * Iterative solvers
-  * Sparse eigenvalue problems
-
-* **61. Advanced sparse computation**
-
-  * Conjugate gradient methods
-  * GMRES
-  * BiCGSTAB
-  * Preconditioning
-  * Large-scale scientific computation
-
----
-
-# XIV. Spatial Algorithms with `scipy.spatial`
-
-* **62. Distance calculations**
-
-  * Euclidean distance
-  * Manhattan distance
-  * Minkowski distance
-  * Pairwise distances
-
-* **63. KD-trees**
-
-  * `KDTree`
-  * Nearest-neighbor search
-  * Radius queries
-  * Spatial indexing
-
-* **64. Convex geometry**
-
-  * Convex hulls
-  * Delaunay triangulation
-  * Voronoi diagrams
-
-* **65. Spatial applications**
-
-  * Geospatial computation
-  * Particle simulations
-  * Computational geometry
-  * Nearest-neighbor analysis
+- **36. Advanced Interpolation**
+  - Extrapolation
+  - Extrapolation methods
+  - `interp1d` with `fill_value`
+  - Advanced interpolation best practices
 
 ---
 
-# XV. Image and Multidimensional Array Processing with `scipy.ndimage`
+# VI. Statistics (scipy.stats)
 
-* **66. Image-processing fundamentals**
+- **37. Statistics Fundamentals**
+  - `scipy.stats`
+  - Statistical distributions
+  - Statistical tests
+  - Descriptive statistics
+  - Statistics best practices
 
-  * Multidimensional arrays
-  * Pixels and voxels
-  * Neighborhood operations
-  * Filtering
+- **38. Continuous Distributions**
+  - `norm`
+  - `uniform`
+  - `expon`
+  - `gamma`
+  - `beta`
+  - `chi2`
+  - `t`
+  - `f`
+  - `lognorm`
+  - `weibull_min`
+  - `weibull_max`
+  - `pareto`
+  - `cauchy`
+  - `laplace`
+  - `logistic`
+  - `gumbel_r`
+  - `gumbel_l`
+  - `rayleigh`
+  - `maxwell`
+  - `wald`
+  - `vonmises`
+  - `nakagami`
+  - `truncnorm`
+  - `triang`
+  - Continuous distribution best practices
 
-* **67. Image filters**
+- **39. Discrete Distributions**
+  - `binom`
+  - `poisson`
+  - `geom`
+  - `hypergeom`
+  - `nbinom`
+  - `bernoulli`
+  - `randint`
+  - `zipf`
+  - `logser`
+  - `boltzmann`
+  - `dlaplace`
+  - `skellam`
+  - Discrete distribution best practices
 
-  * Gaussian filtering
-  * Median filtering
-  * Uniform filtering
-  * Sharpening and smoothing
+- **40. Distribution Methods**
+  - `pdf()`
+  - `cdf()`
+  - `sf()`
+  - `ppf()`
+  - `isf()`
+  - `rvs()`
+  - `fit()`
+  - `stats()`
+  - `moment()`
+  - `mean()`
+  - `median()`
+  - `var()`
+  - `std()`
+  - `entropy()`
+  - Distribution method best practices
 
-* **68. Morphological operations**
+- **41. Descriptive Statistics**
+  - `describe()`
+  - `gmean()`
+  - `hmean()`
+  - `trim_mean()`
+  - `mode()`
+  - `moment()`
+  - `skew()`
+  - `kurtosis()`
+  - `variation()`
+  - `sem()`
+  - `zscore()`
+  - `iqr()`
+  - `median_abs_deviation()`
+  - Descriptive statistics best practices
 
-  * Erosion
-  * Dilation
-  * Opening
-  * Closing
+- **42. Statistical Tests**
+  - `ttest_1samp()`
+  - `ttest_ind()`
+  - `ttest_rel()`
+  - `ttest_ind_from_stats()`
+  - `mannwhitneyu()`
+  - `wilcoxon()`
+  - `kruskal()`
+  - `friedmanchisquare()`
+  - `f_oneway()`
+  - `levene()`
+  - `bartlett()`
+  - `fligner()`
+  - `shapiro()`
+  - `normaltest()`
+  - `anderson()`
+  - `kstest()`
+  - `ks_2samp()`
+  - `chisquare()`
+  - `chi2_contingency()`
+  - `fisher_exact()`
+  - `binomtest()`
+  - `binom_test()`
+  - `power_divergence()`
+  - Statistical test best practices
 
-* **69. Image transformations**
+- **43. Correlation**
+  - `pearsonr()`
+  - `spearmanr()`
+  - `kendalltau()`
+  - `pointbiserialr()`
+  - `linregress()`
+  - `theilslopes()`
+  - `siegelslopes()`
+  - Correlation best practices
 
-  * Rotation
-  * Zoom
-  * Shifting
-  * Affine transformations
+- **44. Transformations**
+  - `boxcox()`
+  - `boxcox_normmax()`
+  - `yeojohnson()`
+  - `yeojohnson_normmax()`
+  - `rankdata()`
+  - `tiecorrect()`
+  - `zmap()`
+  - `zscore()`
+  - Transformation best practices
 
-* **70. Image analysis**
+- **45. Resampling**
+  - `bootstrap()`
+  - `permutation_test()`
+  - `monte_carlo_test()`
+  - `bootstrap` method
+  - Resampling best practices
 
-  * Connected components
-  * Labeling
-  * Measurements
-  * Segmentation support
+- **46. Kernel Density Estimation**
+  - `gaussian_kde()`
+  - `KDE` estimation
+  - Bandwidth selection
+  - KDE best practices
 
----
+- **47. Circular Statistics**
+  - `circmean()`
+  - `circvar()`
+  - `circstd()`
+  - `vonmises`
+  - Circular statistics best practices
 
-# XVI. Input and Output with `scipy.io`
+- **48. Random Number Generation**
+  - `randint()`
+  - `random()`
+  - `uniform()`
+  - `norm()`
+  - `rvs()`
+  - Random best practices
 
-* **71. MATLAB interoperability**
-
-  * Reading MAT files
-  * Writing MAT files
-  * MATLAB-compatible structures
-
-* **72. Scientific file formats**
-
-  * WAV/audio-related data
-  * Matrix-oriented formats
-  * Specialized scientific data
-
-* **73. File-processing principles**
-
-  * Serialization
-  * Metadata
-  * Data compatibility
-  * Precision preservation
-
----
-
-# XVII. Clustering and Computational Geometry
-
-* **74. Clustering**
-
-  * Hierarchical clustering
-  * Distance matrices
-  * Linkage methods
-  * Cluster assignments
-
-* **75. Dendrograms**
-
-  * Hierarchical relationships
-  * Cluster interpretation
-  * Cut thresholds
-
-* **76. Distance metrics**
-
-  * Euclidean
-  * City-block
-  * Cosine
-  * Correlation-based distance
-  * Custom metrics
-
----
-
-# XVIII. Orthogonal Distance Regression
-
-* **77. Understanding ODR**
-
-  * Ordinary least squares versus orthogonal regression
-  * Errors in independent variables
-  * Errors in dependent variables
-
-* **78. `scipy.odr`**
-
-  * Model definition
-  * Parameter fitting
-  * Weighting
-  * Error estimation
-  * Scientific measurement problems
-
----
-
-# XIX. Numerical Accuracy and Stability
-
-* **79. Floating-point arithmetic**
-
-  * Machine precision
-  * Rounding
-  * Cancellation
-  * Overflow
-  * Underflow
-
-* **80. Numerical stability**
-
-  * Stable versus unstable algorithms
-  * Conditioning
-  * Error propagation
-  * Sensitivity analysis
-
-* **81. Convergence**
-
-  * Absolute tolerance
-  * Relative tolerance
-  * Iterative convergence
-  * Stopping conditions
-
-* **82. Numerical validation**
-
-  * Residual analysis
-  * Error bounds
-  * Independent verification
-  * Analytical versus numerical comparisons
-
----
-
-# XX. Performance and Optimization of SciPy Programs
-
-* **83. Vectorization**
-
-  * Avoiding Python loops
-  * NumPy operations
-  * Broadcasting
-  * Array-based computation
-
-* **84. Algorithm selection**
-
-  * Dense versus sparse
-  * Direct versus iterative solvers
-  * Local versus global optimization
-  * Exact versus approximate methods
-
-* **85. Profiling**
-
-  * Identifying bottlenecks
-  * Runtime measurement
-  * Memory profiling
-  * Benchmarking
-
-* **86. Performance engineering**
-
-  * Appropriate data structures
-  * Avoiding unnecessary copies
-  * Efficient array layouts
-  * Chunking
-  * Parallel computation where appropriate
-
----
-
-# XXI. Scientific Modeling with SciPy
-
-* **87. Mathematical model construction**
-
-  * Define variables
-  * Define parameters
-  * Formulate equations
-  * Specify initial conditions
-  * Specify boundary conditions
-
-* **88. Parameter estimation**
-
-  * Model fitting
-  * Least squares
-  * Statistical estimation
-  * Confidence intervals
-
-* **89. Model validation**
-
-  * Residuals
-  * Goodness of fit
-  * Sensitivity
-  * Cross-validation concepts
-  * Experimental validation
-
-* **90. Simulation**
-
-  * ODE simulation
-  * Numerical integration
-  * Random sampling
-  * Optimization-driven simulation
+- **49. Advanced Statistics**
+  - `distributions`
+  - `stats`
+  - `mstats`
+  - `contingency`
+  - `qmc`
+  - `sampling`
+  - `sensitivity_analysis`
+  - Advanced statistics best practices
 
 ---
 
-# XXII. Domain Applications
+# VII. Signal Processing (scipy.signal)
 
-* **91. Physics**
+- **50. Signal Processing Fundamentals**
+  - `scipy.signal`
+  - Signal processing
+  - Time domain
+  - Frequency domain
+  - Signal processing best practices
 
-  * Differential equations
-  * Wave equations
-  * Signal analysis
-  * Statistical mechanics
-  * Optimization
+- **51. Convolution and Correlation**
+  - `convolve()`
+  - `correlate()`
+  - `fftconvolve()`
+  - `oaconvolve()`
+  - `choose_conv_method()`
+  - `convolve2d()`
+  - `correlate2d()`
+  - `sepfir2d()`
+  - Convolution best practices
 
-* **92. Engineering**
+- **52. Filtering**
+  - `butter()`
+  - `cheby1()`
+  - `cheby2()`
+  - `ellip()`
+  - `bessel()`
+  - `iirfilter()`
+  - `iirdesign()`
+  - `lfilter()`
+  - `filtfilt()`
+  - `sosfilt()`
+  - `sosfiltfilt()`
+  - `firwin()`
+  - `firwin2()`
+  - `lfilter_zi()`
+  - `savgol_filter()`
+  - `medfilt()`
+  - `wiener()`
+  - `decimate()`
+  - `resample()`
+  - `resample_poly()`
+  - `upfirdn()`
+  - Filtering best practices
 
-  * Control systems
-  * Structural analysis
-  * Circuit-related calculations
-  * Parameter optimization
-  * Numerical simulation
+- **53. Filter Design**
+  - `butter()`
+  - `cheby1()`
+  - `cheby2()`
+  - `ellip()`
+  - `bessel()`
+  - `iirnotch()`
+  - `iirpeak()`
+  - `iircomb()`
+  - `firwin()`
+  - `firwin2()`
+  - `remez()`
+  - Filter design best practices
 
-* **93. Biology and medicine**
+- **54. Spectral Analysis**
+  - `periodogram()`
+  - `welch()`
+  - `csd()`
+  - `coherence()`
+  - `spectrogram()`
+  - `stft()`
+  - `istft()`
+  - `lombscargle()`
+  - `vectorstrength()`
+  - Spectral analysis best practices
 
-  * Population models
-  * Pharmacokinetic models
-  * Biomedical signals
-  * Statistical inference
+- **55. Waveforms**
+  - `chirp()`
+  - `gausspulse()`
+  - `sawtooth()`
+  - `square()`
+  - `sweep_poly()`
+  - `unit_impulse()`
+  - Waveform best practices
 
-* **94. Finance**
+- **56. Window Functions**
+  - `get_window()`
+  - `boxcar()`
+  - `triang()`
+  - `blackman()`
+  - `hamming()`
+  - `hann()`
+  - `bartlett()`
+  - `flattop()`
+  - `parzen()`
+  - `bohman()`
+  - `blackmanharris()`
+  - `nuttall()`
+  - `barthann()`
+  - `cosine()`
+  - `exponential()`
+  - `tukey()`
+  - `taylor()`
+  - `kaiser()`
+  - `gaussian()`
+  - `general_gaussian()`
+  - `dpss()`
+  - `chebwin()`
+  - Window best practices
 
-  * Optimization
-  * Probability distributions
-  * Risk calculations
-  * Numerical modeling
+- **57. Peak Detection**
+  - `find_peaks()`
+  - `find_peaks_cwt()`
+  - `peak_prominences()`
+  - `peak_widths()`
+  - `argrelextrema()`
+  - `argrelmax()`
+  - `argrelmin()`
+  - Peak detection best practices
 
-* **95. Environmental science**
+- **58. Wavelets**
+  - `cwt()`
+  - `morlet()`
+  - `ricker()`
+  - `morlet2()`
+  - `qmf()`
+  - `cascade()`
+  - `daub()`
+  - Wavelet best practices
 
-  * Spatial analysis
-  * Time-series analysis
-  * Numerical models
-  * Parameter estimation
+- **59. LTI Systems**
+  - `lti`
+  - `dlti`
+  - `TransferFunction`
+  - `ZerosPolesGain`
+  - `StateSpace`
+  - `freqresp()`
+  - `bode()`
+  - `impulse()`
+  - `step()`
+  - `lsim()`
+  - LTI best practices
 
----
-
-# XXIII. Advanced Numerical Methods
-
-* **96. Numerical root-solving**
-
-  * Nonlinear equations
-  * Systems of equations
-  * Robust bracketing
-  * Newton-type methods
-
-* **97. Numerical optimization**
-
-  * Gradient methods
-  * Quasi-Newton methods
-  * Trust-region methods
-  * Constrained optimization
-  * Global optimization
-
-* **98. Numerical integration**
-
-  * Adaptive quadrature
-  * Singular integrals
-  * Multidimensional integration
-  * Oscillatory integrals
-
-* **99. Differential equations**
-
-  * Stiff ODEs
-  * Boundary-value problems
-  * Event-driven integration
-  * Complex-valued systems
-
----
-
-# XXIV. SciPy + Machine Learning
-
-* **100. Preprocessing support**
-
-  * Distance computations
-  * Statistical transformations
-  * Numerical optimization
-  * Interpolation
-
-* **101. Model-fitting support**
-
-  * Least squares
-  * Parameter optimization
-  * Probability distributions
-  * Statistical testing
-
-* **102. Relationship with scikit-learn**
-
-  * SciPy as a numerical foundation
-  * Sparse matrices
-  * Optimization
-  * Distance metrics
-  * Scientific preprocessing
-
----
-
-# XXV. SciPy + Data Science
-
-* **103. Data preparation**
-
-  * Numerical cleaning
-  * Interpolation
-  * Missing-value treatment
-  * Outlier analysis
-
-* **104. Statistical analysis**
-
-  * Hypothesis testing
-  * Correlation
-  * Distribution analysis
-  * Confidence intervals
-
-* **105. Numerical feature engineering**
-
-  * Transformations
-  * Signal-derived features
-  * Statistical summaries
-  * Distance features
-
----
-
-# XXVI. Testing and Reliability
-
-* **106. Numerical testing**
-
-  * Known analytical solutions
-  * Reference values
-  * Tolerance-based assertions
-  * Regression testing
-
-* **107. Edge cases**
-
-  * Empty arrays
-  * NaNs
-  * Infinite values
-  * Singular matrices
-  * Degenerate systems
-  * Boundary conditions
-
-* **108. Scientific reproducibility**
-
-  * Fixed random seeds
-  * Version tracking
-  * Parameter logging
-  * Experiment documentation
-  * Reproducible environments
+- **60. Advanced Signal Processing**
+  - `hilbert()`
+  - `envelope()`
+  - `detrend()`
+  - `sosfilt_zi()`
+  - `freqz()`
+  - `sosfreqz()`
+  - `group_delay()`
+  - `dbode()`
+  - Advanced signal processing best practices
 
 ---
 
-# XXVII. Progressive SciPy Projects
+# VIII. Image Processing (scipy.ndimage)
 
-## Beginner
+- **61. Image Processing Fundamentals**
+  - `scipy.ndimage`
+  - N-dimensional image processing
+  - Image processing best practices
 
-* **109. Numerical integration project**
+- **62. Filtering**
+  - `convolve()`
+  - `convolve1d()`
+  - `correlate()`
+  - `correlate1d()`
+  - `gaussian_filter()`
+  - `gaussian_filter1d()`
+  - `uniform_filter()`
+  - `uniform_filter1d()`
+  - `median_filter()`
+  - `percentile_filter()`
+  - `rank_filter()`
+  - `minimum_filter()`
+  - `maximum_filter()`
+  - `prewitt()`
+  - `sobel()`
+  - `laplace()`
+  - `gaussian_laplace()`
+  - `gaussian_gradient_magnitude()`
+  - Filtering best practices
 
-  * Compute definite integrals
-  * Compare numerical and analytical solutions
-  * Study error behavior
+- **63. Morphology**
+  - `binary_erosion()`
+  - `binary_dilation()`
+  - `binary_opening()`
+  - `binary_closing()`
+  - `grey_erosion()`
+  - `grey_dilation()`
+  - `grey_opening()`
+  - `grey_closing()`
+  - `morphological_gradient()`
+  - `morphological_laplace()`
+  - `white_tophat()`
+  - `black_tophat()`
+  - `distance_transform_bf()`
+  - `distance_transform_cdt()`
+  - `distance_transform_edt()`
+  - Morphology best practices
 
-* **110. Statistics project**
+- **64. Measurements**
+  - `label()`
+  - `find_objects()`
+  - `center_of_mass()`
+  - `extrema()`
+  - `histogram()`
+  - `labeled_comprehension()`
+  - `measurements`
+  - `sum()`
+  - `mean()`
+  - `variance()`
+  - `standard_deviation()`
+  - `minimum()`
+  - `maximum()`
+  - `median()`
+  - `minimum_position()`
+  - `maximum_position()`
+  - Measurement best practices
 
-  * Analyze a dataset
-  * Fit probability distributions
-  * Perform hypothesis tests
+- **65. Interpolation**
+  - `affine_transform()`
+  - `rotate()`
+  - `shift()`
+  - `zoom()`
+  - `map_coordinates()`
+  - `geometric_transform()`
+  - `spline_filter()`
+  - `spline_filter1d()`
+  - Interpolation best practices
 
-* **111. Interpolation project**
+- **66. Fourier Filters**
+  - `fourier_shift()`
+  - `fourier_gaussian()`
+  - `fourier_uniform()`
+  - `fourier_ellipsoid()`
+  - Fourier filter best practices
 
-  * Generate sparse measurements
-  * Interpolate missing values
-  * Compare interpolation methods
-
-## Intermediate
-
-* **112. Optimization project**
-
-  * Fit nonlinear models
-  * Estimate parameters
-  * Compare optimization algorithms
-
-* **113. ODE simulation**
-
-  * Build a physical model
-  * Solve an initial-value problem
-  * Visualize trajectories
-
-* **114. Signal-processing project**
-
-  * Generate noisy signals
-  * Design filters
-  * Perform FFT analysis
-
-## Advanced
-
-* **115. Sparse scientific simulation**
-
-  * Build a large sparse matrix
-  * Solve a sparse linear system
-  * Compare dense and sparse performance
-
-* **116. Scientific parameter-estimation system**
-
-  * Define a physical model
-  * Fit experimental data
-  * Estimate uncertainty
-  * Validate predictions
-
-* **117. Image-analysis pipeline**
-
-  * Load multidimensional data
-  * Filter images
-  * Segment structures
-  * Measure regions
-
-## Expert
-
-* **118. Numerical simulation framework**
-
-  * Differential-equation solver
-  * Parameter management
-  * Optimization
-  * Statistical analysis
-  * Visualization
-  * Validation
-
-* **119. Research-grade computational model**
-
-  * Mathematical formulation
-  * Numerical method selection
-  * Accuracy analysis
-  * Performance optimization
-  * Uncertainty analysis
-  * Reproducibility
-
----
-
-# XXVIII. Progressive Learning Levels
-
-## Level 1 — SciPy Foundations
-
-* Master:
-
-  * NumPy
-  * Arrays
-  * SciPy architecture
-  * Basic statistics
-  * Basic integration
-  * Basic linear algebra
-
-## Level 2 — Numerical Computing
-
-* Master:
-
-  * `scipy.linalg`
-  * `scipy.integrate`
-  * `scipy.optimize`
-  * `scipy.interpolate`
-
-## Level 3 — Scientific Analysis
-
-* Master:
-
-  * `scipy.stats`
-  * `scipy.signal`
-  * `scipy.fft`
-  * `scipy.spatial`
-
-## Level 4 — Advanced Scientific Computing
-
-* Master:
-
-  * Sparse matrices
-  * ODEs
-  * Boundary-value problems
-  * Advanced optimization
-  * Numerical stability
-
-## Level 5 — Scientific Engineering
-
-* Master:
-
-  * Large-scale numerical problems
-  * Sparse computation
-  * Performance optimization
-  * Scientific modeling
-  * Error analysis
-
-## Level 6 — Research / Expert Level
-
-* Master:
-
-  * Algorithm selection
-  * Numerical-method design
-  * Stability and convergence
-  * High-performance scientific computing
-  * Reproducible computational research
+- **67. Advanced Image Processing**
+  - `gaussian_gradient_magnitude()`
+  - `gaussian_laplace()`
+  - `sobel()`
+  - `prewitt()`
+  - `laplace()`
+  - Advanced image processing best practices
 
 ---
 
-# XXIX. Recommended Learning Order
+# IX. Spatial Algorithms (scipy.spatial)
 
-**Python → NumPy → Mathematical Foundations → SciPy Fundamentals → `linalg` → `integrate` → `optimize` → `interpolate` → `stats` → `signal` → `fft` → `sparse` → `spatial` → `ndimage` → Numerical Analysis → Scientific Modeling → Performance Engineering → Research-Grade Applications**
+- **68. Spatial Fundamentals**
+  - `scipy.spatial`
+  - Spatial algorithms
+  - Spatial data structures
+  - Spatial best practices
 
-A strong SciPy learner should ultimately be able to move from:
+- **69. Distance Computations**
+  - `distance`
+  - `pdist()`
+  - `cdist()`
+  - `squareform()`
+  - Distance metrics
+    - `euclidean`
+    - `minkowski`
+    - `cityblock`
+    - `seuclidean`
+    - `sqeuclidean`
+    - `cosine`
+    - `correlation`
+    - `hamming`
+    - `jaccard`
+    - `chebyshev`
+    - `canberra`
+    - `braycurtis`
+    - `mahalanobis`
+    - `yule`
+    - `matching`
+    - `dice`
+    - `kulsinski`
+    - `rogerstanimoto`
+    - `russellrao`
+    - `sokalmichener`
+    - `sokalsneath`
+    - `wminkowski`
+  - `DistanceMetric`
+  - Distance best practices
 
-**Mathematical problem → Mathematical formulation → Appropriate numerical method → SciPy implementation → Numerical validation → Error/stability analysis → Performance optimization → Scientific interpretation.**
+- **70. KD-Trees**
+  - `KDTree`
+  - `cKDTree`
+  - Construction
+  - Query
+  - Nearest neighbors
+  - Range queries
+  - KD-tree best practices
+
+- **71. Ball Trees**
+  - `BallTree`
+  - Construction
+  - Query
+  - Nearest neighbors
+  - Ball tree best practices
+
+- **72. Convex Hulls**
+  - `ConvexHull`
+  - `Delaunay`
+  - `Voronoi`
+  - `HalfspaceIntersection`
+  - `SphericalVoronoi`
+  - Convex hull best practices
+
+- **73. Geometric Algorithms**
+  - `ConvexHull`
+  - `Delaunay`
+  - `Voronoi`
+  - `Delaunay`
+  - `tsearch()`
+  - `sgriddata()`
+  - Geometric best practices
+
+- **74. Transformation**
+  - `transform`
+  - `Rotation`
+  - `Slerp`
+  - Transform best practices
+
+- **75. Advanced Spatial**
+  - `procrustes()`
+  - `geometric_slerp()`
+  - `minkowski_distance()`
+  - `minkowski_distance_p()`
+  - Advanced spatial best practices
+
+---
+
+# X. Sparse Matrices (scipy.sparse)
+
+- **76. Sparse Matrix Fundamentals**
+  - `scipy.sparse`
+  - Sparse matrices
+  - Sparse arrays
+  - Sparse best practices
+
+- **77. Sparse Matrix Formats**
+  - `csr_matrix`
+  - `csc_matrix`
+  - `coo_matrix`
+  - `lil_matrix`
+  - `dok_matrix`
+  - `bsr_matrix`
+  - `dia_matrix`
+  - `csr_array`
+  - `csc_array`
+  - `coo_array`
+  - `lil_array`
+  - `dok_array`
+  - `bsr_array`
+  - `dia_array`
+  - Format comparison
+  - Format selection
+  - Format conversion
+  - Sparse format best practices
+
+- **78. Sparse Matrix Operations**
+  - Construction
+  - Conversion
+  - Arithmetic
+  - Matrix multiplication
+  - Transpose
+  - Indexing
+  - Slicing
+  - Element access
+  - Sparse operations best practices
+
+- **79. Sparse Linear Algebra**
+  - `scipy.sparse.linalg`
+  - `spsolve()`
+  - `spsolve_triangular()`
+  - `factorized()`
+  - `spilu()`
+  - `splu()`
+  - `eigsh()`
+  - `eigs()`
+  - `svds()`
+  - `lobpcg()`
+  - `lsqr()`
+  - `lsmr()`
+  - `minres()`
+  - `gmres()`
+  - `cg()`
+  - `cgs()`
+  - `bicg()`
+  - `bicgstab()`
+  - `qmr()`
+  - Sparse linear algebra best practices
+
+- **80. Sparse Graph Algorithms**
+  - `csgraph`
+  - `connected_components()`
+  - `breadth_first_order()`
+  - `depth_first_order()`
+  - `breadth_first_tree()`
+  - `depth_first_tree()`
+  - `minimum_spanning_tree()`
+  - `shortest_path()`
+  - `dijkstra()`
+  - `floyd_warshall()`
+  - `bellman_ford()`
+  - `johnson()`
+  - `yen()`
+  - Sparse graph best practices
+
+- **81. Sparse Tools**
+  - `find()`
+  - `save_npz()`
+  - `load_npz()`
+  - `random()`
+  - `eye()`
+  - `diags()`
+  - `spdiags()`
+  - `hstack()`
+  - `vstack()`
+  - `block_diag()`
+  - `kron()`
+  - `kronsum()`
+  - `triu()`
+  - `tril()`
+  - Sparse tool best practices
+
+---
+
+# XI. FFT (scipy.fft)
+
+- **82. FFT Fundamentals**
+  - `scipy.fft`
+  - Fast Fourier Transform
+  - FFT best practices
+
+- **83. FFT Functions**
+  - `fft()`
+  - `ifft()`
+  - `fft2()`
+  - `ifft2()`
+  - `fftn()`
+  - `ifftn()`
+  - `rfft()`
+  - `irfft()`
+  - `rfft2()`
+  - `irfft2()`
+  - `rfftn()`
+  - `irfftn()`
+  - `hfft()`
+  - `ihfft()`
+  - `dct()`
+  - `idct()`
+  - `dctn()`
+  - `idctn()`
+  - `dst()`
+  - `idst()`
+  - `dstn()`
+  - `idstn()`
+  - FFT function best practices
+
+- **84. FFT Utilities**
+  - `fftfreq()`
+  - `rfftfreq()`
+  - `fftshift()`
+  - `ifftshift()`
+  - `next_fast_len()`
+  - `set_workers()`
+  - `get_workers()`
+  - FFT utility best practices
+
+- **85. FFT Performance**
+  - FFT performance
+  - Worker threads
+  - PocketFFT
+  - FFTW
+  - MKL
+  - FFT performance best practices
+
+---
+
+# XII. Special Functions (scipy.special)
+
+- **86. Special Functions Fundamentals**
+  - `scipy.special`
+  - Special functions
+  - Special function best practices
+
+- **87. Gamma Functions**
+  - `gamma()`
+  - `gammaln()`
+  - `gammasgn()`
+  - `gammainc()`
+  - `gammaincc()`
+  - `gammaincinv()`
+  - `gammainccinv()`
+  - `beta()`
+  - `betaln()`
+  - `betainc()`
+  - `betaincinv()`
+  - `psi()`
+  - `digamma()`
+  - `polygamma()`
+  - `multigammaln()`
+  - Gamma function best practices
+
+- **88. Error Functions**
+  - `erf()`
+  - `erfc()`
+  - `erfinv()`
+  - `erfcinv()`
+  - `erfi()`
+  - `erfcx()`
+  - `dawsn()`
+  - `voigt_profile()`
+  - `wofz()`
+  - `faddeeva`
+  - Error function best practices
+
+- **89. Bessel Functions**
+  - `jv()`
+  - `jn()`
+  - `j0()`
+  - `j1()`
+  - `yv()`
+  - `yn()`
+  - `y0()`
+  - `y1()`
+  - `iv()`
+  - `in()`
+  - `i0()`
+  - `i1()`
+  - `kv()`
+  - `kn()`
+  - `k0()`
+  - `k1()`
+  - `hankel1()`
+  - `hankel2()`
+  - `spherical_jn()`
+  - `spherical_yn()`
+  - `spherical_in()`
+  - `spherical_kn()`
+  - `riccati_jn()`
+  - `riccati_yn()`
+  - Bessel function best practices
+
+- **90. Orthogonal Polynomials**
+  - `legendre()`
+  - `chebyt()`
+  - `chebyu()`
+  - `chebyc()`
+  - `chebys()`
+  - `hermite()`
+  - `hermitenorm()`
+  - `gegenbauer()`
+  - `jacobi()`
+  - `laguerre()`
+  - `genlaguerre()`
+  - `sh_legendre()`
+  - `sh_chebyt()`
+  - `sh_chebyu()`
+  - `sh_jacobi()`
+  - Orthogonal polynomial best practices
+
+- **91. Hypergeometric Functions**
+  - `hyp2f1()`
+  - `hyp1f1()`
+  - `hyperu()`
+  - `hyp0f1()`
+  - `hyp2f0()`
+  - Hypergeometric best practices
+
+- **92. Elliptic Functions**
+  - `ellipj()`
+  - `ellipk()`
+  - `ellipkm1()`
+  - `ellipkinc()`
+  - `ellipe()`
+  - `ellipeinc()`
+  - `elliprc()`
+  - `elliprd()`
+  - `elliprf()`
+  - `elliprg()`
+  - `elliprj()`
+  - Elliptic function best practices
+
+- **93. Combinatorics**
+  - `comb()`
+  - `perm()`
+  - `factorial()`
+  - `factorial2()`
+  - `factorialk()`
+  - Combinatorics best practices
+
+- **94. Other Special Functions**
+  - `airy()`
+  - `bi_airy()`
+  - `struve()`
+  - `modstruve()`
+  - `kelvin()`
+  - `ber()`
+  - `bei()`
+  - `ker()`
+  - `kei()`
+  - `exp1()`
+  - `expi()`
+  - `expn()`
+  - `logit()`
+  - `expit()`
+  - `logsumexp()`
+  - `softmax()`
+  - `log_softmax()`
+  - `xlogy()`
+  - `xlog1py()`
+  - `sph_harm()`
+  - `sph_harm_y()`
+  - Other special function best practices
+
+---
+
+# XIII. Constants and Units (scipy.constants)
+
+- **95. Constants Fundamentals**
+  - `scipy.constants`
+  - Physical constants
+  - Units
+  - Constants best practices
+
+- **96. Physical Constants**
+  - Mathematical constants
+    - `pi`
+    - `e`
+    - `golden`
+    - `golden_ratio`
+  - Physical constants
+    - `c`
+    - `speed_of_light`
+    - `h`
+    - `Planck`
+    - `hbar`
+    - `G`
+    - `gravitational_constant`
+    - `e`
+    - `elementary_charge`
+    - `N_A`
+    - `Avogadro`
+    - `R`
+    - `gas_constant`
+    - `k`
+    - `Boltzmann`
+    - `sigma`
+    - `Stefan_Boltzmann`
+    - `m_e`
+    - `electron_mass`
+    - `m_p`
+    - `proton_mass`
+    - `m_n`
+    - `neutron_mass`
+    - `epsilon_0`
+    - `mu_0`
+  - Physical constant best practices
+
+- **97. Unit Conversions**
+  - `convert_temperature()`
+  - Temperature conversions
+  - Unit conversions
+  - Unit conversion best practices
+
+- **98. Constants Database**
+  - `physical_constants`
+  - `find()`
+  - `value()`
+  - `unit()`
+  - `precision()`
+  - Constants database best practices
+
+---
+
+# XIV. I/O (scipy.io)
+
+- **99. I/O Fundamentals**
+  - `scipy.io`
+  - File I/O
+  - I/O best practices
+
+- **100. MATLAB I/O**
+  - `loadmat()`
+  - `savemat()`
+  - `whosmat()`
+  - MATLAB I/O best practices
+
+- **101. Matrix Market I/O**
+  - `mmread()`
+  - `mmwrite()`
+  - Matrix Market best practices
+
+- **102. NetCDF I/O**
+  - `netcdf_file()`
+  - `netcdf_variable()`
+  - NetCDF best practices
+
+- **103. WAV I/O**
+  - `wavfile.read()`
+  - `wavfile.write()`
+  - WAV best practices
+
+- **104. ARFF I/O**
+  - `arff.loadarff()`
+  - ARFF best practices
+
+- **105. IDL I/O**
+  - `readsav()`
+  - IDL best practices
+
+- **106. Harwell-Boeing I/O**
+  - `hb_read()`
+  - `hb_write()`
+  - Harwell-Boeing best practices
+
+---
+
+# XV. Clustering (scipy.cluster)
+
+- **107. Clustering Fundamentals**
+  - `scipy.cluster`
+  - Clustering
+  - Clustering best practices
+
+- **108. Vector Quantization**
+  - `vq`
+  - `kmeans()`
+  - `kmeans2()`
+  - `whiten()`
+  - `vq()`
+  - Vector quantization best practices
+
+- **109. Hierarchical Clustering**
+  - `hierarchy`
+  - `linkage()`
+  - `dendrogram()`
+  - `fcluster()`
+  - `leaders()`
+  - `clusterdata()`
+  - `cophenet()`
+  - `inconsistent()`
+  - `maxdists()`
+  - `maxinconsts()`
+  - `maxRstat()`
+  - `to_tree()`
+  - `is_valid_linkage()`
+  - `is_monotonic()`
+  - `num_obs_linkage()`
+  - Hierarchical clustering best practices
+
+---
+
+# XVI. Orthogonal Distance Regression (scipy.odr)
+
+- **110. ODR Fundamentals**
+  - `scipy.odr`
+  - Orthogonal Distance Regression
+  - ODR best practices
+
+- **111. ODR Functions**
+  - `ODR()`
+  - `Data()`
+  - `RealData()`
+  - `Model()`
+  - `Output()`
+  - `odr()` (legacy)
+  - ODR function best practices
+
+- **112. ODR Applications**
+  - Linear regression
+  - Nonlinear regression
+  - Error estimation
+  - ODR application best practices
+
+---
+
+# XVII. Datasets (scipy.datasets)
+
+- **113. Dataset Fundamentals**
+  - `scipy.datasets`
+  - Built-in datasets
+  - Dataset best practices
+
+- **114. Dataset Functions**
+  - `ascent()`
+  - `face()`
+  - `electrocardiogram()`
+  - `download_all()`
+  - `clear_cache()`
+  - Dataset function best practices
+
+---
+
+# XVIII. Performance Optimization
+
+- **115. Performance Fundamentals**
+  - Performance
+  - Memory usage
+  - CPU usage
+  - Vectorization
+  - Performance metrics
+  - Performance best practices
+
+- **116. Vectorization**
+  - Vectorization
+  - NumPy operations
+  - SciPy operations
+  - Avoid Python loops
+  - Vectorization best practices
+
+- **117. Memory Optimization**
+  - Memory layout
+  - Contiguity
+  - Sparse matrices
+  - Data type optimization
+  - Memory optimization best practices
+
+- **118. Parallel Processing**
+  - `multiprocessing`
+  - `joblib`
+  - `dask`
+  - `numba`
+  - Parallel processing best practices
+
+- **119. JIT Compilation**
+  - Numba
+  - Cython
+  - JAX
+  - JIT compilation best practices
+
+- **120. GPU Acceleration**
+  - CuPy
+  - GPU arrays
+  - GPU acceleration best practices
+
+- **121. Profiling**
+  - `cProfile`
+  - `line_profiler`
+  - `memory_profiler`
+  - `pyinstrument`
+  - `snakeviz`
+  - Profiling best practices
+
+- **122. Benchmarking**
+  - `timeit`
+  - `%timeit`
+  - `perfplot`
+  - Benchmarking best practices
+
+---
+
+# XIX. SciPy Ecosystem
+
+- **123. SciPy and NumPy**
+  - NumPy foundation
+  - NumPy arrays
+  - NumPy operations
+  - NumPy integration best practices
+
+- **124. SciPy and Pandas**
+  - Pandas
+  - Pandas DataFrames
+  - SciPy operations on DataFrames
+  - Pandas integration best practices
+
+- **125. SciPy and Matplotlib**
+  - Matplotlib
+  - SciPy plotting
+  - Matplotlib integration best practices
+
+- **126. SciPy and scikit-learn**
+  - scikit-learn
+  - SciPy operations in scikit-learn
+  - scikit-learn integration best practices
+
+- **127. SciPy and statsmodels**
+  - statsmodels
+  - Statistical modeling
+  - statsmodels integration best practices
+
+- **128. SciPy and SymPy**
+  - SymPy
+  - Symbolic computation
+  - Symbolic and numerical integration
+  - SymPy integration best practices
+
+- **129. SciPy and PyTorch**
+  - PyTorch
+  - SciPy operations in PyTorch
+  - PyTorch integration best practices
+
+- **130. SciPy and TensorFlow**
+  - TensorFlow
+  - SciPy operations in TensorFlow
+  - TensorFlow integration best practices
+
+- **131. SciPy and JAX**
+  - JAX
+  - SciPy-compatible operations
+  - JAX integration best practices
+
+- **132. SciPy and Dask**
+  - Dask
+  - Distributed computing
+  - Dask integration best practices
+
+- **133. SciPy and Numba**
+  - Numba
+  - JIT compilation
+  - Numba integration best practices
+
+- **134. SciPy and Cython**
+  - Cython
+  - C extensions
+  - Cython integration best practices
+
+---
+
+# XX. SciPy Projects by Difficulty
+
+## Beginner Projects
+
+- **1. Numerical Integration**
+  - `quad()`
+  - `dblquad()`
+  - Integration limits
+  - Visualization
+
+- **2. Curve Fitting**
+  - `curve_fit()`
+  - Linear regression
+  - Nonlinear regression
+  - Visualization
+
+- **3. Root Finding**
+  - `root_scalar()`
+  - `brentq()`
+  - `newton()`
+  - Visualization
+
+- **4. Statistical Analysis**
+  - Distributions
+  - Statistical tests
+  - Descriptive statistics
+  - Visualization
+
+- **5. Signal Filtering**
+  - `butter()`
+  - `lfilter()`
+  - `filtfilt()`
+  - Visualization
+
+---
+
+## Intermediate Projects
+
+- **6. Optimization Pipeline**
+  - `minimize()`
+  - Constraints
+  - Bounds
+  - Visualization
+
+- **7. ODE Solver**
+  - `solve_ivp()`
+  - Stiff equations
+  - Events
+  - Visualization
+
+- **8. Image Processing Pipeline**
+  - Filtering
+  - Morphology
+  - Measurement
+  - Visualization
+
+- **9. Sparse Matrix Solver**
+  - Sparse matrices
+  - Sparse linear algebra
+  - Iterative solvers
+  - Visualization
+
+- **10. Signal Processing Pipeline**
+  - Filtering
+  - Spectral analysis
+  - Peak detection
+  - Visualization
+
+---
+
+## Advanced Projects
+
+- **11. Scientific Simulation**
+  - ODE/PDE solvers
+  - Numerical methods
+  - Parallel processing
+  - Visualization
+
+- **12. Optimization Framework**
+  - Global optimization
+  - Constrained optimization
+  - Mixed-integer programming
+  - Visualization
+
+- **13. Signal Processing Library**
+  - Filter design
+  - Spectral analysis
+  - Wavelets
+  - Visualization
+
+- **14. Image Processing Library**
+  - Filtering
+  - Morphology
+  - Measurements
+  - Visualization
+
+- **15. Statistical Modeling**
+  - Distributions
+  - Hypothesis testing
+  - Regression
+  - Visualization
+
+---
+
+## Expert Projects
+
+- **16. Scientific Computing Library**
+  - Linear algebra
+  - Optimization
+  - Integration
+  - Statistics
+  - Visualization
+
+- **17. Machine Learning Framework**
+  - Feature engineering
+  - Model training
+  - Model evaluation
+  - Deployment
+
+- **18. Signal Processing Platform**
+  - Real-time processing
+  - Filter design
+  - Spectral analysis
+  - Visualization
+
+- **19. Image Analysis Platform**
+  - Segmentation
+  - Feature extraction
+  - Classification
+  - Visualization
+
+- **20. Research Computing Platform**
+  - Numerical simulation
+  - Optimization
+  - Statistics
+  - Visualization
+  - Reproducibility
+
+---
+
+# XXI. Progressive SciPy Learning Sequence
+
+## Level 1 — SciPy Fundamentals
+
+- Master:
+  - Installation
+  - Import
+  - NumPy prerequisites
+  - First steps
+  - Documentation
+
+## Level 2 — Linear Algebra
+
+- Master:
+  - Basic operations
+  - Matrix decompositions
+  - Eigenvalues
+  - Matrix functions
+  - Special matrices
+  - Advanced linear algebra
+
+## Level 3 — Optimization
+
+- Master:
+  - Unconstrained optimization
+  - Constrained optimization
+  - Least squares
+  - Root finding
+  - Linear programming
+  - Global optimization
+  - Assignment problems
+
+## Level 4 — Integration
+
+- Master:
+  - Single integration
+  - Multiple integration
+  - ODEs
+  - BVPs
+  - DDEs
+  - Advanced integration
+
+## Level 5 — Interpolation
+
+- Master:
+  - Univariate interpolation
+  - Multivariate interpolation
+  - Spline interpolation
+  - Smoothing
+  - Advanced interpolation
+
+## Level 6 — Statistics
+
+- Master:
+  - Continuous distributions
+  - Discrete distributions
+  - Distribution methods
+  - Descriptive statistics
+  - Statistical tests
+  - Correlation
+  - Transformations
+  - Resampling
+  - KDE
+  - Circular statistics
+
+## Level 7 — Signal Processing
+
+- Master:
+  - Convolution and correlation
+  - Filtering
+  - Filter design
+  - Spectral analysis
+  - Waveforms
+  - Window functions
+  - Peak detection
+  - Wavelets
+  - LTI systems
+  - Advanced signal processing
+
+## Level 8 — Image Processing
+
+- Master:
+  - Filtering
+  - Morphology
+  - Measurements
+  - Interpolation
+  - Fourier filters
+  - Advanced image processing
+
+## Level 9 — Spatial Algorithms
+
+- Master:
+  - Distance computations
+  - KD-trees
+  - Ball trees
+  - Convex hulls
+  - Geometric algorithms
+  - Transformation
+  - Advanced spatial
+
+## Level 10 — Sparse Matrices
+
+- Master:
+  - Sparse matrix formats
+  - Sparse matrix operations
+  - Sparse linear algebra
+  - Sparse graph algorithms
+  - Sparse tools
+
+## Level 11 — FFT
+
+- Master:
+  - FFT functions
+  - FFT utilities
+  - FFT performance
+
+## Level 12 — Special Functions
+
+- Master:
+  - Gamma functions
+  - Error functions
+  - Bessel functions
+  - Orthogonal polynomials
+  - Hypergeometric functions
+  - Elliptic functions
+  - Combinatorics
+  - Other special functions
+
+## Level 13 — Constants and I/O
+
+- Master:
+  - Constants
+  - Unit conversions
+  - MATLAB I/O
+  - Matrix Market I/O
+  - NetCDF I/O
+  - WAV I/O
+  - Other I/O
+
+## Level 14 — Clustering and ODR
+
+- Master:
+  - Vector quantization
+  - Hierarchical clustering
+  - Orthogonal Distance Regression
+
+## Level 15 — Performance
+
+- Master:
+  - Vectorization
+  - Memory optimization
+  - Parallel processing
+  - JIT compilation
+  - GPU acceleration
+  - Profiling
+  - Benchmarking
+
+## Level 16 — Ecosystem
+
+- Master:
+  - NumPy
+  - Pandas
+  - Matplotlib
+  - scikit-learn
+  - statsmodels
+  - SymPy
+  - PyTorch
+  - TensorFlow
+  - JAX
+  - Dask
+  - Numba
+  - Cython
+
+## Level 17 — Production Engineering
+
+- Master:
+  - Scientific computing
+  - Research workflows
+  - Reproducibility
+  - Performance tuning
+  - Production best practices
+
+---
+
+# XXII. Final SciPy Competency Map
+
+- **Foundations**
+
+  - Installation
+  - Import
+  - NumPy prerequisites
+  - Architecture
+
+- **Linear Algebra**
+
+  - Basic operations
+  - Matrix decompositions
+  - Eigenvalues
+  - Matrix functions
+  - Special matrices
+  - Advanced linear algebra
+
+- **Optimization**
+
+  - Unconstrained optimization
+  - Constrained optimization
+  - Least squares
+  - Root finding
+  - Linear programming
+  - MILP
+  - Global optimization
+  - Assignment
+
+- **Integration**
+
+  - Single integration
+  - Multiple integration
+  - ODEs
+  - BVPs
+  - DDEs
+
+- **Interpolation**
+
+  - Univariate interpolation
+  - Multivariate interpolation
+  - Spline interpolation
+  - Smoothing
+
+- **Statistics**
+
+  - Continuous distributions
+  - Discrete distributions
+  - Distribution methods
+  - Descriptive statistics
+  - Statistical tests
+  - Correlation
+  - Transformations
+  - Resampling
+  - KDE
+  - Circular statistics
+
+- **Signal Processing**
+
+  - Convolution
+  - Filtering
+  - Filter design
+  - Spectral analysis
+  - Waveforms
+  - Window functions
+  - Peak detection
+  - Wavelets
+  - LTI systems
+
+- **Image Processing**
+
+  - Filtering
+  - Morphology
+  - Measurements
+  - Interpolation
+  - Fourier filters
+
+- **Spatial**
+
+  - Distance computations
+  - KD-trees
+  - Ball trees
+  - Convex hulls
+  - Geometric algorithms
+  - Transformation
+
+- **Sparse**
+
+  - Sparse matrix formats
+  - Sparse matrix operations
+  - Sparse linear algebra
+  - Sparse graph algorithms
+  - Sparse tools
+
+- **FFT**
+
+  - FFT functions
+  - FFT utilities
+  - FFT performance
+
+- **Special Functions**
+
+  - Gamma functions
+  - Error functions
+  - Bessel functions
+  - Orthogonal polynomials
+  - Hypergeometric functions
+  - Elliptic functions
+  - Combinatorics
+  - Other special functions
+
+- **Constants and I/O**
+
+  - Constants
+  - Unit conversions
+  - MATLAB I/O
+  - Matrix Market I/O
+  - NetCDF I/O
+  - WAV I/O
+  - Other I/O
+
+- **Clustering and ODR**
+
+  - Vector quantization
+  - Hierarchical clustering
+  - Orthogonal Distance Regression
+
+- **Performance**
+
+  - Vectorization
+  - Memory optimization
+  - Parallel processing
+  - JIT compilation
+  - GPU acceleration
+  - Profiling
+  - Benchmarking
+
+- **Ecosystem**
+
+  - NumPy
+  - Pandas
+  - Matplotlib
+  - scikit-learn
+  - statsmodels
+  - SymPy
+  - PyTorch
+  - TensorFlow
+  - JAX
+  - Dask
+  - Numba
+  - Cython
+
+- **Production**
+
+  - Scientific computing
+  - Research workflows
+  - Reproducibility
+  - Performance tuning
+
+---
+
+## Recommended Overall Progression
+
+**SciPy Fundamentals → Linear Algebra → Optimization → Integration → Interpolation → Statistics → Signal Processing → Image Processing → Spatial Algorithms → Sparse Matrices → FFT → Special Functions → Constants and I/O → Clustering and ODR → Performance Optimization → Ecosystem → Production Engineering**
+
+For maximum practical mastery, combine this SciPy roadmap with the Python, NumPy, Pandas, Matplotlib, R Language, Jupyter, SQL, DSA, Discrete Mathematics, JavaScript, Node.js, REST API, React, Laravel, jQuery, Java, C#, C++, C Language, Dart, Flutter, Kotlin, Git, and GitHub roadmaps above so the progression becomes:
+
+**Discrete Mathematics → DSA Foundations → Python Fundamentals → NumPy → SciPy Fundamentals → Linear Algebra → Optimization → Integration → Interpolation → Statistics → Signal Processing → Image Processing → Spatial Algorithms → Sparse Matrices → FFT → Special Functions → Pandas → Matplotlib → Seaborn → scikit-learn → statsmodels → SymPy → PyTorch → TensorFlow → JAX → Scientific Computing → Machine Learning → Deep Learning → Computer Vision → NLP → Research Computing → Numerical Simulation → Optimization Engineering → Signal Processing Engineering → Production Scientific Computing → Enterprise Research Platform.**

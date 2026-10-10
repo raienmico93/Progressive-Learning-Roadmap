@@ -1,1818 +1,2159 @@
 # Kotlin Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Concepts to Advanced Practical Mastery
+## From Language Foundations to Advanced Multiplatform Engineering, Android Development, Server-Side Kotlin, and Production Systems
 
-This roadmap follows the same progression as the SQL roadmap: **fundamentals → core language → object-oriented and functional programming → generics → coroutines → Android/backend → testing → performance → architecture → production mastery**.
+Kotlin is best learned as more than "a better Java." The progression should cover **syntax → type system → OOP → functional programming → collections → null safety → generics → coroutines → flows → multiplatform → Android → server-side → testing → performance → architecture → production engineering**.
 
 ---
 
 # I. Kotlin Foundations
 
-* **1. Introduction to Kotlin**
+- **1. What Kotlin Is**
+  - Kotlin
+  - Kotlin history
+  - JetBrains
+  - Andrey Breslav
+  - Kotlin 1.0
+  - Kotlin 1.3 (coroutines stable)
+  - Kotlin 1.5
+  - Kotlin 1.6
+  - Kotlin 1.7
+  - Kotlin 1.8
+  - Kotlin 1.9
+  - Kotlin 2.0 (K2 compiler)
+  - Kotlin 2.1
+  - Kotlin 2.2
+  - Kotlin 2.3
+  - Kotlin philosophy
+    - Concise
+    - Safe
+    - Interoperable
+    - Pragmatic
+    - Multiplatform
+  - Kotlin vs Java
+  - Kotlin vs Scala
+  - Kotlin vs Groovy
+  - Kotlin vs Swift
+  - Kotlin vs Dart
+  - Kotlin use cases
+    - Android development
+    - Server-side development
+    - Multiplatform development
+    - Web development (Kotlin/JS)
+    - Native development (Kotlin/Native)
+    - Data science
+    - Desktop development
+  - Kotlin in modern software
+  - Kotlin is officially supported by Google for Android development
 
-  * What Kotlin is
+- **2. Kotlin Platform**
+  - Kotlin compiler
+  - Kotlin/JVM
+  - Kotlin/JS
+  - Kotlin/Native
+  - Kotlin/Wasm
+  - Kotlin Multiplatform
+  - Kotlin Standard Library
+  - Kotlin ecosystem
+  - Kotlin and Java interop
+  - Kotlin and Gradle
+  - Kotlin and Maven
+  - Kotlin and Android
+  - Kotlin and Spring
+  - Kotlin and Ktor
+  - Kotlin and Compose
+  - Kotlin and coroutines
 
-    * Statically typed programming language
-    * JVM-compatible language
-    * Multi-platform development language
-  * Kotlin ecosystem
+- **3. Setting Up Kotlin**
+  - JDK installation
+  - Kotlin compiler installation
+  - IDE installation
+    - IntelliJ IDEA
+    - Android Studio
+    - VS Code
+    - Eclipse
+  - Build tools
+    - Gradle
+    - Maven
+  - Kotlin REPL
+  - Kotlin playground
+  - Kotlin scripting
+  - Kotlin command-line compiler
+  - Project structure
+  - `build.gradle.kts`
+  - `settings.gradle.kts`
+  - Kotlin project setup
+  - Kotlin Android project setup
+  - Kotlin Multiplatform project setup
 
-    * Kotlin/JVM
-    * Kotlin/Android
-    * Kotlin/JS
-    * Kotlin Multiplatform
-    * Kotlin/Native
-  * Kotlin philosophy
+- **4. Basic Syntax**
+  - Program structure
+  - `main()` function
+  - Statements
+  - Expressions
+  - Semicolons
+  - Comments
+    - Single-line
+    - Multi-line
+    - Documentation comments
+  - Identifiers
+  - Keywords
+  - Naming conventions
+  - Variables
+    - `val`
+    - `var`
+  - Type inference
+  - Type annotations
+  - String templates
+  - String interpolation
+  - Raw strings
+  - Formatting
+  - Kotlin coding conventions
 
-    * Concise syntax
-    * Null safety
-    * Type safety
-    * Interoperability
-    * Functional programming support
-  * Kotlin compared with Java
-
-    * Syntax differences
-    * Null handling
-    * Type inference
-    * Extension functions
-    * Higher-order functions
-    * Coroutines
-
-* **2. Development Environment**
-
-  * Kotlin compiler
-  * IntelliJ IDEA
-  * Android Studio
-  * Kotlin command-line tools
-  * Gradle
-  * Kotlin project structure
-  * Source sets
-  * Build configuration
-  * Dependency management
-
-* **3. Basic Kotlin Syntax**
-
-  * Kotlin file structure
-  * `fun`
-  * `main`
-  * Statements and expressions
-  * Comments
-  * Identifiers
-  * Keywords
-  * Naming conventions
-  * Code formatting
-
----
-
-# II. Variables, Types, and Expressions
-
-* **4. Variables**
-
-  * `val`
-
-    * Immutable references
-  * `var`
-
-    * Mutable variables
-  * Variable initialization
-  * Type inference
-  * Explicit type declarations
-  * Local variables
-  * Properties
-
-* **5. Primitive-Like Kotlin Types**
-
-  * `Int`
-  * `Long`
-  * `Short`
-  * `Byte`
-  * `Float`
-  * `Double`
-  * `Boolean`
-  * `Char`
-  * `String`
-
-* **6. Type System Fundamentals**
-
-  * Static typing
-  * Type inference
-  * Nullable types
-  * Non-nullable types
-  * Type hierarchy
-  * `Any`
-  * `Unit`
-  * `Nothing`
-
-* **7. Operators**
-
-  * Arithmetic
-
-    * `+`
-    * `-`
-    * `*`
-    * `/`
-    * `%`
-  * Comparison
-
-    * `>`
-    * `<`
-    * `>=`
-    * `<=`
-  * Equality
-
-    * `==`
-    * `!=`
-    * `===`
-    * `!==`
-  * Logical
-
-    * `&&`
-    * `||`
-    * `!`
-  * Range operators
-
-    * `..`
-    * `..<`
-    * `downTo`
-    * `step`
-
-* **8. Strings**
-
-  * String literals
-  * String templates
-  * Escaped strings
-  * Raw strings
-  * Multiline strings
-  * String interpolation
-  * Common string operations
-  * String builders
-  * Formatting
+- **5. First Kotlin Program**
+  - Hello World
+  - `println()`
+  - `main()`
+  - Compilation
+  - Execution
+  - Kotlin REPL
+  - Kotlin scripting
+  - Command-line execution
+  - JVM execution
+  - Kotlin/JVM
+  - Kotlin/JS
+  - Kotlin/Native
 
 ---
 
-# III. Control Flow
+# II. Variables and Data Types
 
-* **9. Conditional Logic**
+- **6. Variables**
+  - Variables
+  - Variable declaration
+  - `val` (immutable)
+  - `var` (mutable)
+  - Type inference
+  - Type annotations
+  - Variable scope
+  - Variable lifetime
+  - Naming conventions
+  - Variable best practices
+  - Top-level variables
+  - Local variables
+  - Class properties
+  - Companion object properties
+  - Object properties
 
-  * `if`
-  * `else`
-  * Nested conditions
-  * `if` as an expression
-  * Returning values from conditional expressions
+- **7. Built-in Types**
+  - Numbers
+    - `Int`
+    - `Long`
+    - `Short`
+    - `Byte`
+    - `Double`
+    - `Float`
+    - `Decimal` (via BigDecimal)
+    - Numeric literals
+    - Numeric operations
+    - Type conversion
+    - `toInt()`
+    - `toLong()`
+    - `toDouble()`
+    - `toFloat()`
+    - `toByte()`
+    - `toShort()`
+    - `toChar()`
+  - Booleans
+    - `Boolean`
+    - `true`
+    - `false`
+  - Characters
+    - `Char`
+    - Character literals
+    - Escape sequences
+    - Unicode
+  - Strings
+    - `String`
+    - String literals
+    - String templates
+    - `$variable`
+    - `${expression}`
+    - Raw strings
+    - `"""..."""`
+    - String methods
+    - `length`
+    - `uppercase()`
+    - `lowercase()`
+    - `trim()`
+    - `split()`
+    - `replace()`
+    - `substring()`
+    - `indexOf()`
+    - `contains()`
+    - `startsWith()`
+    - `endsWith()`
+    - `padStart()`
+    - `padEnd()`
+    - `repeat()`
+    - `toIntOrNull()`
+  - Arrays
+    - `Array<T>`
+    - `IntArray`
+    - `DoubleArray`
+    - `BooleanArray`
+    - `CharArray`
+    - Array creation
+    - Array indexing
+    - Array methods
+    - `size`
+    - `get()`
+    - `set()`
+    - `forEach()`
+    - `map()`
+    - `filter()`
+  - Ranges
+    - `IntRange`
+    - `CharRange`
+    - `LongRange`
+    - Range operators
+    - `..`
+    - `until`
+    - `downTo`
+    - `step`
+    - Range iteration
+  - `Unit`
+  - `Nothing`
+  - `Any`
+  - `Nothing?`
+  - `Any?`
 
-* **10. `when` Expressions**
+- **8. Type System**
+  - Static typing
+  - Type inference
+  - Type annotations
+  - Type checking
+  - Smart casts
+  - Type casting
+    - `as`
+    - `as?`
+  - Type testing
+    - `is`
+    - `!is`
+  - Unsafe cast
+  - Safe cast
+  - Type aliases
+    - `typealias`
+  - Generic types
+  - Type parameters
+  - Star projection
+  - `out` and `in` modifiers
+  - Type system best practices
 
-  * Basic `when`
-  * Multiple conditions
-  * Range conditions
-  * Type conditions
-  * Exhaustive `when`
-  * `when` as an expression
+- **9. Null Safety**
+  - Null safety
+  - Nullable types
+  - Non-nullable types
+  - `?` operator
+  - `!!` operator
+  - Null assertion
+  - Safe call operator
+    - `?.`
+  - Elvis operator
+    - `?:`
+  - Safe cast
+    - `as?`
+  - Null-aware operators
+  - `let` with null safety
+  - `run` with null safety
+  - `also` with null safety
+  - `apply` with null safety
+  - Null safety best practices
+  - Null safety pitfalls
 
-* **11. Loops**
+- **10. Operators**
+  - Arithmetic operators
+    - `+`
+    - `-`
+    - `*`
+    - `/`
+    - `%`
+    - `++`
+    - `--`
+  - Assignment operators
+    - `=`
+    - `+=`
+    - `-=`
+    - `*=`
+    - `/=`
+    - `%=`
+  - Comparison operators
+    - `==`
+    - `!=`
+    - `<`
+    - `>`
+    - `<=`
+    - `>=`
+    - `===`
+    - `!==`
+  - Logical operators
+    - `&&`
+    - `||`
+    - `!`
+  - Bitwise operators
+    - `and`
+    - `or`
+    - `xor`
+    - `inv`
+    - `shl`
+    - `shr`
+    - `ushr`
+  - Range operators
+    - `..`
+    - `until`
+    - `downTo`
+    - `step`
+  - Null-aware operators
+    - `?.`
+    - `?:`
+    - `!!`
+  - Elvis operator
+  - Safe call operator
+  - Type check operators
+    - `is`
+    - `!is`
+    - `as`
+    - `as?`
+  - Operator overloading
+  - Operator precedence
+  - Operator best practices
 
-  * `for`
-  * `while`
-  * `do...while`
-  * Iterating ranges
-  * Iterating collections
-  * Indexed iteration
+- **11. Control Flow**
+  - Conditional statements
+    - `if`
+    - `else if`
+    - `else`
+    - `if` as expression
+    - Ternary operator equivalent
+  - `when` expression
+    - `when`
+    - `when` with subject
+    - `when` without subject
+    - `when` branches
+    - `when` with ranges
+    - `when` with types
+    - `when` with conditions
+    - `when` as expression
+    - `when` as statement
+    - Exhaustive `when`
+    - `when` best practices
+  - Loops
+    - `for`
+    - `for` with ranges
+    - `for` with collections
+    - `for` with indices
+    - `while`
+    - `do-while`
+    - `break`
+    - `continue`
+    - Labels
+    - Loop best practices
+  - Exception handling
+    - `try`
+    - `catch`
+    - `finally`
+    - `throw`
+    - `try` as expression
+    - Exception hierarchy
+    - Checked vs unchecked exceptions
+    - Exception best practices
+  - Control flow best practices
 
-* **12. Loop Control**
-
-  * `break`
-  * `continue`
-  * Labels
-  * Labeled breaks
-  * Labeled continues
+- **12. Functions**
+  - Functions
+  - Function declaration
+  - Function parameters
+  - Default parameters
+  - Named parameters
+  - Variable number of arguments
+    - `vararg`
+  - Spread operator
+    - `*`
+  - Function return types
+  - `Unit` return
+  - Expression body functions
+  - `=`
+  - Local functions
+  - Member functions
+  - Top-level functions
+  - Extension functions
+  - Infix functions
+  - Operator functions
+  - Higher-order functions
+  - Lambda expressions
+  - Anonymous functions
+  - Function types
+  - Function references
+    - `::`
+  - Inline functions
+  - `inline`
+  - `noinline`
+  - `crossinline`
+  - `reified` type parameters
+  - Function best practices
+  - Recursion
+  - Tail recursion
+  - `tailrec`
 
 ---
 
-# IV. Functions
+# III. Object-Oriented Programming
 
-* **13. Function Fundamentals**
+- **13. Classes and Objects**
+  - Classes
+  - Objects
+  - Instances
+  - Class declaration
+  - Class members
+  - Properties
+  - Fields
+  - Methods
+  - Constructors
+  - Primary constructor
+  - Secondary constructor
+  - `init` blocks
+  - `this` keyword
+  - Object creation
+  - Object initialization
+  - Object lifecycle
+  - Garbage collection
+  - Object equality
+    - `==`
+    - `equals()`
+    - `hashCode()`
+  - `toString()`
+  - `copy()`
+  - `componentN()`
+  - Destructuring declarations
+  - Class best practices
 
-  * Declaring functions
-  * Parameters
-  * Return values
-  * Expression-body functions
-  * Block-body functions
-  * Explicit return types
+- **14. Properties**
+  - Properties
+  - Property declaration
+  - `val` properties
+  - `var` properties
+  - Custom getters
+  - Custom setters
+  - Backing fields
+  - `field` keyword
+  - Late initialization
+    - `lateinit`
+  - Lazy initialization
+    - `by lazy`
+  - Delegated properties
+    - `by`
+    - `observable`
+    - `vetoable`
+    - `Delegates.notNull()`
+    - Custom delegates
+  - Extension properties
+  - Property best practices
 
-* **14. Function Parameters**
+- **15. Constructors**
+  - Constructors
+  - Primary constructor
+  - Secondary constructor
+  - `constructor` keyword
+  - Constructor parameters
+  - Default parameter values
+  - Constructor visibility
+  - `init` blocks
+  - Constructor delegation
+    - `this()`
+    - `super()`
+  - Constructor best practices
 
-  * Positional parameters
-  * Default arguments
-  * Named arguments
-  * Varargs
-  * Parameter ordering
+- **16. Inheritance**
+  - Inheritance
+  - `open` keyword
+  - `final` keyword
+  - Base class
+  - Derived class
+  - `:`
+  - Method overriding
+    - `override`
+  - Property overriding
+  - `super` keyword
+  - Abstract classes
+    - `abstract`
+  - Abstract methods
+  - Abstract properties
+  - Interface implementation
+    - `:`
+  - Multiple interfaces
+  - Interface delegation
+    - `by`
+  - Inheritance best practices
+  - Composition over inheritance
 
-* **15. Function Concepts**
+- **17. Interfaces**
+  - Interfaces
+  - `interface` keyword
+  - Interface declaration
+  - Interface methods
+  - Interface properties
+  - Default implementations
+  - Interface inheritance
+  - Multiple interfaces
+  - Interface delegation
+  - Functional interfaces
+    - `fun interface`
+  - SAM conversions
+  - Interface best practices
 
-  * Local functions
-  * Recursive functions
-  * Pure functions
-  * Side effects
-  * Function decomposition
-  * Single-responsibility functions
+- **18. Data Classes**
+  - Data classes
+  - `data class`
+  - `equals()`
+  - `hashCode()`
+  - `toString()`
+  - `copy()`
+  - `componentN()`
+  - Destructuring
+  - Data class restrictions
+  - Data class best practices
 
-* **16. Advanced Function Features**
+- **19. Sealed Classes**
+  - Sealed classes
+  - `sealed class`
+  - Sealed interfaces
+  - Sealed class hierarchy
+  - Exhaustive `when`
+  - Sealed class best practices
+  - Sealed class vs enum
 
-  * Infix functions
-  * Extension functions
-  * Higher-order functions
-  * Function types
-  * Lambdas
-  * Anonymous functions
-  * Function references
+- **20. Enum Classes**
+  - Enum classes
+  - `enum class`
+  - Enum constants
+  - Enum properties
+  - Enum methods
+  - Enum constructors
+  - Enum best practices
+
+- **21. Objects**
+  - Object declarations
+  - `object`
+  - Singleton pattern
+  - Companion objects
+  - `companion object`
+  - Object expressions
+  - `object :`
+  - Anonymous objects
+  - Object best practices
+
+- **22. Generics**
+  - Generics
+  - Generic classes
+  - Generic functions
+  - Generic interfaces
+  - Type parameters
+  - Type arguments
+  - Generic constraints
+    - `where`
+    - `:`
+  - Multiple constraints
+  - Variance
+    - `out`
+    - `in`
+  - Star projection
+    - `*`
+  - Reified type parameters
+  - Generic best practices
+
+- **23. Type Aliases**
+  - Type aliases
+  - `typealias`
+  - Function type aliases
+  - Generic type aliases
+  - Type alias best practices
+
+- **24. Delegation**
+  - Delegation
+  - Class delegation
+  - `by`
+  - Interface delegation
+  - Property delegation
+  - Standard delegates
+    - `lazy`
+    - `observable`
+    - `vetoable`
+    - `notNull`
+  - Custom delegates
+  - Delegation best practices
 
 ---
 
-# V. Null Safety
+# IV. Functional Programming
 
-* **17. Nullable Types**
+- **25. Functional Programming Fundamentals**
+  - Functional programming
+  - Pure functions
+  - Immutability
+  - First-class functions
+  - Higher-order functions
+  - Function composition
+  - Functional programming best practices
 
-  * `String?`
-  * Nullable properties
-  * Nullable variables
-  * Nullable parameters
+- **26. Lambdas and Anonymous Functions**
+  - Lambda expressions
+  - Lambda syntax
+  - `{ }`
+  - Lambda parameters
+  - `it` implicit parameter
+  - Lambda return values
+  - Anonymous functions
+  - `fun()`
+  - Lambda vs anonymous function
+  - Lambda best practices
 
-* **18. Null-Safety Operators**
+- **27. Higher-Order Functions**
+  - Higher-order functions
+  - Functions as parameters
+  - Functions as return values
+  - Function composition
+  - `andThen`
+  - `compose`
+  - Higher-order function best practices
 
-  * Safe call
+- **28. Extension Functions**
+  - Extension functions
+  - Extension function declaration
+  - Extension function usage
+  - Extension properties
+  - Extension on nullable types
+  - Extension on generic types
+  - Extension resolution
+  - Extension function best practices
+  - Extension function limitations
 
-    * `?.`
-  * Elvis operator
+- **29. Scope Functions**
+  - `let`
+  - `run`
+  - `with`
+  - `apply`
+  - `also`
+  - Scope function comparison
+  - Scope function selection
+  - Scope function best practices
 
-    * `?:`
-  * Not-null assertion
+- **30. Inline Functions**
+  - Inline functions
+  - `inline`
+  - `noinline`
+  - `crossinline`
+  - `reified`
+  - Inline function benefits
+  - Inline function best practices
+  - Inline function limitations
 
-    * `!!`
-  * Safe casting
+- **31. Collection Operations**
+  - Collection transformations
+    - `map`
+    - `mapNotNull`
+    - `mapIndexed`
+    - `flatMap`
+    - `flatten`
+    - `filter`
+    - `filterNot`
+    - `filterNotNull`
+    - `partition`
+    - `groupBy`
+    - `associate`
+    - `associateBy`
+    - `zip`
+    - `unzip`
+  - Collection aggregations
+    - `fold`
+    - `reduce`
+    - `sum`
+    - `average`
+    - `min`
+    - `max`
+    - `count`
+    - `any`
+    - `all`
+    - `none`
+  - Collection retrieval
+    - `first`
+    - `last`
+    - `find`
+    - `single`
+    - `elementAt`
+    - `firstOrNull`
+    - `lastOrNull`
+    - `findOrNull`
+  - Collection ordering
+    - `sorted`
+    - `sortedBy`
+    - `sortedDescending`
+    - `reversed`
+    - `shuffled`
+    - `distinct`
+    - `distinctBy`
+  - Collection best practices
 
-    * `as?`
-
-* **19. Null-Safety Techniques**
-
-  * Smart casts
-  * Null checks
-  * Guard conditions
-  * Default values
-  * Nullable collection operations
-
-* **20. Null-Safety Design**
-
-  * Avoiding unnecessary nullable types
-  * Using non-null types by default
-  * Modeling optional values
-  * Avoiding excessive `!!`
-  * Null-safe API design
-
----
-
-# VI. Object-Oriented Programming
-
-* **21. Classes**
-
-  * Class declarations
-  * Properties
-  * Methods
-  * Constructors
-  * Primary constructors
-  * Secondary constructors
-
-* **22. Encapsulation**
-
-  * Visibility modifiers
-
-    * `public`
-    * `private`
-    * `protected`
-    * `internal`
-  * Property accessors
-  * Custom getters
-  * Custom setters
-  * Backing fields
-
-* **23. Inheritance**
-
-  * Open classes
-  * Base classes
-  * Derived classes
-  * Method overriding
-  * Property overriding
-  * `super`
-
-* **24. Abstract Classes**
-
-  * Abstract properties
-  * Abstract methods
-  * Partial implementations
-  * Template-style designs
-
-* **25. Interfaces**
-
-  * Interface declarations
-  * Interface properties
-  * Interface methods
-  * Default implementations
-  * Multiple interfaces
-  * Interface delegation
-
----
-
-# VII. Kotlin-Specific Class Types
-
-* **26. Data Classes**
-
-  * `data class`
-  * Generated methods
-
-    * `equals`
-    * `hashCode`
-    * `toString`
-    * `copy`
-    * `componentN`
-  * Destructuring
-  * Immutable data modeling
-
-* **27. Enum Classes**
-
-  * Enum constants
-  * Enum properties
-  * Enum methods
-  * Enum-specific behavior
-  * Mapping enums
-
-* **28. Sealed Classes and Interfaces**
-
-  * Restricted hierarchies
-  * Exhaustive `when`
-  * State modeling
-  * Result modeling
-  * Domain modeling
-
-* **29. Object Declarations**
-
-  * Singleton objects
-  * Companion objects
-  * Anonymous objects
-  * Factory-style usage
-
-* **30. Nested and Inner Classes**
-
-  * Nested classes
-  * `inner`
-  * Outer-class references
-  * Encapsulation considerations
+- **32. Sequences**
+  - Sequences
+  - `Sequence<T>`
+  - Sequence creation
+  - `sequenceOf()`
+  - `asSequence()`
+  - `generateSequence()`
+  - Sequence operations
+  - Lazy evaluation
+  - Sequence vs collection
+  - Sequence performance
+  - Sequence best practices
 
 ---
 
-# VIII. Kotlin Collections
+# V. Null Safety and Type System
 
-* **31. Collection Fundamentals**
+- **33. Null Safety**
+  - Null safety
+  - Nullable types
+  - Non-nullable types
+  - Safe call operator
+  - `?.`
+  - Elvis operator
+  - `?:`
+  - Not-null assertion
+  - `!!`
+  - Safe cast
+  - `as?`
+  - `let` with null safety
+  - `run` with null safety
+  - `also` with null safety
+  - `apply` with null safety
+  - Null safety best practices
+  - Null safety pitfalls
 
-  * `List`
-  * `Set`
-  * `Map`
-  * Mutable versus read-only collections
-  * Collection interfaces
+- **34. Smart Casts**
+  - Smart casts
+  - Type checks
+  - `is`
+  - `!is`
+  - Smart cast rules
+  - Smart cast limitations
+  - Smart cast best practices
 
-* **32. Lists**
+- **35. Type Checks and Casts**
+  - Type checks
+  - `is`
+  - `!is`
+  - Type casts
+  - `as`
+  - `as?`
+  - Unsafe cast
+  - Safe cast
+  - Type check best practices
 
-  * `listOf`
-  * `mutableListOf`
-  * Indexing
-  * Searching
-  * Sorting
-  * Slicing
-
-* **33. Sets**
-
-  * `setOf`
-  * `mutableSetOf`
-  * Uniqueness
-  * Membership testing
-
-* **34. Maps**
-
-  * `mapOf`
-  * `mutableMapOf`
-  * Keys and values
-  * Lookup
-  * Updating entries
-  * Iteration
-
-* **35. Collection Transformations**
-
-  * `map`
-  * `mapNotNull`
-  * `flatMap`
-  * `filter`
-  * `filterNot`
-  * `filterIsInstance`
-  * `associate`
-  * `groupBy`
-  * `partition`
-  * `zip`
-
-* **36. Collection Aggregation**
-
-  * `count`
-  * `sum`
-  * `sumOf`
-  * `average`
-  * `min`
-  * `max`
-  * `reduce`
-  * `fold`
-  * `scan`
-
-* **37. Collection Searching**
-
-  * `find`
-  * `first`
-  * `firstOrNull`
-  * `single`
-  * `singleOrNull`
-  * `any`
-  * `all`
-  * `none`
-  * `contains`
+- **36. Generics Advanced**
+  - Generic constraints
+  - Multiple constraints
+  - `where` clause
+  - Variance
+    - `out`
+    - `in`
+  - Declaration-site variance
+  - Use-site variance
+  - Star projection
+  - Reified type parameters
+  - Generic best practices
 
 ---
 
-# IX. Functional Programming in Kotlin
+# VI. Collections
 
-* **38. Functional Programming Concepts**
+- **37. Collection Types**
+  - Lists
+    - `List<T>`
+    - `MutableList<T>`
+    - `listOf()`
+    - `mutableListOf()`
+    - `ArrayList`
+    - `LinkedList`
+  - Sets
+    - `Set<T>`
+    - `MutableSet<T>`
+    - `setOf()`
+    - `mutableSetOf()`
+    - `HashSet`
+    - `LinkedHashSet`
+    - `TreeSet`
+  - Maps
+    - `Map<K, V>`
+    - `MutableMap<K, V>`
+    - `mapOf()`
+    - `mutableMapOf()`
+    - `HashMap`
+    - `LinkedHashMap`
+    - `TreeMap`
+  - Collection interfaces
+    - `Iterable<T>`
+    - `Collection<T>`
+    - `List<T>`
+    - `Set<T>`
+    - `Map<K, V>`
+  - Collection best practices
 
-  * First-class functions
-  * Pure functions
-  * Immutability
-  * Referential transparency
-  * Higher-order functions
-  * Function composition
+- **38. Collection Operations**
+  - Transformations
+    - `map`
+    - `flatMap`
+    - `filter`
+    - `zip`
+    - `unzip`
+  - Aggregations
+    - `fold`
+    - `reduce`
+    - `sum`
+    - `average`
+    - `min`
+    - `max`
+    - `count`
+  - Retrieval
+    - `first`
+    - `last`
+    - `find`
+    - `single`
+    - `elementAt`
+  - Ordering
+    - `sorted`
+    - `sortedBy`
+    - `reversed`
+    - `shuffled`
+    - `distinct`
+  - Grouping
+    - `groupBy`
+    - `partition`
+    - `chunked`
+    - `windowed`
+  - Collection best practices
 
-* **39. Lambdas**
+- **39. Sequences**
+  - Sequences
+  - Sequence creation
+  - Sequence operations
+  - Lazy evaluation
+  - Sequence vs collection
+  - Sequence performance
+  - Sequence best practices
 
-  * Lambda syntax
-  * Lambda parameters
-  * Lambda return values
-  * Implicit `it`
-  * Multiple parameters
-  * Trailing lambdas
+- **40. Ranges**
+  - Ranges
+  - `IntRange`
+  - `CharRange`
+  - `LongRange`
+  - Range operators
+  - Range iteration
+  - Range methods
+  - Range best practices
 
-* **40. Higher-Order Functions**
-
-  * Functions accepting functions
-  * Functions returning functions
-  * Callback patterns
-  * Strategy patterns
-  * Function composition
-
-* **41. Scope Functions**
-
-  * `let`
-  * `run`
-  * `with`
-  * `apply`
-  * `also`
-  * Choosing appropriate scope functions
-  * Readability considerations
-
-* **42. Functional Collection Processing**
-
-  * Chained transformations
-  * Lazy versus eager operations
-  * Pipeline-style code
-  * Avoiding unnecessarily complex chains
-
----
-
-# X. Generics and Type System Mastery
-
-* **43. Generic Types**
-
-  * Generic classes
-  * Generic functions
-  * Type parameters
-  * Multiple type parameters
-
-* **44. Variance**
-
-  * Covariance
-
-    * `out`
-  * Contravariance
-
-    * `in`
-  * Invariance
-  * Producer/consumer concepts
-
-* **45. Generic Constraints**
-
-  * Upper bounds
-  * Multiple constraints
-  * Generic type safety
-
-* **46. Type Projections**
-
-  * Star projections
-
-    * `*`
-  * Declaration-site variance
-  * Use-site variance
-
-* **47. Reified Type Parameters**
-
-  * `reified`
-  * Runtime type information
-  * Generic type checks
-  * Inline generic functions
-
----
-
-# XI. Exceptions and Error Handling
-
-* **48. Exception Fundamentals**
-
-  * `try`
-  * `catch`
-  * `finally`
-  * Throwing exceptions
-  * Custom exceptions
-
-* **49. Kotlin Exception Model**
-
-  * Checked versus unchecked exceptions
-  * Java interoperability
-  * Exception propagation
-  * Exception boundaries
-
-* **50. Error-Handling Strategies**
-
-  * Exceptions
-  * Nullable results
-  * `Result`
-  * Sealed result types
-  * Domain-specific error models
-
-* **51. Good Error Handling**
-
-  * Avoiding swallowed exceptions
-  * Meaningful error messages
-  * Error transformation
-  * Recovery strategies
-  * Logging
+- **41. Arrays**
+  - Arrays
+  - `Array<T>`
+  - Primitive arrays
+  - Array creation
+  - Array operations
+  - Array methods
+  - Array best practices
 
 ---
 
-# XII. Kotlin Standard Library Mastery
+# VII. Coroutines
 
-* **52. Standard Library Utilities**
+- **42. Coroutines Fundamentals**
+  - Coroutines
+  - Concurrency
+  - Asynchronous programming
+  - Suspending functions
+  - `suspend`
+  - Coroutine builders
+    - `launch`
+    - `async`
+    - `runBlocking`
+    - `runTest`
+    - `withContext`
+    - `coroutineScope`
+    - `supervisorScope`
+  - Coroutine context
+  - Coroutine dispatchers
+    - `Dispatchers.Default`
+    - `Dispatchers.IO`
+    - `Dispatchers.Main`
+    - `Dispatchers.Unconfined`
+  - Coroutine scope
+  - Coroutine lifecycle
+  - Coroutine cancellation
+  - Coroutine best practices
 
-  * Collections
-  * Ranges
-  * Sequences
-  * Strings
-  * Scope functions
-  * Utility functions
+- **43. Suspending Functions**
+  - Suspending functions
+  - `suspend` keyword
+  - Suspending function declaration
+  - Suspending function invocation
+  - Suspending function composition
+  - Suspending function best practices
 
-* **53. Delegated Properties**
+- **44. Coroutine Builders**
+  - `launch`
+  - `async`
+  - `runBlocking`
+  - `runTest`
+  - `withContext`
+  - `coroutineScope`
+  - `supervisorScope`
+  - Builder comparison
+  - Builder best practices
 
-  * `by`
-  * Lazy delegation
-  * Observable properties
-  * Custom delegates
-  * Property delegation patterns
+- **45. Coroutine Context and Dispatchers**
+  - Coroutine context
+  - `CoroutineContext`
+  - Context elements
+  - Dispatchers
+  - `Dispatchers.Default`
+  - `Dispatchers.IO`
+  - `Dispatchers.Main`
+  - `Dispatchers.Unconfined`
+  - Custom dispatchers
+  - Context combination
+  - Context best practices
 
-* **54. Destructuring**
+- **46. Coroutine Scope**
+  - Coroutine scope
+  - `CoroutineScope`
+  - Scope creation
+  - Scope lifecycle
+  - `GlobalScope`
+  - `MainScope`
+  - `lifecycleScope`
+  - `viewModelScope`
+  - Custom scopes
+  - Scope best practices
+  - Structured concurrency
 
-  * Data-class destructuring
-  * Component functions
-  * Pair and Triple
-  * Loop destructuring
+- **47. Coroutine Cancellation**
+  - Cancellation
+  - `cancel()`
+  - `cancelAndJoin()`
+  - Cancellation exceptions
+  - `CancellationException`
+  - Cooperative cancellation
+  - `isActive`
+  - `ensureActive()`
+  - `yield()`
+  - Cancellation best practices
 
-* **55. Operator Overloading**
+- **48. Coroutine Exception Handling**
+  - Exception handling
+  - `try/catch`
+  - `CoroutineExceptionHandler`
+  - Supervisor scope
+  - `supervisorScope`
+  - `SupervisorJob`
+  - Exception propagation
+  - Exception best practices
 
-  * `plus`
-  * `minus`
-  * `times`
-  * `compareTo`
-  * `contains`
-  * `get`
-  * `set`
-  * `invoke`
+- **49. Flows**
+  - Flows
+  - `Flow<T>`
+  - Flow builders
+    - `flow`
+    - `flowOf`
+    - `asFlow`
+    - `channelFlow`
+    - `callbackFlow`
+  - Flow operators
+    - `map`
+    - `filter`
+    - `transform`
+    - `take`
+    - `drop`
+    - `flowOn`
+    - `buffer`
+    - `conflate`
+    - `collectLatest`
+    - `flatMapConcat`
+    - `flatMapMerge`
+    - `flatMapLatest`
+    - `zip`
+    - `combine`
+    - `debounce`
+    - `sample`
+    - `distinctUntilChanged`
+  - Flow collection
+    - `collect`
+    - `collectLatest`
+    - `toList`
+    - `toSet`
+    - `first`
+    - `single`
+    - `reduce`
+    - `fold`
+  - Cold vs hot flows
+  - StateFlow
+  - SharedFlow
+  - StateFlow vs SharedFlow
+  - Flow best practices
 
----
+- **50. Channels**
+  - Channels
+  - `Channel<T>`
+  - Channel types
+    - `RendezvousChannel`
+    - `ArrayChannel`
+    - `LinkedListChannel`
+    - `ConflatedChannel`
+    - `BroadcastChannel`
+  - Channel operations
+    - `send`
+    - `receive`
+    - `close`
+    - `cancel`
+  - Channel best practices
 
-# XIII. Sequences and Lazy Evaluation
-
-* **56. Sequences**
-
-  * `Sequence`
-  * Creating sequences
-  * Converting collections to sequences
-  * Lazy transformations
-
-* **57. Sequence Operations**
-
-  * `map`
-  * `filter`
-  * `flatMap`
-  * `take`
-  * `drop`
-  * `generateSequence`
-
-* **58. Lazy Evaluation**
-
-  * Intermediate operations
-  * Terminal operations
-  * Execution order
-  * Memory implications
-  * When sequences help
-  * When normal collections are better
-
----
-
-# XIV. Delegation and Advanced Language Features
-
-* **59. Class Delegation**
-
-  * `by`
-  * Delegating interfaces
-  * Composition over inheritance
-
-* **60. Property Delegation**
-
-  * Lazy properties
-  * Observable properties
-  * Vetoable properties
-  * Custom property delegates
-
-* **61. Inline Functions**
-
-  * `inline`
-  * `noinline`
-  * `crossinline`
-  * Performance implications
-  * Non-local returns
-
-* **62. Contracts**
-
-  * Kotlin contracts
-  * Smart-cast assistance
-  * Contract-aware APIs
-  * Advanced library design
-
----
-
-# XV. Coroutines
-
-* **63. Coroutine Fundamentals**
-
-  * What coroutines solve
-  * Suspending functions
-  * Coroutine builders
-  * `launch`
-  * `async`
-  * `runBlocking`
-
-* **64. Suspending Functions**
-
-  * `suspend`
-  * Suspension points
-  * Sequential suspension
-  * Composition
-
-* **65. Coroutine Context**
-
-  * Coroutine context
-  * Dispatchers
-
-    * Default
-    * IO
-    * Main
-    * Unconfined
-  * Jobs
-  * Coroutine names
-
-* **66. Structured Concurrency**
-
-  * Coroutine scopes
-  * Parent-child relationships
-  * Cancellation propagation
-  * Failure propagation
-  * Lifecycle-aware concurrency
-
-* **67. Coroutine Cancellation**
-
-  * Cooperative cancellation
-  * `isActive`
-  * `ensureActive`
-  * `yield`
-  * Cancellation exceptions
-  * Resource cleanup
-
-* **68. Coroutine Exception Handling**
-
-  * `CoroutineExceptionHandler`
-  * Structured failure
-  * `supervisorScope`
-  * `SupervisorJob`
-  * Exception propagation
-
----
-
-# XVI. Kotlin Flow and Reactive Programming
-
-* **69. Flow Fundamentals**
-
-  * `Flow`
-  * Cold streams
-  * Producers
-  * Collectors
-  * `flow`
-
-* **70. Flow Operators**
-
-  * `map`
-  * `filter`
-  * `transform`
-  * `debounce`
-  * `sample`
-  * `combine`
-  * `zip`
-  * `flatMapConcat`
-  * `flatMapLatest`
-  * `flatMapMerge`
-
-* **71. Flow Lifecycle**
-
-  * Collection
-  * Cancellation
-  * Completion
-  * Exception handling
-
-* **72. State and Events**
-
-  * `StateFlow`
-  * `SharedFlow`
-  * State modeling
-  * Event streams
-  * Hot versus cold flows
-
-* **73. Flow Performance**
-
-  * Buffering
-  * Context shifting
-  * Backpressure concepts
-  * Conflation
-  * Cancellation behavior
+- **51. Coroutine Patterns**
+  - Producer-consumer
+  - Fan-out
+  - Fan-in
+  - Pipeline
+  - Actor model
+  - Coroutine patterns best practices
 
 ---
 
-# XVII. Kotlin and Java Interoperability
+# VIII. Android Development with Kotlin
 
-* **74. Calling Java from Kotlin**
+- **52. Android Fundamentals**
+  - Android platform
+  - Android Studio
+  - Android project structure
+  - AndroidManifest.xml
+  - Gradle build files
+  - Android SDK
+  - Android versions
+  - Android architecture
+  - Android components
+    - Activities
+    - Fragments
+    - Services
+    - Broadcast receivers
+    - Content providers
+  - Android best practices
 
-  * Java classes
-  * Java methods
-  * Java collections
-  * Java generics
-  * Java exceptions
+- **53. Activities and Fragments**
+  - Activities
+  - Activity lifecycle
+  - `onCreate()`
+  - `onStart()`
+  - `onResume()`
+  - `onPause()`
+  - `onStop()`
+  - `onDestroy()`
+  - Fragments
+  - Fragment lifecycle
+  - Fragment transactions
+  - Navigation component
+  - Navigation graph
+  - Safe Args
+  - Activity and Fragment best practices
 
-* **75. Calling Kotlin from Java**
+- **54. Jetpack Compose**
+  - Jetpack Compose
+  - Compose fundamentals
+  - `@Composable` functions
+  - Composable lifecycle
+  - Recomposition
+  - State in Compose
+  - `remember`
+  - `mutableStateOf`
+  - `State<T>`
+  - `rememberSaveable`
+  - `derivedStateOf`
+  - `LaunchedEffect`
+  - `DisposableEffect`
+  - `SideEffect`
+  - `produceState`
+  - `rememberCoroutineScope`
+  - Compose layout
+    - `Column`
+    - `Row`
+    - `Box`
+    - `LazyColumn`
+    - `LazyRow`
+    - `LazyVerticalGrid`
+    - `Scaffold`
+    - `Surface`
+    - `Modifier`
+  - Compose Material Design
+    - `MaterialTheme`
+    - `ColorScheme`
+    - `Typography`
+    - `Shapes`
+    - `Button`
+    - `TextField`
+    - `Card`
+    - `TopAppBar`
+    - `BottomNavigation`
+    - `NavigationBar`
+    - `NavigationDrawer`
+  - Compose Navigation
+  - Compose state management
+  - Compose testing
+  - Compose best practices
 
-  * `@JvmStatic`
-  * `@JvmField`
-  * `@JvmOverloads`
-  * `@JvmName`
-  * Companion-object interoperability
+- **55. ViewModel**
+  - ViewModel
+  - `ViewModel`
+  - `AndroidViewModel`
+  - ViewModel lifecycle
+  - `viewModelScope`
+  - StateFlow in ViewModel
+  - ViewModel best practices
 
-* **76. Platform Types**
+- **56. LiveData**
+  - LiveData
+  - `LiveData<T>`
+  - `MutableLiveData<T>`
+  - LiveData observers
+  - LiveData transformations
+    - `map`
+    - `switchMap`
+    - `distinctUntilChanged`
+  - LiveData best practices
+  - LiveData vs StateFlow
 
-  * Nullable Java types
-  * Kotlin treatment of Java nullability
-  * Defensive handling
+- **57. Room Database**
+  - Room
+  - Entity
+    - `@Entity`
+  - DAO
+    - `@Dao`
+  - Database
+    - `@Database`
+  - Queries
+    - `@Query`
+    - `@Insert`
+    - `@Update`
+    - `@Delete`
+  - Room operations
+  - Room migrations
+  - Room testing
+  - Room best practices
 
-* **77. Java Migration**
+- **58. Retrofit**
+  - Retrofit
+  - HTTP client
+  - API interface
+  - `@GET`
+  - `@POST`
+  - `@PUT`
+  - `@DELETE`
+  - `@Path`
+  - `@Query`
+  - `@Body`
+  - Response handling
+  - Error handling
+  - Retrofit best practices
 
-  * Java-to-Kotlin conversion
-  * Incremental migration
-  * Interoperability boundaries
-  * Mixed Kotlin/Java projects
+- **59. Kotlin Serialization**
+  - Kotlin Serialization
+  - `@Serializable`
+  - `@SerialName`
+  - `@Transient`
+  - JSON serialization
+  - `Json`
+  - `Json.encodeToString()`
+  - `Json.decodeFromString()`
+  - Serialization best practices
 
----
+- **60. Dependency Injection**
+  - Dependency injection
+  - Dagger Hilt
+  - `@HiltAndroidApp`
+  - `@AndroidEntryPoint`
+  - `@Inject`
+  - `@Module`
+  - `@Provides`
+  - `@Binds`
+  - `@Singleton`
+  - `@ViewModelScoped`
+  - Koin
+  - DI best practices
 
-# XVIII. Kotlin Build Systems and Project Structure
+- **61. Android Architecture**
+  - MVVM
+  - MVP
+  - MVI
+  - Clean Architecture
+  - Repository pattern
+  - Use cases
+  - Data layer
+  - Domain layer
+  - UI layer
+  - Architecture best practices
 
-* **78. Gradle Fundamentals**
+- **62. Android Testing**
+  - Unit testing
+  - Instrumented testing
+  - UI testing
+  - Espresso
+  - Compose testing
+  - Room testing
+  - Retrofit testing
+  - Testing best practices
 
-  * Projects
-  * Modules
-  * Tasks
-  * Dependencies
-  * Repositories
-  * Plugins
+- **63. Android Performance**
+  - Performance optimization
+  - Memory optimization
+  - Battery optimization
+  - Network optimization
+  - UI performance
+  - Profiling
+  - Performance best practices
 
-* **79. Kotlin Build Configuration**
-
-  * Kotlin Gradle plugin
-  * Kotlin/JVM configuration
-  * Kotlin Multiplatform configuration
-  * Compiler configuration
-
-* **80. Dependency Management**
-
-  * Direct dependencies
-  * Transitive dependencies
-  * Version management
-  * Dependency conflicts
-  * Dependency scopes
-
-* **81. Project Organization**
-
-  * Packages
-  * Modules
-  * Layers
-  * Shared code
-  * Public APIs
-  * Internal implementation
-
----
-
-# XIX. Testing Kotlin Applications
-
-* **82. Unit Testing**
-
-  * Test structure
-  * Assertions
-  * Test fixtures
-  * Test isolation
-  * Test naming
-
-* **83. Kotlin Testing Concepts**
-
-  * Testing functions
-  * Testing classes
-  * Testing extension functions
-  * Testing coroutine code
-  * Testing Flow
-
-* **84. Integration Testing**
-
-  * Database integration
-  * HTTP integration
-  * Repository testing
-  * Service testing
-
-* **85. Test Doubles**
-
-  * Mocks
-  * Stubs
-  * Fakes
-  * Spies
-  * Dependency injection in tests
-
-* **86. Testing Quality**
-
-  * Edge cases
-  * Null cases
-  * Error paths
-  * Boundary conditions
-  * Regression tests
-  * Property-based testing concepts
-
----
-
-# XX. Kotlin Development Practices
-
-* **87. Code Quality**
-
-  * Readability
-  * Naming
-  * Immutability
-  * Small functions
-  * Cohesion
-  * Low coupling
-
-* **88. Idiomatic Kotlin**
-
-  * Expression-oriented design
-  * Smart casts
-  * Data classes
-  * Extension functions
-  * Scope functions
-  * Sealed hierarchies
-  * Collection operators
-
-* **89. Avoiding Kotlin Anti-Patterns**
-
-  * Excessive nesting
-  * Overuse of `!!`
-  * Overuse of scope functions
-  * Excessive extension functions
-  * Deep inheritance
-  * Unnecessary mutability
-  * Overly clever one-liners
-
----
-
-# XXI. Design Patterns in Kotlin
-
-* **90. Creational Patterns**
-
-  * Factory
-  * Abstract Factory
-  * Builder
-  * Prototype
-  * Singleton
-
-* **91. Structural Patterns**
-
-  * Adapter
-  * Decorator
-  * Facade
-  * Composite
-  * Proxy
-
-* **92. Behavioral Patterns**
-
-  * Strategy
-  * Observer
-  * Command
-  * State
-  * Chain of Responsibility
-
-* **93. Kotlin-Specific Design Approaches**
-
-  * Sealed hierarchies
-  * Extension-based APIs
-  * Delegation
-  * Higher-order functions
-  * DSLs
-  * Composition
-
----
-
-# XXII. Domain-Driven Kotlin Design
-
-* **94. Domain Modeling**
-
-  * Entities
-  * Value objects
-  * Aggregates
-  * Domain services
-  * Repositories
-  * Domain events
-
-* **95. Type-Safe Domain Modeling**
-
-  * Value classes
-  * Sealed classes
-  * Enums
-  * Restricted states
-  * Strongly typed identifiers
-
-* **96. Modeling Business Rules**
-
-  * Invariants
-  * State transitions
-  * Validation
-  * Domain errors
-  * Explicit state models
+- **64. Android Security**
+  - Security
+  - Permissions
+  - Encryption
+  - Secure storage
+  - Network security
+  - ProGuard/R8
+  - Security best practices
 
 ---
 
-# XXIII. Kotlin DSLs and Metaprogramming Concepts
+# IX. Server-Side Kotlin
 
-* **97. DSL Fundamentals**
+- **65. Server-Side Kotlin**
+  - Server-side Kotlin
+  - Kotlin/JVM
+  - Kotlin and Spring Boot
+  - Kotlin and Ktor
+  - Kotlin and Micronaut
+  - Kotlin and Quarkus
+  - Kotlin and http4k
+  - Server-side best practices
 
-  * Type-safe builders
-  * Lambda receivers
-  * Nested DSL structures
-  * Fluent APIs
+- **66. Spring Boot with Kotlin**
+  - Spring Boot
+  - Kotlin support
+  - `@SpringBootApplication`
+  - `@RestController`
+  - `@GetMapping`
+  - `@PostMapping`
+  - `@PutMapping`
+  - `@DeleteMapping`
+  - `@Service`
+  - `@Repository`
+  - Dependency injection
+  - Spring Data JPA
+  - Spring Security
+  - Spring Boot best practices
 
-* **98. Lambda Receivers**
+- **67. Ktor**
+  - Ktor
+  - Ktor server
+  - Ktor client
+  - Routing
+  - `routing { }`
+  - `get { }`
+  - `post { }`
+  - `put { }`
+  - `delete { }`
+  - Content negotiation
+  - Serialization
+  - Authentication
+  - Ktor best practices
 
-  * Extension lambdas
-  * Receiver context
-  * Builder patterns
+- **68. Database Access**
+  - JDBC
+  - Exposed
+  - Exposed DSL
+  - Exposed DAO
+  - Hibernate
+  - Spring Data JPA
+  - Room
+  - Database best practices
 
-* **99. DSL Design**
+- **69. REST APIs**
+  - REST
+  - Resources
+  - HTTP methods
+  - Status codes
+  - Request/response design
+  - Pagination
+  - Filtering
+  - Sorting
+  - Versioning
+  - Authentication
+  - Authorization
+  - Documentation
+  - OpenAPI
+  - Swagger
+  - REST best practices
 
-  * Readability
-  * Scope control
-  * Type safety
-  * Error messages
-  * Domain-specific abstractions
+- **70. GraphQL**
+  - GraphQL
+  - GraphQL Kotlin
+  - DGS Framework
+  - Schemas
+  - Queries
+  - Mutations
+  - Subscriptions
+  - Resolvers
+  - GraphQL best practices
 
----
+- **71. WebSockets**
+  - WebSockets
+  - Ktor WebSockets
+  - Spring WebSockets
+  - WebSocket best practices
 
-# XXIV. Kotlin for Android Development
+- **72. Microservices**
+  - Microservices
+  - Service boundaries
+  - Communication
+  - Service discovery
+  - API gateway
+  - Circuit breakers
+  - Distributed tracing
+  - Microservices best practices
 
-* **100. Android Fundamentals**
-
-  * Android project structure
-  * Activities
-  * Fragments
-  * Application lifecycle
-  * Resources
-  * Manifest
-
-* **101. Kotlin on Android**
-
-  * Android Kotlin extensions
-  * Lifecycle-aware code
-  * Coroutines
-  * Flow
-  * ViewModel
-  * Dependency injection
-
-* **102. Modern UI Development**
-
-  * Declarative UI concepts
-  * State management
-  * UI composition
-  * Event handling
-  * Navigation
-  * UI testing
-
-* **103. Android Architecture**
-
-  * Presentation layer
-  * Domain layer
-  * Data layer
-  * Repository pattern
-  * ViewModel
-  * Unidirectional data flow
-
----
-
-# XXV. Kotlin Backend Development
-
-* **104. Server-Side Kotlin**
-
-  * HTTP fundamentals
-  * REST APIs
-  * Request/response handling
-  * Serialization
-  * Validation
-  * Authentication
-
-* **105. Backend Framework Concepts**
-
-  * Routing
-  * Middleware
-  * Dependency injection
-  * Controllers
-  * Services
-  * Repositories
-
-* **106. Database Integration**
-
-  * SQL databases
-  * Database drivers
-  * Transactions
-  * Connection pools
-  * ORM concepts
-  * Query builders
-
-* **107. Backend Coroutines**
-
-  * Non-blocking execution
-  * Concurrent requests
-  * Structured concurrency
-  * Async I/O
-
----
-
-# XXVI. Kotlin Multiplatform
-
-* **108. Multiplatform Fundamentals**
-
-  * Shared business logic
-  * Platform-specific code
-  * Common source sets
-  * Platform source sets
-
-* **109. Expect/Actual Concepts**
-
-  * Shared declarations
-  * Platform implementations
-  * Platform-specific APIs
-
-* **110. Shared Architecture**
-
-  * Shared networking
-  * Shared persistence
-  * Shared domain models
-  * Shared validation
-  * Shared business logic
-
-* **111. Multiplatform Engineering**
-
-  * Dependency boundaries
-  * Platform abstractions
-  * Build configuration
-  * Testing shared code
+- **73. Cloud Deployment**
+  - Cloud providers
+  - AWS
+  - Google Cloud
+  - Azure
+  - Docker
+  - Kubernetes
+  - Deployment best practices
 
 ---
 
-# XXVII. Serialization and Networking
+# X. Kotlin Multiplatform
 
-* **112. Serialization**
+- **74. Kotlin Multiplatform Fundamentals**
+  - Kotlin Multiplatform
+  - KMP
+  - Multiplatform projects
+  - Common code
+  - Platform-specific code
+  - `expect`/`actual` declarations
+  - Shared modules
+  - Platform targets
+    - JVM
+    - Android
+    - iOS
+    - JavaScript
+    - Native
+    - WASM
+  - KMP best practices
 
-  * JSON
-  * Serialization models
-  * Encoding
-  * Decoding
-  * Custom serializers
-  * Polymorphic serialization
+- **75. KMP Project Structure**
+  - Project structure
+  - Common module
+  - Platform modules
+  - Source sets
+    - `commonMain`
+    - `androidMain`
+    - `iosMain`
+    - `jsMain`
+    - `nativeMain`
+  - Dependency management
+  - KMP project setup
+  - KMP best practices
 
-* **113. Networking**
+- **76. KMP Libraries**
+  - Ktor client
+  - kotlinx.serialization
+  - kotlinx.coroutines
+  - kotlinx.datetime
+  - SQLDelight
+  - Realm
+  - Koin
+  - KMP libraries best practices
 
-  * HTTP
-  * REST
-  * Request methods
-  * Headers
-  * Authentication
-  * Error handling
-  * Retries
-  * Timeouts
+- **77. Compose Multiplatform**
+  - Compose Multiplatform
+  - Shared UI
+  - Android
+  - iOS
+  - Desktop
+  - Web
+  - Compose Multiplatform best practices
 
-* **114. API Integration**
-
-  * DTOs
-  * Domain models
-  * Mapping
-  * API versioning
-  * Pagination
-  * Caching
-
----
-
-# XXVIII. Database and Persistence
-
-* **115. Relational Databases**
-
-  * SQL fundamentals
-  * Connections
-  * Queries
-  * Transactions
-  * Schema design
-
-* **116. Kotlin Persistence**
-
-  * Data-access layers
-  * Repository abstraction
-  * Mapping database rows to Kotlin models
-  * Transaction boundaries
-
-* **117. Caching**
-
-  * In-memory caching
-  * Local persistence
-  * Cache invalidation
-  * Expiration strategies
-  * Consistency concerns
-
----
-
-# XXIX. Dependency Injection and Application Architecture
-
-* **118. Dependency Injection**
-
-  * Dependency inversion
-  * Constructor injection
-  * Interface-based dependencies
-  * Object graphs
-
-* **119. DI Containers**
-
-  * Registration
-  * Resolution
-  * Scopes
-  * Lifecycle management
-  * Testing dependencies
-
-* **120. Architectural Layers**
-
-  * Presentation
-  * Application
-  * Domain
-  * Infrastructure
-  * Data
-
-* **121. Clean Architecture**
-
-  * Dependency direction
-  * Use cases
-  * Entities
-  * Interface adapters
-  * Framework boundaries
+- **78. KMP Testing**
+  - Common tests
+  - Platform-specific tests
+  - Testing best practices
 
 ---
 
-# XXX. Concurrency and Parallel Programming
+# XI. Kotlin/JS and Kotlin/Native
 
-* **122. Concurrency Fundamentals**
+- **79. Kotlin/JS**
+  - Kotlin/JS
+  - JavaScript compilation
+  - Kotlin/JS IR compiler
+  - JavaScript interop
+  - `js()` function
+  - `external` declarations
+  - Dynamic types
+  - `dynamic`
+  - Kotlin/JS best practices
 
-  * Processes
-  * Threads
-  * Coroutines
-  * Parallelism
-  * Asynchronous execution
+- **80. Kotlin/Native**
+  - Kotlin/Native
+  - Native compilation
+  - LLVM backend
+  - C interop
+  - Objective-C interop
+  - Swift interop
+  - Native targets
+    - iOS
+    - macOS
+    - Linux
+    - Windows
+    - Android Native
+    - WebAssembly
+  - Kotlin/Native best practices
 
-* **123. Shared State**
-
-  * Mutable shared state
-  * Race conditions
-  * Atomicity
-  * Visibility
-  * Synchronization
-
-* **124. Kotlin Synchronization**
-
-  * Mutex
-  * Atomic variables
-  * Thread-safe collections
-  * Thread confinement
-
-* **125. Concurrent Coroutines**
-
-  * Parallel decomposition
-  * `async`
-  * Awaiting results
-  * Structured concurrency
-  * Cancellation
-
----
-
-# XXXI. Performance Optimization
-
-* **126. Kotlin Runtime Performance**
-
-  * Allocation
-  * Boxing/unboxing
-  * Object creation
-  * Function overhead
-  * Inline functions
-
-* **127. Collection Performance**
-
-  * Lists versus sets
-  * Hash-based lookup
-  * Lazy sequences
-  * Allocation overhead
-  * Algorithmic complexity
-
-* **128. Coroutine Performance**
-
-  * Context switching
-  * Dispatcher selection
-  * Structured concurrency
-  * Excessive coroutine creation
-
-* **129. Memory Management**
-
-  * JVM heap
-  * Garbage collection
-  * Memory leaks
-  * Object lifetimes
-  * Profiling
-
-* **130. Profiling**
-
-  * CPU profiling
-  * Memory profiling
-  * Allocation profiling
-  * Bottleneck identification
-  * Benchmarking
+- **81. Kotlin/Wasm**
+  - Kotlin/Wasm
+  - WebAssembly
+  - WASM compilation
+  - WASM best practices
 
 ---
 
-# XXXII. Security
+# XII. Testing
 
-* **131. Application Security**
+- **82. Testing Fundamentals**
+  - Testing
+  - Test types
+    - Unit tests
+    - Integration tests
+    - End-to-end tests
+  - Test pyramid
+  - Test-driven development
+  - Behavior-driven development
+  - Test coverage
+  - Testing best practices
 
-  * Authentication
-  * Authorization
-  * Session management
-  * Secure API design
+- **83. Unit Testing**
+  - JUnit
+  - JUnit 5
+  - Kotlin test
+  - `@Test`
+  - `@BeforeEach`
+  - `@AfterEach`
+  - `@BeforeAll`
+  - `@AfterAll`
+  - Assertions
+  - `assertEquals()`
+  - `assertTrue()`
+  - `assertThrows()`
+  - Unit testing best practices
 
-* **132. Input Security**
+- **84. Kotlin Test**
+  - `kotlin.test`
+  - `assertEquals`
+  - `assertTrue`
+  - `assertFalse`
+  - `assertNull`
+  - `assertNotNull`
+  - `assertFails`
+  - `assertFailsWith`
+  - Kotlin test best practices
 
-  * Input validation
-  * Output encoding
-  * Injection prevention
-  * Safe deserialization
+- **85. Mocking**
+  - MockK
+  - Mockito
+  - Mock creation
+  - `mockk()`
+  - `every { }`
+  - `verify { }`
+  - `slot()`
+  - `capture()`
+  - Mocking best practices
 
-* **133. Secrets Management**
+- **86. Coroutine Testing**
+  - `runTest`
+  - `TestCoroutineDispatcher`
+  - `TestCoroutineScope`
+  - `advanceTimeBy`
+  - `advanceUntilIdle`
+  - `runCurrent`
+  - Coroutine testing best practices
 
-  * API keys
-  * Credentials
-  * Environment configuration
-  * Secret storage
-  * Avoiding secrets in source control
+- **87. Property-Based Testing**
+  - Property-based testing
+  - Kotest
+  - Properties
+  - Generators
+  - Shrinking
+  - Property-based testing best practices
 
-* **134. Secure Kotlin Development**
+- **88. Integration Testing**
+  - Integration testing
+  - Database testing
+  - API testing
+  - External service testing
+  - Testcontainers
+  - Integration testing best practices
 
-  * Immutability
-  * Defensive programming
-  * Safe concurrency
-  * Error handling
-  * Dependency security
-
----
-
-# XXXIII. Advanced Kotlin Language Mastery
-
-* **135. Advanced Type-System Features**
-
-  * Variance
-  * Type projections
-  * Reified generics
-  * Intersection-like constraints
-  * Type-safe APIs
-
-* **136. Advanced Delegation**
-
-  * Custom delegates
-  * Delegated interfaces
-  * Reusable behavior
-
-* **137. Compiler-Aware Kotlin**
-
-  * Inline behavior
-  * Contracts
-  * Generated bytecode concepts
-  * JVM representation
-  * Performance implications
-
-* **138. Kotlin/JVM Internals**
-
-  * Bytecode
-  * JVM method representation
-  * Object layout concepts
-  * Interoperability annotations
-  * Reflection
-
----
-
-# XXXIV. Reflection and Metaprogramming
-
-* **139. Kotlin Reflection**
-
-  * `KClass`
-  * `KFunction`
-  * `KProperty`
-  * Runtime inspection
-  * Reflection costs
-
-* **140. Annotation Processing Concepts**
-
-  * Annotations
-  * Metadata
-  * Code generation
-  * Compile-time processing
-
-* **141. Generated Code**
-
-  * Code-generation concepts
-  * Serialization generation
-  * DI generation
-  * Build-time tooling
+- **89. Test Automation**
+  - CI integration
+  - Test pipelines
+  - Parallel testing
+  - Test reporting
+  - Code coverage
+  - Testing best practices
 
 ---
 
-# XXXV. Advanced Testing and Reliability
+# XIII. Performance Optimization
 
-* **142. Testing Asynchronous Code**
+- **90. Performance Fundamentals**
+  - Performance
+  - Latency
+  - Throughput
+  - Resource utilization
+  - Performance metrics
+  - Performance best practices
 
-  * Coroutine tests
-  * Flow tests
-  * Virtual time
-  * Cancellation tests
+- **91. Profiling**
+  - Profiling
+  - JProfiler
+  - YourKit
+  - async-profiler
+  - VisualVM
+  - Android Profiler
+  - Profiling best practices
 
-* **143. Property-Based Testing**
+- **92. JVM Optimization**
+  - JVM tuning
+  - Heap sizing
+  - GC tuning
+  - JIT compilation
+  - JVM optimization best practices
 
-  * Input generation
-  * Invariants
-  * Randomized tests
-  * Shrinking concepts
+- **93. Coroutine Performance**
+  - Coroutine overhead
+  - Dispatcher selection
+  - Structured concurrency
+  - Coroutine performance best practices
 
-* **144. Architecture Testing**
+- **94. Memory Optimization**
+  - Memory allocation
+  - Garbage collection
+  - Memory leaks
+  - Object pooling
+  - Memory optimization best practices
 
-  * Dependency boundaries
-  * Layer constraints
-  * Module boundaries
-  * API contract testing
+- **95. Android Performance**
+  - Android performance
+  - UI performance
+  - Memory optimization
+  - Battery optimization
+  - Network optimization
+  - Android performance best practices
 
-* **145. Reliability Testing**
-
-  * Failure injection
-  * Retry testing
-  * Timeout testing
-  * Concurrency testing
-  * Recovery testing
-
----
-
-# XXXVI. Kotlin Tooling and Production Engineering
-
-* **146. Build Optimization**
-
-  * Incremental compilation
-  * Dependency optimization
-  * Build caching
-  * Multi-module builds
-
-* **147. CI/CD**
-
-  * Automated builds
-  * Automated tests
-  * Static analysis
-  * Artifact generation
-  * Deployment pipelines
-
-* **148. Observability**
-
-  * Logging
-  * Metrics
-  * Tracing
-  * Error reporting
-  * Performance monitoring
-
-* **149. Production Debugging**
-
-  * Stack traces
-  * Crash analysis
-  * Thread dumps
-  * Memory analysis
-  * Performance regressions
+- **96. Benchmarking**
+  - Benchmarking
+  - JMH
+  - Kotlin benchmarking
+  - Benchmarking best practices
 
 ---
 
-# XXXVII. Advanced Architecture
+# XIV. Design Patterns and Architecture
 
-* **150. Modular Architecture**
+- **97. Design Patterns**
+  - Creational patterns
+    - Singleton
+    - Factory
+    - Builder
+    - Prototype
+  - Structural patterns
+    - Adapter
+    - Bridge
+    - Composite
+    - Decorator
+    - Facade
+    - Proxy
+  - Behavioral patterns
+    - Observer
+    - Strategy
+    - Command
+    - State
+    - Template method
+    - Visitor
+  - Kotlin-specific patterns
+    - Object singleton
+    - Companion object factory
+    - Sealed class state
+    - Extension function
+    - Delegation
+  - Design pattern best practices
 
-  * Feature modules
-  * Core modules
-  * API/implementation separation
-  * Dependency boundaries
+- **98. Architectural Patterns**
+  - Layered architecture
+  - Clean architecture
+  - Hexagonal architecture
+  - Onion architecture
+  - MVVM
+  - MVP
+  - MVI
+  - Microservices
+  - Event-driven architecture
+  - CQRS
+  - Event sourcing
+  - Architectural pattern best practices
 
-* **151. Event-Driven Architecture**
+- **99. SOLID Principles**
+  - Single Responsibility Principle
+  - Open/Closed Principle
+  - Liskov Substitution Principle
+  - Interface Segregation Principle
+  - Dependency Inversion Principle
+  - SOLID in Kotlin
+  - SOLID best practices
 
-  * Events
-  * Producers
-  * Consumers
-  * Event processing
-  * Event ordering
-  * Failure handling
-
-* **152. Distributed Systems**
-
-  * Service boundaries
-  * Remote calls
-  * Timeouts
-  * Retries
-  * Idempotency
-  * Distributed failure
-
-* **153. Microservices with Kotlin**
-
-  * Service design
-  * API contracts
-  * Service communication
-  * Configuration
-  * Observability
-  * Deployment
-
----
-
-# XXXVIII. Progressive Kotlin Projects
-
-* **154. Beginner Projects**
-
-  * Calculator
-
-    * Variables
-    * Functions
-    * Conditionals
-  * Number guessing game
-
-    * Loops
-    * Random values
-    * Input handling
-  * Unit converter
-
-    * Functions
-    * `when`
-    * Data validation
-  * Console todo application
-
-    * Collections
-    * Classes
-    * CRUD logic
-
-* **155. Intermediate Projects**
-
-  * Expense tracker
-
-    * Data classes
-    * Collections
-    * File persistence
-  * Library management system
-
-    * OOP
-    * Interfaces
-    * Data structures
-  * Banking simulation
-
-    * Encapsulation
-    * Transactions
-    * Error handling
-  * Inventory system
-
-    * Generics
-    * Collections
-    * Persistence
-
-* **156. Advanced Projects**
-
-  * REST API
-
-    * HTTP
-    * Serialization
-    * Database
-    * Authentication
-    * Coroutines
-  * E-commerce backend
-
-    * Domain modeling
-    * Transactions
-    * Caching
-    * Concurrency
-  * Real-time application
-
-    * Coroutines
-    * Flow
-    * WebSockets
-    * Event processing
-
-* **157. Expert Projects**
-
-  * Production-grade backend
-
-    * Modular architecture
-    * Authentication
-    * Database
-    * Observability
-    * CI/CD
-  * Kotlin Multiplatform application
-
-    * Shared domain
-    * Shared networking
-    * Platform-specific UI
-  * Distributed Kotlin system
-
-    * Multiple services
-    * Messaging
-    * Fault tolerance
-    * Monitoring
-    * Horizontal scaling
+- **100. Domain-Driven Design**
+  - DDD
+  - Ubiquitous language
+  - Bounded contexts
+  - Entities
+  - Value objects
+  - Aggregates
+  - Domain events
+  - Repositories
+  - DDD best practices
 
 ---
 
-# XXXIX. Progressive Learning Sequence
+# XV. Build Tools and Tooling
 
-## Level 1 — Kotlin Foundations
+- **101. Gradle**
+  - Gradle
+  - `build.gradle.kts`
+  - Kotlin DSL
+  - Tasks
+  - Plugins
+  - Dependencies
+  - Configurations
+  - Gradle lifecycle
+  - Gradle wrapper
+  - Gradle daemon
+  - Gradle build cache
+  - Gradle multi-project builds
+  - Gradle version catalog
+  - Gradle best practices
 
-* Learn:
+- **102. Maven**
+  - Maven
+  - `pom.xml`
+  - Kotlin Maven plugin
+  - Maven best practices
 
-  * Syntax
-  * Variables
-  * Types
-  * Operators
-  * Control flow
-  * Functions
-* Master:
+- **103. Kotlin Compiler**
+  - Kotlin compiler
+  - `kotlinc`
+  - Compiler flags
+  - Compiler plugins
+  - KAPT
+  - KSP
+  - Kotlin compiler best practices
 
-  * `val`
-  * `var`
-  * `if`
-  * `when`
-  * Loops
-  * Function definitions
+- **104. IDE Integration**
+  - IntelliJ IDEA
+  - Android Studio
+  - Kotlin plugin
+  - Debugging
+  - Refactoring
+  - Code inspection
+  - IDE best practices
 
-## Level 2 — Core Kotlin
+- **105. Static Analysis**
+  - Detekt
+  - Ktlint
+  - Kotlin compiler warnings
+  - Static analysis best practices
 
-* Learn:
+- **106. Documentation**
+  - KDoc
+  - Dokka
+  - Documentation best practices
 
-  * Null safety
-  * Classes
-  * Objects
-  * Collections
-  * Exceptions
-* Master:
-
-  * Nullable types
-  * Data classes
-  * Interfaces
-  * Lists
-  * Sets
-  * Maps
-
-## Level 3 — Idiomatic Kotlin
-
-* Learn:
-
-  * Lambdas
-  * Higher-order functions
-  * Extension functions
-  * Scope functions
-  * Collection transformations
-* Master:
-
-  * Functional collection pipelines
-  * Expression-oriented code
-  * Immutable design
-
-## Level 4 — Advanced Language Features
-
-* Learn:
-
-  * Generics
-  * Variance
-  * Sealed types
-  * Delegation
-  * Inline functions
-  * DSLs
-* Master:
-
-  * Type-safe abstractions
-  * Generic APIs
-  * Domain modeling
-
-## Level 5 — Coroutines and Reactive Programming
-
-* Learn:
-
-  * Suspending functions
-  * Structured concurrency
-  * Dispatchers
-  * Cancellation
-  * Flow
-  * StateFlow
-  * SharedFlow
-* Master:
-
-  * Asynchronous programming
-  * Concurrent workflows
-  * Lifecycle-aware concurrency
-
-## Level 6 — Application Development
-
-* Choose one or more:
-
-  * Android
-  * Backend
-  * Multiplatform
-* Learn:
-
-  * Networking
-  * Serialization
-  * Databases
-  * Dependency injection
-  * Architecture
-  * Testing
-
-## Level 7 — Performance and Production
-
-* Learn:
-
-  * Profiling
-  * Memory management
-  * Concurrency
-  * Build optimization
-  * CI/CD
-  * Observability
-  * Security
-
-## Level 8 — Expert Kotlin Engineering
-
-* Learn:
-
-  * Compiler/JVM concepts
-  * Advanced type systems
-  * Distributed systems
-  * Modular architectures
-  * Domain-driven design
-  * Production reliability
-
-* Master:
-
-  * Library/API design
-  * Large-scale architecture
-  * Performance engineering
-  * Concurrent systems
-  * Maintainable production Kotlin
+- **107. Formatting**
+  - Ktlint
+  - Spotless
+  - Formatting best practices
 
 ---
 
-# XL. Kotlin Mastery Map
+# XVI. Kotlin Projects by Difficulty
 
-* **Kotlin Fundamentals**
+## Beginner Projects
 
-  * Syntax
-  * Variables
-  * Types
-  * Control flow
-  * Functions
+- **1. Calculator**
+  - Functions
+  - User input
+  - Arithmetic operations
+  - Error handling
 
-* **Core Language**
+- **2. To-Do List CLI**
+  - Lists
+  - File I/O
+  - CRUD operations
+  - User input
 
-  * Null safety
-  * OOP
-  * Collections
-  * Exceptions
-  * Data classes
-  * Sealed types
+- **3. Bank Account System**
+  - Classes
+  - Inheritance
+  - Polymorphism
+  - Exception handling
 
-* **Functional Kotlin**
+- **4. Student Management System**
+  - Classes
+  - Collections
+  - File I/O
+  - CRUD operations
 
-  * Lambdas
-  * Higher-order functions
-  * Scope functions
-  * Collection pipelines
-  * Sequences
-
-* **Type System**
-
-  * Generics
-  * Variance
-  * Type projections
-  * Reified types
-  * Type-safe APIs
-
-* **Concurrency**
-
-  * Coroutines
-  * Structured concurrency
-  * Cancellation
-  * Flow
-  * StateFlow
-  * SharedFlow
-
-* **Application Engineering**
-
-  * Networking
-  * Serialization
-  * Persistence
-  * Dependency injection
-  * Testing
-
-* **Platform Development**
-
-  * Android
-  * Backend
-  * Kotlin Multiplatform
-  * JVM integration
-
-* **Performance**
-
-  * Memory
-  * Allocation
-  * Collections
-  * Coroutine performance
-  * Profiling
-
-* **Architecture**
-
-  * Clean architecture
-  * Modularization
-  * Domain-driven design
-  * Event-driven systems
-  * Distributed systems
-
-* **Production Mastery**
-
-  * Security
-  * Observability
-  * CI/CD
-  * Reliability
-  * Scalability
-  * Operations
+- **5. Quiz Application**
+  - Classes
+  - Maps
+  - Loops
+  - User input
 
 ---
 
-# XLI. Recommended Kotlin Mastery Progression
+## Intermediate Projects
 
-**Syntax → Functions → Null Safety → OOP → Collections → Functional Programming → Generics → Sealed Types → Delegation → Coroutines → Flow → Testing → Networking → Persistence → Architecture → Performance → Security → Multiplatform/Android/Backend → Production Engineering → Distributed Systems**
+- **6. Library Management System**
+  - OOP
+  - Collections
+  - File I/O
+  - CRUD operations
 
-The key transition is from merely **writing Kotlin syntax** to **thinking in Kotlin**:
+- **7. REST API**
+  - Ktor
+  - JSON serialization
+  - Routing
+  - Validation
 
-**Imperative code → immutable data → expressive types → functional transformations → structured concurrency → domain modeling → composable architecture → production-grade systems.**
+- **8. Chat Application**
+  - WebSockets
+  - Coroutines
+  - Real-time communication
+  - Networking
+
+- **9. E-Commerce Backend**
+  - Spring Boot
+  - JPA
+  - REST APIs
+  - Authentication
+  - Authorization
+
+- **10. Android App**
+  - Android
+  - Jetpack Compose
+  - ViewModel
+  - Room
+  - Retrofit
+
+---
+
+## Advanced Projects
+
+- **11. Microservices Platform**
+  - Multiple services
+  - Service discovery
+  - API gateway
+  - Circuit breakers
+  - Distributed tracing
+
+- **12. Real-Time Analytics Platform**
+  - Coroutines
+  - Flows
+  - WebSockets
+  - Time-series data
+  - Visualization
+
+- **13. Multiplatform App**
+  - Kotlin Multiplatform
+  - Shared code
+  - Android
+  - iOS
+  - Desktop
+
+- **14. Job Processing Platform**
+  - Coroutines
+  - Channels
+  - Workers
+  - Retries
+  - Monitoring
+
+- **15. Content Management System**
+  - Spring Boot
+  - JPA
+  - REST APIs
+  - Authentication
+  - File storage
+
+---
+
+## Expert Projects
+
+- **16. Distributed E-Commerce Platform**
+  - Microservices
+  - API gateway
+  - Service discovery
+  - Distributed tracing
+  - Event-driven architecture
+  - CQRS
+  - Event sourcing
+
+- **17. High-Performance Trading Platform**
+  - Low-latency
+  - Coroutines
+  - Lock-free programming
+  - Memory optimization
+  - Performance tuning
+
+- **18. Cloud-Native Platform**
+  - Kubernetes
+  - Docker
+  - Spring Boot
+  - Observability
+  - Auto-scaling
+
+- **19. Multiplatform Framework**
+  - Kotlin Multiplatform
+  - Shared libraries
+  - Platform-specific code
+  - Compose Multiplatform
+
+- **20. AI-Powered Application**
+  - Kotlin
+  - AI integration
+  - Machine learning
+  - TensorFlow
+  - Production
+
+---
+
+# XVII. Progressive Kotlin Learning Sequence
+
+## Level 1 — Kotlin Fundamentals
+
+- Master:
+  - Installation
+  - Syntax
+  - Variables
+  - Data types
+  - Operators
+  - Control flow
+  - Functions
+  - Collections
+
+## Level 2 — Object-Oriented Programming
+
+- Master:
+  - Classes
+  - Objects
+  - Properties
+  - Constructors
+  - Inheritance
+  - Interfaces
+  - Data classes
+  - Sealed classes
+  - Enum classes
+  - Objects
+  - Generics
+  - Delegation
+
+## Level 3 — Functional Programming
+
+- Master:
+  - Lambdas
+  - Higher-order functions
+  - Extension functions
+  - Scope functions
+  - Inline functions
+  - Collection operations
+  - Sequences
+
+## Level 4 — Null Safety
+
+- Master:
+  - Nullable types
+  - Safe calls
+  - Elvis operator
+  - Not-null assertion
+  - Smart casts
+  - Null safety best practices
+
+## Level 5 — Coroutines
+
+- Master:
+  - Coroutines
+  - Suspending functions
+  - Coroutine builders
+  - Dispatchers
+  - Coroutine scope
+  - Cancellation
+  - Exception handling
+  - Flows
+  - Channels
+  - Coroutine patterns
+
+## Level 6 — Android Development
+
+- Master:
+  - Android fundamentals
+  - Activities
+  - Fragments
+  - Jetpack Compose
+  - ViewModel
+  - LiveData
+  - Room
+  - Retrofit
+  - Kotlin Serialization
+  - Dependency injection
+  - Android architecture
+  - Android testing
+
+## Level 7 — Server-Side Kotlin
+
+- Master:
+  - Spring Boot
+  - Ktor
+  - Database access
+  - REST APIs
+  - GraphQL
+  - WebSockets
+  - Microservices
+  - Cloud deployment
+
+## Level 8 — Kotlin Multiplatform
+
+- Master:
+  - KMP fundamentals
+  - KMP project structure
+  - KMP libraries
+  - Compose Multiplatform
+  - KMP testing
+
+## Level 9 — Kotlin/JS and Kotlin/Native
+
+- Master:
+  - Kotlin/JS
+  - Kotlin/Native
+  - Kotlin/Wasm
+  - Interop
+
+## Level 10 — Testing
+
+- Master:
+  - Unit testing
+  - Kotlin test
+  - Mocking
+  - Coroutine testing
+  - Property-based testing
+  - Integration testing
+  - Test automation
+
+## Level 11 — Performance
+
+- Master:
+  - Profiling
+  - JVM optimization
+  - Coroutine performance
+  - Memory optimization
+  - Android performance
+  - Benchmarking
+
+## Level 12 — Architecture
+
+- Master:
+  - Design patterns
+  - Architectural patterns
+  - SOLID principles
+  - Domain-driven design
+  - Clean architecture
+
+## Level 13 — Tooling and Build
+
+- Master:
+  - Gradle
+  - Maven
+  - Kotlin compiler
+  - IDE integration
+  - Static analysis
+  - Documentation
+  - Formatting
+
+## Level 14 — Production Engineering
+
+- Master:
+  - CI/CD
+  - Deployment
+  - Monitoring
+  - Logging
+  - Security
+  - Production best practices
+
+---
+
+# XVIII. Final Kotlin Competency Map
+
+- **Foundations**
+
+  - Syntax
+  - Variables
+  - Data types
+  - Operators
+  - Control flow
+  - Functions
+  - Null safety
+
+- **OOP**
+
+  - Classes
+  - Objects
+  - Properties
+  - Constructors
+  - Inheritance
+  - Interfaces
+  - Data classes
+  - Sealed classes
+  - Enum classes
+  - Objects
+  - Generics
+  - Delegation
+
+- **Functional Programming**
+
+  - Lambdas
+  - Higher-order functions
+  - Extension functions
+  - Scope functions
+  - Inline functions
+  - Collection operations
+  - Sequences
+
+- **Coroutines**
+
+  - Coroutines
+  - Suspending functions
+  - Builders
+  - Dispatchers
+  - Scope
+  - Cancellation
+  - Exception handling
+  - Flows
+  - Channels
+  - Coroutine patterns
+
+- **Android**
+
+  - Android fundamentals
+  - Jetpack Compose
+  - ViewModel
+  - LiveData
+  - Room
+  - Retrofit
+  - Kotlin Serialization
+  - Dependency injection
+  - Architecture
+  - Testing
+  - Performance
+  - Security
+
+- **Server-Side**
+
+  - Spring Boot
+  - Ktor
+  - Database access
+  - REST APIs
+  - GraphQL
+  - WebSockets
+  - Microservices
+  - Cloud deployment
+
+- **Multiplatform**
+
+  - KMP fundamentals
+  - KMP project structure
+  - KMP libraries
+  - Compose Multiplatform
+  - KMP testing
+  - Kotlin/JS
+  - Kotlin/Native
+  - Kotlin/Wasm
+
+- **Testing**
+
+  - Unit testing
+  - Kotlin test
+  - Mocking
+  - Coroutine testing
+  - Property-based testing
+  - Integration testing
+  - Test automation
+
+- **Performance**
+
+  - Profiling
+  - JVM optimization
+  - Coroutine performance
+  - Memory optimization
+  - Android performance
+  - Benchmarking
+
+- **Architecture**
+
+  - Design patterns
+  - Architectural patterns
+  - SOLID principles
+  - Domain-driven design
+  - Clean architecture
+
+- **Tooling**
+
+  - Gradle
+  - Maven
+  - Kotlin compiler
+  - IDE integration
+  - Static analysis
+  - Documentation
+  - Formatting
+
+- **Production**
+
+  - CI/CD
+  - Deployment
+  - Monitoring
+  - Logging
+  - Security
+
+---
+
+## Recommended Overall Progression
+
+**Kotlin Fundamentals → OOP → Functional Programming → Null Safety → Coroutines → Android Development → Server-Side Kotlin → Kotlin Multiplatform → Kotlin/JS and Kotlin/Native → Testing → Performance Optimization → Architecture → Tooling → Production Engineering**

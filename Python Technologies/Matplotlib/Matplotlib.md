@@ -1,1644 +1,1729 @@
 # Matplotlib Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Concepts to Advanced Visualization and Production Mastery
+## From Plotting Foundations to Advanced Visualization, Statistical Graphics, Interactive Figures, and Production Visualization Engineering
+
+Matplotlib is best learned as more than "a library for making charts." The progression should cover **figure anatomy → pyplot vs OOP API → basic plots → styling → subplots → axes → scales → ticks → legends → annotations → colormaps → 3D plotting → statistical plots → Seaborn integration → animation → interactivity → performance → export → production visualization engineering**.
 
 ---
 
 # I. Matplotlib Foundations
 
-* **1. Introduction to Matplotlib**
+- **1. What Matplotlib Is**
+  - Matplotlib
+  - Matplotlib history
+  - John D. Hunter
+  - Matplotlib 1.0
+  - Matplotlib 2.0
+  - Matplotlib 3.0
+  - Matplotlib 3.5
+  - Matplotlib 3.8
+  - Matplotlib 3.9
+  - Matplotlib 3.10 (current)
+  - Matplotlib philosophy
+    - Publication-quality figures
+    - MATLAB-like interface
+    - Object-oriented API
+    - Extensibility
+    - Composability
+  - Matplotlib vs Seaborn
+  - Matplotlib vs Plotly
+  - Matplotlib vs Bokeh
+  - Matplotlib vs Altair
+  - Matplotlib vs ggplot2
+  - Matplotlib use cases
+    - Scientific visualization
+    - Data analysis
+    - Publication figures
+    - Dashboards
+    - Reports
+    - Machine learning visualization
+    - Engineering plots
+    - Financial charts
+  - Matplotlib in modern data science
+  - Matplotlib as foundation for Seaborn and Pandas plotting
 
-  * What Matplotlib is
+- **2. Matplotlib Architecture**
+  - Matplotlib architecture
+  - Backends
+    - Agg
+    - PDF
+    - PS
+    - SVG
+    - Cairo
+    - GTK
+    - Qt
+    - Tk
+    - wx
+    - macOS
+    - WebAgg
+  - Interactive backends
+  - Non-interactive backends
+  - Backend selection
+    - `matplotlib.use()`
+  - Renderer
+  - Artist layer
+  - FigureCanvas
+  - FigureManager
+  - pyplot interface
+  - Object-oriented interface
+  - State machine
+  - Architecture best practices
 
-    * Python visualization library
-    * General-purpose 2D plotting
-    * Support for many 3D and specialized plotting capabilities
-  * Why Matplotlib matters
+- **3. Installing Matplotlib**
+  - Installation
+    - pip
+    - conda
+    - mamba
+    - uv
+  - `pip install matplotlib`
+  - `conda install matplotlib`
+  - Version checking
+  - `matplotlib.__version__`
+  - Dependencies
+    - NumPy
+    - Pillow
+    - pyparsing
+    - cycler
+    - python-dateutil
+    - kiwisolver
+  - Jupyter integration
+    - `%matplotlib inline`
+    - `%matplotlib notebook`
+    - `%matplotlib widget`
+    - `ipympl`
+  - IDE integration
+  - Matplotlib configuration
+  - `matplotlibrc`
+  - Configuration best practices
 
-    * Exploratory data analysis
-    * Scientific visualization
-    * Statistical visualization
-    * Reporting
-    * Publication-quality figures
-    * Custom dashboards and visual applications
-  * Matplotlib ecosystem
+- **4. Configuration**
+  - `matplotlibrc`
+  - Configuration file locations
+  - `rcParams`
+  - `plt.rcParams`
+  - `mpl.rcParams`
+  - `plt.rc()`
+  - `plt.rcdefaults()`
+  - Style sheets
+  - `plt.style.use()`
+  - Built-in styles
+    - `default`
+    - `classic`
+    - `ggplot`
+    - `seaborn`
+    - `seaborn-v0_8`
+    - `bmh`
+    - `dark_background`
+    - `fast`
+    - `grayscale`
+    - `Solarize_Light2`
+    - `tableau-colorblind10`
+    - `fivethirtyeight`
+  - Style sheets
+  - Custom style sheets
+  - Style sheet locations
+  - Style sheet best practices
+  - Configuration best practices
 
-    * `matplotlib.pyplot`
-    * `matplotlib.figure`
-    * `matplotlib.axes`
-    * `matplotlib.artist`
-    * `matplotlib.patches`
-    * `matplotlib.lines`
-    * `matplotlib.colors`
-    * `matplotlib.cm`
-  * Relationship with other Python libraries
-
-    * NumPy
-    * Pandas
-    * SciPy
-    * Seaborn
-    * Jupyter
-    * scikit-learn
-
-* **2. Installation and Environment**
-
-  * Installing Matplotlib
-
-    * `pip`
-    * Conda
-  * Importing Matplotlib
-  * Import conventions
-  * Jupyter Notebook integration
-  * JupyterLab integration
-  * IDE integration
-  * Python scripts
-  * Interactive environments
-
-* **3. Core Visualization Model**
-
-  * Figure
-
-    * Overall visualization container
-  * Axes
-
-    * Individual plotting area
-  * Axis
-
-    * X-axis and Y-axis
-  * Artists
-
-    * Lines
-    * Text
-    * Patches
-    * Collections
-    * Images
-  * FigureCanvas
-  * Renderer
-  * Understanding the object-oriented architecture
-
----
-
-# II. First Plots
-
-* **4. Basic Plotting**
-
-  * `plt.plot()`
-  * X-values
-  * Y-values
-  * Automatic x-values
-  * Multiple data series
-  * Line plots
-  * Markers
-  * Line styles
-
-* **5. Basic Figure Creation**
-
-  * `plt.figure()`
-  * `fig, ax = plt.subplots()`
-  * Figure dimensions
-  * DPI
-  * Creating multiple figures
-  * Closing figures
-
-* **6. Basic Labels**
-
-  * Plot title
-  * X-axis label
-  * Y-axis label
-  * Legend
-  * Annotations
-  * Text placement
-
-* **7. Displaying Plots**
-
-  * `plt.show()`
-  * Interactive display
-  * Inline plotting
-  * Script-based rendering
-  * Saving without displaying
-
----
-
-# III. Matplotlib Syntax Fundamentals
-
-* **8. pyplot Interface**
-
-  * Stateful plotting model
-  * `plt`
-  * Current figure
-  * Current axes
-  * Basic plotting workflow
-  * Advantages
-  * Limitations
-
-* **9. Object-Oriented Interface**
-
-  * `Figure`
-  * `Axes`
-  * `Axis`
-  * `Line2D`
-  * `Text`
-  * `Patch`
-  * Explicit object references
-  * Why the object-oriented API scales better
-
-* **10. Core Pattern**
-
-  * Create figure
-
-    * `fig`
-  * Create axes
-
-    * `ax`
-  * Plot data
-
-    * `ax.plot()`
-  * Configure
-
-    * `ax.set_title()`
-    * `ax.set_xlabel()`
-    * `ax.set_ylabel()`
-  * Display or save
-
-    * `plt.show()`
-    * `fig.savefig()`
+- **5. First Plot**
+  - Hello plot
+  - `plt.plot()`
+  - `plt.show()`
+  - Simple line plot
+  - Simple scatter plot
+  - Simple bar chart
+  - Simple histogram
+  - Figure creation
+  - Axes creation
+  - pyplot vs OOP
+  - First plot best practices
+  - Saving figures
+  - `plt.savefig()`
+  - `fig.savefig()`
 
 ---
 
-# IV. Basic Plot Types
+# II. Figure and Axes
 
-* **11. Line Charts**
+- **6. Figure Anatomy**
+  - Figure
+  - Axes
+  - Axis
+  - Artist
+  - Subplot
+  - Subplots
+  - Figure size
+  - Figure DPI
+  - Figure background
+  - Figure title
+  - Figure suptitle
+  - Figure legends
+  - Figure colorbar
+  - Figure text
+  - Figure layout
+  - Figure best practices
 
-  * Simple line plots
-  * Multiple lines
-  * Markers
-  * Dashed lines
-  * Step plots
-  * Filled line plots
+- **7. pyplot Interface**
+  - pyplot
+  - State machine
+  - Current figure
+  - Current axes
+  - `plt.figure()`
+  - `plt.gcf()`
+  - `plt.gca()`
+  - `plt.clf()`
+  - `plt.cla()`
+  - `plt.close()`
+  - `plt.close('all')`
+  - `plt.plot()`
+  - `plt.scatter()`
+  - `plt.bar()`
+  - `plt.hist()`
+  - `plt.pie()`
+  - `plt.boxplot()`
+  - `plt.violinplot()`
+  - `plt.imshow()`
+  - `plt.contour()`
+  - `plt.contourf()`
+  - `plt.pcolormesh()`
+  - `plt.quiver()`
+  - `plt.streamplot()`
+  - pyplot best practices
+  - pyplot limitations
 
-* **12. Scatter Plots**
+- **8. Object-Oriented Interface**
+  - Object-oriented interface
+  - Figure objects
+  - Axes objects
+  - `fig, ax = plt.subplots()`
+  - `fig.add_axes()`
+  - `fig.add_subplot()`
+  - `fig.subplots()`
+  - `fig.subplots_adjust()`
+  - `fig.tight_layout()`
+  - `fig.set_layout_engine()`
+  - `constrained_layout`
+  - `fig.legend()`
+  - `fig.colorbar()`
+  - `fig.text()`
+  - `fig.suptitle()`
+  - `ax.plot()`
+  - `ax.scatter()`
+  - `ax.bar()`
+  - `ax.hist()`
+  - `ax.set_title()`
+  - `ax.set_xlabel()`
+  - `ax.set_ylabel()`
+  - `ax.legend()`
+  - `ax.grid()`
+  - `ax.set_xlim()`
+  - `ax.set_ylim()`
+  - OOP interface best practices
+  - OOP vs pyplot
 
-  * `scatter()`
-  * Point size
-  * Point color
-  * Transparency
-  * Categories
-  * Bubble plots
-  * Color-mapped scatter plots
+- **9. Subplots**
+  - Subplots
+  - `plt.subplot()`
+  - `plt.subplots()`
+  - `fig.add_subplot()`
+  - Subplot grid
+  - Subplot spacing
+  - Subplot sharing
+    - Share x-axis
+    - Share y-axis
+  - `subplot_kw`
+  - `gridspec_kw`
+  - `fig.subplots_adjust()`
+  - `fig.tight_layout()`
+  - `constrained_layout`
+  - Subplot best practices
 
-* **13. Bar Charts**
+- **10. GridSpec**
+  - GridSpec
+  - `GridSpec`
+  - `fig.add_gridspec()`
+  - GridSpec layout
+  - GridSpec spanning
+  - `subplot2grid()`
+  - Nested GridSpec
+  - GridSpec best practices
 
-  * Vertical bars
-  * Horizontal bars
-  * Grouped bars
-  * Stacked bars
-  * Error bars
-  * Labels on bars
+- **11. Axes Positioning**
+  - Axes positioning
+  - `fig.add_axes()`
+  - Bounding box
+  - `[left, bottom, width, height]`
+  - Inset axes
+  - `ax.inset_axes()`
+  - `indicate_inset_zoom()`
+  - `indicate_inset()`
+  - `mpl_toolkits.axes_grid1`
+  - Axes positioning best practices
 
-* **14. Histograms**
-
-  * `hist()`
-  * Bin selection
-  * Bin width
-  * Density
-  * Multiple distributions
-  * Cumulative histograms
-  * Histogram normalization
-
-* **15. Pie Charts**
-
-  * `pie()`
-  * Labels
-  * Percentages
-  * Exploded slices
-  * Start angle
-  * Donut-style variations
-
-* **16. Area Charts**
-
-  * Filled regions
-  * Stacked areas
-  * `fill_between()`
-  * Confidence bands
-
----
-
-# V. Intermediate Plot Types
-
-* **17. Box Plots**
-
-  * Quartiles
-  * Median
-  * Whiskers
-  * Outliers
-  * Multiple groups
-  * Customization
-
-* **18. Violin Plots**
-
-  * Distribution shape
-  * Density
-  * Quartiles
-  * Multiple groups
-
-* **19. Error Bar Charts**
-
-  * `errorbar()`
-  * Symmetric errors
-  * Asymmetric errors
-  * Measurement uncertainty
-  * Confidence intervals
-
-* **20. Stem and Step Visualizations**
-
-  * Stem plots
-  * Step plots
-  * Signal-oriented visualization
-
-* **21. Hexbin Plots**
-
-  * High-density scatter data
-  * Binning
-  * Color intensity
-  * Large datasets
-
-* **22. Contour Plots**
-
-  * `contour()`
-  * `contourf()`
-  * Level selection
-  * Filled contours
-  * Color mapping
-  * Topographic and mathematical surfaces
-
-* **23. Image Plots**
-
-  * `imshow()`
-  * Pixel-based data
-  * Grayscale images
-  * Color images
-  * Matrix visualization
-  * Image interpolation
-
-* **24. Heatmaps**
-
-  * Matrix visualization
-  * Color scales
-  * Cell annotations
-  * Correlation visualization
-  * Custom colorbars
-
----
-
-# VI. Data Preparation for Visualization
-
-* **25. NumPy Integration**
-
-  * Arrays
-  * Vectorized operations
-  * Mathematical functions
-  * Reshaping
-  * Masked arrays
-
-* **26. Pandas Integration**
-
-  * Series
-  * DataFrames
-  * Date indexes
-  * Grouped data
-  * Pivot tables
-  * Direct plotting
-  * Custom Matplotlib axes
-
-* **27. Handling Missing Data**
-
-  * `NaN`
-  * Masked values
-  * Gaps in line plots
-  * Missing categories
-  * Explicit missing-value visualization
-
-* **28. Data Transformation**
-
-  * Aggregation
-  * Normalization
-  * Scaling
-  * Binning
-  * Smoothing
-  * Filtering
-  * Resampling
+- **12. Twin Axes**
+  - Twin axes
+  - `ax.twinx()`
+  - `ax.twiny()`
+  - Secondary axis
+  - `secondary_yaxis()`
+  - `secondary_xaxis()`
+  - Twin axes best practices
 
 ---
 
-# VII. Figure and Axes Architecture
+# III. Basic Plot Types
 
-* **29. Figure**
+- **13. Line Plots**
+  - Line plots
+  - `plot()`
+  - Line styles
+    - `-`
+    - `--`
+    - `-.`
+    - `:`
+    - `None`
+  - Line width
+  - Line color
+  - Line markers
+    - `o`
+    - `.`
+    - `,`
+    - `x`
+    - `+`
+    - `*`
+    - `s`
+    - `D`
+    - `d`
+    - `^`
+    - `v`
+    - `<`
+    - `>`
+    - `p`
+    - `h`
+    - `H`
+    - `8`
+    - `P`
+    - `X`
+  - Marker size
+  - Marker edge color
+  - Marker face color
+  - Marker edge width
+  - Alpha
+  - Label
+  - Multiple lines
+  - Line plot best practices
 
-  * Figure size
-  * DPI
-  * Background
-  * Figure-level title
-  * Figure-level text
+- **14. Scatter Plots**
+  - Scatter plots
+  - `scatter()`
+  - Marker size
+  - Marker color
+  - Marker shape
+  - Colormap
+  - Colorbar
+  - Alpha
+  - Edge colors
+  - Edge widths
+  - Bubble charts
+  - Scatter plot best practices
+  - Scatter vs plot
 
-* **30. Axes**
+- **15. Bar Charts**
+  - Bar charts
+  - `bar()`
+  - `barh()`
+  - Horizontal bars
+  - Vertical bars
+  - Grouped bars
+  - Stacked bars
+  - Error bars
+  - Bar width
+  - Bar color
+  - Bar labels
+  - Bar annotations
+  - Bar chart best practices
 
-  * Plotting region
-  * Position
-  * Limits
-  * Labels
-  * Ticks
-  * Grid
-  * Spines
+- **16. Histograms**
+  - Histograms
+  - `hist()`
+  - Bins
+  - Bin edges
+  - Bin counts
+  - Density
+  - Cumulative
+  - Histogram types
+    - `bar`
+    - `barstacked`
+    - `step`
+    - `stepfilled`
+  - Multiple histograms
+  - Histogram best practices
 
-* **31. Axis Objects**
+- **17. Pie Charts**
+  - Pie charts
+  - `pie()`
+  - Slice labels
+  - Slice colors
+  - Explode
+  - Autopct
+  - Shadow
+  - Start angle
+  - Counterclock
+  - Donut charts
+  - Pie chart best practices
+  - Pie chart criticism
 
-  * X-axis
-  * Y-axis
-  * Tick locations
-  * Tick labels
-  * Tick formatting
+- **18. Box Plots**
+  - Box plots
+  - `boxplot()`
+  - Whiskers
+  - Quartiles
+  - Median
+  - Outliers
+  - Notched box plots
+  - Horizontal box plots
+  - Grouped box plots
+  - Box plot best practices
 
-* **32. Artist Hierarchy**
+- **19. Violin Plots**
+  - Violin plots
+  - `violinplot()`
+  - Kernel density estimation
+  - Bandwidth
+  - Inner representation
+  - Violin plot best practices
+  - Violin vs box plot
 
-  * Figure
-  * Axes
-  * Axis
-  * Primitive artists
-  * Containers
-  * Collections
+- **20. Error Bars**
+  - Error bars
+  - `errorbar()`
+  - Symmetric errors
+  - Asymmetric errors
+  - Error bar caps
+  - Error bar colors
+  - Error bar best practices
+
+- **21. Stem Plots**
+  - Stem plots
+  - `stem()`
+  - Stem lines
+  - Stem markers
+  - Stem plot best practices
+
+- **22. Step Plots**
+  - Step plots
+  - `step()`
+  - Step types
+    - `pre`
+    - `post`
+    - `mid`
+  - Step plot best practices
+
+- **23. Fill Between**
+  - `fill_between()`
+  - `fill_betweenx()`
+  - Filled areas
+  - Alpha
+  - Where condition
+  - Interpolation
+  - Fill between best practices
+
+- **24. Area Plots**
+  - Area plots
+  - `stackplot()`
+  - Stacked areas
+  - Area plot best practices
+
+- **25. Heatmaps**
+  - Heatmaps
+  - `imshow()`
+  - `pcolormesh()`
+  - `matshow()`
+  - Colormaps
+  - Colorbar
+  - Annotations
+  - Heatmap best practices
+
+- **26. Contour Plots**
+  - Contour plots
+  - `contour()`
+  - `contourf()`
+  - Contour levels
+  - Contour labels
+  - `clabel()`
+  - Contour best practices
+
+- **27. Quiver Plots**
+  - Quiver plots
+  - `quiver()`
+  - Vector fields
+  - Arrow properties
+  - Quiver best practices
+
+- **28. Stream Plots**
+  - Stream plots
+  - `streamplot()`
+  - Streamlines
+  - Stream plot best practices
+
+- **29. Hexbin Plots**
+  - Hexbin plots
+  - `hexbin()`
+  - Hexagonal binning
+  - Colormap
+  - Hexbin best practices
+
+- **30. 2D Histograms**
+  - 2D histograms
+  - `hist2d()`
+  - Bins
+  - Colormap
+  - 2D histogram best practices
+
+- **31. Image Plots**
+  - Image plots
+  - `imshow()`
+  - Image interpolation
+    - `none`
+    - `antialiased`
+    - `nearest`
+    - `bilinear`
+    - `bicubic`
+    - `spline16`
+    - `spline36`
+    - `hanning`
+    - `hamming`
+    - `hermite`
+    - `kaiser`
+    - `quadric`
+    - `catrom`
+    - `gaussian`
+    - `bessel`
+    - `mitchell`
+    - `sinc`
+    - `lanczos`
+    - `blackman`
+  - Aspect ratio
+  - Image best practices
 
 ---
 
-# VIII. Subplots and Multi-Panel Figures
+# IV. Styling and Customization
 
-* **33. Multiple Axes**
+- **32. Colors**
+  - Color specifications
+    - Named colors
+    - Hex colors
+    - RGB tuples
+    - RGBA tuples
+    - Grayscale
+  - Color palettes
+  - Color cycles
+  - `cycler`
+  - Color maps
+  - Color best practices
 
-  * `subplots()`
-  * Rows
-  * Columns
-  * Grid layouts
+- **33. Colormaps**
+  - Colormaps
+  - Sequential colormaps
+    - `viridis`
+    - `plasma`
+    - `inferno`
+    - `magma`
+    - `cividis`
+  - Diverging colormaps
+    - `RdBu`
+    - `RdYlBu`
+    - `coolwarm`
+    - `PiYG`
+    - `PRGn`
+    - `BrBG`
+  - Cyclic colormaps
+    - `twilight`
+    - `hsv`
+  - Qualitative colormaps
+    - `tab10`
+    - `tab20`
+    - `Set1`
+    - `Set2`
+    - `Set3`
+    - `Paired`
+  - Perceptually uniform colormaps
+  - Colorblind-friendly colormaps
+  - Colormap normalization
+    - `Normalize`
+    - `LogNorm`
+    - `SymLogNorm`
+    - `PowerNorm`
+    - `BoundaryNorm`
+    - `TwoSlopeNorm`
+  - Colormap best practices
 
-* **34. Advanced Subplot Layouts**
+- **34. Markers**
+  - Marker types
+  - Marker sizes
+  - Marker edge colors
+  - Marker face colors
+  - Marker edge widths
+  - Custom markers
+  - Marker paths
+  - Marker best practices
 
-  * `GridSpec`
-  * Nested grids
-  * Variable subplot sizes
-  * Shared axes
-  * Spanning panels
+- **35. Line Styles**
+  - Line styles
+  - Line widths
+  - Line colors
+  - Dashed lines
+  - Dotted lines
+  - Dash-dot lines
+  - Custom dash patterns
+  - Line style best practices
 
-* **35. Shared Axes**
+- **36. Fonts**
+  - Font families
+  - Font sizes
+  - Font weights
+  - Font styles
+  - Font properties
+  - `FontProperties`
+  - `font_manager`
+  - Custom fonts
+  - LaTeX fonts
+  - Font best practices
+  - Font rendering
 
-  * Shared X-axis
-  * Shared Y-axis
-  * Synchronizing limits
-  * Synchronizing ticks
+- **37. Text**
+  - Text annotations
+  - `text()`
+  - `annotate()`
+  - Text coordinates
+  - Text alignment
+  - Text rotation
+  - Text color
+  - Text background
+  - Text bbox
+  - Text best practices
 
-* **36. Layout Management**
+- **38. Titles and Labels**
+  - Figure title
+  - `fig.suptitle()`
+  - Axes title
+  - `ax.set_title()`
+  - X-axis label
+  - `ax.set_xlabel()`
+  - Y-axis label
+  - `ax.set_ylabel()`
+  - Title and label best practices
 
-  * `tight_layout()`
-  * `constrained_layout`
-  * Manual positioning
-  * Figure margins
-  * Spacing between axes
+- **39. Legends**
+  - Legends
+  - `legend()`
+  - Legend location
+    - `best`
+    - `upper right`
+    - `upper left`
+    - `lower right`
+    - `lower left`
+    - `center`
+    - `center left`
+    - `center right`
+    - `upper center`
+    - `lower center`
+  - Legend columns
+  - Legend frame
+  - Legend title
+  - Legend font size
+  - Legend markers
+  - Legend handles
+  - Legend labels
+  - Custom legends
+  - `Line2D`
+  - `Patch`
+  - `Polygon`
+  - Legend best practices
 
-* **37. Figure Composition**
+- **40. Annotations**
+  - Annotations
+  - `annotate()`
+  - Text annotations
+  - Arrow annotations
+  - Arrow styles
+  - Arrow properties
+  - `FancyArrowPatch`
+  - `ArrowStyle`
+  - `ConnectionPatch`
+  - Annotation best practices
 
-  * Main chart
-  * Supporting charts
-  * Insets
-  * Colorbars
-  * Shared legends
-  * Figure annotations
+- **41. Grid**
+  - Grid
+  - `grid()`
+  - Grid lines
+  - Grid color
+  - Grid linestyle
+  - Grid linewidth
+  - Grid alpha
+  - Major grid
+  - Minor grid
+  - Grid best practices
+
+- **42. Spines**
+  - Spines
+  - `spines`
+  - Spine visibility
+  - Spine color
+  - Spine linewidth
+  - Spine position
+  - Spine best practices
+
+- **43. Ticks**
+  - Ticks
+  - Major ticks
+  - Minor ticks
+  - Tick locators
+    - `AutoLocator`
+    - `MultipleLocator`
+    - `FixedLocator`
+    - `LinearLocator`
+    - `LogLocator`
+    - `MaxNLocator`
+    - `NullLocator`
+    - `IndexLocator`
+    - `SymmetricalLogLocator`
+    - `LogitLocator`
+  - Tick formatters
+    - `AutoFormatter`
+    - `FormatStrFormatter`
+    - `StrMethodFormatter`
+    - `FuncFormatter`
+    - `FixedFormatter`
+    - `NullFormatter`
+    - `PercentFormatter`
+    - `EngFormatter`
+    - `ScalarFormatter`
+    - `LogFormatter`
+  - Tick parameters
+  - Tick rotation
+  - Tick label size
+  - Tick label color
+  - Tick best practices
+
+- **44. Axes Limits**
+  - `set_xlim()`
+  - `set_ylim()`
+  - `set_xbound()`
+  - `set_ybound()`
+  - Auto limits
+  - Margins
+  - Inverted axes
+  - Axes limits best practices
+
+- **45. Axes Scales**
+  - Linear scale
+  - Log scale
+    - `set_xscale('log')`
+    - `set_yscale('log')`
+  - Symlog scale
+  - Logit scale
+  - Function scale
+  - Scale best practices
+
+- **46. Aspect Ratio**
+  - Aspect ratio
+  - `set_aspect()`
+  - `'auto'`
+  - `'equal'`
+  - Numeric aspect
+  - Aspect best practices
 
 ---
 
-# IX. Styling and Appearance
+# V. Statistical Plots
 
-* **38. Colors**
+- **47. Statistical Visualization**
+  - Statistical visualization
+  - Distribution plots
+  - Relationship plots
+  - Categorical plots
+  - Regression plots
+  - Statistical best practices
 
-  * Named colors
-  * Hexadecimal colors
-  * RGB
-  * RGBA
-  * Transparency
-  * Color palettes
-  * Perceptually meaningful colors
+- **48. Error Bars**
+  - Error bars
+  - Confidence intervals
+  - Standard deviation
+  - Standard error
+  - Error bar best practices
 
-* **39. Line Styling**
+- **49. Confidence Intervals**
+  - Confidence intervals
+  - `fill_between()`
+  - Confidence bands
+  - Confidence interval best practices
 
-  * Line width
-  * Line style
-  * Marker style
-  * Marker size
-  * Marker edge
-  * Marker transparency
+- **50. Regression Plots**
+  - Regression plots
+  - Linear regression
+  - Polynomial regression
+  - Scatter with fit
+  - Residual plots
+  - Regression plot best practices
 
-* **40. Text Styling**
+- **51. Density Plots**
+  - Density plots
+  - Kernel density estimation
+  - `gaussian_kde`
+  - Histogram vs density
+  - Density plot best practices
 
-  * Font family
-  * Font size
-  * Font weight
-  * Font style
-  * Text alignment
-  * Rotation
-  * Mathematical text
+- **52. QQ Plots**
+  - QQ plots
+  - Quantile-quantile plots
+  - `probplot()`
+  - `qqplot()`
+  - QQ plot best practices
 
-* **41. Grid Styling**
+- **53. Autocorrelation Plots**
+  - Autocorrelation
+  - `acorr()`
+  - `xcorr()`
+  - Lag plots
+  - Autocorrelation best practices
 
-  * Major grids
-  * Minor grids
-  * Line width
-  * Transparency
-  * Grid placement
-
-* **42. Spines**
-
-  * Visibility
-  * Position
-  * Width
-  * Color
-  * Removing unnecessary spines
-
----
-
-# X. Ticks and Axis Formatting
-
-* **43. Tick Control**
-
-  * Major ticks
-  * Minor ticks
-  * Tick frequency
-  * Tick length
-  * Tick direction
-
-* **44. Tick Labels**
-
-  * Formatting
-  * Rotation
-  * Font customization
-  * Conditional formatting
-
-* **45. Locators**
-
-  * Automatic locators
-  * Fixed locators
-  * Multiple locator types
-  * Date locators
-
-* **46. Formatters**
-
-  * Scalar formatters
-  * Percentage formatters
-  * Scientific notation
-  * Currency-style formatting
-  * Custom formatter functions
+- **54. Spectral Plots**
+  - Spectral plots
+  - `specgram()`
+  - `psd()`
+  - `csd()`
+  - `cohere()`
+  - Spectral plot best practices
 
 ---
 
-# XI. Scales and Coordinate Systems
+# VI. 3D Plotting
 
-* **47. Linear Scale**
+- **55. 3D Plotting Fundamentals**
+  - 3D plotting
+  - `mpl_toolkits.mplot3d`
+  - `Axes3D`
+  - `projection='3d'`
+  - 3D axes
+  - 3D best practices
 
-  * Default scale
-  * Linear transformations
+- **56. 3D Plot Types**
+  - 3D line plots
+  - 3D scatter plots
+  - 3D surface plots
+  - 3D wireframe plots
+  - 3D contour plots
+  - 3D bar plots
+  - 3D quiver plots
+  - 3D voxel plots
+  - 3D plot best practices
 
-* **48. Logarithmic Scale**
-
-  * `log`
-  * Log X-axis
-  * Log Y-axis
-  * Log-log plots
-  * Scientific applications
-
-* **49. Symmetric Log Scale**
-
-  * `symlog`
-  * Positive and negative data
-  * Near-zero behavior
-
-* **50. Other Scales**
-
-  * `logit`
-  * Custom scales
-  * Nonlinear axis transformations
-
-* **51. Coordinate Transformations**
-
-  * Data coordinates
-  * Axes coordinates
-  * Figure coordinates
-  * Display coordinates
-  * Transform objects
+- **57. 3D Styling**
+  - 3D view angles
+  - 3D projection
+  - 3D panes
+  - 3D grid
+  - 3D lighting
+  - 3D best practices
 
 ---
 
-# XII. Legends and Annotations
+# VII. Animation
 
-* **52. Legends**
+- **58. Animation Fundamentals**
+  - Animation
+  - `matplotlib.animation`
+  - `FuncAnimation`
+  - `ArtistAnimation`
+  - `TimedAnimation`
+  - Animation best practices
 
-  * Basic legends
-  * Legend locations
-  * Custom handles
-  * Multiple columns
-  * Frame customization
-  * Figure-level legends
+- **59. FuncAnimation**
+  - `FuncAnimation`
+  - Animation function
+  - Frames
+  - Interval
+  - Blit
+  - Repeat
+  - Save animation
+  - FuncAnimation best practices
 
-* **53. Text**
+- **60. ArtistAnimation**
+  - `ArtistAnimation`
+  - Artist lists
+  - Frame sequence
+  - ArtistAnimation best practices
 
-  * `text()`
-  * Figure text
-  * Axes text
-  * Relative positioning
+- **61. Saving Animations**
+  - `save()`
+  - GIF
+  - MP4
+  - WebM
+  - FFmpeg
+  - ImageMagick
+  - Pillow
+  - Animation saving best practices
 
-* **54. Annotations**
-
-  * `annotate()`
-  * Arrows
-  * Callouts
-  * Data-point labeling
-  * Highlighting important regions
-
-* **55. Advanced Annotation**
-
-  * Offset coordinates
-  * Bounding boxes
-  * Connection styles
-  * Custom annotation positions
-
----
-
-# XIII. Color Theory and Colormaps
-
-* **56. Colormap Fundamentals**
-
-  * Sequential colormaps
-  * Diverging colormaps
-  * Qualitative colormaps
-  * Cyclic colormaps
-
-* **57. Normalization**
-
-  * Linear normalization
-  * Log normalization
-  * Boundary normalization
-  * Centered normalization
-
-* **58. Colorbars**
-
-  * Basic colorbar
-  * Shared colorbars
-  * Custom labels
-  * Tick formatting
-  * Colorbar placement
-
-* **59. Color Design**
-
-  * Visual hierarchy
-  * Contrast
-  * Accessibility
-  * Perceptual uniformity
-  * Avoiding misleading color encoding
+- **62. Interactive Animations**
+  - Interactive animations
+  - Widgets
+  - Sliders
+  - Buttons
+  - Animation best practices
 
 ---
 
-# XIV. Dates and Time-Series Visualization
+# VIII. Interactive Plotting
 
-* **60. Date Plotting**
+- **63. Interactive Backends**
+  - Interactive backends
+  - `notebook`
+  - `widget`
+  - `ipympl`
+  - `nbagg`
+  - `tk`
+  - `qt`
+  - `wx`
+  - Interactive backends best practices
 
-  * Python `datetime`
-  * NumPy datetime
-  * Pandas timestamps
-  * Datetime axes
+- **64. Widgets**
+  - Widgets
+  - `matplotlib.widgets`
+  - `Slider`
+  - `Button`
+  - `RadioButtons`
+  - `CheckButtons`
+  - `TextBox`
+  - `SpanSelector`
+  - `RectangleSelector`
+  - `EllipseSelector`
+  - `LassoSelector`
+  - `PolygonSelector`
+  - Widget best practices
 
-* **61. Date Locators**
+- **65. Event Handling**
+  - Event handling
+  - `mpl_connect()`
+  - `mpl_disconnect()`
+  - Event types
+    - `button_press_event`
+    - `button_release_event`
+    - `draw_event`
+    - `key_press_event`
+    - `key_release_event`
+    - `motion_notify_event`
+    - `pick_event`
+    - `resize_event`
+    - `scroll_event`
+    - `figure_enter_event`
+    - `figure_leave_event`
+    - `axes_enter_event`
+    - `axes_leave_event`
+    - `close_event`
+  - Event best practices
 
-  * Years
-  * Months
-  * Weeks
-  * Days
-  * Hours
-  * Minutes
+- **66. Picking**
+  - Picking
+  - `pick_event`
+  - `picker` property
+  - Custom pickers
+  - Picking best practices
 
-* **62. Date Formatters**
-
-  * Custom date formatting
-  * Multi-level date labels
-  * Readability
-
-* **63. Time-Series Charts**
-
-  * Trends
-  * Rolling averages
-  * Seasonal patterns
-  * Missing periods
-  * Multiple time series
-
----
-
-# XV. Statistical Visualization with Matplotlib
-
-* **64. Distribution Visualization**
-
-  * Histogram
-  * Density-like approximations
-  * Box plots
-  * Violin plots
-
-* **65. Relationships**
-
-  * Scatter plots
-  * Regression lines
-  * Reference lines
-  * Group comparisons
-
-* **66. Uncertainty Visualization**
-
-  * Error bars
-  * Confidence intervals
-  * Prediction intervals
-  * Shaded uncertainty bands
-
-* **67. Comparative Visualization**
-
-  * Grouped bars
-  * Box plots
-  * Multiple distributions
-  * Small multiples
-
----
-
-# XVI. Advanced Plot Composition
-
-* **68. Twin Axes**
-
-  * `twinx()`
-  * `twiny()`
-  * Dual-axis charts
-  * Proper labeling
-  * Risks of misleading comparisons
-
-* **69. Secondary Axes**
-
-  * Secondary X-axis
-  * Secondary Y-axis
-  * Coordinate transformations
-
-* **70. Insets**
-
-  * Zoomed regions
-  * Embedded plots
-  * Highlighted details
-
-* **71. Reference Elements**
-
-  * Horizontal lines
-  * Vertical lines
-  * Thresholds
-  * Baselines
-  * Highlighted regions
-  * Event markers
-
-* **72. Custom Layout Composition**
-
-  * Dashboard-like figures
-  * Multiple coordinated panels
-  * Shared annotations
-  * Complex figure geometry
+- **67. Interactive Tools**
+  - Pan
+  - Zoom
+  - Home
+  - Back
+  - Forward
+  - Save
+  - Configure subplots
+  - Interactive tools best practices
 
 ---
 
-# XVII. Patches, Shapes, and Low-Level Graphics
+# IX. Advanced Plotting
 
-* **73. Patches**
+- **68. Custom Artists**
+  - Artists
+  - `Artist` class
+  - Custom artists
+  - `Line2D`
+  - `Patch`
+  - `Rectangle`
+  - `Circle`
+  - `Ellipse`
+  - `Polygon`
+  - `FancyArrow`
+  - `FancyArrowPatch`
+  - `FancyBboxPatch`
+  - `PathPatch`
+  - `Arc`
+  - `Wedge`
+  - Custom artist best practices
 
-  * Rectangle
-  * Circle
-  * Ellipse
-  * Polygon
-  * Fancy boxes
-  * Arrows
+- **69. Paths and Patches**
+  - `Path`
+  - `PathPatch`
+  - `PathEffects`
+  - `patheffects`
+  - `withStroke()`
+  - `Normal()`
+  - Path and patch best practices
 
-* **74. Collections**
+- **70. Transformations**
+  - Transformations
+  - `Transform`
+  - `transData`
+  - `transAxes`
+  - `transFigure`
+  - `transSubfigure`
+  - `IdentityTransform`
+  - `BlendedTransform`
+  - `CompositeTransform`
+  - Transformation best practices
 
-  * Patch collections
-  * Line collections
-  * Efficient rendering of many objects
+- **71. Custom Projections**
+  - Custom projections
+  - `projection` parameter
+  - Projection classes
+  - Polar projection
+  - Geographic projections
+  - Cartopy
+  - Custom projection best practices
 
-* **75. Custom Shapes**
+- **72. Polar Plots**
+  - Polar plots
+  - `projection='polar'`
+  - Polar coordinates
+  - Polar bars
+  - Polar scatter
+  - Polar plots best practices
 
-  * Geometric diagrams
-  * Highlight regions
-  * Custom markers
-  * Visual overlays
+- **73. Geographic Plots**
+  - Geographic plots
+  - Cartopy
+  - Basemap (legacy)
+  - GeoPandas
+  - Map projections
+  - Geographic plots best practices
 
-* **76. Low-Level Artist Manipulation**
+- **74. Sankey Diagrams**
+  - Sankey diagrams
+  - `Sankey`
+  - Flow diagrams
+  - Sankey best practices
 
-  * Adding artists directly
-  * Modifying artist properties
-  * Artist visibility
-  * Z-order
-  * Clipping
+- **75. Treemaps**
+  - Treemaps
+  - `squarify`
+  - `plotly` treemaps
+  - Treemaps best practices
 
----
+- **76. Chord Diagrams**
+  - Chord diagrams
+  - `pycirclize`
+  - `chord`
+  - Chord best practices
 
-# XVIII. Mathematical and Scientific Visualization
-
-* **77. Mathematical Functions**
-
-  * Curves
-  * Parametric functions
-  * Piecewise functions
-  * Trigonometric functions
-
-* **78. Multivariable Functions**
-
-  * Contours
-  * Filled contours
-  * Heatmaps
-  * Surface-like visualizations
-
-* **79. Scientific Data**
-
-  * Experimental measurements
-  * Error visualization
-  * Physical models
-  * Simulation results
-
-* **80. Engineering Visualization**
-
-  * Signals
-  * Frequency-related plots
-  * Measurement series
-  * Thresholds
-  * Calibration charts
-
----
-
-# XIX. 3D Visualization
-
-* **81. 3D Plotting Fundamentals**
-
-  * 3D axes
-  * 3D lines
-  * 3D scatter
-
-* **82. 3D Surfaces**
-
-  * Surface plots
-  * Mesh plots
-  * Wireframes
-
-* **83. 3D Contours**
-
-  * Contour projections
-  * Filled contours
-
-* **84. 3D Configuration**
-
-  * Viewing angle
-  * Elevation
-  * Azimuth
-  * Depth perception
-  * Axis configuration
-
-* **85. Limitations and Alternatives**
-
-  * When 3D helps
-  * When 2D is clearer
-  * Alternatives for scientific visualization
+- **77. Network Graphs**
+  - Network graphs
+  - NetworkX
+  - Node-link diagrams
+  - Network graph best practices
 
 ---
 
-# XX. Images and Matrix Visualization
+# X. Matplotlib and Ecosystem
 
-* **86. `imshow()`**
+- **78. Matplotlib and NumPy**
+  - NumPy arrays
+  - Array plotting
+  - Vectorized plotting
+  - Broadcasting
+  - NumPy best practices
+  - NumPy integration best practices
 
-  * Matrix data
-  * Image arrays
-  * Pixel coordinates
-  * Interpolation
+- **79. Matplotlib and Pandas**
+  - Pandas plotting
+  - `df.plot()`
+  - `df.plot.line()`
+  - `df.plot.bar()`
+  - `df.plot.scatter()`
+  - `df.plot.hist()`
+  - `df.plot.box()`
+  - `df.plot.area()`
+  - `df.plot.pie()`
+  - Pandas integration best practices
+  - Pandas vs Matplotlib
 
-* **87. Image Normalization**
+- **80. Matplotlib and Seaborn**
+  - Seaborn
+  - Seaborn built on Matplotlib
+  - `sns.set_theme()`
+  - `sns.set_style()`
+  - `sns.set_palette()`
+  - Seaborn functions
+    - `sns.scatterplot()`
+    - `sns.lineplot()`
+    - `sns.barplot()`
+    - `sns.histplot()`
+    - `sns.boxplot()`
+    - `sns.violinplot()`
+    - `sns.heatmap()`
+    - `sns.pairplot()`
+    - `sns.jointplot()`
+    - `sns.relplot()`
+    - `sns.catplot()`
+    - `sns.displot()`
+    - `sns.lmplot()`
+    - `sns.clustermap()`
+  - Seaborn integration best practices
+  - Seaborn vs Matplotlib
 
-  * Intensity scaling
-  * Clipping
-  * Log normalization
+- **81. Matplotlib and SciPy**
+  - SciPy
+  - SciPy integration
+  - Statistical plots
+  - Signal processing
+  - SciPy best practices
 
-* **88. Image Annotations**
+- **82. Matplotlib and scikit-learn**
+  - Scikit-learn
+  - Confusion matrix
+  - ROC curve
+  - Precision-recall curve
+  - Learning curves
+  - Validation curves
+  - Feature importance
+  - Scikit-learn plotting best practices
 
-  * Pixel labels
-  * Highlighting areas
-  * Colorbars
+- **83. Matplotlib and Plotly**
+  - Plotly
+  - `plotly` package
+  - Plotly Express
+  - Interactive plots
+  - Plotly vs Matplotlib
+  - Plotly integration best practices
 
-* **89. Specialized Image Visualization**
+- **84. Matplotlib and Bokeh**
+  - Bokeh
+  - Interactive plots
+  - Bokeh vs Matplotlib
+  - Bokeh integration best practices
 
-  * Confusion matrices
-  * Correlation matrices
-  * Classification outputs
-  * Scientific grids
+- **85. Matplotlib and Altair**
+  - Altair
+  - Declarative visualization
+  - Altair vs Matplotlib
+  - Altair integration best practices
 
----
-
-# XXI. Animation
-
-* **90. Animation Fundamentals**
-
-  * `matplotlib.animation`
-  * Frames
-  * Artists
-  * Update functions
-
-* **91. `FuncAnimation`**
-
-  * Initialization
-  * Frame updates
-  * Interval
-  * Blitting
-
-* **92. Saving Animations**
-
-  * GIF
-  * Video
-  * Writer configuration
-  * Frame rate
-
-* **93. Dynamic Visualization**
-
-  * Time-series animation
-  * Simulation animation
-  * Moving scatter plots
-  * Animated charts
-
----
-
-# XXII. Interactive Matplotlib
-
-* **94. Interactive Backends**
-
-  * Notebook backends
-  * GUI backends
-  * Interactive windows
-
-* **95. Event Handling**
-
-  * Mouse events
-  * Keyboard events
-  * Click events
-  * Hover-like interactions
-
-* **96. Interactive Artists**
-
-  * Selectable points
-  * Movable objects
-  * Dynamic annotations
-
-* **97. Interactive Applications**
-
-  * Sliders
-  * Buttons
-  * Checkboxes
-  * Radio buttons
-  * Text boxes
-
----
-
-# XXIII. Saving and Exporting Figures
-
-* **98. File Formats**
-
-  * PNG
-  * JPEG
-  * SVG
-  * PDF
-  * EPS
-  * WebP where supported
-
-* **99. Raster Output**
-
-  * DPI
-  * Resolution
-  * Anti-aliasing
-  * Transparency
-
-* **100. Vector Output**
-
-  * SVG
-  * PDF
-  * EPS
-  * Infinite scalability
-  * Publication workflows
-
-* **101. Export Configuration**
-
-  * `bbox_inches`
-  * Transparency
-  * Background
-  * Tight bounding boxes
-  * Figure dimensions
+- **86. Matplotlib and ipywidgets**
+  - ipywidgets
+  - Interactive widgets
+  - Jupyter integration
+  - ipywidgets best practices
 
 ---
 
-# XXIV. Publication-Quality Visualization
+# XI. Performance Optimization
 
-* **102. Scientific Figure Design**
+- **86. Performance Fundamentals**
+  - Performance
+  - Rendering time
+  - Memory usage
+  - Figure size
+  - Data size
+  - Performance metrics
+  - Performance best practices
 
-  * Clear labels
-  * Appropriate scales
-  * Error representation
-  * Reproducibility
+- **87. Rendering Performance**
+  - Rendering
+  - Backend selection
+  - Agg backend
+  - Blitting
+  - Caching
+  - Pre-rendering
+  - Rendering best practices
 
-* **103. Academic Figures**
+- **88. Data Optimization**
+  - Data reduction
+  - Downsampling
+  - Decimation
+  - Aggregation
+  - Data optimization best practices
 
-  * Multi-panel figures
-  * Figure numbering
-  * Consistent typography
-  * Journal-compatible output
+- **89. Large Datasets**
+  - Large datasets
+  - `rasterized=True`
+  - `hexbin()`
+  - `hist2d()`
+  - `datashader`
+  - `holoviews`
+  - Large dataset best practices
 
-* **104. Presentation Graphics**
+- **90. Memory Optimization**
+  - Memory optimization
+  - Figure cleanup
+  - `plt.close()`
+  - Memory profiling
+  - `memory_profiler`
+  - Memory optimization best practices
 
-  * Large typography
-  * High contrast
-  * Reduced clutter
-  * Screen-friendly dimensions
+- **91. Profiling**
+  - Profiling
+  - `cProfile`
+  - `line_profiler`
+  - `snakeviz`
+  - `pyinstrument`
+  - Profiling best practices
 
-* **105. Business Reporting**
-
-  * KPI charts
-  * Executive dashboards
-  * Trend charts
-  * Comparison charts
-  * Annotation-driven storytelling
-
----
-
-# XXV. Matplotlib Configuration
-
-* **106. `rcParams`**
-
-  * Global defaults
-  * Figure size
-  * Font settings
-  * Line settings
-  * Tick settings
-
-* **107. Style Sheets**
-
-  * Built-in styles
-  * Applying styles
-  * Temporary styles
-  * Custom styles
-
-* **108. Context-Specific Styling**
-
-  * Notebook defaults
-  * Publication defaults
-  * Presentation defaults
-  * Corporate visualization standards
-
-* **109. Reusable Themes**
-
-  * Central configuration
-  * Shared color system
-  * Shared typography
-  * Consistent chart geometry
+- **92. Benchmarking**
+  - Benchmarking
+  - `timeit`
+  - `%timeit`
+  - Benchmarking best practices
 
 ---
 
-# XXVI. Advanced API and Internals
+# XII. Export and Publication
 
-* **110. Artist Architecture**
+- **93. Saving Figures**
+  - `savefig()`
+  - File formats
+    - PNG
+    - PDF
+    - SVG
+    - EPS
+    - PS
+    - JPEG
+    - TIFF
+    - BMP
+    - PGF
+    - RAW
+    - RGBA
+  - DPI
+  - Figure size
+  - Bounding box
+  - Padding
+  - Transparent background
+  - Metadata
+  - Saving best practices
 
-  * Base Artist
-  * Primitive artists
-  * Containers
-  * Rendering pipeline
+- **94. Publication-Quality Figures**
+  - Publication quality
+  - DPI
+  - Font sizes
+  - Line widths
+  - Figure size
+  - Color schemes
+  - Aspect ratios
+  - Vector formats
+  - Publication best practices
 
-* **111. Transform Framework**
+- **95. LaTeX Integration**
+  - LaTeX
+  - `usetex`
+  - `text.usetex`
+  - LaTeX rendering
+  - PGF backend
+  - TikZ
+  - LaTeX best practices
 
-  * Data transform
-  * Axes transform
-  * Figure transform
-  * Blended transforms
+- **96. Vector Graphics**
+  - SVG
+  - PDF
+  - EPS
+  - Vector graphics best practices
+  - Vector vs raster
 
-* **112. Rendering**
+- **97. Raster Graphics**
+  - PNG
+  - JPEG
+  - TIFF
+  - DPI
+  - Resolution
+  - Raster best practices
 
-  * Backend architecture
-  * Renderer
-  * Canvas
-  * Raster rendering
-  * Vector rendering
-
-* **113. Backends**
-
-  * Interactive backends
-  * Non-interactive backends
-  * Backend selection
-  * Headless environments
-
----
-
-# XXVII. Performance Optimization
-
-* **114. Large Dataset Visualization**
-
-  * Sampling
-  * Aggregation
-  * Downsampling
-  * Plot simplification
-
-* **115. Efficient Rendering**
-
-  * Blitting
-  * Reusing artists
-  * Reducing object count
-  * Rasterization
-
-* **116. Memory Management**
-
-  * Closing figures
-  * Avoiding unnecessary figure creation
-  * Managing large image arrays
-
-* **117. Animation Performance**
-
-  * Efficient update functions
-  * Blitting
-  * Frame reduction
-  * Efficient data preparation
-
----
-
-# XXVIII. Matplotlib with Pandas
-
-* **118. DataFrame Plotting**
-
-  * Direct plotting
-  * `DataFrame.plot()`
-  * `Series.plot()`
-
-* **119. Customizing Pandas Plots**
-
-  * Passing Matplotlib axes
-  * Styling
-  * Multiple axes
-
-* **120. Time-Series Data**
-
-  * Datetime indexes
-  * Resampling
-  * Rolling windows
-  * Time-based plotting
-
-* **121. Grouped Visualization**
-
-  * GroupBy results
-  * Aggregated values
-  * Category comparisons
+- **98. Color Management**
+  - Color management
+  - RGB
+  - CMYK
+  - ICC profiles
+  - Color management best practices
 
 ---
 
-# XXIX. Matplotlib with NumPy and Scientific Computing
-
-* **122. Vectorized Data Generation**
-
-  * `linspace`
-  * `arange`
-  * Mesh grids
-  * Random data generation
-
-* **123. Mathematical Visualization**
-
-  * Functions
-  * Parametric plots
-  * Numerical solutions
-  * Simulation outputs
-
-* **124. Scientific Workflows**
-
-  * NumPy → Matplotlib
-  * SciPy → Matplotlib
-  * Simulation → visualization
-  * Experiment → visualization
-
----
-
-# XXX. Matplotlib with Machine Learning
-
-* **125. Exploratory Data Analysis**
-
-  * Feature distributions
-  * Class distributions
-  * Outlier detection
-  * Feature relationships
-
-* **126. Model Evaluation**
-
-  * Prediction versus actual
-  * Residual plots
-  * Learning curves
-  * Validation curves
-
-* **127. Classification Visualization**
-
-  * Confusion matrices
-  * Decision boundaries
-  * ROC curves
-  * Precision-recall curves
-
-* **128. Regression Visualization**
-
-  * Regression line
-  * Residual analysis
-  * Error distributions
-  * Prediction intervals
-
----
-
-# XXXI. Visualization Principles
-
-* **129. Choosing the Correct Chart**
-
-  * Trends → line chart
-  * Comparisons → bar chart
-  * Distribution → histogram/box plot
-  * Relationship → scatter plot
-  * Composition → stacked chart
-  * Matrix → heatmap
-
-* **130. Visual Hierarchy**
-
-  * Most important information first
-  * Emphasis
-  * Contrast
-  * Scale
-  * Position
-
-* **131. Avoiding Misleading Charts**
-
-  * Distorted axes
-  * Excessive decoration
-  * Inappropriate 3D
-  * Misleading color scales
-  * Truncated comparisons
-
-* **132. Data-Ink Efficiency**
-
-  * Remove unnecessary decoration
-  * Reduce clutter
-  * Maximize information density
-  * Preserve interpretability
-
----
-
-# XXXII. Advanced Visualization Patterns
-
-* **133. Small Multiples**
-
-  * Repeated plots
-  * Shared scales
-  * Faceted comparisons
-
-* **134. Multi-Series Visualization**
-
-  * Color encoding
-  * Line styles
-  * Markers
-  * Direct labeling
-
-* **135. Before-and-After Comparisons**
-
-  * Paired plots
-  * Difference plots
-  * Connected points
-
-* **136. Distribution Comparisons**
-
-  * Multiple box plots
-  * Multiple violin plots
-  * Overlaid histograms
-
-* **137. Uncertainty-Aware Charts**
-
-  * Confidence regions
-  * Error bars
-  * Forecast bands
-  * Prediction intervals
-
----
-
-# XXXIII. Customization and Reusability
-
-* **138. Helper Functions**
-
-  * Reusable plotting functions
-  * Standard labels
-  * Standard themes
-  * Reusable legends
-
-* **139. Plot Factories**
-
-  * Chart generation functions
-  * Parameterized visualization
-  * Batch chart generation
-
-* **140. Custom Classes**
-
-  * Visualization components
-  * Specialized axes
-  * Reusable figure objects
-
-* **141. Visualization Libraries**
-
-  * Building project-specific chart utilities
-  * Standardized styles
-  * Consistent API design
-
----
-
-# XXXIV. Debugging Matplotlib
-
-* **142. Common Errors**
-
-  * Incorrect array dimensions
-  * Mismatched X/Y lengths
-  * Invalid arguments
-  * Unsupported formats
-
-* **143. Visual Debugging**
-
-  * Incorrect axis limits
-  * Missing labels
-  * Hidden artists
-  * Incorrect layering
-  * Clipped text
-
-* **144. Layout Debugging**
-
-  * Overlapping labels
-  * Cut-off legends
-  * Colorbar positioning
-  * Subplot spacing
-
-* **145. Performance Debugging**
-
-  * Slow plotting
-  * Excessive artists
-  * Large images
-  * Animation bottlenecks
-
----
-
-# XXXV. Professional Matplotlib Workflow
-
-* **146. Visualization Pipeline**
-
-  * Load data
-  * Clean data
-  * Transform data
-  * Analyze data
-  * Select visualization
-  * Build figure
-  * Style figure
-  * Validate interpretation
-  * Export figure
-
-* **147. Reproducibility**
-
-  * Explicit parameters
-  * Fixed random seeds where appropriate
-  * Version-controlled code
-  * Reusable plotting functions
-  * Reproducible data transformations
-
-* **148. Code Organization**
-
-  * Data layer
-  * Transformation layer
-  * Visualization layer
-  * Export layer
-
-* **149. Visualization QA**
-
-  * Check labels
-  * Check units
-  * Check scales
-  * Check legends
-  * Check color meaning
-  * Check accessibility
-  * Check exported output
-
----
-
-# XXXVI. Progressive Project-Based Learning
+# XIII. Matplotlib Projects by Difficulty
 
 ## Beginner Projects
 
-* **1. Temperature Visualization**
+- **1. Line Plot**
+  - Basic line plot
+  - Labels
+  - Title
+  - Legend
+  - Grid
 
-  * Daily temperatures
-  * Line chart
-  * Labels
-  * Grid
-  * Legend
+- **2. Scatter Plot**
+  - Scatter plot
+  - Colors
+  - Markers
+  - Labels
+  - Title
 
-* **2. Monthly Sales**
+- **3. Bar Chart**
+  - Bar chart
+  - Categories
+  - Values
+  - Labels
+  - Title
 
-  * Bar chart
-  * Categories
-  * Data labels
-  * Sorting
+- **4. Histogram**
+  - Histogram
+  - Bins
+  - Density
+  - Labels
+  - Title
 
-* **3. Exam Scores**
-
-  * Histogram
-  * Mean and median markers
-  * Distribution interpretation
-
-* **4. Simple Correlation Analysis**
-
-  * Scatter plot
-  * Trend line
-  * Annotation
+- **5. Pie Chart**
+  - Pie chart
+  - Slices
+  - Labels
+  - Percentages
+  - Title
 
 ---
 
 ## Intermediate Projects
 
-* **5. E-Commerce Dashboard**
+- **6. Multi-Panel Figure**
+  - Subplots
+  - Layout
+  - Shared axes
+  - Titles
+  - Legends
 
-  * Revenue trend
-  * Product sales
-  * Regional comparison
-  * Category distribution
-  * Multiple subplots
+- **7. Time Series Plot**
+  - Date handling
+  - Time axis
+  - Multiple series
+  - Annotations
+  - Styling
 
-* **6. Financial Time Series**
+- **8. Statistical Dashboard**
+  - Distribution plots
+  - Box plots
+  - Violin plots
+  - Correlation matrix
+  - Heatmap
 
-  * Time-series line chart
-  * Moving average
-  * Volume
-  * Reference lines
+- **9. 3D Visualization**
+  - 3D plots
+  - Surface plots
+  - Contour plots
+  - 3D styling
+  - View angles
 
-* **7. Customer Analysis**
-
-  * Distribution plots
-  * Segment comparisons
-  * Scatter plots
-  * Correlation heatmap
-
-* **8. Scientific Experiment**
-
-  * Measurements
-  * Error bars
-  * Multiple experimental conditions
-  * Confidence regions
+- **10. Interactive Dashboard**
+  - Widgets
+  - Sliders
+  - Buttons
+  - Event handling
+  - Jupyter integration
 
 ---
 
 ## Advanced Projects
 
-* **9. Machine Learning Evaluation Suite**
+- **11. Animated Visualization**
+  - `FuncAnimation`
+  - Frames
+  - Saving animations
+  - Optimization
+  - Publication
 
-  * Confusion matrix
-  * ROC curve
-  * Precision-recall curve
-  * Residual plots
-  * Learning curves
+- **12. Geographic Visualization**
+  - Cartopy
+  - Map projections
+  - Geographic data
+  - Choropleth maps
+  - Annotations
 
-* **10. Multi-Panel Scientific Report**
+- **13. Network Visualization**
+  - NetworkX
+  - Node-link diagrams
+  - Layouts
+  - Styling
+  - Interactivity
 
-  * Complex `GridSpec`
-  * Shared axes
-  * Shared colorbars
-  * Annotations
-  * Publication-ready export
+- **14. Machine Learning Visualization**
+  - Confusion matrix
+  - ROC curve
+  - Precision-recall curve
+  - Learning curves
+  - Feature importance
 
-* **11. Interactive Simulation**
-
-  * Animation
-  * Sliders
-  * Buttons
-  * Dynamic plots
-
-* **12. Large-Scale Data Visualization**
-
-  * Millions of observations
-  * Downsampling
-  * Efficient rendering
-  * Performance optimization
-
----
-
-# XXXVII. Progressive Learning Levels
-
-## Level 1 — Matplotlib Beginner
-
-* Learn:
-
-  * `pyplot`
-  * `figure`
-  * `axes`
-  * `plot`
-  * `scatter`
-  * `bar`
-  * `hist`
-* Master:
-
-  * Creating basic plots
-  * Labels
-  * Legends
-  * Titles
-  * Saving images
+- **15. Custom Artist**
+  - Custom artists
+  - Patches
+  - Paths
+  - Transformations
+  - Animations
 
 ---
 
-## Level 2 — Core Visualization
+## Expert Projects
 
-* Learn:
+- **16. Publication Figure Suite**
+  - Publication quality
+  - LaTeX integration
+  - Vector graphics
+  - Color management
+  - Accessibility
 
-  * Subplots
-  * Styling
-  * Ticks
-  * Colors
-  * Colormaps
-  * Annotations
-* Master:
+- **17. Interactive Visualization Platform**
+  - Widgets
+  - Event handling
+  - Jupyter integration
+  - Dashboard
+  - Deployment
 
-  * Multi-panel figures
-  * Professional basic styling
-  * Axis formatting
+- **18. Large-Scale Data Visualization**
+  - Datashader
+  - HoloViews
+  - Large datasets
+  - Performance optimization
+  - Rendering
 
----
+- **19. Custom Projection Library**
+  - Custom projections
+  - Geographic projections
+  - Polar projections
+  - Transformations
+  - Cartopy integration
 
-## Level 3 — Intermediate Matplotlib
-
-* Learn:
-
-  * Object-oriented API
-  * `GridSpec`
-  * Advanced legends
-  * Colorbars
-  * Time-series plotting
-  * Statistical plots
-* Master:
-
-  * Complex figures
-  * Reusable plotting functions
-
----
-
-## Level 4 — Advanced Visualization
-
-* Learn:
-
-  * Transformations
-  * Artists
-  * Patches
-  * Custom annotations
-  * Twin axes
-  * Insets
-  * Specialized plots
-* Master:
-
-  * Fine-grained visual control
+- **20. Visualization Framework**
+  - Custom artists
+  - Custom backends
+  - Custom styling
+  - Custom widgets
+  - Extensibility
 
 ---
 
-## Level 5 — Scientific and Analytical Visualization
+# XIV. Progressive Matplotlib Learning Sequence
 
-* Learn:
+## Level 1 — Matplotlib Fundamentals
 
-  * Statistical visualization
-  * Scientific visualization
-  * Image visualization
-  * 3D visualization
-  * Machine-learning visualization
-* Master:
+- Master:
+  - Installation
+  - pyplot
+  - First plot
+  - Line plots
+  - Scatter plots
+  - Bar charts
+  - Histograms
+  - Pie charts
 
-  * Data-driven visual storytelling
+## Level 2 — Figure and Axes
+
+- Master:
+  - Figure anatomy
+  - Axes
+  - pyplot interface
+  - OOP interface
+  - Subplots
+  - GridSpec
+  - Axes positioning
+  - Twin axes
+
+## Level 3 — Plot Types
+
+- Master:
+  - Line plots
+  - Scatter plots
+  - Bar charts
+  - Histograms
+  - Pie charts
+  - Box plots
+  - Violin plots
+  - Error bars
+  - Stem plots
+  - Step plots
+  - Fill between
+  - Heatmaps
+  - Contour plots
+  - Quiver plots
+  - Stream plots
+  - Hexbin plots
+  - 2D histograms
+  - Image plots
+
+## Level 4 — Styling
+
+- Master:
+  - Colors
+  - Colormaps
+  - Markers
+  - Line styles
+  - Fonts
+  - Text
+  - Titles and labels
+  - Legends
+  - Annotations
+  - Grid
+  - Spines
+  - Ticks
+  - Axes limits
+  - Axes scales
+  - Aspect ratio
+
+## Level 5 — Statistical Plots
+
+- Master:
+  - Statistical visualization
+  - Error bars
+  - Confidence intervals
+  - Regression plots
+  - Density plots
+  - QQ plots
+  - Autocorrelation plots
+  - Spectral plots
+
+## Level 6 — 3D Plotting
+
+- Master:
+  - 3D plotting
+  - 3D plot types
+  - 3D styling
+
+## Level 7 — Animation
+
+- Master:
+  - Animation
+  - FuncAnimation
+  - ArtistAnimation
+  - Saving animations
+  - Interactive animations
+
+## Level 8 — Interactive Plotting
+
+- Master:
+  - Interactive backends
+  - Widgets
+  - Event handling
+  - Picking
+  - Interactive tools
+
+## Level 9 — Advanced Plotting
+
+- Master:
+  - Custom artists
+  - Paths and patches
+  - Transformations
+  - Custom projections
+  - Polar plots
+  - Geographic plots
+  - Sankey diagrams
+  - Treemaps
+  - Chord diagrams
+  - Network graphs
+
+## Level 10 — Ecosystem
+
+- Master:
+  - NumPy
+  - Pandas
+  - Seaborn
+  - SciPy
+  - scikit-learn
+  - Plotly
+  - Bokeh
+  - Altair
+  - ipywidgets
+
+## Level 11 — Performance
+
+- Master:
+  - Performance fundamentals
+  - Rendering performance
+  - Data optimization
+  - Large datasets
+  - Memory optimization
+  - Profiling
+  - Benchmarking
+
+## Level 12 — Export and Publication
+
+- Master:
+  - Saving figures
+  - Publication-quality figures
+  - LaTeX integration
+  - Vector graphics
+  - Raster graphics
+  - Color management
+
+## Level 13 — Production Engineering
+
+- Master:
+  - Visualization pipelines
+  - Automated reporting
+  - Dashboard integration
+  - Accessibility
+  - Reproducibility
+  - Production best practices
 
 ---
 
-## Level 6 — Interactive and Dynamic Visualization
+# XV. Final Matplotlib Competency Map
 
-* Learn:
+- **Foundations**
 
-  * Events
-  * Widgets
-  * Animations
-  * Interactive backends
-* Master:
+  - Installation
+  - Configuration
+  - pyplot
+  - OOP interface
+  - Figure anatomy
+  - First plot
 
-  * Interactive visual applications
+- **Figure and Axes**
+
+  - Figure
+  - Axes
+  - Subplots
+  - GridSpec
+  - Axes positioning
+  - Twin axes
+
+- **Plot Types**
+
+  - Line plots
+  - Scatter plots
+  - Bar charts
+  - Histograms
+  - Pie charts
+  - Box plots
+  - Violin plots
+  - Error bars
+  - Stem plots
+  - Step plots
+  - Fill between
+  - Heatmaps
+  - Contour plots
+  - Quiver plots
+  - Stream plots
+  - Hexbin plots
+  - 2D histograms
+  - Image plots
+
+- **Styling**
+
+  - Colors
+  - Colormaps
+  - Markers
+  - Line styles
+  - Fonts
+  - Text
+  - Titles and labels
+  - Legends
+  - Annotations
+  - Grid
+  - Spines
+  - Ticks
+  - Axes limits
+  - Axes scales
+  - Aspect ratio
+
+- **Statistical**
+
+  - Error bars
+  - Confidence intervals
+  - Regression plots
+  - Density plots
+  - QQ plots
+  - Autocorrelation
+  - Spectral plots
+
+- **3D**
+
+  - 3D plotting
+  - 3D plot types
+  - 3D styling
+
+- **Animation**
+
+  - FuncAnimation
+  - ArtistAnimation
+  - Saving animations
+  - Interactive animations
+
+- **Interactive**
+
+  - Interactive backends
+  - Widgets
+  - Event handling
+  - Picking
+  - Interactive tools
+
+- **Advanced**
+
+  - Custom artists
+  - Paths and patches
+  - Transformations
+  - Custom projections
+  - Polar plots
+  - Geographic plots
+  - Sankey diagrams
+  - Treemaps
+  - Chord diagrams
+  - Network graphs
+
+- **Ecosystem**
+
+  - NumPy
+  - Pandas
+  - Seaborn
+  - SciPy
+  - scikit-learn
+  - Plotly
+  - Bokeh
+  - Altair
+  - ipywidgets
+
+- **Performance**
+
+  - Rendering performance
+  - Data optimization
+  - Large datasets
+  - Memory optimization
+  - Profiling
+  - Benchmarking
+
+- **Export**
+
+  - Saving figures
+  - Publication quality
+  - LaTeX integration
+  - Vector graphics
+  - Raster graphics
+  - Color management
+
+- **Production**
+
+  - Visualization pipelines
+  - Automated reporting
+  - Dashboard integration
+  - Accessibility
+  - Reproducibility
 
 ---
 
-## Level 7 — Performance and Engineering
+## Recommended Overall Progression
 
-* Learn:
+**Matplotlib Fundamentals → Figure and Axes → Plot Types → Styling → Statistical Plots → 3D Plotting → Animation → Interactive Plotting → Advanced Plotting → Ecosystem → Performance → Export and Publication → Production Engineering**
 
-  * Rendering architecture
-  * Backends
-  * Large datasets
-  * Blitting
-  * Rasterization
-  * Memory optimization
-* Master:
+For maximum practical mastery, combine this Matplotlib roadmap with the Python, R Language, Jupyter, SQL, DSA, Discrete Mathematics, JavaScript, Node.js, REST API, React, Laravel, jQuery, Java, C#, C++, C Language, Dart, Flutter, Kotlin, Git, and GitHub roadmaps above so the progression becomes:
 
-  * High-performance Matplotlib systems
-
----
-
-## Level 8 — Publication and Production Mastery
-
-* Learn:
-
-  * Publication standards
-  * Design systems
-  * Reusable themes
-  * Automated figure generation
-  * Visualization QA
-* Master:
-
-  * Reproducible, publication-quality and production-grade visualization
-
----
-
-# XXXVIII. Final Matplotlib Competency Map
-
-* **Foundations**
-
-  * Python plotting
-  * Figures
-  * Axes
-  * Artists
-  * Basic charts
-
-* **Core Visualization**
-
-  * Lines
-  * Bars
-  * Scatter
-  * Histograms
-  * Box plots
-  * Heatmaps
-
-* **Figure Composition**
-
-  * Subplots
-  * GridSpec
-  * Insets
-  * Shared axes
-  * Colorbars
-
-* **Styling**
-
-  * Colors
-  * Fonts
-  * Ticks
-  * Spines
-  * Legends
-  * Themes
-
-* **Advanced Visualization**
-
-  * Annotations
-  * Patches
-  * Transformations
-  * Specialized charts
-  * 3D
-
-* **Scientific/Analytical**
-
-  * Time series
-  * Statistics
-  * Uncertainty
-  * Scientific data
-  * Machine learning
-
-* **Interactivity**
-
-  * Events
-  * Widgets
-  * Animation
-  * Dynamic figures
-
-* **Engineering**
-
-  * Artists
-  * Backends
-  * Rendering
-  * Performance
-  * Large datasets
-
-* **Professional Mastery**
-
-  * Publication-quality figures
-  * Reusable visualization systems
-  * Automated reporting
-  * Reproducibility
-  * Visualization design
-
-### The ideal progression
-
-**Python Basics → NumPy → Matplotlib Fundamentals → pyplot → Figure/Axes → Basic Charts → Object-Oriented API → Subplots → Styling → Ticks/Scales → Legends/Annotations → Colormaps → Pandas Integration → Statistical Visualization → Time Series → Advanced Layouts → Artists/Patches → Transformations → Images/Contours → 3D → Animation → Interactivity → Performance Optimization → Publication-Quality Visualization → Reusable Visualization Engineering.**
+**Discrete Mathematics → DSA Foundations → Python Fundamentals → NumPy → Pandas → Matplotlib Fundamentals → Plot Types → Styling → Statistical Plots → Seaborn → scikit-learn Visualization → 3D Plotting → Animation → Interactive Plotting → Advanced Plotting → Cartopy → NetworkX → Performance Optimization → Publication Quality → Automated Reporting → Dashboard Integration → Production Visualization Engineering → Data Science → Machine Learning → Business Intelligence → Scientific Computing → Enterprise Analytics.**

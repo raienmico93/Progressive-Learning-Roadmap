@@ -1,1135 +1,1516 @@
 # Seaborn Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Visualization Foundations to Advanced Statistical Visualization
+## From Statistical Visualization Foundations to Advanced Multi-Plot Grids, Customization, and Production Data Visualization Engineering
 
-Seaborn is a Python visualization library focused on statistical graphics and works closely with Matplotlib. Its current official documentation organizes the library around relational, distributional, categorical, regression, matrix, multi-plot, aesthetics, and the newer `seaborn.objects` interface. ([Seaborn][1])
-
----
-
-# I. Prerequisites
-
-* **1. Python Fundamentals**
-
-  * Variables
-  * Data types
-  * Lists and dictionaries
-  * Functions
-  * Loops
-  * Conditional statements
-  * Imports
-  * Exception handling
-
-* **2. NumPy Fundamentals**
-
-  * Arrays
-  * Vectorized operations
-  * Boolean indexing
-  * Aggregation
-  * Mathematical operations
-
-* **3. Pandas Fundamentals**
-
-  * `Series`
-  * `DataFrame`
-  * Reading CSV/Excel data
-  * Selecting columns
-  * Filtering rows
-  * Sorting
-  * Grouping
-  * Aggregation
-  * Missing-value handling
-  * Reshaping data
-
-* **4. Matplotlib Fundamentals**
-
-  * Figures
-  * Axes
-  * Figure-level versus axes-level thinking
-  * Titles
-  * Labels
-  * Legends
-  * Ticks
-  * Annotations
-  * Saving figures
+Seaborn is best learned as more than "a wrapper around Matplotlib." The progression should cover **Python prerequisites → Matplotlib prerequisites → Pandas prerequisites → statistical visualization fundamentals → relational plots → distribution plots → categorical plots → regression plots → matrix plots → multi-plot grids → customization → themes → color palettes → statistical estimation → advanced customization → performance → integration → production visualization engineering**.
 
 ---
 
-# II. Seaborn Foundations
+# I. Seaborn Foundations
 
-* **5. Introduction to Seaborn**
+- **1. What Seaborn Is**
+  - Seaborn
+  - Seaborn history
+  - Michael Waskom
+  - Seaborn 0.9
+  - Seaborn 0.10
+  - Seaborn 0.11
+  - Seaborn 0.12
+  - Seaborn 0.13 (current)
+  - Seaborn philosophy
+    - Statistical visualization
+    - Built on Matplotlib
+    - Pandas integration
+    - Dataset-oriented
+    - Declarative
+    - Beautiful defaults
+  - Seaborn vs Matplotlib
+  - Seaborn vs Plotly
+  - Seaborn vs Bokeh
+  - Seaborn vs Altair
+  - Seaborn vs ggplot2
+  - Seaborn use cases
+    - Exploratory data analysis
+    - Statistical visualization
+    - Publication figures
+    - Data science
+    - Machine learning
+    - Business analytics
+    - Scientific research
+    - Financial analysis
+  - Seaborn in modern data science
+  - Seaborn ecosystem
+  - Seaborn API
+  - Seaborn best practices
 
-  * What Seaborn is
-  * Why use Seaborn instead of raw Matplotlib
-  * Statistical visualization
-  * High-level visualization API
-  * Relationship between Seaborn and Matplotlib
-  * Seaborn's opinionated defaults ([Seaborn][1])
+- **2. Prerequisites**
+  - Python fundamentals
+  - Variables
+  - Data types
+  - Control flow
+  - Functions
+  - Classes
+  - Modules
+  - NumPy
+    - ndarray
+    - Indexing
+    - Slicing
+    - Broadcasting
+    - Aggregation
+  - Pandas
+    - Series
+    - DataFrame
+    - Index
+    - Selection
+    - Cleaning
+    - Transformation
+    - Grouping
+    - Merging
+    - Reshaping
+  - Matplotlib
+    - Figure
+    - Axes
+    - Plotting
+    - Subplots
+    - Styling
+    - Legends
+    - Annotations
+  - Jupyter
+    - Notebooks
+    - Cells
+  - Statistics
+    - Descriptive statistics
+    - Distributions
+    - Correlation
+    - Regression
+  - Prerequisite best practices
 
-* **6. Installation and Environment**
+- **3. Installing Seaborn**
+  - Installation
+    - pip
+    - conda
+    - mamba
+    - uv
+  - `pip install seaborn`
+  - `conda install seaborn`
+  - Version checking
+  - `sns.__version__`
+  - Dependencies
+    - NumPy
+    - Pandas
+    - Matplotlib
+  - Optional dependencies
+    - SciPy
+    - statsmodels
+    - fastcluster
+  - Installation best practices
 
-  * Installing Seaborn
+- **4. Importing Seaborn**
+  - `import seaborn as sns`
+  - `import matplotlib.pyplot as plt`
+  - `import pandas as pd`
+  - `import numpy as np`
+  - Import best practices
+  - Namespace conventions
 
-    * `pip`
-    * Conda
-  * Importing
+- **5. Seaborn API**
+  - Figure-level functions
+    - `relplot`
+    - `displot`
+    - `catplot`
+    - `lmplot`
+    - `clustermap`
+    - `jointplot`
+    - `pairplot`
+    - `FacetGrid`
+    - `PairGrid`
+    - `JointGrid`
+  - Axes-level functions
+    - `scatterplot`
+    - `lineplot`
+    - `histplot`
+    - `kdeplot`
+    - `ecdfplot`
+    - `rugplot`
+    - `boxplot`
+    - `violinplot`
+    - `boxenplot`
+    - `stripplot`
+    - `swarmplot`
+    - `barplot`
+    - `pointplot`
+    - `countplot`
+    - `regplot`
+    - `residplot`
+    - `heatmap`
+    - `clustermap`
+  - Figure-level vs Axes-level
+  - API best practices
 
-    * `import seaborn as sns`
-  * Checking the installed version
-  * Notebook environments
+- **6. First Seaborn Plot**
+  - Dataset loading
+  - Basic plot
+  - Figure-level plot
+  - Axes-level plot
+  - First plot best practices
 
-    * Jupyter
-    * VS Code
-  * Reproducible environments
-
-* **7. Seaborn Data Structures**
-
-  * Long-form data
-  * Wide-form data
-  * Tidy data
-  * Variables
-
-    * Numerical
-    * Categorical
-    * Temporal
-    * Boolean
-  * Mapping variables to visual properties ([Seaborn][1])
-
-* **8. Core Seaborn Concepts**
-
-  * `x`
-  * `y`
-  * `hue`
-  * `style`
-  * `size`
-  * `col`
-  * `row`
-  * `weights`
-  * Aggregation
-  * Statistical estimation
-  * Faceting
-
----
-
-# III. Basic Plotting
-
-* **9. Relational Visualization**
-
-  * Scatter plots
-
-    * `sns.scatterplot()`
-  * Line plots
-
-    * `sns.lineplot()`
-  * Figure-level relational plotting
-
-    * `sns.relplot()`
-  * Encoding additional variables
-
-    * Color
-    * Marker style
-    * Size
-  * Multiple groups
-  * Continuous versus categorical encodings ([Seaborn][2])
-
-* **10. Scatter Plot Mastery**
-
-  * X/Y relationships
-  * Grouping with `hue`
-  * Marker variation with `style`
-  * Point sizing
-  * Transparency
-  * Overplotting
-  * Small versus large datasets
-  * Interpreting correlation visually
-
-* **11. Line Plot Mastery**
-
-  * Trends
-  * Time-series visualization
-  * Multiple lines
-  * Grouped lines
-  * Aggregated observations
-  * Error intervals
-  * Sorting temporal data
-  * Avoiding misleading line connections
-
----
-
-# IV. Distribution Visualization
-
-* **12. Histograms**
-
-  * `sns.histplot()`
-  * Binning
-  * Bin width
-  * Bin count
-  * Frequency
-  * Density
-  * Cumulative distributions
-  * Univariate histograms
-  * Bivariate histograms
-
-* **13. Kernel Density Estimation**
-
-  * `sns.kdeplot()`
-  * Density estimation
-  * Bandwidth
-  * Univariate KDE
-  * Bivariate KDE
-  * Filled KDE
-  * Density interpretation
-
-* **14. Empirical Distributions**
-
-  * `sns.ecdfplot()`
-  * Cumulative probability
-  * Distribution comparison
-  * Percentile interpretation
-
-* **15. Rug Plots**
-
-  * `sns.rugplot()`
-  * Individual observations
-  * Marginal distribution visualization
-  * Combining rug plots with KDE/histograms ([Seaborn][2])
-
----
-
-# V. Categorical Visualization
-
-* **16. Categorical Scatterplots**
-
-  * `sns.stripplot()`
-  * `sns.swarmplot()`
-  * Jitter
-  * Overplotting
-  * Comparing individual observations
-
-* **17. Box Plots**
-
-  * `sns.boxplot()`
-  * Median
-  * Quartiles
-  * Interquartile range
-  * Whiskers
-  * Outliers
-  * Group comparisons
-
-* **18. Violin Plots**
-
-  * `sns.violinplot()`
-  * Distribution shape
-  * KDE-based representation
-  * Inner statistics
-  * Split/grouped distributions
-
-* **19. Boxen Plots**
-
-  * `sns.boxenplot()`
-  * Large datasets
-  * Distribution tails
-  * Comparison with box plots
-
-* **20. Estimation Plots**
-
-  * `sns.barplot()`
-  * `sns.pointplot()`
-  * `sns.countplot()`
-  * Central tendency
-  * Error bars
-  * Observation counts
-  * Difference between count and estimate plots ([Seaborn][2])
+- **7. Built-in Datasets**
+  - `sns.load_dataset()`
+  - Datasets
+    - `tips`
+    - `titanic`
+    - `iris`
+    - `penguins`
+    - `flights`
+    - `diamonds`
+    - `fmri`
+    - `planets`
+    - `exercise`
+    - `car_crashes`
+    - `dots`
+    - `anscombe`
+    - `attention`
+    - `brain_networks`
+    - `dowjones`
+    - `geyser`
+    - `glue`
+    - `healthexp`
+    - `mpg`
+    - `paintings`
+    - `seaice`
+    - `smokers`
+    - `space_launches`
+    - `taxis`
+    - `titanic`
+  - Dataset exploration
+  - Dataset best practices
 
 ---
 
-# VI. Statistical Estimation
+# II. Relational Plots
 
-* **21. Aggregation**
+- **8. Relational Plot Fundamentals**
+  - Relational plots
+  - Relationships between variables
+  - `relplot`
+  - `scatterplot`
+  - `lineplot`
+  - Relational plot best practices
 
-  * Grouped statistics
-  * Mean
-  * Median
-  * Custom aggregation
-  * Weighted estimates
+- **9. Scatter Plots**
+  - `scatterplot`
+  - `relplot(kind='scatter')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `size`
+    - `style`
+    - `palette`
+    - `sizes`
+    - `markers`
+    - `alpha`
+    - `data`
+  - Semantic mappings
+  - Scatter plot best practices
 
-* **22. Error Bars**
+- **10. Line Plots**
+  - `lineplot`
+  - `relplot(kind='line')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `size`
+    - `style`
+    - `units`
+    - `estimator`
+    - `errorbar`
+    - `ci`
+    - `n_boot`
+    - `seed`
+    - `sort`
+    - `err_style`
+    - `err_kws`
+    - `dashes`
+    - `markers`
+  - Aggregation
+  - Confidence intervals
+  - Line plot best practices
 
-  * Measures of spread
-  * Measures of uncertainty
-  * Confidence intervals
-  * Standard deviation
-  * Percentile intervals
-  * Bootstrapping
-  * Interpreting uncertainty ([Seaborn][1])
+- **11. Relational Plot Customization**
+  - Faceting
+  - `col`
+  - `row`
+  - `col_wrap`
+  - `height`
+  - `aspect`
+  - `facet_kws`
+  - Customization best practices
 
-* **23. Statistical Communication**
-
-  * Estimate versus raw observation
-  * Showing variability
-  * Avoiding misleading summaries
-  * Choosing appropriate uncertainty representations
-
----
-
-# VII. Regression Visualization
-
-* **24. Regression Basics**
-
-  * `sns.regplot()`
-  * Linear relationships
-  * Regression line
-  * Scatter observations
-
-* **25. Figure-Level Regression**
-
-  * `sns.lmplot()`
-  * Regression across groups
-  * Faceted regression
-
-* **26. Residual Analysis**
-
-  * `sns.residplot()`
-  * Residuals
-  * Model fit assessment
-  * Detecting nonlinear patterns
-  * Detecting heteroscedasticity
-
-* **27. Advanced Regression Visualization**
-
-  * Different regression models
-  * Polynomial fits
-  * Logistic regression where supported
-  * Confidence intervals
-  * Group conditioning ([Seaborn][1])
-
----
-
-# VIII. Multi-Variable Visualization
-
-* **28. Semantic Mapping**
-
-  * `hue`
-  * `style`
-  * `size`
-  * Combining semantic dimensions
-  * Continuous versus discrete semantic variables
-
-* **29. Faceting**
-
-  * `col`
-  * `row`
-  * Multiple subsets
-  * Small multiples
-  * Conditional visualization
-
-* **30. `relplot()`**
-
-  * Figure-level interface
-  * Scatter-based faceting
-  * Line-based faceting
-  * Consistent semantics across facets
-
-* **31. `catplot()`**
-
-  * Figure-level categorical visualization
-  * Switching categorical plot types
-  * Faceted category comparisons
+- **12. Relational Plot Best Practices**
+  - Variable selection
+  - Semantic mapping
+  - Faceting
+  - Plot aesthetics
+  - Best practices
 
 ---
 
-# IX. Pairwise and Joint Visualization
+# III. Distribution Plots
 
-* **32. Pair Plots**
+- **13. Distribution Plot Fundamentals**
+  - Distribution plots
+  - Univariate distributions
+  - Bivariate distributions
+  - `displot`
+  - `histplot`
+  - `kdeplot`
+  - `ecdfplot`
+  - `rugplot`
+  - Distribution plot best practices
 
-  * `sns.pairplot()`
-  * Pairwise relationships
-  * Diagonal distributions
-  * Off-diagonal relationships
-  * Group coloring
+- **14. Histograms**
+  - `histplot`
+  - `displot(kind='hist')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `bins`
+    - `binwidth`
+    - `binrange`
+    - `discrete`
+    - `cumulative`
+    - `stat`
+    - `element`
+    - `fill`
+    - `multiple`
+    - `shrink`
+    - `kde`
+    - `kde_kws`
+    - `hue_order`
+  - Histogram best practices
 
-* **33. `PairGrid`**
+- **15. KDE Plots**
+  - `kdeplot`
+  - `displot(kind='kde')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `bw_adjust`
+    - `bw_method`
+    - `common_norm`
+    - `common_grid`
+    - `cumulative`
+    - `log_scale`
+    - `levels`
+    - `thresh`
+    - `fill`
+    - `multiple`
+  - Bandwidth selection
+  - KDE best practices
 
-  * `sns.PairGrid()`
-  * Custom functions
-  * Separate diagonal/lower/upper plots
-  * Custom statistical views
+- **16. ECDF Plots**
+  - `ecdfplot`
+  - `displot(kind='ecdf')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `stat`
+    - `complementary`
+  - ECDF best practices
 
-* **34. Joint Plots**
+- **17. Rug Plots**
+  - `rugplot`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `height`
+    - `expand_margins`
+  - Rug plot best practices
 
-  * `sns.jointplot()`
-  * Joint distribution
-  * Marginal distributions
-  * Scatter + histogram
-  * Scatter + KDE
-  * Regression relationships
+- **18. Bivariate Distributions**
+  - `histplot` with `x` and `y`
+  - `kdeplot` with `x` and `y`
+  - Joint distributions
+  - Bivariate best practices
 
-* **35. `JointGrid`**
-
-  * Custom joint plots
-  * Custom marginal plots
-  * Combining multiple plot functions ([Seaborn][2])
-
----
-
-# X. Matrix and Correlation Visualization
-
-* **36. Heatmaps**
-
-  * `sns.heatmap()`
-  * Matrix visualization
-  * Correlation matrices
-  * Annotation
-  * Cell formatting
-  * Masks
-  * Color scales
-
-* **37. Clustered Heatmaps**
-
-  * `sns.clustermap()`
-  * Hierarchical clustering
-  * Row clustering
-  * Column clustering
-  * Dendrograms
-  * Cluster interpretation ([Seaborn][2])
-
-* **38. Correlation Analysis**
-
-  * Pearson correlation
-  * Spearman correlation
-  * Correlation matrices
-  * Correlation versus causation
-  * Visual interpretation
-
----
-
-# XI. Figure Aesthetics and Styling
-
-* **39. Themes**
-
-  * `sns.set_theme()`
-  * `sns.set_style()`
-  * `sns.axes_style()`
-  * Style configuration
-  * Context configuration ([Seaborn][2])
-
-* **40. Plot Context**
-
-  * `sns.set_context()`
-  * Notebook context
-  * Paper context
-  * Talk context
-  * Poster context
-  * Scaling text and graphical elements
-
-* **41. Spines and Axes**
-
-  * `sns.despine()`
-  * Removing unnecessary spines
-  * Axis limits
-  * Tick configuration
-  * Grid configuration
-
-* **42. Figure Composition**
-
-  * Figure dimensions
-  * Aspect ratios
-  * Layout
-  * Margins
-  * Titles
-  * Subtitles
-  * Annotations
-  * Legends
+- **19. Distribution Plot Customization**
+  - Faceting
+  - `col`
+  - `row`
+  - `col_wrap`
+  - `height`
+  - `aspect`
+  - Customization best practices
 
 ---
 
-# XII. Color Theory and Palettes
+# IV. Categorical Plots
 
-* **43. Palette Fundamentals**
+- **20. Categorical Plot Fundamentals**
+  - Categorical plots
+  - Categorical data
+  - `catplot`
+  - `stripplot`
+  - `swarmplot`
+  - `boxplot`
+  - `violinplot`
+  - `boxenplot`
+  - `pointplot`
+  - `barplot`
+  - `countplot`
+  - Categorical plot best practices
 
-  * Qualitative palettes
-  * Sequential palettes
-  * Diverging palettes
-  * Perceptual considerations ([Seaborn][1])
+- **21. Strip Plots**
+  - `stripplot`
+  - `catplot(kind='strip')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `order`
+    - `hue_order`
+    - `jitter`
+    - `dodge`
+    - `orient`
+    - `color`
+    - `palette`
+    - `size`
+    - `edgecolor`
+    - `linewidth`
+    - `native_scale`
+    - `formatter`
+    - `legend`
+  - Strip plot best practices
 
-* **44. Built-In Palettes**
+- **22. Swarm Plots**
+  - `swarmplot`
+  - `catplot(kind='swarm')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `order`
+    - `hue_order`
+    - `dodge`
+    - `orient`
+    - `color`
+    - `palette`
+    - `size`
+    - `edgecolor`
+    - `linewidth`
+    - `native_scale`
+    - `formatter`
+    - `legend`
+    - `warn_thresh`
+  - Swarm plot best practices
 
-  * `color_palette()`
-  * `set_palette()`
-  * ColorBrewer palettes
-  * Cubehelix palettes
-  * HLS/HUSL palettes
+- **23. Box Plots**
+  - `boxplot`
+  - `catplot(kind='box')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `order`
+    - `hue_order`
+    - `orient`
+    - `color`
+    - `palette`
+    - `saturation`
+    - `width`
+    - `dodge`
+    - `fliersize`
+    - `linewidth`
+    - `whis`
+    - `fill`
+    - `gap`
+  - Box plot best practices
 
-* **45. Choosing Effective Colors**
+- **24. Violin Plots**
+  - `violinplot`
+  - `catplot(kind='violin')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `order`
+    - `hue_order`
+    - `orient`
+    - `color`
+    - `palette`
+    - `saturation`
+    - `width`
+    - `dodge`
+    - `inner`
+    - `split`
+    - `scale`
+    - `scale_hue`
+    - `bw`
+    - `bw_method`
+    - `cut`
+    - `gridsize`
+    - `density_norm`
+    - `common_norm`
+    - `linewidth`
+    - `fill`
+    - `gap`
+  - Violin plot best practices
 
-  * Categorical data
-  * Ordered numerical data
-  * Diverging numerical data
-  * Contrast
-  * Accessibility
-  * Colorblind-friendly visualization
+- **25. Boxen Plots**
+  - `boxenplot`
+  - `catplot(kind='boxen')`
+  - Letter-value plots
+  - Boxen plot best practices
 
-* **46. Advanced Palette Construction**
+- **26. Point Plots**
+  - `pointplot`
+  - `catplot(kind='point')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `order`
+    - `hue_order`
+    - `estimator`
+    - `errorbar`
+    - `ci`
+    - `n_boot`
+    - `units`
+    - `seed`
+    - `markers`
+    - `linestyles`
+    - `dodge`
+    - `join`
+    - `scale`
+    - `orient`
+    - `color`
+    - `palette`
+    - `errwidth`
+    - `capsize`
+    - `err_kws`
+  - Point plot best practices
 
-  * `dark_palette()`
-  * `light_palette()`
-  * `diverging_palette()`
-  * `blend_palette()`
-  * Custom palettes
+- **27. Bar Plots**
+  - `barplot`
+  - `catplot(kind='bar')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `order`
+    - `hue_order`
+    - `estimator`
+    - `errorbar`
+    - `ci`
+    - `n_boot`
+    - `units`
+    - `seed`
+    - `orient`
+    - `color`
+    - `palette`
+    - `saturation`
+    - `width`
+    - `dodge`
+    - `gap`
+    - `log_scale`
+    - `native_scale`
+    - `formatter`
+    - `legend`
+    - `errcolor`
+    - `errwidth`
+    - `capsize`
+    - `err_kws`
+  - Bar plot best practices
 
----
+- **28. Count Plots**
+  - `countplot`
+  - `catplot(kind='count')`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `order`
+    - `hue_order`
+    - `orient`
+    - `color`
+    - `palette`
+    - `saturation`
+    - `dodge`
+    - `gap`
+    - `log_scale`
+    - `native_scale`
+    - `formatter`
+    - `legend`
+    - `stat`
+  - Count plot best practices
 
-# XIII. Figure-Level vs Axes-Level API
-
-* **47. Axes-Level Functions**
-
-  * `scatterplot`
-  * `lineplot`
-  * `histplot`
-  * `kdeplot`
-  * `boxplot`
-  * `violinplot`
-  * `heatmap`
-  * Other plot functions
-
-* **48. Figure-Level Functions**
-
-  * `relplot`
-  * `displot`
-  * `catplot`
-  * `lmplot`
-  * `pairplot`
-  * `jointplot`
-
-* **49. Choosing Between Them**
-
-  * Single plot
-  * Multi-panel figure
-  * Faceting
-  * Figure-wide configuration
-  * Combining Seaborn with Matplotlib
-
-The distinction between figure-level and axes-level interfaces is a core organizational concept in the official documentation. ([Seaborn][1])
-
----
-
-# XIV. Matplotlib Integration
-
-* **50. Seaborn + Matplotlib**
-
-  * Understanding returned `Axes`
-  * Understanding returned figure objects
-  * Modifying Seaborn-generated plots with Matplotlib
-
-* **51. Advanced Axes Control**
-
-  * `ax`
-  * Multiple axes
-  * Subplots
-  * Shared axes
-  * Figure-level customization
-
-* **52. Advanced Annotation**
-
-  * Text
-  * Arrows
-  * Reference lines
-  * Statistical markers
-  * Custom annotations
-
-* **53. Publication-Quality Output**
-
-  * Figure sizing
-  * DPI
-  * Raster output
-  * Vector output
-  * SVG
-  * PDF
-  * Consistent typography
-
----
-
-# XV. The `seaborn.objects` Interface
-
-The official documentation currently provides a declarative `seaborn.objects` interface alongside the traditional function interface. ([Seaborn][1])
-
-* **54. Objects Interface Fundamentals**
-
-  * `so.Plot`
-  * Declarative plotting
-  * Data mapping
-  * Composition
-
-* **55. Marks**
-
-  * `so.Dot`
-  * `so.Dots`
-  * `so.Line`
-  * `so.Lines`
-  * `so.Bar`
-  * `so.Bars`
-  * `so.Area`
-  * `so.Band`
-  * `so.Text` ([Seaborn][2])
-
-* **56. Statistical Transformations**
-
-  * `so.Agg`
-  * `so.Est`
-  * `so.Count`
-  * `so.Hist`
-  * `so.KDE`
-  * `so.Perc`
-  * `so.PolyFit` ([Seaborn][2])
-
-* **57. Positional and Scale Transformations**
-
-  * `so.Dodge`
-  * `so.Jitter`
-  * `so.Stack`
-  * `so.Shift`
-  * `so.Norm`
-  * `so.Boolean`
-  * `so.Continuous`
-  * `so.Nominal`
-  * `so.Temporal` ([Seaborn][2])
-
-* **58. Plot Composition**
-
-  * `.add()`
-  * `.scale()`
-  * `.facet()`
-  * `.pair()`
-  * `.layout()`
-  * `.label()`
-  * `.limit()`
-  * `.share()`
-  * `.theme()`
-  * `.show()`
-  * `.save()` ([Seaborn][2])
-
----
-
-# XVI. Data Preparation for Seaborn
-
-* **59. Tidy Data**
-
-  * One observation per row
-  * One variable per column
-  * One observational unit per dataset
-
-* **60. Data Transformation**
-
-  * Filtering
-  * Sorting
-  * Grouping
-  * Aggregation
-  * Pivoting
-  * Melting
-  * Reshaping
-
-* **61. Handling Missing Data**
-
-  * Missing-value detection
-  * Missing-value removal
-  * Missing-value imputation
-  * Understanding plotting effects
-
-* **62. Categorical Variables**
-
-  * Category ordering
-  * Explicit ordering
-  * Category labels
-  * Ordered categories
-
----
-
-# XVII. Statistical Visualization Concepts
-
-* **63. Distribution**
-
-  * Mean
-  * Median
-  * Variance
-  * Standard deviation
-  * Quantiles
-  * Percentiles
-  * Skewness
-  * Outliers
-
-* **64. Relationships**
-
-  * Correlation
-  * Covariance
-  * Association
-  * Regression
-  * Nonlinear relationships
-
-* **65. Uncertainty**
-
-  * Sampling variability
-  * Confidence intervals
-  * Error bars
-  * Bootstrapping
-
-* **66. Experimental Interpretation**
-
-  * Observational versus experimental data
-  * Confounding
-  * Correlation versus causality
-  * Statistical significance versus practical significance
+- **29. Categorical Plot Customization**
+  - Faceting
+  - `col`
+  - `row`
+  - `col_wrap`
+  - `height`
+  - `aspect`
+  - `kind`
+  - Customization best practices
 
 ---
 
-# XVIII. Advanced Visualization Patterns
+# V. Regression Plots
 
-* **67. Time-Series Visualization**
+- **30. Regression Plot Fundamentals**
+  - Regression plots
+  - `lmplot`
+  - `regplot`
+  - `residplot`
+  - Regression plot best practices
 
-  * Trend lines
-  * Rolling statistics
-  * Seasonal patterns
-  * Multiple time series
-  * Confidence intervals
+- **31. Linear Regression Plots**
+  - `regplot`
+  - `lmplot`
+  - Parameters
+    - `x`
+    - `y`
+    - `hue`
+    - `data`
+    - `order`
+    - `logistic`
+    - `lowess`
+    - `robust`
+    - `logx`
+    - `x_estimator`
+    - `x_bins`
+    - `x_ci`
+    - `scatter`
+    - `fit_reg`
+    - `ci`
+    - `n_boot`
+    - `units`
+    - `seed`
+    - `marker`
+    - `color`
+    - `scatter_kws`
+    - `line_kws`
+    - `truncate`
+    - `dropna`
+    - `x_jitter`
+    - `y_jitter`
+    - `label`
+  - Linear regression best practices
 
-* **68. Distribution Comparison**
+- **32. Polynomial Regression**
+  - `order`
+  - Polynomial regression
+  - Polynomial best practices
 
-  * Groups
-  * Subgroups
-  * Segments
-  * Before/after comparisons
-  * Multiple populations
+- **33. Logistic Regression**
+  - `logistic=True`
+  - Logistic regression
+  - Logistic best practices
 
-* **69. Multivariate Analysis**
+- **34. LOWESS Regression**
+  - `lowess=True`
+  - LOWESS
+  - LOWESS best practices
 
-  * Three-variable relationships
-  * Four-variable relationships
-  * Semantic mappings
-  * Faceting
-  * Pairwise analysis
+- **35. Robust Regression**
+  - `robust=True`
+  - Robust regression
+  - Robust best practices
 
-* **70. High-Dimensional Visualization**
+- **36. Residual Plots**
+  - `residplot`
+  - Residuals
+  - Residual plot best practices
 
-  * Reducing visual clutter
-  * Selecting informative variables
-  * Faceting
-  * Color encoding
-  * Small multiples
-
----
-
-# XIX. Visualization for Data Science and Machine Learning
-
-* **71. Exploratory Data Analysis**
-
-  * Distribution inspection
-  * Outlier detection
-  * Missing-data visualization
-  * Feature relationships
-  * Correlation analysis
-
-* **72. Feature Analysis**
-
-  * Numerical features
-  * Categorical features
-  * Feature distributions
-  * Feature-target relationships
-
-* **73. Model Diagnostics**
-
-  * Predicted versus actual
-  * Residual plots
-  * Error distributions
-  * Regression diagnostics
-  * Classification-oriented visual summaries
-
-* **74. Model Comparison**
-
-  * Performance distributions
-  * Cross-validation results
-  * Feature importance visualization
-  * Grouped model comparisons
-
----
-
-# XX. Advanced Customization
-
-* **75. Custom Plot Functions**
-
-  * Reusable plotting functions
-  * Parameterized charts
-  * Consistent styles
-  * Plotting pipelines
-
-* **76. Custom Faceting**
-
-  * Custom subplot organization
-  * Conditional analysis
-  * Dataset segmentation
-
-* **77. Custom Statistical Operations**
-
-  * Custom aggregation
-  * Custom estimators
-  * Custom transformations
-  * Integration with NumPy/Pandas
-
-* **78. Custom Matplotlib Integration**
-
-  * Adding artists
-  * Custom ticks
-  * Custom annotations
-  * Specialized axes
-  * Shared figure configuration
+- **37. Regression Plot Customization**
+  - Faceting
+  - `col`
+  - `row`
+  - `col_wrap`
+  - `height`
+  - `aspect`
+  - Customization best practices
 
 ---
 
-# XXI. Performance and Large Datasets
+# VI. Matrix Plots
 
-* **79. Overplotting**
+- **38. Matrix Plot Fundamentals**
+  - Matrix plots
+  - Heatmaps
+  - Clustermaps
+  - Matrix plot best practices
 
-  * Transparency
-  * Jitter
-  * Aggregation
-  * Sampling
-  * Binning
+- **39. Heatmaps**
+  - `heatmap`
+  - Parameters
+    - `data`
+    - `vmin`
+    - `vmax`
+    - `cmap`
+    - `center`
+    - `robust`
+    - `annot`
+    - `fmt`
+    - `annot_kws`
+    - `linewidths`
+    - `linecolor`
+    - `cbar`
+    - `cbar_kws`
+    - `cbar_ax`
+    - `square`
+    - `xticklabels`
+    - `yticklabels`
+    - `mask`
+    - `ax`
+    - `dtype`
+  - Heatmap best practices
 
-* **80. Large Data**
+- **40. Clustermaps**
+  - `clustermap`
+  - Parameters
+    - `data`
+    - `pivot_kws`
+    - `method`
+    - `metric`
+    - `z_score`
+    - `standard_scale`
+    - `figsize`
+    - `dendrogram_ratio`
+    - `colors_ratio`
+    - `cbar_pos`
+    - `tree_kws`
+    - `cmap`
+    - `center`
+    - `robust`
+    - `annot`
+    - `fmt`
+    - `annot_kws`
+    - `linewidths`
+    - `linecolor`
+    - `cbar`
+    - `cbar_kws`
+    - `cbar_ax`
+    - `square`
+    - `xticklabels`
+    - `yticklabels`
+    - `mask`
+    - `dtype`
+  - Clustermap best practices
 
-  * Reducing unnecessary observations
-  * Pre-aggregation
-  * Efficient Pandas operations
-  * Appropriate plot selection
+- **41. Correlation Matrices**
+  - Correlation matrices
+  - `df.corr()`
+  - Heatmap
+  - Correlation matrix best practices
 
-* **81. Visualization Performance**
-
-  * Avoiding excessive facets
-  * Avoiding unnecessary high-resolution output
-  * Choosing appropriate representations
-  * Separating exploratory and publication workflows
-
----
-
-# XXII. Visualization Design Principles
-
-* **82. Choosing the Correct Chart**
-
-  * Relationship → scatter/line
-  * Distribution → histogram/KDE/ECDF
-  * Category comparison → box/violin/bar
-  * Matrix → heatmap
-  * Hierarchical grouping → faceted views
-
-* **83. Avoiding Misleading Visualizations**
-
-  * Truncated axes
-  * Inappropriate aggregation
-  * Excessive decoration
-  * Poor color selection
-  * Overplotting
-  * Hidden uncertainty
-
-* **84. Data-Ink and Clarity**
-
-  * Remove unnecessary elements
-  * Maximize information density
-  * Highlight important patterns
-  * Maintain visual hierarchy
-
-* **85. Accessibility**
-
-  * Readable labels
-  * Sufficient contrast
-  * Colorblind-safe palettes
-  * Marker redundancy
-  * Appropriate font sizes
-
----
-
-# XXIII. Reproducible Visualization
-
-* **86. Reproducible Code**
-
-  * Explicit parameters
-  * Fixed random seeds where appropriate
-  * Version tracking
-  * Stable data pipelines
-
-* **87. Visualization Utilities**
-
-  * Reusable styling functions
-  * Reusable palette definitions
-  * Reusable plotting functions
-  * Consistent chart templates
-
-* **88. Project Organization**
-
-  * Data
-  * Analysis
-  * Visualization
-  * Output
-  * Configuration
-  * Documentation
+- **42. Pivot Tables**
+  - Pivot tables
+  - Heatmap
+  - Pivot table best practices
 
 ---
 
-# XXIV. Progressive Project Portfolio
+# VII. Multi-Plot Grids
 
-* **89. Beginner Projects**
+- **43. Multi-Plot Grid Fundamentals**
+  - Multi-plot grids
+  - Faceting
+  - Grids
+  - Multi-plot grid best practices
 
-  * Iris dataset
+- **44. FacetGrid**
+  - `FacetGrid`
+  - Parameters
+    - `data`
+    - `row`
+    - `col`
+    - `hue`
+    - `row_order`
+    - `col_order`
+    - `hue_order`
+    - `palette`
+    - `hue_kws`
+    - `height`
+    - `aspect`
+    - `layout_pad`
+    - `legend_out`
+    - `sharex`
+    - `sharey`
+    - `margin_titles`
+    - `facet_kws`
+    - `despine`
+  - Mapping functions
+    - `.map()`
+    - `.map_dataframe()`
+  - FacetGrid best practices
 
-    * Scatter plots
-    * Histograms
-    * Box plots
-    * Pair plots
-  * Titanic-style dataset
+- **45. PairGrid**
+  - `PairGrid`
+  - Parameters
+    - `data`
+    - `hue`
+    - `hue_order`
+    - `palette`
+    - `vars`
+    - `x_vars`
+    - `y_vars`
+    - `height`
+    - `aspect`
+    - `despine`
+    - `corner`
+    - `diag_sharey`
+    - `layout_pad`
+    - `dropna`
+  - Mapping functions
+    - `.map()`
+    - `.map_diag()`
+    - `.map_offdiag()`
+    - `.map_lower()`
+    - `.map_upper()`
+  - PairGrid best practices
 
-    * Categorical analysis
-    * Distribution comparison
-    * Count plots
+- **46. JointGrid**
+  - `JointGrid`
+  - Parameters
+    - `x`
+    - `y`
+    - `data`
+    - `hue`
+    - `palette`
+    - `height`
+    - `ratio`
+    - `space`
+    - `dropna`
+    - `xlim`
+    - `ylim`
+    - `marginal_ticks`
+  - Mapping functions
+    - `.plot()`
+    - `.plot_joint()`
+    - `.plot_marginals()`
+  - JointGrid best practices
 
-* **90. Intermediate Projects**
+- **47. Pairplot**
+  - `pairplot`
+  - Pairwise relationships
+  - Parameters
+    - `data`
+    - `hue`
+    - `hue_order`
+    - `palette`
+    - `vars`
+    - `x_vars`
+    - `y_vars`
+    - `kind`
+    - `diag_kind`
+    - `markers`
+    - `height`
+    - `aspect`
+    - `corner`
+    - `dropna`
+    - `plot_kws`
+    - `diag_kws`
+    - `grid_kws`
+    - `size`
+  - Pairplot best practices
 
-  * Sales analytics
+- **48. Jointplot**
+  - `jointplot`
+  - Joint distribution
+  - Parameters
+    - `data`
+    - `x`
+    - `y`
+    - `hue`
+    - `kind`
+    - `height`
+    - `ratio`
+    - `space`
+    - `dropna`
+    - `xlim`
+    - `ylim`
+    - `color`
+    - `palette`
+    - `hue_order`
+    - `marginal_ticks`
+    - `joint_kws`
+    - `marginal_kws`
+    - `annot_kws`
+  - Jointplot best practices
 
-    * Time-series trends
-    * Category comparisons
-    * Revenue distributions
-    * Correlation heatmaps
-  * Customer analytics
-
-    * Customer segmentation
-    * Spending distributions
-    * Cohort comparisons
-
-* **91. Advanced Projects**
-
-  * Financial analytics
-
-    * Time series
-    * Volatility visualization
-    * Correlation structures
-    * Distribution analysis
-  * Machine-learning EDA
-
-    * Feature distributions
-    * Feature relationships
-    * Outlier investigation
-    * Model diagnostics
-
-* **92. Expert Projects**
-
-  * Interactive analytical reporting workflow
-
-    * Data preparation
-    * Statistical visualization
-    * Multi-panel reporting
-    * Reusable plotting functions
-  * Publication-quality analytical report
-
-    * Consistent visual language
-    * Advanced annotations
-    * Carefully selected palettes
-    * High-resolution export
-
----
-
-# XXV. Progressive Learning Levels
-
-## Level 1 — Seaborn Beginner
-
-* Learn:
-
-  * Installation
-  * `DataFrame` integration
-  * Basic plotting
-  * `x` and `y`
-  * Titles and labels
-  * Basic styling
-
-* Master:
-
-  * `scatterplot()`
-  * `lineplot()`
-  * `histplot()`
-  * `boxplot()`
-  * `countplot()`
-
----
-
-## Level 2 — Core Visualization
-
-* Learn:
-
-  * `hue`
-  * `style`
-  * `size`
-  * Categorical plots
-  * Distribution plots
-  * Regression plots
-
-* Master:
-
-  * `stripplot()`
-  * `swarmplot()`
-  * `violinplot()`
-  * `barplot()`
-  * `kdeplot()`
-  * `regplot()`
-
----
-
-## Level 3 — Statistical Visualization
-
-* Learn:
-
-  * Aggregation
-  * Estimation
-  * Error bars
-  * Confidence intervals
-  * KDE
-  * ECDF
-  * Regression
-
-* Master:
-
-  * Choosing representations based on the statistical question
-  * Interpreting uncertainty
-  * Comparing distributions correctly
-
----
-
-## Level 4 — Advanced Seaborn
-
-* Learn:
-
-  * Faceting
-  * `relplot()`
-  * `displot()`
-  * `catplot()`
-  * `pairplot()`
-  * `jointplot()`
-  * `FacetGrid`
-  * `PairGrid`
-  * `JointGrid`
-  * Heatmaps
+- **49. Faceting**
+  - Faceting
+  - `col`
+  - `row`
+  - `col_wrap`
+  - `hue`
+  - Faceting best practices
 
 ---
 
-## Level 5 — Professional Visualization
+# VIII. Customization
 
-* Learn:
+- **50. Aesthetics**
+  - Aesthetics
+  - Aesthetic mappings
+  - Semantic mappings
+  - Aesthetic best practices
 
-  * Advanced styling
-  * Color theory
-  * Matplotlib integration
-  * Annotations
-  * Publication-quality output
-  * Accessibility
-  * Reusable visualization code
+- **51. Themes**
+  - `set_theme()`
+  - `set_style()`
+  - `set_context()`
+  - `set_palette()`
+  - `reset_defaults()`
+  - `reset_orig()`
+  - Themes
+    - `darkgrid`
+    - `whitegrid`
+    - `dark`
+    - `white`
+    - `ticks`
+  - Contexts
+    - `paper`
+    - `notebook`
+    - `talk`
+    - `poster`
+  - Theme best practices
+
+- **52. Color Palettes**
+  - Color palettes
+  - `color_palette()`
+  - `set_palette()`
+  - Qualitative palettes
+    - `deep`
+    - `muted`
+    - `pastel`
+    - `bright`
+    - `dark`
+    - `colorblind`
+  - Sequential palettes
+    - `Blues`
+    - `Greens`
+    - `Reds`
+    - `Oranges`
+    - `Purples`
+    - `Greys`
+    - `BuGn`
+    - `BuPu`
+    - `GnBu`
+    - `OrRd`
+    - `PuBu`
+    - `PuBuGn`
+    - `PuRd`
+    - `RdPu`
+    - `YlGn`
+    - `YlGnBu`
+    - `YlOrBr`
+    - `YlOrRd`
+  - Diverging palettes
+    - `RdBu`
+    - `RdGy`
+    - `RdYlBu`
+    - `RdYlGn`
+    - `Spectral`
+    - `coolwarm`
+    - `bwr`
+    - `seismic`
+  - Custom palettes
+  - Palette best practices
+
+- **53. Figure Aesthetics**
+  - Figure size
+  - Figure DPI
+  - Figure background
+  - Figure titles
+  - Figure best practices
+
+- **54. Axes Aesthetics**
+  - Axes titles
+  - Axes labels
+  - Axes limits
+  - Axes ticks
+  - Axes spines
+  - Axes grid
+  - Axes best practices
+
+- **55. Legend Customization**
+  - Legend location
+  - Legend title
+  - Legend labels
+  - Legend frame
+  - Legend best practices
+
+- **56. Annotations**
+  - Text annotations
+  - Arrow annotations
+  - Annotation best practices
+
+- **57. Despining**
+  - Despine
+  - `despine()`
+  - Despine best practices
 
 ---
 
-## Level 6 — `seaborn.objects`
+# IX. Advanced Topics
 
-* Learn:
+- **58. Statistical Estimation**
+  - Statistical estimation
+  - Estimators
+  - Bootstrapping
+  - Confidence intervals
+  - Error bars
+  - Statistical estimation best practices
 
-  * Declarative plotting
-  * Marks
-  * Statistical transformations
-  * Scales
-  * Faceting
-  * Layout
-  * Plot composition
+- **59. Aggregation**
+  - Aggregation
+  - `estimator`
+  - `errorbar`
+  - `n_boot`
+  - Aggregation best practices
 
-* Master:
+- **60. Weighted Data**
+  - Weighted data
+  - `weights`
+  - Weighted best practices
 
-  * Building complex visualizations from composable components rather than relying only on predefined plotting functions. ([Seaborn][1])
+- **61. Log Scales**
+  - Log scales
+  - `log_scale`
+  - Log scale best practices
+
+- **62. Categorical Ordering**
+  - Categorical ordering
+  - `order`
+  - `hue_order`
+  - Ordering best practices
+
+- **63. Pandas Integration**
+  - Pandas DataFrames
+  - Pandas Series
+  - Long-form data
+  - Wide-form data
+  - Pandas integration best practices
+
+- **64. NumPy Integration**
+  - NumPy arrays
+  - NumPy integration best practices
+
+- **65. Matplotlib Integration**
+  - Matplotlib integration
+  - Axes-level functions
+  - Figure-level functions
+  - Matplotlib integration best practices
+
+- **66. Subplots**
+  - Subplots
+  - `plt.subplots()`
+  - Axes-level functions
+  - Subplot best practices
+
+- **67. Custom Functions**
+  - Custom plotting functions
+  - Custom functions best practices
+
+- **68. Statistical Models**
+  - Statistical models
+  - statsmodels
+  - Linear models
+  - Statistical models best practices
 
 ---
 
-## Level 7 — Visualization Mastery
+# X. Performance
 
-* Master:
+- **69. Performance Fundamentals**
+  - Performance
+  - Rendering time
+  - Memory usage
+  - Performance metrics
+  - Performance best practices
 
-  * Exploratory data analysis
-  * Statistical communication
-  * Multivariate visualization
-  * Model diagnostics
-  * Complex datasets
-  * Large-data visualization
-  * Publication-quality figures
-  * Reusable visualization systems
+- **70. Large Datasets**
+  - Large datasets
+  - Downsampling
+  - Aggregation
+  - Data reduction
+  - Large dataset best practices
+
+- **71. Rendering Performance**
+  - Rendering
+  - Backend selection
+  - Agg backend
+  - Performance optimization
+  - Rendering best practices
+
+- **72. Memory Optimization**
+  - Memory optimization
+  - Figure cleanup
+  - `plt.close()`
+  - Memory best practices
+
+- **73. Profiling**
+  - Profiling
+  - `cProfile`
+  - `line_profiler`
+  - `memory_profiler`
+  - Profiling best practices
+
+- **74. Benchmarking**
+  - Benchmarking
+  - `timeit`
+  - `%timeit`
+  - Benchmarking best practices
 
 ---
 
-# XXVI. Final Seaborn Competency Map
+# XI. Export and Publication
 
-* **Python/Data Foundations**
+- **75. Saving Figures**
+  - `savefig()`
+  - File formats
+    - PNG
+    - PDF
+    - SVG
+    - EPS
+    - JPEG
+    - TIFF
+  - DPI
+  - Figure size
+  - Bounding box
+  - Saving best practices
 
-  * Python
-  * NumPy
-  * Pandas
-  * Matplotlib
+- **76. Publication-Quality Figures**
+  - Publication quality
+  - DPI
+  - Font sizes
+  - Line widths
+  - Figure size
+  - Color schemes
+  - Publication best practices
 
-* **Core Seaborn**
+- **77. LaTeX Integration**
+  - LaTeX
+  - `usetex`
+  - LaTeX rendering
+  - LaTeX best practices
 
-  * Scatter
-  * Line
-  * Histogram
-  * KDE
-  * Categorical plots
+- **78. Vector Graphics**
+  - SVG
+  - PDF
+  - EPS
+  - Vector graphics best practices
 
-* **Statistical Visualization**
+---
 
-  * Aggregation
-  * Estimation
-  * Error bars
-  * Regression
-  * Distributions
+# XII. Seaborn Projects by Difficulty
 
-* **Multivariate Visualization**
+## Beginner Projects
 
-  * `hue`
-  * `style`
-  * `size`
-  * Faceting
-  * Pairwise relationships
+- **1. Tips Dataset Analysis**
+  - Dataset loading
+  - Scatter plot
+  - Histogram
+  - Box plot
+  - Bar plot
 
-* **Advanced Visualization**
+- **2. Iris Dataset Visualization**
+  - Pairplot
+  - Scatter plot
+  - Box plot
+  - Violin plot
 
-  * Heatmaps
-  * Cluster maps
-  * Grids
-  * Joint plots
-  * Complex figure layouts
+- **3. Titanic Survival Analysis**
+  - Count plot
+  - Bar plot
+  - Distribution plot
+  - Categorical plot
 
-* **Design**
+- **4. Flights Dataset Visualization**
+  - Heatmap
+  - Line plot
+  - Pivot table
+  - Time series
 
-  * Themes
-  * Color palettes
-  * Typography
-  * Accessibility
-  * Visual hierarchy
+- **5. Penguins Dataset Analysis**
+  - Pairplot
+  - Scatter plot
+  - Box plot
+  - Distribution plot
 
-* **Modern Seaborn**
+---
 
-  * `seaborn.objects`
-  * Marks
-  * Stats
-  * Scales
-  * Declarative composition
+## Intermediate Projects
 
-* **Professional Practice**
+- **6. Exploratory Data Analysis**
+  - Multiple plots
+  - Faceting
+  - Customization
+  - Themes
+  - Color palettes
 
-  * EDA
-  * Statistical communication
-  * Model diagnostics
-  * Reproducibility
-  * Publication-quality figures
+- **7. Statistical Visualization**
+  - Regression plots
+  - Residual plots
+  - Distribution plots
+  - Correlation matrices
 
-### Complete progression
+- **8. Time Series Visualization**
+  - Line plots
+  - Faceting
+  - Aggregation
+  - Confidence intervals
 
-**Python → NumPy → Pandas → Matplotlib → Seaborn Basics → Relational Plots → Distribution Plots → Categorical Plots → Statistical Estimation → Regression → Faceting → Pair/Joint Grids → Heatmaps → Styling → Color Theory → Matplotlib Integration → `seaborn.objects` → Advanced Statistical Visualization → EDA → ML Diagnostics → Professional Visualization Mastery.**
+- **9. Categorical Data Analysis**
+  - Box plots
+  - Violin plots
+  - Bar plots
+  - Point plots
 
-[1]: https://seaborn.pydata.org/tutorial.html "User guide and tutorial — seaborn 0.13.2 documentation"
-[2]: https://seaborn.pydata.org/api.html "API reference — seaborn 0.13.2 documentation"
+- **10. Correlation Analysis**
+  - Heatmaps
+  - Clustermaps
+  - Pair plots
+  - Joint plots
+
+---
+
+## Advanced Projects
+
+- **11. Publication-Quality Figures**
+  - Themes
+  - Color palettes
+  - Customization
+  - Export
+  - LaTeX
+
+- **12. Dashboard Visualization**
+  - Multi-plot grids
+  - Faceting
+  - Customization
+  - Interactivity
+
+- **13. Machine Learning Visualization**
+  - Feature importance
+  - Confusion matrix
+  - ROC curve
+  - Learning curves
+
+- **14. Financial Data Visualization**
+  - Time series
+  - Candlestick
+  - Correlation
+  - Risk analysis
+
+- **15. Scientific Data Visualization**
+  - Heatmaps
+  - Clustermaps
+  - Distribution plots
+  - Regression plots
+
+---
+
+## Expert Projects
+
+- **16. Custom Visualization Library**
+  - Custom functions
+  - Custom themes
+  - Custom palettes
+  - Documentation
+  - Testing
+
+- **17. Interactive Dashboard**
+  - Seaborn
+  - Plotly
+  - Dash
+  - Streamlit
+  - Deployment
+
+- **18. Automated Reporting**
+  - Seaborn
+  - Pandas
+  - Jupyter
+  - Papermill
+  - Automation
+
+- **19. High-Performance Visualization**
+  - Large datasets
+  - Downsampling
+  - Aggregation
+  - Performance optimization
+
+- **20. Production Visualization Platform**
+  - Data pipelines
+  - Visualization
+  - Reporting
+  - Deployment
+  - Monitoring
+
+---
+
+# XIII. Progressive Seaborn Learning Sequence
+
+## Level 1 — Seaborn Fundamentals
+
+- Master:
+  - Installation
+  - Import
+  - API
+  - First plot
+  - Built-in datasets
+
+## Level 2 — Relational Plots
+
+- Master:
+  - Relational plot fundamentals
+  - Scatter plots
+  - Line plots
+  - Relational plot customization
+  - Relational plot best practices
+
+## Level 3 — Distribution Plots
+
+- Master:
+  - Distribution plot fundamentals
+  - Histograms
+  - KDE plots
+  - ECDF plots
+  - Rug plots
+  - Bivariate distributions
+  - Distribution plot customization
+
+## Level 4 — Categorical Plots
+
+- Master:
+  - Categorical plot fundamentals
+  - Strip plots
+  - Swarm plots
+  - Box plots
+  - Violin plots
+  - Boxen plots
+  - Point plots
+  - Bar plots
+  - Count plots
+  - Categorical plot customization
+
+## Level 5 — Regression Plots
+
+- Master:
+  - Regression plot fundamentals
+  - Linear regression plots
+  - Polynomial regression
+  - Logistic regression
+  - LOWESS regression
+  - Robust regression
+  - Residual plots
+  - Regression plot customization
+
+## Level 6 — Matrix Plots
+
+- Master:
+  - Matrix plot fundamentals
+  - Heatmaps
+  - Clustermaps
+  - Correlation matrices
+  - Pivot tables
+
+## Level 7 — Multi-Plot Grids
+
+- Master:
+  - Multi-plot grid fundamentals
+  - FacetGrid
+  - PairGrid
+  - JointGrid
+  - Pairplot
+  - Jointplot
+  - Faceting
+
+## Level 8 — Customization
+
+- Master:
+  - Aesthetics
+  - Themes
+  - Color palettes
+  - Figure aesthetics
+  - Axes aesthetics
+  - Legend customization
+  - Annotations
+  - Despining
+
+## Level 9 — Advanced Topics
+
+- Master:
+  - Statistical estimation
+  - Aggregation
+  - Weighted data
+  - Log scales
+  - Categorical ordering
+  - Pandas integration
+  - NumPy integration
+  - Matplotlib integration
+  - Subplots
+  - Custom functions
+  - Statistical models
+
+## Level 10 — Performance
+
+- Master:
+  - Performance fundamentals
+  - Large datasets
+  - Rendering performance
+  - Memory optimization
+  - Profiling
+  - Benchmarking
+
+## Level 11 — Export and Publication
+
+- Master:
+  - Saving figures
+  - Publication-quality figures
+  - LaTeX integration
+  - Vector graphics
+
+## Level 12 — Production Engineering
+
+- Master:
+  - Visualization pipelines
+  - Automated reporting
+  - Dashboard integration
+  - Accessibility
+  - Reproducibility
+  - Production best practices
+
+---
+
+# XIV. Final Seaborn Competency Map
+
+- **Foundations**
+
+  - Installation
+  - Import
+  - API
+  - First plot
+  - Built-in datasets
+
+- **Relational Plots**
+
+  - Relational plot fundamentals
+  - Scatter plots
+  - Line plots
+  - Relational plot customization
+
+- **Distribution Plots**
+
+  - Distribution plot fundamentals
+  - Histograms
+  - KDE plots
+  - ECDF plots
+  - Rug plots
+  - Bivariate distributions
+  - Distribution plot customization
+
+- **Categorical Plots**
+
+  - Categorical plot fundamentals
+  - Strip plots
+  - Swarm plots
+  - Box plots
+  - Violin plots
+  - Boxen plots
+  - Point plots
+  - Bar plots
+  - Count plots
+  - Categorical plot customization
+
+- **Regression Plots**
+
+  - Regression plot fundamentals
+  - Linear regression plots
+  - Polynomial regression
+  - Logistic regression
+  - LOWESS regression
+  - Robust regression
+  - Residual plots
+  - Regression plot customization
+
+- **Matrix Plots**
+
+  - Matrix plot fundamentals
+  - Heatmaps
+  - Clustermaps
+  - Correlation matrices
+  - Pivot tables
+
+- **Multi-Plot Grids**
+
+  - Multi-plot grid fundamentals
+  - FacetGrid
+  - PairGrid
+  - JointGrid
+  - Pairplot
+  - Jointplot
+  - Faceting
+
+- **Customization**
+
+  - Aesthetics
+  - Themes
+  - Color palettes
+  - Figure aesthetics
+  - Axes aesthetics
+  - Legend customization
+  - Annotations
+  - Despining
+
+- **Advanced Topics**
+
+  - Statistical estimation
+  - Aggregation
+  - Weighted data
+  - Log scales
+  - Categorical ordering
+  - Pandas integration
+  - NumPy integration
+  - Matplotlib integration
+  - Subplots
+  - Custom functions
+  - Statistical models
+
+- **Performance**
+
+  - Performance fundamentals
+  - Large datasets
+  - Rendering performance
+  - Memory optimization
+  - Profiling
+  - Benchmarking
+
+- **Export**
+
+  - Saving figures
+  - Publication-quality figures
+  - LaTeX integration
+  - Vector graphics
+
+- **Production**
+
+  - Visualization pipelines
+  - Automated reporting
+  - Dashboard integration
+  - Accessibility
+  - Reproducibility
+
+---
+
+## Recommended Overall Progression
+
+**Seaborn Fundamentals → Relational Plots → Distribution Plots → Categorical Plots → Regression Plots → Matrix Plots → Multi-Plot Grids → Customization → Advanced Topics → Performance → Export and Publication → Production Engineering**

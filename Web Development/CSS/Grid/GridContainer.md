@@ -159,15 +159,6 @@ selector {
 **CSS File (`display-grid.css`):**
 
 ```css
-body {
-    font-family: system-ui, sans-serif;
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 20px;
-    line-height: 1.8;
-    background-color: #f5f5f5;
-}
-
 /* Block-level grid container */
 .grid-block {
     display: grid;

@@ -1,1573 +1,1671 @@
 # TensorFlow Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Concepts to Advanced Practical Mastery
+## From Tensor Foundations to Advanced Deep Learning, Distributed Training, Deployment, and Production ML Engineering
 
-TensorFlow is best learned progressively: start with tensors and automatic differentiation, move quickly into **Keras** for model development, then learn `tf.data`, custom training, computer vision/NLP, optimization, distributed training, and deployment. TensorFlow's own documentation recommends Keras as the high-level starting point and provides a progression from beginner workflows to custom models and distributed training. ([TensorFlow][1])
-
----
-
-# I. Prerequisites
-
-* **1. Python**
-
-  * Syntax
-
-    * Variables
-    * Functions
-    * Classes
-    * Modules
-  * Core data structures
-
-    * Lists
-    * Tuples
-    * Dictionaries
-    * Sets
-  * Iteration
-
-    * `for`
-    * `while`
-    * Comprehensions
-  * Error handling
-  * File I/O
-  * Virtual environments
-  * Package management
-
-    * `pip`
-  * Object-oriented programming basics
-
-* **2. Numerical Computing**
-
-  * NumPy
-
-    * Arrays
-    * Shapes
-    * Broadcasting
-    * Vectorization
-    * Matrix operations
-  * Linear algebra
-
-    * Vectors
-    * Matrices
-    * Dot products
-    * Matrix multiplication
-    * Transpose
-  * Basic probability
-  * Basic statistics
-  * Calculus fundamentals
-
-    * Derivatives
-    * Partial derivatives
-    * Gradients
-    * Chain rule
-
-* **3. Machine Learning Fundamentals**
-
-  * Supervised learning
-  * Unsupervised learning
-  * Training, validation, and test sets
-  * Features and labels
-  * Loss functions
-  * Optimization
-  * Overfitting
-  * Underfitting
-  * Regularization
-  * Evaluation metrics
+TensorFlow is best learned as more than "a library for neural networks." The progression should cover **Python prerequisites → NumPy prerequisites → ML fundamentals → TensorFlow core → tensors → variables → autodiff → Keras → model building → training → evaluation → CNN → RNN → Transformers → NLP → computer vision → custom training → distributed training → TFX → TensorFlow Lite → TensorFlow.js → TensorFlow Serving → deployment → MLOps → production engineering**.
 
 ---
 
-# II. TensorFlow Ecosystem
+# I. TensorFlow Foundations
 
-* **4. Understanding TensorFlow**
+- **1. What TensorFlow Is**
+  - TensorFlow
+  - TensorFlow history
+  - Google Brain
+  - TensorFlow 1.0
+  - TensorFlow 2.0
+  - TensorFlow 2.15
+  - TensorFlow 2.16
+  - TensorFlow 2.17
+  - TensorFlow 2.18
+  - TensorFlow 2.19 (current)
+  - TensorFlow philosophy
+    - End-to-end platform
+    - Production-ready
+    - Scalable
+    - Portable
+    - Open source
+    - Ecosystem
+  - TensorFlow vs PyTorch
+  - TensorFlow vs JAX
+  - TensorFlow vs Keras
+  - TensorFlow vs scikit-learn
+  - TensorFlow use cases
+    - Deep learning
+    - Neural networks
+    - Computer vision
+    - Natural language processing
+    - Speech recognition
+    - Recommendation systems
+    - Time series
+    - Reinforcement learning
+    - Generative AI
+    - Production ML
+  - TensorFlow in modern ML
+  - TensorFlow ecosystem
+  - TensorFlow components
+    - TensorFlow Core
+    - Keras
+    - TensorFlow Lite
+    - TensorFlow.js
+    - TensorFlow Extended (TFX)
+    - TensorFlow Serving
+    - TensorFlow Hub
+    - TensorBoard
+    - TensorFlow Datasets
+    - TensorFlow Probability
+    - TensorFlow Graphics
+    - TensorFlow Quantum
+    - TensorFlow Federated
+    - TensorFlow Model Optimization
+    - TensorFlow Recommenders
+    - TensorFlow Agents
+    - TensorFlow Ranking
+    - TensorFlow Text
+    - TensorFlow Addons
 
-  * What TensorFlow is
-  * TensorFlow 2.x programming model
-  * Eager execution
-  * Tensor-based computation
-  * Automatic differentiation
-  * Graph-based execution
-  * Hardware acceleration
+- **2. Prerequisites**
+  - Python fundamentals
+  - Variables
+  - Data types
+  - Control flow
+  - Functions
+  - Classes
+  - Modules
+  - NumPy
+    - ndarray
+    - Indexing
+    - Slicing
+    - Broadcasting
+    - Universal functions
+    - Aggregation
+    - Linear algebra
+    - Random
+  - Pandas
+    - Series
+    - DataFrame
+    - Index
+    - Selection
+    - Cleaning
+    - Transformation
+  - Matplotlib
+    - Plotting
+    - Subplots
+  - SciPy
+    - Linear algebra
+    - Statistics
+  - Jupyter
+    - Notebooks
+    - Cells
+  - Machine learning concepts
+  - Deep learning concepts
+  - Prerequisite best practices
 
-    * CPU
-    * GPU
-    * TPU
+- **3. Machine Learning Foundations**
+  - Machine learning
+  - Supervised learning
+  - Unsupervised learning
+  - Reinforcement learning
+  - Classification
+  - Regression
+  - Clustering
+  - Features
+  - Labels
+  - Training data
+  - Validation data
+  - Test data
+  - Overfitting
+  - Underfitting
+  - Bias-variance tradeoff
+  - Regularization
+  - Cross-validation
+  - Model evaluation
+  - Model selection
+  - Hyperparameter tuning
+  - ML workflow
+  - ML best practices
 
-* **5. TensorFlow and Keras**
+- **4. Deep Learning Foundations**
+  - Deep learning
+  - Neural networks
+  - Neurons
+  - Layers
+  - Weights
+  - Biases
+  - Activations
+  - Loss functions
+  - Optimizers
+  - Backpropagation
+  - Gradient descent
+  - Forward propagation
+  - Backward propagation
+  - Epochs
+  - Batches
+  - Iterations
+  - Learning rate
+  - Regularization
+  - Dropout
+  - Batch normalization
+  - Deep learning best practices
 
-  * TensorFlow Core
-  * Keras high-level API
-  * Relationship between TensorFlow and Keras
-  * When to use high-level APIs
-  * When lower-level TensorFlow APIs are useful
-  * Keras workflow
+- **5. Installing TensorFlow**
+  - Installation
+    - pip
+    - conda
+    - mamba
+    - uv
+  - `pip install tensorflow`
+  - `pip install tensorflow-cpu`
+  - `pip install tensorflow-gpu`
+  - `pip install tensorflow[and-cuda]`
+  - Version checking
+  - `tf.__version__`
+  - Dependencies
+    - NumPy
+    - Protobuf
+    - h5py
+    - TensorBoard
+    - Keras
+  - Optional dependencies
+    - CUDA
+    - cuDNN
+    - GPU support
+  - Pre-built wheels
+  - Platform-specific installation
+  - Installation best practices
 
-    * Data
-    * Layers
-    * Models
-    * Losses
-    * Optimizers
-    * Metrics
-    * Training
-    * Evaluation
-    * Deployment
+- **6. Importing TensorFlow**
+  - `import tensorflow as tf`
+  - `from tensorflow import keras`
+  - `import keras`
+  - Subpackage imports
+  - Import best practices
+  - Namespace conventions
 
-* **6. Development Environment**
-
-  * Installing TensorFlow
-  * Jupyter
-  * Google Colab
-  * Local development
-  * GPU environments
-  * Dependency management
-  * Reproducible environments
-  * Checking TensorFlow installation
-  * Checking available devices
-
----
-
-# III. Tensor Fundamentals
-
-* **7. Tensors**
-
-  * Scalar tensors
-  * Vector tensors
-  * Matrix tensors
-  * Higher-dimensional tensors
-  * Rank
-  * Shape
-  * Size
-  * Data type
-  * Device placement
-
-* **8. Creating Tensors**
-
-  * `tf.constant`
-  * `tf.zeros`
-  * `tf.ones`
-  * `tf.fill`
-  * Random tensors
-  * Tensor initialization
-
-* **9. Tensor Inspection**
-
-  * `shape`
-  * `dtype`
-  * `ndim`
-  * Tensor values
-  * Device information
-
-* **10. Tensor Operations**
-
-  * Arithmetic
-  * Comparison
-  * Logical operations
-  * Matrix multiplication
-  * Reduction operations
-  * Element-wise operations
-  * Broadcasting
-  * Reshaping
-  * Transposition
-
-* **11. Tensor Manipulation**
-
-  * `tf.reshape`
-  * `tf.squeeze`
-  * `tf.expand_dims`
-  * `tf.concat`
-  * `tf.stack`
-  * `tf.unstack`
-  * `tf.gather`
-  * Slicing
-  * Masking
-
-* **12. Data Types and Conversion**
-
-  * Integer tensors
-  * Floating-point tensors
-  * Boolean tensors
-  * String tensors
-  * Casting
-  * Numerical precision
-  * Mixed-precision concepts
-
----
-
-# IV. TensorFlow Mathematical Foundations
-
-* **13. Linear Algebra with TensorFlow**
-
-  * Matrix multiplication
-  * Dot products
-  * Transpose
-  * Inverse where appropriate
-  * Eigen concepts
-  * Decompositions
-  * Batch matrix operations
-
-* **14. Statistical Operations**
-
-  * Mean
-  * Sum
-  * Variance
-  * Standard deviation
-  * Minimum
-  * Maximum
-  * Argmin
-  * Argmax
-
-* **15. Randomness**
-
-  * Random number generation
-  * Seeds
-  * Reproducibility
-  * Sampling
-  * Initialization strategies
-
----
-
-# V. Automatic Differentiation
-
-* **16. Gradients**
-
-  * Derivative
-  * Gradient
-  * Chain rule
-  * Computational graphs
-  * Backpropagation
-
-* **17. `tf.GradientTape`**
-
-  * Recording operations
-  * Computing gradients
-  * Persistent tapes
-  * Watching tensors
-  * Nested gradient tapes
-  * Higher-order derivatives
-
-* **18. Understanding Backpropagation**
-
-  * Forward pass
-  * Loss calculation
-  * Gradient calculation
-  * Parameter update
-  * Gradient descent
-  * Backpropagation through layers
-
----
-
-# VI. Keras Fundamentals
-
-Keras is TensorFlow's high-level API and is the primary entry point for many TensorFlow workflows. TensorFlow's official learning material starts beginners with Keras and then progresses toward Functional API, subclassing, customization, and custom training loops. ([TensorFlow][1])
-
-* **19. Keras Building Blocks**
-
-  * Layers
-  * Models
-  * Losses
-  * Optimizers
-  * Metrics
-  * Callbacks
-
-* **20. Sequential API**
-
-  * Creating a sequential model
-  * Adding layers
-  * Input shape
-  * Dense networks
-  * Compiling models
-  * Training models
-  * Evaluating models
-  * Prediction
-
-* **21. Functional API**
-
-  * Functional model construction
-  * Inputs
-  * Outputs
-  * Multiple inputs
-  * Multiple outputs
-  * Branching architectures
-  * Shared layers
-  * Skip connections
-
-* **22. Model Subclassing**
-
-  * `keras.Model`
-  * Custom model classes
-  * Custom `call`
-  * State management
-  * Reusable model components
+- **7. TensorFlow API**
+  - TensorFlow API
+  - High-level API
+    - Keras
+  - Mid-level API
+    - `tf.Module`
+    - `tf.keras.Model`
+  - Low-level API
+    - Tensors
+    - Variables
+    - Operations
+    - GradientTape
+  - API best practices
 
 ---
 
-# VII. Neural Network Fundamentals
+# II. TensorFlow Core
 
-* **23. Artificial Neural Networks**
+- **8. Tensors**
+  - Tensors
+  - Tensor creation
+    - `tf.constant()`
+    - `tf.zeros()`
+    - `tf.ones()`
+    - `tf.fill()`
+    - `tf.random()`
+    - `tf.random.normal()`
+    - `tf.random.uniform()`
+    - `tf.range()`
+    - `tf.linspace()`
+    - `tf.eye()`
+    - `tf.reshape()`
+    - `tf.convert_to_tensor()`
+  - Tensor attributes
+    - `shape`
+    - `dtype`
+    - `device`
+    - `numpy()`
+  - Tensor operations
+    - Arithmetic operations
+    - Comparison operations
+    - Logical operations
+    - Reduction operations
+    - Broadcasting
+    - Indexing
+    - Slicing
+    - Reshaping
+    - Transposing
+    - Concatenation
+    - Stacking
+    - Splitting
+  - Tensor types
+    - `tf.Variable`
+    - `tf.Tensor`
+    - `tf.RaggedTensor`
+    - `tf.SparseTensor`
+    - `tf.string`
+    - `tf.bool`
+    - `tf.int32`
+    - `tf.int64`
+    - `tf.float32`
+    - `tf.float64`
+  - Tensor best practices
 
-  * Neurons
-  * Weights
-  * Biases
-  * Linear transformations
-  * Activations
+- **9. Variables**
+  - Variables
+  - `tf.Variable`
+  - Variable creation
+  - Variable initialization
+  - Variable assignment
+  - Variable operations
+  - Variable trainable
+  - Variable nontrainable
+  - Variable best practices
 
-* **24. Activation Functions**
+- **10. Operations**
+  - Operations
+  - `tf.add()`
+  - `tf.subtract()`
+  - `tf.multiply()`
+  - `tf.divide()`
+  - `tf.matmul()`
+  - `tf.tensordot()`
+  - `tf.einsum()`
+  - `tf.reduce_sum()`
+  - `tf.reduce_mean()`
+  - `tf.reduce_max()`
+  - `tf.reduce_min()`
+  - `tf.argmax()`
+  - `tf.argmin()`
+  - `tf.cast()`
+  - `tf.transpose()`
+  - `tf.reshape()`
+  - `tf.squeeze()`
+  - `tf.expand_dims()`
+  - `tf.concat()`
+  - `tf.stack()`
+  - `tf.split()`
+  - `tf.gather()`
+  - `tf.scatter_nd()`
+  - `tf.where()`
+  - `tf.boolean_mask()`
+  - `tf.one_hot()`
+  - `tf.clip_by_value()`
+  - `tf.clip_by_norm()`
+  - Operation best practices
 
-  * ReLU
-  * Sigmoid
-  * Tanh
-  * Softmax
-  * GELU
-  * Activation selection
+- **11. Automatic Differentiation**
+  - Automatic differentiation
+  - Autodiff
+  - `tf.GradientTape`
+  - Gradient computation
+  - Gradient tape
+  - Persistent tape
+  - Nested tape
+  - Watch variables
+  - Gradients
+  - `tape.gradient()`
+  - `tape.jacobian()`
+  - `tape.batch_jacobian()`
+  - `tape.hessians()`
+  - Custom gradients
+  - `tf.custom_gradient`
+  - Autodiff best practices
 
-* **25. Dense Networks**
+- **12. Eager Execution**
+  - Eager execution
+  - `tf.executing_eagerly()`
+  - `tf.function`
+  - Graph mode
+  - Eager mode
+  - Tracing
+  - Retracing
+  - `tf.function` parameters
+  - `input_signature`
+  - `reduce_retracing`
+  - `experimental_follow_type_hints`
+  - Eager execution best practices
 
-  * Fully connected layers
-  * Hidden layers
-  * Network depth
-  * Network width
-  * Parameter counts
+- **13. `tf.function`**
+  - `tf.function`
+  - Function compilation
+  - Tracing
+  - Graph mode
+  - AutoGraph
+  - Control flow
+  - Python side effects
+  - Variable creation
+  - Input signature
+  - Retracing
+  - `tf.function` best practices
 
-* **26. Training Neural Networks**
+- **14. Devices**
+  - Devices
+  - CPU
+  - GPU
+  - TPU
+  - Device placement
+  - `tf.device()`
+  - Device detection
+  - `tf.config.list_physical_devices()`
+  - `tf.config.list_logical_devices()`
+  - Memory growth
+  - `tf.config.experimental.set_memory_growth()`
+  - Virtual devices
+  - `tf.config.set_logical_device_configuration()`
+  - Device best practices
 
-  * Forward pass
-  * Loss
-  * Backpropagation
-  * Optimizer update
-  * Epoch
-  * Batch
-  * Iteration
+- **15. Datasets**
+  - Datasets
+  - `tf.data.Dataset`
+  - Dataset creation
+    - `tf.data.Dataset.from_tensor_slices()`
+    - `tf.data.Dataset.from_generator()`
+    - `tf.data.Dataset.from_tensors()`
+    - `tf.data.Dataset.list_files()`
+    - `tf.data.Dataset.range()`
+    - `tf.data.Dataset.zip()`
+  - Dataset transformations
+    - `map()`
+    - `filter()`
+    - `batch()`
+    - `shuffle()`
+    - `repeat()`
+    - `cache()`
+    - `prefetch()`
+    - `take()`
+    - `skip()`
+    - `concatenate()`
+    - `interleave()`
+    - `padded_batch()`
+    - `window()`
+    - `flat_map()`
+    - `unbatch()`
+    - `apply()`
+  - Dataset iteration
+  - Dataset performance
+  - `tf.data.AUTOTUNE`
+  - Dataset best practices
 
----
+- **16. TFRecord**
+  - TFRecord
+  - TFRecord format
+  - TFRecord writing
+  - TFRecord reading
+  - `tf.io.TFRecordWriter`
+  - `tf.data.TFRecordDataset`
+  - Example protocol buffer
+  - `tf.train.Example`
+  - Feature serialization
+  - TFRecord best practices
 
-# VIII. Loss Functions and Optimization
-
-* **27. Loss Functions**
-
-  * Mean squared error
-  * Mean absolute error
-  * Binary cross-entropy
-  * Categorical cross-entropy
-  * Sparse categorical cross-entropy
-  * Huber loss
-  * Custom losses
-
-* **28. Optimizers**
-
-  * Gradient descent
-  * SGD
-  * Momentum
-  * RMSprop
-  * Adam
-  * AdamW
-  * Learning-rate selection
-
-* **29. Learning-Rate Strategies**
-
-  * Fixed learning rate
-  * Learning-rate decay
-  * Scheduling
-  * Warm-up
-  * Adaptive strategies
-
-* **30. Optimization Problems**
-
-  * Vanishing gradients
-  * Exploding gradients
-  * Poor initialization
-  * Unstable training
-  * Overfitting
-
----
-
-# IX. Data Input and `tf.data`
-
-TensorFlow's official guides emphasize `tf.data` for building reusable and composable input pipelines. ([TensorFlow][2])
-
-* **31. Dataset Fundamentals**
-
-  * `tf.data.Dataset`
-  * Dataset creation
-  * Tensor slices
-  * From generators
-
-* **32. Dataset Transformations**
-
-  * `map`
-  * `filter`
-  * `batch`
-  * `shuffle`
-  * `repeat`
-  * `take`
-  * `skip`
-  * `cache`
-  * `prefetch`
-
-* **33. Efficient Input Pipelines**
-
-  * Pipeline parallelism
-  * Prefetching
-  * Caching
-  * Parallel mapping
-  * Avoiding input bottlenecks
-
-* **34. File-Based Data**
-
-  * Images
-  * CSV
-  * TFRecord
-  * Structured data
-  * Large datasets
-
-* **35. TensorFlow Datasets**
-
-  * Dataset discovery
-  * Loading datasets
-  * Dataset metadata
-  * Train/test splits
-  * Integration with `tf.data`
-
----
-
-# X. Data Preprocessing
-
-* **36. Numerical Features**
-
-  * Normalization
-  * Standardization
-  * Missing values
-  * Outlier treatment
-
-* **37. Categorical Features**
-
-  * Integer encoding
-  * One-hot encoding
-  * Vocabulary creation
-  * Embeddings
-
-* **38. Text Preprocessing**
-
-  * Tokenization
-  * Vocabulary
-  * Sequence creation
-  * Padding
-  * Masking
-
-* **39. Image Preprocessing**
-
-  * Resizing
-  * Normalization
-  * Cropping
-  * Flipping
-  * Rotation
-  * Augmentation
-
-* **40. Keras Preprocessing Layers**
-
-  * Normalization
-  * Rescaling
-  * Text vectorization
-  * Categorical encoding
-  * Hashing
-
----
-
-# XI. Model Training with Keras
-
-* **41. `compile()`**
-
-  * Optimizer
-  * Loss
-  * Metrics
-
-* **42. `fit()`**
-
-  * Epochs
-  * Batches
-  * Validation
-  * Callbacks
-  * Dataset input
-
-* **43. `evaluate()`**
-
-  * Evaluation metrics
-  * Validation performance
-  * Test performance
-
-* **44. `predict()`**
-
-  * Batch prediction
-  * Single-example inference
-  * Production inference patterns
-
-* **45. Callbacks**
-
-  * Early stopping
-  * Model checkpointing
-  * Learning-rate scheduling
-  * Logging
-  * Custom callbacks
-
----
-
-# XII. Model Evaluation
-
-* **46. Classification Metrics**
-
-  * Accuracy
-  * Precision
-  * Recall
-  * F1 score
-  * Confusion matrix
-  * ROC-AUC
-  * PR-AUC
-
-* **47. Regression Metrics**
-
-  * MAE
-  * MSE
-  * RMSE
-  * MAPE
-  * R²
-
-* **48. Model Diagnostics**
-
-  * Training curves
-  * Validation curves
-  * Error analysis
-  * Bias versus variance
-  * Calibration
+- **17. TensorBoard**
+  - TensorBoard
+  - TensorBoard installation
+  - TensorBoard setup
+  - `tf.summary`
+  - Scalars
+  - Images
+  - Audio
+  - Histograms
+  - Graphs
+  - Distributions
+  - Text
+  - Embeddings
+  - Profiling
+  - TensorBoard best practices
 
 ---
 
-# XIII. Computer Vision with TensorFlow
+# III. Keras
 
-* **49. Image Classification**
+- **18. Keras Fundamentals**
+  - Keras
+  - Keras history
+  - Keras 2
+  - Keras 3
+  - Keras philosophy
+    - User-friendly
+    - Modular
+    - Composable
+    - Multi-backend
+    - Multi-platform
+  - Keras API
+  - Keras best practices
 
-  * Image pipelines
-  * CNN fundamentals
-  * Convolution
-  * Pooling
-  * Feature maps
-  * Classification heads
+- **19. Sequential API**
+  - Sequential API
+  - `keras.Sequential`
+  - Layer stacking
+  - `add()`
+  - Model creation
+  - Model summary
+  - Sequential best practices
 
-* **50. Convolutional Architectures**
+- **20. Functional API**
+  - Functional API
+  - `keras.Input`
+  - Model creation
+  - Multiple inputs
+  - Multiple outputs
+  - Shared layers
+  - `keras.Model`
+  - Functional best practices
 
-  * Basic CNN
-  * Deeper CNNs
-  * Batch normalization
-  * Dropout
-  * Residual connections
+- **21. Model Subclassing**
+  - Model subclassing
+  - `keras.Model`
+  - `call()`
+  - Custom models
+  - Model subclassing best practices
 
-* **51. Transfer Learning**
+- **22. Layers**
+  - Layers
+  - Core layers
+    - `Dense`
+    - `Activation`
+    - `Dropout`
+    - `Flatten`
+    - `Reshape`
+    - `Permute`
+    - `RepeatVector`
+    - `Lambda`
+    - `Masking`
+    - `SpatialDropout1D`
+    - `SpatialDropout2D`
+    - `SpatialDropout3D`
+  - Convolutional layers
+    - `Conv1D`
+    - `Conv2D`
+    - `Conv3D`
+    - `SeparableConv1D`
+    - `SeparableConv2D`
+    - `DepthwiseConv2D`
+    - `Conv1DTranspose`
+    - `Conv2DTranspose`
+    - `Conv3DTranspose`
+  - Pooling layers
+    - `MaxPooling1D`
+    - `MaxPooling2D`
+    - `MaxPooling3D`
+    - `AveragePooling1D`
+    - `AveragePooling2D`
+    - `AveragePooling3D`
+    - `GlobalMaxPooling1D`
+    - `GlobalMaxPooling2D`
+    - `GlobalMaxPooling3D`
+    - `GlobalAveragePooling1D`
+    - `GlobalAveragePooling2D`
+    - `GlobalAveragePooling3D`
+  - Recurrent layers
+    - `RNN`
+    - `LSTM`
+    - `GRU`
+    - `SimpleRNN`
+    - `Bidirectional`
+    - `ConvLSTM1D`
+    - `ConvLSTM2D`
+    - `ConvLSTM3D`
+  - Attention layers
+    - `Attention`
+    - `AdditiveAttention`
+    - `MultiHeadAttention`
+  - Normalization layers
+    - `BatchNormalization`
+    - `LayerNormalization`
+    - `GroupNormalization`
+    - `UnitNormalization`
+    - `SyncBatchNormalization`
+  - Regularization layers
+    - `Dropout`
+    - `SpatialDropout1D`
+    - `SpatialDropout2D`
+    - `SpatialDropout3D`
+    - `GaussianDropout`
+    - `GaussianNoise`
+    - `ActivityRegularization`
+  - Embedding layers
+    - `Embedding`
+  - Merge layers
+    - `Add`
+    - `Subtract`
+    - `Multiply`
+    - `Average`
+    - `Maximum`
+    - `Minimum`
+    - `Concatenate`
+    - `Dot`
+  - Preprocessing layers
+    - `TextVectorization`
+    - `Normalization`
+    - `Discretization`
+    - `CategoryEncoding`
+    - `Hashing`
+    - `IntegerLookup`
+    - `StringLookup`
+    - `ImagePreprocessing`
+    - `Rescaling`
+    - `Resizing`
+    - `RandomFlip`
+    - `RandomRotation`
+    - `RandomZoom`
+    - `RandomTranslation`
+    - `RandomContrast`
+    - `RandomBrightness`
+    - `RandomCrop`
+    - `CenterCrop`
+    - `RandomHeight`
+    - `RandomWidth`
+  - Layer best practices
 
-  * Pretrained networks
-  * Feature extraction
-  * Fine-tuning
-  * Frozen layers
-  * Unfrozen layers
+- **23. Activations**
+  - Activations
+  - `relu`
+  - `sigmoid`
+  - `softmax`
+  - `tanh`
+  - `elu`
+  - `selu`
+  - `gelu`
+  - `swish`
+  - `silu`
+  - `softplus`
+  - `softsign`
+  - `exponential`
+  - `linear`
+  - `leaky_relu`
+  - `prelu`
+  - `relu6`
+  - `hard_sigmoid`
+  - `hard_silu`
+  - `hard_swish`
+  - `mish`
+  - `log_softmax`
+  - Activation best practices
 
-* **52. Image Augmentation**
+- **24. Loss Functions**
+  - Loss functions
+  - Regression losses
+    - `MeanSquaredError`
+    - `MeanAbsoluteError`
+    - `MeanAbsolutePercentageError`
+    - `MeanSquaredLogarithmicError`
+    - `CosineSimilarity`
+    - `Huber`
+    - `LogCosh`
+  - Classification losses
+    - `BinaryCrossentropy`
+    - `CategoricalCrossentropy`
+    - `SparseCategoricalCrossentropy`
+    - `Poisson`
+    - `KLDivergence`
+    - `Hinge`
+    - `SquaredHinge`
+    - `CategoricalHinge`
+  - Custom losses
+  - Loss function best practices
 
-  * Geometric transformations
-  * Photometric transformations
-  * Random augmentation
-  * Augmentation pipelines
+- **25. Metrics**
+  - Metrics
+  - Regression metrics
+    - `MeanSquaredError`
+    - `RootMeanSquaredError`
+    - `MeanAbsoluteError`
+    - `MeanAbsolutePercentageError`
+    - `MeanSquaredLogarithmicError`
+    - `CosineSimilarity`
+    - `LogCoshError`
+  - Classification metrics
+    - `Accuracy`
+    - `BinaryAccuracy`
+    - `CategoricalAccuracy`
+    - `SparseCategoricalAccuracy`
+    - `TopKCategoricalAccuracy`
+    - `SparseTopKCategoricalAccuracy`
+    - `Precision`
+    - `Recall`
+    - `AUC`
+    - `TruePositives`
+    - `TrueNegatives`
+    - `FalsePositives`
+    - `FalseNegatives`
+    - `F1Score`
+    - `FBetaScore`
+  - Custom metrics
+  - Metric best practices
 
-* **53. Computer Vision Tasks**
+- **26. Optimizers**
+  - Optimizers
+  - `SGD`
+  - `Adam`
+  - `AdamW`
+  - `Adadelta`
+  - `Adagrad`
+  - `Adamax`
+  - `Nadam`
+  - `Ftrl`
+  - `RMSprop`
+  - Learning rate schedules
+    - `ExponentialDecay`
+    - `PiecewiseConstantDecay`
+    - `PolynomialDecay`
+    - `InverseTimeDecay`
+    - `CosineDecay`
+    - `CosineDecayRestarts`
+    - `LinearCosineDecay`
+    - `NoisyLinearCosineDecay`
+  - Learning rate schedulers
+    - `ReduceLROnPlateau`
+    - `LearningRateScheduler`
+    - `LearningRateScheduler`
+  - Gradient clipping
+  - Optimizer best practices
 
-  * Image classification
-  * Object detection
-  * Semantic segmentation
-  * Instance segmentation
-  * Image generation
+- **27. Model Compilation**
+  - `compile()`
+  - Optimizer
+  - Loss
+  - Metrics
+  - Loss weights
+  - Weighted metrics
+  - Run eagerly
+  - Steps per execution
+  - Compilation best practices
+
+- **28. Model Training**
+  - `fit()`
+  - `validation_data`
+  - `validation_split`
+  - `epochs`
+  - `batch_size`
+  - `callbacks`
+  - `class_weight`
+  - `sample_weight`
+  - `initial_epoch`
+  - `steps_per_epoch`
+  - `validation_steps`
+  - `validation_batch_size`
+  - `validation_freq`
+  - `verbose`
+  - Training best practices
+
+- **29. Model Evaluation**
+  - `evaluate()`
+  - `predict()`
+  - `predict_on_batch()`
+  - `test_on_batch()`
+  - Evaluation best practices
+
+- **30. Callbacks**
+  - Callbacks
+  - `ModelCheckpoint`
+  - `EarlyStopping`
+  - `ReduceLROnPlateau`
+  - `TensorBoard`
+  - `CSVLogger`
+  - `LearningRateScheduler`
+  - `TerminateOnNaN`
+  - `LambdaCallback`
+  - `RemoteMonitor`
+  - `BackupAndRestore`
+  - `ProgbarLogger`
+  - `History`
+  - Custom callbacks
+  - Callback best practices
+
+- **31. Model Saving and Loading**
+  - Model saving
+  - `model.save()`
+  - SavedModel
+  - HDF5
+  - Keras format
+  - Model loading
+  - `keras.models.load_model()`
+  - Weights saving
+  - Weights loading
+  - Model saving best practices
+
+- **32. Model Visualization**
+  - `model.summary()`
+  - `keras.utils.plot_model()`
+  - Model visualization
+  - Layer visualization
+  - Model visualization best practices
 
 ---
 
-# XIV. Natural Language Processing
+# IV. Computer Vision
 
-* **54. Text Classification**
+- **33. Image Processing**
+  - Image loading
+  - `tf.keras.utils.load_img()`
+  - Image preprocessing
+  - `tf.keras.utils.img_to_array()`
+  - Image resizing
+  - Image normalization
+  - Image augmentation
+  - Image best practices
 
-  * Text preprocessing
-  * Embeddings
-  * Sequence models
-  * Classification
+- **34. Convolutional Neural Networks**
+  - CNNs
+  - Convolutional layers
+  - Pooling layers
+  - Padding
+  - Strides
+  - Filters
+  - Kernels
+  - Feature maps
+  - Receptive field
+  - CNN architecture
+  - CNN best practices
 
-* **55. Embeddings**
+- **35. Image Classification**
+  - Image classification
+  - Dataset loading
+  - `tf.keras.utils.image_dataset_from_directory()`
+  - Data augmentation
+  - Model building
+  - Model training
+  - Model evaluation
+  - Image classification best practices
 
-  * Word embeddings
-  * Sentence representations
-  * Learned embeddings
+- **36. Transfer Learning**
+  - Transfer learning
+  - Pre-trained models
+    - `VGG16`
+    - `VGG19`
+    - `ResNet50`
+    - `ResNet101`
+    - `ResNet152`
+    - `InceptionV3`
+    - `InceptionResNetV2`
+    - `Xception`
+    - `MobileNet`
+    - `MobileNetV2`
+    - `MobileNetV3`
+    - `DenseNet121`
+    - `DenseNet169`
+    - `DenseNet201`
+    - `NASNetMobile`
+    - `NASNetLarge`
+    - `EfficientNetB0` to `EfficientNetB7`
+    - `EfficientNetV2B0` to `EfficientNetV2L`
+    - `ConvNeXtTiny` to `ConvNeXtXLarge`
+  - Feature extraction
+  - Fine-tuning
+  - Transfer learning best practices
 
-* **56. Sequence Models**
+- **37. Object Detection**
+  - Object detection
+  - `TensorFlow Object Detection API`
+  - `SSD`
+  - `Faster R-CNN`
+  - `YOLO`
+  - `EfficientDet`
+  - Object detection best practices
 
-  * RNN
-  * LSTM
-  * GRU
-  * Bidirectional networks
+- **38. Image Segmentation**
+  - Image segmentation
+  - Semantic segmentation
+  - Instance segmentation
+  - `U-Net`
+  - `DeepLab`
+  - `Mask R-CNN`
+  - Image segmentation best practices
 
-* **57. Attention**
-
-  * Query
-  * Key
-  * Value
-  * Attention weights
-  * Self-attention
-
-* **58. Transformer Models**
-
-  * Transformer architecture
-  * Positional information
-  * Encoder
-  * Decoder
-  * Multi-head attention
-  * Transformer-based classification
-  * Sequence-to-sequence modeling
-
-* **59. Transfer Learning for NLP**
-
-  * Pretrained language models
-  * Fine-tuning
-  * Embedding extraction
-  * Text classification
-
-TensorFlow's tutorials also cover advanced areas such as Transformer-style models and other specialized workflows. ([TensorFlow][3])
-
----
-
-# XV. Advanced Keras Architecture
-
-* **60. Custom Layers**
-
-  * Layer subclassing
-  * Trainable weights
-  * Non-trainable weights
-  * Custom forward computation
-
-* **61. Custom Models**
-
-  * Model subclassing
-  * Complex architectures
-  * Multi-branch models
-  * Stateful components
-
-* **62. Custom Losses**
-
-  * Writing loss functions
-  * Auxiliary losses
-  * Regularization losses
-
-* **63. Custom Metrics**
-
-  * Metric classes
-  * Stateful metrics
-  * Aggregation
-
-* **64. Custom Callbacks**
-
-  * Training hooks
-  * Logging
-  * Dynamic control
-  * Experiment instrumentation
-
----
-
-# XVI. Custom Training Loops
-
-* **65. Why Custom Training Loops**
-
-  * Non-standard optimization
-  * Research workflows
-  * Multiple objectives
-  * Custom gradient logic
-
-* **66. Training-Step Design**
-
-  * Forward pass
-  * Loss computation
-  * Gradient calculation
-  * Gradient application
-
-* **67. `tf.GradientTape` + Keras**
-
-  * Custom training steps
-  * Gradient clipping
-  * Multiple optimizers
-  * Gradient accumulation
-
-* **68. Extending `fit()`**
-
-  * Overriding `train_step`
-  * Custom evaluation
-  * Custom metric reporting
+- **39. Generative Models**
+  - Generative models
+  - GANs
+  - DCGAN
+  - CycleGAN
+  - StyleGAN
+  - VAEs
+  - Diffusion models
+  - Generative model best practices
 
 ---
 
-# XVII. TensorFlow Graphs and `tf.function`
+# V. Natural Language Processing
 
-* **69. Eager Execution**
+- **40. Text Processing**
+  - Text processing
+  - Tokenization
+  - `tf.keras.preprocessing.text.Tokenizer`
+  - `TextVectorization`
+  - `StringLookup`
+  - `IntegerLookup`
+  - Padding
+  - `tf.keras.utils.pad_sequences()`
+  - Text processing best practices
 
-  * Immediate execution
-  * Debugging
-  * Interactive development
+- **41. Word Embeddings**
+  - Word embeddings
+  - `Embedding` layer
+  - Pre-trained embeddings
+    - Word2Vec
+    - GloVe
+    - FastText
+  - `tf.keras.utils.get_file()`
+  - Embedding best practices
 
-* **70. Graph Execution**
+- **42. Recurrent Neural Networks**
+  - RNNs
+  - `SimpleRNN`
+  - `LSTM`
+  - `GRU`
+  - `Bidirectional`
+  - Sequence processing
+  - Sequence prediction
+  - RNN best practices
 
-  * Computational graphs
-  * Graph tracing
-  * Graph optimization
+- **43. Sequence-to-Sequence**
+  - Sequence-to-sequence
+  - Encoder-decoder
+  - Attention
+  - `MultiHeadAttention`
+  - Seq2seq best practices
 
-* **71. `tf.function`**
+- **44. Transformers**
+  - Transformers
+  - Self-attention
+  - Multi-head attention
+  - Positional encoding
+  - Encoder
+  - Decoder
+  - Transformer architecture
+  - Transformer best practices
 
-  * Decorating Python functions
-  * Tracing
-  * Retracing
-  * Input signatures
+- **45. Hugging Face Transformers**
+  - Hugging Face
+  - Transformers library
+  - Pre-trained models
+    - BERT
+    - GPT
+    - RoBERTa
+    - DistilBERT
+    - T5
+    - BART
+    - ELECTRA
+    - XLNet
+    - ALBERT
+    - DeBERTa
+  - Tokenizers
+  - Fine-tuning
+  - Hugging Face best practices
 
-* **72. Graph-Compatible Code**
+- **46. Text Classification**
+  - Text classification
+  - Sentiment analysis
+  - Spam detection
+  - Topic classification
+  - Text classification best practices
 
-  * Tensor versus Python values
-  * Control flow
-  * Side effects
-  * Shape constraints
+- **47. Named Entity Recognition**
+  - NER
+  - NER models
+  - NER best practices
 
----
+- **48. Machine Translation**
+  - Machine translation
+  - Seq2seq
+  - Transformers
+  - Machine translation best practices
 
-# XVIII. Performance Optimization
+- **49. Text Generation**
+  - Text generation
+  - Language models
+  - GPT
+  - Text generation best practices
 
-* **73. Performance Fundamentals**
-
-  * CPU utilization
-  * GPU utilization
-  * Input bottlenecks
-  * Memory bottlenecks
-  * Compute bottlenecks
-
-* **74. Input Pipeline Optimization**
-
-  * Parallel `map`
-  * Cache
-  * Prefetch
-  * Batch optimization
-
-* **75. Model Optimization**
-
-  * Batch-size tuning
-  * Efficient layers
-  * Memory optimization
-  * Mixed precision
-
-* **76. Profiling**
-
-  * TensorBoard profiling
-  * Operation-level performance
-  * Input pipeline profiling
-  * Device utilization
-
----
-
-# XIX. TensorBoard and Experiment Tracking
-
-* **77. TensorBoard Fundamentals**
-
-  * Scalars
-  * Histograms
-  * Images
-  * Graphs
-  * Embeddings
-
-* **78. Training Visualization**
-
-  * Loss curves
-  * Metric curves
-  * Learning-rate tracking
-
-* **79. Experiment Management**
-
-  * Run comparison
-  * Hyperparameter tracking
-  * Checkpoint management
-  * Reproducibility
-
----
-
-# XX. Regularization and Generalization
-
-* **80. Regularization Techniques**
-
-  * L1 regularization
-  * L2 regularization
-  * Weight decay
-  * Dropout
-
-* **81. Data-Based Regularization**
-
-  * Data augmentation
-  * Noise injection
-  * Mixup-style methods
-
-* **82. Generalization**
-
-  * Overfitting detection
-  * Underfitting detection
-  * Dataset-size effects
-  * Architecture complexity
+- **50. Question Answering**
+  - Question answering
+  - QA models
+  - QA best practices
 
 ---
 
-# XXI. Hyperparameter Optimization
+# VI. Custom Training
 
-* **83. Hyperparameters**
+- **51. Custom Training Loops**
+  - Custom training loops
+  - `tf.GradientTape`
+  - Forward pass
+  - Loss computation
+  - Gradient computation
+  - Optimizer application
+  - Metrics update
+  - Custom training best practices
 
-  * Learning rate
-  * Batch size
-  * Number of layers
-  * Hidden dimensions
-  * Dropout
-  * Weight decay
+- **52. Custom Layers**
+  - Custom layers
+  - `keras.layers.Layer`
+  - `build()`
+  - `call()`
+  - `get_config()`
+  - Custom layer best practices
 
-* **84. Search Strategies**
+- **53. Custom Models**
+  - Custom models
+  - `keras.Model`
+  - `call()`
+  - Custom model best practices
 
-  * Manual tuning
-  * Grid search
-  * Random search
-  * Bayesian optimization
+- **54. Custom Losses**
+  - Custom losses
+  - Loss function
+  - Loss implementation
+  - Custom loss best practices
 
-* **85. Experiment Design**
+- **55. Custom Metrics**
+  - Custom metrics
+  - `keras.metrics.Metric`
+  - Metric implementation
+  - Custom metric best practices
 
-  * Baselines
-  * Controlled experiments
-  * Reproducibility
-  * Validation strategy
+- **56. Custom Callbacks**
+  - Custom callbacks
+  - `keras.callbacks.Callback`
+  - Callback implementation
+  - Custom callback best practices
 
----
-
-# XXII. Model Saving and Serialization
-
-* **86. Saving Models**
-
-  * Model weights
-  * Full model serialization
-  * Checkpoints
-
-* **87. Loading Models**
-
-  * Restoring weights
-  * Restoring complete models
-  * Restoring optimizer state
-
-* **88. Export and Reproducibility**
-
-  * Saved models
-  * Versioning
-  * Model artifacts
-  * Dependency tracking
-
-TensorFlow's model guides explicitly cover defining, saving, and restoring models, including understanding the lower-level representation beneath Keras. ([TensorFlow][4])
-
----
-
-# XXIII. TensorFlow Model Deployment
-
-* **89. Deployment Concepts**
-
-  * Training versus inference
-  * Batch inference
-  * Online inference
-  * Latency
-  * Throughput
-
-* **90. TensorFlow Serving**
-
-  * Serving trained models
-  * REST interfaces
-  * gRPC
-  * Model versioning
-  * Production inference
-
-* **91. Web and API Integration**
-
-  * Python services
-  * REST APIs
-  * Request validation
-  * Prediction endpoints
-
-* **92. Browser and Edge Deployment**
-
-  * JavaScript-oriented deployment
-  * Client-side inference
-  * Resource constraints
+- **57. Custom Training Loops with Distribution**
+  - Distributed training loops
+  - `tf.distribute.Strategy`
+  - Custom training with distribution
+  - Distributed custom training best practices
 
 ---
 
-# XXIV. TensorFlow Lite / On-Device ML
+# VII. Distributed Training
 
-* **93. Edge Inference**
+- **58. Distributed Training Fundamentals**
+  - Distributed training
+  - Data parallelism
+  - Model parallelism
+  - Pipeline parallelism
+  - Hybrid parallelism
+  - Distributed training best practices
 
-  * Mobile devices
-  * Embedded systems
-  * Resource-constrained inference
+- **59. Distribution Strategies**
+  - `tf.distribute.Strategy`
+  - `MirroredStrategy`
+  - `MultiWorkerMirroredStrategy`
+  - `TPUStrategy`
+  - `ParameterServerStrategy`
+  - `CentralStorageStrategy`
+  - `OneDeviceStrategy`
+  - Strategy selection
+  - Strategy best practices
 
-* **94. Model Conversion**
+- **60. MirroredStrategy**
+  - `MirroredStrategy`
+  - Single-machine multi-GPU
+  - Model replication
+  - Gradient synchronization
+  - MirroredStrategy best practices
 
-  * Converting trained models
-  * Supported operations
-  * Compatibility issues
+- **61. MultiWorkerMirroredStrategy**
+  - `MultiWorkerMirroredStrategy`
+  - Multi-machine multi-GPU
+  - Cluster configuration
+  - `TF_CONFIG`
+  - MultiWorkerMirroredStrategy best practices
 
-* **95. Quantization**
+- **62. TPUStrategy**
+  - `TPUStrategy`
+  - TPU training
+  - TPU configuration
+  - TPU best practices
 
-  * Float models
-  * Reduced precision
-  * Integer quantization
-  * Latency and size trade-offs
+- **63. ParameterServerStrategy**
+  - `ParameterServerStrategy`
+  - Parameter server architecture
+  - Asynchronous training
+  - ParameterServerStrategy best practices
 
-* **96. On-Device Optimization**
+- **64. Mixed Precision**
+  - Mixed precision
+  - `tf.keras.mixed_precision`
+  - `Policy`
+  - `mixed_float16`
+  - `mixed_bfloat16`
+  - Loss scaling
+  - Mixed precision best practices
 
-  * Model size
-  * Memory usage
-  * Inference latency
-  * Battery considerations
-
----
-
-# XXV. Transfer Learning and Pretrained Models
-
-* **97. Pretrained Model Usage**
-
-  * Feature extraction
-  * Fine-tuning
-  * Domain adaptation
-
-* **98. TensorFlow Hub**
-
-  * Pretrained models
-  * Embeddings
-  * Transfer learning
-  * Fine-tuning
-
-TensorFlow Hub provides pretrained models and tutorials covering tasks such as image classification, text classification with BERT, and other transfer-learning workflows. ([TensorFlow][5])
-
-* **99. Fine-Tuning Strategy**
-
-  * Freeze backbone
-  * Train prediction head
-  * Gradual unfreezing
-  * Low learning rates
-  * Validation monitoring
-
----
-
-# XXVI. Generative Deep Learning
-
-* **100. Autoencoders**
-
-  * Encoder
-  * Decoder
-  * Reconstruction loss
-  * Latent representation
-
-* **101. Variational Autoencoders**
-
-  * Latent distributions
-  * Reconstruction objective
-  * KL divergence
-
-* **102. GANs**
-
-  * Generator
-  * Discriminator
-  * Adversarial training
-  * Mode collapse
-  * Training stability
-
-* **103. Generative Applications**
-
-  * Image generation
-  * Style transfer
-  * Representation learning
-
-TensorFlow's advanced tutorial collection includes generative and research-oriented examples such as CycleGAN and neural machine translation. ([TensorFlow][3])
+- **65. Distributed Dataset**
+  - Distributed dataset
+  - `strategy.experimental_distribute_dataset()`
+  - `strategy.distribute_datasets_from_function()`
+  - Distributed dataset best practices
 
 ---
 
-# XXVII. Probabilistic and Specialized TensorFlow
+# VIII. TensorFlow Extended (TFX)
 
-* **104. Probabilistic Modeling**
+- **66. TFX Fundamentals**
+  - TFX
+  - TensorFlow Extended
+  - Production ML pipelines
+  - TFX components
+  - TFX best practices
 
-  * Probability distributions
-  * Bayesian concepts
-  * Probabilistic neural networks
-  * Uncertainty estimation
+- **67. TFX Components**
+  - `ExampleGen`
+  - `StatisticsGen`
+  - `SchemaGen`
+  - `ExampleValidator`
+  - `Transform`
+  - `Trainer`
+  - `Tuner`
+  - `Evaluator`
+  - `InfraValidator`
+  - `Pusher`
+  - `BulkInferrer`
+  - Component best practices
 
-* **105. TensorFlow Probability**
+- **68. TFX Pipelines**
+  - TFX pipelines
+  - Pipeline orchestration
+  - Apache Airflow
+  - Apache Beam
+  - Kubeflow Pipelines
+  - Pipeline best practices
 
-  * Distributions
-  * Bayesian inference
-  * Probabilistic layers
-  * Monte Carlo methods
+- **69. TFX Metadata**
+  - ML Metadata
+  - MLMD
+  - Metadata store
+  - Artifact tracking
+  - Metadata best practices
 
-* **106. Reinforcement Learning**
+- **70. TFX Serving**
+  - TensorFlow Serving
+  - Model serving
+  - REST API
+  - gRPC API
+  - Serving best practices
 
-  * States
-  * Actions
-  * Rewards
-  * Policies
-  * Value functions
-  * Q-learning
-  * Deep reinforcement learning
-  * TensorFlow Agents
-
----
-
-# XXVIII. Distributed Training
-
-TensorFlow's `tf.distribute.Strategy` supports distributing training across multiple GPUs, machines, and TPUs, with integration into both Keras `Model.fit` and custom training loops. ([TensorFlow][6])
-
-* **107. Distributed-Training Concepts**
-
-  * Data parallelism
-  * Model parallelism
-  * Synchronous training
-  * Asynchronous training
-
-* **108. Distribution Strategies**
-
-  * `MirroredStrategy`
-  * `MultiWorkerMirroredStrategy`
-  * TPU strategies
-  * Strategy scopes
-
-* **109. Multi-GPU Training**
-
-  * Replica execution
-  * Gradient aggregation
-  * Batch-size scaling
-  * Synchronization
-
-* **110. Multi-Worker Training**
-
-  * Worker configuration
-  * Cluster coordination
-  * Failure handling
-  * Distributed checkpoints
-
-* **111. TPU Training**
-
-  * TPU architecture
-  * TPU initialization
-  * Distributed execution
-  * TPU-specific considerations
+- **71. TFX Transform**
+  - `tf.Transform`
+  - Feature engineering
+  - Preprocessing
+  - Transform best practices
 
 ---
 
-# XXIX. Advanced Model Optimization
+# IX. TensorFlow Lite
 
-* **112. Mixed Precision**
+- **72. TensorFlow Lite Fundamentals**
+  - TensorFlow Lite
+  - TFLite
+  - Mobile and embedded ML
+  - TFLite best practices
 
-  * Lower-precision computation
-  * Memory reduction
-  * Hardware acceleration
-  * Numerical stability
+- **73. Model Conversion**
+  - Model conversion
+  - `tf.lite.TFLiteConverter`
+  - SavedModel conversion
+  - Keras conversion
+  - Concrete function conversion
+  - Conversion best practices
 
-* **113. Quantization**
+- **74. Model Optimization**
+  - Model optimization
+  - Quantization
+    - Post-training quantization
+    - Quantization-aware training
+    - Dynamic range quantization
+    - Full integer quantization
+    - Float16 quantization
+  - Pruning
+  - Clustering
+  - Weight clustering
+  - Model optimization best practices
 
-  * Post-training quantization
-  * Quantization-aware training
-  * Integer inference
+- **75. TFLite Inference**
+  - TFLite inference
+  - `tf.lite.Interpreter`
+  - Python inference
+  - Android inference
+  - iOS inference
+  - Edge TPU
+  - TFLite inference best practices
 
-* **114. Pruning**
-
-  * Weight pruning
-  * Sparsity
-  * Compression
-  * Inference implications
-
-* **115. Knowledge Distillation**
-
-  * Teacher models
-  * Student models
-  * Soft targets
-  * Compression
-
----
-
-# XXX. MLOps with TensorFlow
-
-* **116. Experiment Management**
-
-  * Reproducibility
-  * Configuration management
-  * Dataset versioning
-  * Model versioning
-
-* **117. Training Pipelines**
-
-  * Data ingestion
-  * Preprocessing
-  * Training
-  * Evaluation
-  * Model validation
-  * Model deployment
-
-* **118. TensorFlow Extended (TFX)**
-
-  * Data validation
-  * Data transformation
-  * Model training
-  * Model evaluation
-  * Model serving
-  * Pipeline orchestration
-
-* **119. Production Monitoring**
-
-  * Model performance
-  * Data drift
-  * Prediction drift
-  * Latency
-  * Resource utilization
+- **76. TFLite in Production**
+  - TFLite in production
+  - Mobile deployment
+  - Embedded deployment
+  - Edge deployment
+  - TFLite production best practices
 
 ---
 
-# XXXI. Production Engineering
+# X. TensorFlow.js
 
-* **120. Reliability**
+- **77. TensorFlow.js Fundamentals**
+  - TensorFlow.js
+  - TF.js
+  - Browser ML
+  - Node.js ML
+  - TF.js best practices
 
-  * Fault tolerance
-  * Checkpointing
-  * Recovery
-  * Retry behavior
+- **78. TensorFlow.js Core**
+  - Tensors
+  - Operations
+  - Models
+  - Layers
+  - Training
+  - TF.js core best practices
 
-* **121. Scalability**
+- **79. TensorFlow.js Models**
+  - Model conversion
+  - `tensorflowjs_converter`
+  - Model loading
+  - Model inference
+  - TF.js model best practices
 
-  * Horizontal scaling
-  * Distributed inference
-  * Batch inference
-  * Resource allocation
+- **80. TensorFlow.js in Browser**
+  - Browser deployment
+  - WebGL backend
+  - WASM backend
+  - WebGPU backend
+  - Browser best practices
 
-* **122. Model Governance**
-
-  * Model versioning
-  * Artifact lineage
-  * Reproducibility
-  * Auditability
-
-* **123. Security**
-
-  * Secure model APIs
-  * Input validation
-  * Access control
-  * Dependency security
-
----
-
-# XXXII. Advanced TensorFlow Architecture
-
-* **124. Custom TensorFlow Components**
-
-  * Custom operations
-  * Custom layers
-  * Custom training systems
-  * Reusable modules
-
-* **125. Framework Internals**
-
-  * Tensors
-  * Variables
-  * Operations
-  * Graphs
-  * Execution engines
-  * Automatic differentiation
-
-* **126. Hardware-Aware TensorFlow**
-
-  * CPU kernels
-  * GPU execution
-  * TPU execution
-  * Memory transfer
-  * Kernel efficiency
+- **81. TensorFlow.js in Node.js**
+  - Node.js deployment
+  - `@tensorflow/tfjs-node`
+  - `@tensorflow/tfjs-node-gpu`
+  - Node.js best practices
 
 ---
 
-# XXXIII. TensorFlow Projects by Difficulty
+# XI. TensorFlow Serving
+
+- **82. TensorFlow Serving Fundamentals**
+  - TensorFlow Serving
+  - Model serving
+  - Production serving
+  - Serving best practices
+
+- **83. Model Export**
+  - SavedModel
+  - Model export
+  - Signature definitions
+  - `tf.saved_model.save()`
+  - Model export best practices
+
+- **84. Serving Configuration**
+  - Serving configuration
+  - Model config
+  - Batching
+  - Versioning
+  - Serving configuration best practices
+
+- **85. Serving API**
+  - REST API
+  - gRPC API
+  - Prediction API
+  - Serving API best practices
+
+- **86. Serving in Production**
+  - Docker
+  - Kubernetes
+  - Load balancing
+  - Monitoring
+  - Serving production best practices
+
+---
+
+# XII. TensorFlow Hub
+
+- **87. TensorFlow Hub Fundamentals**
+  - TensorFlow Hub
+  - TF Hub
+  - Pre-trained models
+  - Model reuse
+  - TF Hub best practices
+
+- **88. Model Discovery**
+  - Model discovery
+  - Model search
+  - Model versions
+  - Model documentation
+  - Model discovery best practices
+
+- **89. Model Usage**
+  - Model loading
+  - `hub.load()`
+  - `hub.KerasLayer()`
+  - Model fine-tuning
+  - Model usage best practices
+
+- **90. Popular Models**
+  - Image classification
+  - Object detection
+  - Image segmentation
+  - Text embedding
+  - Text classification
+  - Sentence encoding
+  - Popular model best practices
+
+---
+
+# XIII. TensorFlow Projects by Difficulty
 
 ## Beginner Projects
 
-* **127. Basic Regression**
+- **1. MNIST Classification**
+  - Dataset loading
+  - Model building
+  - Model training
+  - Model evaluation
 
-  * Predict a continuous value
-  * Build a dense network
-  * Train and evaluate
+- **2. Fashion MNIST Classification**
+  - Dataset loading
+  - CNN
+  - Model training
+  - Model evaluation
 
-* **128. Image Classifier**
+- **3. House Price Prediction**
+  - Regression
+  - Model building
+  - Model training
+  - Model evaluation
 
-  * Load image dataset
-  * Build CNN
-  * Evaluate predictions
+- **4. Sentiment Analysis**
+  - Text preprocessing
+  - Embedding
+  - Model training
+  - Model evaluation
 
-* **129. Tabular Classifier**
-
-  * Numeric features
-  * Categorical features
-  * Preprocessing
-  * Dense model
+- **5. Image Classification**
+  - Data augmentation
+  - CNN
+  - Model training
+  - Model evaluation
 
 ---
 
 ## Intermediate Projects
 
-* **130. Image Classification with Transfer Learning**
+- **6. Transfer Learning**
+  - Pre-trained model
+  - Feature extraction
+  - Fine-tuning
+  - Model evaluation
 
-  * Pretrained backbone
-  * Data augmentation
-  * Fine-tuning
-  * Model evaluation
+- **7. Text Classification**
+  - Text vectorization
+  - Embedding
+  - LSTM
+  - Model evaluation
 
-* **131. Text Classification**
+- **8. Object Detection**
+  - Pre-trained model
+  - Fine-tuning
+  - Inference
+  - Visualization
 
-  * Text preprocessing
-  * Embeddings
-  * Sequence model
-  * Evaluation
+- **9. Image Segmentation**
+  - U-Net
+  - Model training
+  - Model evaluation
+  - Visualization
 
-* **132. Time-Series Forecasting**
-
-  * Windowed datasets
-  * Sequence models
-  * Forecast evaluation
+- **10. Generative Model**
+  - GAN
+  - Model training
+  - Image generation
+  - Evaluation
 
 ---
 
 ## Advanced Projects
 
-* **133. Object Detection**
+- **11. Custom Training Loop**
+  - GradientTape
+  - Custom training
+  - Metrics
+  - Callbacks
 
-  * Image pipeline
-  * Bounding boxes
-  * Detection model
-  * Evaluation
+- **12. Distributed Training**
+  - MirroredStrategy
+  - Multi-GPU
+  - Mixed precision
+  - Performance
 
-* **134. Semantic Segmentation**
+- **13. Transformer Model**
+  - Self-attention
+  - Encoder
+  - Decoder
+  - Training
 
-  * Pixel-level labels
-  * Encoder-decoder architecture
-  * Segmentation metrics
+- **14. TensorFlow Lite**
+  - Model conversion
+  - Quantization
+  - Mobile deployment
+  - Inference
 
-* **135. Transformer Application**
-
-  * Tokenization
-  * Attention
-  * Transformer architecture
-  * Fine-tuning
-
-* **136. Custom Training System**
-
-  * Custom model
-  * Custom loss
-  * Custom training loop
-  * TensorBoard monitoring
+- **15. TensorFlow Serving**
+  - Model export
+  - Serving
+  - REST API
+  - Deployment
 
 ---
 
 ## Expert Projects
 
-* **137. Production Inference Service**
+- **16. Production ML Platform**
+  - TFX
+  - Pipelines
+  - Serving
+  - Monitoring
+  - MLOps
 
-  * Train model
-  * Export model
-  * Serve model
-  * Monitor inference
-  * Version models
+- **17. Real-Time ML System**
+  - Streaming data
+  - Online learning
+  - Real-time predictions
+  - Monitoring
 
-* **138. Distributed Training System**
+- **18. Multi-Modal Model**
+  - Image + text
+  - Fusion
+  - Training
+  - Deployment
 
-  * Multi-GPU training
-  * Distributed datasets
-  * Checkpointing
-  * Performance profiling
+- **19. Generative AI Application**
+  - Diffusion model
+  - GAN
+  - Text generation
+  - Deployment
 
-* **139. Edge ML Application**
-
-  * Train model
-  * Optimize model
-  * Quantize
-  * Deploy on-device
-
-* **140. End-to-End MLOps Pipeline**
-
-  * Data ingestion
-  * Validation
-  * Transformation
-  * Training
-  * Evaluation
-  * Deployment
-  * Monitoring
-
----
-
-# XXXIV. Progressive TensorFlow Learning Levels
-
-## Level 1 — Python + ML Foundations
-
-* Learn:
-
-  * Python
-  * NumPy
-  * Linear algebra
-  * Probability
-  * Basic machine learning
-
-* Master:
-
-  * Arrays
-  * Matrix operations
-  * Gradients
-  * Training/validation/test concepts
+- **20. End-to-End MLOps Pipeline**
+  - Data versioning
+  - Experiment tracking
+  - Model registry
+  - CI/CD
+  - Monitoring
+  - Governance
 
 ---
+
+# XIV. Progressive TensorFlow Learning Sequence
+
+## Level 1 — TensorFlow Fundamentals
+
+- Master:
+  - Installation
+  - Import
+  - Tensors
+  - Variables
+  - Operations
+  - Autodiff
 
 ## Level 2 — TensorFlow Core
 
-* Learn:
-
-  * Tensors
-  * Tensor operations
-  * Variables
-  * Automatic differentiation
-  * `GradientTape`
-
-* Master:
-
-  * Tensor manipulation
-  * Gradient computation
-  * Basic computational graphs
-
----
+- Master:
+  - Eager execution
+  - `tf.function`
+  - Devices
+  - Datasets
+  - TFRecord
+  - TensorBoard
 
 ## Level 3 — Keras
 
-* Learn:
+- Master:
+  - Sequential API
+  - Functional API
+  - Model subclassing
+  - Layers
+  - Activations
+  - Loss functions
+  - Metrics
+  - Optimizers
+  - Model compilation
+  - Model training
+  - Model evaluation
+  - Callbacks
+  - Model saving and loading
+  - Model visualization
 
-  * Sequential API
-  * Functional API
-  * Model subclassing
-  * Layers
-  * Losses
-  * Optimizers
-  * Metrics
+## Level 4 — Computer Vision
 
-* Master:
+- Master:
+  - Image processing
+  - CNNs
+  - Image classification
+  - Transfer learning
+  - Object detection
+  - Image segmentation
+  - Generative models
 
-  * Build
-  * Compile
-  * Train
-  * Evaluate
-  * Predict
+## Level 5 — Natural Language Processing
 
----
+- Master:
+  - Text processing
+  - Word embeddings
+  - RNNs
+  - Sequence-to-sequence
+  - Transformers
+  - Hugging Face Transformers
+  - Text classification
+  - NER
+  - Machine translation
+  - Text generation
+  - Question answering
 
-## Level 4 — Data + Training
+## Level 6 — Custom Training
 
-* Learn:
+- Master:
+  - Custom training loops
+  - Custom layers
+  - Custom models
+  - Custom losses
+  - Custom metrics
+  - Custom callbacks
+  - Custom training loops with distribution
 
-  * `tf.data`
-  * Preprocessing
-  * Batching
-  * Shuffling
-  * Prefetching
-  * Callbacks
+## Level 7 — Distributed Training
 
-* Master:
+- Master:
+  - Distributed training fundamentals
+  - Distribution strategies
+  - MirroredStrategy
+  - MultiWorkerMirroredStrategy
+  - TPUStrategy
+  - ParameterServerStrategy
+  - Mixed precision
+  - Distributed dataset
 
-  * Efficient training pipelines
-  * Reproducible experiments
-  * Model evaluation
+## Level 8 — TensorFlow Extended
 
----
+- Master:
+  - TFX fundamentals
+  - TFX components
+  - TFX pipelines
+  - TFX metadata
+  - TFX serving
+  - TFX transform
 
-## Level 5 — Deep Learning
+## Level 9 — TensorFlow Lite
 
-* Learn:
+- Master:
+  - TFLite fundamentals
+  - Model conversion
+  - Model optimization
+  - TFLite inference
+  - TFLite in production
 
-  * Dense networks
-  * CNNs
-  * RNNs
-  * LSTMs
-  * GRUs
-  * Attention
-  * Transformers
+## Level 10 — TensorFlow.js
 
-* Master:
+- Master:
+  - TF.js fundamentals
+  - TF.js core
+  - TF.js models
+  - TF.js in browser
+  - TF.js in Node.js
 
-  * Computer vision
-  * NLP
-  * Time series
+## Level 11 — TensorFlow Serving
 
----
+- Master:
+  - Serving fundamentals
+  - Model export
+  - Serving configuration
+  - Serving API
+  - Serving in production
 
-## Level 6 — Advanced TensorFlow
+## Level 12 — TensorFlow Hub
 
-* Learn:
+- Master:
+  - TF Hub fundamentals
+  - Model discovery
+  - Model usage
+  - Popular models
 
-  * Custom layers
-  * Custom models
-  * Custom losses
-  * Custom metrics
-  * Custom training loops
-  * `tf.function`
+## Level 13 — Production Engineering
 
-* Master:
-
-  * Non-standard architectures
-  * Research-style training workflows
-
----
-
-## Level 7 — Performance + Distributed ML
-
-* Learn:
-
-  * Profiling
-  * Mixed precision
-  * Multi-GPU
-  * Multi-worker
-  * TPU training
-  * `tf.distribute`
-
-* Master:
-
-  * Efficient large-scale training
-  * Hardware-aware optimization
-
----
-
-## Level 8 — Deployment
-
-* Learn:
-
-  * Model serialization
-  * TensorFlow Serving
-  * Edge deployment
-  * Quantization
-  * Model optimization
-
-* Master:
-
-  * Production inference
-  * Low-latency deployment
-  * Resource-constrained inference
-
----
-
-## Level 9 — MLOps + Production
-
-* Learn:
-
-  * TFX
-  * Model versioning
-  * Pipeline orchestration
-  * Monitoring
-  * Data/model drift
-
-* Master:
-
-  * Reproducible ML systems
-  * Automated training and deployment
-  * Production monitoring
+- Master:
+  - Data pipelines
+  - Feature engineering
+  - Model training
+  - Model evaluation
+  - Model deployment
+  - Monitoring
+  - MLOps
+  - Production best practices
 
 ---
 
-# XXXV. TensorFlow Mastery Map
+# XV. Final TensorFlow Competency Map
 
-* **Foundations**
+- **Foundations**
 
-  * Python
-  * NumPy
-  * Mathematics
-  * Machine learning
+  - Installation
+  - Import
+  - API
+  - Tensors
+  - Variables
+  - Operations
+  - Autodiff
 
-* **TensorFlow Core**
+- **Core**
 
-  * Tensors
-  * Variables
-  * Operations
-  * Automatic differentiation
-  * `tf.function`
+  - Eager execution
+  - `tf.function`
+  - Devices
+  - Datasets
+  - TFRecord
+  - TensorBoard
 
-* **Keras**
+- **Keras**
 
-  * Sequential
-  * Functional
-  * Subclassing
-  * Custom components
+  - Sequential API
+  - Functional API
+  - Model subclassing
+  - Layers
+  - Activations
+  - Loss functions
+  - Metrics
+  - Optimizers
+  - Model compilation
+  - Model training
+  - Model evaluation
+  - Callbacks
+  - Model saving and loading
+  - Model visualization
 
-* **Data Engineering**
+- **Computer Vision**
 
-  * `tf.data`
-  * TFRecord
-  * Preprocessing
-  * Data augmentation
+  - Image processing
+  - CNNs
+  - Image classification
+  - Transfer learning
+  - Object detection
+  - Image segmentation
+  - Generative models
 
-* **Deep Learning**
+- **NLP**
 
-  * MLPs
-  * CNNs
-  * RNNs
-  * LSTMs
-  * Transformers
+  - Text processing
+  - Word embeddings
+  - RNNs
+  - Sequence-to-sequence
+  - Transformers
+  - Hugging Face Transformers
+  - Text classification
+  - NER
+  - Machine translation
+  - Text generation
+  - Question answering
 
-* **Advanced Training**
+- **Custom Training**
 
-  * Custom loops
-  * Gradient manipulation
-  * Mixed precision
-  * Hyperparameter optimization
+  - Custom training loops
+  - Custom layers
+  - Custom models
+  - Custom losses
+  - Custom metrics
+  - Custom callbacks
 
-* **Performance**
+- **Distributed Training**
 
-  * Profiling
-  * Input optimization
-  * GPU/TPU utilization
-  * Memory optimization
+  - Distribution strategies
+  - MirroredStrategy
+  - MultiWorkerMirroredStrategy
+  - TPUStrategy
+  - ParameterServerStrategy
+  - Mixed precision
+  - Distributed dataset
 
-* **Distributed ML**
+- **TFX**
 
-  * Multi-GPU
-  * Multi-worker
-  * TPU
-  * `tf.distribute`
+  - TFX components
+  - TFX pipelines
+  - TFX metadata
+  - TFX serving
+  - TFX transform
 
-* **Deployment**
+- **TensorFlow Lite**
 
-  * Saved models
-  * Serving
-  * Edge inference
-  * Quantization
+  - Model conversion
+  - Model optimization
+  - TFLite inference
+  - TFLite in production
 
-* **Production ML**
+- **TensorFlow.js**
 
-  * TFX
-  * Monitoring
-  * Versioning
-  * Reliability
-  * MLOps
+  - TF.js core
+  - TF.js models
+  - TF.js in browser
+  - TF.js in Node.js
 
-* **Expert Level**
+- **TensorFlow Serving**
 
-  * Framework internals
-  * Hardware-aware optimization
-  * Distributed systems
-  * Research workflows
-  * Production ML architecture
+  - Model export
+  - Serving configuration
+  - Serving API
+  - Serving in production
+
+- **TensorFlow Hub**
+
+  - Model discovery
+  - Model usage
+  - Popular models
+
+- **Production**
+
+  - Data pipelines
+  - Feature engineering
+  - Model training
+  - Model evaluation
+  - Model deployment
+  - Monitoring
+  - MLOps
 
 ---
 
-# XXXVI. Recommended Learning Order
+## Recommended Overall Progression
 
-**Python → NumPy → Machine Learning Mathematics → TensorFlow Tensors → Automatic Differentiation → Keras → `tf.data` → Dense Networks → CNNs → Transfer Learning → RNN/LSTM/GRU → Attention → Transformers → Custom Layers → Custom Training Loops → `tf.function` → TensorBoard → Profiling → Mixed Precision → Distributed Training → Model Optimization → TensorFlow Serving → Edge Deployment → TFX/MLOps → Production ML Architecture.**
+**TensorFlow Fundamentals → TensorFlow Core → Keras → Computer Vision → Natural Language Processing → Custom Training → Distributed Training → TensorFlow Extended → TensorFlow Lite → TensorFlow.js → TensorFlow Serving → TensorFlow Hub → Production Engineering**
 
-For practical learning, prioritize **Keras first rather than trying to master every low-level TensorFlow API immediately**; TensorFlow's official guidance follows this progressive-disclosure approach, moving from the high-level Keras workflow into lower-level customization when needed. ([TensorFlow][1])
+For maximum practical mastery, combine this TensorFlow roadmap with the Python, NumPy, Pandas, Matplotlib, SciPy, Scikit-learn, Jupyter, SQL, DSA, Discrete Mathematics, JavaScript, Node.js, REST API, React, Laravel, jQuery, Java, C#, C++, C Language, Dart, Flutter, Kotlin, R Language, Git, GitHub, Node.js, and Express.js roadmaps above so the progression becomes:
 
-[1]: https://www.tensorflow.org/guide/keras?utm_source=chatgpt.com "Keras: The high-level API for TensorFlow  |  TensorFlow Core"
-[2]: https://www.tensorflow.org/guide?utm_source=chatgpt.com "Guide  |  TensorFlow Core"
-[3]: https://www.tensorflow.org/tutorials?utm_source=chatgpt.com "Tutorials  |  TensorFlow Core"
-[4]: https://www.tensorflow.org/guide/intro_to_modules?utm_source=chatgpt.com "Introduction to modules, layers, and models  |  TensorFlow Core"
-[5]: https://www.tensorflow.org/hub/tutorials?utm_source=chatgpt.com "Tutorials  |  TensorFlow Hub"
-[6]: https://www.tensorflow.org/guide/distributed_training?utm_source=chatgpt.com "Distributed training with TensorFlow  |  TensorFlow Core"
+**Discrete Mathematics → DSA Foundations → Python Fundamentals → NumPy → Pandas → Matplotlib → SciPy → Scikit-learn → TensorFlow Fundamentals → TensorFlow Core → Keras → Computer Vision → NLP → Transformers → Custom Training → Distributed Training → TFX → TensorFlow Lite → TensorFlow.js → TensorFlow Serving → TensorFlow Hub → MLOps → Production Deep Learning Engineering → Enterprise AI Architecture → Generative AI → Large Language Models → AI Research.**

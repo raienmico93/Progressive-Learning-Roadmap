@@ -1,1241 +1,1394 @@
 # GitHub Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Git Fundamentals to Advanced Collaboration, CI/CD, Security, and DevOps
+## From Version Control Hosting Foundations to Advanced Automation, Security, AI-Native Development, and Production Platform Engineering
 
-> **Important distinction:** Git and GitHub are related but different. **Git** is the distributed version-control system; **GitHub** is a platform built around Git repositories, collaboration, automation, security, project management, and software delivery.
-
----
-
-# I. Git and GitHub Foundations
-
-* **1. Version Control Fundamentals**
-
-  * What version control solves
-
-    * Tracking changes
-    * Collaboration
-    * History
-    * Reverting mistakes
-  * Types of version control
-
-    * Local
-    * Centralized
-    * Distributed
-  * Git concepts
-
-    * Repository
-    * Commit
-    * Branch
-    * Merge
-    * Remote
-    * Working tree
-    * Staging area
-
-* **2. GitHub Fundamentals**
-
-  * What GitHub provides
-
-    * Hosted Git repositories
-    * Collaboration
-    * Pull requests
-    * Issues
-    * Discussions
-    * Project management
-    * Automation
-    * Package distribution
-    * Security tooling
-  * GitHub terminology
-
-    * Repository
-    * Organization
-    * Profile
-    * Fork
-    * Clone
-    * Pull request
-    * Issue
-    * Release
-    * Tag
-    * Action
-    * Workflow
-
-* **3. Git Installation and Configuration**
-
-  * Installing Git
-  * Configuring identity
-
-    * `git config`
-    * Username
-    * Email
-  * Default branch configuration
-  * Line-ending configuration
-  * Credential management
-  * Git aliases
-  * Global versus local configuration
+GitHub is best learned as more than "a place to store code." The progression should cover **account setup → repositories → issues → pull requests → code review → GitHub Actions → CI/CD → packages → security → Copilot → Projects → discussions → wikis → pages → API → enterprise governance → production engineering**.
 
 ---
 
-# II. Core Git Workflow
+# I. GitHub Foundations
 
-* **4. Creating Repositories**
+- **1. What GitHub Is**
+  - GitHub
+  - GitHub history
+  - Microsoft acquisition
+  - GitHub platform
+  - Git hosting
+  - Social coding
+  - Open source
+  - Collaboration
+  - GitHub vs GitLab
+  - GitHub vs Bitbucket
+  - GitHub vs Gitea
+  - GitHub use cases
+    - Open source
+    - Enterprise development
+    - DevOps
+    - CI/CD
+    - Documentation
+    - Project management
+    - AI-assisted development
+  - GitHub in modern software
+  - GitHub Universe
+  - GitHub Galaxy
 
-  * `git init`
-  * `.git` directory
-  * Creating a GitHub repository
-  * Connecting local and remote repositories
-  * `git remote`
+- **2. GitHub Account Setup**
+  - Account creation
+  - Username
+  - Email verification
+  - Two-factor authentication
+  - 2FA
+  - SSH keys
+  - GPG keys
+  - Personal access tokens
+  - Fine-grained tokens
+  - Profile setup
+  - Profile README
+  - GitHub Sponsors
+  - GitHub Education
+  - GitHub Student Developer Pack
+  - Account security
+  - Account best practices
 
-* **5. Basic Git Commands**
+- **3. GitHub Interface**
+  - Dashboard
+  - Home page
+  - Repository page
+  - Code tab
+  - Issues tab
+  - Pull requests tab
+  - Actions tab
+  - Projects tab
+  - Wiki tab
+  - Security tab
+  - Insights tab
+  - Settings tab
+  - Notifications
+  - Search
+  - Command palette
+  - Keyboard shortcuts
+  - GitHub Mobile
+  - GitHub Desktop
+  - GitHub CLI
+  - `gh` command
+  - Interface best practices
 
-  * `git status`
-  * `git add`
-  * `git commit`
-  * `git log`
-  * `git diff`
-  * `git show`
-
-* **6. Working with Remotes**
-
-  * `git clone`
-  * `git fetch`
-  * `git pull`
-  * `git push`
-  * `origin`
-  * Remote branches
-  * Tracking branches
-
-* **7. Understanding Git History**
-
-  * Commit history
-  * Commit hashes
-  * Parents
-  * HEAD
-  * HEAD-relative references
-  * `HEAD~`
-  * `HEAD^`
-  * Viewing historical changes
-
----
-
-# III. Branching and Merging
-
-* **8. Branch Fundamentals**
-
-  * Why branches exist
-  * Creating branches
-  * Switching branches
-  * `git switch`
-  * `git checkout`
-  * Deleting branches
-  * Renaming branches
-
-* **9. Merging**
-
-  * `git merge`
-  * Fast-forward merges
-  * Three-way merges
-  * Merge commits
-  * Merge conflicts
-
-* **10. Conflict Resolution**
-
-  * Identifying conflicts
-  * Reading conflict markers
-  * Resolving conflicts
-  * Staging resolved files
-  * Completing a merge
-  * Aborting a merge
-  * Preventing avoidable conflicts
-
-* **11. Rebasing**
-
-  * `git rebase`
-  * Rebase versus merge
-  * Interactive rebase
-  * Squashing commits
-  * Reordering commits
-  * Editing commit history
-  * Rebase conflicts
-  * When rewriting history is appropriate
-
----
-
-# IV. GitHub Repository Management
-
-* **12. Repository Structure**
-
-  * Source code
-  * Documentation
-  * Configuration
-  * Tests
-  * Assets
-  * `.gitignore`
-  * `README.md`
-  * `LICENSE`
-  * `CONTRIBUTING.md`
-  * `SECURITY.md`
-  * `CODEOWNERS`
-
-* **13. Repository Settings**
-
-  * Default branch
-  * Visibility
-
-    * Public
-    * Private
-  * Access management
-  * Branch settings
-  * Rulesets
-  * Webhooks
-  * Repository features
-
-* **14. README and Documentation**
-
-  * Project description
-  * Installation instructions
-  * Usage instructions
-  * Examples
-  * Architecture documentation
-  * Contribution instructions
-  * Troubleshooting information
-
-* **15. `.gitignore`**
-
-  * Ignoring generated files
-  * Ignoring dependencies
-  * Ignoring operating-system files
-  * Ignoring IDE files
-  * Ignoring local configuration
-  * Preventing accidental secret commits
+- **4. GitHub CLI**
+  - GitHub CLI
+  - `gh` command
+  - Installation
+  - Authentication
+  - `gh auth login`
+  - `gh auth status`
+  - `gh repo`
+  - `gh issue`
+  - `gh pr`
+  - `gh run`
+  - `gh workflow`
+  - `gh project`
+  - `gh api`
+  - `gh release`
+  - `gh gist`
+  - `gh copilot`
+  - `gh extension`
+  - `gh alias`
+  - `gh config`
+  - CLI best practices
 
 ---
 
-# V. GitHub Collaboration
+# II. Repositories
 
-* **16. Forks and Cloning**
+- **5. Repository Fundamentals**
+  - Repositories
+  - Repository creation
+  - Repository visibility
+    - Public
+    - Private
+    - Internal
+  - Repository templates
+  - Repository initialization
+  - README
+  - LICENSE
+  - `.gitignore`
+  - Repository settings
+  - Repository topics
+  - Repository description
+  - Repository website
+  - Repository social preview
+  - Repository best practices
 
-  * Forking repositories
-  * Cloning repositories
-  * Upstream versus origin
-  * Synchronizing a fork
+- **6. Repository Structure**
+  - Source code
+  - Documentation
+  - Tests
+  - Configuration
+  - Scripts
+  - Assets
+  - `.github/` directory
+    - `workflows/`
+    - `ISSUE_TEMPLATE/`
+    - `PULL_REQUEST_TEMPLATE.md`
+    - `CODEOWNERS`
+    - `dependabot.yml`
+    - `FUNDING.yml`
+    - `SECURITY.md`
+    - `CONTRIBUTING.md`
+    - `CODE_OF_CONDUCT.md`
+  - README structure
+    - Project name
+    - Badges
+    - Description
+    - Features
+    - Quick start
+    - Installation
+    - Usage
+    - Documentation
+    - Contributing
+    - License
+  - Repository structure best practices
+  - Essential files
+    - README.md
+    - LICENSE
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
+    - SECURITY.md
+    - `.gitignore`
+    - `CODEOWNERS`
+    - `dependabot.yml`
 
-* **17. Pull Requests**
+- **7. Repository Management**
+  - Branch management
+  - Default branch
+  - Branch protection rules
+  - Protected branches
+  - Required reviews
+  - Required status checks
+  - Required signatures
+  - Linear history
+  - Merge strategies
+    - Merge commit
+    - Squash merge
+    - Rebase merge
+  - Repository rulesets
+  - Repository insights
+  - Repository traffic
+  - Repository contributors
+  - Repository best practices
 
-  * Creating pull requests
-  * Draft pull requests
-  * Base branch
-  * Compare branch
-  * Reviewers
-  * Assignees
-  * Labels
-  * Milestones
-  * Pull-request descriptions
+- **8. Repository Templates**
+  - Template repositories
+  - Creating templates
+  - Using templates
+  - Template best practices
+  - Repository templates vs forks
+  - Repository templates vs generated projects
 
-* **18. Code Review**
-
-  * Reviewing changed files
-  * Inline comments
-  * General review comments
-  * Approval
-  * Requesting changes
-  * Suggested changes
-  * Review conversations
-  * Resolving review discussions
-
-* **19. Collaboration Workflows**
-
-  * Feature-branch workflow
-  * Trunk-based development
-  * GitHub Flow
-  * Fork-and-pull workflow
-  * Release-branch strategies
-  * Choosing an appropriate branching strategy
-
----
-
-# VI. Issues and Project Management
-
-* **20. GitHub Issues**
-
-  * Creating issues
-  * Bug reports
-  * Feature requests
-  * Task tracking
-  * Labels
-  * Assignees
-  * Milestones
-  * Issue templates
-
-* **21. GitHub Discussions**
-
-  * Questions and answers
-  * Community discussions
-  * Ideas
-  * Announcements
-  * Polls and feedback
-
-* **22. GitHub Projects**
-
-  * Project boards
-  * Tables
-  * Views
-  * Custom fields
-  * Filters
-  * Iterations
-  * Roadmaps
-  * Linking issues and pull requests
-
-* **23. Repository Governance**
-
-  * Contribution guidelines
-  * Code of conduct
-  * Maintainer responsibilities
-  * Review requirements
-  * Community standards
-
----
-
-# VII. Intermediate Git Techniques
-
-* **24. Stashing**
-
-  * `git stash`
-  * Saving temporary work
-  * Applying stashes
-  * Popping stashes
-  * Listing stashes
-  * Managing multiple stashes
-
-* **25. Undoing Changes**
-
-  * `git restore`
-  * `git revert`
-  * `git reset`
-  * Working-tree changes
-  * Staged changes
-  * Committed changes
-  * Public versus private history rewriting
-
-* **26. Commit Management**
-
-  * Atomic commits
-  * Commit messages
-  * Conventional commit concepts
-  * Squashing
-  * Amendments
-  * Interactive staging
-
-* **27. Advanced History Inspection**
-
-  * `git log`
-  * Graph visualization
-  * `git blame`
-  * `git reflog`
-  * `git bisect`
-  * Finding when regressions appeared
+- **9. Repository Migration**
+  - Importing repositories
+  - GitHub Importer
+  - Migrating from GitLab
+  - Migrating from Bitbucket
+  - Migrating from SVN
+  - Migrating from Mercurial
+  - Repository migration best practices
 
 ---
 
-# VIII. Git Internals
+# III. Issues and Project Management
 
-* **28. Git Object Model**
+- **10. Issues Fundamentals**
+  - Issues
+  - Issue creation
+  - Issue title
+  - Issue description
+  - Issue assignees
+  - Issue labels
+  - Issue milestones
+  - Issue projects
+  - Issue comments
+  - Issue reactions
+  - Issue pinning
+  - Issue closing
+  - Issue reopening
+  - Issue best practices
 
-  * Blob objects
-  * Tree objects
-  * Commit objects
-  * Tag objects
-  * Object hashes
+- **11. Issue Labels**
+  - Labels
+  - Default labels
+  - Custom labels
+  - Label colors
+  - Label descriptions
+  - Label usage
+  - Label best practices
+  - Common labels
+    - `bug`
+    - `enhancement`
+    - `feature`
+    - `documentation`
+    - `good first issue`
+    - `help wanted`
+    - `priority:high`
+    - `priority:low`
+    - `duplicate`
+    - `invalid`
+    - `wontfix`
 
-* **29. References**
+- **12. Issue Milestones**
+  - Milestones
+  - Milestone creation
+  - Milestone due dates
+  - Milestone progress
+  - Milestone closing
+  - Milestone best practices
 
-  * Branch references
-  * Tag references
-  * HEAD
-  * Symbolic references
-  * Remote-tracking references
+- **13. Issue Templates**
+  - Issue templates
+  - Template configuration
+  - Bug report template
+  - Feature request template
+  - Custom templates
+  - Template best practices
+  - Template YAML
+  - Template markdown
 
-* **30. Git Storage**
+- **14. Issue Automation**
+  - Issue automation
+  - GitHub Actions for issues
+  - Issue assignment
+  - Issue labeling
+  - Issue closing
+  - Issue comments
+  - Issue best practices
 
-  * `.git/`
-  * Object database
-  * Index
-  * Reflog
-  * Packfiles
-  * Garbage collection
+- **15. GitHub Projects**
+  - GitHub Projects
+  - Projects v2
+  - Project creation
+  - Project views
+    - Board view
+    - Table view
+    - Timeline view
+    - Roadmap view
+  - Project fields
+    - Status
+    - Priority
+    - Sprint
+    - Assignee
+    - Labels
+    - Milestones
+  - Project automation
+  - Project workflows
+  - Project insights
+  - Project best practices
+  - Project templates
+  - Project linking to issues and PRs
 
-* **31. Git Plumbing and Porcelain**
+- **16. GitHub Discussions**
+  - Discussions
+  - Discussion categories
+  - Discussion creation
+  - Discussion replies
+  - Discussion answers
+  - Discussion polls
+  - Discussion announcements
+  - Discussion best practices
+  - Discussions vs issues
+  - Discussions vs comments
 
-  * High-level commands
-  * Low-level commands
-  * Understanding how common commands operate
-  * Diagnosing repository internals
-
----
-
-# IX. GitHub Releases and Distribution
-
-* **32. Tags**
-
-  * Lightweight tags
-  * Annotated tags
-  * Semantic versioning concepts
-  * Tagging releases
-
-* **33. Releases**
-
-  * Creating releases
-  * Release notes
-  * Release assets
-  * Draft releases
-  * Pre-releases
-  * Versioning strategies
-
-* **34. Changelogs**
-
-  * Generated changelogs
-  * Manual changelogs
-  * Release-note conventions
-  * Communicating breaking changes
-
----
-
-# X. GitHub CLI and Developer Tooling
-
-* **35. GitHub CLI**
-
-  * Installing `gh`
-  * Authentication
-  * Repository operations
-  * Pull-request operations
-  * Issue operations
-  * Release operations
-  * Workflow operations
-
-* **36. CLI-Based GitHub Workflow**
-
-  * Creating repositories
-  * Cloning repositories
-  * Creating pull requests
-  * Reviewing pull requests
-  * Managing issues
-  * Inspecting Actions runs
-
-* **37. GitHub API**
-
-  * REST API concepts
-  * GraphQL API concepts
-  * Authentication
-  * Tokens
-  * Pagination
-  * Rate limits
-  * API automation
-
----
-
-# XI. GitHub Actions Fundamentals
-
-GitHub Actions is GitHub's automation platform for workflows such as build, test, and deployment.
-
-* **38. Actions Fundamentals**
-
-  * Workflow
-  * Job
-  * Step
-  * Runner
-  * Action
-  * Event
-  * Artifact
-
-* **39. Workflow Files**
-
-  * `.github/workflows/`
-  * YAML syntax
-  * Workflow naming
-  * Triggers
-  * Jobs
-  * Steps
-  * Environment variables
-
-* **40. Workflow Triggers**
-
-  * Push events
-  * Pull-request events
-  * Manual execution
-  * Scheduled execution
-  * Repository events
-  * Conditional execution
-
-* **41. Runners**
-
-  * GitHub-hosted runners
-  * Self-hosted runners
-  * Runner environments
-  * Operating-system differences
-  * Runner security considerations
+- **17. GitHub Wikis**
+  - Wikis
+  - Wiki creation
+  - Wiki pages
+  - Wiki sidebar
+  - Wiki footer
+  - Wiki editing
+  - Wiki best practices
+  - Wiki vs README
+  - Wiki vs documentation
 
 ---
 
-# XII. Advanced GitHub Actions
+# IV. Pull Requests and Code Review
 
-* **42. Workflow Logic**
+- **18. Pull Requests Fundamentals**
+  - Pull requests
+  - PR creation
+  - PR title
+  - PR description
+  - PR assignees
+  - PR reviewers
+  - PR labels
+  - PR milestones
+  - PR projects
+  - PR linked issues
+  - PR comments
+  - PR reviews
+  - PR draft status
+  - PR ready for review
+  - PR merge
+  - PR closing
+  - PR best practices
 
-  * Expressions
-  * Contexts
-  * Conditions
-  * Outputs
-  * Dependencies between jobs
-  * Matrices
+- **19. Pull Request Templates**
+  - PR templates
+  - Template creation
+  - Template configuration
+  - Template content
+  - Template best practices
+  - Template YAML
+  - Template markdown
 
-* **43. Matrix Builds**
+- **20. Code Review**
+  - Code review
+  - Review requests
+  - Review comments
+  - Review suggestions
+  - Review approvals
+  - Review changes requested
+  - Review dismissal
+  - Review re-request
+  - Review best practices
+  - Inline comments
+  - File comments
+  - Line comments
+  - Suggestion commits
+  - Multi-line comments
+  - Review checklist
+  - Review etiquette
+  - Review automation
+  - Auto code review
+  - Copilot code review
+  - Agentic code review
 
-  * Multiple operating systems
-  * Multiple language versions
-  * Multiple dependency versions
-  * Parallel testing
-  * Failure handling
+- **21. Code Owners**
+  - CODEOWNERS
+  - Code owner syntax
+  - Code owner patterns
+  - Code owner assignments
+  - Code owner reviews
+  - Code owner best practices
 
-* **44. Reusable Workflows**
+- **22. Pull Request Automation**
+  - PR automation
+  - Auto-assign
+  - Auto-label
+  - Auto-merge
+  - Merge queue
+  - PR best practices
 
-  * Shared workflows
-  * Workflow inputs
-  * Workflow secrets
-  * Workflow outputs
-  * Organization-wide automation
-
-GitHub supports reusable workflows that can be called from other workflows. ([GitHub Docs][1])
-
-* **45. Environments**
-
-  * Development
-  * Staging
-  * Production
-  * Environment variables
-  * Environment secrets
-  * Deployment approvals
-  * Deployment protection rules
-
-GitHub environments can restrict access to environment secrets until required reviewers approve a deployment. ([GitHub Docs][2])
-
-* **46. Artifacts and Caching**
-
-  * Uploading artifacts
-  * Downloading artifacts
-  * Build outputs
-  * Test reports
-  * Dependency caching
-  * Cache invalidation
-
----
-
-# XIII. CI/CD with GitHub
-
-* **47. Continuous Integration**
-
-  * Automated builds
-  * Automated tests
-  * Linting
-  * Static analysis
-  * Pull-request validation
-
-* **48. Continuous Delivery**
-
-  * Build artifacts
-  * Release preparation
-  * Staging deployment
-  * Production deployment
-  * Approval workflows
-
-* **49. Deployment Automation**
-
-  * Cloud deployment
-  * Container deployment
-  * Infrastructure deployment
-  * Environment promotion
-  * Rollbacks
-
-* **50. CI/CD Pipeline Design**
-
-  * Build
-  * Test
-  * Security scan
-  * Package
-  * Deploy
-  * Verify
-  * Roll back
+- **23. Merge Strategies**
+  - Merge commit
+  - Squash merge
+  - Rebase merge
+  - Merge queue
+  - Branch protection
+  - Required checks
+  - Required reviews
+  - Merge best practices
+  - Merge conflicts
+  - Conflict resolution
 
 ---
 
-# XIV. GitHub Security
+# V. GitHub Actions
 
-* **51. Secret Management**
+- **24. GitHub Actions Fundamentals**
+  - GitHub Actions
+  - Workflows
+  - Jobs
+  - Steps
+  - Actions
+  - Runners
+  - Events
+  - Triggers
+  - Workflow syntax
+  - YAML
+  - `.github/workflows/`
+  - Actions best practices
 
-  * Repository secrets
-  * Environment secrets
-  * Organization secrets
-  * Variables
-  * Preventing hardcoded credentials
-  * Credential rotation
+- **25. Workflow Syntax**
+  - `name`
+  - `on`
+  - `jobs`
+  - `steps`
+  - `uses`
+  - `run`
+  - `with`
+  - `env`
+  - `secrets`
+  - `if`
+  - `needs`
+  - `strategy`
+  - `matrix`
+  - `services`
+  - `container`
+  - `timeout-minutes`
+  - `continue-on-error`
+  - `outputs`
+  - `permissions`
+  - Workflow syntax best practices
 
-GitHub Actions supports secrets at repository, environment, and organization scope. ([GitHub Docs][3])
+- **26. Events and Triggers**
+  - `push`
+  - `pull_request`
+  - `pull_request_target`
+  - `schedule`
+  - `workflow_dispatch`
+  - `repository_dispatch`
+  - `release`
+  - `issues`
+  - `issue_comment`
+  - `pull_request_review`
+  - `pull_request_review_comment`
+  - `discussion`
+  - `discussion_comment`
+  - `create`
+  - `delete`
+  - `fork`
+  - `watch`
+  - `star`
+  - `page_build`
+  - `deployment`
+  - `deployment_status`
+  - `check_run`
+  - `check_suite`
+  - `status`
+  - Event filters
+  - Branch filters
+  - Path filters
+  - Tag filters
+  - Event best practices
 
-* **52. Secret Scanning**
+- **27. Jobs and Steps**
+  - Jobs
+  - Steps
+  - Job dependencies
+  - Job outputs
+  - Job conditionals
+  - Job matrix
+  - Job strategy
+  - Job containers
+  - Job services
+  - Job runners
+  - Job best practices
 
-  * Detecting exposed credentials
-  * Secret-scanning alerts
-  * Push protection
-  * Secret remediation
-  * Credential revocation
+- **28. Runners**
+  - GitHub-hosted runners
+    - `ubuntu-latest`
+    - `windows-latest`
+    - `macos-latest`
+    - `ubuntu-22.04`
+    - `ubuntu-24.04`
+    - `windows-2022`
+    - `windows-2025`
+    - `macos-13`
+    - `macos-14`
+    - `macos-15`
+  - Self-hosted runners
+  - Runner groups
+  - Runner scaling
+  - Runner security
+  - Runner best practices
 
-GitHub documents secret scanning as a mechanism for detecting exposed credentials across repository history; availability varies by repository type and plan. ([GitHub Docs][4])
+- **29. Actions Marketplace**
+  - Actions Marketplace
+  - Official actions
+    - `actions/checkout`
+    - `actions/setup-node`
+    - `actions/setup-python`
+    - `actions/setup-java`
+    - `actions/setup-dotnet`
+    - `actions/cache`
+    - `actions/upload-artifact`
+    - `actions/download-artifact`
+    - `actions/github-script`
+    - `actions/create-release`
+    - `actions/upload-release-asset`
+  - Community actions
+  - Action versions
+  - Action security
+  - Action best practices
 
-* **53. Dependency Security**
+- **30. CI/CD Workflows**
+  - CI pipeline
+  - CD pipeline
+  - Build
+  - Test
+  - Lint
+  - Security scan
+  - Deploy
+  - Release
+  - CI/CD best practices
+  - Example CI workflow
+  - Example CD workflow
+  - Example release workflow
+  - Matrix builds
+  - Caching
+  - Artifacts
 
-  * Dependency graph
-  * Dependabot alerts
-  * Dependency updates
-  * Dependency review
-  * Vulnerable dependencies
+- **31. Secrets and Variables**
+  - Secrets
+  - Repository secrets
+  - Environment secrets
+  - Organization secrets
+  - Environment variables
+  - Configuration variables
+  - Secret management
+  - Secret best practices
+  - Secret rotation
+  - Secret scanning
 
-* **54. Code Security**
+- **32. Environments**
+  - Environments
+  - Environment protection rules
+  - Required reviewers
+  - Wait timer
+  - Deployment branches
+  - Environment secrets
+  - Environment variables
+  - Environment best practices
 
-  * Code scanning
-  * CodeQL
-  * Static analysis
-  * Security alerts
-  * Pull-request security checks
+- **33. Reusable Workflows**
+  - Reusable workflows
+  - Workflow calls
+  - `workflow_call`
+  - Inputs
+  - Secrets
+  - Outputs
+  - Reusable workflow best practices
 
-GitHub's current security tooling includes dependency-related alerts, secret scanning, code scanning, and related capabilities, with availability depending on repository type and plan. ([GitHub Docs][5])
+- **34. Composite Actions**
+  - Composite actions
+  - Action metadata
+  - `action.yml`
+  - Composite action steps
+  - Composite action best practices
+
+- **35. Custom Actions**
+  - JavaScript actions
+  - Docker actions
+  - Composite actions
+  - Action metadata
+  - Action inputs
+  - Action outputs
+  - Action best practices
+
+- **36. Caching**
+  - Dependency caching
+  - `actions/cache`
+  - Cache keys
+  - Cache restore keys
+  - Cache scopes
+  - Caching best practices
+
+- **37. Artifacts**
+  - Build artifacts
+  - `actions/upload-artifact`
+  - `actions/download-artifact`
+  - Artifact retention
+  - Artifact best practices
+
+- **38. Debugging Workflows**
+  - Workflow logs
+  - Step logs
+  - Debug logging
+  - `ACTIONS_STEP_DEBUG`
+  - `ACTIONS_RUNNER_DEBUG`
+  - Workflow debugging best practices
+
+- **39. Security Hardening**
+  - Action pinning
+  - SHA pinning
+  - Permissions
+  - Least privilege
+  - Secret scanning
+  - Dependency scanning
+  - Security hardening best practices
 
 ---
 
-# XV. Advanced Repository Security and Governance
+# VI. GitHub Packages
 
-* **55. Branch Protection**
+- **40. GitHub Packages Fundamentals**
+  - GitHub Packages
+  - Package registries
+    - npm
+    - Docker
+    - RubyGems
+    - Apache Maven
+    - Gradle
+    - NuGet
+  - Package hosting
+  - Package management
+  - Package best practices
 
-  * Required pull requests
-  * Required reviews
-  * Required status checks
-  * Conversation resolution
-  * Restricting direct pushes
+- **41. Container Registry**
+  - GitHub Container Registry
+  - GHCR
+  - `ghcr.io`
+  - Docker images
+  - OCI images
+  - Image publishing
+  - Image pulling
+  - Image tagging
+  - Image linking
+  - Container registry best practices
+  - Authentication
+  - Personal access tokens
+  - GitHub Actions tokens
+  - `GITHUB_TOKEN`
 
-* **56. Rulesets**
+- **42. Publishing Packages**
+  - Publishing npm packages
+  - Publishing Docker images
+  - Publishing Maven packages
+  - Publishing NuGet packages
+  - Publishing RubyGems
+  - Publishing best practices
+  - Workflow integration
+  - Package permissions
 
-  * Repository rules
-  * Branch rules
-  * Tag rules
-  * Enforcement
-  * Organization-level governance
-
-* **57. CODEOWNERS**
-
-  * Ownership rules
-  * Automatic reviewer assignment
-  * Team-based review
-  * Critical-code ownership
-
-* **58. Security Policies**
-
-  * `SECURITY.md`
-  * Vulnerability reporting
-  * Responsible disclosure
-  * Security response procedures
-
-* **59. Audit and Governance**
-
-  * Audit logs
-  * Repository access
-  * Organization activity
-  * Security alerts
-  * Webhooks
-  * Governance automation
-
-GitHub documents audit and webhook support for security-related events, including Dependabot and secret-scanning events. ([GitHub Docs][6])
-
----
-
-# XVI. GitHub Packages and Container Workflows
-
-* **60. Package Management**
-
-  * GitHub Packages
-  * Package registries
-  * Versioning
-  * Publishing packages
-  * Consuming packages
-
-* **61. Containers**
-
-  * Docker
-  * Container images
-  * GitHub Container Registry
-  * Image tagging
-  * Image publishing
-  * Image security
-
-* **62. Automated Package Delivery**
-
-  * Build package
-  * Test package
-  * Publish package
-  * Create release
-  * Update consumers
+- **43. Package Management**
+  - Package versions
+  - Package deletion
+  - Package access control
+  - Package visibility
+  - Package linking
+  - Package best practices
 
 ---
 
-# XVII. GitHub Codespaces and Cloud Development
+# VII. GitHub Security
 
-* **63. Codespaces Fundamentals**
+- **44. Security Fundamentals**
+  - Security
+  - Threat modeling
+  - Attack surface
+  - Defense in depth
+  - Least privilege
+  - Secure defaults
+  - Security best practices
 
-  * Cloud development environments
-  * Repository-based environments
-  * Development containers
-  * Editor integration
+- **45. GitHub Advanced Security**
+  - GitHub Advanced Security
+  - GHAS
+  - GitHub Secret Protection
+  - GitHub Code Security
+  - Security overview
+  - Security best practices
 
-* **64. Dev Containers**
+- **46. Secret Scanning**
+  - Secret scanning
+  - Secret detection
+  - Secret alerts
+  - Secret revocation
+  - Push protection
+  - Secret scanning best practices
+  - AI-detected secrets
+  - Custom patterns
+  - Secret scanning partners
 
-  * `devcontainer.json`
-  * Containerized development
-  * Reproducible environments
-  * Development dependencies
+- **47. Dependabot**
+  - Dependabot
+  - Dependabot alerts
+  - Dependabot security updates
+  - Dependabot version updates
+  - `dependabot.yml`
+  - Dependency graph
+  - Dependency review
+  - Dependabot best practices
 
-* **65. Team Development Environments**
+- **48. Code Scanning**
+  - Code scanning
+  - CodeQL
+  - CodeQL analysis
+  - Code scanning alerts
+  - Code scanning workflows
+  - Code scanning best practices
+  - SARIF
+  - Code scanning tools
 
-  * Standardized tooling
-  * Shared configurations
-  * Environment reproducibility
-  * Onboarding automation
+- **49. Copilot Autofix**
+  - Copilot Autofix
+  - AI-powered fixes
+  - Vulnerability remediation
+  - Autofix best practices
 
----
+- **50. Security Advisories**
+  - Security advisories
+  - Vulnerability disclosure
+  - Advisory creation
+  - Advisory management
+  - Advisory best practices
 
-# XVIII. GitHub for Open Source
+- **51. Security Policies**
+  - Security policies
+  - `SECURITY.md`
+  - Security best practices
+  - Security auditing
+  - Security compliance
 
-* **66. Open-Source Contribution**
-
-  * Finding issues
-  * Forking repositories
-  * Creating branches
-  * Making changes
-  * Pull requests
-  * Responding to reviews
-
-* **67. Open-Source Project Maintenance**
-
-  * Issue triage
-  * Labels
-  * Templates
-  * Release management
-  * Contributor guidance
-  * Security reporting
-
-* **68. Community Health**
-
-  * README
-  * License
-  * Code of Conduct
-  * Contribution guidelines
-  * Security policy
-  * Issue templates
-  * Pull-request templates
-
----
-
-# XIX. Team and Organization Administration
-
-* **69. Organizations**
-
-  * Organization structure
-  * Members
-  * Teams
-  * Repository access
-  * Roles
-
-* **70. Permission Models**
-
-  * Read
-  * Triage
-  * Write
-  * Maintain
-  * Admin
-  * Fine-grained access controls
-
-* **71. Team Management**
-
-  * Team hierarchy
-  * Team repositories
-  * Code ownership
-  * Review assignments
-
-* **72. Enterprise Governance**
-
-  * Centralized policies
-  * Repository controls
-  * Security configurations
-  * Auditability
-  * Enterprise-wide standards
+- **52. Security Automation**
+  - Security automation
+  - GitHub Actions for security
+  - CodeQL actions
+  - Dependabot automation
+  - Secret scanning automation
+  - Security automation best practices
 
 ---
 
-# XX. Advanced Git Workflows
+# VIII. GitHub Copilot and AI
 
-* **73. Git Flow**
+- **53. GitHub Copilot Fundamentals**
+  - GitHub Copilot
+  - AI pair programmer
+  - Copilot features
+  - Copilot chat
+  - Copilot completions
+  - Copilot for individuals
+  - Copilot for business
+  - Copilot for enterprise
+  - Copilot best practices
 
-  * Main branch
-  * Development branch
-  * Feature branches
-  * Release branches
-  * Hotfix branches
+- **54. Copilot Chat**
+  - Copilot Chat
+  - Chat interface
+  - Code explanation
+  - Code generation
+  - Code refactoring
+  - Code debugging
+  - Code documentation
+  - Chat best practices
 
-* **74. Trunk-Based Development**
+- **55. Copilot Agent Mode**
+  - Agent mode
+  - Autonomous tasks
+  - Multi-step tasks
+  - Code changes
+  - Test running
+  - Error fixing
+  - Agent mode best practices
 
-  * Short-lived branches
-  * Frequent integration
-  * Feature flags
-  * Continuous integration
+- **56. Copilot Coding Agent**
+  - Coding agent
+  - Issue assignment
+  - Autonomous code changes
+  - Pull request creation
+  - Coding agent best practices
 
-* **75. Monorepo Workflows**
+- **57. Copilot Code Review**
+  - Copilot code review
+  - AI-generated reviews
+  - Review suggestions
+  - Agentic code review
+  - Code review best practices
 
-  * Multiple applications
-  * Shared libraries
-  * Dependency management
-  * Selective CI
-  * Path-based workflows
+- **58. Copilot CLI**
+  - Copilot CLI
+  - Command-line assistance
+  - Copilot CLI best practices
 
-* **76. Large Repository Management**
+- **59. Copilot in IDE**
+  - VS Code
+  - Visual Studio
+  - JetBrains
+  - Neovim
+  - Copilot in IDE best practices
 
-  * Git LFS
-  * Repository size management
-  * Binary assets
-  * History cleanup
-  * Performance considerations
+- **60. Copilot Extensions**
+  - Copilot Extensions
+  - Custom agents
+  - MCP servers
+  - Copilot Extensions best practices
 
----
+- **61. Agent HQ**
+  - Agent HQ
+  - Agent orchestration
+  - Agent collaboration
+  - Agent governance
+  - Agent best practices
+  - Enterprise Agent Control Plane
+  - Agent metrics
 
-# XXI. Advanced Git Recovery and Troubleshooting
-
-* **77. Recovering Lost Work**
-
-  * `git reflog`
-  * Recovering commits
-  * Recovering deleted branches
-  * Detached HEAD recovery
-
-* **78. Repository Repair**
-
-  * Integrity checks
-  * Object inspection
-  * Corruption diagnosis
-  * Garbage collection
-
-* **79. History Rewriting**
-
-  * Interactive rebase
-  * Commit filtering
-  * Removing sensitive content
-  * Force pushes
-  * Coordinating history rewrites
-
-* **80. Debugging Collaboration Problems**
-
-  * Diverged branches
-  * Merge conflicts
-  * Rebase conflicts
-  * Failed CI
-  * Broken branch protections
-  * Incorrect permissions
-
----
-
-# XXII. GitHub API and Automation
-
-* **81. REST API Automation**
-
-  * Repository management
-  * Issue management
-  * Pull-request automation
-  * Release automation
-  * User and organization operations
-
-* **82. GraphQL**
-
-  * GraphQL schema
-  * Queries
-  * Mutations
-  * Connections
-  * Pagination
-
-* **83. Webhooks**
-
-  * Repository events
-  * Pull-request events
-  * Issue events
-  * Deployment events
-  * Security events
-  * Event-driven automation
-
-* **84. GitHub Apps**
-
-  * Authentication
-  * Permissions
-  * Installation
-  * Event subscriptions
-  * Automated repository integrations
+- **62. AI-Native Development**
+  - AI-native development
+  - AI-assisted coding
+  - AI code review
+  - AI testing
+  - AI documentation
+  - AI best practices
 
 ---
 
-# XXIII. GitHub + DevOps
+# IX. GitHub Pages and Documentation
 
-* **85. Infrastructure as Code**
+- **63. GitHub Pages Fundamentals**
+  - GitHub Pages
+  - Static site hosting
+  - Pages setup
+  - Pages configuration
+  - Custom domains
+  - HTTPS
+  - Jekyll
+  - Static site generators
+  - Pages best practices
 
-  * Terraform
-  * Cloud configuration
-  * Automated infrastructure deployment
-  * State management
+- **64. Jekyll**
+  - Jekyll
+  - Jekyll themes
+  - Jekyll configuration
+  - Jekyll plugins
+  - Jekyll best practices
 
-* **86. Containerization**
-
-  * Docker
-  * Image builds
-  * Registry publishing
-  * Container deployment
-
-* **87. Kubernetes Integration**
-
-  * Kubernetes manifests
-  * Helm
-  * CI/CD deployment
-  * Environment promotion
-
-* **88. Cloud Platforms**
-
-  * AWS
-  * Azure
-  * Google Cloud
-  * Cloud authentication
-  * Federated credentials
-  * Automated deployments
-
-* **89. DevSecOps**
-
-  * CI security
-  * Dependency scanning
-  * Secret scanning
-  * Code scanning
-  * Infrastructure scanning
-  * Artifact integrity
+- **65. Documentation**
+  - Documentation
+  - README
+  - Wiki
+  - GitHub Pages
+  - Documentation best practices
+  - Documentation tools
+  - MkDocs
+  - Docusaurus
+  - VitePress
 
 ---
 
-# XXIV. Professional GitHub Engineering
+# X. GitHub API and Integrations
 
-* **90. Repository Architecture**
+- **66. GitHub API Fundamentals**
+  - GitHub API
+  - REST API
+  - GraphQL API
+  - API versions
+  - API authentication
+  - API rate limits
+  - API best practices
 
-  * Repository boundaries
-  * Monorepo versus multirepo
-  * Shared libraries
-  * Ownership models
+- **67. REST API**
+  - REST API
+  - Endpoints
+  - Resources
+  - HTTP methods
+  - Status codes
+  - Pagination
+  - Rate limiting
+  - Authentication
+  - REST API best practices
 
-* **91. Engineering Standards**
+- **68. GraphQL API**
+  - GraphQL API
+  - GraphQL queries
+  - GraphQL mutations
+  - GraphQL schema
+  - GraphQL introspection
+  - GraphQL best practices
+  - GraphQL vs REST
 
-  * Branching policies
-  * Commit conventions
-  * Pull-request standards
-  * Review requirements
-  * Release procedures
+- **69. GitHub Apps**
+  - GitHub Apps
+  - App creation
+  - App permissions
+  - App authentication
+  - App webhooks
+  - App best practices
 
-* **92. Automation Architecture**
+- **70. OAuth Apps**
+  - OAuth Apps
+  - OAuth flow
+  - OAuth scopes
+  - OAuth best practices
 
-  * Reusable workflows
-  * Composite actions
-  * Organization automation
-  * Event-driven systems
-  * Deployment pipelines
+- **71. Webhooks**
+  - Webhooks
+  - Webhook events
+  - Webhook configuration
+  - Webhook security
+  - Webhook best practices
 
-* **93. Supply-Chain Security**
+- **72. GitHub Marketplace**
+  - GitHub Marketplace
+  - Actions
+  - Apps
+  - Marketplace best practices
 
-  * Dependency integrity
-  * Build provenance
-  * Artifact verification
-  * Dependency review
-  * Secret protection
-  * Secure CI/CD design
-
----
-
-# XXV. Progressive GitHub Learning Levels
-
-## Level 1 — Beginner
-
-* Learn:
-
-  * Git basics
-  * GitHub repositories
-  * Clone
-  * Commit
-  * Push
-  * Pull
-  * Basic branches
-* Build:
-
-  * Personal coding repository
-  * README
-  * `.gitignore`
-  * Basic commit history
-
-## Level 2 — Intermediate
-
-* Learn:
-
-  * Branching
-  * Merging
-  * Rebasing
-  * Pull requests
-  * Code review
-  * Issues
-  * Projects
-* Build:
-
-  * Collaborative project
-  * Feature branches
-  * Pull-request workflow
-  * Issue tracking
-
-## Level 3 — Advanced
-
-* Learn:
-
-  * Git internals
-  * GitHub CLI
-  * Releases
-  * Actions
-  * CI
-  * Automation
-* Build:
-
-  * Automated test pipeline
-  * Release workflow
-  * Artifact generation
-
-## Level 4 — DevOps
-
-* Learn:
-
-  * CD
-  * Environments
-  * Deployment automation
-  * Containers
-  * Cloud integration
-  * Infrastructure as Code
-* Build:
-
-  * CI/CD pipeline
-  * Staging environment
-  * Production deployment workflow
-
-## Level 5 — Security
-
-* Learn:
-
-  * Secrets
-  * Secret scanning
-  * Dependency security
-  * Code scanning
-  * CodeQL
-  * Branch/ruleset governance
-* Build:
-
-  * Security-enabled repository
-  * Automated dependency updates
-  * Security gates in CI
-
-## Level 6 — Professional
-
-* Learn:
-
-  * Organizations
-  * Permissions
-  * Reusable workflows
-  * GitHub Apps
-  * APIs
-  * Webhooks
-  * Monorepo management
-* Build:
-
-  * Organization-wide automation
-  * Reusable CI/CD architecture
-  * API-driven GitHub tooling
-
-## Level 7 — Expert
-
-* Learn:
-
-  * Enterprise governance
-  * DevSecOps
-  * Supply-chain security
-  * Large-scale automation
-  * Distributed team workflows
-  * Repository architecture
-* Master:
-
-  * Designing GitHub platforms for software teams
-  * Automating software delivery
-  * Establishing secure development workflows
-  * Managing large repositories and organizations
+- **73. Integrations**
+  - Slack
+  - Microsoft Teams
+  - Jira
+  - Linear
+  - Azure Boards
+  - Notion
+  - Integration best practices
 
 ---
 
-# XXVI. Project-Based GitHub Mastery
+# XI. GitHub Enterprise
 
-* **Beginner Project**
+- **74. GitHub Enterprise Fundamentals**
+  - GitHub Enterprise
+  - GitHub Enterprise Cloud
+  - GHEC
+  - GitHub Enterprise Server
+  - GHES
+  - Enterprise features
+  - Enterprise best practices
 
-  * Personal portfolio repository
+- **75. Enterprise Governance**
+  - Enterprise governance
+  - Enterprise teams
+  - Enterprise roles
+  - Enterprise policies
+  - Enterprise security
+  - Enterprise compliance
+  - Enterprise best practices
 
-    * README
-    * Branches
-    * Commits
-    * Tags
-    * Releases
+- **76. Enterprise Security**
+  - Enterprise security
+  - Enterprise Security Manager
+  - ESM
+  - Security overview
+  - Security policies
+  - Security compliance
+  - Security best practices
 
-* **Intermediate Project**
+- **77. Enterprise Management**
+  - User management
+  - Organization management
+  - Repository management
+  - Billing
+  - Usage metrics
+  - Enterprise best practices
 
-  * Team application
+- **78. Enterprise Compliance**
+  - Compliance
+  - Audit logs
+  - Data residency
+  - SOC 2
+  - ISO 27001
+  - GDPR
+  - HIPAA
+  - Compliance best practices
 
-    * Issues
-    * Projects
-    * Pull requests
-    * Code review
-    * Branch protection
-
-* **Advanced Project**
-
-  * CI/CD application
-
-    * Automated tests
-    * Build pipeline
-    * Artifacts
-    * Deployment environments
-    * Release automation
-
-* **DevOps Project**
-
-  * Containerized application
-
-    * Docker image
-    * GitHub Actions
-    * Container registry
-    * Cloud deployment
-    * Environment-specific configuration
-
-* **Security Project**
-
-  * Secure development repository
-
-    * Secret protection
-    * Dependency monitoring
-    * Code scanning
-    * Security policy
-    * Automated security checks
-
-* **Expert Project**
-
-  * Multi-repository engineering platform
-
-    * Organization
-    * Teams
-    * Rulesets
-    * CODEOWNERS
-    * Reusable workflows
-    * API automation
-    * Deployment governance
+- **79. Enterprise Migration**
+  - Migration
+  - GitHub Enterprise Importer
+  - Migration from GitHub.com
+  - Migration from other platforms
+  - Migration best practices
 
 ---
 
-# XXVII. Final GitHub Competency Map
+# XII. GitHub Projects by Difficulty
 
-* **Git Fundamentals**
+## Beginner Projects
 
-  * Repository
-  * Commit
-  * Branch
-  * Merge
-  * Rebase
-  * Remote
+- **1. Personal Repository**
+  - Repository creation
+  - README
+  - Commits
+  - Branches
+  - Push
 
-* **GitHub Collaboration**
+- **2. Open Source Contribution**
+  - Forking
+  - Pull requests
+  - Code review
+  - Issues
 
-  * Forks
-  * Pull requests
-  * Reviews
-  * Issues
-  * Discussions
-  * Projects
+- **3. Documentation Site**
+  - GitHub Pages
+  - Jekyll
+  - Markdown
+  - Custom domain
 
-* **Repository Management**
+- **4. GitHub Profile**
+  - Profile README
+  - Pinned repositories
+  - Profile best practices
 
-  * README
-  * Documentation
-  * Releases
-  * Tags
-  * Governance
+- **5. GitHub Actions Workflow**
+  - Basic CI
+  - Testing
+  - Build
+  - Artifacts
 
-* **Automation**
+---
 
-  * GitHub Actions
-  * Workflows
-  * Runners
-  * Artifacts
-  * Reusable workflows
-  * Environments
+## Intermediate Projects
 
-* **CI/CD**
+- **6. CI/CD Pipeline**
+  - GitHub Actions
+  - Build
+  - Test
+  - Security scan
+  - Deploy
 
-  * Build
-  * Test
-  * Package
-  * Deploy
-  * Release
-  * Rollback
+- **7. Package Publishing**
+  - GitHub Packages
+  - npm
+  - Docker
+  - Versioning
 
-* **Security**
+- **8. Security Hardening**
+  - Dependabot
+  - Secret scanning
+  - Code scanning
+  - Copilot Autofix
 
-  * Secrets
-  * Secret scanning
-  * Dependency security
-  * Code scanning
-  * CodeQL
-  * Rulesets
+- **9. Project Management**
+  - GitHub Projects
+  - Issues
+  - Labels
+  - Milestones
+  - Automation
 
-* **Developer Productivity**
+- **10. Copilot Integration**
+  - Copilot Chat
+  - Agent mode
+  - Code review
+  - Best practices
 
-  * GitHub CLI
-  * Codespaces
-  * Dev Containers
-  * APIs
+---
 
-* **DevOps**
+## Advanced Projects
 
-  * Docker
-  * Cloud
-  * Kubernetes
-  * Infrastructure as Code
-  * DevSecOps
+- **11. Enterprise Governance**
+  - Enterprise teams
+  - Roles
+  - Policies
+  - Compliance
+  - Audit logs
 
-* **Enterprise**
+- **12. API Integration**
+  - REST API
+  - GraphQL API
+  - Webhooks
+  - GitHub Apps
 
-  * Organizations
-  * Teams
-  * Permissions
-  * Governance
-  * Audit
-  * Supply-chain security
+- **13. Monorepo with Actions**
+  - Monorepo
+  - Matrix builds
+  - Caching
+  - Reusable workflows
 
-### Complete progression
+- **14. Security Automation**
+  - CodeQL
+  - Dependabot
+  - Secret scanning
+  - Security workflows
 
-**Git Fundamentals → GitHub Basics → Repositories → Branching → Merging → Pull Requests → Code Review → Issues → Projects → Releases → GitHub CLI → GitHub Actions → CI → CD → Environments → Security → Dependency Management → Code Scanning → API/Webhooks → Containers → Cloud → Infrastructure as Code → DevSecOps → Organization Governance → Enterprise GitHub Architecture**
+- **15. AI-Native Development**
+  - Agent HQ
+  - Copilot agents
+  - Custom agents
+  - MCP servers
 
-This gives you a path from **“I can use GitHub”** to **“I can design and operate a professional software-development workflow around GitHub.”**
+---
 
-[1]: https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations?utm_source=chatgpt.com "Reusing workflow configurations - GitHub Docs"
-[2]: https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments?utm_source=chatgpt.com "Deployments and environments - GitHub Docs"
-[3]: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets?utm_source=chatgpt.com "Using secrets in GitHub Actions - GitHub Docs"
-[4]: https://docs.github.com/en/code-security/concepts/secret-security/secret-scanning?utm_source=chatgpt.com "Secret scanning - GitHub Docs"
-[5]: https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security?utm_source=chatgpt.com "About GitHub Advanced Security - GitHub Docs"
-[6]: https://docs.github.com/en/code-security/concepts/security-at-scale/audit-security-alerts?utm_source=chatgpt.com "Auditing security alerts - GitHub Docs"
+## Expert Projects
+
+- **16. Enterprise Platform**
+  - GitHub Enterprise
+  - Governance
+  - Security
+  - Compliance
+  - Migration
+
+- **17. Custom GitHub App**
+  - GitHub App
+  - OAuth
+  - Webhooks
+  - API integration
+
+- **18. Multi-Repository Automation**
+  - GitHub Actions
+  - Reusable workflows
+  - Composite actions
+  - Cross-repo automation
+
+- **19. Security Operations**
+  - Security overview
+  - Alert management
+  - Incident response
+  - Compliance reporting
+
+- **20. AI Agent Orchestration**
+  - Agent HQ
+  - Multi-agent workflows
+  - Agent governance
+  - Agent metrics
+
+---
+
+# XIII. Progressive GitHub Learning Sequence
+
+## Level 1 — GitHub Fundamentals
+
+- Master:
+  - Account setup
+  - Repositories
+  - README
+  - Issues
+  - Pull requests
+  - GitHub CLI
+  - GitHub Desktop
+  - GitHub Mobile
+
+## Level 2 — Collaboration
+
+- Master:
+  - Branching
+  - Merging
+  - Code review
+  - Code owners
+  - Pull request templates
+  - Issue templates
+  - Labels
+  - Milestones
+
+## Level 3 — Project Management
+
+- Master:
+  - GitHub Projects
+  - Project views
+  - Project fields
+  - Project automation
+  - Discussions
+  - Wikis
+
+## Level 4 — GitHub Actions
+
+- Master:
+  - Workflows
+  - Jobs
+  - Steps
+  - Actions
+  - Triggers
+  - Runners
+  - Secrets
+  - Environments
+  - Caching
+  - Artifacts
+  - Reusable workflows
+  - Composite actions
+  - Custom actions
+
+## Level 5 — CI/CD
+
+- Master:
+  - CI pipelines
+  - CD pipelines
+  - Build
+  - Test
+  - Lint
+  - Security scan
+  - Deploy
+  - Release
+  - Matrix builds
+  - Debugging workflows
+
+## Level 6 — Packages
+
+- Master:
+  - GitHub Packages
+  - Container Registry
+  - Publishing packages
+  - Package management
+  - Package access control
+
+## Level 7 — Security
+
+- Master:
+  - GitHub Advanced Security
+  - Secret scanning
+  - Dependabot
+  - Code scanning
+  - CodeQL
+  - Copilot Autofix
+  - Security advisories
+  - Security policies
+  - Security automation
+
+## Level 8 — AI and Copilot
+
+- Master:
+  - GitHub Copilot
+  - Copilot Chat
+  - Agent mode
+  - Coding agent
+  - Code review
+  - Copilot CLI
+  - Copilot Extensions
+  - Agent HQ
+  - AI-native development
+
+## Level 9 — API and Integrations
+
+- Master:
+  - GitHub API
+  - REST API
+  - GraphQL API
+  - GitHub Apps
+  - OAuth Apps
+  - Webhooks
+  - GitHub Marketplace
+  - Integrations
+
+## Level 10 — Enterprise
+
+- Master:
+  - GitHub Enterprise
+  - Enterprise governance
+  - Enterprise teams
+  - Enterprise roles
+  - Enterprise security
+  - Enterprise compliance
+  - Enterprise migration
+  - Enterprise management
+
+## Level 11 — Production Engineering
+
+- Master:
+  - Monorepo management
+  - Multi-repository automation
+  - Security operations
+  - AI agent orchestration
+  - Platform engineering
+  - Enterprise architecture
+  - Production best practices
+
+---
+
+# XIV. Final GitHub Competency Map
+
+- **Foundations**
+
+  - Account setup
+  - Repositories
+  - README
+  - GitHub CLI
+  - GitHub Desktop
+  - GitHub Mobile
+  - Interface
+
+- **Collaboration**
+
+  - Issues
+  - Pull requests
+  - Code review
+  - Code owners
+  - Templates
+  - Labels
+  - Milestones
+  - Branching
+  - Merging
+
+- **Project Management**
+
+  - GitHub Projects
+  - Project views
+  - Project fields
+  - Project automation
+  - Discussions
+  - Wikis
+
+- **Actions**
+
+  - Workflows
+  - Jobs
+  - Steps
+  - Actions
+  - Triggers
+  - Runners
+  - Secrets
+  - Environments
+  - Caching
+  - Artifacts
+  - Reusable workflows
+  - Composite actions
+  - Custom actions
+
+- **CI/CD**
+
+  - CI pipelines
+  - CD pipelines
+  - Build
+  - Test
+  - Lint
+  - Security scan
+  - Deploy
+  - Release
+  - Matrix builds
+  - Debugging workflows
+
+- **Packages**
+
+  - GitHub Packages
+  - Container Registry
+  - Publishing packages
+  - Package management
+
+- **Security**
+
+  - GitHub Advanced Security
+  - Secret scanning
+  - Dependabot
+  - Code scanning
+  - CodeQL
+  - Copilot Autofix
+  - Security advisories
+  - Security policies
+  - Security automation
+
+- **Copilot and AI**
+
+  - GitHub Copilot
+  - Copilot Chat
+  - Agent mode
+  - Coding agent
+  - Code review
+  - Copilot CLI
+  - Copilot Extensions
+  - Agent HQ
+  - AI-native development
+
+- **API**
+
+  - GitHub API
+  - REST API
+  - GraphQL API
+  - GitHub Apps
+  - OAuth Apps
+  - Webhooks
+  - GitHub Marketplace
+
+- **Enterprise**
+
+  - GitHub Enterprise
+  - Enterprise governance
+  - Enterprise teams
+  - Enterprise roles
+  - Enterprise security
+  - Enterprise compliance
+  - Enterprise migration
+
+- **Production**
+
+  - Monorepo management
+  - Multi-repository automation
+  - Security operations
+  - AI agent orchestration
+  - Platform engineering
+  - Enterprise architecture
+
+---
+
+## Recommended Overall Progression
+
+**GitHub Fundamentals → Collaboration → Project Management → GitHub Actions → CI/CD → Packages → Security → Copilot and AI → API and Integrations → Enterprise → Production Engineering**
+
+For maximum practical mastery, combine this GitHub roadmap with the Git, DSA, JavaScript, TypeScript, Node.js, REST API, SQL, Discrete Mathematics, React, Laravel, jQuery, Jupyter, Python, Java, C#, C++, C Language, Dart, Flutter, Kotlin, and R Language roadmaps above so the progression becomes:
+
+**Discrete Mathematics → DSA Foundations → Git Fundamentals → GitHub Fundamentals → Collaboration → Pull Requests → Code Review → GitHub Actions → CI/CD → GitHub Packages → Security → GitHub Advanced Security → Dependabot → CodeQL → GitHub Copilot → Agent HQ → AI-Native Development → GitHub API → GitHub Apps → Enterprise Governance → Platform Engineering → Enterprise Architecture → Production GitHub Engineering → Open Source Contribution → DevOps Engineering → Platform Engineering.**

@@ -1,1443 +1,1965 @@
 # Bootstrap Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From Foundational Concepts to Advanced Practical Mastery
+## From Grid and Utility Foundations to Advanced Theming, Component Architecture, and Production Bootstrap Engineering
+
+Bootstrap is best learned as more than "a CSS framework with ready-made components." The progression should cover **CSS prerequisites → Bootstrap fundamentals → grid system → layout utilities → content styles → components → forms → JavaScript plugins → customization → theming → Sass → accessibility → performance → migration → production engineering**.
 
 ---
 
-# I. Web Development Foundations
+# I. Bootstrap Foundations
 
-* **1. Internet and Web Fundamentals**
+- **1. What Bootstrap Is**
+  - Bootstrap
+  - Bootstrap history
+  - Mark Otto
+  - Jacob Thornton
+  - Twitter
+  - Bootstrap 1
+  - Bootstrap 2
+  - Bootstrap 3
+  - Bootstrap 4
+  - Bootstrap 5
+  - Bootstrap 5.3
+  - Bootstrap 5.4
+  - Bootstrap philosophy
+    - Mobile-first
+    - Responsive
+    - Component-based
+    - Utility-first
+    - Sass-powered
+    - Accessible
+  - Bootstrap vs Tailwind CSS
+  - Bootstrap vs Foundation
+  - Bootstrap vs Bulma
+  - Bootstrap vs Material UI
+  - Bootstrap vs custom CSS
+  - Bootstrap use cases
+    - Websites
+    - Web applications
+    - Admin dashboards
+    - Landing pages
+    - Prototypes
+    - Internal tools
+    - Email templates
+  - Bootstrap in modern web development
+  - Bootstrap ecosystem
+  - Bootstrap Icons
+  - Bootstrap Themes
+  - Bootstrap Examples
+  - Bootstrap CDN
 
-  * How the web works
+- **2. Prerequisites**
+  - HTML fundamentals
+  - Semantic HTML
+  - CSS fundamentals
+  - Selectors
+  - Box model
+  - Flexbox
+  - Grid
+  - Responsive design
+  - Media queries
+  - JavaScript fundamentals
+  - DOM
+  - Events
+  - npm
+  - Node.js
+  - Sass
+  - Prerequisite best practices
 
-    * Client
-    * Server
-    * Browser
-    * HTTP/HTTPS
-    * DNS
-  * Web pages and web applications
-  * Static versus dynamic websites
-  * Frontend versus backend
-  * Request-response lifecycle
+- **3. Installing Bootstrap**
+  - CDN installation
+    - CSS CDN
+    - JS CDN
+    - Bundle CDN
+    - Popper
+  - Local installation
+    - Download files
+    - npm
+    - Yarn
+    - pnpm
+    - Bun
+  - Package managers
+    - `npm install bootstrap`
+    - `npm install bootstrap@5`
+    - `npm install bootstrap-icons`
+    - `npm install @popperjs/core`
+  - Build tools
+    - Webpack
+    - Vite
+    - Parcel
+    - Rollup
+    - esbuild
+  - Sass installation
+  - Bootstrap source files
+  - Bootstrap distribution files
+  - Installation best practices
 
-* **2. HTML Foundations**
+- **4. Bootstrap Setup**
+  - HTML template
+  - Viewport meta tag
+  - CSS link
+  - JS bundle
+  - Popper
+  - Bundle vs separate files
+  - Module scripts
+  - Importing Bootstrap
+    - `import 'bootstrap'`
+    - `import 'bootstrap/dist/css/bootstrap.min.css'`
+    - `import 'bootstrap/dist/js/bootstrap.bundle.min.js'`
+  - Bootstrap with React
+  - Bootstrap with Vue
+  - Bootstrap with Angular
+  - Bootstrap with Next.js
+  - Bootstrap with Laravel
+  - Setup best practices
 
-  * HTML document structure
-  * Semantic HTML
+- **5. Bootstrap Structure**
+  - Bootstrap directory
+  - `dist/`
+  - `js/`
+  - `css/`
+  - `scss/`
+  - `icons/`
+  - Bootstrap files
+    - `bootstrap.css`
+    - `bootstrap.min.css`
+    - `bootstrap-grid.css`
+    - `bootstrap-grid.min.css`
+    - `bootstrap-reboot.css`
+    - `bootstrap-reboot.min.css`
+    - `bootstrap-utilities.css`
+    - `bootstrap-utilities.min.css`
+    - `bootstrap.bundle.js`
+    - `bootstrap.bundle.min.js`
+    - `bootstrap.js`
+    - `bootstrap.min.js`
+  - Bootstrap modules
+  - Structure best practices
 
-    * `header`
-    * `nav`
-    * `main`
-    * `section`
-    * `article`
-    * `aside`
-    * `footer`
-  * Headings
-  * Paragraphs
-  * Links
-  * Images
-  * Lists
-  * Tables
-  * Forms
-  * Buttons
-  * Inputs
-  * Accessibility basics
-
-    * Labels
-    * Alternative text
-    * Semantic elements
-    * Keyboard accessibility
-
-* **3. CSS Foundations**
-
-  * CSS syntax
-  * Selectors
-  * Properties
-  * Values
-  * Cascading
-  * Specificity
-  * Inheritance
-  * Box model
-
-    * Content
-    * Padding
-    * Border
-    * Margin
-  * Colors
-  * Typography
-  * Backgrounds
-  * Borders
-  * Shadows
-
-* **4. Modern CSS Layout**
-
-  * Display types
-  * Normal document flow
-  * Positioning
-  * Flexbox
-  * CSS Grid
-  * Responsive design
-  * Media queries
-  * Relative units
-
-    * `%`
-    * `rem`
-    * `em`
-    * `vw`
-    * `vh`
-
----
-
-# II. Bootstrap Fundamentals
-
-* **5. Introduction to Bootstrap**
-
-  * What Bootstrap is
-  * CSS framework concepts
-  * Component-based development
-  * Utility-first concepts versus component frameworks
-  * Advantages of Bootstrap
-  * Limitations of Bootstrap
-  * Bootstrap versus writing CSS from scratch
-
-* **6. Setting Up Bootstrap**
-
-  * CDN usage
-  * Local installation
-  * Package management
-  * npm-based projects
-  * JavaScript dependencies
-  * Bootstrap CSS
-  * Bootstrap JavaScript
-  * Integrating Bootstrap into:
-
-    * Static HTML
-    * Modern frontend projects
-    * Server-rendered applications
-
-* **7. Bootstrap Project Structure**
-
-  * HTML structure
-  * Bootstrap CSS inclusion
-  * Bootstrap JavaScript inclusion
-  * Asset organization
-  * Custom stylesheet organization
-  * Custom JavaScript organization
-
----
-
-# III. Bootstrap Core Concepts
-
-* **8. Bootstrap Containers**
-
-  * `.container`
-  * `.container-fluid`
-  * Responsive containers
-  * Breakpoint-specific containers
-  * Container sizing
-  * Nested containers
-  * Choosing the appropriate container
-
-* **9. Bootstrap Grid System**
-
-  * Grid fundamentals
-  * Rows
-  * Columns
-  * 12-column grid
-  * Column sizing
-  * Responsive columns
-  * Column offsets
-  * Column ordering
-  * Nested grids
-  * Auto-layout columns
-
-* **10. Bootstrap Breakpoints**
-
-  * Responsive breakpoints
-  * Mobile-first design
-  * Breakpoint-specific classes
-  * Designing for:
-
-    * Small screens
-    * Medium screens
-    * Large screens
-    * Extra-large screens
-  * Responsive composition
-
-* **11. Responsive Design**
-
-  * Mobile-first principles
-  * Responsive layouts
-  * Responsive typography
-  * Responsive images
-  * Responsive navigation
-  * Responsive tables
-  * Responsive visibility
-  * Device-independent design
+- **6. First Bootstrap Page**
+  - HTML template
+  - Container
+  - Row
+  - Columns
+  - Navbar
+  - Buttons
+  - Cards
+  - First page best practices
 
 ---
 
-# IV. Bootstrap Typography and Content
+# II. Grid System
 
-* **12. Typography**
+- **7. Grid Fundamentals**
+  - Grid system
+  - Flexbox-based grid
+  - 12-column grid
+  - Breakpoints
+  - Containers
+  - Rows
+  - Columns
+  - Gutters
+  - Grid best practices
 
-  * Headings
-  * Display headings
-  * Paragraphs
-  * Lead text
-  * Inline text
-  * Text alignment
-  * Text transformation
-  * Font weight
-  * Font style
-  * Text wrapping
-  * Text truncation
+- **8. Containers**
+  - `.container`
+  - `.container-fluid`
+  - `.container-{breakpoint}`
+  - `.container-sm`
+  - `.container-md`
+  - `.container-lg`
+  - `.container-xl`
+  - `.container-xxl`
+  - Container padding
+  - Container nesting
+  - Container best practices
 
-* **13. Text Utilities**
+- **9. Rows**
+  - `.row`
+  - Row columns
+  - `.row-cols-*`
+  - Row gutters
+  - `.g-*`
+  - `.gx-*`
+  - `.gy-*`
+  - `.g-0`
+  - Row best practices
 
-  * Font sizes
-  * Font weights
-  * Line heights
-  * Text colors
-  * Text opacity
-  * Text decoration
-  * Text wrapping
-  * Word breaking
+- **10. Columns**
+  - Column classes
+  - `.col`
+  - `.col-{number}`
+  - `.col-{breakpoint}-{number}`
+  - `.col-auto`
+  - `.col-{breakpoint}-auto`
+  - Column sizing
+  - Column ordering
+    - `.order-*`
+    - `.order-{breakpoint}-*`
+  - Column offsetting
+    - `.offset-*`
+    - `.offset-{breakpoint}-*`
+  - Column alignment
+  - Column best practices
 
-* **14. Images**
+- **11. Breakpoints**
+  - Breakpoints
+    - `xs` (no breakpoint)
+    - `sm` (576px)
+    - `md` (768px)
+    - `lg` (992px)
+    - `xl` (1200px)
+    - `xxl` (1400px)
+  - Breakpoint usage
+  - Breakpoint customization
+  - Breakpoint best practices
 
-  * Responsive images
-  * Image thumbnails
-  * Rounded images
-  * Circular images
-  * Image alignment
-  * Object fitting
-  * Image sizing
+- **12. Gutters**
+  - Gutters
+  - Horizontal gutters
+  - Vertical gutters
+  - Gutter classes
+    - `.g-*`
+    - `.gx-*`
+    - `.gy-*`
+    - `.g-0`
+  - Gutter sizes
+    - `0`
+    - `1`
+    - `2`
+    - `3`
+    - `4`
+    - `5`
+  - Gutter customization
+  - Gutter best practices
 
-* **15. Tables**
+- **13. Grid Alignment**
+  - Vertical alignment
+    - `.align-items-start`
+    - `.align-items-center`
+    - `.align-items-end`
+    - `.align-items-baseline`
+    - `.align-items-stretch`
+  - Horizontal alignment
+    - `.justify-content-start`
+    - `.justify-content-center`
+    - `.justify-content-end`
+    - `.justify-content-around`
+    - `.justify-content-between`
+    - `.justify-content-evenly`
+  - Self alignment
+    - `.align-self-start`
+    - `.align-self-center`
+    - `.align-self-end`
+    - `.align-self-baseline`
+    - `.align-self-stretch`
+  - Grid alignment best practices
 
-  * Basic Bootstrap tables
-  * Striped tables
-  * Hover states
-  * Bordered tables
-  * Borderless tables
-  * Small tables
-  * Responsive tables
-  * Contextual table styling
+- **14. Grid Nesting**
+  - Nested rows
+  - Nested columns
+  - Nesting best practices
 
----
-
-# V. Bootstrap Utility System
-
-* **16. Utility Classes**
-
-  * What utility classes are
-  * Utility composition
-  * Utility classes versus custom CSS
-  * Utility API concepts
-
-* **17. Spacing Utilities**
-
-  * Margin
-  * Padding
-  * Horizontal spacing
-  * Vertical spacing
-  * Responsive spacing
-  * Auto margins
-
-* **18. Display Utilities**
-
-  * `display`
-  * Block
-  * Inline
-  * Inline-block
-  * Flex
-  * Grid
-  * None
-  * Responsive display switching
-
-* **19. Flexbox Utilities**
-
-  * Flex direction
-  * Flex wrapping
-  * Justification
-  * Alignment
-  * Flex growth
-  * Flex shrink
-  * Ordering
-  * Gap
-
-* **20. Position Utilities**
-
-  * Relative positioning
-  * Absolute positioning
-  * Fixed positioning
-  * Sticky positioning
-  * Top
-  * Bottom
-  * Start
-  * End
-  * Translate utilities
-
-* **21. Sizing Utilities**
-
-  * Width
-  * Height
-  * Maximum width
-  * Maximum height
-  * Viewport sizing
-  * Percentage-based dimensions
-
-* **22. Color Utilities**
-
-  * Text colors
-  * Background colors
-  * Borders
-  * Opacity
-  * Contextual colors
-  * Theme colors
-
-* **23. Border Utilities**
-
-  * Borders
-  * Border width
-  * Border color
-  * Border radius
-  * Rounded corners
-  * Border removal
+- **15. Grid Patterns**
+  - Equal-width columns
+  - Setting one column width
+  - Variable-width content
+  - Responsive columns
+  - Stacked-to-horizontal
+  - Mixed mobile and desktop
+  - Grid pattern best practices
 
 ---
 
-# VI. Bootstrap Components
+# III. Layout
 
-* **24. Buttons**
+- **16. Layout Fundamentals**
+  - Layout
+  - Containers
+  - Grid
+  - Flexbox utilities
+  - Spacing utilities
+  - Layout best practices
 
-  * Basic buttons
-  * Button variants
-  * Outline buttons
-  * Button sizes
-  * Disabled buttons
-  * Button groups
-  * Button toolbar
-  * Link-style buttons
+- **17. Flexbox Utilities**
+  - `d-flex`
+  - `d-inline-flex`
+  - Flex direction
+    - `.flex-row`
+    - `.flex-column`
+    - `.flex-row-reverse`
+    - `.flex-column-reverse`
+  - Justify content
+    - `.justify-content-start`
+    - `.justify-content-end`
+    - `.justify-content-center`
+    - `.justify-content-between`
+    - `.justify-content-around`
+    - `.justify-content-evenly`
+  - Align items
+    - `.align-items-start`
+    - `.align-items-end`
+    - `.align-items-center`
+    - `.align-items-baseline`
+    - `.align-items-stretch`
+  - Align self
+    - `.align-self-start`
+    - `.align-self-end`
+    - `.align-self-center`
+    - `.align-self-baseline`
+    - `.align-self-stretch`
+  - Flex fill
+    - `.flex-fill`
+  - Flex grow and shrink
+    - `.flex-grow-0`
+    - `.flex-grow-1`
+    - `.flex-shrink-0`
+    - `.flex-shrink-1`
+  - Flex wrap
+    - `.flex-wrap`
+    - `.flex-nowrap`
+    - `.flex-wrap-reverse`
+  - Order
+    - `.order-*`
+  - Flexbox utility best practices
 
-* **25. Alerts**
+- **18. Spacing Utilities**
+  - Margin
+    - `.m-*`
+    - `.mt-*`
+    - `.mb-*`
+    - `.ms-*`
+    - `.me-*`
+    - `.mx-*`
+    - `.my-*`
+  - Padding
+    - `.p-*`
+    - `.pt-*`
+    - `.pb-*`
+    - `.ps-*`
+    - `.pe-*`
+    - `.px-*`
+    - `.py-*`
+  - Spacing scale
+    - `0`
+    - `1`
+    - `2`
+    - `3`
+    - `4`
+    - `5`
+    - `auto`
+  - Responsive spacing
+  - Spacing best practices
 
-  * Basic alerts
-  * Contextual alerts
-  * Dismissible alerts
-  * Alert content
-  * Alert links
+- **19. Display Utilities**
+  - `.d-*`
+  - `.d-none`
+  - `.d-inline`
+  - `.d-inline-block`
+  - `.d-block`
+  - `.d-grid`
+  - `.d-table`
+  - `.d-table-row`
+  - `.d-table-cell`
+  - `.d-flex`
+  - `.d-inline-flex`
+  - Responsive display
+  - Print display
+  - Display best practices
 
-* **26. Badges**
+- **20. Position Utilities**
+  - `.position-static`
+  - `.position-relative`
+  - `.position-absolute`
+  - `.position-fixed`
+  - `.position-sticky`
+  - `.top-*`
+  - `.bottom-*`
+  - `.start-*`
+  - `.end-*`
+  - `.translate-middle`
+  - Position best practices
 
-  * Basic badges
-  * Contextual badges
-  * Pill badges
-  * Badge positioning
+- **21. Sizing Utilities**
+  - Width
+    - `.w-25`
+    - `.w-50`
+    - `.w-75`
+    - `.w-100`
+    - `.w-auto`
+  - Height
+    - `.h-25`
+    - `.h-50`
+    - `.h-75`
+    - `.h-100`
+    - `.h-auto`
+  - Max width
+    - `.mw-100`
+  - Max height
+    - `.mh-100`
+  - Viewport sizing
+    - `.vw-100`
+    - `.vh-100`
+    - `.min-vw-100`
+    - `.min-vh-100`
+  - Sizing best practices
 
-* **27. Cards**
+- **22. Visibility Utilities**
+  - `.visible`
+  - `.invisible`
+  - `.visually-hidden`
+  - `.visually-hidden-focusable`
+  - Visibility best practices
 
-  * Card structure
-  * Card headers
-  * Card bodies
-  * Card footers
-  * Card images
-  * Card titles
-  * Card links
-  * Card groups
-  * Card layouts
+- **23. Overflow Utilities**
+  - `.overflow-auto`
+  - `.overflow-hidden`
+  - `.overflow-visible`
+  - `.overflow-scroll`
+  - `.overflow-x-*`
+  - `.overflow-y-*`
+  - Overflow best practices
 
-* **28. List Groups**
-
-  * Basic list groups
-  * Active items
-  * Disabled items
-  * Links
-  * Buttons
-  * Contextual list groups
-  * Numbered list groups
-
-* **29. Breadcrumbs**
-
-  * Breadcrumb structure
-  * Navigation hierarchy
-  * Custom separators
-  * Accessibility considerations
-
-* **30. Pagination**
-
-  * Basic pagination
-  * Active pages
-  * Disabled pages
-  * Pagination sizing
-  * Responsive pagination
-
----
-
-# VII. Bootstrap Navigation
-
-* **31. Navbar**
-
-  * Basic navbar
-  * Navbar branding
-  * Navigation links
-  * Navbar forms
-  * Navbar buttons
-  * Responsive navbar
-  * Navbar toggler
-  * Collapsible navigation
-  * Color schemes
-
-* **32. Nav Components**
-
-  * Basic nav
-  * Tabs
-  * Pills
-  * Vertical navigation
-  * Responsive navigation
-
-* **33. Dropdowns**
-
-  * Dropdown buttons
-  * Dropdown menus
-  * Dropdown items
-  * Dropdown alignment
-  * Dropdown headers
-  * Dropdown dividers
-  * Nested behavior considerations
-
----
-
-# VIII. Bootstrap Forms
-
-* **34. Form Fundamentals**
-
-  * Form structure
-  * Labels
-  * Inputs
-  * Textareas
-  * Select elements
-  * Checkboxes
-  * Radio buttons
-  * File inputs
-  * Range inputs
-
-* **35. Form Styling**
-
-  * Form controls
-  * Input groups
-  * Floating labels
-  * Form sizing
-  * Disabled controls
-  * Read-only controls
-
-* **36. Form Layout**
-
-  * Vertical forms
-  * Horizontal forms
-  * Grid-based forms
-  * Multi-column forms
-  * Responsive forms
-
-* **37. Validation**
-
-  * Browser validation
-  * Bootstrap validation states
-  * Valid inputs
-  * Invalid inputs
-  * Validation messages
-  * Custom validation
-  * Client-side validation concepts
-
-* **38. Advanced Form UX**
-
-  * Input groups
-  * Search interfaces
-  * Password inputs
-  * Date inputs
-  * Form feedback
-  * Progressive disclosure
-
----
-
-# IX. Bootstrap Interactive Components
-
-* **39. Modal**
-
-  * Modal structure
-  * Modal header
-  * Modal body
-  * Modal footer
-  * Modal sizing
-  * Vertically centered modals
-  * Scrollable modals
-  * Dynamic modal content
-
-* **40. Collapse**
-
-  * Expand/collapse
-  * Accordion
-  * Multiple collapsible sections
-  * Responsive content
-
-* **41. Accordion**
-
-  * Accordion structure
-  * Flush accordions
-  * Multiple sections
-  * Active-state behavior
-
-* **42. Carousel**
-
-  * Carousel basics
-  * Slides
-  * Controls
-  * Indicators
-  * Captions
-  * Auto cycling
-  * Responsive carousel layouts
-
-* **43. Offcanvas**
-
-  * Side panels
-  * Navigation drawers
-  * Responsive offcanvas
-  * Placement
-  * Backdrop behavior
-
-* **44. Tooltips**
-
-  * Tooltip initialization
-  * Positioning
-  * Content
-  * Dynamic tooltips
-
-* **45. Popovers**
-
-  * Popover initialization
-  * Placement
-  * Trigger behavior
-  * Dynamic content
-
-* **46. Toasts**
-
-  * Toast notifications
-  * Auto-hide
-  * Positioning
-  * Stacking
-  * Notification UX
-
-* **47. Scrollspy**
-
-  * Section tracking
-  * Navigation synchronization
-  * Long-page navigation
+- **24. Z-Index Utilities**
+  - `.z-*`
+  - Z-index scale
+  - Z-index best practices
 
 ---
 
-# X. Bootstrap Icons and Visual Assets
+# IV. Content
 
-* **48. Icon Integration**
+- **25. Reboot**
+  - Reboot
+  - CSS reset
+  - Base styles
+  - Typography defaults
+  - Reboot best practices
 
-  * Icon libraries
-  * SVG icons
-  * Icon sizing
-  * Icon alignment
-  * Icon accessibility
+- **26. Typography**
+  - Headings
+    - `<h1>` to `<h6>`
+    - `.h1` to `.h6`
+  - Display headings
+    - `.display-1` to `.display-6`
+  - Lead paragraph
+    - `.lead`
+  - Inline text elements
+    - `<mark>`
+    - `<small>`
+    - `<del>`
+    - `<s>`
+    - `<ins>`
+    - `<u>`
+    - `<strong>`
+    - `<em>`
+  - Text utilities
+    - `.text-start`
+    - `.text-center`
+    - `.text-end`
+    - `.text-nowrap`
+    - `.text-wrap`
+    - `.text-break`
+    - `.text-lowercase`
+    - `.text-uppercase`
+    - `.text-capitalize`
+  - Font size
+    - `.fs-1` to `.fs-6`
+  - Font weight
+    - `.fw-light`
+    - `.fw-lighter`
+    - `.fw-normal`
+    - `.fw-bold`
+    - `.fw-bolder`
+  - Font style
+    - `.fst-italic`
+    - `.fst-normal`
+  - Line height
+    - `.lh-1`
+    - `.lh-sm`
+    - `.lh-base`
+    - `.lh-lg`
+  - Text decoration
+    - `.text-decoration-underline`
+    - `.text-decoration-line-through`
+    - `.text-decoration-none`
+  - Text color
+    - `.text-primary`
+    - `.text-secondary`
+    - `.text-success`
+    - `.text-danger`
+    - `.text-warning`
+    - `.text-info`
+    - `.text-light`
+    - `.text-dark`
+    - `.text-body`
+    - `.text-muted`
+    - `.text-white`
+    - `.text-black-50`
+    - `.text-white-50`
+  - Text opacity
+    - `.text-opacity-*`
+  - Typography best practices
 
-* **49. Icon Usage**
+- **27. Images**
+  - Responsive images
+    - `.img-fluid`
+  - Image thumbnails
+    - `.img-thumbnail`
+  - Image alignment
+    - `.float-start`
+    - `.float-end`
+    - `.mx-auto`
+    - `.d-block`
+  - Image shapes
+    - `.rounded`
+    - `.rounded-circle`
+    - `.rounded-pill`
+    - `.rounded-0` to `.rounded-5`
+  - Image best practices
 
-  * Navigation icons
-  * Button icons
-  * Status icons
-  * Action icons
-  * Decorative icons
+- **28. Figures**
+  - `.figure`
+  - `.figure-img`
+  - `.figure-caption`
+  - `.figure-caption`
+  - Figure best practices
 
-* **50. Visual Hierarchy**
-
-  * Spacing
-  * Typography
-  * Color contrast
-  * Component emphasis
-  * Information hierarchy
-
----
-
-# XI. Bootstrap Customization
-
-* **51. Bootstrap Theming**
-
-  * Default Bootstrap theme
-  * Theme variables
-  * Color system
-  * Typography variables
-  * Spacing variables
-  * Border variables
-  * Component variables
-
-* **52. CSS Customization**
-
-  * Custom CSS on top of Bootstrap
-  * Overriding Bootstrap styles
-  * Specificity management
-  * Custom utility classes
-  * Avoiding unnecessary overrides
-
-* **53. Sass Customization**
-
-  * Sass fundamentals
-  * Bootstrap Sass source
-  * Variables
-  * Mixins
-  * Functions
-  * Partial files
-  * Import architecture
-  * Recompiling Bootstrap
-
-* **54. Custom Design Systems**
-
-  * Custom color palette
-  * Custom typography
-  * Custom spacing scale
-  * Custom component styles
-  * Brand consistency
-  * Reusable design tokens
-
----
-
-# XII. Advanced Responsive Design
-
-* **55. Mobile-First Architecture**
-
-  * Base mobile layout
-  * Progressive enhancement
-  * Breakpoint overrides
-  * Responsive component composition
-
-* **56. Responsive Components**
-
-  * Responsive navbars
-  * Responsive cards
-  * Responsive grids
-  * Responsive forms
-  * Responsive tables
-  * Responsive modals
-
-* **57. Responsive Patterns**
-
-  * Stack-to-row layouts
-  * Hide/show content
-  * Responsive ordering
-  * Responsive alignment
-  * Adaptive navigation
-  * Responsive dashboards
-
----
-
-# XIII. Bootstrap Layout Mastery
-
-* **58. Advanced Grid Techniques**
-
-  * Complex column structures
-  * Nested rows
-  * Variable column widths
-  * Responsive offsets
-  * Responsive ordering
-  * Equal-height layouts
-
-* **59. Flexbox-Based Layouts**
-
-  * Centering
-  * Vertical alignment
-  * Horizontal distribution
-  * Full-height layouts
-  * Sticky footers
-  * Navigation alignment
-
-* **60. Dashboard Layouts**
-
-  * Sidebar
-  * Top navigation
-  * Main content
-  * Cards
-  * Statistics panels
-  * Responsive collapse behavior
-
-* **61. Landing Page Layouts**
-
-  * Hero sections
-  * Feature sections
-  * Testimonials
-  * Pricing sections
-  * Calls to action
-  * Footers
+- **29. Tables**
+  - `.table`
+  - Table variants
+    - `.table-primary`
+    - `.table-secondary`
+    - `.table-success`
+    - `.table-danger`
+    - `.table-warning`
+    - `.table-info`
+    - `.table-light`
+    - `.table-dark`
+  - Table modifiers
+    - `.table-striped`
+    - `.table-striped-columns`
+    - `.table-hover`
+    - `.table-active`
+    - `.table-bordered`
+    - `.table-borderless`
+    - `.table-sm`
+  - Table grouping
+    - `.table-group-divider`
+  - Responsive tables
+    - `.table-responsive`
+    - `.table-responsive-{breakpoint}`
+  - Table caption
+    - `.caption-top`
+  - Table best practices
 
 ---
 
-# XIV. Accessibility with Bootstrap
+# V. Components
 
-* **62. Accessibility Fundamentals**
+- **30. Accordion**
+  - `.accordion`
+  - `.accordion-item`
+  - `.accordion-header`
+  - `.accordion-button`
+  - `.accordion-collapse`
+  - `.accordion-body`
+  - Accordion best practices
 
-  * Semantic HTML
-  * Keyboard navigation
-  * Focus management
-  * Screen readers
-  * Color contrast
-  * Accessible forms
+- **31. Alerts**
+  - `.alert`
+  - Alert variants
+    - `.alert-primary`
+    - `.alert-secondary`
+    - `.alert-success`
+    - `.alert-danger`
+    - `.alert-warning`
+    - `.alert-info`
+    - `.alert-light`
+    - `.alert-dark`
+  - Alert links
+    - `.alert-link`
+  - Alert dismissible
+    - `.alert-dismissible`
+  - Alert best practices
 
-* **63. ARIA**
+- **32. Badges**
+  - `.badge`
+  - Badge variants
+  - `.rounded-pill`
+  - Badge in buttons
+  - Badge in headings
+  - Badge best practices
 
-  * ARIA roles
-  * ARIA labels
-  * ARIA states
-  * ARIA relationships
-  * When not to use ARIA
+- **33. Breadcrumb**
+  - `.breadcrumb`
+  - `.breadcrumb-item`
+  - Breadcrumb divider
+  - Breadcrumb best practices
 
-* **64. Accessible Components**
+- **34. Buttons**
+  - `.btn`
+  - Button variants
+    - `.btn-primary`
+    - `.btn-secondary`
+    - `.btn-success`
+    - `.btn-danger`
+    - `.btn-warning`
+    - `.btn-info`
+    - `.btn-light`
+    - `.btn-dark`
+    - `.btn-link`
+  - Button outlines
+    - `.btn-outline-*`
+  - Button sizes
+    - `.btn-sm`
+    - `.btn-lg`
+  - Button states
+    - `.active`
+    - `.disabled`
+  - Button groups
+    - `.btn-group`
+    - `.btn-group-{size}`
+    - `.btn-group-vertical`
+  - Button toolbar
+    - `.btn-toolbar`
+  - Button best practices
 
-  * Navigation
-  * Modal dialogs
-  * Dropdowns
-  * Forms
-  * Alerts
-  * Tooltips
-  * Accordions
+- **35. Card**
+  - `.card`
+  - `.card-body`
+  - `.card-title`
+  - `.card-subtitle`
+  - `.card-text`
+  - `.card-link`
+  - `.card-header`
+  - `.card-footer`
+  - `.card-img-top`
+  - `.card-img-bottom`
+  - `.card-img`
+  - `.card-img-overlay`
+  - Card groups
+    - `.card-group`
+  - Card grid
+    - `.row-cols-*`
+  - Card best practices
 
-* **65. Accessibility Testing**
+- **36. Carousel**
+  - `.carousel`
+  - `.carousel-inner`
+  - `.carousel-item`
+  - `.carousel-control-prev`
+  - `.carousel-control-next`
+  - `.carousel-indicators`
+  - `.carousel-caption`
+  - `.carousel-fade`
+  - Carousel best practices
 
-  * Keyboard-only testing
-  * Screen-reader testing
-  * Contrast testing
-  * Automated accessibility testing
-  * Focus-order testing
+- **37. Collapse**
+  - `.collapse`
+  - `.collapsing`
+  - `.collapse-horizontal`
+  - Collapse best practices
+
+- **38. Dropdowns**
+  - `.dropdown`
+  - `.dropdown-toggle`
+  - `.dropdown-menu`
+  - `.dropdown-item`
+  - `.dropdown-divider`
+  - `.dropdown-header`
+  - `.dropdown-item-text`
+  - Dropdown variants
+    - `.dropup`
+    - `.dropend`
+    - `.dropstart`
+  - Dropdown alignment
+    - `.dropdown-menu-end`
+  - Dropdown best practices
+
+- **39. List Group**
+  - `.list-group`
+  - `.list-group-item`
+  - `.list-group-item-action`
+  - `.list-group-flush`
+  - `.list-group-horizontal`
+  - List group variants
+  - List group badges
+  - List group best practices
+
+- **40. Modal**
+  - `.modal`
+  - `.modal-dialog`
+  - `.modal-content`
+  - `.modal-header`
+  - `.modal-title`
+  - `.modal-body`
+  - `.modal-footer`
+  - Modal sizes
+    - `.modal-sm`
+    - `.modal-lg`
+    - `.modal-xl`
+  - Modal variants
+    - `.modal-dialog-centered`
+    - `.modal-dialog-scrollable`
+    - `.modal-fullscreen`
+  - Modal best practices
+
+- **41. Navbar**
+  - `.navbar`
+  - `.navbar-brand`
+  - `.navbar-nav`
+  - `.navbar-toggler`
+  - `.navbar-collapse`
+  - `.navbar-expand-{breakpoint}`
+  - Navbar variants
+    - `.navbar-light`
+    - `.navbar-dark`
+    - `data-bs-theme`
+  - Navbar fixed
+    - `.fixed-top`
+    - `.fixed-bottom`
+    - `.sticky-top`
+  - Navbar best practices
+
+- **42. Navs and Tabs**
+  - `.nav`
+  - `.nav-item`
+  - `.nav-link`
+  - `.nav-tabs`
+  - `.nav-pills`
+  - `.nav-fill`
+  - `.nav-justified`
+  - `.tab-content`
+  - `.tab-pane`
+  - Nav best practices
+
+- **43. Offcanvas**
+  - `.offcanvas`
+  - `.offcanvas-start`
+  - `.offcanvas-end`
+  - `.offcanvas-top`
+  - `.offcanvas-bottom`
+  - Offcanvas best practices
+
+- **44. Pagination**
+  - `.pagination`
+  - `.page-item`
+  - `.page-link`
+  - Pagination sizes
+    - `.pagination-sm`
+    - `.pagination-lg`
+  - Pagination alignment
+  - Pagination best practices
+
+- **45. Placeholders**
+  - `.placeholder`
+  - `.placeholder-glow`
+  - `.placeholder-wave`
+  - Placeholder best practices
+
+- **46. Popovers**
+  - `data-bs-toggle="popover"`
+  - Popover options
+  - Popover best practices
+
+- **47. Progress**
+  - `.progress`
+  - `.progress-bar`
+  - Progress variants
+  - Progress striped
+  - Progress animated
+  - Progress best practices
+
+- **48. Scrollspy**
+  - `data-bs-spy="scroll"`
+  - Scrollspy best practices
+
+- **49. Spinners**
+  - `.spinner-border`
+  - `.spinner-grow`
+  - Spinner sizes
+  - Spinner variants
+  - Spinner best practices
+
+- **50. Toasts**
+  - `.toast`
+  - `.toast-container`
+  - `.toast-header`
+  - `.toast-body`
+  - Toast best practices
+
+- **51. Tooltips**
+  - `data-bs-toggle="tooltip"`
+  - Tooltip options
+  - Tooltip best practices
+
+- **52. Component Patterns**
+  - Component composition
+  - Component customization
+  - Component accessibility
+  - Component best practices
 
 ---
 
-# XV. Bootstrap JavaScript
+# VI. Forms
 
-* **66. JavaScript Fundamentals Required for Bootstrap**
+- **53. Form Fundamentals**
+  - Forms
+  - Form controls
+  - Form layout
+  - Form validation
+  - Form accessibility
+  - Form best practices
 
-  * Variables
-  * Functions
-  * Objects
-  * Arrays
-  * DOM manipulation
-  * Events
-  * Event listeners
-  * Classes
+- **54. Form Controls**
+  - `.form-control`
+  - `.form-select`
+  - `.form-check`
+  - `.form-check-input`
+  - `.form-check-label`
+  - `.form-range`
+  - `.form-control-sm`
+  - `.form-control-lg`
+  - `.form-select-sm`
+  - `.form-select-lg`
+  - `.form-control-plaintext`
+  - Form control best practices
 
-* **67. Bootstrap JavaScript Architecture**
+- **55. Form Layout**
+  - Form groups
+  - `.mb-3`
+  - Grid forms
+  - Horizontal forms
+  - Inline forms
+  - Form layout best practices
 
-  * JavaScript plugins
-  * Data attributes
-  * Component initialization
-  * Component APIs
-  * Events
-  * Programmatic control
+- **56. Form Validation**
+  - Validation styles
+    - `.is-valid`
+    - `.is-invalid`
+  - Validation feedback
+    - `.valid-feedback`
+    - `.invalid-feedback`
+  - Validation tooltips
+  - Browser validation
+  - Custom validation
+  - Validation best practices
 
-* **68. Interactive Component Control**
+- **57. Input Groups**
+  - `.input-group`
+  - `.input-group-text`
+  - `.input-group-sm`
+  - `.input-group-lg`
+  - Input group best practices
 
-  * Opening modals programmatically
-  * Controlling dropdowns
-  * Controlling collapse
-  * Controlling carousels
-  * Managing toasts
-  * Managing tooltips
+- **58. Floating Labels**
+  - `.form-floating`
+  - Floating label best practices
 
----
-
-# XVI. Bootstrap with JavaScript Frameworks
-
-* **69. Bootstrap + Vanilla JavaScript**
-
-  * DOM integration
-  * Event handling
-  * Dynamic components
-  * Dynamic content
-
-* **70. Bootstrap + React**
-
-  * Bootstrap CSS with React
-  * Component architecture
-  * React-Bootstrap concepts
-  * Controlled components
-  * Form integration
-  * Modal integration
-
-* **71. Bootstrap + Vue**
-
-  * Bootstrap styling
-  * Component integration
-  * Reactive forms
-  * Modal and navigation integration
-
-* **72. Bootstrap + Angular**
-
-  * Bootstrap styling
-  * Component integration
-  * Forms
-  * Responsive layouts
-  * UI component strategies
+- **59. Form Accessibility**
+  - Labels
+  - Fieldsets
+  - Legends
+  - ARIA attributes
+  - Error messages
+  - Form accessibility best practices
 
 ---
 
-# XVII. Bootstrap Forms + Backend Integration
+# VII. Helpers and Utilities
 
-* **73. Server-Side Forms**
+- **60. Clearfix**
+  - `.clearfix`
+  - Clearfix best practices
 
-  * Form submission
-  * GET versus POST
-  * Validation
-  * Error handling
-  * Success messages
+- **61. Colored Links**
+  - `.link-primary`
+  - `.link-secondary`
+  - `.link-success`
+  - `.link-danger`
+  - `.link-warning`
+  - `.link-info`
+  - `.link-light`
+  - `.link-dark`
+  - Colored link best practices
 
-* **74. Authentication Interfaces**
+- **62. Focus Ring**
+  - `.focus-ring`
+  - Focus ring best practices
 
-  * Login forms
-  * Registration forms
-  * Password-reset forms
-  * Verification forms
-  * Profile forms
+- **63. Icon Link**
+  - `.icon-link`
+  - `.icon-link-hover`
+  - Icon link best practices
 
-* **75. CRUD Interfaces**
+- **64. Ratio**
+  - `.ratio`
+  - `.ratio-1x1`
+  - `.ratio-4x3`
+  - `.ratio-16x9`
+  - `.ratio-21x9`
+  - Ratio best practices
 
-  * Create forms
-  * Read tables
-  * Update forms
-  * Delete confirmations
-  * Modal-based editing
-  * Search
-  * Filtering
-  * Pagination
+- **65. Stacks**
+  - `.vstack`
+  - `.hstack`
+  - Stack best practices
 
----
+- **66. Stretched Link**
+  - `.stretched-link`
+  - Stretched link best practices
 
-# XVIII. Bootstrap and APIs
+- **67. Text Truncation**
+  - `.text-truncate`
+  - Text truncation best practices
 
-* **76. API Fundamentals**
+- **68. Vertical Rule**
+  - `.vr`
+  - Vertical rule best practices
 
-  * REST APIs
-  * HTTP methods
+- **69. Visually Hidden**
+  - `.visually-hidden`
+  - `.visually-hidden-focusable`
+  - Visually hidden best practices
 
-    * GET
-    * POST
-    * PUT
-    * PATCH
-    * DELETE
-  * JSON
-  * HTTP status codes
+- **70. Background Utilities**
+  - `.bg-primary`
+  - `.bg-secondary`
+  - `.bg-success`
+  - `.bg-danger`
+  - `.bg-warning`
+  - `.bg-info`
+  - `.bg-light`
+  - `.bg-dark`
+  - `.bg-body`
+  - `.bg-white`
+  - `.bg-transparent`
+  - `.bg-gradient`
+  - `.bg-opacity-*`
+  - Background best practices
 
-* **77. Fetching API Data**
+- **71. Border Utilities**
+  - `.border`
+  - `.border-0`
+  - `.border-top`
+  - `.border-end`
+  - `.border-bottom`
+  - `.border-start`
+  - Border colors
+    - `.border-primary`
+    - `.border-secondary`
+    - `.border-success`
+    - `.border-danger`
+    - `.border-warning`
+    - `.border-info`
+    - `.border-light`
+    - `.border-dark`
+    - `.border-white`
+    - `.border-black`
+  - Border width
+    - `.border-1` to `.border-5`
+  - Border radius
+    - `.rounded`
+    - `.rounded-0` to `.rounded-5`
+    - `.rounded-circle`
+    - `.rounded-pill`
+    - `.rounded-top`
+    - `.rounded-end`
+    - `.rounded-bottom`
+    - `.rounded-start`
+  - Border best practices
 
-  * Fetch API
-  * Loading states
-  * Error states
-  * Empty states
-  * Dynamic rendering
+- **72. Color Utilities**
+  - Text colors
+  - Background colors
+  - Border colors
+  - Link colors
+  - Color opacity
+  - Color best practices
 
-* **78. Dynamic Bootstrap Components**
+- **73. Opacity Utilities**
+  - `.opacity-0`
+  - `.opacity-25`
+  - `.opacity-50`
+  - `.opacity-75`
+  - `.opacity-100`
+  - Opacity best practices
 
-  * Populate tables from APIs
-  * Dynamic cards
-  * Dynamic dropdowns
-  * Dynamic modals
-  * Dynamic alerts
-  * Pagination from APIs
+- **74. Shadow Utilities**
+  - `.shadow-none`
+  - `.shadow-sm`
+  - `.shadow`
+  - `.shadow-lg`
+  - Shadow best practices
 
----
+- **75. Float Utilities**
+  - `.float-start`
+  - `.float-end`
+  - `.float-none`
+  - Responsive floats
+  - Float best practices
 
-# XIX. Bootstrap UI/UX Patterns
+- **76. Interactions**
+  - `.user-select-all`
+  - `.user-select-auto`
+  - `.user-select-none`
+  - `.pe-none`
+  - `.pe-auto`
+  - Interaction best practices
 
-* **79. Navigation Patterns**
+- **77. Object Fit**
+  - `.object-fit-contain`
+  - `.object-fit-cover`
+  - `.object-fit-fill`
+  - `.object-fit-scale`
+  - `.object-fit-none`
+  - Object fit best practices
 
-  * Corporate websites
-  * SaaS applications
-  * Admin dashboards
-  * E-commerce sites
-
-* **80. Data Display Patterns**
-
-  * Tables
-  * Cards
-  * Lists
-  * Statistics
-  * Dashboards
-
-* **81. Feedback Patterns**
-
-  * Alerts
-  * Toasts
-  * Validation feedback
-  * Loading indicators
-  * Error messages
-  * Empty states
-
-* **82. User Interaction Patterns**
-
-  * Confirmation dialogs
-  * Modal forms
-  * Dropdown actions
-  * Context menus
-  * Progressive disclosure
-
----
-
-# XX. Bootstrap Performance
-
-* **83. CSS Performance**
-
-  * Avoiding unnecessary CSS
-  * CSS bundling
-  * Minification
-  * Reducing overrides
-  * Reducing unused styles
-
-* **84. JavaScript Performance**
-
-  * Loading Bootstrap efficiently
-  * Avoiding unnecessary plugins
-  * Event management
-  * Dynamic component initialization
-
-* **85. Asset Optimization**
-
-  * Image optimization
-  * Font optimization
-  * SVG optimization
-  * Compression
-  * Caching
-
-* **86. Production Builds**
-
-  * Development builds
-  * Production builds
-  * Bundlers
-  * Minification
-  * Source maps
-
----
-
-# XXI. Bootstrap with Build Tools
-
-* **87. npm**
-
-  * Package installation
-  * Dependency management
-  * `package.json`
-  * Scripts
-  * Development dependencies
-
-* **88. Modern Build Systems**
-
-  * Module bundling
-  * Asset pipelines
-  * CSS processing
-  * JavaScript bundling
-  * Development servers
-
-* **89. Sass Workflow**
-
-  * Bootstrap Sass source
-  * Custom variables
-  * Partial compilation
-  * Production compilation
-
-* **90. Version Management**
-
-  * Bootstrap versions
-  * Dependency updates
-  * Breaking changes
-  * Migration strategies
-  * Compatibility testing
+- **78. Vertical Align**
+  - `.align-baseline`
+  - `.align-top`
+  - `.align-middle`
+  - `.align-bottom`
+  - `.align-text-bottom`
+  - `.align-text-top`
+  - Vertical align best practices
 
 ---
 
-# XXII. Bootstrap Testing
+# VIII. JavaScript Plugins
 
-* **91. Visual Testing**
+- **79. JavaScript Fundamentals**
+  - Bootstrap JavaScript
+  - Data attributes
+  - JavaScript API
+  - Plugin methods
+  - Plugin events
+  - Plugin options
+  - Plugin best practices
 
-  * Responsive testing
-  * Cross-browser testing
-  * Component consistency
-  * Layout regression testing
+- **80. Plugin Installation**
+  - Bundle
+  - Individual plugins
+  - ESM imports
+  - CommonJS imports
+  - UMD builds
+  - Plugin installation best practices
 
-* **92. Functional Testing**
+- **81. Plugin Usage**
+  - Data attributes
+    - `data-bs-toggle`
+    - `data-bs-target`
+    - `data-bs-*`
+  - JavaScript API
+    - `new bootstrap.Modal()`
+    - `bootstrap.Modal.getInstance()`
+    - `bootstrap.Modal.getOrCreateInstance()`
+  - Plugin methods
+  - Plugin events
+  - Plugin best practices
 
-  * Forms
-  * Buttons
-  * Modals
-  * Navigation
-  * Dropdowns
-  * Interactive components
+- **82. Accordion Plugin**
+  - Accordion JS
+  - Accordion options
+  - Accordion methods
+  - Accordion events
+  - Accordion best practices
 
-* **93. Accessibility Testing**
+- **83. Alert Plugin**
+  - Alert JS
+  - Alert methods
+  - Alert events
+  - Alert best practices
 
-  * Keyboard navigation
-  * Screen readers
-  * Focus handling
-  * Contrast validation
+- **84. Carousel Plugin**
+  - Carousel JS
+  - Carousel options
+  - Carousel methods
+  - Carousel events
+  - Carousel best practices
 
-* **94. Browser Testing**
+- **85. Collapse Plugin**
+  - Collapse JS
+  - Collapse options
+  - Collapse methods
+  - Collapse events
+  - Collapse best practices
 
-  * Chrome
-  * Firefox
-  * Safari
-  * Edge
-  * Mobile browsers
+- **86. Dropdown Plugin**
+  - Dropdown JS
+  - Dropdown options
+  - Dropdown methods
+  - Dropdown events
+  - Dropdown best practices
 
----
+- **87. Modal Plugin**
+  - Modal JS
+  - Modal options
+  - Modal methods
+  - Modal events
+  - Modal best practices
 
-# XXIII. Bootstrap Architecture and Maintainability
+- **88. Offcanvas Plugin**
+  - Offcanvas JS
+  - Offcanvas options
+  - Offcanvas methods
+  - Offcanvas events
+  - Offcanvas best practices
 
-* **95. Component Organization**
+- **89. Popover Plugin**
+  - Popover JS
+  - Popover options
+  - Popover methods
+  - Popover events
+  - Popover best practices
 
-  * Reusable sections
-  * Reusable components
-  * Page templates
-  * Layout templates
+- **90. Scrollspy Plugin**
+  - Scrollspy JS
+  - Scrollspy options
+  - Scrollspy methods
+  - Scrollspy events
+  - Scrollspy best practices
 
-* **96. CSS Architecture**
+- **91. Tab Plugin**
+  - Tab JS
+  - Tab methods
+  - Tab events
+  - Tab best practices
 
-  * Bootstrap utilities
-  * Custom component classes
-  * Design tokens
-  * Naming conventions
-  * Avoiding specificity conflicts
+- **92. Toast Plugin**
+  - Toast JS
+  - Toast options
+  - Toast methods
+  - Toast events
+  - Toast best practices
 
-* **97. Maintainable Bootstrap Projects**
+- **93. Tooltip Plugin**
+  - Tooltip JS
+  - Tooltip options
+  - Tooltip methods
+  - Tooltip events
+  - Tooltip best practices
 
-  * Separation of concerns
-  * Consistent spacing
-  * Consistent naming
-  * Reusable components
-  * Minimal custom overrides
-
-* **98. Design System Architecture**
-
-  * Tokens
-  * Components
-  * Patterns
-  * Templates
-  * Documentation
-  * Governance
-
----
-
-# XXIV. Bootstrap Advanced Customization
-
-* **99. Custom Utilities**
-
-  * Creating utility classes
-  * Utility configuration
-  * Responsive utilities
-  * Custom spacing utilities
-  * Custom positioning utilities
-
-* **100. Custom Components**
-
-  * Component composition
-  * Bootstrap primitives
-  * Custom cards
-  * Custom navigation
-  * Custom forms
-  * Custom alerts
-
-* **101. Theme Systems**
-
-  * Light themes
-  * Dark themes
-  * Brand themes
-  * CSS variables
-  * Dynamic themes
-
-* **102. Design Tokens**
-
-  * Color tokens
-  * Spacing tokens
-  * Typography tokens
-  * Border tokens
-  * Shadow tokens
-  * Responsive tokens
-
----
-
-# XXV. Bootstrap Security Considerations
-
-* **103. Form Security**
-
-  * Input validation
-  * Server-side validation
-  * Output encoding
-  * CSRF considerations
-
-* **104. Dynamic Content**
-
-  * Safe DOM manipulation
-  * Avoiding unsafe HTML injection
-  * Sanitization concepts
-  * User-generated content
-
-* **105. Authentication UI**
-
-  * Secure password forms
-  * Error-message design
-  * Session-related interfaces
-  * Logout flows
+- **94. Plugin Events**
+  - Show events
+  - Shown events
+  - Hide events
+  - Hidden events
+  - Plugin event best practices
 
 ---
 
-# XXVI. Professional Bootstrap Development
+# IX. Customization and Theming
 
-* **106. Code Quality**
+- **95. Customization Fundamentals**
+  - Customization
+  - CSS variables
+  - Sass variables
+  - Sass maps
+  - Sass functions
+  - Sass mixins
+  - Customization best practices
 
-  * Consistent markup
-  * Semantic structure
-  * Reusable utilities
-  * Avoiding excessive nesting
-  * Avoiding conflicting classes
+- **96. CSS Variables**
+  - Bootstrap CSS variables
+  - `--bs-*`
+  - Color variables
+  - Spacing variables
+  - Typography variables
+  - Border variables
+  - CSS variable best practices
 
-* **107. Team Development**
+- **97. Sass Variables**
+  - Sass variables
+  - `$primary`
+  - `$secondary`
+  - `$success`
+  - `$danger`
+  - `$warning`
+  - `$info`
+  - `$light`
+  - `$dark`
+  - `$body-bg`
+  - `$body-color`
+  - `$font-family-base`
+  - `$font-size-base`
+  - `$line-height-base`
+  - `$border-radius`
+  - `$spacer`
+  - Sass variable best practices
 
-  * Naming conventions
-  * Component guidelines
-  * Git workflows
-  * Code review
-  * Design review
+- **98. Sass Maps**
+  - Sass maps
+  - `$theme-colors`
+  - `$spacers`
+  - `$grid-breakpoints`
+  - `$container-max-widths`
+  - `$font-sizes`
+  - Sass map best practices
 
-* **108. Documentation**
+- **99. Sass Functions**
+  - `map-get()`
+  - `map-merge()`
+  - `map-remove()`
+  - `color-contrast()`
+  - `tint-color()`
+  - `shade-color()`
+  - Sass function best practices
 
-  * Component documentation
-  * Design-system documentation
-  * Usage examples
-  * Accessibility requirements
-  * Responsive behavior documentation
+- **100. Sass Mixins**
+  - `media-breakpoint-up()`
+  - `media-breakpoint-down()`
+  - `media-breakpoint-between()`
+  - `make-container()`
+  - `make-row()`
+  - `make-col()`
+  - `button-variant()`
+  - `button-outline-variant()`
+  - Sass mixin best practices
+
+- **101. Customization Workflow**
+  - Customization workflow
+  - Override variables
+  - Override maps
+  - Import Bootstrap
+  - Build CSS
+  - Customization best practices
+
+- **102. Color Modes**
+  - Color modes
+  - `data-bs-theme`
+  - Dark mode
+  - Light mode
+  - Custom color modes
+  - Color mode best practices
+
+- **103. Theming**
+  - Theming
+  - Theme colors
+  - Theme variants
+  - Theme customization
+  - Theming best practices
+
+- **104. Custom Components**
+  - Custom components
+  - Component patterns
+  - Component documentation
+  - Custom component best practices
 
 ---
 
-# XXVII. Bootstrap Projects by Difficulty
+# X. Accessibility
+
+- **105. Accessibility Fundamentals**
+  - Accessibility
+  - A11y
+  - WCAG
+  - POUR principles
+  - Accessibility best practices
+
+- **106. Semantic HTML**
+  - Semantic HTML
+  - Semantic elements
+  - Semantic best practices
+
+- **107. ARIA**
+  - ARIA
+  - ARIA roles
+  - ARIA states
+  - ARIA properties
+  - ARIA best practices
+  - ARIA pitfalls
+
+- **108. Keyboard Accessibility**
+  - Keyboard accessibility
+  - Focus management
+  - Tab order
+  - Focus indicators
+  - Keyboard accessibility best practices
+
+- **109. Screen Readers**
+  - Screen readers
+  - Screen reader testing
+  - Screen reader best practices
+
+- **110. Accessible Components**
+  - Accessible accordion
+  - Accessible alerts
+  - Accessible buttons
+  - Accessible cards
+  - Accessible carousel
+  - Accessible dropdowns
+  - Accessible forms
+  - Accessible modal
+  - Accessible navbar
+  - Accessible pagination
+  - Accessible tabs
+  - Accessible tooltips
+  - Accessible component best practices
+
+- **111. Color and Contrast**
+  - Color contrast
+  - WCAG contrast requirements
+  - Color blindness
+  - Color and contrast best practices
+
+- **112. Accessibility Testing**
+  - Accessibility testing
+  - Automated testing
+  - Manual testing
+  - Lighthouse
+  - axe
+  - WAVE
+  - Accessibility testing best practices
+
+---
+
+# XI. Performance
+
+- **113. Performance Fundamentals**
+  - Performance
+  - Load performance
+  - Rendering performance
+  - Performance metrics
+  - Core Web Vitals
+  - Performance best practices
+
+- **114. Bundle Optimization**
+  - Bundle size
+  - Tree shaking
+  - Minification
+  - Compression
+  - Bundle optimization best practices
+
+- **115. Selective Imports**
+  - Selective imports
+  - Import only needed components
+  - Import only needed utilities
+  - Selective import best practices
+
+- **116. Custom Builds**
+  - Custom builds
+  - Sass customization
+  - Utility API
+  - Custom build best practices
+
+- **117. CDN Optimization**
+  - CDN
+  - Caching
+  - Compression
+  - HTTP/2
+  - CDN best practices
+
+- **118. Lazy Loading**
+  - Lazy loading
+  - Images
+  - Iframes
+  - Lazy loading best practices
+
+- **119. Critical CSS**
+  - Critical CSS
+  - Inline critical CSS
+  - Deferred CSS
+  - Critical CSS best practices
+
+- **120. Profiling**
+  - Chrome DevTools
+  - Lighthouse
+  - WebPageTest
+  - Profiling best practices
+
+---
+
+# XII. Bootstrap Ecosystem
+
+- **121. Bootstrap Icons**
+  - Bootstrap Icons
+  - Installation
+  - Usage
+  - Icon names
+  - Icon sizes
+  - Icon colors
+  - Bootstrap Icons best practices
+
+- **122. Bootstrap Themes**
+  - Bootstrap themes
+  - Theme marketplaces
+  - Theme customization
+  - Theme best practices
+
+- **123. Bootstrap Examples**
+  - Bootstrap examples
+  - Official examples
+  - Example usage
+  - Example best practices
+
+- **124. Bootstrap Templates**
+  - Bootstrap templates
+  - Template marketplaces
+  - Template customization
+  - Template best practices
+
+- **125. Bootstrap and React**
+  - Bootstrap with React
+  - React-Bootstrap
+  - Reactstrap
+  - Bootstrap components in React
+  - Bootstrap and React best practices
+
+- **126. Bootstrap and Vue**
+  - Bootstrap with Vue
+  - BootstrapVue
+  - BootstrapVueNext
+  - Bootstrap and Vue best practices- **127. Bootstrap and Angular**
+  - Bootstrap with Angular
+  - ng-bootstrap
+  - Bootstrap and Angular best practices
+
+- **128. Bootstrap and Laravel**
+  - Bootstrap with Laravel
+  - Laravel UI
+  - Laravel Breeze
+  - Laravel Jetstream
+  - Bootstrap and Laravel best practices
+
+- **129. Bootstrap and Django**
+  - Bootstrap with Django
+  - django-bootstrap5
+  - Bootstrap and Django best practices
+
+- **130. Bootstrap and Next.js**
+  - Bootstrap with Next.js
+  - Bootstrap and Next.js best practices
+
+---
+
+# XIII. Bootstrap Projects by Difficulty
 
 ## Beginner Projects
 
-* **109. Personal Profile Page**
+- **1. Landing Page**
+  - Grid
+  - Components
+  - Utilities
+  - Responsive design
 
-  * Navbar
-  * Hero section
-  * About section
-  * Skills cards
-  * Contact form
-  * Footer
+- **2. Portfolio Page**
+  - Navbar
+  - Cards
+  - Grid
+  - Responsive design
 
-* **110. Restaurant Website**
+- **3. Contact Form**
+  - Forms
+  - Input groups
+  - Validation
+  - Responsive design
 
-  * Responsive navbar
-  * Hero
-  * Menu cards
-  * Gallery
-  * Contact form
+- **4. Pricing Page**
+  - Cards
+  - Buttons
+  - Grid
+  - Responsive design
 
-* **111. Simple Blog**
-
-  * Post cards
-  * Categories
-  * Pagination
-  * Sidebar
+- **5. Photo Gallery**
+  - Grid
+  - Images
+  - Modal
+  - Responsive design
 
 ---
 
 ## Intermediate Projects
 
-* **112. E-Commerce Frontend**
+- **6. Admin Dashboard**
+  - Grid
+  - Cards
+  - Tables
+  - Charts
+  - Responsive design
 
-  * Product grid
-  * Filters
-  * Product cards
-  * Shopping cart
-  * Checkout form
-  * Modals
+- **7. E-Commerce Product Page**
+  - Navbar
+  - Cards
+  - Carousel
+  - Forms
+  - Responsive design
 
-* **113. Admin Dashboard**
+- **8. Blog Layout**
+  - Navbar
+  - Cards
+  - Pagination
+  - Responsive design
 
-  * Sidebar
-  * Navbar
-  * Statistics cards
-  * Tables
-  * Charts
-  * Notifications
+- **9. Documentation Site**
+  - Navbar
+  - Sidebar
+  - Tabs
+  - Responsive design
 
-* **114. Authentication System UI**
-
-  * Login
-  * Registration
-  * Password reset
-  * Profile
-  * Account settings
+- **10. Multi-Step Form**
+  - Forms
+  - Tabs
+  - Validation
+  - Responsive design
 
 ---
 
 ## Advanced Projects
 
-* **115. SaaS Dashboard**
+- **11. Custom Bootstrap Theme**
+  - Sass customization
+  - CSS variables
+  - Theming
+  - Color modes
+  - Build process
 
-  * Responsive navigation
-  * Multi-section dashboard
-  * Dynamic tables
-  * Forms
-  * Modals
-  * Toasts
-  * API integration
+- **12. Component Library**
+  - Custom components
+  - Documentation
+  - Theming
+  - Accessibility
+  - Testing
 
-* **116. Project Management System**
+- **13. E-Commerce Platform**
+  - Grid
+  - Components
+  - Forms
+  - Accessibility
+  - Performance
 
-  * Projects
-  * Tasks
-  * Users
-  * Status badges
-  * Filters
-  * Search
-  * CRUD operations
+- **14. Admin Dashboard with Charts**
+  - Grid
+  - Cards
+  - Charts
+  - Tables
+  - Responsive design
 
-* **117. Analytics Dashboard**
-
-  * KPI cards
-  * Tables
-  * Filtering
-  * Responsive charts
-  * Date controls
-  * API integration
+- **15. Bootstrap + React App**
+  - React
+  - React-Bootstrap
+  - Components
+  - State management
+  - Responsive design
 
 ---
 
 ## Expert Projects
 
-* **118. Production-Grade Design System**
+- **16. Design System**
+  - Custom components
+  - Design tokens
+  - Theming
+  - Documentation
+  - Accessibility
+  - Testing
 
-  * Custom Bootstrap theme
-  * Design tokens
-  * Reusable components
-  * Documentation
-  * Accessibility
-  * Responsive behavior
+- **17. Bootstrap + Next.js App**
+  - Next.js
+  - Bootstrap
+  - SSR
+  - Performance
+  - Accessibility
 
-* **119. Enterprise Admin Platform**
+- **18. Bootstrap + Laravel App**
+  - Laravel
+  - Bootstrap
+  - Blade
+  - Authentication
+  - CRUD operations
 
-  * Authentication
-  * Role-based UI
-  * Complex forms
-  * Data tables
-  * CRUD workflows
-  * Notifications
-  * API integration
-  * Error handling
+- **19. High-Performance Bootstrap Site**
+  - Critical CSS
+  - Selective imports
+  - Lazy loading
+  - CDN
+  - Core Web Vitals
 
-* **120. Complete SaaS Frontend**
-
-  * Landing page
-  * Authentication
-  * Dashboard
-  * User management
-  * Billing UI
-  * Settings
-  * Notifications
-  * Responsive mobile experience
-  * Accessibility
-  * Production build
-
----
-
-# XXVIII. Progressive Bootstrap Learning Levels
-
-## Level 1 — Bootstrap Beginner
-
-* Learn:
-
-  * Containers
-  * Rows
-  * Columns
-  * Typography
-  * Buttons
-  * Colors
-  * Spacing
-* Build:
-
-  * Simple landing pages
-
-## Level 2 — Bootstrap Layout Developer
-
-* Learn:
-
-  * Grid
-  * Flexbox utilities
-  * Responsive design
-  * Cards
-  * Navigation
-  * Tables
-* Build:
-
-  * Responsive multi-page websites
-
-## Level 3 — Bootstrap UI Developer
-
-* Learn:
-
-  * Forms
-  * Modals
-  * Dropdowns
-  * Accordions
-  * Carousel
-  * Toasts
-  * Offcanvas
-* Build:
-
-  * Interactive websites
-
-## Level 4 — Bootstrap Customization Specialist
-
-* Learn:
-
-  * CSS customization
-  * Sass
-  * Variables
-  * Utility customization
-  * Themes
-  * Design tokens
-* Build:
-
-  * Custom branded interfaces
-
-## Level 5 — Bootstrap Application Developer
-
-* Learn:
-
-  * JavaScript
-  * APIs
-  * Dynamic components
-  * CRUD interfaces
-  * Authentication UI
-  * Form validation
-* Build:
-
-  * Complete web applications
-
-## Level 6 — Bootstrap Professional
-
-* Learn:
-
-  * Accessibility
-  * Performance
-  * Testing
-  * Build systems
-  * Maintainability
-  * Component architecture
-* Build:
-
-  * Production-ready applications
-
-## Level 7 — Bootstrap Expert
-
-* Learn:
-
-  * Design systems
-  * Advanced customization
-  * Enterprise UI architecture
-  * Frontend integration
-  * Scalable component systems
-* Build:
-
-  * Enterprise-grade UI platforms
+- **20. Production Bootstrap Platform**
+  - Custom theme
+  - Component library
+  - Accessibility
+  - Performance
+  - Testing
+  - Documentation
+  - Deployment
 
 ---
 
-# XXIX. Final Bootstrap Competency Map
+# XIV. Progressive Bootstrap Learning Sequence
 
-* **Web Foundations**
+## Level 1 — Bootstrap Fundamentals
 
-  * HTML
-  * CSS
-  * JavaScript
-  * Responsive design
+- Master:
+  - Installation
+  - Setup
+  - Structure
+  - First page
+  - Containers
+  - Grid
 
-* **Bootstrap Core**
+## Level 2 — Grid System
 
-  * Containers
-  * Grid
-  * Breakpoints
-  * Utilities
+- Master:
+  - Grid fundamentals
+  - Containers
+  - Rows
+  - Columns
+  - Breakpoints
+  - Gutters
+  - Grid alignment
+  - Grid nesting
+  - Grid patterns
 
-* **Bootstrap Components**
+## Level 3 — Layout
 
-  * Buttons
-  * Cards
-  * Alerts
-  * Navbar
-  * Dropdowns
-  * Forms
-  * Tables
+- Master:
+  - Layout fundamentals
+  - Flexbox utilities
+  - Spacing utilities
+  - Display utilities
+  - Position utilities
+  - Sizing utilities
+  - Visibility utilities
+  - Overflow utilities
+  - Z-index utilities
 
-* **Interactive Bootstrap**
+## Level 4 — Content
 
-  * Modal
-  * Collapse
-  * Accordion
-  * Carousel
-  * Offcanvas
-  * Toast
-  * Tooltip
-  * Popover
+- Master:
+  - Reboot
+  - Typography
+  - Images
+  - Figures
+  - Tables
 
-* **Customization**
+## Level 5 — Components
 
-  * CSS overrides
-  * Sass
-  * Variables
-  * Utilities
-  * Themes
-  * Design tokens
+- Master:
+  - Accordion
+  - Alerts
+  - Badges
+  - Breadcrumb
+  - Buttons
+  - Card
+  - Carousel
+  - Collapse
+  - Dropdowns
+  - List group
+  - Modal
+  - Navbar
+  - Navs and tabs
+  - Offcanvas
+  - Pagination
+  - Placeholders
+  - Popovers
+  - Progress
+  - Scrollspy
+  - Spinners
+  - Toasts
+  - Tooltips
 
-* **Responsive Development**
+## Level 6 — Forms
 
-  * Mobile-first
-  * Adaptive layouts
-  * Responsive components
-  * Dashboard layouts
+- Master:
+  - Form fundamentals
+  - Form controls
+  - Form layout
+  - Form validation
+  - Input groups
+  - Floating labels
+  - Form accessibility
 
-* **JavaScript Integration**
+## Level 7 — Helpers and Utilities
 
-  * DOM
-  * Events
-  * Bootstrap APIs
-  * Dynamic components
+- Master:
+  - Clearfix
+  - Colored links
+  - Focus ring
+  - Icon link
+  - Ratio
+  - Stacks
+  - Stretched link
+  - Text truncation
+  - Vertical rule
+  - Visually hidden
+  - Background utilities
+  - Border utilities
+  - Color utilities
+  - Opacity utilities
+  - Shadow utilities
+  - Float utilities
+  - Interactions
+  - Object fit
+  - Vertical align
 
-* **Application Development**
+## Level 8 — JavaScript Plugins
 
-  * Forms
-  * APIs
-  * Authentication
-  * CRUD
-  * Dynamic interfaces
+- Master:
+  - JavaScript fundamentals
+  - Plugin installation
+  - Plugin usage
+  - Accordion plugin
+  - Alert plugin
+  - Carousel plugin
+  - Collapse plugin
+  - Dropdown plugin
+  - Modal plugin
+  - Offcanvas plugin
+  - Popover plugin
+  - Scrollspy plugin
+  - Tab plugin
+  - Toast plugin
+  - Tooltip plugin
+  - Plugin events
 
-* **Professional Engineering**
+## Level 9 — Customization and Theming
 
-  * Accessibility
-  * Performance
-  * Testing
-  * Build systems
-  * Maintainability
+- Master:
+  - Customization fundamentals
+  - CSS variables
+  - Sass variables
+  - Sass maps
+  - Sass functions
+  - Sass mixins
+  - Customization workflow
+  - Color modes
+  - Theming
+  - Custom components
 
-* **Expert Mastery**
+## Level 10 — Accessibility
 
-  * Design systems
-  * Enterprise UI architecture
-  * Custom themes
-  * Scalable component libraries
-  * Production-grade applications
+- Master:
+  - Accessibility fundamentals
+  - Semantic HTML
+  - ARIA
+  - Keyboard accessibility
+  - Screen readers
+  - Accessible components
+  - Color and contrast
+  - Accessibility testing
+
+## Level 11 — Performance
+
+- Master:
+  - Performance fundamentals
+  - Bundle optimization
+  - Selective imports
+  - Custom builds
+  - CDN optimization
+  - Lazy loading
+  - Critical CSS
+  - Profiling
+
+## Level 12 — Ecosystem
+
+- Master:
+  - Bootstrap Icons
+  - Bootstrap themes
+  - Bootstrap examples
+  - Bootstrap templates
+  - Bootstrap and React
+  - Bootstrap and Vue
+  - Bootstrap and Angular
+  - Bootstrap and Laravel
+  - Bootstrap and Django
+  - Bootstrap and Next.js
+
+## Level 13 — Production Engineering
+
+- Master:
+  - Design systems
+  - Component libraries
+  - Theming
+  - Accessibility
+  - Performance
+  - Testing
+  - Documentation
+  - Deployment
+  - Production best practices
 
 ---
 
-## Recommended Learning Sequence
+# XV. Final Bootstrap Competency Map
 
-**HTML → CSS → Flexbox/Grid → Responsive Design → Bootstrap Setup → Containers → Grid → Utilities → Typography → Components → Forms → Navbar → Interactive Components → JavaScript → Bootstrap Customization → Sass → APIs → CRUD Interfaces → Accessibility → Performance → Testing → Design Systems → Production Architecture**
+- **Foundations**
 
-The key distinction is that **Bootstrap mastery is not the same as memorizing Bootstrap classes**. The progression should be:
+  - Bootstrap history
+  - Prerequisites
+  - Installation
+  - Setup
+  - Structure
+  - First page
 
-**Understand CSS → understand responsive layout → learn Bootstrap primitives → compose components → customize Bootstrap → integrate JavaScript → build applications → engineer maintainable production interfaces.**
+- **Grid System**
+
+  - Grid fundamentals
+  - Containers
+  - Rows
+  - Columns
+  - Breakpoints
+  - Gutters
+  - Grid alignment
+  - Grid nesting
+  - Grid patterns
+
+- **Layout**
+
+  - Flexbox utilities
+  - Spacing utilities
+  - Display utilities
+  - Position utilities
+  - Sizing utilities
+  - Visibility utilities
+  - Overflow utilities
+  - Z-index utilities
+
+- **Content**
+
+  - Reboot
+  - Typography
+  - Images
+  - Figures
+  - Tables
+
+- **Components**
+
+  - Accordion
+  - Alerts
+  - Badges
+  - Breadcrumb
+  - Buttons
+  - Card
+  - Carousel
+  - Collapse
+  - Dropdowns
+  - List group
+  - Modal
+  - Navbar
+  - Navs and tabs
+  - Offcanvas
+  - Pagination
+  - Placeholders
+  - Popovers
+  - Progress
+  - Scrollspy
+  - Spinners
+  - Toasts
+  - Tooltips
+
+- **Forms**
+
+  - Form fundamentals
+  - Form controls
+  - Form layout
+  - Form validation
+  - Input groups
+  - Floating labels
+  - Form accessibility
+
+- **Helpers and Utilities**
+
+  - Clearfix
+  - Colored links
+  - Focus ring
+  - Icon link
+  - Ratio
+  - Stacks
+  - Stretched link
+  - Text truncation
+  - Vertical rule
+  - Visually hidden
+  - Background utilities
+  - Border utilities
+  - Color utilities
+  - Opacity utilities
+  - Shadow utilities
+  - Float utilities
+  - Interactions
+  - Object fit
+  - Vertical align
+
+- **JavaScript Plugins**
+
+  - JavaScript fundamentals
+  - Plugin installation
+  - Plugin usage
+  - Accordion plugin
+  - Alert plugin
+  - Carousel plugin
+  - Collapse plugin
+  - Dropdown plugin
+  - Modal plugin
+  - Offcanvas plugin
+  - Popover plugin
+  - Scrollspy plugin
+  - Tab plugin
+  - Toast plugin
+  - Tooltip plugin
+  - Plugin events
+
+- **Customization and Theming**
+
+  - Customization fundamentals
+  - CSS variables
+  - Sass variables
+  - Sass maps
+  - Sass functions
+  - Sass mixins
+  - Customization workflow
+  - Color modes
+  - Theming
+  - Custom components
+
+- **Accessibility**
+
+  - Accessibility fundamentals
+  - Semantic HTML
+  - ARIA
+  - Keyboard accessibility
+  - Screen readers
+  - Accessible components
+  - Color and contrast
+  - Accessibility testing
+
+- **Performance**
+
+  - Performance fundamentals
+  - Bundle optimization
+  - Selective imports
+  - Custom builds
+  - CDN optimization
+  - Lazy loading
+  - Critical CSS
+  - Profiling
+
+- **Ecosystem**
+
+  - Bootstrap Icons
+  - Bootstrap themes
+  - Bootstrap examples
+  - Bootstrap templates
+  - Bootstrap and React
+  - Bootstrap and Vue
+  - Bootstrap and Angular
+  - Bootstrap and Laravel
+  - Bootstrap and Django
+  - Bootstrap and Next.js
+
+- **Production**
+
+  - Design systems
+  - Component libraries
+  - Theming
+  - Accessibility
+  - Performance
+  - Testing
+  - Documentation
+  - Deployment
+
+---
+
+## Recommended Overall Progression
+
+**Bootstrap Fundamentals → Grid System → Layout → Content → Components → Forms → Helpers and Utilities → JavaScript Plugins → Customization and Theming → Accessibility → Performance → Ecosystem → Production Engineering**

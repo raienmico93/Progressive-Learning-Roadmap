@@ -226,7 +226,8 @@ export const oidcConfig = {
   automaticSilentRenew: true,
   loadUserInfo: true,
 };
-
+```
+```jsx
 // index.jsx
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -239,7 +240,8 @@ createRoot(document.getElementById('root')).render(
     <App />
   </AuthProvider>
 );
-
+```
+```jsx
 // App.jsx
 import React from 'react';
 import { useAuth } from 'react-oidc-context';
