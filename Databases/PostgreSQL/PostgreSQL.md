@@ -1,1881 +1,2038 @@
 # PostgreSQL Comprehensive, Structured, and Progressive Learning Roadmap
 
-## From PostgreSQL Foundations to Advanced Production Mastery
+## From Relational Database Foundations to Advanced Query Optimization, Replication, Extensions, and Production PostgreSQL Engineering
 
-This version is specifically tailored to **PostgreSQL**, including PostgreSQL-specific SQL, `psql`, data types, indexing, MVCC, transactions, PL/pgSQL, JSONB, extensions, partitioning, replication concepts, administration, and performance engineering.
+PostgreSQL is best learned as more than "an open-source database." The progression should cover **database fundamentals → relational theory → installation → data types → DDL → DML → queries → joins → subqueries → aggregation → window functions → CTEs → JSON/JSONB → full-text search → indexes → transactions → MVCC → stored procedures → triggers → views → users → security → backup → replication → performance → scaling → extensions → cloud → production engineering**.
 
 ---
 
 # I. PostgreSQL Foundations
 
-* **1. Relational Database Fundamentals**
+- **1. What PostgreSQL Is**
+  - PostgreSQL
+  - Postgres
+  - PostgreSQL history
+  - POSTGRES
+  - Michael Stonebraker
+  - Berkeley
+  - PostgreSQL 6.0
+  - PostgreSQL 7.x
+  - PostgreSQL 8.x
+  - PostgreSQL 9.x
+  - PostgreSQL 10
+  - PostgreSQL 11
+  - PostgreSQL 12
+  - PostgreSQL 13
+  - PostgreSQL 14
+  - PostgreSQL 15
+  - PostgreSQL 16
+  - PostgreSQL 17
+  - PostgreSQL 18 (current)
+  - PostgreSQL philosophy
+    - Relational database
+    - Object-relational
+    - ACID compliant
+    - Extensible
+    - Standards-compliant
+    - Open source
+    - Community-driven
+  - PostgreSQL vs MySQL
+  - PostgreSQL vs MariaDB
+  - PostgreSQL vs SQLite
+  - PostgreSQL vs SQL Server
+  - PostgreSQL vs Oracle
+  - PostgreSQL use cases
+    - Web applications
+    - E-commerce
+    - SaaS
+    - Analytics
+    - Data warehousing
+    - Geospatial
+    - Time-series
+    - Full-text search
+    - JSON documents
+    - Microservices
+  - PostgreSQL in modern software
+  - PostgreSQL ecosystem
+  - PostgreSQL forks
+    - Greenplum
+    - TimescaleDB
+    - Citus
+    - YugabyteDB
+    - CockroachDB
+    - Amazon Aurora PostgreSQL
+    - Amazon RDS PostgreSQL
+    - Azure Database for PostgreSQL
+    - Google Cloud SQL PostgreSQL
 
-  * Database
-  * Schema
-  * Table
-  * Row
-  * Column
-  * Primary key
-  * Foreign key
-  * Constraint
-  * Index
-  * View
-  * Sequence
-  * Function
-  * Trigger
-  * Transaction
+- **2. Prerequisites**
+  - Computer fundamentals
+  - Command line
+  - Programming
+  - SQL basics
+  - Data types
+  - Database concepts
+  - Tables
+  - Rows
+  - Columns
+  - Prerequisite best practices
 
-* **2. PostgreSQL Architecture**
+- **3. Database Fundamentals**
+  - Databases
+  - Database management systems
+  - Relational databases
+  - NoSQL databases
+  - Tables
+  - Rows
+  - Columns
+  - Schemas
+  - Catalogs
+  - Primary keys
+  - Foreign keys
+  - Indexes
+  - Transactions
+  - ACID
+  - Database best practices
 
-  * PostgreSQL server
-  * Client-server model
-  * Database cluster
-  * Database
-  * Schema
-  * Relation
-  * Tablespace
-  * PostgreSQL processes
-  * Shared memory
-  * Write-Ahead Log (WAL)
-  * Background processes
-  * MVCC
-  * Planner and executor
+- **4. Relational Theory**
+  - Relational model
+  - Relations
+  - Tuples
+  - Attributes
+  - Domains
+  - Keys
+  - Referential integrity
+  - Entity integrity
+  - Normalization
+  - Normal forms
+    - 1NF
+    - 2NF
+    - 3NF
+    - BCNF
+    - 4NF
+    - 5NF
+    - 6NF
+  - Denormalization
+  - Relational theory best practices
 
-* **3. PostgreSQL Installation and Setup**
+- **5. Installing PostgreSQL**
+  - Installation
+    - Windows
+    - macOS
+    - Linux
+  - Package managers
+    - apt
+    - yum
+    - dnf
+    - Homebrew
+    - Chocolatey
+    - Scoop
+  - PostgreSQL Installer
+  - PostgreSQL Server
+  - PostgreSQL Client
+  - pgAdmin
+  - psql
+  - Docker installation
+  - Configuration
+  - `postgresql.conf`
+  - `pg_hba.conf`
+  - `pg_ident.conf`
+  - PostgreSQL verification
+  - `psql --version`
+  - Installation best practices
 
-  * Installing PostgreSQL
+- **6. PostgreSQL Architecture**
+  - PostgreSQL architecture
+  - Process architecture
+    - Postmaster
+    - Backend processes
+    - Background processes
+    - WAL writer
+    - Checkpointer
+    - Autovacuum launcher
+    - Background writer
+    - Stats collector
+    - Logical replication launcher
+  - Memory architecture
+    - Shared memory
+    - Shared buffers
+    - WAL buffers
+    - Work memory
+    - Maintenance work memory
+  - Storage architecture
+    - Data directory
+    - Tablespaces
+    - Write-ahead log
+    - WAL
+    - Heap files
+    - Index files
+    - TOAST
+    - Free space map
+    - Visibility map
+  - MVCC
+  - Architecture best practices
 
-    * Linux
-    * Windows
-    * macOS
-  * PostgreSQL versions
-  * Initializing a cluster
-  * Starting and stopping the server
-  * PostgreSQL configuration files
+- **7. psql**
+  - psql
+  - Connection
+  - `psql -U user -d database`
+  - `psql -h host -U user -d database`
+  - psql commands
+    - `\l`
+    - `\c`
+    - `\dt`
+    - `\d`
+    - `\d+`
+    - `\dn`
+    - `\df`
+    - `\dv`
+    - `\di`
+    - `\ds`
+    - `\dp`
+    - `\du`
+    - `\dg`
+    - `\drds`
+    - `\x`
+    - `\e`
+    - `\i`
+    - `\o`
+    - `\copy`
+    - `\timing`
+    - `\watch`
+    - `\gexec`
+    - `\gset`
+    - `\gdesc`
+    - `\conninfo`
+    - `\encoding`
+    - `\q`
+  - psql variables
+  - psql scripting
+  - psql best practices
 
-    * `postgresql.conf`
-    * `pg_hba.conf`
-  * Environment variables
-  * Connecting with:
+- **8. pgAdmin**
+  - pgAdmin
+  - pgAdmin 4
+  - Connection
+  - Object browser
+  - Query tool
+  - Data output
+  - Dashboard
+  - Backup and restore
+  - pgAdmin best practices
 
-    * `psql`
-    * GUI clients
-    * Application drivers
-
----
-
-# II. `psql` and PostgreSQL Tooling
-
-* **4. Mastering `psql`**
-
-  * Connecting to PostgreSQL
-  * Database selection
-  * Executing SQL
-  * Meta-commands
-
-    * `\l`
-    * `\c`
-    * `\dt`
-    * `\d`
-    * `\dn`
-    * `\du`
-    * `\df`
-    * `\dv`
-    * `\di`
-  * Output control
-  * Expanded output
-  * Query timing
-  * Command history
-  * Variables
-  * Scripts
-
-* **5. PostgreSQL Utilities**
-
-  * `pg_dump`
-  * `pg_dumpall`
-  * `pg_restore`
-  * `createdb`
-  * `dropdb`
-  * `createuser`
-  * `dropuser`
-  * `vacuumdb`
-  * `reindexdb`
-  * `psql` scripting
-
-* **6. GUI and Development Tools**
-
-  * pgAdmin
-  * Database IDEs
-  * Query editors
-  * Schema browsers
-  * Execution-plan viewers
-  * Monitoring dashboards
-
----
-
-# III. PostgreSQL SQL Fundamentals
-
-* **7. DDL**
-
-  * `CREATE`
-  * `ALTER`
-  * `DROP`
-  * `TRUNCATE`
-  * Tables
-  * Schemas
-  * Databases
-  * Sequences
-  * Views
-  * Indexes
-
-* **8. DML**
-
-  * `INSERT`
-  * `SELECT`
-  * `UPDATE`
-  * `DELETE`
-  * `MERGE`
-  * `RETURNING`
-
-* **9. PostgreSQL Query Basics**
-
-  * `WHERE`
-  * `ORDER BY`
-  * `DISTINCT`
-  * `LIMIT`
-  * `OFFSET`
-  * `FETCH`
-  * Column aliases
-  * Table aliases
-  * Expressions
-  * Operators
-
----
-
-# IV. PostgreSQL Data Types
-
-* **10. Numeric Types**
-
-  * `smallint`
-  * `integer`
-  * `bigint`
-  * `numeric`
-  * `decimal`
-  * `real`
-  * `double precision`
-  * `serial`
-  * `bigserial`
-  * Identity columns
-
-* **11. Character Types**
-
-  * `char`
-  * `varchar`
-  * `text`
-
-* **12. Boolean**
-
-  * `boolean`
-  * TRUE/FALSE
-  * NULL interactions
-
-* **13. Date and Time**
-
-  * `date`
-  * `time`
-  * `timestamp`
-  * `timestamptz`
-  * `interval`
-  * Time zones
-  * Date arithmetic
-
-* **14. PostgreSQL-Specific Types**
-
-  * `uuid`
-  * Arrays
-  * `json`
-  * `jsonb`
-  * Range types
-  * Multirange types
-  * Enumerated types
-  * Composite types
-  * Domain types
-  * Network address types
-
-    * `inet`
-    * `cidr`
-    * `macaddr`
-  * Geometric types
-  * Full-text-search-related types
-
----
-
-# V. Constraints and Data Integrity
-
-* **15. Primary and Unique Constraints**
-
-  * `PRIMARY KEY`
-  * `UNIQUE`
-  * Composite keys
-  * Multiple unique constraints
-  * NULL behavior
-
-* **16. Foreign Keys**
-
-  * Referential integrity
-  * `REFERENCES`
-  * Cascading actions
-
-    * `ON DELETE CASCADE`
-    * `ON DELETE SET NULL`
-    * `ON DELETE RESTRICT`
-    * `ON UPDATE`
-  * Deferrable foreign keys
-
-* **17. Check and Not-Null Constraints**
-
-  * `CHECK`
-  * `NOT NULL`
-  * Column constraints
-  * Table constraints
-  * Constraint naming
-
-* **18. PostgreSQL Constraint Features**
-
-  * Deferrable constraints
-  * `DEFERRABLE`
-  * `INITIALLY DEFERRED`
-  * `INITIALLY IMMEDIATE`
-  * Exclusion constraints
-  * Constraint validation
-
----
-
-# VI. Core PostgreSQL Querying
-
-* **19. Filtering**
-
-  * Comparison operators
-  * Boolean logic
-  * `IN`
-  * `NOT IN`
-  * `BETWEEN`
-  * `LIKE`
-  * `ILIKE`
-  * Regular expressions
-
-* **20. NULL Handling**
-
-  * `IS NULL`
-  * `IS NOT NULL`
-  * Three-valued logic
-  * `COALESCE`
-  * `NULLIF`
-
-* **21. Conditional Logic**
-
-  * `CASE`
-  * Simple `CASE`
-  * Searched `CASE`
-  * Conditional expressions
-
-* **22. PostgreSQL Operators**
-
-  * Arithmetic
-  * Comparison
-  * Logical
-  * String
-  * Array operators
-  * JSON/JSONB operators
-  * Range operators
+- **9. PostgreSQL Configuration**
+  - `postgresql.conf`
+  - `pg_hba.conf`
+  - `pg_ident.conf`
+  - Configuration parameters
+    - `listen_addresses`
+    - `port`
+    - `max_connections`
+    - `shared_buffers`
+    - `work_mem`
+    - `maintenance_work_mem`
+    - `effective_cache_size`
+    - `wal_level`
+    - `max_wal_size`
+    - `min_wal_size`
+    - `checkpoint_timeout`
+    - `checkpoint_completion_target`
+    - `autovacuum`
+    - `log_statement`
+    - `log_min_duration_statement`
+    - `log_destination`
+    - `logging_collector`
+    - `log_directory`
+    - `log_filename`
+  - Configuration files
+  - Configuration reload
+  - Configuration best practices
 
 ---
 
-# VII. PostgreSQL Functions
+# II. Data Types
 
-* **23. String Functions**
+- **10. Data Type Fundamentals**
+  - Data types
+  - Type categories
+  - Type selection
+  - Data type best practices
 
-  * `length`
-  * `lower`
-  * `upper`
-  * `trim`
-  * `substring`
-  * `replace`
-  * `split_part`
-  * Concatenation
-  * Regular expressions
+- **11. Numeric Types**
+  - `SMALLINT`
+  - `INTEGER`
+  - `INT`
+  - `BIGINT`
+  - `DECIMAL`
+  - `NUMERIC`
+  - `REAL`
+  - `DOUBLE PRECISION`
+  - `SMALLSERIAL`
+  - `SERIAL`
+  - `BIGSERIAL`
+  - Numeric type best practices
 
-* **24. Numeric Functions**
+- **12. Character Types**
+  - `CHAR`
+  - `CHARACTER`
+  - `VARCHAR`
+  - `CHARACTER VARYING`
+  - `TEXT`
+  - Character type best practices
 
-  * `round`
-  * `ceil`
-  * `floor`
-  * `abs`
-  * `mod`
-  * Mathematical functions
+- **13. Date and Time Types**
+  - `DATE`
+  - `TIME`
+  - `TIME WITH TIME ZONE`
+  - `TIMETZ`
+  - `TIMESTAMP`
+  - `TIMESTAMP WITH TIME ZONE`
+  - `TIMESTAMPTZ`
+  - `INTERVAL`
+  - Date and time best practices
 
-* **25. Date/Time Functions**
+- **14. Boolean Type**
+  - `BOOLEAN`
+  - `TRUE`
+  - `FALSE`
+  - `NULL`
+  - Boolean best practices
 
-  * `now()`
-  * `current_date`
-  * `current_timestamp`
-  * `date_trunc`
-  * `date_part`
-  * `extract`
-  * Interval operations
-  * Time-zone conversion
+- **15. Binary Types**
+  - `BYTEA`
+  - Binary operations
+  - Binary best practices
 
-* **26. Conversion Functions**
+- **16. UUID Type**
+  - `UUID`
+  - UUID generation
+  - `gen_random_uuid()`
+  - `uuid-ossp`
+  - `pgcrypto`
+  - UUID best practices
 
-  * `CAST`
-  * `::` casting syntax
-  * Type conversion
-  * Formatting functions
+- **17. JSON Types**
+  - `JSON`
+  - `JSONB`
+  - JSON vs JSONB
+  - JSON operations
+  - JSON functions
+  - `json_build_object()`
+  - `jsonb_build_object()`
+  - `json_agg()`
+  - `jsonb_agg()`
+  - `json_object_agg()`
+  - `jsonb_object_agg()`
+  - `jsonb_set()`
+  - `jsonb_insert()`
+  - `jsonb_pretty()`
+  - `jsonb_path_query()`
+  - JSON best practices
 
----
+- **18. Array Types**
+  - Arrays
+  - Array creation
+  - Array operations
+  - Array functions
+    - `array_agg()`
+    - `array_append()`
+    - `array_prepend()`
+    - `array_cat()`
+    - `array_length()`
+    - `array_position()`
+    - `array_remove()`
+    - `array_replace()`
+    - `unnest()`
+  - Array best practices
 
-# VIII. Joins and Relational Querying
+- **19. Range Types**
+  - Range types
+  - `int4range`
+  - `int8range`
+  - `numrange`
+  - `tsrange`
+  - `tstzrange`
+  - `daterange`
+  - Range operations
+  - Range best practices
 
-* **27. Join Types**
+- **20. Network Address Types**
+  - `INET`
+  - `CIDR`
+  - `MACADDR`
+  - `MACADDR8`
+  - Network address best practices
 
-  * `INNER JOIN`
-  * `LEFT JOIN`
-  * `RIGHT JOIN`
-  * `FULL OUTER JOIN`
-  * `CROSS JOIN`
-  * `LATERAL JOIN`
+- **21. Bit String Types**
+  - `BIT`
+  - `BIT VARYING`
+  - Bit string operations
+  - Bit string best practices
 
-* **28. Advanced Join Patterns**
+- **22. Text Search Types**
+  - `TSVECTOR`
+  - `TSQUERY`
+  - Text search operations
+  - Text search best practices
 
-  * Self joins
-  * Multiple joins
-  * Range joins
-  * Conditional joins
-  * Semi-joins
-  * Anti-joins
-  * `EXISTS`
-  * `NOT EXISTS`
+- **23. Geometric Types**
+  - `POINT`
+  - `LINE`
+  - `LSEG`
+  - `BOX`
+  - `PATH`
+  - `POLYGON`
+  - `CIRCLE`
+  - Geometric operations
+  - Geometric best practices
 
-* **29. `LATERAL`**
+- **24. Enumerated Types**
+  - `ENUM`
+  - Enum creation
+  - Enum operations
+  - Enum best practices
 
-  * `LATERAL` fundamentals
-  * Correlated table expressions
-  * Per-row subqueries
-  * Top-N-per-group patterns
-  * JSON expansion
-  * Set-returning functions
+- **25. Composite Types**
+  - Composite types
+  - Composite creation
+  - Composite operations
+  - Composite best practices
 
----
+- **26. Domain Types**
+  - Domains
+  - Domain creation
+  - Domain constraints
+  - Domain best practices
 
-# IX. Aggregation
-
-* **30. Aggregate Functions**
-
-  * `count`
-  * `sum`
-  * `avg`
-  * `min`
-  * `max`
-  * `string_agg`
-  * `array_agg`
-  * `json_agg`
-  * `jsonb_agg`
-
-* **31. Grouping**
-
-  * `GROUP BY`
-  * Multiple grouping columns
-  * `HAVING`
-  * Conditional aggregation
-
-* **32. Advanced PostgreSQL Aggregation**
-
-  * `FILTER`
-  * `GROUPING SETS`
-  * `ROLLUP`
-  * `CUBE`
-  * Ordered aggregates
-  * Statistical aggregates
-
----
-
-# X. Subqueries and CTEs
-
-* **33. Subqueries**
-
-  * Scalar subqueries
-  * Single-row subqueries
-  * Multi-row subqueries
-  * Correlated subqueries
-
-* **34. `EXISTS`**
-
-  * Existence checks
-  * Semi-join behavior
-  * Anti-join behavior
-  * Performance considerations
-
-* **35. Common Table Expressions**
-
-  * `WITH`
-  * Multiple CTEs
-  * CTE chaining
-  * Readability
-  * Query decomposition
-
-* **36. Recursive CTEs**
-
-  * Recursive `WITH`
-  * Anchor query
-  * Recursive query
-  * Tree traversal
-  * Organizational hierarchies
-  * Graph-like queries
-  * Cycle handling
-
----
-
-# XI. Set Operations
-
-* **37. Combining Query Results**
-
-  * `UNION`
-  * `UNION ALL`
-  * `INTERSECT`
-  * `EXCEPT`
-
-* **38. Set-Based Problem Solving**
-
-  * Duplicate elimination
-  * Set differences
-  * Membership analysis
-  * Relational division patterns
-
----
-
-# XII. PostgreSQL Sequences and Identity Columns
-
-* **39. Sequences**
-
-  * `CREATE SEQUENCE`
-  * `nextval`
-  * `currval`
-  * `setval`
-  * Sequence ownership
-  * Sequence gaps
-
-* **40. Identity Columns**
-
-  * `GENERATED ALWAYS AS IDENTITY`
-  * `GENERATED BY DEFAULT AS IDENTITY`
-  * Identity versus `serial`
-  * Generated identifiers
+- **27. Custom Types**
+  - Custom types
+  - `CREATE TYPE`
+  - Custom type operations
+  - Custom type best practices
 
 ---
 
-# XIII. Database Design with PostgreSQL
+# III. DDL (Data Definition Language)
 
-* **41. Schema Design**
+- **28. Database Operations**
+  - `CREATE DATABASE`
+  - `DROP DATABASE`
+  - `ALTER DATABASE`
+  - `\c`
+  - `\l`
+  - Database operation best practices
 
-  * Entity identification
-  * Relationships
-  * Primary-key strategy
-  * Foreign-key strategy
-  * Naming conventions
-  * Data-type selection
+- **29. Schema Operations**
+  - Schemas
+  - `CREATE SCHEMA`
+  - `DROP SCHEMA`
+  - `ALTER SCHEMA`
+  - `search_path`
+  - Schema best practices
 
-* **42. Normalization**
+- **30. Table Operations**
+  - `CREATE TABLE`
+  - `DROP TABLE`
+  - `ALTER TABLE`
+  - `TRUNCATE TABLE`
+  - `RENAME TABLE`
+  - `\dt`
+  - `\d table_name`
+  - Table operation best practices
 
-  * 1NF
-  * 2NF
-  * 3NF
-  * BCNF
-  * Functional dependencies
-  * Normalization trade-offs
+- **31. Column Operations**
+  - `ADD COLUMN`
+  - `DROP COLUMN`
+  - `ALTER COLUMN`
+  - `RENAME COLUMN`
+  - Column operation best practices
 
-* **43. PostgreSQL Design Decisions**
+- **32. Constraints**
+  - `PRIMARY KEY`
+  - `FOREIGN KEY`
+  - `UNIQUE`
+  - `NOT NULL`
+  - `CHECK`
+  - `EXCLUDE`
+  - `DEFAULT`
+  - `GENERATED`
+  - Constraint best practices
 
-  * `integer` vs `bigint`
-  * `text` vs `varchar`
-  * UUID vs numeric identifiers
-  * `timestamp` vs `timestamptz`
-  * `jsonb` vs relational columns
-  * Enum vs lookup table
-  * Soft deletes vs hard deletes
+- **33. Indexes**
+  - Indexes
+  - `CREATE INDEX`
+  - `DROP INDEX`
+  - `CREATE UNIQUE INDEX`
+  - `REINDEX`
+  - Index types
+    - B-tree
+    - Hash
+    - GiST
+    - SP-GiST
+    - GIN
+    - BRIN
+  - Index best practices
 
----
+- **34. Views**
+  - `CREATE VIEW`
+  - `DROP VIEW`
+  - `ALTER VIEW`
+  - `CREATE MATERIALIZED VIEW`
+  - `REFRESH MATERIALIZED VIEW`
+  - `\dv`
+  - `\dm`
+  - View best practices
 
-# XIV. Views and Materialized Views
+- **35. Sequences**
+  - Sequences
+  - `CREATE SEQUENCE`
+  - `DROP SEQUENCE`
+  - `ALTER SEQUENCE`
+  - `nextval()`
+  - `currval()`
+  - `setval()`
+  - Sequence best practices
 
-* **44. Views**
+- **36. Tablespaces**
+  - Tablespaces
+  - `CREATE TABLESPACE`
+  - `DROP TABLESPACE`
+  - Tablespace best practices
 
-  * `CREATE VIEW`
-  * `CREATE OR REPLACE VIEW`
-  * View dependencies
-  * Updatable views
-  * Security-oriented views
+- **37. Inheritance**
+  - Table inheritance
+  - `INHERITS`
+  - Inheritance best practices
 
-* **45. Materialized Views**
-
-  * `CREATE MATERIALIZED VIEW`
-  * Refreshing views
-  * `REFRESH MATERIALIZED VIEW`
-  * `CONCURRENTLY`
-  * Indexing materialized views
-  * Reporting workloads
-
----
-
-# XV. PostgreSQL Indexing
-
-* **46. B-tree Indexes**
-
-  * Default indexing strategy
-  * Equality searches
-  * Range searches
-  * Ordering
-  * Composite B-tree indexes
-
-* **47. Hash Indexes**
-
-  * Equality lookups
-  * Appropriate use cases
-
-* **48. PostgreSQL Specialized Indexes**
-
-  * GIN
-
-    * Arrays
-    * `jsonb`
-    * Full-text search
-  * GiST
-
-    * Geometric data
-    * Range types
-    * Specialized search
-  * SP-GiST
-  * BRIN
-
-    * Large ordered tables
-    * Time-series workloads
-
-* **49. Advanced Index Design**
-
-  * Composite indexes
-  * Column order
-  * Partial indexes
-  * Expression indexes
-  * Covering indexes
-  * `INCLUDE`
-  * Unique indexes
-  * Concurrent index creation
-
----
-
-# XVI. PostgreSQL Query Planner and Optimization
-
-* **50. Query Processing**
-
-  * Parsing
-  * Rewriting
-  * Planning
-  * Execution
-
-* **51. Execution Plans**
-
-  * `EXPLAIN`
-  * `EXPLAIN ANALYZE`
-  * `BUFFERS`
-  * Cost estimates
-  * Actual execution statistics
-
-* **52. Plan Operators**
-
-  * Sequential scan
-  * Index scan
-  * Index-only scan
-  * Bitmap heap scan
-  * Bitmap index scan
-  * Sort
-  * Aggregate
-  * Hash aggregate
-  * Nested loop
-  * Hash join
-  * Merge join
-  * Materialization
-
-* **53. Query Optimization**
-
-  * Predicate selectivity
-  * Join ordering
-  * Index selection
-  * Statistics
-  * Cardinality estimates
-  * Avoiding unnecessary sorting
-  * Reducing row volume
-  * Query rewriting
-
-* **54. PostgreSQL Statistics**
-
-  * `ANALYZE`
-  * `pg_stats`
-  * Table statistics
-  * Column statistics
-  * Extended statistics
-  * Planner estimates
+- **38. Partitioning**
+  - Partitioning
+  - Partition types
+    - Range
+    - List
+    - Hash
+  - Declarative partitioning
+  - `PARTITION BY`
+  - `CREATE TABLE ... PARTITION OF`
+  - Partition pruning
+  - Partitioning best practices
 
 ---
 
-# XVII. Transactions and MVCC
+# IV. DML (Data Manipulation Language)
 
-* **55. Transactions**
+- **39. Insert**
+  - `INSERT INTO`
+  - `INSERT INTO ... VALUES`
+  - `INSERT INTO ... SELECT`
+  - `INSERT INTO ... DEFAULT VALUES`
+  - `INSERT ... ON CONFLICT`
+  - `INSERT ... RETURNING`
+  - `COPY`
+  - Insert best practices
 
-  * `BEGIN`
-  * `COMMIT`
-  * `ROLLBACK`
-  * `SAVEPOINT`
-  * `ROLLBACK TO SAVEPOINT`
-  * `RELEASE SAVEPOINT`
+- **40. Update**
+  - `UPDATE`
+  - `UPDATE ... SET`
+  - `UPDATE ... WHERE`
+  - `UPDATE ... FROM`
+  - `UPDATE ... RETURNING`
+  - Update best practices
 
-* **56. ACID**
+- **41. Delete**
+  - `DELETE FROM`
+  - `DELETE FROM ... WHERE`
+  - `DELETE FROM ... USING`
+  - `DELETE FROM ... RETURNING`
+  - `TRUNCATE TABLE`
+  - Delete best practices
 
-  * Atomicity
-  * Consistency
-  * Isolation
-  * Durability
+- **42. Merge**
+  - `MERGE`
+  - `WHEN MATCHED`
+  - `WHEN NOT MATCHED`
+  - Merge best practices
 
-* **57. PostgreSQL MVCC**
+- **43. Select**
+  - `SELECT`
+  - `SELECT *`
+  - `SELECT column`
+  - `SELECT DISTINCT`
+  - `SELECT DISTINCT ON`
+  - `SELECT ... AS`
+  - `SELECT ... INTO`
+  - Select best practices
 
-  * Tuple versions
-  * Snapshots
-  * Transaction IDs
-  * Visibility
-  * Old row versions
-  * Vacuum relationship
+- **44. Where Clause**
+  - `WHERE`
+  - Comparison operators
+  - Logical operators
+  - `BETWEEN`
+  - `IN`
+  - `LIKE`
+  - `ILIKE`
+  - `SIMILAR TO`
+  - `IS NULL`
+  - `IS NOT NULL`
+  - `IS DISTINCT FROM`
+  - `REGEXP`
+  - Where clause best practices
 
-* **58. Isolation Levels**
+- **45. Order By**
+  - `ORDER BY`
+  - `ASC`
+  - `DESC`
+  - `NULLS FIRST`
+  - `NULLS LAST`
+  - Multiple columns
+  - Order by best practices
 
-  * Read Committed
-  * Repeatable Read
-  * Serializable
-  * PostgreSQL-specific behavior
-  * Snapshot isolation concepts
+- **46. Limit**
+  - `LIMIT`
+  - `OFFSET`
+  - `FETCH FIRST`
+  - `FETCH NEXT`
+  - Pagination
+  - Limit best practices
 
----
+- **47. Group By**
+  - `GROUP BY`
+  - Aggregation
+  - `HAVING`
+  - `GROUPING SETS`
+  - `ROLLUP`
+  - `CUBE`
+  - Group by best practices
 
-# XVIII. Locking and Concurrency
+- **48. Joins**
+  - `INNER JOIN`
+  - `LEFT JOIN`
+  - `RIGHT JOIN`
+  - `FULL JOIN`
+  - `CROSS JOIN`
+  - `SELF JOIN`
+  - `NATURAL JOIN`
+  - `USING`
+  - `LATERAL`
+  - Join best practices
 
-* **59. Row-Level Locks**
+- **49. Subqueries**
+  - Subqueries
+  - Scalar subqueries
+  - Correlated subqueries
+  - `EXISTS`
+  - `NOT EXISTS`
+  - `IN`
+  - `ANY`
+  - `ALL`
+  - Subquery best practices
 
-  * `FOR UPDATE`
-  * `FOR NO KEY UPDATE`
-  * `FOR SHARE`
-  * `FOR KEY SHARE`
+- **50. Set Operations**
+  - `UNION`
+  - `UNION ALL`
+  - `INTERSECT`
+  - `INTERSECT ALL`
+  - `EXCEPT`
+  - `EXCEPT ALL`
+  - Set operation best practices
 
-* **60. Explicit Locks**
+- **51. CTEs**
+  - Common Table Expressions
+  - `WITH`
+  - Recursive CTEs
+  - `WITH RECURSIVE`
+  - `MATERIALIZED`
+  - `NOT MATERIALIZED`
+  - CTE best practices
 
-  * Table locks
-  * Advisory locks
-  * Lock modes
+- **52. Window Functions**
+  - Window functions
+  - `OVER`
+  - `PARTITION BY`
+  - `ORDER BY`
+  - Window frames
+    - `ROWS`
+    - `RANGE`
+    - `GROUPS`
+  - Window functions
+    - `ROW_NUMBER`
+    - `RANK`
+    - `DENSE_RANK`
+    - `PERCENT_RANK`
+    - `CUME_DIST`
+    - `NTILE`
+    - `LAG`
+    - `LEAD`
+    - `FIRST_VALUE`
+    - `LAST_VALUE`
+    - `NTH_VALUE`
+  - Window function best practices
 
-* **61. Concurrency Problems**
-
-  * Lost updates
-  * Write conflicts
-  * Serialization failures
-  * Deadlocks
-
-* **62. Concurrency Techniques**
-
-  * `SELECT ... FOR UPDATE`
-  * `SKIP LOCKED`
-  * `NOWAIT`
-  * Retry logic
-  * Short transactions
-  * Deadlock avoidance
-
----
-
-# XIX. VACUUM, AUTOVACUUM, and Storage Internals
-
-* **63. VACUUM**
-
-  * Purpose
-  * Dead tuples
-  * Free space
-  * Visibility information
-
-* **64. Autovacuum**
-
-  * Autovacuum workers
-  * Analyze activity
-  * Vacuum thresholds
-  * Tuning autovacuum
-
-* **65. Table Bloat**
-
-  * Sources of bloat
-  * Detecting bloat
-  * Managing bloat
-  * `VACUUM FULL`
-  * `REINDEX`
-
-* **66. PostgreSQL Storage Concepts**
-
-  * Heap storage
-  * Pages
-  * Tuples
-  * TOAST
-  * Visibility map
-  * Free Space Map
-
----
-
-# XX. PostgreSQL Procedural Programming
-
-* **67. PL/pgSQL**
-
-  * `CREATE FUNCTION`
-  * Variables
-  * Parameters
-  * Return values
-  * `BEGIN ... END`
-  * Conditional statements
-  * Loops
-
-* **68. PL/pgSQL Control Flow**
-
-  * `IF`
-  * `CASE`
-  * `LOOP`
-  * `WHILE`
-  * `FOR`
-  * `FOREACH`
-
-* **69. PL/pgSQL Error Handling**
-
-  * `EXCEPTION`
-  * Error conditions
-  * Error messages
-  * Custom exceptions
-  * Transaction implications
-
-* **70. Functions**
-
-  * SQL functions
-  * PL/pgSQL functions
-  * Scalar functions
-  * Set-returning functions
-  * Table functions
-  * Function volatility
-
-    * `IMMUTABLE`
-    * `STABLE`
-    * `VOLATILE`
-
----
-
-# XXI. PostgreSQL Triggers
-
-* **71. Trigger Fundamentals**
-
-  * `BEFORE`
-  * `AFTER`
-  * `INSTEAD OF`
-  * Row-level triggers
-  * Statement-level triggers
-
-* **72. Trigger Events**
-
-  * `INSERT`
-  * `UPDATE`
-  * `DELETE`
-  * `TRUNCATE`
-
-* **73. Trigger Applications**
-
-  * Audit logging
-  * Automatic timestamps
-  * Derived values
-  * Change tracking
-  * Data validation
-
-* **74. Trigger Engineering**
-
-  * Trigger ordering
-  * Recursive behavior
-  * Performance implications
-  * Avoiding hidden business logic
+- **53. Aggregate Functions**
+  - `COUNT`
+  - `SUM`
+  - `AVG`
+  - `MIN`
+  - `MAX`
+  - `STRING_AGG`
+  - `ARRAY_AGG`
+  - `JSON_AGG`
+  - `JSONB_AGG`
+  - `BOOL_AND`
+  - `BOOL_OR`
+  - `STDDEV`
+  - `VARIANCE`
+  - `PERCENTILE_CONT`
+  - `PERCENTILE_DISC`
+  - `MODE`
+  - Aggregate function best practices
 
 ---
 
-# XXII. JSON and JSONB Mastery
+# V. Advanced Queries
 
-* **75. JSON Fundamentals**
+- **54. Query Optimization**
+  - Query optimization
+  - Query execution plan
+  - `EXPLAIN`
+  - `EXPLAIN ANALYZE`
+  - `EXPLAIN (FORMAT JSON)`
+  - `EXPLAIN (ANALYZE, BUFFERS)`
+  - Query optimization best practices
 
-  * JSON documents
-  * JSON objects
-  * JSON arrays
-  * Nested structures
+- **55. Index Optimization**
+  - Index optimization
+  - Index types
+  - Index selection
+  - Composite indexes
+  - Covering indexes
+  - Partial indexes
+  - Expression indexes
+  - Index statistics
+  - Index optimization best practices
 
-* **76. JSON vs JSONB**
+- **56. Full-Text Search**
+  - Full-text search
+  - `to_tsvector`
+  - `to_tsquery`
+  - `plainto_tsquery`
+  - `phraseto_tsquery`
+  - `websearch_to_tsquery`
+  - `ts_rank`
+  - `ts_rank_cd`
+  - `ts_headline`
+  - GIN indexes
+  - GiST indexes
+  - Full-text search best practices
 
-  * Storage differences
-  * Parsing
-  * Indexing
-  * Query performance
-  * Typical use cases
+- **57. JSON Queries**
+  - JSON queries
+  - JSON operators
+    - `->`
+    - `->>`
+    - `#>`
+    - `#>>`
+    - `@>`
+    - `<@`
+    - `?`
+    - `?|`
+    - `?&`
+  - JSON functions
+    - `jsonb_set`
+    - `jsonb_insert`
+    - `jsonb_path_query`
+    - `jsonb_to_record`
+    - `jsonb_to_recordset`
+  - JSON best practices
 
-* **77. JSONB Operators**
+- **58. Regular Expressions**
+  - Regular expressions
+  - `~`
+  - `~*`
+  - `!~`
+  - `!~*`
+  - `regexp_match`
+  - `regexp_matches`
+  - `regexp_replace`
+  - `regexp_split_to_array`
+  - `regexp_split_to_table`
+  - Regular expression best practices
 
-  * `->`
-  * `->>`
-  * `#>`
-  * `#>>`
-  * `@>`
-  * `<@`
-  * `?`
-  * `?|`
-  * `?&`
-
-* **78. JSONB Functions**
-
-  * `jsonb_build_object`
-  * `jsonb_agg`
-  * `jsonb_array_elements`
-  * `jsonb_each`
-  * `jsonb_set`
-  * JSON path functionality
-
-* **79. JSONB Indexing**
-
-  * GIN
-  * Expression indexes
-  * Partial indexes
-  * Query optimization
-
----
-
-# XXIII. Arrays and Advanced Data Structures
-
-* **80. PostgreSQL Arrays**
-
-  * Creating arrays
-  * Accessing elements
-  * Array slicing
-  * Array operators
-  * Array functions
-
-* **81. Array Processing**
-
-  * `unnest`
-  * `array_agg`
-  * Searching arrays
-  * Updating arrays
-
-* **82. Range Types**
-
-  * Integer ranges
-  * Numeric ranges
-  * Date/time ranges
-  * Range operators
-  * Exclusion constraints
-
----
-
-# XXIV. Full-Text Search
-
-* **83. PostgreSQL Text Search**
-
-  * `tsvector`
-  * `tsquery`
-  * Text normalization
-  * Tokenization
-  * Dictionaries
-  * Configurations
-
-* **84. Full-Text Search Queries**
-
-  * `to_tsvector`
-  * `to_tsquery`
-  * `plainto_tsquery`
-  * `websearch_to_tsquery`
-  * Ranking
-
-* **85. Full-Text Search Optimization**
-
-  * GIN indexes
-  * Generated search columns
-  * Search ranking
-  * Search relevance
+- **59. Advanced SQL**
+  - `FILTER`
+  - `WITHIN GROUP`
+  - `DISTINCT ON`
+  - `LATERAL`
+  - `RETURNING`
+  - `ON CONFLICT`
+  - `NULLIF`
+  - `COALESCE`
+  - `GREATEST`
+  - `LEAST`
+  - Advanced SQL best practices
 
 ---
 
-# XXV. Advanced PostgreSQL Features
+# VI. Transactions
 
-* **86. Generated Columns**
+- **60. Transaction Fundamentals**
+  - Transactions
+  - ACID
+    - Atomicity
+    - Consistency
+    - Isolation
+    - Durability
+  - Transaction statements
+    - `BEGIN`
+    - `COMMIT`
+    - `ROLLBACK`
+    - `SAVEPOINT`
+    - `ROLLBACK TO SAVEPOINT`
+    - `RELEASE SAVEPOINT`
+  - Transaction best practices
 
-  * Stored generated columns
-  * Computed values
-  * Indexing generated values
+- **61. Isolation Levels**
+  - Isolation levels
+    - `READ UNCOMMITTED`
+    - `READ COMMITTED`
+    - `REPEATABLE READ`
+    - `SERIALIZABLE`
+  - Isolation level selection
+  - Isolation level best practices
 
-* **87. Domains**
+- **62. Locking**
+  - Locking
+  - Row locks
+  - Table locks
+  - Advisory locks
+  - `SELECT ... FOR UPDATE`
+  - `SELECT ... FOR SHARE`
+  - `SELECT ... FOR NO KEY UPDATE`
+  - `SELECT ... FOR KEY SHARE`
+  - `LOCK TABLE`
+  - Locking best practices
 
-  * Custom domain types
-  * Domain constraints
-  * Reusable validation
+- **63. Deadlocks**
+  - Deadlocks
+  - Deadlock detection
+  - Deadlock prevention
+  - Deadlock best practices
 
-* **88. Enumerated Types**
+- **64. MVCC**
+  - MVCC
+  - Multi-Version Concurrency Control
+  - Snapshots
+  - Transaction IDs
+  - Visibility
+  - VACUUM
+  - Autovacuum
+  - MVCC best practices
 
-  * `CREATE TYPE ... AS ENUM`
-  * Enum values
-  * Schema evolution considerations
+- **65. VACUUM**
+  - VACUUM
+  - `VACUUM`
+  - `VACUUM FULL`
+  - `VACUUM ANALYZE`
+  - Autovacuum
+  - Vacuum tuning
+  - Bloat
+  - Vacuum best practices
 
-* **89. Composite Types**
-
-  * User-defined composite records
-  * Functions returning composite types
-
-* **90. Exclusion Constraints**
-
-  * `EXCLUDE`
-  * Range conflicts
-  * Scheduling systems
-  * Spatial-style constraints
-
----
-
-# XXVI. Partitioning
-
-* **91. Partitioning Fundamentals**
-
-  * Partitioned tables
-  * Parent table
-  * Child partitions
-  * Partition key
-
-* **92. Partitioning Strategies**
-
-  * Range partitioning
-  * List partitioning
-  * Hash partitioning
-  * Multi-level partitioning
-
-* **93. Partition Management**
-
-  * Creating partitions
-  * Attaching partitions
-  * Detaching partitions
-  * Default partitions
-  * Partition maintenance
-
-* **94. Partition Performance**
-
-  * Partition pruning
-  * Partition-local indexes
-  * Large-table management
-  * Time-series workloads
-
----
-
-# XXVII. Security and Access Control
-
-* **95. PostgreSQL Roles**
-
-  * Roles
-  * Login roles
-  * Group roles
-  * Role inheritance
-  * Role attributes
-
-* **96. Authentication**
-
-  * `pg_hba.conf`
-  * Password authentication
-  * Certificate authentication
-  * Peer authentication
-  * Authentication methods
-
-* **97. Authorization**
-
-  * `GRANT`
-  * `REVOKE`
-  * Object privileges
-  * Schema privileges
-  * Default privileges
-
-* **98. Row-Level Security**
-
-  * `ENABLE ROW LEVEL SECURITY`
-  * Policies
-  * `USING`
-  * `WITH CHECK`
-  * Multi-tenant security
-
-* **99. PostgreSQL Security Engineering**
-
-  * Principle of least privilege
-  * Application roles
-  * Credential management
-  * Security auditing
-  * SQL injection prevention
+- **66. Two-Phase Commit**
+  - Two-phase commit
+  - `PREPARE TRANSACTION`
+  - `COMMIT PREPARED`
+  - `ROLLBACK PREPARED`
+  - Two-phase commit best practices
 
 ---
 
-# XXVIII. Backup and Recovery
+# VII. Stored Programs
 
-* **100. Logical Backups**
+- **67. Functions**
+  - Functions
+  - `CREATE FUNCTION`
+  - `DROP FUNCTION`
+  - `ALTER FUNCTION`
+  - Function parameters
+  - Function return types
+  - Function languages
+    - SQL
+    - PL/pgSQL
+    - PL/Python
+    - PL/Perl
+    - PL/Tcl
+    - PL/Java
+    - PL/V8
+  - Function best practices
 
-  * `pg_dump`
-  * `pg_dumpall`
-  * Plain SQL format
-  * Custom format
-  * Directory format
-  * Tar format
+- **68. Stored Procedures**
+  - Stored procedures
+  - `CREATE PROCEDURE`
+  - `DROP PROCEDURE`
+  - `CALL`
+  - Procedure parameters
+  - Procedure best practices
 
-* **101. Restoration**
+- **69. PL/pgSQL**
+  - PL/pgSQL
+  - Block structure
+  - Declarations
+  - Variables
+  - Constants
+  - Control structures
+    - `IF`
+    - `CASE`
+    - `LOOP`
+    - `WHILE`
+    - `FOR`
+    - `FOREACH`
+    - `EXIT`
+    - `CONTINUE`
+  - Cursors
+  - Exceptions
+  - `RAISE`
+  - `ASSERT`
+  - Dynamic SQL
+  - PL/pgSQL best practices
 
-  * `psql`
-  * `pg_restore`
-  * Selective restore
-  * Object restoration
-  * Data-only restore
-  * Schema-only restore
+- **70. Triggers**
+  - Triggers
+  - `CREATE TRIGGER`
+  - `DROP TRIGGER`
+  - Trigger types
+    - `BEFORE`
+    - `AFTER`
+    - `INSTEAD OF`
+  - Row-level triggers
+  - Statement-level triggers
+  - Trigger functions
+  - `NEW`
+  - `OLD`
+  - `TG_OP`
+  - `TG_TABLE_NAME`
+  - Trigger best practices
 
-* **102. Physical Backups**
+- **71. Events**
+  - Event triggers
+  - `CREATE EVENT TRIGGER`
+  - Event trigger functions
+  - Event best practices
 
-  * Base backups
-  * WAL
-  * Physical replication
-  * Point-in-time recovery
-
-* **103. Recovery Concepts**
-
-  * RPO
-  * RTO
-  * WAL archiving
-  * Recovery targets
-  * Disaster recovery
-
----
-
-# XXIX. WAL and Replication
-
-* **104. Write-Ahead Logging**
-
-  * WAL purpose
-  * WAL segments
-  * Durability
-  * Crash recovery
-  * WAL archiving
-
-* **105. Streaming Replication**
-
-  * Primary
-  * Standby
-  * WAL streaming
-  * Replication slots
-  * Replication lag
-
-* **106. Logical Replication**
-
-  * Publications
-  * Subscriptions
-  * Logical replication slots
-  * Selective table replication
-  * Cross-version migration use cases
-
-* **107. High Availability Concepts**
-
-  * Failover
-  * Promotion
-  * Read replicas
-  * Synchronous replication
-  * Asynchronous replication
-  * Split-brain considerations
-
----
-
-# XXX. PostgreSQL Monitoring and Administration
-
-* **108. System Catalogs**
-
-  * `pg_catalog`
-  * `pg_class`
-  * `pg_attribute`
-  * `pg_constraint`
-  * `pg_index`
-  * `pg_namespace`
-  * `pg_roles`
-
-* **109. Useful PostgreSQL Views**
-
-  * `pg_stat_activity`
-  * `pg_stat_database`
-  * `pg_stat_user_tables`
-  * `pg_stat_user_indexes`
-  * `pg_locks`
-
-* **110. Monitoring**
-
-  * Active queries
-  * Long-running queries
-  * Blocked queries
-  * Locks
-  * Connection usage
-  * Cache behavior
-  * Replication lag
-
-* **111. Query Monitoring**
-
-  * `pg_stat_statements`
-  * Query frequency
-  * Query execution time
-  * I/O behavior
-  * Query normalization
-  * Identifying expensive SQL
+- **72. Rules**
+  - Rules
+  - `CREATE RULE`
+  - `DROP RULE`
+  - Rule best practices
+  - Rule limitations
 
 ---
 
-# XXXI. PostgreSQL Performance Engineering
+# VIII. Users and Security
 
-* **112. Query-Level Optimization**
+- **73. Roles**
+  - Roles
+  - `CREATE ROLE`
+  - `DROP ROLE`
+  - `ALTER ROLE`
+  - Role attributes
+    - `SUPERUSER`
+    - `CREATEDB`
+    - `CREATEROLE`
+    - `LOGIN`
+    - `REPLICATION`
+    - `BYPASSRLS`
+  - Role membership
+  - Role best practices
 
-  * Read execution plans
-  * Reduce unnecessary rows
-  * Reduce unnecessary columns
-  * Improve predicates
-  * Optimize joins
-  * Optimize aggregation
+- **74. Privileges**
+  - Privileges
+  - `GRANT`
+  - `REVOKE`
+  - Privilege types
+    - `SELECT`
+    - `INSERT`
+    - `UPDATE`
+    - `DELETE`
+    - `TRUNCATE`
+    - `REFERENCES`
+    - `TRIGGER`
+    - `CREATE`
+    - `CONNECT`
+    - `TEMPORARY`
+    - `EXECUTE`
+    - `USAGE`
+  - Privilege best practices
 
-* **113. Index-Level Optimization**
+- **75. Authentication**
+  - Authentication
+  - `pg_hba.conf`
+  - Authentication methods
+    - `trust`
+    - `reject`
+    - `md5`
+    - `password`
+    - `scram-sha-256`
+    - `gss`
+    - `sspi`
+    - `ident`
+    - `peer`
+    - `ldap`
+    - `radius`
+    - `cert`
+    - `pam`
+    - `bsd`
+  - Authentication best practices
 
-  * Identify missing indexes
-  * Remove unused indexes
-  * Composite index design
-  * Partial indexes
-  * Covering indexes
-  * GIN/GiST/BRIN selection
+- **76. Row-Level Security**
+  - Row-Level Security
+  - RLS
+  - `ENABLE ROW LEVEL SECURITY`
+  - `CREATE POLICY`
+  - `USING`
+  - `WITH CHECK`
+  - RLS best practices
 
-* **114. Configuration-Level Optimization**
+- **77. Security**
+  - Security
+  - SQL injection prevention
+  - Prepared statements
+  - Parameterized queries
+  - SSL/TLS
+  - Encryption
+  - `pgcrypto`
+  - `pgcrypto` functions
+  - Security best practices
 
-  * `shared_buffers`
-  * `work_mem`
-  * `maintenance_work_mem`
-  * `effective_cache_size`
-  * WAL settings
-  * Checkpoint configuration
-  * Parallel-query settings
-
-* **115. Workload-Level Optimization**
-
-  * OLTP workloads
-  * Reporting workloads
-  * Analytical workloads
-  * Mixed workloads
-  * Connection-pool management
-
----
-
-# XXXII. PostgreSQL Extensions
-
-* **116. Extension Fundamentals**
-
-  * `CREATE EXTENSION`
-  * Extension versions
-  * Extension dependencies
-
-* **117. Important Extensions to Study**
-
-  * `pg_stat_statements`
-  * PostGIS
-  * `pg_trgm`
-  * `citext`
-  * `hstore`
-  * `uuid-ossp`
-  * Other workload-specific extensions
-
-* **118. Extension Engineering**
-
-  * Installation
-  * Configuration
-  * Permissions
-  * Version compatibility
-  * Upgrade considerations
-
----
-
-# XXXIII. PostgreSQL and Application Development
-
-* **119. Application Connectivity**
-
-  * JDBC
-  * Python
-  * Node.js
-  * Go
-  * .NET
-  * PHP
-  * Connection strings
-
-* **120. Connection Pooling**
-
-  * Pooling concepts
-  * Pool sizing
-  * Connection exhaustion
-  * Transaction pooling
-  * Session pooling
-  * PgBouncer concepts
-
-* **121. Application Transactions**
-
-  * Begin/commit/rollback
-  * Error handling
-  * Isolation
-  * Retry logic
-  * Idempotency
-
-* **122. ORM Interaction**
-
-  * Generated SQL
-  * N+1 queries
-  * Lazy loading
-  * Eager loading
-  * Raw SQL
-  * ORM transaction boundaries
+- **78. Audit**
+  - Audit
+  - Audit logging
+  - `pgaudit`
+  - Audit triggers
+  - Audit best practices
 
 ---
 
-# XXXIV. Migration and Schema Versioning
+# IX. Backup and Recovery
 
-* **123. Migration Fundamentals**
+- **79. Backup Fundamentals**
+  - Backup
+  - Backup types
+    - Logical
+    - Physical
+    - Full
+    - Incremental
+  - Backup strategies
+  - Backup best practices
 
-  * Versioned migrations
-  * Up migrations
-  * Down migrations
-  * Deployment ordering
-  * Backward-compatible schema changes
+- **80. pg_dump**
+  - `pg_dump`
+  - Dump options
+  - Dump databases
+  - Dump tables
+  - Dump schemas
+  - Dump formats
+    - Plain
+    - Custom
+    - Directory
+    - Tar
+  - Restore
+  - `pg_restore`
+  - pg_dump best practices
 
-* **124. Migration Tools**
+- **81. pg_dumpall**
+  - `pg_dumpall`
+  - Dump all databases
+  - Dump globals
+  - Restore
+  - pg_dumpall best practices
 
-  * Flyway
-  * Liquibase
-  * Alembic
-  * Application-specific migration systems
+- **82. Physical Backup**
+  - Physical backup
+  - `pg_basebackup`
+  - Low-level backup
+  - Backup best practices
 
-* **125. Production Schema Changes**
+- **83. WAL Archiving**
+  - WAL archiving
+  - `archive_mode`
+  - `archive_command`
+  - `archive_library`
+  - WAL archiving best practices
 
-  * Adding columns safely
-  * Large-table updates
-  * Index creation concurrently
-  * Lock duration
-  * Zero/minimal-downtime strategies
+- **84. Point-in-Time Recovery**
+  - Point-in-Time Recovery
+  - PITR
+  - Recovery targets
+  - `recovery_target_time`
+  - `recovery_target_xid`
+  - `recovery_target_lsn`
+  - `recovery_target_name`
+  - PITR best practices
 
----
-
-# XXXV. PostgreSQL Testing
-
-* **126. SQL Testing**
-
-  * Query correctness
-  * Boundary cases
-  * NULL cases
-  * Duplicate cases
-  * Empty results
-
-* **127. Database Testing**
-
-  * Constraints
-  * Foreign keys
-  * Functions
-  * Triggers
-  * Transactions
-  * RLS policies
-
-* **128. Performance Testing**
-
-  * `EXPLAIN ANALYZE`
-  * Benchmarking
-  * Load testing
-  * Concurrent transactions
-  * Lock contention
-
----
-
-# XXXVI. Advanced Analytics with PostgreSQL
-
-* **129. Window Functions**
-
-  * `row_number`
-  * `rank`
-  * `dense_rank`
-  * `lag`
-  * `lead`
-  * `first_value`
-  * `last_value`
-
-* **130. Window Frames**
-
-  * `ROWS`
-  * `RANGE`
-  * `GROUPS`
-  * Running totals
-  * Moving averages
-
-* **131. Analytical Patterns**
-
-  * Top-N per group
-  * Deduplication
-  * Gaps and islands
-  * Cohort analysis
-  * Retention analysis
-  * Sessionization
-  * Funnel analysis
-  * Time-series analysis
+- **85. Backup Tools**
+  - `pgBackRest`
+  - `Barman`
+  - `WAL-G`
+  - `pg_probackup`
+  - `pg_basebackup`
+  - Backup tool best practices
 
 ---
 
-# XXXVII. PostgreSQL Data Engineering
+# X. Replication
 
-* **132. Data Import**
+- **86. Replication Fundamentals**
+  - Replication
+  - Primary-replica
+  - Replication types
+    - Physical
+    - Logical
+    - Streaming
+    - Synchronous
+    - Asynchronous
+  - Replication best practices
 
-  * `COPY`
-  * `\copy`
-  * CSV
-  * Bulk loading
-  * Batch processing
+- **87. Streaming Replication**
+  - Streaming replication
+  - Primary configuration
+  - Replica configuration
+  - `primary_conninfo`
+  - `standby_mode`
+  - Replication slots
+  - Streaming replication best practices
 
-* **133. Data Export**
+- **88. Logical Replication**
+  - Logical replication
+  - Publication
+  - Subscription
+  - `CREATE PUBLICATION`
+  - `CREATE SUBSCRIPTION`
+  - Logical replication best practices
 
-  * `COPY`
-  * Query exports
-  * CSV
-  * JSON
-  * Backup formats
+- **89. Cascading Replication**
+  - Cascading replication
+  - Cascading setup
+  - Cascading best practices
 
-* **134. ETL with PostgreSQL**
+- **90. Synchronous Replication**
+  - Synchronous replication
+  - `synchronous_standby_names`
+  - `synchronous_commit`
+  - Synchronous replication best practices
 
-  * Staging tables
-  * Data cleansing
-  * Transformation
-  * Deduplication
-  * Incremental loads
-  * Upserts
+- **91. Replication Slots**
+  - Replication slots
+  - Physical slots
+  - Logical slots
+  - `pg_replication_slots`
+  - Replication slot best practices
 
-* **135. Upsert Patterns**
+- **92. Failover**
+  - Failover
+  - Manual failover
+  - Automatic failover
+  - Patroni
+  - repmgr
+  - Stolon
+  - pg_auto_failover
+  - Failover best practices
 
-  * `INSERT ... ON CONFLICT`
-  * Conflict targets
-  * `DO NOTHING`
-  * `DO UPDATE`
-  * Idempotent loading
+- **93. High Availability**
+  - High availability
+  - HA architecture
+  - Load balancing
+  - Connection pooling
+  - PgBouncer
+  - HAProxy
+  - HA best practices
 
----
-
-# XXXVIII. Data Warehousing with PostgreSQL
-
-* **136. Dimensional Modeling**
-
-  * Fact tables
-  * Dimension tables
-  * Star schema
-  * Snowflake schema
-
-* **137. Slowly Changing Dimensions**
-
-  * Type 1
-  * Type 2
-  * Historical tracking
-
-* **138. Analytical PostgreSQL**
-
-  * Large aggregations
-  * Materialized views
-  * Partitioning
-  * Parallel query
-  * Column-oriented extensions where appropriate
-
----
-
-# XXXIX. PostgreSQL Internals
-
-* **139. MVCC Internals**
-
-  * Transaction IDs
-  * Tuple visibility
-  * Snapshots
-  * Dead tuples
-  * Vacuum interaction
-
-* **140. Storage Internals**
-
-  * Heap pages
-  * Tuple headers
-  * TOAST
-  * Visibility map
-  * Free Space Map
-
-* **141. Query Planner Internals**
-
-  * Statistics
-  * Cost model
-  * Cardinality estimation
-  * Join selection
-  * Scan selection
-
-* **142. WAL Internals**
-
-  * WAL records
-  * Checkpoints
-  * Full-page writes
-  * WAL retention
-  * Crash recovery
+- **94. Replication Monitoring**
+  - Replication monitoring
+  - `pg_stat_replication`
+  - `pg_stat_wal_receiver`
+  - Replication lag
+  - Replication monitoring best practices
 
 ---
 
-# XL. Production PostgreSQL Engineering
+# XI. Performance Optimization
 
-* **143. Reliability**
+- **95. Performance Fundamentals**
+  - Performance
+  - Latency
+  - Throughput
+  - Resource utilization
+  - Performance metrics
+  - Performance best practices
 
-  * Backups
-  * Restore testing
-  * Replication
-  * Failover
-  * Disaster recovery
+- **96. Configuration Tuning**
+  - Configuration tuning
+  - `postgresql.conf`
+  - `shared_buffers`
+  - `work_mem`
+  - `maintenance_work_mem`
+  - `effective_cache_size`
+  - `wal_buffers`
+  - `max_wal_size`
+  - `min_wal_size`
+  - `checkpoint_timeout`
+  - `checkpoint_completion_target`
+  - `max_connections`
+  - `random_page_cost`
+  - `effective_io_concurrency`
+  - `autovacuum`
+  - Configuration tuning best practices
 
-* **144. Performance**
+- **97. Query Optimization**
+  - Query optimization
+  - `EXPLAIN`
+  - `EXPLAIN ANALYZE`
+  - Query planner
+  - Statistics
+  - `ANALYZE`
+  - `pg_stat_statements`
+  - Query optimization best practices
 
-  * Slow-query analysis
-  * Query regression detection
-  * Index maintenance
-  * Vacuum tuning
-  * Connection management
+- **98. Index Optimization**
+  - Index optimization
+  - Index types
+  - Index statistics
+  - Composite indexes
+  - Covering indexes
+  - Partial indexes
+  - Expression indexes
+  - Index optimization best practices
 
-* **145. Security**
+- **99. Schema Optimization**
+  - Schema optimization
+  - Data types
+  - Normalization
+  - Denormalization
+  - Partitioning
+  - Schema optimization best practices
 
-  * Role design
-  * Least privilege
-  * RLS
-  * Authentication
-  * Auditing
+- **100. Partitioning**
+  - Partitioning
+  - Partition types
+    - Range
+    - List
+    - Hash
+  - Declarative partitioning
+  - Partition pruning
+  - Partition maintenance
+  - Partitioning best practices
 
-* **146. Operations**
+- **101. Caching**
+  - Caching
+  - Shared buffers
+  - OS cache
+  - Application caching
+  - Redis
+  - Memcached
+  - Caching best practices
 
-  * Monitoring
-  * Alerting
-  * Capacity planning
-  * Upgrades
-  * Configuration management
-  * Incident response
+- **102. Connection Pooling**
+  - Connection pooling
+  - PgBouncer
+  - Pgpool-II
+  - Connection pool configuration
+  - Connection pooling best practices
 
----
+- **103. Monitoring**
+  - Monitoring
+  - `pg_stat_activity`
+  - `pg_stat_statements`
+  - `pg_stat_user_tables`
+  - `pg_stat_user_indexes`
+  - `pg_stat_database`
+  - `pg_locks`
+  - `pg_stat_replication`
+  - `pg_stat_bgwriter`
+  - Prometheus
+  - Grafana
+  - pgAdmin
+  - Monitoring best practices
 
-# XLI. Progressive PostgreSQL Learning Levels
+- **104. Profiling**
+  - Profiling
+  - `EXPLAIN ANALYZE`
+  - `auto_explain`
+  - `pg_stat_statements`
+  - `pgbadger`
+  - Profiling best practices
 
-## Level 1 — PostgreSQL Beginner
-
-* Learn:
-
-  * PostgreSQL architecture basics
-  * `psql`
-  * Databases
-  * Schemas
-  * Tables
-  * Data types
-  * Basic constraints
-* Master:
-
-  * `CREATE TABLE`
-  * `INSERT`
-  * `SELECT`
-  * `UPDATE`
-  * `DELETE`
-  * `WHERE`
-  * `ORDER BY`
-
-## Level 2 — SQL Query Developer
-
-* Learn:
-
-  * Functions
-  * NULL
-  * Aggregation
-  * Joins
-  * Subqueries
-  * CTEs
-* Master:
-
-  * Complex `SELECT`
-  * `JOIN`
-  * `GROUP BY`
-  * `HAVING`
-  * `CASE`
-  * `EXISTS`
-
-## Level 3 — PostgreSQL Developer
-
-* Learn:
-
-  * PostgreSQL-specific data types
-  * Arrays
-  * JSONB
-  * `RETURNING`
-  * `ON CONFLICT`
-  * Identity columns
-  * Views
-  * Functions
-* Build:
-
-  * Application databases
-  * CRUD APIs
-  * Transactional systems
-
-## Level 4 — Advanced SQL Developer
-
-* Learn:
-
-  * Window functions
-  * Recursive CTEs
-  * `LATERAL`
-  * Advanced aggregation
-  * JSONB querying
-  * Full-text search
-* Solve:
-
-  * Complex analytical problems
-  * Hierarchical problems
-  * Time-series problems
-  * Data transformation problems
-
-## Level 5 — PostgreSQL Performance Engineer
-
-* Learn:
-
-  * B-tree
-  * GIN
-  * GiST
-  * BRIN
-  * `EXPLAIN ANALYZE`
-  * Statistics
-  * Query planner
-  * Vacuum
-* Master:
-
-  * Query optimization
-  * Index optimization
-  * Execution-plan analysis
-  * Lock analysis
-
-## Level 6 — PostgreSQL Database Engineer
-
-* Learn:
-
-  * MVCC
-  * WAL
-  * Autovacuum
-  * Replication
-  * Partitioning
-  * Backup/recovery
-  * Security
-* Master:
-
-  * Production operations
-  * High availability
-  * Disaster recovery
-  * Database security
-
-## Level 7 — PostgreSQL Expert
-
-* Master:
-
-  * PostgreSQL internals
-  * Query planner behavior
-  * Advanced indexing
-  * Concurrency
-  * Large-scale partitioning
-  * Replication architectures
-  * Performance engineering
-  * Database migrations
-  * Extension ecosystem
-  * Production troubleshooting
-
-## Level 8 — PostgreSQL Architect
-
-* Design:
-
-  * High-scale OLTP systems
-  * Analytical systems
-  * Multi-tenant systems
-  * Highly available PostgreSQL architectures
-  * Data platforms
-* Evaluate:
-
-  * Schema architecture
-  * Consistency requirements
-  * Indexing strategies
-  * Partitioning
-  * Replication
-  * Backup/recovery
-  * Cost/performance trade-offs
+- **105. Benchmarking**
+  - Benchmarking
+  - `pgbench`
+  - `sysbench`
+  - Benchmarking best practices
 
 ---
 
-# XLII. PostgreSQL Hands-On Project Progression
+# XII. Scaling
 
-* **Beginner**
+- **106. Scaling Fundamentals**
+  - Scaling
+  - Vertical scaling
+  - Horizontal scaling
+  - Scaling best practices
 
-  * Library Management System
+- **107. Read Scaling**
+  - Read scaling
+  - Read replicas
+  - Load balancing
+  - PgBouncer
+  - HAProxy
+  - Read scaling best practices
 
-    * Books
-    * Authors
-    * Members
-    * Borrowing
-    * Basic joins
-  * Student Management System
+- **108. Write Scaling**
+  - Write scaling
+  - Partitioning
+  - Sharding
+  - Logical replication
+  - Write scaling best practices
 
-    * Students
-    * Courses
-    * Enrollments
-    * Grades
+- **109. Sharding**
+  - Sharding
+  - Sharding strategies
+  - Citus
+  - Sharding best practices
 
-* **Intermediate**
+- **110. Citus**
+  - Citus
+  - Distributed PostgreSQL
+  - Citus setup
+  - Citus best practices
 
-  * E-commerce Database
-
-    * Customers
-    * Products
-    * Orders
-    * Payments
-    * Inventory
-    * `ON CONFLICT`
-    * Transactions
-  * Task Management System
-
-    * Users
-    * Projects
-    * Tasks
-    * Status history
-    * PostgreSQL constraints
-
-* **Advanced**
-
-  * Analytics Platform
-
-    * CTEs
-    * Window functions
-    * Materialized views
-    * JSONB
-    * Reporting
-  * Reservation System
-
-    * Transactions
-    * Concurrency
-    * Locks
-    * Exclusion constraints
-    * Race-condition handling
-
-* **Expert**
-
-  * Multi-Tenant SaaS Database
-
-    * Roles
-    * Row-level security
-    * Tenant isolation
-    * Partitioning
-    * Audit logging
-  * High-Volume Event Platform
-
-    * Partitioning
-    * BRIN indexes
-    * Bulk loading
-    * WAL
-    * Replication
-    * Query optimization
+- **111. Distributed PostgreSQL**
+  - Distributed PostgreSQL
+  - CockroachDB
+  - YugabyteDB
+  - Distributed best practices
 
 ---
 
-# XLIII. PostgreSQL Mastery Checklist
+# XIII. PostgreSQL Extensions
 
-### SQL
+- **112. Extensions Fundamentals**
+  - Extensions
+  - `CREATE EXTENSION`
+  - `DROP EXTENSION`
+  - `ALTER EXTENSION`
+  - `\dx`
+  - Extensions best practices
 
-* `SELECT`
-* `INSERT`
-* `UPDATE`
-* `DELETE`
-* `MERGE`
-* `JOIN`
-* `GROUP BY`
-* `HAVING`
-* `CASE`
-* Subqueries
-* CTEs
-* Recursive CTEs
-* Window functions
-* Set operations
+- **113. Built-in Extensions**
+  - `pg_stat_statements`
+  - `pgcrypto`
+  - `uuid-ossp`
+  - `pg_trgm`
+  - `hstore`
+  - `ltree`
+  - `citext`
+  - `unaccent`
+  - `tablefunc`
+  - `btree_gin`
+  - `btree_gist`
+  - `earthdistance`
+  - `cube`
+  - `isn`
+  - `pg_prewarm`
+  - Built-in extension best practices
 
-### PostgreSQL-Specific SQL
+- **114. PostGIS**
+  - PostGIS
+  - Geospatial
+  - Geometry types
+  - Geography types
+  - Spatial functions
+  - Spatial indexes
+  - PostGIS best practices
 
-* `RETURNING`
-* `ON CONFLICT`
-* `FILTER`
-* `LATERAL`
-* `DISTINCT ON`
-* `GENERATED ... AS IDENTITY`
-* `COPY`
-* JSONB operators
-* Array operators
-* Range operators
+- **115. TimescaleDB**
+  - TimescaleDB
+  - Time-series
+  - Hypertables
+  - Continuous aggregates
+  - TimescaleDB best practices
 
-### Database Design
+- **116. pgvector**
+  - pgvector
+  - Vector similarity search
+  - Vector indexes
+  - pgvector best practices
 
-* Keys
-* Constraints
-* Normalization
-* Relationships
-* Data types
-* Schema organization
-
-### PostgreSQL Internals
-
-* MVCC
-* VACUUM
-* Autovacuum
-* WAL
-* TOAST
-* Visibility map
-* Query planner
-
-### Performance
-
-* `EXPLAIN`
-* `EXPLAIN ANALYZE`
-* Indexes
-* B-tree
-* GIN
-* GiST
-* BRIN
-* Query planning
-* Statistics
-* `pg_stat_statements`
-
-### Transactions
-
-* ACID
-* Isolation levels
-* Locks
-* Deadlocks
-* Savepoints
-* MVCC
-
-### Programmability
-
-* PL/pgSQL
-* Functions
-* Procedures
-* Triggers
-* Dynamic SQL
-
-### Advanced Data
-
-* JSONB
-* Arrays
-* Ranges
-* Full-text search
-* Composite types
-* Domains
-* Enums
-
-### Administration
-
-* Roles
-* `pg_hba.conf`
-* `GRANT`
-* `REVOKE`
-* Backup
-* Restore
-* WAL
-* Replication
-* Monitoring
-
-### Production
-
-* Partitioning
-* High availability
-* Disaster recovery
-* Connection pooling
-* Schema migrations
-* Capacity planning
-* Observability
+- **117. Other Extensions**
+  - `citus`
+  - `pg_partman`
+  - `pg_repack`
+  - `pglogical`
+  - `pg_cron`
+  - `pgaudit`
+  - `pg_stat_kcache`
+  - `hypopg`
+  - `pg_hint_plan`
+  - Extension best practices
 
 ---
 
-# XLIV. The Recommended PostgreSQL Progression
+# XIV. PostgreSQL in Production
 
-```text
-1. Relational Database Fundamentals
-        ↓
-2. PostgreSQL Installation + psql
-        ↓
-3. SQL Syntax
-        ↓
-4. Tables + Data Types + Constraints
-        ↓
-5. CRUD
-        ↓
-6. Filtering + Functions
-        ↓
-7. Joins
-        ↓
-8. Aggregation
-        ↓
-9. Subqueries
-        ↓
-10. CTEs
-        ↓
-11. PostgreSQL-Specific SQL
-        ↓
-12. Database Design + Normalization
-        ↓
-13. Views + Materialized Views
-        ↓
-14. Window Functions
-        ↓
-15. JSONB + Arrays + Ranges
-        ↓
-16. PL/pgSQL + Functions + Triggers
-        ↓
-17. Transactions + MVCC
-        ↓
-18. Locks + Concurrency
-        ↓
-19. Indexing
-        ↓
-20. EXPLAIN + Query Optimization
-        ↓
-21. VACUUM + Autovacuum
-        ↓
-22. Security + Row-Level Security
-        ↓
-23. Backup + Recovery
-        ↓
-24. WAL + Replication
-        ↓
-25. Partitioning
-        ↓
-26. Monitoring + pg_stat_statements
-        ↓
-27. Extensions + Advanced PostgreSQL
-        ↓
-28. Production Operations
-        ↓
-29. PostgreSQL Internals
-        ↓
-30. PostgreSQL Architecture + Mastery
-```
+- **118. Production Fundamentals**
+  - Production
+  - Environments
+    - Development
+    - Staging
+    - Production
+  - Production best practices
 
-### Core principle
+- **119. Deployment**
+  - Deployment
+  - Installation
+  - Configuration
+  - Automation
+  - Ansible
+  - Terraform
+  - Docker
+  - Kubernetes
+  - Deployment best practices
 
-Do not treat PostgreSQL as merely a collection of SQL commands. Progress through **four layers of competence**:
+- **120. Monitoring**
+  - Monitoring
+  - Prometheus
+  - Grafana
+  - pgAdmin
+  - Datadog
+  - New Relic
+  - Monitoring best practices
 
-**SQL syntax → relational problem solving → PostgreSQL internals → production database engineering.**
+- **121. Logging**
+  - Logging
+  - Error log
+  - Slow query log
+  - `log_statement`
+  - `log_min_duration_statement`
+  - Logging best practices
 
-That progression is what takes you from being able to *write PostgreSQL queries* to being able to *design, optimize, troubleshoot, secure, and operate PostgreSQL systems*.
+- **122. Alerting**
+  - Alerting
+  - Alert rules
+  - Alert routing
+  - Alerting best practices
+
+- **123. High Availability**
+  - High availability
+  - Patroni
+  - repmgr
+  - Stolon
+  - pg_auto_failover
+  - HA best practices
+
+- **124. Disaster Recovery**
+  - Disaster recovery
+  - DR planning
+  - DR testing
+  - DR best practices
+
+---
+
+# XV. Cloud PostgreSQL
+
+- **125. Cloud PostgreSQL Fundamentals**
+  - Cloud PostgreSQL
+  - Managed PostgreSQL
+  - Cloud providers
+    - AWS RDS
+    - AWS Aurora
+    - Azure Database
+    - Google Cloud SQL
+    - Google AlloyDB
+    - DigitalOcean
+    - Supabase
+    - Neon
+    - Timescale Cloud
+  - Cloud PostgreSQL best practices
+
+- **126. AWS RDS PostgreSQL**
+  - AWS RDS PostgreSQL
+  - RDS setup
+  - RDS configuration
+  - RDS monitoring
+  - RDS best practices
+
+- **127. Amazon Aurora PostgreSQL**
+  - Amazon Aurora PostgreSQL
+  - Aurora setup
+  - Aurora configuration
+  - Aurora monitoring
+  - Aurora best practices
+
+- **128. Azure Database for PostgreSQL**
+  - Azure Database for PostgreSQL
+  - Azure setup
+  - Azure configuration
+  - Azure monitoring
+  - Azure best practices
+
+- **129. Google Cloud SQL PostgreSQL**
+  - Google Cloud SQL PostgreSQL
+  - Cloud SQL setup
+  - Cloud SQL configuration
+  - Cloud SQL monitoring
+  - Cloud SQL best practices
+
+- **130. Google AlloyDB**
+  - Google AlloyDB
+  - AlloyDB setup
+  - AlloyDB configuration
+  - AlloyDB best practices
+
+- **131. Supabase**
+  - Supabase
+  - Supabase setup
+  - Supabase features
+  - Supabase best practices
+
+- **132. Neon**
+  - Neon
+  - Neon setup
+  - Neon features
+  - Neon best practices
+
+---
+
+# XVI. PostgreSQL Projects by Difficulty
+
+## Beginner Projects
+
+- **1. Student Database**
+  - Database creation
+  - Tables
+  - CRUD operations
+  - Queries
+
+- **2. Library Database**
+  - Tables
+  - Relationships
+  - CRUD operations
+  - Queries
+
+- **3. Blog Database**
+  - Tables
+  - Relationships
+  - CRUD operations
+  - Queries
+
+- **4. Inventory Database**
+  - Tables
+  - Relationships
+  - CRUD operations
+  - Reports
+
+- **5. Employee Database**
+  - Tables
+  - Relationships
+  - CRUD operations
+  - Reports
+
+---
+
+## Intermediate Projects
+
+- **6. E-Commerce Database**
+  - Products
+  - Categories
+  - Customers
+  - Orders
+  - Payments
+  - Reports
+
+- **7. Social Media Database**
+  - Users
+  - Posts
+  - Comments
+  - Likes
+  - Follows
+
+- **8. Analytics Database**
+  - Events
+  - Users
+  - Sessions
+  - Aggregations
+  - Reports
+
+- **9. Multi-Tenant Database**
+  - Tenant isolation
+  - Row-Level Security
+  - Shared tables
+  - Tenant schemas
+
+- **10. Data Warehouse**
+  - Star schema
+  - Snowflake schema
+  - ETL
+  - Aggregations
+  - Reports
+
+---
+
+## Advanced Projects
+
+- **11. High-Availability Cluster**
+  - Streaming replication
+  - Patroni
+  - HAProxy
+  - Failover
+
+- **12. Sharded Database**
+  - Citus
+  - Partitioning
+  - Scaling
+  - Performance
+
+- **13. Geospatial Database**
+  - PostGIS
+  - Geospatial queries
+  - Spatial indexes
+  - Maps
+
+- **14. Time-Series Database**
+  - TimescaleDB
+  - Hypertables
+  - Continuous aggregates
+  - Analytics
+
+- **15. Vector Database**
+  - pgvector
+  - Vector search
+  - Embeddings
+  - AI applications
+
+---
+
+## Expert Projects
+
+- **16. Production Database Platform**
+  - HA
+  - Monitoring
+  - Backup
+  - Security
+  - Scaling
+
+- **17. Multi-Region Deployment**
+  - Replication
+  - Failover
+  - Consistency
+  - Latency
+
+- **18. High-Traffic Application**
+  - Scaling
+  - Caching
+  - Sharding
+  - Performance
+
+- **19. Data Warehouse**
+  - Star schema
+  - ETL
+  - Aggregations
+  - Analytics
+
+- **20. Cloud PostgreSQL Platform**
+  - AWS RDS
+  - Aurora
+  - Azure Database
+  - Google Cloud SQL
+  - Supabase
+
+---
+
+# XVII. Progressive PostgreSQL Learning Sequence
+
+## Level 1 — PostgreSQL Fundamentals
+
+- Master:
+  - What PostgreSQL is
+  - Database fundamentals
+  - Relational theory
+  - Installation
+  - PostgreSQL architecture
+  - psql
+  - pgAdmin
+  - PostgreSQL configuration
+
+## Level 2 — Data Types
+
+- Master:
+  - Data type fundamentals
+  - Numeric types
+  - Character types
+  - Date and time types
+  - Boolean type
+  - Binary types
+  - UUID type
+  - JSON types
+  - Array types
+  - Range types
+  - Network address types
+  - Bit string types
+  - Text search types
+  - Geometric types
+  - Enumerated types
+  - Composite types
+  - Domain types
+  - Custom types
+
+## Level 3 — DDL
+
+- Master:
+  - Database operations
+  - Schema operations
+  - Table operations
+  - Column operations
+  - Constraints
+  - Indexes
+  - Views
+  - Sequences
+  - Tablespaces
+  - Inheritance
+  - Partitioning
+
+## Level 4 — DML
+
+- Master:
+  - Insert
+  - Update
+  - Delete
+  - Merge
+  - Select
+  - Where clause
+  - Order by
+  - Limit
+  - Group by
+  - Joins
+  - Subqueries
+  - Set operations
+  - CTEs
+  - Window functions
+  - Aggregate functions
+
+## Level 5 — Advanced Queries
+
+- Master:
+  - Query optimization
+  - Index optimization
+  - Full-text search
+  - JSON queries
+  - Regular expressions
+  - Advanced SQL
+
+## Level 6 — Transactions
+
+- Master:
+  - Transaction fundamentals
+  - Isolation levels
+  - Locking
+  - Deadlocks
+  - MVCC
+  - VACUUM
+  - Two-phase commit
+
+## Level 7 — Stored Programs
+
+- Master:
+  - Functions
+  - Stored procedures
+  - PL/pgSQL
+  - Triggers
+  - Events
+  - Rules
+
+## Level 8 — Users and Security
+
+- Master:
+  - Roles
+  - Privileges
+  - Authentication
+  - Row-Level Security
+  - Security
+  - Audit
+
+## Level 9 — Backup and Recovery
+
+- Master:
+  - Backup fundamentals
+  - pg_dump
+  - pg_dumpall
+  - Physical backup
+  - WAL archiving
+  - Point-in-Time Recovery
+  - Backup tools
+
+## Level 10 — Replication
+
+- Master:
+  - Replication fundamentals
+  - Streaming replication
+  - Logical replication
+  - Cascading replication
+  - Synchronous replication
+  - Replication slots
+  - Failover
+  - High availability
+  - Replication monitoring
+
+## Level 11 — Performance Optimization
+
+- Master:
+  - Performance fundamentals
+  - Configuration tuning
+  - Query optimization
+  - Index optimization
+  - Schema optimization
+  - Partitioning
+  - Caching
+  - Connection pooling
+  - Monitoring
+  - Profiling
+  - Benchmarking
+
+## Level 12 — Scaling
+
+- Master:
+  - Scaling fundamentals
+  - Read scaling
+  - Write scaling
+  - Sharding
+  - Citus
+  - Distributed PostgreSQL
+
+## Level 13 — Extensions
+
+- Master:
+  - Extensions fundamentals
+  - Built-in extensions
+  - PostGIS
+  - TimescaleDB
+  - pgvector
+  - Other extensions
+
+## Level 14 — Production
+
+- Master:
+  - Production fundamentals
+  - Deployment
+  - Monitoring
+  - Logging
+  - Alerting
+  - High availability
+  - Disaster recovery
+
+## Level 15 — Cloud PostgreSQL
+
+- Master:
+  - Cloud PostgreSQL fundamentals
+  - AWS RDS PostgreSQL
+  - Amazon Aurora PostgreSQL
+  - Azure Database for PostgreSQL
+  - Google Cloud SQL PostgreSQL
+  - Google AlloyDB
+  - Supabase
+  - Neon
+
+## Level 16 — Production Engineering
+
+- Master:
+  - Database architecture
+  - Security
+  - Performance
+  - Scaling
+  - Monitoring
+  - Backup
+  - Recovery
+  - Production best practices
+
+---
+
+# XVIII. Final PostgreSQL Competency Map
+
+- **Foundations**
+
+  - What PostgreSQL is
+  - Database fundamentals
+  - Relational theory
+  - Installation
+  - PostgreSQL architecture
+  - psql
+  - pgAdmin
+  - PostgreSQL configuration
+
+- **Data Types**
+
+  - Data type fundamentals
+  - Numeric types
+  - Character types
+  - Date and time types
+  - Boolean type
+  - Binary types
+  - UUID type
+  - JSON types
+  - Array types
+  - Range types
+  - Network address types
+  - Bit string types
+  - Text search types
+  - Geometric types
+  - Enumerated types
+  - Composite types
+  - Domain types
+  - Custom types
+
+- **DDL**
+
+  - Database operations
+  - Schema operations
+  - Table operations
+  - Column operations
+  - Constraints
+  - Indexes
+  - Views
+  - Sequences
+  - Tablespaces
+  - Inheritance
+  - Partitioning
+
+- **DML**
+
+  - Insert
+  - Update
+  - Delete
+  - Merge
+  - Select
+  - Where clause
+  - Order by
+  - Limit
+  - Group by
+  - Joins
+  - Subqueries
+  - Set operations
+  - CTEs
+  - Window functions
+  - Aggregate functions
+
+- **Advanced Queries**
+
+  - Query optimization
+  - Index optimization
+  - Full-text search
+  - JSON queries
+  - Regular expressions
+  - Advanced SQL
+
+- **Transactions**
+
+  - Transaction fundamentals
+  - Isolation levels
+  - Locking
+  - Deadlocks
+  - MVCC
+  - VACUUM
+  - Two-phase commit
+
+- **Stored Programs**
+
+  - Functions
+  - Stored procedures
+  - PL/pgSQL
+  - Triggers
+  - Events
+  - Rules
+
+- **Users and Security**
+
+  - Roles
+  - Privileges
+  - Authentication
+  - Row-Level Security
+  - Security
+  - Audit
+
+- **Backup and Recovery**
+
+  - Backup fundamentals
+  - pg_dump
+  - pg_dumpall
+  - Physical backup
+  - WAL archiving
+  - Point-in-Time Recovery
+  - Backup tools
+
+- **Replication**
+
+  - Replication fundamentals
+  - Streaming replication
+  - Logical replication
+  - Cascading replication
+  - Synchronous replication
+  - Replication slots
+  - Failover
+  - High availability
+  - Replication monitoring
+
+- **Performance**
+
+  - Performance fundamentals
+  - Configuration tuning
+  - Query optimization
+  - Index optimization
+  - Schema optimization
+  - Partitioning
+  - Caching
+  - Connection pooling
+  - Monitoring
+  - Profiling
+  - Benchmarking
+
+- **Scaling**
+
+  - Scaling fundamentals
+  - Read scaling
+  - Write scaling
+  - Sharding
+  - Citus
+  - Distributed PostgreSQL
+
+- **Extensions**
+
+  - Extensions fundamentals
+  - Built-in extensions
+  - PostGIS
+  - TimescaleDB
+  - pgvector
+  - Other extensions
+
+- **Production**
+
+  - Production fundamentals
+  - Deployment
+  - Monitoring
+  - Logging
+  - Alerting
+  - High availability
+  - Disaster recovery
+
+- **Cloud**
+
+  - Cloud PostgreSQL fundamentals
+  - AWS RDS PostgreSQL
+  - Amazon Aurora PostgreSQL
+  - Azure Database for PostgreSQL
+  - Google Cloud SQL PostgreSQL
+  - Google AlloyDB
+  - Supabase
+  - Neon
+
+---
+
+## Recommended Overall Progression
+
+**PostgreSQL Fundamentals → Data Types → DDL → DML → Advanced Queries → Transactions → Stored Programs → Users and Security → Backup and Recovery → Replication → Performance Optimization → Scaling → Extensions → Production → Cloud PostgreSQL → Production Engineering**

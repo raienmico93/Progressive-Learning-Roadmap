@@ -161,7 +161,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # III. Routing
 
-- **8. Routing Fundamentals**
+- [**8. Routing Fundamentals**](/Web%20Development/Laravel/Routing/BasicRouting.md)
   - Routes
   - Route files
     - `routes/web.php`
@@ -193,7 +193,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Route list
   - Route debugging
 
-- **9. Route Model Binding**
+- [**9. Route Model Binding**](/Web%20Development/Laravel/Routing/RouteModelBinding.md)
   - Implicit binding
   - Custom keys
   - Explicit binding
@@ -202,7 +202,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Route model binding with soft deletes
   - Route model binding best practices
 
-- **10. Route Groups**
+- [**10. Route Groups**](/Web%20Development/Laravel/Routing/RouteGroups.md)
   - Route prefixes
   - Route name prefixes
   - Route middleware
@@ -212,7 +212,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Route subdomain routing
   - Route group best practices
 
-- **11. Advanced Routing**
+- [**11. Advanced Routing**](/Web%20Development/Laravel/Routing/AdvancedRouting.md)
   - Route resources
     - `Route::resource`
     - `Route::apiResource`
@@ -236,7 +236,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # IV. Controllers and Middleware
 
-- **12. Controllers**
+- [**12. Controllers**](/Web%20Development/Laravel/Controller/BasicController.md)
   - Controllers
   - Controller creation
   - `artisan make:controller`
@@ -291,7 +291,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # V. Blade Templating
 
-- **15. Blade Fundamentals**
+- [**15. Blade Fundamentals**](/Web%20Development/Laravel/BladeTemplating/Blade.md)
   - Blade
   - Blade templates
   - Blade files
@@ -308,80 +308,85 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Blade inheritance
 
 - **16. Blade Directives**
-  - Control structures
-    - `@if`
+  - Conditional Statements
+    - `@if` and `@endif`
     - `@elseif`
     - `@else`
-    - `@endif`
-    - `@unless`
-    - `@endunless`
-    - `@isset`
-    - `@endisset`
-    - `@empty`
-    - `@endempty`
-    - `@auth`
-    - `@guest`
+    - `@unless` and `@endunless`
+    - `@isset` and `@endisset`
+    - `@empty` and `@endempty`
+    - `@env`
+    - `@production`
+  - Switch Statements
     - `@switch`
     - `@case`
     - `@break`
     - `@default`
     - `@endswitch`
-    - `@for`
-    - `@endfor`
-    - `@foreach`
-    - `@endforeach`
-    - `@forelse`
+  - Looping Statements
+    - `@for` and `@endfor`
+    - `@foreach` and `@endforeach`
+    - `@forelse` and `@endforelse`
     - `@empty`
-    - `@endforelse`
-    - `@while`
-    - `@endwhile`
+    - `@while` and `@endwhile`
     - `@continue`
     - `@break`
-  - `@include`
-  - `@includeIf`
-  - `@includeWhen`
-  - `@includeUnless`
-  - `@each`
-  - `@extends`
-  - `@section`
-  - `@show`
-  - `@yield`
-  - `@parent`
-  - `@push`
-  - `@stack`
-  - `@once`
-  - `@php`
-  - `@endphp`
-  - `@json`
-  - `@class`
-  - `@style`
-  - `@checked`
-  - `@selected`
-  - `@disabled`
-  - `@readonly`
-  - `@required`
-  - `@props`
-  - `@aware`
-  - `@error`
-  - `@enderror`
-  - `@csrf`
-  - `@method`
-  - `@vite`
-  - `@viteReactRefresh`
-  - `@livewireStyles`
-  - `@livewireScripts`
-  - `@inertia`
-  - `@inertiaHead`
-  - `@routes`
-  - `@lang`
-  - `@choice`
-  - `@env`
-  - `@production`
-  - `@session`
-  - `@dd`
-  - `@dump`
+  - Subviews and Fragment Inclusion
+    - `@include`
+    - `@includeIf`
+    - `@includeWhen`
+    - `@includeUnless`
+    - `@each`
+  - Template Layouts & Inheritance
+    - `@extends`
+    - `@section`
+    - `@show`
+    - `@yield`
+    - `@parent`
+  - Stacks
+    - `@push`
+    - `@stack`
+  - Authentication and Authorization
+    - `@auth`
+    - `@guest`
+  - Raw PHP, JSON, and Optimization
+    - `@php` and `@endphp`
+    - `@json`
+    - `@once`
+  - HTML Attributes and Styling
+    - `@class`
+    - `@style`
+    - `@checked`
+    - `@selected`
+    - `@disabled`
+    - `@readonly`
+    - `@required`
+  - Component Authoring
+    - `@props`
+    - `@aware`
+  - Form, Security, and Session
+    - `@error`
+    - `@enderror`
+    - `@csrf`
+    - `@method`
+    - `@session`
+  - Assets & Frontend Tooling Integration (Vite)
+    - `@vite`
+    - `@viteReactRefresh`
+  - Ecosystem Packages (Livewire & Inertia)
+    - `@livewireStyles`
+    - `@livewireScripts`
+    - `@inertia`
+    - `@inertiaHead`
+    - `@routes`
+  - Localization
+    - `@lang`
+    - `@choice`
+  - Debugging
+    - `@dd`
+    - `@dump`
 
-- **17. Blade Components**
+- [**17. Blade Components**](/Web%20Development/Laravel/BladeTemplating/BladeComponents.md)
   - Blade components
   - Component creation
   - `artisan make:component`
@@ -397,7 +402,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Component testing
   - Component best practices
 
-- **18. Blade Layouts**
+- [**18. Blade Layouts**](/Web%20Development/Laravel/BladeTemplating/BladeLayouts.md)
   - Layouts
   - Template inheritance
   - `@extends`
@@ -410,7 +415,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Layout components
   - Layout best practices
 
-- **19. Blade Stacks**
+- [**19. Blade Stacks**](/Web%20Development/Laravel/BladeTemplating/BladeStacks.md)
   - Stacks
   - `@push`
   - `@prepend`
@@ -420,7 +425,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Stack ordering
   - Stack best practices
 
-- **20. Blade Components Advanced**
+- [**20. Blade Components Advanced**](/Web%20Development/Laravel/BladeTemplating/BladeAdvanced.md)
   - Component attributes
   - Attribute bags
   - `$attributes`
@@ -451,7 +456,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # VI. Eloquent ORM
 
-- **21. Eloquent Fundamentals**
+- [**21. Eloquent Fundamentals**](/Web%20Development/Laravel/EloquentORM/Eloquent.md)
   - Eloquent
   - Models
   - Model creation
@@ -473,7 +478,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Model seeders
   - Eloquent best practices
 
-- **22. Eloquent Relationships**
+- [**22. Eloquent Relationships**](/Web%20Development/Laravel/EloquentORM/EloquentRelationships.md)
   - One-to-one
   - One-to-many
   - Many-to-many
@@ -658,7 +663,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Deadlock handling
   - Database best practices
 
-- **27. Migrations**
+- [**27. Migrations**](/Web%20Development/Laravel/Migrations/Migrations.md)
   - Migrations
   - Migration creation
   - `artisan make:migration`
@@ -669,68 +674,75 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Schema builder
   - Table creation
   - Column types
-    - `id`
-    - `bigIncrements`
-    - `bigInteger`
-    - `binary`
-    - `boolean`
-    - `char`
-    - `dateTimeTz`
-    - `dateTime`
-    - `date`
-    - `decimal`
-    - `double`
-    - `enum`
-    - `float`
-    - `foreignId`
-    - `foreignUlid`
-    - `foreignUuid`
-    - `geometryCollection`
-    - `geometry`
-    - `increments`
-    - `integer`
-    - `ipAddress`
-    - `json`
-    - `jsonb`
-    - `lineString`
-    - `longText`
-    - `macAddress`
-    - `mediumIncrements`
-    - `mediumInteger`
-    - `mediumText`
-    - `morphs`
-    - `nullableMorphs`
-    - `nullableTimestamps`
-    - `nullableUlidMorphs`
-    - `nullableUuidMorphs`
-    - `rememberToken`
-    - `set`
-    - `smallIncrements`
-    - `smallInteger`
-    - `softDeletesTz`
-    - `softDeletes`
-    - `string`
-    - `text`
-    - `timeTz`
-    - `time`
-    - `timestampTz`
-    - `timestamp`
-    - `timestampsTz`
-    - `timestamps`
-    - `tinyIncrements`
-    - `tinyInteger`
-    - `tinyText`
-    - `unsignedBigInteger`
-    - `unsignedDecimal`
-    - `unsignedInteger`
-    - `unsignedMediumInteger`
-    - `unsignedSmallInteger`
-    - `unsignedTinyInteger`
-    - `ulidMorphs`
-    - `uuidMorphs`
-    - `ulid`
-    - `uuid`
-    - `year`
+    - Numeric & Integer Types
+      - `bigIncrements`
+      - `bigInteger`
+      - `decimal`
+      - `double`
+      - `float`
+      - `increments`
+      - `integer`
+      - `mediumIncrements`
+      - `mediumInteger`
+      - `smallIncrements`
+      - `smallInteger`
+      - `tinyIncrements`
+      - `tinyInteger`
+      - `unsignedBigInteger`
+      - `unsignedDecimal`
+      - `unsignedInteger`
+      - `unsignedMediumInteger`
+      - `unsignedSmallInteger`
+      - `unsignedTinyInteger`
+    - String & Text Types
+      - `char`
+      - `longText`
+      - `mediumText`
+      - `string`
+      - `text`
+      - `tinyText`
+    - Date & Time Types
+      - `dateTimeTz`
+      - `dateTime`
+      - `date`
+      - `nullableTimestamps`
+      - `softDeletesTz`
+      - `softDeletes`
+      - `timeTz`
+      - `time`
+      - `timestampTz`
+      - `timestamp`
+      - `timestampsTz`
+      - `timestamps`
+      - `year`
+    - Keys, IDs & Identifiers
+      - `id`
+      - `foreignId`
+      - `foreignUlid`
+      - `foreignUuid`
+      - `ulid`
+      - `uuid`
+    - Polymorphic Relations
+      - `morphs`
+      - `nullableMorphs`
+      - `nullableUlidMorphs`
+      - `nullableUuidMorphs`
+      - `ulidMorphs`
+      - `uuidMorphs`
+    - Spatial / Geometry Types
+      - `geometryCollection`
+      - `geometry`
+      - `lineString`
+    - Specialized and Miscellaneous Types
+      - `binary`
+      - `boolean`
+      - `enum`
+      - `ipAddress`
+      - `json`
+      - `jsonb`
+      - `macAddress`
+      - `rememberToken`
+      - `set`
   - Column modifiers
     - `after`
     - `autoIncrement`
@@ -802,7 +814,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # VIII. Validation
 
-- **31. Validation Fundamentals**
+- [**31. Validation Fundamentals**](/Web%20Development/Laravel/Validation/Validation.md)
   - Validation
   - `validate()`
   - `Validator::make()`
@@ -895,7 +907,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Conditional rules
   - Validation best practices
 
-- **33. Form Request Validation**
+- [**33. Form Request Validation**](/Web%20Development/Laravel/Validation/FormRequestValidation.md)
   - Form requests
   - Form request creation
   - Form request validation
@@ -917,7 +929,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # IX. Authentication and Authorization
 
-- **35. Authentication Fundamentals**
+- [**35. Authentication Fundamentals**](/Web%20Development/Laravel/Authentication/Authentication.md)
   - Authentication
   - Authentication guards
   - Authentication providers
@@ -932,7 +944,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Laravel Passport
   - Authentication best practices
 
-- **36. Session Authentication**
+- [**36. Session Authentication**](/Web%20Development/Laravel/Authentication/Session.md)
   - Session authentication
   - Login
   - Logout
@@ -945,7 +957,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Session security
   - Session best practices
 
-- **37. Token Authentication**
+- [**37. Token Authentication**](/Web%20Development/Laravel/Authentication/Token.md)
   - API tokens
   - Sanctum
   - Sanctum installation
@@ -959,10 +971,10 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Passport OAuth2 flows
   - Token best practices
 
-- **38. Authorization**
+- [**38. Authorization**](/Web%20Development/Laravel/Authorization/Autorization.md)
   - Authorization
-  - Gates
-  - Policies
+  - [Gates](/Web%20Development/Laravel/Authorization/Gates.md)
+  - [Policies](/Web%20Development/Laravel/Authorization/Policies.md)
   - Policy creation
   - Policy registration
   - Policy methods
@@ -984,7 +996,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - `@canany`
   - Authorization best practices
 
-- **39. Role-Based Access Control**
+- [**39. Role-Based Access Control**](/Web%20Development/Laravel/Authorization/RoleAndPermission.md)
   - Roles
   - Permissions
   - Role assignment
@@ -1008,7 +1020,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # X. APIs
 
-- **41. API Fundamentals**
+- [**41. API Fundamentals**](/Web%20Development/Laravel/API%20Development/API.md)
   - APIs
   - REST APIs
   - API resources
@@ -1019,7 +1031,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - API documentation
   - API best practices
 
-- **42. API Resources**
+- [**42. API Resources**](/Web%20Development/Laravel/API%20Development/APIResources.md)
   - API resources
   - Resource creation
   - `artisan make:resource`
@@ -1031,7 +1043,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Resource relationships
   - Resource best practices
 
-- **43. API Authentication**
+- [**43. API Authentication**](/Web%20Development/Laravel/API%20Development/APIAuth.md)
   - API authentication
   - Sanctum
   - Passport

@@ -138,7 +138,7 @@
 
 # III. Components, Props, and Composition
 
-* [**8. Props**](/Web%20Development/React/Basics/Props.md)
+* [**8. Props**](/Web%20Development/React/Components/Props.md)
 
   * Props definition
   * Passing data
@@ -150,7 +150,7 @@
   * Object and array props
   * Children prop
 
-* [**9. Component Composition**](/Web%20Development/React/Basics/ComponentComposition.md)
+* [**9. Component Composition**](/Web%20Development/React/Components/ComponentComposition.md)
 
   * Parent-child relationships
   * Nested components
@@ -306,7 +306,7 @@
   * Complex state transitions
   * Reducer composition
 
-* [**23. Performance Hooks**](/Web%20Development/React/Hooks/PerformanceHooks.md)
+* **23. Performance Hooks**
 
   * `useMemo`
   * `useCallback`
@@ -315,7 +315,7 @@
   * Avoiding premature optimization
   * Dependency management
 
-* [**24. Advanced Hooks**](/Web%20Development/React/Hooks/AdvancedHooks.md)
+* **24. Advanced Hooks**
 
   * `useLayoutEffect`
   * `useImperativeHandle`

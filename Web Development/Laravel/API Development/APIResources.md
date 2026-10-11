@@ -1,4 +1,4 @@
-# Laravel API Resources — Comprehensive Programming Cheat Sheet
+# Laravel API Resources: A Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,76 +6,88 @@
 
 ### Definitions
 
-**Core Definition:** Laravel API Resources are transformation classes that sit between Eloquent models and JSON responses, giving developers granular control over which attributes are exposed, how relationships are serialised, and how response envelopes are structured.
+**Core Definition**
 
-**Technical Definition:** API Resources are classes extending `Illuminate\Http\Resources\Json\JsonResource` (for single models) or `Illuminate\Http\Resources\Json\ResourceCollection` (for collections). Each resource defines a `toArray(Request $request): array` method that returns the array of attributes to be serialised to JSON. Resources leverage the `ConditionallyLoadsAttributes` trait, which provides methods such as `when()`, `mergeWhen()`, and `whenLoaded()` for conditional attribute inclusion. When returned from a controller or route, resources are automatically wrapped in a `data` key by default, and paginated collections receive automatic `links` and `meta` keys. The static `$wrap` property and the `withoutWrapping()` method control response enveloping.
+Laravel API Resources are transformation classes that sit between Eloquent models and the JSON responses returned to API consumers, providing a controlled layer for selecting, formatting, and structuring model data.
 
-**Beginner-Friendly Explanation:** When you return an Eloquent model directly from a controller, Laravel converts every column into JSON — including sensitive fields like passwords or internal flags. API Resources solve this by letting you define exactly what the API should output. Think of a resource as a "template" that takes a model and produces a clean, controlled JSON object. You decide which fields appear, how dates are formatted, and whether related data (like a post's author) should be included. This makes your API consistent, secure, and easy to document.
+**Technical Definition**
+
+API Resources are classes extending `Illuminate\Http\Resources\Json\JsonResource` (for single models) or `Illuminate\Http\Resources\Json\ResourceCollection` (for collections). They define a `toArray(Request $request): array` method that returns the attributes to be serialized to JSON. Resources support conditional attributes (`when()`, `whenLoaded()`, `whenNotNull()`, `whenHas()`), relationship inclusion via `whenLoaded()`, pagination metadata, and custom wrapping. The `make:resource` Artisan command generates resource classes in `app/Http/Resources`.
+
+**Beginner-Friendly Explanation**
+
+Imagine you have a database table full of user records. If you sent all that data to your API users, you would expose everything—including maybe the password hash and internal IDs. API Resources are a filter that decides exactly what data goes out. You write a simple class that says "only send the name, email, and avatar" and Laravel handles the rest. It is like a bouncer for your data: only the allowed fields get through.
+
+---
 
 ### Key Characteristics
 
-- **Transformation layer:** Resources decouple database structure from API output, preventing accidental exposure of internal columns.
-- **Single-model and collection variants:** `JsonResource` transforms one model; `ResourceCollection` transforms arrays of models with pagination support.
-- **Conditional attributes:** Methods like `when()`, `mergeWhen()`, and `whenLoaded()` include data only when conditions are met.
-- **Automatic wrapping:** The outermost resource is wrapped in a `data` key by default; this can be disabled or customised.
-- **Pagination awareness:** Resource collections automatically include `links` and `meta` keys when given a paginator instance.
-- **Relationship safety:** `whenLoaded()` prevents N+1 query problems by including relationships only when they have been eager-loaded.
+- **Data Transformation Layer**: Resources sit between models and JSON responses, decoupling database schema from API output.
+- **Explicit Field Selection**: Only the fields defined in `toArray()` are included in the response.
+- **Conditional Attributes**: The `when()`, `whenLoaded()`, `whenNotNull()`, and `whenHas()` methods allow attributes to be included based on request context, permissions, or relationship loading state.
+- **Automatic Pagination Metadata**: When used with paginated data, resources automatically include `links` and `meta` keys with pagination information.
+- **Relationship Handling**: Relationships can be included via nested resources and conditionally via `whenLoaded()` to prevent N+1 queries.
+- **Data Wrapping**: Responses are wrapped in a `data` key by default, reserving other keys for metadata and errors.
+- **Works with Any Data**: Resources can transform not only Eloquent models but also plain arrays and objects.
+- **JSON:API Support**: Laravel 12.45+ includes a `JsonApiResource` class for JSON:API-compliant responses via the `--json-api` flag.
+
+---
 
 ### Prerequisites
 
-- PHP 8.1+ (Laravel 10+) or PHP 8.2+ (Laravel 11+).
-- Composer dependency manager.
-- A Laravel application with Eloquent models and controllers configured.
-- Basic understanding of Eloquent relationships (`hasMany`, `belongsTo`, etc.).
-- Familiarity with Laravel's service container and dependency injection.
+- **PHP 8.1 or higher** (Laravel 10+) or **PHP 8.2** (Laravel 11+).
+- **A Laravel application** installed via Composer.
+- **Eloquent models** set up for the resources to transform.
+- **A configured API route file** (`routes/api.php`), created via `php artisan install:api`.
+- **Basic understanding of JSON** and HTTP responses.
+
+---
 
 ### Related Programming Areas
 
-- **Eloquent ORM** — Resources transform Eloquent models and collections into JSON.
-- **API Controllers** — Resources are returned from controller methods.
-- **FormRequest Validation** — Ensures data integrity before resources are created or updated.
-- **Pagination** — Resource collections integrate with Laravel's paginator to produce `links` and `meta`.
-- **Error Handling** — Resources interact with the exception handler when models are not found.
-- **JSON:API Specification** — A standard that inspired many of Laravel's resource conventions.
-
-### Core Concepts / Features
-
-1. **Resource Classes:** Transforming single models into structured JSON objects via `JsonResource`.
-2. **Collection Resources:** Wrapping arrays of data using `ResourceCollection` and custom metadata.
-3. **Conditional Attributes:** Using `$this->when()`, `$this->mergeWhen()`, and conditional loading based on user permissions.
-4. **Relationship Serialization:** Eager loading checks with `$this->whenLoaded()` to prevent N+1 query problems in JSON outputs.
-5. **Response Consistency:** Standardising envelopes, data wrapping, and custom root keys.
+- **Eloquent ORM**: Resources transform Eloquent models and their relationships into JSON.
+- **API Development**: Resources are the response formatting layer for all API endpoints.
+- **Pagination**: Resources integrate with `paginate()` and `cursorPaginate()` to produce paginated JSON responses.
+- **API Documentation**: Tools like Scramble and Scribe can generate documentation from API Resources.
+- **JSON:API Specification**: Laravel's `JsonApiResource` provides a compliant implementation of the JSON:API standard.
 
 ---
 
-## 1. Resource Classes
+## Core Concepts
 
-### Definitions
+---
 
-**Core Definition:** A resource class is a transformation class that defines how a single Eloquent model is converted into a structured JSON object.
+### 1. API Resources
 
-**Technical Definition:** A resource class extends `Illuminate\Http\Resources\Json\JsonResource`. It defines a `toArray(Request $request): array` method that returns an associative array of attributes. The resource automatically proxies property and method access to the underlying model via the `$this` variable. Resources are generated with `php artisan make:resource UserResource` and stored in `app/Http/Resources/`. When a resource is returned from a controller, Laravel serialises it to JSON and wraps it in a `data` key by default.
+#### Definitions
 
-**Beginner-Friendly Explanation:** A resource class is like a "recipe" for turning a database row into JSON. Instead of returning the raw model and hoping for the best, you write a small class that says "include the ID, the name, and the email, but format the date this way." This keeps your API output predictable and safe.
+**Core Definition**
 
-### Purposes
+An API Resource is a PHP class that transforms an Eloquent model or other data structure into a structured JSON array for API responses.
 
-- To explicitly define which model attributes are exposed in API responses, preventing accidental data leaks.
-- To transform raw model data (e.g., timestamps, booleans) into client-friendly formats (e.g., ISO 8601 strings, human-readable labels).
-- To compute derived fields (e.g., excerpts, full URLs, formatted prices) without modifying the database schema.
-- To provide a single source of truth for a resource's JSON representation, ensuring consistency across all endpoints that return that resource.
-- To enable nested resource inclusion for relationships, producing hierarchical JSON structures.
+**Technical Definition**
 
-### Syntax Rules and Structure
+`JsonResource` wraps a single model instance. The `toArray(Request $request)` method defines the output structure. The `$this` variable inside the resource proxies property and method access to the underlying model. Resources are returned directly from controllers or routes and are automatically serialized to JSON. The `toResource()` method on models provides framework-convention-based resource discovery.
 
-#### Complete General Syntax
+**Beginner-Friendly Explanation**
+
+An API Resource is a class that acts as a translator. You give it a model, and it outputs a clean JSON array with only the fields you want. For example, a `UserResource` might output `id`, `name`, and `email` but hide `password` and `remember_token`.
+
+#### Purposes
+
+- To control exactly which model attributes are exposed in API responses.
+- To transform attribute values (e.g., format dates, compute derived fields).
+- To provide a consistent JSON structure across all endpoints.
+- To prevent accidental exposure of sensitive or internal data.
+- To decouple the API contract from the database schema.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
 
 ```php
-// Step 1: Generate the resource
-// php artisan make:resource UserResource
-
-// File: app/Http/Resources/UserResource.php
-
+<?php
+// app/Http/Resources/UserResource.php
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -86,478 +98,55 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'         => $this->id,
-            'name'       => $this->name,
-            'email'      => $this->email,
-            'created_at' => $this->created_at->toIso8601String(),
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
 }
 ```
 
 ```php
-// Step 2: Return the resource from a controller
+// Controller usage
 use App\Http\Resources\UserResource;
 use App\Models\User;
 
-public function show(User $user): JsonResponse
-{
-    return response()->json(new UserResource($user));
-}
+return new UserResource(User::findOrFail($id));
 ```
 
-**Component Breakdown:**
+**Component Breakdown**
 
-- `class UserResource extends JsonResource` — Extends the base resource class, inheriting all conditional and serialisation methods.
-- `toArray(Request $request): array` — The method that defines the JSON structure. `$this` refers to the underlying Eloquent model.
-- `$this->id`, `$this->name`, `$this->email` — Model attributes accessed directly through the resource's proxy.
-- `new UserResource($user)` — Instantiates the resource with a model instance, ready for serialisation.
+| Component | Description |
+|-----------|-------------|
+| `extends JsonResource` | Base class for single-model resources. |
+| `toArray(Request $request)` | Defines the JSON output structure. |
+| `$this` | Proxies to the underlying model instance. |
+| `new UserResource($user)` | Wraps a model for transformation. |
 
-**Syntax Rules:**
+**Syntax Rules**
 
-- Resource classes **must** extend `JsonResource` (for single models) or `ResourceCollection` (for collections).
-- The `toArray()` method **must** return an array; nested resources and collections are automatically serialised.
-- The `$request` parameter provides access to the incoming request, enabling conditional logic based on user permissions or query parameters.
-- Resources can be returned directly from routes or controllers; Laravel handles serialisation and response generation.
-- The `data` wrapper is applied by default; this can be disabled globally via `JsonResource::withoutWrapping()` or per-class via `public static $wrap = null`.
+- Resources are generated via `php artisan make:resource UserResource`.
+- Resources are placed in `app/Http/Resources`.
+- `toArray()` must return an array.
+- The underlying model is accessible via `$this`.
+- Resources can be returned directly from controllers or routes.
 
-**Constraints and Limitations:**
+**Constraints and Limitations**
 
-- **Resources should not perform database queries.** Use `whenLoaded()` to include relationships only when they have been eager-loaded, preventing N+1 problems.
-- **The `data` wrapper is applied to the outermost resource only.** Nested resources are not wrapped unless they are returned as the outermost response.
-- **Resources are serialised lazily.** The `toArray()` method is called when the response is rendered, not when the resource is instantiated.
+- Resources add a `data` wrapper by default (can be disabled via `JsonResource::withoutWrapping()`).
+- `toArray()` should not perform database queries; all relationships must be eager-loaded before the resource is created.
+- Resource classes should not contain business logic.
 
-### Annotated Code Examples
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
 
-**Example 1: A Basic User Resource with Derived Fields**
+**Example 1: Basic User Resource**
+
+**Resource**
 
 ```php
 <?php
-// File: app/Http/Resources/UserResource.php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-
-class UserResource extends JsonResource
-{
-    public function toArray(Request $request): array
-    {
-        return [
-            'id'         => $this->id,
-            'name'       => $this->name,
-            'email'      => $this->email,
-            // Derived field: extract initials from the name
-            'initials'   => collect(explode(' ', $this->name))
-                                ->map(fn($part) => strtoupper($part[0]))
-                                ->join(''),
-            // Formatted date: ISO 8601 string
-            'member_since' => $this->created_at->toIso8601String(),
-            // Conditional field: only include phone if the viewer is the user
-            'phone'      => $this->when(
-                $request->user()?->id === $this->id,
-                $this->phone
-            ),
-        ];
-    }
-}
-```
-
-**Step-by-Step Setup:**
-
-1. Run `php artisan make:resource UserResource`.
-2. Define the `toArray()` method as shown.
-3. Ensure the `User` model has `name`, `email`, `phone`, and `created_at` attributes.
-4. Return `new UserResource($user)` from a controller.
-
-**Expected Output:**
-
-```json
-{
-    "data": {
-        "id": 1,
-        "name": "Alice Johnson",
-        "email": "alice@example.com",
-        "initials": "AJ",
-        "member_since": "2024-01-15T08:30:00+00:00",
-        "phone": "+1-555-0100"
-    }
-}
-```
-
-**Why This Output Occurs:** The resource transforms the model's `name` into `initials` using a collection pipeline. The `created_at` timestamp is formatted as an ISO 8601 string. The `phone` field is included only because the authenticated user's ID matches the resource's ID — if a different user viewed the resource, the `phone` key would be absent.
-
----
-
-**Example 2: Resource with Nested Relationship (No N+1)**
-
-```php
-<?php
-// File: app/Http/Resources/PostResource.php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-
-class PostResource extends JsonResource
-{
-    public function toArray(Request $request): array
-    {
-        return [
-            'id'         => $this->id,
-            'title'      => $this->title,
-            'excerpt'    => substr($this->body, 0, 120) . '...',
-            'author'     => new UserResource($this->whenLoaded('user')),
-            'comments'   => CommentResource::collection($this->whenLoaded('comments')),
-            'published_at' => $this->created_at->toIso8601String(),
-        ];
-    }
-}
-```
-
-```php
-// Controller — eager-load relationships
-$post = Post::with(['user', 'comments.author'])->findOrFail($id);
-return new PostResource($post);
-```
-
-**Expected Output:**
-
-```json
-{
-    "data": {
-        "id": 5,
-        "title": "Getting Started with Laravel",
-        "excerpt": "Laravel is a PHP framework that makes...",
-        "author": {
-            "data": { "id": 2, "name": "Alice", "email": "alice@example.com" }
-        },
-        "comments": {
-            "data": [
-                { "id": 10, "body": "Great post!", "author": { "data": { "id": 7, "name": "Bob" } } }
-            ]
-        },
-        "published_at": "2025-06-01T09:30:00+00:00"
-    }
-}
-```
-
-**Why This Output Occurs:** The `whenLoaded('user')` call includes the `author` key only because the `user` relationship was eager-loaded via `->with('user')`. If the relationship had not been loaded, the key would be absent, and no additional query would be executed. This pattern prevents N+1 query problems in API responses.
-
-### Real-World Cases
-
-- **Public user profiles:** Resources expose only the fields that are safe for public consumption (name, avatar, bio) while omitting email, phone, and internal IDs.
-- **Admin panels:** A single `UserResource` can conditionally include admin-only fields (e.g., `last_login_ip`) using `$this->when($request->user()->isAdmin(), ...)`.
-- **E-commerce product listings:** Resources compute derived fields like `discounted_price`, `in_stock`, and `image_url` without modifying the database.
-- **API versioning:** V1 and V2 resources can transform the same model differently, supporting backward compatibility while evolving the API.
-
----
-
-## 2. Collection Resources
-
-### Definitions
-
-**Core Definition:** A collection resource is a transformation class that wraps an array or paginator of models, producing a JSON array with optional metadata such as pagination links and totals.
-
-**Technical Definition:** Collection resources extend `Illuminate\Http\Resources\Json\ResourceCollection` and are generated with `php artisan make:resource UserCollection` or by naming the resource with the `Collection` suffix. By default, Laravel automatically wraps a collection of models in an anonymous `ResourceCollection` using the singular resource class for transformation. Custom collection resources override the `toArray()` method to define the collection-level structure, and can use the `with()` method to add metadata to the response. When a paginator is passed, Laravel automatically injects `links` and `meta` keys containing pagination information.
-
-**Beginner-Friendly Explanation:** When your API returns a list of things — like a list of users or products — you need more than just an array. You often need to include pagination information (which page you're on, how many total items there are) and maybe some custom metadata. A collection resource handles this: it wraps the array of items and adds all the extra information the client needs to navigate the list.
-
-### Purposes
-
-- To standardise the JSON structure of collections, ensuring consistency across all list endpoints.
-- To include pagination metadata (`links`, `meta`) automatically when returning paginated results.
-- To add custom metadata (e.g., total counts, aggregations, version information) to collection responses.
-- To control how individual items within the collection are transformed by referencing a singular resource class.
-- To provide a dedicated class for collection-level logic, separating it from single-model transformation.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
-
-```php
-// Step 1: Generate the collection resource
-// php artisan make:resource UserCollection
-
-// File: app/Http/Resources/UserCollection.php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\ResourceCollection;
-
-class UserCollection extends ResourceCollection
-{
-    // The resource that this collection collects.
-    public $collects = UserResource::class;
-
-    public function toArray(Request $request): array
-    {
-        return [
-            'data' => $this->collection,
-        ];
-    }
-
-    // Optional: Add custom metadata to the response.
-    public function with(Request $request): array
-    {
-        return [
-            'meta' => [
-                'total_users' => $this->collection->count(),
-                'api_version' => '1.0',
-            ],
-        ];
-    }
-}
-```
-
-```php
-// Step 2: Return the collection from a controller
-use App\Http\Resources\UserCollection;
-use App\Models\User;
-
-public function index(): UserCollection
-{
-    return new UserCollection(User::paginate(15));
-    // Or: return UserResource::collection(User::paginate(15));
-}
-```
-
-**Component Breakdown:**
-
-- `class UserCollection extends ResourceCollection` — Extends the base collection resource class.
-- `public $collects = UserResource::class` — Specifies which singular resource class transforms each item in the collection.
-- `toArray(Request $request): array` — Defines the collection-level structure. Returning `['data' => $this->collection]` preserves the standard `data` wrapper.
-- `with(Request $request): array` — Returns additional metadata to be merged into the response. The `with` method is called only for the outermost resource.
-- `UserResource::collection($users)` — A shortcut for creating an anonymous collection resource using the specified singular resource.
-
-**Syntax Rules:**
-
-- Collection resources **must** extend `ResourceCollection` (not `JsonResource`).
-- The `$collects` property links the collection to its singular resource; if omitted, Laravel infers it from the class name (e.g., `UserCollection` → `UserResource`).
-- The `with()` method is called only when the collection is the outermost resource in the response; nested collections do not invoke it.
-- Paginated collections automatically include `links` and `meta` keys. Custom keys added via `with()` are merged into the `meta` array, avoiding conflicts with pagination metadata.
-- The `withoutWrapping()` method does **not** remove the `data` key from paginated responses; pagination always wraps data in `data`.
-
-**Constraints and Limitations:**
-
-- **Custom collection metadata added via `with()` is only applied to the outermost collection.** If a collection is nested inside another resource, its `with()` method is not called.
-- **The `data` key cannot be removed from paginated collections** even when `withoutWrapping()` is called. This is because pagination requires the `data`, `links`, and `meta` structure.
-- **The `$collects` property must reference a valid `JsonResource` class.** If it does not exist, Laravel throws an exception during serialisation.
-
-### Annotated Code Examples
-
-**Example 1: Paginated Collection with Custom Metadata**
-
-```php
-<?php
-// File: app/Http/Resources/PostCollection.php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\ResourceCollection;
-
-class PostCollection extends ResourceCollection
-{
-    public $collects = PostResource::class;
-
-    public function toArray(Request $request): array
-    {
-        return [
-            'data' => $this->collection,
-        ];
-    }
-
-    public function with(Request $request): array
-    {
-        return [
-            'meta' => [
-                'total_posts' => $this->collection->total(),
-                'published_today' => $this->collection->filter(
-                    fn($post) => $post->created_at->isToday()
-                )->count(),
-            ],
-        ];
-    }
-}
-```
-
-```php
-// Controller
-use App\Http\Resources\PostCollection;
-use App\Models\Post;
-
-public function index(): PostCollection
-{
-    return new PostCollection(Post::with('user')->latest()->paginate(15));
-}
-```
-
-**Expected Output:**
-
-```json
-{
-    "data": [
-        { "id": 1, "title": "First Post", "author": { "data": { "id": 2, "name": "Alice" } } },
-        { "id": 2, "title": "Second Post", "author": { "data": { "id": 3, "name": "Bob" } } }
-    ],
-    "links": {
-        "first": "https://example.com/api/posts?page=1",
-        "last": "https://example.com/api/posts?page=5",
-        "prev": null,
-        "next": "https://example.com/api/posts?page=2"
-    },
-    "meta": {
-        "current_page": 1,
-        "per_page": 15,
-        "total": 72,
-        "total_posts": 72,
-        "published_today": 3
-    }
-}
-```
-
-**Why This Output Occurs:** The `PostCollection` wraps the paginator in a `data` key. Laravel automatically merges the pagination `links` and `meta` keys. The custom `with()` method adds `total_posts` and `published_today` to the `meta` array. Because the collection is the outermost resource, `with()` is invoked and its metadata is merged with the pagination metadata without conflict.
-
----
-
-**Example 2: Non-Paginated Collection with Custom Root Key**
-
-```php
-<?php
-// File: app/Http/Resources/CountryCollection.php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\ResourceCollection;
-
-class CountryCollection extends ResourceCollection
-{
-    public $collects = CountryResource::class;
-
-    public function toArray(Request $request): array
-    {
-        // Custom root key instead of 'data'
-        return [
-            'countries' => $this->collection,
-        ];
-    }
-}
-```
-
-```php
-// Controller
-return new CountryCollection(Country::all());
-```
-
-**Expected Output:**
-
-```json
-{
-    "countries": [
-        { "code": "US", "name": "United States" },
-        { "code": "GB", "name": "United Kingdom" }
-    ]
-}
-```
-
-**Why This Output Occurs:** The `toArray()` method explicitly returns an array with a `countries` key instead of the default `data` key. This overrides the default wrapping behaviour for this specific collection resource. Note that if `withoutWrapping()` is called globally, this custom key is preserved because it is explicitly defined in `toArray()`.
-
-### Real-World Cases
-
-- **Paginated list endpoints:** Every `GET /api/posts`, `GET /api/users`, etc., returns a `PostCollection` or `UserCollection` with pagination links and metadata.
-- **Dashboard summary endpoints:** A collection resource can include aggregate metadata (e.g., total revenue, active users) alongside the list of items.
-- **Search results:** A `SearchResultCollection` can include metadata about the query (e.g., `total_results`, `search_time_ms`) in addition to the result items.
-- **Multi-language content:** A collection resource can include a `meta.locale` key indicating the language of the returned content.
-
----
-
-## 3. Conditional Attributes
-
-### Definitions
-
-**Core Definition:** Conditional attributes are resource fields that are included in the JSON output only when a specified condition evaluates to true, enabling context-aware responses based on user permissions, request parameters, or model state.
-
-**Technical Definition:** Laravel's `ConditionallyLoadsAttributes` trait, used by `JsonResource`, provides methods such as `when(bool $condition, mixed $value, mixed $default = null)` and `mergeWhen(bool $condition, mixed $value, mixed $default = new MissingValue())`. The `when()` method returns the value if the condition is true, or a `MissingValue` instance (which is removed during filtering) if false. The `mergeWhen()` method merges an array of attributes when the condition is true. The `whenHas()` method conditionally includes an attribute if it exists on the model, and `whenAppended()` checks for accessor-appended attributes.
-
-**Beginner-Friendly Explanation:** Not every client should see every field. An admin might see a user's email, but a regular user should not. A resource can say "include this field only if the viewer is an admin" or "include this relationship only if it was already loaded." Conditional attributes make this easy: you wrap the field in a `when()` call, and Laravel automatically removes it from the response if the condition is not met.
-
-### Purposes
-
-- To include sensitive or privileged data only when the authenticated user has the appropriate permissions.
-- To conditionally include relationships based on whether they have been eager-loaded, preventing N+1 queries.
-- To adapt the response structure based on request parameters (e.g., `?include=comments`).
-- To omit fields that are null or missing, reducing payload size and avoiding null values in JSON.
-- To merge multiple attributes under a single condition, reducing repetitive `when()` calls.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
-
-```php
-// When — conditionally include a single attribute
-'email' => $this->when(
-    $request->user()->isAdmin(),
-    $this->email
-),
-
-// When with a closure — compute the value only if the condition is true
-'secret' => $this->when(
-    $request->user()->isAdmin(),
-    fn() => 'secret-value'
-),
-
-// MergeWhen — conditionally include multiple attributes
-$this->mergeWhen($request->user()->isAdmin(), [
-    'first-secret' => 'value',
-    'second-secret' => 'value',
-]),
-
-// WhenLoaded — include a relationship only if it was eager-loaded
-'posts' => PostResource::collection($this->whenLoaded('posts')),
-
-// WhenHas — include an attribute only if it exists on the model
-'tax' => $this->whenHas('price', fn() => number_format($this->price * 0.21, 2)),
-
-// WhenAppended — include an accessor-appended attribute
-'address_lines' => $this->whenAppended('address_lines', $this->address_lines),
-```
-
-**Component Breakdown:**
-
-- `when(bool $condition, mixed $value)` — Returns `$value` if `$condition` is true; otherwise, a `MissingValue` instance is returned and removed during filtering.
-- `mergeWhen(bool $condition, array $value)` — Merges the array of attributes into the response if `$condition` is true.
-- `whenLoaded(string $relationship, mixed $value = null)` — Returns the relationship value only if `relationLoaded($relationship)` returns true on the model.
-- `whenHas(string $attribute, mixed $value = null)` — Returns the value only if the attribute exists in the model's attributes array.
-- `whenAppended(string $attribute, mixed $value = null)` — Returns the value only if the attribute is in the model's `$appends` array.
-
-**Syntax Rules:**
-
-- The `when()` method accepts a boolean condition as its first argument and the value to return as its second. A closure can be passed as the second argument to defer value computation.
-- The `mergeWhen()` method **should not** be used within arrays that mix string and numeric keys, or within arrays with numeric keys that are not ordered sequentially.
-- The `whenLoaded()` method accepts the relationship name as a string, not the relationship itself. This prevents accidental lazy loading.
-- The `whenHas()` method checks `array_key_exists()` on the model's attributes, meaning the attribute must be present in the database query result.
-- The `whenAppended()` method checks the model's `$appends` array, which is populated by accessor methods.
-
-**Constraints and Limitations:**
-
-- **`when()` returns a `MissingValue` instance when the condition is false**, which is removed during the `filter()` phase of resource serialisation. If you return this value from a nested resource, it may cause unexpected behaviour.
-- **`whenLoaded()` only works with Eloquent relationships**, not with arbitrary attributes or computed properties.
-- **`mergeWhen()` cannot be used at the top level of an array with numeric keys**; it must be used within an associative array.
-- **Conditional attributes are evaluated during serialisation**, not when the resource is instantiated. This means the request object must be available at serialisation time.
-
-### Annotated Code Examples
-
-**Example 1: Admin-Only Fields with `when()` and `mergeWhen()`**
-
-```php
-<?php
-// File: app/Http/Resources/UserResource.php
-
+// app/Http/Resources/UserResource.php
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -571,605 +160,1420 @@ class UserResource extends JsonResource
             'id'    => $this->id,
             'name'  => $this->name,
             'email' => $this->email,
-
-            // Single conditional attribute: only include phone
-            // if the authenticated user is viewing their own profile.
-            'phone' => $this->when(
-                $request->user()?->id === $this->id,
-                $this->phone
-            ),
-
-            // Merge multiple admin-only attributes under one condition.
-            // This is more efficient than multiple when() calls.
-            $this->mergeWhen($request->user()?->isAdmin(), [
-                'last_login_ip'  => $this->last_login_ip,
-                'login_count'    => $this->login_count,
-                'account_status' => $this->account_status,
-            ]),
-
-            'created_at' => $this->created_at->toIso8601String(),
         ];
     }
 }
 ```
 
-**Step-by-Step Setup:**
+**Controller**
 
-1. Ensure the `User` model has `phone`, `last_login_ip`, `login_count`, and `account_status` attributes.
-2. Define the resource as shown.
-3. Return `new UserResource($user)` from a controller.
+```php
+// app/Http/Controllers/Api/UserController.php
+use App\Http\Resources\UserResource;
+use App\Models\User;
 
-**Expected Output (as the user viewing their own profile):**
+public function show(string $id)
+{
+    return new UserResource(User::findOrFail($id));
+}
+```
+
+**Expected Output**
 
 ```json
 {
     "data": {
         "id": 1,
-        "name": "Alice Johnson",
-        "email": "alice@example.com",
-        "phone": "+1-555-0100",
-        "created_at": "2024-01-15T08:30:00+00:00"
+        "name": "John Doe",
+        "email": "john@example.com"
     }
 }
 ```
 
-**Expected Output (as an admin viewing another user):**
+**Why This Output Occurs**
+
+The `UserResource` transforms the `User` model into a JSON object with only the specified fields, wrapped in a `data` key.
+
+---
+
+**Example 2: Using `toResource()` for Automatic Discovery**
+
+```php
+// In a controller
+return User::findOrFail($id)->toResource();
+```
+
+**Expected Output**
 
 ```json
 {
     "data": {
         "id": 1,
-        "name": "Alice Johnson",
-        "email": "alice@example.com",
-        "last_login_ip": "192.168.1.100",
-        "login_count": 42,
-        "account_status": "active",
-        "created_at": "2024-01-15T08:30:00+00:00"
+        "name": "John Doe",
+        "email": "john@example.com"
     }
 }
 ```
 
-**Expected Output (as a regular user viewing another user):**
+**Why This Output Occurs**
 
-```json
-{
-    "data": {
-        "id": 1,
-        "name": "Alice Johnson",
-        "email": "alice@example.com",
-        "created_at": "2024-01-15T08:30:00+00:00"
-    }
-}
-```
-
-**Why This Output Occurs:** The `when()` call for `phone` checks if the authenticated user's ID matches the resource's ID. If true, the phone is included; if false, the key is omitted. The `mergeWhen()` call merges three admin-only fields into the response only when `isAdmin()` returns true. Because `mergeWhen()` returns an array, the fields are merged at the top level of the JSON object.
+Laravel automatically discovers the `UserResource` class based on the model name and uses it to transform the model.
 
 ---
 
-**Example 2: Using `whenLoaded()` and `whenHas()` to Prevent N+1 and Missing Attributes**
+#### Real-World Cases with Explanation
+
+**Case 1: Public API with Sensitive Data Protection**
+
+A public API returns user profiles but must never expose `email`, `password_hash`, or `remember_token`. A `UserResource` includes only `id`, `name`, and `avatar_url`, preventing sensitive data leakage.
+
+**Explanation**: API Resources provide a safety layer that prevents accidental exposure of database schema and sensitive attributes.
+
+---
+
+### 2. Resource Creation
+
+#### Definitions
+
+**Core Definition**
+
+Resource creation is the process of generating a new API Resource class using Laravel's Artisan CLI.
+
+**Technical Definition**
+
+The `php artisan make:resource` command generates a PHP class in `app/Http/Resources` extending `JsonResource`. The `--collection` flag (or appending `Collection` to the name) generates a `ResourceCollection` class for transforming collections. The `--json-api` flag (Laravel 12.45+) generates a `JsonApiResource` class for JSON:API-compliant responses.
+
+**Beginner-Friendly Explanation**
+
+Creating a resource is a one-command process. Laravel generates the file for you, and you fill in the fields you want to expose.
+
+#### Purposes
+
+- To automate the generation of resource class boilerplate.
+- To ensure resources are placed in the correct directory and namespace.
+- To support both single-resource and collection-resource generation.
+- To enable JSON:API-compliant resources.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+# Single resource
+php artisan make:resource UserResource
+
+# Resource collection
+php artisan make:resource User --collection
+php artisan make:resource UserCollection
+
+# JSON:API resource (Laravel 12.45+)
+php artisan make:resource PostResource --json-api
+```
+
+**Component Breakdown**
+
+| Command | Effect |
+|---------|--------|
+| `make:resource UserResource` | Creates `app/Http/Resources/UserResource.php`. |
+| `make:resource User --collection` | Creates `app/Http/Resources/UserCollection.php`. |
+| `make:resource UserCollection` | Creates a collection resource (name-based detection). |
+| `--json-api` | Creates a `JsonApiResource`. |
+
+**Syntax Rules**
+
+- The resource name should be PascalCase and end with `Resource` (convention).
+- Collection resources extend `ResourceCollection`.
+- The `--collection` flag and `Collection` suffix are equivalent.
+
+**Constraints and Limitations**
+
+- Generated files must be edited to add the `toArray()` logic.
+- The `--json-api` flag is available in Laravel 12.45+ only.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Generating a Resource**
+
+**Command**
+
+```bash
+php artisan make:resource UserResource
+```
+
+**Generated File**
 
 ```php
 <?php
-// File: app/Http/Resources/ProductResource.php
-
+// app/Http/Resources/UserResource.php
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ProductResource extends JsonResource
-{
-    public function toArray(Request $request): array
-    {
-        return [
-            'id'    => $this->id,
-            'name'  => $this->name,
-            'price' => $this->price,
-
-            // Only include category if it was eager-loaded.
-            // Without this, accessing $this->category would trigger
-            // a separate query for every product (N+1 problem).
-            'category' => new CategoryResource($this->whenLoaded('category')),
-
-            // Only include reviews if eager-loaded.
-            'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
-
-            // Only include tax if the price attribute exists.
-            // This prevents errors when the price column is omitted
-            // from a selective query.
-            'tax' => $this->whenHas('price', fn() => number_format($this->price * 0.21, 2)),
-
-            // Only include discount if it was appended via an accessor.
-            'discount' => $this->whenAppended('discount'),
-        ];
-    }
-}
-```
-
-```php
-// Controller — eager-load relationships, but optionally omit price
-public function index(Request $request)
-{
-    $query = Product::with(['category', 'reviews']);
-
-    // If the client requests a lightweight list, omit the price column
-    if ($request->boolean('lightweight')) {
-        $query->select('id', 'name');
-    }
-
-    return ProductResource::collection($query->paginate(20));
-}
-```
-
-**Expected Output (full query):**
-
-```json
-{
-    "data": [
-        {
-            "id": 1,
-            "name": "Widget",
-            "price": 9.99,
-            "category": { "data": { "id": 3, "name": "Tools" } },
-            "reviews": { "data": [ { "id": 10, "rating": 5 } ] },
-            "tax": "2.10",
-            "discount": "10%"
-        }
-    ]
-}
-```
-
-**Expected Output (lightweight query without `price`):**
-
-```json
-{
-    "data": [
-        {
-            "id": 1,
-            "name": "Widget",
-            "category": { "data": { "id": 3, "name": "Tools" } },
-            "reviews": { "data": [ { "id": 10, "rating": 5 } ] }
-        }
-    ]
-}
-```
-
-**Why This Output Occurs:** In the lightweight query, the `select('id', 'name')` clause omits the `price` column. The `whenHas('price', ...)` method checks `array_key_exists('price', $this->resource->getAttributes())`. Because `price` is not present, the `tax` key is omitted entirely — no error is thrown, and no meaningless null value appears in the JSON. The `whenLoaded()` calls ensure that relationships are only included if they were eager-loaded.
-
-### Real-World Cases
-
-- **Public vs. admin API responses:** The same `UserResource` returns different fields depending on whether the requester is an admin, a regular user viewing their own profile, or a guest.
-- **Query-parameter-driven responses:** A `?include=comments` parameter can control whether `whenLoaded('comments')` includes the relationship (provided the controller eager-loads it conditionally).
-- **Sparse fieldsets (JSON:API style):** Conditional attributes can be combined with query parameters to let clients request only the fields they need.
-- **Multi-tenant applications:** Conditional attributes can include tenant-specific fields only when the authenticated user belongs to that tenant.
-
----
-
-## 4. Relationship Serialization
-
-### Definitions
-
-**Core Definition:** Relationship serialisation is the process of including related models (e.g., a post's author, a product's category) in a resource's JSON output, with safeguards to prevent N+1 query problems.
-
-**Technical Definition:** Laravel resources include relationships via the `whenLoaded()` method, which checks whether a relationship has been eager-loaded on the underlying model using `relationLoaded()`. If the relationship is loaded, the method returns the relationship value, which is typically wrapped in another resource or resource collection for transformation. If the relationship is not loaded, a `MissingValue` is returned and filtered out of the response. This pattern ensures that relationships are only serialised when the controller has explicitly eager-loaded them, preventing the N+1 query problem where each model in a collection triggers a separate query for its relationship.
-
-**Beginner-Friendly Explanation:** When you return a list of 100 posts, each post has an author. If you naively include the author for each post, Laravel would run 100 separate queries — one for each author. This is the N+1 problem. The solution is to "eager-load" all authors in a single query, then tell the resource "include the author only if it was already loaded." The `whenLoaded()` method does exactly this: it includes the relationship if it was eager-loaded, and silently omits it if not. This keeps your API fast and your database happy.
-
-### Purposes
-
-- To include related model data in JSON responses without triggering additional database queries.
-- To prevent the N+1 query problem by requiring explicit eager-loading in controllers.
-- To allow controllers to decide which relationships to include based on the endpoint or request parameters.
-- To transform related models using their own resource classes, ensuring consistency.
-- To support conditional relationship inclusion based on whether the relationship exists or has been loaded.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
-
-```php
-// Including a hasOne or belongsTo relationship
-'author' => new UserResource($this->whenLoaded('user')),
-
-// Including a hasMany relationship
-'comments' => CommentResource::collection($this->whenLoaded('comments')),
-
-// Including a nested relationship (relationship of a relationship)
-'comments' => CommentResource::collection(
-    $this->whenLoaded('comments', fn() => $this->comments->load('author'))
-),
-
-// Conditional relationship based on request parameter
-'posts' => PostResource::collection(
-    $this->when(
-        $request->boolean('include_posts'),
-        fn() => $this->posts
-    )
-),
-```
-
-```php
-// Controller — eager-load relationships
-$posts = Post::with(['user', 'comments.author'])->paginate(15);
-return PostResource::collection($posts);
-```
-
-**Component Breakdown:**
-
-- `$this->whenLoaded('user')` — Returns the `user` relationship value if it has been eager-loaded; otherwise returns a `MissingValue`.
-- `new UserResource($this->whenLoaded('user'))` — Wraps the relationship in its own resource class for transformation.
-- `CommentResource::collection($this->whenLoaded('comments'))` — Wraps a collection relationship in its collection resource.
-- `$this->whenLoaded('comments', fn() => $this->comments->load('author'))` — A closure can be passed to load nested relationships only when the parent is loaded.
-- `->with(['user', 'comments.author'])` — Eager-loads relationships in the controller before returning the resource.
-
-**Syntax Rules:**
-
-- The `whenLoaded()` method **must** receive the relationship name as a string, not the relationship object. This is intentional: passing the relationship object would trigger a lazy load if it was not already loaded.
-- The relationship **must** be eager-loaded in the controller using `->with()` or `->load()` for `whenLoaded()` to include it.
-- Nested resources (e.g., `UserResource`) are wrapped in their own `data` key unless wrapping is disabled. Laravel prevents double-wrapping of the outermost resource.
-- For nested relationships deeper than one level (e.g., `origin.season`), use `->when()` with a manual `relationLoaded()` check instead of `whenLoaded()`, because `whenLoaded()` may trigger lazy loading for nested relations.
-
-**Constraints and Limitations:**
-
-- **`whenLoaded()` does not eager-load relationships.** It only checks whether the relationship has already been loaded. If the controller does not eager-load, the relationship is silently omitted.
-- **Nested `whenLoaded()` calls can trigger lazy loading.** If the parent relationship is loaded but the child is not, accessing the child can trigger a separate query. Use `->when()` with `relationLoaded()` for deep nesting.
-- **Polymorphic relationships require special handling.** The `whenLoaded()` method works with polymorphic relationships, but the morph type may need to be checked before including the relationship.
-- **Lazy loading prevention is critical in production.** Laravel's `Model::preventLazyLoading()` method can be enabled in development to catch accidental lazy loads.
-
-### Annotated Code Examples
-
-**Example 1: Eager Loading with `whenLoaded()` to Prevent N+1**
-
-```php
-<?php
-// File: app/Http/Resources/PostResource.php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-
-class PostResource extends JsonResource
-{
-    public function toArray(Request $request): array
-    {
-        return [
-            'id'      => $this->id,
-            'title'   => $this->title,
-            'author'  => new UserResource($this->whenLoaded('user')),
-            'comments' => CommentResource::collection($this->whenLoaded('comments')),
-        ];
-    }
-}
-```
-
-```php
-// Controller — eager-load both relationships
-public function index(): PostCollection
-{
-    // Single query for posts, one for users, one for comments
-    $posts = Post::with(['user', 'comments'])->paginate(15);
-    return new PostCollection($posts);
-}
-```
-
-**Expected Output:**
-
-```json
-{
-    "data": [
-        {
-            "id": 1,
-            "title": "First Post",
-            "author": { "data": { "id": 2, "name": "Alice" } },
-            "comments": { "data": [ { "id": 10, "body": "Great!" } ] }
-        },
-        {
-            "id": 2,
-            "title": "Second Post",
-            "author": { "data": { "id": 3, "name": "Bob" } },
-            "comments": { "data": [] }
-        }
-    ]
-}
-```
-
-**Why This Output Occurs:** The controller eager-loads `user` and `comments` using `->with(['user', 'comments'])`. This executes three queries total: one for posts, one for all related users, and one for all related comments. The `whenLoaded()` calls in the resource check whether these relationships are loaded. Because they are, the resource includes them. Without `whenLoaded()`, accessing `$this->user` for each post would trigger a separate query — the N+1 problem.
-
----
-
-**Example 2: Nested Relationship Loading with `when()`**
-
-```php
-<?php
-// File: app/Http/Resources/OrderResource.php
-
-namespace App\Http\Resources;
-
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
-
-class OrderResource extends JsonResource
-{
-    public function toArray(Request $request): array
-    {
-        return [
-            'id'     => $this->id,
-            'total'  => $this->total,
-
-            // Include customer if loaded
-            'customer' => new UserResource($this->whenLoaded('customer')),
-
-            // Include items and their products if loaded
-            'items' => OrderItemResource::collection(
-                $this->whenLoaded('items')
-            ),
-
-            // Nested relationship with manual load check
-            // (whenLoaded would trigger lazy loading for items.product)
-            'items_with_products' => $this->when(
-                $this->relationLoaded('items'),
-                fn() => OrderItemResource::collection(
-                    $this->items->load('product')
-                )
-            ),
-        ];
-    }
-}
-```
-
-```php
-// Controller
-$order = Order::with(['customer', 'items'])->findOrFail($id);
-return new OrderResource($order);
-```
-
-**Expected Output:**
-
-```json
-{
-    "data": {
-        "id": 100,
-        "total": 249.99,
-        "customer": { "data": { "id": 5, "name": "Carol" } },
-        "items": {
-            "data": [
-                { "id": 1, "product_id": 10, "quantity": 2 },
-                { "id": 2, "product_id": 15, "quantity": 1 }
-            ]
-        },
-        "items_with_products": {
-            "data": [
-                { "id": 1, "product": { "data": { "id": 10, "name": "Widget" } }, "quantity": 2 },
-                { "id": 2, "product": { "data": { "id": 15, "name": "Gadget" } }, "quantity": 1 }
-            ]
-        }
-    }
-}
-```
-
-**Why This Output Occurs:** The controller eager-loads `customer` and `items`. The `whenLoaded('items')` call includes the items collection. The `when()` call with `relationLoaded('items')` manually checks if items are loaded, then loads the `product` relationship on the items collection via `->load('product')`. This executes one additional query for all products, rather than one query per item. Using `whenLoaded('items.product')` would not work correctly for nested relationships and could trigger lazy loading.
-
-### Real-World Cases
-
-- **Blog APIs:** Posts include their author and comments; comments include their author. All relationships are eager-loaded in the controller and conditionally serialised via `whenLoaded()`.
-- **E-commerce orders:** Orders include customers, items, and each item's product. Nested relationships are loaded manually to avoid N+1.
-- **Social media feeds:** Posts include users, likes, and comments. `whenLoaded()` ensures that only eager-loaded relationships appear in the feed, keeping response times low.
-- **Admin dashboards:** Controllers decide which relationships to eager-load based on the dashboard view; resources include them conditionally, so the same resource works across different views.
-
----
-
-## 5. Response Consistency
-
-### Definitions
-
-**Core Definition:** Response consistency refers to the standardisation of JSON response structure across all API endpoints, including the use of envelopes, data wrapping, and custom root keys.
-
-**Technical Definition:** By default, Laravel wraps the outermost resource in a `data` key. This can be customised by defining a `public static $wrap` property on a resource class, disabling globally via `JsonResource::withoutWrapping()` in a service provider, or overriding the `toArray()` method to return a custom root key. Paginated responses always include `data`, `links`, and `meta` keys, regardless of wrapping configuration. Custom metadata can be added via the `with()` method on collection resources or the `additional()` method on individual resources.
-
-**Beginner-Friendly Explanation:** Imagine if one API endpoint returned `{"users": [...]}` and another returned `{"data": [...]}` and a third returned just `[...]`. Clients would have to write different code for each. Response consistency means deciding on one structure — like always wrapping in a `data` key — and applying it everywhere. Laravel's default wrapping handles this automatically, but you can customise it if your API needs a different envelope.
-
-### Purposes
-
-- To ensure that all API endpoints return JSON in the same structure, reducing client-side parsing complexity.
-- To control the root key of responses, allowing custom envelopes such as `{ "users": [...] }` or `{ "result": {...} }`.
-- To disable wrapping entirely for APIs that require a flat JSON structure.
-- To add consistent metadata to all collection responses (pagination, totals, version).
-- To prevent double-wrapping of nested resources and ensure predictable nesting behaviour.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
-
-```php
-// Default wrapping — outermost resource is wrapped in 'data'
-return new UserResource($user);
-// Output: { "data": { "id": 1, ... } }
-
-// Custom root key via $wrap property
 class UserResource extends JsonResource
 {
-    public static $wrap = 'user';
-}
-// Output: { "user": { "id": 1, ... } }
-
-// Disable wrapping per-class
-class UserResource extends JsonResource
-{
-    public static $wrap = null;
-}
-// Output: { "id": 1, ... }
-
-// Disable wrapping globally
-// File: app/Providers/AppServiceProvider.php
-public function boot(): void
-{
-    JsonResource::withoutWrapping();
-}
-// Output: { "id": 1, ... } (no 'data' key)
-
-// Adding metadata to a resource
-return (new UserResource($user))->additional([
-    'meta' => ['version' => '1.0'],
-]);
-// Output: { "data": {...}, "meta": {"version": "1.0"} }
-```
-
-**Component Breakdown:**
-
-- `public static $wrap = 'user'` — Overrides the default `data` key for this resource class only.
-- `public static $wrap = null` — Disables wrapping for this resource class only.
-- `JsonResource::withoutWrapping()` — Globally disables wrapping for all resources extending `JsonResource`. Typically called in `AppServiceProvider::boot()`.
-- `->additional(['meta' => [...]])` — Adds top-level metadata to the resource response. Merged with pagination `meta` if present.
-- `with()` method on collection resources — Returns metadata that is automatically merged into the response.
-
-**Syntax Rules:**
-
-- The `$wrap` property **must** be `public static` to be effective.
-- `withoutWrapping()` affects only the outermost resource; nested resources are not wrapped unless they are returned as the outermost response.
-- Paginated collections **always** include the `data` key, even when `withoutWrapping()` is called. This is because `links` and `meta` are required for pagination.
-- Custom metadata added via `additional()` or `with()` is merged into the `meta` key of the response. Pagination metadata is preserved.
-- `withoutWrapping()` is typically called in a service provider's `boot()` method to apply globally.
-
-**Constraints and Limitations:**
-
-- **`withoutWrapping()` does not remove the `data` key from paginated responses.** If you need a flat paginated response, you must customise the collection resource's `toArray()` method.
-- **Defining `public static $wrap = null` on a resource class overrides the global `withoutWrapping()` setting** for that class only.
-- **Custom root keys defined in `toArray()` (e.g., `['users' => $this->collection]`) are not affected by `withoutWrapping()`** because they are explicitly returned.
-- **`additional()` metadata is merged into the `meta` key.** If you use `additional()` to add a `meta` key that already exists (e.g., from pagination), the values are merged, with the resource's values taking precedence.
-
-### Annotated Code Examples
-
-**Example 1: Global `withoutWrapping()` for a Flat API**
-
-```php
-<?php
-// File: app/Providers/AppServiceProvider.php
-
-namespace App\Providers;
-
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\ServiceProvider;
-
-class AppServiceProvider extends ServiceProvider
-{
-    public function boot(): void
+    public function toArray(Request $request): array
     {
-        // Disable the 'data' wrapper globally for all resources.
-        // This produces a flatter JSON structure:
-        // { "id": 1, "name": "Alice" }
-        // instead of:
-        // { "data": { "id": 1, "name": "Alice" } }
-        JsonResource::withoutWrapping();
+        return parent::toArray($request);
     }
 }
 ```
 
-```php
-// Controller — no changes needed
-return new UserResource($user);
+**Expected Output (Terminal)**
+
+```
+INFO  Resource [app/Http/Resources/UserResource.php] created successfully.
 ```
 
-**Expected Output:**
+**Why This Output Occurs**
 
-```json
-{
-    "id": 1,
-    "name": "Alice Johnson",
-    "email": "alice@example.com"
-}
-```
-
-**Why This Output Occurs:** The `withoutWrapping()` call in the service provider's `boot()` method removes the `data` key from all resource responses. This is applied globally, so every resource returned from the application produces a flat JSON structure. This is useful for APIs that must match a pre-existing specification (e.g., legacy APIs or JSON:API without the `data` envelope).
+Artisan scaffolds the resource class with a default `toArray()` method.
 
 ---
 
-**Example 2: Custom Root Key and Metadata**
+**Example 2: Generating a Collection Resource**
+
+**Command**
+
+```bash
+php artisan make:resource User --collection
+```
+
+**Generated File**
 
 ```php
 <?php
-// File: app/Http/Resources/ProductCollection.php
-
+// app/Http/Resources/UserCollection.php
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class ProductCollection extends ResourceCollection
+class UserCollection extends ResourceCollection
 {
-    public $collects = ProductResource::class;
-
     public function toArray(Request $request): array
     {
-        // Custom root key: 'products' instead of 'data'
-        return [
-            'products' => $this->collection,
-        ];
+        return parent::toArray($request);
     }
+}
+```
 
-    public function with(Request $request): array
-    {
-        return [
-            'meta' => [
-                'currency'    => 'USD',
-                'api_version' => '2.0',
-            ],
-        ];
+**Expected Output (Terminal)**
+
+```
+INFO  Resource [app/Http/Resources/UserCollection.php] created successfully.
+```
+
+**Why This Output Occurs**
+
+The `--collection` flag generates a `ResourceCollection` class instead of a `JsonResource`.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Rapid API Development**
+
+A developer runs `php artisan make:resource ProductResource` and immediately edits it to expose `id`, `name`, `price`, and `category`—a fully functional API transformation layer in minutes.
+
+**Explanation**: Artisan accelerates development by generating appropriate resource stubs.
+
+---
+
+### 3. `artisan make:resource`
+
+#### Definitions
+
+**Core Definition**
+
+`artisan make:resource` is the Artisan command used to generate new API Resource classes.
+
+**Technical Definition**
+
+The command is implemented by `Illuminate\Foundation\Console\ResourceMakeCommand`. It generates a PHP class file in `app/Http/Resources`. The `--collection` option generates a `ResourceCollection` subclass; the `--json-api` option generates a `JsonApiResource`. By default, the generated class extends `JsonResource`.
+
+**Beginner-Friendly Explanation**
+
+`artisan make:resource` is the terminal command you type to create a new resource class file.
+
+#### Purposes
+
+- To generate resource classes with minimal effort.
+- To provide consistent structure for resource files.
+- To support collection and JSON:API resource generation.
+- To enforce Laravel's naming and directory conventions.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+php artisan make:resource <Name> [options]
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `make:resource` | The Artisan command. |
+| `<Name>` | The resource class name (PascalCase). |
+| `--collection` | Generate a collection resource. |
+| `--json-api` | Generate a JSON:API resource (Laravel 12.45+). |
+
+**Syntax Rules**
+
+- The resource name is required.
+- The `--collection` and `--json-api` flags are optional.
+- Generated files are placed in `app/Http/Resources`.
+
+**Constraints and Limitations**
+
+- Routes are not registered automatically.
+- Generated stubs must be filled in with `toArray()` logic.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Generating a Resource with Collection**
+
+**Command**
+
+```bash
+php artisan make:resource PostResource --collection
+```
+
+**Expected Output (Terminal)**
+
+```
+INFO  Resource [app/Http/Resources/PostResource.php] created successfully.
+```
+
+**Why This Output Occurs**
+
+The `--collection` flag generates a collection resource class.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: API-First Development**
+
+A team building an API-first application generates resources for each model upfront, establishing the API contract before implementing controllers.
+
+**Explanation**: Resource generation is the first step in building a structured API.
+
+---
+
+### 4. Resource Collections
+
+#### Definitions
+
+**Core Definition**
+
+A Resource Collection is a resource class that transforms a collection of models (e.g., from `Model::all()` or `Model::paginate()`) into a structured JSON array, optionally including pagination metadata and collection-level links.
+
+**Technical Definition**
+
+Collection resources extend `Illuminate\Http\Resources\Json\ResourceCollection`. They are used via `Resource::collection($models)`. When the underlying data is a paginator (`LengthAwarePaginator`, `Paginator`, or `CursorPaginator`), Laravel automatically includes `links` and `meta` keys. The `collection()` static method on `JsonResource` creates an anonymous collection resource for single-model resources.
+
+**Beginner-Friendly Explanation**
+
+A Resource Collection is like a Resource but for multiple records at once. Instead of transforming one user, it transforms a list of users and automatically adds pagination information like "page 1 of 5" and "next page" links.
+
+#### Purposes
+
+- To transform collections of models into JSON arrays.
+- To automatically include pagination metadata and links.
+- To provide collection-level customisation (e.g., adding summary data).
+- To maintain a consistent structure between single resources and collections.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+// Controller usage
+use App\Http\Resources\UserResource;
+
+// Using collection() on a resource
+return UserResource::collection(User::paginate(15));
+
+// Using a dedicated collection resource
+return new UserCollection(User::paginate(15));
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `Resource::collection($models)` | Transforms a collection using a single-model resource. |
+| `new UserCollection($models)` | Uses a dedicated collection resource class. |
+| `ResourceCollection` | Base class for collection resources. |
+| `links` and `meta` | Automatically included for paginated data. |
+
+**Syntax Rules**
+
+- Use `Resource::collection()` for most cases.
+- Use a dedicated collection resource when you need collection-level customisation.
+- Pagination metadata is added automatically when the collection is a paginator.
+
+**Constraints and Limitations**
+
+- Collection resources cannot be used for single models.
+- Pagination metadata is only included for paginator instances.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Basic Collection**
+
+**Controller**
+
+```php
+use App\Http\Resources\UserResource;
+use App\Models\User;
+
+public function index()
+{
+    return UserResource::collection(User::all());
+}
+```
+
+**Expected Output**
+
+```json
+{
+    "data": [
+        {"id": 1, "name": "John", "email": "john@example.com"},
+        {"id": 2, "name": "Jane", "email": "jane@example.com"}
+    ]
+}
+```
+
+**Why This Output Occurs**
+
+`UserResource::collection()` transforms each model in the collection using the `UserResource` class.
+
+---
+
+**Example 2: Paginated Collection**
+
+```php
+public function index()
+{
+    return UserResource::collection(User::paginate(15));
+}
+```
+
+**Expected Output**
+
+```json
+{
+    "data": [
+        {"id": 1, "name": "John", "email": "john@example.com"}
+    ],
+    "links": {
+        "first": "http://example.com/users?page=1",
+        "last": "http://example.com/users?page=5",
+        "prev": null,
+        "next": "http://example.com/users?page=2"
+    },
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 5,
+        "path": "http://example.com/users",
+        "per_page": 15,
+        "to": 15,
+        "total": 75
     }
+}
+```
+
+**Why This Output Occurs**
+
+Laravel automatically adds `links` and `meta` keys when the collection is a paginator.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: E-commerce Product Listing**
+
+An e-commerce API returns a paginated list of products. The collection resource includes pagination links so the frontend can implement "next page" and "previous page" navigation.
+
+**Explanation**: Resource collections with pagination are essential for scalable APIs.
+
+---
+
+### 5. Resource Methods
+
+#### Definitions
+
+**Core Definition**
+
+Resource methods are the methods available on `JsonResource` instances that control transformation, conditional inclusion, relationship handling, wrapping, and pagination behaviour.
+
+**Technical Definition**
+
+Key methods include `toArray()` (required, defines output), `with()` (adds top-level data), `additional()` (adds metadata), `when()` / `whenLoaded()` / `whenNotNull()` / `whenHas()` / `whenAppended()` / `whenCounted()` (conditional attributes), `mergeWhen()` (merge multiple conditional attributes), `response()` / `withResponse()` (customize the HTTP response), and `paginationInformation()` (customize pagination metadata).
+
+**Beginner-Friendly Explanation**
+
+Resource methods are the tools you use inside a resource class to control exactly how your data is transformed. You can conditionally include fields, merge data, and customize the response.
+
+#### Purposes
+
+- To conditionally include or exclude attributes based on context.
+- To add metadata to responses (`with()`, `additional()`).
+- To customize pagination information.
+- To control the HTTP response (status code, headers).
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+// Conditional attributes
+'email' => $this->when($request->user()->isAdmin(), $this->email),
+'posts' => PostResource::collection($this->whenLoaded('posts')),
+'name' => $this->whenNotNull($this->name),
+'name' => $this->whenHas('name'),
+
+// Merging conditional attributes
+$this->mergeWhen($request->user()->isAdmin(), [
+    'secret' => 'secret-value',
+    'internal_id' => $this->internal_id,
+]),
+
+// Top-level data
+public function with(Request $request): array
+{
+    return ['meta' => ['version' => '1.0']];
+}
+
+// Additional data
+public function additional(Request $request): array
+{
+    return ['timestamp' => now()->toIso8601String()];
+}
+```
+
+**Component Breakdown**
+
+| Method | Description |
+|--------|-------------|
+| `when($condition, $value)` | Include if condition is true. |
+| `whenLoaded($relationship)` | Include relationship if eager-loaded. |
+| `whenNotNull($value)` | Include if value is not null. |
+| `whenHas($attribute)` | Include if attribute exists on model. |
+| `mergeWhen($condition, $attributes)` | Merge multiple attributes conditionally. |
+| `with($request)` | Add top-level data to the response. |
+| `additional($request)` | Add metadata to the response. |
+| `paginationInformation()` | Customize pagination links and meta. |
+
+**Syntax Rules**
+
+- `when()` accepts a boolean condition and a value or closure.
+- `whenLoaded()` checks if a relationship has been eager-loaded.
+- `mergeWhen()` accepts a condition and an array of attributes.
+- `with()` and `additional()` return arrays.
+
+**Constraints and Limitations**
+
+- `whenLoaded()` does not trigger lazy loading; the relationship must be eager-loaded.
+- `when()` with a closure defers the value computation until the condition is true.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Conditional Attributes**
+
+**Resource**
+
+```php
+public function toArray(Request $request): array
+{
+    return [
+        'id' => $this->id,
+        'name' => $this->name,
+        'email' => $this->when($request->user()?->isAdmin(), $this->email),
+        'secret' => $this->when($request->user()?->isAdmin(), 'secret-value'),
+        'created_at' => $this->created_at,
+    ];
+}
+```
+
+**Expected Output (admin user)**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "secret": "secret-value",
+        "created_at": "2026-10-11T12:00:00Z"
+    }
+}
+```
+
+**Expected Output (non-admin user)**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "name": "John Doe",
+        "created_at": "2026-10-11T12:00:00Z"
+    }
+}
+```
+
+**Why This Output Occurs**
+
+The `when()` method includes the `email` and `secret` attributes only if the authenticated user is an admin.
+
+---
+
+**Example 2: Using `with()` and `additional()`**
+
+```php
+public function with(Request $request): array
+{
+    return [
+        'meta' => [
+            'version' => '1.0',
+            'generated_at' => now()->toIso8601String(),
+        ],
+    ];
+}
+```
+
+**Expected Output**
+
+```json
+{
+    "data": { ... },
+    "meta": {
+        "version": "1.0",
+        "generated_at": "2026-10-11T12:00:00Z"
+    }
+}
+```
+
+**Why This Output Occurs**
+
+The `with()` method adds top-level `meta` data to the response.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Admin-Only Fields**
+
+An API resource conditionally includes `profit_margin` and `internal_notes` only for admin users, using `when()` with the user's role.
+
+**Explanation**: Conditional attributes enable role-based response customization.
+
+---
+
+### 6. Resource Wrapping
+
+#### Definitions
+
+**Core Definition**
+
+Resource wrapping is the automatic enclosing of resource responses in a `data` key, which is the default behaviour of Laravel API Resources.
+
+**Technical Definition**
+
+By default, `JsonResource` wraps the transformed data in a `data` key. This reserves the top-level response for `links`, `meta`, and error information. Wrapping can be disabled globally via `JsonResource::withoutWrapping()` in `AppServiceProvider::boot()`. Individual resources can override the wrapper by defining `public static $wrap = 'custom_key'` or `public static $wrap = null`.
+
+**Beginner-Friendly Explanation**
+
+Wrapping means your data is always returned inside a `data` container. So instead of `{"name": "John"}`, you get `{"data": {"name": "John"}}`. This is a best practice because it leaves room for other information like pagination links or error messages.
+
+#### Purposes
+
+- To provide a consistent response structure across all API endpoints.
+- To reserve top-level keys for metadata, links, and errors.
+- To allow clients to distinguish between data and response metadata.
+- To comply with JSON:API conventions (which require a `data` key).
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+// Disable wrapping globally (AppServiceProvider)
+use Illuminate\Http\Resources\Json\JsonResource;
+
+public function boot(): void
+{
+    JsonResource::withoutWrapping();
 }
 ```
 
 ```php
-// Controller
-return new ProductCollection(Product::paginate(20));
+// Custom wrapper key on a resource
+class UserResource extends JsonResource
+{
+    public static $wrap = 'user';
+}
 ```
 
-**Expected Output:**
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| Default `data` wrapper | Applied automatically to all resources. |
+| `withoutWrapping()` | Disables wrapping globally. |
+| `public static $wrap` | Custom wrapper key per resource. |
+
+**Syntax Rules**
+
+- Wrapping is enabled by default.
+- Disable globally via `JsonResource::withoutWrapping()`.
+- Override per-resource via `$wrap`.
+- Collection responses also use the `data` wrapper.
+
+**Constraints and Limitations**
+
+- Disabling wrapping globally may break clients expecting the `data` key.
+- Custom wrapper keys must be valid JSON keys.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Default Wrapping**
+
+```php
+return new UserResource($user);
+```
+
+**Expected Output**
 
 ```json
 {
-    "products": [
-        { "id": 1, "name": "Widget", "price": 9.99 },
-        { "id": 2, "name": "Gadget", "price": 19.99 }
-    ],
-    "links": {
-        "first": "https://example.com/api/products?page=1",
-        "last": "https://example.com/api/products?page=3",
-        "prev": null,
-        "next": "https://example.com/api/products?page=2"
-    },
-    "meta": {
-        "current_page": 1,
-        "per_page": 20,
-        "total": 55,
-        "currency": "USD",
-        "api_version": "2.0"
+    "data": {
+        "id": 1,
+        "name": "John Doe"
     }
 }
 ```
 
-**Why This Output Occurs:** The `toArray()` method returns an array with a `products` key instead of the default `data` key. This overrides the default wrapping for this collection. The `with()` method adds `currency` and `api_version` to the `meta` array. Laravel automatically merges the pagination `links` and `meta` keys, so the final response contains both pagination metadata and custom metadata in the `meta` object.
+**Why This Output Occurs**
 
-### Real-World Cases
+The default `data` wrapper is applied automatically.
 
-- **Public APIs with established specifications:** Some APIs require a flat JSON structure (no `data` wrapper) to comply with existing client implementations. `withoutWrapping()` enables this without modifying every resource.
-- **Multi-version APIs:** V1 resources can use the default `data` wrapper, while V2 resources use a custom root key like `result` to signal a breaking change.
-- **API gateways with response transformers:** Gateways may expect a specific envelope (e.g., `{ "status": "success", "data": {...} }`); resources can be customised to produce this structure.
-- **Consistent error and success responses:** By standardising the response envelope, clients can handle all responses uniformly — checking `data` for success, `errors` for validation failures, and `meta` for pagination.
+---
+
+**Example 2: Disabling Wrapping**
+
+```php
+// AppServiceProvider.php
+use Illuminate\Http\Resources\Json\JsonResource;
+
+public function boot(): void
+{
+    JsonResource::withoutWrapping();
+}
+```
+
+**Expected Output**
+
+```json
+{
+    "id": 1,
+    "name": "John Doe"
+}
+```
+
+**Why This Output Occurs**
+
+Wrapping is disabled globally, so the resource data is returned at the top level.
+
+---
+
+**Example 3: Custom Wrapper**
+
+```php
+class UserResource extends JsonResource
+{
+    public static $wrap = 'user';
+}
+```
+
+**Expected Output**
+
+```json
+{
+    "user": {
+        "id": 1,
+        "name": "John Doe"
+    }
+}
+```
+
+**Why This Output Occurs**
+
+The `$wrap` property overrides the default `data` key with `user`.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: JSON:API Compliance**
+
+A team building a JSON:API-compliant API uses the default `data` wrapper, which is required by the specification.
+
+**Explanation**: Wrapping aligns Laravel's output with the JSON:API standard.
+
+---
+
+### 7. Resource Pagination
+
+#### Definitions
+
+**Core Definition**
+
+Resource pagination is the automatic inclusion of `links` and `meta` keys in resource responses when the underlying data is a paginator, providing clients with navigation information for paginated collections.
+
+**Technical Definition**
+
+When a resource or resource collection wraps a `LengthAwarePaginator`, `Paginator`, or `CursorPaginator`, Laravel automatically adds `links` (first, last, prev, next) and `meta` (current_page, from, last_page, path, per_page, to, total) keys to the JSON response. The `paginationInformation()` method on a resource can customize these keys.
+
+**Beginner-Friendly Explanation**
+
+Pagination means your API returns data in pages instead of all at once. Resource pagination automatically adds "next page" and "previous page" links so the client knows how to navigate.
+
+#### Purposes
+
+- To provide clients with navigation links for paginated data.
+- To include pagination metadata (total items, current page, etc.).
+- To support cursor-based pagination for large datasets.
+- To allow customisation of pagination output.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+// Controller
+return UserResource::collection(User::paginate(15));
+return UserResource::collection(User::simplePaginate(15));
+return UserResource::collection(User::cursorPaginate(15));
+
+// Custom pagination information
+public function paginationInformation($request, $paginated, $default)
+{
+    $default['links']['custom'] = 'https://example.com';
+    return $default;
+}
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `paginate($perPage)` | Length-aware pagination with total count. |
+| `simplePaginate($perPage)` | Simple pagination (no total count). |
+| `cursorPaginate($perPage)` | Cursor-based pagination. |
+| `paginationInformation()` | Customizes links and meta. |
+
+**Syntax Rules**
+
+- Pagination metadata is added automatically for paginator instances.
+- `paginate()` returns `LengthAwarePaginator`; `simplePaginate()` returns `Paginator`.
+- `paginationInformation()` receives the request, paginated data, and default links/meta.
+
+**Constraints and Limitations**
+
+- Cursor pagination cannot jump to arbitrary pages.
+- Simple pagination does not include total item count.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Length-Aware Pagination**
+
+```php
+return UserResource::collection(User::paginate(15));
+```
+
+**Expected Output**
+
+```json
+{
+    "data": [ ... ],
+    "links": {
+        "first": "http://example.com/users?page=1",
+        "last": "http://example.com/users?page=5",
+        "prev": null,
+        "next": "http://example.com/users?page=2"
+    },
+    "meta": {
+        "current_page": 1,
+        "from": 1,
+        "last_page": 5,
+        "path": "http://example.com/users",
+        "per_page": 15,
+        "to": 15,
+        "total": 75
+    }
+}
+```
+
+**Why This Output Occurs**
+
+Laravel automatically includes pagination links and metadata for `LengthAwarePaginator` instances.
+
+---
+
+**Example 2: Cursor Pagination**
+
+```php
+return UserResource::collection(User::cursorPaginate(15));
+```
+
+**Expected Output**
+
+```json
+{
+    "data": [ ... ],
+    "links": {
+        "prev": null,
+        "next": "http://example.com/users?cursor=eyJpZCI6MTV9"
+    },
+    "meta": {
+        "path": "http://example.com/users",
+        "per_page": 15,
+        "next_cursor": "eyJpZCI6MTV9",
+        "prev_cursor": null
+    }
+}
+```
+
+**Why This Output Occurs**
+
+Cursor pagination provides cursor-based navigation instead of page numbers.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Infinite Scroll**
+
+A social media app uses cursor pagination to implement infinite scroll. The `next_cursor` in the response tells the app which cursor to send for the next batch of posts.
+
+**Explanation**: Cursor pagination is ideal for large, frequently changing datasets.
+
+---
+
+### 8. Resource Conditional Attributes
+
+#### Definitions
+
+**Core Definition**
+
+Conditional attributes are resource attributes that are included or excluded from the JSON response based on runtime conditions such as user permissions, relationship loading state, or attribute values.
+
+**Technical Definition**
+
+Laravel provides six conditional methods: `when($condition, $value)` (include if condition is true), `whenLoaded($relationship)` (include if eager-loaded), `whenNotNull($value)` (include if not null), `whenHas($attribute)` (include if the model has the attribute), `whenAppended($attribute)` (include if appended), and `whenCounted($relationship)` (include if count loaded). The `mergeWhen($condition, $attributes)` method merges multiple attributes conditionally.
+
+**Beginner-Friendly Explanation**
+
+Conditional attributes let you show or hide fields depending on who is asking. For example, an admin might see a user's email address, while a regular user does not. Or a related model is only included if it was loaded from the database.
+
+#### Purposes
+
+- To customize API responses based on user permissions.
+- To prevent N+1 queries by including relationships only when loaded.
+- To handle nullable attributes gracefully.
+- To support context-dependent responses (e.g., list view vs. detail view).
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+return [
+    'id' => $this->id,
+    'email' => $this->when($request->user()?->isAdmin(), $this->email),
+    'posts' => PostResource::collection($this->whenLoaded('posts')),
+    'name' => $this->whenNotNull($this->name),
+    'nickname' => $this->whenHas('nickname'),
+    'comments_count' => $this->whenCounted('comments'),
+    $this->mergeWhen($request->user()?->isAdmin(), [
+        'internal_id' => $this->internal_id,
+        'secret' => 'secret-value',
+    ]),
+];
+```
+
+**Component Breakdown**
+
+| Method | Condition | Use Case |
+|--------|-----------|----------|
+| `when($condition, $value)` | Boolean condition | Admin-only fields |
+| `whenLoaded($rel)` | Relationship eager-loaded | N+1 prevention |
+| `whenNotNull($value)` | Value is not null | Optional attributes |
+| `whenHas($attr)` | Attribute exists on model | Dynamic attributes |
+| `whenAppended($attr)` | Attribute is appended | Accessor values |
+| `whenCounted($rel)` | Count is loaded | Relationship counts |
+| `mergeWhen($cond, $attrs)` | Boolean condition | Multiple conditional attributes |
+
+**Syntax Rules**
+
+- `when()` accepts a boolean, a value, and an optional closure.
+- `whenLoaded()` requires the relationship to be eager-loaded (via `with()`).
+- `mergeWhen()` accepts a condition and an array of attributes.
+- Conditional methods return a `MissingValue` instance when the condition is false, and Laravel removes it from the output.
+
+**Constraints and Limitations**
+
+- `whenLoaded()` does not trigger lazy loading; the relationship must be loaded in the controller.
+- `whenHas()` checks if the attribute exists on the model, not if it is non-null.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Admin-Only Email**
+
+**Resource**
+
+```php
+public function toArray(Request $request): array
+{
+    return [
+        'id' => $this->id,
+        'name' => $this->name,
+        'email' => $this->when($request->user()?->isAdmin(), $this->email),
+    ];
+}
+```
+
+**Expected Output (admin)**
+
+```json
+{"data": {"id": 1, "name": "John", "email": "john@example.com"}}
+```
+
+**Expected Output (non-admin)**
+
+```json
+{"data": {"id": 1, "name": "John"}}
+```
+
+**Why This Output Occurs**
+
+The `when()` method includes the `email` attribute only if the authenticated user is an admin.
+
+---
+
+**Example 2: Relationship Only When Loaded**
+
+**Controller**
+
+```php
+return new UserResource(User::with('posts')->findOrFail($id));
+```
+
+**Resource**
+
+```php
+'posts' => PostResource::collection($this->whenLoaded('posts')),
+```
+
+**Expected Output (when loaded)**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "name": "John",
+        "posts": [
+            {"id": 1, "title": "First Post"}
+        ]
+    }
+}
+```
+
+**Expected Output (when not loaded)**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "name": "John"
+    }
+}
+```
+
+**Why This Output Occurs**
+
+`whenLoaded()` includes the `posts` relationship only if it has been eager-loaded via `with('posts')`, preventing N+1 queries.
+
+---
+
+**Example 3: Merging Conditional Attributes**
+
+```php
+return [
+    'id' => $this->id,
+    'name' => $this->name,
+    $this->mergeWhen($request->user()?->isAdmin(), [
+        'internal_id' => $this->internal_id,
+        'profit_margin' => $this->calculateProfitMargin(),
+    ]),
+];
+```
+
+**Expected Output (admin)**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "name": "Product",
+        "internal_id": "SKU-001",
+        "profit_margin": 0.45
+    }
+}
+```
+
+**Why This Output Occurs**
+
+`mergeWhen()` merges multiple attributes into the response when the condition is true.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Role-Based API Responses**
+
+An e-commerce API returns full product details (cost price, profit margin) only to admin users. Regular customers see only the retail price and description.
+
+**Explanation**: Conditional attributes enforce role-based data visibility without separate endpoints.
+
+---
+
+### 9. Resource Relationships
+
+#### Definitions
+
+**Core Definition**
+
+Resource relationships are the inclusion of related models (e.g., a post's author, a user's posts) within an API Resource response, either nested directly or conditionally via `whenLoaded()`.
+
+**Technical Definition**
+
+Related models are included by nesting their resource classes within the parent resource's `toArray()` method. The `whenLoaded()` method conditionally includes relationships only when they have been eager-loaded in the controller. `whenCounted()` includes relationship counts. Nested resources can be collections (`Resource::collection($this->whenLoaded('relationship'))`) or single resources (`new RelatedResource($this->whenLoaded('relationship'))`). API resources are often combined with query builder packages (e.g., Spatie Query Builder) to handle `?include=` parameters.
+
+**Beginner-Friendly Explanation**
+
+Relationships let you include related data in your API response. For example, when you fetch a blog post, you can also include the author's name and the comments on that post—all in one response.
+
+#### Purposes
+
+- To include related model data in API responses without multiple requests.
+- To conditionally include relationships only when requested.
+- To prevent N+1 queries by using `whenLoaded()`.
+- To support `?include=` query parameters for client-controlled relationship inclusion.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+// Nested single resource
+'author' => new UserResource($this->whenLoaded('author')),
+
+// Nested collection resource
+'comments' => CommentResource::collection($this->whenLoaded('comments')),
+
+// Relationship count
+'comments_count' => $this->whenCounted('comments'),
+
+// Always-included relationship (eager-loaded in controller)
+'category' => new CategoryResource($this->category),
+```
+
+**Component Breakdown**
+
+| Pattern | Description |
+|---------|-------------|
+| `new UserResource($this->whenLoaded('author'))` | Nested single resource. |
+| `CommentResource::collection($this->whenLoaded('comments'))` | Nested collection. |
+| `$this->whenCounted('comments')` | Relationship count. |
+| `new CategoryResource($this->category)` | Always included (must be eager-loaded). |
+
+**Syntax Rules**
+
+- Relationships must be eager-loaded in the controller (`with()`, `load()`, or `loadMissing()`).
+- Use `whenLoaded()` to conditionally include relationships.
+- Use `whenCounted()` for `withCount()` results.
+- Nested resources can be nested to any depth.
+
+**Constraints and Limitations**
+
+- Lazy loading inside resources causes N+1 queries.
+- Deeply nested resources can cause performance issues.
+- Circular relationships can cause infinite recursion.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Nested Single Resource**
+
+**Controller**
+
+```php
+return new PostResource(Post::with('author')->findOrFail($id));
+```
+
+**Resource**
+
+```php
+public function toArray(Request $request): array
+{
+    return [
+        'id' => $this->id,
+        'title' => $this->title,
+        'author' => new UserResource($this->whenLoaded('author')),
+    ];
+}
+```
+
+**Expected Output**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "title": "My First Post",
+        "author": {
+            "id": 5,
+            "name": "John Doe"
+        }
+    }
+}
+```
+
+**Why This Output Occurs**
+
+The `author` relationship is eager-loaded via `with('author')` and included using `whenLoaded()`.
+
+---
+
+**Example 2: Nested Collection Resource**
+
+**Controller**
+
+```php
+return new UserResource(User::with('posts')->findOrFail($id));
+```
+
+**Resource**
+
+```php
+'posts' => PostResource::collection($this->whenLoaded('posts')),
+```
+
+**Expected Output**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "name": "John",
+        "posts": [
+            {"id": 1, "title": "Post 1"},
+            {"id": 2, "title": "Post 2"}
+        ]
+    }
+}
+```
+
+**Why This Output Occurs**
+
+The `posts` relationship is eager-loaded and transformed using `PostResource::collection()`.
+
+---
+
+**Example 3: Relationship Count**
+
+**Controller**
+
+```php
+return new PostResource(Post::withCount('comments')->findOrFail($id));
+```
+
+**Resource**
+
+```php
+'comments_count' => $this->whenCounted('comments'),
+```
+
+**Expected Output**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "title": "My Post",
+        "comments_count": 5
+    }
+}
+```
+
+**Why This Output Occurs**
+
+`whenCounted()` includes the relationship count if `withCount('comments')` was used.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Blog API with Author and Comments**
+
+A blog API returns posts with the author's name and the number of comments. The controller eager-loads both relationships, and the resource conditionally includes them using `whenLoaded()` and `whenCounted()`.
+
+**Explanation**: Relationship handling in resources enables rich, single-request API responses.
+
+---
+
+### 10. Resource Best Practices
+
+#### Definitions
+
+**Core Definition**
+
+Resource best practices are the recommended guidelines for designing, implementing, and maintaining API Resources to maximize security, performance, maintainability, and consistency.
+
+**Technical Definition**
+
+Best practices encompass resource class design, field selection, conditional attribute usage, relationship handling, eager loading, wrapping strategy, versioning, and testing.
+
+**Beginner-Friendly Explanation**
+
+Best practices are the tips experienced developers follow to build clean, efficient, and secure API resources.
+
+#### Key Best Practices
+
+1. **Never Return Eloquent Models Directly**: Always use `JsonResource` or `ResourceCollection` to avoid leaking database schema, internal attributes, or relationship cycles.
+
+2. **Eager Load Relationships Before Resources**: Use `with()`, `load()`, or `loadMissing()` in the controller. Never trigger lazy loading inside a resource.
+
+3. **Use `whenLoaded()` for Relationships**: Conditionally include relationships only when eager-loaded to prevent N+1 queries.
+
+4. **Create Separate Resources for Different Contexts**: Use different resources for list views (summary fields) and detail views (full fields).
+
+5. **Use Conditional Attributes for Role-Based Access**: Use `when()` to include sensitive fields only for authorized users.
+
+6. **Keep Resources Slim**: Resources should only transform data, not contain business logic.
+
+7. **Format Dates Consistently**: Use `toIso8601String()` or `toDateTimeString()` for consistent date formatting across resources.
+
+8. **Use `Resource::collection()` for Collections**: Prefer `Resource::collection()` over manual array mapping for consistency and pagination support.
+
+9. **Consider Custom Collection Resources**: Use dedicated collection resource classes when you need collection-level metadata or customization.
+
+10. **Test Resource Output**: Write tests that assert the exact JSON structure of resource responses to prevent regressions.
+
+11. **Document Resource Fields**: Use PHPDoc annotations to document the output structure of each resource.
+
+12. **Version Resources Alongside API Versions**: Create versioned resource classes (e.g., `V1\UserResource`, `V2\UserResource`) when the API version changes.
+
+#### Multiple Annotated Complete Step by Step Code Example and Expected Output
+
+**Example 1: Well-Structured Resource with Conditional Relationships**
+
+**Resource**
+
+```php
+<?php
+declare(strict_types=1);
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+/** @mixin \App\Models\User */
+final class UserResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->when($request->user()?->isAdmin(), $this->email),
+            'avatar_url' => $this->avatar_url,
+            'created_at' => $this->created_at?->toIso8601String(),
+
+            // Relationships — only included when eager-loaded
+            'posts' => PostResource::collection($this->whenLoaded('posts')),
+            'profile' => new ProfileResource($this->whenLoaded('profile')),
+
+            // Relationship count
+            'posts_count' => $this->whenCounted('posts'),
+        ];
+    }
+}
+```
+
+**Controller**
+
+```php
+public function show(User $user): UserResource
+{
+    return new UserResource(
+        $user->loadMissing(['posts', 'profile'])->loadCount('posts')
+    );
+}
+```
+
+**Expected Output**
+
+```json
+{
+    "data": {
+        "id": 1,
+        "name": "John Doe",
+        "avatar_url": "https://example.com/avatar.jpg",
+        "created_at": "2026-10-11T12:00:00Z",
+        "posts": [
+            {"id": 1, "title": "First Post"}
+        ],
+        "profile": {
+            "bio": "Laravel developer"
+        },
+        "posts_count": 5
+    }
+}
+```
+
+**Why This Output Occurs**
+
+The resource conditionally includes `email` (admin only), includes `posts` and `profile` only when eager-loaded, and includes the `posts_count` only when counted. All relationships are eager-loaded in the controller to prevent N+1 queries.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Enterprise API Platform**
+
+A large organization follows all best practices: separate resources for list and detail views, `whenLoaded()` for all relationships, no business logic in resources, consistent date formatting, and comprehensive resource tests.
+
+**Explanation**: Following best practices ensures the API is secure, performant, and maintainable at scale.
 
 ---
 
 ## References
 
-- Laravel Eloquent: API Resources Documentation (13.x) — https://laravel.com/framework/docs/eloquent-resources
-- Laravel Eloquent: API Resources Documentation (10.x) — https://laravel.com/framework/docs/10.x/eloquent-resources
-- Laravel `JsonResource` API — https://api.laravel.com/docs/10.x/Illuminate/Http/Resources/Json/JsonResource.html
-- Laravel `ResourceCollection` API — https://api.laravel.com/docs/10.x/Illuminate/Http/Resources/Json/ResourceCollection.html
-- Laravel API Resources with Relations: Methods to Avoid N+1 Query (Laravel Daily) — https://laraveldaily.com/post/laravel-api-resources-relations-when-methods
-- Using `withoutWrapping` to Flatten API Responses (Laravel News) — https://laravel-news.com/without-wrapping
-- Eloquent API Resources: Best Practices for Transforming Data in Laravel (TSECURITY) — https://tsecurity.de/de/2661028/it+programmierung/eloquent+api+resources:+best+practices+for+transforming+data+in+laravel/
-- Laravel `ConditionallyLoadsAttributes` Trait — https://api.laravel.com/docs/10.x/Illuminate/Http/Resources/Concerns/ConditionallyLoadsAttributes.html
-- Laravel API Resources: `whenLoaded()` for Deeper Relations (Stack Overflow) — https://stackoverflow.com/questions/50002845/how-do-i-use-whenloaded-for-deeper-than-one-level-relations
-- Laravel `JsonResource::withoutWrapping()` — https://api.laravel.com/docs/10.x/Illuminate/Http/Resources/Json/JsonResource.html#method_withoutWrapping
-- Laravel `JsonResource::additional()` — https://api.laravel.com/docs/10.x/Illuminate/Http/Resources/Json/JsonResource.html#method_additional
-- Laravel `ResourceCollection::with()` — https://api.laravel.com/docs/10.x/Illuminate/Http/Resources/Json/ResourceCollection.html#method_with
+- Eloquent: API Resources – Laravel 12.x Documentation — https://laravel.com/docs/12.x/eloquent-resources
+- Eloquent: API Resources – Laravel master Documentation — https://laravel.com/framework/docs/master/eloquent-resources
+- Eloquent: API Resources – Laravel 10.x Documentation — https://laravel.com/docs/10.x/eloquent-resources
+- Dynamic API Response Control in Laravel Resources – Laravel News — https://laravel-news.com/index.php/dynamic-api-response-control-in-laravel-resources
+- API Response Transformation with JsonResource – voku/agent-skills (GitHub) — https://github.com/voku/agent-skills/blob/main/skills/laravel-best-practices/rules/controller-api-resources.md
+- Laravel whenLoaded – Performance Optimization via Conditional Relationship Loading – Laravel News — https://laravel-news.com/laravel-whenloaded
+- Getting Single Record and API Resources – Laravel Daily — https://laraveldaily.com/lesson/api-laravel/getting-single-record-and-api-resources
+- Laravel API Resources with Relations: Methods to Avoid N+1 Query – Laravel Daily — https://laraveldaily.com/post/laravel-api-resources-with-relations-methods-to-avoid-n1-query
+- JSON:API Resource in Laravel 12.45 – Laravel News — https://laravel-news.com/jsonapi-resource-laravel-12-45
+- Eloquent: API Resources – Laravel 12.x (Vectorial1024 mirror) — https://github.com/Vectorial1024/docs/blob/12.x/eloquent-resources.md

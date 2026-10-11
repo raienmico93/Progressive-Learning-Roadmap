@@ -1,717 +1,1054 @@
-# `useState` — Comprehensive Programming Cheat Sheet
+# `useState` Hook — Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition**
+**Core Definition:** `useState` is a React Hook that lets you add a state variable to a function component, allowing the component to "remember" information between renders.
 
-`useState` is a React Hook that lets a functional component "remember" information between renders by declaring a state variable and a setter function to update it.
+**Technical Definition:** `useState` is a React Hook that accepts an initial state value and returns an array with exactly two elements: the current state value and a setter function. The setter function updates the state and triggers a re-render of the component. State is local to the component instance and persists across renders. `useState` must be called at the top level of a component or a custom Hook — never inside loops, conditions, or nested functions.
 
-**Technical Definition**
-
-`useState` accepts an initial state value (or a lazy initializer function) and returns an array pair: the current state snapshot for this render, and a setter function. React stores state externally in its Fiber tree, keyed by the Hook's call order. Calling the setter queues a re-render with the new value. State updates are asynchronous with respect to the running code—the state variable in the current render never changes; only the next render receives the updated value .
-
-**Beginner-Friendly Explanation**
-
-`useState` gives your component a memory. You tell it what to remember first, and it gives you back two things: the current value and a way to change it. When you change it, React re-renders your component with the new value.
+**Beginner-Friendly Explanation:** `useState` is how a component remembers things. When you call `useState`, you give it a starting value, and it gives you back two things: the current value and a function to change it. When you change the value, React updates the screen to reflect the new data. Think of it like a component's personal notebook: you write something down, you can change it later, and whenever it changes, React updates what you see.
 
 ### Key Characteristics
 
-- **Snapshot Behavior**: The state variable is a constant within a single render; calling the setter does not change it in the currently executing code .
-- **Lazy Initialization**: Passing a function to `useState` runs it only on the initial render, avoiding expensive recomputation .
-- **Immutable Updates**: Objects and arrays in state must be replaced with new copies, never mutated directly .
-- **Batched Updates**: React batches multiple state updates within the same event handler for performance .
-- **Stable Setter Identity**: The setter function has a stable identity across renders, so it can be safely omitted from dependency arrays .
+- **Hook-based:** Only usable in function components and custom Hooks, not in class components.
+- **Local scope:** State is private to the component instance; it is not shared across components.
+- **Asynchronous:** State updates are queued and do not take effect immediately.
+- **Batched:** React groups multiple state updates into a single re-render for performance.
+- **Immutable:** State values must never be mutated directly; new values must be created.
+- **Snapshot-based:** Each render receives a fixed snapshot of state that never changes within that render.
 
 ### Prerequisites
 
-- JavaScript functions, arrays, and objects
-- React functional components and JSX
-- Basic understanding of rendering and re-rendering
+- JavaScript fundamentals: variables, functions, objects, arrays, destructuring, spread operator.
+- Basic React function component syntax.
+- JSX syntax and expressions.
+- Understanding of rendering and re-renders.
 
 ### Related Programming Areas
 
-- **`useReducer`**: An alternative for complex state logic involving multiple sub-values .
-- **Props**: The other primary data source for components; unlike state, props are read-only and flow from parent to child.
-- **Custom Hooks**: `useState` is the building block for many custom Hooks that encapsulate reusable stateful logic.
-
-### Core Concepts / Features
-
-- Initial State
-- State Setters
-- Functional State Updates
-- Object State
-- Array State
-- Multiple State Variables
-- State Initialization Patterns
+- **`useReducer`** — an alternative for managing complex state objects with multiple sub-values.
+- **`useEffect`** — for synchronising state with external systems.
+- **`useContext`** — for sharing state across components without prop drilling.
+- **State management libraries** — Redux, Zustand, Jotai for global state.
 
 ---
 
-## 1. Initial State
+## 1. `useState`
 
 ### Definitions
 
-**Core Definition**
+**Core Definition:** `useState` is a React Hook that declares a state variable in a function component.
 
-Initial state is the value a state variable holds on the first render, provided as the argument to `useState`.
+**Technical Definition:** `useState(initialState)` returns an array with two values: the current state, initially matching `initialState`, and a set function that updates the state and triggers a re-render. The convention is to name state variables using array destructuring: `[something, setSomething]`.
 
-**Technical Definition**
-
-The argument passed to `useState` is used only during the initial render. React saves this value and ignores the argument on subsequent renders. If a function is passed, React treats it as a lazy initializer and calls it only once during initialization .
-
-**Beginner-Friendly Explanation**
-
-Initial state is the starting value—what the component remembers before the user does anything.
+**Beginner-Friendly Explanation:** `useState` is a function you call to create a piece of state. You give it a starting value, and it gives you back the current value and a function to change it.
 
 ### Purposes
 
-- To provide a starting value for a state variable.
-- To avoid `undefined` errors on the first render.
-- To set up the initial configuration of a component.
+- To add local state to function components.
+- To retain data between renders.
+- To trigger re-renders when state changes.
+- To make components interactive and dynamic.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
+**General Syntax:**
 
 ```jsx
-const [state, setState] = useState(initialValue);
-const [state, setState] = useState(() => computeExpensiveValue());
+import { useState } from 'react';
+
+const [state, setState] = useState(initialState);
 ```
 
-**Component Breakdown**
+**Component Breakdown:**
 
 | Component | Description |
 |-----------|-------------|
-| `initialValue` | Direct value used on first render only. |
-| `() => computeExpensiveValue()` | Lazy initializer function; called only once. |
+| `useState(initialState)` | Hook call that declares state. |
+| `state` | The current state value for this render. |
+| `setState` | Function to update the state and trigger re-render. |
+| `initialState` | The value used on the first render only. |
 
-**Syntax Rules**
+**Syntax Rules:**
 
-1. **Direct value**: For primitives and simple literals, pass the value directly.
-2. **Lazy initializer**: For expensive computations, pass a function. React calls it only during initialization .
-3. **Function identity matters**: Pass `createInitialTodos`, not `createInitialTodos()` .
+1. Call `useState` at the top level of a component or custom Hook.
+2. Use array destructuring to name the state variable and setter.
+3. The initial value is ignored after the first render.
 
-**Constraints and Limitations**
+**Constraints and Limitations:**
 
-- The initial value is ignored after the first render.
-- React may call initializer functions twice in development Strict Mode to verify purity .
+- Cannot be called inside loops or conditions.
+- Cannot be called in class components.
+- In Strict Mode, the initializer runs twice in development.
 
-### Annotated Complete Code Examples
-
-**Example 1: Direct Initial State**
+### Annotated Code Example
 
 ```jsx
+import { useState } from 'react';
+
 function Counter() {
-  // count starts at 0 on the first render
+  // Declare state 'count' with initial value 0
   const [count, setCount] = useState(0);
-
-  return <button onClick={() => setCount(count + 1)}>{count}</button>;
-}
-```
-
-**Expected Output (initial)**
-
-```
-0
-```
-
-**Why This Output Occurs**
-
-`useState(0)` stores `0` as the initial state. On the first render, `count` is `0`. React ignores the `0` argument on subsequent renders .
-
-**Example 2: Lazy Initial State**
-
-```jsx
-function TodoList() {
-  // createInitialTodos runs ONLY on the first render
-  const [todos, setTodos] = useState(createInitialTodos);
-  const [text, setText] = useState('');
 
   return (
     <div>
-      <input value={text} onChange={e => setText(e.target.value)} />
-      <button onClick={() => setTodos([...todos, { id: todos.length, text }])}>
-        Add
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
       </button>
     </div>
   );
 }
 ```
 
-**Why This Works**
+**Expected Output:** A paragraph showing "Count: 0" and a button. Clicking increments the count.
 
-Passing `createInitialTodos` (the function itself) means React calls it only during initialization. If you passed `createInitialTodos()`, it would run on every render, wasting computation .
+**Why this output:** `useState(0)` initialises `count` to 0. Clicking calls `setCount(1)`, which schedules a re-render. On the next render, `count` is 1.
 
 ### Real-World Cases
 
-**Case: Loading Settings from localStorage**
-
-A component initializes state from `localStorage` using a lazy initializer to avoid parsing the stored JSON on every render .
+- **Counters:** Tracking numeric values.
+- **Toggles:** Tracking boolean states (open/closed, on/off).
+- **Form inputs:** Storing the current value of text fields.
+- **API data:** Storing fetched data for display.
 
 ### References
 
-- React — Avoiding recreating the initial state - https://uk.react.dev/reference/react/useState
-- Vercel Labs — Use Lazy State Initialization - https://github.com/vercel-labs/agent-skills/blob/react-best-practices/skills/react-best-practices//references/rules/rerender-lazy-state-init.md
+- React — useState — https://react.dev/reference/react/useState
+- React — State: A Component's Memory — https://react.dev/learn/state-a-components-memory
 
 ---
 
-## 2. State Setters
+## 2. State Initialization
 
 ### Definitions
 
-**Core Definition**
+**Core Definition:** State initialization is the process of providing an initial value when a state variable is first declared.
 
-A state setter is the function returned by `useState` that updates the state variable and triggers a re-render.
+**Technical Definition:** The initial value passed to `useState` is used only during the first render. React ignores it on subsequent renders. If the initial value is expensive to compute, a function can be passed as an initializer; React will call it only once during initialisation and store its return value as the initial state.
 
-**Technical Definition**
-
-The setter function accepts either a new value or an updater function. When called, React queues a re-render and updates the stored state for the next render. The setter has a stable identity across renders. If the new value is identical to the current state (per `Object.is`), React skips the re-render .
-
-**Beginner-Friendly Explanation**
-
-The setter is how you change what your component remembers. Call it with a new value, and React will update the screen.
+**Beginner-Friendly Explanation:** When you create a state variable, you give it a starting value. This value is only used the first time the component renders.
 
 ### Purposes
 
-- To update state in response to user interactions.
-- To trigger re-renders when data changes.
-- To schedule state changes for the next render.
+- To set the starting value of a state variable.
+- To avoid expensive computations on every render.
+- To make initial state explicit and readable.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
+**Direct Initial Value:**
 
 ```jsx
-setState(newValue);
-setState(prevState => newValue);
+const [count, setCount] = useState(0);
 ```
 
-**Component Breakdown**
+**Lazy Initializer Function:**
 
-| Component | Description |
-|-----------|-------------|
-| `setState(newValue)` | Sets state to the given value. |
-| `setState(prev => ...)` | Receives pending state and returns new state. |
+```jsx
+const [todos, setTodos] = useState(() => createTodos());
+```
 
-**Syntax Rules**
+**Syntax Rules:**
 
-1. **State is a snapshot**: Calling the setter does not change the variable in the current render .
-2. **Stable identity**: The setter function is stable and can be safely omitted from dependency arrays .
-3. **Batching**: React batches multiple setters within the same event handler.
+1. The initial value is used only on the first render.
+2. Pass a function (not a function call) for expensive initialisation.
+3. The initializer function must be pure and take no arguments.
 
-**Constraints and Limitations**
+### Annotated Code Example
 
-- The setter has no return value.
-- Calling the setter does not update the current render's state variable.
+```jsx
+// ❌ Expensive computation runs on every render
+const [data, setData] = useState(expensiveComputation());
 
-### Annotated Complete Code Examples
+// ✅ Expensive computation runs only once
+const [data, setData] = useState(() => expensiveComputation());
 
-**Example 1: The Snapshot Behavior**
+function expensiveComputation() {
+  return Array.from({ length: 1000 }, (_, i) => i);
+}
+```
+
+**Expected Output:** The state is initialised with an array of 1000 numbers.
+
+**Why this output:** The function form `() => expensiveComputation()` is passed as the initializer. React calls it once during initialisation and uses the result. The non-function form runs `expensiveComputation()` on every render.
+
+### Real-World Cases
+
+- **Reading from localStorage:** Initialising state from persisted data.
+- **Computing derived initial state:** Parsing or transforming initial props.
+- **Expensive data structures:** Building large arrays or objects once.
+
+### References
+
+- React — useState: Avoiding recreating the initial state — https://react.dev/reference/react/useState#avoiding-recreating-the-initial-state
+- Vercel — Use Lazy State Initialization — https://github.com/mdresch/adpa/blob/main/skills/vercel-react-best-practices/rules/rerender-lazy-state-init.md
+
+---
+
+## 3. Lazy Initialization
+
+### Definitions
+
+**Core Definition:** Lazy initialization is the practice of passing a function to `useState` so that the initial value is computed only when needed, not on every render.
+
+**Technical Definition:** Without the function form, the initializer expression runs on every render even though the value is only used once. By passing a function, React calls it only during the initial render and stores its return value as the initial state.
+
+**Beginner-Friendly Explanation:** If computing the starting value is slow, you can give React a function instead of a value. React will call that function only once, saving time on every subsequent render.
+
+### Purposes
+
+- To avoid wasted computation on every render.
+- To improve performance for expensive initial values.
+- To read from external sources (localStorage, DOM) only once.
+
+### Syntax Rules and Structure
+
+```jsx
+const [state, setState] = useState(() => computeExpensiveValue());
+```
+
+**Syntax Rules:**
+
+1. Pass a function reference, not a function call.
+2. The initializer function takes no arguments.
+3. The function should be pure.
+
+### Annotated Code Example
+
+```jsx
+function FilteredList({ items }) {
+  // ❌ buildSearchIndex() runs on EVERY render
+  // const [searchIndex, setSearchIndex] = useState(buildSearchIndex(items));
+
+  // ✅ buildSearchIndex() runs ONLY on initial render
+  const [searchIndex, setSearchIndex] = useState(() => buildSearchIndex(items));
+  const [query, setQuery] = useState('');
+
+  return <SearchResults index={searchIndex} query={query} />;
+}
+```
+
+**Expected Output:** The search index is built once and reused across renders.
+
+**Why this output:** The lazy initializer function is called only during the first render. Subsequent renders skip the computation entirely.
+
+### Real-World Cases
+
+- **localStorage/sessionStorage:** Reading persisted state once.
+- **Building indexes:** Creating search indexes or maps.
+- **Reading from the DOM:** Measuring elements once on mount.
+- **Heavy transformations:** Parsing JSON or complex calculations.
+
+### References
+
+- Vercel — Use Lazy State Initialization — https://github.com/mdresch/adpa/blob/main/skills/vercel-react-best-practices/rules/rerender-lazy-state-init.md
+- Egghead — Use a lazy initializer with useState — https://egghead.io/lessons/react-use-a-lazy-initializer-with-usestate
+
+---
+
+## 4. State Updater Function
+
+### Definitions
+
+**Core Definition:** The state updater function is the second element returned by `useState`, used to update the state and trigger a re-render.
+
+**Technical Definition:** `setSomething(nextState)` accepts either a new state value or a function that computes the next state from the previous one. When a function is passed, it is treated as an updater function and is placed in a queue. During the next render, React applies all queued updaters to the previous state to compute the new state.
+
+**Beginner-Friendly Explanation:** The setter function is how you change state. You can give it the new value directly, or you can give it a function that receives the old value and returns the new one.
+
+### Purposes
+
+- To update a state variable's value.
+- To trigger a re-render with the new data.
+- To queue multiple updates safely using updater functions.
+
+### Syntax Rules and Structure
+
+**Direct Update:**
+
+```jsx
+setCount(5);
+```
+
+**Updater Function:**
+
+```jsx
+setCount(prev => prev + 1);
+```
+
+**Syntax Rules:**
+
+1. State updates are asynchronous; reading state immediately after setting gives the old value.
+2. Use updater functions when the new state depends on the previous state.
+3. Multiple updates in the same event handler are batched.
+
+### Annotated Code Example
 
 ```jsx
 function Counter() {
   const [count, setCount] = useState(0);
 
   function handleClick() {
-    setCount(count + 1);
-    console.log(count); // Still 0!
+    // ❌ Wrong: both use the same stale count (0)
+    // setCount(count + 1);
+    // setCount(count + 1);
+
+    // ✅ Correct: each updater receives the latest queued value
+    setCount(c => c + 1);
+    setCount(c => c + 1);
   }
 
-  return <button onClick={handleClick}>{count}</button>;
+  return <button onClick={handleClick}>+2</button>;
 }
 ```
 
-**Expected Output (after one click)**
+**Expected Output:** Clicking the button increments the count by 2.
 
-```
-Button displays: 1
-Console: 0
-```
-
-**Why This Output Occurs**
-
-`count` is a constant for this render. `setCount` schedules a re-render with the new value, but the local `count` variable remains `0` in the running handler .
+**Why this output:** The first setter receives the current count (0) and queues an update to 1. The second setter receives the queued value (1) and queues an update to 2.
 
 ### Real-World Cases
 
-**Case: Form Input**
-
-An input's `onChange` calls `setName(e.target.value)` to update the name state, which re-renders the input with the new value.
-
-### References
-
-- React — useState API Reference (set function) - https://zh-hans.react.dev/reference/react/useState
-
----
-
-## 3. Functional State Updates
-
-### Definitions
-
-**Core Definition**
-
-A functional state update is passing a function to the setter that receives the pending state and returns the next state, ensuring updates are based on the latest queued value.
-
-**Technical Definition**
-
-When multiple updates are queued within a single event handler, passing a value to the setter uses the snapshot value from that render. Passing an updater function queues the function, and React calls them in order during the next render, each receiving the result of the previous update .
-
-**Beginner-Friendly Explanation**
-
-If you need to update state multiple times in a row, use a function instead of a value. That way, each update builds on the last one, instead of all using the same old value.
-
-### Purposes
-
-- To correctly queue multiple state updates in one handler.
-- To update state based on its previous value.
-- To avoid stale closures in async code.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```jsx
-setState(prev => nextState);
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|-----------|-------------|
-| `prev` | The pending state value. |
-| `=> nextState` | Return the next state. |
-
-**Syntax Rules**
-
-1. **Use for sequential updates**: When multiple updates must accumulate.
-2. **Use in timers/async**: Prevents stale closure issues.
-
-### Annotated Complete Code Examples
-
-**Example 1: Incorrect vs. Correct Sequential Updates**
-
-```jsx
-// ❌ All three use the same count (0)
-setCount(count + 1);
-setCount(count + 1);
-setCount(count + 1);
-// Result: count becomes 1
-
-// ✅ Each receives the pending state
-setCount(c => c + 1);
-setCount(c => c + 1);
-setCount(c => c + 1);
-// Result: count becomes 3
-```
-
-**Explanation**
-
-With direct values, all three calls compute `0 + 1 = 1`. With updater functions, React queues them and calls each with the latest pending state, producing `3` .
-
-### Real-World Cases
-
-**Case: Shopping Cart**
-
-Adding multiple items rapidly uses `setCart(prev => [...prev, item])` to ensure each item is added to the latest cart state.
+- **Counters:** Incrementing values safely.
+- **Todo lists:** Adding items based on previous state.
+- **Shopping carts:** Updating quantities.
+- **Form state:** Toggling checkboxes.
 
 ### References
 
-- React — Updating state based on the previous state - https://zh-hans.react.dev/reference/react/useState
+- React — Queueing a Series of State Updates — https://react.dev/learn/queueing-a-series-of-state-updates
+- React — useState: set functions — https://react.dev/reference/react/useState#setstate
 
 ---
 
-## 4. Object State
+## 5. Functional Updates
 
 ### Definitions
 
-**Core Definition**
+**Core Definition:** Functional updates are state updates where you pass a function to the setter instead of a direct value, ensuring the update is based on the latest state.
 
-Object state is state whose value is a JavaScript object, requiring new object creation for updates rather than mutation.
+**Technical Definition:** When updating state based on the current state value, the functional update form `setState(prev => newState)` should be used instead of directly referencing the state variable. This prevents stale closures, eliminates unnecessary dependencies, and creates stable callback references.
 
-**Technical Definition**
-
-Objects in state are treated as immutable snapshots. To update a property, create a new object with the changed property, typically using the spread operator. React compares object references to determine if a re-render is needed .
-
-**Beginner-Friendly Explanation**
-
-State objects are like a sealed box. You can't change what's inside—you have to make a new box with the changes.
+**Beginner-Friendly Explanation:** If you need to change state based on its current value, use a function instead of the value itself. This ensures you always work with the latest state.
 
 ### Purposes
 
-- To group related state fields into one object.
-- To manage form data with multiple fields.
-- To represent structured data (user, settings, configuration).
+- To prevent stale closures in asynchronous code.
+- To safely update state multiple times in one event handler.
+- To eliminate unnecessary dependencies in `useCallback` and `useEffect`.
+- To create stable callback references.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
-
 ```jsx
-setState({ ...prev, field: newValue });
+setState(prevState => nextState);
 ```
 
-**Component Breakdown**
+**Syntax Rules:**
 
-| Component | Description |
-|-----------|-------------|
-| `...prev` | Copy all existing properties. |
-| `field: newValue` | Override the changed property. |
+1. The updater function receives the pending state as its only argument.
+2. It must be pure and return the next state.
+3. Use functional updates whenever the new state depends on the previous state.
 
-**Syntax Rules**
-
-1. **Never mutate**: Do not write `state.field = value` .
-2. **Spread for shallow copy**: `{ ...prev, field: value }`.
-3. **Nested objects require multiple spreads**: `{ ...prev, nested: { ...prev.nested, key: value } }` .
-
-### Annotated Complete Code Examples
-
-**Example 1: Updating a Form Object**
+### Annotated Code Example
 
 ```jsx
-function Form() {
-  const [person, setPerson] = useState({
-    firstName: 'Barbara',
-    lastName: 'Hepworth',
-    email: '[email protected]'
-  });
+function Chat() {
+  const [messages, setMessages] = useState([]);
 
-  function handleChange(e) {
-    setPerson({
-      ...person,
-      [e.target.name]: e.target.value
-    });
+  function sendMessage(text) {
+    // ✅ Functional update: always works on the latest messages
+    setMessages(prev => [...prev, text]);
   }
 
   return (
-    <form>
-      <input name="firstName" value={person.firstName} onChange={handleChange} />
-      <input name="lastName" value={person.lastName} onChange={handleChange} />
-      <input name="email" value={person.email} onChange={handleChange} />
-    </form>
+    <button onClick={() => sendMessage('Hello')}>
+      Send ({messages.length})
+    </button>
   );
 }
 ```
 
-**Explanation**
+**Expected Output:** Clicking appends "Hello" to the messages list and updates the count.
 
-The spread operator copies all existing fields, and the computed property `[e.target.name]` overrides only the field that changed. This is the standard pattern for multi-field forms .
-
-### Real-World Cases
-
-**Case: User Settings**
-
-A settings form stores theme, notifications, and language in one object, updating individual fields with spread.
-
-### References
-
-- React — Updating Objects in State - https://ar.react.dev/learn/updating-objects-in-state
-- React — Immutability Lint Rule - https://de.react.dev/reference/eslint-plugin-react-hooks/lints/immutability
-
----
-
-## 5. Array State
-
-### Definitions
-
-**Core Definition**
-
-Array state is state whose value is a JavaScript array, requiring new array creation for updates rather than mutation.
-
-**Technical Definition**
-
-Arrays in state are immutable. Use non-mutating methods (`map`, `filter`, `concat`, spread) to create new arrays. Mutating methods (`push`, `pop`, `splice`, `sort`, `reverse`) must be avoided or used on a copy .
-
-**Beginner-Friendly Explanation**
-
-State arrays are like a numbered list on a whiteboard. To change an item, you don't erase and rewrite—you make a new list with the change.
-
-### Purposes
-
-- To manage collections of items (todos, messages, products).
-- To add, remove, or update items in a list.
-- To maintain ordered data.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```jsx
-// Add
-setItems([...items, newItem]);
-setItems(items => [...items, newItem]);
-
-// Remove
-setItems(items.filter(item => item.id !== id));
-
-// Update
-setItems(items.map(item => item.id === id ? { ...item, done: true } : item));
-```
-
-**Syntax Rules**
-
-1. **Use `concat` or spread to add**: `[...items, newItem]` .
-2. **Use `filter` to remove**: Creates a new array without the removed item.
-3. **Use `map` to update**: Returns a new array with the changed item .
-4. **Copy before `sort`/`reverse`**: `[...items].sort()` .
-
-### Annotated Complete Code Examples
-
-**Example 1: Todo List Operations**
-
-```jsx
-function TodoList() {
-  const [todos, setTodos] = useState([
-    { id: 1, text: 'Learn React', done: true },
-    { id: 2, text: 'Build app', done: false }
-  ]);
-
-  const addTodo = (text) => {
-    setTodos([...todos, { id: Date.now(), text, done: false }]);
-  };
-
-  const toggleTodo = (id) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, done: !todo.done } : todo
-    ));
-  };
-
-  const removeTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id));
-  };
-
-  return (
-    <ul>
-      {todos.map(todo => (
-        <li key={todo.id}>
-          <input type="checkbox" checked={todo.done} onChange={() => toggleTodo(todo.id)} />
-          {todo.text}
-          <button onClick={() => removeTodo(todo.id)}>Delete</button>
-        </li>
-      ))}
-    </ul>
-  );
-}
-```
-
-**Explanation**
-
-Each operation creates a new array. `addTodo` spreads the old array and appends. `toggleTodo` maps and returns a new object for the changed item. `removeTodo` filters out the item .
+**Why this output:** The functional update `prev => [...prev, text]` receives the latest queued state, so no messages are lost even if multiple messages are sent quickly.
 
 ### Real-World Cases
 
-**Case: Chat Messages**
-
-Messages are stored in an array, appended with spread, and filtered for deletion.
+- **Chat applications:** Appending messages safely.
+- **Debounced search:** Reading the latest query in a debounced callback.
+- **Timers:** Incrementing counters inside `setInterval`.
+- **WebSocket handlers:** Updating state when messages arrive.
 
 ### References
 
-- React — Updating Arrays in State - https://zh-hans.react.dev/learn/updating-arrays-in-state
-- React — Immutability Lint Rule (Array push) - https://de.react.dev/reference/eslint-plugin-react-hooks/lints/immutability
+- Vercel — Use Functional setState Updates — https://github.com/sickn33/agentic-awesome-skills/blob/main/skills/react-best-practices/rules/rerender-functional-setstate.md
+- React — Queueing a Series of State Updates — https://react.dev/learn/queueing-a-series-of-state-updates
 
 ---
 
-## 6. Multiple State Variables
+## 6. State Destructuring
 
 ### Definitions
 
-**Core Definition**
+**Core Definition:** State destructuring is the use of array destructuring to extract the state value and setter from the array returned by `useState`.
 
-Multiple state variables means calling `useState` multiple times in a single component, each creating an independent piece of state.
+**Technical Definition:** `useState` returns an array with exactly two elements. Array destructuring assigns these to named variables: `const [state, setState] = useState(initialState)`. The convention is to name the setter with a `set` prefix followed by the state name.
 
-**Technical Definition**
-
-React identifies each `useState` call by its order of execution during render. The first call gets the first state slot, the second gets the second, and so on. Each state variable is independent and updates trigger re-renders of the component .
-
-**Beginner-Friendly Explanation**
-
-You can give your component multiple memories. One for the count, one for the name, one for the color. They don't interfere with each other.
+**Beginner-Friendly Explanation:** `useState` gives you back an array of two things. Destructuring lets you give them names, like `[count, setCount]`.
 
 ### Purposes
 
-- To manage multiple independent values.
-- To separate unrelated state for clarity.
-- To avoid a single complex state object.
+- To give meaningful names to the state value and setter.
+- To follow React's naming convention.
+- To make code readable and consistent.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
-
 ```jsx
-const [count, setCount] = useState(0);
-const [name, setName] = useState('');
-const [isActive, setIsActive] = useState(false);
+const [something, setSomething] = useState(initialValue);
 ```
 
-**Component Breakdown**
+**Syntax Rules:**
 
-| Component | Description |
-|-----------|-------------|
-| First `useState` | State slot 1 |
-| Second `useState` | State slot 2 |
-| Third `useState` | State slot 3 |
+1. The first element is the current state.
+2. The second element is the setter function.
+3. The naming convention is `[thing, setThing]`.
 
-**Syntax Rules**
-
-1. **Order matters**: Hooks must be called in the same order every render .
-2. **Independent updates**: Changing one state does not affect others.
-
-### Annotated Complete Code Examples
-
-**Example 1: Independent State Variables**
+### Annotated Code Example
 
 ```jsx
 function Profile() {
-  const [name, setName] = useState('John');
+  const [name, setName] = useState('Alice');
   const [age, setAge] = useState(30);
-  const [isActive, setIsActive] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   return (
     <div>
       <p>{name}, {age}</p>
-      <button onClick={() => setAge(age + 1)}>Birthday</button>
-      <button onClick={() => setIsActive(!isActive)}>
-        {isActive ? 'Deactivate' : 'Activate'}
+      <button onClick={() => setIsAdmin(!isAdmin)}>
+        {isAdmin ? 'Admin' : 'User'}
       </button>
     </div>
   );
 }
 ```
 
-**Explanation**
+**Expected Output:** A profile showing name and age, with a toggle for admin status.
 
-Three independent state variables. Clicking "Birthday" only updates `age`; clicking "Deactivate" only updates `isActive`. They do not interfere .
+**Why this output:** Each `useState` call returns an array that is destructured into a named value and setter.
 
 ### Real-World Cases
 
-**Case: Search Component**
-
-A search component uses separate state for `query`, `results`, `isLoading`, and `error`, keeping each concern isolated.
+- **All function components:** Destructuring is the standard way to use `useState`.
+- **Multiple state variables:** Each state variable gets its own `useState` call.
 
 ### References
 
-- LabEx — Can I use multiple states? - https://labex.io/questions/can-i-use-multiple-states-270832
-- Epic React — All useState Hooks Are Overwriting the Same State - https://www.epicreact.dev/tutorials/build-react-hooks/all-usestate-hooks-are-overwriting-the-same-state
+- React — useState — https://react.dev/reference/react/useState
 
 ---
 
-## 7. State Initialization Patterns
+## 7. Multiple State Variables
 
 ### Definitions
 
-**Core Definition**
+**Core Definition:** Multiple state variables are separate `useState` calls used to manage independent pieces of state within a single component.
 
-State initialization patterns are techniques for providing the initial value of state, ranging from direct values to lazy functions and component key resets.
+**Technical Definition:** React allows multiple `useState` calls in the same component. Each call creates an independent state variable with its own setter. This is preferred over storing everything in a single object because it keeps state updates simple and avoids unnecessary object spreading.
 
-**Technical Definition**
-
-React supports several patterns: passing a direct value, passing a lazy initializer function, and resetting state by changing a component's `key` prop. Each serves different use cases and performance characteristics .
-
-**Beginner-Friendly Explanation**
-
-There are different ways to tell a component what to remember first. For simple things, just give the value. For expensive things, give a function. For resetting everything, change the key.
+**Beginner-Friendly Explanation:** You can have as many state variables as you need. Each one is separate and independent.
 
 ### Purposes
 
-- To initialize state with static values.
-- To avoid expensive computations on every render.
-- To reset component state cleanly.
+- To manage multiple independent pieces of state.
+- To keep state updates simple and focused.
+- To avoid unnecessary object spreading.
+- To improve readability and maintainability.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax (Direct)**
-
 ```jsx
-const [count, setCount] = useState(0);
+const [name, setName] = useState('');
+const [age, setAge] = useState(0);
+const [isAdmin, setIsAdmin] = useState(false);
 ```
 
-**Complete General Syntax (Lazy)**
+**Syntax Rules:**
+
+1. Each `useState` call creates a separate state variable.
+2. State variables are independent of each other.
+3. Use multiple state variables when the values do not change together.
+
+### Annotated Code Example
 
 ```jsx
-const [data, setData] = useState(() => expensiveComputation());
-```
+function UserForm() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
 
-**Complete General Syntax (Key Reset)**
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log({ firstName, lastName, email });
+  }
 
-```jsx
-<Form key={version} />
-```
-
-**Syntax Rules**
-
-1. **Direct for cheap values**: Numbers, strings, booleans, simple objects .
-2. **Lazy for expensive values**: `localStorage` reads, large arrays, transformations .
-3. **Key for reset**: Changing `key` remounts the component with fresh state .
-
-**Constraints and Limitations**
-
-- Lazy initializers should be pure.
-- Key resets destroy all state in the component and its children.
-
-### Annotated Complete Code Examples
-
-**Example 1: Lazy Initialization from localStorage**
-
-```jsx
-function SettingsForm() {
-  // JSON.parse runs only on the first render
-  const [settings, setSettings] = useState(() => {
-    const stored = localStorage.getItem('settings');
-    return stored ? JSON.parse(stored) : {};
-  });
-
-  return <form>{/* settings fields */}</form>;
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First" />
+      <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last" />
+      <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+      <button type="submit">Submit</button>
+    </form>
+  );
 }
 ```
 
-**Explanation**
+**Expected Output:** A form with three independent inputs.
 
-Without the lazy initializer, `JSON.parse` would run on every render even though the result is only used once. The function form ensures it runs only during initialization .
+**Why this output:** Each field has its own state variable and setter, so updating one field does not affect the others.
 
-**Example 2: Resetting State with Key**
+### Real-World Cases
+
+- **Forms:** Separate state for each field.
+- **UI state:** Separate booleans for different UI toggles.
+- **Pagination:** Separate state for page and page size.
+
+### References
+
+- React — Choosing the State Structure — https://react.dev/learn/choosing-the-state-structure
+
+---
+
+## 8. State with Objects
+
+### Definitions
+
+**Core Definition:** State with objects involves storing an object as a state value, requiring immutable updates when changing any property.
+
+**Technical Definition:** Unlike class component `setState`, `useState` does not automatically merge update objects. You must create a new object by spreading the existing state and overriding the changed properties. React compares state by reference, so mutating an object does not trigger a re-render.
+
+**Beginner-Friendly Explanation:** If your state is an object, you cannot change just one property. You have to copy the whole object, change the property you want, and give the new object to React.
+
+### Purposes
+
+- To store related data together in a single state variable.
+- To manage complex data structures like user profiles or settings.
+
+### Syntax Rules and Structure
 
 ```jsx
-function App() {
-  const [version, setVersion] = useState(0);
+const [user, setUser] = useState({ name: 'Alice', age: 30 });
+
+// Update one property
+setUser({ ...user, name: 'Bob' });
+```
+
+**Syntax Rules:**
+
+1. Always spread the existing object when updating.
+2. Never mutate nested objects directly; copy each level that changes.
+3. Shallow copying only copies the top level.
+
+### Annotated Code Example
+
+```jsx
+function UserProfile() {
+  const [user, setUser] = useState({
+    name: 'Alice',
+    address: { city: 'London', country: 'UK' },
+  });
+
+  function updateCity(newCity) {
+    // ✅ Copy each level that changes
+    setUser({
+      ...user,
+      address: {
+        ...user.address,
+        city: newCity,
+      },
+    });
+  }
 
   return (
     <div>
-      <button onClick={() => setVersion(version + 1)}>Reset</button>
-      <Form key={version} />
+      <p>{user.name} lives in {user.address.city}</p>
+      <button onClick={() => updateCity('Paris')}>Move to Paris</button>
     </div>
   );
 }
 ```
 
-**Explanation**
+**Expected Output:** The city updates to Paris when the button is clicked.
 
-When `version` changes, the `key` on `<Form />` changes. React unmounts the old `Form` and mounts a new one with fresh state, effectively resetting the form .
+**Why this output:** A new top-level object and a new nested `address` object are created, so React detects the change and re-renders.
 
 ### Real-World Cases
 
-**Case: Multi-Step Form Reset**
-
-After successful submission, incrementing a `version` state and passing it as a `key` to the form resets all fields.
+- **User profiles:** Storing name, email, address.
+- **Settings:** Storing multiple configuration options.
+- **Form state:** Storing form data as an object.
 
 ### References
 
-- React — Avoiding recreating the initial state - https://uk.react.dev/reference/react/useState
-- React — Resetting state with a key - https://18.react.dev/reference/react/useState
-- Vercel Labs — Use Lazy State Initialization - https://github.com/vercel-labs/agent-skills/blob/react-best-practices/skills/react-best-practices//references/rules/rerender-lazy-state-init.md
+- React — Updating Objects in State — https://react.dev/learn/updating-objects-in-state
+
+---
+
+## 9. State with Arrays
+
+### Definitions
+
+**Core Definition:** State with arrays involves storing an array as a state value, requiring immutable updates when adding, removing, or modifying items.
+
+**Technical Definition:** Arrays in React state must be treated as immutable. Methods like `push()`, `pop()`, `splice()`, and `sort()` mutate the original array and must be avoided. Instead, create a new array using the spread operator or methods like `filter()`, `map()`, and `concat()`.
+
+**Beginner-Friendly Explanation:** If your state is an array, you cannot use `push` to add items. You have to create a new array with the changes you want.
+
+### Purposes
+
+- To store lists of data (todos, messages, items).
+- To manage dynamic collections that change over time.
+
+### Syntax Rules and Structure
+
+```jsx
+const [items, setItems] = useState([]);
+
+// Add
+setItems([...items, newItem]);
+
+// Remove
+setItems(items.filter(i => i.id !== id));
+
+// Update
+setItems(items.map(i => i.id === id ? { ...i, done: true } : i));
+```
+
+**Syntax Rules:**
+
+1. Never mutate the array directly.
+2. Use spread to create a new array.
+3. Use `filter`, `map`, and `concat` for transformations.
+
+### Annotated Code Example
+
+```jsx
+function TodoList() {
+  const [todos, setTodos] = useState([]);
+  const [input, setInput] = useState('');
+
+  function addTodo() {
+    setTodos([...todos, { id: Date.now(), text: input, done: false }]);
+    setInput('');
+  }
+
+  function toggleTodo(id) {
+    setTodos(todos.map(t =>
+      t.id === id ? { ...t, done: !t.done } : t
+    ));
+  }
+
+  function removeTodo(id) {
+    setTodos(todos.filter(t => t.id !== id));
+  }
+
+  return (
+    <div>
+      <input value={input} onChange={(e) => setInput(e.target.value)} />
+      <button onClick={addTodo}>Add</button>
+      <ul>
+        {todos.map(t => (
+          <li key={t.id}>
+            <span style={{ textDecoration: t.done ? 'line-through' : 'none' }}
+                  onClick={() => toggleTodo(t.id)}>
+              {t.text}
+            </span>
+            <button onClick={() => removeTodo(t.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+**Expected Output:** A todo list where items can be added, toggled, and removed.
+
+**Why this output:** Each operation creates a new array, so React detects the change and re-renders.
+
+### Real-World Cases
+
+- **Todo lists:** Adding, toggling, and removing items.
+- **Chat messages:** Appending new messages.
+- **Shopping carts:** Adding and removing products.
+- **Data tables:** Sorting and filtering rows.
+
+### References
+
+- React — Updating Arrays in State — https://react.dev/learn/updating-arrays-in-state
+
+---
+
+## 10. State with Primitives
+
+### Definitions
+
+**Core Definition:** State with primitives involves storing simple values like numbers, strings, or booleans as state.
+
+**Technical Definition:** Primitives (numbers, strings, booleans, `null`, `undefined`) are immutable by nature. Updating primitive state simply means passing the new value to the setter. No spreading or copying is required.
+
+**Beginner-Friendly Explanation:** For simple values like numbers and strings, you just give the new value to the setter.
+
+### Purposes
+
+- To track simple values like counts, names, and toggles.
+- To avoid unnecessary complexity for simple data.
+
+### Syntax Rules and Structure
+
+```jsx
+const [count, setCount] = useState(0);
+const [name, setName] = useState('');
+const [isOn, setIsOn] = useState(false);
+```
+
+**Syntax Rules:**
+
+1. Primitive state updates are direct.
+2. No spreading or copying is needed.
+3. Use functional updates when the new value depends on the previous value.
+
+### Annotated Code Example
+
+```jsx
+function Toggle() {
+  const [isOn, setIsOn] = useState(false);
+
+  return (
+    <button onClick={() => setIsOn(!isOn)}>
+      {isOn ? 'ON' : 'OFF'}
+    </button>
+  );
+}
+```
+
+**Expected Output:** A button that toggles between ON and OFF.
+
+**Why this output:** `isOn` is a boolean primitive. The setter is called with the new boolean value.
+
+### Real-World Cases
+
+- **Counters:** Incrementing numeric values.
+- **Toggles:** Boolean on/off states.
+- **Text inputs:** String values.
+- **Loading flags:** Boolean loading states.
+
+### References
+
+- React — State: A Component's Memory — https://react.dev/learn/state-a-components-memory
+
+---
+
+## 11. State Batching
+
+### Definitions
+
+**Core Definition:** State batching is React's practice of grouping multiple state updates into a single re-render for performance.
+
+**Technical Definition:** When multiple state setters are called within the same event handler, React batches them and performs a single re-render after all the code has run. Since React 18, automatic batching is enabled by default, meaning updates are batched even inside promises, `setTimeout`, and native event handlers.
+
+**Beginner-Friendly Explanation:** If you change several pieces of state at once, React waits and updates everything together in one go.
+
+### Purposes
+
+- To improve performance by reducing re-renders.
+- To avoid inconsistent UI states during multiple updates.
+- To ensure state updates from a single event are processed together.
+
+### Syntax Rules and Structure
+
+```jsx
+function handleClick() {
+  setCount(c => c + 1);   // Queued
+  setFlag(f => !f);       // Queued
+  // React batches these into ONE re-render
+}
+```
+
+**Syntax Rules:**
+
+1. React batches updates within event handlers by default.
+2. React 18 batches all updates by default, including async code.
+3. To opt out, use `flushSync` (rarely recommended).
+
+### Annotated Code Example
+
+```jsx
+function BatchingExample() {
+  const [count, setCount] = useState(0);
+  const [flag, setFlag] = useState(false);
+
+  function handleClick() {
+    setCount(c => c + 1);
+    setFlag(f => !f);
+    // React batches these into ONE re-render
+  }
+
+  return (
+    <button onClick={handleClick}>
+      Count: {count}, Flag: {String(flag)}
+    </button>
+  );
+}
+```
+
+**Expected Output:** Clicking updates both `count` and `flag` in a single re-render.
+
+**Why this output:** Both setters are called in the same event handler. React queues both updates and processes them together after the handler finishes.
+
+### Real-World Cases
+
+- **Form submissions:** Updating multiple fields before a single re-render.
+- **Complex UI state:** Toggling multiple flags together.
+- **Data fetching:** Setting data, loading, and error states together.
+
+### References
+
+- React — Queueing a Series of State Updates — https://react.dev/learn/queueing-a-series-of-state-updates
+- React Blog — Automatic batching in React 18 — https://reactjs.org/blog/2022/03/29/react-v18.html
+
+---
+
+## 12. State Update Ordering
+
+### Definitions
+
+**Core Definition:** State update ordering refers to the sequence in which queued state updates are processed by React.
+
+**Technical Definition:** React processes state updates in the order they were queued. When multiple updater functions are queued for the same state variable, they are applied in order, with each receiving the result of the previous update. React may batch updates, but it does not change their order.
+
+**Beginner-Friendly Explanation:** If you update the same state multiple times, React processes them in the order you called them.
+
+### Purposes
+
+- To understand how multiple updates to the same state are processed.
+- To ensure correct state transitions when multiple updates are queued.
+
+### Syntax Rules and Structure
+
+```jsx
+setCount(c => c + 1); // Applied first
+setCount(c => c + 1); // Applied second
+// Final: count increased by 2
+```
+
+**Syntax Rules:**
+
+1. Updates are processed in the order they were queued.
+2. Each updater receives the result of the previous update.
+3. Batching does not change the order of updates.
+
+### Annotated Code Example
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    setCount(c => c + 1);  // Queue 1: 0 → 1
+    setCount(c => c + 1);  // Queue 2: 1 → 2
+    setCount(c => c + 1);  // Queue 3: 2 → 3
+  }
+
+  return <button onClick={handleClick}>Count: {count}</button>;
+}
+```
+
+**Expected Output:** Clicking increments the count by 3.
+
+**Why this output:** React processes the three queued updaters in order, each receiving the result of the previous one. The final state is 3.
+
+### Real-World Cases
+
+- **Multi-step updates:** Incrementing by multiple values in one event.
+- **Complex state transitions:** Applying multiple transformations in sequence.
+
+### References
+
+- React — Queueing a Series of State Updates — https://react.dev/learn/queueing-a-series-of-state-updates
+
+---
+
+## 13. State Update Pitfalls
+
+### Definitions
+
+**Core Definition:** State update pitfalls are common mistakes developers make when updating React state, leading to bugs or unexpected behaviour.
+
+**Technical Definition:** Common pitfalls include direct mutation of state, stale closures in async code, relying on state immediately after setting it, storing redundant or derived state, and violating the Rules of Hooks. Understanding these pitfalls is essential for writing correct React code.
+
+**Beginner-Friendly Explanation:** These are the traps that catch developers when working with state.
+
+### Common Pitfalls
+
+| Pitfall | Problem | Solution |
+|---------|---------|----------|
+| Direct mutation | No re-render; state appears unchanged | Create a new object/array |
+| Stale closure | Async code reads old state | Use functional updates |
+| Reading state after setter | Gets old value | Use `useEffect` to react to changes |
+| Redundant state | Synchronisation bugs | Derive during render |
+| Conditional Hook | Breaks Hook order | Always call Hooks at the top level |
+| State in render | Infinite loop | Use `useEffect` for side effects |
+
+### Annotated Code Examples
+
+**Pitfall 1: Direct Mutation**
+
+```jsx
+// ❌ Wrong
+items.push(newItem);
+setItems(items); // Same reference — no re-render
+
+// ✅ Correct
+setItems([...items, newItem]);
+```
+
+**Pitfall 2: Stale Closure**
+
+```jsx
+// ❌ Wrong
+setTimeout(() => {
+  setCount(count + 1); // Uses stale count
+}, 1000);
+
+// ✅ Correct
+setTimeout(() => {
+  setCount(c => c + 1); // Always latest
+}, 1000);
+```
+
+**Pitfall 3: Redundant State**
+
+```jsx
+// ❌ Wrong
+const [items, setItems] = useState([]);
+const [total, setTotal] = useState(0);
+
+// ✅ Correct
+const [items, setItems] = useState([]);
+const total = items.reduce((sum, item) => sum + item.price, 0);
+```
+
+**Expected Output:** The correct versions behave predictably; the incorrect versions cause bugs.
+
+**Why this output:** Direct mutation does not trigger re-renders. Stale closures read old state. Redundant state desynchronises.
+
+### Real-World Cases
+
+- **Debugging:** Identifying why state is not updating.
+- **Code reviews:** Catching common state mistakes.
+- **Performance:** Avoiding unnecessary re-renders from redundant state.
+
+### References
+
+- React — Choosing the State Structure — https://react.dev/learn/choosing-the-state-structure
+- Refine — 5 Most Common useState Mistakes — https://refine.dev/blog/common-usestate-mistakes
+
+---
+
+## 14. `useState` Best Practices
+
+### Definitions
+
+**Core Definition:** `useState` best practices are guidelines for using the Hook effectively, safely, and maintainably.
+
+**Technical Definition:** Best practices encompass using functional updates when state depends on previous state, avoiding redundant and derived state, using lazy initialization for expensive initial values, grouping related state logically, and keeping state as local as possible. These practices improve code quality, prevent bugs, and align with React's recommendations.
+
+**Beginner-Friendly Explanation:** Best practices are the "do's and don'ts" that experienced React developers follow to keep their code clean and bug-free.
+
+### Best Practices Table
+
+| Practice | Description |
+|----------|-------------|
+| Use functional updates | When new state depends on previous state. |
+| Avoid redundant state | Derive values during render instead of storing them. |
+| Use lazy initialization | For expensive initial values. |
+| Keep state local | Lift state only when necessary. |
+| Group related state | Use objects for values that change together. |
+| Avoid contradictory state | Do not store values that can be derived from each other. |
+| Use multiple state variables | For independent values. |
+
+### Annotated Code Examples
+
+**✅ Good Practices:**
+
+```jsx
+// Functional update for dependent state
+setCount(c => c + 1);
+
+// Lazy initialization for expensive values
+const [index, setIndex] = useState(() => buildIndex(items));
+
+// Derived state computed during render
+const total = items.reduce((sum, item) => sum + item.price, 0);
+
+// Multiple independent state variables
+const [name, setName] = useState('');
+const [age, setAge] = useState(0);
+```
+
+**❌ Bad Practices:**
+
+```jsx
+// Stale closure
+setCount(count + 1);
+
+// Expensive computation on every render
+const [index, setIndex] = useState(buildIndex(items));
+
+// Redundant state
+const [total, setTotal] = useState(0);
+
+// Contradictory state
+const [isLoading, setIsLoading] = useState(false);
+const [isError, setIsError] = useState(false);
+const [isSuccess, setIsSuccess] = useState(false);
+```
+
+**Expected Output:** The good practices produce predictable, performant code.
+
+**Why this output:** Functional updates prevent stale closures. Lazy initialization avoids wasted computation. Derived state stays in sync. Multiple state variables keep updates simple.
+
+### Real-World Cases
+
+- **All React applications:** These practices apply universally.
+- **Code reviews:** Best practices are enforced through ESLint and review checklists.
+- **Performance optimisation:** Avoiding redundant state and using lazy initialization improves performance.
+
+### References
+
+- React — Choosing the State Structure — https://react.dev/learn/choosing-the-state-structure
+- LogRocket — React Hooks cheat sheet: Best practices — https://blog.logrocket.com/react-hooks-cheat-sheet-simple-examples
+- Vercel — React Best Practices — https://github.com/sickn33/agentic-awesome-skills
 
 ---
 
 ## References
 
-- React — useState API Reference - https://uk.react.dev/reference/react/useState
-- React — useState API Reference (React 18) - https://18.react.dev/reference/react/useState
-- React — useState API Reference (Chinese) - https://zh-hans.react.dev/reference/react/useState
-- React — Updating Objects in State - https://ar.react.dev/learn/updating-objects-in-state
-- React — Updating Arrays in State - https://zh-hans.react.dev/learn/updating-arrays-in-state
-- React — Immutability Lint Rule - https://de.react.dev/reference/eslint-plugin-react-hooks/lints/immutability
-- React — Built-in React Hooks - https://18.react.dev/reference/react/hooks
-- React — Hooks API Reference (useReducer) - https://ru.react.js.org/docs/hooks-reference.html
-- Vercel Labs — Use Lazy State Initialization - https://github.com/vercel-labs/agent-skills/blob/react-best-practices/skills/react-best-practices//references/rules/rerender-lazy-state-init.md
-- LabEx — Can I use multiple states? - https://labex.io/questions/can-i-use-multiple-states-270832
-- Epic React — All useState Hooks Are Overwriting the Same State - https://www.epicreact.dev/tutorials/build-react-hooks/all-usestate-hooks-are-overwriting-the-same-state
-- GitHub — useState initial value and lazy initialization - https://raw.githubusercontent.com/rohan-paul/Awesome-JavaScript-Interviews/33d091e5666c4ef41574d75e69d5b0d398a25d0e/React/Hooks/useState-replace-componentWillReceiveProps-getDerivedStateFromProps.md
+- React — useState — https://react.dev/reference/react/useState
+- React — State: A Component's Memory — https://react.dev/learn/state-a-components-memory
+- React — Queueing a Series of State Updates — https://react.dev/learn/queueing-a-series-of-state-updates
+- React — Updating Objects in State — https://react.dev/learn/updating-objects-in-state
+- React — Updating Arrays in State — https://react.dev/learn/updating-arrays-in-state
+- React — Choosing the State Structure — https://react.dev/learn/choosing-the-state-structure
+- React Blog — Automatic batching in React 18 — https://reactjs.org/blog/2022/03/29/react-v18.html
+- Vercel — Use Lazy State Initialization — https://github.com/mdresch/adpa/blob/main/skills/vercel-react-best-practices/rules/rerender-lazy-state-init.md
+- Vercel — Use Functional setState Updates — https://github.com/sickn33/agentic-awesome-skills/blob/main/skills/react-best-practices/rules/rerender-functional-setstate.md
+- Refine — 5 Most Common useState Mistakes — https://refine.dev/blog/common-usestate-mistakes
+- LogRocket — React Hooks cheat sheet: Best practices — https://blog.logrocket.com/react-hooks-cheat-sheet-simple-examples
+- Egghead — Use a lazy initializer with useState — https://egghead.io/lessons/react-use-a-lazy-initializer-with-usestate

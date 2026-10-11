@@ -1,4 +1,4 @@
-# Laravel Authentication Architecture and Core Components: A Comprehensive Cheat Sheet
+# Laravel Authentication Fundamentals: A Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,868 +6,1422 @@
 
 ### Definitions
 
-**Core Definition:** Laravel's authentication architecture is a configurable, driver-based system that separates the concerns of *how users are retrieved from storage* (User Providers) from *how users are authenticated on each request* (Authentication Guards), with middleware acting as the gatekeeper for protected routes.
+**Core Definition**
 
-**Technical Definition:** The authentication system is orchestrated by the `Illuminate\Auth\AuthManager` class, which implements the `Factory` contract. It resolves guards and user providers based on the `config/auth.php` configuration file. Guards implement the `Illuminate\Contracts\Auth\Guard` interface (with `SessionGuard` and `TokenGuard` as built-in implementations), while user providers implement the `Illuminate\Contracts\Auth\UserProvider` interface (with `EloquentUserProvider` and `DatabaseUserProvider` as built-in implementations). Middleware classes such as `Authenticate`, `RedirectIfAuthenticated`, and `EnsureEmailIsVerified` intercept requests before they reach controllers.
+Laravel Authentication is the framework's built-in system for verifying user identity, managing user sessions, and controlling access to protected resources within a web application.
 
-**Beginner-Friendly Explanation:** Think of Laravel authentication as a security checkpoint with two separate roles. The **User Provider** is the filing cabinet—it knows how to look up user records (usually from a database). The **Guard** is the security guard—it checks each visitor's credentials (via session cookie or API token) and decides if they're allowed in. **Middleware** is the door—it ensures only authenticated visitors reach protected rooms. You can have multiple guards (e.g., one for regular users, one for admins) each using their own filing cabinet.
+**Technical Definition**
+
+Laravel's authentication system is composed of "guards" and "providers." Guards define how users are authenticated for each request (e.g., session-based, token-based), while providers define how users are retrieved from persistent storage (e.g., Eloquent, database query builder). The system is configured in `config/auth.php` and provides facades (`Auth`), middleware (`auth`), and a suite of starter kits and packages for rapid implementation.
+
+**Beginner-Friendly Explanation**
+
+Authentication is how your application knows who is using it. When a user logs in with their email and password, Laravel checks if those credentials are correct and then remembers that user for subsequent requests. It is like a bouncer at a club who checks your ID and then gives you a wristband so you don't have to show your ID again every time you go to the bar.
+
+---
 
 ### Key Characteristics
 
-- **Driver-Based Architecture:** Guards and providers are resolved from configuration, not hardcoded.
-- **Separation of Concerns:** Providers handle storage retrieval; guards handle request authentication.
-- **Multi-Guard Support:** Applications can define multiple guards for different user types (web, admin, API).
-- **Middleware Enforcement:** The `auth`, `guest`, and `verified` middleware enforce access rules declaratively.
-- **Config-Driven:** All guards, providers, and defaults are defined in `config/auth.php`.
+- **Guard-Based Architecture**: Multiple authentication strategies (session, token) can coexist, each with its own guard.
+- **Provider Abstraction**: User retrieval is decoupled from authentication logic, allowing Eloquent, database, or custom providers.
+- **Starter Kits**: Breeze, Jetstream, and Fortify provide pre-built authentication scaffolding for rapid development.
+- **API Authentication**: Sanctum (lightweight, token-based) and Passport (full OAuth2) cover API authentication needs.
+- **Session Management**: Automatic session regeneration on login prevents session fixation attacks.
+- **Rate Limiting**: Built-in throttling on login attempts protects against brute-force attacks.
+- **Remember Me**: Persistent authentication via a `remember_token` column.
+
+---
 
 ### Prerequisites
 
-- A Laravel application with the authentication scaffolding (starter kit or manual setup).
-- A `User` model implementing `Illuminate\Contracts\Auth\Authenticatable`.
-- A configured database with a `users` table (or equivalent).
-- Understanding of HTTP middleware and route protection.
+- **PHP 8.1 or higher** (Laravel 10+) or **PHP 8.2** (Laravel 11+).
+- **A Laravel application** installed via Composer.
+- **A configured database** with a `users` table containing `email`, `password`, and a nullable `remember_token` column of at least 100 characters.
+- **Basic knowledge of PHP, Blade, and Eloquent**.
+- **Composer** for installing authentication packages.
+
+---
 
 ### Related Programming Areas
 
-- **Eloquent ORM:** The `EloquentUserProvider` retrieves users via Eloquent models.
-- **Session Management:** `SessionGuard` relies on Laravel's session driver.
-- **Middleware:** `auth`, `guest`, and `verified` middleware intercept requests.
-- **Authorization:** Gates and Policies build on top of the authentication system.
-
-### Core Concepts / Features
-
-1. User Providers (Eloquent vs. Database)
-2. Authentication Guards (Session vs. Token)
-3. Multiple Authenticators (Multi-Guard Architectures)
-4. HTTP Middleware (auth, guest, verified)
+- **Authorization**: Permissions and policies that determine what an authenticated user can do.
+- **Session Management**: Laravel's session driver stores authentication state for web requests.
+- **API Development**: Sanctum and Passport provide token-based authentication for APIs.
+- **Middleware**: The `auth` middleware protects routes from unauthenticated access.
+- **Frontend Integration**: Breeze and Jetstream provide Blade, Livewire, and Inertia.js frontends.
 
 ---
 
-## 1. User Providers: Managing How Users Are Retrieved
-
-### Definitions
-
-**Core Definition:** A User Provider is a class that knows how to retrieve user records from a persistent storage system (typically a database) by a unique identifier or set of credentials.
-
-**Technical Definition:** User providers implement the `Illuminate\Contracts\Auth\UserProvider` interface, which defines methods `retrieveById()`, `retrieveByToken()`, `updateRememberToken()`, `retrieveByCredentials()`, and `validateCredentials()`. Laravel ships with `EloquentUserProvider` (retrieves users via an Eloquent model) and `DatabaseUserProvider` (retrieves users via the query builder). The `AuthManager` resolves providers via `createUserProvider()`, which reads the `providers` array in `config/auth.php`.
-
-**Beginner-Friendly Explanation:** The User Provider is the "filing cabinet" of your authentication system. When the guard needs to find a user by email or ID, it asks the provider. The provider knows which table to query and which model to use. Eloquent providers use your `User` model; Database providers use raw query builder calls.
-
-### Purposes
-
-- To define how users are retrieved from persistent storage (database, external API, etc.).
-- To decouple the authentication guard from the specific storage mechanism.
-- To support different user models for different user types (users, admins, customers).
-- To allow custom providers for non-relational storage systems.
-- To centralise credential validation logic in a single class.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax — Configuration:**
-
-```php
-// config/auth.php
-'providers' => [
-    'users' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\User::class,
-    ],
-    'customers' => [
-        'driver' => 'database',
-        'table' => 'customers',
-    ],
-],
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `'users'` | Provider name (referenced by guards). |
-| `'driver' => 'eloquent'` | Uses `EloquentUserProvider`. |
-| `'model' => User::class` | The Eloquent model to retrieve users from. |
-| `'driver' => 'database'` | Uses `DatabaseUserProvider` (query builder). |
-| `'table' => 'customers'` | The database table to query. |
-
-**Complete General Syntax — Custom Provider:**
-
-```php
-// In AuthServiceProvider::boot()
-use Illuminate\Support\Facades\Auth;
-
-Auth::provider('riak', function ($app, array $config) {
-    return new RiakUserProvider($app['riak.connection']);
-});
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `Auth::provider('riak', ...)` | Registers a custom provider driver. |
-| `$config` | The provider configuration from `auth.php`. |
-| Return value | Must implement `UserProvider`. |
-
-**Syntax Rules:**
-- The `providers` array in `config/auth.php` defines available providers.
-- Each provider has a `driver` key (`eloquent` or `database`) and driver-specific configuration.
-- Guards reference providers by name via the `provider` key.
-- Custom providers are registered via `Auth::provider()` in a service provider.
-
-**Constraints and Limitations:**
-- **Eloquent provider:** Requires the model to implement `Authenticatable` and `CanResetPassword` (for password resets).
-- **Database provider:** Uses the query builder; the table must have standard column names (`id`, `password`, `remember_token`).
-- **Single model per provider:** Each Eloquent provider maps to exactly one model class.
-- **Provider resolution:** The `AuthManager` caches resolved providers; config changes require application restart.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Eloquent Provider (Default)**
-
-```php
-<?php
-// config/auth.php
-
-return [
-    'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\User::class,
-        ],
-    ],
-
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-    ],
-];
-```
-
-```php
-<?php
-// app/Models/User.php
-
-namespace App\Models;
-
-use Illuminate\Foundation\Auth\User as Authenticatable;
-
-class User extends Authenticatable
-{
-    protected $fillable = ['name', 'email', 'password'];
-    protected $hidden = ['password', 'remember_token'];
-}
-```
-
-**Expected Output:** The `web` guard uses `EloquentUserProvider` to retrieve users from the `users` table via the `User` model.
-
-**Why:** The `eloquent` driver tells the `AuthManager` to create an `EloquentUserProvider` with the specified model. The guard delegates user retrieval to this provider.
+## Core Concepts
 
 ---
 
-**Example 2: Database Provider**
+### 1. Authentication
 
-```php
-<?php
-// config/auth.php
+#### Definitions
 
-return [
-    'providers' => [
-        'users' => [
-            'driver' => 'database',
-            'table' => 'users',
-        ],
-    ],
-];
-```
+**Core Definition**
 
-**Expected Output:** The guard uses `DatabaseUserProvider` to retrieve users via the query builder.
+Authentication is the process of verifying that a user is who they claim to be, typically by validating credentials such as an email and password.
 
-**Why:** The `database` driver uses raw query builder calls instead of Eloquent. This is useful for legacy databases or when Eloquent overhead is unwanted.
+**Technical Definition**
 
----
+Laravel's authentication system provides the `Auth` facade, the `Authenticatable` contract, and the `Guard` interface. When a user submits credentials, the `attempt()` method retrieves the user via the configured provider and verifies the password using `Hash::check()`. If successful, the user is logged into the session (or issued a token), and subsequent requests are authenticated via middleware.
 
-**Example 3: Custom Provider Registration**
+**Beginner-Friendly Explanation**
 
-```php
-<?php
-// app/Providers/AuthServiceProvider.php
+Authentication is the login process. When you enter your email and password, Laravel checks if they match what is stored in the database. If they do, you are "logged in" and can access protected pages.
 
-namespace App\Providers;
+#### Purposes
 
-use App\Extensions\RiakUserProvider;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+- To verify user identity before granting access to protected resources.
+- To maintain user state across multiple HTTP requests (which are stateless by nature).
+- To provide a foundation for authorization (what the user is allowed to do).
+- To protect sensitive data and functionality from unauthorised access.
 
-class AuthServiceProvider extends ServiceProvider
-{
-    public function boot(): void
-    {
-        Auth::provider('riak', function ($app, array $config) {
-            return new RiakUserProvider($app['riak.connection']);
-        });
-    }
-}
-```
+#### Syntax Rules and Structure
 
-```php
-// config/auth.php
-'providers' => [
-    'users' => [
-        'driver' => 'riak',
-    ],
-],
-```
-
-**Expected Output:** The `riak` provider driver resolves to the custom `RiakUserProvider` class.
-
-**Why:** `Auth::provider()` registers a custom driver creator. The `AuthManager` calls this closure when resolving a provider with `driver => riak`.
-
-### Real-World Cases
-
-- **Multi-Tenant Applications:** Different providers for different tenant databases (e.g., `tenant_1_users`, `tenant_2_users`).
-- **Legacy Systems:** Database provider for applications with non-Eloquent database access layers.
-- **External Authentication:** Custom providers for LDAP, OAuth, or third-party user stores.
-- **Separate User Types:** Eloquent providers for `users` and `admins` using different models.
-
-### References
-
-- Laravel Authentication (12.x) — https://laravel.com/framework/docs/12.x/authentication
-- AuthManager API — https://api.laravel.com/docs/9.x/Illuminate/Auth/AuthManager.html
-- Adding Custom User Providers — https://laravel.com/framework/docs/7.x/authentication
-
----
-
-## 2. Authentication Guards: How Users Are Authenticated
-
-### Definitions
-
-**Core Definition:** An Authentication Guard is a class that determines whether an incoming request is from an authenticated user, using a specific mechanism (session cookie or API token) and a User Provider for storage retrieval.
-
-**Technical Definition:** Guards implement the `Illuminate\Contracts\Auth\Guard` interface, which defines methods `check()`, `guest()`, `user()`, `id()`, `validate()`, `setUser()`, and `hasUser()`. Laravel ships with `SessionGuard` (stateful, cookie-based authentication) and `TokenGuard` (stateless, API token authentication). The `AuthManager` resolves guards via `createSessionDriver()` or `createTokenDriver()`, reading the `guards` array in `config/auth.php`.
-
-**Beginner-Friendly Explanation:** The Guard is the "security guard" at the door. For web applications, it checks the session cookie to see if you've logged in. For APIs, it checks the `Authorization` header for a token. Each guard has its own provider (filing cabinet) to look up user records.
-
-### Purposes
-
-- To authenticate users for each incoming HTTP request.
-- To provide a consistent API for checking authentication state (`check()`, `guest()`, `user()`).
-- To support both stateful (session) and stateless (token) authentication.
-- To enable different authentication mechanisms for different parts of the application.
-- To manage user login, logout, and "remember me" functionality.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax — Guard Configuration:**
-
-```php
-// config/auth.php
-'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'users',
-    ],
-    'api' => [
-        'driver' => 'token',
-        'provider' => 'users',
-        'input_key' => 'api_token',
-        'storage_key' => 'api_token',
-    ],
-],
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `'web'` | Guard name (referenced by middleware). |
-| `'driver' => 'session'` | Uses `SessionGuard` (cookie-based). |
-| `'driver' => 'token'` | Uses `TokenGuard` (API token). |
-| `'provider' => 'users'` | The user provider to use. |
-| `'input_key'` | Query string parameter name for token (TokenGuard). |
-| `'storage_key'` | Token column name in storage (TokenGuard). |
-
-**Complete General Syntax — Using a Guard:**
+**Complete General Syntax**
 
 ```php
 use Illuminate\Support\Facades\Auth;
 
-// Get the default guard
-$user = Auth::user();
-
-// Get a specific guard
-$user = Auth::guard('admin')->user();
-
-// Check authentication
-if (Auth::guard('web')->check()) {
-    // User is authenticated
+// Attempt to authenticate
+if (Auth::attempt(['email' => $email, 'password' => $password])) {
+    // Authentication passed
+    $request->session()->regenerate();
+    return redirect()->intended('dashboard');
 }
+
+// Check if authenticated
+if (Auth::check()) {
+    $user = Auth::user();
+}
+
+// Logout
+Auth::logout();
 ```
 
-**Component Breakdown:**
+**Component Breakdown**
 
 | Method | Description |
 |--------|-------------|
-| `Auth::user()` | Returns the authenticated user (or `null`). |
-| `Auth::guard('name')` | Returns a specific guard instance. |
-| `Auth::check()` | Returns `true` if authenticated. |
-| `Auth::guest()` | Returns `true` if not authenticated. |
-| `Auth::id()` | Returns the authenticated user's ID. |
+| `Auth::attempt($credentials)` | Attempts login with credentials. |
+| `Auth::check()` | Returns `true` if a user is authenticated. |
+| `Auth::user()` | Returns the authenticated user instance. |
+| `Auth::logout()` | Logs the user out and clears the session. |
+| `$request->session()->regenerate()` | Prevents session fixation. |
 
-**Syntax Rules:**
-- The `guards` array in `config/auth.php` defines available guards.
-- Each guard has a `driver` (`session` or `token`) and a `provider`.
-- The `defaults.guard` setting determines which guard is used by default.
-- `Auth::guard('name')` returns the guard instance for method calls.
-- Middleware `auth:guard_name` specifies which guard to use for a route.
+**Syntax Rules**
 
-**Constraints and Limitations:**
-- **SessionGuard requires sessions:** The `session` driver requires session middleware to be active.
-- **TokenGuard is stateless:** No session is created; each request must include the token.
-- **TokenGuard input key:** The default input key is `api_token`, configurable via the guard config.
-- **Guard caching:** Resolved guards are cached by `AuthManager`; configuration changes require a restart.
+- `attempt()` accepts an array of credentials.
+- The `password` key is automatically hashed and compared.
+- Session regeneration is recommended after successful login.
+- The `Auth` facade is available globally.
 
-### Multiple Annotated Complete Code Examples
+**Constraints and Limitations**
 
-**Example 1: Session Guard (Web)**
+- `attempt()` does not work with API tokens; use `auth('api')->attempt()` or token-based methods.
+- The `remember` option must be passed as the second argument to `attempt()`.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Basic Login**
+
+**Controller**
 
 ```php
 <?php
+// app/Http/Controllers/AuthController.php
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->intended('dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
+    }
+}
+```
+
+**Route**
+
+```php
+Route::post('/login', [AuthController::class, 'login']);
+```
+
+**Expected Output**
+
+```
+// Successful: Redirect to /dashboard
+// Failed: Redirect back with error message
+```
+
+**Why This Output Occurs**
+
+`Auth::attempt()` retrieves the user by email, verifies the password hash, and if successful, logs the user into the session. The session ID is regenerated to prevent fixation.
+
+---
+
+**Example 2: Checking Authentication Status**
+
+**Blade View**
+
+```blade
+@auth
+    <p>Welcome, {{ auth()->user()->name }}!</p>
+@endauth
+
+@guest
+    <p>Please <a href="/login">log in</a>.</p>
+@endguest
+```
+
+**Expected Output (when logged in)**
+
+```html
+<p>Welcome, John!</p>
+```
+
+**Why This Output Occurs**
+
+The `@auth` directive checks if a user is authenticated. If so, the user's name is displayed. Otherwise, the `@guest` block is rendered.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: User Dashboard**
+
+A dashboard route is protected by the `auth` middleware. Only logged-in users can access it, and the controller retrieves the authenticated user via `Auth::user()`.
+
+**Explanation**: Authentication gates access to private areas of the application.
+
+---
+
+### 2. Authentication Guards
+
+#### Definitions
+
+**Core Definition**
+
+Authentication guards define how users are authenticated for each request, specifying the mechanism (session, token) used to verify identity.
+
+**Technical Definition**
+
+A guard is a class implementing `Illuminate\Contracts\Auth\Guard`. Laravel ships with `SessionGuard` (session-based) and `TokenGuard` (token-based). Guards are configured in `config/auth.php` under the `guards` key. Each guard is associated with a provider and a driver. The default guard is `web` (session), and an `api` guard is also pre-configured.
+
+**Beginner-Friendly Explanation**
+
+A guard is like a specific door into your application. The `web` guard uses cookies and sessions (for browser users), while the `api` guard uses tokens (for mobile apps or external services).
+
+#### Purposes
+
+- To support multiple authentication strategies within a single application.
+- To separate web (session) and API (token) authentication concerns.
+- To allow custom authentication logic through custom guard implementations.
+- To provide a consistent interface for authenticating users regardless of mechanism.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
 // config/auth.php
 'guards' => [
     'web' => [
         'driver' => 'session',
         'provider' => 'users',
     ],
-],
-```
-
-```php
-<?php
-// Login controller
-use Illuminate\Support\Facades\Auth;
-
-public function login(Request $request)
-{
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
-        return redirect()->intended('dashboard');
-    }
-
-    return back()->withErrors([
-        'email' => 'The provided credentials do not match our records.',
-    ]);
-}
-```
-
-**Expected Output:** On successful login, the user is authenticated via session and redirected to the dashboard. The session ID is regenerated to prevent session fixation.
-
-**Why:** `Auth::attempt()` uses the default guard (`web`), which is a `SessionGuard`. It retrieves the user via the provider, validates credentials, and stores the user ID in the session.
-
----
-
-**Example 2: Token Guard (API)**
-
-```php
-<?php
-// config/auth.php
-'guards' => [
     'api' => [
         'driver' => 'token',
         'provider' => 'users',
-        'input_key' => 'api_token',
-        'storage_key' => 'api_token',
+        'hash' => false,
     ],
 ],
 ```
 
-```php
-// Request with token
-// GET /api/user?api_token=abc123
-```
+**Component Breakdown**
+
+| Key | Description |
+|-----|-------------|
+| `driver` | The authentication driver (`session`, `token`, `sanctum`, `passport`). |
+| `provider` | The user provider (`users`, `admins`). |
+
+**Syntax Rules**
+
+- Guards are defined in `config/auth.php`.
+- The `defaults.guard` key specifies the default guard.
+- Guards can be accessed via `Auth::guard('api')`.
+- Middleware can specify a guard: `auth:api`.
+
+**Constraints and Limitations**
+
+- A guard requires a corresponding provider.
+- Custom guards must implement `Illuminate\Contracts\Auth\Guard`.
+- Guards are resolved per-request.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Using the API Guard**
+
+**Route**
 
 ```php
-<?php
-// Route
-Route::get('/user', function (Request $request) {
-    return $request->user(); // Authenticated via token
-})->middleware('auth:api');
+Route::middleware('auth:api')->get('/user', function (Request $request) {
+    return $request->user();
+});
 ```
 
-**Expected Output:** The request is authenticated by matching the `api_token` query parameter against the `api_token` column in the `users` table.
+**Expected Output**
 
-**Why:** `TokenGuard` reads the token from the request (via `input_key`) and looks it up in the user provider (via `storage_key`). No session is created.
+```json
+{"id":1,"name":"John","email":"john@example.com"}
+```
+
+**Why This Output Occurs**
+
+The `auth:api` middleware instructs Laravel to use the `api` guard (token driver) to authenticate the request. If a valid token is provided, the user is returned.
 
 ---
 
-**Example 3: Manual Guard Usage**
+**Example 2: Accessing a Specific Guard**
+
+**Controller**
 
 ```php
-<?php
-use Illuminate\Support\Facades\Auth;
-
-// Get the default guard's user
-$user = Auth::user();
-
-// Get the admin guard's user
-$admin = Auth::guard('admin')->user();
-
-// Check if the current user is authenticated
-if (Auth::check()) {
-    // ...
-}
-
-// Check a specific guard
-if (Auth::guard('api')->check()) {
-    // API user is authenticated
-}
+$user = Auth::guard('web')->user();
 ```
 
-**Expected Output:** `Auth::user()` returns the user from the default guard. `Auth::guard('admin')->user()` returns the admin user (if authenticated via the admin guard).
+**Expected Output**
 
-**Why:** Each guard maintains its own authentication state. `Auth::guard()` resolves and returns the specified guard instance.
+```php
+// Returns the authenticated web user or null
+```
 
-### Real-World Cases
+**Why This Output Occurs**
 
-- **Web Applications:** Session guard for browser-based authentication with "remember me" cookies.
-- **API Applications:** Token guard for stateless API authentication.
-- **SPA + API:** Sanctum uses a hybrid approach (session for SPA, token for API).
-- **Multi-Device Sessions:** Session guard supports `logoutOtherDevices()` for invalidating sessions on other devices.
-
-### References
-
-- Laravel Authentication (12.x) — https://laravel.com/framework/docs/12.x/authentication
-- SessionGuard API — https://api.laravel.com/docs/7.x/Illuminate/Auth/SessionGuard.html
-- TokenGuard API — https://api.laravel.com/docs/8.x/Illuminate/Auth/TokenGuard.html
-- AuthManager API — https://api.laravel.com/docs/9.x/Illuminate/Auth/AuthManager.html
+`Auth::guard('web')` explicitly uses the `web` guard, bypassing the default guard.
 
 ---
 
-## 3. Multiple Authenticators: Multi-Guard Architectures
+#### Real-World Cases with Explanation
 
-### Definitions
+**Case 1: Separate Admin and User Guards**
 
-**Core Definition:** A multi-guard architecture allows an application to define multiple authentication guards, each with its own user provider and authentication mechanism, enabling different user types (e.g., regular users and administrators) to authenticate independently.
+An application has a `web` guard for regular users and an `admin` guard for administrators, each with its own provider and session key.
 
-**Technical Definition:** Each guard is defined in the `guards` array of `config/auth.php` with a unique name, a `driver`, and a `provider`. Routes specify which guard to use via middleware (`auth:guard_name`). The `Auth` facade resolves guards by name via `Auth::guard('name')`. Guards maintain independent authentication state, so a user can be authenticated on one guard and a guest on another.
+**Explanation**: Multiple guards allow different user types to be authenticated independently.
 
-**Beginner-Friendly Explanation:** Imagine a building with two separate entrances—one for regular users and one for administrators. Each entrance has its own security guard and its own filing cabinet. A person can be logged into the user entrance but not the admin entrance, and vice versa. Multi-guard lets you protect different parts of your application with different authentication systems.
+---
 
-### Purposes
+### 3. Authentication Providers
 
-- To authenticate different user types with separate models and credentials.
-- To isolate web and admin authentication completely.
-- To support API and web authentication simultaneously.
-- To allow different providers for different guards (Eloquent, Database, custom).
-- To enforce access control based on the guard a user is authenticated against.
+#### Definitions
 
-### Syntax Rules and Structure
+**Core Definition**
 
-**Complete General Syntax — Multi-Guard Configuration:**
+Authentication providers define how users are retrieved from persistent storage, such as a database, during authentication.
+
+**Technical Definition**
+
+A provider is a class implementing `Illuminate\Contracts\Auth\UserProvider`. Laravel ships with `EloquentUserProvider` and `DatabaseUserProvider`. Providers are configured in `config/auth.php` under the `providers` key. Each provider specifies a `driver` and a `model` (for Eloquent) or `table` (for database).
+
+**Beginner-Friendly Explanation**
+
+A provider is the system that looks up users in your database. It knows which table or model to query when someone tries to log in.
+
+#### Purposes
+
+- To decouple user retrieval from authentication logic.
+- To support different user storage mechanisms (Eloquent, database, external API).
+- To allow multiple user types (e.g., users and admins) with separate tables.
+- To provide a consistent interface for retrieving users by credentials or ID.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
 
 ```php
 // config/auth.php
-'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'users',
-    ],
-    'admin' => [
-        'driver' => 'session',
-        'provider' => 'admins',
-    ],
-],
-
 'providers' => [
     'users' => [
         'driver' => 'eloquent',
         'model' => App\Models\User::class,
     ],
     'admins' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\Admin::class,
+        'driver' => 'database',
+        'table' => 'admins',
     ],
 ],
 ```
 
-**Component Breakdown:**
+**Component Breakdown**
+
+| Key | Description |
+|-----|-------------|
+| `driver` | `eloquent` or `database`. |
+| `model` | The Eloquent model class (for Eloquent provider). |
+| `table` | The table name (for database provider). |
+
+**Syntax Rules**
+
+- Providers are defined in `config/auth.php`.
+- Each guard references a provider.
+- Custom providers must implement `UserProvider`.
+
+**Constraints and Limitations**
+
+- The Eloquent provider requires the model to implement `Authenticatable`.
+- The database provider requires a table with the necessary columns.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Eloquent Provider**
+
+**Config**
+
+```php
+'providers' => [
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\User::class,
+    ],
+],
+```
+
+**Expected Output**
+
+- Users are retrieved via the User Eloquent model
+
+**Why This Output Occurs**
+
+The Eloquent provider uses the `User` model to query the `users` table.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Custom User Table**
+
+An application uses a `members` table instead of `users`. The provider is configured with `'table' => 'members'` and the database driver.
+
+**Explanation**: Providers allow non-standard table names and schemas.
+
+---
+
+### 4. Authentication Drivers
+
+#### Definitions
+
+**Core Definition**
+
+Authentication drivers are the underlying implementations that determine how authentication state is maintained (e.g., session, token).
+
+**Technical Definition**
+
+Drivers are specified in the `driver` key of a guard configuration. Laravel supports `session`, `token`, `sanctum`, and `passport` drivers. Each driver corresponds to a guard class: `SessionGuard`, `TokenGuard`, `Sanctum` guard, and `Passport` guard respectively.
+
+**Beginner-Friendly Explanation**
+
+A driver is the specific technology used for authentication. Session drivers use cookies; token drivers use API tokens.
+
+#### Purposes
+
+- To provide different mechanisms for maintaining authentication state.
+- To allow the same provider to be used with different authentication strategies.
+- To enable seamless switching between session and token authentication.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+    'api' => [
+        'driver' => 'sanctum',
+        'provider' => 'users',
+    ],
+],
+```
+
+**Component Breakdown**
+
+| Driver | Description |
+|--------|-------------|
+| `session` | Uses PHP sessions and cookies. |
+| `token` | Uses API tokens in the `Authorization` header. |
+| `sanctum` | Uses Sanctum's token or SPA cookie authentication. |
+| `passport` | Uses Passport's OAuth2 tokens. |
+
+**Syntax Rules**
+
+- The driver is specified per guard.
+- Changing the driver does not require changing the provider.
+- Custom drivers can be registered via `Auth::extend()`.
+
+**Constraints and Limitations**
+
+- Some drivers require additional packages (Sanctum, Passport).
+- Session driver requires session middleware.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Session Driver**
+
+**Config**
+
+```php
+'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+],
+```
+
+**Expected Output**
+
+```php
+// Auth::attempt() logs the user into the session
+```
+
+**Why This Output Occurs**
+
+The session driver stores the user ID in the session after successful authentication.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Mixed Authentication**
+
+A SaaS application uses session authentication for the web dashboard and Sanctum token authentication for its mobile app, both using the same `users` provider.
+
+**Explanation**: Drivers allow different client types to authenticate using the appropriate mechanism.
+
+---
+
+### 5. Session Authentication
+
+#### Definitions
+
+**Core Definition**
+
+Session authentication is a stateful authentication mechanism where the user's authentication status is stored in a server-side session and referenced by a cookie.
+
+**Technical Definition**
+
+Laravel's `SessionGuard` stores the authenticated user's ID in the session. On each request, the guard retrieves the session, finds the user ID, and loads the user via the provider. The session is identified by a cookie (default: `laravel_session`). Session authentication includes CSRF protection via the `VerifyCsrfToken` middleware.
+
+**Beginner-Friendly Explanation**
+
+Session authentication is the standard "log in and stay logged in" approach for websites. After you log in, the server remembers you by storing a session ID in a cookie.
+
+#### Purposes
+
+- To provide a seamless login experience for browser-based users.
+- To maintain authentication state across multiple page requests.
+- To leverage Laravel's built-in CSRF protection.
+- To enable "remember me" functionality for persistent sessions.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+// Login
+Auth::attempt($credentials);
+
+// Check
+Auth::check();
+
+// Logout
+Auth::logout();
+```
+
+**Component Breakdown**
+
+| Method | Description |
+|--------|-------------|
+| `attempt()` | Authenticates and logs in. |
+| `login($user)` | Logs in a user instance directly. |
+| `logout()` | Logs out and invalidates the session. |
+| `viaRemember()` | Checks if the user was authenticated via "remember me". |
+
+**Syntax Rules**
+
+- Requires the `StartSession` middleware.
+- The `remember` option must be passed as a boolean to `attempt()`.
+- Session ID regeneration is recommended after login.
+
+**Constraints and Limitations**
+
+- Not suitable for stateless APIs.
+- Sessions require server-side storage (file, database, Redis).
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Login with Remember Me**
+
+**Controller**
+
+```php
+if (Auth::attempt($credentials, $request->boolean('remember'))) {
+    $request->session()->regenerate();
+    return redirect()->intended('dashboard');
+}
+```
+
+**Expected Output**
+
+```
+// User is logged in and a remember_token is set in the cookie
+```
+
+**Why This Output Occurs**
+
+The second argument to `attempt()` enables the "remember me" feature, which sets a long-lived cookie.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: E-commerce Checkout**
+
+An e-commerce site uses session authentication so users can log in, browse products, and checkout without re-authenticating.
+
+**Explanation**: Session authentication is ideal for traditional web applications.
+
+---
+
+### 6. Token Authentication
+
+#### Definitions
+
+**Core Definition**
+
+Token authentication is a stateless authentication mechanism where a token (a string) is issued to the client and sent with each request to authenticate.
+
+**Technical Definition**
+
+Laravel's `TokenGuard` (or Sanctum/Passport) authenticates requests by checking the `Authorization: Bearer <token>` header or an `api_token` query parameter. Tokens are stored in the database and associated with a user. Sanctum issues personal access tokens with abilities, while Passport issues OAuth2 access tokens.
+
+**Beginner-Friendly Explanation**
+
+Token authentication is like a temporary key. You log in once, receive a key, and use that key for every subsequent request. It is ideal for mobile apps and APIs.
+
+#### Purposes
+
+- To authenticate stateless API requests.
+- To support mobile applications and third-party integrations.
+- To avoid the need for session cookies in API contexts.
+- To enable fine-grained access control via token abilities/scopes.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+// Issuing a token (Sanctum)
+$token = $user->createToken('token-name', ['ability1'])->plainTextToken;
+
+// Using the token
+// Authorization: Bearer <token>
+```
+
+**Component Breakdown**
 
 | Component | Description |
 |-----------|-------------|
-| `'admin'` | Second guard name. |
-| `'driver' => 'session'` | Uses the same session driver. |
-| `'provider' => 'admins'` | References the `admins` provider. |
-| `'admins'` provider | Uses the `Admin` model for retrieval. |
+| `createToken()` | Issues a new token. |
+| `plainTextToken` | The token string to send to the client. |
+| `abilities` | Permissions associated with the token. |
 
-**Complete General Syntax — Route Protection:**
+**Syntax Rules**
 
-```php
-// Protect with default guard
-Route::get('/dashboard', ...)->middleware('auth');
+- Tokens are sent in the `Authorization` header.
+- Sanctum uses the `auth:sanctum` middleware.
+- Passport uses the `auth:api` middleware.
 
-// Protect with admin guard
-Route::get('/admin/dashboard', ...)->middleware('auth:admin');
+**Constraints and Limitations**
 
-// Multiple guards (either/or)
-Route::get('/profile', ...)->middleware('auth:web,admin');
-```
+- Tokens must be stored securely on the client.
+- Token revocation requires database updates.
 
-**Syntax Rules:**
-- Each guard requires a unique name in the `guards` array.
-- Each guard references a provider by name.
-- Routes specify the guard via `auth:guard_name` middleware.
-- Multiple guards in middleware (`auth:web,admin`) allow authentication via any of the listed guards.
-- The `Auth` facade resolves guards by name: `Auth::guard('admin')`.
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
 
-**Constraints and Limitations:**
-- **Session conflicts:** Both guards using `session` driver share the same session, but store user IDs under different keys.
-- **Route model binding:** `$request->user()` returns the user for the **default** guard; use `$request->user('admin')` for a specific guard.
-- **Redirect logic:** The `auth` middleware redirects to the `login` named route; multi-guard applications may need custom redirect logic.
-- **Permission systems:** Packages like Spatie Permission require explicit `guard_name` configuration for multi-guard support .
+**Example 1: Issuing a Sanctum Token**
 
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Web and Admin Guards**
+**Controller**
 
 ```php
-<?php
-// config/auth.php
-'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'users',
-    ],
-    'admin' => [
-        'driver' => 'session',
-        'provider' => 'admins',
-    ],
-],
-
-'providers' => [
-    'users' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\User::class,
-    ],
-    'admins' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\Admin::class,
-    ],
-],
-```
-
-```php
-// Admin login controller
-use Illuminate\Support\Facades\Auth;
-
 public function login(Request $request)
 {
-    $credentials = $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
+    $user = User::where('email', $request->email)->first();
 
-    if (Auth::guard('admin')->attempt($credentials)) {
-        $request->session()->regenerate();
-        return redirect()->intended('/admin/dashboard');
+    if (! $user || ! Hash::check($request->password, $user->password)) {
+        throw ValidationException::withMessages([
+            'email' => ['The provided credentials are incorrect.'],
+        ]);
     }
 
-    return back()->withErrors(['email' => 'Invalid credentials.']);
+    $token = $user->createToken('mobile-app')->plainTextToken;
+
+    return response()->json(['token' => $token]);
 }
 ```
 
-**Expected Output:** Admin users authenticate via the `admin` guard and are redirected to the admin dashboard. Regular users use the `web` guard independently.
+**Expected Output**
 
-**Why:** `Auth::guard('admin')->attempt()` uses the admin guard and its provider (`admins`), which retrieves users from the `admins` table via the `Admin` model.
+```json
+{"token":"1|abc123def456..."}
+```
+
+**Why This Output Occurs**
+
+The token is generated and returned as a plain text string. The client stores it and sends it in the `Authorization` header for subsequent requests.
 
 ---
 
-**Example 2: Route Protection with Multiple Guards**
+#### Real-World Cases with Explanation
 
-```php
-<?php
-// routes/web.php
+**Case 1: Mobile App API**
 
-// Only authenticated web users
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth');
+A mobile app authenticates users via Sanctum tokens. The token is stored in secure device storage and included in every API request.
 
-// Only authenticated admins
-Route::prefix('admin')->middleware('auth:admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    });
-});
-
-// Either web or admin
-Route::get('/profile', function () {
-    $user = Auth::guard('web')->user() ?? Auth::guard('admin')->user();
-    return view('profile', compact('user'));
-})->middleware('auth:web,admin');
-```
-
-**Expected Output:**
-- `/dashboard` requires web guard authentication.
-- `/admin/dashboard` requires admin guard authentication.
-- `/profile` accepts either web or admin authentication.
-
-**Why:** The `auth:admin` middleware specifies the `admin` guard. The `auth:web,admin` middleware accepts either guard.
+**Explanation**: Token authentication is the standard for mobile and API-first applications.
 
 ---
 
-**Example 3: Accessing Users from Specific Guards**
+### 7. Authentication Scaffolding
 
-```php
-<?php
-use Illuminate\Support\Facades\Auth;
+#### Definitions
 
-// In a controller
-public function index(Request $request)
-{
-    // Default guard user
-    $user = $request->user();
+**Core Definition**
 
-    // Admin guard user
-    $admin = $request->user('admin');
+Authentication scaffolding refers to the pre-built controllers, routes, views, and configuration that Laravel provides to implement authentication quickly.
 
-    // Using Auth facade
-    $admin = Auth::guard('admin')->user();
+**Technical Definition**
 
-    // Check which guard is authenticated
-    if (Auth::guard('admin')->check()) {
-        // Admin is logged in
-    } elseif (Auth::guard('web')->check()) {
-        // Regular user is logged in
-    }
-}
+Laravel offers three official starter kits: Breeze (minimal), Jetstream (full-featured), and Fortify (headless backend). Each provides different levels of abstraction and frontend integration. Additionally, the `php artisan make:auth` command (deprecated in newer versions) historically generated basic scaffolding.
+
+**Beginner-Friendly Explanation**
+
+Scaffolding is pre-made code that gives you a complete login, registration, and password reset system without having to write everything from scratch.
+
+#### Purposes
+
+- To accelerate development by providing ready-to-use authentication code.
+- To demonstrate Laravel's authentication best practices.
+- To allow developers to choose the level of frontend integration they need.
+- To provide a starting point that can be customised.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+# Breeze (Blade)
+composer require laravel/breeze --dev
+php artisan breeze:install
+
+# Jetstream
+composer require laravel/jetstream
+php artisan jetstream:install livewire
+
+# Fortify
+composer require laravel/fortify
+php artisan fortify:install
 ```
 
-**Expected Output:** The controller can access users from both guards independently.
+**Component Breakdown**
 
-**Why:** `$request->user('admin')` resolves the user from the admin guard. `Auth::guard('admin')->check()` checks the admin guard's authentication state.
+| Package | Description |
+|---------|-------------|
+| Breeze | Minimal scaffolding with Blade, Livewire, or Inertia. |
+| Jetstream | Full-featured with teams, 2FA, API support. |
+| Fortify | Headless backend for custom frontends. |
 
-### Real-World Cases
+**Syntax Rules**
 
-- **E-commerce:** `web` guard for customers, `admin` guard for store administrators.
-- **SaaS Applications:** `web` guard for account owners, `api` guard for API clients, `admin` guard for platform administrators.
-- **Healthcare Systems:** `patient` guard, `doctor` guard, `admin` guard with separate models.
-- **Multi-Tenant:** `tenant` guard with dynamic provider switching per tenant.
+- Starter kits are installed via Composer.
+- Each has an install command that publishes files.
+- Breeze and Jetstream include frontend; Fortify does not.
 
-### References
+**Constraints and Limitations**
 
-- Laravel Passport: Multiple Authentication Guards — https://laravel.com/framework/docs/11.x/passport
-- Laravel Permission: Multiple Guards — https://mintlify.wiki/spatie/laravel-permission/advanced-usage/multiple-guards
-- Laravel Authentication (12.x) — https://laravel.com/framework/docs/12.x/authentication
+- Starter kits are opinionated; customisation may require overriding published files.
+- Jetstream requires Livewire or Inertia.js.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Installing Breeze**
+
+**Command**
+
+```bash
+composer require laravel/breeze --dev
+php artisan breeze:install
+npm install && npm run dev
+php artisan migrate
+```
+
+**Expected Output**
+
+```
+// Breeze publishes controllers, routes, and Blade views
+// Authentication is fully functional at /login, /register, etc.
+```
+
+**Why This Output Occurs**
+
+Breeze scaffolds a complete authentication system with Blade views and Tailwind CSS.
 
 ---
 
-## 4. Deep-Dive into HTTP Middleware (auth, guest, verified)
+#### Real-World Cases with Explanation
 
-### Definitions
+**Case 1: Rapid MVP Development**
 
-**Core Definition:** Laravel's authentication middleware are HTTP middleware classes that intercept requests to enforce authentication, guest-only access, or email verification before allowing access to routes.
+A startup uses Breeze to get authentication working in minutes, allowing the team to focus on core product features.
 
-**Technical Definition:** The `auth` middleware (`Illuminate\Auth\Middleware\Authenticate`) checks if the request is authenticated and redirects unauthenticated users to the login route or returns a 401 JSON response for APIs. The `guest` middleware (`Illuminate\Auth\Middleware\RedirectIfAuthenticated`) redirects authenticated users away from guest-only routes. The `verified` middleware (`Illuminate\Auth\Middleware\EnsureEmailIsVerified`) checks if the authenticated user's email is verified, redirecting to the verification notice if not.
-
-**Beginner-Friendly Explanation:** Middleware are like security checkpoints at different doors. The `auth` door says "only logged-in users can pass." The `guest` door says "only non-logged-in users can pass" (for login/register pages). The `verified` door says "only users who have verified their email can pass."
-
-### Purposes
-
-- To protect routes from unauthenticated access using `auth`.
-- To prevent authenticated users from accessing login/register pages using `guest`.
-- To enforce email verification before accessing certain routes using `verified`.
-- To support API-specific unauthenticated responses (401 JSON instead of redirect).
-- To allow specifying which guard to use for authentication.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax — `auth` Middleware:**
-
-```php
-Route::get('/dashboard', function () {
-    // Only authenticated users
-})->middleware('auth');
-```
-
-**Complete General Syntax — `guest` Middleware:**
-
-```php
-Route::get('/login', function () {
-    // Only guests (non-authenticated users)
-})->middleware('guest');
-```
-
-**Complete General Syntax — `verified` Middleware:**
-
-```php
-Route::get('/profile', function () {
-    // Only users with verified email
-})->middleware(['auth', 'verified']);
-```
-
-**Complete General Syntax — Specifying a Guard:**
-
-```php
-Route::get('/admin', function () {
-    // Only admin guard authenticated users
-})->middleware('auth:admin');
-```
-
-**Component Breakdown:**
-
-| Middleware | Alias | Class | Behaviour |
-|------------|-------|-------|-----------|
-| `auth` | `auth` | `Authenticate` | Redirects guests to login (web) or 401 (API). |
-| `guest` | `guest` | `RedirectIfAuthenticated` | Redirects authenticated users to dashboard. |
-| `verified` | `verified` | `EnsureEmailIsVerified` | Redirects unverified users to verification notice. |
-| `auth:admin` | `auth` | `Authenticate` | Uses the `admin` guard instead of default. |
-
-**Syntax Rules:**
-- Middleware are attached to routes using `->middleware('name')`.
-- Multiple middleware can be chained: `->middleware(['auth', 'verified'])`.
-- The `auth` middleware accepts guard names after a colon: `auth:admin`.
-- Multiple guards can be specified: `auth:web,admin`.
-- `guest` middleware accepts a guard name: `guest:admin`.
-
-**Constraints and Limitations:**
-- **Redirect targets:** The `auth` middleware redirects to the `login` named route; customise via `redirectGuestsTo()` in `bootstrap/app.php` .
-- **API behaviour:** Requests expecting JSON receive a 401 response instead of a redirect.
-- **`verified` requires `auth`:** The `verified` middleware assumes an authenticated user; it should be used after `auth`.
-- **Email verification setup:** The `verified` middleware requires the `User` model to implement `MustVerifyEmail`.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: `auth` Middleware Protection**
-
-```php
-<?php
-// routes/web.php
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth');
-
-// With specific guard
-Route::prefix('admin')->middleware('auth:admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    });
-});
-```
-
-**Expected Output:**
-- Unauthenticated user visiting `/dashboard` is redirected to `/login`.
-- Unauthenticated AJAX request to `/dashboard` receives 401 JSON.
-- Unauthenticated user visiting `/admin/dashboard` is redirected to `/login` (or custom admin login).
-
-**Why:** The `auth` middleware checks `Auth::guard()->check()`. If false, it redirects to the `login` route for web requests or returns 401 for JSON requests.
+**Explanation**: Scaffolding dramatically reduces time-to-market for authentication.
 
 ---
 
-**Example 2: `guest` Middleware for Login/Register**
+### 8. Laravel Breeze
 
-```php
-<?php
-// routes/web.php
+#### Definitions
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])
-    ->middleware('guest');
+**Core Definition**
 
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])
-    ->middleware('guest');
+Laravel Breeze is a minimal, simple implementation of Laravel's authentication features, providing Blade views, routes, and controllers for login, registration, password reset, email verification, and password confirmation.
+
+**Technical Definition**
+
+Breeze is a Composer package (`laravel/breeze`) that publishes authentication controllers, routes, and views to the application. It uses Tailwind CSS for styling and supports Blade, Livewire, or Inertia.js (with React/Vue) stacks. Breeze does not use Fortify; it is a standalone implementation.
+
+**Beginner-Friendly Explanation**
+
+Breeze is the easiest way to add authentication to a Laravel app. It gives you everything you need with a simple, clean interface.
+
+#### Purposes
+
+- To provide a lightweight, easy-to-understand authentication scaffold.
+- To give developers full control over the authentication code.
+- To serve as a learning tool for Laravel authentication.
+- To support rapid prototyping and MVP development.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+composer require laravel/breeze --dev
+php artisan breeze:install
+php artisan migrate
+npm install && npm run dev
 ```
 
-**Expected Output:** Authenticated users visiting `/login` or `/register` are redirected to the dashboard (or home).
+**Component Breakdown**
 
-**Why:** The `guest` middleware checks if the user is authenticated. If true, it redirects to the `dashboard` or `home` named route.
+| Component | Description |
+|-----------|-------------|
+| Published controllers | `app/Http/Controllers/Auth` |
+| Published routes | `routes/auth.php` |
+| Published views | `resources/views/auth` |
+
+**Syntax Rules**
+
+- Breeze is installed as a dev dependency.
+- The install command publishes files.
+- Frontend assets require `npm install` and `npm run dev`.
+
+**Constraints and Limitations**
+
+- Breeze is intentionally minimal; advanced features (teams, 2FA) require Jetstream or custom code.
+- Breeze publishes code to the application, which must be maintained.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Customising Breeze Views**
+
+**Published View**
+
+```blade
+<!-- resources/views/auth/login.blade.php -->
+<form method="POST" action="{{ route('login') }}">
+    @csrf
+    <input type="email" name="email" required>
+    <input type="password" name="password" required>
+    <button type="submit">Log in</button>
+</form>
+```
+
+**Expected Output**
+
+```html
+<!-- Custom login form rendered at /login -->
+```
+
+**Why This Output Occurs**
+
+Breeze publishes the login view, which can be modified directly.
 
 ---
 
-**Example 3: `verified` Middleware for Email Verification**
+#### Real-World Cases with Explanation
 
-```php
-<?php
-// routes/web.php
+**Case 1: Simple SaaS Application**
 
-Route::get('/profile', function () {
-    return view('profile');
-})->middleware(['auth', 'verified']);
-```
+A small SaaS application uses Breeze for authentication because it needs only basic login and registration.
 
-```php
-<?php
-// app/Models/User.php
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-
-class User extends Authenticatable implements MustVerifyEmail
-{
-    // ...
-}
-```
-
-**Expected Output:** Authenticated users with unverified emails are redirected to the email verification notice page.
-
-**Why:** The `verified` middleware checks `$user->hasVerifiedEmail()`. If false, it redirects to the `verification.notice` route.
+**Explanation**: Breeze is ideal for projects that do not require advanced authentication features.
 
 ---
 
-**Example 4: Custom Redirect Targets**
+### 9. Laravel Jetstream
+
+#### Definitions
+
+**Core Definition**
+
+Laravel Jetstream is a more robust application starter kit that provides authentication, two-factor authentication, team management, API support via Sanctum, and optional frontend stacks (Livewire or Inertia.js).
+
+**Technical Definition**
+
+Jetstream is built on top of Fortify and provides a complete application scaffold. Unlike Breeze, Jetstream does not publish controllers or routes to the application; instead, its functionality is customised via "Action" classes. Jetstream includes features such as profile management, API token management, and team billing.
+
+**Beginner-Friendly Explanation**
+
+Jetstream is a full-featured starting point for applications that need more than just basic authentication—like teams, two-factor authentication, and API tokens.
+
+#### Purposes
+
+- To provide a complete application scaffold with advanced authentication features.
+- To support team-based applications with membership and roles.
+- To integrate with Livewire or Inertia.js for modern frontends.
+- To offer API authentication out of the box via Sanctum.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+composer require laravel/jetstream
+php artisan jetstream:install livewire
+php artisan migrate
+npm install && npm run dev
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| Actions | Customisation points in `app/Actions/Jetstream`. |
+| Livewire/Inertia | Frontend stack choice. |
+| Features | Teams, API, 2FA, profile photos. |
+
+**Syntax Rules**
+
+- Jetstream requires Livewire or Inertia.js.
+- Actions are used for customisation instead of controllers.
+- Features are enabled/disabled in `config/jetstream.php`.
+
+**Constraints and Limitations**
+
+- Jetstream is more opinionated and complex than Breeze.
+- Customisation requires understanding Action classes.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Enabling Two-Factor Authentication**
+
+**Config**
+
+```php
+// config/jetstream.php
+'features' => [
+    Features::twoFactorAuthentication([
+        'confirmPassword' => true,
+    ]),
+],
+```
+
+**Expected Output**
+
+```
+// 2FA setup is available in the user's profile settings
+```
+
+**Why This Output Occurs**
+
+The `twoFactorAuthentication` feature is enabled, providing the necessary routes and views.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Team Collaboration Platform**
+
+A project management tool uses Jetstream for team management, user roles, and API tokens.
+
+**Explanation**: Jetstream provides the infrastructure for complex multi-user applications.
+
+---
+
+### 10. Laravel Fortify
+
+#### Definitions
+
+**Core Definition**
+
+Laravel Fortify is a frontend-agnostic authentication backend for Laravel that registers the routes and controllers needed for authentication features without providing any user interface.
+
+**Technical Definition**
+
+Fortify is a Composer package that implements all of Laravel's authentication features as a headless backend. It registers routes for login, registration, password reset, email verification, and two-factor authentication. Fortify is used internally by Jetstream and can be used independently with a custom frontend.
+
+**Beginner-Friendly Explanation**
+
+Fortify provides the "brain" of authentication—all the logic and routes—but you build your own login page and user interface.
+
+#### Purposes
+
+- To provide authentication logic without frontend opinions.
+- To support custom frontends (SPAs, mobile apps, custom Blade views).
+- To serve as the backend for Jetstream.
+- To allow developers to use Laravel's authentication features without adopting a full starter kit.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+composer require laravel/fortify
+php artisan fortify:install
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| Routes | Registered by Fortify automatically. |
+| Actions | Customisation points in `app/Actions/Fortify`. |
+| Features | Configurable in `config/fortify.php`. |
+
+**Syntax Rules**
+
+- Fortify registers routes prefixed with `/` by default.
+- Actions handle login, registration, password reset, etc.
+- Features are enabled in `config/fortify.php`.
+
+**Constraints and Limitations**
+
+- Fortify does not provide views; you must build your own.
+- Fortify is not required if using Breeze or Jetstream.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Customising the Login Action**
+
+**Action**
 
 ```php
 <?php
-// bootstrap/app.php
+// app/Actions/Fortify/AuthenticateUser.php
+namespace App\Actions\Fortify;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-return Application::configure(basePath: dirname(__DIR__))
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->redirectGuestsTo('/custom-login');
-        $middleware->redirectUsersTo('/panel');
-    })
+class AuthenticateUser
+{
+    public function __invoke(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
+    }
+}
 ```
 
-**Expected Output:**
-- Unauthenticated users are redirected to `/custom-login` instead of `/login`.
-- Authenticated users visiting guest pages are redirected to `/panel`.
+**Expected Output**
 
-**Why:** `redirectGuestsTo()` overrides the default login redirect. `redirectUsersTo()` overrides the default authenticated redirect.
+```
+// Custom login logic is used when the /login route is hit
+```
 
-### Real-World Cases
+**Why This Output Occurs**
 
-- **Dashboard Protection:** `auth` middleware on all dashboard routes.
-- **Login/Register Pages:** `guest` middleware to prevent authenticated users from accessing auth forms.
-- **Email Verification Gating:** `verified` middleware on profile, settings, and premium features.
-- **Admin Panels:** `auth:admin` middleware on all admin routes.
+Fortify resolves the `AuthenticateUser` action for the login route, allowing custom behaviour.
 
-### References
+---
 
-- Laravel Authentication: Protecting Routes — https://laravel.com/framework/docs/12.x/authentication
-- Email Verification Middleware — https://laravel.com/docs/5.8/verification
-- Laravel Middleware Documentation — https://laravel.com/framework/docs/12.x/middleware
+#### Real-World Cases with Explanation
+
+**Case 1: Custom SPA Frontend**
+
+A team building a Vue SPA uses Fortify for the authentication backend and builds a custom Vue login page that posts to Fortify's routes.
+
+**Explanation**: Fortify provides the backend without forcing a specific frontend technology.
+
+---
+
+### 11. Laravel Sanctum
+
+#### Definitions
+
+**Core Definition**
+
+Laravel Sanctum is a lightweight authentication package for SPAs (single-page applications), mobile applications, and simple token-based APIs. It provides both API token issuance and SPA cookie-based authentication.
+
+**Technical Definition**
+
+Sanctum stores API tokens in a `personal_access_tokens` table. Tokens are issued via `$user->createToken()` and authenticated via the `auth:sanctum` middleware. For SPAs, Sanctum uses Laravel's `web` session guard with cookie-based authentication, providing CSRF protection without tokens.
+
+**Beginner-Friendly Explanation**
+
+Sanctum is the simple way to authenticate SPAs and mobile apps. It can use either tokens or cookies, depending on your needs.
+
+#### Purposes
+
+- To provide simple API token authentication without OAuth2 complexity.
+- To authenticate SPAs using session cookies (more secure than tokens in the browser).
+- To support mobile applications with long-lived personal access tokens.
+- To offer token abilities for fine-grained access control.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+composer require laravel/sanctum
+php artisan install:api
+```
+
+```php
+// Issuing a token
+$token = $user->createToken('token-name', ['server:update'])->plainTextToken;
+
+// Protecting routes
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `createToken()` | Issues a new personal access token. |
+| `auth:sanctum` | Middleware for token/SPA authentication. |
+| `SANCTUM_STATEFUL_DOMAINS` | Config for SPA cookie authentication. |
+
+**Syntax Rules**
+
+- Sanctum is installed via `install:api`.
+- The `HasApiTokens` trait must be added to the `User` model.
+- SPA authentication requires stateful domain configuration.
+
+**Constraints and Limitations**
+
+- Sanctum does not support OAuth2.
+- SPA authentication requires same-domain or configured stateful domains.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Issuing and Using a Token**
+
+**Controller**
+
+```php
+public function createToken(Request $request)
+{
+    $token = $request->user()->createToken('api-token')->plainTextToken;
+    return response()->json(['token' => $token]);
+}
+```
+
+**Route**
+
+```php
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+```
+
+**Expected Output**
+
+```json
+{"token":"1|abc123..."}
+```
+
+**Why This Output Occurs**
+
+The token is generated and returned. Subsequent requests with `Authorization: Bearer 1|abc123...` are authenticated.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: SPA with Laravel API**
+
+A React SPA uses Sanctum's SPA authentication (cookie-based) to communicate with a Laravel API, benefiting from CSRF protection.
+
+**Explanation**: Sanctum is the recommended solution for first-party SPAs.
+
+---
+
+### 12. Laravel Passport
+
+#### Definitions
+
+**Core Definition**
+
+Laravel Passport is a full OAuth2 server implementation for Laravel applications, providing a complete OAuth2 authorization server with support for access tokens, refresh tokens, and scopes.
+
+**Technical Definition**
+
+Passport is built on the League OAuth2 server and provides routes and middleware for issuing and validating OAuth2 tokens. It supports authorization code grant, password grant, client credentials grant, and personal access tokens. Passport is recommended when OAuth2 is required.
+
+**Beginner-Friendly Explanation**
+
+Passport is the full-featured OAuth2 solution. Use it when you need to let third-party applications access your API on behalf of users.
+
+#### Purposes
+
+- To provide full OAuth2 server capabilities.
+- To support third-party integrations and API ecosystems.
+- To issue access and refresh tokens with scopes.
+- To enable authorization code flow with PKCE.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+composer require laravel/passport
+php artisan install:api --passport
+php artisan passport:keys
+```
+
+```php
+// Protecting routes
+Route::middleware('auth:api')->get('/user', function (Request $request) {
+    return $request->user();
+});
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `HasApiTokens` | Trait for the User model. |
+| `auth:api` | Middleware for Passport authentication. |
+| `passport:keys` | Generates encryption keys. |
+
+**Syntax Rules**
+
+- Passport is installed via `install:api --passport`.
+- The `HasApiTokens` trait and `OAuthenticatable` interface must be added to the User model.
+- The `api` guard must use the `passport` driver.
+
+**Constraints and Limitations**
+
+- Passport is more complex to set up than Sanctum.
+- Not recommended for simple SPAs or mobile apps (use Sanctum instead).
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Setting Up Passport**
+
+**User Model**
+
+```php
+use Laravel\Passport\HasApiTokens;
+use Laravel\Passport\Contracts\OAuthenticatable;
+
+class User extends Authenticatable implements OAuthenticatable
+{
+    use HasApiTokens;
+}
+```
+
+**Config**
+
+```php
+'guards' => [
+    'api' => [
+        'driver' => 'passport',
+        'provider' => 'users',
+    ],
+],
+```
+
+**Expected Output**
+
+```
+// Passport routes are registered at /oauth/*
+```
+
+**Why This Output Occurs**
+
+Passport registers its OAuth2 routes and uses the `passport` driver for API authentication.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Third-Party API Access**
+
+A platform allows external developers to build integrations using OAuth2. Passport provides the authorization server.
+
+**Explanation**: Passport is the correct choice when OAuth2 is a requirement.
+
+---
+
+### 13. Authentication Best Practices
+
+#### Definitions
+
+**Core Definition**
+
+Authentication best practices are the recommended guidelines for implementing secure, maintainable, and performant authentication in Laravel applications.
+
+**Technical Definition**
+
+Best practices encompass password hashing, session security, rate limiting, token management, CSRF protection, and choosing the right authentication mechanism for the use case.
+
+**Beginner-Friendly Explanation**
+
+Best practices are the security rules and patterns that experienced developers follow to keep user accounts safe.
+
+#### Key Best Practices
+
+1. **Use Bcrypt or Argon2 for Password Hashing**: Laravel's `Hash` facade defaults to bcrypt. Never store plain-text passwords.
+
+2. **Regenerate Session ID on Login**: Prevents session fixation attacks. Laravel does this automatically with Breeze/Jetstream, but manual implementations must call `$request->session()->regenerate()`.
+
+3. **Rate Limit Login Attempts**: Apply `throttle:login` middleware or use `RateLimiter` to prevent brute-force attacks (e.g., 5 attempts per minute).
+
+4. **Use CSRF Protection**: Laravel's `VerifyCsrfToken` middleware is enabled by default for web routes. Never disable it.
+
+5. **Enable Two-Factor Authentication (2FA)**: For sensitive applications, enable 2FA via Fortify or Jetstream.
+
+6. **Choose the Right Authentication Mechanism**:
+   - Session for traditional web applications.
+   - Sanctum for SPAs and mobile apps.
+   - Passport for third-party OAuth2 integrations.
+
+7. **Use HTTPS**: Always serve authentication pages over HTTPS to prevent credential interception.
+
+8. **Set Secure Cookie Flags**: Use `HttpOnly`, `SameSite=Lax` or `Strict`, and `Secure` flags for session cookies.
+
+9. **Hash Remember Tokens**: The `remember_token` should be hashed in the database.
+
+10. **Revoke Tokens on Logout**: For token-based authentication, revoke tokens when the user logs out.
+
+11. **Use Strong Password Rules**: Enforce minimum length, complexity, and check against breached password databases using `Password::defaults()`.
+
+12. **Avoid Storing Sensitive Data in Tokens**: Tokens should be opaque; store user data server-side.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Rate Limiting Login**
+
+**Route**
+
+```php
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1'); // 5 attempts per minute
+```
+
+**Expected Output**
+
+```
+// After 5 failed attempts, the user is blocked for 1 minute
+```
+
+**Why This Output Occurs**
+
+The `throttle` middleware limits requests to 5 per minute per IP address.
+
+---
+
+**Example 2: Session Regeneration**
+
+**Controller**
+
+```php
+if (Auth::attempt($credentials)) {
+    $request->session()->regenerate();
+    return redirect()->intended('dashboard');
+}
+```
+
+**Expected Output**
+
+```
+// A new session ID is issued after login, preventing session fixation
+```
+
+**Why This Output Occurs**
+
+`regenerate()` creates a new session ID while preserving session data, preventing attackers from using a pre-set session ID.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Banking Application**
+
+A banking application uses session authentication with 2FA, rate limiting, and strict password policies. Sessions are regenerated on login, and all traffic is over HTTPS.
+
+**Explanation**: High-security applications require multiple layers of protection.
 
 ---
 
 ## References
 
-- Laravel Authentication (12.x) — https://laravel.com/framework/docs/12.x/authentication
-- Laravel Authentication (13.x) — https://laravel.com/framework/docs/authentication
-- Laravel Passport: Multiple Authentication Guards — https://laravel.com/framework/docs/11.x/passport
-- Laravel Passport (10.x) — https://laravel.com/framework/docs/10.x/passport
-- Laravel Passport (8.x) — https://laravel.com/docs/8.x/passport
-- Laravel Email Verification (5.8) — https://laravel.com/docs/5.8/verification
-- AuthManager API (9.x) — https://api.laravel.com/docs/9.x/Illuminate/Auth/AuthManager.html
-- AuthManager API (8.x) — https://api.laravel.com/docs/8.x/Illuminate/Auth/AuthManager.html
-- SessionGuard API — https://api.laravel.com/docs/7.x/Illuminate/Auth/SessionGuard.html
-- TokenGuard API — https://api.laravel.com/docs/8.x/Illuminate/Auth/TokenGuard.html
-- RequestGuard API — https://api.laravel.com/docs/8.x//Illuminate/Auth/RequestGuard.html
-- Laravel Permission: Multiple Guards — https://mintlify.wiki/spatie/laravel-permission/advanced-usage/multiple-guards
-- Laravel Multiple Guards Package — https://packagist.org/packages/shiftechafrica/laravel-multiple-guards
-- Laravel Permission (Packagist) — https://packagist.org/packages/hoai/laravel-permission-main
-- Laravel Authentication (Vectorial1024/docs) — https://github.com/Vectorial1024/docs/blob/12.x/authentication.md
-- Laravel Authentication (GitHub 12.x) — https://raw.githubusercontent.com/laravel/docs/refs/heads/12.x/authentication.md
+- Authentication – Laravel 13.x Documentation — https://laravel.com/framework/docs/13.x/authentication
+- Laravel Sanctum – Laravel 13.x Documentation — https://laravel.com/framework/docs/13.x/sanctum
+- Laravel Fortify – Laravel 13.x Documentation — https://laravel.com/framework/docs/13.x/fortify
+- Laravel Passport – Laravel 13.x Documentation — https://laravel.com/framework/docs/13.x/passport
+- Laravel Sanctum vs Passport: Which One Should You Use? – Bagisto — https://bagisto.com/en/laravel-sanctum-vs-passport-which-one-should-you-use/
+- Laravel Auth Systems: Breeze, Jetstream, Fortify Compared – LinkedIn — https://www.linkedin.com/posts/saqib-hussain-99ab56287_laravel-authentication-systems-breeze-vs-activity-7425070704234184705-EeXO
+- Authentication, Rate Limiting, and Session Fixation – GitHub (voku/agent-skills) — https://github.com/voku/agent-skills/blob/main/skills/laravel-owasp-security/rules/sec-authentication-rate-limiting.md
+- ADR-002: Authentication Architecture – GitHub (Sourdough) — https://github.com/Sourdough-start/sourdough/blob/master/docs/adr/002-authentication-architecture.md
+- Laravel Breeze vs Jetstream vs Fortify Compared 2026 – Laracopilot — https://laracopilot.com/blog/laravel-breeze-vs-jetstream-vs-fortify-compared/
+- How to Add Auth to a Laravel App (Breeze, Fortify, Sanctum) – Beag — https://beag.io/how-to-add-auth-to-a-laravel-app-breeze-fortify-sanctum/
+
+---
+
+**Version Note**: This cheat sheet is based on Laravel 10.x through 13.x documentation. Authentication features such as guards, providers, and session authentication have remained stable across these versions. Breeze, Jetstream, and Fortify have evolved, with Jetstream and Breeze being the primary starter kits in recent versions. Sanctum is the recommended solution for SPAs and mobile apps, while Passport is reserved for OAuth2 requirements. Developers should always consult the documentation for their specific Laravel version.

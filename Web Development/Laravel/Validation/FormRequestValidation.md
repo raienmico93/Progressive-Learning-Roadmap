@@ -1,4 +1,4 @@
-# Laravel Form Request Validation: A Comprehensive Cheat Sheet
+# Laravel Form Request Validation: A Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,116 +6,88 @@
 
 ### Definitions
 
-**Core Definition:** Form Requests are dedicated classes that encapsulate validation logic, authorization checks, and input preparation for a specific HTTP request, isolating this logic from controllers.
+**Core Definition**
 
-**Technical Definition:** Form Requests extend `Illuminate\Foundation\Http\FormRequest`, which itself extends `Illuminate\Http\Request`. The class defines a `rules()` method returning the validation rules, an `authorize()` method returning a boolean for permission checks, and optional lifecycle hooks (`prepareForValidation()`, `passedValidation()`). When type-hinted in a controller method, Laravel resolves the Form Request via the service container and runs authorization and validation before the controller action executes.
+A Laravel Form Request is a dedicated class that encapsulates validation and authorization logic for a specific HTTP request, extracting it from controllers into a reusable, testable unit.
 
-**Beginner-Friendly Explanation:** Instead of writing validation rules directly in your controller, you create a separate class that handles all the validation for a specific form. When the user submits, Laravel checks the rules, and if anything fails, it automatically redirects them back with errors—all before your controller code even runs.
+**Technical Definition**
+
+Form Requests extend `Illuminate\Foundation\Http\FormRequest`, which itself extends the base `Request` class and implements the `ValidatesWhenResolved` contract. When a controller method type-hints a Form Request class, Laravel's service container resolves the class and automatically triggers the `authorize()` method and the validation rules defined in `rules()`. If authorization fails, an HTTP 403 response is returned and the controller method never executes. If validation fails, the user is redirected back with flashed error messages and input, or a JSON 422 response is returned for AJAX/API requests. The class provides extension points for customising error messages (`messages()`), attribute names (`attributes()`), input preparation (`prepareForValidation()`), post-validation normalization (`passedValidation()`), and after-validation hooks (`after()`).
+
+**Beginner-Friendly Explanation**
+
+A Form Request is a dedicated class that handles all the "checking" for a specific form or API endpoint. Instead of writing validation rules inside your controller—which can make the controller messy and hard to read—you move them into their own class. When someone submits a form, Laravel automatically finds the right Form Request class (based on the type-hint in your controller), runs the authorization check, then runs all the validation rules. If anything fails, Laravel handles the redirect and error messages for you. It keeps your controllers clean and your validation logic reusable.
+
 
 ### Key Characteristics
 
-- **Dedicated Classes:** Validation logic lives in `app/Http/Requests/`.
-- **Automatic Resolution:** Type-hinting the Form Request in a controller triggers validation automatically.
-- **Authorization First:** The `authorize()` method runs before validation rules.
-- **Customisable Messages:** Override default error messages via `messages()` and `attributes()`.
-- **Input Lifecycle Hooks:** `prepareForValidation()` sanitises input before validation; `passedValidation()` transforms data after.
-- **Validated Data Access:** `$request->validated()` returns only rule-checked fields.
+- **Automatic Execution**: Type-hinting a Form Request in a controller method triggers authorization and validation automatically before the method executes—no manual `validate()` call is needed.
+- **Separation of Concerns**: Validation and authorization logic live in dedicated classes, keeping controllers thin and focused on business logic.
+- **Reusability**: The same Form Request can be used across multiple controllers or actions, ensuring consistent validation rules.
+- **Authorization Integration**: The `authorize()` method determines if the authenticated user has permission to make the request; returning `false` results in an automatic 403 response.
+- **Customisable Error Messages and Attributes**: The `messages()` and `attributes()` methods allow full control over the wording and field names used in error messages.
+- **Input Preparation and Normalisation**: The `prepareForValidation()` method sanitises or transforms input before validation; `passedValidation()` normalises data after validation passes.
+- **After-Validation Hooks**: The `after()` method supports custom validation logic that depends on multiple fields or database state.
+- **Named Error Bags**: The `$errorBag` property or `validateWithBag()` method stores errors in a named bag, preventing cross-contamination when multiple forms exist on one page.
+- **Configurable Redirects**: The `$redirect`, `$redirectRoute`, and `$redirectAction` properties customise where users are redirected on validation failure.
+- **Stop on First Failure**: The `$stopOnFirstFailure` property instructs the validator to stop validating all attributes once a single failure occurs.
+
 
 ### Prerequisites
 
-- A Laravel application with controllers and routes.
-- Basic understanding of HTTP requests and validation rules.
-- Familiarity with controller method injection.
-- Artisan CLI for generating Form Request classes.
+- **PHP 8.1 or higher** (Laravel 10+) or **PHP 8.2** (Laravel 11+).
+- **A Laravel application** installed via Composer.
+- **A basic understanding of HTTP requests** and form handling.
+- **Familiarity with Laravel's validation rules** (see the Validation Fundamentals cheat sheet).
+- **Knowledge of Eloquent models** for database-backed rules (`unique`, `exists`).
+- **A text editor or IDE** with PHP support.
+
 
 ### Related Programming Areas
 
-- **Validation Fundamentals:** Inline validation rules and error display.
-- **Service Container:** Form Requests are resolved and injected automatically.
-- **Authorization:** Gates and Policies integrate with the `authorize()` method.
-- **Middleware:** Form Request validation runs after middleware (e.g., `auth`).
+- **Validation**: Form Requests are the recommended approach for non-trivial validation in Laravel.
+- **Authorization**: The `authorize()` method integrates with Gates and Policies for request-level access control.
+- **Controllers**: Form Requests keep controllers thin by extracting validation and authorization logic.
+- **Blade Templating**: Validation errors flashed to the session are displayed in Blade views using the `@error` directive.
+- **API Development**: Form Requests automatically return JSON 422 responses for API requests, providing consistent error structures.
+- **Service Container**: Dependencies type-hinted in the `authorize()` or `rules()` methods are automatically resolved.
 
-### Core Concepts / Features
 
-1. Generating and Isolating Validation Logic
-2. Request Authorization (`authorize()`)
-3. Overriding Validation Vocabulary (`messages()`, `attributes()`)
-4. Data Lifecycle Hooks (`prepareForValidation()`, `passedValidation()`)
+## Core Concepts
 
 ---
 
-## 1. Generating and Isolating Validation Logic
+### 1. Form Requests
 
-### Definitions
+#### Definitions
 
-**Core Definition:** A Form Request is a class that isolates validation rules and authorization logic for a specific request, keeping controllers thin and focused on application logic.
+**Core Definition**
 
-**Technical Definition:** Generate a Form Request using `php artisan make:request StorePostRequest`. The class extends `FormRequest` and must implement `rules(): array`. When type-hinted in a controller method, Laravel resolves the Form Request, runs `authorize()`, creates a validator from `rules()`, and either redirects/throws on failure or passes the request to the controller.
+A Form Request is a custom request class that contains validation rules and authorization logic for a specific HTTP request, executed automatically when the request is resolved.
 
-**Beginner-Friendly Explanation:** Instead of cluttering your controller with validation rules, you move them into a dedicated class. When the controller method runs, Laravel has already validated the request. If validation fails, the controller never executes.
+**Technical Definition**
 
-### Purposes
+Form Requests extend `Illuminate\Foundation\Http\FormRequest`. The class must define a `rules()` method returning an array of validation rules and may define an `authorize()` method returning a boolean. When a controller method type-hints the Form Request, Laravel's `ValidatesWhenResolved` contract triggers validation during route resolution. The `validated()` method returns only the fields that were validated, preventing mass assignment of unvalidated data.
 
-- To isolate validation logic into a dedicated, testable class.
-- To keep controllers focused on application logic rather than input validation.
-- To reuse the same validation rules across multiple controllers.
-- To automatically run validation before the controller action executes.
+**Beginner-Friendly Explanation**
 
-### Syntax Rules and Structure
+A Form Request is a class you create for each form (or API endpoint) that needs validation. It holds all the rules and permission checks. When the form is submitted, Laravel finds the class automatically and runs everything. You do not have to call any validation method yourself—it just works.
 
-**Complete General Syntax:**
+#### Purposes
 
-```php
-namespace App\Http\Requests;
+- To extract validation and authorization logic from controllers into dedicated, reusable classes.
+- To ensure consistent validation rules across multiple controllers or actions.
+- To automatically handle validation failure responses (redirects or JSON) without manual intervention.
+- To provide a single source of truth for a request's validation and authorization requirements.
+- To enable dependency injection for authorization and validation logic.
 
-use Illuminate\Foundation\Http\FormRequest;
+#### Syntax Rules and Structure
 
-class StorePostRequest extends FormRequest
-{
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    public function rules(): array
-    {
-        return [
-            'title' => 'required|unique:posts|max:255',
-            'body' => 'required',
-        ];
-    }
-}
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `extends FormRequest` | Base class providing validation lifecycle. |
-| `authorize(): bool` | Returns `true`/`false` for permission checks. |
-| `rules(): array` | Returns validation rules for the request. |
-| `$request->validated()` | Returns only the validated fields. |
-
-**Syntax Rules:**
-- Form Request classes live in `app/Http/Requests/`.
-- Generate via `php artisan make:request RequestName`.
-- The `authorize()` method must return `true` or `false`.
-- The `rules()` method must return an array of validation rules.
-- Type-hint the Form Request in a controller method to trigger validation.
-
-**Constraints and Limitations:**
-- **GET requests:** Form Requests work with any HTTP verb, including GET, but are less common for query-string validation.
-- **Authorization:** A `false` return from `authorize()` throws a `403` HTTP exception.
-- **Empty rules:** Returning an empty array from `rules()` skips validation entirely.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Basic Form Request**
+**Complete General Syntax**
 
 ```php
 <?php
 // app/Http/Requests/StorePostRequest.php
-
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -130,18 +102,81 @@ class StorePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'        => 'required|unique:posts|max:255',
-            'body'         => 'required|min:10',
-            'published_at' => 'nullable|date',
+            'title' => 'required|string|max:255',
+            'body'  => 'required|string|min:10',
         ];
     }
 }
 ```
 
 ```php
+// Controller usage
+public function store(StorePostRequest $request)
+{
+    Post::create($request->validated());
+    return redirect()->route('posts.index');
+}
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `extends FormRequest` | Base class providing validation and authorization infrastructure. |
+| `authorize(): bool` | Determines if the user is authorized. Return `true` to allow. |
+| `rules(): array` | Returns the validation rules for the request. |
+| `$request->validated()` | Returns only the validated fields. |
+
+**Syntax Rules**
+
+- The class must extend `FormRequest`.
+- `rules()` is required; `authorize()` is optional (defaults to allowing all).
+- The controller method must type-hint the Form Request as its first parameter.
+- The `validated()` method returns an array of only the validated fields.
+- Form Requests are stored in `app/Http/Requests`.
+
+**Constraints and Limitations**
+
+- Form Requests cannot be used in Closure-based routes; they require a controller method.
+- Extremely simple endpoints with one or two trivial rules may not warrant a Form Request class.
+- The `authorize()` method must return a boolean; returning `false` results in a 403 response.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Basic Form Request with Authorization**
+
+**Form Request**
+
+```php
+<?php
+// app/Http/Requests/StorePostRequest.php
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StorePostRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        // Only authenticated users can create posts
+        return $this->user() !== null;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'title' => 'required|string|max:255',
+            'body'  => 'required|string|min:10',
+        ];
+    }
+}
+```
+
+**Controller**
+
+```php
 <?php
 // app/Http/Controllers/PostController.php
-
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
@@ -151,305 +186,589 @@ class PostController extends Controller
 {
     public function store(StorePostRequest $request)
     {
-        // Validation already passed; $request->validated() contains only validated fields
         $post = Post::create($request->validated());
 
-        return redirect()->route('posts.show', $post);
+        return redirect()->route('posts.show', $post)
+            ->with('success', 'Post created successfully.');
     }
 }
 ```
 
-**Expected Output:** On valid submission, the post is created. On invalid submission, the user is redirected back with errors and old input.
+**Route**
 
-**Why:** The type-hinted `StorePostRequest` triggers automatic validation before the `store()` method body executes. `$request->validated()` returns only the fields that passed validation.
+```php
+// routes/web.php
+Route::post('/posts', [PostController::class, 'store']);
+```
+
+**Expected Output (Success)**
+
+```
+// Authenticated user, valid data → post created, redirect to posts.show with success message
+```
+
+**Expected Output (Unauthenticated)**
+
+```
+// Guest user → 403 Forbidden response, controller method not executed
+```
+
+**Expected Output (Validation Failure)**
+
+```
+// Missing title → redirect back with "The title field is required." and old input
+```
+
+**Why This Output Occurs**
+
+The `authorize()` method checks if a user is authenticated. If not, Laravel returns a 403 response before the controller method runs. If authorized, the `rules()` method validates the input. On failure, Laravel redirects back with errors; on success, `$request->validated()` returns only the validated fields, which are used to create the post.
 
 ---
 
-**Example 2: Validated Data Access**
+**Example 2: Form Request with Route Model Binding**
 
-```php
-public function store(StorePostRequest $request)
-{
-    // Option 1: validated() — returns array of validated data
-    $validated = $request->validated();
-
-    // Option 2: safe() — returns ValidatedInput object
-    $validated = $request->safe()->only(['title', 'body']);
-    $validated = $request->safe()->except(['published_at']);
-    $validated = $request->safe()->all();
-}
-```
-
-**Expected Output:** `$request->validated()` returns an array of only the validated keys. `safe()->only(...)` returns a subset.
-
-**Why:** `validated()` and `safe()` ensure only rule-checked fields are used, preventing attackers from injecting extra columns .
-
-### Real-World Cases
-
-- **Blog Posts:** `StorePostRequest` and `UpdatePostRequest` separate create/update rules.
-- **User Registration:** `RegisterRequest` handles name, email, password validation.
-- **API Endpoints:** Form Requests validate JSON payloads with `Accept: application/json`.
-
-### References
-
-- Laravel Validation: Form Request Validation — https://laravel.com/docs/12.x/validation#form-request-validation
-- Laravel Form Requests (Laravel News) — https://laravel-news.com/form-requests
-- Form Request Validation for Filament — https://packagist.org/packages/occ-therapist/form-request-validation-for-filament
-
----
-
-## 2. Request Authorization (`authorize()`)
-
-### Definitions
-
-**Core Definition:** The `authorize()` method in a Form Request determines whether the authenticated user has permission to perform the requested action.
-
-**Technical Definition:** Before validation rules run, Laravel calls `authorize()`. If it returns `false`, a `Illuminate\Auth\Access\AuthorizationException` is thrown, resulting in a 403 HTTP response. The method can type-hint dependencies (e.g., `Gate`) for complex authorization logic.
-
-**Beginner-Friendly Explanation:** Even if the data is valid, a user might not have permission to perform the action. The `authorize()` method checks this first—before validation even runs. Return `true` to allow, `false` to deny.
-
-### Purposes
-
-- To verify user permissions before processing the request.
-- To prevent unauthorized users from reaching validation or controller logic.
-- To centralise authorization checks alongside validation rules.
-- To integrate with Laravel's Gate and Policy systems.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```php
-public function authorize(): bool
-{
-    return $this->user()->can('update', $this->route('post'));
-}
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `$this->user()` | The authenticated user instance. |
-| `->can('ability', $model)` | Gate/Policy check. |
-| `$this->route('post')` | Route parameter (e.g., the `Post` model). |
-
-**Syntax Rules:**
-- `authorize()` must return a boolean.
-- Returning `false` throws `AuthorizationException` → 403 response.
-- Type-hint dependencies (e.g., `Gate`) for complex checks.
-- Access route parameters via `$this->route('name')`.
-
-**Constraints and Limitations:**
-- **No automatic redirect:** Unlike validation failures, authorization failures return 403, not a redirect.
-- **Route model binding:** Route parameters are resolved before `authorize()` runs.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Basic Authorization Check**
-
-```php
-public function authorize(): bool
-{
-    return $this->user() && $this->user()->isAdmin();
-}
-```
-
-**Expected Output:** Admin users pass; non-admins receive 403.
-
-**Why:** The method checks the authenticated user's role before allowing the request.
-
----
-
-**Example 2: Policy-Based Authorization**
-
-```php
-public function authorize(): bool
-{
-    return $this->user()->can('update', $this->route('post'));
-}
-```
-
-**Expected Output:** Users who can update the route-bound `Post` model pass; others receive 403.
-
-**Why:** The `can()` method delegates to the `PostPolicy::update()` method .
-
-### Real-World Cases
-
-- **Post Updates:** Only the post author or an admin can update.
-- **Role Assignment:** Only admins can assign roles .
-- **Comment Deletion:** Only the comment owner or a moderator can delete.
-
-### References
-
-- Laravel Authorization — https://laravel.com/docs/12.x/authorization
-- Validating Role Assignments via Form Request (Laracasts) — https://laracasts.com/index.php/discuss/channels/laravel/validating-role-assignments-via-form-request
-
----
-
-## 3. Overriding Validation Vocabulary (`messages()` and `attributes()`)
-
-### Definitions
-
-**Core Definition:** The `messages()` method customises error messages for specific rules, while `attributes()` provides human-readable names for fields in error messages.
-
-**Technical Definition:** `messages()` returns an array keyed by `attribute.rule` (e.g., `'email.required' => '...'`). `attributes()` returns an array mapping field names to friendly labels (e.g., `'email' => 'email address'`). These override the default messages in `lang/en/validation.php`.
-
-**Beginner-Friendly Explanation:** Instead of "The email field is required," you can say "We need your email address." `messages()` customises the message, and `attributes()` customises the field name.
-
-### Purposes
-
-- To provide user-friendly error messages instead of technical defaults.
-- To rename fields in error messages (e.g., `first_name` → "first name").
-- To localise messages for specific attributes or rules.
-- To maintain a consistent voice throughout the application.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```php
-public function messages(): array
-{
-    return [
-        'email.required' => 'We need your email address!',
-        'title.max'      => 'The title must not exceed 255 characters.',
-    ];
-}
-
-public function attributes(): array
-{
-    return [
-        'email'      => 'email address',
-        'first_name' => 'first name',
-    ];
-}
-```
-
-**Component Breakdown:**
-
-| Method | Key Format | Purpose |
-|--------|-----------|---------|
-| `messages()` | `attribute.rule` | Override message for specific rule. |
-| `attributes()` | `attribute` | Override field name in messages. |
-
-**Syntax Rules:**
-- `messages()` keys use dot notation: `attribute.rule`.
-- `attributes()` keys are field names; values are display names.
-- The `:attribute` placeholder in default messages is replaced by the value from `attributes()`.
-
-**Constraints and Limitations:**
-- **Rule-specific:** `messages()` targets specific rule failures, not the field in general.
-- **Global vs. local:** These methods override only for the current Form Request; use language files for global overrides.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Custom Messages and Attributes**
+**Form Request**
 
 ```php
 <?php
+// app/Http/Requests/UpdatePostRequest.php
+namespace App\Http\Requests;
 
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdatePostRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        // Only the post author or an admin can update
+        $post = $this->route('post');
+        return $this->user()->id === $post->user_id
+            || $this->user()->hasRole('admin');
+    }
+
+    public function rules(): array
+    {
+        return [
+            'title' => 'required|string|max:255',
+            'body'  => 'required|string|min:10',
+        ];
+    }
+}
+```
+
+**Controller**
+
+```php
+public function update(UpdatePostRequest $request, Post $post)
+{
+    $post->update($request->validated());
+
+    return redirect()->route('posts.show', $post);
+}
+```
+
+**Expected Output**
+
+```
+// Author → update proceeds
+// Non-author non-admin → 403 Forbidden
+// Validation fails → redirect back with errors
+```
+
+**Why This Output Occurs**
+
+The `authorize()` method accesses the resolved `Post` model via `$this->route('post')` (route model binding) and checks ownership or admin role. If authorized, validation runs; otherwise, a 403 response is returned.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Blog Post Management**
+
+A blog application uses `StorePostRequest` for creating posts and `UpdatePostRequest` for updating posts. Both classes share similar rules but have different authorization logic (create requires authentication; update requires ownership or admin). The controllers remain thin, and the validation logic is reusable.
+
+**Explanation**: Form Requests centralise validation and authorization, making the application easier to maintain and test.
+
+**Case 2: API Endpoint with Consistent Error Responses**
+
+A REST API uses Form Requests for all write endpoints. Validation failures automatically return a JSON 422 response with structured error data, which the frontend parses to display field-level errors. The API controllers contain only the business logic for creating or updating resources.
+
+**Explanation**: Form Requests ensure consistent API error handling across all endpoints without duplicating validation logic.
+
+
+### 2. Form Request Creation
+
+#### Definitions
+
+**Core Definition**
+
+Form Request creation is the process of generating a new Form Request class using Laravel's Artisan CLI.
+
+**Technical Definition**
+
+The `php artisan make:request` command generates a PHP class in `app/Http/Requests` extending `Illuminate\Foundation\Http\FormRequest`. The generated class contains stubs for the `authorize()` and `rules()` methods. The `authorize()` method defaults to returning `false`, requiring the developer to explicitly enable authorization.
+
+**Beginner-Friendly Explanation**
+
+Creating a Form Request is a one-command process. Laravel makes the file for you with the two methods you need to fill in: one for permissions and one for validation rules.
+
+#### Purposes
+
+- To automate the creation of Form Request boilerplate.
+- To ensure Form Requests are placed in the correct namespace and directory.
+- To provide consistent method stubs for authorization and validation.
+- To reduce manual file creation errors.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+php artisan make:request StorePostRequest
+php artisan make:request UpdatePostRequest
+```
+
+**Component Breakdown**
+
+| Command | Effect |
+|---------|--------|
+| `make:request StorePostRequest` | Creates `app/Http/Requests/StorePostRequest.php`. |
+| `make:request UpdatePostRequest` | Creates `app/Http/Requests/UpdatePostRequest.php`. |
+
+**Syntax Rules**
+
+- The request name should be PascalCase and descriptive (e.g., `StorePostRequest`, `UpdateUserRequest`).
+- The `Request` suffix is a strong convention but not enforced.
+- Generated files must be edited to add rules and authorization logic.
+
+**Constraints and Limitations**
+
+- The command does not register the Form Request automatically; it must be type-hinted in a controller.
+- The default `authorize()` method returns `false`, which blocks all requests until changed.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Generating a Form Request**
+
+**Command**
+
+```bash
+php artisan make:request StorePostRequest
+```
+
+**Generated File**
+
+```php
+<?php
+// app/Http/Requests/StorePostRequest.php
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePostRequest extends FormRequest
 {
-    // 1. Determine if the user is authorized to make this request
     public function authorize(): bool
     {
-        return true; 
+        return false;
     }
 
-    // 2. Define your validation rules
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            // Note: 'required' is added here to show how attributes work
-            'title' => 'required|max:255', 
-        ];
-    }
-
-    // 3. Customize specific rule error messages
-    public function messages(): array
-    {
-        return [
-            'email.required' => 'We need your email address!',
-            'email.email'    => 'Please provide a valid email address.',
-            'title.max'      => 'The title is too long (max 255 characters).',
-        ];
-    }
-
-    // 4. Define friendly names for fields
-    public function attributes(): array
-    {
-        return [
-            'email' => 'email address',
-            'title' => 'post title',
+            //
         ];
     }
 }
 ```
-```php
-<?php
 
-namespace App\Http\Controllers;
+**Expected Output (Terminal)**
 
-use App\Http\Requests\StorePostRequest;
-
-class PostController extends Controller
-{
-    public function store(StorePostRequest $request)
-    {
-        // If code reaches here, validation passed!
-        return response()->json(['message' => 'Validation passed!']);
-    }
-}
+```
+INFO  Request [app/Http/Requests/StorePostRequest.php] created successfully.
 ```
 
-**Expected Output:**
-- Missing email: "We need your email address!"
-- Invalid email: "Please provide a valid email address."
-- Title too long: "The post title is too long (max 255 characters)."
+**Why This Output Occurs**
 
-**Why:** `messages()` targets specific `attribute.rule` combinations. `attributes()` replaces `:attribute` in default messages .
-
-### Real-World Cases
-
-- **User Registration:** Friendly messages for email, password, and name fields.
-- **E-commerce Checkout:** Clear messages for card number and expiry fields.
-- **API Responses:** Consistent, machine-readable error messages.
-
-### References
-
-- Laravel Validation: Customising Error Messages — https://laravel.com/docs/12.x/validation#customizing-the-error-messages
-- Laravel Validation: Specifying Custom Attributes — https://laravel.com/docs/12.x/validation#specifying-custom-attribute-values
+Artisan scaffolds the Form Request class with the required methods. The `authorize()` method returns `false` by default, and `rules()` returns an empty array.
 
 ---
 
-## 4. Data Lifecycle Hooks (`prepareForValidation()` and `passedValidation()`)
+#### Real-World Cases with Explanation
 
-### Definitions
+**Case 1: Rapid Feature Development**
 
-**Core Definition:** `prepareForValidation()` sanitises or augments input before validation runs, while `passedValidation()` transforms data after validation succeeds but before the controller receives it.
+A developer working on a new "Product" feature runs `php artisan make:request StoreProductRequest` and immediately fills in the rules and authorization logic. The Form Request is then type-hinted in the `ProductController`'s `store` method.
 
-**Technical Definition:** `prepareForValidation()` is called by `validated()` before creating the validator. It typically uses `$this->merge()` or `$this->replace()` to modify request data. `passedValidation()` is called after the validator succeeds, before the controller action executes, allowing final data transformations.
+**Explanation**: Artisan accelerates development by generating the necessary boilerplate.
 
-**Beginner-Friendly Explanation:** Sometimes input needs cleaning before validation (e.g., trimming spaces, converting a comma-separated string to an array). `prepareForValidation()` does this. After validation passes, you might want to hash a password or format data—`passedValidation()` handles that.
 
-### Purposes
+### 3. Form Request Validation
 
-- To normalise input before validation (trim, lowercase, convert formats).
-- To merge additional data into the request (e.g., authenticated user's locale).
-- To transform validated data after validation (hash passwords, uppercase names).
-- To convert value objects or compute derived fields.
+#### Definitions
 
-### Syntax Rules and Structure
+**Core Definition**
 
-**Complete General Syntax — `prepareForValidation()`:**
+Form Request validation is the process by which the `rules()` method's validation rules are applied to the incoming request data when the Form Request is resolved.
+
+**Technical Definition**
+
+When a controller method type-hints a Form Request, Laravel's route dispatcher resolves the class and calls its `validateResolved()` method. This method invokes `$this->validator = $this->createDefaultValidator($this->container['validation.validator'])`, which applies the rules returned by `rules()` to the request input. If validation fails, a `ValidationException` is thrown and converted to a redirect or JSON response. On success, `$request->validated()` returns only the validated data.
+
+**Beginner-Friendly Explanation**
+
+Validation happens automatically when you type-hint a Form Request in your controller. You just list your rules in the `rules()` method, and Laravel checks them before your controller code runs.
+
+#### Purposes
+
+- To apply validation rules to incoming request data automatically.
+- To ensure only validated data is used for mass assignment.
+- To provide a consistent validation experience across all request types (web, API).
+- To keep validation rules separate from controller logic.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
 
 ```php
+public function rules(): array
+{
+    return [
+        'title' => 'required|string|max:255',
+        'body'  => ['required', 'string', 'min:10'],
+        'email' => ['required', 'email', Rule::unique('users')],
+    ];
+}
+```
+
+**Component Breakdown**
+
+| Rule Category | Examples |
+|--------------|----------|
+| Presence | `required`, `nullable`, `filled` |
+| Type | `string`, `integer`, `numeric`, `boolean`, `array` |
+| Length | `min:value`, `max:value`, `between:min,max` |
+| Format | `email`, `url`, `ip`, `json`, `regex:pattern` |
+| Database | `unique:table,column`, `exists:table,column` |
+| Conditional | `required_if`, `Rule::when()` |
+
+**Syntax Rules**
+
+- `rules()` must return an array.
+- Rules can be strings (`'required|email'`) or arrays (`['required', 'email']`).
+- Array notation is preferred for rules with parameters containing commas or `|` characters.
+- The `bail` rule stops validation for a field on first failure.
+- The `nullable` rule allows `null` values.
+
+**Constraints and Limitations**
+
+- The `validated()` method returns only the fields present in the rules array.
+- Rules that depend on the authenticated user (e.g., `unique:users,email,{$userId}`) can access the user via `$this->user()`.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Basic Validation Rules**
+
+**Form Request**
+
+```php
+public function rules(): array
+{
+    return [
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|email|unique:users,email',
+        'password' => 'required|string|min:8|confirmed',
+        'role'     => 'required|in:admin,editor,viewer',
+    ];
+}
+```
+
+**Expected Output**
+
+```
+// Valid data → passes validation
+// Missing email → "The email field is required."
+// Password too short → "The password must be at least 8 characters."
+// Role not in list → "The selected role is invalid."
+```
+
+**Why This Output Occurs**
+
+Each rule applies its specific constraint. Multiple rules for a field are applied in sequence, and the first failure generates an error message.
+
+---
+
+**Example 2: Nested Array Validation with Wildcards**
+
+```php
+public function rules(): array
+{
+    return [
+        'items'              => 'required|array|min:1',
+        'items.*.product_id' => 'required|integer|exists:products,id',
+        'items.*.quantity'   => 'required|integer|min:1|max:100',
+    ];
+}
+```
+
+**Expected Output**
+
+```
+// Valid items array → passes
+// items[0].product_id missing → "The items.0.product_id field is required."
+// items[1].quantity is 0 → "The items.1.quantity must be at least 1."
+```
+
+**Why This Output Occurs**
+
+The wildcard `*` applies the rules to every element in the `items` array. Error messages include the specific index.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: E-commerce Order Validation**
+
+An order Form Request validates `customer_email`, `items` (nested array), `items.*.product_id` (exists in products), and `items.*.quantity` (integer, min 1). This ensures every order item is valid before the order is created.
+
+**Explanation**: Nested array validation is essential for complex data structures like orders.
+
+---
+
+### 4. Form Request Authorization
+
+#### Definitions
+
+**Core Definition**
+
+Form Request authorization is the process by which the `authorize()` method determines whether the authenticated user has permission to perform the request, returning a boolean.
+
+**Technical Definition**
+
+The `authorize()` method is called before validation. It must return `true` (authorized) or `false` (denied). If `false` is returned, Laravel automatically returns an HTTP 403 response, and the controller method is never executed. The method has access to the authenticated user via `$this->user()` and route parameters via `$this->route('parameter')`. Dependencies type-hinted in the `authorize()` signature are resolved by the service container.
+
+**Beginner-Friendly Explanation**
+
+Authorization is the "can this user do this?" check. You put your permission logic in the `authorize()` method. If the user is not allowed, Laravel stops the request and returns a "Forbidden" error. You do not have to write any extra code in your controller.
+
+#### Purposes
+
+- To determine if the authenticated user is permitted to make the request.
+- To automatically return a 403 response for unauthorized requests.
+- To keep authorization logic separate from validation and controller logic.
+- To leverage Gates and Policies for complex permission checks.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+public function authorize(): bool
+{
+    return $this->user() !== null;
+}
+
+// With model binding
+public function authorize(): bool
+{
+    $post = $this->route('post');
+    return $this->user()->can('update', $post);
+}
+
+// With dependency injection
+public function authorize(SomeService $service): bool
+{
+    return $service->check($this->user());
+}
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `$this->user()` | The authenticated user instance. |
+| `$this->route('param')` | Access route parameters (including bound models). |
+| `$this->can('ability', $model)` | Check against a Gate or Policy. |
+
+**Syntax Rules**
+
+- Must return `bool`.
+- Returning `false` triggers a 403 response.
+- Can type-hint dependencies for automatic resolution.
+- If authorization is handled elsewhere, return `true` or remove the method.
+
+**Constraints and Limitations**
+
+- The `authorize()` method runs before validation, so invalid input does not bypass authorization.
+- Route parameters are available via `$this->route()`.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Ownership Check with Route Model Binding**
+
+**Form Request**
+
+```php
+public function authorize(): bool
+{
+    $post = $this->route('post');
+    return $this->user()->id === $post->user_id;
+}
+```
+
+**Controller**
+
+```php
+public function update(UpdatePostRequest $request, Post $post)
+{
+    $post->update($request->validated());
+    return redirect()->route('posts.show', $post);
+}
+```
+
+**Expected Output**
+
+```
+// Author → update proceeds
+// Non-author → 403 Forbidden
+```
+
+**Why This Output Occurs**
+
+The `authorize()` method retrieves the `Post` model via route model binding and checks if the authenticated user's ID matches the post's `user_id`.
+
+---
+
+**Example 2: Gate/Policy Authorization**
+
+```php
+public function authorize(): bool
+{
+    return $this->user()->can('update', $this->route('post'));
+}
+```
+
+**Expected Output**
+
+```
+// If the user passes the 'update' policy → authorized
+// If not → 403 Forbidden
+```
+
+**Why This Output Occurs**
+
+The `can()` method delegates to the registered Policy for the `Post` model, checking the `update` ability.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Admin-Only Resource Management**
+
+An admin panel's `StoreUserRequest` uses `authorize()` to check `$this->user()->hasRole('admin')`. Only admins can create users; other authenticated users receive a 403 response.
+
+**Explanation**: Form Request authorization centralises permission checks for a specific action.
+
+
+### 5. Form Request Customization
+
+#### Definitions
+
+**Core Definition**
+
+Form Request customization refers to the extension points that allow developers to control input preparation, post-validation normalisation, redirect behaviour, and after-validation logic.
+
+**Technical Definition**
+
+The `FormRequest` class provides several overridable methods and properties: `prepareForValidation()` (sanitise input before validation), `passedValidation()` (normalise data after validation passes), `after()` (custom validation logic after standard rules), `$redirect` / `$redirectRoute` / `$redirectAction` (custom redirect locations), `$errorBag` (named error bag), and `$stopOnFirstFailure` (halt on first failure).
+
+**Beginner-Friendly Explanation**
+
+Customization lets you fine-tune how the Form Request behaves. You can clean up input before checking it, modify data after checking it, redirect to a different page on failure, or run your own custom validation logic.
+
+#### Purposes
+
+- To sanitise or transform input before validation rules are applied.
+- To normalise data after validation passes (e.g., hashing passwords, generating slugs).
+- To redirect users to a specific page when validation fails.
+- To store errors in a named bag for multi-form pages.
+- To stop validation on the first failure for performance.
+- To add custom validation logic that depends on multiple fields.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+// Prepare input before validation
+protected function prepareForValidation(): void
+{
+    $this->merge([
+        'slug' => Str::slug($this->title),
+    ]);
+}
+
+// Normalise after validation passes
+protected function passedValidation(): void
+{
+    $this->replace(['name' => 'Taylor']);
+}
+
+// Custom redirect on failure
+protected $redirect = '/dashboard';
+protected $redirectRoute = 'posts.create';
+
+// Named error bag
+protected $errorBag = 'createPost';
+
+// Stop on first failure
+protected $stopOnFirstFailure = true;
+
+// After-validation hook
+public function after(): array
+{
+    return [
+        function ($validator) {
+            if ($this->quantity > Product::find($this->product_id)?->stock) {
+                $validator->errors()->add('quantity', 'Not enough stock.');
+            }
+        },
+    ];
+}
+```
+
+**Component Breakdown**
+
+| Method/Property | Description |
+|----------------|-------------|
+| `prepareForValidation()` | Modifies input before validation. |
+| `passedValidation()` | Modifies data after validation passes. |
+| `$redirect` | URI to redirect to on failure. |
+| `$redirectRoute` | Named route to redirect to on failure. |
+| `$errorBag` | Name of the error bag. |
+| `$stopOnFirstFailure` | Stop validation on first failure. |
+| `after()` | Custom validation logic after standard rules. |
+
+**Syntax Rules**
+
+- `prepareForValidation()` and `passedValidation()` are `protected` methods.
+- `$redirect` accepts a URI string; `$redirectRoute` accepts a route name.
+- `$stopOnFirstFailure` is a `protected` boolean property.
+- `after()` returns an array of closures or invokable classes.
+
+**Constraints and Limitations**
+
+- `passedValidation()` mutations are not reflected in `validated()` or `safe()`; they are reflected in `all()` and `input()`.
+- The `$redirect` and `$redirectRoute` properties only apply to web requests.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Preparing Input Before Validation**
+
+**Form Request**
+
+```php
+use Illuminate\Support\Str;
+
 protected function prepareForValidation(): void
 {
     $this->merge([
@@ -458,178 +777,438 @@ protected function prepareForValidation(): void
 }
 ```
 
-**Complete General Syntax — `passedValidation()`:**
+**Expected Output**
 
-```php
-protected function passedValidation(): void
-{
-    $this->replace([
-        'password' => Hash::make($this->password),
-    ]);
-}
+```
+// If title is "My First Post" → slug is "my-first-post" before validation
 ```
 
-**Component Breakdown:**
+**Why This Output Occurs**
 
-| Method | Timing | Purpose |
-|--------|--------|---------|
-| `prepareForValidation()` | Before validation | Sanitise, merge, normalise. |
-| `passedValidation()` | After validation | Transform, hash, format. |
+The `prepareForValidation()` method merges the generated slug into the request data before the `rules()` method is applied.
 
-**Syntax Rules:**
-- `prepareForValidation()` receives no arguments; use `$this->merge()` or `$this->replace()`.
-- `passedValidation()` receives no arguments; use `$this->replace()` to modify data.
-- Both methods are `protected` and return `void`.
+---
 
-**Constraints and Limitations:**
-- **`prepareForValidation()` does not validate:** It only prepares data; rules run afterward.
-- **`passedValidation()` runs before controller:** The controller receives the transformed data.
-- **Manual instantiation:** These hooks only run through the normal request lifecycle, not when manually instantiating a Form Request .
+**Example 2: After-Validation Hook for Multi-Field Logic**
 
-### Multiple Annotated Complete Code Examples
-
-**Example 1: `prepareForValidation()` — Normalising Input**
+**Form Request**
 
 ```php
-/**
- * Modify data BEFORE validation runs.
- */
-protected function prepareForValidation(): void
-{
-    $this->merge([
-        'slug'  => Str::slug($this->title),   // Converts "My First Post" to "my-first-post"
-        'email' => strtolower($this->email), // Converts "USER@Example.com" to "user@example.com"
-    ]);
-}
-/**
- * Get the validation rules that apply to the request.
- */
-public function rules(): array
+public function after(): array
 {
     return [
-        'title' => 'required|string|max:255',
-        'slug'  => 'required|string|unique:posts,slug', // Validates the generated slug
-        'email' => 'required|email|unique:users,email', // Validates the lowercase email
+        function ($validator) {
+            if ($this->shipping_method === 'express'
+                && collect($this->items)->sum('quantity') > 50) {
+                $validator->errors()->add(
+                    'shipping_method',
+                    'Express shipping is not available for orders over 50 items.'
+                );
+            }
+        },
     ];
 }
 ```
 
-**Expected Output:** The `slug` and `email` fields are normalised before validation rules run.
+**Expected Output**
 
-**Why:** `prepareForValidation()` modifies the request data before the validator inspects it .
+```
+// Express shipping with 60 items → error added to shipping_method
+// Express shipping with 30 items → validation passes
+```
+
+**Why This Output Occurs**
+
+The `after()` closure runs after the standard rules. It checks the combined quantity of all items and adds a custom error if the express shipping limit is exceeded.
 
 ---
 
-**Example 2: `prepareForValidation()` — Converting String to Array**
+#### Real-World Cases with Explanation
+
+**Case 1: Slug Generation**
+
+A blog's `StorePostRequest` uses `prepareForValidation()` to generate a URL slug from the title before validation, ensuring the slug is unique and properly formatted.
+
+**Explanation**: `prepareForValidation()` ensures derived fields are available to validation rules.
+
+---
+
+### 6. Form Request Error Messages
+
+#### Definitions
+
+**Core Definition**
+
+Form Request error messages are the human-readable messages displayed to users when validation rules fail, customisable via the `messages()` method.
+
+**Technical Definition**
+
+The `messages()` method returns an array of `field.rule` keyed messages that override Laravel's default messages. The `:attribute` placeholder is replaced with the field name (or a custom attribute name from `attributes()`). Messages can include rule-specific placeholders like `:min`, `:max`, and `:value`.
+
+**Beginner-Friendly Explanation**
+
+Error messages are what users see when they make a mistake. You can customise them to be friendlier or more specific to your application.
+
+#### Purposes
+
+- To provide clear, user-friendly feedback when validation fails.
+- To customise messages to match the application's tone and language.
+- To support localization and multi-language applications.
+- To include rule-specific parameters in messages.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
 
 ```php
-/**
- * Sanitize or transform input before validation runs.
- */
-protected function prepareForValidation(): void
+public function messages(): array
 {
-    if (is_string($this->roles)) {
-        // Split by comma and trim whitespace
-        $array = array_map('trim', explode(',', $this->roles));
-        
-        // Remove empty values (e.g., if they typed "admin,,editor")
-        $filteredArray = array_filter($array);
+    return [
+        'title.required' => 'A title is required',
+        'body.required'  => 'A message is required',
+        'email.unique'   => 'This email is already registered.',
+        'password.min'   => 'Your password must be at least :min characters.',
+    ];
+}
+```
 
+**Component Breakdown**
+
+| Placeholder | Description |
+|-------------|-------------|
+| `:attribute` | The field name (or custom attribute name). |
+| `:value` | The invalid value submitted. |
+| `:min`, `:max` | Rule parameters (e.g., minimum/maximum length). |
+
+**Syntax Rules**
+
+- Messages are keyed by `field.rule` (e.g., `email.required`).
+- The `:attribute` placeholder is replaced with the field name.
+- Custom messages override default messages for the specified rule.
+
+**Constraints and Limitations**
+
+- The `:value` placeholder should be used cautiously, as it may expose sensitive input.
+- Custom messages must be defined for each `field.rule` combination.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Custom Error Messages**
+
+**Form Request**
+
+```php
+public function messages(): array
+{
+    return [
+        'email.required' => 'We need your email address to create your account.',
+        'email.email'    => 'That does not look like a valid email address.',
+        'email.unique'   => 'An account with this email already exists.',
+        'password.min'   => 'Your password must be at least :min characters.',
+    ];
+}
+```
+
+**Expected Output**
+
+```
+// If email is missing → "We need your email address to create your account."
+// If password is too short → "Your password must be at least 8 characters."
+```
+
+**Why This Output Occurs**
+
+The `messages()` method overrides the default messages for the specified `field.rule` combinations.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: User-Friendly Registration Form**
+
+A registration form uses custom messages like "We need your email address" instead of the default "The email field is required." This makes the form feel more personal and less robotic.
+
+**Explanation**: Custom error messages improve the user experience by providing clear, friendly guidance.
+
+
+### 7. Form Request Attributes
+
+#### Definitions
+
+**Core Definition**
+
+Form Request attributes are the human-readable names used in error messages to refer to form fields, replacing technical field names via the `attributes()` method.
+
+**Technical Definition**
+
+The `attributes()` method returns an array mapping field names to custom attribute names. The `:attribute` placeholder in error messages is replaced with these names. This is particularly useful for fields with underscores (e.g., `first_name` → `first name`) or technical names (e.g., `dob` → `date of birth`).
+
+**Beginner-Friendly Explanation**
+
+Attributes let you replace technical field names with natural language. Instead of "The first_name field is required," you get "The first name field is required."
+
+#### Purposes
+
+- To improve error message readability by using natural language field names.
+- To replace technical field names with human-friendly names.
+- To support localization of attribute names.
+- To provide consistent field naming across error messages.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+public function attributes(): array
+{
+    return [
+        'email'      => 'email address',
+        'first_name' => 'first name',
+        'dob'        => 'date of birth',
+    ];
+}
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `attributes()` | Returns attribute name mappings. |
+| `'email' => 'email address'` | Maps the `email` field to "email address" in messages. |
+
+**Syntax Rules**
+
+- Attribute names are keyed by the field name.
+- The `:attribute` placeholder is replaced with the custom attribute name.
+- Attributes can be defined per Form Request.
+
+**Constraints and Limitations**
+
+- Attribute names must be defined for each field that needs customisation.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Custom Attribute Names**
+
+**Form Request**
+
+```php
+public function attributes(): array
+{
+    return [
+        'email'      => 'email address',
+        'first_name' => 'first name',
+        'dob'        => 'date of birth',
+    ];
+}
+```
+
+**Expected Output**
+
+- If email is missing → "The email address field is required."
+- If first_name is missing → "The first name field is required."
+- If dob is invalid → "The date of birth must be a date before today."
+
+
+**Why This Output Occurs**
+
+The `attributes()` method maps field names to human-readable names, which are substituted into the `:attribute` placeholder in error messages.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Multi-Word Field Names**
+
+A form uses field names like `first_name`, `last_name`, and `phone_number`. The `attributes()` method maps these to "first name," "last name," and "phone number," producing natural-sounding error messages.
+
+**Explanation**: Custom attribute names make error messages more readable, especially for fields with underscores or technical naming.
+
+
+### 8. Form Request Best Practices
+
+#### Definitions
+
+**Core Definition**
+
+Form Request best practices are the recommended guidelines for designing, implementing, and maintaining Form Request classes to maximise maintainability, security, and consistency.
+
+**Technical Definition**
+
+Best practices encompass using Form Requests for non-trivial validation, always using `validated()` for mass assignment, preferring array notation for rules, using `Rule::when()` for conditional validation, using `after()` for multi-field logic, and testing Form Requests thoroughly.
+
+**Beginner-Friendly Explanation**
+
+Best practices are the tips experienced developers follow to keep their Form Requests clean, secure, and easy to maintain.
+
+#### Key Best Practices
+
+1. **Use Form Requests for Any Non-Trivial Validation**: Extract validation and authorization logic into dedicated classes for forms with multiple rules or complex logic.
+
+2. **Always Use `validated()` for Mass Assignment**: Never use `$request->all()` for mass operations. Use `$request->validated()` to ensure only validated data is passed to `create()` or `update()`.
+
+3. **Prefer Array Notation for Rules**: Array syntax (`['required', 'email', Rule::unique('users')]`) is more readable and composes cleanly with `Rule` objects.
+
+4. **Use `Rule::when()` for Conditional Validation**: The `Rule::when()` method provides a clean way to apply rules conditionally.
+
+5. **Use `after()` for Multi-Field Validation**: The `after()` method allows custom validation logic that depends on multiple fields or database state, executed after standard rules.
+
+6. **Use Policies in `authorize()`**: Rather than hardcoding role checks, use `$this->user()->can('ability', $model)` to delegate to Policies.
+
+7. **Customise Messages and Attributes**: Override `messages()` and `attributes()` to provide user-friendly error messages and field names.
+
+8. **Use `prepareForValidation()` to Sanitise Input**: Normalise input (e.g., lowercase emails, generate slugs) before validation rules are applied.
+
+9. **Use `passedValidation()` for Post-Validation Normalisation**: Normalise data (e.g., hash passwords, format dates) after validation passes.
+
+10. **Use Named Error Bags for Multiple Forms**: When multiple forms exist on one page, use `$errorBag` or `validateWithBag()` to prevent error cross-contamination.
+
+11. **Test Form Requests Thoroughly**: Write tests for rules, authorization, custom messages, and edge cases using `assertSessionHasErrors()` and `assertForbidden()`.
+
+12. **Use `stopOnFirstFailure` for Performance**: For requests with many rules, use `protected $stopOnFirstFailure = true` to halt validation on the first failure.
+
+#### Multiple Annotated Complete Step by Step Code Example and Expected Output
+
+**Example 1: Well-Structured Form Request with Best Practices**
+
+**Form Request**
+
+```php
+<?php
+declare(strict_types=1);
+
+namespace App\Http\Requests\Orders;
+
+use App\Rules\SufficientInventoryRule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+
+final class StoreOrderRequest extends FormRequest
+{
+    protected $stopOnFirstFailure = true;
+    protected $errorBag = 'createOrder';
+
+    public function authorize(): bool
+    {
+        return $this->user()->can('create', Order::class);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'customer_email'     => ['required', 'string', 'email:rfc,dns', 'max:255'],
+            'items'              => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
+            'items.*.quantity'   => ['required', 'integer', 'min:1', 'max:100', new SufficientInventoryRule()],
+            'shipping_method'    => ['required', 'string', Rule::in(['standard', 'express'])],
+            'express_notes'      => [
+                Rule::when($this->input('shipping_method') === 'express', ['required', 'string', 'max:500']),
+            ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'customer_email.required'   => 'We need your email address to process the order.',
+            'items.required'            => 'Your order must contain at least one item.',
+            'items.*.product_id.exists' => 'One of the selected products is no longer available.',
+            'express_notes.required'    => 'Please provide delivery notes for express shipping.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'customer_email' => 'email address',
+            'items.*.product_id' => 'product',
+        ];
+    }
+
+    protected function prepareForValidation(): void
+    {
         $this->merge([
-            'roles' => $filteredArray,
+            'customer_email' => Str::lower($this->customer_email),
         ]);
     }
-}
 
-/**
- * Define the validation rules against the transformed data.
- */
-public function rules(): array
-{
-    return [
-        'roles'   => ['required', 'array'],
-        'roles.*' => ['string', 'in:admin,editor,subscriber'],
-    ];
+    public function after(): array
+    {
+        return [
+            function ($validator) {
+                if ($this->shipping_method === 'express'
+                    && collect($this->items)->sum('quantity') > 50) {
+                    $validator->errors()->add(
+                        'shipping_method',
+                        'Express shipping is not available for orders over 50 items.'
+                    );
+                }
+            },
+        ];
+    }
 }
 ```
 
-**Expected Output:** A comma-separated `roles` string is converted to an array, allowing `'roles.*' => 'exists:roles,name'` validation .
-
-**Why:** The input is normalised to match the expected array structure before validation.
-
----
-
-**Example 3: `passedValidation()` — Hashing Password**
+**Controller**
 
 ```php
-protected function passedValidation(): void
+public function store(StoreOrderRequest $request)
 {
-    $this->replace([
-        'password' => Hash::make($this->password),
-    ]);
+    $order = Order::create($request->validated());
+
+    return redirect()->route('orders.show', $order)
+        ->with('success', 'Order placed successfully.');
 }
 ```
 
-**Expected Output:** The validated password is hashed before reaching the controller.
+**Expected Output**
 
-**Why:** `passedValidation()` runs after validation passes, allowing secure transformation of sensitive data .
+- Authorized user with valid data → order created, redirect to orders.show
+- Unauthorized user → 403 Forbidden
+- Invalid email → "We need your email address to process the order."
+- Missing items → "Your order must contain at least one item."
+- Product not found → "One of the selected products is no longer available."
+- Express shipping with >50 items → custom error added via after() hook
 
----
+**Why This Output Occurs**
 
-**Example 4: `passedValidation()` — Adding Computed Fields**
+The Form Request encapsulates all validation and authorization logic:
+- `authorize()` delegates to a Policy for the `Order` model.
+- `rules()` uses array notation and `Rule::when()` for conditional validation.
+- `messages()` and `attributes()` provide user-friendly error feedback.
+- `prepareForValidation()` normalises the email to lowercase.
+- `after()` adds a custom multi-field validation check.
+- `$stopOnFirstFailure` halts validation on the first error.
+- `$errorBag` stores errors in a named bag.
 
-```php
-public function rules(): array
-{
-    return [
-        'coupon_code' => 'nullable|string',
-        'subtotal'    => 'required|numeric',
-        
-        // Add these so Laravel includes them in $request->validated()
-        'total_discount_amount' => ['sometimes'],
-        'processed_at'          => ['sometimes'],
-    ];
-}
-
-protected function passedValidation(): void
-{
-    $this->merge([
-        'total_discount_amount' => $this->calculateDiscount(),
-        'processed_at'          => now(),
-    ]);
-}
-```
-
-**Expected Output:** Computed fields are added to the validated data before the controller receives it.
-
-**Why:** `passedValidation()` can augment the request with derived data that should not be validated but is needed by the controller.
-
-### Real-World Cases
-
-- **User Registration:** `prepareForValidation()` normalises email; `passedValidation()` hashes the password.
-- **Role Assignment:** `prepareForValidation()` converts a string to an array for validation .
-- **E-commerce:** `prepareForValidation()` formats discount strings; `passedValidation()` computes totals.
-- **Multi-tenant:** `prepareForValidation()` merges the tenant ID from the authenticated user.
-
-### References
-
-- Laravel Form Requests (Laravel News) — https://laravel-news.com/form-requests
-- Form Request Validation Tips (Laravel Magazine) — https://laravelmagazine.com/form-request-validation-tips-for-cleaner-controllers
-- Validating Role Assignments via Form Request (Laracasts) — https://laracasts.com/index.php/discuss/channels/laravel/validating-role-assignments-via-form-request
-- How to Create a Form Request Manually (Stack Overflow) — https://stackoverflow.com/questions/75508715/how-to-create-an-form-request-manually-in-laravel-9
+The controller type-hints `StoreOrderRequest`, which triggers automatic authorization and validation before the method executes. `$request->validated()` ensures only validated data is passed to `Order::create()`.
 
 ---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Enterprise E-commerce Platform**
+
+An e-commerce platform uses Form Requests for all order-related validation, with nested array validation for order items, custom rule objects for inventory checks, conditional rules for shipping methods, and after-validation hooks for complex business logic. The validation logic is centralised, testable, and reusable across web and API controllers.
+
+**Explanation**: Following Form Request best practices ensures the platform handles complex order data securely and consistently.
+
 
 ## References
 
-- Laravel Validation Documentation (12.x) — https://laravel.com/docs/12.x/validation
-- Laravel Validation: Form Request Validation — https://laravel.com/docs/12.x/validation#form-request-validation
-- Laravel Validation: Working With Validated Input — https://laravel.com/docs/12.x/validation#working-with-validated-input
-- Laravel Validation: Customizing Error Messages — https://laravel.com/docs/12.x/validation#customizing-the-error-messages
-- Laravel Validation: Specifying Custom Attributes — https://laravel.com/docs/12.x/validation#specifying-custom-attribute-values
-- Laravel FormRequest API (8.x) — https://api.laravel.com/docs/8.x/Illuminate/Foundation/Http/FormRequest.html
-- Let's talk about Form Requests (Laravel News) — https://laravel-news.com/form-requests
-- Form Request Validation Tips for Cleaner Controllers (Laravel Magazine) — https://laravelmagazine.com/form-request-validation-tips-for-cleaner-controllers
-- Validating Role Assignments via Form Request (Laracasts) — https://laracasts.com/index.php/discuss/channels/laravel/validating-role-assignments-via-form-request
-- Form Request Validation for Filament — https://packagist.org/packages/occ-therapist/form-request-validation-for-filament
-- Laravel Typed Request Package — https://root.packagist.org/packages/pi-space/laravel-typed-request
+- Validation – Laravel 13.x Documentation — https://laravel.com/docs/13.x/validation
+- Validation – Laravel 12.x Documentation — https://laravel.com/docs/12.x/validation
+- Validation – Laravel 11.x Documentation — https://laravel.com/docs/11.x/validation
+- Validation – Laravel 10.x Documentation — https://laravel.com/docs/10.x/validation
+- Validation – Laravel master Documentation — https://laravel.com/framework/docs/master/validation
+- FormRequest Class – Laravel API Reference — https://api.laravel.com/docs/12.x/Illuminate/Foundation/Http/FormRequest.html
+- Use Form Request Classes – Dutch Laravel Foundation Best Practices — https://github.com/Dutch-Laravel-Foundation/best-practices/blob/main/routing/use-form-request-classes.md
+- Form Requests, Array Validation, and Custom Rules – voku/agent-skills (GitHub) — https://github.com/voku/agent-skills/blob/main/skills/laravel-best-practices/rules/validation-rules.md
+- Laravel Validation: Preparing Input for Validation – Laravel Documentation — https://laravel.com/docs/validation#preparing-input-for-validation
+- Laravel Validation: Customizing the Redirect Location – Laravel Documentation — https://laravel.com/docs/validation#customizing-the-redirect-location
+- Laravel Validation: Named Error Bags – Laravel Documentation — https://laravel.com/docs/validation#named-error-bags
+- Laravel Validation: Stopping on First Failure – Laravel Documentation — https://laravel.com/docs/validation#stopping-on-first-validation-failure
+
+
+**Version Note**: This cheat sheet is based on Laravel 10.x through 13.x documentation. Key version-specific features include: the `after()` method for Form Requests (Laravel 10+), the `passedValidation()` method (Laravel 9+), and `prepareForValidation()` (Laravel 6+). The `validateWithBag()` method and named error bags are available in Laravel 8+. The `$stopOnFirstFailure` property is available in Laravel 8+. Custom rule objects implementing `ValidationRule` (with a `validate()` method) are the modern approach. Developers should always consult the documentation for their specific Laravel version.

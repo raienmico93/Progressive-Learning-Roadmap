@@ -77,7 +77,7 @@ React is best learned as more than "a library for building UIs." The progression
   - VS Code extensions
   - React Developer Tools
 
-- **4. JSX**
+- [**4. JSX**](/Web%20Development/React/Basics/JSX.md)
   - JSX syntax
   - JSX expressions
   - JSX attributes
@@ -105,7 +105,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # II. Components
 
-- **5. Component Fundamentals**
+- [**5. Component Fundamentals**](/Web%20Development/React/Components/Component.md)
   - Components
   - Component types
     - Function components
@@ -124,7 +124,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Component boundaries
   - Component patterns
 
-- **6. Function Components**
+- [**6. Function Components**](/Web%20Development/React/Components/Function.md)
   - Function components
   - Arrow function components
   - Component definition
@@ -136,7 +136,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Component naming conventions
   - Component file organization
 
-- **7. Class Components**
+- [**7. Class Components**](/Web%20Development/React/Components/Class.md)
   - Class components
   - `React.Component`
   - `React.PureComponent`
@@ -159,7 +159,7 @@ React is best learned as more than "a library for building UIs." The progression
   - When to use class components
   - Migrating to function components
 
-- **8. Props**
+- [**8. Props**](/Web%20Development/React/Components/Props.md)
   - Props
   - Prop passing
   - Prop drilling
@@ -177,7 +177,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Props immutability
   - Props best practices
 
-- **9. Component Composition**
+- [**9. Component Composition**](/Web%20Development/React/Components/ComponentComposition.md)
   - Composition
   - Composition vs inheritance
   - Containment
@@ -196,7 +196,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Smart vs dumb components
   - Composition patterns
 
-- **10. Component Patterns**
+- [**10. Component Patterns**](/Web%20Development/React/Components/ComponentPatterns.md)
   - Container/Presentational pattern
   - Higher-Order Component (HOC)
   - Render props
@@ -218,7 +218,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # III. State
 
-- **11. State Fundamentals**
+- [**11. State Fundamentals**](/Web%20Development/React/State%20Management/State.md)
   - State
   - Component state
   - Local state
@@ -235,7 +235,7 @@ React is best learned as more than "a library for building UIs." The progression
   - State updates and closures
   - State update pitfalls
 
-- **12. `useState` Hook**
+- [**12. `useState` Hook**](/Web%20Development/React/Hooks/useState.md)
   - `useState`
   - State initialization
   - Lazy initialization
@@ -251,7 +251,7 @@ React is best learned as more than "a library for building UIs." The progression
   - State update pitfalls
   - `useState` best practices
 
-- **13. `useReducer` Hook**
+- [**13. `useReducer` Hook**](/Web%20Development/React/Hooks/useReducer.md)
   - `useReducer`
   - Reducer function
   - Initial state
@@ -266,7 +266,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Reducer testing
   - `useReducer` best practices
 
-- **14. State Patterns**
+- [**14. State Patterns**](/Web%20Development/React/State%20Management/StatePatterns.md)
   - Lifting state up
   - Colocating state
   - Derived state
@@ -288,7 +288,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # IV. Hooks
 
-- **15. Hook Fundamentals**
+- [**15. Hook Fundamentals**](/Web%20Development/React/Hooks/Hooks.md)
   - Hooks
   - Hook rules
   - Hook rules of hooks
@@ -305,7 +305,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Hook closure
   - Hook memory
 
-- **16. `useEffect` Hook**
+- [**16. `useEffect` Hook**](/Web%20Development/React/Hooks/useEffect.md)
   - `useEffect`
   - Effect function
   - Cleanup function
@@ -331,7 +331,7 @@ React is best learned as more than "a library for building UIs." The progression
     - Animation
     - Syncing with external systems
 
-- **17. `useContext` Hook**
+- [**17. `useContext` Hook**](/Web%20Development/React/Hooks/useContext.md)
   - `useContext`
   - Context
   - `React.createContext`
@@ -346,7 +346,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Context best practices
   - Context pitfalls
 
-- **18. `useRef` Hook**
+- [**18. `useRef` Hook**](/Web%20Development/React/Hooks/useRef.md)
   - `useRef`
   - Ref objects
   - `current` property
@@ -361,7 +361,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Refs vs state
   - Ref best practices
 
-- **19. `useMemo` Hook**
+- [**19. `useMemo` Hook**](/Web%20Development/React/Hooks/)
   - `useMemo`
   - Memoization
   - Dependency array
@@ -372,7 +372,7 @@ React is best learned as more than "a library for building UIs." The progression
   - `useMemo` pitfalls
   - `useMemo` best practices
 
-- **20. `useCallback` Hook**
+- [**20. `useCallback` Hook**](/Web%20Development/React/Hooks/useCallback.md)
   - `useCallback`
   - Function memoization
   - Dependency array
@@ -490,7 +490,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # V. Rendering and Reconciliation
 
-- **28. Rendering Fundamentals**
+- [**28. Rendering Fundamentals**](/Web%20Development/React/Rendering/Rendering.md)
   - Rendering
   - Initial render
   - Re-rendering

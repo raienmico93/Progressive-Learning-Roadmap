@@ -254,14 +254,14 @@ This roadmap organizes Laravel as a **progressive application-development curric
   - Nested bindings
   - Missing-model handling
 
-- [**18. Resource Routing**](/Web%20Development/Laravel/Routing/ResourceRouting.md)
+- **18. Resource Routing**
   - Resource controllers
   - CRUD routes
   - API resource routes
   - Partial resource routes
   - Route inspection
 
-- [**19. Routing Architecture**](/Web%20Development/Laravel/Routing/Architecture.md)
+- **19. Routing Architecture**
   - Web routes
   - API routes
   - Console routes
@@ -601,7 +601,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
   - Authentication guards
   - Providers
 
-- [**56. Authentication Workflows**](/Web%20Development/Laravel/Authentication/AuthenticationWorkflows.md)
+- **56. Authentication Workflows**
   - Registration
   - Login
   - Logout
@@ -609,14 +609,14 @@ This roadmap organizes Laravel as a **progressive application-development curric
   - Email verification
   - Remember-me functionality
 
-- [**57. Authentication Architecture**](/Web%20Development/Laravel/Authentication/AuthenticationArchitecture.md)
+- **57. Authentication Architecture**
   - Guards
   - Providers
   - Multiple authentication mechanisms
   - Session-based authentication
   - Token-based authentication
 
-- [**58. Modern Authentication Integration**](/Web%20Development/Laravel/Authentication/AuthenticationIntegration.md)
+- **58. Modern Authentication Integration**
   - Laravel starter kits
   - API authentication
   - SPA authentication
