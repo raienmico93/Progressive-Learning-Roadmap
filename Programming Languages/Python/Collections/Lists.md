@@ -1,1918 +1,1668 @@
 # Python Lists: A Comprehensive Programming Cheat Sheet
 
+---
+
 ## Topic Overview
 
 ### Definitions
 
 **Core Definition**
-A list is a built-in Python data type that stores an ordered, mutable collection of items, which can be of any type.
+
+A Python list is a mutable, ordered sequence of elements. It is one of Python's most versatile and widely used built-in data structures, allowing you to store, access, modify, and organize collections of items in a single variable.
 
 **Technical Definition**
-Lists are mutable sequences, typically used to store collections of homogeneous items (where the precise degree of similarity will vary by application). They are implemented as dynamic arrays that hold references to objects, supporting indexing, slicing, concatenation, repetition, and a rich set of in-place modification methods. List objects are defined by the `list` class and support the full sequence protocol (`__getitem__`, `__setitem__`, `__len__`, etc.), the iterator protocol (`__iter__`), and comparison operations.
+
+In Python, a list is an instance of the `list` class, a mutable sequence type that stores an ordered collection of object references. Lists are implemented in CPython as dynamic arrays of pointers to Python objects, providing O(1) amortized append and O(1) random access by index. Lists support all common sequence operations (indexing, slicing, concatenation, repetition, membership testing, iteration) as well as mutable sequence operations (item assignment, slice assignment, deletion). Lists are generic over the types of their items, meaning a single list can contain elements of different types. The `list` constructor and literal syntax provide multiple ways to create list objects.
 
 **Beginner-Friendly Explanation**
-A list is like a numbered shopping list. You can add items, remove items, change items, and look up items by their position (index). Lists keep things in order, and you can have as many items as you want. They're one of the most commonly used data structures in Python because they're flexible and easy to work with.
+
+Think of a Python list as a shopping list on a piece of paper. You can write items down in order, add new items to the end, cross items off, change an item, or check whether something is already on the list. Lists are ordered (the first item stays first unless you move it), mutable (you can change them after creation), and can hold anything—numbers, strings, even other lists.
 
 ### Key Characteristics
 
-| Characteristic | Description |
-|---|---|
-| **Ordered** | Items maintain their insertion order; indexing and slicing work predictably |
-| **Mutable** | Items can be added, removed, or changed in place after creation |
-| **Heterogeneous** | A single list can contain items of different types (integers, strings, other lists, etc.) |
-| **Dynamic** | Lists grow and shrink automatically as items are added or removed |
-| **Reference-Based** | Lists store references to objects, not the objects themselves |
-| **Iterable** | Lists support iteration via the `for` loop and the iterator protocol |
-| **Indexable** | Items are accessed by zero-based integer indices, including negative indices |
-| **Slicable** | Sub-lists can be extracted using slice notation `[start:stop:step]` |
+- **Ordered**: Elements maintain their insertion order; indexing and slicing respect this order.
+- **Mutable**: Elements can be added, removed, or changed after the list is created.
+- **Heterogeneous**: Lists can store elements of different types (e.g., `[1, "hello", 3.14, [1, 2]]`).
+- **Dynamic**: Lists grow and shrink automatically as elements are added or removed.
+- **Zero-Indexed**: The first element is at index `0`, the second at `1`, and so on.
+- **Slicable**: Sub-lists can be extracted using slice notation (`list[start:stop:step]`).
+- **Iterable**: Lists can be iterated over in `for` loops.
+- **Reference-Based**: Lists store references to objects, not the objects themselves.
 
 ### Prerequisites
 
-- **Basic Python syntax**: variables, expressions, and statements
-- **Understanding of data types**: integers, floats, strings, booleans
-- **Familiarity with the Python interpreter**: running scripts or using the REPL
-- **Basic concepts of mutability**: understanding that some objects can change after creation
+- Basic understanding of Python variables and assignment.
+- Familiarity with Python's built-in data types (integers, strings, booleans).
+- Knowledge of control flow statements (`if`, `for`, `while`).
+- Understanding of indexing and basic sequence concepts.
 
 ### Related Programming Areas
 
-- **Tuples**: Immutable sequences, often used for heterogeneous data
-- **Sets**: Unordered collections of unique elements
-- **Dictionaries**: Key-value mappings (hash tables)
-- **Arrays**: From the `array` module or NumPy, for homogeneous numeric data
-- **Deques**: From `collections`, for efficient appends and pops from both ends
-- **Iterators and Generators**: Lazy evaluation and the iteration protocol
-- **Comprehensions**: Concise list construction from existing iterables
-
-### Core Concepts / Features
-
-1. **Creating Lists** (Literals, constructors, and conversions)
-2. **Indexing and Negative Indexing** (Accessing elements by position)
-3. **Slicing** (Extracting sub-lists with `[start:stop:step]`)
-4. **Mutation and In-Place Operations** (Modifying lists directly)
-5. **Adding Elements** (`append`, `extend`, `insert`)
-6. **Removing Elements** (`pop`, `remove`, `clear`)
-7. **Sorting** (`sort()` vs. `sorted()`, custom keys)
-8. **Reversing** (`reverse()` and `reversed()`)
-9. **Copying** (Shallow vs. deep copy)
-10. **Nested Lists** (Lists within lists)
-11. **List Comprehensions** (Concise list construction)
-12. **List Methods** (Complete reference)
+- **Data Structures and Algorithms**: Lists are the foundation for stacks, queues, and many algorithmic patterns.
+- **Data Science**: Lists are used extensively with libraries like NumPy and pandas for data manipulation.
+- **Web Development**: Lists store query results, form data, and configuration values.
+- **Automation and Scripting**: Lists manage collections of files, URLs, and tasks.
+- **Functional Programming**: List comprehensions and higher-order functions operate on lists.
 
 ---
 
-## Core Concept 1: Creating Lists
+## Core Concepts / Features
 
-### Definitions
+---
+
+### 1. Lists, List Literals, and List Creation
+
+#### Definitions
 
 **Core Definition**
-Creating a list means instantiating a new `list` object, either by writing a list literal or by calling the `list()` constructor.
+
+A list literal is a comma-separated sequence of expressions enclosed in square brackets (`[]`). List creation refers to the various ways of constructing list objects, including literals, the `list()` constructor, and comprehensions.
 
 **Technical Definition**
-List literals are written as comma-separated expressions enclosed in square brackets: `[expr1, expr2, ...]`. The `list()` constructor accepts an optional iterable argument and returns a new list containing the iterable's items in order. Lists can also be created via list comprehensions, repetition (`[x] * n`), and concatenation (`list1 + list2`).
+
+Lists may be constructed in several ways: using a pair of square brackets for the empty list `[]`; using square brackets with comma-separated items `[a, b, c]`; using a list comprehension `[x for x in iterable]`; or using the `list()` constructor, which accepts any iterable and builds a list whose items are in the same order as the iterable's items. If the iterable is already a list, a copy is made and returned, similar to `iterable[:]`. The `list()` constructor with no arguments creates an empty list `[]`.
 
 **Beginner-Friendly Explanation**
-You create a list by putting items inside square brackets, separated by commas. You can also create an empty list with `[]` or `list()`. If you have another iterable (like a string or tuple), you can convert it to a list using `list()`.
 
-### Purposes
+Creating a list is like writing a shopping list. You can write it directly with square brackets: `fruits = ["apple", "banana", "cherry"]`. Or you can make a list from something else, like turning a string into a list of characters: `list("abc")` gives `['a', 'b', 'c']`.
 
-- **To store multiple values** in a single variable
-- **To group related data** together (e.g., a list of names, scores, or coordinates)
-- **To serve as the foundation for** indexing, iteration, and list operations
-- **To convert other iterables** into a mutable sequence
-- **To initialise** a collection for later population
+#### Purposes
 
-### Syntax Rules and Structure
+- To create a collection of items that can be accessed, modified, and iterated over.
+- To group related data into a single variable.
+- To provide an ordered, mutable container for heterogeneous data.
+- To serve as the foundation for more complex data processing operations.
+
+#### Syntax Rules and Structure
 
 **Complete General Syntax**
 
 ```
-# Empty list
-[]
-list()
+# Empty list literal
+empty = []
 
-# List literal
-[expr1, expr2, expr3, ...]
+# List literal with items
+items = [expression1, expression2, expression3]
 
-# List from iterable
-list(iterable)
+# List constructor from iterable
+from_iterable = list(iterable)
 
-# Repetition
-[value] * n
-
-# Concatenation
-list1 + list2
+# List comprehension
+comprehension = [expression for item in iterable if condition]
 ```
 
-**Breakdown:**
-- `[]`: Empty list literal.
-- `list()`: Constructor that returns a new empty list.
-- `[expr1, expr2, ...]`: List literal; expressions are evaluated left to right.
-- `list(iterable)`: Converts an iterable (string, tuple, range, etc.) to a list.
-- `[value] * n`: Creates a list with `n` references to the same value.
-- `list1 + list2`: Creates a new list by concatenating two lists.
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `[]` | Square brackets denote a list literal. |
+| `expression1, expression2` | Comma-separated expressions become list elements. |
+| `list(iterable)` | Constructor that builds a list from any iterable. |
+| `[x for x in iterable]` | List comprehension syntax. |
+| `if condition` | Optional filter in a comprehension. |
 
 **Syntax Rules**
 
-| Rule | Description |
-|---|---|
-| Square brackets | List literals use `[]` |
-| Comma separation | Items are separated by commas |
-| Trailing comma allowed | `[1, 2, 3,]` is valid |
-| Any expression | Items can be any Python expression |
-| Nested lists | Lists can contain other lists |
+- A trailing comma after the last element is allowed: `[1, 2, 3,]`.
+- Lists can span multiple lines using implicit line joining inside brackets.
+- The `list()` constructor accepts at most one argument (an iterable).
+- List comprehensions can contain multiple `for` and `if` clauses.
+- Nested lists are created by placing lists inside lists: `[[1, 2], [3, 4]]`.
 
 **Constraints and Limitations**
 
-- **No fixed size**: Lists are dynamic; there is no upper limit other than available memory.
-- **Repetition shares references**: `[[]] * 3` creates three references to the same inner list.
-- **`list()` on a string**: `list("abc")` returns `['a', 'b', 'c']`, not a list containing the string.
+- List literals evaluate all expressions at creation time.
+- The `list()` constructor creates a shallow copy of the iterable's items.
+- List comprehensions have their own scope for the loop variable.
+- Very large list literals may hit parser or memory limits.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Creating Lists in Various Ways**
+**Example 1: Creating Lists in Multiple Ways**
 
 ```python
-# Step 1: Empty list
+# Empty list
 empty = []
-print(f"Empty: {empty}")
+print("Empty:", empty)
 
-# Step 2: List literal with mixed types
-mixed = [1, "hello", 3.14, True, None]
-print(f"Mixed: {mixed}")
+# Literal with mixed types
+mixed = [1, "two", 3.0, True, None]
+print("Mixed:", mixed)
 
-# Step 3: List from a string (iterates characters)
-chars = list("Python")
-print(f"Chars: {chars}")
+# List from a string (iterable of characters)
+chars = list("hello")
+print("Chars:", chars)
 
-# Step 4: List from a range
+# List from a range
 numbers = list(range(5))
-print(f"Numbers: {numbers}")
+print("Numbers:", numbers)
 
-# Step 5: Repetition
-repeated = [0] * 3
-print(f"Repeated: {repeated}")
-
-# Step 6: Concatenation
-combined = [1, 2] + [3, 4]
-print(f"Combined: {combined}")
+# List from a tuple
+from_tuple = list((10, 20, 30))
+print("From tuple:", from_tuple)
 ```
 
 **Expected Output:**
+
 ```
 Empty: []
-Mixed: [1, 'hello', 3.14, True, None]
-Chars: ['P', 'y', 't', 'h', 'o', 'n']
+Mixed: [1, 'two', 3.0, True, None]
+Chars: ['h', 'e', 'l', 'l', 'o']
 Numbers: [0, 1, 2, 3, 4]
-Repeated: [0, 0, 0]
-Combined: [1, 2, 3, 4]
+From tuple: [10, 20, 30]
 ```
 
-**Breakdown:** Each creation method produces a distinct list. `list("Python")` iterates the string, producing individual characters. `[0] * 3` creates a list with three zeroes. `[1, 2] + [3, 4]` concatenates without modifying either original list.
+**Step-by-Step Breakdown:**
 
-**Example 2: Nested List Creation**
+1. `[]` creates an empty list.
+2. `[1, "two", 3.0, True, None]` creates a list with five elements of different types.
+3. `list("hello")` iterates over the string and creates a list of its characters.
+4. `list(range(5))` converts the range object into a list of integers.
+5. `list((10, 20, 30))` converts a tuple into a list.
 
-```python
-# Step 1: Create a nested list (matrix)
-matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-print(f"Matrix: {matrix}")
+**Why the Output is Produced:**
 
-# Step 2: Access nested elements
-print(f"matrix[0][1] = {matrix[0][1]}")  # First row, second column
-
-# Step 3: Create a 3x3 matrix of zeros (correct way)
-zeros = [[0] * 3 for _ in range(3)]
-print(f"Zeros: {zeros}")
-
-# Step 4: Demonstrate the sharing pitfall
-shared = [[0] * 3] * 3  # WRONG: all rows are the same list
-shared[0][0] = 1
-print(f"Shared (buggy): {shared}")
-```
-
-**Expected Output:**
-```
-Matrix: [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-matrix[0][1] = 2
-Zeros: [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-Shared (buggy): [[1, 0, 0], [1, 0, 0], [1, 0, 0]]
-```
-
-**Breakdown:** The `[[0] * 3 for _ in range(3)]` approach creates independent inner lists. The `[[0] * 3] * 3` approach creates three references to the *same* inner list, so modifying one row modifies all rows.
-
-### Real-World Cases with Explanation
-
-**Case 1: Storing User Records**
-
-```python
-users = [
-    {"name": "Alice", "age": 30},
-    {"name": "Bob", "age": 25},
-]
-```
-
-**Why it matters:** Lists of dictionaries are a common pattern for storing tabular data, such as rows from a database query or CSV file.
-
-**Case 2: Initialising a Fixed-Size Buffer**
-
-```python
-buffer = [None] * 1024  # Pre-allocate 1024 slots
-buffer[0] = "first"
-```
-
-**Why it matters:** Pre-allocating lists with a fixed size is useful for buffer management and performance-sensitive code.
+The `list()` constructor accepts any iterable and builds a new list containing its elements in order. String literals, ranges, and tuples are all iterables, so they can be converted to lists.
 
 ---
 
-## Core Concept 2: Indexing and Negative Indexing
+**Example 2: List Comprehension**
 
-### Definitions
+```python
+# Create a list of squares using a comprehension.
+squares = [x ** 2 for x in range(10)]
+print("Squares:", squares)
+
+# Create a list of even numbers using a conditional comprehension.
+evens = [x for x in range(20) if x % 2 == 0]
+print("Evens:", evens)
+```
+
+**Expected Output:**
+
+```
+Squares: [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+Evens: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+```
+
+**Step-by-Step Breakdown:**
+
+1. `[x ** 2 for x in range(10)]` iterates over `0` through `9`, squares each value, and collects the results.
+2. `[x for x in range(20) if x % 2 == 0]` iterates over `0` through `19` and includes only even numbers.
+
+**Why the Output is Produced:**
+
+List comprehensions provide a concise syntax for building lists by applying an expression to each element of an iterable, with an optional filter condition.
+
+#### Real-World Cases
+
+- **Data Collection**: Gathering user inputs, query results, or sensor readings into a list.
+- **Configuration**: Storing a list of allowed values, file paths, or server addresses.
+- **Data Processing**: Building intermediate results before further transformation.
+
+---
+
+### 2. List Indexing
+
+#### Definitions
 
 **Core Definition**
-Indexing accesses a single element from a list using its zero-based position; negative indexing accesses elements from the end of the list.
+
+List indexing is the process of accessing a specific element of a list by its position (index). Python uses zero-based indexing, meaning the first element is at index `0`.
 
 **Technical Definition**
-List indexing uses the syntax `list[index]`, where `index` is an integer. Python's index operator calls `__getitem__(index)` on the list. A negative index `-n` is equivalent to `len(list) - n`, so `list[-1]` accesses the last element, `list[-2]` the second-to-last, and so on. Indexing outside the valid range raises `IndexError`.
+
+Lists support indexing with both positive and negative integers. Positive indices count from the beginning (0 to `len(list) - 1`), while negative indices count from the end (`-1` is the last element, `-2` the second-to-last, etc.). Indexing a list returns the object reference stored at that position. Attempting to access an index outside the valid range raises an `IndexError`. List indexing is an O(1) operation because lists are implemented as arrays of pointers.
 
 **Beginner-Friendly Explanation**
-Lists are numbered starting from 0. So `my_list[0]` is the first item, `my_list[1]` is the second, and so on. Python also lets you count from the end: `my_list[-1]` is the last item, `my_list[-2]` is the second-to-last. This is handy when you need the last item but don't know the list's length.
 
-### Purposes
+Indexing is like using a numbered slot in a pill organizer. The first slot is `0`, the second is `1`, and so on. You can also count from the end: `-1` is the last slot, `-2` is the second-to-last. If you ask for a slot that doesn't exist, Python raises an error.
 
-- **To retrieve a specific element** by its position
-- **To access the first or last element** conveniently
-- **To modify an element** in place by assigning to its index
-- **To iterate over a list with index access** when needed
-- **To work with parallel arrays** where index correspondence matters
+#### Purposes
 
-### Syntax Rules and Structure
+- To retrieve individual elements from a list.
+- To update or replace specific elements.
+- To access elements relative to the end of the list using negative indices.
+- To support algorithms that require positional access.
+
+#### Syntax Rules and Structure
 
 **Complete General Syntax**
 
 ```
-list[index]          # positive indexing (0-based)
-list[-index]         # negative indexing (from the end)
+element = list_name[index]
+list_name[index] = new_value
 ```
 
-**Breakdown:**
-- `list`: The list object.
-- `index`: An integer (positive or negative).
-- `list[0]`: First element.
-- `list[-1]`: Last element.
-- `list[-len(list)]`: First element (equivalent to `list[0]`).
+**Component Breakdown**
 
-**Indexing Rules**
+| Component | Description |
+|-----------|-------------|
+| `list_name` | The list object. |
+| `[index]` | Square brackets containing an integer index. |
+| `element` | The retrieved object. |
+| `new_value` | The value to assign at the given index. |
 
-| Rule | Description |
-|---|---|
-| Zero-based | First element is at index `0` |
-| Negative indexing | `-1` is last, `-2` is second-to-last, etc. |
-| `IndexError` | Raised for out-of-range indices |
-| Assignment | `list[i] = value` modifies the element in place |
-| Nested indexing | `list[i][j]` accesses nested lists |
+**Syntax Rules**
+
+- Indices must be integers (or objects implementing `__index__`).
+- Valid positive indices: `0` to `len(list) - 1`.
+- Valid negative indices: `-1` to `-len(list)`.
+- Indexing outside the valid range raises `IndexError`.
+- Assignment to an index replaces the existing element.
 
 **Constraints and Limitations**
 
-- **No dynamic sizing during iteration**: Indexing assumes the list is not being structurally modified.
-- **`IndexError` on invalid indices**: Always ensure the index is within `[-len(list), len(list) - 1]`.
-- **Negative index bounds**: `list[-len(list)]` is valid; `list[-len(list) - 1]` raises `IndexError`.
+- Lists are zero-indexed; there is no index `len(list)`.
+- Negative indices work for reading and writing.
+- Attempting to assign to an out-of-range index raises `IndexError`.
+- Indexing a nested list returns a sub-list, which must be indexed again to access inner elements.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Basic Indexing**
+**Example 1: Positive and Negative Indexing**
 
 ```python
-# Step 1: Define a list
-students = ["Abraham", "Bella", "Connor", "Da-ming", "Enya"]
+fruits = ["apple", "banana", "cherry", "date", "elderberry"]
 
-# Step 2: Positive indexing
-print(students[0])   # First element
-print(students[2])   # Third element
+# Positive indexing
+print("First:", fruits[0])
+print("Third:", fruits[2])
 
-# Step 3: Negative indexing
-print(students[-1])  # Last element
-print(students[-2])  # Second-to-last element
+# Negative indexing
+print("Last:", fruits[-1])
+print("Second to last:", fruits[-2])
 
-# Step 4: Modify by index
-students[1] = "Beatrice"
-print(students)
+# Modifying an element
+fruits[1] = "blueberry"
+print("After modification:", fruits)
 ```
 
 **Expected Output:**
+
 ```
-Abraham
-Connor
-Enya
-Da-ming
-['Abraham', 'Beatrice', 'Connor', 'Da-ming', 'Enya']
+First: apple
+Third: cherry
+Last: elderberry
+Second to last: date
+After modification: ['apple', 'blueberry', 'cherry', 'date', 'elderberry']
 ```
 
-**Breakdown:** `students[0]` is `"Abraham"`, `students[-1]` is `"Enya"`. Assigning `students[1] = "Beatrice"` replaces the second element in place.
+**Step-by-Step Breakdown:**
 
-**Example 2: Nested List Indexing**
+1. `fruits[0]` accesses the first element (`"apple"`).
+2. `fruits[2]` accesses the third element (`"cherry"`).
+3. `fruits[-1]` accesses the last element (`"elderberry"`).
+4. `fruits[-2]` accesses the second-to-last element (`"date"`).
+5. `fruits[1] = "blueberry"` replaces the element at index `1`.
+
+**Why the Output is Produced:**
+
+Positive indices count from the start, while negative indices count from the end. Python resolves the index to an absolute position internally.
+
+---
+
+**Example 2: IndexError**
 
 ```python
-# Step 1: Define a nested list
-x = [1, 2, [3, 4, 5], 6]
-
-# Step 2: Access the nested list
-print(x[2])        # [3, 4, 5]
-
-# Step 3: Access an element inside the nested list
-print(x[2][1])     # 4
-
-# Step 4: Negative indexing on nested list
-print(x[2][-1])    # 5
-```
-
-**Expected Output:**
-```
-[3, 4, 5]
-4
-5
-```
-
-**Breakdown:** `x[2]` retrieves the inner list `[3, 4, 5]`. `x[2][1]` then indexes into that inner list to get `4`.
-
-**Example 3: Index Out of Range**
-
-```python
-# Step 1: Define a list
 numbers = [10, 20, 30]
 
-# Step 2: Try an invalid index
+# This will raise IndexError
 try:
     print(numbers[5])
 except IndexError as e:
     print(f"Error: {e}")
 
-# Step 3: Valid negative index
-print(numbers[-1])  # Last element
+# Negative index out of range
+try:
+    print(numbers[-5])
+except IndexError as e:
+    print(f"Error: {e}")
 ```
 
 **Expected Output:**
+
 ```
 Error: list index out of range
-30
+Error: list index out of range
 ```
 
-**Breakdown:** Index `5` is out of range for a 3-element list, raising `IndexError`. The valid negative index `-1` returns the last element.
+**Step-by-Step Breakdown:**
 
-### Real-World Cases with Explanation
+1. `numbers[5]` attempts to access index `5`, which is out of range for a 3-element list.
+2. Python raises `IndexError: list index out of range`.
+3. `numbers[-5]` also raises `IndexError` because `-5` is less than `-3`.
 
-**Case 1: Accessing Configuration Values**
+**Why the Output is Produced:**
 
-```python
-config = ["localhost", 8080, "admin"]
-host = config[0]
-port = config[1]
-role = config[2]
-```
+Python validates the index against the list's length. If the absolute index is outside `[0, len(list) - 1]`, an `IndexError` is raised.
 
-**Why it matters:** Lists are often used as lightweight records. Indexing extracts each field into a named variable.
+#### Real-World Cases
 
-**Case 2: Getting the Most Recent Item**
-
-```python
-recent_orders = get_orders()
-latest = recent_orders[-1]  # No need for len() - 1
-```
-
-**Why it matters:** Negative indexing is the idiomatic way to access the last element of a list without computing its length.
+- **Accessing Records**: Retrieving a specific row from a list of database query results.
+- **Game Development**: Accessing player statistics by index.
+- **Data Analysis**: Extracting specific columns or rows from tabular data stored as lists.
 
 ---
 
-## Core Concept 3: Slicing
+### 3. List Slicing
 
-### Definitions
+#### Definitions
 
 **Core Definition**
-Slicing extracts a sub-list from a list using the syntax `[start:stop:step]`, creating a new list containing the selected elements.
+
+List slicing is a mechanism for extracting a sub-list from a list using the syntax `list[start:stop:step]`. It returns a new list containing the selected elements.
 
 **Technical Definition**
-The slice syntax `list[start:stop:step]` calls `list.__getitem__(slice(start, stop, step))`. The `start` index is inclusive, `stop` is exclusive, and `step` is the stride. Missing values default to `0`, `len(list)`, and `1`, respectively. Slicing never raises `IndexError`; out-of-range indices are clamped. Slicing creates a shallow copy of the selected elements.
+
+Slicing creates a new list object containing references to the elements in the specified range. The `start` index is inclusive, the `stop` index is exclusive, and `step` determines the stride. All three parameters are optional and can be negative. Slicing a list is an O(k) operation where k is the number of elements in the resulting slice. Assigning to a slice can replace, insert, or delete elements, and the assigned iterable must have the same length as the slice being replaced when using extended slice syntax.
 
 **Beginner-Friendly Explanation**
-Slicing lets you grab a portion of a list. `my_list[1:4]` gives you elements from index 1 up to (but not including) index 4. You can also add a step: `my_list[::2]` gives you every other element. Slicing always creates a new list; it doesn't change the original.
 
-### Purposes
+Slicing is like cutting a piece of a cake. You say where to start cutting, where to stop, and how big each piece should be. `fruits[1:4]` gives you elements at positions 1, 2, and 3 (not 4—the stop is exclusive). You can even use negative numbers to count from the end.
 
-- **To extract a contiguous sub-sequence** from a list
-- **To create a shallow copy** of the entire list (`list[:]`)
-- **To reverse a list** (`list[::-1]`)
-- **To extract every Nth element** (`list[::N]`)
-- **To skip elements** in the output
+#### Purposes
 
-### Syntax Rules and Structure
+- To extract sub-lists without modifying the original list.
+- To create a copy of a list using `list[:]`.
+- To reverse a list using `list[::-1]`.
+- To replace or delete a range of elements via slice assignment.
+
+#### Syntax Rules and Structure
 
 **Complete General Syntax**
 
-```py
-list[start:stop]          # basic slice
-list[start:stop:step]     # slice with step
-list[:stop]               # start defaults to 0
-list[start:]              # stop defaults to len(list)
-list[:]                   # full copy
-list[::-1]                # reversed copy
+```
+sub_list = list_name[start:stop:step]
+list_name[start:stop] = iterable
+del list_name[start:stop]
 ```
 
-**Breakdown:**
-- `start`: First index to include (default `0`).
-- `stop`: Last index to exclude (default `len(list)`).
-- `step`: Stride between elements (default `1`; can be negative).
-- `list[:]`: Creates a shallow copy.
-- `list[::-1]`: Creates a reversed shallow copy.
+**Component Breakdown**
 
-**Slicing Rules**
+| Component | Description |
+|-----------|-------------|
+| `start` | Starting index (inclusive). Defaults to `0`. |
+| `stop` | Ending index (exclusive). Defaults to `len(list)`. |
+| `step` | Stride between elements. Defaults to `1`. |
+| `iterable` | Replacement elements for slice assignment. |
 
-| Rule | Description |
-|---|---|
-| `start` inclusive | The element at `start` is included |
-| `stop` exclusive | The element at `stop` is not included |
-| Negative indices | Allowed in slices; count from the end |
-| Out-of-range | Clamped silently; no error |
-| New list | Slicing always returns a new list |
-| Step of 0 | Raises `ValueError` |
+**Syntax Rules**
+
+- `start` and `stop` can be omitted, in which case defaults apply.
+- Negative values for `start`, `stop`, and `step` are supported.
+- A step of `0` raises `ValueError`.
+- Slice assignment can change the length of the list unless using extended slice syntax with a step.
+- Deleting a slice removes the elements and shifts subsequent elements.
 
 **Constraints and Limitations**
 
-- **Step cannot be 0**: `list[::0]` raises `ValueError`.
-- **Shallow copy only**: Nested lists are still shared between the original and the slice.
-- **Performance**: Slicing a large list creates a new list; be mindful of memory usage.
+- Extended slice assignment (with a step other than 1) requires the replacement iterable to have the same length as the slice.
+- Slicing always creates a new list (shallow copy of references).
+- Slicing beyond bounds does not raise an error; it clamps to the list's bounds.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
 **Example 1: Basic Slicing**
 
 ```python
-# Step 1: Define a list
-students = ["Abraham", "Bella", "Connor", "Da-ming", "Enya"]
-
-# Step 2: Basic slice
-print(students[1:4])    # Elements 1, 2, 3
-
-# Step 3: Omitting start
-print(students[:3])     # Elements 0, 1, 2
-
-# Step 4: Omitting stop
-print(students[2:])     # Elements 2, 3, 4
-
-# Step 5: Full copy
-print(students[:])      # All elements
-```
-
-**Expected Output:**
-```
-['Bella', 'Connor', 'Da-ming']
-['Abraham', 'Bella', 'Connor']
-['Connor', 'Da-ming', 'Enya']
-['Abraham', 'Bella', 'Connor', 'Da-ming', 'Enya']
-```
-
-**Breakdown:** `students[1:4]` includes indices 1, 2, and 3 (stop exclusive). Omitting `start` or `stop` defaults to the beginning or end of the list.
-
-**Example 2: Slicing with Step**
-
-```python
-# Step 1: Define a list
 numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-# Step 2: Every second element
-print(numbers[::2])
+# Basic slice: indices 2, 3, 4
+print(numbers[2:5])
 
-# Step 3: Every third element starting from index 1
-print(numbers[1::3])
+# Slice from the beginning
+print(numbers[:4])
 
-# Step 4: Reverse the list
+# Slice to the end
+print(numbers[6:])
+
+# Slice with step
+print(numbers[1:8:2])
+
+# Reverse the list
 print(numbers[::-1])
-
-# Step 5: Reverse with step
-print(numbers[::-2])
 ```
 
 **Expected Output:**
+
 ```
-[0, 2, 4, 6, 8]
-[1, 4, 7]
+[2, 3, 4]
+[0, 1, 2, 3]
+[6, 7, 8, 9]
+[1, 3, 5, 7]
 [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-[9, 7, 5, 3, 1]
 ```
 
-**Breakdown:** `numbers[::2]` takes every second element. `numbers[::-1]` reverses the list. `numbers[::-2]` takes every second element from the end.
+**Step-by-Step Breakdown:**
 
-**Example 3: Negative Slicing**
+1. `numbers[2:5]` returns elements at indices `2`, `3`, and `4` (stop is exclusive).
+2. `numbers[:4]` returns elements from index `0` to `3`.
+3. `numbers[6:]` returns elements from index `6` to the end.
+4. `numbers[1:8:2]` returns every second element from index `1` to `7`.
+5. `numbers[::-1]` reverses the list by using a step of `-1`.
 
-```python
-# Step 1: Define a list
-letters = ['a', 'b', 'c', 'd', 'e', 'f']
+**Why the Output is Produced:**
 
-# Step 2: Last three elements
-print(letters[-3:])
-
-# Step 3: All but the last two
-print(letters[:-2])
-
-# Step 4: Middle slice with negative indices
-print(letters[-4:-1])
-```
-
-**Expected Output:**
-```
-['d', 'e', 'f']
-['a', 'b', 'c', 'd']
-['c', 'd', 'e']
-```
-
-**Breakdown:** Negative indices in slices count from the end. `letters[-3:]` starts at the third-from-last element and goes to the end.
-
-### Real-World Cases with Explanation
-
-**Case 1: Pagination**
-
-```python
-page_size = 10
-page_number = 2
-start = (page_number - 1) * page_size
-end = start + page_size
-page = all_items[start:end]
-```
-
-**Why it matters:** Slicing is the natural way to implement pagination, extracting a window of items from a larger list.
-
-**Case 2: Reversing a List**
-
-```python
-original = [1, 2, 3, 4, 5]
-reversed_list = original[::-1]  # Creates a new reversed list
-# original is unchanged
-```
-
-**Why it matters:** `[::-1]` is the idiomatic Python way to create a reversed copy without modifying the original.
+Slicing creates a new list by selecting elements according to the start, stop, and step values. Negative steps traverse the list in reverse.
 
 ---
 
-## Core Concept 4: Mutation and In-Place Operations
-
-### Definitions
-
-**Core Definition**
-Mutation refers to modifying a list's contents in place without creating a new list object; in-place operations modify the list directly and typically return `None`.
-
-**Technical Definition**
-Lists are mutable, meaning their elements can be changed, added, or removed after creation. In-place methods (like `append()`, `sort()`, `reverse()`) modify the list object itself and return `None`, a design choice made to avoid confusion between in-place and copying operations. The `id()` of the list remains the same before and after mutation.
-
-**Beginner-Friendly Explanation**
-When you modify a list "in place," you're changing the same list object—not making a copy. For example, `my_list.append(5)` adds 5 to the existing list. This is different from `my_list = my_list + [5]`, which creates a new list. In-place methods don't return the list; they return `None`, so you should not write `my_list = my_list.append(5)`.
-
-### Purposes
-
-- **To modify a list without creating a new object** (memory efficient)
-- **To update elements** in place (`list[i] = value`)
-- **To add or remove elements** without reassigning the variable
-- **To sort or reverse** a list in place
-- **To avoid the overhead** of copying large lists
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```py
-list[index] = value          # replace element
-del list[index]              # delete element
-del list[start:stop]         # delete slice
-list.append(x)               # add to end (in place)
-list.extend(iterable)        # add multiple (in place)
-list.insert(i, x)            # insert at position (in place)
-list.remove(x)               # remove first occurrence (in place)
-list.pop([i])                # remove and return (in place)
-list.clear()                 # remove all (in place)
-list.sort()                  # sort in place
-list.reverse()               # reverse in place
-```
-
-**Mutation Rules**
-
-| Rule | Description |
-|---|---|
-| In-place methods return `None` | Do not assign the result back to the list |
-| `del` removes by index or slice | `del list[i]` removes the element at index `i` |
-| Slice assignment | `list[i:j] = new_values` replaces a slice |
-| `id()` unchanged | In-place operations do not change the list's identity |
-
-**Constraints and Limitations**
-
-- **In-place methods return `None`**: `my_list = my_list.append(5)` sets `my_list` to `None`.
-- **Modifying during iteration**: Changing a list while iterating over it can skip elements or cause unpredictable behaviour.
-- **Slice assignment length**: `list[i:j] = new` can change the list's length if `len(new) != j - i`.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: In-Place Element Replacement**
+**Example 2: Slice Assignment**
 
 ```python
-# Step 1: Define a list
-colors = ["red", "green", "blue"]
+letters = ['a', 'b', 'c', 'd', 'e']
 
-# Step 2: Replace an element by index
-colors[1] = "yellow"
-print(colors)
+# Replace a slice
+letters[1:4] = ['X', 'Y', 'Z']
+print("After replacement:", letters)
 
-# Step 3: Replace a slice
-colors[0:2] = ["black", "white"]
-print(colors)
+# Insert elements using a slice
+letters[2:2] = ['NEW']
+print("After insertion:", letters)
 
-# Step 4: Delete an element
-del colors[0]
-print(colors)
+# Delete a slice
+del letters[1:3]
+print("After deletion:", letters)
 ```
 
 **Expected Output:**
+
 ```
-['red', 'yellow', 'blue']
-['black', 'white', 'blue']
-['white', 'blue']
-```
-
-**Breakdown:** Assigning to an index replaces a single element. Slice assignment replaces multiple elements. `del` removes by index.
-
-**Example 2: Demonstrating `None` Return**
-
-```python
-# Step 1: Define a list
-numbers = [3, 1, 4, 1, 5]
-
-# Step 2: Call sort() and capture return
-result = numbers.sort()
-print(f"Return value: {result}")   # None
-print(f"List after sort: {numbers}")
-
-# Step 3: Compare with sorted()
-new_list = sorted(numbers)
-print(f"sorted() returns: {new_list}")
-print(f"Original unchanged: {numbers}")
+After replacement: ['a', 'X', 'Y', 'Z', 'e']
+After insertion: ['a', 'X', 'NEW', 'Y', 'Z', 'e']
+After deletion: ['a', 'NEW', 'Z', 'e']
 ```
 
-**Expected Output:**
-```
-Return value: None
-List after sort: [1, 1, 3, 4, 5]
-sorted() returns: [1, 1, 3, 4, 5]
-Original unchanged: [1, 1, 3, 4, 5]
-```
+**Step-by-Step Breakdown:**
 
-**Breakdown:** `list.sort()` modifies in place and returns `None`. `sorted()` returns a new sorted list, leaving the original unchanged.
+1. `letters[1:4] = ['X', 'Y', 'Z']` replaces elements at indices `1`, `2`, `3` with three new elements.
+2. `letters[2:2] = ['NEW']` inserts `'NEW'` at index `2` without replacing anything.
+3. `del letters[1:3]` deletes elements at indices `1` and `2`.
 
-**Example 3: Slice Assignment to Change Length**
+**Why the Output is Produced:**
 
-```python
-# Step 1: Define a list
-data = [1, 2, 3, 4, 5]
+Slice assignment can replace, insert, or delete elements. When the start and stop indices are equal, the assignment inserts elements at that position. Deletion removes the specified range and shifts the remaining elements.
 
-# Step 2: Replace a slice with more elements
-data[1:3] = [10, 20, 30]
-print(data)
+#### Real-World Cases
 
-# Step 3: Replace a slice with fewer elements
-data[2:5] = [99]
-print(data)
-
-# Step 4: Insert via slice assignment
-data[1:1] = ["inserted"]
-print(data)
-```
-
-**Expected Output:**
-```
-[1, 10, 20, 30, 4, 5]
-[1, 10, 99, 5]
-[1, 'inserted', 10, 99, 5]
-```
-
-**Breakdown:** Slice assignment can change the list's length. `data[1:1] = ["inserted"]` inserts an element at index 1 without removing anything.
-
-### Real-World Cases with Explanation
-
-**Case 1: Updating a Shopping Cart**
-
-```python
-cart = ["apple", "banana", "cherry"]
-cart[1] = "blueberry"      # Replace an item
-cart.append("date")         # Add an item
-cart.remove("apple")        # Remove an item
-```
-
-**Why it matters:** In-place operations are natural for stateful objects like shopping carts, where the same list object persists across operations.
-
-**Case 2: Sorting a Leaderboard**
-
-```python
-scores = [("Alice", 85), ("Bob", 92), ("Charlie", 78)]
-scores.sort(key=lambda x: x[1], reverse=True)
-# scores is now sorted by score, highest first
-```
-
-**Why it matters:** In-place sorting is efficient for large datasets and is the preferred approach when the original order is no longer needed.
+- **Pagination**: Extracting a page of results from a large list.
+- **Data Splitting**: Splitting a dataset into training and testing subsets.
+- **Window Operations**: Extracting sliding windows for signal processing.
 
 ---
 
-## Core Concept 5: Adding Elements
+### 4. List Methods
 
-### Definitions
-
-**Core Definition**
-Adding elements to a list means appending, extending, or inserting items, increasing the list's length.
-
-**Technical Definition**
-Python lists provide three primary methods for adding elements: `append(x)` adds a single item to the end; `extend(iterable)` appends all items from an iterable; `insert(i, x)` inserts a single item at a given position. All three modify the list in place and return `None`. The `+` operator and `+=` also add elements, but `+=` behaves like `extend()` for lists.
-
-**Beginner-Friendly Explanation**
-You can add items to a list in different ways. `append()` adds one item to the end. `extend()` adds multiple items from another list. `insert()` adds an item at a specific position. All of these change the list directly.
-
-### Purposes
-
-- **To grow a list dynamically** as new data arrives
-- **To build a collection** incrementally in a loop
-- **To combine lists** without creating a new object
-- **To insert items at specific positions** when order matters
-- **To maintain a queue or stack** (append and pop)
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```py
-list.append(x)           # add single item to end
-list.extend(iterable)    # add all items from iterable
-list.insert(i, x)        # insert x before index i
-list += iterable         # equivalent to extend()
-```
-
-**Breakdown:**
-- `append(x)`: Adds `x` as a single element. Equivalent to `a[len(a):] = [x]`.
-- `extend(iterable)`: Adds each item from `iterable`. Equivalent to `a[len(a):] = iterable`.
-- `insert(i, x)`: Inserts `x` before index `i`. `a.insert(0, x)` inserts at the front; `a.insert(len(a), x)` is equivalent to `a.append(x)`.
-- `+=`: In-place extend.
-
-**Adding Rules**
-
-| Method | Description | Returns |
-|---|---|---|
-| `append(x)` | Adds `x` as a single element | `None` |
-| `extend(iterable)` | Adds each element of `iterable` | `None` |
-| `insert(i, x)` | Inserts `x` before index `i` | `None` |
-| `+=` | Equivalent to `extend()` | `None` |
-
-**Constraints and Limitations**
-
-- **`append` vs. `extend`**: `append([1, 2])` adds a single list element; `extend([1, 2])` adds two elements.
-- **`insert` is O(n)**: Inserting at the front of a large list is slow because all subsequent elements must be shifted.
-- **Return value**: All three methods return `None`; do not assign the result.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: `append()` vs. `extend()`**
-
-```python
-# Step 1: Define a list
-numbers = [1, 2, 3]
-
-# Step 2: Append a single item
-numbers.append(4)
-print(f"After append: {numbers}")
-
-# Step 3: Append a list as a single element
-numbers.append([5, 6])
-print(f"After append list: {numbers}")
-
-# Step 4: Extend with a list
-numbers = [1, 2, 3]
-numbers.extend([4, 5, 6])
-print(f"After extend: {numbers}")
-
-# Step 5: Extend with a string
-numbers = [1, 2, 3]
-numbers.extend("abc")
-print(f"After extend string: {numbers}")
-```
-
-**Expected Output:**
-```
-After append: [1, 2, 3, 4]
-After append list: [1, 2, 3, 4, [5, 6]]
-After extend: [1, 2, 3, 4, 5, 6]
-After extend string: [1, 2, 3, 'a', 'b', 'c']
-```
-
-**Breakdown:** `append([5, 6])` adds the list as a single nested element. `extend([4, 5, 6])` adds each element individually. `extend("abc")` adds each character.
-
-**Example 2: `insert()`**
-
-```python
-# Step 1: Define a list
-letters = ['a', 'c', 'd']
-
-# Step 2: Insert at index 1
-letters.insert(1, 'b')
-print(letters)
-
-# Step 3: Insert at the front
-letters.insert(0, 'z')
-print(letters)
-
-# Step 4: Insert at the end (equivalent to append)
-letters.insert(len(letters), 'e')
-print(letters)
-```
-
-**Expected Output:**
-```
-['a', 'b', 'c', 'd']
-['z', 'a', 'b', 'c', 'd']
-['z', 'a', 'b', 'c', 'd', 'e']
-```
-
-**Breakdown:** `insert(1, 'b')` places `'b'` before index 1. `insert(0, 'z')` inserts at the front. `insert(len(letters), 'e')` appends to the end.
-
-**Example 3: Building a List in a Loop**
-
-```python
-# Step 1: Initialize an empty list
-squares = []
-
-# Step 2: Populate in a loop
-for i in range(5):
-    squares.append(i ** 2)
-
-print(squares)
-
-# Step 3: Equivalent using extend with a comprehension
-squares2 = []
-squares2.extend([i ** 2 for i in range(5)])
-print(squares2)
-```
-
-**Expected Output:**
-```
-[0, 1, 4, 9, 16]
-[0, 1, 4, 9, 16]
-```
-
-**Breakdown:** `append()` is the standard way to build a list incrementally. `extend()` with a comprehension adds all computed values at once.
-
-### Real-World Cases with Explanation
-
-**Case 1: Collecting Log Entries**
-
-```python
-log_entries = []
-for line in log_file:
-    log_entries.append(line.strip())
-```
-
-**Why it matters:** `append()` is the idiomatic way to collect results from an iteration.
-
-**Case 2: Merging Data from Multiple Sources**
-
-```python
-all_records = []
-for source in sources:
-    all_records.extend(source.get_records())
-```
-
-**Why it matters:** `extend()` efficiently merges multiple lists without creating intermediate lists.
-
----
-
-## Core Concept 6: Removing Elements
-
-### Definitions
+#### Definitions
 
 **Core Definition**
-Removing elements from a list means deleting items by value, index, or clearing the entire list.
+
+List methods are built-in functions that operate on list objects, providing operations such as adding, removing, searching, sorting, and copying elements. They are called using dot notation: `list_name.method_name(arguments)`.
 
 **Technical Definition**
-Python lists provide `pop([i])` to remove and return an item at index `i` (default last), `remove(x)` to remove the first occurrence of a value, and `clear()` to remove all items. The `del` statement also removes items by index or slice. All these operations modify the list in place. `pop()` returns the removed item; `remove()` and `clear()` return `None`.
+
+The `list` class defines a set of methods that implement mutable sequence operations. These include methods for adding elements (`append`, `extend`, `insert`), removing elements (`remove`, `pop`, `clear`), searching (`index`, `count`), sorting and rearranging (`sort`, `reverse`), and copying (`copy`). Most list methods modify the list in place and return `None`, with the notable exceptions of `pop` (which returns the removed element) and `copy` (which returns a new list).
 
 **Beginner-Friendly Explanation**
-You can remove items from a list in different ways. `pop()` removes an item and gives it back to you (useful when you need the removed value). `remove()` removes a specific value without returning it. `clear()` empties the entire list. `del` removes by position.
 
-### Purposes
+List methods are like tools in a toolbox that are specifically designed for lists. `append` adds something to the end, `remove` takes something out, `sort` puts things in order, and so on. You use them by typing the list's name, a dot, and the method name.
 
-- **To delete items by index** (`pop()`, `del`)
-- **To delete items by value** (`remove()`)
-- **To empty a list** (`clear()`)
-- **To use a list as a stack or queue** (`pop()`)
-- **To filter a list** by removing unwanted items
+#### Purposes
 
-### Syntax Rules and Structure
+- To add, remove, or modify elements in a list.
+- To search for elements and count occurrences.
+- To sort and reverse the list in place.
+- To create a copy of the list.
+- To clear the list entirely.
+
+#### Syntax Rules and Structure
 
 **Complete General Syntax**
 
 ```
-list.pop([i])        # remove and return item at index i (default -1)
-list.remove(x)       # remove first occurrence of value x
-list.clear()         # remove all items
-del list[i]          # remove item at index i
-del list[start:stop] # remove slice
+list_name.append(element)
+list_name.extend(iterable)
+list_name.insert(index, element)
+list_name.remove(element)
+list_name.pop(index=-1)
+list_name.clear()
+list_name.index(element, start=0, stop=len(list))
+list_name.count(element)
+list_name.sort(*, key=None, reverse=False)
+list_name.reverse()
+list_name.copy()
 ```
 
-**Breakdown:**
-- `pop([i])`: Removes and returns the item at index `i` (default last). Raises `IndexError` if the list is empty or the index is out of range.
-- `remove(x)`: Removes the first item equal to `x`. Raises `ValueError` if not found.
-- `clear()`: Removes all items. Equivalent to `del a[:]`.
-- `del list[i]`: Removes the item at index `i` without returning it.
+**Component Breakdown**
 
-**Removal Rules**
+| Method | Description |
+|--------|-------------|
+| `append(x)` | Adds `x` to the end of the list. |
+| `extend(iterable)` | Adds all elements from `iterable` to the end. |
+| `insert(i, x)` | Inserts `x` at index `i`. |
+| `remove(x)` | Removes the first occurrence of `x`. |
+| `pop(i=-1)` | Removes and returns the element at index `i`. |
+| `clear()` | Removes all elements. |
+| `index(x, start, stop)` | Returns the index of the first occurrence of `x`. |
+| `count(x)` | Returns the number of occurrences of `x`. |
+| `sort(key, reverse)` | Sorts the list in place. |
+| `reverse()` | Reverses the list in place. |
+| `copy()` | Returns a shallow copy of the list. |
 
-| Method | Removes by | Returns | Raises |
-|---|---|---|---|
-| `pop([i])` | Index | Removed item | `IndexError` |
-| `remove(x)` | Value | `None` | `ValueError` |
-| `clear()` | All items | `None` | — |
-| `del list[i]` | Index | — | `IndexError` |
+**Syntax Rules**
+
+- All methods are called on a list object using dot notation.
+- `append`, `extend`, `insert`, `remove`, `clear`, `sort`, and `reverse` modify the list in place and return `None`.
+- `pop` returns the removed element.
+- `copy` returns a new list.
+- `sort` and `reverse` are in-place operations.
+- `sort` accepts only keyword arguments for `key` and `reverse`.
 
 **Constraints and Limitations**
 
-- **`pop()` on empty list**: Raises `IndexError`.
-- **`remove()` on missing value**: Raises `ValueError`; use `in` to check first.
-- **`remove()` is O(n)**: It searches the list linearly.
-- **`pop(0)` is O(n)**: Removing from the front shifts all subsequent elements; use `collections.deque` for efficient front removals.
+- `remove` raises `ValueError` if the element is not found.
+- `pop` raises `IndexError` if the list is empty or the index is out of range.
+- `index` raises `ValueError` if the element is not found.
+- `sort` raises `TypeError` if elements are not comparable.
+- `extend` accepts any iterable, but not non-iterable objects.
+- `copy` creates a shallow copy; nested objects are shared.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: `pop()` and `remove()`**
+**Example 1: Adding Elements**
 
 ```python
-# Step 1: Define a list
-fruits = ['apple', 'banana', 'cherry', 'banana', 'date']
+fruits = ["apple", "banana"]
 
-# Step 2: Pop the last item
-last = fruits.pop()
-print(f"Popped: {last}")
-print(f"After pop: {fruits}")
+# append: add one element
+fruits.append("cherry")
+print("After append:", fruits)
 
-# Step 3: Pop at a specific index
-second = fruits.pop(1)
-print(f"Popped at index 1: {second}")
-print(f"After pop(1): {fruits}")
+# extend: add multiple elements from an iterable
+fruits.extend(["date", "elderberry"])
+print("After extend:", fruits)
 
-# Step 4: Remove by value (first occurrence)
-fruits.remove('banana')
-print(f"After remove('banana'): {fruits}")
+# insert: add at a specific position
+fruits.insert(1, "blueberry")
+print("After insert:", fruits)
 ```
 
 **Expected Output:**
+
 ```
-Popped: date
-After pop: ['apple', 'banana', 'cherry', 'banana']
-Popped at index 1: banana
-After pop(1): ['apple', 'cherry', 'banana']
-After remove('banana'): ['apple', 'cherry']
+After append: ['apple', 'banana', 'cherry']
+After extend: ['apple', 'banana', 'cherry', 'date', 'elderberry']
+After insert: ['apple', 'blueberry', 'banana', 'cherry', 'date', 'elderberry']
 ```
 
-**Breakdown:** `pop()` removes and returns the last item. `pop(1)` removes and returns the item at index 1. `remove('banana')` removes the first occurrence by value.
+**Step-by-Step Breakdown:**
 
-**Example 2: `clear()` and `del`**
+1. `append("cherry")` adds a single element to the end.
+2. `extend(["date", "elderberry"])` adds each element from the iterable.
+3. `insert(1, "blueberry")` inserts `"blueberry"` at index `1`, shifting subsequent elements.
+
+**Why the Output is Produced:**
+
+`append` adds one element at the end. `extend` iterates over its argument and appends each element. `insert` places the element at the specified index and shifts elements to the right.
+
+---
+
+**Example 2: Removing Elements**
 
 ```python
-# Step 1: Define a list
-numbers = [1, 2, 3, 4, 5]
+numbers = [10, 20, 30, 20, 40, 20]
 
-# Step 2: Delete a slice
-del numbers[1:3]
-print(f"After del slice: {numbers}")
+# remove: remove first occurrence
+numbers.remove(20)
+print("After remove:", numbers)
 
-# Step 3: Delete a single element
-del numbers[0]
-print(f"After del index: {numbers}")
+# pop: remove and return element at index
+popped = numbers.pop()
+print("Popped:", popped)
+print("After pop:", numbers)
 
-# Step 4: Clear the list
+# pop with index
+popped_at_index = numbers.pop(0)
+print("Popped at index 0:", popped_at_index)
+print("After pop(0):", numbers)
+
+# clear: remove all elements
 numbers.clear()
-print(f"After clear: {numbers}")
+print("After clear:", numbers)
 ```
 
 **Expected Output:**
+
 ```
-After del slice: [1, 4, 5]
-After del index: [4, 5]
+After remove: [10, 30, 20, 40, 20]
+Popped: 20
+After pop: [10, 30, 20, 40]
+Popped at index 0: 10
+After pop(0): [30, 20, 40]
 After clear: []
 ```
 
-**Breakdown:** `del numbers[1:3]` removes elements at indices 1 and 2. `del numbers[0]` removes the first element. `clear()` empties the list.
+**Step-by-Step Breakdown:**
 
-**Example 3: Using a List as a Stack**
+1. `remove(20)` removes the first occurrence of `20` (at index `1`).
+2. `pop()` removes and returns the last element (`20`).
+3. `pop(0)` removes and returns the element at index `0` (`10`).
+4. `clear()` removes all remaining elements.
 
-```python
-# Step 1: Initialize a stack
-stack = []
+**Why the Output is Produced:**
 
-# Step 2: Push items
-stack.append(1)
-stack.append(2)
-stack.append(3)
-print(f"Stack: {stack}")
-
-# Step 3: Pop items (LIFO)
-print(f"Popped: {stack.pop()}")
-print(f"Popped: {stack.pop()}")
-print(f"Stack after pops: {stack}")
-```
-
-**Expected Output:**
-```
-Stack: [1, 2, 3]
-Popped: 3
-Popped: 2
-Stack after pops: [1]
-```
-
-**Breakdown:** `append()` pushes onto the stack, and `pop()` (without an index) pops from the end, giving LIFO (last-in, first-out) behaviour.
-
-### Real-World Cases with Explanation
-
-**Case 1: Processing a Queue**
-
-```python
-tasks = ["task1", "task2", "task3"]
-while tasks:
-    task = tasks.pop(0)  # Remove from front (inefficient for large lists)
-    process(task)
-```
-
-**Why it matters:** Lists can serve as simple queues, though `collections.deque` is more efficient for frequent front removals.
-
-**Case 2: Removing Invalid Data**
-
-```python
-data = [1, -2, 3, -4, 5]
-for value in data[:]:  # Iterate over a copy
-    if value < 0:
-        data.remove(value)
-print(data)  # [1, 3, 5]
-```
-
-**Why it matters:** Removing items during iteration requires iterating over a copy to avoid skipping elements.
+`remove` searches for the first matching element and removes it. `pop` removes an element by index (default is the last) and returns it. `clear` empties the list.
 
 ---
 
-## Core Concept 7: Sorting
-
-### Definitions
-
-**Core Definition**
-Sorting arranges a list's elements in a specified order; Python provides the in-place `list.sort()` method and the `sorted()` built-in function.
-
-**Technical Definition**
-`list.sort(*, key=None, reverse=False)` sorts the list in place and returns `None`. `sorted(iterable, *, key=None, reverse=False)` returns a new sorted list from any iterable. Both accept a `key` function that computes a comparison key for each element and a `reverse` boolean. Python's sort is stable (equal elements retain their relative order) and uses the Timsort algorithm.
-
-**Beginner-Friendly Explanation**
-You can sort a list in two ways: `list.sort()` changes the list itself, while `sorted(list)` gives you a new sorted list and leaves the original alone. You can sort in reverse order with `reverse=True`, and you can customise the sort with a `key` function—for example, sorting strings case-insensitively or sorting objects by an attribute.
-
-### Purposes
-
-- **To arrange data in ascending or descending order**
-- **To sort complex objects** by a specific attribute or computed value
-- **To perform stable sorting** (preserving relative order of equal elements)
-- **To sort without modifying the original** (`sorted()`)
-- **To prepare data for binary search** or other algorithms
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```
-list.sort(*, key=None, reverse=False)
-sorted(iterable, *, key=None, reverse=False)
-```
-
-**Breakdown:**
-- `key`: A function that takes an element and returns a comparison key. Default: `None` (compare elements directly).
-- `reverse`: If `True`, sort in descending order. Default: `False`.
-- `list.sort()`: Modifies in place, returns `None`.
-- `sorted()`: Returns a new list, works with any iterable.
-
-**Sorting Rules**
-
-| Feature | `list.sort()` | `sorted()` |
-|---|---|---|
-| Modifies original | Yes (in place) | No |
-| Return value | `None` | New sorted list |
-| Works on | Lists only | Any iterable |
-| Stability | Stable | Stable |
-| Key function | Supported | Supported |
-| Reverse | Supported | Supported |
-
-**Constraints and Limitations**
-
-- **`sort()` returns `None`**: Do not assign the result.
-- **Key function called once per element**: Efficient for complex keys.
-- **Cannot sort mixed types**: Comparing incomparable types (e.g., `int` and `str`) raises `TypeError`.
-- **Stability**: Python's sort is guaranteed stable.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Basic Sorting**
+**Example 3: Searching and Counting**
 
 ```python
-# Step 1: Define a list
-numbers = [5, 2, 8, 1, 9, 3]
+fruits = ["apple", "banana", "cherry", "banana", "apple", "banana"]
 
-# Step 2: In-place sort
+# count: number of occurrences
+print("Banana count:", fruits.count("banana"))
+print("Apple count:", fruits.count("apple"))
+
+# index: position of first occurrence
+print("First banana index:", fruits.index("banana"))
+print("Banana index after 2:", fruits.index("banana", 2))
+```
+
+**Expected Output:**
+
+```
+Banana count: 3
+Apple count: 2
+First banana index: 1
+Banana index after 2: 3
+```
+
+**Step-by-Step Breakdown:**
+
+1. `count("banana")` returns `3` because "banana" appears three times.
+2. `index("banana")` returns `1`, the first occurrence.
+3. `index("banana", 2)` searches starting from index `2` and returns `3`.
+
+**Why the Output is Produced:**
+
+`count` iterates through the list and counts matches. `index` returns the position of the first match, with optional `start` and `stop` parameters to limit the search range.
+
+---
+
+**Example 4: Sorting and Reversing**
+
+```python
+numbers = [3, 1, 4, 1, 5, 9, 2, 6]
+
+# sort: in-place ascending
 numbers.sort()
-print(f"After sort(): {numbers}")
+print("Sorted:", numbers)
 
-# Step 3: New sorted list
-original = [5, 2, 8, 1, 9, 3]
-new_sorted = sorted(original)
-print(f"Original: {original}")
-print(f"sorted(): {new_sorted}")
-
-# Step 4: Reverse sort
+# sort descending
 numbers.sort(reverse=True)
-print(f"Descending: {numbers}")
-```
+print("Descending:", numbers)
 
-**Expected Output:**
-```
-After sort(): [1, 2, 3, 5, 8, 9]
-Original: [5, 2, 8, 1, 9, 3]
-sorted(): [1, 2, 3, 5, 8, 9]
-Descending: [9, 8, 5, 3, 2, 1]
-```
-
-**Breakdown:** `sort()` modifies in place and returns `None`. `sorted()` returns a new list. `reverse=True` sorts in descending order.
-
-**Example 2: Custom Key Function**
-
-```python
-# Step 1: Define a list of tuples
-students = [
-    ('john', 'A', 15),
-    ('jane', 'B', 12),
-    ('dave', 'B', 10),
-]
-
-# Step 2: Sort by age (index 2)
-by_age = sorted(students, key=lambda s: s[2])
-print(f"By age: {by_age}")
-
-# Step 3: Sort by grade then age
-by_grade_age = sorted(students, key=lambda s: (s[1], s[2]))
-print(f"By grade, age: {by_grade_age}")
-
-# Step 4: Case-insensitive string sort
-words = ["banana", "Apple", "cherry"]
-case_insensitive = sorted(words, key=str.casefold)
-print(f"Case-insensitive: {case_insensitive}")
-```
-
-**Expected Output:**
-```
-By age: [('dave', 'B', 10), ('jane', 'B', 12), ('john', 'A', 15)]
-By grade, age: [('john', 'A', 15), ('dave', 'B', 10), ('jane', 'B', 12)]
-Case-insensitive: ['Apple', 'banana', 'cherry']
-```
-
-**Breakdown:** The `key` function extracts a comparison value. `lambda s: s[2]` sorts by the third element. `(s[1], s[2])` sorts by grade, then age. `str.casefold` sorts strings case-insensitively.
-
-**Example 3: Sorting Objects by Attribute**
-
-```python
-# Step 1: Define a class
-class Student:
-    def __init__(self, name, grade, age):
-        self.name = name
-        self.grade = grade
-        self.age = age
-    def __repr__(self):
-        return repr((self.name, self.grade, self.age))
-
-# Step 2: Create objects
-students = [
-    Student('john', 'A', 15),
-    Student('jane', 'B', 12),
-    Student('dave', 'B', 10),
-]
-
-# Step 3: Sort by age attribute
-by_age = sorted(students, key=lambda s: s.age)
-print(by_age)
-```
-
-**Expected Output:**
-```
-[('dave', 'B', 10), ('jane', 'B', 12), ('john', 'A', 15)]
-```
-
-**Breakdown:** The `key` function accesses the `age` attribute of each `Student` object. This pattern works for any object with attributes.
-
-### Real-World Cases with Explanation
-
-**Case 1: Sorting a Leaderboard**
-
-```python
-scores = [("Alice", 85), ("Bob", 92), ("Charlie", 78)]
-leaderboard = sorted(scores, key=lambda x: x[1], reverse=True)
-```
-
-**Why it matters:** Sorting by a specific field in descending order is common for rankings and leaderboards.
-
-**Case 2: Sorting Files by Modification Time**
-
-```python
-import os
-files = os.listdir('.')
-files.sort(key=os.path.getmtime)
-```
-
-**Why it matters:** Sorting by a computed key (file modification time) is a frequent file-system operation.
-
----
-
-## Core Concept 8: Reversing
-
-### Definitions
-
-**Core Definition**
-Reversing a list means changing the order of its elements so that the last becomes first and the first becomes last.
-
-**Technical Definition**
-`list.reverse()` reverses the list in place and returns `None`. The built-in `reversed(seq)` returns a reverse iterator over a sequence without modifying it. Slicing with `[::-1]` creates a new reversed list. For large lists, `reverse()` is more memory-efficient than creating a reversed copy.
-
-**Beginner-Friendly Explanation**
-You can reverse a list in place with `my_list.reverse()`, which changes the list itself. Or you can use `reversed(my_list)` to iterate backwards without changing the list. And `my_list[::-1]` creates a new reversed list.
-
-### Purposes
-
-- **To reverse the order of elements** in place
-- **To iterate backwards** over a list without copying
-- **To create a reversed copy** of a list
-- **To implement stack-like behaviour** (though `append`/`pop` is more common)
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```
-list.reverse()        # in-place reversal, returns None
-reversed(sequence)    # returns a reverse iterator
-list[::-1]            # creates a new reversed list
-```
-
-**Breakdown:**
-- `list.reverse()`: Reverses in place, returns `None`.
-- `reversed(seq)`: Returns an iterator; works on any sequence supporting `__reversed__()` or the sequence protocol.
-- `list[::-1]`: Slice that creates a reversed shallow copy.
-
-**Reversal Rules**
-
-| Method | Modifies original | Returns |
-|---|---|---|
-| `list.reverse()` | Yes | `None` |
-| `reversed(list)` | No | Reverse iterator |
-| `list[::-1]` | No | New reversed list |
-
-**Constraints and Limitations**
-
-- **`reverse()` returns `None`**: Do not assign the result.
-- **`reversed()` returns an iterator**: Wrap in `list()` to materialise.
-- **Slicing creates a copy**: Uses additional memory for large lists.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: In-Place Reversal**
-
-```python
-# Step 1: Define a list
-numbers = [1, 2, 3, 4, 5]
-
-# Step 2: Reverse in place
+# reverse: in-place reversal
 numbers.reverse()
-print(numbers)
+print("Reversed:", numbers)
 
-# Step 3: Verify identity unchanged
-print(f"Type: {type(numbers)}")
+# sort with key function
+words = ["banana", "apple", "cherry"]
+words.sort(key=len)
+print("Sorted by length:", words)
 ```
 
 **Expected Output:**
+
 ```
-[5, 4, 3, 2, 1]
-Type: <class 'list'>
-```
-
-**Breakdown:** `reverse()` modifies the list in place. The list object is the same; only the order of elements changed.
-
-**Example 2: `reversed()` Iterator**
-
-```python
-# Step 1: Define a list
-letters = ['a', 'b', 'c', 'd']
-
-# Step 2: Iterate in reverse
-for letter in reversed(letters):
-    print(letter, end=" ")
-print()
-
-# Step 3: Materialise the reversed iterator
-rev_list = list(reversed(letters))
-print(rev_list)
+Sorted: [1, 1, 2, 3, 4, 5, 6, 9]
+Descending: [9, 6, 5, 4, 3, 2, 1, 1]
+Reversed: [1, 1, 2, 3, 4, 5, 6, 9]
+Sorted by length: ['apple', 'banana', 'cherry']
 ```
 
-**Expected Output:**
-```
-d c b a 
-['d', 'c', 'b', 'a']
-```
+**Step-by-Step Breakdown:**
 
-**Breakdown:** `reversed()` returns an iterator that yields elements from last to first. The original list is unchanged.
+1. `sort()` sorts the list in ascending order in place.
+2. `sort(reverse=True)` sorts in descending order.
+3. `reverse()` reverses the list in place.
+4. `sort(key=len)` sorts strings by their length.
 
-**Example 3: Reversed Copy via Slicing**
+**Why the Output is Produced:**
 
-```python
-# Step 1: Define a list
-original = [10, 20, 30, 40]
-
-# Step 2: Create reversed copy
-reversed_copy = original[::-1]
-print(f"Original: {original}")
-print(f"Reversed copy: {reversed_copy}")
-
-# Step 3: Verify they are independent
-reversed_copy[0] = 99
-print(f"After modifying copy: {reversed_copy}")
-print(f"Original unchanged: {original}")
-```
-
-**Expected Output:**
-```
-Original: [10, 20, 30, 40]
-Reversed copy: [40, 30, 20, 10]
-After modifying copy: [99, 30, 20, 10]
-Original unchanged: [10, 20, 30, 40]
-```
-
-**Breakdown:** `original[::-1]` creates a new list. Modifying the copy does not affect the original.
-
-### Real-World Cases with Explanation
-
-**Case 1: Processing a History Stack**
-
-```python
-history = ["page1", "page2", "page3"]
-for page in reversed(history):
-    print(page)  # Prints page3, page2, page1
-```
-
-**Why it matters:** `reversed()` is ideal for iterating backwards through a history or log without modifying the original order.
-
-**Case 2: Reversing a String via List**
-
-```python
-text = "hello"
-reversed_text = "".join(reversed(text))
-# Or using slicing: text[::-1]
-```
-
-**Why it matters:** Reversing strings often involves converting to a list, reversing, and joining back—`reversed()` and slicing make this concise.
+`sort` uses the Timsort algorithm (O(n log n)) and sorts in place. `reverse` swaps elements symmetrically. The `key` parameter applies a function to each element and sorts by the result.
 
 ---
 
-## Core Concept 9: Copying (Shallow vs. Deep Copy)
-
-### Definitions
-
-**Core Definition**
-Copying a list creates a new list object; a shallow copy duplicates the outer list but shares references to nested objects, while a deep copy recursively duplicates all nested objects.
-
-**Technical Definition**
-A shallow copy constructs a new compound object and then (to the extent possible) inserts references to the objects found in the original. A deep copy constructs a new compound object and then, recursively, inserts copies of the objects found in the original. The `copy` module provides `copy.copy()` for shallow copies and `copy.deepcopy()` for deep copies. List methods like `list.copy()` and slicing (`list[:]`) produce shallow copies.
-
-**Beginner-Friendly Explanation**
-When you copy a list normally (e.g., `list[:]`), you get a new list, but if the original contains other lists, those inner lists are still shared. This is a "shallow copy." If you want completely independent copies of everything, including nested lists, you need a "deep copy" using `copy.deepcopy()`.
-
-### Purposes
-
-- **To duplicate a list** without affecting the original
-- **To create independent copies** of nested structures (deep copy)
-- **To avoid unintended side effects** from shared references
-- **To pass copies to functions** when the original should not be modified
-- **To implement undo/redo** or snapshot functionality
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```
-import copy
-
-shallow1 = list[:]           # slice copy
-shallow2 = list.copy()       # method copy
-shallow3 = copy.copy(list)   # module copy
-deep = copy.deepcopy(list)   # deep copy
-```
-
-**Breakdown:**
-- `list[:]`: Returns a shallow copy of the list.
-- `list.copy()`: Returns a shallow copy.
-- `copy.copy(list)`: Generic shallow copy.
-- `copy.deepcopy(list)`: Recursively copies all nested objects.
-
-**Copying Rules**
-
-| Copy Type | Outer list | Nested objects | Method |
-|---|---|---|---|
-| Shallow | New | Shared references | `list[:]`, `list.copy()`, `copy.copy()` |
-| Deep | New | Independent copies | `copy.deepcopy()` |
-
-**Constraints and Limitations**
-
-- **Shallow copies share nested objects**: Modifying a nested list in the copy affects the original.
-- **Deep copy can be slow**: Recursively copying large structures is expensive.
-- **Deep copy of recursive objects**: `deepcopy()` handles recursive references via its `memo` dictionary.
-- **Some objects cannot be deep-copied**: Modules, sockets, files, etc., are returned as-is.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Shallow Copy of a Simple List**
+**Example 5: Copying**
 
 ```python
-# Step 1: Create a list
 original = [1, 2, 3]
 
-# Step 2: Shallow copy via slicing
-shallow = original[:]
+# Create a shallow copy using copy()
+copied = original.copy()
+print("Original:", original)
+print("Copied:", copied)
 
-# Step 3: Modify the copy
-shallow[0] = 99
-
-print(f"Original: {original}")
-print(f"Shallow:  {shallow}")
+# Modify the copy; original is unaffected
+copied.append(4)
+print("After modifying copy:")
+print("Original:", original)
+print("Copied:", copied)
 ```
 
 **Expected Output:**
+
 ```
 Original: [1, 2, 3]
-Shallow:  [99, 2, 3]
+Copied: [1, 2, 3]
+After modifying copy:
+Original: [1, 2, 3]
+Copied: [1, 2, 3, 4]
 ```
 
-**Breakdown:** For a list of immutables, a shallow copy behaves like an independent copy because integers are immutable.
+**Step-by-Step Breakdown:**
 
-**Example 2: Shallow Copy with Nested Lists (The Pitfall)**
+1. `original.copy()` creates a new list with the same elements.
+2. Modifying `copied` does not affect `original` because they are separate list objects.
 
-```python
-# Step 1: Create a nested list
-original = [[1, 2], [3, 4]]
+**Why the Output is Produced:**
 
-# Step 2: Shallow copy
-shallow = original[:]
+`copy()` creates a shallow copy: a new list containing references to the same objects. For immutable elements like integers, modifying the copy's structure (adding/removing elements) does not affect the original.
 
-# Step 3: Modify a nested list in the copy
-shallow[0][0] = 99
+#### Real-World Cases
 
-print(f"Original: {original}")
-print(f"Shallow:  {shallow}")
-```
-
-**Expected Output:**
-```
-Original: [[99, 2], [3, 4]]
-Shallow:  [[99, 2], [3, 4]]
-```
-
-**Breakdown:** The shallow copy created a new outer list, but the inner lists are still shared. Modifying `shallow[0][0]` affects both because they reference the same inner list.
-
-**Example 3: Deep Copy**
-
-```python
-import copy
-
-# Step 1: Create a nested list
-original = [[1, 2], [3, 4]]
-
-# Step 2: Deep copy
-deep = copy.deepcopy(original)
-
-# Step 3: Modify a nested list in the copy
-deep[0][0] = 99
-
-print(f"Original: {original}")
-print(f"Deep:     {deep}")
-```
-
-**Expected Output:**
-```
-Original: [[1, 2], [3, 4]]
-Deep:     [[99, 2], [3, 4]]
-```
-
-**Breakdown:** `deepcopy()` recursively copies all nested objects, so modifying the copy does not affect the original.
-
-### Real-World Cases with Explanation
-
-**Case 1: Configuration Snapshots**
-
-```python
-import copy
-
-base_config = {"settings": {"debug": False, "log_level": "INFO"}}
-user_config = copy.deepcopy(base_config)
-user_config["settings"]["debug"] = True
-# base_config remains unchanged
-```
-
-**Why it matters:** Deep copying ensures that modifying a user's configuration does not affect the shared base configuration.
-
-**Case 2: Undo Functionality**
-
-```python
-history = []
-current_state = [[1, 2], [3, 4]]
-
-def save_state(state):
-    history.append(copy.deepcopy(state))
-
-def undo():
-    return history.pop()
-```
-
-**Why it matters:** Deep copying captures a complete snapshot of the state, allowing accurate restoration during undo operations.
+- **Data Cleaning**: `append` and `extend` build lists of cleaned records; `remove` and `pop` eliminate invalid entries.
+- **Ranking Systems**: `sort` orders scores or results; `reverse` displays them from highest to lowest.
+- **Inventory Management**: `count` and `index` track stock levels and locations.
 
 ---
 
-## Core Concept 10: Nested Lists
+### 5. List Operations
 
-### Definitions
+#### Definitions
 
 **Core Definition**
-A nested list is a list that contains other lists as its elements, enabling the representation of multidimensional data structures like matrices or grids.
+
+List operations are built-in language operations that work on lists, including concatenation (`+`), repetition (`*`), membership testing (`in`), and iteration (`for` loops).
 
 **Technical Definition**
-A nested list is a list whose elements are themselves lists. Access requires multiple indices: `nested[i][j]` accesses the `j`-th element of the `i`-th inner list. Nested lists are commonly used to represent 2D arrays, matrices, tables, and hierarchical data.
+
+Lists support several operators and built-in functions: concatenation with `+` creates a new list by joining two lists; repetition with `*` creates a new list by repeating elements; the `in` and `not in` operators test membership; and lists are iterable, meaning they can be looped over with `for`. These operations are implemented through the sequence protocol and are documented in the Common Sequence Operations section of the Python documentation.
 
 **Beginner-Friendly Explanation**
-A nested list is a list inside another list. Think of a table: the outer list is the rows, and each inner list is the columns. You access an item with two indices: the first for the row, the second for the column.
 
-### Purposes
+List operations are the basic things you can do with lists: combine two lists into one (`+`), repeat a list several times (`*`), check whether an item is in a list (`in`), and go through each item one by one (`for`).
 
-- **To represent matrices and grids** (2D data)
-- **To store tabular data** (rows and columns)
-- **To model hierarchical structures** (lists of lists of lists)
-- **To implement board games** (chess, tic-tac-toe)
-- **To group related lists** together
+#### Purposes
 
-### Syntax Rules and Structure
+- To combine multiple lists into a single list.
+- To repeat a list's contents multiple times.
+- To check whether a value exists in a list.
+- To process each element of a list sequentially.
+
+#### Syntax Rules and Structure
 
 **Complete General Syntax**
 
 ```
-nested = [[a, b, c], [d, e, f], [g, h, i]]
-nested[row][col]          # access element
-nested[row]               # access entire row
+# Concatenation
+combined = list1 + list2
+
+# Repetition
+repeated = list1 * n
+
+# Membership
+exists = element in list1
+not_exists = element not in list1
+
+# Iteration
+for item in list1:
+    # process item
+    pass
 ```
 
-**Breakdown:**
-- `nested[i]`: The `i`-th inner list (row).
-- `nested[i][j]`: The `j`-th element of the `i`-th row.
-- Nested lists can be arbitrarily deep.
+**Component Breakdown**
 
-**Nested List Rules**
+| Operation | Description |
+|-----------|-------------|
+| `+` | Concatenates two lists into a new list. |
+| `*` | Repeats a list `n` times. |
+| `in` | Returns `True` if element is in the list. |
+| `for` | Iterates over each element. |
 
-| Rule | Description |
-|---|---|
-| Multi-level indexing | `list[i][j]` for 2D, `list[i][j][k]` for 3D |
-| Inner lists are independent | Each inner list is a separate object |
-| Shallow copy pitfall | `[[0]*3]*3` creates shared inner lists |
-| Safe creation | Use comprehension: `[[0]*3 for _ in range(3)]` |
+**Syntax Rules**
+
+- Concatenation requires both operands to be lists; `list + tuple` raises `TypeError`.
+- Repetition requires an integer on the right side.
+- `in` and `not in` return boolean values.
+- Iteration yields elements in order.
+- Concatenation and repetition create new lists; the originals are unchanged.
 
 **Constraints and Limitations**
 
-- **Sharing pitfall**: `[[0] * 3] * 3` creates three references to the same inner list.
-- **Deep modification requires deep copy**: Modifying nested lists in a shallow copy affects the original.
-- **Performance**: Nested list access has overhead compared to flat lists or NumPy arrays.
+- Concatenation creates a new list, which can be memory-intensive for large lists.
+- Repetition with a mutable element (e.g., a nested list) repeats the reference, not a copy.
+- Membership testing is O(n) for lists.
+- Iteration over a list while modifying it can lead to unexpected behavior.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Creating and Accessing a Matrix**
+**Example 1: Concatenation and Repetition**
 
 ```python
-# Step 1: Create a 3x3 matrix
-matrix = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9]
-]
+list1 = [1, 2, 3]
+list2 = [4, 5, 6]
 
-# Step 2: Access elements
-print(matrix[0][0])   # Top-left
-print(matrix[1][2])   # Middle-right
-print(matrix[2][1])   # Bottom-middle
+# Concatenation
+combined = list1 + list2
+print("Combined:", combined)
 
-# Step 3: Access a row
-print(matrix[1])      # Entire second row
+# Repetition
+repeated = [0] * 5
+print("Repeated:", repeated)
+
+# Repetition with a list
+repeated_list = list1 * 2
+print("Repeated list:", repeated_list)
 ```
 
 **Expected Output:**
+
 ```
-1
-6
-8
-[4, 5, 6]
+Combined: [1, 2, 3, 4, 5, 6]
+Repeated: [0, 0, 0, 0, 0]
+Repeated list: [1, 2, 3, 1, 2, 3]
 ```
 
-**Breakdown:** `matrix[1][2]` accesses row 1, column 2 (value 6). `matrix[1]` returns the entire second row.
+**Step-by-Step Breakdown:**
 
-**Example 2: Safe Matrix Creation**
+1. `list1 + list2` creates a new list containing all elements of `list1` followed by all elements of `list2`.
+2. `[0] * 5` creates a list with five zeros.
+3. `list1 * 2` creates a new list with `list1`'s elements repeated twice.
+
+**Why the Output is Produced:**
+
+Concatenation joins two lists end-to-end. Repetition duplicates the list's contents the specified number of times. Both operations create new list objects.
+
+---
+
+**Example 2: Membership Testing**
 
 ```python
-# Step 1: CORRECT way to create a 3x3 matrix of zeros
-matrix = [[0] * 3 for _ in range(3)]
-matrix[0][0] = 1
+fruits = ["apple", "banana", "cherry"]
+
+print("banana" in fruits)
+print("grape" in fruits)
+print("grape" not in fruits)
+```
+
+**Expected Output:**
+
+```
+True
+False
+True
+```
+
+**Step-by-Step Breakdown:**
+
+1. `"banana" in fruits` returns `True` because `"banana"` is in the list.
+2. `"grape" in fruits` returns `False`.
+3. `"grape" not in fruits` returns `True`.
+
+**Why the Output is Produced:**
+
+The `in` operator iterates through the list and returns `True` as soon as it finds a matching element. If no match is found, it returns `False`. `not in` is the logical negation.
+
+---
+
+**Example 3: Iteration**
+
+```python
+numbers = [10, 20, 30]
+
+# Basic iteration
+for num in numbers:
+    print(num)
+
+# Iteration with index using enumerate
+for index, num in enumerate(numbers):
+    print(f"Index {index}: {num}")
+```
+
+**Expected Output:**
+
+```
+10
+20
+30
+Index 0: 10
+Index 1: 20
+Index 2: 30
+```
+
+**Step-by-Step Breakdown:**
+
+1. `for num in numbers` iterates over each element, binding `num` to the current element.
+2. `enumerate(numbers)` yields pairs of `(index, element)`.
+
+**Why the Output is Produced:**
+
+Lists implement the iterator protocol, allowing `for` loops to traverse them. `enumerate` provides both the index and the value.
+
+#### Real-World Cases
+
+- **Combining Datasets**: Concatenating lists of records from multiple sources.
+- **Placeholder Initialization**: Using `[None] * n` to create a list of `n` placeholders.
+- **Validation**: Checking membership to validate user input against allowed values.
+- **Batch Processing**: Iterating over lists of tasks, files, or records.
+
+---
+
+### 6. List Comprehensions
+
+#### Definitions
+
+**Core Definition**
+
+A list comprehension is a concise syntactic construct for creating a new list by applying an expression to each element of an iterable, optionally filtering elements with a condition.
+
+**Technical Definition**
+
+Introduced in PEP 202 (Python 2.0), list comprehensions provide a declarative way to build lists. The syntax `[expression for item in iterable if condition]` is equivalent to a `for` loop that appends the result of `expression` to a new list for each `item` in `iterable` for which `condition` is true. Comprehensions have their own scope for the loop variable and are generally faster than equivalent `for` loops because they are optimized by the interpreter. Nested comprehensions allow multiple `for` clauses and multiple `if` conditions.
+
+**Beginner-Friendly Explanation**
+
+A list comprehension is a shortcut for building a list. Instead of writing a `for` loop that appends to a list, you write a single line: `[x * 2 for x in numbers]`. It's like saying, "Give me `x * 2` for each `x` in `numbers`."
+
+#### Purposes
+
+- To create lists concisely and readably.
+- To replace `map()` and `filter()` operations with a more Pythonic syntax.
+- To perform transformations and filtering in a single expression.
+- To improve performance compared to equivalent `for` loops.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```
+[expression for item in iterable if condition]
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `expression` | The value to include in the new list. |
+| `for item in iterable` | Iterates over the source iterable. |
+| `if condition` | Optional filter; only elements satisfying the condition are included. |
+
+**Syntax Rules**
+
+- The expression can be any valid Python expression.
+- Multiple `for` clauses create nested loops.
+- Multiple `if` clauses apply all conditions (logical AND).
+- The loop variable is scoped to the comprehension.
+- Comprehensions can be nested inside other comprehensions.
+
+**Constraints and Limitations**
+
+- Comprehensions should be kept simple; complex logic reduces readability.
+- The loop variable does not leak into the enclosing scope (Python 3).
+- Very deeply nested comprehensions can be hard to read.
+- Comprehensions are evaluated eagerly (all at once), unlike generator expressions.
+
+#### Annotated Code Examples
+
+**Example 1: Basic and Conditional Comprehensions**
+
+```python
+# Basic: squares of numbers 0-9
+squares = [x ** 2 for x in range(10)]
+print(squares)
+
+# Conditional: even squares only
+even_squares = [x ** 2 for x in range(10) if x % 2 == 0]
+print(even_squares)
+```
+
+**Expected Output:**
+
+```
+[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+[0, 4, 16, 36, 64]
+```
+
+**Step-by-Step Breakdown:**
+
+1. `[x ** 2 for x in range(10)]` computes the square of each number from 0 to 9.
+2. `[x ** 2 for x in range(10) if x % 2 == 0]` includes only even numbers before squaring.
+
+**Why the Output is Produced:**
+
+The comprehension iterates over the range, applies the expression to each element, and optionally filters with the condition.
+
+---
+
+**Example 2: Nested Comprehensions**
+
+```python
+# Create a 3x3 matrix using a nested comprehension
+matrix = [[i * 3 + j for j in range(3)] for i in range(3)]
 print(matrix)
 
-# Step 2: INCORRECT way (shared references)
-wrong = [[0] * 3] * 3
-wrong[0][0] = 1
-print(wrong)
+# Flatten a matrix
+flat = [num for row in matrix for num in row]
+print(flat)
 ```
 
 **Expected Output:**
+
 ```
-[[1, 0, 0], [0, 0, 0], [0, 0, 0]]
-[[1, 0, 0], [1, 0, 0], [1, 0, 0]]
-```
-
-**Breakdown:** The comprehension `[[0] * 3 for _ in range(3)]` creates three independent inner lists. The multiplication `[[0] * 3] * 3` creates three references to the same inner list.
-
-**Example 3: Modifying Nested Lists**
-
-```python
-# Step 1: Create a nested list
-grid = [
-    [1, 2, 3],
-    [4, 5, 6],
-]
-
-# Step 2: Modify an element
-grid[1][0] = 40
-print(grid)
-
-# Step 3: Modify an entire row
-grid[0] = [10, 20, 30]
-print(grid)
-
-# Step 4: Append a new row
-grid.append([7, 8, 9])
-print(grid)
+[[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+[0, 1, 2, 3, 4, 5, 6, 7, 8]
 ```
 
-**Expected Output:**
-```
-[[1, 2, 3], [40, 5, 6]]
-[[10, 20, 30], [40, 5, 6]]
-[[10, 20, 30], [40, 5, 6], [7, 8, 9]]
-```
+**Step-by-Step Breakdown:**
 
-**Breakdown:** `grid[1][0] = 40` modifies a single element. `grid[0] = [10, 20, 30]` replaces an entire row. `grid.append(...)` adds a new row.
+1. The outer comprehension `for i in range(3)` creates three rows.
+2. The inner comprehension `for j in range(3)` creates three columns per row.
+3. The flattening comprehension iterates over each row and then over each element in the row.
 
-### Real-World Cases with Explanation
+**Why the Output is Produced:**
 
-**Case 1: Tic-Tac-Toe Board**
-
-```python
-board = [[" " for _ in range(3)] for _ in range(3)]
-board[0][0] = "X"
-board[1][1] = "O"
-```
-
-**Why it matters:** Game boards are naturally represented as 2D grids. Nested lists provide the structure for moves and win detection.
-
-**Case 2: Image Pixel Data**
-
-```python
-# A small grayscale image (3x3 pixels)
-image = [
-    [0, 128, 255],
-    [64, 192, 32],
-    [200, 100, 50]
-]
-# Access pixel at row 1, column 2
-pixel = image[1][2]  # 32
-```
-
-**Why it matters:** Nested lists model 2D image data, where each inner list is a row of pixels.
+Nested comprehensions evaluate the inner comprehension for each iteration of the outer comprehension. The flattening comprehension uses two `for` clauses: the first iterates over rows, the second over elements within each row.
 
 ---
 
-## Core Concept 11: List Comprehensions
+**Example 3: Multiple Conditions**
 
-### Definitions
+```python
+# Numbers divisible by 2 and 3
+result = [x for x in range(50) if x % 2 == 0 if x % 3 == 0]
+print(result)
+```
+
+**Expected Output:**
+
+```
+[0, 6, 12, 18, 24, 30, 36, 42, 48]
+```
+
+**Step-by-Step Breakdown:**
+
+1. The first `if x % 2 == 0` keeps even numbers.
+2. The second `if x % 3 == 0` keeps numbers divisible by 3.
+3. Both conditions must be true (logical AND).
+
+**Why the Output is Produced:**
+
+Multiple `if` clauses in a comprehension are applied as consecutive filters. An element must pass all filters to be included.
+
+#### Real-World Cases
+
+- **Data Transformation**: Converting a list of dictionaries into a list of specific values.
+- **Filtering**: Extracting valid records from a dataset based on multiple criteria.
+- **Matrix Operations**: Creating and manipulating matrices as lists of lists.
+- **String Processing**: Building lists of cleaned or transformed strings.
+
+---
+
+### 7. List Unpacking
+
+#### Definitions
 
 **Core Definition**
-A list comprehension is a concise syntactic construct for creating a new list by applying an expression to each item in an iterable, optionally filtering with a condition.
+
+List unpacking is the process of assigning elements of a list to multiple variables in a single statement.
 
 **Technical Definition**
-List comprehensions provide a concise way to create lists without having to use `list.append()` in a `for` loop, `map()`, `filter()`, and/or `lambda`. The syntax is `[expression for item in iterable if condition]`. The resulting list is built by evaluating `expression` for each `item` in `iterable` that satisfies the optional `condition`. Comprehensions can have multiple `for` and `if` clauses and can be nested.
+
+Python supports iterable unpacking, which allows a list (or any iterable) to be unpacked into individual variables. The syntax `a, b, c = list` assigns the first element to `a`, the second to `b`, and the third to `c`. Extended unpacking with `*` collects remaining elements into a list: `first, *rest = list`. Unpacking requires the number of variables on the left to match the number of elements on the right, unless `*` is used.
 
 **Beginner-Friendly Explanation**
-A list comprehension is a shortcut for building a list from another sequence. Instead of writing a loop that appends items one by one, you write a single expression: `[x**2 for x in range(10)]` creates a list of squares. You can add a condition to filter items: `[x for x in numbers if x > 0]` keeps only positive numbers.
 
-### Purposes
+Unpacking is like opening a box of chocolates and giving each chocolate to a different person. `a, b, c = [1, 2, 3]` gives `1` to `a`, `2` to `b`, and `3` to `c`. You can also say "give me the first one, and put the rest in a bag" using `*`.
 
-- **To create lists concisely** from existing iterables
-- **To replace explicit `for` loops** with a more readable expression
-- **To filter elements** while transforming them
-- **To apply an expression** to every element of a sequence
-- **To flatten nested loops** into a single expression
+#### Purposes
 
-### Syntax Rules and Structure
+- To extract multiple values from a list into separate variables.
+- To swap variables without a temporary variable.
+- To capture the "rest" of a list using starred assignment.
+- To simplify code that would otherwise use indexing.
+
+#### Syntax Rules and Structure
 
 **Complete General Syntax**
 
 ```
-[expression for item in iterable]
-[expression for item in iterable if condition]
-[expression for item1 in iterable1 for item2 in iterable2]
-[expression for item in iterable if cond1 if cond2]
+a, b, c = list_name
+first, *rest = list_name
+*init, last = list_name
 ```
 
-**Breakdown:**
-- `expression`: The value to include in the new list (can use `item`).
-- `for item in iterable`: The iteration clause.
-- `if condition`: Optional filter; only items satisfying the condition are included.
-- Multiple `for`/`if` clauses: Applied left to right.
+**Component Breakdown**
 
-**Comprehension Rules**
+| Component | Description |
+|-----------|-------------|
+| `a, b, c` | Variables to assign elements to. |
+| `*rest` | Collects remaining elements into a list. |
+| `list_name` | The list (or iterable) being unpacked. |
 
-| Rule | Description |
-|---|---|
-| Expression first | The output expression comes before `for` |
-| Scope | Loop variables are local to the comprehension |
-| No side effects | Comprehensions should not modify external state |
-| Nested | Multiple `for` and `if` clauses allowed |
-| Tuple expressions | Must be parenthesised: `[(x, y) for ...]` |
+**Syntax Rules**
+
+- The number of variables must match the number of elements, unless `*` is used.
+- Only one starred variable is allowed per unpacking.
+- The starred variable can appear at any position.
+- Unpacking works with any iterable, not just lists.
+- Nested unpacking is supported: `(a, b), c = [1, 2], 3`.
 
 **Constraints and Limitations**
 
-- **Memory**: Creates the entire list in memory at once; use generator expressions for lazy evaluation.
-- **Readability**: Overly complex comprehensions should be replaced with explicit loops.
-- **No `break` or `continue`**: Comprehensions do not support loop control statements.
-- **No statements**: Only expressions are allowed.
+- Too many or too few variables raise `ValueError`.
+- The starred variable always receives a list (even if empty).
+- Unpacking a nested list requires matching nested structure.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Basic Comprehension**
+**Example 1: Basic Unpacking**
 
 ```python
-# Step 1: Squares using a loop
-squares_loop = []
-for x in range(10):
-    squares_loop.append(x**2)
-print(f"Loop: {squares_loop}")
+coordinates = [10, 20, 30]
+x, y, z = coordinates
+print(f"x={x}, y={y}, z={z}")
 
-# Step 2: Squares using a comprehension
-squares_comp = [x**2 for x in range(10)]
-print(f"Comp: {squares_comp}")
+# Swap variables
+a, b = 1, 2
+a, b = b, a
+print(f"a={a}, b={b}")
 ```
 
 **Expected Output:**
+
 ```
-Loop: [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
-Comp: [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
-```
-
-**Breakdown:** The comprehension produces the same result as the loop but in a single expression.
-
-**Example 2: Comprehension with Filter**
-
-```python
-# Step 1: Filter even numbers
-evens = [x for x in range(10) if x % 2 == 0]
-print(f"Evens: {evens}")
-
-# Step 2: Filter strings by length
-words = ["apple", "cat", "banana", "dog"]
-short = [w for w in words if len(w) <= 3]
-print(f"Short: {short}")
-
-# Step 3: Transform and filter
-squares_of_odds = [x**2 for x in range(10) if x % 2 == 1]
-print(f"Squares of odds: {squares_of_odds}")
+x=10, y=20, z=30
+a=2, b=1
 ```
 
-**Expected Output:**
-```
-Evens: [0, 2, 4, 6, 8]
-Short: ['cat', 'dog']
-Squares of odds: [1, 9, 25, 49, 81]
-```
+**Step-by-Step Breakdown:**
 
-**Breakdown:** The `if` clause filters items before the expression is applied. `x % 2 == 0` keeps even numbers; `len(w) <= 3` keeps short words.
+1. `x, y, z = [10, 20, 30]` assigns each element to a corresponding variable.
+2. `a, b = b, a` swaps the values using tuple packing and unpacking.
 
-**Example 3: Nested Comprehension**
+**Why the Output is Produced:**
 
-```python
-# Step 1: Cartesian product
-pairs = [(x, y) for x in [1, 2, 3] for y in [3, 1, 4] if x != y]
-print(f"Pairs: {pairs}")
-
-# Step 2: Flatten a nested list
-matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-flat = [num for row in matrix for num in row]
-print(f"Flat: {flat}")
-
-# Step 3: Transpose a matrix
-transposed = [[row[i] for row in matrix] for i in range(3)]
-print(f"Transposed: {transposed}")
-```
-
-**Expected Output:**
-```
-Pairs: [(1, 3), (1, 4), (2, 3), (2, 1), (2, 4), (3, 1), (3, 4)]
-Flat: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-Transposed: [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
-```
-
-**Breakdown:** Multiple `for` clauses create nested iterations. The flattening comprehension reads left to right: for each row, for each number in the row, include the number. The transpose comprehension builds each row by indexing the original matrix.
-
-### Real-World Cases with Explanation
-
-**Case 1: Data Transformation**
-
-```python
-prices = [10.99, 5.49, 20.00, 15.75]
-discounted = [round(p * 0.9, 2) for p in prices]
-```
-
-**Why it matters:** Comprehensions are ideal for applying a consistent transformation to every element in a list.
-
-**Case 2: Filtering Data**
-
-```python
-users = [{"name": "Alice", "active": True}, {"name": "Bob", "active": False}]
-active_names = [u["name"] for u in users if u["active"]]
-```
-
-**Why it matters:** Filtering and extracting fields in one expression is concise and readable.
+Unpacking assigns elements positionally. The right-hand side is evaluated first, then unpacked into the left-hand side.
 
 ---
 
-## Core Concept 12: List Methods
+**Example 2: Extended Unpacking with `*`**
 
-### Complete List Method Reference
+```python
+numbers = [1, 2, 3, 4, 5]
 
-| Method | Syntax | Description | Returns |
-|---|---|---|---|
-| `append` | `list.append(x)` | Add item to end | `None` |
-| `extend` | `list.extend(iterable)` | Add all items from iterable | `None` |
-| `insert` | `list.insert(i, x)` | Insert item before index `i` | `None` |
-| `remove` | `list.remove(x)` | Remove first occurrence of `x` | `None` |
-| `pop` | `list.pop([i])` | Remove and return item at index `i` (default -1) | Removed item |
-| `clear` | `list.clear()` | Remove all items | `None` |
-| `index` | `list.index(x[, start[, end]])` | Return index of first occurrence of `x` | Integer |
-| `count` | `list.count(x)` | Count occurrences of `x` | Integer |
-| `sort` | `list.sort(*, key=None, reverse=False)` | Sort in place | `None` |
-| `reverse` | `list.reverse()` | Reverse in place | `None` |
-| `copy` | `list.copy()` | Return shallow copy | New list |
+first, *middle, last = numbers
+print(f"First: {first}")
+print(f"Middle: {middle}")
+print(f"Last: {last}")
 
-**Method Details**
+*init, last = numbers
+print(f"Init: {init}, Last: {last}")
+```
 
-**`append(x)`**: Add an item to the end of the list. Equivalent to `a[len(a):] = [x]`.
+**Expected Output:**
 
-**`extend(iterable)`**: Extend the list by appending all the items from the iterable. Equivalent to `a[len(a):] = iterable`.
+```
+First: 1
+Middle: [2, 3, 4]
+Last: 5
+Init: [1, 2, 3, 4], Last: 5
+```
 
-**`insert(i, x)`**: Insert an item at a given position. The first argument is the index of the element before which to insert. `a.insert(0, x)` inserts at the front; `a.insert(len(a), x)` is equivalent to `a.append(x)`.
+**Step-by-Step Breakdown:**
 
-**`remove(x)`**: Remove the first item from the list whose value is equal to `x`. Raises `ValueError` if there is no such item.
+1. `first, *middle, last = numbers` assigns `1` to `first`, `[2, 3, 4]` to `middle`, and `5` to `last`.
+2. `*init, last = numbers` assigns `[1, 2, 3, 4]` to `init` and `5` to `last`.
 
-**`pop([i])`**: Remove the item at the given position and return it. If no index is specified, `a.pop()` removes and returns the last item. Raises `IndexError` if the list is empty or the index is out of range.
+**Why the Output is Produced:**
 
-**`clear()`**: Remove all items from the list. Equivalent to `del a[:]`.
+The starred variable collects all elements that are not assigned to other variables. It always receives a list, even if there are no elements.
 
-**`index(x[, start[, end]])`**: Return zero-based index of the first item whose value is equal to `x`. Raises `ValueError` if there is no such item. Optional arguments `start` and `end` limit the search to a subsequence.
+#### Real-World Cases
 
-**`count(x)`**: Return the number of times `x` appears in the list.
+- **Function Returns**: Unpacking multiple return values from a function.
+- **Data Parsing**: Extracting fields from a record stored as a list.
+- **Configuration**: Assigning settings from a list to named variables.
 
-**`sort(*, key=None, reverse=False)`**: Sort the items of the list in place.
+---
 
-**`reverse()`**: Reverse the elements of the list in place.
+### 8. List Copying: Shallow Copy vs. Deep Copy
 
-**`copy()`**: Return a shallow copy of the list. Equivalent to `a[:]`.
+#### Definitions
+
+**Core Definition**
+
+**Shallow copy** creates a new list object containing references to the same elements as the original. **Deep copy** creates a new list and recursively copies all nested objects, so the copy is fully independent of the original.
+
+**Technical Definition**
+
+Assignment in Python does not copy objects; it creates bindings between a target and an object. A shallow copy constructs a new compound object and inserts references to the objects found in the original. A deep copy constructs a new compound object and recursively inserts copies of the objects found in the original. Shallow copies can be made using `list.copy()`, `list[:]`, or `copy.copy()`. Deep copies require `copy.deepcopy()`.
+
+**Beginner-Friendly Explanation**
+
+A shallow copy is like photocopying a document that has sticky notes on it. The photocopy has the same sticky notes (references to the same objects). If you change a sticky note, both copies see the change. A deep copy is like retyping the entire document, including recreating the sticky notes from scratch—now the two documents are completely independent.
+
+#### Purposes
+
+- To create an independent copy of a list to avoid unintended side effects.
+- To duplicate nested data structures fully (deep copy).
+- To share inner objects between copies when appropriate (shallow copy).
+- To avoid the overhead of deep copying when only the top-level structure needs to be independent.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```
+# Shallow copy
+shallow = original.copy()
+shallow2 = original[:]
+shallow3 = list(original)
+import copy
+shallow4 = copy.copy(original)
+
+# Deep copy
+import copy
+deep = copy.deepcopy(original)
+```
+
+**Component Breakdown**
+
+| Method | Type | Description |
+|--------|------|-------------|
+| `list.copy()` | Shallow | Returns a new list with references to the same elements. |
+| `list[:]` | Shallow | Slicing creates a shallow copy. |
+| `list(original)` | Shallow | Constructor creates a shallow copy. |
+| `copy.copy(x)` | Shallow | Generic shallow copy function. |
+| `copy.deepcopy(x)` | Deep | Recursively copies all nested objects. |
+
+**Syntax Rules**
+
+- Shallow copies are fast (O(n)) and memory-efficient for the top level.
+- Deep copies are slower and use more memory because they recursively copy everything.
+- `copy.deepcopy()` handles recursive objects with a memo dictionary.
+- Custom classes can define `__copy__()` and `__deepcopy__()` to control copying behavior.
+
+**Constraints and Limitations**
+
+- Shallow copies share nested mutable objects; modifying them affects both copies.
+- Deep copies may fail or behave unexpectedly with objects that cannot be copied (e.g., file handles, sockets).
+- Deep copying large nested structures can be expensive.
+- The `copy` module does not copy types like modules, methods, stack traces, or sockets.
+
+#### Annotated Code Examples
+
+**Example 1: Shallow Copy vs. Deep Copy**
+
+```python
+import copy
+
+original = [[1, 2], [3, 4]]
+
+# Shallow copy
+shallow = original.copy()
+shallow[0][0] = "CHANGED"
+
+print("Original after shallow modification:", original)
+print("Shallow:", shallow)
+
+# Reset
+original = [[1, 2], [3, 4]]
+
+# Deep copy
+deep = copy.deepcopy(original)
+deep[0][0] = "CHANGED"
+
+print("Original after deep modification:", original)
+print("Deep:", deep)
+```
+
+**Expected Output:**
+
+```
+Original after shallow modification: [['CHANGED', 2], [3, 4]]
+Shallow: [['CHANGED', 2], [3, 4]]
+Original after deep modification: [[1, 2], [3, 4]]
+Deep: [['CHANGED', 2], [3, 4]]
+```
+
+**Step-by-Step Breakdown:**
+
+1. `original.copy()` creates a shallow copy. The inner lists are shared.
+2. Modifying `shallow[0][0]` also modifies `original[0][0]` because they reference the same inner list.
+3. `copy.deepcopy(original)` creates a fully independent copy.
+4. Modifying `deep[0][0]` does not affect `original`.
+
+**Why the Output is Produced:**
+
+Shallow copies duplicate only the outer list structure. Nested objects are shared by reference. Deep copies recursively duplicate every object, so changes to the copy do not affect the original.
+
+#### Real-World Cases
+
+- **Configuration Management**: Shallow copying a configuration list to modify the top-level structure without affecting the original.
+- **Data Snapshots**: Deep copying data before applying transformations to preserve the original state.
+- **Undo Systems**: Deep copying state to enable reverting changes.
+
+---
+
+### 9. List Performance
+
+#### Definitions
+
+**Core Definition**
+
+List performance refers to the time and space complexity of operations on Python lists. Different operations have different costs depending on where in the list they occur.
+
+**Technical Definition**
+
+The CPython documentation provides a time complexity table for list operations. The highest costs occur when expanding a list beyond its current allocation size (all elements must be moved) or when inserting or removing items near the beginning (all subsequent elements must be shifted). Key complexities: indexing and assignment are O(1); `append` is O(1) amortized; `pop()` from the end is O(1); `pop(k)` from an arbitrary index is O(n - k); `insert(k, x)` is O(n - k); `remove` and `index` are O(n); `sort` is O(n log n); `extend` is O(len(t)); concatenation is O(len(l1) + len(l2)); membership testing is O(n).
+
+**Beginner-Friendly Explanation**
+
+Some list operations are fast (like adding to the end), while others are slow (like inserting at the beginning). If you need to add or remove items from both ends frequently, Python's `collections.deque` is a better choice. Understanding these costs helps you write efficient code.
+
+#### Purposes
+
+- To understand the performance implications of different list operations.
+- To choose the right data structure for the task.
+- To write efficient algorithms and avoid performance bottlenecks.
+- To optimize code by replacing slow operations with faster alternatives.
+
+#### Syntax Rules and Structure
+
+**Time Complexity Table**
+
+| Operation | Average Case | Notes |
+|-----------|-------------|-------|
+| `l[k]` (index) | O(1) | Random access is constant time. |
+| `l[k] = x` (assign) | O(1) | Assignment to an index is constant time. |
+| `len(l)` | O(1) | Length is stored as metadata. |
+| `l.append(x)` | O(1) amortized | Occasionally O(n) when the list is resized. |
+| `l.pop()` | O(1) | Removing the last element is constant time. |
+| `l.pop(k)` | O(n - k) | Removing from the middle requires shifting. |
+| `l.insert(k, x)` | O(n - k) | Inserting requires shifting subsequent elements. |
+| `l.remove(x)` | O(n) | Must search for the element. |
+| `x in l` | O(n) | Linear search. |
+| `l.sort()` | O(n log n) | Timsort algorithm. |
+| `l.reverse()` | O(n) | Swaps elements symmetrically. |
+| `l.copy()` | O(n) | Copies all references. |
+| `l1 + l2` | O(len(l1) + len(l2)) | Creates a new list. |
+| `l * k` | O(nk) | Creates a new list with repeated elements. |
+| `l.extend(t)` | O(len(t)) | Appends all elements from `t`. |
+| `l[i:j]` (slice) | O(j - i) | Creates a new list. |
+
+**Constraints and Limitations**
+
+- Amortized O(1) for `append` means that while most appends are fast, occasional resizes are O(n).
+- Performance characteristics may vary across Python implementations (e.g., PyPy, Jython).
+- Subclasses of `list` may have different performance characteristics.
+
+#### Annotated Code Examples
+
+**Example 1: Performance of Append vs. Insert**
+
+```python
+import time
+
+# Append to the end (fast)
+start = time.perf_counter()
+lst = []
+for i in range(100000):
+    lst.append(i)
+end = time.perf_counter()
+print(f"Append 100k items: {end - start:.4f} seconds")
+
+# Insert at the beginning (slow)
+start = time.perf_counter()
+lst = []
+for i in range(10000):
+    lst.insert(0, i)
+end = time.perf_counter()
+print(f"Insert 10k items at front: {end - start:.4f} seconds")
+```
+
+**Expected Output (approximate):**
+
+```
+Append 100k items: 0.0080 seconds
+Insert 10k items at front: 0.2500 seconds
+```
+
+**Step-by-Step Breakdown:**
+
+1. `append` adds each element at the end, which is O(1) amortized.
+2. `insert(0, i)` inserts at the beginning, which requires shifting all existing elements each time (O(n)).
+3. The insert operation is significantly slower even for fewer elements.
+
+**Why the Output is Produced:**
+
+Appending to the end rarely requires resizing, so it is very fast. Inserting at the front shifts every existing element on each insertion, resulting in quadratic overall time.
+
+---
+
+**Example 2: Using `deque` for Fast Appends and Pops**
+
+```python
+from collections import deque
+import time
+
+# Using a list for queue operations
+start = time.perf_counter()
+lst = []
+for i in range(100000):
+    lst.append(i)
+while lst:
+    lst.pop(0)  # O(n) each time
+end = time.perf_counter()
+print(f"List queue: {end - start:.4f} seconds")
+
+# Using deque for queue operations
+start = time.perf_counter()
+dq = deque()
+for i in range(100000):
+    dq.append(i)
+while dq:
+    dq.popleft()  # O(1) each time
+end = time.perf_counter()
+print(f"Deque queue: {end - start:.4f} seconds")
+```
+
+**Expected Output (approximate):**
+
+```
+List queue: 1.5000 seconds
+Deque queue: 0.0200 seconds
+```
+
+**Step-by-Step Breakdown:**
+
+1. Using a list as a queue, `pop(0)` removes the first element, shifting all subsequent elements (O(n)).
+2. Using `deque.popleft()` removes the first element in O(1) time.
+
+**Why the Output is Produced:**
+
+Lists are optimized for end operations. Removing from the front requires shifting elements. `deque` is implemented as a doubly-linked list of blocks, making front and back operations O(1).
+
+#### Real-World Cases
+
+- **Queue Implementation**: Use `deque` instead of a list for FIFO queues.
+- **Data Processing**: Prefer `append` over `insert(0, ...)` when building lists.
+- **Search Optimization**: Use sets or dictionaries for O(1) membership testing when order is not required.
+
+---
+
+### 10. List Best Practices
+
+#### Definitions
+
+**Core Definition**
+
+List best practices are guidelines for using Python lists effectively, including proper creation, modification, copying, and performance considerations.
+
+**Technical Definition**
+
+Best practices for lists encompass following PEP 8 style conventions, using list comprehensions appropriately, understanding mutability and copying semantics, choosing the right operations for performance, and avoiding common pitfalls such as modifying a list while iterating. PEP 8 discourages adding a space before the opening bracket when indexing a list element and recommends 4-space indentation and maximum line lengths of 79 characters.
+
+**Beginner-Friendly Explanation**
+
+Best practices are good habits that make your list code clean, efficient, and bug-free. They include things like using meaningful variable names, not modifying a list while looping over it, and choosing the right tool for the job.
+
+#### Purposes
+
+- To write readable and maintainable list code.
+- To avoid common bugs related to mutability and references.
+- To optimize performance by choosing appropriate operations.
+- To align with Python community conventions.
+
+#### Syntax Rules and Structure
+
+**General Guidelines**
+
+```python
+# Good: Use list comprehensions for simple transformations
+squares = [x ** 2 for x in range(10)]
+
+# Good: Use enumerate when you need both index and value
+for i, value in enumerate(items):
+    print(i, value)
+
+# Good: Use zip to iterate over multiple lists
+for name, age in zip(names, ages):
+    print(name, age)
+
+# Bad: Modifying a list while iterating over it
+# for item in items:
+#     if condition:
+#         items.remove(item)  # BUG!
+
+# Good: Create a new list or iterate over a copy
+items = [item for item in items if not condition]
+```
+
+**Best Practices Table**
+
+| Practice | Description |
+|----------|-------------|
+| Use list comprehensions for simple transformations | More readable and often faster than `for` loops with `append`. |
+| Avoid modifying a list while iterating | Use a copy or build a new list. |
+| Use `enumerate` instead of manual index tracking | Cleaner and less error-prone. |
+| Use `zip` for parallel iteration | Avoids index-based access. |
+| Prefer `append` over `insert(0, ...)` | O(1) vs. O(n). |
+| Use `deque` for queue operations | Faster front operations. |
+| Be aware of shallow vs. deep copy | Choose the right copy for your needs. |
+| Use `in` for membership testing | Readable and efficient for small lists. |
+| Avoid using `list` as a variable name | Shadows the built-in type. |
+| Follow PEP 8 spacing conventions | No space before indexing brackets. |
+
+**Constraints and Limitations**
+
+- Best practices are guidelines, not absolute rules; context matters.
+- Performance recommendations may vary by Python implementation.
+- Readability should generally take precedence over micro-optimizations.
+
+#### Annotated Code Examples
+
+**Example 1: Safe List Modification During Iteration**
+
+```python
+# BAD: Modifying a list while iterating
+numbers = [1, 2, 3, 4, 5, 6]
+for num in numbers:
+    if num % 2 == 0:
+        numbers.remove(num)  # Skips elements and causes bugs!
+print("Bad result:", numbers)
+
+# GOOD: Build a new list with a comprehension
+numbers = [1, 2, 3, 4, 5, 6]
+numbers = [num for num in numbers if num % 2 != 0]
+print("Good result:", numbers)
+```
+
+**Expected Output:**
+
+```
+Bad result: [1, 3, 5]
+Good result: [1, 3, 5]
+```
+
+**Step-by-Step Breakdown:**
+
+1. In the bad version, removing elements during iteration shifts indices, causing the loop to skip elements.
+2. The good version creates a new list with only the odd numbers.
+
+**Why the Output is Produced:**
+
+Modifying a list while iterating changes its length and disrupts the iterator's position. Building a new list avoids this problem entirely.
+
+---
+
+**Example 2: PEP 8 Spacing for Lists**
+
+```python
+# Correct: No space before indexing brackets
+fruits = ["apple", "banana", "cherry"]
+print(fruits[0])
+
+# Wrong: Space before bracket
+# print(fruits [0])
+
+# Correct: Spaces after commas in list literals
+numbers = [1, 2, 3, 4]
+
+# Wrong: No spaces after commas
+# numbers = [1,2,3,4]
+```
+
+**Expected Output:**
+
+```
+apple
+```
+
+**Step-by-Step Breakdown:**
+
+1. PEP 8 recommends no space between the variable name and the opening bracket when indexing.
+2. PEP 8 recommends spaces after commas in list literals for readability.
+
+**Why the Output is Produced:**
+
+These are style conventions that improve code readability and consistency across Python projects.
+
+#### Real-World Cases
+
+- **Code Reviews**: Following PEP 8 and best practices makes code easier for teams to review.
+- **Performance-Critical Code**: Choosing the right operations (e.g., `deque` vs. list) can dramatically improve performance.
+- **Library Development**: Well-designed list usage is essential for libraries that process large datasets.
 
 ---
 
 ## References
 
-- Python Software Foundation. *5. Data Structures — Python Tutorial*. https://docs.python.org/3/tutorial/datastructures.html
-- Python Software Foundation. *Built-in Types — list*. https://docs.python.org/3/library/stdtypes.html#list
-- Python Software Foundation. *copy — Shallow and deep copy operations*. https://docs.python.org/3/library/copy.html
-- Python Software Foundation. *Sorting HOW TO*. https://docs.python.org/3/howto/sorting.html
-- Real Python. *Python's list Data Type: A Deep Dive With Examples*. https://realpython.com/python-list/
-- Real Python. *Python List Sorting: How to Use sorted() and .sort()*. https://realpython.com/python-sort/
-- Real Python. *Shallow vs Deep Copying of Python Objects*. https://realpython.com/copying-python-objects/
-- Python Software Foundation. *PEP 202 – List Comprehensions*. https://peps.python.org/pep-0202/
-- Python Software Foundation. *PEP 3132 – Extended Iterable Unpacking*. https://peps.python.org/pep-3132/
-- Microsoft Learn. *Python Lists — Training*. https://learn.microsoft.com/en-us/training/modules/python-lists/
-- Python Software Foundation. *Data Structures — Python Tutorial (Chinese)*. https://docs.python.org/zh-tw/dev/tutorial/datastructures.html
-- Python Software Foundation. *copy — Shallow and deep copy operations (Chinese)*. https://docs.python.org/zh-cn/3.10/library/copy.html
-- Python Software Foundation. *Sorting Techniques (Chinese)*. https://docs.python.org/zh-cn/3.13/howto/sorting.html
-- Imperial College London. *Accessing Lists — Introduction to Machine Learning*. https://intro2ml.pages.doc.ic.ac.uk/autumn2021/modules/lab-cpp/list-access
-- Python Bug Tracker. *Issue 13549: List comprehension documentation improvement*. https://bugs.python.org/file23882/issue13549.diff
+- Python Official Documentation – Built-in Types: Lists - https://docs.python.org/3/library/stdtypes.html#lists
+- Python Official Documentation – More on Lists (Tutorial) - https://docs.python.org/3/tutorial/datastructures.html#more-on-lists
+- Python Official Documentation – Time Complexity of Operations on Built-in Types - https://docs.python.org/3/library/time-complexity.html
+- Python Official Documentation – `copy` Module: Shallow and Deep Copy Operations - https://docs.python.org/3/library/copy.html
+- PEP 202 – List Comprehensions - https://peps.python.org/pep-0202/
+- PEP 8 – Style Guide for Python Code - https://peps.python.org/pep-0008/
+- PEP 257 – Docstring Conventions - https://peps.python.org/pep-0257/
+- Real Python – Python Lists and List Manipulation - https://realpython.com/python-lists-tuples/
+- Real Python – Python List Comprehensions - https://realpython.com/list-comprehension-python/
+- Real Python – Shallow vs Deep Copy in Python - https://realpython.com/copying-python-objects/
+- Python Wiki – TimeComplexity - https://wiki.python.org/moin/TimeComplexity
+- GeeksforGeeks – Python List Methods - https://www.geeksforgeeks.org/list-methods-python/
+- W3Schools – Python Lists - https://www.w3schools.com/python/python_lists.asp
+- Programiz – Python List - https://www.programiz.com/python-programming/list

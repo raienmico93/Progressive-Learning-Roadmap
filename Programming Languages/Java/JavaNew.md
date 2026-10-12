@@ -400,7 +400,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # III. Operators
 
-- **14. Arithmetic Operators**
+- [**14. Arithmetic Operators**](/Programming%20Languages/Java/Basics/Operators/Arithmetic.md)
   - `+`
   - `-`
   - `*`
@@ -408,7 +408,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - `%`
   - `++`
   - `--`
-  - Unary operators
+  - [Unary operators](/Programming%20Languages/Java/Basics/Operators/Unary.md)
   - Operator precedence
   - Operator associativity
 
@@ -479,7 +479,22 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Nested ternaries
   - Readability
 
-- **20. Switch Expressions**
+---
+
+# IV. Control Flow
+
+- **20. Conditional Statements**
+  - `if`
+  - `else if`
+  - `else`
+  - Nested conditionals
+  - Ternary operator
+  - Switch statement
+  - Switch expression
+  - Pattern matching
+  - Conditional best practices
+
+- **21. Switch Expressions**
   - Traditional switch
   - Switch expression
   - Arrow syntax
@@ -490,21 +505,6 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Null handling
   - Exhaustiveness
   - Switch best practices
-
----
-
-# IV. Control Flow
-
-- **21. Conditional Statements**
-  - `if`
-  - `else if`
-  - `else`
-  - Nested conditionals
-  - Ternary operator
-  - Switch statement
-  - Switch expression
-  - Pattern matching
-  - Conditional best practices
 
 - **22. Loops**
   - `for` loop
@@ -543,7 +543,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # V. Methods
 
-- **25. Method Fundamentals**
+- [**25. Method Fundamentals**](/Programming%20Languages/Java/Methods/Methods.md)
   - Methods
   - Method declaration
   - Method signature
@@ -569,7 +569,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Method naming
   - Method best practices
 
-- **26. Parameter Passing**
+- [**26. Parameter Passing**](/Programming%20Languages/Java/Methods/ParameterPassing.md)
   - Pass by value
   - Pass by reference
   - Java is pass-by-value
@@ -579,7 +579,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Immutability
   - Parameter best practices
 
-- **27. Variable Arguments**
+- [**27. Variable Arguments**](/Programming%20Languages/Java/Methods/Varargs.md)
   - Varargs
   - `...`
   - Varargs syntax
@@ -587,7 +587,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Varargs limitations
   - Varargs best practices
 
-- **28. Method Overloading**
+- [**28. Method Overloading**](/Programming%20Languages/Java/Methods/MethodOverloading.md)
   - Method overloading
   - Overloading rules
   - Overloading resolution
@@ -595,7 +595,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Overloading vs overriding
   - Overloading best practices
 
-- **29. Recursion**
+- [**29. Recursion**](/Programming%20Languages/Java/Methods/Recursion.md)
   - Recursion
   - Base case
   - Recursive case
@@ -606,7 +606,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Recursion vs iteration
   - Recursion examples
 
-- **30. Javadoc**
+- [**30. Javadoc**](/Programming%20Languages/Java/Methods/Javadoc.md)
   - Javadoc
   - Javadoc comments
   - `/**`
@@ -633,7 +633,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # VI. Object-Oriented Programming
 
-- **31. Classes and Objects**
+- [**31. Classes and Objects**](/Programming%20Languages/Java/OOP/ClassesAndObjects.md)
   - Classes
   - Objects
   - Instances
@@ -645,7 +645,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Initializer blocks
   - Static initializer blocks
   - Instance initializer blocks
-  - `this` keyword
+  - [`this` keyword](/Programming%20Languages/Java/OOP/ThisKeyword.md)
   - `super` keyword
   - Object creation
   - `new` keyword
@@ -659,7 +659,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - `clone()`
   - Object best practices
 
-- **32. Constructors**
+- [**32. Constructors**](/Programming%20Languages/Java/OOP/Constructors.md)
   - Constructors
   - Default constructor
   - Parameterized constructor
@@ -673,9 +673,9 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Builder pattern
   - Constructor best practices
 
-- **33. Encapsulation**
+- [**33. Encapsulation**](/Programming%20Languages/Java/OOP/Encapsulation.md)
   - Encapsulation
-  - Access modifiers
+  - [Access modifiers](/Programming%20Languages/Java/OOP/AccessModifiers.md)
     - `private`
     - `default` (package-private)
     - `protected`
@@ -688,7 +688,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Defensive copying
   - Encapsulation best practices
 
-- **34. Inheritance**
+- [**34. Inheritance**](/Programming%20Languages/Java/OOP/Inheritance.md)
   - Inheritance
   - `extends`
   - Superclass
@@ -707,7 +707,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Inheritance best practices
   - Composition over inheritance
 
-- **35. Polymorphism**
+- [**35. Polymorphism**](/Programming%20Languages/Java/OOP/Polymorphism.md)
   - Polymorphism
   - Compile-time polymorphism
   - Runtime polymorphism
@@ -720,7 +720,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Pattern matching
   - Polymorphism best practices
 
-- **36. Interfaces**
+- [**36. Interfaces**](/Programming%20Languages/Java/OOP/Interfaces.md)
   - Interfaces
   - `interface` keyword
   - Interface declaration
@@ -738,7 +738,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Interface vs abstract class
   - Interface best practices
 
-- **37. Abstract Classes**
+- [**37. Abstract Classes**](/Programming%20Languages/Java/OOP/Abstraction.md)
   - Abstract classes
   - `abstract` keyword
   - Abstract methods
@@ -750,7 +750,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - When to use interfaces
   - Abstract class best practices
 
-- **38. Inner Classes**
+- [**38. Inner Classes**](/Programming%20Languages/Java/OOP/InnerClasses.md)
   - Inner classes
   - Non-static nested classes
   - Static nested classes
@@ -761,7 +761,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Inner class limitations
   - Inner class best practices
 
-- **39. Object Class**
+- [**39. Object Class**](/Programming%20Languages/Java/OOP/ObjectClass.md)
   - `Object` class
   - `equals()`
   - `hashCode()`
@@ -788,7 +788,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - `Objects.checkFromToIndex()`
     - `Objects.compare()`
 
-- **40. Sealed Classes**
+- [**40. Sealed Classes**](/Programming%20Languages/Java/OOP/SealedClasses.md)
   - Sealed classes
   - Java 17 sealed classes
   - `sealed` keyword
@@ -800,7 +800,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Exhaustiveness
   - Sealed class best practices
 
-- **41. Pattern Matching**
+- [**41. Pattern Matching**](/Programming%20Languages/Java/OOP/PatternMatching.md)
   - Pattern matching
   - `instanceof` pattern
   - Type patterns
@@ -813,7 +813,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # VII. Collections Framework
 
-- **42. Collections Fundamentals**
+- [**42. Collections Fundamentals**](/Programming%20Languages/Java/Data%20Structures/Collections.md)
   - Collections framework
   - Collection hierarchy
   - `Iterable`
@@ -828,7 +828,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Collection utilities
   - Collections best practices
 
-- **43. Lists**
+- [**43. Lists**](/Programming%20Languages/Java/Data%20Structures/Lists.md)
   - `List` interface
   - `ArrayList`
   - `LinkedList`
@@ -858,7 +858,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - List implementations comparison
   - List best practices
 
-- **44. Sets**
+- [**44. Sets**](/Programming%20Languages/Java/Data%20Structures/Sets.md)
   - `Set` interface
   - `HashSet`
   - `LinkedHashSet`
@@ -883,7 +883,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Set implementations comparison
   - Set best practices
 
-- **45. Queues and Deques**
+- [**45. Queues and Deques**](/Programming%20Languages/Java/Data%20Structures/QueueAndDequeue.md)
   - `Queue` interface
   - `Deque` interface
   - `PriorityQueue`
@@ -910,7 +910,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - `take()`
   - Queue best practices
 
-- **46. Maps**
+- [**46. Maps**](/Programming%20Languages/Java/Data%20Structures/Maps.md)
   - `Map` interface
   - `HashMap`
   - `LinkedHashMap`
@@ -945,7 +945,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Map implementations comparison
   - Map best practices
 
-- **47. Iterators**
+- [**47. Iterators**](/Programming%20Languages/Java/Data%20Structures/Iterators.md)
   - `Iterator`
   - `ListIterator`
   - `Spliterator`
@@ -958,7 +958,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Fail-safe iterators
   - Iterator best practices
 
-- **48. Comparable and Comparator**
+- [**48. Comparable and Comparator**](/Programming%20Languages/Java/Data%20Structures/ComparableAndComparator.md)
   - `Comparable`
   - `compareTo()`
   - Natural ordering
@@ -981,7 +981,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Comparable vs Comparator
   - Best practices
 
-- **49. Collections Utility Class**
+- [**49. Collections Utility Class**](/Programming%20Languages/Java/Data%20Structures/UtilityAlgorithms.md)
   - `Collections`
   - `Collections.sort()`
   - `Collections.binarySearch()`
@@ -1012,7 +1012,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - `Collections.replaceAll()`
   - Collections best practices
 
-- **50. Immutable Collections**
+- [**50. Immutable Collections**](/Programming%20Languages/Java/Data%20Structures/ImmutableCollections.md)
   - Immutable collections
   - `List.of()`
   - `Set.of()`
@@ -1028,7 +1028,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # VIII. Generics
 
-- **51. Generics Fundamentals**
+- [**51. Generics Fundamentals**](/Programming%20Languages/Java/Generics/Generics.md)
   - Generics
   - Type parameters
   - Generic classes
@@ -1052,7 +1052,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Generic limitations
   - Generic best practices
 
-- **52. Generic Classes**
+- [**52. Generic Classes**](/Programming%20Languages/Java/Generics/GenericClasses.md)
   - Generic class declaration
   - Multiple type parameters
   - Generic fields
@@ -1061,21 +1061,21 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Generic inheritance
   - Generic best practices
 
-- **53. Generic Methods**
+- [**53. Generic Methods**](/Programming%20Languages/Java/Generics/GenericMethods.md)
   - Generic method declaration
   - Type inference
   - Generic method invocation
   - Generic method overloading
   - Generic method best practices
 
-- **54. Bounded Type Parameters**
+- [**54. Bounded Type Parameters**](/Programming%20Languages/Java/Generics/BoundedTypeParameters.md)
   - Upper bounds
   - Lower bounds
   - Multiple bounds
   - Recursive bounds
   - Bounded type best practices
 
-- **55. Wildcards**
+- [**55. Wildcards**](/Programming%20Languages/Java/Generics/BoundedWildcards.md)
   - Unbounded wildcards
   - Upper bounded wildcards
   - Lower bounded wildcards
@@ -1083,7 +1083,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Wildcard best practices
   - PECS principle
 
-- **56. Type Erasure**
+- [**56. Type Erasure**](/Programming%20Languages/Java/Generics/TypeErasure.md)
   - Type erasure
   - Erasure rules
   - Bridge methods
@@ -1096,7 +1096,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # IX. Functional Programming
 
-- **57. Lambda Expressions**
+- [**57. Lambda Expressions**](/Programming%20Languages/Java/Functional/LambdaExpressions.md)
   - Lambda expressions
   - Lambda syntax
   - Functional interfaces
@@ -1107,7 +1107,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Lambda vs anonymous classes
   - Lambda best practices
 
-- **58. Functional Interfaces**
+- [**58. Functional Interfaces**](/Programming%20Languages/Java/Functional/FunctionalInterface.md)
   - `@FunctionalInterface`
   - Built-in functional interfaces
     - `Function<T, R>`
@@ -1124,7 +1124,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - `Comparator<T>`
     - `Runnable`
     - `Callable`
-  - Primitive specializations
+  - [Primitive specializations](/Programming%20Languages/Java/Functional/PrimitiveSpecializations.md)
     - `IntFunction`
     - `LongFunction`
     - `DoubleFunction`
@@ -1149,7 +1149,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Custom functional interfaces
   - Functional interface best practices
 
-- **59. Method References**
+- [**59. Method References**](/Programming%20Languages/Java/Functional/MethodReferences.md)
   - Method references
   - Static method references
     - `ClassName::staticMethod`
@@ -1164,7 +1164,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Method reference vs lambda
   - Method reference best practices
 
-- **60. Streams API**
+- [**60. Streams API**](/Programming%20Languages/Java/Functional/StreamAPI.md)
   - Streams
   - Stream pipeline
   - Stream sources
@@ -1173,7 +1173,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - I/O
     - Generators
     - Ranges
-  - Intermediate operations
+  - [Intermediate operations](/Programming%20Languages/Java/Functional/StreamIntermediateOperations.md)
     - `filter()`
     - `map()`
     - `flatMap()`
@@ -1188,7 +1188,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - `mapToLong()`
     - `mapToDouble()`
     - `boxed()`
-  - Terminal operations
+  - [Terminal operations](/Programming%20Languages/Java/Functional/StreamTerminalOperations.md)
     - `forEach()`
     - `forEachOrdered()`
     - `toArray()`
@@ -1202,7 +1202,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - `noneMatch()`
     - `findFirst()`
     - `findAny()`
-  - Collectors
+  - [Collectors](/Programming%20Languages/Java/Functional/Collectors.md)
     - `toList()`
     - `toSet()`
     - `toMap()`
@@ -1223,7 +1223,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Stream best practices
   - Stream pitfalls
 
-- **61. Optional**
+- [**61. Optional**](/Programming%20Languages/Java/Functional/Optional.md)
   - `Optional`
   - Optional creation
     - `Optional.of()`
@@ -1249,7 +1249,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - `OptionalLong`
   - `OptionalDouble`
 
-- **62. Functional Programming Patterns**
+- [**62. Functional Programming Patterns**](/Programming%20Languages/Java/Functional/Patterns.md)
   - Pure functions
   - Immutability
   - Higher-order functions

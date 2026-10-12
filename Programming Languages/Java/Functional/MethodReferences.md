@@ -1,684 +1,835 @@
 # Java Method References: A Comprehensive Programming Cheat Sheet
 
+---
+
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** A method reference is a compact, readable shorthand syntax for a lambda expression that invokes an existing method by name, using the double-colon operator `::`.
+**Core Definition:** A method reference is a compact expression that refers to an existing method or constructor by name, allowing it to be used as the implementation of a functional interface without explicitly writing a lambda expression.
 
-**Technical Definition:** A method reference expression (JLS §15.13) is a syntactic construct of the form `ReferenceType::Identifier`, `Primary::Identifier`, `super::Identifier`, `TypeName.super::Identifier`, `ClassType::new`, or `ArrayType::new`. It is compatible in an assignment, invocation, or casting context with a target type `T` if `T` is a functional interface type and the expression is congruent with the function type of the ground target type derived from `T`. A method reference is a compile-time construct: the compiler resolves which method is being referenced and generates an `invokedynamic` call site, avoiding the boilerplate of an explicit lambda body.
+**Technical Definition:** "A method reference expression is used to refer to the invocation of a method without actually performing the invocation. Certain forms of method reference expression also allow class instance creation or array creation to be invoked". "A method reference expression is compatible in an assignment context, invocation context, or casting context with a target type T if T is a functional interface type and the expression is congruent with the function type of the ground target type derived from T".
 
-**Beginner-Friendly Explanation:** A method reference is a shortcut for a lambda expression that does nothing but call an existing method. Instead of writing `s -> System.out.println(s)`, you write `System.out::println`. The `::` operator says "use this existing method as the implementation of the functional interface." Method references make code shorter, cleaner, and easier to read when the lambda body is just a method call.
+**Beginner-Friendly Explanation:** A method reference is like pointing at an existing tool and saying "use that one." Instead of describing what to do step by step (a lambda), you simply refer to a method that already does exactly what you need. For example, instead of writing `s -> System.out.println(s)`, you write `System.out::println`, which means "use the `println` method that already exists."
 
 ### Key Characteristics
 
-Method references are characterized by their **conciseness** (they eliminate redundant parameter declarations), **type inference** (the compiler determines the method signature from the target functional interface), and **readability** (they clearly express intent by naming the method being called). They are not first-class objects with an inherent type; their type is always inferred from the context in which they appear. There are exactly four kinds of method references: static method references, bound instance method references, unbound instance method references, and constructor references. Method references are non-capturing when they do not close over any variables, allowing the JVM to create a single instance that can be reused, which can offer a slight performance advantage over capturing lambdas.
+- **Compact Syntax:** Method references use the `::` operator to refer to an existing method by name, eliminating the need for lambda boilerplate.
+- **Four Kinds:** There are four categories: static method references, instance method references of a particular object, instance method references of an arbitrary object of a particular type, and constructor references.
+- **Target Typed:** Like lambdas, method references are compatible with functional interfaces based on context.
+- **Semantically Equivalent to Lambdas:** Every method reference can be expressed as an equivalent lambda expression.
+- **Compile-Time Verification:** The compiler verifies that the referenced method's signature is compatible with the functional interface's abstract method.
 
 ### Prerequisites
 
-Readers should be familiar with Java generics, lambda expressions, and functional interfaces (particularly `Function`, `Predicate`, `Consumer`, `Supplier`, and `BiFunction`). A basic understanding of the Stream API is helpful for the array constructor reference examples.
+- Basic understanding of Java interfaces and abstract methods
+- Familiarity with lambda expressions
+- Knowledge of functional interfaces (e.g., `Function`, `Predicate`, `Consumer`, `Supplier`)
+- Understanding of generics and type inference
 
-### Related Programming Areas with Explanation
+### Related Programming Areas
 
-Method references are related to **functional programming** (they are a syntactic sugar for lambdas, which are the primary vehicle for functional-style code in Java), **API design** (they encourage the use of existing, named methods rather than anonymous lambda bodies), **the Stream API** (many stream operations accept functional interfaces that can be satisfied by method references), and **code readability and maintainability** (method references name the operation being performed, making the code's intent clearer than an equivalent lambda).
+- **Functional Programming:** Method references are a key feature of Java's functional programming support.
+- **Stream API:** Method references are frequently used in stream pipelines for mapping, filtering, and collecting.
+- **Comparator:** Method references simplify the creation of comparators.
+- **Event Handling:** Method references can be used for event listeners.
+- **Factory Patterns:** Constructor references enable factory-style object creation.
 
+### Core Concepts / Features
 
-## 1. The Four Types of Method References
+---
 
-### 1.1 Static Method References
+## 1. Method References
 
-#### Definitions
+### Definitions
 
-- **Core Definition:** A method reference that refers to a `static` method of a class.
-- **Technical Definition:** Static method references have the syntax `ContainingClass::staticMethodName`. The arguments of the functional interface map directly to the parameters of the static method. The target type's function type must be congruent with the signature of the referenced static method.
-- **Beginner-Friendly Explanation:** You are pointing to a method that belongs to the class itself, not to any particular object. The method is called without needing an instance.
+**Core Definition:** A method reference is an expression that denotes a method without invoking it, used to implement a functional interface.
 
-#### Purposes
+**Technical Definition:** "Method references enable you to do this; they are compact, easy-to-read lambda expressions for methods that already have a name". "The method reference `Person::compareByAge` is semantically the same as the lambda expression `(a, b) -> Person.compareByAge(a, b)`".
 
-- To refer to a utility or helper method as a functional interface implementation.
-- To replace a lambda whose body is a single static method call.
-- To pass a class-level method as a callback or stream operation.
+**Beginner-Friendly Explanation:** A method reference is a shorthand way of saying "just use this method." If a lambda expression does nothing but call an existing method, you can replace it with a method reference, which is shorter and clearer.
 
-#### Syntax Structures and Rules
+### Purposes
 
-Complete general syntax:
+- To reduce boilerplate code by eliminating unnecessary lambda expressions
+- To improve code readability by directly naming the method being used
+- To enable concise stream operations and functional pipelines
+- To provide a clear, declarative way to pass behaviour as a method argument
 
-```java
-ContainingClass::staticMethodName
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```
+ReferenceType::methodName
 ```
 
-Component breakdown:
+**Component Breakdown:**
 
-- `ContainingClass`: the name of the class that declares the static method.
-- `staticMethodName`: the name of the static method being referenced.
-- The arguments of the functional interface are passed as arguments to the static method.
+| Component | Description |
+|-----------|-------------|
+| `ReferenceType` | A class name, an object reference, or a type name. |
+| `::` | The method reference operator (double colon). |
+| `methodName` | The name of the method being referenced, or `new` for constructors. |
 
-Syntax rules: The static method must be accessible from the context where the method reference appears. The signature of the static method (after type inference) must be congruent with the function type of the target functional interface.
+**Syntax Rules:**
 
-Constraints and limitations: You cannot pass explicit arguments inside the method reference syntax. If the static method requires arguments that are not supplied by the functional interface, the method reference is not valid.
+- The `::` operator is always used.
+- The reference must be compatible with the target functional interface.
+- Method references can be used wherever a lambda expression of the same shape is valid.
+- There are four kinds of method references (detailed below).
 
-#### Multiple Annotated Complete Code Examples and Their Expected Outputs
+**Constraints and Limitations:**
 
-**Example 1: Static method reference with `Integer::parseInt`**
+- Method references cannot be used where a lambda body requires additional logic beyond a simple method call.
+- Method references cannot handle checked exceptions if the functional interface's method does not declare them.
+- Ambiguity can arise when a method name exists as both a static and instance method.
+
+### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Basic Method Reference vs Lambda**
 
 ```java
-import java.util.function.Function;
+// File: MethodReferenceBasic.java
+import java.util.*;
+import java.util.function.*;
 
-public class StaticMethodRefExample {
+public class MethodReferenceBasic {
     public static void main(String[] args) {
-        // Step 1: Define a Function that takes a String and returns an int
-        // Integer::parseInt is a static method reference to Integer.parseInt(String)
-        Function<String, Integer> parser = Integer::parseInt;
+        List<String> names = List.of("Alice", "Bob", "Charlie");
 
-        // Step 2: Apply the function
-        int result = parser.apply("123");
-        System.out.println("Parsed: " + result);
+        // Lambda expression: calls an existing method
+        names.forEach(name -> System.out.println(name));
+
+        // Method reference: refers to the existing method directly
+        names.forEach(System.out::println);
+        // Both produce the same output:
+        // Alice
+        // Bob
+        // Charlie
+
+        // Lambda: s -> s.toUpperCase()
+        Function<String, String> upperLambda = s -> s.toUpperCase();
+
+        // Method reference: String::toUpperCase
+        Function<String, String> upperRef = String::toUpperCase;
+        System.out.println(upperRef.apply("hello"));  // Output: HELLO
     }
 }
 ```
 
-Expected Output:
+**Expected Output:**
+```
+Alice
+Bob
+Charlie
+Alice
+Bob
+Charlie
+HELLO
+```
 
+**Step-by-Step Explanation:**
+
+1. The lambda `name -> System.out.println(name)` calls the `println` method on `System.out`.
+2. The method reference `System.out::println` refers to the same method directly, without a lambda wrapper.
+3. The lambda `s -> s.toUpperCase()` calls `toUpperCase` on the parameter `s`.
+4. The method reference `String::toUpperCase` refers to the `toUpperCase` instance method, which will be called on each argument passed by the functional interface.
+
+### Real-World Cases
+
+- **Stream Mapping:** `stream.map(String::toUpperCase)` instead of `stream.map(s -> s.toUpperCase())`.
+- **List Sorting:** `list.sort(String::compareTo)` instead of `list.sort((a, b) -> a.compareTo(b))`.
+- **Optional Handling:** `optional.ifPresent(System.out::println)` instead of `optional.ifPresent(v -> System.out.println(v))`.
+
+---
+
+## 2. Static Method References
+
+### Definitions
+
+**Core Definition:** A static method reference refers to a static method of a class, using the syntax `ClassName::staticMethod`.
+
+**Technical Definition:** "Reference to a static method: `ContainingClass::staticMethodName`". The method reference is compatible with a functional interface whose abstract method has the same parameter types and return type as the static method.
+
+**Beginner-Friendly Explanation:** A static method reference is like pointing to a utility tool in a toolbox. You say "use the tool from that box" — the class name tells you which toolbox, and the method name tells you which tool.
+
+### Purposes
+
+- To refer to utility methods in a class without writing a lambda
+- To use static factory methods as functional interface implementations
+- To simplify stream operations that use static helper methods
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```
+ClassName::staticMethodName
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `ClassName` | The class containing the static method. |
+| `::` | The method reference operator. |
+| `staticMethodName` | The name of the static method. |
+
+**Syntax Rules:**
+
+- The static method must be accessible from the context of the method reference.
+- The method's parameter types and return type must match the functional interface's abstract method.
+- The method reference can refer to overloaded static methods; the compiler selects the appropriate one based on context.
+
+**Constraints and Limitations:**
+
+- Cannot refer to a private static method from outside the class.
+- Ambiguity can occur if multiple overloaded static methods match the functional interface.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: StaticMethodReferenceDemo.java
+import java.util.*;
+import java.util.function.*;
+
+public class StaticMethodReferenceDemo {
+    public static void main(String[] args) {
+        // Example 1: Integer.parseInt is a static method
+        // Lambda: s -> Integer.parseInt(s)
+        Function<String, Integer> parseLambda = s -> Integer.parseInt(s);
+
+        // Method reference: Integer::parseInt
+        Function<String, Integer> parseRef = Integer::parseInt;
+        System.out.println("Parsed: " + parseRef.apply("123"));  // Output: 123
+
+        // Example 2: Math.max is a static method
+        // Lambda: (a, b) -> Math.max(a, b)
+        BinaryOperator<Integer> maxLambda = (a, b) -> Math.max(a, b);
+
+        // Method reference: Math::max
+        BinaryOperator<Integer> maxRef = Math::max;
+        System.out.println("Max: " + maxRef.apply(10, 20));  // Output: 20
+
+        // Example 3: Using static method reference in a stream
+        List<String> numbers = List.of("1", "2", "3", "4", "5");
+        List<Integer> parsed = numbers.stream()
+            .map(Integer::parseInt)      // Static method reference
+            .toList();
+        System.out.println("Parsed list: " + parsed);  // Output: [1, 2, 3, 4, 5]
+    }
+}
+```
+
+**Expected Output:**
 ```
 Parsed: 123
+Max: 20
+Parsed list: [1, 2, 3, 4, 5]
 ```
 
-**Why the code produces this result:** `Integer::parseInt` is a static method reference. The `Function<String, Integer>` interface has a functional method `apply(String)` that returns `Integer`. The compiler matches this to the static method `Integer.parseInt(String)`, which takes a `String` and returns an `int` (autoboxed to `Integer`).
+**Step-by-Step Explanation:**
 
-**Example 2: Static method reference in a stream pipeline**
+1. `Integer::parseInt` refers to the static method `Integer.parseInt(String)`, which matches `Function<String, Integer>`.
+2. `Math::max` refers to the static method `Math.max(int, int)`, which matches `BinaryOperator<Integer>`.
+3. In the stream, `Integer::parseInt` is used as the mapper function for `map`, converting each string to an integer.
+
+### Real-World Cases
+
+- **String Parsing:** `stream.map(Integer::parseInt)` converts strings to integers.
+- **Math Operations:** `stream.reduce(0, Integer::sum)` sums a stream of integers.
+- **Validation:** `Predicate<String> isNumeric = NumberUtils::isCreatable` uses a static utility method.
+
+---
+
+## 3. Instance Method References (Particular Object)
+
+### Definitions
+
+**Core Definition:** An instance method reference of a particular object refers to an instance method of a specific object, using the syntax `instance::method`.
+
+**Technical Definition:** "Reference to an instance method of a particular object: `containingObject::instanceMethodName`". The object is captured at the time the method reference is created.
+
+**Beginner-Friendly Explanation:** This is like pointing to a specific person and saying "use that person's skill." The object is already chosen, and the method will be called on that specific object.
+
+### Purposes
+
+- To refer to a method on an existing object without creating a lambda
+- To bind a method to a specific instance
+- To use instance methods as functional interface implementations
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```
+instanceReference::instanceMethodName
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `instanceReference` | A variable or expression that evaluates to an object reference. |
+| `::` | The method reference operator. |
+| `instanceMethodName` | The name of the instance method. |
+
+**Syntax Rules:**
+
+- The instance must be effectively final if captured from a local variable.
+- The method's signature must match the functional interface's abstract method.
+- The bound object is evaluated once, at the time the method reference is created.
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-import java.util.stream.Stream;
+// File: InstanceMethodReferenceDemo.java
+import java.util.*;
+import java.util.function.*;
 
-public class StaticMethodRefStreamExample {
+public class InstanceMethodReferenceDemo {
     public static void main(String[] args) {
-        // Math::sqrt is a static method reference to Math.sqrt(double)
-        Stream.of(4.0, 9.0, 16.0, 25.0)
-              .map(Math::sqrt)
-              .forEach(System.out::println);
+        // Example 1: Bound instance method reference
+        String prefix = "Hello, ";
+        // Lambda: name -> prefix.concat(name)
+        Function<String, String> greetLambda = name -> prefix.concat(name);
+
+        // Method reference: prefix::concat
+        Function<String, String> greetRef = prefix::concat;
+        System.out.println(greetRef.apply("Alice"));  // Output: Hello, Alice
+
+        // Example 2: Using a StringBuilder instance
+        StringBuilder sb = new StringBuilder();
+        Consumer<String> appendToSb = sb::append;      // Bound to sb
+        appendToSb.accept("Hello");
+        appendToSb.accept(" World");
+        System.out.println(sb.toString());              // Output: Hello World
+
+        // Example 3: Sorting with a bound comparator
+        List<String> names = new ArrayList<>(List.of("Charlie", "Alice", "Bob"));
+        Comparator<String> comparator = String::compareTo;  // Unbound, see next section
+        names.sort(comparator);
+        System.out.println(names);                      // Output: [Alice, Bob, Charlie]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-2.0
-3.0
-4.0
-5.0
+Hello, Alice
+Hello World
+[Alice, Bob, Charlie]
 ```
 
-**Why the code produces this result:** `Math::sqrt` refers to the static method `Math.sqrt(double)`. The `map` operation applies this function to each element, producing a stream of square roots.
+**Step-by-Step Explanation:**
 
-**Real-World Cases with Explanation**
+1. `prefix::concat` is bound to the `prefix` object. When `apply("Alice")` is called, it invokes `prefix.concat("Alice")`.
+2. `sb::append` is bound to the `sb` StringBuilder. Each `accept` call appends to that specific `sb` object.
+3. The `String::compareTo` reference is unbound (covered in the next section), but it demonstrates how comparators can be created.
 
-In a data parsing pipeline, `Integer::parseInt` or `Double::parseDouble` are used to convert strings to numbers. In a scientific computing application, `Math::sqrt`, `Math::sin`, or `Math::log` are used as transformation functions. In a validation system, `Objects::isNull` or `Objects::nonNull` are used as predicates.
+### Real-World Cases
 
-**References Links**
+- **Logging:** `logger::info` bound to a specific logger instance.
+- **Appending:** `stringBuilder::append` bound to a StringBuilder.
+- **Event Handling:** `button::setText` bound to a specific button.
 
-- Method References (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-- JLS §15.13: Method Reference Expressions – https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.13
+---
 
-### 1.2 Bound Instance Method References
+## 4. Arbitrary Object Method References
 
-#### Definitions
+### Definitions
 
-- **Core Definition:** A method reference that refers to an instance method of an existing, specific external object.
-- **Technical Definition:** Bound instance method references have the syntax `containingObject::instanceMethodName`. The receiver object is fixed at the time the method reference is created. The arguments of the functional interface map directly to the parameters of the instance method.
-- **Beginner-Friendly Explanation:** You are pointing to a method of a particular object that already exists. The object is "bound" to the method reference, so you do not need to supply it as an argument.
+**Core Definition:** An instance method reference of an arbitrary object of a particular type refers to an instance method that will be invoked on the first parameter passed to the functional interface, using the syntax `ClassName::instanceMethod`.
 
-#### Purposes
+**Technical Definition:** "Reference to an instance method of an arbitrary object of a particular type: `ContainingType::methodName`". The first parameter of the functional interface's method becomes the receiver of the instance method call.
 
-- To refer to a method of a specific object instance as a functional interface.
-- To create a callback that always operates on a known target object.
-- To replace a lambda that calls a method on a captured or existing object.
+**Beginner-Friendly Explanation:** This is like saying "use this skill on whatever object is given to you." You don't specify the object in advance; the object comes from the first argument of the lambda.
 
-#### Syntax Structures and Rules
+### Purposes
 
-Complete general syntax:
+- To refer to an instance method that will be called on each element of a stream
+- To create comparators that compare two objects of the same type
+- To avoid specifying a particular object when the method will be called on different objects
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```
+ClassName::instanceMethodName
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `ClassName` | The type of object on which the method will be invoked. |
+| `::` | The method reference operator. |
+| `instanceMethodName` | The name of the instance method. |
+
+**Syntax Rules:**
+
+- The first parameter of the functional interface's method is used as the receiver.
+- The remaining parameters (if any) are passed as arguments to the instance method.
+- This form is particularly common in `Comparator` creation and stream mapping.
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-containingObject::instanceMethodName
-```
+// File: ArbitraryObjectMethodReferenceDemo.java
+import java.util.*;
+import java.util.function.*;
 
-Component breakdown:
-
-- `containingObject`: an expression that evaluates to the object whose method is being referenced.
-- `instanceMethodName`: the name of the instance method.
-- The arguments of the functional interface are passed as arguments to the instance method. The receiver (`containingObject`) is supplied by the method reference itself.
-
-Syntax rules: The instance method must be accessible. The functional interface's parameter list must match the instance method's parameter list (excluding the receiver).
-
-Constraints and limitations: The object must exist before the method reference is created. The method reference captures the object reference at creation time.
-
-#### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Bound method reference with `System.out::println`**
-
-```java
-import java.util.function.Consumer;
-
-public class BoundMethodRefExample {
+public class ArbitraryObjectMethodReferenceDemo {
     public static void main(String[] args) {
-        // System.out is the bound object; println is the instance method
-        Consumer<String> printer = System.out::println;
+        // Example 1: String::toUpperCase (arbitrary object)
+        // Lambda: s -> s.toUpperCase()
+        Function<String, String> upperLambda = s -> s.toUpperCase();
 
-        printer.accept("Hello, Bound Method Reference!");
+        // Method reference: String::toUpperCase
+        Function<String, String> upperRef = String::toUpperCase;
+        System.out.println(upperRef.apply("hello"));  // Output: HELLO
+
+        // Example 2: Sorting with String::compareTo
+        List<String> names = new ArrayList<>(List.of("Charlie", "Alice", "Bob"));
+        // Lambda: (a, b) -> a.compareTo(b)
+        names.sort((a, b) -> a.compareTo(b));
+
+        // Method reference: String::compareTo
+        names.sort(String::compareTo);
+        System.out.println(names);  // Output: [Alice, Bob, Charlie]
+
+        // Example 3: Stream mapping with String::length
+        List<String> words = List.of("apple", "banana", "cherry");
+        List<Integer> lengths = words.stream()
+            .map(String::length)      // String::length
+            .toList();
+        System.out.println("Lengths: " + lengths);  // Output: [5, 6, 6]
     }
 }
 ```
 
-Expected Output:
-
-```
-Hello, Bound Method Reference!
-```
-
-**Why the code produces this result:** `System.out` is the receiver object, and `println` is an instance method of `PrintStream`. The `Consumer<String>` interface's `accept(String)` method takes one argument, which is passed directly to `println(String)`.
-
-**Example 2: Bound method reference on a list instance**
-
-```java
-import java.util.ArrayList;
-import java.util.List;
-
-public class BoundListExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-
-        // list::add is a bound instance method reference to list.add
-        list.forEach(System.out::println); // No output; list is empty
-
-        // Using a bound reference to add elements
-        list.add("Alpha");
-        list.add("Beta");
-
-        list.forEach(System.out::println);
-    }
-}
-```
-
-Expected Output:
-
-```
-Alpha
-Beta
-```
-
-**Why the code produces this result:** `System.out::println` is a bound method reference where `System.out` is the receiver. It is passed to `forEach` as a `Consumer<String>`.
-
-**Real-World Cases with Explanation**
-
-In a GUI application, `button::setEnabled` might be used as a bound method reference to enable a button when a condition is met. In a logging system, `logger::info` is a bound method reference used as a `Consumer<String>` to log messages. In a collection processing pipeline, `list::add` can be used as a `Consumer` to accumulate elements.
-
-**References Links**
-
-- Bound Method References (Dev.java) – https://dev.java/learn/lambdas/method-references/#bound-method-references
-- Method References (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-
-### 1.3 Unbound Instance Method References
-
-#### Definitions
-
-- **Core Definition:** A method reference that refers to an instance method of an arbitrary object of a specific type. The first argument of the functional interface becomes the target object itself.
-- **Technical Definition:** Unbound instance method references have the syntax `ContainingType::instanceMethodName`. The receiver is not fixed; instead, the first parameter of the functional interface supplies the receiver object, and any subsequent parameters become the method arguments.
-- **Beginner-Friendly Explanation:** You are pointing to an instance method that will be called on whatever object is passed in as the first argument. The object is "unbound" because it is not fixed at the time the method reference is created.
-
-#### Purposes
-
-- To refer to an instance method that should be applied to an object supplied at call time.
-- To create a function that operates on any instance of a given type.
-- To replace lambdas like `s -> s.toLowerCase()` with `String::toLowerCase`.
-
-#### Syntax Structures and Rules
-
-Complete general syntax:
-
-```java
-ContainingType::instanceMethodName
-```
-
-Component breakdown:
-
-- `ContainingType`: the name of the class or interface that declares the instance method.
-- `instanceMethodName`: the name of the instance method.
-- The first argument of the functional interface becomes the receiver object; subsequent arguments become the method parameters.
-
-Syntax rules: The functional interface's first parameter type must be compatible with `ContainingType`. The remaining parameters must match the instance method's parameter list.
-
-Constraints and limitations: The method must not be `static`. The type must not be a raw type if the method is generic.
-
-#### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Unbound method reference with `String::toUpperCase`**
-
-```java
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-public class UnboundMethodRefExample {
-    public static void main(String[] args) {
-        // String::toUpperCase is an unbound instance method reference
-        // The first argument (the String) becomes the receiver
-        Stream.of("hello", "world", "java")
-              .map(String::toUpperCase)
-              .forEach(System.out::println);
-    }
-}
-```
-
-Expected Output:
-
+**Expected Output:**
 ```
 HELLO
-WORLD
-JAVA
+[Alice, Bob, Charlie]
+Lengths: [5, 6, 6]
 ```
 
-**Why the code produces this result:** `String::toUpperCase` refers to the instance method `toUpperCase()` of `String`. In the `map` operation, each string element becomes the receiver for the method call. The result is a new stream of uppercase strings.
+**Step-by-Step Explanation:**
 
-**Example 2: Unbound method reference with `String::concat`**
+1. `String::toUpperCase` is an arbitrary object method reference. When `apply("hello")` is called, the `toUpperCase` method is invoked on `"hello"`.
+2. `String::compareTo` is used as a `Comparator<String>`. When `compare(a, b)` is called, `a.compareTo(b)` is invoked.
+3. `String::length` is used as a `Function<String, Integer>`. Each string in the stream has its `length` method called.
 
-```java
-import java.util.function.BiFunction;
+### Real-World Cases
 
-public class UnboundConcatExample {
-    public static void main(String[] args) {
-        // String::concat takes two arguments: the receiver String and the argument String
-        BiFunction<String, String, String> concat = String::concat;
+- **Stream Mapping:** `stream.map(String::trim)`, `stream.map(Person::getName)`.
+- **Sorting:** `list.sort(String::compareToIgnoreCase)`.
+- **Filtering:** `stream.filter(String::isEmpty)`.
 
-        String result = concat.apply("Hello, ", "World!");
-        System.out.println(result);
-    }
-}
+---
+
+## 5. Constructor References
+
+### Definitions
+
+**Core Definition:** A constructor reference refers to a class constructor, using the syntax `ClassName::new`.
+
+**Technical Definition:** "Reference to a constructor: `ClassName::new`". The constructor reference is compatible with a functional interface whose abstract method returns an instance of the specified class.
+
+**Beginner-Friendly Explanation:** A constructor reference is a way to say "create a new object using this class's constructor." Instead of writing `() -> new ArrayList<>()`, you write `ArrayList::new`.
+
+### Purposes
+
+- To create instances of a class in a functional context
+- To use constructors as factory methods
+- To simplify stream operations that create new objects
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
 ```
-
-Expected Output:
-
-```
-Hello, World!
-```
-
-**Why the code produces this result:** `String::concat` is an unbound instance method reference. The `BiFunction<String, String, String>` interface takes two arguments: the first becomes the receiver (`"Hello, "`), and the second becomes the argument to `concat` (`"World!"`).
-
-**Real-World Cases with Explanation**
-
-In a stream pipeline, `String::length` or `String::isEmpty` are used as unbound method references to extract properties from strings. In a data processing system, `Person::getName` is used to extract names from `Person` objects. In a sorting operation, `String::compareTo` is used as a `Comparator` to sort strings alphabetically.
-
-**References Links**
-
-- Unbound Method References (Dev.java) – https://dev.java/learn/lambdas/method-references/#unbound-method-references
-- Method References (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-
-### 1.4 Constructor References
-
-#### Definitions
-
-- **Core Definition:** A method reference that refers to a constructor of a class.
-- **Technical Definition:** Constructor references have the syntax `ClassName::new`. The functional interface determines which constructor is called based on the number and types of arguments provided by the interface's functional method. A constructor reference `ClassName::new` is treated like a "diamond" instance creation (`new ClassName<>()`), with the type arguments inferred from the target type.
-- **Beginner-Friendly Explanation:** You are pointing to a constructor. When the functional interface is invoked, it calls `new` with the appropriate arguments, creating a new instance of the class.
-
-#### Purposes
-
-- To use a constructor as a factory function.
-- To create new instances in a stream pipeline (e.g., mapping values to new objects).
-- To defer object creation until the functional interface is invoked.
-
-#### Syntax Structures and Rules
-
-Complete general syntax:
-
-```java
 ClassName::new
 ```
 
-Component breakdown:
+**Component Breakdown:**
 
-- `ClassName`: the name of the class whose constructor is being referenced.
-- The arguments of the functional interface are passed to the constructor.
+| Component | Description |
+|-----------|-------------|
+| `ClassName` | The class whose constructor is being referenced. |
+| `::` | The method reference operator. |
+| `new` | Keyword indicating constructor reference. |
+
+**Syntax Rules:**
+
+- The constructor's parameter types must match the functional interface's abstract method parameters.
 - The return type is the class itself.
+- Generic type parameters can be inferred from context.
 
-Syntax rules: The compiler selects the constructor whose signature matches the functional interface's parameter list. If the class is generic, the type arguments are inferred from the target type. A reference to the constructor of a raw type is not expressible.
-
-Constraints and limitations: The constructor must be accessible. If multiple constructors match, the compiler resolves the ambiguity based on the target type.
-
-#### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Constructor reference with `ArrayList::new`**
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
+// File: ConstructorReferenceDemo.java
+import java.util.*;
+import java.util.function.*;
 
-public class ConstructorRefExample {
+public class ConstructorReferenceDemo {
     public static void main(String[] args) {
-        // ArrayList::new is a constructor reference to the no-arg constructor
-        Supplier<List<String>> listFactory = ArrayList::new;
+        // Example 1: No-argument constructor
+        // Lambda: () -> new ArrayList<>()
+        Supplier<List<String>> listLambda = () -> new ArrayList<>();
 
-        List<String> list = listFactory.get();
+        // Method reference: ArrayList::new
+        Supplier<List<String>> listRef = ArrayList::new;
+        List<String> list = listRef.get();
         list.add("Hello");
-        list.add("World");
-        System.out.println(list);
+        System.out.println(list);  // Output: [Hello]
+
+        // Example 2: Constructor with one argument
+        // Lambda: s -> new StringBuilder(s)
+        Function<String, StringBuilder> sbLambda = s -> new StringBuilder(s);
+
+        // Method reference: StringBuilder::new
+        Function<String, StringBuilder> sbRef = StringBuilder::new;
+        System.out.println(sbRef.apply("Hello"));  // Output: Hello
+
+        // Example 3: Constructor with two arguments
+        // Lambda: (a, b) -> new AbstractMap.SimpleEntry<>(a, b)
+        BiFunction<String, Integer, AbstractMap.SimpleEntry<String, Integer>> entryLambda =
+            (a, b) -> new AbstractMap.SimpleEntry<>(a, b);
+
+        // Method reference: AbstractMap.SimpleEntry::new
+        BiFunction<String, Integer, AbstractMap.SimpleEntry<String, Integer>> entryRef =
+            AbstractMap.SimpleEntry::new;
+        System.out.println(entryRef.apply("Age", 30));  // Output: Age=30
     }
 }
 ```
 
-Expected Output:
+**Expected Output:**
+```
+[Hello]
+Hello
+Age=30
+```
+
+**Step-by-Step Explanation:**
+
+1. `ArrayList::new` refers to the no-argument constructor of `ArrayList`, matching `Supplier<List<String>>`.
+2. `StringBuilder::new` refers to the constructor that takes a `String`, matching `Function<String, StringBuilder>`.
+3. `AbstractMap.SimpleEntry::new` refers to the constructor that takes two arguments, matching `BiFunction<String, Integer, ...>`.
+
+### Real-World Cases
+
+- **Collection Creation:** `stream.collect(Collectors.toCollection(ArrayList::new))`.
+- **Object Mapping:** `stream.map(Person::new)` when a constructor takes the stream element.
+- **Factory Pattern:** `Supplier<Connection> factory = Connection::new`.
+
+---
+
+## 6. Array Constructor References
+
+### Definitions
+
+**Core Definition:** An array constructor reference refers to the creation of an array of a specified type, using the syntax `Type[]::new`.
+
+**Technical Definition:** "Array constructor references are a special form of constructor reference. The syntax is `Type[]::new`". The reference is compatible with a functional interface whose abstract method takes an `int` (the array size) and returns an array of the specified type.
+
+**Beginner-Friendly Explanation:** An array constructor reference is a way to say "create a new array of this type with the given size." For example, `String[]::new` means "create a new `String` array."
+
+### Purposes
+
+- To create arrays in functional contexts
+- To use array creation as a factory function
+- To simplify stream operations that produce arrays
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
 
 ```
-[Hello, World]
+Type[]::new
 ```
 
-**Example 2: Constructor reference with `String::new` in a stream**
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `Type` | The element type of the array. |
+| `[]` | Indicates array type. |
+| `::` | The method reference operator. |
+| `new` | Keyword indicating array creation. |
+
+**Syntax Rules:**
+
+- The functional interface must have an `int` parameter (the array size) and return an array of `Type`.
+- The syntax is compatible with `IntFunction<Type[]>`.
+- Array constructor references are often used with `Stream.toArray()`.
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-import java.util.stream.Stream;
+// File: ArrayConstructorReferenceDemo.java
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
 
-public class ConstructorRefStreamExample {
+public class ArrayConstructorReferenceDemo {
     public static void main(String[] args) {
-        // String::new takes a String and creates a new String (copy constructor)
-        Stream.of("a", "b", "c")
-              .map(String::new)
-              .forEach(s -> System.out.println(s + " (class: " + s.getClass().getSimpleName() + ")"));
+        // Example 1: IntFunction for String array
+        IntFunction<String[]> arrayFactory = String[]::new;
+        String[] array = arrayFactory.apply(5);
+        System.out.println("Array length: " + array.length);  // Output: 5
+
+        // Example 2: Using with Stream.toArray()
+        List<String> names = List.of("Alice", "Bob", "Charlie");
+        String[] namesArray = names.stream().toArray(String[]::new);
+        System.out.println("Names array: " + Arrays.toString(namesArray));
+        // Output: [Alice, Bob, Charlie]
+
+        // Example 3: Integer array
+        IntFunction<Integer[]> intArrayFactory = Integer[]::new;
+        Integer[] intArray = intArrayFactory.apply(3);
+        System.out.println("Integer array length: " + intArray.length);  // Output: 3
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-a (class: String)
-b (class: String)
-c (class: String)
+Array length: 5
+Names array: [Alice, Bob, Charlie]
+Integer array length: 3
 ```
 
-**Real-World Cases with Explanation**
+**Step-by-Step Explanation:**
 
-In a stream pipeline, `ArrayList::new` or `HashSet::new` are used as downstream collectors to specify the collection type. In a factory pattern, `Person::new` is used to create new `Person` objects from stream elements. In a testing framework, `StringBuilder::new` is used to create a new builder for each test case.
+1. `String[]::new` refers to the creation of a `String` array. `apply(5)` creates a `String` array of length 5.
+2. `names.stream().toArray(String[]::new)` collects the stream elements into a `String` array using the array constructor reference.
+3. `Integer[]::new` creates an `Integer` array of the specified size.
 
-**References Links**
+### Real-World Cases
 
-- Constructor References (Dev.java) – https://dev.java/learn/lambdas/method-references/#constructor-method-references
-- JLS §15.13.1: Compile-Time Declaration of a Method Reference – https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.13.1
+- **Stream to Array:** `stream.toArray(String[]::new)`.
+- **Array Creation:** `IntFunction<int[]> factory = int[]::new`.
+- **Collection Conversion:** Converting a stream to an array for legacy APIs.
 
+---
 
-## 2. Syntax, Typing, and Readability Mechanics
+## 7. Method Reference vs Lambda
 
-### 2.1 Target Typing
+### Definitions
 
-#### Definitions
+**Core Definition:** Method references and lambda expressions are both mechanisms for implementing functional interfaces, but method references are a more concise notation when a lambda simply calls an existing method.
 
-- **Core Definition:** A method reference does not have an implicit type. The compiler figures out what it is by matching its signature against the functional interface expected in that exact context.
-- **Technical Definition:** A method reference expression is compatible in an assignment context, invocation context, or casting context with a target type `T` if `T` is a functional interface type and the expression is congruent with the function type of the ground target type derived from `T`. The ground target type is derived from `T` by resolving any wildcards. A method reference expression is congruent with a function type if the function type identifies a single compile-time declaration corresponding to the reference and the return types are compatible.
-- **Beginner-Friendly Explanation:** When you write `System.out::println`, the compiler does not know what type it is until it sees how it is used. If you assign it to a `Consumer<String>`, it matches `println(String)`. If you assign it to a `Consumer<Object>`, it matches `println(Object)`. The context provides the target type.
+**Technical Definition:** "Method references are compact, easy-to-read lambda expressions for methods that already have a name". "A method reference is compatible if and only if the equivalent lambda expression is compatible". "Unlike a lambda expression, a method reference can be congruent with a generic function type".
 
-#### Purposes
+**Beginner-Friendly Explanation:** A lambda is like writing out a set of instructions. A method reference is like pointing to an existing set of instructions and saying "use those." Both accomplish the same thing, but the method reference is shorter when the instructions already exist.
 
-- To allow the same method reference to be used in different functional interface contexts.
-- To enable type inference without explicit type arguments.
-- To support the diamond-style inference for generic types.
+### Purposes
 
-#### Syntax Structures and Rules
+- To choose the most readable and concise notation for a given situation
+- To understand the semantic differences between lambdas and method references
+- To make informed decisions about when to use each
 
-There is no special syntax for target typing; it is an inherent part of how the compiler resolves method references. The target type is always provided by the context: assignment, method invocation, or cast.
+### Syntax Rules and Structure
 
-#### Multiple Annotated Complete Code Examples and Their Expected Outputs
+**Comparison Table:**
 
-**Example 1: Same method reference, different target types**
+| Aspect | Lambda | Method Reference |
+|--------|--------|------------------|
+| Syntax | `(a, b) -> a + b` | `Integer::sum` |
+| Use case | Any custom logic | Direct method call |
+| Scope | Lexically scoped | Lexically scoped |
+| `this` | Refers to enclosing instance | Refers to enclosing instance |
+| Compilation | Compiles to synthetic method | May avoid synthetic method |
+| Readability | Better for complex logic | Better for existing methods |
+| Generic types | Limited congruence | Can be congruent with generic function types |
+
+**Syntax Rules:**
+
+- Use a method reference when the lambda body is exactly a method call on one of the lambda's parameters (or a static method).
+- Use a lambda when additional logic, casting, or transformation is required.
+- The `::` operator is only valid for method references; `->` is only valid for lambdas.
+
+**Constraints and Limitations:**
+
+- Method references cannot express conditional logic or multiple statements.
+- Method references cannot handle checked exceptions unless the functional interface declares them.
+- Lambdas can be debugged with breakpoints inside the body; method references cannot.
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+// File: MethodRefVsLambdaDemo.java
+import java.util.*;
+import java.util.function.*;
 
-public class TargetTypingExample {
+public class MethodRefVsLambdaDemo {
     public static void main(String[] args) {
-        // System.out::println can be a Consumer
-        Consumer<String> consumer = System.out::println;
-        consumer.accept("Hello from Consumer");
+        // Scenario 1: Direct method call — method reference is better
+        // Lambda: s -> s.toUpperCase()
+        Function<String, String> lambda1 = s -> s.toUpperCase();
 
-        // String::new can be a Supplier<String>
-        Supplier<String> supplier = String::new;
-        System.out.println("Empty string: '" + supplier.get() + "'");
+        // Method reference: String::toUpperCase
+        Function<String, String> ref1 = String::toUpperCase;
+        System.out.println(ref1.apply("hello"));  // Output: HELLO
 
-        // Integer::parseInt can be a Function<String, Integer>
-        Function<String, Integer> function = Integer::parseInt;
-        System.out.println("Parsed: " + function.apply("42"));
+        // Scenario 2: Additional logic — lambda is required
+        // This cannot be a method reference because it adds "!"
+        Function<String, String> lambda2 = s -> s.toUpperCase() + "!";
+        System.out.println(lambda2.apply("hello"));  // Output: HELLO!
+
+        // Scenario 3: Static method call — method reference is better
+        // Lambda: s -> Integer.parseInt(s)
+        Function<String, Integer> lambda3 = s -> Integer.parseInt(s);
+
+        // Method reference: Integer::parseInt
+        Function<String, Integer> ref3 = Integer::parseInt;
+        System.out.println(ref3.apply("42"));  // Output: 42
+
+        // Scenario 4: Conditional logic — lambda is required
+        Predicate<String> lambda4 = s -> s.length() > 3 && s.startsWith("A");
+        // Cannot be a method reference
+        System.out.println(lambda4.test("Apple"));  // Output: true
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Hello from Consumer
-Empty string: ''
-Parsed: 42
+HELLO
+HELLO!
+42
+true
 ```
 
-**Why the code produces this result:** The compiler uses the target type (the variable's declared type) to determine which method signature is being referenced. `System.out::println` matches `Consumer<String>` because `println` accepts a `String`. `String::new` matches `Supplier<String>` because it has a no-arg constructor. `Integer::parseInt` matches `Function<String, Integer>` because it takes a `String` and returns an `int` (autoboxed to `Integer`).
+**Step-by-Step Explanation:**
 
-**Real-World Cases with Explanation**
+1. `s -> s.toUpperCase()` can be replaced by `String::toUpperCase` because it simply calls an existing method.
+2. `s -> s.toUpperCase() + "!"` cannot be a method reference because it performs additional concatenation.
+3. `s -> Integer.parseInt(s)` can be replaced by `Integer::parseInt`.
+4. The predicate with conditional logic cannot be a method reference.
 
-In a generic utility method that accepts a `Function<T, R>`, the caller can pass `String::length` and the compiler will infer the correct types. In a stream pipeline, `.map(String::toUpperCase)` works because the `map` method's parameter type (`Function<? super T, ? extends R>`) provides the target type.
+### Real-World Cases
 
-**References Links**
+- **Stream API:** `stream.map(String::toUpperCase)` is preferred over `stream.map(s -> s.toUpperCase())`.
+- **Sorting:** `list.sort(String::compareTo)` is preferred over `list.sort((a, b) -> a.compareTo(b))`.
+- **Complex Logic:** `stream.filter(s -> s.length() > 3 && s.startsWith("A"))` must remain a lambda.
 
-- JLS §15.13.2: Type of a Method Reference – https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.13.2
-- Package java.util.function (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html
+---
 
-### 2.2 The "No Argument" Rule
+## 8. Method Reference Best Practices
 
-#### Definitions
+### Definitions
 
-- **Core Definition:** You cannot pass explicit arguments inside a method reference syntax. If you need to supply hardcoded parameters, you must fall back to a traditional lambda expression.
-- **Technical Definition:** A method reference expression does not contain an argument list. The arguments are supplied implicitly by the functional interface when the method reference is invoked. The syntax `System.out::println` is valid; `System.out::println("Item: ")` is a compile-time error because parentheses and arguments are not part of the method reference syntax.
-- **Beginner-Friendly Explanation:** A method reference is just a name, not a call. You cannot put arguments inside it. If you need to pass a specific value to the method, you must use a lambda instead.
+**Core Definition:** Method reference best practices are guidelines for using method references effectively, choosing between method references and lambdas, and avoiding common pitfalls.
 
-#### Purposes
+**Technical Definition:** Best practices derive from authoritative sources including *Effective Java* by Joshua Bloch. The key principle is: "Where method references are shorter and clearer, use them; where they aren't, stick with lambdas".
 
-- To clarify the distinction between a method reference (a name) and a method invocation (a call with arguments).
-- To guide developers toward the correct syntax when hardcoded arguments are needed.
+**Beginner-Friendly Explanation:** Best practices help you decide when to use a method reference versus a lambda, and how to write clean, readable code that clearly communicates intent.
 
-#### Syntax Structures and Rules
+### Purposes
 
-Valid method reference syntax:
+- To improve code readability by choosing the most appropriate notation
+- To avoid ambiguity and confusion in method reference usage
+- To ensure consistent style across a codebase
+- To leverage the conciseness of method references without sacrificing clarity
+
+### Key Best Practices
+
+| Practice | Description |
+|----------|-------------|
+| Prefer Method References to Lambdas | When a lambda simply calls an existing method, use a method reference (Effective Java, Item 43). |
+| Use Lambdas for Complex Logic | When the lambda contains additional logic, conditional expressions, or multiple statements, keep it as a lambda. |
+| Use Descriptive Parameter Names | Sometimes lambda parameter names provide useful documentation, making the lambda more readable than a method reference. |
+| Avoid Ambiguous References | If a method name exists as both static and instance methods, or is overloaded, method references can be ambiguous. |
+| Use Method References in Streams | Method references are particularly effective in stream pipelines for mapping, filtering, and collecting. |
+| Consider Debugging | Lambdas allow breakpoints inside the body; method references do not. |
+| Use Constructor References for Factories | Constructor references provide a clean way to create objects in functional contexts. |
+| Verify Compatibility | Ensure the referenced method's signature matches the functional interface's abstract method. |
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-System.out::println
-```
+// File: MethodReferenceBestPractices.java
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
 
-Invalid method reference syntax (compile-time error):
-
-```java
-System.out::println("Item: ")  // ERROR: parentheses and arguments not allowed
-```
-
-If hardcoded arguments are needed, use a lambda:
-
-```java
-item -> System.out.println("Item: " + item)
-```
-
-#### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Valid method reference without arguments**
-
-```java
-import java.util.List;
-
-public class ValidMethodRefExample {
+public class MethodReferenceBestPractices {
     public static void main(String[] args) {
-        List<String> items = List.of("Alpha", "Beta", "Gamma");
-        items.forEach(System.out::println);
+        List<String> names = List.of("Alice", "Bob", "Charlie", "David");
+
+        // GOOD: Method reference for a simple method call
+        names.stream()
+             .map(String::toUpperCase)       // Concise and clear
+             .forEach(System.out::println);
+        // Output: ALICE, BOB, CHARLIE, DAVID
+
+        // GOOD: Lambda for additional logic (cannot be a method reference)
+        names.stream()
+             .filter(s -> s.length() > 3 && s.startsWith("A"))
+             .forEach(System.out::println);
+        // Output: Alice
+
+        // GOOD: Lambda with descriptive parameter name (more readable than method reference)
+        names.stream()
+             .sorted((name1, name2) -> name1.compareToIgnoreCase(name2))
+             .forEach(System.out::println);
+        // Output: Alice, Bob, Charlie, David
+
+        // GOOD: Constructor reference for factory
+        Supplier<List<String>> listFactory = ArrayList::new;
+        List<String> newList = listFactory.get();
+
+        // GOOD: Array constructor reference with stream
+        String[] array = names.stream().toArray(String[]::new);
+        System.out.println("Array: " + Arrays.toString(array));
+        // Output: Array: [Alice, Bob, Charlie, David]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Alpha
-Beta
-Gamma
-```
-
-**Example 2: Lambda needed for hardcoded arguments**
-
-```java
-import java.util.List;
-
-public class LambdaForArgumentsExample {
-    public static void main(String[] args) {
-        List<String> items = List.of("Alpha", "Beta", "Gamma");
-
-        // This is a lambda because we need to prepend "Item: "
-        items.forEach(item -> System.out.println("Item: " + item));
-    }
-}
+ALICE
+BOB
+CHARLIE
+DAVID
+Alice
+Alice
+Bob
+Charlie
+David
+Array: [Alice, Bob, Charlie, David]
 ```
 
-Expected Output:
+**Step-by-Step Explanation:**
 
-```
-Item: Alpha
-Item: Beta
-Item: Gamma
-```
+1. `String::toUpperCase` and `System.out::println` are method references that make the stream pipeline concise and readable.
+2. The `filter` with `s -> s.length() > 3 && s.startsWith("A")` cannot be a method reference because it contains conditional logic.
+3. The `sorted` lambda uses descriptive parameter names (`name1`, `name2`), which some developers find more readable than `String::compareToIgnoreCase`.
+4. `ArrayList::new` is a constructor reference used as a factory.
+5. `String[]::new` is an array constructor reference used with `Stream.toArray()`.
 
-**Why the lambda is necessary:** The method reference `System.out::println` can only pass the argument supplied by `forEach` (the item itself). To prepend a fixed string, a lambda expression is required to perform the string concatenation.
+### Real-World Cases
 
-**Real-World Cases with Explanation**
+- **Stream Pipelines:** Method references are the standard way to write concise stream operations.
+- **Code Reviews:** Best practices form the basis for review checklists (e.g., prefer method references where applicable).
+- **Static Analysis:** Tools like SonarQube recommend replacing lambdas with method references when possible.
 
-In logging, `logger::info` is a method reference that logs the message supplied by the caller. If you need to log a formatted message with a fixed prefix, you use a lambda: `msg -> logger.info("[PREFIX] " + msg)`.
+---
 
-**References Links**
+## References Links
 
-- Method References (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-
-### 2.3 Array Constructor References
-
-#### Definitions
-
-- **Core Definition:** A specialized extension of constructor references used frequently inside streams to convert a stream back into a concrete native array.
-- **Technical Definition:** Array constructor references have the syntax `TypeName[]::new`. The compiler desugars an array constructor reference `Foo[]::new` to a lambda `i -> new Foo[i]`, and then proceeds as with any other lambda or method reference. The functional interface must accept an `int` (the array size) and return an array of the specified type.
-- **Beginner-Friendly Explanation:** `String[]::new` is a recipe for creating a new `String` array of a given size. It is used with `Stream.toArray()` to tell the stream what kind of array to produce.
-
-#### Purposes
-
-- To convert a stream of objects into a native array of the correct type.
-- To avoid the unsafe cast from `Object[]` to a typed array.
-- To provide a concise way to specify the array type in `toArray()`.
-
-#### Syntax Structures and Rules
-
-Complete general syntax:
-
-```java
-TypeName[]::new
-```
-
-Component breakdown:
-
-- `TypeName`: the element type of the array.
-- `new`: the constructor reference keyword.
-- The functional interface must have a functional method that takes an `int` and returns an array of `TypeName`.
-
-Syntax rules: An array constructor reference is always exact. It is typically used with `Stream.toArray(IntFunction<A[]>)` or `IntStream.toArray()`.
-
-#### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Converting a stream to a String array**
-
-```java
-import java.util.stream.Stream;
-
-public class ArrayConstructorRefExample {
-    public static void main(String[] args) {
-        String[] array = Stream.of("apple", "banana", "cherry")
-                               .toArray(String[]::new);
-
-        for (String s : array) {
-            System.out.println(s);
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-apple
-banana
-cherry
-```
-
-**Why the code produces this result:** `String[]::new` is an `IntFunction<String[]>` that creates a new `String` array of the specified size. The `toArray` method uses this function to allocate the array and fill it with the stream elements.
-
-**Example 2: Converting an IntStream to an int array**
-
-```java
-import java.util.stream.IntStream;
-
-public class IntArrayConstructorRefExample {
-    public static void main(String[] args) {
-        int[] array = IntStream.rangeClosed(1, 5).toArray();
-
-        for (int n : array) {
-            System.out.print(n + " ");
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-1 2 3 4 5 
-```
-
-**Why the code produces this result:** `IntStream.toArray()` internally uses an array constructor reference equivalent to `int[]::new` to create the result array.
-
-**Real-World Cases with Explanation**
-
-In a data export system, `toArray(String[]::new)` is used to convert a stream of records into an array for use with a legacy API. In a numerical computing application, `IntStream.toArray()` is used to convert a range of integers into a native `int[]` for use with a matrix library.
-
-**References Links**
-
-- How do Java 8 array constructor references work? (Stack Overflow, Brian Goetz) – https://stackoverflow.com/questions/29447561/how-do-java-8-array-constructor-references-work
-- JLS §15.13.1: Compile-Time Declaration of a Method Reference – https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.13.1
-
-
-## Summary Table of Method Reference Types
-
-| Type | Syntax | Example | Corresponding Lambda |
-|---|---|---|---|
-| Static Method Reference | `ContainingClass::staticMethodName` | `Integer::parseInt` | `s -> Integer.parseInt(s)` |
-| Bound Instance Method Reference | `containingObject::instanceMethodName` | `System.out::println` | `s -> System.out.println(s)` |
-| Unbound Instance Method Reference | `ContainingType::instanceMethodName` | `String::toUpperCase` | `s -> s.toUpperCase()` |
-| Constructor Reference | `ClassName::new` | `ArrayList::new` | `() -> new ArrayList<>()` |
-| Array Constructor Reference | `TypeName[]::new` | `String[]::new` | `i -> new String[i]` |
-
-
-## Version-Specific Notes
-
-- Method references were introduced in Java 8 as part of JSR 335 (Lambda Expressions for the Java Programming Language).
-- Array constructor references (`TypeName[]::new`) are always exact and were part of the Java 8 specification.
-- Method references to generic methods or generic constructors may require explicit type arguments in some contexts, although the compiler often infers them from the target type.
-- Method references are not serializable by default; if a method reference needs to be serialized, the target functional interface must extend `Serializable`.
-
-
-## References
-
-- Method References (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
-- JLS §15.13: Method Reference Expressions – https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.13
-- JLS §15.13.1: Compile-Time Declaration of a Method Reference – https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.13.1
-- JLS §15.13.2: Type of a Method Reference – https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html#jls-15.13.2
-- Writing Lambda Expressions as Method References (Dev.java) – https://dev.java/learn/lambdas/method-references/
-- Overview of Java Method References (Vanderbilt University) – http://www.dre.vanderbilt.edu/~schmidt/cs254/2023-PDFs/2.5.6-overview-of-java-method-references.pdf
-- Get started with method references in Java (InfoWorld) – https://www.infoworld.com/article/2264379/get-started-with-method-references-in-java.html
-- How do Java 8 array constructor references work? (Stack Overflow) – https://stackoverflow.com/questions/29447561/how-do-java-8-array-constructor-references-work
-- Package java.util.function (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html
-- JSR 335: Lambda Expressions for the Java Programming Language – https://cr.openjdk.org/~briangoetz/lambda/lambda-libraries-final.html
+- Method References — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/java/javaOO/methodreferences.html
+- Writing Lambda Expressions as Method References — Dev.java - https://dev.java/learn/language/fp/lambdas/method-references/
+- Java Language Specification, Chapter 15: Expressions (Method Reference Expressions) - https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html#jls-15.13
+- JSR 335: Lambda Expressions for the Java™ Programming Language - https://cr.openjdk.org/~dlsmith/jsr335/jsr335-0.6.2/index.html
+- Method References in Java — Baeldung - https://www.baeldung.com/java-method-references
+- Effective Java (3rd Edition) by Joshua Bloch — Item 43: Prefer method references to lambdas
+- JDK-8068581: Clarify potential compatibility of method references — OpenJDK Bug System - https://bugs.openjdk.org/browse/JDK-8068581

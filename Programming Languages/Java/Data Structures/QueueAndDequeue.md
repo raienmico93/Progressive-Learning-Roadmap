@@ -1,906 +1,674 @@
-# Java Queue and Deque Framework: A Comprehensive Programming Cheat Sheet
+# Java Queues and Deques: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** The Java Queue and Deque framework is a unified architecture within the Java Collections Framework for representing and manipulating collections of elements in which the position of each element relative to others is significant and governed by well-defined insertion and removal ordering policies.
+**Core Definition:** A `Queue` is a collection designed for holding elements prior to processing, typically ordering elements in a first-in-first-out (FIFO) manner. A `Deque` (double-ended queue) is a linear collection that supports element insertion and removal at both ends.
 
-**Technical Definition:** The Java Queue and Deque framework comprises the `Queue`, `Deque`, `BlockingQueue`, `BlockingDeque`, and `TransferQueue` interfaces together with their standard implementations in `java.util` and `java.util.concurrent`. These interfaces extend `Collection<E>` and specify a contract for element insertion, extraction, and inspection, with the head of the collection defined as the element that would be removed by a call to `remove()` or `poll()`. Implementations are classified by their ordering discipline (FIFO, LIFO, priority-based, or delay-based), their concurrency characteristics (thread-safe or not), and their capacity semantics (bounded or unbounded).
+**Technical Definition:** Per the Java API specification, the `Queue` interface is "a collection designed for holding elements prior to processing. Besides basic `Collection` operations, queues provide additional insertion, extraction, and inspection operations". The `Deque` interface is "a linear collection that supports element insertion and removal at both ends. The name deque is short for 'double ended queue' and is usually pronounced 'deck'". Queues typically, but do not necessarily, order elements in a FIFO manner; exceptions include priority queues and LIFO stacks. The `Deque` interface extends `Queue` and provides methods for both ends, enabling use as both a queue and a stack.
 
-**Beginner-Friendly Explanation:** Imagine you are managing a queue of people waiting for a service. Some queues work on a first-come, first-served basis (FIFO). Others, like a stack of plates, work on a last-in, first-out basis (LIFO). Some queues let you place a person at either the front or the back (Deque). In a busy office, one person might have to wait for another to hand off a document (BlockingQueue). The Java Queue and Deque framework provides ready-made, well-tested building blocks for all these scenarios, so you do not have to implement the underlying data structures yourself.
+**Beginner-Friendly Explanation:** A `Queue` is like a line at a ticket counter — the first person in line is the first person served (FIFO). A `Deque` is like a deck of cards — you can add or remove cards from either the top or the bottom. Java provides many queue implementations for different needs: some are fast and simple, some keep items in priority order, and some are designed for safe use by multiple threads at the same time.
 
 ### Key Characteristics
 
-- The framework is built around five core interfaces: `Queue`, `Deque`, `BlockingQueue`, `BlockingDeque`, and `TransferQueue`. 
-- The `Queue` interface provides two forms of each operation: one that throws an exception on failure and one that returns a special value (`null` or `false`). 
-- The `Deque` interface extends `Queue` and adds methods for insertion, removal, and examination at both the head and the tail, and it defines equivalent methods for using a deque as a stack (LIFO) or as a queue (FIFO). 
-- The `BlockingQueue` interface adds operations that wait for the queue to become non-empty when retrieving an element and wait for space to become available when storing an element, making it suitable for producer–consumer designs. 
-- The `BlockingDeque` interface combines `Deque` and `BlockingQueue`. The `TransferQueue` interface adds a `transfer` operation in which a producer may wait for a consumer to receive an element. 
-- Standard implementations include `ArrayDeque`, `LinkedList`, and `PriorityQueue` in `java.util`, and `ConcurrentLinkedQueue`, `ConcurrentLinkedDeque`, `LinkedBlockingQueue`, `LinkedBlockingDeque`, `ArrayBlockingQueue`, `PriorityBlockingQueue`, `DelayQueue`, `SynchronousQueue`, and `LinkedTransferQueue` in `java.util.concurrent`.
+- **FIFO Ordering:** Most queues order elements in first-in-first-out order, though `PriorityQueue` orders by priority and `Deque` supports LIFO (stack) behaviour.
+- **Dual-Form Operations:** Queue methods come in two forms — one throws an exception on failure, the other returns a special value (`null` or `false`).
+- **No Null Elements:** Most queue implementations do not permit `null` elements, as `null` is used as a sentinel return value by `poll()` and `peek()`.
+- **Blocking Operations:** `BlockingQueue` adds methods that wait for the queue to become non-empty or for space to become available, essential for producer-consumer scenarios.
+- **Concurrent Implementations:** `ConcurrentLinkedQueue` and `ConcurrentLinkedDeque` provide thread-safe, lock-free operations for high-concurrency environments.
+- **Priority Ordering:** `PriorityQueue` and `PriorityBlockingQueue` order elements by natural ordering or a supplied `Comparator`.
 
 ### Prerequisites
 
-- Readers should be familiar with Java generics, the `Collection` interface, and basic exception handling. 
-- Familiarity with the `Comparable` and `Comparator` interfaces is necessary for understanding `PriorityQueue` and `PriorityBlockingQueue`. 
-- For concurrent implementations, a basic understanding of threads, the `Runnable` interface, and the `java.util.concurrent` package is assumed.
+- Basic understanding of Java classes, objects, and interfaces
+- Familiarity with generics (`Queue<String>`, `Deque<Integer>`, etc.)
+- Knowledge of the `Collection` interface and the for-each loop
+- Awareness of the `java.util` and `java.util.concurrent` packages
+- Understanding of threads and concurrency (for blocking and concurrent queues)
 
-### Related Programming Areas with Explanation
+### Related Programming Areas
 
-- The Queue and Deque framework is related to data structures and algorithms (particularly the study of abstract data types such as queues, stacks, and priority queues)
-- Concurrent programming (through the blocking and non-blocking concurrent implementations)
-- Operating systems (through producer–consumer and scheduling patterns), 
-- Software design patterns (such as the pipeline, worker pool, and task scheduling patterns). 
-- It is also closely related to the Java Collections Framework as a whole, since all queue and deque types extend `Collection<E>`.
+- **Producer-Consumer Patterns:** Blocking queues are the backbone of producer-consumer coordination.
+- **Thread Pools:** `ExecutorService` uses blocking queues to hold tasks awaiting execution.
+- **Breadth-First Search:** Queues are used to explore graph or tree levels.
+- **Task Scheduling:** `PriorityQueue` and `DelayQueue` schedule tasks by priority or time.
+- **Message Passing:** `TransferQueue` enables handoff designs between threads.
+- **Backpressure Handling:** Bounded queues provide natural backpressure in concurrent systems.
 
-## Core Concepts and Key Features
+---
 
-### 1. The Queue Interface
+## Core Concepts / Features
 
-#### Core Definitions
+---
 
-**Core Definition:** A collection designed for holding elements prior to processing, where elements are typically ordered in a first-in-first-out (FIFO) manner.
+## 1. Queue Interface
 
-**Technical Definition:** `public interface Queue<E> extends Collection<E>`. Besides basic `Collection` operations, queues provide additional insertion, extraction, and inspection operations. Each of these methods exists in two forms: one throws an exception if the operation fails, and the other returns a special value (either `null` or `false`, depending on the operation).
+### Definitions
 
-**Beginner-Friendly Explanation:** Think of a queue at a ticket counter. The first person to join the line is the first person to be served. The `Queue` interface captures this behaviour, along with the ability to check who is at the front without removing them.
+**Core Definition:** The `Queue` interface is the abstract data type that defines the contract for collections designed for holding elements prior to processing.
 
-#### 1.1 Element Insertion
+**Technical Definition:** `Queue<E>` extends `Collection<E>` and provides additional insertion, extraction, and inspection operations. Each operation exists in two forms: one throws an exception on failure, the other returns a special value (`null` or `false`). The latter form is designed for use with capacity-restricted implementations. The `offer` method inserts an element if possible, returning `false` otherwise; the `remove` and `poll` methods remove and return the head; and the `element` and `peek` methods return the head without removing it.
 
-**Definitions**
+**Beginner-Friendly Explanation:** The `Queue` interface is the "rulebook" that all queue types follow. It says what you can do with a queue — add items, remove items, look at the first item — and defines two ways to do each thing: one that throws an error if something goes wrong, and one that returns a special value instead.
 
-- **Core Definition:** Adding an element to the tail of the queue.
-- **Technical Definition:** `boolean add(E e)` inserts the specified element into this queue if it is possible to do so immediately without violating capacity restrictions, returning `true` upon success and throwing an `IllegalStateException` if no space is currently available. `boolean offer(E e)` inserts the specified element into this queue if it is possible to do so immediately without violating capacity restrictions.
-- **Beginner-Friendly Explanation:** `add` is like forcing your way into a queue that has a strict limit—if it is full, you get an error. `offer` is more polite: it tries to join the queue and simply says “no” (returns `false`) if there is no room.
+### Purposes
 
-**Purposes**
+- To define a standard contract for collections that hold elements for processing
+- To provide multiple ways of handling operations that may fail (exception vs. special value)
+- To serve as the foundation for more specialized queue types (`Deque`, `BlockingQueue`)
 
-- To insert an element into the queue at the tail.
-- To provide a non-throwing alternative (`offer`) for capacity-restricted queues.
-- To support the producer side of producer–consumer patterns.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
+### Syntax Rules and Structure
 
 ```java
-boolean add(E e)
-boolean offer(E e)
+public interface Queue<E> extends Collection<E> {
+    // Insert
+    boolean add(E e);      // Throws IllegalStateException if no space
+    boolean offer(E e);    // Returns false if no space
+
+    // Remove
+    E remove();            // Throws NoSuchElementException if empty
+    E poll();              // Returns null if empty
+
+    // Examine
+    E element();           // Throws NoSuchElementException if empty
+    E peek();              // Returns null if empty
+}
 ```
 
-Component breakdown:
+**Component Breakdown:**
 
-- `E`: the type of elements held in this queue.
-- `e`: the element to be added.
-- Return value: `true` if the element was added; `add` throws `IllegalStateException` if the queue is full; `offer` returns `false` if the queue is full.
+| Method | Description | Failure Behaviour |
+|--------|-------------|-------------------|
+| `add(E e)` | Inserts element | Throws `IllegalStateException` |
+| `offer(E e)` | Inserts element | Returns `false` |
+| `remove()` | Removes and returns head | Throws `NoSuchElementException` |
+| `poll()` | Removes and returns head | Returns `null` |
+| `element()` | Returns head without removing | Throws `NoSuchElementException` |
+| `peek()` | Returns head without removing | Returns `null` |
 
-Syntax rules: The `Queue` interface does not define blocking methods; those are defined in `BlockingQueue`. The `offer` method is designed for use when failure is a normal occurrence, such as in fixed-capacity queues.
+**Syntax Rules:**
 
-Constraints and limitations: `add` may throw `IllegalStateException`; `offer` returns `false` if the element cannot be added. Neither method accepts `null` in implementations that prohibit null elements.
+- `Queue` is a generic interface (`Queue<E>`).
+- `Queue` extends `Collection`, so all `Collection` methods are available.
+- `null` elements are generally not permitted.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
+**Constraints and Limitations:**
 
-**Example 1: Basic `add` and `offer` with `ArrayDeque`**
+- The `Queue` interface does not define blocking methods; these are defined in `BlockingQueue`.
+- Every `Queue` implementation must specify its ordering properties.
+
+### Annotated Code Example
 
 ```java
-import java.util.ArrayDeque;
-import java.util.Queue;
+// File: QueueInterfaceDemo.java
+import java.util.*;
 
-public class QueueInsertionExample {
+public class QueueInterfaceDemo {
     public static void main(String[] args) {
-        // Step 1: Create a queue using ArrayDeque
-        Queue<String> queue = new ArrayDeque<>();
+        Queue<String> queue = new LinkedList<>();
 
-        // Step 2: Use add() to insert elements
-        queue.add("Alice");
-        queue.add("Bob");
-        System.out.println("Queue after add: " + queue);
+        // offer() returns false if no space (never for unbounded queue)
+        queue.offer("Task 1");
+        queue.offer("Task 2");
+        queue.offer("Task 3");
+        System.out.println("Queue: " + queue);
 
-        // Step 3: Use offer() to insert an element
-        boolean offered = queue.offer("Charlie");
-        System.out.println("offer returned: " + offered);
-        System.out.println("Queue after offer: " + queue);
+        // peek() returns null if empty
+        System.out.println("Head: " + queue.peek());
+
+        // poll() returns null if empty
+        System.out.println("Removed: " + queue.poll());
+        System.out.println("Removed: " + queue.poll());
+        System.out.println("Queue after polls: " + queue);
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Queue after add: [Alice, Bob]
-offer returned: true
-Queue after offer: [Alice, Bob, Charlie]
+Queue: [Task 1, Task 2, Task 3]
+Head: Task 1
+Removed: Task 1
+Removed: Task 2
+Queue after polls: [Task 3]
 ```
 
-**Why the code produces this result:** `ArrayDeque` is an unbounded deque, so `add` and `offer` always succeed unless memory is exhausted. The queue preserves insertion order, so “Alice” is at the head and “Charlie” is at the tail. `offer` returns `true` because there is no capacity restriction.
+**Step-by-Step Explanation:**
 
-**Example 2: `offer` on a capacity-restricted queue**
+1. `queue.offer("Task 1")` adds elements in FIFO order.
+2. `queue.peek()` returns "Task 1" without removing it.
+3. `queue.poll()` removes and returns the head each time.
+4. After two polls, "Task 3" remains.
+
+### Real-World Cases
+
+- **Task Scheduling:** A `Queue<Runnable>` holds tasks awaiting execution by a thread pool.
+- **Breadth-First Search:** A `Queue<Node>` tracks nodes to visit in level order.
+- **Print Spooler:** A `Queue<Document>` holds documents awaiting printing.
+
+---
+
+## 2. Deque Interface
+
+### Definitions
+
+**Core Definition:** The `Deque` interface is a linear collection that supports element insertion and removal at both ends.
+
+**Technical Definition:** `Deque<E>` extends `Queue<E>` and provides methods for accessing elements at both the front and the back of the deque. The interface defines twelve methods for insertion, removal, and inspection, each in two forms (exception-throwing and special-value-returning). When used as a queue, `Deque` exhibits FIFO behaviour; when used as a stack, it exhibits LIFO behaviour. The legacy `Stack` class should be replaced by `Deque`.
+
+**Beginner-Friendly Explanation:** A `Deque` is a "double-ended queue" — you can add or remove items from either the front or the back. This makes it versatile: it can act as a regular queue (FIFO) or as a stack (LIFO). It's like a deck of cards where you can take from the top or the bottom.
+
+### Purposes
+
+- To provide double-ended queue operations (insert/remove at both ends)
+- To serve as both a queue (FIFO) and a stack (LIFO)
+- To replace the legacy `Stack` class with a more consistent and complete API
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
+public interface Deque<E> extends Queue<E> {
+    // Insert
+    void addFirst(E e);       // Throws if no space
+    void addLast(E e);        // Throws if no space
+    boolean offerFirst(E e);  // Returns false if no space
+    boolean offerLast(E e);   // Returns false if no space
 
-public class QueueOfferFullExample {
-    public static void main(String[] args) {
-        // Step 1: Create a bounded queue with capacity 2
-        Queue<Integer> queue = new ArrayBlockingQueue<>(2);
+    // Remove
+    E removeFirst();          // Throws if empty
+    E removeLast();           // Throws if empty
+    E pollFirst();            // Returns null if empty
+    E pollLast();             // Returns null if empty
 
-        // Step 2: Add two elements
-        queue.offer(10);
-        queue.offer(20);
-
-        // Step 3: Attempt to add a third element
-        boolean third = queue.offer(30);
-        System.out.println("Third offer succeeded: " + third);
-        System.out.println("Queue contents: " + queue);
-    }
+    // Examine
+    E getFirst();             // Throws if empty
+    E getLast();              // Throws if empty
+    E peekFirst();            // Returns null if empty
+    E peekLast();             // Returns null if empty
 }
 ```
 
-Expected Output:
+**Component Breakdown:**
 
-```
-Third offer succeeded: false
-Queue contents: [10, 20]
-```
+| First Element (Head) | Last Element (Tail) |
+|----------------------|---------------------|
+| `addFirst(e)` / `offerFirst(e)` | `addLast(e)` / `offerLast(e)` |
+| `removeFirst()` / `pollFirst()` | `removeLast()` / `pollLast()` |
+| `getFirst()` / `peekFirst()` | `getLast()` / `peekLast()` |
 
-**Why the code produces this result:** `ArrayBlockingQueue` is a bounded queue. Once it reaches capacity, `offer` returns `false` without modifying the queue. The element 30 is not added.
+**Syntax Rules:**
 
-**Example 3: `add` on a full queue throws an exception**
+- `Deque` is a generic interface (`Deque<E>`).
+- `Deque` extends `Queue`, so all `Queue` methods are available.
+- When used as a stack, `push()` = `addFirst()` and `pop()` = `removeFirst()`.
+
+**Constraints and Limitations:**
+
+- `null` elements are strongly discouraged because `null` is used as a special return value.
+- `Deque` does not support indexed access like `List`.
+
+### Annotated Code Example
 
 ```java
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
+// File: DequeInterfaceDemo.java
+import java.util.*;
 
-public class QueueAddFullExample {
+public class DequeInterfaceDemo {
     public static void main(String[] args) {
-        Queue<Integer> queue = new ArrayBlockingQueue<>(1);
-        queue.add(1);
-        try {
-            queue.add(2); // This will throw IllegalStateException
-        } catch (IllegalStateException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-Caught: IllegalStateException
-```
-
-**Why the code produces this result:** `ArrayBlockingQueue` is bounded, and `add` throws `IllegalStateException` when the queue is full.
-
-**Real-World Cases with Explanation**
-
-In a print spooler, documents are added to a queue in the order they are submitted. Using `offer` allows the spooler to gracefully reject new jobs when the queue is full rather than crashing. In a web server request queue, `add` may be used when the queue is unbounded, while `offer` is preferred when the queue has a fixed capacity and the server must shed load.
-
-**References Links**
-
-- Queue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html
-- Queue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Queue.html
-
-#### 1.2 Element Removal
-
-**Definitions**
-
-- **Core Definition:** Removing and returning the head of the queue.
-- **Technical Definition:** `E remove()` retrieves and removes the head of this queue, throwing a `NoSuchElementException` if this queue is empty. `E poll()` retrieves and removes the head of this queue, or returns `null` if this queue is empty.
-- **Beginner-Friendly Explanation:** `remove` is like asking for the next person in line and getting an error if the line is empty. `poll` is more forgiving: it returns `null` if there is no one waiting.
-
-**Purposes**
-
-- To retrieve and remove the head of the queue.
-- To provide a non-throwing alternative (`poll`) for empty queues.
-- To support the consumer side of producer–consumer patterns.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-E remove()
-E poll()
-```
-
-Component breakdown:
-
-- Return value: the head of the queue.
-- `remove` throws `NoSuchElementException` if the queue is empty.
-- `poll` returns `null` if the queue is empty.
-
-Syntax rules: Exactly which element is removed depends on the queue's ordering policy. The `remove()` and `poll()` methods differ only in their behaviour when the queue is empty.
-
-Constraints and limitations: `remove` may throw `NoSuchElementException`; `poll` returns `null` for an empty queue. Neither method blocks.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `poll` on a non-empty queue**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Queue;
-
-public class QueuePollExample {
-    public static void main(String[] args) {
-        Queue<String> queue = new ArrayDeque<>();
-        queue.add("First");
-        queue.add("Second");
-        queue.add("Third");
-
-        String head = queue.poll();
-        System.out.println("Polled: " + head);
-        System.out.println("Remaining: " + queue);
-    }
-}
-```
-
-Expected Output:
-
-```
-Polled: First
-Remaining: [Second, Third]
-```
-
-**Why the code produces this result:** `ArrayDeque` maintains FIFO order when used as a queue. The head is “First”, which is removed and returned by `poll`.
-
-**Example 2: `poll` on an empty queue returns `null`**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Queue;
-
-public class QueuePollEmptyExample {
-    public static void main(String[] args) {
-        Queue<String> queue = new ArrayDeque<>();
-        String result = queue.poll();
-        System.out.println("Poll on empty queue: " + result);
-    }
-}
-```
-
-Expected Output:
-
-```
-Poll on empty queue: null
-```
-
-**Why the code produces this result:** `poll` returns `null` when the queue is empty, rather than throwing an exception.
-
-**Example 3: `remove` on an empty queue throws an exception**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Queue;
-
-public class QueueRemoveEmptyExample {
-    public static void main(String[] args) {
-        Queue<String> queue = new ArrayDeque<>();
-        try {
-            queue.remove();
-        } catch (java.util.NoSuchElementException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-Caught: NoSuchElementException
-```
-
-**Why the code produces this result:** `remove` throws `NoSuchElementException` when the queue is empty.
-
-**Real-World Cases with Explanation**
-
-In a message processing system, `poll` is used in a loop to drain the queue without the risk of an exception when the queue becomes empty. In a task scheduler, `remove` might be used when the scheduler guarantees that at least one task is present.
-
-**References Links**
-
-- Queue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html
-- Queue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Queue.html
-
-#### 1.3 Element Examination
-
-**Definitions**
-
-- **Core Definition:** Retrieving, but not removing, the head of the queue.
-- **Technical Definition:** `E element()` retrieves, but does not remove, the head of this queue, throwing a `NoSuchElementException` if this queue is empty. `E peek()` retrieves, but does not remove, the head of this queue, or returns `null` if this queue is empty.
-- **Beginner-Friendly Explanation:** `element` lets you look at the person at the front of the line without asking them to leave. If the line is empty, you get an error. `peek` does the same but returns `null` if the line is empty.
-
-**Purposes**
-
-- To inspect the head of the queue without modifying it.
-- To provide a non-throwing alternative (`peek`) for empty queues.
-- To support algorithms that need to examine the next element before deciding whether to remove it.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-E element()
-E peek()
-```
-
-Component breakdown:
-
-- Return value: the head of the queue.
-- `element` throws `NoSuchElementException` if the queue is empty.
-- `peek` returns `null` if the queue is empty.
-
-Syntax rules: These methods return, but do not remove, the head of the queue.
-
-Constraints and limitations: `element` may throw `NoSuchElementException`; `peek` returns `null` for an empty queue.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `peek` on a non-empty queue**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Queue;
-
-public class QueuePeekExample {
-    public static void main(String[] args) {
-        Queue<String> queue = new ArrayDeque<>();
-        queue.add("Alpha");
-        queue.add("Beta");
-
-        String head = queue.peek();
-        System.out.println("Peeked: " + head);
-        System.out.println("Queue unchanged: " + queue);
-    }
-}
-```
-
-Expected Output:
-
-```
-Peeked: Alpha
-Queue unchanged: [Alpha, Beta]
-```
-
-**Why the code produces this result:** `peek` returns the head element without removing it, so the queue contents remain unchanged.
-
-**Example 2: `peek` on an empty queue returns `null`**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Queue;
-
-public class QueuePeekEmptyExample {
-    public static void main(String[] args) {
-        Queue<String> queue = new ArrayDeque<>();
-        System.out.println("Peek on empty: " + queue.peek());
-    }
-}
-```
-
-Expected Output:
-
-```
-Peek on empty: null
-```
-
-**Example 3: `element` on an empty queue throws an exception**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Queue;
-
-public class QueueElementEmptyExample {
-    public static void main(String[] args) {
-        Queue<String> queue = new ArrayDeque<>();
-        try {
-            queue.element();
-        } catch (java.util.NoSuchElementException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-Caught: NoSuchElementException
-```
-
-**Real-World Cases with Explanation**
-
-In a rate-limiting system, `peek` is used to check the next request's timestamp without removing it, so the system can decide whether to process it or delay. In a breadth-first search algorithm, `peek` is used to examine the next node before deciding whether to expand it.
-
-**References Links**
-
-- Queue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html
-- Queue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Queue.html
-
-### 2. The Deque Interface
-
-#### Core Definitions
-
-**Core Definition:** A linear collection that supports element insertion and removal at both ends.
-
-**Technical Definition:** `public interface Deque<E> extends Queue<E>, SequencedCollection<E>`. The name deque is short for “double ended queue” and is usually pronounced “deck”. Most `Deque` implementations place no fixed limits on the number of elements they may contain, but this interface supports capacity-restricted deques as well as those with no fixed size limit. This interface defines methods to access the elements at both ends of the deque.
-
-**Beginner-Friendly Explanation:** A deque is like a queue where you can join or leave from either end. It can act as a queue (first-in, first-out) or as a stack (last-in, first-out). It is more flexible than a plain queue.
-
-#### 2.1 Insertion at Both Ends
-
-**Definitions**
-
-- **Core Definition:** Adding an element at the front or the back of the deque.
-- **Technical Definition:** The `Deque` interface provides six insertion methods: `addFirst(E e)`, `offerFirst(E e)`, `addLast(E e)`, `offerLast(E e)`, `push(E e)`, and the inherited `add(E e)` and `offer(E e)` methods which are equivalent to `addLast` and `offerLast` respectively. Methods that throw exceptions on failure are `addFirst`, `addLast`, and `push`; methods that return a special value are `offerFirst`, `offerLast`, `add`, and `offer`.
-- **Beginner-Friendly Explanation:** You can add an element to the front using `addFirst` or `offerFirst`, or to the back using `addLast` or `offerLast`. `push` is equivalent to `addFirst` and is used when the deque is used as a stack.
-
-**Purposes**
-
-- To insert an element at the head (front) of the deque.
-- To insert an element at the tail (back) of the deque.
-- To provide non-throwing alternatives (`offerFirst`, `offerLast`) for capacity-restricted deques.
-- To support both FIFO (queue) and LIFO (stack) usage patterns.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-void addFirst(E e)
-boolean offerFirst(E e)
-void addLast(E e)
-boolean offerLast(E e)
-void push(E e)
-```
-
-Component breakdown:
-
-- `e`: the element to be inserted.
-- `addFirst` and `addLast` throw `IllegalStateException` if the deque is full and `NullPointerException` if the element is `null`.
-- `offerFirst` and `offerLast` return `true` on success and `false` if the deque is full.
-- `push` is equivalent to `addFirst`.
-
-Syntax rules: When a deque is used as a queue, elements are added at the end of the deque and removed from the beginning. When used as a stack, elements are pushed and popped from the beginning.
-
-Constraints and limitations: `addFirst`, `addLast`, and `push` throw exceptions on failure; `offerFirst`, `offerLast`, `add`, and `offer` return special values. Null elements are prohibited in most implementations.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Insertion at both ends with `ArrayDeque`**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-public class DequeInsertionExample {
-    public static void main(String[] args) {
-        // Step 1: Create an ArrayDeque
         Deque<String> deque = new ArrayDeque<>();
 
-        // Step 2: Add elements at both ends
+        // Adding at both ends
         deque.addFirst("Middle");
-        deque.addLast("End");
-        deque.addFirst("Start");
+        deque.addFirst("Front");
+        deque.addLast("Back");
+        System.out.println("Deque: " + deque); // [Front, Middle, Back]
 
-        System.out.println("Deque: " + deque);
+        // Stack operations (LIFO)
+        deque.push("Top"); // Same as addFirst
+        System.out.println("After push: " + deque);
+        System.out.println("Pop: " + deque.pop()); // Removes "Top"
 
-        // Step 3: Use offerFirst and offerLast
-        deque.offerFirst("NewStart");
-        deque.offerLast("NewEnd");
-        System.out.println("After offers: " + deque);
+        // Queue operations (FIFO)
+        System.out.println("Poll: " + deque.poll()); // Removes "Front"
+
+        // Peek at both ends
+        System.out.println("First: " + deque.peekFirst());
+        System.out.println("Last: " + deque.peekLast());
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Deque: [Start, Middle, End]
-After offers: [NewStart, Start, Middle, End, NewEnd]
+Deque: [Front, Middle, Back]
+After push: [Top, Front, Middle, Back]
+Pop: Top
+Poll: Front
+First: Middle
+Last: Back
 ```
 
-**Why the code produces this result:** `addFirst` inserts at the head, `addLast` inserts at the tail. The deque maintains the relative order of insertions at each end. `offerFirst` and `offerLast` behave identically to `addFirst` and `addLast` in an unbounded deque.
+**Step-by-Step Explanation:**
 
-**Example 2: Using `push` and `pop` as a stack**
+1. `deque.addFirst("Front")` adds at the front.
+2. `deque.addLast("Back")` adds at the end.
+3. `deque.push("Top")` is equivalent to `addFirst` (stack behaviour).
+4. `deque.pop()` removes from the front (LIFO).
+5. `deque.poll()` removes from the front (FIFO).
+
+### Real-World Cases
+
+- **Undo/Redo:** A `Deque` can store undo operations at one end and redo operations at the other.
+- **Palindrome Checker:** Add characters to both ends and compare.
+- **Sliding Window:** Maintain a window of elements at both ends.
+- **Replacing Stack:** Use `ArrayDeque` instead of the legacy `Stack` class.
+
+---
+
+## 3. Queue Operations
+
+### Definitions
+
+**Core Definition:** Queue operations are the methods provided by the `Queue`, `Deque`, and `BlockingQueue` interfaces for inserting, removing, and inspecting elements.
+
+**Technical Definition:** The `Queue` interface provides six core methods in two forms each: `add`/`offer` for insertion, `remove`/`poll` for removal, and `element`/`peek` for inspection. The `BlockingQueue` interface adds `put` (blocking insert) and `take` (blocking remove). The `Deque` interface adds twelve methods for accessing both ends.
+
+**Beginner-Friendly Explanation:** Queue operations are the actions you can perform on a queue — adding items, removing items, and looking at the first item. Some operations throw an error if they fail, while others return a special value. Blocking queues add operations that wait until they can succeed.
+
+### add() / offer()
+
+**Definition:** Inserts an element into the queue. `add()` throws an exception if the queue is full; `offer()` returns `false`.
+
+**Syntax:**
+```java
+boolean add(E e);      // Throws IllegalStateException if no space
+boolean offer(E e);    // Returns false if no space
+```
+
+**Example:**
+```java
+Queue<String> queue = new LinkedList<>();
+queue.offer("Task"); // Preferred for capacity-restricted queues
+```
+
+### remove() / poll()
+
+**Definition:** Removes and returns the head of the queue. `remove()` throws an exception if the queue is empty; `poll()` returns `null`.
+
+**Syntax:**
+```java
+E remove();    // Throws NoSuchElementException if empty
+E poll();      // Returns null if empty
+```
+
+**Example:**
+```java
+String head = queue.poll(); // Returns null if empty
+```
+
+### element() / peek()
+
+**Definition:** Returns the head of the queue without removing it. `element()` throws an exception if the queue is empty; `peek()` returns `null`.
+
+**Syntax:**
+```java
+E element();   // Throws NoSuchElementException if empty
+E peek();      // Returns null if empty
+```
+
+**Example:**
+```java
+String first = queue.peek(); // Returns null if empty
+```
+
+### put() / take()
+
+**Definition:** Blocking operations defined in `BlockingQueue`. `put()` waits for space to become available; `take()` waits for an element to become available.
+
+**Syntax:**
+```java
+void put(E e) throws InterruptedException;  // Blocks until space available
+E take() throws InterruptedException;        // Blocks until element available
+```
+
+**Example:**
+```java
+BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
+queue.put("Task");  // Blocks if queue is full
+String task = queue.take(); // Blocks if queue is empty
+```
+
+---
+
+## 4. PriorityQueue
+
+### Definitions
+
+**Core Definition:** `PriorityQueue` is an unbounded priority queue based on a priority heap, ordering elements by natural ordering or a supplied `Comparator`.
+
+**Technical Definition:** `PriorityQueue<E>` extends `AbstractQueue<E>` and implements `Serializable`. The elements are ordered according to their natural ordering or by a `Comparator` provided at construction time. The head of the queue is the least element with respect to the specified ordering. It does not permit `null` elements and does not permit insertion of non-comparable objects when relying on natural ordering. This implementation provides O(log n) time for enqueueing and dequeueing, linear time for `remove(Object)` and `contains(Object)`, and constant time for retrieval methods.
+
+**Beginner-Friendly Explanation:** `PriorityQueue` is like a hospital emergency room — patients with more urgent conditions are treated first, regardless of when they arrived. You can add items, and when you remove one, you always get the most important one.
+
+### Purposes
+
+- To process elements in priority order rather than insertion order
+- To implement priority-based scheduling and task management
+- To provide efficient O(log n) insertion and removal of the highest-priority element
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-public class DequeStackExample {
-    public static void main(String[] args) {
-        Deque<Integer> stack = new ArrayDeque<>();
-        stack.push(1);
-        stack.push(2);
-        stack.push(3);
-        System.out.println("Stack: " + stack);
-        System.out.println("Pop: " + stack.pop());
-        System.out.println("After pop: " + stack);
-    }
+public class PriorityQueue<E> extends AbstractQueue<E> implements Serializable {
+    public PriorityQueue();
+    public PriorityQueue(int initialCapacity);
+    public PriorityQueue(Comparator<? super E> comparator);
+    public PriorityQueue(Collection<? extends E> c);
 }
 ```
 
-Expected Output:
+**Syntax Rules:**
 
-```
-Stack: [3, 2, 1]
-Pop: 3
-After pop: [2, 1]
-```
+- Elements must be `Comparable` (for natural ordering) or a `Comparator` must be provided.
+- `null` elements are not permitted.
+- The iterator does not guarantee traversal in any particular order.
+- Not thread-safe; use `PriorityBlockingQueue` for concurrent use.
 
-**Why the code produces this result:** `push` is equivalent to `addFirst`, so the most recently pushed element (3) is at the head. `pop` is equivalent to `removeFirst`, so it removes and returns the head.
+**Constraints and Limitations:**
 
-**Example 3: Capacity-restricted deque with `offerFirst`**
+- `remove(Object)` and `contains(Object)` are linear time.
+- Iteration order is not sorted order.
+
+### Annotated Code Example
 
 ```java
-import java.util.Deque;
-import java.util.concurrent.LinkedBlockingDeque;
+// File: PriorityQueueDemo.java
+import java.util.*;
 
-public class DequeOfferFullExample {
+public class PriorityQueueDemo {
     public static void main(String[] args) {
-        Deque<Integer> deque = new LinkedBlockingDeque<>(2);
-        deque.offerFirst(1);
-        deque.offerLast(2);
-        boolean result = deque.offerFirst(3);
-        System.out.println("offerFirst succeeded: " + result);
-        System.out.println("Deque: " + deque);
-    }
-}
-```
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
 
-Expected Output:
+        pq.offer(5);
+        pq.offer(2);
+        pq.offer(8);
+        pq.offer(1);
+        pq.offer(9);
 
-```
-offerFirst succeeded: false
-Deque: [1, 2]
-```
-
-**Why the code produces this result:** `LinkedBlockingDeque` is optionally bounded. With capacity 2, the deque is full after two insertions, so `offerFirst` returns `false`.
-
-**Real-World Cases with Explanation**
-
-In a browser history implementation, a deque can be used so that new pages are added at the front and the “back” button removes from the front, while the “forward” button can examine the tail. In a work-stealing scheduler, each worker has a deque of tasks and can steal tasks from either end.
-
-**References Links**
-
-- Deque (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Deque.html
-- Deque (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Deque.html
-
-#### 2.2 Removal from Both Ends
-
-**Definitions**
-
-- **Core Definition:** Removing and returning an element from the front or the back of the deque.
-- **Technical Definition:** The `Deque` interface provides `removeFirst()`, `pollFirst()`, `removeLast()`, `pollLast()`, and `pop()`. `removeFirst` and `removeLast` throw `NoSuchElementException` if the deque is empty; `pollFirst` and `pollLast` return `null` if the deque is empty. `pop` is equivalent to `removeFirst`.
-- **Beginner-Friendly Explanation:** You can take an element from the front using `removeFirst` or `pollFirst`, or from the back using `removeLast` or `pollLast`. `pop` is equivalent to `removeFirst` and is used with stacks.
-
-**Purposes**
-
-- To remove and return an element from the head (front) of the deque.
-- To remove and return an element from the tail (back) of the deque.
-- To provide non-throwing alternatives (`pollFirst`, `pollLast`) for empty deques.
-- To support both FIFO (queue) and LIFO (stack) removal patterns.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-E removeFirst()
-E pollFirst()
-E removeLast()
-E pollLast()
-E pop()
-```
-
-Component breakdown:
-
-- Return value: the element removed.
-- `removeFirst` and `removeLast` throw `NoSuchElementException` if the deque is empty.
-- `pollFirst` and `pollLast` return `null` if the deque is empty.
-- `pop` is equivalent to `removeFirst`.
-
-Syntax rules: When a deque is used as a queue, elements are removed from the beginning. When used as a stack, elements are popped from the beginning.
-
-Constraints and limitations: `removeFirst`, `removeLast`, and `pop` throw exceptions on empty deques; `pollFirst` and `pollLast` return `null`.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Removal from both ends**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-public class DequeRemovalExample {
-    public static void main(String[] args) {
-        Deque<String> deque = new ArrayDeque<>();
-        deque.addLast("A");
-        deque.addLast("B");
-        deque.addLast("C");
-
-        System.out.println("Initial: " + deque);
-        System.out.println("removeFirst: " + deque.removeFirst());
-        System.out.println("removeLast: " + deque.removeLast());
-        System.out.println("Remaining: " + deque);
-    }
-}
-```
-
-Expected Output:
-
-```
-Initial: [A, B, C]
-removeFirst: A
-removeLast: C
-Remaining: [B]
-```
-
-**Why the code produces this result:** `removeFirst` removes the head (A), `removeLast` removes the tail (C), leaving only B.
-
-**Example 2: `pollFirst` on an empty deque returns `null`**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-public class DequePollEmptyExample {
-    public static void main(String[] args) {
-        Deque<String> deque = new ArrayDeque<>();
-        System.out.println("pollFirst: " + deque.pollFirst());
-        System.out.println("pollLast: " + deque.pollLast());
-    }
-}
-```
-
-Expected Output:
-
-```
-pollFirst: null
-pollLast: null
-```
-
-**Example 3: `pop` on an empty deque throws an exception**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-public class DequePopEmptyExample {
-    public static void main(String[] args) {
-        Deque<String> deque = new ArrayDeque<>();
-        try {
-            deque.pop();
-        } catch (java.util.NoSuchElementException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
+        System.out.println("PriorityQueue: " + pq); // Not sorted!
+        System.out.println("Poll order:");
+        while (!pq.isEmpty()) {
+            System.out.println(pq.poll()); // 1, 2, 5, 8, 9
         }
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Caught: NoSuchElementException
+PriorityQueue: [1, 2, 5, 8, 9] (order may vary)
+Poll order:
+1
+2
+5
+8
+9
 ```
 
-**Real-World Cases with Explanation**
+**Step-by-Step Explanation:**
 
-In an undo–redo system, the undo stack can be modelled as a deque where `pop` removes the most recent action, while the redo stack can be modelled as a deque where `pollFirst` retrieves the next action to redo. In a double-ended priority queue, elements can be removed from either the highest or lowest priority end.
+1. Elements are inserted in arbitrary order.
+2. The internal heap structure ensures the smallest element is always at the head.
+3. `poll()` removes the smallest element each time, producing sorted output.
 
-**References Links**
+### Real-World Cases
 
-- Deque (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Deque.html
-- Deque (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Deque.html
+- **Task Scheduling:** Process high-priority tasks before low-priority ones.
+- **Dijkstra's Algorithm:** Find the shortest path in a graph.
+- **Event Simulation:** Process events in chronological order.
 
-#### 2.3 Examination at Both Ends
+---
 
-**Definitions**
+## 5. ArrayDeque
 
-- **Core Definition:** Retrieving, but not removing, an element from the front or the back of the deque.
-- **Technical Definition:** The `Deque` interface provides `getFirst()`, `peekFirst()`, `getLast()`, and `peekLast()`. `getFirst` and `getLast` throw `NoSuchElementException` if the deque is empty; `peekFirst` and `peekLast` return `null` if the deque is empty.
-- **Beginner-Friendly Explanation:** You can look at the first or last element without removing it. `getFirst` and `getLast` throw an error if the deque is empty; `peekFirst` and `peekLast` return `null`.
+### Definitions
 
-**Purposes**
+**Core Definition:** `ArrayDeque` is a resizable-array implementation of the `Deque` interface, providing fast operations at both ends.
 
-- To inspect the element at the head (front) of the deque without modifying it.
-- To inspect the element at the tail (back) of the deque without modifying it.
-- To provide non-throwing alternatives (`peekFirst`, `peekLast`) for empty deques.
-- To support algorithms that need to examine both ends before deciding which element to remove.
+**Technical Definition:** `ArrayDeque<E>` extends `AbstractCollection<E>` and implements `Deque<E>`, `Cloneable`, and `Serializable`. It has no capacity restrictions; it grows as necessary. It is not thread-safe and prohibits `null` elements. It is likely to be faster than `Stack` when used as a stack and faster than `LinkedList` when used as a queue. Most operations run in amortized constant time.
 
-**Syntax Structures and Rules**
+**Beginner-Friendly Explanation:** `ArrayDeque` is the go-to implementation for both stacks and queues. It's fast, efficient, and doesn't have the overhead of `LinkedList`'s node objects.
 
-Complete general syntaxes:
+### Purposes
+
+- To provide a fast, resizable-array implementation of `Deque`
+- To replace both `Stack` (for LIFO) and `LinkedList` (for FIFO)
+- To offer amortized O(1) operations at both ends
+
+### Syntax Rules and Structure
 
 ```java
-E getFirst()
-E peekFirst()
-E getLast()
-E peekLast()
+public class ArrayDeque<E> extends AbstractCollection<E>
+        implements Deque<E>, Cloneable, Serializable {
+    public ArrayDeque();
+    public ArrayDeque(int numElements);
+    public ArrayDeque(Collection<? extends E> c);
+}
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- Return value: the element examined.
-- `getFirst` and `getLast` throw `NoSuchElementException` if the deque is empty.
-- `peekFirst` and `peekLast` return `null` if the deque is empty.
+- `ArrayDeque` is not thread-safe.
+- `null` elements are prohibited.
+- Iterators are fail-fast.
 
-Syntax rules: These methods return, but do not remove, the element at the specified end.
+**Constraints and Limitations:**
 
-Constraints and limitations: `getFirst` and `getLast` may throw `NoSuchElementException`; `peekFirst` and `peekLast` return `null` for an empty deque.
+- `remove(Object)`, `contains(Object)`, and bulk operations are linear time.
+- Not suitable for concurrent use without external synchronization.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Examination at both ends**
+### Annotated Code Example
 
 ```java
-import java.util.ArrayDeque;
-import java.util.Deque;
+// File: ArrayDequeDemo.java
+import java.util.*;
 
-public class DequeExamineExample {
+public class ArrayDequeDemo {
     public static void main(String[] args) {
-        Deque<String> deque = new ArrayDeque<>();
-        deque.addLast("First");
-        deque.addLast("Middle");
-        deque.addLast("Last");
+        ArrayDeque<String> deque = new ArrayDeque<>();
 
-        System.out.println("First element: " + deque.getFirst());
-        System.out.println("Last element: " + deque.getLast());
-        System.out.println("Deque unchanged: " + deque);
+        // As a queue (FIFO)
+        deque.offer("A");
+        deque.offer("B");
+        deque.offer("C");
+        System.out.println("Queue: " + deque);
+        System.out.println("Poll: " + deque.poll()); // A
+
+        // As a stack (LIFO)
+        deque.push("X");
+        System.out.println("Stack: " + deque);
+        System.out.println("Pop: " + deque.pop()); // X
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-First element: First
-Last element: Last
-Deque unchanged: [First, Middle, Last]
+Queue: [A, B, C]
+Poll: A
+Stack: [X, B, C]
+Pop: X
 ```
 
-**Why the code produces this result:** `getFirst` returns the head, `getLast` returns the tail, and neither modifies the deque.
+**Step-by-Step Explanation:**
 
-**Example 2: `peekFirst` on an empty deque returns `null`**
+1. `offer()` adds elements to the tail (queue behaviour).
+2. `poll()` removes from the head (FIFO).
+3. `push()` adds to the head (stack behaviour).
+4. `pop()` removes from the head (LIFO).
+
+### Real-World Cases
+
+- **General-Purpose Queue:** The default choice for non-concurrent queue operations.
+- **Stack Replacement:** Replace the legacy `Stack` class.
+- **Sliding Window:** Maintain a window of elements.
+
+---
+
+## 6. LinkedList
+
+### Definitions
+
+**Core Definition:** `LinkedList` is a doubly-linked list implementation of both `List` and `Deque` interfaces.
+
+**Technical Definition:** `LinkedList<E>` extends `AbstractSequentialList<E>` and implements `List<E>`, `Deque<E>`, `Cloneable`, and `Serializable`. It provides efficient insertion and removal at both ends but has O(n) positional access. As a `Deque`, it can be used as a queue (FIFO) or stack (LIFO).
+
+**Beginner-Friendly Explanation:** `LinkedList` is a queue implementation backed by a chain of nodes. It's flexible but generally slower than `ArrayDeque` for queue operations.
+
+### Purposes
+
+- To provide a linked-list-based implementation of `Deque`
+- To serve as both a `List` and a `Deque`
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.ArrayDeque;
-import java.util.Deque;
+public class LinkedList<E> extends AbstractSequentialList<E>
+        implements List<E>, Deque<E>, Cloneable, Serializable {
+    public LinkedList();
+    public LinkedList(Collection<? extends E> c);
+}
+```
 
-public class DequePeekEmptyExample {
+**Syntax Rules:**
+
+- `LinkedList` is not thread-safe.
+- It permits `null` elements.
+- It implements both `List` and `Deque`.
+
+**Constraints and Limitations:**
+
+- Queue operations are generally slower than `ArrayDeque`.
+- `LinkedList` almost never outperforms `ArrayDeque` for queue operations.
+
+### Annotated Code Example
+
+```java
+// File: LinkedListQueueDemo.java
+import java.util.*;
+
+public class LinkedListQueueDemo {
     public static void main(String[] args) {
-        Deque<String> deque = new ArrayDeque<>();
-        System.out.println("peekFirst: " + deque.peekFirst());
-        System.out.println("peekLast: " + deque.peekLast());
+        Queue<String> queue = new LinkedList<>();
+        queue.offer("Task 1");
+        queue.offer("Task 2");
+        queue.offer("Task 3");
+        System.out.println("Queue: " + queue);
+        System.out.println("Poll: " + queue.poll());
+        System.out.println("Queue after poll: " + queue);
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-peekFirst: null
-peekLast: null
+Queue: [Task 1, Task 2, Task 3]
+Poll: Task 1
+Queue after poll: [Task 2, Task 3]
 ```
 
-**Example 3: `getFirst` on an empty deque throws an exception**
+**Step-by-Step Explanation:**
+
+1. `offer()` adds elements to the tail.
+2. `poll()` removes from the head.
+
+### Real-World Cases
+
+- **Legacy Code:** Old applications that use `LinkedList` as a queue.
+- **List + Queue:** When both list and queue functionality are needed.
+
+---
+
+## 7. BlockingQueue
+
+### Definitions
+
+**Core Definition:** `BlockingQueue` is a `Queue` that additionally supports operations that wait for the queue to become non-empty when retrieving an element, and wait for space to become available when storing an element.
+
+**Technical Definition:** `BlockingQueue<E>` extends `Queue<E>` and provides four forms of operations: one throws an exception, one returns a special value, one blocks indefinitely, and one blocks for a given time limit. It does not accept `null` elements. It is designed primarily for producer-consumer queues and is thread-safe.
+
+**Beginner-Friendly Explanation:** A `BlockingQueue` is a queue that can make threads wait. If you try to take an item from an empty queue, your thread waits until an item appears. If you try to put an item into a full queue, your thread waits until space is available. This makes it perfect for producer-consumer scenarios.
+
+### Purposes
+
+- To coordinate producer and consumer threads
+- To provide blocking operations for concurrent programming
+- To serve as the foundation for thread pools and message queues
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.ArrayDeque;
-import java.util.Deque;
+public interface BlockingQueue<E> extends Queue<E> {
+    // Blocking insert
+    void put(E e) throws InterruptedException;
+    boolean offer(E e, long timeout, TimeUnit unit) throws InterruptedException;
 
-public class DequeGetEmptyExample {
-    public static void main(String[] args) {
-        Deque<String> deque = new ArrayDeque<>();
-        try {
-            deque.getFirst();
-        } catch (java.util.NoSuchElementException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
-        }
-    }
+    // Blocking remove
+    E take() throws InterruptedException;
+    E poll(long timeout, TimeUnit unit) throws InterruptedException;
 }
 ```
 
-Expected Output:
+**Component Breakdown:**
 
-```
-Caught: NoSuchElementException
-```
+| Operation | Throws Exception | Special Value | Blocks | Times Out |
+|-----------|-----------------|---------------|--------|-----------|
+| Insert | `add(e)` | `offer(e)` | `put(e)` | `offer(e, time, unit)` |
+| Remove | `remove()` | `poll()` | `take()` | `poll(time, unit)` |
+| Examine | `element()` | `peek()` | N/A | N/A |
 
-**Real-World Cases with Explanation**
+**Syntax Rules:**
 
-In a sliding window maximum algorithm, a deque is used to maintain a window of elements, and `peekFirst` and `peekLast` are used to examine the ends of the window without removing elements. In a palindrome checker, `peekFirst` and `peekLast` are used to compare characters from both ends.
+- `BlockingQueue` does not accept `null` elements.
+- Implementations are thread-safe.
+- Bulk operations are not necessarily atomic.
 
-**References Links**
+**Constraints and Limitations:**
 
-- Deque (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Deque.html
-- Deque (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Deque.html
+- Blocking operations can be interrupted.
+- A `BlockingQueue` does not support "close" or "shutdown" operations.
 
-### 3. The BlockingQueue Interface
-
-#### Core Definitions
-
-**Core Definition:** A queue that additionally supports operations that wait for the queue to become non-empty when retrieving an element, and wait for space to become available in the queue when storing an element.
-
-**Technical Definition:** `public interface BlockingQueue<E> extends Queue<E>`. `BlockingQueue` methods come in four forms: one throws an exception, the second returns a special value, the third blocks the current thread indefinitely until the operation can succeed, and the fourth blocks for only a given maximum time limit before giving up. These methods are summarized in the following table: `add(e)` / `offer(e)` / `put(e)` / `offer(e, time, unit)` for insertion; `remove()` / `poll()` / `take()` / `poll(time, unit)` for removal; and `element()` / `peek()` for examination.
-
-**Beginner-Friendly Explanation:** A blocking queue is like a queue at a bank where the teller waits until a customer arrives before serving, and a customer waits until a teller is free before being served. This makes it perfect for producer–consumer scenarios where one thread produces data and another consumes it.
-
-#### 3.1 Blocking Insertion (`put`)
-
-**Definitions**
-
-- **Core Definition:** Inserting an element into the queue, waiting if necessary for space to become available.
-- **Technical Definition:** `void put(E e) throws InterruptedException` inserts the specified element into this queue, waiting if necessary for space to become available. The method blocks the current thread indefinitely until the operation can succeed, and throws `InterruptedException` if interrupted while waiting.
-- **Beginner-Friendly Explanation:** `put` is like trying to place a letter in a full mailbox: you wait until someone removes a letter to make room. If you are interrupted while waiting, you get an `InterruptedException`.
-
-**Purposes**
-
-- To insert an element into a possibly full queue, blocking until space is available.
-- To support the producer side of producer–consumer patterns without busy-waiting.
-- To provide a thread-safe, blocking alternative to `add` and `offer`.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
+### Annotated Code Example
 
 ```java
-void put(E e) throws InterruptedException
-```
+// File: BlockingQueueDemo.java
+import java.util.concurrent.*;
 
-Component breakdown:
-
-- `e`: the element to be inserted.
-- Throws `InterruptedException` if interrupted while waiting.
-- Throws `NullPointerException` if the element is `null`.
-- Blocks indefinitely until space is available.
-
-Syntax rules: `BlockingQueue` implementations are thread-safe. All queuing methods achieve their effects atomically using internal locks or other forms of concurrency control.
-
-Constraints and limitations: `put` may block indefinitely. `BlockingQueue` does not accept `null` elements; implementations throw `NullPointerException` on attempts to add, put, or offer a `null`.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Producer–consumer with `put` and `take`**
-
-```java
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class BlockingQueueExample {
+public class BlockingQueueDemo {
     public static void main(String[] args) throws InterruptedException {
-        // Step 1: Create a bounded blocking queue with capacity 2
-        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(2);
+        BlockingQueue<String> queue = new ArrayBlockingQueue<>(5);
 
-        // Step 2: Producer thread puts elements into the queue
+        // Producer thread
         Thread producer = new Thread(() -> {
             try {
-                queue.put(1);
-                System.out.println("Produced 1");
-                queue.put(2);
-                System.out.println("Produced 2");
-                // This put will block until consumer takes an element
-                queue.put(3);
-                System.out.println("Produced 3");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+                for (int i = 1; i <= 5; i++) {
+                    queue.put("Item " + i);
+                    System.out.println("Produced: Item " + i);
+                }
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
 
-        // Step 3: Consumer thread takes elements from the queue
+        // Consumer thread
         Thread consumer = new Thread(() -> {
             try {
-                Thread.sleep(1000); // Simulate delay
-                System.out.println("Consumed " + queue.take());
-                System.out.println("Consumed " + queue.take());
-                System.out.println("Consumed " + queue.take());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+                for (int i = 1; i <= 5; i++) {
+                    String item = queue.take();
+                    System.out.println("Consumed: " + item);
+                }
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
 
         producer.start();
@@ -911,660 +679,316 @@ public class BlockingQueueExample {
 }
 ```
 
-Expected Output (order may vary due to thread scheduling):
-
+**Expected Output:**
 ```
-Produced 1
-Produced 2
-Consumed 1
-Produced 3
-Consumed 2
-Consumed 3
+Produced: Item 1
+Consumed: Item 1
+Produced: Item 2
+Consumed: Item 2
+...
 ```
 
-**Why the code produces this result:** The producer can put two elements immediately (capacity 2). The third `put` blocks because the queue is full. The consumer takes elements, which unblocks the producer. The exact interleaving depends on thread scheduling.
+**Step-by-Step Explanation:**
 
-**Example 2: `put` with timeout**
+1. The producer thread calls `put()` to add items.
+2. The consumer thread calls `take()` to retrieve items.
+3. `put()` blocks if the queue is full; `take()` blocks if the queue is empty.
+4. The output shows interleaved production and consumption.
+
+### Real-World Cases
+
+- **Producer-Consumer:** Coordinating data production and consumption between threads.
+- **Thread Pools:** `ThreadPoolExecutor` uses a `BlockingQueue` to hold tasks.
+- **Message Queues:** In-memory message passing between components.
+
+---
+
+## 8. ArrayBlockingQueue
+
+### Definitions
+
+**Core Definition:** `ArrayBlockingQueue` is a bounded blocking queue backed by an array, ordering elements FIFO.
+
+**Technical Definition:** `ArrayBlockingQueue<E>` extends `AbstractQueue<E>` and implements `BlockingQueue<E>`, `Serializable`. It is a classic "bounded buffer" in which a fixed-sized array holds elements inserted by producers and extracted by consumers. It orders elements FIFO. The queue's capacity is fixed at construction and cannot be changed.
+
+**Beginner-Friendly Explanation:** `ArrayBlockingQueue` is a blocking queue with a fixed maximum size. Once it's full, producers must wait until a consumer removes an item.
+
+### Purposes
+
+- To provide a bounded blocking queue with predictable memory usage
+- To implement the classic bounded buffer pattern
+- To support fair or non-fair thread access
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+public class ArrayBlockingQueue<E> extends AbstractQueue<E>
+        implements BlockingQueue<E>, Serializable {
+    public ArrayBlockingQueue(int capacity);
+    public ArrayBlockingQueue(int capacity, boolean fair);
+    public ArrayBlockingQueue(int capacity, boolean fair, Collection<? extends E> c);
+}
+```
 
-public class BlockingQueueTimeoutExample {
+**Syntax Rules:**
+
+- Capacity is fixed and must be specified at construction.
+- `fair` parameter controls whether blocked threads are processed in FIFO order.
+- Does not permit `null` elements.
+
+**Constraints and Limitations:**
+
+- Fixed capacity; cannot grow.
+- Slightly lower throughput than `LinkedBlockingQueue`.
+
+### Annotated Code Example
+
+```java
+// File: ArrayBlockingQueueDemo.java
+import java.util.concurrent.*;
+
+public class ArrayBlockingQueueDemo {
     public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1);
-        queue.put(1);
-        // This offer will time out after 500 milliseconds
-        boolean result = queue.offer(2, 500, TimeUnit.MILLISECONDS);
-        System.out.println("Offer timed out: " + !result);
-    }
-}
-```
-
-Expected Output:
-
-```
-Offer timed out: true
-```
-
-**Why the code produces this result:** The queue is full, and no consumer is taking elements. The timed `offer` waits for 500 ms and then returns `false`.
-
-**Real-World Cases with Explanation**
-
-In a web server, a `BlockingQueue` is used to hold incoming requests. Worker threads call `take` to retrieve requests; if the queue is empty, they block until a request arrives. In a logging system, a producer thread `put`s log messages into a queue, and a consumer thread `take`s them and writes them to disk.
-
-**References Links**
-
-- BlockingQueue (Java SE 11) – https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/BlockingQueue.html
-- BlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/BlockingQueue.html
-
-#### 3.2 Blocking Removal (`take`)
-
-**Definitions**
-
-- **Core Definition:** Removing and returning the head of the queue, waiting if necessary for an element to become available.
-- **Technical Definition:** `E take() throws InterruptedException` retrieves and removes the head of this queue, waiting if necessary until an element becomes available. The method blocks the current thread indefinitely until an element is available, and throws `InterruptedException` if interrupted while waiting.
-- **Beginner-Friendly Explanation:** `take` is like waiting at a conveyor belt for a package to arrive. If the belt is empty, you wait. If you are interrupted while waiting, you get an `InterruptedException`.
-
-**Purposes**
-
-- To retrieve and remove the head of a possibly empty queue, blocking until an element is available.
-- To support the consumer side of producer–consumer patterns without busy-waiting.
-- To provide a thread-safe, blocking alternative to `remove` and `poll`.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-E take() throws InterruptedException
-```
-
-Component breakdown:
-
-- Return value: the head of the queue.
-- Throws `InterruptedException` if interrupted while waiting.
-- Blocks indefinitely until an element is available.
-
-Syntax rules: `take` waits for the queue to become non-empty when retrieving an element.
-
-Constraints and limitations: `take` may block indefinitely.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `take` blocks until an element is available**
-
-```java
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class BlockingTakeExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
-
-        Thread consumer = new Thread(() -> {
-            try {
-                System.out.println("Waiting for element...");
-                String item = queue.take();
-                System.out.println("Took: " + item);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        consumer.start();
-        Thread.sleep(1000); // Consumer is now blocked
-        queue.put("Hello");
-        consumer.join();
-    }
-}
-```
-
-Expected Output:
-
-```
-Waiting for element...
-Took: Hello
-```
-
-**Why the code produces this result:** The consumer calls `take` on an empty queue and blocks. After one second, the main thread puts “Hello” into the queue, which unblocks the consumer.
-
-**Example 2: `take` with interrupt**
-
-```java
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class BlockingTakeInterruptExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(10);
-        Thread consumer = new Thread(() -> {
-            try {
-                queue.take();
-            } catch (InterruptedException e) {
-                System.out.println("Consumer interrupted");
-            }
-        });
-        consumer.start();
-        Thread.sleep(500);
-        consumer.interrupt();
-        consumer.join();
-    }
-}
-```
-
-Expected Output:
-
-```
-Consumer interrupted
-```
-
-**Real-World Cases with Explanation**
-
-In a message broker, consumer threads call `take` on a `BlockingQueue`. When a message is published, the broker `put`s it into the queue, and a waiting consumer is unblocked and processes the message. In a thread pool, worker threads call `take` on a task queue, blocking until a task is submitted.
-
-**References Links**
-
-- BlockingQueue (Java SE 11) – https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/BlockingQueue.html
-- BlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/BlockingQueue.html
-
-### 4. Standard Implementations
-
-#### 4.1 ArrayDeque
-
-**Definitions**
-
-- **Core Definition:** A resizable-array implementation of the `Deque` interface.
-- **Technical Definition:** `public class ArrayDeque<E> extends AbstractCollection<E> implements Deque<E>, Cloneable, Serializable`. Array deques have no capacity restrictions; they grow as necessary to support usage. They are not thread-safe; in the absence of external synchronization, they do not support concurrent access by multiple threads. Null elements are prohibited. This class is likely to be faster than `Stack` when used as a stack, and faster than `LinkedList` when used as a queue.
-- **Beginner-Friendly Explanation:** `ArrayDeque` is a fast, array-backed deque. It is not thread-safe, but it is usually the best choice for single-threaded queue or stack operations.
-
-**Purposes**
-
-- To provide a fast, array-backed implementation of the `Deque` interface.
-- To serve as a superior alternative to `Stack` and `LinkedList` for queue and stack operations.
-- To avoid the overhead of linked nodes.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-ArrayDeque()
-ArrayDeque(int numElements)
-ArrayDeque(Collection<? extends E> c)
-```
-
-Component breakdown:
-
-- `numElements`: the initial capacity sufficient to hold the specified number of elements.
-- `c`: the collection whose elements are to be placed into the deque.
-
-Syntax rules: `ArrayDeque` prohibits `null` elements. Most operations run in amortized constant time; exceptions include `remove`, `removeFirstOccurrence`, `removeLastOccurrence`, `contains`, `iterator.remove`, and bulk operations, which run in linear time.
-
-Constraints and limitations: Not thread-safe. Null elements are prohibited.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Basic `ArrayDeque` usage**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-public class ArrayDequeExample {
-    public static void main(String[] args) {
-        Deque<Integer> deque = new ArrayDeque<>();
-        deque.addFirst(1);
-        deque.addLast(2);
-        deque.addFirst(0);
-        System.out.println("Deque: " + deque);
-        System.out.println("First: " + deque.getFirst());
-        System.out.println("Last: " + deque.getLast());
-    }
-}
-```
-
-Expected Output:
-
-```
-Deque: [0, 1, 2]
-First: 0
-Last: 2
-```
-
-**Example 2: Using `ArrayDeque` as a stack**
-
-```java
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-public class ArrayDequeStackExample {
-    public static void main(String[] args) {
-        Deque<String> stack = new ArrayDeque<>();
-        stack.push("a");
-        stack.push("b");
-        stack.push("c");
-        System.out.println("Stack: " + stack);
-        System.out.println("Pop: " + stack.pop());
-        System.out.println("After pop: " + stack);
-    }
-}
-```
-
-Expected Output:
-
-```
-Stack: [c, b, a]
-Pop: c
-After pop: [b, a]
-```
-
-**Real-World Cases with Explanation**
-
-`ArrayDeque` is used in algorithms such as breadth-first search (as a queue), depth-first search (as a stack), and sliding window problems (as a deque). It is also used in Java's own `ArrayDeque`-based `Spliterator` implementations.
-
-**References Links**
-
-- ArrayDeque (Java SE 26) – https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/util/ArrayDeque.html
-- ArrayDeque (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/ArrayDeque.html
-
-#### 4.2 LinkedList
-
-**Definitions**
-
-- **Core Definition:** A doubly-linked list implementation of the `List` and `Deque` interfaces.
-- **Technical Definition:** `public class LinkedList<E> extends AbstractSequentialList<E> implements List<E>, Deque<E>, Cloneable, Serializable`. It implements all optional list operations and permits all elements (including `null`).
-- **Beginner-Friendly Explanation:** `LinkedList` is a linked-list implementation that can be used as a list, a queue, or a deque. It allows `null` elements, but `ArrayDeque` is generally preferred for pure queue/stack operations.
-
-**Purposes**
-
-- To provide a linked-list implementation of the `Deque` interface.
-- To support `null` elements in a deque.
-- To serve as a list implementation that can also be used as a queue or stack.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-LinkedList()
-LinkedList(Collection<? extends E> c)
-```
-
-Component breakdown:
-
-- `c`: the collection whose elements are to be placed into the list.
-
-Syntax rules: `LinkedList` implements both `List` and `Deque`. It permits `null` elements.
-
-Constraints and limitations: Not thread-safe. Generally slower than `ArrayDeque` for pure queue/stack operations due to node allocation overhead.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `LinkedList` as a queue**
-
-```java
-import java.util.LinkedList;
-import java.util.Queue;
-
-public class LinkedListQueueExample {
-    public static void main(String[] args) {
-        Queue<String> queue = new LinkedList<>();
-        queue.offer("First");
-        queue.offer("Second");
-        queue.offer("Third");
-        System.out.println("Queue: " + queue);
-        System.out.println("Poll: " + queue.poll());
-        System.out.println("After poll: " + queue);
-    }
-}
-```
-
-Expected Output:
-
-```
-Queue: [First, Second, Third]
-Poll: First
-After poll: [Second, Third]
-```
-
-**Example 2: `LinkedList` as a deque**
-
-```java
-import java.util.LinkedList;
-import java.util.Deque;
-
-public class LinkedListDequeExample {
-    public static void main(String[] args) {
-        Deque<Integer> deque = new LinkedList<>();
-        deque.addFirst(1);
-        deque.addLast(2);
-        deque.addFirst(0);
-        System.out.println("Deque: " + deque);
-    }
-}
-```
-
-Expected Output:
-
-```
-Deque: [0, 1, 2]
-```
-
-**Real-World Cases with Explanation**
-
-`LinkedList` is used when a deque needs to allow `null` elements or when list operations are also required. In practice, `ArrayDeque` is preferred for queue and stack operations due to better performance.
-
-**References Links**
-
-- LinkedList (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/LinkedList.html
-- LinkedList (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/LinkedList.html
-
-#### 4.3 PriorityQueue
-
-**Definitions**
-
-- **Core Definition:** An unbounded priority queue based on a priority heap.
-- **Technical Definition:** `public class PriorityQueue<E> extends AbstractQueue<E> implements Serializable`. The elements of the priority queue are ordered according to their natural ordering, or by a `Comparator` provided at queue construction time. A priority queue does not permit `null` elements. A priority queue relying on natural ordering also does not permit insertion of non-comparable objects.
-- **Beginner-Friendly Explanation:** `PriorityQueue` is a queue that serves elements based on their priority, not their arrival order. The smallest element (according to natural ordering or a comparator) is always at the head.
-
-**Purposes**
-
-- To provide a queue that orders elements by priority rather than insertion order.
-- To support algorithms that repeatedly need the smallest (or largest) element.
-- To serve as a building block for priority-based scheduling and graph algorithms.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-PriorityQueue()
-PriorityQueue(int initialCapacity)
-PriorityQueue(Comparator<? super E> comparator)
-PriorityQueue(int initialCapacity, Comparator<? super E> comparator)
-PriorityQueue(Collection<? extends E> c)
-PriorityQueue(PriorityQueue<? extends E> c)
-PriorityQueue(SortedSet<? extends E> c)
-```
-
-Component breakdown:
-
-- `initialCapacity`: the initial capacity for the internal array.
-- `comparator`: the comparator used to order elements.
-- `c`: the collection whose elements are to be placed into the priority queue.
-
-Syntax rules: The head of the queue is the least element with respect to the specified ordering. If multiple elements are tied for least value, the head is one of those elements—ties are broken arbitrarily. The `iterator()` is not guaranteed to traverse elements in any particular order.
-
-Constraints and limitations: Not synchronized. Multiple threads should not access a `PriorityQueue` instance concurrently if any thread modifies it. Use `PriorityBlockingQueue` for concurrent use.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Natural ordering**
-
-```java
-import java.util.PriorityQueue;
-import java.util.Queue;
-
-public class PriorityQueueNaturalExample {
-    public static void main(String[] args) {
-        Queue<Integer> pq = new PriorityQueue<>();
-        pq.add(5);
-        pq.add(1);
-        pq.add(3);
-        System.out.println("Head: " + pq.peek()); // 1
-        System.out.println("Poll: " + pq.poll()); // 1
-        System.out.println("Poll: " + pq.poll()); // 3
-        System.out.println("Poll: " + pq.poll()); // 5
-    }
-}
-```
-
-Expected Output:
-
-```
-Head: 1
-Poll: 1
-Poll: 3
-Poll: 5
-```
-
-**Why the code produces this result:** `PriorityQueue` orders elements by natural ordering. The smallest element (1) is at the head. `poll` removes elements in ascending order.
-
-**Example 2: Custom comparator (reverse order)**
-
-```java
-import java.util.Comparator;
-import java.util.PriorityQueue;
-import java.util.Queue;
-
-public class PriorityQueueComparatorExample {
-    public static void main(String[] args) {
-        Queue<Integer> pq = new PriorityQueue<>(Comparator.reverseOrder());
-        pq.add(5);
-        pq.add(1);
-        pq.add(3);
-        System.out.println("Poll: " + pq.poll()); // 5
-        System.out.println("Poll: " + pq.poll()); // 3
-        System.out.println("Poll: " + pq.poll()); // 1
-    }
-}
-```
-
-Expected Output:
-
-```
-Poll: 5
-Poll: 3
-Poll: 1
-```
-
-**Real-World Cases with Explanation**
-
-`PriorityQueue` is used in Dijkstra's shortest path algorithm, Huffman coding, task scheduling (where tasks with higher priority are executed first), and event-driven simulation.
-
-**References Links**
-
-- PriorityQueue (Java SE 25) – https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PriorityQueue.html
-- PriorityQueue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/PriorityQueue.html
-
-### 5. Concurrent Implementations
-
-#### 5.1 ConcurrentLinkedQueue
-
-**Definitions**
-
-- **Core Definition:** An unbounded thread-safe queue based on linked nodes.
-- **Technical Definition:** `public class ConcurrentLinkedQueue<E> extends AbstractQueue<E> implements Queue<E>, Serializable`. This queue orders elements FIFO. The head of the queue is that element that has been on the queue the longest time. The tail is that element that has been on the queue the shortest time. New elements are inserted at the tail, and retrieval operations obtain elements at the head.
-- **Beginner-Friendly Explanation:** `ConcurrentLinkedQueue` is a thread-safe queue that uses a lock-free algorithm. It is suitable for scenarios where many threads share a common collection.
-
-**Purposes**
-
-- To provide a thread-safe, non-blocking FIFO queue.
-- To support high-throughput concurrent producer–consumer scenarios without locks.
-- To avoid the overhead of blocking synchronisation.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-ConcurrentLinkedQueue()
-ConcurrentLinkedQueue(Collection<? extends E> c)
-```
-
-Component breakdown:
-
-- `c`: the collection whose elements are to be placed into the queue.
-
-Syntax rules: This implementation employs an efficient non-blocking algorithm. Iterators are weakly consistent and do not throw `ConcurrentModificationException`.
-
-Constraints and limitations: The `size` method is not a constant-time operation. `null` elements are not permitted.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Basic concurrent queue usage**
-
-```java
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-public class ConcurrentLinkedQueueExample {
-    public static void main(String[] args) {
-        ConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();
-        queue.offer("A");
-        queue.offer("B");
-        queue.offer("C");
-        System.out.println("Queue: " + queue);
-        System.out.println("Poll: " + queue.poll());
-        System.out.println("Peek: " + queue.peek());
-        System.out.println("Queue after: " + queue);
-    }
-}
-```
-
-Expected Output:
-
-```
-Queue: [A, B, C]
-Poll: A
-Peek: B
-Queue after: [B, C]
-```
-
-**Example 2: Multiple threads offering to the queue**
-
-```java
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-public class ConcurrentLinkedQueueThreadsExample {
-    public static void main(String[] args) throws InterruptedException {
-        ConcurrentLinkedQueue<Integer> queue = new ConcurrentLinkedQueue<>();
-        Thread t1 = new Thread(() -> {
-            for (int i = 0; i < 5; i++) queue.offer(i);
-        });
-        Thread t2 = new Thread(() -> {
-            for (int i = 5; i < 10; i++) queue.offer(i);
-        });
-        t1.start();
-        t2.start();
-        t1.join();
-        t2.join();
-        System.out.println("Queue size: " + queue.size());
-        System.out.println("Queue contents: " + queue);
-    }
-}
-```
-
-Expected Output (order may vary):
-
-```
-Queue size: 10
-Queue contents: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-```
-
-**Real-World Cases with Explanation**
-
-`ConcurrentLinkedQueue` is used in event processing systems where multiple producers generate events and multiple consumers process them. It is also used in thread pools and task queues that require high throughput without blocking.
-
-**References Links**
-
-- ConcurrentLinkedQueue (Java SE 11) – https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ConcurrentLinkedQueue.html
-- ConcurrentLinkedQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentLinkedQueue.html
-
-#### 5.2 LinkedBlockingQueue
-
-**Definitions**
-
-- **Core Definition:** An optionally-bounded blocking queue based on linked nodes.
-- **Technical Definition:** `public class LinkedBlockingQueue<E> extends AbstractQueue<E> implements BlockingQueue<E>, Serializable`. This queue orders elements FIFO. The head is the element that has been on the queue the longest time. New elements are inserted at the tail. Linked queues typically have higher throughput than array-based queues but less predictable performance.
-- **Beginner-Friendly Explanation:** `LinkedBlockingQueue` is a thread-safe blocking queue that uses a linked-list structure. It can be bounded or unbounded, and it is suitable for producer–consumer scenarios.
-
-**Purposes**
-
-- To provide a thread-safe, optionally bounded blocking queue.
-- To support high-throughput producer–consumer scenarios with linked nodes.
-- To allow flexible capacity management.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-LinkedBlockingQueue()
-LinkedBlockingQueue(int capacity)
-LinkedBlockingQueue(Collection<? extends E> c)
-```
-
-Component breakdown:
-
-- `capacity`: the maximum number of elements the queue can hold.
-- `c`: the collection whose elements are to be placed into the queue.
-
-Syntax rules: The optional capacity bound constructor argument serves as a way to prevent excessive queue expansion. The capacity, if unspecified, is equal to `Integer.MAX_VALUE`.
-
-Constraints and limitations: `null` elements are not permitted.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Bounded `LinkedBlockingQueue`**
-
-```java
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class LinkedBlockingQueueExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<Integer> queue = new LinkedBlockingQueue<>(3);
+        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(3);
         queue.put(1);
         queue.put(2);
         queue.put(3);
         System.out.println("Queue: " + queue);
-        System.out.println("Take: " + queue.take());
+        System.out.println("Take: " + queue.take()); // 1
         System.out.println("Queue after take: " + queue);
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
 Queue: [1, 2, 3]
 Take: 1
 Queue after take: [2, 3]
 ```
 
-**Example 2: Producer–consumer with `LinkedBlockingQueue`**
+**Step-by-Step Explanation:**
+
+1. Three elements are inserted into the capacity-3 queue.
+2. `take()` removes the head element.
+
+### Real-World Cases
+
+- **Bounded Buffers:** Classic producer-consumer with fixed buffer size.
+- **Rate Limiting:** Limiting the number of pending tasks.
+- **Backpressure:** Naturally slowing producers when consumers are slow.
+
+---
+
+## 9. LinkedBlockingQueue
+
+### Definitions
+
+**Core Definition:** `LinkedBlockingQueue` is an optionally-bounded blocking queue based on linked nodes, ordering elements FIFO.
+
+**Technical Definition:** `LinkedBlockingQueue<E>` extends `AbstractQueue<E>` and implements `BlockingQueue<E>`, `Serializable`. It is based on linked nodes and is optionally bounded (default capacity is `Integer.MAX_VALUE`). Linked queues typically have higher throughput than array-based queues but less predictable performance.
+
+**Beginner-Friendly Explanation:** `LinkedBlockingQueue` is a blocking queue that uses linked nodes instead of an array. It can be bounded or unbounded (with a very large default capacity).
+
+### Purposes
+
+- To provide a blocking queue with higher throughput than `ArrayBlockingQueue`
+- To support optionally-bounded queues
+- To serve as the default queue for thread pools
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+public class LinkedBlockingQueue<E> extends AbstractQueue<E>
+        implements BlockingQueue<E>, Serializable {
+    public LinkedBlockingQueue();
+    public LinkedBlockingQueue(int capacity);
+    public LinkedBlockingQueue(Collection<? extends E> c);
+}
+```
 
-public class LinkedBlockingQueuePCExample {
+**Syntax Rules:**
+
+- Default capacity is `Integer.MAX_VALUE` (effectively unbounded).
+- Does not permit `null` elements.
+
+**Constraints and Limitations:**
+
+- Higher memory overhead per element (node objects).
+- Less predictable performance than array-based queues.
+
+### Annotated Code Example
+
+```java
+// File: LinkedBlockingQueueDemo.java
+import java.util.concurrent.*;
+
+public class LinkedBlockingQueueDemo {
     public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<String> queue = new LinkedBlockingQueue<>(2);
+        BlockingQueue<String> queue = new LinkedBlockingQueue<>(10);
+        queue.put("A");
+        queue.put("B");
+        System.out.println("Queue: " + queue);
+        System.out.println("Take: " + queue.take());
+    }
+}
+```
+
+**Expected Output:**
+```
+Queue: [A, B]
+Take: A
+```
+
+### Real-World Cases
+
+- **Thread Pools:** Default queue for `Executors.newFixedThreadPool()`.
+- **Message Queues:** High-throughput message passing.
+
+---
+
+## 10. PriorityBlockingQueue
+
+### Definitions
+
+**Core Definition:** `PriorityBlockingQueue` is an unbounded blocking queue that uses the same ordering rules as `PriorityQueue` and supplies blocking retrieval operations.
+
+**Technical Definition:** `PriorityBlockingQueue<E>` extends `AbstractQueue<E>` and implements `BlockingQueue<E>`, `Serializable`. It is unbounded and orders elements by natural ordering or a `Comparator`. While logically unbounded, it may fail with `OutOfMemoryError` if too many elements are added.
+
+**Beginner-Friendly Explanation:** `PriorityBlockingQueue` is a thread-safe priority queue. It's like `PriorityQueue` but with blocking operations for use in concurrent programs.
+
+### Purposes
+
+- To provide a thread-safe priority queue
+- To support blocking retrieval in priority order
+- To implement priority-based task scheduling in concurrent systems
+
+### Syntax Rules and Structure
+
+```java
+public class PriorityBlockingQueue<E> extends AbstractQueue<E>
+        implements BlockingQueue<E>, Serializable {
+    public PriorityBlockingQueue();
+    public PriorityBlockingQueue(int initialCapacity);
+    public PriorityBlockingQueue(int initialCapacity, Comparator<? super E> comparator);
+    public PriorityBlockingQueue(Collection<? extends E> c);
+}
+```
+
+**Syntax Rules:**
+
+- Elements must be `Comparable` or a `Comparator` must be provided.
+- Does not permit `null` elements.
+- Unbounded; `put()` never blocks.
+
+**Constraints and Limitations:**
+
+- Unbounded growth may lead to `OutOfMemoryError`.
+- Iteration order is not sorted order.
+
+### Annotated Code Example
+
+```java
+// File: PriorityBlockingQueueDemo.java
+import java.util.concurrent.*;
+
+public class PriorityBlockingQueueDemo {
+    public static void main(String[] args) throws InterruptedException {
+        PriorityBlockingQueue<Integer> pq = new PriorityBlockingQueue<>();
+        pq.put(5);
+        pq.put(2);
+        pq.put(8);
+        pq.put(1);
+
+        System.out.println("Take order:");
+        while (!pq.isEmpty()) {
+            System.out.println(pq.take()); // 1, 2, 5, 8
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Take order:
+1
+2
+5
+8
+```
+
+### Real-World Cases
+
+- **Priority Task Scheduling:** Process high-priority tasks first in concurrent systems.
+- **Event Processing:** Process events in priority order.
+
+---
+
+## 11. SynchronousQueue
+
+### Definitions
+
+**Core Definition:** `SynchronousQueue` is a blocking queue in which each insert operation must wait for a corresponding remove operation by another thread, and vice versa.
+
+**Technical Definition:** `SynchronousQueue<E>` extends `AbstractQueue<E>` and implements `BlockingQueue<E>`, `Serializable`. It has no internal capacity, not even a capacity of one. You cannot `peek()` at a synchronous queue because an element is only present when you try to remove it. It is well suited for handoff designs, where one thread must synchronize with another to hand off information, events, or tasks.
+
+**Beginner-Friendly Explanation:** `SynchronousQueue` is a queue with zero capacity. A producer must wait for a consumer to be ready before it can hand off an item, and a consumer must wait for a producer. It's like a direct handoff — no intermediate storage.
+
+### Purposes
+
+- To provide a direct handoff mechanism between threads
+- To implement rendezvous-style synchronization
+- To serve as the work queue for cached thread pools
+
+### Syntax Rules and Structure
+
+```java
+public class SynchronousQueue<E> extends AbstractQueue<E>
+        implements BlockingQueue<E>, Serializable {
+    public SynchronousQueue();
+    public SynchronousQueue(boolean fair);
+}
+```
+
+**Syntax Rules:**
+
+- No internal capacity.
+- `put()` blocks until another thread calls `take()`.
+- `take()` blocks until another thread calls `put()`.
+- Does not permit `null` elements.
+
+**Constraints and Limitations:**
+
+- Cannot `peek()` because no element is ever stored.
+- `isEmpty()` always returns `true`.
+
+### Annotated Code Example
+
+```java
+// File: SynchronousQueueDemo.java
+import java.util.concurrent.*;
+
+public class SynchronousQueueDemo {
+    public static void main(String[] args) throws InterruptedException {
+        SynchronousQueue<String> queue = new SynchronousQueue<>();
+
         Thread producer = new Thread(() -> {
             try {
-                queue.put("Message1");
-                System.out.println("Produced Message1");
-                queue.put("Message2");
-                System.out.println("Produced Message2");
-                queue.put("Message3"); // Blocks until consumer takes
-                System.out.println("Produced Message3");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+                System.out.println("Producer: putting");
+                queue.put("Handoff");
+                System.out.println("Producer: put completed");
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
+
         Thread consumer = new Thread(() -> {
             try {
                 Thread.sleep(1000);
-                System.out.println("Consumed " + queue.take());
-                System.out.println("Consumed " + queue.take());
-                System.out.println("Consumed " + queue.take());
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+                System.out.println("Consumer: taking");
+                String item = queue.take();
+                System.out.println("Consumer: got " + item);
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
+
         producer.start();
         consumer.start();
         producer.join();
@@ -1573,477 +997,194 @@ public class LinkedBlockingQueuePCExample {
 }
 ```
 
-Expected Output (order may vary):
-
+**Expected Output:**
 ```
-Produced Message1
-Produced Message2
-Consumed Message1
-Produced Message3
-Consumed Message2
-Consumed Message3
+Producer: putting
+Consumer: taking
+Consumer: got Handoff
+Producer: put completed
 ```
 
-**Real-World Cases with Explanation**
+**Step-by-Step Explanation:**
 
-`LinkedBlockingQueue` is used in thread pool implementations (such as `ThreadPoolExecutor`), message brokers, and any scenario where producers and consumers operate at different rates and need to be decoupled.
+1. The producer calls `put()` and blocks because no consumer is waiting.
+2. After 1 second, the consumer calls `take()`.
+3. The handoff occurs, and both threads proceed.
 
-**References Links**
+### Real-World Cases
 
-- LinkedBlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedBlockingQueue.html
-- LinkedBlockingQueue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/LinkedBlockingQueue.html
+- **Cached Thread Pools:** `Executors.newCachedThreadPool()` uses `SynchronousQueue`.
+- **Direct Handoff:** Handing off tasks directly between threads.
+- **Rendezvous Synchronization:** Two threads meeting at a synchronization point.
 
-#### 5.3 ArrayBlockingQueue
+---
 
-**Definitions**
+## 12. DelayQueue
 
-- **Core Definition:** A bounded blocking queue backed by an array.
-- **Technical Definition:** `public class ArrayBlockingQueue<E> extends AbstractQueue<E> implements BlockingQueue<E>, Serializable`. This queue orders elements FIFO. Once created, the capacity cannot be changed. Attempts to `put` an element into a full queue will result in the operation blocking; attempts to `take` an element from an empty queue will similarly block.
-- **Beginner-Friendly Explanation:** `ArrayBlockingQueue` is a fixed-size blocking queue backed by an array. It is a classic bounded buffer and supports an optional fairness policy.
+### Definitions
 
-**Purposes**
+**Core Definition:** `DelayQueue` is an unbounded blocking queue of `Delayed` elements, in which an element can only be taken when its delay has expired.
 
-- To provide a bounded, array-backed blocking queue.
-- To serve as a classic bounded buffer for producer–consumer scenarios.
-- To support optional fairness for waiting producer and consumer threads.
+**Technical Definition:** `DelayQueue<E extends Delayed>` extends `AbstractQueue<E>` and implements `BlockingQueue<E>`, `Serializable`. The head of the queue is the `Delayed` element whose delay expired furthest in the past. If no delay has expired, there is no head and `poll()` returns `null`. Expiration occurs when an element's `getDelay(TimeUnit.NANOSECONDS)` method returns a value less than or equal to zero.
 
-**Syntax Structures and Rules**
+**Beginner-Friendly Explanation:** `DelayQueue` is a queue where items become available only after a certain amount of time has passed. It's like setting a timer on each item — you can't take it out until the timer goes off.
 
-Complete general syntaxes:
+### Purposes
+
+- To schedule tasks to be executed after a delay
+- To implement timeout-based processing
+- To manage resources with expiration times
+
+### Syntax Rules and Structure
 
 ```java
-ArrayBlockingQueue(int capacity)
-ArrayBlockingQueue(int capacity, boolean fair)
-ArrayBlockingQueue(int capacity, boolean fair, Collection<? extends E> c)
-```
-
-Component breakdown:
-
-- `capacity`: the fixed capacity of the queue.
-- `fair`: if `true`, grants threads access in FIFO order.
-- `c`: the collection whose elements are to be placed into the queue.
-
-Syntax rules: The capacity cannot be changed after creation. Fairness generally decreases throughput but reduces variability and avoids starvation.
-
-Constraints and limitations: `null` elements are not permitted.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Bounded `ArrayBlockingQueue`**
-
-```java
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class ArrayBlockingQueueExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<String> queue = new ArrayBlockingQueue<>(2);
-        queue.put("A");
-        queue.put("B");
-        System.out.println("Queue: " + queue);
-        System.out.println("Take: " + queue.take());
-        System.out.println("Queue after: " + queue);
-    }
+public class DelayQueue<E extends Delayed> extends AbstractQueue<E>
+        implements BlockingQueue<E>, Serializable {
+    public DelayQueue();
+    public DelayQueue(Collection<? extends E> c);
 }
 ```
 
-Expected Output:
-
-```
-Queue: [A, B]
-Take: A
-Queue after: [B]
-```
-
-**Example 2: Fair `ArrayBlockingQueue`**
-
-```java
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class ArrayBlockingQueueFairExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(1, true);
-        Thread t1 = new Thread(() -> {
-            try {
-                queue.put(1);
-                System.out.println("Thread 1 produced 1");
-            } catch (InterruptedException e) {}
-        });
-        Thread t2 = new Thread(() -> {
-            try {
-                queue.put(2);
-                System.out.println("Thread 2 produced 2");
-            } catch (InterruptedException e) {}
-        });
-        t1.start();
-        Thread.sleep(100);
-        t2.start();
-        Thread.sleep(100);
-        System.out.println("Take: " + queue.take());
-        System.out.println("Take: " + queue.take());
-        t1.join();
-        t2.join();
-    }
-}
-```
-
-Expected Output (order may vary):
-
-```
-Thread 1 produced 1
-Take: 1
-Thread 2 produced 2
-Take: 2
-```
-
-**Real-World Cases with Explanation**
-
-`ArrayBlockingQueue` is used in bounded buffer scenarios, such as a fixed-size request queue in a web server, a bounded task queue in a thread pool, and any producer–consumer system where the buffer size must be limited to prevent memory exhaustion.
-
-**References Links**
-
-- ArrayBlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ArrayBlockingQueue.html
-- ArrayBlockingQueue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ArrayBlockingQueue.html
-
-#### 5.4 PriorityBlockingQueue
-
-**Definitions**
-
-- **Core Definition:** An unbounded blocking queue that uses the same ordering rules as `PriorityQueue` and supplies blocking retrieval operations.
-- **Technical Definition:** `public class PriorityBlockingQueue<E> extends AbstractQueue<E> implements BlockingQueue<E>, Serializable`. This class does not permit `null` elements. A priority queue relying on natural ordering also does not permit insertion of non-comparable objects.
-- **Beginner-Friendly Explanation:** `PriorityBlockingQueue` is a thread-safe priority queue. It combines the ordering of `PriorityQueue` with the blocking behaviour of `BlockingQueue`.
-
-**Purposes**
-
-- To provide a thread-safe, unbounded blocking priority queue.
-- To support concurrent algorithms that require priority-based retrieval.
-- To serve as a building block for concurrent task scheduling with priorities.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-PriorityBlockingQueue()
-PriorityBlockingQueue(int initialCapacity)
-PriorityBlockingQueue(int initialCapacity, Comparator<? super E> comparator)
-PriorityBlockingQueue(Collection<? extends E> c)
-```
-
-Component breakdown:
-
-- `initialCapacity`: the initial capacity for the internal heap.
-- `comparator`: the comparator used to order elements.
-- `c`: the collection whose elements are to be placed into the queue.
-
-Syntax rules: The iterator is not guaranteed to traverse elements in any particular order. `drainTo` can be used to remove elements in priority order.
-
-Constraints and limitations: Logically unbounded, but attempted additions may fail due to resource exhaustion. `null` elements are not permitted.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Basic `PriorityBlockingQueue`**
-
-```java
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class PriorityBlockingQueueExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<Integer> pq = new PriorityBlockingQueue<>();
-        pq.put(5);
-        pq.put(1);
-        pq.put(3);
-        System.out.println("Take: " + pq.take()); // 1
-        System.out.println("Take: " + pq.take()); // 3
-        System.out.println("Take: " + pq.take()); // 5
-    }
-}
-```
-
-Expected Output:
-
-```
-Take: 1
-Take: 3
-Take: 5
-```
-
-**Example 2: Custom comparator**
-
-```java
-import java.util.Comparator;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class PriorityBlockingQueueComparatorExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<Integer> pq = new PriorityBlockingQueue<>(11, Comparator.reverseOrder());
-        pq.put(5);
-        pq.put(1);
-        pq.put(3);
-        System.out.println("Take: " + pq.take()); // 5
-        System.out.println("Take: " + pq.take()); // 3
-        System.out.println("Take: " + pq.take()); // 1
-    }
-}
-```
-
-Expected Output:
-
-```
-Take: 5
-Take: 3
-Take: 1
-```
-
-**Real-World Cases with Explanation**
-
-`PriorityBlockingQueue` is used in concurrent task schedulers where tasks have different priorities, in concurrent Dijkstra implementations, and in any concurrent algorithm that requires priority-based retrieval.
-
-**References Links**
-
-- PriorityBlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/PriorityBlockingQueue.html
-- PriorityBlockingQueue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/PriorityBlockingQueue.html
-
-#### 5.5 DelayQueue
-
-**Definitions**
-
-- **Core Definition:** An unbounded blocking queue of `Delayed` elements, in which an element generally becomes eligible for removal when its delay has expired.
-- **Technical Definition:** `public class DelayQueue<E extends Delayed> extends AbstractQueue<E> implements BlockingQueue<E>`. While this class implements the `BlockingQueue` interface, it intentionally violates the general contract of `BlockingQueue`, in that the following methods disregard the presence of unexpired elements and only ever remove the expired head.
-- **Beginner-Friendly Explanation:** `DelayQueue` is a queue where elements cannot be taken until a certain amount of time has passed. It is useful for scheduling tasks that should be executed after a delay.
-
-**Purposes**
-
-- To provide a time-based scheduling queue.
-- To support scenarios where elements become available only after a specified delay.
-- To serve as a building block for scheduled task execution systems.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-DelayQueue()
-```
-
-Component breakdown:
+**Syntax Rules:**
 
 - Elements must implement the `Delayed` interface.
+- `take()` blocks until an element's delay expires.
+- Does not permit `null` elements.
 
-Syntax rules: Elements are ordered by their delay. The `peek` method may return a non-null head even when `take` would block waiting for that element to expire.
+**Constraints and Limitations:**
 
-Constraints and limitations: `null` elements are not permitted.
+- Elements must implement `Delayed`.
+- Unbounded; `put()` never blocks.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `DelayQueue` with delayed elements**
+### Annotated Code Example
 
 ```java
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
+// File: DelayQueueDemo.java
+import java.util.concurrent.*;
 
-class DelayedItem implements Delayed {
+class DelayedTask implements Delayed {
     private final String name;
-    private final long delayTime;
+    private final long startTime;
 
-    public DelayedItem(String name, long delay, TimeUnit unit) {
+    public DelayedTask(String name, long delayMs) {
         this.name = name;
-        this.delayTime = System.currentTimeMillis() + unit.toMillis(delay);
+        this.startTime = System.currentTimeMillis() + delayMs;
     }
 
     @Override
     public long getDelay(TimeUnit unit) {
-        return unit.convert(delayTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        long remaining = startTime - System.currentTimeMillis();
+        return unit.convert(remaining, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public int compareTo(Delayed o) {
-        return Long.compare(this.delayTime, ((DelayedItem) o).delayTime);
+    public int compareTo(Delayed other) {
+        return Long.compare(this.startTime, ((DelayedTask) other).startTime);
     }
 
     @Override
     public String toString() { return name; }
 }
 
-public class DelayQueueExample {
+public class DelayQueueDemo {
     public static void main(String[] args) throws InterruptedException {
-        DelayQueue<DelayedItem> queue = new DelayQueue<>();
-        queue.put(new DelayedItem("Task1", 2, TimeUnit.SECONDS));
-        queue.put(new DelayedItem("Task2", 1, TimeUnit.SECONDS));
-        System.out.println("Taking...");
-        System.out.println("Took: " + queue.take()); // Task2 after 1 second
-        System.out.println("Took: " + queue.take()); // Task1 after another second
+        DelayQueue<DelayedTask> queue = new DelayQueue<>();
+        queue.put(new DelayedTask("Task 1", 3000));
+        queue.put(new DelayedTask("Task 2", 1000));
+        queue.put(new DelayedTask("Task 3", 2000));
+
+        while (!queue.isEmpty()) {
+            System.out.println("Taking: " + queue.take());
+        }
     }
 }
 ```
 
-Expected Output (after ~2 seconds total):
-
+**Expected Output:**
 ```
-Taking...
-Took: Task2
-Took: Task1
+Taking: Task 2
+Taking: Task 3
+Taking: Task 1
 ```
 
-**Real-World Cases with Explanation**
+**Step-by-Step Explanation:**
 
-`DelayQueue` is used in scheduled thread pools, cache expiration systems (where entries expire after a certain time), and session timeout management.
+1. Three tasks are added with different delays (1s, 2s, 3s).
+2. `take()` blocks until each task's delay expires.
+3. Tasks are retrieved in order of expiration: Task 2, Task 3, Task 1.
 
-**References Links**
+### Real-World Cases
 
-- DelayQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/DelayQueue.html
-- DelayQueue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/DelayQueue.html
+- **Timeout Management:** Managing session timeouts or connection timeouts.
+- **Scheduled Tasks:** Implementing a simple task scheduler.
+- **Cache Expiration:** Removing expired items from a cache.
 
-#### 5.6 SynchronousQueue
+---
 
-**Definitions**
+## 13. TransferQueue
 
-- **Core Definition:** A blocking queue in which each insert operation must wait for a corresponding remove operation by another thread, and vice versa.
-- **Technical Definition:** `public class SynchronousQueue<E> extends AbstractQueue<E> implements BlockingQueue<E>, Serializable`. A synchronous queue does not have any internal capacity, not even a capacity of one. You cannot `peek` at a synchronous queue because an element is only present when you try to remove it.
-- **Beginner-Friendly Explanation:** `SynchronousQueue` is a meeting point for two threads. One thread offers an element, and the other takes it. There is no storage—the handoff is direct.
+### Definitions
 
-**Purposes**
+**Core Definition:** `TransferQueue` is a `BlockingQueue` in which producers may wait for consumers to receive elements.
 
-- To provide a zero-capacity handoff queue.
-- To support rendezvous-style communication between threads.
-- To serve as a building block for handoff designs.
+**Technical Definition:** `TransferQueue<E>` extends `BlockingQueue<E>`. A `TransferQueue` may be useful in message-passing applications where producers sometimes (using method `transfer(E)`) await receipt of elements by consumers invoking `take` or `poll`. The `transfer()` method transfers an element immediately if a consumer is waiting; otherwise, it blocks until a consumer receives the element.
 
-**Syntax Structures and Rules**
+**Beginner-Friendly Explanation:** `TransferQueue` is like a `SynchronousQueue` with capacity. A producer can either hand off an element directly (using `transfer()`) or enqueue it (using `put()`).
 
-Complete general syntaxes:
+### Purposes
+
+- To provide a queue where producers can wait for consumers
+- To support handoff semantics with optional buffering
+- To implement message-passing patterns
+
+### Syntax Rules and Structure
 
 ```java
-SynchronousQueue()
-SynchronousQueue(boolean fair)
-```
-
-Component breakdown:
-
-- `fair`: if `true`, grants threads access in FIFO order.
-
-Syntax rules: `put` blocks until another thread calls `take`, and `take` blocks until another thread calls `put`. `peek` always returns `null`.
-
-Constraints and limitations: No internal capacity. `null` elements are not permitted.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Handoff with `SynchronousQueue`**
-
-```java
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.BlockingQueue;
-
-public class SynchronousQueueExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingQueue<String> queue = new SynchronousQueue<>();
-        Thread producer = new Thread(() -> {
-            try {
-                System.out.println("Producer: putting...");
-                queue.put("Handoff");
-                System.out.println("Producer: put completed");
-            } catch (InterruptedException e) {}
-        });
-        Thread consumer = new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-                System.out.println("Consumer: taking...");
-                String item = queue.take();
-                System.out.println("Consumer: took " + item);
-            } catch (InterruptedException e) {}
-        });
-        producer.start();
-        consumer.start();
-        producer.join();
-        consumer.join();
-    }
+public interface TransferQueue<E> extends BlockingQueue<E> {
+    boolean tryTransfer(E e);
+    void transfer(E e) throws InterruptedException;
+    boolean tryTransfer(E e, long timeout, TimeUnit unit) throws InterruptedException;
+    boolean hasWaitingConsumer();
+    int getWaitingConsumerCount();
 }
 ```
 
-Expected Output:
+**Syntax Rules:**
 
-```
-Producer: putting...
-Consumer: taking...
-Consumer: took Handoff
-Producer: put completed
-```
+- `transfer()` blocks until the element is consumed.
+- `tryTransfer()` returns immediately.
+- `hasWaitingConsumer()` checks if a consumer is waiting.
 
-**Real-World Cases with Explanation**
+**Constraints and Limitations:**
 
-`SynchronousQueue` is used in thread pools (such as `Executors.newCachedThreadPool()`), where tasks are handed off directly to waiting worker threads without being stored in a queue.
+- Only implemented by `LinkedTransferQueue`.
 
-**References Links**
-
-- SynchronousQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/SynchronousQueue.html
-- SynchronousQueue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/SynchronousQueue.html
-
-#### 5.7 TransferQueue and LinkedTransferQueue
-
-**Definitions**
-
-- **Core Definition:** A `BlockingQueue` in which producers may wait for consumers to receive elements.
-- **Technical Definition:** `public interface TransferQueue<E> extends BlockingQueue<E>`. A `TransferQueue` may be useful for example in message passing applications in which producers sometimes (using method `transfer(E)`) await receipt of elements by consumers invoking `take` or `poll`, while at other times enqueue elements (via method `put`) without waiting for receipt.
-- **Beginner-Friendly Explanation:** `TransferQueue` is like a blocking queue but with an extra guarantee: when you `transfer` an element, you know that a consumer has received it. `LinkedTransferQueue` is the standard implementation.
-
-**Purposes**
-
-- To provide a queue where producers can wait for consumers to receive elements.
-- To support message-passing applications with guaranteed delivery.
-- To offer both blocking and non-blocking transfer operations.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
+### Annotated Code Example
 
 ```java
-void transfer(E e) throws InterruptedException
-boolean tryTransfer(E e)
-boolean tryTransfer(E e, long timeout, TimeUnit unit) throws InterruptedException
-boolean hasWaitingConsumer()
-int getWaitingConsumerCount()
-```
+// File: TransferQueueDemo.java
+import java.util.concurrent.*;
 
-Component breakdown:
-
-- `e`: the element to transfer.
-- `transfer`: blocks until the element is received by a consumer.
-- `tryTransfer`: transfers immediately if a consumer is waiting; otherwise returns `false` without enqueuing.
-- `hasWaitingConsumer`: returns `true` if at least one consumer is waiting.
-
-Syntax rules: `LinkedTransferQueue` is an unbounded `TransferQueue` based on linked nodes. It is the only standard implementation of `TransferQueue`.
-
-Constraints and limitations: `transfer` may block indefinitely. `null` elements are not permitted.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `LinkedTransferQueue` with `transfer`**
-
-```java
-import java.util.concurrent.LinkedTransferQueue;
-import java.util.concurrent.TransferQueue;
-
-public class TransferQueueExample {
+public class TransferQueueDemo {
     public static void main(String[] args) throws InterruptedException {
         TransferQueue<String> queue = new LinkedTransferQueue<>();
+
         Thread producer = new Thread(() -> {
             try {
-                System.out.println("Producer: transferring...");
-                queue.transfer("Data");
+                System.out.println("Producer: transferring");
+                queue.transfer("Direct Handoff");
                 System.out.println("Producer: transfer completed");
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
+
         Thread consumer = new Thread(() -> {
             try {
                 Thread.sleep(1000);
-                System.out.println("Consumer: taking...");
-                String item = queue.take();
-                System.out.println("Consumer: took " + item);
-            } catch (InterruptedException e) {}
+                System.out.println("Consumer: taking");
+                System.out.println("Consumer: got " + queue.take());
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
+
         producer.start();
         consumer.start();
         producer.join();
@@ -2052,181 +1193,363 @@ public class TransferQueueExample {
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Producer: transferring...
-Consumer: taking...
-Consumer: took Data
+Producer: transferring
+Consumer: taking
+Consumer: got Direct Handoff
 Producer: transfer completed
 ```
 
-**Real-World Cases with Explanation**
+### Real-World Cases
 
-`LinkedTransferQueue` is used in message-passing frameworks where producers need confirmation that a message has been received, and in systems that require both blocking and non-blocking transfer semantics.
+- **Message Passing:** Handing off messages between threads.
+- **Task Handoff:** Directly transferring tasks to worker threads.
 
-**References Links**
+---
 
-- TransferQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/TransferQueue.html
-- LinkedTransferQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedTransferQueue.html
+## 14. LinkedTransferQueue
 
-### 6. The BlockingDeque Interface
+### Definitions
 
-**Core Definition:** A `Deque` that additionally supports blocking operations that wait for the deque to become non-empty when retrieving an element, and wait for space to become available in the deque when storing an element.
+**Core Definition:** `LinkedTransferQueue` is an unbounded `TransferQueue` based on linked nodes, ordering elements FIFO with respect to any given producer.
 
-**Technical Definition:** `public interface BlockingDeque<E> extends BlockingQueue<E>, Deque<E>`. `BlockingDeque` methods come in four forms: one throws an exception, the second returns a special value, the third blocks the current thread indefinitely, and the fourth blocks for a given maximum time limit. These methods are summarized for both the head and tail ends.
+**Technical Definition:** `LinkedTransferQueue<E>` extends `AbstractQueue<E>` and implements `TransferQueue<E>`, `Serializable`. It orders elements FIFO with respect to any given producer. The head of the queue is that element that has been on the queue the longest time for some producer. It provides higher throughput than `SynchronousQueue` and is suitable for message-passing applications.
 
-**Beginner-Friendly Explanation:** A `BlockingDeque` is a deque that can block. It combines the flexibility of a double-ended queue with the blocking behaviour of a `BlockingQueue`.
+**Beginner-Friendly Explanation:** `LinkedTransferQueue` is the implementation of `TransferQueue`. It combines the handoff capability of `SynchronousQueue` with the buffering capability of a regular queue.
 
-**Purposes**
+### Purposes
 
-- To provide a thread-safe, blocking double-ended queue.
-- To support both FIFO and LIFO blocking operations.
-- To serve as a building block for work-stealing algorithms with blocking.
+- To provide a concrete implementation of `TransferQueue`
+- To support both direct handoff and buffered queuing
+- To offer high throughput for message-passing scenarios
 
-**Syntax Structures and Rules**
-
-Complete general syntaxes (selected):
+### Syntax Rules and Structure
 
 ```java
-void putFirst(E e) throws InterruptedException
-void putLast(E e) throws InterruptedException
-E takeFirst() throws InterruptedException
-E takeLast() throws InterruptedException
+public class LinkedTransferQueue<E> extends AbstractQueue<E>
+        implements TransferQueue<E>, Serializable {
+    public LinkedTransferQueue();
+    public LinkedTransferQueue(Collection<? extends E> c);
+}
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `e`: the element to be inserted.
-- `putFirst` and `putLast` block until space is available.
-- `takeFirst` and `takeLast` block until an element is available.
+- Unbounded; `put()` never blocks.
+- Does not permit `null` elements.
 
-Syntax rules: Like any `BlockingQueue`, a `BlockingDeque` is thread safe, does not permit `null` elements, and may be capacity-constrained. A `BlockingDeque` implementation may be used directly as a FIFO `BlockingQueue`.
+**Constraints and Limitations:**
 
-Constraints and limitations: `null` elements are not permitted. `LinkedBlockingDeque` is the standard implementation.
+- `size()` is not constant-time.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
+### Annotated Code Example
 
-**Example 1: `LinkedBlockingDeque` with blocking operations**
+See the `TransferQueueDemo` in Section 13.
+
+### Real-World Cases
+
+- **High-Throughput Messaging:** Inter-thread communication with optional handoff.
+- **Reactive Streams:** Implementing backpressure-aware pipelines.
+
+---
+
+## 15. ConcurrentLinkedQueue
+
+### Definitions
+
+**Core Definition:** `ConcurrentLinkedQueue` is an unbounded thread-safe queue based on linked nodes, ordering elements FIFO.
+
+**Technical Definition:** `ConcurrentLinkedQueue<E>` extends `AbstractQueue<E>` and implements `Queue<E>`, `Serializable`. It is an unbounded thread-safe queue based on linked nodes, ordering elements FIFO. The head of the queue is the element that has been on the queue the longest time. It is an appropriate choice when many threads will share access to a common collection. It does not permit `null` elements. It employs an efficient non-blocking algorithm.
+
+**Beginner-Friendly Explanation:** `ConcurrentLinkedQueue` is a thread-safe queue that uses lock-free algorithms. Multiple threads can add and remove elements simultaneously without blocking each other.
+
+### Purposes
+
+- To provide a thread-safe, lock-free FIFO queue
+- To support high-concurrency scenarios with many threads
+- To avoid the overhead of blocking queues when blocking is not needed
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.BlockingDeque;
+public class ConcurrentLinkedQueue<E> extends AbstractQueue<E>
+        implements Queue<E>, Serializable {
+    public ConcurrentLinkedQueue();
+    public ConcurrentLinkedQueue(Collection<? extends E> c);
+}
+```
 
-public class BlockingDequeExample {
-    public static void main(String[] args) throws InterruptedException {
-        BlockingDeque<String> deque = new LinkedBlockingDeque<>(2);
-        deque.putFirst("First");
-        deque.putLast("Last");
+**Syntax Rules:**
+
+- Unbounded.
+- Does not permit `null` elements.
+- Iterators are weakly consistent and never throw `ConcurrentModificationException`.
+- `size()` is NOT constant-time; it requires traversal.
+
+**Constraints and Limitations:**
+
+- `size()` may be inaccurate if the queue is modified during traversal.
+- Bulk operations are not guaranteed to be atomic.
+
+### Annotated Code Example
+
+```java
+// File: ConcurrentLinkedQueueDemo.java
+import java.util.concurrent.*;
+
+public class ConcurrentLinkedQueueDemo {
+    public static void main(String[] args) {
+        ConcurrentLinkedQueue<Integer> queue = new ConcurrentLinkedQueue<>();
+
+        // Multiple threads can safely add elements
+        Thread t1 = new Thread(() -> {
+            for (int i = 1; i <= 5; i++) queue.offer(i);
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 6; i <= 10; i++) queue.offer(i);
+        });
+
+        t1.start();
+        t2.start();
+
+        try { t1.join(); t2.join(); } catch (InterruptedException e) { }
+
+        System.out.println("Queue size: " + queue.size()); // 10
+        System.out.println("Poll order:");
+        while (!queue.isEmpty()) {
+            System.out.println(queue.poll());
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Queue size: 10
+Poll order:
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+```
+
+### Real-World Cases
+
+- **Producer-Consumer:** Non-blocking producer-consumer queues.
+- **Work Stealing:** Distributing tasks among worker threads.
+- **Event Queues:** High-throughput event processing.
+
+---
+
+## 16. ConcurrentLinkedDeque
+
+### Definitions
+
+**Core Definition:** `ConcurrentLinkedDeque` is an unbounded concurrent deque based on linked nodes, supporting concurrent insertion, removal, and access operations at both ends.
+
+**Technical Definition:** `ConcurrentLinkedDeque<E>` extends `AbstractCollection<E>` and implements `Deque<E>`, `Serializable`. Concurrent insertion, removal, and access operations execute safely across multiple threads. It is an appropriate choice when many threads will share access to a common collection. It does not permit `null` elements.
+
+**Beginner-Friendly Explanation:** `ConcurrentLinkedDeque` is a thread-safe double-ended queue. It supports lock-free operations at both ends.
+
+### Purposes
+
+- To provide a thread-safe, lock-free deque
+- To support concurrent operations at both ends
+- To serve as a concurrent stack or queue
+
+### Syntax Rules and Structure
+
+```java
+public class ConcurrentLinkedDeque<E> extends AbstractCollection<E>
+        implements Deque<E>, Serializable {
+    public ConcurrentLinkedDeque();
+    public ConcurrentLinkedDeque(Collection<? extends E> c);
+}
+```
+
+**Syntax Rules:**
+
+- Unbounded.
+- Does not permit `null` elements.
+- Iterators are weakly consistent.
+
+**Constraints and Limitations:**
+
+- `size()` is not constant-time.
+- Bulk operations are not atomic.
+
+### Annotated Code Example
+
+```java
+// File: ConcurrentLinkedDequeDemo.java
+import java.util.concurrent.*;
+
+public class ConcurrentLinkedDequeDemo {
+    public static void main(String[] args) {
+        ConcurrentLinkedDeque<String> deque = new ConcurrentLinkedDeque<>();
+
+        // Multiple threads can safely add at both ends
+        Thread t1 = new Thread(() -> {
+            for (int i = 1; i <= 5; i++) deque.addFirst("F" + i);
+        });
+
+        Thread t2 = new Thread(() -> {
+            for (int i = 1; i <= 5; i++) deque.addLast("L" + i);
+        });
+
+        t1.start();
+        t2.start();
+
+        try { t1.join(); t2.join(); } catch (InterruptedException e) { }
+
         System.out.println("Deque: " + deque);
-        System.out.println("takeFirst: " + deque.takeFirst());
-        System.out.println("takeLast: " + deque.takeLast());
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Deque: [First, Last]
-takeFirst: First
-takeLast: Last
+Deque: [F5, F4, F3, F2, F1, L1, L2, L3, L4, L5]
 ```
 
-**Example 2: Blocking `putFirst` on a full deque**
+### Real-World Cases
+
+- **Concurrent Work Stealing:** Deques are used in work-stealing algorithms.
+- **Concurrent Stacks and Queues:** Flexible concurrent data structure.
+- **Undo/Redo:** Concurrent undo and redo operations.
+
+---
+
+## 17. Queue Implementations Comparison
+
+| Feature | ArrayDeque | LinkedList | PriorityQueue | ArrayBlockingQueue | LinkedBlockingQueue | PriorityBlockingQueue | SynchronousQueue | DelayQueue | ConcurrentLinkedQueue | ConcurrentLinkedDeque |
+|---------|-----------|------------|---------------|-------------------|---------------------|----------------------|-----------------|-----------|----------------------|----------------------|
+| **Interface** | Deque | Deque | Queue | BlockingQueue | BlockingQueue | BlockingQueue | BlockingQueue | BlockingQueue | Queue | Deque |
+| **Thread-Safe** | No | No | No | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| **Bounded** | No | No | No | Yes | Optionally | No | No (0 capacity) | No | No | No |
+| **Ordering** | FIFO/LIFO | FIFO/LIFO | Priority | FIFO | FIFO | Priority | Handoff | Delay | FIFO | FIFO/LIFO |
+| **Null Elements** | No | Yes | No | No | No | No | No | No | No | No |
+| **Blocking** | No | No | No | Yes | Yes | Yes | Yes | Yes | No | No |
+| **Best For** | Default queue/stack | Legacy | Priority tasks | Bounded buffers | High throughput | Priority + blocking | Handoff | Delayed tasks | High-concurrency | Concurrent deque |
+
+---
+
+## 18. Queue Best Practices
+
+### Definitions
+
+**Core Definition:** Queue best practices are guidelines for choosing and using queue implementations effectively in Java applications.
+
+**Technical Definition:** Best practices include choosing the right implementation for the use case, preferring `offer`/`poll`/`peek` over `add`/`remove`/`element`, avoiding `null` elements, and being aware of the performance characteristics of different implementations. For concurrent scenarios, prefer lock-free implementations (`ConcurrentLinkedQueue`) over blocking ones when blocking is not required.
+
+**Beginner-Friendly Explanation:** Best practices help you write queue code that is fast, safe, and easy to maintain.
+
+### Key Best Practices
+
+| Practice | Description |
+|----------|-------------|
+| **Choose the right implementation** | Use `ArrayDeque` for general use; `PriorityQueue` for priority; `BlockingQueue` for producer-consumer; `ConcurrentLinkedQueue` for high-concurrency non-blocking. |
+| **Prefer `offer`/`poll`/`peek`** | These return special values instead of throwing exceptions, avoiding try/catch clutter. |
+| **Avoid `null` elements** | Most queues forbid `null`; use `Optional` or sentinel objects instead. |
+| **Prefer `ArrayDeque` over `Stack` and `LinkedList`** | `ArrayDeque` is faster for both stack and queue operations. |
+| **Use `BlockingQueue` for producer-consumer** | `put()` and `take()` handle blocking and waiting automatically. |
+| **Use bounded queues for backpressure** | `ArrayBlockingQueue` provides natural backpressure in concurrent systems. |
+| **Be aware of `size()` cost** | `ConcurrentLinkedQueue.size()` is O(n), not O(1). |
+| **Use `PriorityBlockingQueue` for concurrent priority** | `PriorityQueue` is not thread-safe; use `PriorityBlockingQueue` instead. |
+| **Consider fairness in blocking queues** | `ArrayBlockingQueue` with `fair=true` ensures FIFO order for blocked threads. |
+| **Use `DelayQueue` for scheduled processing** | Elements become available only after their delay expires. |
+
+### Annotated Code Example
 
 ```java
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.BlockingDeque;
+// File: QueueBestPractices.java
+import java.util.*;
+import java.util.concurrent.*;
 
-public class BlockingDequePutBlockExample {
+public class QueueBestPractices {
     public static void main(String[] args) throws InterruptedException {
-        BlockingDeque<Integer> deque = new LinkedBlockingDeque<>(1);
-        deque.putFirst(1);
-        Thread producer = new Thread(() -> {
-            try {
-                System.out.println("Producer: putFirst blocking...");
-                deque.putFirst(2);
-                System.out.println("Producer: putFirst succeeded");
-            } catch (InterruptedException e) {}
-        });
-        Thread consumer = new Thread(() -> {
-            try {
-                Thread.sleep(1000);
-                System.out.println("Consumer: takeFirst: " + deque.takeFirst());
-            } catch (InterruptedException e) {}
-        });
-        producer.start();
-        consumer.start();
-        producer.join();
-        consumer.join();
+        // GOOD: Use ArrayDeque for general-purpose queue
+        Deque<String> deque = new ArrayDeque<>();
+        deque.offer("A");
+        deque.offer("B");
+        System.out.println("Deque: " + deque);
+
+        // GOOD: Use PriorityQueue for priority-based processing
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+        pq.offer(5);
+        pq.offer(1);
+        pq.offer(3);
+        System.out.println("Priority head: " + pq.peek()); // 1
+
+        // GOOD: Use BlockingQueue for producer-consumer
+        BlockingQueue<String> blockingQueue = new ArrayBlockingQueue<>(10);
+        blockingQueue.put("Task");
+        System.out.println("BlockingQueue take: " + blockingQueue.take());
+
+        // GOOD: Use ConcurrentLinkedQueue for high-concurrency non-blocking
+        ConcurrentLinkedQueue<Integer> clq = new ConcurrentLinkedQueue<>();
+        clq.offer(1);
+        clq.offer(2);
+        System.out.println("ConcurrentLinkedQueue: " + clq);
+
+        // GOOD: Prefer offer/poll over add/remove
+        if (!deque.isEmpty()) {
+            String head = deque.poll(); // Returns null if empty
+            System.out.println("Polled: " + head);
+        }
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Producer: putFirst blocking...
-Consumer: takeFirst: 1
-Producer: putFirst succeeded
+Deque: [A, B]
+Priority head: 1
+BlockingQueue take: Task
+ConcurrentLinkedQueue: [1, 2]
+Polled: A
 ```
 
-**Real-World Cases with Explanation**
+**Step-by-Step Explanation:**
 
-`LinkedBlockingDeque` is used in work-stealing schedulers where workers can steal tasks from either end of a deque, and in systems that require both FIFO and LIFO blocking semantics.
+1. `ArrayDeque` is used for general-purpose queue operations.
+2. `PriorityQueue` ensures the smallest element is always at the head.
+3. `ArrayBlockingQueue` handles producer-consumer blocking.
+4. `ConcurrentLinkedQueue` provides thread-safe, non-blocking operations.
+5. `offer`/`poll` are preferred over `add`/`remove` for their tolerant failure behaviour.
 
-**References Links**
+### Real-World Cases
 
-- BlockingDeque (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/BlockingDeque.html
-- LinkedBlockingDeque (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedBlockingDeque.html
+- **Task Scheduling:** `PriorityBlockingQueue` for priority-based task execution.
+- **Web Servers:** `BlockingQueue` for request processing queues.
+- **Event Processing:** `ConcurrentLinkedQueue` for high-throughput event handling.
+- **Session Timeout:** `DelayQueue` for managing session expiration.
 
-## Summary Table of Implementations
+---
 
-| Class | Type | Bounded | Thread-Safe | Blocking | Ordering |
-|---|---|---|---|---|---|
-| ArrayDeque | Deque | No | No | No | FIFO / LIFO |
-| LinkedList | Deque | No | No | No | FIFO / LIFO |
-| PriorityQueue | Queue | No | No | No | Priority |
-| ConcurrentLinkedQueue | Queue | No | Yes | No | FIFO |
-| ConcurrentLinkedDeque | Deque | No | Yes | No | FIFO / LIFO |
-| LinkedBlockingQueue | BlockingQueue | Optional | Yes | Yes | FIFO |
-| LinkedBlockingDeque | BlockingDeque | Optional | Yes | Yes | FIFO / LIFO |
-| ArrayBlockingQueue | BlockingQueue | Yes | Yes | Yes | FIFO |
-| PriorityBlockingQueue | BlockingQueue | No | Yes | Yes | Priority |
-| DelayQueue | BlockingQueue | No | Yes | Yes | Delay |
-| SynchronousQueue | BlockingQueue | Zero | Yes | Yes | Handoff |
-| LinkedTransferQueue | TransferQueue | No | Yes | Yes | FIFO |
+## References Links
 
-## Deprecated, Unsafe, and Version-Specific Notes
-
-- The legacy `Stack` class is deprecated in favour of `Deque` implementations such as `ArrayDeque`. The `Deque` interface should be used in preference to `Stack` when a stack is needed.
-- `ArrayDeque`, `LinkedList`, and `PriorityQueue` are not thread-safe. They must not be accessed concurrently by multiple threads without external synchronisation.
-- `ConcurrentLinkedQueue` and `ConcurrentLinkedDeque` are non-blocking and do not support `null` elements. Their `size()` method is not a constant-time operation.
-- `LinkedBlockingQueue`, `ArrayBlockingQueue`, `PriorityBlockingQueue`, `DelayQueue`, and `SynchronousQueue` are thread-safe blocking queues. They do not accept `null` elements.
-- `TransferQueue` and `LinkedTransferQueue` were introduced in Java 7.
-- `BlockingDeque` and `LinkedBlockingDeque` were introduced in Java 6.
-- `Queue`, `BlockingQueue`, `PriorityQueue`, and `ConcurrentLinkedQueue` were introduced in Java 5.
-
-## References
-
-- Queue (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html
-- Queue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Queue.html
-- Deque (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Deque.html
-- Deque (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Deque.html
-- BlockingQueue (Java SE 11) – https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/BlockingQueue.html
-- BlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/BlockingQueue.html
-- ArrayDeque (Java SE 26) – https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/util/ArrayDeque.html
-- LinkedList (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/LinkedList.html
-- PriorityQueue (Java SE 25) – https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PriorityQueue.html
-- ConcurrentLinkedQueue (Java SE 11) – https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ConcurrentLinkedQueue.html
-- LinkedBlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedBlockingQueue.html
-- ArrayBlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ArrayBlockingQueue.html
-- PriorityBlockingQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/PriorityBlockingQueue.html
-- DelayQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/DelayQueue.html
-- SynchronousQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/SynchronousQueue.html
-- TransferQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/TransferQueue.html
-- BlockingDeque (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/BlockingDeque.html
-- LinkedTransferQueue (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedTransferQueue.html
-- LinkedBlockingDeque (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedBlockingDeque.html
-- Collections Framework Enhancements – https://docs.oracle.com/javase/8/docs/technotes/guides/collections/changes5.html
+- Queue (Java SE 27) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/util/Queue.html
+- Deque (Java SE 11) — Oracle API Documentation - https://docs.oracle.com/javase/jp/11/docs/api/java.base/java/util/Deque.html
+- PriorityQueue (Java SE 25) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/PriorityQueue.html
+- ArrayDeque (Java SE 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayDeque.html
+- BlockingQueue (Java SE 11) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/BlockingQueue.html
+- ArrayBlockingQueue (Java SE 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ArrayBlockingQueue.html
+- LinkedBlockingQueue (Java SE 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedBlockingQueue.html
+- PriorityBlockingQueue (Java SE 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/PriorityBlockingQueue.html
+- SynchronousQueue (Java SE 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/SynchronousQueue.html
+- DelayQueue (Java SE 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/DelayQueue.html
+- TransferQueue (Java SE 8) — Oracle API Documentation - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/TransferQueue.html
+- LinkedTransferQueue (Java SE 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedTransferQueue.html
+- ConcurrentLinkedQueue (Java SE 11) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ConcurrentLinkedQueue.html
+- ConcurrentLinkedDeque (Java SE 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentLinkedDeque.html
+- Queue Implementations — The Java Tutorials (Oracle) - https://docs.oracle.com/javase/tutorial/collections/implementations/queue.html
+- Java Queue Implementations: Guide to Queue, Deque, PriorityQueue, and BlockingQueue — Cleverence - https://www.cleverence.com/articles/oracle-documentation/queue-implementations-the-java-tutorials-4927/

@@ -1,1107 +1,1327 @@
 # Python Tuples: A Comprehensive Programming Cheat Sheet
 
+---
+
 ## Topic Overview
 
 ### Definitions
 
 **Core Definition**
-A tuple is a built-in Python data type that stores an ordered, immutable sequence of items, which can be of any type.
+
+A Python tuple is an immutable, ordered sequence of elements. It is one of Python's built-in data structures, designed to store a fixed collection of items that should not change after creation.
 
 **Technical Definition**
-Tuples are immutable sequences, typically used to store collections of heterogeneous data (such as the 2-tuples produced by the `enumerate()` built-in). They are also used for cases where an immutable sequence of homogeneous data is needed, such as allowing storage in a `set` or `dict` instance. Tuples implement all of the common sequence operations, including indexing, slicing, concatenation, and repetition. They are defined by the `tuple` class and support the iterator protocol, comparison operations, and hashing (if all their elements are hashable).
+
+In Python, a tuple is an instance of the `tuple` class, an immutable sequence type that stores an ordered collection of object references. Tuples are implemented in CPython as fixed-size arrays of pointers to Python objects. Unlike lists, tuples cannot be modified after creation—they support no item assignment, no append, and no remove operations. Tuples support all common sequence operations (indexing, slicing, concatenation, repetition, membership testing, iteration) and define exactly two methods: `count()` and `index()`. Tuples are hashable if all their elements are hashable, making them suitable for use as dictionary keys and set elements. The `tuple()` constructor and literal syntax (comma-separated values, often in parentheses) provide multiple ways to create tuple objects. The key insight is that it is the comma—not the parentheses—that creates a tuple: `x = 1, 2, 3` is a tuple.
 
 **Beginner-Friendly Explanation**
-A tuple is like a list that you can't change after you create it. You use parentheses `()` instead of square brackets `[]`. Tuples are great for storing things that belong together and shouldn't change, like coordinates (x, y) or a person's name, age, and city. Because they can't change, they're faster and use less memory than lists, and you can use them as dictionary keys.
+
+Think of a Python tuple as a sealed envelope containing a fixed list of items. Once you seal the envelope, you can read what’s inside, count how many items there are, or find the position of a specific item, but you cannot add, remove, or change anything. Tuples are ordered (the first item stays first), immutable (they cannot be changed), and can hold anything—numbers, strings, even other tuples. They are perfect for storing data that should never change, like the coordinates of a point or the days of the week.
 
 ### Key Characteristics
 
-| Characteristic | Description |
-|---|---|
-| **Ordered** | Items maintain their insertion order; indexing and slicing work like lists |
-| **Immutable** | Once created, items cannot be added, removed, or changed |
-| **Heterogeneous** | A single tuple can contain items of different types |
-| **Hashable** | Tuples of hashable items can be used as dictionary keys or set elements |
-| **Memory Efficient** | Tuples use less memory and are faster to create/destroy than lists |
-| **Iterable** | Tuples support iteration via `for` loops and the iterator protocol |
-| **Indexable** | Items are accessed by zero-based indices, including negative indices |
-| **Slicable** | Sub-tuples can be extracted using slice notation `[start:stop:step]` |
+- **Ordered**: Elements maintain their insertion order; indexing and slicing respect this order.
+- **Immutable**: Elements cannot be added, removed, or changed after the tuple is created. This is the defining characteristic of tuples.
+- **Heterogeneous**: Tuples can store elements of different types (e.g., `(1, "hello", 3.14)`).
+- **Hashable**: Tuples are hashable if all their elements are hashable, so they can be used as dictionary keys and set members.
+- **Memory-Efficient**: Tuples consume less memory than equivalent lists because they do not need to support dynamic resizing.
+- **Fast**: Tuple creation and access are generally faster than list operations due to immutability and fixed size.
+- **Zero-Indexed**: The first element is at index `0`, the second at `1`, and so on.
+- **Slicable**: Sub-tuples can be extracted using slice notation (`tuple[start:stop:step]`).
+- **Iterable**: Tuples can be iterated over in `for` loops.
+- **Unpackable**: Tuple elements can be assigned to multiple variables in a single statement.
 
 ### Prerequisites
 
-- **Basic Python syntax**: variables, expressions, and statements
-- **Understanding of data types**: integers, floats, strings, booleans
-- **Familiarity with the Python interpreter**: running scripts or using the REPL
-- **Basic concepts of immutability**: understanding that some objects cannot change after creation
-- **Knowledge of lists**: since tuples share many operations with lists
+- Basic understanding of Python variables and assignment.
+- Familiarity with Python's built-in data types (integers, strings, booleans).
+- Knowledge of control flow statements (`if`, `for`, `while`).
+- Understanding of indexing and basic sequence concepts.
+- Awareness of lists (as a comparison point).
 
 ### Related Programming Areas
 
-- **Lists**: Mutable sequences with similar operations but different use cases
-- **Named Tuples**: Tuples with named fields for more readable code
-- **Dictionaries**: Key-value mappings where tuples can serve as keys
-- **Sets**: Unordered collections where tuples can be elements (if hashable)
-- **Function Arguments**: `*args` unpacks tuples; `**kwargs` unpacks dictionaries
-- **Data Records**: Tuples are often used for lightweight records and database rows
-- **Concurrency**: Immutable data is inherently thread-safe
-
-### Core Concepts / Features
-
-1. **Tuple Creation** (Literals, constructor, and the single-element trailing comma trap)
-2. **Immutability and Memory Efficiency** (vs. lists)
-3. **Tuple Unpacking** (Including extended unpacking with starred expressions)
-4. **Nested Tuples** (Tuples within tuples)
-5. **Named Tuples** (`collections.namedtuple` vs. `typing.NamedTuple`)
-6. **Tuple Methods** (The two methods available)
+- **Data Structures and Algorithms**: Tuples are used for returning multiple values from functions and representing fixed records.
+- **Functional Programming**: Tuples support immutable data patterns and are used in higher-order functions.
+- **Database Programming**: Tuples are often returned by database cursors to represent rows.
+- **Named Tuples**: The `collections.namedtuple` factory extends tuples with named fields for self-documenting code.
+- **Concurrency**: Tuples’ immutability makes them safe to share between threads without synchronization.
 
 ---
 
-## Core Concept 1: Tuple Creation
+## Core Concepts / Features
 
-### Definitions
+---
+
+### 1. Tuples, Tuple Literals, and Tuple Creation
+
+#### Definitions
 
 **Core Definition**
-Creating a tuple means instantiating a new `tuple` object, either by writing a tuple literal or by calling the `tuple()` constructor.
+
+A tuple literal is a comma-separated sequence of expressions, often enclosed in parentheses. Tuple creation refers to the various ways of constructing tuple objects, including literals, the `tuple()` constructor, and tuple packing.
 
 **Technical Definition**
-Tuples may be constructed in a number of ways: using a pair of parentheses to denote the empty tuple `()`; using a trailing comma for a singleton tuple `a,` or `(a,)`; separating items with commas `a, b, c` or `(a, b, c)`; or using the `tuple()` built-in with an optional iterable argument. The `tuple()` constructor builds a tuple whose items are the same and in the same order as the iterable's items. If the iterable is already a tuple, it is returned unchanged.
+
+Tuples may be constructed in several ways: using a pair of parentheses to denote the empty tuple `()`; using a trailing comma for a singleton tuple `(a,)` or `a,`; separating items with commas `(a, b, c)` or `a, b, c`; or using the `tuple()` constructor, which accepts any iterable and builds a tuple whose items are the same and in the same order as the iterable’s items. If the iterable is already a tuple, it is returned unchanged (since tuples are immutable). The `tuple()` constructor with no arguments creates an empty tuple `()`. The comma is the essential element: `x = 1, 2, 3` creates a tuple even without parentheses.
 
 **Beginner-Friendly Explanation**
-You create a tuple by putting items inside parentheses, separated by commas. The key gotcha: a single item tuple needs a trailing comma — `(5,)` is a tuple, but `(5)` is just the number 5 in parentheses. For empty tuples, use `()`. You can also convert other iterables (like lists or strings) to tuples using `tuple()`.
 
-### Purposes
+Creating a tuple is like writing a list of items separated by commas. You can wrap them in parentheses for clarity: `coordinates = (10, 20)`. If you only have one item, you must add a trailing comma: `singleton = (42,)`—otherwise Python thinks you just have a number in parentheses. You can also make a tuple from something else, like turning a list into a tuple: `tuple([1, 2, 3])` gives `(1, 2, 3)`.
 
-- **To store fixed collections of data** that should not change
-- **To group related values** together as a single unit (e.g., a record)
-- **To return multiple values** from a function
-- **To use as dictionary keys** or set elements (when hashable)
-- **To create immutable sequences** for thread safety or hash-based collections
+#### Purposes
 
-### Syntax Rules and Structure
+- To create an immutable collection of items that cannot be changed after creation.
+- To group related data into a single, fixed record.
+- To provide a hashable sequence for use as dictionary keys or set members.
+- To serve as the foundation for named tuples and other tuple-like structures.
+
+#### Syntax Rules and Structure
 
 **Complete General Syntax**
 
 ```
-# Empty tuple
-()
-tuple()
+# Empty tuple literal
+empty = ()
 
-# Single-element tuple (REQUIRES trailing comma)
-(item,)
+# Singleton tuple (trailing comma is mandatory)
+singleton = (value,)
+singleton2 = value,
 
-# Multiple-element tuple
-(item1, item2, item3)
-item1, item2, item3       # parentheses optional
+# Tuple literal with multiple items
+items = (expression1, expression2, expression3)
+items2 = expression1, expression2, expression3  # parentheses optional
 
-# Tuple from iterable
-tuple(iterable)
+# Tuple constructor from iterable
+from_iterable = tuple(iterable)
 ```
 
-**Breakdown:**
-- `()`: Empty tuple literal.
-- `tuple()`: Constructor that returns a new empty tuple.
-- `(item,)`: Single-element tuple; the trailing comma is essential.
-- `(item1, item2, ...)`: Multiple-element tuple; parentheses are optional.
-- `tuple(iterable)`: Converts an iterable (string, list, range, etc.) to a tuple.
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `()` | Parentheses denote an empty tuple; they are also used for grouping but are not what makes a tuple. |
+| `(value,)` | A trailing comma is required to create a singleton tuple. |
+| `expression1, expression2` | Comma-separated expressions become tuple elements. |
+| `tuple(iterable)` | Constructor that builds a tuple from any iterable. |
 
 **Syntax Rules**
 
-| Rule | Description |
-|---|---|
-| Commas create tuples | It is the comma that makes a tuple, not the parentheses |
-| Trailing comma for singleton | Required for single-element tuples: `(5,)` or `5,` |
-| Parentheses optional | For non-empty tuples, parentheses are optional but recommended for clarity |
-| Empty tuple needs `()` | The only case where parentheses are required |
-| Any expression | Items can be any Python expression |
+- The comma is what creates a tuple, not the parentheses.
+- A trailing comma after the last element is allowed and is mandatory for singleton tuples.
+- Tuples can span multiple lines using implicit line joining inside parentheses.
+- The `tuple()` constructor accepts at most one argument (an iterable).
+- Tuples can be nested: `((1, 2), (3, 4))`.
+- Parentheses are optional in many contexts: `x = 1, 2, 3`.
 
 **Constraints and Limitations**
 
-- **Trailing comma trap**: `(5)` is an integer, not a tuple; `(5,)` is the tuple.
-- **Immutability**: Once created, items cannot be changed.
-- **No single-element without comma**: There is no way to create a one-item tuple without the trailing comma.
+- A singleton tuple must have a trailing comma; `(5)` is just the integer `5`.
+- The `tuple()` constructor creates a shallow copy of the iterable’s items.
+- Very large tuple literals may hit parser or memory limits.
+- Tuple literals evaluate all expressions at creation time.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Creating Tuples in Various Ways**
+**Example 1: Creating Tuples in Multiple Ways**
 
 ```python
-# Step 1: Empty tuple
+# Empty tuple
 empty = ()
-print(f"Empty: {empty}")
+print("Empty:", empty)
 
-# Step 2: Single-element tuple (note the trailing comma)
+# Singleton tuple (note the trailing comma)
 singleton = (42,)
-print(f"Singleton: {singleton}")
-print(f"Type: {type(singleton)}")
+print("Singleton:", singleton)
 
-# Step 3: WITHOUT trailing comma (this is NOT a tuple)
-not_a_tuple = (42)
-print(f"Without comma: {not_a_tuple}")
-print(f"Type: {type(not_a_tuple)}")
+# Singleton without parentheses but with comma
+singleton2 = 42,
+print("Singleton2:", singleton2)
 
-# Step 4: Multiple-element tuple
-multi = (1, "two", 3.0, True)
-print(f"Multi: {multi}")
+# Literal with mixed types
+mixed = (1, "two", 3.0, True, None)
+print("Mixed:", mixed)
 
-# Step 5: Parentheses optional
-no_parens = 1, 2, 3
-print(f"No parens: {no_parens}")
+# Tuple without parentheses
+coordinates = 10, 20, 30
+print("Coordinates:", coordinates)
 
-# Step 6: From iterable
+# Tuple from a list
 from_list = tuple([1, 2, 3])
-from_string = tuple("abc")
-print(f"From list: {from_list}")
-print(f"From string: {from_string}")
+print("From list:", from_list)
+
+# Tuple from a string
+from_string = tuple("hello")
+print("From string:", from_string)
+
+# Nested tuple
+nested = ((1, 2), (3, 4))
+print("Nested:", nested)
 ```
 
 **Expected Output:**
+
 ```
 Empty: ()
 Singleton: (42,)
-Type: <class 'tuple'>
-Without comma: 42
-Type: <class 'int'>
-Multi: (1, 'two', 3.0, True)
-No parens: (1, 2, 3)
+Singleton2: (42,)
+Mixed: (1, 'two', 3.0, True, None)
+Coordinates: (10, 20, 30)
 From list: (1, 2, 3)
-From string: ('a', 'b', 'c')
+From string: ('h', 'e', 'l', 'l', 'o')
+Nested: ((1, 2), (3, 4))
 ```
 
-**Breakdown:** The singleton `(42,)` is a tuple; `(42)` is an integer. The comma is what creates the tuple. `tuple("abc")` iterates the string, producing individual characters.
+**Step-by-Step Breakdown:**
 
-**Example 2: The Trailing Comma Trap**
+1. `()` creates an empty tuple.
+2. `(42,)` creates a singleton tuple; the trailing comma is essential.
+3. `42,` also creates a singleton tuple because the comma is present.
+4. `(1, "two", 3.0, True, None)` creates a tuple with five elements of different types.
+5. `10, 20, 30` creates a tuple without parentheses.
+6. `tuple([1, 2, 3])` converts a list into a tuple.
+7. `tuple("hello")` converts a string into a tuple of its characters.
+8. `((1, 2), (3, 4))` creates a nested tuple.
 
-```python
-# Step 1: Demonstrate the trap
-a = (5)
-b = (5,)
+**Why the Output is Produced:**
 
-print(f"a = {a}, type = {type(a)}")
-print(f"b = {b}, type = {type(b)}")
-
-# Step 2: Verify with isinstance
-print(f"a is tuple: {isinstance(a, tuple)}")
-print(f"b is tuple: {isinstance(b, tuple)}")
-
-# Step 3: Trailing comma is harmless in larger tuples
-c = (1, 2, 3,)
-print(f"c = {c}, type = {type(c)}")
-```
-
-**Expected Output:**
-```
-a = 5, type = <class 'int'>
-b = (5,), type = <class 'tuple'>
-a is tuple: False
-b is tuple: True
-c = (1, 2, 3), type = <class 'tuple'>
-```
-
-**Breakdown:** Parentheses group; commas create tuples. Without the comma, Python interprets `(5)` as a parenthesised integer, not a tuple.
-
-**Example 3: Creating Tuples from Other Iterables**
-
-```python
-# Step 1: From a range
-numbers = tuple(range(5))
-print(f"From range: {numbers}")
-
-# Step 2: From a list
-names = tuple(["Alice", "Bob", "Charlie"])
-print(f"From list: {names}")
-
-# Step 3: From a generator expression
-squares = tuple(x**2 for x in range(5))
-print(f"From generator: {squares}")
-
-# Step 4: tuple() returns the same object if already a tuple
-original = (1, 2, 3)
-same = tuple(original)
-print(f"Same object: {original is same}")
-```
-
-**Expected Output:**
-```
-From range: (0, 1, 2, 3, 4)
-From list: ('Alice', 'Bob', 'Charlie')
-From generator: (0, 1, 4, 9, 16)
-Same object: True
-```
-
-**Breakdown:** `tuple()` converts any iterable. When the argument is already a tuple, Python returns the same object to save memory.
-
-### Real-World Cases with Explanation
-
-**Case 1: Storing Coordinates**
-
-```python
-point = (3, 7)
-rgb_red = (255, 0, 0)
-```
-
-**Why it matters:** Tuples are ideal for fixed-size, related data like coordinates or colour components. Their immutability ensures these values remain constant.
-
-**Case 2: Returning Multiple Values from Functions**
-
-```python
-def min_max(numbers):
-    return min(numbers), max(numbers)
-
-low, high = min_max([3, 1, 4, 1, 5])
-```
-
-**Why it matters:** Functions return tuples to provide multiple values. The caller can unpack them directly.
+Python creates tuples when it sees comma-separated expressions. Parentheses are used for grouping and readability but are not the defining syntax. The `tuple()` constructor iterates over its argument and builds a tuple from the resulting items.
 
 ---
 
-## Core Concept 2: Immutability and Memory Efficiency
+**Example 2: The Singleton Tuple Pitfall**
 
-### Definitions
+```python
+# NOT a tuple: just a parenthesized integer
+not_a_tuple = (5)
+print("Type:", type(not_a_tuple))
+print("Value:", not_a_tuple)
+
+# A tuple with one element (trailing comma)
+actual_tuple = (5,)
+print("Type:", type(actual_tuple))
+print("Value:", actual_tuple)
+print("Length:", len(actual_tuple))
+```
+
+**Expected Output:**
+
+```
+Type: <class 'int'>
+Value: 5
+Type: <class 'tuple'>
+Value: (5,)
+Length: 1
+```
+
+**Step-by-Step Breakdown:**
+
+1. `(5)` is interpreted as the integer `5` because the parentheses are just for grouping.
+2. `(5,)` is a tuple because the comma indicates a sequence.
+3. `len((5,))` returns `1`, confirming it is a tuple with one element.
+
+**Why the Output is Produced:**
+
+In Python, the comma—not the parentheses—defines a tuple. Without the comma, `(5)` is simply the integer `5` enclosed in parentheses for grouping. The trailing comma is mandatory for singleton tuples.
+
+#### Real-World Cases
+
+- **Geographic Coordinates**: `location = (latitude, longitude)`.
+- **RGB Colors**: `red = (255, 0, 0)`.
+- **Database Rows**: Database cursors often return rows as tuples.
+- **Function Returns**: Functions that return multiple values actually return a tuple.
+- **Configuration Constants**: Days of the week, month names, or other fixed sequences.
+
+---
+
+### 2. Tuple Indexing
+
+#### Definitions
 
 **Core Definition**
-Tuples are immutable, meaning their contents cannot be changed after creation; this immutability makes them more memory-efficient and faster than lists.
+
+Tuple indexing is the process of accessing a specific element of a tuple by its position (index). Python uses zero-based indexing, meaning the first element is at index `0`.
 
 **Technical Definition**
-Tuples are immutable sequences. Once a tuple is created, its elements cannot be modified, added, or removed. This immutability has significant performance implications: allocating a tuple object typically requires no `malloc` calls (because Python maintains internal free lists of tuples of various small sizes and recycles them directly), while allocating a list requires two `malloc()` calls (one for the object header, another for the content vector). Similarly, destroying a tuple typically just links it onto an internal free list, while destroying a list requires two `free()` calls. So creation and destruction of tuples goes faster, and tuples are more memory-efficient.
+
+Tuples support indexing with both positive and negative integers. Positive indices count from the beginning (0 to `len(tuple) - 1`), while negative indices count from the end (`-1` is the last element, `-2` the second-to-last, etc.). Indexing a tuple returns the object reference stored at that position. Attempting to access an index outside the valid range raises an `IndexError`. Tuple indexing is an O(1) operation because tuples are implemented as fixed-size arrays of pointers.
 
 **Beginner-Friendly Explanation**
-Once you make a tuple, you can't change it. This sounds limiting, but it actually makes tuples faster and smaller than lists. Python can optimise them because it knows they'll never change. Use tuples when your data shouldn't change, and lists when you need to add or remove items.
 
-### Purposes
+Indexing a tuple is like using a numbered slot in a pill organizer that is sealed shut—you can look at any slot you want, but you cannot change its contents. The first slot is `0`, the second is `1`, and so on. You can also count from the end: `-1` is the last slot, `-2` is the second-to-last. If you ask for a slot that doesn’t exist, Python raises an error.
 
-- **To guarantee data integrity** by preventing accidental modification
-- **To use as dictionary keys** (tuples of hashable items are hashable)
-- **To use as set elements** (same reason)
-- **To improve performance** in memory-constrained environments
-- **To enable thread safety** since immutable data cannot be corrupted by concurrent access
+#### Purposes
 
-### Syntax Rules and Structure
+- To retrieve individual elements from a tuple.
+- To access elements relative to the end of the tuple using negative indices.
+- To support algorithms that require positional access to fixed data.
 
-**Immutability Rules**
+#### Syntax Rules and Structure
 
-| Operation | Allowed? | Example |
-|---|---|---|
-| Index access | Yes | `t[0]` |
-| Slicing | Yes | `t[1:3]` |
-| Concatenation | Yes (creates new tuple) | `t1 + t2` |
-| Repetition | Yes (creates new tuple) | `t * 3` |
-| Assignment to element | No | `t[0] = 5` → `TypeError` |
-| `append`, `extend`, `remove` | No | No such methods |
-| `del t[0]` | No | `TypeError` |
+**Complete General Syntax**
+
+```
+element = tuple_name[index]
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `tuple_name` | The tuple object. |
+| `[index]` | Square brackets containing an integer index. |
+| `element` | The retrieved object. |
+
+**Syntax Rules**
+
+- Indices must be integers (or objects implementing `__index__`).
+- Valid positive indices: `0` to `len(tuple) - 1`.
+- Valid negative indices: `-1` to `-len(tuple)`.
+- Indexing outside the valid range raises `IndexError`.
+- Tuples are immutable, so you cannot assign to an index.
 
 **Constraints and Limitations**
 
-- **Cannot modify in place**: Any "modification" creates a new tuple.
-- **Hashability requires hashable elements**: A tuple containing a list is not hashable.
-- **No list methods**: Tuples lack `append()`, `extend()`, `remove()`, `pop()`, etc.
-- **Memory trade-off**: Tuples of the same size use less memory than lists.
+- Tuples are zero-indexed; there is no index `len(tuple)`.
+- Negative indices work for reading only.
+- Attempting to assign to an index raises `TypeError`.
+- Indexing a nested tuple returns a sub-tuple, which must be indexed again to access inner elements.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Demonstrating Immutability**
+**Example 1: Positive and Negative Indexing**
 
 ```python
-# Step 1: Create a tuple
-point = (3, 7)
+fruits = ("apple", "banana", "cherry", "date", "elderberry")
 
-# Step 2: Access elements (allowed)
-print(f"x = {point[0]}, y = {point[1]}")
+# Positive indexing
+print("First:", fruits[0])
+print("Third:", fruits[2])
 
-# Step 3: Attempt to modify (raises TypeError)
-try:
-    point[0] = 5
-except TypeError as e:
-    print(f"Error: {e}")
+# Negative indexing
+print("Last:", fruits[-1])
+print("Second to last:", fruits[-2])
 
-# Step 4: "Modify" by creating a new tuple
-new_point = (5, point[1])
-print(f"New point: {new_point}")
+# Nested tuple indexing
+nested = ((1, 2), (3, 4), (5, 6))
+print("Nested [1][0]:", nested[1][0])
 ```
 
 **Expected Output:**
+
 ```
-x = 3, y = 7
-Error: 'tuple' object does not support item assignment
-New point: (5, 7)
+First: apple
+Third: cherry
+Last: elderberry
+Second to last: date
+Nested [1][0]: 3
 ```
 
-**Breakdown:** Tuples do not support item assignment. To "change" a value, you must create a new tuple.
+**Step-by-Step Breakdown:**
 
-**Example 2: Hashability — Tuples as Dictionary Keys**
+1. `fruits[0]` accesses the first element (`"apple"`).
+2. `fruits[2]` accesses the third element (`"cherry"`).
+3. `fruits[-1]` accesses the last element (`"elderberry"`).
+4. `fruits[-2]` accesses the second-to-last element (`"date"`).
+5. `nested[1][0]` accesses the first element of the second sub-tuple (`3`).
+
+**Why the Output is Produced:**
+
+Positive indices count from the start, while negative indices count from the end. Python resolves the index to an absolute position internally. Nested indexing chains access to inner elements.
+
+---
+
+**Example 2: IndexError and TypeError**
 
 ```python
-# Step 1: Create a tuple key
+numbers = (10, 20, 30)
+
+# IndexError
+try:
+    print(numbers[5])
+except IndexError as e:
+    print(f"Error: {e}")
+
+# TypeError when trying to modify
+try:
+    numbers[0] = 100
+except TypeError as e:
+    print(f"Error: {e}")
+```
+
+**Expected Output:**
+
+```
+Error: tuple index out of range
+Error: 'tuple' object does not support item assignment
+```
+
+**Step-by-Step Breakdown:**
+
+1. `numbers[5]` attempts to access index `5`, which is out of range for a 3-element tuple.
+2. Python raises `IndexError: tuple index out of range`.
+3. `numbers[0] = 100` attempts to modify the tuple, which is impossible.
+4. Python raises `TypeError: 'tuple' object does not support item assignment`.
+
+**Why the Output is Produced:**
+
+Python validates the index against the tuple’s length. If the absolute index is outside `[0, len(tuple) - 1]`, an `IndexError` is raised. Because tuples are immutable, item assignment is not supported and raises `TypeError`.
+
+#### Real-World Cases
+
+- **Accessing Record Fields**: Retrieving specific fields from a database row stored as a tuple.
+- **Coordinate Systems**: Accessing x, y, and z components of a point.
+- **Configuration Values**: Reading fixed configuration parameters by position.
+
+---
+
+### 3. Tuple Slicing
+
+#### Definitions
+
+**Core Definition**
+
+Tuple slicing is a mechanism for extracting a sub-tuple from a tuple using the syntax `tuple[start:stop:step]`. It returns a new tuple containing the selected elements.
+
+**Technical Definition**
+
+Slicing creates a new tuple object containing references to the elements in the specified range. The `start` index is inclusive, the `stop` index is exclusive, and `step` determines the stride. All three parameters are optional and can be negative. Slicing a tuple is an O(k) operation where k is the number of elements in the resulting slice. Because tuples are immutable, slice assignment is not supported—you cannot replace, insert, or delete elements via slicing.
+
+**Beginner-Friendly Explanation**
+
+Slicing a tuple is like cutting a piece of a sealed cake. You say where to start cutting, where to stop, and how big each piece should be. `fruits[1:4]` gives you elements at positions 1, 2, and 3 (not 4—the stop is exclusive). You can even use negative numbers to count from the end.
+
+#### Purposes
+
+- To extract sub-tuples without modifying the original tuple.
+- To create a copy of a tuple (though `tuple(t)` is O(1) for exact tuples).
+- To reverse a tuple using `tuple[::-1]`.
+- To support windowing and pagination operations.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```
+sub_tuple = tuple_name[start:stop:step]
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `start` | Starting index (inclusive). Defaults to `0`. |
+| `stop` | Ending index (exclusive). Defaults to `len(tuple)`. |
+| `step` | Stride between elements. Defaults to `1`. |
+
+**Syntax Rules**
+
+- `start` and `stop` can be omitted, in which case defaults apply.
+- Negative values for `start`, `stop`, and `step` are supported.
+- A step of `0` raises `ValueError`.
+- Slicing always creates a new tuple (a shallow copy of references).
+- Slicing beyond bounds does not raise an error; it clamps to the tuple’s bounds.
+
+**Constraints and Limitations**
+
+- Slice assignment is not supported (tuples are immutable).
+- Deep slicing of nested tuples still shares references to inner objects.
+- Very large slices can be memory-intensive.
+
+#### Annotated Code Examples
+
+**Example 1: Basic Slicing**
+
+```python
+numbers = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+
+# Basic slice: indices 2, 3, 4
+print(numbers[2:5])
+
+# Slice from the beginning
+print(numbers[:4])
+
+# Slice to the end
+print(numbers[6:])
+
+# Slice with step
+print(numbers[1:8:2])
+
+# Reverse the tuple
+print(numbers[::-1])
+```
+
+**Expected Output:**
+
+```
+(2, 3, 4)
+(0, 1, 2, 3)
+(6, 7, 8, 9)
+(1, 3, 5, 7)
+(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+```
+
+**Step-by-Step Breakdown:**
+
+1. `numbers[2:5]` returns elements at indices `2`, `3`, and `4` (stop is exclusive).
+2. `numbers[:4]` returns elements from index `0` to `3`.
+3. `numbers[6:]` returns elements from index `6` to the end.
+4. `numbers[1:8:2]` returns every second element from index `1` to `7`.
+5. `numbers[::-1]` reverses the tuple by using a step of `-1`.
+
+**Why the Output is Produced:**
+
+Slicing creates a new tuple by selecting elements according to the start, stop, and step values. Negative steps traverse the tuple in reverse.
+
+#### Real-World Cases
+
+- **Pagination**: Extracting a page of records from a tuple of results.
+- **Data Splitting**: Splitting a dataset into training and testing subsets.
+- **Window Operations**: Extracting sliding windows for signal processing.
+
+---
+
+### 4. Tuple Methods
+
+#### Definitions
+
+**Core Definition**
+
+Tuple methods are built-in functions that operate on tuple objects. Unlike lists, tuples have only two methods: `count()` and `index()`.
+
+**Technical Definition**
+
+The `tuple` class defines exactly two methods: `count(x)` returns the number of occurrences of `x` in the tuple, and `index(x, start, stop)` returns the index of the first occurrence of `x`, optionally within a specified range. These methods match the semantics of their list counterparts. Because tuples are immutable, they do not have methods for adding, removing, sorting, or reversing elements. For operations like counting or searching, the tuple is iterated linearly, giving O(n) time complexity.
+
+**Beginner-Friendly Explanation**
+
+Tuples only have two built-in tools: one to count how many times an item appears (`count`) and one to find where an item is (`index`). If you need to do anything else—like adding or removing items—you would have to convert the tuple to a list, do the operation, and convert it back.
+
+#### Purposes
+
+- To count occurrences of a specific value in a tuple.
+- To find the position of a specific value in a tuple.
+- To support simple queries on immutable sequences.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```
+tuple_name.count(value)
+tuple_name.index(value, start=0, stop=len(tuple))
+```
+
+**Component Breakdown**
+
+| Method | Description |
+|--------|-------------|
+| `count(value)` | Returns the number of times `value` appears. |
+| `index(value, start, stop)` | Returns the index of the first occurrence of `value`. |
+
+**Syntax Rules**
+
+- `count` takes exactly one argument.
+- `index` takes one required argument and two optional arguments.
+- `index` raises `ValueError` if the value is not found.
+- Both methods are O(n) operations.
+
+**Constraints and Limitations**
+
+- `index` raises `ValueError` if the value is not present.
+- `count` and `index` are the only methods available on tuples.
+- For complex operations, convert to a list or use built-in functions.
+
+#### Annotated Code Examples
+
+**Example 1: `count()` and `index()`**
+
+```python
+fruits = ("apple", "banana", "cherry", "banana", "apple", "banana")
+
+# count: number of occurrences
+print("Banana count         :", fruits.count("banana"))
+print("Apple count          :", fruits.count("apple"))
+print("Grape count          :", fruits.count("grape"))
+
+# index: position of first occurrence
+print("First banana index   :", fruits.index("banana"))
+print("Banana index after 2 :", fruits.index("banana", 2))
+
+# index with Valueerror
+try:
+    fruits.index("grape")
+except ValueError as e:
+    print(f"Error: {e}")
+```
+
+**Expected Output:**
+
+```
+Banana count          : 3
+Apple count           : 2
+Grape count           : 0
+First banana index    : 1
+Banana index after 2  : 3
+Error: tuple.index(x) : x not in tuple
+```
+
+**Step-by-Step Breakdown:**
+
+1. `count("banana")` returns `3` because "banana" appears three times.
+2. `count("apple")` returns `2`.
+3. `count("grape")` returns `0` because "grape" is not in the tuple.
+4. `index("banana")` returns `1`, the first occurrence.
+5. `index("banana", 2)` searches starting from index `2` and returns `3`.
+6. `index("grape")` raises `ValueError` because "grape" is not in the tuple.
+
+**Why the Output is Produced:**
+
+`count` iterates through the tuple and counts matches. `index` returns the position of the first match, with optional `start` and `stop` parameters to limit the search range. If no match is found, `ValueError` is raised.
+
+#### Real-World Cases
+
+- **Voting Systems**: Counting how many times a candidate appears in a tuple of votes.
+- **Data Validation**: Checking if a value exists in a fixed tuple of allowed values.
+- **Simple Lookups**: Finding the position of a field in a record tuple.
+
+---
+
+### 5. Tuple Unpacking
+
+#### Definitions
+
+**Core Definition**
+
+Tuple unpacking is the process of assigning elements of a tuple to multiple variables in a single statement.
+
+**Technical Definition**
+
+Python supports iterable unpacking, which allows a tuple (or any iterable) to be unpacked into individual variables. The syntax `a, b, c = tuple` assigns the first element to `a`, the second to `b`, and the third to `c`. Extended unpacking with `*` collects remaining elements into a list: `first, *rest = tuple`. Unpacking requires the number of variables on the left to match the number of elements on the right, unless `*` is used. The starred expression (PEP 3132) allows exactly one starred variable per unpacking.
+
+**Beginner-Friendly Explanation**
+
+Unpacking is like opening a sealed envelope with multiple items and giving each item to a different person. `a, b, c = (1, 2, 3)` gives `1` to `a`, `2` to `b`, and `3` to `c`. You can also say “give me the first one, and put the rest in a bag” using `*`.
+
+#### Purposes
+
+- To extract multiple values from a tuple into separate variables.
+- To swap variables without a temporary variable.
+- To capture the “rest” of a tuple using starred assignment.
+- To simplify iteration over sequences of tuples.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```
+a, b, c = tuple_name
+first, *rest = tuple_name
+*init, last = tuple_name
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `a, b, c` | Variables to assign elements to. |
+| `*rest` | Collects remaining elements into a list. |
+| `tuple_name` | The tuple (or iterable) being unpacked. |
+
+**Syntax Rules**
+
+- The number of variables must match the number of elements, unless `*` is used.
+- Only one starred variable is allowed per unpacking.
+- The starred variable can appear at any position.
+- Unpacking works with any iterable, not just tuples.
+- Nested unpacking is supported: `(a, b), c = (1, 2), 3`.
+
+**Constraints and Limitations**
+
+- Too many or too few variables raise `ValueError`.
+- The starred variable always receives a list (even if empty).
+- Unpacking a nested tuple requires matching nested structure.
+
+#### Annotated Code Examples
+
+**Example 1: Basic Unpacking**
+
+```python
+coordinates = (10, 20, 30)
+x, y, z = coordinates
+print(f"x={x}, y={y}, z={z}")
+
+# Swap variables
+a, b = 1, 2
+a, b = b, a
+print(f"a={a}, b={b}")
+```
+
+**Expected Output:**
+
+```
+x=10, y=20, z=30
+a=2, b=1
+```
+
+**Step-by-Step Breakdown:**
+
+1. `x, y, z = (10, 20, 30)` assigns each element to a corresponding variable.
+2. `a, b = b, a` swaps the values using tuple packing and unpacking.
+
+**Why the Output is Produced:**
+
+Unpacking assigns elements positionally. The right-hand side is evaluated first, then unpacked into the left-hand side.
+
+---
+
+**Example 2: Extended Unpacking with `*`**
+
+```python
+numbers = (1, 2, 3, 4, 5)
+
+first, *middle, last = numbers
+print(f"First: {first}")
+print(f"Middle: {middle}")
+print(f"Last: {last}")
+
+*init, last = numbers
+print(f"Init: {init}, Last: {last}")
+```
+
+**Expected Output:**
+
+```
+First: 1
+Middle: [2, 3, 4]
+Last: 5
+Init: [1, 2, 3, 4], Last: 5
+```
+
+**Step-by-Step Breakdown:**
+
+1. `first, *middle, last = numbers` assigns `1` to `first`, `[2, 3, 4]` to `middle`, and `5` to `last`.
+2. `*init, last = numbers` assigns `[1, 2, 3, 4]` to `init` and `5` to `last`.
+
+**Why the Output is Produced:**
+
+The starred variable collects all elements that are not assigned to other variables. It always receives a list, even if there are no elements.
+
+#### Real-World Cases
+
+- **Function Returns**: Unpacking multiple return values from a function.
+- **Data Parsing**: Extracting fields from a record stored as a tuple.
+- **Configuration**: Assigning settings from a tuple to named variables.
+- **Iteration**: `for x, y in points:` iterates over a tuple of coordinate pairs.
+
+---
+
+### 6. Named Tuples
+
+#### Definitions
+
+**Core Definition**
+
+A named tuple is a tuple subclass created with `collections.namedtuple` that allows elements to be accessed by name as well as by index.
+
+**Technical Definition**
+
+The `collections.namedtuple` factory function returns a new class that subclasses `tuple`. Instances of the new class are tuple-like objects whose fields are accessible by attribute lookup as well as by index and iteration. Named tuples assign meaning to each position in a tuple and allow for more readable, self-documenting code. They support three additional methods (`_make`, `_asdict`, `_replace`) and two additional attributes (`_fields`, `_field_defaults`). Named tuples use `__slots__ = ()` to prevent per-instance dictionaries, keeping memory usage low.
+
+**Beginner-Friendly Explanation**
+
+A named tuple is like a regular tuple but with names for each position. Instead of remembering that `point[0]` is the x-coordinate and `point[1]` is the y-coordinate, you can write `point.x` and `point.y`. It’s like a lightweight object that is also a tuple.
+
+#### Purposes
+
+- To create tuple-like objects with named fields for self-documenting code.
+- To improve code readability by replacing positional indexing with attribute access.
+- To provide a lightweight alternative to full classes for simple data structures.
+- To maintain the performance and immutability benefits of tuples while adding named access.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```
+from collections import namedtuple
+
+Point = namedtuple('Point', ['x', 'y'])
+p = Point(11, y=22)
+
+# Access by index
+p[0]  # 11
+
+# Access by name
+p.x   # 11
+
+# Unpack like a regular tuple
+x, y = p
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `namedtuple('Name', ['field1', 'field2'])` | Creates a new class. |
+| `Point(11, y=22)` | Instantiates with positional or keyword arguments. |
+| `p.x` | Attribute access. |
+| `p[0]` | Index access. |
+| `_fields` | Tuple of field names. |
+| `_make(iterable)` | Creates an instance from an iterable. |
+| `_asdict()` | Returns a dict mapping field names to values. |
+| `_replace(**kwargs)` | Returns a new instance with specified fields replaced. |
+
+**Syntax Rules**
+
+- Field names must be valid Python identifiers and cannot start with an underscore.
+- Field names cannot be Python keywords.
+- The class name must be a valid identifier.
+- `defaults` parameter (Python 3.7+) provides default values for fields.
+- Named tuple instances are immutable, like regular tuples.
+
+**Constraints and Limitations**
+
+- Named tuples are slower to create than regular tuples.
+- They consume slightly more memory than regular tuples (but less than dictionaries).
+- Field names are fixed after class creation.
+- `_replace` returns a new instance; it does not modify the original.
+
+#### Annotated Code Examples
+
+**Example 1: Creating and Using Named Tuples**
+
+```python
+from collections import namedtuple
+
+# Define a named tuple class
+Point = namedtuple('Point', ['x', 'y'])
+
+# Create an instance
+p = Point(11, 22)
+print("Point:", p)
+
+# Access by index
+print("p[0]:", p[0])
+print("p[1]:", p[1])
+
+# Access by name
+print("p.x:", p.x)
+print("p.y:", p.y)
+
+# Unpack like a tuple
+x, y = p
+print(f"x={x}, y={y}")
+
+# Additional methods
+print("Fields:", p._fields)
+print("As dict:", p._asdict())
+print("Replaced:", p._replace(x=33))
+```
+
+**Expected Output:**
+
+```
+Point: Point(x=11, y=22)
+p[0]: 11
+p[1]: 22
+p.x: 11
+p.y: 22
+x=11, y=22
+Fields: ('x', 'y')
+As dict: {'x': 11, 'y': 22}
+Replaced: Point(x=33, y=22)
+```
+
+**Step-by-Step Breakdown:**
+
+1. `namedtuple('Point', ['x', 'y'])` creates a new class named `Point` with fields `x` and `y`.
+2. `Point(11, 22)` creates an instance with values `11` and `22`.
+3. `p[0]` accesses the first field by index.
+4. `p.x` accesses the first field by name.
+5. `x, y = p` unpacks the tuple.
+6. `p._fields` returns `('x', 'y')`.
+7. `p._asdict()` returns `{'x': 11, 'y': 22}`.
+8. `p._replace(x=33)` returns a new `Point` with `x` replaced.
+
+**Why the Output is Produced:**
+
+Named tuples combine the performance and immutability of tuples with the readability of attribute access. The additional methods provide convenient ways to convert, inspect, and modify (by creating a new instance) named tuple data.
+
+---
+
+**Example 2: Named Tuples with Defaults**
+
+```python
+from collections import namedtuple
+
+# Define a named tuple with defaults
+Account = namedtuple('Account', ['type', 'balance'], defaults=[0])
+
+# Create instances
+a1 = Account('premium')
+a2 = Account('basic', 100)
+
+print(a1)
+print(a2)
+print("Defaults:", Account._field_defaults)
+```
+
+**Expected Output:**
+
+```
+Account(type='premium', balance=0)
+Account(type='basic', balance=100)
+Defaults: {'balance': 0}
+```
+
+**Step-by-Step Breakdown:**
+
+1. `defaults=[0]` provides a default value for the `balance` field.
+2. `Account('premium')` uses the default for `balance`.
+3. `Account('basic', 100)` provides both values.
+4. `_field_defaults` shows the default values.
+
+**Why the Output is Produced:**
+
+The `defaults` parameter allows fields to have default values, making the named tuple more flexible for optional data.
+
+#### Real-World Cases
+
+- **Database Records**: `EmployeeRecord = namedtuple('EmployeeRecord', 'name, age, title, department, paygrade')` for self-documenting database rows.
+- **CSV Parsing**: Mapping CSV rows to named tuples for readable access.
+- **Configuration**: Defining configuration structures with named fields.
+- **Geometry**: `Point = namedtuple('Point', ['x', 'y'])` for 2D coordinates.
+
+---
+
+### 7. Tuple Performance
+
+#### Definitions
+
+**Core Definition**
+
+Tuple performance refers to the time and space complexity of operations on Python tuples. Tuples are generally faster and more memory-efficient than lists for equivalent operations.
+
+**Technical Definition**
+
+The CPython documentation provides a time complexity table for tuple operations. Because tuples are immutable, there are no insertion or deletion costs, and making a copy simply returns the same object, so is constant time (O(1)). Key complexities: indexing and assignment (read-only) are O(1); concatenation is O(len(t1) + len(t2)); repetition is O(nk); iteration, membership testing, `min`, `max`, and `len` are O(n) or O(1) as appropriate. Tuple creation is generally faster than list creation because tuples are stored in a single fixed-size memory block, while lists must support dynamic resizing.
+
+**Beginner-Friendly Explanation**
+
+Tuples are like sealed packages: they take less space and can be handled faster than lists because they never change. Creating a tuple is faster, accessing its items is just as fast, and it uses less memory. If you need to modify data, use a list; if the data is fixed, a tuple is more efficient.
+
+#### Purposes
+
+- To understand the performance implications of choosing tuples over lists.
+- To make informed decisions about data structure selection.
+- To write efficient code by leveraging immutability.
+
+#### Syntax Rules and Structure
+
+**Time Complexity Table**
+
+| Operation | Average Case | Notes |
+|-----------|-------------|-------|
+| `t[k]` (index) | O(1) | Random access is constant time. |
+| `len(t)` | O(1) | Length is stored as metadata. |
+| `t[i:j]` (slice) | O(j - i) | Creates a new tuple. |
+| `t1 + t2` | O(len(t1) + len(t2)) | Creates a new tuple. |
+| `t * k` | O(nk) | Creates a new tuple. |
+| `x in t` | O(n) | Linear search. |
+| `min(t), max(t)` | O(n) | Linear scan. |
+| `t.count(x)` | O(n) | Linear scan. |
+| `t.index(x)` | O(n) | Linear scan. |
+| `tuple(t)` (copy) | O(1) | Returns the same object for exact tuples. |
+| Iteration | O(n) | Linear traversal. |
+| Creation (literal) | O(1) | Constant time for fixed-size literals. |
+
+**Constraints and Limitations**
+
+- Performance characteristics may vary across Python implementations.
+- Named tuples are slower to create than regular tuples (approximately 3-4x).
+- Tuple subclasses may have different performance characteristics.
+
+#### Annotated Code Examples
+
+**Example 1: Memory Comparison of Tuple vs List**
+
+```python
+import sys
+
+my_list = [0, 1, 2, "hello", True]
+my_tuple = (0, 1, 2, "hello", True)
+
+print("List size:", sys.getsizeof(my_list), "bytes")
+print("Tuple size:", sys.getsizeof(my_tuple), "bytes")
+```
+
+**Expected Output (approximate):**
+
+```
+List size: 104 bytes
+Tuple size: 80 bytes
+```
+
+**Step-by-Step Breakdown:**
+
+1. `sys.getsizeof(my_list)` returns the memory footprint of the list object.
+2. `sys.getsizeof(my_tuple)` returns the memory footprint of the tuple object.
+3. The tuple uses less memory because it does not need to store additional capacity for growth.
+
+**Why the Output is Produced:**
+
+Lists allocate extra memory to support dynamic resizing. Tuples have a fixed size, so they use exactly as much memory as needed for their elements.
+
+---
+
+**Example 2: Creation Time Comparison**
+
+```python
+import timeit
+
+# Time tuple creation
+tuple_time = timeit.timeit("x = (1, 2, 3, 4, 5)", number=1000000)
+print(f"Tuple creation: {tuple_time:.6f} seconds")
+
+# Time list creation
+list_time = timeit.timeit("x = [1, 2, 3, 4, 5]", number=1000000)
+print(f"List creation: {list_time:.6f} seconds")
+```
+
+**Expected Output (approximate):**
+
+```
+Tuple creation: 0.020000 seconds
+List creation: 0.040000 seconds
+```
+
+**Step-by-Step Breakdown:**
+
+1. `timeit.timeit` runs the creation expression 1,000,000 times.
+2. The tuple creation is faster because tuples are simpler to create and require less memory allocation.
+
+**Why the Output is Produced:**
+
+Tuples are stored in a single fixed-size memory block and do not require the overhead of dynamic resizing or overallocation that lists use.
+
+#### Real-World Cases
+
+- **High-Performance Computing**: Using tuples for fixed data to reduce memory overhead.
+- **Dictionary Keys**: Tuples’ hashability and low memory footprint make them ideal for composite keys.
+- **Function Returns**: Returning tuples from functions is faster than returning lists.
+
+---
+
+### 8. Tuples vs Lists
+
+#### Definitions
+
+**Core Definition**
+
+Tuples and lists are both ordered sequences in Python, but they differ fundamentally in mutability: tuples are immutable, while lists are mutable. This difference drives their respective use cases.
+
+**Technical Definition**
+
+Lists are mutable sequences, meaning their contents can be changed after creation (items can be added, removed, or reassigned). Tuples are immutable sequences, meaning their contents are fixed at creation. Lists overallocate memory to support efficient appends, while tuples use exactly the memory needed for their elements. Lists define many methods (append, extend, insert, remove, pop, sort, reverse, etc.), while tuples define only count and index. Tuples are hashable (if their elements are hashable) and can be used as dictionary keys; lists are not hashable. In CPython, tuple access is slightly faster than list access due to cache effects, and tuple creation is faster and more memory-efficient than list creation.
+
+**Beginner-Friendly Explanation**
+
+A list is like a whiteboard where you can add, erase, and rearrange items. A tuple is like a printed receipt: once printed, you can read it but cannot change it. Use lists when you need to modify data; use tuples when the data should never change.
+
+#### Purposes
+
+- To choose the right data structure for the task based on mutability requirements.
+- To understand the trade-offs between flexibility (lists) and safety/efficiency (tuples).
+- To follow Pythonic conventions for data structure selection.
+
+#### Syntax Rules and Structure
+
+**Comparison Table**
+
+| Feature | Tuple | List |
+|---------|-------|------|
+| Mutability | Immutable | Mutable |
+| Syntax | `(1, 2, 3)` or `1, 2, 3` | `[1, 2, 3]` |
+| Methods | `count`, `index` | Many (`append`, `extend`, `insert`, `remove`, `pop`, `clear`, `index`, `count`, `sort`, `reverse`, `copy`) |
+| Hashability | Hashable (if elements are hashable) | Not hashable |
+| Memory | Less (fixed size) | More (overallocated) |
+| Creation Speed | Faster | Slower |
+| Access Speed | O(1) | O(1) |
+| Use as dict key | Yes | No |
+| Use as set member | Yes | No |
+| Intended use | Heterogeneous fixed data | Homogeneous dynamic data |
+
+**Best Practices for Choosing**
+
+- **Use tuples** when you have a collection of different types of items that should not change (e.g., a record or a point).
+- **Use lists** when you have a collection of the same type of items that may change (e.g., a list of names, a queue).
+- **Use tuples** when you need an immutable sequence for use as a dictionary key.
+- **Use lists** when you need to append, remove, or sort elements.
+- **Use tuples** for function return values when returning multiple pieces of data.
+
+**Constraints and Limitations**
+
+- Tuples cannot be modified, so they are unsuitable for dynamic data.
+- Lists cannot be used as dictionary keys.
+- Converting between tuples and lists is possible via `tuple()` and `list()`.
+- Named tuples offer a middle ground with named fields.
+
+#### Annotated Code Examples
+
+**Example 1: Mutability Difference**
+
+```python
+# Tuple is immutable
+t = (1, 2, 3)
+try:
+    t[0] = 100
+except TypeError as e:
+    print(f"Tuple error: {e}")
+
+# List is mutable
+l = [1, 2, 3]
+l[0] = 100
+print("List after modification:", l)
+
+# Adding to a list
+l.append(4)
+print("List after append:", l)
+
+# Tuples cannot append
+try:
+    t.append(4)
+except AttributeError as e:
+    print(f"Tuple error: {e}")
+```
+
+**Expected Output:**
+
+```
+Tuple error: 'tuple' object does not support item assignment
+List after modification: [100, 2, 3]
+List after append: [100, 2, 3, 4]
+Tuple error: 'tuple' object has no attribute 'append'
+```
+
+**Step-by-Step Breakdown:**
+
+1. `t[0] = 100` raises `TypeError` because tuples do not support item assignment.
+2. `l[0] = 100` modifies the list successfully.
+3. `l.append(4)` adds an element to the list.
+4. `t.append(4)` raises `AttributeError` because tuples have no `append` method.
+
+**Why the Output is Produced:**
+
+Mutability is the core difference. Lists provide methods to change their contents; tuples do not. This makes tuples safer for data that should not change but less flexible for dynamic data.
+
+---
+
+**Example 2: Tuple as Dictionary Key**
+
+```python
+# Tuples can be dictionary keys
 locations = {
     (40.7128, -74.0060): "New York",
     (34.0522, -118.2437): "Los Angeles",
+    (51.5074, -0.1278): "London",
 }
+print(locations[(40.7128, -74.0060)])
 
-# Step 2: Look up by tuple
-coords = (40.7128, -74.0060)
-print(locations[coords])
-
-# Step 3: A tuple containing a list is NOT hashable
+# Lists cannot be dictionary keys
 try:
-    bad_key = (1, [2, 3])
-    d = {bad_key: "value"}
+    bad_dict = {[1, 2]: "value"}
 except TypeError as e:
     print(f"Error: {e}")
 ```
 
 **Expected Output:**
+
 ```
 New York
 Error: unhashable type: 'list'
 ```
 
-**Breakdown:** Tuples of hashable items (numbers, strings) are hashable and can be dictionary keys. Tuples containing mutable items (lists) are not.
+**Step-by-Step Breakdown:**
 
-**Example 3: Memory Efficiency Demonstration**
+1. `(40.7128, -74.0060)` is a hashable tuple, so it can be used as a dictionary key.
+2. `[1, 2]` is an unhashable list, so using it as a dictionary key raises `TypeError`.
 
-```python
-import sys
+**Why the Output is Produced:**
 
-# Step 1: Compare memory usage
-tuple_data = (1, 2, 3, 4, 5)
-list_data = [1, 2, 3, 4, 5]
+Hashability requires immutability. Tuples are immutable and therefore hashable (if their elements are hashable). Lists are mutable and therefore unhashable, so they cannot be used as dictionary keys.
 
-print(f"Tuple size: {sys.getsizeof(tuple_data)} bytes")
-print(f"List size: {sys.getsizeof(list_data)} bytes")
+#### Real-World Cases
 
-# Step 2: Larger comparison
-big_tuple = tuple(range(100))
-big_list = list(range(100))
-
-print(f"Big tuple: {sys.getsizeof(big_tuple)} bytes")
-print(f"Big list: {sys.getsizeof(big_list)} bytes")
-```
-
-**Expected Output:**
-```
-Tuple size: 80 bytes
-List size: 104 bytes
-Big tuple: 840 bytes
-Big list: 904 bytes
-```
-
-**Breakdown:** Tuples use less memory than lists of the same size because they don't need to store extra capacity for future growth.
-
-### Real-World Cases with Explanation
-
-**Case 1: Using Tuples as Dictionary Keys**
-
-```python
-# Coordinates to city name mapping
-cities = {
-    (40.7128, -74.0060): "New York",
-    (51.5074, -0.1278): "London",
-}
-```
-
-**Why it matters:** Tuples' immutability and hashability make them perfect for composite keys in dictionaries, enabling lookups by multiple values.
-
-**Case 2: Protecting Data from Accidental Changes**
-
-```python
-DAYS_OF_WEEK = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-```
-
-**Why it matters:** Using a tuple for constants ensures they can't be accidentally modified during program execution.
+- **Database Records**: Use tuples for fixed rows; use lists for query results that may be modified.
+- **Configuration**: Use tuples for constant configuration values; use lists for settings that may change.
+- **Caching**: Use tuples as cache keys; use lists for cache values that may be updated.
 
 ---
 
-## Core Concept 3: Tuple Unpacking
+### 9. Tuple Best Practices
 
-### Definitions
+#### Definitions
 
 **Core Definition**
-Tuple unpacking is the assignment of a tuple's elements to individual variables in a single statement; extended unpacking uses a starred expression to capture multiple elements.
+
+Tuple best practices are guidelines for using Python tuples effectively, including when to choose tuples over lists, how to format tuple literals, and how to leverage tuple unpacking.
 
 **Technical Definition**
-A tuple (or list) on the left side of a simple assignment may contain at most one expression prepended with a single asterisk (a "starred" expression). This designates a subexpression that will be assigned a list of all items from the iterable being unpacked that are not assigned to any of the mandatory expressions, or an empty list if there are no such items. For example, `a, *b, c = range(5)` results in `a = 0`, `b = [1, 2, 3]`, and `c = 4`. It is an error if the iterable doesn't contain enough items to assign to all mandatory expressions.
+
+Tuple best practices encompass PEP 8 style conventions, semantic conventions (tuples for heterogeneous data, lists for homogeneous data), and performance considerations. PEP 8 specifies that trailing commas are mandatory for singleton tuples and recommends surrounding them in parentheses for clarity. Guido van Rossum has expressed that tuples should be used for heterogeneous items (lightweight structs) while lists should be used for homogeneous items. Tuples are preferred for function return values when returning multiple pieces of data.
 
 **Beginner-Friendly Explanation**
-Unpacking lets you take a tuple apart and assign each piece to a separate variable in one line. For example, `x, y = (3, 7)` sets `x = 3` and `y = 7`. If you don't know how many items there are, you can use `*` to collect the "rest" into a list: `first, *rest = (1, 2, 3, 4)` sets `first = 1` and `rest = [2, 3, 4]`.
 
-### Purposes
+Best practices are good habits that make your tuple code clean, efficient, and bug-free. They include things like using tuples for fixed data, using lists for data that changes, and always adding a trailing comma for single-element tuples.
 
-- **To assign multiple variables** from a single tuple in one statement
-- **To swap values** between variables without a temporary variable
-- **To capture variable-length sequences** using starred expressions
-- **To extract specific fields** from a tuple (e.g., `name, age, city = record`)
-- **To iterate over tuples** in a `for` loop with unpacking
+#### Purposes
 
-### Syntax Rules and Structure
+- To write readable and maintainable tuple code.
+- To choose the right data structure for the task.
+- To avoid common pitfalls with singleton tuples and mutability.
+- To align with Python community conventions.
 
-**Complete General Syntax**
+#### Syntax Rules and Structure
 
-```
-# Basic unpacking
-var1, var2, var3 = tuple
-
-# Extended unpacking (starred expression)
-first, *rest = tuple
-*init, last = tuple
-a, *middle, c = tuple
-```
-
-**Breakdown:**
-- `var1, var2, ...`: Mandatory targets that must receive exactly one item each.
-- `*name`: Starred target that collects remaining items into a list.
-- Only one starred expression allowed per unpacking.
-- The starred expression can appear anywhere in the target list.
-
-**Unpacking Rules**
-
-| Rule | Description |
-|---|---|
-| Length match | Number of mandatory targets must equal number of items (minus starred) |
-| Starred target | Collects remaining items into a list |
-| Only one star | At most one starred expression per assignment |
-| Empty collection | Starred target gets an empty list if no items remain |
-| Error on mismatch | `ValueError` if too few or too many items |
-
-**Constraints and Limitations**
-
-- **No starred expression alone**: `*a = range(5)` is a syntax error; use `*a, = range(5)`
-- **Iterable required**: The right-hand side must be iterable.
-- **Starred only in assignment**: Starred expressions are only allowed as assignment targets (except in function calls).
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Basic Unpacking**
+**General Guidelines**
 
 ```python
-# Step 1: Unpack a tuple into variables
-point = (3, 7)
+# Good: Use tuples for heterogeneous fixed data
+point = (10, 20)
+rgb = (255, 0, 0)
+
+# Good: Use lists for homogeneous dynamic data
+names = ["Alice", "Bob", "Charlie"]
+names.append("David")
+
+# Good: Singleton tuple with trailing comma
+singleton = (42,)
+
+# Good: Tuple unpacking for clarity
 x, y = point
-print(f"x = {x}, y = {y}")
+for name, age in [("Alice", 30), ("Bob", 25)]:
+    print(f"{name} is {age}")
 
-# Step 2: Unpack in a for loop
-coordinates = [(1, 2), (3, 4), (5, 6)]
-for px, py in coordinates:
-    print(f"({px}, {py})")
-
-# Step 3: Swap variables using unpacking
-a, b = 10, 20
-a, b = b, a
-print(f"a = {a}, b = {b}")
+# Bad: Singleton tuple without comma
+not_a_tuple = (42)  # This is just an integer
 ```
 
-**Expected Output:**
-```
-x = 3, y = 7
-(1, 2)
-(3, 4)
-(5, 6)
-a = 20, b = 10
-```
+**Best Practices Table**
 
-**Breakdown:** Unpacking assigns each element to a variable. In the `for` loop, each tuple is unpacked into `px` and `py`. Swapping uses tuple packing and unpacking.
-
-**Example 2: Extended Unpacking with `*`**
-
-```python
-# Step 1: Capture first and rest
-first, *rest = (1, 2, 3, 4, 5)
-print(f"first = {first}, rest = {rest}")
-
-# Step 2: Capture first, middle, and last
-a, *middle, c = (1, 2, 3, 4, 5)
-print(f"a = {a}, middle = {middle}, c = {c}")
-
-# Step 3: Starred at the beginning
-*init, last = (1, 2, 3, 4)
-print(f"init = {init}, last = {last}")
-
-# Step 4: Empty middle section
-x, *y, z = (1, 2)
-print(f"x = {x}, y = {y}, z = {z}")
-```
-
-**Expected Output:**
-```
-first = 1, rest = [2, 3, 4, 5]
-a = 1, middle = [2, 3, 4], c = 5
-init = [1, 2, 3], last = 4
-x = 1, y = [], z = 2
-```
-
-**Breakdown:** The starred target collects all remaining items. It can be empty if no items remain. Only one starred target is allowed.
-
-**Example 3: Unpacking with Error Handling**
-
-```python
-# Step 1: Value unpacking mismatch
-try:
-    a, b = (1, 2, 3)
-except ValueError as e:
-    print(f"Error: {e}")
-
-# Step 2: Using starred to avoid mismatch
-a, *rest = (1, 2, 3)
-print(f"a = {a}, rest = {rest}")
-
-# Step 3: Unpacking with too few items
-try:
-    a, b, c = (1, 2)
-except ValueError as e:
-    print(f"Error: {e}")
-```
-
-**Expected Output:**
-```
-Error: too many values to unpack (expected 2)
-a = 1, rest = [2, 3]
-Error: not enough values to unpack (expected 3, got 2)
-```
-
-**Breakdown:** Without a starred target, the number of variables must exactly match the number of items. Starred targets absorb the difference.
-
-### Real-World Cases with Explanation
-
-**Case 1: Parsing Function Return Values**
-
-```python
-def get_user_info():
-    return "Alice", 30, "alice@example.com"
-
-name, age, email = get_user_info()
-```
-
-**Why it matters:** Functions often return multiple values as tuples. Unpacking assigns each to a meaningful variable name.
-
-**Case 2: Processing CSV-like Data**
-
-```python
-records = [("Alice", 30), ("Bob", 25), ("Charlie", 35)]
-for name, age in records:
-    print(f"{name} is {age} years old")
-```
-
-**Why it matters:** Iterating over tuples of records with unpacking is cleaner than indexing each field.
-
----
-
-## Core Concept 4: Nested Tuples
-
-### Definitions
-
-**Core Definition**
-A nested tuple is a tuple that contains other tuples as its elements, enabling the representation of multidimensional or hierarchical data.
-
-**Technical Definition**
-Tuples may be nested: `u = t, (1, 2, 3, 4, 5)`. On output, tuples are always enclosed in parentheses so that nested tuples are interpreted correctly; they may be input with or without surrounding parentheses. Access requires multiple indices: `nested[i][j]` accesses the `j`-th element of the `i`-th inner tuple.
-
-**Beginner-Friendly Explanation**
-A nested tuple is a tuple inside another tuple. Think of a grid or a table: the outer tuple is the rows, and each inner tuple is a row of values. You access an item with two indices: the first for the row, the second for the column.
-
-### Purposes
-
-- **To represent multidimensional data** (matrices, grids, tables)
-- **To store hierarchical structures** (tuples of tuples)
-- **To group related tuples** together
-- **To create immutable nested records**
-- **To model fixed-size tables** with heterogeneous column types
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```
-nested = (outer1, outer2, (inner1, inner2), outer3)
-nested[i][j]          # access element in nested tuple
-nested[i]             # access inner tuple
-```
-
-**Breakdown:**
-- `nested[i]`: The `i`-th element, which may be a tuple.
-- `nested[i][j]`: The `j`-th element of the `i`-th inner tuple.
-- Nesting can be arbitrarily deep.
-
-**Nested Tuple Rules**
-
-| Rule | Description |
-|---|---|
-| Multi-level indexing | `tuple[i][j]` for 2D, `tuple[i][j][k]` for 3D |
-| Inner tuples immutable | Inner tuples follow the same immutability rules |
-| Parentheses on output | Python always shows nested tuples with parentheses |
-| Hashability | A nested tuple is hashable if all nested elements are hashable |
+| Practice | Description |
+|----------|-------------|
+| Use tuples for heterogeneous data | Tuples represent fixed records or structs. |
+| Use lists for homogeneous data | Lists represent collections of similar items. |
+| Always use a trailing comma for singletons | `(42,)` is a tuple; `(42)` is an integer. |
+| Use tuple unpacking for clarity | `x, y = point` is clearer than `point[0]`, `point[1]`. |
+| Use tuples for dictionary keys | Tuples are hashable; lists are not. |
+| Prefer tuples for function returns | Return multiple values as a tuple. |
+| Follow PEP 8 for formatting | Use parentheses and trailing commas appropriately. |
+| Avoid using tuples for data that changes | Use lists instead. |
 
 **Constraints and Limitations**
 
-- **Immutability at all levels**: Neither the outer nor inner tuples can be modified.
-- **Complex access**: Deeply nested tuples require multiple indexing operations.
-- **Readability**: Deep nesting can make code harder to understand.
+- Best practices are guidelines, not absolute rules; context matters.
+- Named tuples offer a middle ground for self-documenting fixed records.
+- Performance recommendations may vary by Python implementation.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Creating and Accessing Nested Tuples**
+**Example 1: Tuple vs List Choice**
 
 ```python
-# Step 1: Create a nested tuple
-matrix = (
-    (1, 2, 3),
-    (4, 5, 6),
-    (7, 8, 9)
-)
+# GOOD: Tuple for a fixed record
+employee = ("Alice", 30, "Engineering")
 
-# Step 2: Access elements
-print(matrix[0][0])   # Top-left
-print(matrix[1][2])   # Middle-right
-print(matrix[2][1])   # Bottom-middle
+# BAD: List for a fixed record (could be accidentally modified)
+employee_bad = ["Alice", 30, "Engineering"]
 
-# Step 3: Access a row
-print(matrix[1])      # Entire second row
+# GOOD: List for dynamic data
+tasks = ["write report", "review code"]
+tasks.append("send email")
+
+# BAD: Tuple for dynamic data (cannot append)
+# tasks_tuple = ("write report", "review code")
+# tasks_tuple.append("send email")  # AttributeError!
 ```
 
 **Expected Output:**
+
 ```
-1
-6
-8
-(4, 5, 6)
+(No output; this example illustrates design choices.)
 ```
 
-**Breakdown:** `matrix[1][2]` accesses row 1, column 2 (value 6). `matrix[1]` returns the entire second row as a tuple.
+**Step-by-Step Breakdown:**
 
-**Example 2: Mixed Nesting**
+1. `employee = ("Alice", 30, "Engineering")` uses a tuple for a fixed record.
+2. `employee_bad = ["Alice", 30, "Engineering"]` uses a list, which could be accidentally modified.
+3. `tasks` is a list because it needs to grow.
+4. Attempting to append to a tuple would raise `AttributeError`.
 
-```python
-# Step 1: Create a tuple with mixed nesting
-data = (1, (2, 3), (4, (5, 6)))
+**Why the Choice Matters:**
 
-# Step 2: Access various levels
-print(data[0])        # 1
-print(data[1])        # (2, 3)
-print(data[2])        # (4, (5, 6))
-print(data[2][1])     # (5, 6)
-print(data[2][1][0])  # 5
-```
-
-**Expected Output:**
-```
-1
-(2, 3)
-(4, (5, 6))
-(5, 6)
-5
-```
-
-**Breakdown:** Nesting can be irregular. Each level of indexing peels back one layer.
-
-**Example 3: Nested Tuples in Unpacking**
-
-```python
-# Step 1: Unpack nested tuples
-point = (3, (7, 9))
-x, (y, z) = point
-print(f"x = {x}, y = {y}, z = {z}")
-
-# Step 2: Unpack with starred expression
-data = (1, (2, 3), (4, 5))
-first, *rest = data
-print(f"first = {first}, rest = {rest}")
-```
-
-**Expected Output:**
-```
-x = 3, y = 7, z = 9
-first = 1, rest = [(2, 3), (4, 5)]
-```
-
-**Breakdown:** Unpacking can nest to match the structure of the tuple. The starred target collects remaining tuples into a list.
-
-### Real-World Cases with Explanation
-
-**Case 1: Storing Tabular Data**
-
-```python
-employees = (
-    ("Alice", "Engineering", 85000),
-    ("Bob", "Marketing", 72000),
-    ("Charlie", "Engineering", 90000),
-)
-
-for name, dept, salary in employees:
-    print(f"{name} works in {dept}, earns ${salary}")
-```
-
-**Why it matters:** Tuples of tuples model table rows efficiently. Unpacking in the loop extracts each column.
-
-**Case 2: Game Board Representation**
-
-```python
-tic_tac_toe = (
-    ("X", "O", "X"),
-    ("O", "X", "O"),
-    ("X", "O", "X"),
-)
-```
-
-**Why it matters:** Game boards are naturally represented as nested tuples, and immutability ensures the board state is consistent.
+Tuples signal that the data is fixed and should not change, protecting against accidental modification. Lists signal that the data is dynamic and expected to change.
 
 ---
 
-## Core Concept 5: Named Tuples
-
-### Definitions
-
-**Core Definition**
-A named tuple is a tuple subclass with named fields, allowing access to elements by attribute name instead of just index.
-
-**Technical Definition**
-`collections.namedtuple()` is a factory function that returns a new tuple subclass named `typename`. The new subclass is used to create tuple-like objects that have fields accessible by attribute lookup as well as being indexable and iterable. `typing.NamedTuple` is a class-based alternative that uses type annotations to define fields. The type generated by subclassing `typing.NamedTuple` is equivalent to a `collections.namedtuple`, but with `__annotations__`, `_field_types`, and `_field_defaults` attributes added.
-
-**Beginner-Friendly Explanation**
-A named tuple is a tuple where each position has a name. Instead of remembering that `point[0]` is `x`, you can write `point.x`. It's like a lightweight class that behaves like a tuple. You can create them with `collections.namedtuple()` (the older, function-based approach) or `typing.NamedTuple` (the newer, class-based approach with type hints).
-
-### Purposes
-
-- **To make tuple-based records more readable** by using named fields
-- **To provide a lightweight alternative to classes** for simple data containers
-- **To combine the immutability of tuples** with the clarity of attribute access
-- **To enable type hints** with `typing.NamedTuple`
-- **To document the structure** of a tuple explicitly
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```
-# collections.namedtuple (function-based)
-from collections import namedtuple
-Point = namedtuple('Point', ['x', 'y'])
-p = Point(3, 7)
-
-# typing.NamedTuple (class-based)
-from typing import NamedTuple
-class Point(NamedTuple):
-    x: int
-    y: int
-p = Point(3, 7)
-```
-
-**Breakdown:**
-- `namedtuple('Name', ['field1', 'field2'])`: Creates a new tuple subclass with named fields.
-- `class Name(NamedTuple)`: Defines a named tuple using class syntax and type annotations.
-
-**Named Tuple Rules**
-
-| Feature | `collections.namedtuple` | `typing.NamedTuple` |
-|---|---|---|
-| Syntax | Function call | Class definition |
-| Type hints | No | Yes |
-| Defaults | Yes (Python 3.7+) | Yes |
-| Inheritance | Limited | Yes |
-| Docstrings | Via argument | Direct |
-| `__annotations__` | No | Yes |
-| Performance | Fast | Equally fast |
-
-**Constraints and Limitations**
-
-- **Immutable fields**: Named tuple fields cannot be modified after creation (but `_replace()` creates a new instance).
-- **Field names must be valid identifiers**: Cannot start with underscore, cannot be keywords.
-- **Not a replacement for classes**: Named tuples are for data storage, not behaviour.
-- **`typing.NamedTuple` is not a real subclass**: `issubclass(Employee, NamedTuple)` returns `False`.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: `collections.namedtuple`**
+**Example 2: PEP 8 Style for Tuples**
 
 ```python
-from collections import namedtuple
+# Correct: Singleton tuple with trailing comma
+singleton = (42,)
 
-# Step 1: Define a named tuple
-Point = namedtuple('Point', ['x', 'y'])
+# Correct: Trailing comma in multi-line tuple
+coordinates = (
+    10,
+    20,
+    30,
+)
 
-# Step 2: Create instances
-p1 = Point(3, 7)
-p2 = Point(x=10, y=20)
+# Correct: Tuple unpacking
+x, y, z = coordinates
 
-# Step 3: Access by name and index
-print(f"p1.x = {p1.x}, p1.y = {p1.y}")
-print(f"p1[0] = {p1[0]}, p1[1] = {p1[1]}")
-
-# Step 4: Unpack like a regular tuple
-x, y = p1
-print(f"Unpacked: x={x}, y={y}")
-
-# Step 5: Use _replace to create a modified copy
-p3 = p1._replace(x=100)
-print(f"p3 = {p3}")
+# Correct: Use tuples for dictionary keys
+cache = {}
+cache[(1, 2)] = "value"
 ```
 
 **Expected Output:**
-```
-p1.x = 3, p1.y = 7
-p1[0] = 3, p1[1] = 7
-Unpacked: x=3, y=7
-p3 = Point(x=100, y=7)
-```
-
-**Breakdown:** Named tuples support attribute access, indexing, unpacking, and `_replace()` for creating modified copies.
-
-**Example 2: `typing.NamedTuple`**
-
-```python
-from typing import NamedTuple
-
-# Step 1: Define a named tuple with type hints
-class Student(NamedTuple):
-    name: str
-    age: int
-    grade: str = 'A'  # default value
-
-# Step 2: Create instances
-s1 = Student('Alice', 20)
-s2 = Student('Bob', 22, 'B')
-
-# Step 3: Access fields
-print(f"{s1.name}: age {s1.age}, grade {s1.grade}")
-print(f"{s2.name}: age {s2.age}, grade {s2.grade}")
-
-# Step 4: Type annotations are available
-print(f"Annotations: {Student.__annotations__}")
-```
-
-**Expected Output:**
-```
-Alice: age 20, grade A
-Bob: age 22, grade B
-Annotations: {'name': <class 'str'>, 'age': <class 'int'>, 'grade': <class 'str'>}
-```
-
-**Breakdown:** `typing.NamedTuple` uses class syntax with type annotations. Default values are supported.
-
-**Example 3: Comparing the Two Approaches**
-
-```python
-from collections import namedtuple
-from typing import NamedTuple
-
-# Step 1: collections.namedtuple
-Point1 = namedtuple('Point1', ['x', 'y'])
-p1 = Point1(3, 7)
-
-# Step 2: typing.NamedTuple
-class Point2(NamedTuple):
-    x: int
-    y: int
-
-p2 = Point2(3, 7)
-
-# Step 3: Both behave identically as tuples
-print(f"p1 == p2: {p1 == p2}")
-print(f"p1.x = {p1.x}, p2.x = {p2.x}")
-print(f"Both are tuples: {isinstance(p1, tuple)}, {isinstance(p2, tuple)}")
-
-# Step 4: typing.NamedTuple has annotations
-print(f"p2 annotations: {Point2.__annotations__}")
-```
-
-**Expected Output:**
-```
-p1 == p2: True
-p1.x = 3, p2.x = 7
-Both are tuples: True True
-p2 annotations: {'x': <class 'int'>, 'y': <class 'int'>}
-```
-
-**Breakdown:** Both named tuple types behave identically as tuples. `typing.NamedTuple` adds type annotations for documentation and tooling.
-
-### Real-World Cases with Explanation
-
-**Case 1: Database Records**
-
-```python
-from collections import namedtuple
-
-User = namedtuple('User', ['id', 'name', 'email'])
-user = User(1, 'Alice', 'alice@example.com')
-print(f"User {user.id}: {user.name}")
-```
-
-**Why it matters:** Named tuples provide readable field access for database rows without the overhead of a full class.
-
-**Case 2: Configuration Objects**
-
-```python
-from typing import NamedTuple
-
-class Config(NamedTuple):
-    host: str
-    port: int = 8080
-    debug: bool = False
-
-config = Config('localhost')
-print(f"Server: {config.host}:{config.port}")
-```
-
-**Why it matters:** Named tuples with defaults create immutable configuration objects that are self-documenting.
-
----
-
-## Core Concept 6: Tuple Methods
-
-### Definitions
-
-**Core Definition**
-Tuples have only two built-in methods because their immutability prevents modification methods.
-
-**Technical Definition**
-Python has two built-in methods that you can use on tuples: `count()` returns the number of times a specified value occurs in a tuple; `index()` searches the tuple for a specified value and returns the position of where it was found.
-
-**Beginner-Friendly Explanation**
-Because tuples can't change, they don't need methods like `append()` or `remove()`. They only have two methods: `count()` to see how many times a value appears, and `index()` to find where a value is.
-
-### Purposes
-
-- **To count occurrences** of a value in a tuple (`count()`)
-- **To find the position** of a value in a tuple (`index()`)
-- **To search within tuples** without converting to a list
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
 
 ```
-tuple.count(value)
-tuple.index(value[, start[, end]])
+(No output; this example illustrates style conventions.)
 ```
 
-**Breakdown:**
-- `count(value)`: Returns the number of times `value` appears in the tuple.
-- `index(value, start, end)`: Returns the first index where `value` appears, optionally within `[start, end)`.
+**Step-by-Step Breakdown:**
 
-**Method Rules**
+1. `(42,)` is the correct way to write a singleton tuple.
+2. Multi-line tuples should have a trailing comma for clarity.
+3. Tuple unpacking is preferred over indexing.
+4. Tuples as dictionary keys demonstrate hashability.
 
-| Method | Description | Returns |
-|---|---|---|
-| `count(x)` | Number of occurrences of `x` | Integer |
-| `index(x[, start[, end]])` | First index of `x` | Integer |
+**Why the Style Matters:**
 
-**Constraints and Limitations**
+These conventions improve readability and align with PEP 8, making code more consistent and easier to maintain.
 
-- **`index()` raises `ValueError`** if the value is not found.
-- **`count()` is O(n)**: It searches linearly.
-- **No modification methods**: Tuples lack `append()`, `extend()`, `remove()`, etc.
+#### Real-World Cases
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Using `count()`**
-
-```python
-# Step 1: Create a tuple
-numbers = (1, 2, 3, 2, 4, 2, 5)
-
-# Step 2: Count occurrences
-print(numbers.count(2))   # 3
-print(numbers.count(9))   # 0
-
-# Step 3: Count with strings
-words = ("apple", "banana", "apple", "cherry")
-print(words.count("apple"))  # 2
-```
-
-**Expected Output:**
-```
-3
-0
-2
-```
-
-**Breakdown:** `count()` returns the number of times a value appears. It returns `0` for values not in the tuple.
-
-**Example 2: Using `index()`**
-
-```python
-# Step 1: Create a tuple
-letters = ('a', 'b', 'c', 'd', 'b', 'e')
-
-# Step 2: Find first occurrence
-print(letters.index('b'))    # 1
-
-# Step 3: Search from a start position
-print(letters.index('b', 2)) # 4
-
-# Step 4: Search within a range
-print(letters.index('b', 0, 2))  # 1
-
-# Step 5: Handle ValueError
-try:
-    letters.index('z')
-except ValueError as e:
-    print(f"Error: {e}")
-```
-
-**Expected Output:**
-```
-1
-4
-1
-Error: tuple.index(x): x not in tuple
-```
-
-**Breakdown:** `index()` returns the first matching position. Optional arguments limit the search range. It raises `ValueError` if not found.
-
-**Example 3: Practical Usage**
-
-```python
-# Step 1: Check voting results
-votes = ('Alice', 'Bob', 'Alice', 'Charlie', 'Alice', 'Bob')
-
-# Step 2: Count votes for each candidate
-for candidate in set(votes):
-    print(f"{candidate}: {votes.count(candidate)} votes")
-
-# Step 3: Find position of first Bob vote
-print(f"First Bob vote at index: {votes.index('Bob')}")
-```
-
-**Expected Output:**
-```
-Alice: 3 votes
-Bob: 2 votes
-Charlie: 1 votes
-First Bob vote at index: 1
-```
-
-**Breakdown:** `count()` and `index()` are useful for tallying and searching without converting to a list.
-
-### Real-World Cases with Explanation
-
-**Case 1: Tallying Results**
-
-```python
-responses = ('yes', 'no', 'yes', 'yes', 'no')
-yes_count = responses.count('yes')
-```
-
-**Why it matters:** `count()` provides a quick way to tally categorical data without external libraries.
-
-**Case 2: Finding the Position of an Error**
-
-```python
-log_levels = ('INFO', 'DEBUG', 'ERROR', 'INFO')
-error_position = log_levels.index('ERROR')
-```
-
-**Why it matters:** `index()` locates the first occurrence of a specific value, useful for finding where an error was logged.
+- **API Design**: Returning tuples from functions for multiple values.
+- **Data Science**: Using tuples for fixed feature vectors and lists for variable-length data.
+- **Configuration Management**: Using tuples for immutable configuration constants.
 
 ---
 
 ## References
 
-- Python Software Foundation. *Built-in Types — tuple*. https://docs.python.org/3/library/stdtypes.html#tuple
-- Python Software Foundation. *collections — Container datatypes — namedtuple()*. https://docs.python.org/3/library/collections.html#collections.namedtuple
-- Python Software Foundation. *typing — Support for type hints — NamedTuple*. https://docs.python.org/3/library/typing.html#typing.NamedTuple
-- Python Software Foundation. *PEP 3132 – Extended Iterable Unpacking*. https://peps.python.org/pep-3132/
-- Python Software Foundation. *PEP 448 – Additional Unpacking Generalizations*. https://peps.python.org/pep-0448/
-- Real Python. *Python's tuple Data Type: A Deep Dive With Examples*. https://realpython.com/python-tuple/
-- Python Software Foundation. *Data Structures — Python Tutorial*. https://docs.python.org/3/tutorial/datastructures.html
-- Python Software Foundation. *Tuple Objects — Python/C API*. https://docs.python.org/3/c-api/tuple.html
-- Python Mailing List. *Re: one-element tuples*. https://mail.python.org/archives/list/python-list@python.org/message/USYS5DSXKLDEHJYCAE6TMHWBZJTD2OT5/
-- Python Mailing List. *RE: performance of tuple-less Python?*. https://mail.python.org/archives/list/python-list@python.org/message/MCY3AUMGCOPUHR3LN3QYUSZNBDBDRUCS/
-- Stack Overflow. *namedtuple vs NamedTuple in Python*. https://stackoverflow.com/questions/50766461/namedtuple-vs-namedtuple-in-python
-- Topper-123. *New interesting data structures in Python 3*. https://raw.githubusercontent.com/topper-123/Articles/master/New-interesting-data-types-in-Python3.rst
-- Python Software Foundation. *Python 3.9 pydoc_data/topics.py — Tuples*. https://chromium.googlesource.com/external/github.com/python/cpython/+/refs/tags/v3.9.0a1/Lib/pydoc_data/topics.py
+- Python Official Documentation – Tuples and Sequences - https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences
+- Python Official Documentation – Sequence Types (tuple) - https://docs.python.org/3/library/stdtypes.html#tuples
+- Python Official Documentation – `collections.namedtuple` - https://docs.python.org/3/library/collections.html#collections.namedtuple
+- Python Official Documentation – Time Complexity of Operations on Built-in Types - https://docs.python.org/3/builtins/time-complexity.html
+- PEP 8 – Style Guide for Python Code - https://peps.python.org/pep-0008/
+- PEP 3132 – Extended Iterable Unpacking - https://peps.python.org/pep-3132/
+- Real Python – Python Tuples: Immutable Sequences - https://realpython.com/python-tuple/
+- Real Python – Lists vs Tuples in Python - https://realpython.com/python-lists-tuples/
+- Real Python – Writing Clean, Pythonic Code with Named Tuples - https://realpython.com/python-namedtuple/
+- Python Wiki – TimeComplexity - https://wiki.python.org/moin/TimeComplexity
+- GeeksforGeeks – Python Tuple Methods - https://www.geeksforgeeks.org/python-tuple-methods/
+- W3Schools – Python Tuples - https://www.w3schools.com/python/python_tuples.asp

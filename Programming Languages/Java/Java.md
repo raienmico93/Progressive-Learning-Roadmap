@@ -268,7 +268,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Recursive problem solving
   - Tail-recursion considerations
 
-- [**23. Variable Scope**](/Programming%20Languages/Java/Methods/VariableScope.md)
+- **23. Variable Scope**
   - Local scope
   - Block scope
   - Parameter scope
@@ -337,7 +337,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Constructor behavior
   - `super`
 
-- [**31. Method Overriding**](/Programming%20Languages/Java/OOP/Overriding.md)
+- **31. Method Overriding**
   - Runtime method dispatch
   - Override rules
   - `@Override`
@@ -391,7 +391,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Package-private
   - Visibility rules
 
-- [**38. Nested Types**](/Programming%20Languages/Java/OOP/NestedTypes.md)
+- **38. Nested Types**
   - Static nested classes
   - Inner classes
   - Local classes
@@ -547,7 +547,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Compact constructors
   - Immutable data modeling
 
-- [**58. Sealed Types**](/Programming%20Languages/Java/Advanced/SealedClasses.md)
+- **58. Sealed Types**
   - Sealed classes
   - Sealed interfaces
   - `permits`
@@ -632,7 +632,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - `summarizing`
   - Nested grouping
 
-- [**67. Advanced Stream Processing**](/Programming%20Languages/Java/Functional/AdvancedStreamProcessing.md)
+- **67. Advanced Stream Processing**
   - Primitive streams
   - Stream flattening
   - Complex reductions

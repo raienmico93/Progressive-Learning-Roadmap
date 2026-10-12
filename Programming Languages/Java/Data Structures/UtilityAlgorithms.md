@@ -1,1712 +1,1013 @@
-# Java Collections Framework Algorithms: A Comprehensive Programming Cheat Sheet
+# Java Collections Utility Class: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** The Java Collections Framework algorithms are a set of reusable, polymorphic static methods provided by the `java.util.Collections` class (and related classes such as `java.util.Arrays`) that perform common operations on collections and arrays, such as sorting, searching, shuffling, and data manipulation.
+**Core Definition:** The `Collections` utility class is a final class consisting exclusively of static methods that operate on or return collections, providing polymorphic algorithms, wrapper factories, and other utility methods.
 
-**Technical Definition:** `public class Collections extends Object` consists exclusively of static methods that operate on or return collections. It contains polymorphic algorithms that operate on collections, "wrappers", which return a new collection backed by a specified collection, and a few other odds and ends. The methods of this class all throw a `NullPointerException` if the collections or class objects provided to them are `null`. The documentation for the polymorphic algorithms contained in this class generally includes a brief description of the implementation. Such descriptions should be regarded as implementation notes, rather than parts of the specification. Implementors should feel free to substitute other algorithms, so long as the specification itself is adhered to. (For example, the algorithm used by `sort` does not have to be a mergesort, but it does have to be stable.) The "destructive" algorithms contained in this class, that is, the algorithms that modify the collection on which they operate, are specified to throw `UnsupportedOperationException` if the collection does not support the appropriate mutation primitive(s), such as the `set` method. These algorithms may, but are not required to, throw this exception if an invocation would have no effect on the collection. For example, invoking the `sort` method on an unmodifiable list that is already sorted may or may not throw `UnsupportedOperationException`.
+**Technical Definition:** The `java.util.Collections` class consists exclusively of static methods that operate on or return collections. It contains polymorphic algorithms that operate on collections, "wrappers", which return a new collection backed by a specified collection, and a few other odds and ends. The methods of this class all throw a `NullPointerException` if the collections or class objects provided to them are `null`. The "destructive" algorithms contained in this class, that is, the algorithms that modify the collection on which they operate, are specified to throw `UnsupportedOperationException` if the collection does not support the appropriate mutation primitive(s), such as the `set` method.
 
-**Beginner-Friendly Explanation:** The Java Collections Framework algorithms are like a toolbox of ready-made operations you can apply to your lists, sets, and maps. Instead of writing your own code to sort a list, reverse it, find the maximum element, or make it thread-safe, you can use these built-in methods. They are tested, optimized, and consistent across all Java programs.
+**Beginner-Friendly Explanation:** The `Collections` class is a toolbox of static helper methods for working with collections. It's like a Swiss Army knife for lists, sets, and maps — it can sort, search, shuffle, reverse, fill, copy, and wrap your collections, among many other operations. You never create an instance of `Collections`; you just call its static methods directly, like `Collections.sort(myList)`.
 
 ### Key Characteristics
 
-All algorithms are static methods of the `Collections` class. The great majority of the algorithms provided by the Java platform operate on `List` instances, but a few of them operate on arbitrary `Collection` instances. The `sort` algorithm uses a slightly optimized merge sort algorithm that is fast and stable: it is guaranteed to run in `n log(n)` time and runs substantially faster on nearly sorted lists, and it does not reorder equal elements. The `Collections` class also provides wrapper methods that return unmodifiable, synchronized, or checked views of collections, as well as factory methods that return immutable singleton or empty collections. Since Java 9, `List.of()`, `Set.of()`, and `Map.of()` provide additional immutable factory methods.
+- **Utility Class:** Cannot be instantiated (it has a private constructor); all methods are static.
+- **Polymorphic Algorithms:** Sorting, searching, shuffling, and other algorithms work on any collection that implements the appropriate interface.
+- **Wrapper Factories:** Provides unmodifiable, synchronized, and type-checked views of collections.
+- **Factory Methods:** Provides immutable empty collections and singleton collections.
+- **Destructive Operations:** Some methods modify the collection in place; these throw `UnsupportedOperationException` if the collection does not support mutation.
+- **Null-Hostile:** All methods throw `NullPointerException` if provided with `null` collections or class objects.
 
 ### Prerequisites
 
-Readers should be familiar with Java generics, the `Collection`, `List`, `Set`, and `Map` interfaces, and the `Comparable` and `Comparator` interfaces. A basic understanding of algorithms and data structures (sorting, searching, shuffling) is helpful but not strictly required.
+- Basic understanding of Java classes, objects, and interfaces
+- Familiarity with the Java Collections Framework (`List`, `Set`, `Map`, etc.)
+- Knowledge of generics and the `Comparable`/`Comparator` interfaces
+- Awareness of the `java.util` package
 
-### Related Programming Areas with Explanation
+### Related Programming Areas
 
-The Collections Framework algorithms are related to data structures and algorithms (sorting, searching, and permutation algorithms), functional programming (through `Comparator` and method references), concurrent programming (through synchronized wrappers and thread-safe collections), and software design patterns (such as the wrapper pattern, used by the unmodifiable and synchronized views).
+- **Collections Framework:** The `Collections` class is a core member of the Java Collections Framework.
+- **Algorithms:** Provides reusable sorting, searching, and shuffling algorithms.
+- **Thread Safety:** Synchronization wrappers enable thread-safe access to collections.
+- **API Design:** Unmodifiable wrappers protect internal state when returning collections from APIs.
+- **Functional Programming:** Some methods (`sort`, `replaceAll`, `addAll`) integrate with lambdas.
 
-## Core Concepts and Key Features
+---
 
-### 1. Sorting and Ordering
+## Core Concepts / Features
 
-**Core Definition:** Sorting is the process of arranging the elements of a list into a defined order, such as ascending or descending; ordering is the specification of the comparison rule used to determine that sequence.
+---
 
-**Technical Definition:** `Collections.sort(List<T> list)` sorts the specified list into ascending order, according to the natural ordering of its elements. `Collections.sort(List<T> list, Comparator<? super T> c)` sorts the specified list according to the order induced by the specified comparator. The sort is guaranteed to be stable: equal elements will not be reordered as a result of the sort. The specified list must be modifiable, but need not be resizable. This implementation is a stable, adaptive, iterative mergesort. `Collections.reverse(List<?> list)` reverses the order of the elements in the specified list. `Collections.reverseOrder()` returns a comparator that imposes the reverse of the natural ordering on a collection of objects that implement the `Comparable` interface. `Collections.reverseOrder(Comparator<T> cmp)` returns a comparator that imposes the reverse ordering of the specified comparator.
+## 1. Collections
 
-**Beginner-Friendly Explanation:** Sorting puts your list in order, such as alphabetically or numerically. You can also sort in reverse order using a comparator. Reversing a list simply flips its order, so the last element becomes the first.
+### Definitions
 
-#### 1.1 `sort(List<T> list)` and `sort(List<T> list, Comparator<? super T> c)`
+**Core Definition:** `Collections` is a final utility class in the `java.util` package that provides static methods for operating on or returning collections.
 
-**Definitions**
+**Technical Definition:** `public class Collections extends Object`. "This class consists exclusively of static methods that operate on or return collections. It contains polymorphic algorithms that operate on collections, 'wrappers', which return a new collection backed by a specified collection, and a few other odds and ends". The class is declared `final` and has a private constructor, so it cannot be instantiated or subclassed. It was introduced in JDK 1.2.
 
-- **Core Definition:** Sorts a list into ascending order according to natural ordering or a specified comparator.
-- **Technical Definition:** `static <T extends Comparable<? super T>> void sort(List<T> list)` sorts the specified list into ascending order according to the natural ordering of its elements. `static <T> void sort(List<T> list, Comparator<? super T> c)` sorts the specified list according to the order induced by the specified comparator.
-- **Beginner-Friendly Explanation:** `sort(list)` arranges the list from smallest to largest (or A to Z). `sort(list, comparator)` lets you specify your own ordering rule.
+**Beginner-Friendly Explanation:** `Collections` is like a toolbox. You don't build a toolbox — you just open it and use the tools inside. Each tool (static method) helps you do something useful with your collections.
 
-**Purposes**
+### Purposes
 
-- To arrange the elements of a list in a defined order.
-- To provide a stable sort that preserves the relative order of equal elements.
-- To support both natural ordering and custom ordering via a `Comparator`.
+- To provide reusable algorithms (sorting, searching, shuffling) for collections
+- To create unmodifiable and synchronized wrappers for collections
+- To provide factory methods for empty and singleton collections
+- To simplify common collection tasks and reduce boilerplate code
 
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
+### Syntax Rules and Structure
 
 ```java
+// All methods are static — call them directly on the class
+Collections.methodName(arguments);
+```
+
+**Key Categories of Methods:**
+
+| Category | Examples |
+|----------|----------|
+| Algorithms | `sort()`, `binarySearch()`, `shuffle()`, `reverse()`, `rotate()`, `swap()`, `fill()`, `copy()` |
+| Aggregates | `min()`, `max()`, `frequency()`, `disjoint()` |
+| Bulk Operations | `addAll()`, `replaceAll()` |
+| Wrappers | `unmodifiableList()`, `synchronizedList()`, `checkedList()` |
+| Factories | `emptyList()`, `singletonList()`, `nCopies()` |
+
+**Syntax Rules:**
+
+- `Collections` is `final` and cannot be instantiated.
+- All methods are `static`.
+- Methods throw `NullPointerException` if provided `null` arguments.
+- Destructive algorithms throw `UnsupportedOperationException` if the collection does not support mutation.
+
+**Constraints and Limitations:**
+
+- The class does not provide a method for every possible collection operation.
+- Some methods are only applicable to `List` implementations.
+
+### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Basic Collections Utility Usage**
+
+```java
+// File: CollectionsUtilityDemo.java
+import java.util.*;
+
+public class CollectionsUtilityDemo {
+    public static void main(String[] args) {
+        List<Integer> numbers = new ArrayList<>(Arrays.asList(5, 2, 8, 1, 9, 3));
+
+        // Sorting
+        Collections.sort(numbers);
+        System.out.println("Sorted: " + numbers); // [1, 2, 3, 5, 8, 9]
+
+        // Binary search (on sorted list)
+        int index = Collections.binarySearch(numbers, 5);
+        System.out.println("Index of 5: " + index); // 3
+
+        // Min, max
+        System.out.println("Min: " + Collections.min(numbers)); // 1
+        System.out.println("Max: " + Collections.max(numbers)); // 9
+
+        // Reverse
+        Collections.reverse(numbers);
+        System.out.println("Reversed: " + numbers); // [9, 8, 5, 3, 2, 1]
+
+        // Shuffle
+        Collections.shuffle(numbers);
+        System.out.println("Shuffled: " + numbers); // random order
+
+        // Unmodifiable wrapper
+        List<Integer> immutable = Collections.unmodifiableList(numbers);
+        // immutable.add(100); // UnsupportedOperationException
+    }
+}
+```
+
+**Expected Output:**
+```
+Sorted: [1, 2, 3, 5, 8, 9]
+Index of 5: 3
+Min: 1
+Max: 9
+Reversed: [9, 8, 5, 3, 2, 1]
+Shuffled: [3, 9, 2, 1, 8, 5] (order varies)
+```
+
+### Real-World Cases
+
+- **Sorting User Data:** Sorting a list of users by name, age, or registration date.
+- **Searching:** Binary search on sorted lists for fast lookups.
+- **Shuffling:** Randomising a deck of cards or a playlist.
+- **Protecting API State:** Returning unmodifiable views from getters.
+
+---
+
+## 2. Collections.sort()
+
+### Definitions
+
+**Core Definition:** `Collections.sort()` sorts the specified list into ascending order according to the natural ordering of its elements, or according to a specified `Comparator`.
+
+**Technical Definition:** `static <T extends Comparable<? super T>> void sort(List<T> list)` sorts the list into ascending order according to natural ordering. `static <T> void sort(List<T> list, Comparator<? super T> c)` sorts according to the order induced by the comparator. The sort is guaranteed to be stable: equal elements will not be reordered. The specified list must be modifiable, but need not be resizable. This implementation dumps the list into an array, sorts the array, and iterates over the list resetting each element from the corresponding position in the array.
+
+**Beginner-Friendly Explanation:** `sort()` arranges the items in a list in order — either the natural order (like numbers smallest to largest, or strings A to Z) or a custom order you specify.
+
+### Purposes
+
+- To arrange list elements in a specific order
+- To prepare data for binary search
+- To improve data presentation and readability
+
+### Syntax Rules and Structure
+
+```java
+// Natural ordering
 static <T extends Comparable<? super T>> void sort(List<T> list)
+
+// Custom ordering
 static <T> void sort(List<T> list, Comparator<? super T> c)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `list`: the list to be sorted. Must be modifiable but need not be resizable.
-- `c`: the comparator that determines the order of the list.
-- Throws `UnsupportedOperationException` if the list's list-iterator does not support the `set` operation.
-- Throws `ClassCastException` if the list contains elements that are not mutually comparable using the specified comparator.
-- Throws `IllegalArgumentException` if the comparator is found to violate the `Comparator` contract.
+- Elements must implement `Comparable` (for natural ordering) or a `Comparator` must be provided.
+- The list must be modifiable.
+- The sort is stable.
+- The sort is O(n log n).
 
-Syntax rules: The sort is stable: equal elements will not be reordered as a result of the sort. The algorithm used by `sort` does not have to be a mergesort, but it does have to be stable. This implementation is a stable, adaptive, iterative mergesort that requires far fewer than `n lg(n)` comparisons when the input array is partially sorted, while offering the performance of a traditional mergesort when the input array is randomly ordered. If the input array is nearly sorted, the implementation requires approximately `n` comparisons.
+**Constraints and Limitations:**
 
-Constraints and limitations: The list must be modifiable. The elements must be mutually comparable. The implementation dumps the specified list into an array, sorts the array, and iterates over the list resetting each element from the corresponding position in the array. This avoids the `n² log(n)` performance that would result from attempting to sort a linked list in place.
+- Cannot sort unmodifiable lists (throws `UnsupportedOperationException`).
+- Cannot sort lists whose elements are not mutually comparable.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Natural ordering sort**
+### Annotated Code Example
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class SortNaturalExample {
-    public static void main(String[] args) {
-        // Step 1: Create a list of strings
-        List<String> list = new ArrayList<>();
-        list.add("banana");
-        list.add("apple");
-        list.add("cherry");
-
-        // Step 2: Sort using natural ordering
-        Collections.sort(list);
-
-        // Step 3: Print the sorted list
-        System.out.println(list);
-    }
-}
-```
-
-Expected Output:
-
-```
-[apple, banana, cherry]
-```
-
-**Why the code produces this result:** `Collections.sort(list)` uses the natural ordering of `String`, which is lexicographic (alphabetical) order. The list is sorted in place.
-
-**Example 2: Custom comparator sort**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-public class SortComparatorExample {
-    public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        list.add(5);
-        list.add(1);
-        list.add(3);
-
-        // Sort in descending order using a comparator
-        Collections.sort(list, Comparator.reverseOrder());
-        System.out.println(list);
-    }
-}
-```
-
-Expected Output:
-
-```
-[5, 3, 1]
-```
-
-**Example 3: Stable sort demonstration**
-
-```java
+// File: SortDemo.java
 import java.util.*;
 
-class Person {
-    String name;
-    int age;
-    Person(String name, int age) { this.name = name; this.age = age; }
-    @Override
-    public String toString() { return name + "(" + age + ")"; }
-}
-
-public class StableSortExample {
+public class SortDemo {
     public static void main(String[] args) {
-        List<Person> people = new ArrayList<>();
-        people.add(new Person("Alice", 30));
-        people.add(new Person("Bob", 25));
-        people.add(new Person("Charlie", 30));
+        // Natural ordering
+        List<String> names = new ArrayList<>(Arrays.asList("Charlie", "Alice", "Bob"));
+        Collections.sort(names);
+        System.out.println("Natural: " + names); // [Alice, Bob, Charlie]
 
-        // Sort by age
-        Collections.sort(people, Comparator.comparingInt(p -> p.age));
-        System.out.println("Sorted by age: " + people);
-
-        // Sort by age again; stable sort preserves original order of equal elements
-        Collections.sort(people, Comparator.comparingInt(p -> p.age));
-        System.out.println("Sorted by age again: " + people);
+        // Custom ordering (by length)
+        List<String> words = new ArrayList<>(Arrays.asList("Java", "is", "versatile", "and", "powerful"));
+        Collections.sort(words, Comparator.comparingInt(String::length));
+        System.out.println("By length: " + words); // [is, and, Java, powerful, versatile]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Sorted by age: [Bob(25), Alice(30), Charlie(30)]
-Sorted by age again: [Bob(25), Alice(30), Charlie(30)]
+Natural: [Alice, Bob, Charlie]
+By length: [is, and, Java, powerful, versatile]
 ```
 
-**Why the code produces this result:** The second sort preserves the relative order of Alice and Charlie (both age 30) because the sort is stable.
+### Real-World Cases
 
-**Real-World Cases with Explanation**
+- **E-commerce:** Sorting products by price or popularity.
+- **Contact Lists:** Sorting contacts alphabetically.
+- **Log Files:** Sorting log entries by timestamp.
 
-Sorting is used in e-commerce to sort products by price, in address books to sort contacts by name, and in data processing to order records by timestamp or ID. The stable property is important when sorting by multiple criteria in sequence.
+---
 
-**References Links**
+## 3. Collections.binarySearch()
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-- Lesson: Algorithms – https://docs.oracle.com/javase/tutorial/collections/algorithms/index.html
+### Definitions
 
-#### 1.2 `reverse(List<?> list)`
+**Core Definition:** `Collections.binarySearch()` searches a sorted list for a specified object using the binary search algorithm.
 
-**Definitions**
+**Technical Definition:** `static <T> int binarySearch(List<? extends Comparable<? super T>> list, T key)` searches the list for the key using natural ordering. `static <T> int binarySearch(List<? extends T> list, T key, Comparator<? super T> c)` uses the comparator. Returns the index of the search key, if it is contained in the list; otherwise, returns `(-(insertion point) - 1)`. The list must be sorted into ascending order according to the same ordering prior to making this call.
 
-- **Core Definition:** Reverses the order of the elements in a list.
-- **Technical Definition:** `static void reverse(List<?> list)` reverses the order of the elements in the specified list. This method runs in linear time.
-- **Beginner-Friendly Explanation:** `reverse` flips the list so the first element becomes the last and vice versa.
+**Beginner-Friendly Explanation:** `binarySearch()` finds the position of an item in a **sorted** list very quickly. It's like looking up a word in a dictionary — you open to the middle, decide whether to go left or right, and repeat.
 
-**Purposes**
+### Purposes
 
-- To reverse the order of elements in a list.
-- To support algorithms that require reverse traversal or reverse ordering.
-- To serve as a building block for other operations.
+- To find the index of an element in a sorted list efficiently (O(log n))
+- To determine where an element should be inserted to maintain sorted order
 
-**Syntax Structures and Rules**
+### Syntax Rules and Structure
 
-Complete general syntax:
+```java
+// Natural ordering
+static <T> int binarySearch(List<? extends Comparable<? super T>> list, T key)
+
+// Custom ordering
+static <T> int binarySearch(List<? extends T> list, T key, Comparator<? super T> c)
+```
+
+**Syntax Rules:**
+
+- The list must be sorted in ascending order before calling.
+- If the list is not sorted, the result is undefined.
+- Returns the index of the key if found; otherwise returns `-(insertion point) - 1`.
+
+**Constraints and Limitations:**
+
+- Uses `equals()` to determine equality, not `compareTo()`.
+- Not suitable for unsorted lists.
+
+### Annotated Code Example
+
+```java
+// File: BinarySearchDemo.java
+import java.util.*;
+
+public class BinarySearchDemo {
+    public static void main(String[] args) {
+        List<Integer> numbers = new ArrayList<>(Arrays.asList(1, 3, 5, 7, 9, 11, 13));
+
+        int index = Collections.binarySearch(numbers, 7);
+        System.out.println("Index of 7: " + index); // 3
+
+        int notFound = Collections.binarySearch(numbers, 4);
+        System.out.println("Index of 4: " + notFound); // -4 (insertion point 3, so -3-1 = -4)
+    }
+}
+```
+
+**Expected Output:**
+```
+Index of 7: 3
+Index of 4: -4
+```
+
+### Real-World Cases
+
+- **Searching Sorted Data:** Finding a student's record by ID in a sorted list.
+- **Insertion Point:** Determining where to insert a new element to keep a list sorted.
+
+---
+
+## 4. Collections.reverse()
+
+### Definitions
+
+**Core Definition:** `Collections.reverse()` reverses the order of the elements in the specified list.
+
+**Technical Definition:** `static void reverse(List<?> list)` reverses the order of the elements in the specified list. This method runs in linear time.
+
+**Beginner-Friendly Explanation:** `reverse()` flips the list — the first element becomes last, the last becomes first, and so on.
+
+### Purposes
+
+- To reverse the order of elements in a list
+- To display data in reverse order
+- To implement undo/redo functionality
+
+### Syntax Rules and Structure
 
 ```java
 static void reverse(List<?> list)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `list`: the list whose elements are to be reversed.
-- Throws `UnsupportedOperationException` if the specified list or its list-iterator does not support the `set` operation.
+- The list must be modifiable.
+- Runs in linear time.
 
-Syntax rules: This method runs in linear time. It mutates the specified list in-place.
+**Constraints and Limitations:**
 
-Constraints and limitations: The list must be modifiable.
+- Throws `UnsupportedOperationException` for unmodifiable lists.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Reversing a list**
+### Annotated Code Example
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+// File: ReverseDemo.java
+import java.util.*;
 
-public class ReverseExample {
+public class ReverseDemo {
     public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        list.add(1);
-        list.add(2);
-        list.add(3);
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C", "D"));
         Collections.reverse(list);
-        System.out.println(list);
+        System.out.println("Reversed: " + list); // [D, C, B, A]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-[3, 2, 1]
-```
-
-**Example 2: Reversing an empty list**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class ReverseEmptyExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        Collections.reverse(list);
-        System.out.println("Empty list after reverse: " + list);
-    }
-}
+Reversed: [D, C, B, A]
 ```
 
-Expected Output:
+### Real-World Cases
 
-```
-Empty list after reverse: []
-```
+- **Displaying Recent First:** Reversing a list of log entries to show newest first.
+- **Undo History:** Reversing the order of operations.
 
-**Real-World Cases with Explanation**
+---
 
-Reversing is used in displaying a log in reverse chronological order, in palindrome checking, and in algorithms that require processing elements from the end.
+## 5. Collections.shuffle()
 
-**References Links**
+### Definitions
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+**Core Definition:** `Collections.shuffle()` randomly permutes the elements in the specified list.
 
-#### 1.3 `reverseOrder()` and `reverseOrder(Comparator<T> cmp)`
+**Technical Definition:** `static void shuffle(List<?> list)` randomly permutes the list using a default source of randomness. `static void shuffle(List<?> list, Random rnd)` uses the specified source of randomness. This implementation traverses the list backwards, from the last element up to the second, repeatedly swapping a randomly selected element into the "current position".
 
-**Definitions**
+**Beginner-Friendly Explanation:** `shuffle()` mixes up the items in a list randomly, like shuffling a deck of cards.
 
-- **Core Definition:** Returns a comparator that imposes the reverse of the natural ordering or the reverse of a specified comparator's ordering.
-- **Technical Definition:** `static <T> Comparator<T> reverseOrder()` returns a comparator that imposes the reverse of the natural ordering on a collection of objects that implement the `Comparable` interface. `static <T> Comparator<T> reverseOrder(Comparator<T> cmp)` returns a comparator that imposes the reverse ordering of the specified comparator.
-- **Beginner-Friendly Explanation:** `reverseOrder()` gives you a comparator that sorts in descending order. `reverseOrder(cmp)` gives you a comparator that reverses whatever ordering `cmp` provides.
+### Purposes
 
-**Purposes**
+- To randomise the order of elements in a list
+- To implement card games, lottery draws, or randomised playlists
+- To eliminate ordering bias in experiments or simulations
 
-- To obtain a comparator that sorts in reverse order.
-- To reverse the effect of an existing comparator.
-- To support descending sorts without writing a custom comparator.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-static <T> Comparator<T> reverseOrder()
-static <T> Comparator<T> reverseOrder(Comparator<T> cmp)
-```
-
-Component breakdown:
-
-- `cmp`: the comparator whose ordering is to be reversed.
-- Returns a comparator that imposes the reverse ordering.
-
-Syntax rules: The returned comparator is serializable if the specified comparator is also serializable or `null`.
-
-Constraints and limitations: If `cmp` is `null`, the method behaves like `reverseOrder()`.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `reverseOrder()` with natural ordering**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class ReverseOrderExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("banana");
-        list.add("apple");
-        list.add("cherry");
-
-        Collections.sort(list, Collections.reverseOrder());
-        System.out.println(list);
-    }
-}
-```
-
-Expected Output:
-
-```
-[cherry, banana, apple]
-```
-
-**Example 2: `reverseOrder(Comparator)`**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-public class ReverseOrderComparatorExample {
-    public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        list.add(5);
-        list.add(1);
-        list.add(3);
-
-        // Reverse of natural order = descending order
-        Collections.sort(list, Collections.reverseOrder(Comparator.naturalOrder()));
-        System.out.println(list);
-    }
-}
-```
-
-Expected Output:
-
-```
-[5, 3, 1]
-```
-
-**Real-World Cases with Explanation**
-
-`reverseOrder` is used to display leaderboards from highest to lowest, to sort products from most expensive to least expensive, and to reverse the ordering of any custom comparator.
-
-**References Links**
-
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-
-### 2. Searching and Extremum Finding
-
-**Core Definition:** Searching algorithms locate a specific element within a collection; extremum-finding algorithms identify the maximum or minimum element according to a defined ordering.
-
-**Technical Definition:** `Collections.binarySearch(List<? extends Comparable<? super T>> list, T key)` searches the specified list for the specified object using the binary search algorithm. `Collections.max(Collection<? extends T> coll)` returns the maximum element of the given collection according to the natural ordering of its elements. `Collections.min(Collection<? extends T> coll)` returns the minimum element of the given collection according to the natural ordering of its elements. Overloads accepting a `Comparator` are also provided.
-
-**Beginner-Friendly Explanation:** Binary search is a fast way to find an element in a sorted list by repeatedly dividing the search interval in half. `max` and `min` find the largest and smallest elements in a collection.
-
-#### 2.1 `binarySearch(List<? extends Comparable<? super T>> list, T key)` and `binarySearch(List<? extends T> list, T key, Comparator<? super T> c)`
-
-**Definitions**
-
-- **Core Definition:** Searches a sorted list for a specified key using the binary search algorithm.
-- **Technical Definition:** `static <T> int binarySearch(List<? extends Comparable<? super T>> list, T key)` searches the specified list for the specified object using the binary search algorithm. The list must be sorted into ascending order according to the natural ordering of its elements prior to making this call. If it is not sorted, the results are undefined. `static <T> int binarySearch(List<? extends T> list, T key, Comparator<? super T> c)` performs the same search according to the order induced by the specified comparator.
-- **Beginner-Friendly Explanation:** `binarySearch` finds the position of a key in a sorted list. It returns the index of the key if found, or a negative number indicating where it would be inserted.
-
-**Purposes**
-
-- To locate a specified element in a sorted list efficiently.
-- To provide a logarithmic-time search algorithm for random-access lists.
-- To support both natural ordering and custom comparator-based searching.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-static <T> int binarySearch(List<? extends Comparable<? super T>> list, T key)
-static <T> int binarySearch(List<? extends T> list, T key, Comparator<? super T> c)
-```
-
-Component breakdown:
-
-- `list`: the list to be searched. Must be sorted.
-- `key`: the value to be searched for.
-- `c`: the comparator by which the list is ordered.
-- Returns the index of the search key, if it is contained in the list; otherwise, `(-(insertion point) - 1)`. The insertion point is defined as the point at which the key would be inserted into the list.
-- Throws `ClassCastException` if the list contains elements that are not mutually comparable.
-
-Syntax rules: This method runs in `log(n)` time for a "random access" list (which provides near-constant-time positional access). If the specified list does not implement the `RandomAccess` interface and is large, this method will do an iterator-based binary search that performs `O(n)` link traversals and `O(log n)` element comparisons.
-
-Constraints and limitations: The list must be sorted prior to calling `binarySearch`. If the list is not sorted, the results are undefined.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Binary search in a sorted list**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class BinarySearchExample {
-    public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        list.add(10);
-        list.add(20);
-        list.add(30);
-        list.add(40);
-        list.add(50);
-
-        int index = Collections.binarySearch(list, 30);
-        System.out.println("Index of 30: " + index);
-
-        int notFound = Collections.binarySearch(list, 25);
-        System.out.println("Result for 25: " + notFound);
-    }
-}
-```
-
-Expected Output:
-
-```
-Index of 30: 2
-Result for 25: -3
-```
-
-**Why the code produces this result:** 30 is at index 2. 25 is not present; the insertion point would be index 2, so the return value is `-(2) - 1 = -3`.
-
-**Example 2: Binary search with custom comparator**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-public class BinarySearchComparatorExample {
-    public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        list.add(50);
-        list.add(40);
-        list.add(30);
-        list.add(20);
-        list.add(10); // Sorted in descending order
-
-        int index = Collections.binarySearch(list, 30, Comparator.reverseOrder());
-        System.out.println("Index of 30 (reverse order): " + index);
-    }
-}
-```
-
-Expected Output:
-
-```
-Index of 30 (reverse order): 2
-```
-
-**Real-World Cases with Explanation**
-
-Binary search is used in dictionaries, phone books, and any application where a large sorted dataset must be searched quickly. It is the basis of many database indexing algorithms.
-
-**References Links**
-
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-
-#### 2.2 `max(Collection<? extends T> coll)` and `min(Collection<? extends T> coll)`
-
-**Definitions**
-
-- **Core Definition:** Returns the maximum or minimum element of a collection according to natural ordering or a specified comparator.
-- **Technical Definition:** `static <T extends Object & Comparable<? super T>> T max(Collection<? extends T> coll)` returns the maximum element of the given collection according to the natural ordering of its elements. `static <T> T max(Collection<? extends T> coll, Comparator<? super T> comp)` returns the maximum element according to the specified comparator. `min` has analogous overloads.
-- **Beginner-Friendly Explanation:** `max` finds the largest element; `min` finds the smallest. You can use natural ordering or provide your own comparison rule.
-
-**Purposes**
-
-- To find the largest or smallest element in a collection.
-- To support both natural ordering and custom comparison rules.
-- To provide a simple way to compute extremum values without sorting.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
-
-```java
-static <T extends Object & Comparable<? super T>> T max(Collection<? extends T> coll)
-static <T> T max(Collection<? extends T> coll, Comparator<? super T> comp)
-static <T extends Object & Comparable<? super T>> T min(Collection<? extends T> coll)
-static <T> T min(Collection<? extends T> coll, Comparator<? super T> comp)
-```
-
-Component breakdown:
-
-- `coll`: the collection whose maximum or minimum element is to be determined.
-- `comp`: the comparator with which to determine the maximum or minimum element.
-- Throws `NoSuchElementException` if the collection is empty.
-- Throws `ClassCastException` if the collection contains elements that are not mutually comparable.
-
-Syntax rules: This method iterates over the entire collection, hence it requires time proportional to the size of the collection.
-
-Constraints and limitations: The collection must not be empty. Elements must be mutually comparable.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `max` and `min` with natural ordering**
-
-```java
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-public class MaxMinExample {
-    public static void main(String[] args) {
-        List<Integer> list = Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6);
-        System.out.println("Max: " + Collections.max(list));
-        System.out.println("Min: " + Collections.min(list));
-    }
-}
-```
-
-Expected Output:
-
-```
-Max: 9
-Min: 1
-```
-
-**Example 2: `max` with custom comparator**
-
-```java
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-public class MaxComparatorExample {
-    public static void main(String[] args) {
-        List<String> list = Arrays.asList("apple", "banana", "cherry");
-        // Find the longest string
-        String longest = Collections.max(list, Comparator.comparingInt(String::length));
-        System.out.println("Longest: " + longest);
-    }
-}
-```
-
-Expected Output:
-
-```
-Longest: banana
-```
-
-**Real-World Cases with Explanation**
-
-`max` and `min` are used in statistical analysis, finding the highest score in a game, the lowest price in a product catalog, or the earliest date in a log.
-
-**References Links**
-
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-
-### 3. Data Modification and Shuffling
-
-**Core Definition:** Data modification algorithms alter the contents or arrangement of a collection, such as shuffling, filling, copying, swapping, or replacing elements.
-
-**Technical Definition:** The `Collections` class provides five algorithms for doing routine data manipulation on `List` objects: `shuffle`, `fill`, `copy`, `swap`, and `replaceAll`. These algorithms modify the list in place.
-
-**Beginner-Friendly Explanation:** These methods let you rearrange or change the elements of a list: shuffle randomizes the order, fill replaces all elements with a single value, copy duplicates one list into another, swap exchanges two elements, and replaceAll changes all occurrences of one value to another.
-
-#### 3.1 `shuffle(List<?> list)` and `shuffle(List<?> list, Random rnd)`
-
-**Definitions**
-
-- **Core Definition:** Randomly permutes the elements of a list.
-- **Technical Definition:** `static void shuffle(List<?> list)` randomly permutes the specified list using a default source of randomness. `static void shuffle(List<?> list, Random rnd)` randomly permutes the list using the specified source of randomness.
-- **Beginner-Friendly Explanation:** `shuffle` mixes up the list, just like shuffling a deck of cards.
-
-**Purposes**
-
-- To randomize the order of elements in a list.
-- To support randomized algorithms and simulations.
-- To provide a fair and unpredictable permutation.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
+### Syntax Rules and Structure
 
 ```java
 static void shuffle(List<?> list)
 static void shuffle(List<?> list, Random rnd)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `list`: the list to be shuffled.
-- `rnd`: the source of randomness to use to shuffle the list.
-- Throws `UnsupportedOperationException` if the specified list or its list-iterator does not support the `set` operation.
+- The list must be modifiable.
+- Runs in linear time.
 
-Syntax rules: This implementation traverses the list backwards, from the last element up to the second, repeatedly swapping a randomly selected element into the "current position". Elements are randomly selected from the portion of the list that runs from the first element to the current position, inclusive. This method runs in linear time.
+**Constraints and Limitations:**
 
-Constraints and limitations: The list must be modifiable. If the list is large and does not implement the `RandomAccess` interface, the implementation dumps the list into an array before shuffling it, to avoid quadratic behavior.
+- Throws `UnsupportedOperationException` for unmodifiable lists.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Shuffling a list**
+### Annotated Code Example
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+// File: ShuffleDemo.java
+import java.util.*;
 
-public class ShuffleExample {
+public class ShuffleDemo {
     public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) list.add(i);
+        List<Integer> numbers = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+        Collections.shuffle(numbers);
+        System.out.println("Shuffled: " + numbers); // random order
 
-        Collections.shuffle(list);
-        System.out.println("Shuffled: " + list);
+        // With a specific Random for reproducibility
+        Collections.shuffle(numbers, new Random(42));
+        System.out.println("Shuffled with seed: " + numbers);
     }
 }
 ```
 
-Expected Output (order varies):
-
+**Expected Output:**
 ```
-Shuffled: [7, 2, 9, 1, 5, 10, 3, 8, 4, 6]
-```
-
-**Example 2: Shuffling with a seeded `Random`**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-
-public class ShuffleSeededExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add("B");
-        list.add("C");
-        list.add("D");
-
-        Collections.shuffle(list, new Random(42));
-        System.out.println("Seeded shuffle: " + list);
-    }
-}
+Shuffled: [4, 2, 5, 1, 3] (varies)
+Shuffled with seed: [3, 5, 1, 4, 2] (varies)
 ```
 
-Expected Output (deterministic with seed 42):
+### Real-World Cases
 
-```
-Seeded shuffle: [C, A, D, B]
-```
+- **Card Games:** Shuffling a deck of cards.
+- **Lottery:** Drawing random numbers.
+- **Playlists:** Randomising song order.
 
-**Real-World Cases with Explanation**
+---
 
-Shuffling is used in card games, randomized quizzes, load balancing, and Monte Carlo simulations.
+## 6. Collections.swap()
 
-**References Links**
+### Definitions
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+**Core Definition:** `Collections.swap()` swaps the elements at two specified positions in a list.
 
-#### 3.2 `fill(List<? super T> list, T obj)`
+**Technical Definition:** `static void swap(List<?> list, int i, int j)` swaps the elements at the specified positions in the specified list. If `i == j`, the invocation leaves the list unchanged.
 
-**Definitions**
+**Beginner-Friendly Explanation:** `swap()` exchanges the items at two positions in a list. It's like swapping the positions of two books on a shelf.
 
-- **Core Definition:** Replaces all elements of a list with a specified element.
-- **Technical Definition:** `static <T> void fill(List<? super T> list, T obj)` replaces all of the elements of the specified list with the specified element.
-- **Beginner-Friendly Explanation:** `fill` sets every element in the list to the same value.
+### Purposes
 
-**Purposes**
+- To exchange two elements in a list
+- To implement sorting algorithms (e.g., bubble sort)
+- To reorder elements by position
 
-- To initialize or reset all elements of a list to a single value.
-- To support algorithms that require a uniform starting state.
-- To provide a simple way to clear a list's contents (by filling with `null`).
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-static <T> void fill(List<? super T> list, T obj)
-```
-
-Component breakdown:
-
-- `list`: the list to be filled with the specified element.
-- `obj`: the element with which to fill the specified list.
-- Throws `UnsupportedOperationException` if the specified list or its list-iterator does not support the `set` operation.
-
-Syntax rules: This method runs in linear time. The list size remains unchanged.
-
-Constraints and limitations: The list must be modifiable.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Filling a list**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class FillExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add("B");
-        list.add("C");
-
-        Collections.fill(list, "X");
-        System.out.println(list);
-    }
-}
-```
-
-Expected Output:
-
-```
-[X, X, X]
-```
-
-**Example 2: Filling with `null`**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class FillNullExample {
-    public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        list.add(1);
-        list.add(2);
-        list.add(3);
-
-        Collections.fill(list, null);
-        System.out.println(list);
-    }
-}
-```
-
-Expected Output:
-
-```
-[null, null, null]
-```
-
-**Real-World Cases with Explanation**
-
-`fill` is used to reset a game board, to initialize a list of default values, or to clear the contents of a list while preserving its size.
-
-**References Links**
-
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-
-#### 3.3 `copy(List<? super T> dest, List<? extends T> src)`
-
-**Definitions**
-
-- **Core Definition:** Copies all elements from one list into another.
-- **Technical Definition:** `static <T> void copy(List<? super T> dest, List<? extends T> src)` copies all of the elements from one list into another. After the operation, the index of each copied element in the destination list will be identical to its index in the source list. The destination list must be at least as long as the source list. If it is longer, the remaining elements in the destination list are unaffected.
-- **Beginner-Friendly Explanation:** `copy` duplicates the contents of one list into another. The destination list must already be large enough to hold all the elements.
-
-**Purposes**
-
-- To copy elements from a source list to a destination list.
-- To duplicate a list's contents into an existing list.
-- To support list cloning and backup operations.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-static <T> void copy(List<? super T> dest, List<? extends T> src)
-```
-
-Component breakdown:
-
-- `dest`: the destination list.
-- `src`: the source list.
-- Throws `IndexOutOfBoundsException` if the destination list is too small to contain the entire source list.
-- Throws `UnsupportedOperationException` if the destination list's list-iterator does not support the `set` operation.
-
-Syntax rules: The destination list must be at least as long as the source list. This method runs in linear time.
-
-Constraints and limitations: The destination list must be modifiable and large enough.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Copying a list**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class CopyExample {
-    public static void main(String[] args) {
-        List<String> src = new ArrayList<>();
-        src.add("A");
-        src.add("B");
-        src.add("C");
-
-        List<String> dest = new ArrayList<>();
-        dest.add("");
-        dest.add("");
-        dest.add("");
-
-        Collections.copy(dest, src);
-        System.out.println("Destination: " + dest);
-    }
-}
-```
-
-Expected Output:
-
-```
-Destination: [A, B, C]
-```
-
-**Example 2: Destination larger than source**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class CopyLargerDestExample {
-    public static void main(String[] args) {
-        List<String> src = new ArrayList<>();
-        src.add("X");
-        src.add("Y");
-
-        List<String> dest = new ArrayList<>();
-        dest.add("1");
-        dest.add("2");
-        dest.add("3");
-        dest.add("4");
-
-        Collections.copy(dest, src);
-        System.out.println("Destination: " + dest);
-    }
-}
-```
-
-Expected Output:
-
-```
-Destination: [X, Y, 3, 4]
-```
-
-**Why the code produces this result:** The first two elements of `dest` are replaced by the source elements. The remaining elements (`3` and `4`) are unaffected.
-
-**Real-World Cases with Explanation**
-
-`copy` is used to create backups of lists, to duplicate configuration settings, or to transfer data between lists while preserving index positions.
-
-**References Links**
-
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-
-#### 3.4 `swap(List<?> list, int i, int j)`
-
-**Definitions**
-
-- **Core Definition:** Swaps the elements at two specified positions in a list.
-- **Technical Definition:** `static void swap(List<?> list, int i, int j)` swaps the elements at the specified positions in the specified list.
-- **Beginner-Friendly Explanation:** `swap` exchanges the positions of two elements in a list.
-
-**Purposes**
-
-- To exchange the positions of two elements in a list.
-- To support sorting algorithms and permutation generation.
-- To provide a simple way to reorder list elements.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
+### Syntax Rules and Structure
 
 ```java
 static void swap(List<?> list, int i, int j)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `list`: the list in which to swap elements.
-- `i`: the index of one element to be swapped.
-- `j`: the index of the other element to be swapped.
-- Throws `IndexOutOfBoundsException` if either `i` or `j` is out of range (`i < 0 || i >= list.size() || j < 0 || j >= list.size()`).
+- The list must be modifiable.
+- `i` and `j` must be valid indices (0 ≤ index < size).
+- If `i == j`, the list is unchanged.
 
-Syntax rules: This method runs in linear time. If `i` equals `j`, the list is unchanged.
+**Constraints and Limitations:**
 
-Constraints and limitations: The list must be modifiable.
+- Throws `IndexOutOfBoundsException` for invalid indices.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Swapping elements**
+### Annotated Code Example
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+// File: SwapDemo.java
+import java.util.*;
 
-public class SwapExample {
+public class SwapDemo {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add("B");
-        list.add("C");
-        list.add("D");
-
-        Collections.swap(list, 1, 3);
-        System.out.println(list);
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C", "D"));
+        Collections.swap(list, 0, 3);
+        System.out.println("After swap: " + list); // [D, B, C, A]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-[A, D, C, B]
+After swap: [D, B, C, A]
 ```
 
-**Example 2: Swapping with out-of-range index**
+### Real-World Cases
+
+- **Sorting:** Swapping elements during custom sort implementations.
+- **Game Boards:** Swapping tiles or pieces.
+- **List Reordering:** Moving an element to a specific position.
+
+---
+
+## 7. Collections.fill()
+
+### Definitions
+
+**Core Definition:** `Collections.fill()` replaces all elements in a list with the specified element.
+
+**Technical Definition:** `static <T> void fill(List<? super T> list, T obj)` replaces all of the elements of the specified list with the specified element. This method runs in linear time.
+
+**Beginner-Friendly Explanation:** `fill()` is like painting every item in a list the same colour — it replaces all elements with the same value.
+
+### Purposes
+
+- To initialise a list with a default value
+- To reset all elements to a single value
+- To prepare a list for further operations
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+static <T> void fill(List<? super T> list, T obj)
+```
 
-public class SwapOutOfRangeExample {
+**Syntax Rules:**
+
+- The list must be modifiable.
+- Runs in linear time.
+
+**Constraints and Limitations:**
+
+- Throws `UnsupportedOperationException` for unmodifiable lists.
+
+### Annotated Code Example
+
+```java
+// File: FillDemo.java
+import java.util.*;
+
+public class FillDemo {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add("B");
-        try {
-            Collections.swap(list, 0, 5);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
-        }
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C"));
+        Collections.fill(list, "X");
+        System.out.println("Filled: " + list); // [X, X, X]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Caught: IndexOutOfBoundsException
+Filled: [X, X, X]
 ```
 
-**Real-World Cases with Explanation**
+### Real-World Cases
 
-`swap` is used in card games to exchange cards, in sorting algorithms to swap out-of-order elements, and in UI applications to reorder list items.
+- **Initialisation:** Creating a list of default values.
+- **Reset:** Clearing a board game or grid.
 
-**References Links**
+---
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+## 8. Collections.copy()
 
-#### 3.5 `replaceAll(List<T> list, T oldVal, T newVal)`
+### Definitions
 
-**Definitions**
+**Core Definition:** `Collections.copy()` copies all elements from one list into another.
 
-- **Core Definition:** Replaces all occurrences of one specified value in a list with another.
-- **Technical Definition:** `static <T> boolean replaceAll(List<T> list, T oldVal, T newVal)` replaces all occurrences of one specified value in a list with another. More formally, replaces with `newVal` each element `e` in `list` such that `(oldVal==null ? e==null : oldVal.equals(e))`. This method has no effect on the size of the list.
-- **Beginner-Friendly Explanation:** `replaceAll` changes every instance of a particular value in the list to a new value.
+**Technical Definition:** `static <T> void copy(List<? super T> dest, List<? extends T> src)` copies all of the elements from one list into another. After the operation, the index of each copied element in the destination list will be identical to its index in the source list. The destination list must be at least as long as the source list. If it is longer, the remaining elements in the destination list are unaffected.
 
-**Purposes**
+**Beginner-Friendly Explanation:** `copy()` copies the contents of one list into another list, replacing the destination's elements.
 
-- To replace all occurrences of a value in a list.
-- To support data cleansing and normalization.
-- To provide a bulk replacement operation.
+### Purposes
 
-**Syntax Structures and Rules**
+- To duplicate the contents of a list into another
+- To back up a list
+- To transfer data between lists
 
-Complete general syntax:
+### Syntax Rules and Structure
 
 ```java
-static <T> boolean replaceAll(List<T> list, T oldVal, T newVal)
+static <T> void copy(List<? super T> dest, List<? extends T> src)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `list`: the list in which replacement is to occur.
-- `oldVal`: the old value to be replaced.
-- `newVal`: the new value with which `oldVal` is to be replaced.
-- Returns `true` if the list contained one or more elements `e` such that `(oldVal==null ? e==null : oldVal.equals(e))`.
-- Throws `UnsupportedOperationException` if the specified list or its list-iterator does not support the `set` operation.
+- The destination list must be at least as long as the source list.
+- The destination list must be modifiable.
+- Runs in linear time.
 
-Syntax rules: This method runs in linear time.
+**Constraints and Limitations:**
 
-Constraints and limitations: The list must be modifiable.
+- Throws `IndexOutOfBoundsException` if the destination list is too small.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Replacing all occurrences**
+### Annotated Code Example
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+// File: CopyDemo.java
+import java.util.*;
 
-public class ReplaceAllExample {
+public class CopyDemo {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("apple");
-        list.add("banana");
-        list.add("apple");
-        list.add("cherry");
+        List<String> src = Arrays.asList("A", "B", "C");
+        List<String> dest = new ArrayList<>(Arrays.asList("X", "Y", "Z", "W"));
 
-        boolean replaced = Collections.replaceAll(list, "apple", "orange");
-        System.out.println("Replaced: " + replaced);
-        System.out.println(list);
+        Collections.copy(dest, src);
+        System.out.println("After copy: " + dest); // [A, B, C, W]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Replaced: true
-[orange, banana, orange, cherry]
+After copy: [A, B, C, W]
 ```
 
-**Example 2: Replacing with `null`**
+### Real-World Cases
+
+- **Backup:** Copying a list before modifying it.
+- **Batch Processing:** Transferring data between buffers.
+
+---
+
+## 9. Collections.min() / Collections.max()
+
+### Definitions
+
+**Core Definition:** `Collections.min()` and `Collections.max()` return the minimum or maximum element of a collection according to natural ordering or a specified comparator.
+
+**Technical Definition:** `static <T extends Object & Comparable<? super T>> T min(Collection<? extends T> coll)` returns the minimum element according to natural ordering. `static <T> T min(Collection<? extends T> coll, Comparator<? super T> comp)` uses the comparator. Similarly for `max()`. These methods iterate over the entire collection.
+
+**Beginner-Friendly Explanation:** `min()` finds the smallest element, and `max()` finds the largest, according to a comparison rule.
+
+### Purposes
+
+- To find the smallest or largest element in a collection
+- To determine extremes in data sets
+- To implement leaderboards or rankings
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+static <T extends Object & Comparable<? super T>> T min(Collection<? extends T> coll)
+static <T> T min(Collection<? extends T> coll, Comparator<? super T> comp)
+static <T extends Object & Comparable<? super T>> T max(Collection<? extends T> coll)
+static <T> T max(Collection<? extends T> coll, Comparator<? super T> comp)
+```
 
-public class ReplaceAllNullExample {
+**Syntax Rules:**
+
+- The collection must be non-empty.
+- Elements must be mutually comparable.
+- Runs in linear time.
+
+**Constraints and Limitations:**
+
+- Throws `NoSuchElementException` if the collection is empty.
+
+### Annotated Code Example
+
+```java
+// File: MinMaxDemo.java
+import java.util.*;
+
+public class MinMaxDemo {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add(null);
-        list.add("B");
-        list.add(null);
+        List<Integer> numbers = Arrays.asList(5, 2, 8, 1, 9);
 
-        Collections.replaceAll(list, null, "X");
-        System.out.println(list);
+        System.out.println("Min: " + Collections.min(numbers)); // 1
+        System.out.println("Max: " + Collections.max(numbers)); // 9
+
+        // With custom comparator (reverse order)
+        System.out.println("Min (reverse): " + Collections.min(numbers, Comparator.reverseOrder())); // 9
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-[A, X, B, X]
+Min: 1
+Max: 9
+Min (reverse): 9
 ```
 
-**Real-World Cases with Explanation**
+### Real-World Cases
 
-`replaceAll` is used in data migration to update old values to new ones, in text processing to replace placeholders, and in configuration management to update settings.
+- **Leaderboards:** Finding the highest score.
+- **Data Analysis:** Finding the minimum or maximum value in a dataset.
+- **Scheduling:** Finding the earliest or latest date.
 
-**References Links**
+---
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+## 10. Collections.frequency()
 
-### 4. Frequency and Composition Analysis
+### Definitions
 
-**Core Definition:** Frequency and composition analysis algorithms determine how many times an element appears in a collection, whether two collections share elements, and where sublists appear within larger lists.
+**Core Definition:** `Collections.frequency()` returns the number of elements in a collection equal to a specified object.
 
-**Technical Definition:** `Collections.frequency(Collection<?> c, Object o)` returns the number of elements in the specified collection equal to the specified object. `Collections.disjoint(Collection<?> c1, Collection<?> c2)` returns `true` if the two specified collections have no elements in common. `Collections.indexOfSubList(List<?> source, List<?> target)` returns the starting position of the first occurrence of the specified target list within the specified source list, or `-1` if there is no such occurrence. `Collections.lastIndexOfSubList` performs the analogous search for the last occurrence.
+**Technical Definition:** `static int frequency(Collection<?> c, Object o)` returns the number of elements in the specified collection equal to the specified object. More formally, returns the number of elements `e` in the collection such that `Objects.equals(o, e)`.
 
-**Beginner-Friendly Explanation:** `frequency` counts how many times something appears. `disjoint` checks if two collections have nothing in common. `indexOfSubList` finds where a smaller list appears inside a larger list.
+**Beginner-Friendly Explanation:** `frequency()` counts how many times a specific item appears in a collection.
 
-#### 4.1 `frequency(Collection<?> c, Object o)`
+### Purposes
 
-**Definitions**
+- To count occurrences of an element
+- To analyse data distributions
+- To detect duplicates
 
-- **Core Definition:** Returns the number of elements in a collection equal to a specified object.
-- **Technical Definition:** `static int frequency(Collection<?> c, Object o)` returns the number of elements in the specified collection equal to the specified object. More formally, returns the number of elements `e` in the collection such that `(o == null ? e == null : o.equals(e))`.
-- **Beginner-Friendly Explanation:** `frequency` counts how many times a particular value appears in a collection.
-
-**Purposes**
-
-- To count the occurrences of an element in a collection.
-- To support statistical analysis and histogram generation.
-- To provide a simple way to measure frequency.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
+### Syntax Rules and Structure
 
 ```java
 static int frequency(Collection<?> c, Object o)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `c`: the collection in which to determine the frequency of `o`.
-- `o`: the object whose frequency is to be determined.
-- Returns the number of elements in `c` equal to `o`.
-- Throws `NullPointerException` if `c` is `null`.
+- Uses `Objects.equals()` for comparison.
+- Runs in linear time.
 
-Syntax rules: This method runs in linear time.
+**Constraints and Limitations:**
 
-Constraints and limitations: The collection must not be `null`.
+- None significant.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Counting occurrences**
+### Annotated Code Example
 
 ```java
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+// File: FrequencyDemo.java
+import java.util.*;
 
-public class FrequencyExample {
+public class FrequencyDemo {
     public static void main(String[] args) {
-        List<String> list = Arrays.asList("A", "B", "A", "C", "A", "B");
-        int countA = Collections.frequency(list, "A");
-        int countB = Collections.frequency(list, "B");
-        int countD = Collections.frequency(list, "D");
-
-        System.out.println("A appears " + countA + " times");
-        System.out.println("B appears " + countB + " times");
-        System.out.println("D appears " + countD + " times");
+        List<String> words = Arrays.asList("apple", "banana", "apple", "cherry", "apple");
+        System.out.println("Frequency of apple: " + Collections.frequency(words, "apple")); // 3
+        System.out.println("Frequency of banana: " + Collections.frequency(words, "banana")); // 1
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-A appears 3 times
-B appears 2 times
-D appears 0 times
+Frequency of apple: 3
+Frequency of banana: 1
 ```
 
-**Example 2: Counting `null` occurrences**
+### Real-World Cases
 
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+- **Text Analysis:** Counting word occurrences.
+- **Inventory:** Counting stock items.
+- **Voting:** Counting votes for candidates.
 
-public class FrequencyNullExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("X");
-        list.add(null);
-        list.add("Y");
-        list.add(null);
+---
 
-        int nullCount = Collections.frequency(list, null);
-        System.out.println("null appears " + nullCount + " times");
-    }
-}
-```
+## 11. Collections.disjoint()
 
-Expected Output:
+### Definitions
 
-```
-null appears 2 times
-```
+**Core Definition:** `Collections.disjoint()` returns `true` if two collections have no elements in common.
 
-**Real-World Cases with Explanation**
+**Technical Definition:** `static boolean disjoint(Collection<?> c1, Collection<?> c2)` returns `true` if the two specified collections have no elements in common. If either collection is empty, returns `true`.
 
-`frequency` is used in word counting, inventory management, survey analysis, and any application that requires counting occurrences of values.
+**Beginner-Friendly Explanation:** `disjoint()` checks if two collections share any elements. It's like checking if two people have any common friends.
 
-**References Links**
+### Purposes
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+- To check if two collections are completely different
+- To detect overlapping data
+- To validate that sets are mutually exclusive
 
-#### 4.2 `disjoint(Collection<?> c1, Collection<?> c2)`
-
-**Definitions**
-
-- **Core Definition:** Returns `true` if two collections have no elements in common.
-- **Technical Definition:** `static boolean disjoint(Collection<?> c1, Collection<?> c2)` returns `true` if the two specified collections have no elements in common.
-- **Beginner-Friendly Explanation:** `disjoint` checks whether two collections are completely separate, with no shared elements.
-
-**Purposes**
-
-- To determine whether two collections share any elements.
-- To support set operations such as intersection testing.
-- To provide a fast way to check for common elements.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
+### Syntax Rules and Structure
 
 ```java
 static boolean disjoint(Collection<?> c1, Collection<?> c2)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `c1`: the first collection.
-- `c2`: the second collection.
-- Returns `true` if the two collections have no elements in common.
-- Throws `NullPointerException` if either collection is `null`.
+- Returns `true` if no elements are shared.
+- Runs in linear time.
 
-Syntax rules: The implementation iterates over the smaller collection and checks containment in the larger collection, preferring the collection whose `contains()` method has lower complexity.
+**Constraints and Limitations:**
 
-Constraints and limitations: The collections must not be `null`.
+- If either collection is empty, returns `true`.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Disjoint collections**
+### Annotated Code Example
 
 ```java
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+// File: DisjointDemo.java
+import java.util.*;
 
-public class DisjointExample {
+public class DisjointDemo {
     public static void main(String[] args) {
-        List<Integer> c1 = Arrays.asList(1, 2, 3);
-        List<Integer> c2 = Arrays.asList(4, 5, 6);
-        List<Integer> c3 = Arrays.asList(3, 4, 5);
+        Set<String> set1 = new HashSet<>(Arrays.asList("A", "B", "C"));
+        Set<String> set2 = new HashSet<>(Arrays.asList("D", "E", "F"));
+        Set<String> set3 = new HashSet<>(Arrays.asList("C", "D", "E"));
 
-        System.out.println("c1 and c2 disjoint: " + Collections.disjoint(c1, c2));
-        System.out.println("c1 and c3 disjoint: " + Collections.disjoint(c1, c3));
+        System.out.println("set1 and set2 disjoint: " + Collections.disjoint(set1, set2)); // true
+        System.out.println("set1 and set3 disjoint: " + Collections.disjoint(set1, set3)); // false
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-c1 and c2 disjoint: true
-c1 and c3 disjoint: false
+set1 and set2 disjoint: true
+set1 and set3 disjoint: false
 ```
 
-**Example 2: Disjoint with mixed types**
+### Real-World Cases
+
+- **Permissions:** Checking if two roles have overlapping permissions.
+- **Scheduling:** Finding free time slots.
+- **Data Validation:** Ensuring sets are mutually exclusive.
+
+---
+
+## 12. Collections.addAll()
+
+### Definitions
+
+**Core Definition:** `Collections.addAll()` adds all of the specified elements to the specified collection.
+
+**Technical Definition:** `static <T> boolean addAll(Collection<? super T> c, T... elements)` adds all of the specified elements to the specified collection. The behaviour of this convenience method is identical to that of `c.addAll(Arrays.asList(elements))`, but this method is likely to run significantly faster under most implementations.
+
+**Beginner-Friendly Explanation:** `addAll()` adds a bunch of items to a collection in one go.
+
+### Purposes
+
+- To add multiple elements to a collection efficiently
+- To combine collections
+- To initialise collections with multiple values
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+static <T> boolean addAll(Collection<? super T> c, T... elements)
+```
 
-public class DisjointMixedExample {
+**Syntax Rules:**
+
+- Returns `true` if the collection changed as a result.
+- Runs in linear time.
+
+**Constraints and Limitations:**
+
+- Throws `UnsupportedOperationException` for unmodifiable collections.
+
+### Annotated Code Example
+
+```java
+// File: AddAllDemo.java
+import java.util.*;
+
+public class AddAllDemo {
     public static void main(String[] args) {
-        List<String> c1 = Arrays.asList("A", "B");
-        List<Integer> c2 = Arrays.asList(1, 2);
-        System.out.println("Disjoint: " + Collections.disjoint(c1, c2));
+        List<String> list = new ArrayList<>();
+        Collections.addAll(list, "A", "B", "C", "D");
+        System.out.println("After addAll: " + list); // [A, B, C, D]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Disjoint: true
+After addAll: [A, B, C, D]
 ```
 
-**Real-World Cases with Explanation**
+### Real-World Cases
 
-`disjoint` is used in database query optimization, in scheduling to check for conflicts, and in security to verify that two sets of permissions do not overlap.
+- **Bulk Initialisation:** Adding initial data to a collection.
+- **Merging Data:** Combining multiple collections.
 
-**References Links**
+---
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+## 13. Collections.unmodifiableList() / unmodifiableSet() / unmodifiableMap()
 
-#### 4.3 `indexOfSubList(List<?> source, List<?> target)` and `lastIndexOfSubList(List<?> source, List<?> target)`
+### Definitions
 
-**Definitions**
+**Core Definition:** These methods return unmodifiable views of the specified collections, preventing any modifications to the underlying collection through the view.
 
-- **Core Definition:** Finds the starting position of the first or last occurrence of a sublist within a larger list.
-- **Technical Definition:** `static int indexOfSubList(List<?> source, List<?> target)` returns the starting position of the first occurrence of the specified target list within the specified source list, or `-1` if there is no such occurrence. `static int lastIndexOfSubList(List<?> source, List<?> target)` returns the starting position of the last occurrence.
-- **Beginner-Friendly Explanation:** `indexOfSubList` finds where a smaller list first appears inside a larger list; `lastIndexOfSubList` finds the last occurrence.
+**Technical Definition:** `static <T> List<T> unmodifiableList(List<? extends T> list)` returns an unmodifiable view of the specified list. `unmodifiableSet()` and `unmodifiableMap()` are similar. Attempts to modify the returned collection, whether directly or via its iterator, result in an `UnsupportedOperationException`. The returned collection acts as a read-only view; the underlying collection can still be modified through the original reference.
 
-**Purposes**
+**Beginner-Friendly Explanation:** These methods create a "read-only" wrapper around a collection. You can look at it, but you cannot change it — any attempt to modify it throws an exception.
 
-- To locate a sublist within a larger list.
-- To support pattern matching and text processing.
-- To provide a way to find sequences of elements.
+### Purposes
 
-**Syntax Structures and Rules**
+- To protect internal collections from external modification
+- To return read-only views from APIs
+- To enforce immutability of collection contents
 
-Complete general syntaxes:
+### Syntax Rules and Structure
 
 ```java
-static int indexOfSubList(List<?> source, List<?> target)
-static int lastIndexOfSubList(List<?> source, List<?> target)
-```
-
-Component breakdown:
-
-- `source`: the list in which to search for the first occurrence of `target`.
-- `target`: the list to search for as a subList of `source`.
-- Returns the starting position of the first (or last) occurrence, or `-1` if there is no such occurrence.
-- Throws `NullPointerException` if either list is `null`.
-
-Syntax rules: This method runs in linear time.
-
-Constraints and limitations: The lists must not be `null`.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Finding a sublist**
-
-```java
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-public class IndexOfSubListExample {
-    public static void main(String[] args) {
-        List<Integer> source = Arrays.asList(1, 2, 3, 4, 3, 2, 1);
-        List<Integer> target = Arrays.asList(3, 4);
-
-        int first = Collections.indexOfSubList(source, target);
-        int last = Collections.lastIndexOfSubList(source, target);
-
-        System.out.println("First occurrence: " + first);
-        System.out.println("Last occurrence: " + last);
-    }
-}
-```
-
-Expected Output:
-
-```
-First occurrence: 2
-Last occurrence: 2
-```
-
-**Example 2: Sublist not found**
-
-```java
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-public class SublistNotFoundExample {
-    public static void main(String[] args) {
-        List<String> source = Arrays.asList("a", "b", "c");
-        List<String> target = Arrays.asList("x", "y");
-        System.out.println("Index: " + Collections.indexOfSubList(source, target));
-    }
-}
-```
-
-Expected Output:
-
-```
-Index: -1
-```
-
-**Real-World Cases with Explanation**
-
-`indexOfSubList` is used in DNA sequence analysis to find gene patterns, in text editors to find phrases, and in network packet inspection to detect patterns.
-
-**References Links**
-
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-
-### 5. Collection Factory and Wrapper Methods
-
-**Core Definition:** Collection factory and wrapper methods create or return collections that are unmodifiable, synchronized, or contain only a single element or no elements.
-
-**Technical Definition:** The `Collections` class provides "wrappers" that return a new collection backed by a specified collection. These include unmodifiable views, which throw `UnsupportedOperationException` on any attempt to modify the collection; synchronized views, which are thread-safe but require manual synchronization during iteration; and factory methods such as `singleton()`, `singletonList()`, `singletonMap()`, `emptyList()`, `emptySet()`, and `emptyMap()`, which return immutable collections.
-
-**Beginner-Friendly Explanation:** These methods let you create read-only views of collections, make collections thread-safe, and create small immutable collections with a single element or no elements.
-
-#### 5.1 `unmodifiableCollection()` / `unmodifiableList()` / `unmodifiableSet()` etc.
-
-**Definitions**
-
-- **Core Definition:** Returns an unmodifiable view of a collection.
-- **Technical Definition:** `static <T> Collection<T> unmodifiableCollection(Collection<? extends T> c)` returns an unmodifiable view of the specified collection. Query operations on the returned collection "read through" to the specified collection, and attempts to modify the returned collection, whether direct or via its iterator, result in an `UnsupportedOperationException`. Analogous methods exist for `List`, `Set`, `SortedSet`, `NavigableSet`, `Map`, `SortedMap`, and `NavigableMap`.
-- **Beginner-Friendly Explanation:** `unmodifiableList` gives you a read-only view of a list. You can look at it but cannot change it.
-
-**Purposes**
-
-- To provide a read-only view of a collection.
-- To prevent accidental modification of a collection.
-- To safely share a collection with untrusted code.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-static <T> Collection<T> unmodifiableCollection(Collection<? extends T> c)
 static <T> List<T> unmodifiableList(List<? extends T> list)
 static <T> Set<T> unmodifiableSet(Set<? extends T> s)
 static <K,V> Map<K,V> unmodifiableMap(Map<? extends K, ? extends V> m)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `c` / `list` / `s` / `m`: the collection for which an unmodifiable view is to be returned.
-- Returns an unmodifiable view of the specified collection.
+- The returned collection is a view backed by the original.
+- Any modification attempt throws `UnsupportedOperationException`.
+- The original collection can still be modified elsewhere.
 
-Syntax rules: The returned collection is a view, not a copy. Changes to the backing collection are visible through the unmodifiable view. Attempts to modify the view throw `UnsupportedOperationException`.
+**Constraints and Limitations:**
 
-Constraints and limitations: The returned view is unmodifiable, but the backing collection can still be modified by other references.
+- The view is read-only, but the original is still mutable.
+- Does not make a copy; it wraps.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Unmodifiable list**
+### Annotated Code Example
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+// File: UnmodifiableDemo.java
+import java.util.*;
 
-public class UnmodifiableListExample {
+public class UnmodifiableDemo {
     public static void main(String[] args) {
-        List<String> mutable = new ArrayList<>();
-        mutable.add("A");
-        mutable.add("B");
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C"));
+        List<String> immutable = Collections.unmodifiableList(list);
 
-        List<String> unmodifiable = Collections.unmodifiableList(mutable);
-        System.out.println("Unmodifiable: " + unmodifiable);
-
-        // Modify the backing list
-        mutable.add("C");
-        System.out.println("After backing modification: " + unmodifiable);
+        System.out.println("Immutable view: " + immutable); // [A, B, C]
 
         try {
-            unmodifiable.add("D");
+            immutable.add("D");
         } catch (UnsupportedOperationException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
+            System.out.println("Cannot modify unmodifiable list");
         }
+
+        // Original list can still be modified
+        list.add("D");
+        System.out.println("Original after modification: " + list); // [A, B, C, D]
+        System.out.println("Immutable view reflects change: " + immutable); // [A, B, C, D]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Unmodifiable: [A, B]
-After backing modification: [A, B, C]
-Caught: UnsupportedOperationException
+Immutable view: [A, B, C]
+Cannot modify unmodifiable list
+Original after modification: [A, B, C, D]
+Immutable view reflects change: [A, B, C, D]
 ```
 
-**Example 2: Unmodifiable set**
+### Real-World Cases
+
+- **API Design:** Returning unmodifiable collections from getters.
+- **Defensive Programming:** Protecting internal state from external modification.
+- **Read-Only Views:** Providing read-only access to shared data.
+
+---
+
+## 14. Collections.synchronizedList() / synchronizedSet() / synchronizedMap()
+
+### Definitions
+
+**Core Definition:** These methods return synchronized (thread-safe) views of the specified collections.
+
+**Technical Definition:** `static <T> List<T> synchronizedList(List<T> list)` returns a synchronized (thread-safe) list backed by the specified list. `synchronizedSet()` and `synchronizedMap()` are similar. To guarantee serial access, it is critical that all access to the backing collection is accomplished through the returned collection. It is imperative that the user manually synchronize on the returned collection when iterating over it.
+
+**Beginner-Friendly Explanation:** These methods wrap a collection so that only one thread can access it at a time, preventing race conditions in multi-threaded programs.
+
+### Purposes
+
+- To provide thread-safe access to collections
+- To protect against concurrent modification in multi-threaded environments
+- To serve as a legacy alternative to concurrent collections
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-public class UnmodifiableSetExample {
-    public static void main(String[] args) {
-        Set<Integer> set = new HashSet<>();
-        set.add(1);
-        set.add(2);
-
-        Set<Integer> unmodifiable = Collections.unmodifiableSet(set);
-        System.out.println(unmodifiable);
-    }
-}
-```
-
-Expected Output:
-
-```
-[1, 2]
-```
-
-**Real-World Cases with Explanation**
-
-Unmodifiable views are used to return collections from methods without exposing internal mutable state, to create read-only configuration objects, and to enforce immutability in APIs.
-
-**References Links**
-
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-
-#### 5.2 `synchronizedCollection()` / `synchronizedList()` / `synchronizedSet()` etc.
-
-**Definitions**
-
-- **Core Definition:** Returns a thread-safe (synchronized) collection backed by the specified collection.
-- **Technical Definition:** `static <T> Collection<T> synchronizedCollection(Collection<T> c)` returns a synchronized (thread-safe) collection backed by the specified collection. To guarantee serial access, it is critical that all access to the backing collection is accomplished through the returned collection. It is imperative that the user manually synchronize on the returned collection when iterating over it. Analogous methods exist for `List`, `Set`, `SortedSet`, `NavigableSet`, `Map`, `SortedMap`, and `NavigableMap`.
-- **Beginner-Friendly Explanation:** `synchronizedList` makes a list thread-safe. Multiple threads can access it safely, but you still need to synchronize when iterating.
-
-**Purposes**
-
-- To provide a thread-safe view of a collection.
-- To support concurrent access to a collection from multiple threads.
-- To wrap a non-thread-safe collection with synchronization.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-static <T> Collection<T> synchronizedCollection(Collection<T> c)
 static <T> List<T> synchronizedList(List<T> list)
 static <T> Set<T> synchronizedSet(Set<T> s)
 static <K,V> Map<K,V> synchronizedMap(Map<K,V> m)
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `c` / `list` / `s` / `m`: the collection to be wrapped in a synchronized collection.
-- Returns a synchronized view of the specified collection.
+- The returned collection is thread-safe for individual operations.
+- Manual synchronization is required for iteration.
+- The original collection should not be accessed directly.
 
-Syntax rules: It is imperative that the user manually synchronize on the returned collection when traversing it via `Iterator`, `Spliterator`, or `Stream`.
+**Constraints and Limitations:**
 
-Constraints and limitations: The returned collection is thread-safe for individual operations, but compound operations (such as iteration) require external synchronization.
+- Compound operations (e.g., check-then-act) are not atomic.
+- Iteration requires manual synchronization.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Synchronized list**
-
-```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-public class SynchronizedListExample {
-    public static void main(String[] args) throws InterruptedException {
-        List<Integer> list = Collections.synchronizedList(new ArrayList<>());
-
-        Thread t1 = new Thread(() -> {
-            for (int i = 0; i < 1000; i++) list.add(i);
-        });
-        Thread t2 = new Thread(() -> {
-            for (int i = 1000; i < 2000; i++) list.add(i);
-        });
-
-        t1.start();
-        t2.start();
-        t1.join();
-        t2.join();
-
-        System.out.println("Size: " + list.size());
-    }
-}
-```
-
-Expected Output:
-
-```
-Size: 2000
-```
-
-**Example 2: Iterating a synchronized list**
+### Annotated Code Example
 
 ```java
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+// File: SynchronizedDemo.java
+import java.util.*;
 
-public class SynchronizedIterationExample {
+public class SynchronizedDemo {
     public static void main(String[] args) {
-        List<String> list = Collections.synchronizedList(new ArrayList<>());
-        list.add("A");
-        list.add("B");
+        List<String> list = new ArrayList<>();
+        List<String> syncList = Collections.synchronizedList(list);
 
-        synchronized (list) {
-            for (String s : list) {
-                System.out.println(s);
+        // Thread-safe individual operations
+        syncList.add("A");
+        syncList.add("B");
+
+        // Manual synchronization for iteration
+        synchronized (syncList) {
+            for (String item : syncList) {
+                System.out.println(item);
             }
         }
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
 A
 B
 ```
 
-**Real-World Cases with Explanation**
+### Real-World Cases
 
-Synchronized wrappers are used in multi-threaded applications where a collection is shared between threads but a full `java.util.concurrent` collection is not necessary.
+- **Multi-Threaded Applications:** Sharing a list between threads.
+- **Legacy Code:** Thread-safe collections in older Java code.
+- **Simple Synchronization:** When full concurrent collections are overkill.
 
-**References Links**
+---
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+## 15. Collections.emptyList() / emptySet() / emptyMap()
 
-#### 5.3 `singleton(T o)` / `singletonList(T item)` / `singletonMap(K key, V value)`
+### Definitions
 
-**Definitions**
+**Core Definition:** These methods return immutable empty collections.
 
-- **Core Definition:** Returns an immutable collection containing only the specified object.
-- **Technical Definition:** `static <T> Set<T> singleton(T o)` returns an immutable set containing only the specified object. `static <T> List<T> singletonList(T o)` returns an immutable list containing only the specified object. `static <K,V> Map<K,V> singletonMap(K key, V value)` returns an immutable map, mapping only the specified key to the specified value.
-- **Beginner-Friendly Explanation:** `singletonList("X")` creates a list with exactly one element, "X", and that list cannot be changed.
+**Technical Definition:** `static <T> List<T> emptyList()` returns an empty immutable list. `emptySet()` and `emptyMap()` are similar. These methods are useful when you want to return an empty collection from a method without allocating a new one each time.
 
-**Purposes**
+**Beginner-Friendly Explanation:** These methods give you an empty collection that you cannot modify. They are useful for returning "nothing" from a method.
 
-- To create an immutable collection with a single element.
-- To provide a convenient way to pass a single element as a collection.
-- To avoid the overhead of creating a full collection for one element.
+### Purposes
 
-**Syntax Structures and Rules**
+- To return an empty collection without allocating a new one
+- To avoid `null` returns from methods
+- To provide a shared, immutable empty collection
 
-Complete general syntaxes:
-
-```java
-static <T> Set<T> singleton(T o)
-static <T> List<T> singletonList(T o)
-static <K,V> Map<K,V> singletonMap(K key, V value)
-```
-
-Component breakdown:
-
-- `o`: the sole object to be stored in the returned collection.
-- `key`: the sole key to be stored in the returned map.
-- `value`: the value to which the returned map maps `key`.
-- Returns an immutable collection containing only the specified object.
-
-Syntax rules: The returned collection is immutable.
-
-Constraints and limitations: The returned collection is immutable. It is serializable.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Singleton list**
-
-```java
-import java.util.Collections;
-import java.util.List;
-
-public class SingletonListExample {
-    public static void main(String[] args) {
-        List<String> singleton = Collections.singletonList("Only");
-        System.out.println(singleton);
-        System.out.println("Size: " + singleton.size());
-    }
-}
-```
-
-Expected Output:
-
-```
-[Only]
-Size: 1
-```
-
-**Example 2: Singleton map**
-
-```java
-import java.util.Collections;
-import java.util.Map;
-
-public class SingletonMapExample {
-    public static void main(String[] args) {
-        Map<String, Integer> singleton = Collections.singletonMap("key", 42);
-        System.out.println(singleton);
-        System.out.println("Value: " + singleton.get("key"));
-    }
-}
-```
-
-Expected Output:
-
-```
-{key=42}
-Value: 42
-```
-
-**Real-World Cases with Explanation**
-
-Singleton collections are used to return a single result as a collection, to represent a default configuration with one value, or to provide a convenient immutable wrapper around a single element.
-
-**References Links**
-
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-
-#### 5.4 `emptyList()` / `emptySet()` / `emptyMap()`
-
-**Definitions**
-
-- **Core Definition:** Returns a type-safe, immutable empty collection.
-- **Technical Definition:** `static <T> List<T> emptyList()` returns the empty list (immutable). `static <T> Set<T> emptySet()` returns the empty set (immutable). `static <K,V> Map<K,V> emptyMap()` returns the empty map (immutable). These methods are type-safe and generic.
-- **Beginner-Friendly Explanation:** `emptyList()` gives you an empty list that you cannot add to. It is useful as a placeholder or default return value.
-
-**Purposes**
-
-- To return an empty collection without allocating a new object.
-- To provide a type-safe way to represent an empty collection.
-- To avoid `NullPointerException` when returning empty collections.
-
-**Syntax Structures and Rules**
-
-Complete general syntaxes:
+### Syntax Rules and Structure
 
 ```java
 static <T> List<T> emptyList()
@@ -1714,108 +1015,397 @@ static <T> Set<T> emptySet()
 static <K,V> Map<K,V> emptyMap()
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- Returns an immutable empty collection of the inferred type.
+- The returned collections are immutable.
+- Attempts to modify throw `UnsupportedOperationException`.
+- The same instance may be returned for each call.
 
-Syntax rules: The returned collection is immutable.
+**Constraints and Limitations:**
 
-Constraints and limitations: The returned collection is immutable. Attempts to modify it throw `UnsupportedOperationException`.
+- Cannot add elements to the returned collections.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Empty list**
+### Annotated Code Example
 
 ```java
-import java.util.Collections;
-import java.util.List;
+// File: EmptyDemo.java
+import java.util.*;
 
-public class EmptyListExample {
+public class EmptyDemo {
+    public static List<String> getNames(boolean hasNames) {
+        if (!hasNames) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList("Alice", "Bob");
+    }
+
     public static void main(String[] args) {
-        List<String> empty = Collections.emptyList();
-        System.out.println("Size: " + empty.size());
-        System.out.println("Is empty: " + empty.isEmpty());
+        System.out.println(getNames(false)); // []
+        System.out.println(getNames(true));  // [Alice, Bob]
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Size: 0
-Is empty: true
+[]
+[Alice, Bob]
 ```
 
-**Example 2: Empty set and map**
+### Real-World Cases
+
+- **API Design:** Returning empty collections instead of `null`.
+- **Default Values:** Providing default empty collections.
+
+---
+
+## 16. Collections.singletonList() / singleton() / singletonMap()
+
+### Definitions
+
+**Core Definition:** These methods return immutable collections containing a single element.
+
+**Technical Definition:** `static <T> List<T> singletonList(T o)` returns an immutable list containing only the specified object. `singleton(T o)` returns an immutable set containing only the specified object. `singletonMap(K key, V value)` returns an immutable map containing only the specified key-value pair.
+
+**Beginner-Friendly Explanation:** These methods create a collection with exactly one item, which cannot be changed.
+
+### Purposes
+
+- To create a single-element collection
+- To return a single value as a collection from an API
+- To provide a convenient way to create immutable single-element collections
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+static <T> List<T> singletonList(T o)
+static <T> Set<T> singleton(T o)
+static <K,V> Map<K,V> singletonMap(K key, V value)
+```
 
-public class EmptySetMapExample {
+**Syntax Rules:**
+
+- The returned collections are immutable.
+- Attempts to modify throw `UnsupportedOperationException`.
+
+**Constraints and Limitations:**
+
+- Cannot add or remove elements.
+
+### Annotated Code Example
+
+```java
+// File: SingletonDemo.java
+import java.util.*;
+
+public class SingletonDemo {
     public static void main(String[] args) {
-        Set<Integer> emptySet = Collections.emptySet();
-        Map<String, Integer> emptyMap = Collections.emptyMap();
-        System.out.println("Empty set: " + emptySet);
-        System.out.println("Empty map: " + emptyMap);
+        List<String> singleList = Collections.singletonList("Only");
+        Set<String> singleSet = Collections.singleton("Only");
+        Map<String, Integer> singleMap = Collections.singletonMap("Only", 1);
+
+        System.out.println("List: " + singleList); // [Only]
+        System.out.println("Set: " + singleSet);   // [Only]
+        System.out.println("Map: " + singleMap);   // {Only=1}
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Empty set: []
-Empty map: {}
+List: [Only]
+Set: [Only]
+Map: {Only=1}
 ```
 
-**Real-World Cases with Explanation**
+### Real-World Cases
 
-Empty collections are used as default return values from methods that would otherwise return `null`, as placeholders in data structures, and as safe initial values for collections that will be populated later.
+- **API Design:** Returning a single element as a collection.
+- **Configuration:** Creating a map with one entry.
 
-**References Links**
+---
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+## 17. Collections.nCopies()
 
-## Summary Table of Algorithms
+### Definitions
 
-| Category | Method | Description |
-|---|---|---|
-| Sorting | `sort(list)` | Sorts list into ascending natural order |
-| Sorting | `sort(list, comparator)` | Sorts list according to comparator |
-| Sorting | `reverse(list)` | Reverses list order |
-| Sorting | `reverseOrder()` | Returns comparator for reverse natural order |
-| Searching | `binarySearch(list, key)` | Binary search in sorted list |
-| Searching | `binarySearch(list, key, comparator)` | Binary search with comparator |
-| Extremum | `max(coll)` / `min(coll)` | Finds maximum / minimum element |
-| Shuffling | `shuffle(list)` | Randomly permutes list |
-| Data | `fill(list, obj)` | Replaces all elements with obj |
-| Data | `copy(dest, src)` | Copies src into dest |
-| Data | `swap(list, i, j)` | Swaps elements at i and j |
-| Data | `replaceAll(list, old, new)` | Replaces all occurrences |
-| Frequency | `frequency(c, o)` | Counts occurrences of o |
-| Composition | `disjoint(c1, c2)` | Checks for common elements |
-| Composition | `indexOfSubList(source, target)` | Finds sublist position |
-| Wrapper | `unmodifiableList(list)` | Returns read-only view |
-| Wrapper | `synchronizedList(list)` | Returns thread-safe view |
-| Factory | `singletonList(obj)` | Returns immutable single-element list |
-| Factory | `emptyList()` | Returns immutable empty list |
+**Core Definition:** `Collections.nCopies()` returns an immutable list consisting of `n` copies of a specified object.
 
-## Deprecated, Unsafe, and Version-Specific Notes
+**Technical Definition:** `static <T> List<T> nCopies(int n, T o)` returns an immutable list consisting of `n` copies of the specified object. The newly allocated data object is tiny (it contains a single reference to the data object). This method is useful when you need a list of a certain size filled with the same element.
 
-- The `Collections` class has been part of the Java Collections Framework since JDK 1.2.
-- The `sort` method was originally implemented as a tuned quicksort, but since Java 7 it uses a stable, adaptive, iterative mergesort (TimSort). The documentation explicitly states that the algorithm used by `sort` does not have to be a mergesort, but it does have to be stable.
-- The "destructive" algorithms (those that modify the collection) throw `UnsupportedOperationException` if the collection does not support the appropriate mutation primitive(s). They may, but are not required to, throw this exception if an invocation would have no effect on the collection. For example, invoking `sort` on an unmodifiable list that is already sorted may or may not throw `UnsupportedOperationException`.
-- The `synchronizedList` and related methods return views that require manual synchronization during iteration.
-- The `unmodifiableList` and related methods return views, not copies. Changes to the backing collection are visible through the view.
-- Since Java 9, `List.of()`, `Set.of()`, and `Map.of()` provide alternative immutable factory methods that are often preferred over `Collections.emptyList()` and `Collections.singletonList()` for fixed-size immutable collections.
+**Beginner-Friendly Explanation:** `nCopies()` creates a list with the same item repeated `n` times.
 
-## References
+### Purposes
 
-- Collections (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html
-- Collections (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
-- Lesson: Algorithms (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/collections/algorithms/index.html
-- Object Ordering (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/collections/interfaces/order.html
-- Collections Utility Class – Sip of Java – https://inside.java/2023/06/11/sip-012/
+- To create a list with repeated elements
+- To initialise a list with a default value
+- To avoid manually adding the same element multiple times
+
+### Syntax Rules and Structure
+
+```java
+static <T> List<T> nCopies(int n, T o)
+```
+
+**Syntax Rules:**
+
+- `n` must be non-negative.
+- Returns an immutable list.
+- Uses a single reference internally for efficiency.
+
+**Constraints and Limitations:**
+
+- Throws `IllegalArgumentException` if `n < 0`.
+
+### Annotated Code Example
+
+```java
+// File: NCopiesDemo.java
+import java.util.*;
+
+public class NCopiesDemo {
+    public static void main(String[] args) {
+        List<String> list = Collections.nCopies(3, "Hello");
+        System.out.println("nCopies: " + list); // [Hello, Hello, Hello]
+    }
+}
+```
+
+**Expected Output:**
+```
+nCopies: [Hello, Hello, Hello]
+```
+
+### Real-World Cases
+
+- **Initialisation:** Creating a list of default values.
+- **Padding:** Filling a list with a placeholder value.
+
+---
+
+## 18. Collections.rotate()
+
+### Definitions
+
+**Core Definition:** `Collections.rotate()` rotates the elements in a list by a specified distance.
+
+**Technical Definition:** `static void rotate(List<?> list, int distance)` rotates the elements in the specified list by the specified distance. After calling this method, the element at index `i` will be the element previously at index `(i - distance) mod list.size()`, for all values of `i`. This method has no effect on the size of the list.
+
+**Beginner-Friendly Explanation:** `rotate()` shifts all elements in a list by a certain number of positions, wrapping around the ends.
+
+### Purposes
+
+- To rotate the elements of a list
+- To implement circular buffers
+- To shift data by a fixed amount
+
+### Syntax Rules and Structure
+
+```java
+static void rotate(List<?> list, int distance)
+```
+
+**Syntax Rules:**
+
+- `distance` can be positive or negative.
+- Positive distance rotates right; negative rotates left.
+- The list must be modifiable.
+
+**Constraints and Limitations:**
+
+- Throws `UnsupportedOperationException` for unmodifiable lists.
+
+### Annotated Code Example
+
+```java
+// File: RotateDemo.java
+import java.util.*;
+
+public class RotateDemo {
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C", "D", "E"));
+
+        Collections.rotate(list, 2);
+        System.out.println("Rotated right by 2: " + list); // [D, E, A, B, C]
+
+        Collections.rotate(list, -1);
+        System.out.println("Rotated left by 1: " + list); // [E, A, B, C, D]
+    }
+}
+```
+
+**Expected Output:**
+```
+Rotated right by 2: [D, E, A, B, C]
+Rotated left by 1: [E, A, B, C, D]
+```
+
+### Real-World Cases
+
+- **Circular Buffers:** Rotating data in a fixed-size buffer.
+- **Shift Scheduling:** Rotating duty rosters.
+- **Data Rotation:** Shifting elements by a fixed amount.
+
+---
+
+## 19. Collections.replaceAll()
+
+### Definitions
+
+**Core Definition:** `Collections.replaceAll()` replaces all occurrences of one specified value in a list with another.
+
+**Technical Definition:** `static <T> boolean replaceAll(List<T> list, T oldVal, T newVal)` replaces all occurrences of the specified value `oldVal` in the list with `newVal`. Returns `true` if any replacements were made. More formally, replaces with `newVal` each element `e` in the list such that `Objects.equals(oldVal, e)`.
+
+**Beginner-Friendly Explanation:** `replaceAll()` finds every occurrence of one value in a list and replaces it with another value.
+
+### Purposes
+
+- To replace all occurrences of a value in a list
+- To update data in bulk
+- To standardise values in a collection
+
+### Syntax Rules and Structure
+
+```java
+static <T> boolean replaceAll(List<T> list, T oldVal, T newVal)
+```
+
+**Syntax Rules:**
+
+- Uses `Objects.equals()` for comparison.
+- Returns `true` if any replacements occurred.
+- The list must be modifiable.
+
+**Constraints and Limitations:**
+
+- Throws `UnsupportedOperationException` for unmodifiable lists.
+
+### Annotated Code Example
+
+```java
+// File: ReplaceAllDemo.java
+import java.util.*;
+
+public class ReplaceAllDemo {
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "A", "C", "A"));
+        boolean replaced = Collections.replaceAll(list, "A", "X");
+        System.out.println("Replaced: " + replaced); // true
+        System.out.println("List: " + list); // [X, B, X, C, X]
+    }
+}
+```
+
+**Expected Output:**
+```
+Replaced: true
+List: [X, B, X, C, X]
+```
+
+### Real-World Cases
+
+- **Data Cleaning:** Replacing null values with defaults.
+- **Standardisation:** Replacing abbreviations with full terms.
+- **Bulk Updates:** Updating all occurrences of a value.
+
+---
+
+## 20. Collections Best Practices
+
+### Definitions
+
+**Core Definition:** Best practices for using the `Collections` utility class are guidelines for writing efficient, safe, and maintainable code when working with collections.
+
+**Technical Definition:** Best practices include programming to interfaces, using the most general type for parameters and the most specific for return values, preferring `Collections` factory methods for empty and singleton collections, using unmodifiable wrappers to protect internal state, and being aware of the performance implications of each method. "Never use an implementation type because this defeats the purpose of an interface-based Collections Framework, which is to allow collections to be manipulated without regard to implementation details". "Use the least-specific type that makes sense".
+
+**Beginner-Friendly Explanation:** Best practices help you use the `Collections` toolbox correctly — choosing the right tool for the job and avoiding common mistakes.
+
+### Key Best Practices
+
+| Practice | Description |
+|----------|-------------|
+| **Program to interfaces** | Use `List`, `Set`, `Map` as parameter and variable types. |
+| **Use the least-specific type for parameters** | Accept `Collection` instead of `List` when possible. |
+| **Return the most specific type** | Return `List` or `SortedMap` when the caller needs those capabilities. |
+| **Use `Collections.emptyList()` instead of `null`** | Avoid `null` returns; return an empty collection. |
+| **Use `Collections.unmodifiableList()` to protect internal state** | Return read-only views from getters. |
+| **Use `Collections.synchronizedList()` for thread safety** | Wrap collections when multiple threads access them. |
+| **Prefer `List.of()` over `Collections.unmodifiableList()`** | Java 9+ provides immutable factory methods. |
+| **Use `Collections.sort()` on modifiable lists** | Do not attempt to sort unmodifiable lists. |
+| **Use `Collections.binarySearch()` on sorted lists** | The list must be sorted before searching. |
+| **Be aware of `UnsupportedOperationException`** | Destructive algorithms throw when the collection is unmodifiable. |
+| **Use `Collections.addAll()` for bulk additions** | More efficient than adding elements one by one. |
+| **Use `Collections.frequency()` for counting** | Convenient for counting occurrences. |
+
+### Annotated Code Example
+
+```java
+// File: CollectionsBestPractices.java
+import java.util.*;
+
+public class CollectionsBestPractices {
+
+    // GOOD: Accept the most general type
+    public static int sumAll(Collection<Integer> numbers) {
+        int total = 0;
+        for (int n : numbers) total += n;
+        return total;
+    }
+
+    // GOOD: Return an unmodifiable view
+    public static List<String> getNames() {
+        List<String> names = new ArrayList<>(Arrays.asList("Alice", "Bob"));
+        return Collections.unmodifiableList(names);
+    }
+
+    // GOOD: Use emptyList() instead of null
+    public static List<String> getEmpty() {
+        return Collections.emptyList();
+    }
+
+    public static void main(String[] args) {
+        // GOOD: Use Collections.addAll()
+        List<String> list = new ArrayList<>();
+        Collections.addAll(list, "A", "B", "C");
+
+        // GOOD: Use Collections.sort()
+        Collections.sort(list);
+
+        // GOOD: Use Collections.frequency()
+        System.out.println("Frequency of B: " + Collections.frequency(list, "B"));
+
+        // GOOD: Use Collections.unmodifiableList()
+        List<String> immutable = getNames();
+        // immutable.add("C"); // UnsupportedOperationException
+
+        System.out.println("Names: " + immutable);
+    }
+}
+```
+
+**Expected Output:**
+```
+Frequency of B: 1
+Names: [Alice, Bob]
+```
+
+### Real-World Cases
+
+- **API Design:** Returning unmodifiable collections from getters.
+- **Thread Safety:** Wrapping collections with `synchronizedList()`.
+- **Data Processing:** Using `Collections.sort()`, `binarySearch()`, and `frequency()`.
+
+---
+
+## References Links
+
+- Collections (Java SE 21 & JDK 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collections.html
+- Collections (Java Platform SE 11) — Oracle API Documentation - https://docs.oracle.com/javase/jp/11/docs/api/java.base/java/util/Collections.html
+- Lesson: Algorithms — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/collections/algorithms/index.html
+- API Design — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/collections/interoperability/api-design.html
+- Class Collections (OpenJDK) - https://cr.openjdk.org/~iris/se/15/latestSpec/apidiffs/java.base/java/util/Collections-report.html
+- Collections Utility Class — Sip of Java (Inside.java) - https://inside.java/2023/06/11/sip080/
+- Java Collections Framework: Complete Guide, Patterns, and Best Practices — Cleverence - https://www.cleverence.com/articles/oracle-documentation/java-collections-framework-4721/
+- Unmodifiable Wrappers — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/collections/implementations/wrapper.html
+- Synchronization Wrappers — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/collections/implementations/wrapper.html
+- Java Collections Utility Methods — Baeldung - https://www.baeldung.com/java-collections-utility-class

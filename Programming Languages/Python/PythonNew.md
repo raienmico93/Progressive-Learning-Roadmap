@@ -144,7 +144,7 @@ Python is best learned as more than "a scripting language." The progression shou
 
 # II. Variables and Data Types
 
-- **5. Variables**
+- [**5. Variables**](/Programming%20Languages/Python/Basics/Variables.md)
   - Variables
   - Variable assignment
   - Multiple assignment
@@ -297,108 +297,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - `struct` module
   - `binascii` module
 
-- **9. Lists**
-  - Lists
-  - List literals
-  - List creation
-  - List indexing
-  - List slicing
-  - List methods
-    - `append()`
-    - `extend()`
-    - `insert()`
-    - `remove()`
-    - `pop()`
-    - `clear()`
-    - `index()`
-    - `count()`
-    - `sort()`
-    - `reverse()`
-    - `copy()`
-  - List operations
-    - Concatenation
-    - Repetition
-    - Membership
-    - Iteration
-  - List comprehensions
-  - Nested comprehensions
-  - Conditional comprehensions
-  - List unpacking
-  - List copying
-    - Shallow copy
-    - Deep copy
-  - List performance
-  - List best practices
-
-- **10. Tuples**
-  - Tuples
-  - Tuple literals
-  - Tuple creation
-  - Tuple indexing
-  - Tuple slicing
-  - Tuple methods
-    - `count()`
-    - `index()`
-  - Tuple unpacking
-  - Named tuples
-  - Tuple performance
-  - Tuples vs lists
-  - Tuple best practices
-
-- **11. Dictionaries**
-  - Dictionaries
-  - Dictionary literals
-  - Dictionary creation
-  - Dictionary keys
-  - Dictionary values
-  - Dictionary methods
-    - `get()`
-    - `keys()`
-    - `values()`
-    - `items()`
-    - `update()`
-    - `pop()`
-    - `popitem()`
-    - `setdefault()`
-    - `clear()`
-    - `copy()`
-    - `fromkeys()`
-  - Dictionary comprehensions
-  - Dictionary iteration
-  - Dictionary merging
-  - Nested dictionaries
-  - Ordered dictionaries
-  - `collections.OrderedDict`
-  - `collections.defaultdict`
-  - `collections.Counter`
-  - Dictionary performance
-  - Dictionary best practices
-
-- **12. Sets**
-  - Sets
-  - Set literals
-  - Set creation
-  - Set methods
-    - `add()`
-    - `remove()`
-    - `discard()`
-    - `pop()`
-    - `clear()`
-    - `copy()`
-  - Set operations
-    - Union
-    - Intersection
-    - Difference
-    - Symmetric difference
-    - Subset
-    - Superset
-    - Disjoint
-  - Set comprehensions
-  - Frozen sets
-  - Set performance
-  - Set best practices
-
-- **13. None and Booleans**
+- **9. None and Booleans**
   - `None`
   - `NoneType`
   - `None` vs `False`
@@ -418,7 +317,7 @@ Python is best learned as more than "a scripting language." The progression shou
 
 # III. Operators
 
-- **14. Arithmetic Operators**
+- **10. Arithmetic Operators**
   - `+`
   - `-`
   - `*`
@@ -430,7 +329,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Operator precedence
   - Operator associativity
 
-- **15. Comparison Operators**
+- **11. Comparison Operators**
   - `==`
   - `!=`
   - `<`
@@ -451,7 +350,7 @@ Python is best learned as more than "a scripting language." The progression shou
     - `__gt__`
     - `__ge__`
 
-- **16. Logical Operators**
+- **12. Logical Operators**
   - `and`
   - `or`
   - `not`
@@ -459,7 +358,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Logical vs bitwise
   - Truthy and falsy
 
-- **17. Bitwise Operators**
+- **13. Bitwise Operators**
   - `&`
   - `|`
   - `^`
@@ -471,7 +370,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Bit manipulation
   - Bit manipulation applications
 
-- **18. Assignment Operators**
+- **14. Assignment Operators**
   - `=`
   - `+=`
   - `-=`
@@ -490,7 +389,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Multiple assignment
   - Unpacking assignment
 
-- **19. Identity Operators**
+- **15. Identity Operators**
   - `is`
   - `is not`
   - Object identity
@@ -498,7 +397,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Identity vs equality
   - Identity pitfalls
 
-- **20. Membership Operators**
+- **16. Membership Operators**
   - `in`
   - `not in`
   - Membership testing
@@ -506,7 +405,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Membership in collections
   - Membership performance
 
-- **21. Operator Overloading**
+- **17. Operator Overloading**
   - Operator overloading
   - Magic methods
     - `__add__`
@@ -543,7 +442,7 @@ Python is best learned as more than "a scripting language." The progression shou
     - `__hash__`
     - `__bool__`
 
-- **22. Ternary Operator**
+- **18. Ternary Operator**
   - Ternary operator
   - Conditional expressions
   - `x if condition else y`
@@ -554,7 +453,7 @@ Python is best learned as more than "a scripting language." The progression shou
 
 # IV. Control Flow
 
-- **23. Conditional Statements**
+- **19. Conditional Statements**
   - `if`
   - `elif`
   - `else`
@@ -577,7 +476,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Pattern matching use cases
   - Pattern matching best practices
 
-- **24. Loops**
+- **20. Loops**
   - `for` loops
   - `while` loops
   - `for...else`
@@ -597,6 +496,111 @@ Python is best learned as more than "a scripting language." The progression shou
   - Infinite loops
   - Loop performance
   - Loop best practices
+
+---
+
+# Data Structures
+
+- [**21. Lists**](/Programming%20Languages/Python/Collections/Lists.md)
+  - Lists
+  - List literals
+  - List creation
+  - List indexing
+  - List slicing
+  - List methods
+    - `append()`
+    - `extend()`
+    - `insert()`
+    - `remove()`
+    - `pop()`
+    - `clear()`
+    - `index()`
+    - `count()`
+    - `sort()`
+    - `reverse()`
+    - `copy()`
+  - List operations
+    - Concatenation
+    - Repetition
+    - Membership
+    - Iteration
+  - List comprehensions
+  - Nested comprehensions
+  - Conditional comprehensions
+  - List unpacking
+  - List copying
+    - Shallow copy
+    - Deep copy
+  - List performance
+  - List best practices
+
+- [**22. Tuples**](/Programming%20Languages/Python/Collections/Tuples.md)
+  - Tuples
+  - Tuple literals
+  - Tuple creation
+  - Tuple indexing
+  - Tuple slicing
+  - Tuple methods
+    - `count()`
+    - `index()`
+  - Tuple unpacking
+  - Named tuples
+  - Tuple performance
+  - Tuples vs lists
+  - Tuple best practices
+
+- **23. Sets**
+  - Sets
+  - Set literals
+  - Set creation
+  - Set methods
+    - `add()`
+    - `remove()`
+    - `discard()`
+    - `pop()`
+    - `clear()`
+    - `copy()`
+  - Set operations
+    - Union
+    - Intersection
+    - Difference
+    - Symmetric difference
+    - Subset
+    - Superset
+    - Disjoint
+  - Set comprehensions
+  - Frozen sets
+  - Set performance
+  - Set best practices
+
+- **24. Dictionaries**
+  - Dictionaries
+  - Dictionary literals
+  - Dictionary creation
+  - Dictionary keys
+  - Dictionary values
+  - Dictionary methods
+    - `get()`
+    - `keys()`
+    - `values()`
+    - `items()`
+    - `update()`
+    - `pop()`
+    - `popitem()`
+    - `setdefault()`
+    - `clear()`
+    - `copy()`
+    - `fromkeys()`
+  - Dictionary comprehensions
+  - Dictionary iteration
+  - Dictionary merging
+  - Nested dictionaries
+  - Ordered dictionaries
+  - `collections.OrderedDict`
+  - `collections.defaultdict`
+  - `collections.Counter`
+  - Dictionary performance
+  - Dictionary best practices
 
 - **25. Comprehensions**
   - List comprehensions
@@ -649,16 +653,14 @@ Python is best learned as more than "a scripting language." The progression shou
     - `pairwise()`
     - `batched()`
 
----
-
 # V. Functions
 
-- **27. Function Fundamentals**
+- [**27. Function Fundamentals**](/Programming%20Languages/Python/Functions/Function.md)
   - Functions
   - `def` keyword
   - Function definition
   - Function call
-  - Function parameters
+  - [Function parameters](/Programming%20Languages/Python/Functions/FunctionParams.md)
   - Function arguments
   - Positional arguments
   - Keyword arguments
@@ -681,7 +683,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Function composition
   - Function best practices
 
-- **28. Scope and Namespaces**
+- [**28. Scope and Namespaces**](/Programming%20Languages/Python/Functions/ScoreAndNamespaces.md)
   - Scope
   - Local scope
   - Enclosing scope

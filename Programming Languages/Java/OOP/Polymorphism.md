@@ -1,779 +1,1290 @@
-# Java Polymorphism: A Comprehensive Cheat Sheet
+# Java Polymorphism: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
-### Core Definition
+### Definitions
 
-**Polymorphism** is the object-oriented programming principle that allows objects of different types to be treated as instances of a common supertype, with each type providing its own specialized behavior for shared operations.
+**Core Definition:** Polymorphism is a fundamental principle of object-oriented programming that allows objects of different classes to be treated as objects of a common superclass, with the specific behaviour determined at runtime based on the actual object type.
 
-### Technical Definition
+**Technical Definition:** Polymorphism (from Greek: "poly" = many, "morph" = form) is the ability of a reference variable to refer to objects of different types and to invoke methods that behave differently depending on the actual type of the object. In Java, polymorphism is achieved through method overriding (runtime polymorphism) and method overloading (compile-time polymorphism). The Java Virtual Machine uses dynamic method dispatch to determine which method implementation to invoke at runtime based on the actual class of the object, not the declared type of the reference.
 
-Polymorphism in Java is realized through **subtype polymorphism**, where a superclass reference can refer to a subclass object, and the method invoked is determined by the **runtime type** of the object rather than the **compile-time type** of the reference . Java supports two primary forms: **compile-time polymorphism** (static binding via method overloading) and **runtime polymorphism** (dynamic binding via method overriding) . The JVM uses **dynamic method dispatch** to select the most specific implementation at runtime . Type safety during casting is ensured through `instanceof` checks, with modern pattern matching providing more concise and exhaustive alternatives .
-
-### Beginner-Friendly Explanation
-
-Imagine you have a universal remote that can control any TV, DVD player, or sound system. When you press "power," each device responds in its own way—the TV turns on, the DVD player ejects its tray, and the sound system starts playing. You used the same button (same method call), but each device did its own thing. That's polymorphism: one interface, many behaviors.
+**Beginner-Friendly Explanation:** Polymorphism is like a universal remote control. You press the "play" button, and whether it's a DVD player, a streaming box, or a game console, the "play" command works — but each device does something different. In Java, you can write code that says "call the `makeSound()` method" on an `Animal` reference, and whether it's actually a `Dog` or a `Cat`, the correct sound is produced.
 
 ### Key Characteristics
 
-- **Subtype substitutability**: A subclass object can be used wherever a superclass object is expected.
-- **Dynamic dispatch**: Method calls are resolved at runtime based on the actual object type.
-- **Two forms**: Compile-time (overloading) and runtime (overriding).
-- **Upcasting is safe**: Converting a subtype reference to a supertype is implicit and always valid.
-- **Downcasting requires care**: Converting a supertype reference to a subtype requires explicit cast and runtime check.
-- **Pattern matching**: Modern Java provides concise, safe downcasting with `instanceof` patterns and exhaustive `switch` .
+- **"Many Forms":** The same method call can behave differently depending on the actual object type.
+- **Runtime Resolution:** The specific method implementation is determined at runtime, not compile time (for overriding).
+- **Substitutability:** A subclass object can be used wherever a superclass object is expected (Liskov Substitution Principle).
+- **Interface-Based:** Polymorphism works through inheritance hierarchies and interfaces.
+- **Dynamic Dispatch:** The JVM uses the actual object's class to select the method implementation.
+- **Two Types:** Compile-time polymorphism (overloading) and runtime polymorphism (overriding).
 
 ### Prerequisites
 
-- Basic understanding of classes, inheritance, and the `extends` keyword.
-- Familiarity with method overloading and method overriding.
-- Knowledge of access modifiers and exception handling in overrides.
+- Understanding of classes, objects, and inheritance
+- Familiarity with method declaration and invocation
+- Knowledge of method overriding and the `@Override` annotation
+- Awareness of the `super` keyword and constructor chaining
+- Basic understanding of the class hierarchy and `Object` as the root
 
 ### Related Programming Areas
 
-- **Method Overloading**: Compile-time polymorphism.
-- **Method Overriding**: Runtime polymorphism.
-- **Design Patterns**: Strategy, Template Method, Factory patterns rely on polymorphism.
-- **SOLID Principles**: Liskov Substitution Principle (LSP) is foundational to correct polymorphism .
+- **Object-Oriented Programming (OOP):** Polymorphism is one of the four fundamental OOP principles (along with encapsulation, inheritance, and abstraction).
+- **Design Patterns:** Many patterns (Strategy, Factory, Observer, Command) rely heavily on polymorphism.
+- **Frameworks:** Frameworks like Spring and Hibernate use polymorphism extensively for dependency injection and ORM.
+- **Collections Framework:** The `Collection`, `List`, `Set`, and `Map` interfaces demonstrate polymorphic behaviour.
+- **Functional Programming:** Java 8+ lambdas and method references provide a form of polymorphic behaviour.
 
 ### Core Concepts / Features
 
-1. Compile-Time Polymorphism (Overloading) vs. Runtime Polymorphism (Overriding)
-2. Upcasting (Implicit Casting to a Supertype)
-3. Downcasting (Explicit Casting to a Subtype)
-4. Dynamic Method Dispatch
-5. Safe Downcasting: `instanceof` and Pattern Matching
-6. Design Principles: Liskov Substitution Principle (LSP) and Coding to an Interface/Type
+---
 
-
-## Core Concept 1: Compile-Time Polymorphism (Overloading) vs. Runtime Polymorphism (Overriding)
+## 1. Polymorphism
 
 ### Definitions
 
-**Core Definition**: **Compile-time polymorphism** (static binding) is achieved through method overloading, where the compiler determines which method to call based on the arguments. **Runtime polymorphism** (dynamic binding) is achieved through method overriding, where the JVM determines which method to call based on the object's actual type.
+**Core Definition:** Polymorphism is the ability of an object to take on many forms, allowing a single interface to represent different underlying types.
 
-**Technical Definition**: Method overloading is an example of compile-time/static polymorphism because the compiler resolves the method call at compile time based on the static types of the arguments . Method overriding is an example of runtime/dynamic polymorphism because the JVM resolves the method call at runtime based on the dynamic type of the receiver object . The key distinction is **when** the method is selected: overloaded methods are selected by the compiler, while overridden methods are selected by the JVM.
+**Technical Definition:** In Java, polymorphism enables a reference variable of a superclass type to refer to an object of any subclass type. When a method is invoked on that reference, the JVM determines which implementation to execute based on the actual type of the object at runtime. This is known as dynamic method dispatch. Polymorphism is implemented through method overriding (runtime) and method overloading (compile-time).
 
-**Beginner-Friendly Explanation**: Overloading is like a restaurant menu with "small pizza" and "large pizza"—you decide which one to order when you speak (compile time). Overriding is like a franchise where each location makes the "house special" their own way—you don't know which recipe you'll get until you visit the actual restaurant (runtime).
+**Beginner-Friendly Explanation:** Polymorphism means "many shapes." In Java, it means you can use a general type (like `Animal`) to refer to specific types (like `Dog` or `Cat`), and when you call a method, the specific type's version runs. It's like saying "give me a vehicle" and getting either a car or a bike — both can `move()`, but they do it differently.
 
 ### Purposes
 
-- **Overloading**: To provide convenient variations of a method for different input types or numbers of arguments.
-- **Overriding**: To allow subclasses to customize inherited behavior while maintaining a consistent interface.
-- To enable both early (compile-time) and late (runtime) binding based on the design need.
-- To support flexible, extensible systems where new subclasses can be added without modifying existing code.
+- To enable writing flexible, reusable code that works with objects of multiple types
+- To allow a single method or data structure to handle different types uniformly
+- To support the "open-closed principle" by allowing new types to be added without modifying existing code
+- To reduce coupling between components by programming to interfaces or abstract classes
+- To enable frameworks and libraries to work with user-defined types through common contracts
 
 ### Syntax Rules and Structure
 
-**Compile-Time Polymorphism (Overloading):**
+**Complete General Syntax:**
 
 ```java
-public void process(int value) { }
-public void process(String value) { }
-public void process(int a, int b) { }
+// Superclass or interface reference
+SuperType reference = new SubType();
+
+// Polymorphic method call
+reference.methodName();  // Resolved at runtime
 ```
 
-**Runtime Polymorphism (Overriding):**
+**Component Breakdown:**
 
-```java
-class Superclass {
-    public void process() { System.out.println("Super"); }
-}
-
-class Subclass extends Superclass {
-    @Override
-    public void process() { System.out.println("Sub"); }
-}
-```
-
-**Comparison Table:**
-
-| Aspect | Overloading (Compile-Time) | Overriding (Runtime) |
-|--------|---------------------------|----------------------|
-| Binding | Static (compile time) | Dynamic (runtime) |
-| Selection basis | Argument static types | Object runtime type |
-| Method signature | Must differ | Must match |
-| Inheritance | Same class (or related) | Superclass/subclass |
-| Polymorphic? | Ad-hoc polymorphism | Subtype polymorphism |
+| Component | Description |
+|-----------|-------------|
+| `SuperType` | The declared type of the reference (class or interface). |
+| `SubType` | The actual type of the object being created. |
+| `reference` | A variable that can hold any subtype of `SuperType`. |
+| `methodName()` | A method defined in `SuperType` and overridden in `SubType`. |
 
 **Syntax Rules:**
 
-- Overloading: same method name, different parameter lists .
-- Overriding: same signature, `@Override` recommended.
-- Overloading is resolved using the **compile-time type** of the receiver and arguments .
-- Overriding is resolved using the **runtime type** of the receiver .
+- The reference type determines which methods can be called (compile-time check).
+- The object type determines which method implementation runs (runtime dispatch).
+- Polymorphism works with both classes (inheritance) and interfaces (implementation).
 
 **Constraints and Limitations:**
 
-- Cannot overload by return type alone.
-- Cannot override `final`, `static`, or `private` methods.
-- Overloading can create ambiguity (e.g., with autoboxing/varargs).
-- Overriding must respect access, exception, and covariant return rules.
+- Polymorphism does not apply to fields (fields are resolved at compile time based on the reference type).
+- Static methods are not polymorphic; they are resolved at compile time.
+- Private methods are not polymorphic; they are not inherited.
+- Final methods cannot be overridden, so they are not polymorphic.
 
-### Annotated Complete Code Examples
+### Annotated Complete Step-by-Step Code Examples
 
-**Example 1: Overloading vs. Overriding**
+**Example 1: Basic Polymorphism with Classes**
 
 ```java
-/**
- * Demonstrates compile-time and runtime polymorphism.
- */
-class Calculator {
-    // Overloaded methods (compile-time polymorphism)
-    public int add(int a, int b) { return a + b; }
-    public double add(double a, double b) { return a + b; }
-    public int add(int a, int b, int c) { return a + b + c; }
-}
-
+// File: PolymorphismDemo.java
+// Superclass
 class Animal {
     public void makeSound() {
-        System.out.println("Animal makes sound");
+        System.out.println("Some generic animal sound");
     }
 }
 
+// Subclass
 class Dog extends Animal {
     @Override
     public void makeSound() {
-        System.out.println("Dog barks");
+        System.out.println("Woof! Woof!");
+    }
+}
+
+// Subclass
+class Cat extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("Meow!");
     }
 }
 
 public class PolymorphismDemo {
     public static void main(String[] args) {
-        // Compile-time: compiler picks add(int, int)
-        Calculator calc = new Calculator();
-        System.out.println("add(2,3): " + calc.add(2, 3));
-        System.out.println("add(2.5,3.5): " + calc.add(2.5, 3.5));
-        System.out.println("add(1,2,3): " + calc.add(1, 2, 3));
+        // Polymorphic references: SuperType reference = new SubType()
+        Animal myDog = new Dog();   // Upcasting
+        Animal myCat = new Cat();   // Upcasting
 
-        // Runtime: JVM picks Dog.makeSound()
-        Animal a = new Dog();
-        a.makeSound(); // "Dog barks"
+        // Polymorphic method calls
+        myDog.makeSound();  // Resolves to Dog's implementation
+        myCat.makeSound();  // Resolves to Cat's implementation
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-add(2,3): 5
-add(2.5,3.5): 6.0
-add(1,2,3): 6
-Dog barks
+Woof! Woof!
+Meow!
 ```
 
-**Why This Output Occurs:**
-- The compiler selects `add(int, int)` for `(2, 3)`, `add(double, double)` for `(2.5, 3.5)`, and `add(int, int, int)` for `(1, 2, 3)` based on argument types .
-- `a.makeSound()` dispatches to `Dog.makeSound()` at runtime because `a` refers to a `Dog` object .
+**Step-by-Step Explanation:**
 
-### Real-World Cases
+1. `Animal` is the superclass with a generic `makeSound()` method.
+2. `Dog` and `Cat` are subclasses that override `makeSound()`.
+3. `Animal myDog = new Dog()` creates a `Dog` object but assigns it to an `Animal` reference (upcasting).
+4. When `myDog.makeSound()` is called, the JVM checks the actual object type (`Dog`) and invokes `Dog`'s version of the method.
+5. Similarly, `myCat.makeSound()` invokes `Cat`'s version.
+6. This demonstrates runtime polymorphism — the same method call produces different behaviour based on the object type.
 
-- **Collections**: `Collections.sort()` overloaded for `List` and arrays.
-- **Template Method Pattern**: Superclass defines the algorithm; subclasses override steps.
-- **Strategy Pattern**: Different strategies implement the same interface.
-
-### References
-
-- Dev.java – Polymorphism - https://dev.java/learn/inheritance/polymorphism/ 
-- University of Washington – Overloading vs. Overriding - https://courses.cs.washington.edu/courses/cse331/18au/lectures/lect06a-overloading.pdf 
-
-
-## Core Concept 2: Upcasting (Implicit Casting to a Supertype)
-
-### Definitions
-
-**Core Definition**: **Upcasting** is the implicit conversion of a subclass reference to a superclass reference, allowing a subclass object to be treated as an instance of its superclass.
-
-**Technical Definition**: Upcasting is always safe and implicit because a subclass **is-a** superclass . When a subclass object is assigned to a superclass reference, the compiler allows it without an explicit cast. The reference type determines which methods are **accessible** at compile time, but the runtime type determines which **implementation** executes . This is the foundation of runtime polymorphism.
-
-**Beginner-Friendly Explanation**: Upcasting is like putting a square peg in a round hole that's actually a "shape" hole. Since a square is a shape, you can treat it as a shape without any problem. You lose the ability to call square-specific methods through the shape reference, but you can still call all shape methods.
-
-### Purposes
-
-- To enable polymorphic behavior where different subclasses can be treated uniformly.
-- To allow writing generic code that operates on a supertype rather than specific subtypes.
-- To support the Liskov Substitution Principle by treating subtypes as supertypes.
-- To decouple client code from concrete implementations.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
+**Example 2: Polymorphism with Arrays**
 
 ```java
-Superclass reference = new Subclass();  // Implicit upcast
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `Superclass` | The compile-time type of the reference. |
-| `reference` | The variable holding the reference. |
-| `new Subclass()` | The runtime type of the object. |
-
-**Syntax Rules:**
-
-- Upcasting is implicit; no cast operator is needed.
-- The subclass must have an "is-a" relationship with the superclass.
-- Through the superclass reference, only members declared in the superclass are accessible.
-- The runtime type determines which overridden methods execute .
-
-**Constraints and Limitations:**
-
-- Cannot access subclass-specific members through the superclass reference without downcasting.
-- Fields are not polymorphic; field access uses the reference type .
-
-### Annotated Complete Code Examples
-
-**Example 1: Upcasting and Polymorphic Behavior**
-
-```java
-/**
- * Demonstrates upcasting.
- */
+// File: PolymorphismArrayDemo.java
 class Shape {
-    public void draw() {
-        System.out.println("Drawing shape");
+    public double area() {
+        return 0;
     }
 }
 
 class Circle extends Shape {
+    private double radius;
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
     @Override
-    public void draw() {
-        System.out.println("Drawing circle");
-    }
-
-    public void drawCircle() {
-        System.out.println("Circle-specific method");
+    public double area() {
+        return Math.PI * radius * radius;
     }
 }
 
-public class UpcastDemo {
+class Rectangle extends Shape {
+    private double width, height;
+
+    public Rectangle(double width, double height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    @Override
+    public double area() {
+        return width * height;
+    }
+}
+
+public class PolymorphismArrayDemo {
     public static void main(String[] args) {
-        // Implicit upcast
-        Shape shape = new Circle();
+        // Array of superclass type holding subclass objects
+        Shape[] shapes = {
+            new Circle(5),
+            new Rectangle(4, 3),
+            new Circle(2)
+        };
 
-        // Calls overridden method (runtime dispatch)
-        shape.draw(); // "Drawing circle"
-
-        // Cannot call drawCircle() through Shape reference
-        // shape.drawCircle(); // Compile error
-    }
-}
-```
-
-**Expected Output:**
-
-```
-Drawing circle
-```
-
-**Why This Output Occurs:**
-- `Shape shape = new Circle()` upcasts implicitly.
-- `shape.draw()` dispatches to `Circle.draw()` at runtime .
-- `drawCircle()` is not accessible through the `Shape` reference because it is not declared in `Shape`.
-
-### Real-World Cases
-
-- **Collections**: `List<String> list = new ArrayList<>()` upcasts `ArrayList` to `List`.
-- **Event handling**: `EventHandler handler = new ButtonHandler()`.
-- **Framework APIs**: Treating all `Shape` objects uniformly for rendering.
-
-### References
-
-- Dev.java – Polymorphism (Virtual Method Invocation) - https://dev.java/learn/inheritance/polymorphism/ 
-
-
-## Core Concept 3: Downcasting (Explicit Casting to a Subtype)
-
-### Definitions
-
-**Core Definition**: **Downcasting** is the explicit conversion of a superclass reference to a subclass reference, allowing access to subclass-specific members.
-
-**Technical Definition**: Downcasting requires an explicit cast and is not guaranteed to succeed at compile time. If the object's runtime type is not compatible with the target type, a `ClassCastException` is thrown at runtime . Downcasting is necessary when a superclass reference points to a subclass object and you need to access subclass-specific methods or fields. Safe downcasting should be preceded by an `instanceof` check .
-
-**Beginner-Friendly Explanation**: Downcasting is like receiving a package labeled "Shape" and hoping it's actually a "Circle" so you can call circle-specific methods. You have to check first—if it's really a square, trying to treat it as a circle will cause an error.
-
-### Purposes
-
-- To access subclass-specific members through a superclass reference.
-- To recover the specific type of an object after upcasting.
-- To enable type-specific operations in polymorphic collections.
-- To work with legacy APIs that return `Object`.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```java
-Subclass reference = (Subclass) superclassReference;  // Explicit downcast
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `Subclass` | The target type of the cast. |
-| `(Subclass)` | The explicit cast operator. |
-| `superclassReference` | The reference being downcast. |
-
-**Syntax Rules:**
-
-- Downcasting requires an explicit cast operator.
-- The cast is checked at runtime; if the object is not an instance of the target type, `ClassCastException` is thrown .
-- Safe downcasting should be preceded by `instanceof` check .
-- The target type must be a subclass of the reference's compile-time type.
-
-**Constraints and Limitations:**
-
-- Downcasting can fail at runtime if the object's actual type is incompatible.
-- `instanceof` should always be used to avoid `ClassCastException`.
-- Modern Java recommends pattern matching for `instanceof` to combine check and cast .
-
-### Annotated Complete Code Examples
-
-**Example 1: Unsafe Downcasting (ClassCastException)**
-
-```java
-/**
- * Demonstrates unsafe downcasting.
- */
-class Animal { }
-class Dog extends Animal {
-    public void bark() { System.out.println("Woof"); }
-}
-class Cat extends Animal { }
-
-public class UnsafeDowncastDemo {
-    public static void main(String[] args) {
-        Animal animal = new Cat();
-
-        // Unsafe downcast: Cat is not a Dog
-        try {
-            Dog dog = (Dog) animal; // ClassCastException
-            dog.bark();
-        } catch (ClassCastException e) {
-            System.out.println("ClassCastException: " + e.getMessage());
+        // Polymorphic method calls on each element
+        for (Shape shape : shapes) {
+            System.out.println("Area: " + shape.area());
         }
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-ClassCastException: class Cat cannot be cast to class Dog
+Area: 78.53981633974483
+Area: 12.0
+Area: 12.566370614359172
 ```
 
-**Why This Output Occurs:**
-- `animal` refers to a `Cat` object at runtime.
-- `(Dog) animal` attempts to downcast to `Dog`, which is incompatible.
-- The JVM throws `ClassCastException` at runtime .
+**Step-by-Step Explanation:**
+
+1. `Shape` is the superclass with a default `area()` method.
+2. `Circle` and `Rectangle` override `area()` with specific implementations.
+3. The `shapes` array is of type `Shape[]`, but holds `Circle` and `Rectangle` objects.
+4. The enhanced for-loop iterates over the array, calling `area()` on each element.
+5. At runtime, the JVM determines the actual type of each object and invokes the appropriate `area()` method.
 
 ### Real-World Cases
 
-- **Event handling**: Casting `Event` to `MouseEvent` to access mouse-specific data.
-- **Object deserialization**: Casting `Object` to the expected type.
-- **Legacy collections**: Casting elements from a raw `List` to their actual types.
+- **Collections Framework:** A `List` reference can point to an `ArrayList` or `LinkedList`; calling `add()` works uniformly.
+- **JDBC:** A `Connection` reference can point to different database-specific implementations.
+- **GUI Frameworks:** A `JComponent` array can hold `JButton`, `JLabel`, and `JTextField` objects, all responding to `paint()`.
+- **Plugin Systems:** Plugins implement a common interface, and the host application calls methods polymorphically.
 
-### References
+---
 
-- Dev.java – Polymorphism (Casting Objects) - https://dev.java/learn/inheritance/polymorphism/ 
-- GitHub – Safe Downcasting with Pattern Matching - https://github.com/ericrisco/rsc-harness/blob/main/skills/java/SKILL.md 
-
-
-## Core Concept 4: Dynamic Method Dispatch
+## 2. Compile-Time Polymorphism
 
 ### Definitions
 
-**Core Definition**: **Dynamic method dispatch** is the JVM mechanism that selects the most specific method implementation based on the runtime type of the object, not the compile-time type of the reference.
+**Core Definition:** Compile-time polymorphism (also called static polymorphism) is polymorphism resolved at compile time, achieved through method overloading.
 
-**Technical Definition**: When an overridden instance method is invoked, the Java Virtual Machine (JVM) calls the appropriate method for the object that is referred to in each variable. It does not call the method that is defined by the variable's type. This behavior is referred to as **virtual method invocation** and demonstrates an aspect of the important polymorphism features in the Java language . The compiler resolves the method **family** (signature) at compile time, but the JVM resolves the actual **implementation** at runtime .
+**Technical Definition:** Compile-time polymorphism occurs when the compiler determines which method to invoke based on the number, types, and order of arguments at the call site. This is achieved through method overloading, where multiple methods share the same name but have different parameter lists. The compiler selects the most specific applicable method during compilation.
 
-**Beginner-Friendly Explanation**: Dynamic dispatch is like calling a company's main phone number and asking for "customer service." The phone system (JVM) routes your call to the right department (implementation) based on which company branch (object type) you're actually calling, not based on the number you dialed (reference type).
+**Beginner-Friendly Explanation:** Compile-time polymorphism is like having multiple tools with the same label ("screwdriver") but different sizes. When you ask for a screwdriver, you specify the size, and the right one is chosen before you even start working.
 
 ### Purposes
 
-- To enable runtime polymorphism where subclasses provide specialized behavior.
-- To allow code to be written against supertypes and work correctly with any subtype.
-- To support the Open/Closed Principle (open for extension, closed for modification).
-- To make systems extensible without modifying existing code.
+- To provide multiple ways to perform similar operations with different input types
+- To improve code readability by using consistent method names
+- To enable the compiler to catch type errors early
+- To avoid the overhead of runtime method resolution
 
 ### Syntax Rules and Structure
 
-**Dynamic Dispatch Algorithm:**
+**Complete General Syntax:**
 
-1. **Compile-time**: The compiler verifies the method exists in the reference type and selects the method signature (method family) .
-2. **Runtime**: The JVM looks at the actual class of the receiver object and finds the most specific implementation of that signature .
-3. **Execution**: The found implementation is invoked.
+```java
+// Multiple methods with the same name but different parameters
+returnType methodName(type1 param1) { ... }
+returnType methodName(type2 param1, type3 param2) { ... }
+returnType methodName(type4... param1) { ... }
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| Same `methodName` | All overloaded methods share the same name. |
+| Different parameter lists | Must differ in number, type, or order of parameters. |
+| Return type | May differ but does not participate in resolution. |
 
 **Syntax Rules:**
 
-- Only instance methods participate in dynamic dispatch.
-- `static`, `private`, and `final` methods use static binding.
-- Fields are not polymorphic; they use the reference type .
-- `super.method()` bypasses dynamic dispatch and calls the superclass version.
+- Overloaded methods must have different signatures.
+- The compiler chooses the most specific applicable method.
+- Widening conversions are preferred over boxing/unboxing.
+- Varargs methods are considered last.
 
 **Constraints and Limitations:**
 
-- Dynamic dispatch has a slight performance overhead (vtable lookup).
-- Cannot dynamically dispatch to a method not declared in the compile-time type.
-- Type erasure can generate bridge methods that affect dispatch .
+- Overloading cannot be based solely on return type.
+- Overloading is resolved at compile time; runtime types are not considered.
+- Ambiguous overloads cause compile-time errors.
 
-### Annotated Complete Code Examples
-
-**Example 1: Dynamic Dispatch in Action**
+### Annotated Code Example
 
 ```java
-/**
- * Demonstrates dynamic method dispatch.
- */
+// File: CompileTimePolymorphismDemo.java
+public class CompileTimePolymorphismDemo {
+
+    // Overload 1: int
+    public static void print(int value) {
+        System.out.println("int: " + value);
+    }
+
+    // Overload 2: double
+    public static void print(double value) {
+        System.out.println("double: " + value);
+    }
+
+    // Overload 3: String
+    public static void print(String value) {
+        System.out.println("String: " + value);
+    }
+
+    public static void main(String[] args) {
+        print(10);        // Resolves to print(int)
+        print(10.5);      // Resolves to print(double)
+        print("Hello");   // Resolves to print(String)
+    }
+}
+```
+
+**Expected Output:**
+```
+int: 10
+double: 10.5
+String: Hello
+```
+
+**Step-by-Step Explanation:**
+
+1. Three `print` methods are declared with different parameter types.
+2. At each call site, the compiler examines the argument type and selects the matching overload.
+3. `print(10)` matches `print(int)` because `10` is an `int`.
+4. `print(10.5)` matches `print(double)`.
+5. `print("Hello")` matches `print(String)`.
+6. All resolution happens at compile time — no runtime lookup is required.
+
+### Real-World Cases
+
+- **`System.out.println`:** Overloaded for `int`, `double`, `String`, `Object`, etc.
+- **`String.valueOf`:** Overloaded for different primitive and reference types.
+- **`Math.max`:** Overloaded for `int`, `long`, `float`, `double`.
+- **`Collections.sort`:** Overloaded for natural ordering and custom comparator.
+
+---
+
+## 3. Runtime Polymorphism
+
+### Definitions
+
+**Core Definition:** Runtime polymorphism (also called dynamic polymorphism) is polymorphism resolved at runtime, achieved through method overriding.
+
+**Technical Definition:** Runtime polymorphism occurs when a subclass overrides a method from its superclass, and the JVM determines at runtime which implementation to invoke based on the actual type of the object. This is implemented through dynamic method dispatch. The reference type determines which methods are accessible at compile time, but the object type determines which implementation runs at runtime.
+
+**Beginner-Friendly Explanation:** Runtime polymorphism is like calling a "play" command on different devices. You don't know which device you have until you press play — then the correct behaviour happens. In Java, the actual object type determines which method runs.
+
+### Purposes
+
+- To allow a single method call to behave differently based on the actual object type
+- To enable the "open-closed principle" — new subclasses can be added without modifying existing code
+- To support frameworks and libraries that work with user-defined types
+- To implement the Strategy pattern and other behavioural patterns
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```java
+// Superclass
+class Superclass {
+    public returnType methodName(parameters) { ... }
+}
+
+// Subclass
+class Subclass extends Superclass {
+    @Override
+    public returnType methodName(parameters) { ... }
+}
+
+// Usage
+Superclass ref = new Subclass();  // Upcasting
+ref.methodName();                 // Runtime dispatch
+```
+
+**Syntax Rules:**
+
+- The overriding method must have the same signature as the overridden method.
+- The return type must be the same or covariant.
+- The access modifier cannot be more restrictive.
+- The `@Override` annotation is recommended for compile-time verification.
+
+**Constraints and Limitations:**
+
+- `final`, `static`, and `private` methods cannot be overridden.
+- Fields are not polymorphic; they are resolved at compile time based on the reference type.
+- Constructors are not polymorphic.
+
+### Annotated Code Example
+
+```java
+// File: RuntimePolymorphismDemo.java
 class Payment {
-    void process() {
-        System.out.println("Processing payment generically");
+    public void process(double amount) {
+        System.out.println("Processing generic payment: $" + amount);
     }
 }
 
 class CreditCardPayment extends Payment {
     @Override
-    void process() {
-        System.out.println("Processing credit card payment");
+    public void process(double amount) {
+        System.out.println("Processing credit card payment: $" + amount);
     }
 }
 
 class PayPalPayment extends Payment {
     @Override
-    void process() {
-        System.out.println("Processing PayPal payment");
+    public void process(double amount) {
+        System.out.println("Processing PayPal payment: $" + amount);
     }
 }
 
-public class DispatchDemo {
+public class RuntimePolymorphismDemo {
     public static void main(String[] args) {
+        // Array of superclass type holding subclass objects
         Payment[] payments = {
             new Payment(),
             new CreditCardPayment(),
             new PayPalPayment()
         };
 
-        for (Payment p : payments) {
-            p.process(); // Dynamic dispatch selects the actual type's method
+        // Polymorphic method calls
+        for (Payment payment : payments) {
+            payment.process(100.0);
         }
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Processing payment generically
-Processing credit card payment
-Processing PayPal payment
+Processing generic payment: $100.0
+Processing credit card payment: $100.0
+Processing PayPal payment: $100.0
 ```
 
-**Why This Output Occurs:**
-- The array `Payment[]` holds objects of different runtime types.
-- Each `p.process()` call dispatches to the implementation of the actual object's class .
-- The compiler only knows `p` as `Payment`, but the JVM uses the runtime type.
+**Step-by-Step Explanation:**
+
+1. `Payment` is the superclass with a generic `process()` method.
+2. `CreditCardPayment` and `PayPalPayment` override `process()` with specific implementations.
+3. The `payments` array holds objects of different types but is declared as `Payment[]`.
+4. In the loop, `payment.process(100.0)` is called on each element.
+5. At runtime, the JVM inspects the actual type of each object and invokes the corresponding `process()` method.
+6. This demonstrates dynamic method dispatch — the same call produces different behaviour based on the object type.
 
 ### Real-World Cases
 
-- **GUI frameworks**: `paint()` method overridden by different components.
-- **Plugin architectures**: Plugins implement a common interface; dispatch calls the plugin's implementation.
-- **Stream API**: `forEach()` dispatches to the consumer's `accept()` method.
+- **JDBC Drivers:** Different database drivers implement the same `Connection` interface differently.
+- **Servlet Containers:** `HttpServlet.doGet()` is overridden by user servlets.
+- **Event Handling:** `ActionListener.actionPerformed()` is implemented differently by different listeners.
+- **Design Patterns:** Strategy, Template Method, and Observer patterns all rely on runtime polymorphism.
 
-### References
+---
 
-- Dev.java – Polymorphism (Virtual Method Invocation) - https://dev.java/learn/inheritance/polymorphism/ 
-- University of Washington – Overloading vs. Overriding (Resolving Overriding) - https://courses.cs.washington.edu/courses/cse331/18au/lectures/lect06a-overloading.pdf 
-
-
-## Core Concept 5: Safe Downcasting: `instanceof` and Pattern Matching
+## 4. Method Overriding
 
 ### Definitions
 
-**Core Definition**: **Safe downcasting** uses the `instanceof` operator (and modern pattern matching) to verify an object's type before casting, preventing `ClassCastException` at runtime.
+**Core Definition:** Method overriding occurs when a subclass provides a new implementation for a method that is already defined in its superclass.
 
-**Technical Definition**: The `instanceof` operator checks whether an object is an instance of a specific type (or its subtype). In modern Java (16+), **pattern matching for `instanceof`** combines the type check and cast into a single expression: `if (obj instanceof String s)` checks the type and assigns the cast value to `s` in one step . Java 21+ extends pattern matching to `switch` expressions, enabling exhaustive handling of sealed type hierarchies .
+**Technical Definition:** An instance method in a subclass with the same signature (name, plus the number and type of its parameters) and return type as an instance method in the superclass overrides the superclass's method. The ability of a subclass to override a method allows a class to inherit from a superclass whose behavior is "close enough" and then to modify behavior as needed. An overriding method can also return a subtype of the type returned by the overridden method; this subtype is called a covariant return type.
 
-**Beginner-Friendly Explanation**: Safe downcasting is like checking the label on a package before opening it. If the label says "Circle," you open it as a circle. Modern pattern matching lets you say "if this is a Circle, call it circle and use it" in one clean step.
+**Beginner-Friendly Explanation:** Overriding is like a child who inherits a recipe from a parent but decides to change some ingredients. The recipe name stays the same, but the child's version is used when you ask the child to cook.
 
 ### Purposes
 
-- To prevent `ClassCastException` by verifying types before casting.
-- To enable safe type-specific operations in polymorphic code.
-- To provide concise, readable type checking and casting.
-- To enable exhaustive pattern matching over sealed hierarchies.
+- To allow a subclass to provide a specific implementation of a method already defined by its superclass
+- To enable runtime polymorphism (dynamic method dispatch)
+- To customize inherited behaviour for specific subclasses
+- To implement the "open-closed principle" by extending behaviour without modifying existing code
 
 ### Syntax Rules and Structure
 
-**Traditional `instanceof` + Cast:**
+**Complete General Syntax:**
 
 ```java
-if (obj instanceof String) {
-    String s = (String) obj;
-    // use s
-}
-```
+// Superclass
+public returnType methodName(parameters) { ... }
 
-**Pattern Matching for `instanceof` (Java 16+):**
-
-```java
-if (obj instanceof String s) {
-    // use s directly
-}
-```
-
-**Pattern Matching in `switch` (Java 21+):**
-
-```java
-switch (obj) {
-    case String s -> System.out.println(s.length());
-    case Integer i -> System.out.println(i * 2);
-    default -> System.out.println("Unknown");
-}
+// Subclass
+@Override
+public returnType methodName(parameters) { ... }
 ```
 
 **Component Breakdown:**
 
-| Construct | Description |
+| Component | Description |
 |-----------|-------------|
-| `instanceof Type` | Type check without binding. |
-| `instanceof Type var` | Type check with pattern binding. |
-| `case Type var ->` | Switch pattern with binding. |
-| `when` guard | Additional condition on pattern . |
+| `@Override` | Optional annotation that instructs the compiler to verify the method actually overrides a superclass method. |
+| Same signature | Name and parameter types must match exactly. |
+| Same or covariant return type | Return type must be the same or a subtype of the superclass method's return type. |
+| Access modifier | Cannot be more restrictive than the overridden method's access modifier. |
 
 **Syntax Rules:**
 
-- Pattern variables are in scope only when the pattern matches.
-- Pattern matching in `switch` supports exhaustiveness checking for sealed types .
-- Guards (`when`) add conditions to patterns .
-- `instanceof` returns `false` for `null`; pattern matching follows the same rule.
+- The overriding method must have the same signature as the overridden method.
+- The return type must be the same or a subtype (covariant return).
+- The access modifier cannot be more restrictive.
+- The overriding method cannot throw broader checked exceptions.
+- `final`, `static`, and `private` methods cannot be overridden.
 
 **Constraints and Limitations:**
 
-- Pattern matching cannot be used with generic types directly (due to erasure) .
-- `switch` patterns require a default case unless the type is sealed and exhaustive .
-- Pattern variables are implicitly final.
+- Constructors cannot be overridden.
+- Static methods are hidden, not overridden.
+- Private methods are not inherited and therefore cannot be overridden.
 
-### Annotated Complete Code Examples
-
-**Example 1: Traditional vs. Pattern Matching Downcast**
+### Annotated Code Example
 
 ```java
-/**
- * Demonstrates safe downcasting with instanceof and pattern matching.
- */
-sealed interface Shape permits Circle, Square { }
-
-record Circle(double radius) implements Shape { }
-record Square(double side) implements Shape { }
-
-public class SafeDowncastDemo {
-    // Traditional approach
-    static double areaTraditional(Shape shape) {
-        if (shape instanceof Circle) {
-            Circle c = (Circle) shape;
-            return Math.PI * c.radius() * c.radius();
-        } else if (shape instanceof Square) {
-            Square s = (Square) shape;
-            return s.side() * s.side();
-        }
-        return 0;
+// File: OverridingDemo.java
+class Animal {
+    public void makeSound() {
+        System.out.println("Some generic animal sound");
     }
 
-    // Modern pattern matching approach
-    static double areaModern(Shape shape) {
-        return switch (shape) {
-            case Circle c -> Math.PI * c.radius() * c.radius();
-            case Square s -> s.side() * s.side();
-            // No default needed: sealed hierarchy is exhaustive
-        };
+    public void move() {
+        System.out.println("Animal moves");
+    }
+}
+
+class Dog extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("Woof! Woof!");
     }
 
+    @Override
+    public void move() {
+        System.out.println("Dog runs on four legs");
+    }
+}
+
+class Cat extends Animal {
+    @Override
+    public void makeSound() {
+        System.out.println("Meow!");
+    }
+}
+
+public class OverridingDemo {
     public static void main(String[] args) {
-        Shape circle = new Circle(5);
-        Shape square = new Square(4);
+        Animal myAnimal = new Animal();
+        Animal myDog = new Dog();      // Upcasting
+        Animal myCat = new Cat();      // Upcasting
 
-        System.out.println("Traditional circle area: " + areaTraditional(circle));
-        System.out.println("Modern circle area: " + areaModern(circle));
-        System.out.println("Modern square area: " + areaModern(square));
+        myAnimal.makeSound();          // Some generic animal sound
+        myDog.makeSound();             // Woof! Woof!
+        myCat.makeSound();             // Meow!
+
+        myDog.move();                  // Dog runs on four legs
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Traditional circle area: 78.53981633974483
-Modern circle area: 78.53981633974483
-Modern square area: 16.0
+Some generic animal sound
+Woof! Woof!
+Meow!
+Dog runs on four legs
 ```
 
-**Why This Output Occurs:**
-- `areaTraditional` uses `instanceof` and explicit casts.
-- `areaModern` uses pattern matching in `switch`, combining check and cast .
-- The sealed interface ensures exhaustiveness; no `default` case is needed .
+**Step-by-Step Explanation:**
+
+1. `Animal` defines `makeSound()` and `move()`.
+2. `Dog` overrides both methods with its own implementations.
+3. `Cat` overrides only `makeSound()`.
+4. `Animal myDog = new Dog()` upcasts a `Dog` object to an `Animal` reference.
+5. When `myDog.makeSound()` is called, the JVM uses dynamic method lookup to determine the actual object type (`Dog`) and invokes `Dog`'s version of `makeSound()`.
+6. Similarly, `myCat.makeSound()` invokes `Cat`'s version.
+7. `myDog.move()` invokes `Dog`'s overridden `move()` method.
 
 ### Real-World Cases
 
-- **Sealed hierarchies**: Pattern matching over `Result` types (Success/Failure).
-- **Event processing**: Dispatching on event subtypes.
-- **AST processing**: Pattern matching over expression nodes.
+- **`toString()`:** Overridden in almost every custom class to provide meaningful string representation.
+- **`equals()` and `hashCode()`:** Overridden for proper object equality and hash-based collections.
+- **`compareTo()`:** Overridden in classes implementing `Comparable`.
+- **Template Method Pattern:** Abstract methods are overridden in concrete subclasses to fill in specific behaviour.
 
-### References
+---
 
-- Modern Java in 2026 (CVUT) – Pattern Matching - https://cw.fel.cvut.cz/b252/_media/courses/b0b36pjv/prednasky/modern_java_2026.pdf 
-- GitHub – Safe Downcasting with Pattern Matching - https://github.com/ericrisco/rsc-harness/blob/main/skills/java/SKILL.md 
-- Dev.java – Type Erasure (bridge methods) - https://dev.java/learn/generics/type-erasure/ 
-
-
-## Core Concept 6: Design Principles: Liskov Substitution Principle (LSP) and Coding to an Interface/Type
+## 5. Dynamic Dispatch
 
 ### Definitions
 
-**Core Definition**: The **Liskov Substitution Principle (LSP)** states that objects of a superclass should be replaceable with objects of its subclasses without affecting the correctness of the program . **Coding to an interface** means declaring variables, parameters, and return types using interfaces or abstract supertypes rather than concrete implementations.
+**Core Definition:** Dynamic dispatch (also called dynamic method dispatch or virtual method invocation) is the mechanism by which the JVM determines at runtime which method implementation to invoke based on the actual type of the object.
 
-**Technical Definition**: LSP is one of the five SOLID principles. It requires that subtypes must be substitutable for their base types . This means subclasses cannot strengthen preconditions, weaken postconditions, violate invariants, or modify inherited state unexpectedly . Coding to an interface decouples client code from implementations, enabling polymorphism and making systems more flexible and testable.
+**Technical Definition:** When an instance method is invoked, the JVM examines the actual class of the object (not the declared type of the reference) and searches for the method implementation starting from that class and moving up the inheritance hierarchy. The first matching implementation found is invoked. This process is known as dynamic method dispatch or virtual method invocation.
 
-**Beginner-Friendly Explanation**: LSP is like a universal power adapter. If your device works with a "Type A" plug, any "Type A" plug from any brand should work—if one doesn't, it violates the substitution principle. Coding to an interface is like saying "I need a plug that fits Type A" instead of "I need the specific brand X plug."
+**Beginner-Friendly Explanation:** Dynamic dispatch is like asking a question to a group of people. Depending on who is actually in the room (the object type), a different person answers (the method implementation).
 
 ### Purposes
 
-- To ensure polymorphic code works correctly with any subtype.
-- To prevent subtle bugs from violated inheritance contracts.
-- To decouple code from concrete implementations.
-- To make systems more extensible, testable, and maintainable.
+- To enable runtime polymorphism by selecting the correct method implementation
+- To allow subclasses to override behaviour without modifying the caller's code
+- To support the "open-closed principle" and extensibility
+- To implement the Strategy and Template Method patterns
 
 ### Syntax Rules and Structure
 
-**LSP Rules:**
-
-| Rule | Meaning  |
-|------|----------------------|
-| Preconditions | Subclass cannot strengthen (require more). |
-| Postconditions | Subclass cannot weaken (promise less). |
-| Invariants | Subclass must maintain parent's invariants. |
-| History | Subclass cannot modify inherited state unexpectedly. |
-
-**Coding to an Interface:**
+**Complete General Syntax:**
 
 ```java
-// BAD: Depends on concrete class
-ArrayList<String> list = new ArrayList<>();
-
-// GOOD: Depends on interface
-List<String> list = new ArrayList<>();
+// The JVM performs dynamic dispatch automatically
+SuperType ref = new SubType();
+ref.methodName();  // JVM looks up the method in SubType first
 ```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `SuperType ref` | The compile-time type of the reference. |
+| `new SubType()` | The runtime type of the object. |
+| `ref.methodName()` | The JVM searches for `methodName` starting from `SubType`. |
 
 **Syntax Rules:**
 
-- LSP violations can be detected by `instanceof` checks before method calls .
-- Subclasses should not throw exceptions the parent doesn't throw .
-- Use interfaces or abstract classes for polymorphic types.
-- Return types should be interfaces where possible.
+- Dynamic dispatch applies only to instance methods (not static, private, or final methods).
+- The method must be overridden in the subclass for dynamic dispatch to select a different implementation.
+- The JVM maintains a virtual method table (vtable) for each class to speed up method lookup.
 
 **Constraints and Limitations:**
 
-- LSP is a semantic constraint, not enforced by the compiler.
-- Violating LSP leads to fragile code that breaks when subtypes are substituted.
-- Coding to interfaces can introduce indirection but improves flexibility.
+- Fields are not subject to dynamic dispatch.
+- Static methods are resolved at compile time.
+- Private and final methods are resolved at compile time.
 
-### Annotated Complete Code Examples
-
-**Example 1: LSP Violation and Fix**
+### Annotated Code Example
 
 ```java
-/**
- * Demonstrates LSP violation and correction.
- */
-// VIOLATION: Square changes Rectangle's behavior
-class Rectangle {
-    protected int width, height;
-    public void setWidth(int w) { width = w; }
-    public void setHeight(int h) { height = h; }
-    public int area() { return width * height; }
-}
-
-class SquareViolation extends Rectangle {
-    @Override
-    public void setWidth(int w) { width = w; height = w; }
-    @Override
-    public void setHeight(int h) { width = h; height = h; }
-}
-
-// FIX: Separate abstractions with common interface
-interface Shape {
-    int area();
-}
-
-class RectangleFixed implements Shape {
-    private final int width, height;
-    RectangleFixed(int w, int h) { width = w; height = h; }
-    public int area() { return width * height; }
-}
-
-class SquareFixed implements Shape {
-    private final int side;
-    SquareFixed(int s) { side = s; }
-    public int area() { return side * side; }
-}
-
-public class LspDemo {
-    static void testRectangle(Rectangle r) {
-        r.setWidth(5);
-        r.setHeight(4);
-        System.out.println("Expected area: 20, Actual: " + r.area());
+// File: DynamicDispatchDemo.java
+class Vehicle {
+    public void start() {
+        System.out.println("Vehicle starting");
     }
+}
 
+class Car extends Vehicle {
+    @Override
+    public void start() {
+        System.out.println("Car engine starting");
+    }
+}
+
+class Motorcycle extends Vehicle {
+    @Override
+    public void start() {
+        System.out.println("Motorcycle engine starting");
+    }
+}
+
+public class DynamicDispatchDemo {
     public static void main(String[] args) {
-        System.out.println("Violation:");
-        testRectangle(new SquareViolation()); // Breaks LSP
+        Vehicle v;
 
-        System.out.println("\nFixed:");
-        System.out.println("Rectangle area: " + new RectangleFixed(5, 4).area());
-        System.out.println("Square area: " + new SquareFixed(4).area());
+        v = new Car();
+        v.start();  // JVM dispatches to Car.start()
+
+        v = new Motorcycle();
+        v.start();  // JVM dispatches to Motorcycle.start()
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Violation:
-Expected area: 20, Actual: 16
-
-Fixed:
-Rectangle area: 20
-Square area: 16
+Car engine starting
+Motorcycle engine starting
 ```
 
-**Why This Output Occurs:**
-- `SquareViolation` changes `setWidth` to also set height, violating the Rectangle contract .
-- `testRectangle` expects area 20 but gets 16.
-- The fixed version separates `Rectangle` and `Square` as independent `Shape` implementations, preserving LSP.
+**Step-by-Step Explanation:**
+
+1. `Vehicle` is the superclass with a `start()` method.
+2. `Car` and `Motorcycle` override `start()`.
+3. `v` is declared as `Vehicle`, but its actual object changes.
+4. When `v = new Car()`, `v.start()` dispatches to `Car.start()`.
+5. When `v = new Motorcycle()`, `v.start()` dispatches to `Motorcycle.start()`.
+6. The JVM uses the actual object type (`Car` or `Motorcycle`) to determine which method to invoke.
 
 ### Real-World Cases
 
-- **Collections**: `List` interface allows `ArrayList` or `LinkedList` without client changes.
-- **Payment processing**: `PaymentMethod` interface with `CreditCard`, `PayPal` implementations.
-- **Plugin systems**: Coding to interfaces enables dynamic plugin loading.
+- **JDBC:** The `DriverManager.getConnection()` method returns a `Connection` object that dispatches to the appropriate database driver.
+- **Servlet Containers:** The container calls `service()` on a servlet, which dispatches to the correct HTTP method handler.
+- **Collections:** `List.add()` dispatches to `ArrayList.add()` or `LinkedList.add()` depending on the actual object.
 
-### References
+---
 
-- GitHub – SOLID Principles (LSP) - https://raw.githubusercontent.com/NeverSight/skills_feed/refs/heads/main/data/skills-md/decebals/claude-code-java/solid-principles/SKILL.md 
-- GitHub – SOLID Principles in Java (LSP) - https://raw.githubusercontent.com/MultiChatNetwork/engineering-multichat/765e5d79ff24b2079453f7df69cef9caa24f4bf9/posts/java-solid-principles.md 
-- Baeldung – Liskov Substitution Principle - https://www.baeldung.com/java-liskov-substitution-principle 
+## 6. Virtual Methods
 
+### Definitions
 
-## References
+**Core Definition:** A virtual method is an instance method that can be overridden by subclasses and is subject to dynamic dispatch.
 
-- Dev.java – Polymorphism - https://dev.java/learn/inheritance/polymorphism/ 
-- University of Washington – Overloading vs. Overriding - https://courses.cs.washington.edu/courses/cse331/18au/lectures/lect06a-overloading.pdf 
-- Modern Java in 2026 (CVUT) – Pattern Matching - https://cw.fel.cvut.cz/b252/_media/courses/b0b36pjv/prednasky/modern_java_2026.pdf 
-- GitHub – Safe Downcasting with Pattern Matching - https://github.com/ericrisco/rsc-harness/blob/main/skills/java/SKILL.md 
-- GitHub – SOLID Principles (LSP) - https://raw.githubusercontent.com/NeverSight/skills_feed/refs/heads/main/data/skills-md/decebals/claude-code-java/solid-principles/SKILL.md 
-- GitHub – SOLID Principles in Java (LSP) - https://raw.githubusercontent.com/MultiChatNetwork/engineering-multichat/765e5d79ff24b2079453f7df69cef9caa24f4bf9/posts/java-solid-principles.md 
-- Baeldung – Liskov Substitution Principle - https://www.baeldung.com/java-liskov-substitution-principle 
-- Dev.java – Type Erasure - https://dev.java/learn/generics/type-erasure/ 
-- Oracle – Wildcards Guidelines - https://docs.oracle.com/javase/tutorial/java/generics/wildcardGuidelines.html 
+**Technical Definition:** In Java, all non-static, non-final, non-private instance methods are virtual methods by default. The JVM uses a virtual method table (vtable) to resolve method calls at runtime. When a virtual method is invoked, the JVM looks up the method in the vtable of the object's actual class.
+
+**Beginner-Friendly Explanation:** Virtual methods are methods that can be "replaced" by subclasses. In Java, almost all methods are virtual — you can override them. The only exceptions are methods marked `final`, `static`, or `private`.
+
+### Purposes
+
+- To allow subclasses to override behaviour
+- To enable runtime polymorphism
+- To provide a mechanism for dynamic dispatch
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```java
+// By default, all instance methods are virtual
+public returnType methodName(parameters) { ... }
+
+// To make a method non-virtual:
+public final returnType methodName(parameters) { ... }  // Cannot be overridden
+public static returnType methodName(parameters) { ... }  // Not virtual
+private returnType methodName(parameters) { ... }        // Not inherited
+```
+
+**Component Breakdown:**
+
+| Method Type | Virtual? |
+|-------------|----------|
+| Instance method (default) | Yes |
+| `final` method | No |
+| `static` method | No |
+| `private` method | No |
+
+**Syntax Rules:**
+
+- All instance methods are virtual unless marked `final`.
+- Static methods are not virtual; they are resolved at compile time.
+- Private methods are not virtual; they are not inherited.
+
+**Constraints and Limitations:**
+
+- Overusing `final` can prevent flexibility.
+- Virtual method calls have a slight performance overhead compared to non-virtual calls (though JIT optimizations often mitigate this).
+
+### Annotated Code Example
+
+```java
+// File: VirtualMethodDemo.java
+class Base {
+    // Virtual method (can be overridden)
+    public void virtualMethod() {
+        System.out.println("Base virtual method");
+    }
+
+    // Non-virtual method (final)
+    public final void nonVirtualMethod() {
+        System.out.println("Base non-virtual method");
+    }
+}
+
+class Derived extends Base {
+    @Override
+    public void virtualMethod() {
+        System.out.println("Derived virtual method");
+    }
+
+    // Cannot override nonVirtualMethod() — it's final
+}
+
+public class VirtualMethodDemo {
+    public static void main(String[] args) {
+        Base obj = new Derived();
+        obj.virtualMethod();      // Derived virtual method (dynamic dispatch)
+        obj.nonVirtualMethod();   // Base non-virtual method (compile-time resolution)
+    }
+}
+```
+
+**Expected Output:**
+```
+Derived virtual method
+Base non-virtual method
+```
+
+**Step-by-Step Explanation:**
+
+1. `virtualMethod()` is virtual and can be overridden; `nonVirtualMethod()` is final and cannot be overridden.
+2. `Base obj = new Derived()` upcasts a `Derived` object.
+3. `obj.virtualMethod()` dispatches to `Derived.virtualMethod()` at runtime.
+4. `obj.nonVirtualMethod()` is resolved at compile time and always calls `Base.nonVirtualMethod()`.
+
+### Real-World Cases
+
+- **`Object.toString()`:** A virtual method overridden by most classes.
+- **`Object.equals()`:** A virtual method overridden for value equality.
+- **`InputStream.read()`:** A virtual method overridden by `FileInputStream`, `ByteArrayInputStream`, etc.
+
+---
+
+## 7. Upcasting
+
+### Definitions
+
+**Core Definition:** Upcasting is the act of treating a subclass object as an object of its superclass type.
+
+**Technical Definition:** Upcasting involves assigning a reference of a subclass type to a reference variable of a superclass type. This is always safe and implicit in Java because a subclass object "is-a" superclass object. Upcasting is the foundation of polymorphism.
+
+**Beginner-Friendly Explanation:** Upcasting is like saying "a dog is an animal." You can always treat a specific type (dog) as a more general type (animal) without any risk.
+
+### Purposes
+
+- To enable polymorphic behaviour by using a general reference type
+- To allow objects of different subclasses to be handled uniformly
+- To provide flexibility in method parameters and collections
+
+### Syntax Rules and Structure
+
+```java
+SuperType ref = new SubType();  // Implicit upcasting
+```
+
+**Syntax Rules:**
+
+- Upcasting is implicit and does not require a cast.
+- The subclass object can only access members defined in the superclass type (at compile time).
+- The actual object type is preserved for method dispatch.
+
+**Constraints and Limitations:**
+
+- After upcasting, only methods declared in the superclass are accessible without downcasting.
+- Fields are accessed based on the reference type, not the object type.
+
+### Annotated Code Example
+
+```java
+// File: UpcastingDemo.java
+class Animal {
+    public void eat() {
+        System.out.println("Animal eating");
+    }
+}
+
+class Dog extends Animal {
+    public void bark() {
+        System.out.println("Dog barking");
+    }
+}
+
+public class UpcastingDemo {
+    public static void main(String[] args) {
+        // Upcasting: Dog object assigned to Animal reference
+        Animal animal = new Dog();
+
+        animal.eat();   // Inherited method — accessible
+
+        // animal.bark();  // COMPILE ERROR: bark() not defined in Animal
+
+        // To call bark(), downcast back to Dog
+        if (animal instanceof Dog) {
+            ((Dog) animal).bark();
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Animal eating
+Dog barking
+```
+
+**Step-by-Step Explanation:**
+
+1. `Dog` extends `Animal` and adds `bark()`.
+2. `Animal animal = new Dog()` upcasts the `Dog` object.
+3. `animal.eat()` is accessible because `eat()` is defined in `Animal`.
+4. `animal.bark()` would cause a compile error because `bark()` is not in `Animal`.
+5. Downcasting with `(Dog) animal` restores access to `bark()`.
+
+### Real-World Cases
+
+- **Collections:** `List<String> list = new ArrayList<>()` — `ArrayList` upcast to `List`.
+- **Method Parameters:** `void process(Animal a)` can accept `Dog`, `Cat`, etc.
+- **Event Handling:** `ActionEvent` is upcast to `EventObject` in some APIs.
+
+---
+
+## 8. Downcasting
+
+### Definitions
+
+**Core Definition:** Downcasting is the act of treating a superclass reference as a reference to a subclass type.
+
+**Technical Definition:** Downcasting involves casting a superclass reference back to a subclass type. Unlike upcasting, downcasting requires an explicit cast and can throw a `ClassCastException` if the object is not actually an instance of the target type.
+
+**Beginner-Friendly Explanation:** Downcasting is like saying "this animal is actually a dog." You can only do this if the animal really is a dog — otherwise, you'll get an error.
+
+### Purposes
+
+- To access subclass-specific methods and fields after upcasting
+- To recover the specific type of an object when needed
+- To implement certain design patterns (e.g., Visitor)
+
+### Syntax Rules and Structure
+
+```java
+SubType ref = (SubType) superTypeRef;  // Explicit downcast
+```
+
+**Syntax Rules:**
+
+- Downcasting requires an explicit cast.
+- It throws `ClassCastException` if the object is not an instance of the target type.
+- Always use `instanceof` to check before downcasting.
+
+**Constraints and Limitations:**
+
+- Downcasting can fail at runtime if the object is not of the expected type.
+- Excessive downcasting is a code smell; consider redesigning with polymorphism.
+
+### Annotated Code Example
+
+```java
+// File: DowncastingDemo.java
+class Animal {
+    public void eat() {
+        System.out.println("Animal eating");
+    }
+}
+
+class Dog extends Animal {
+    public void bark() {
+        System.out.println("Dog barking");
+    }
+}
+
+public class DowncastingDemo {
+    public static void main(String[] args) {
+        Animal animal = new Dog();  // Upcasting
+
+        // Safe downcasting with instanceof check
+        if (animal instanceof Dog) {
+            Dog dog = (Dog) animal;
+            dog.bark();  // Dog barking
+        }
+
+        // Unsafe downcasting — throws ClassCastException
+        Animal anotherAnimal = new Animal();
+        try {
+            Dog dog = (Dog) anotherAnimal;  // ClassCastException
+        } catch (ClassCastException e) {
+            System.out.println("Caught: " + e.getMessage());
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Dog barking
+Caught: class Animal cannot be cast to class Dog
+```
+
+**Step-by-Step Explanation:**
+
+1. `Animal animal = new Dog()` upcasts a `Dog` object.
+2. `animal instanceof Dog` checks the actual type before downcasting.
+3. `(Dog) animal` downcasts and allows access to `bark()`.
+4. Attempting to downcast an `Animal` object to `Dog` throws `ClassCastException` because the object is not actually a `Dog`.
+
+### Real-World Cases
+
+- **Legacy Code:** Downcasting is sometimes necessary when working with older APIs.
+- **Object Serialization:** Reading objects from a stream may require downcasting.
+- **Generic Collections:** Before Java 5 generics, downcasting was common when retrieving elements from collections.
+
+---
+
+## 9. instanceof
+
+### Definitions
+
+**Core Definition:** The `instanceof` operator is a binary operator that checks whether an object is an instance of a particular type.
+
+**Technical Definition:** The `instanceof` operator returns `true` if the object on the left is an instance of the class or interface on the right, or a subclass or implementing class thereof. It is commonly used before downcasting to avoid `ClassCastException`. As of Java 16, pattern matching for `instanceof` allows the type check and cast to be combined.
+
+**Beginner-Friendly Explanation:** `instanceof` is like asking "Is this a...?" — "Is this animal a dog?" If yes, you can safely treat it as a dog.
+
+### Purposes
+
+- To check the actual type of an object before downcasting
+- To implement type-specific behaviour in polymorphic code
+- To enable pattern matching (Java 16+)
+
+### Syntax Rules and Structure
+
+**Traditional Syntax:**
+
+```java
+if (object instanceof Type) {
+    Type ref = (Type) object;
+    // use ref
+}
+```
+
+**Pattern Matching Syntax (Java 16+):**
+
+```java
+if (object instanceof Type ref) {
+    // use ref directly
+}
+```
+
+**Syntax Rules:**
+
+- `instanceof` returns `false` if the object is `null`.
+- It checks the runtime type of the object, not the reference type.
+- Pattern matching eliminates the need for an explicit cast.
+
+**Constraints and Limitations:**
+
+- `instanceof` cannot be used with primitive types.
+- Excessive use of `instanceof` may indicate a design problem.
+
+### Annotated Code Example
+
+```java
+// File: InstanceofDemo.java
+class Animal {
+    public void eat() {
+        System.out.println("Animal eating");
+    }
+}
+
+class Dog extends Animal {
+    public void bark() {
+        System.out.println("Dog barking");
+    }
+}
+
+public class InstanceofDemo {
+    public static void main(String[] args) {
+        Animal animal = new Dog();
+
+        // Traditional instanceof
+        if (animal instanceof Dog) {
+            Dog dog = (Dog) animal;
+            dog.bark();  // Dog barking
+        }
+
+        // Pattern matching (Java 16+)
+        if (animal instanceof Dog dog) {
+            dog.bark();  // Dog barking
+        }
+
+        // instanceof with null
+        Animal nullAnimal = null;
+        System.out.println(nullAnimal instanceof Animal);  // false
+    }
+}
+```
+
+**Expected Output:**
+```
+Dog barking
+Dog barking
+false
+```
+
+**Step-by-Step Explanation:**
+
+1. `animal instanceof Dog` checks if the actual object is a `Dog`.
+2. Traditional syntax requires an explicit cast after the check.
+3. Pattern matching syntax combines the check and cast.
+4. `null instanceof Animal` returns `false` because `null` is not an instance of any type.
+
+### Real-World Cases
+
+- **Event Handling:** Checking the type of an `Event` before processing.
+- **Visitor Pattern:** Determining which `accept()` method to call.
+- **Serialization:** Checking object types during deserialization.
+
+---
+
+## 10. Pattern Matching
+
+### Definitions
+
+**Core Definition:** Pattern matching for `instanceof` is a Java 16+ feature that allows the type check and cast to be combined into a single expression.
+
+**Technical Definition:** Pattern matching for `instanceof` eliminates the need for explicit casting after a type check. The syntax `object instanceof Type variable` checks if `object` is an instance of `Type` and, if so, binds it to `variable` of type `Type`. The variable is in scope only where the pattern is guaranteed to match.
+
+**Beginner-Friendly Explanation:** Pattern matching is like saying "If this animal is a dog, call it 'dog' and use that name." You don't have to cast separately — it's all in one step.
+
+### Purposes
+
+- To simplify code by eliminating redundant casts
+- To improve readability and reduce boilerplate
+- To make type checks more concise and less error-prone
+
+### Syntax Rules and Structure
+
+```java
+if (object instanceof Type variable) {
+    // variable is in scope here
+}
+
+// With negation (Java 17+):
+if (!(object instanceof Type variable)) {
+    // variable is not in scope here
+}
+```
+
+**Syntax Rules:**
+
+- The variable is in scope only where the pattern is guaranteed to match.
+- Pattern matching works with `instanceof` and `switch` (Java 21+).
+- The variable cannot be reassigned within the pattern block.
+
+**Constraints and Limitations:**
+
+- Pattern matching for `instanceof` was previewed in Java 14, finalized in Java 16.
+- Pattern matching for `switch` was finalized in Java 21.
+
+### Annotated Code Example
+
+```java
+// File: PatternMatchingDemo.java
+class Animal {
+    public void eat() {
+        System.out.println("Animal eating");
+    }
+}
+
+class Dog extends Animal {
+    public void bark() {
+        System.out.println("Dog barking");
+    }
+}
+
+class Cat extends Animal {
+    public void meow() {
+        System.out.println("Cat meowing");
+    }
+}
+
+public class PatternMatchingDemo {
+    public static void describe(Animal animal) {
+        // Pattern matching for instanceof
+        if (animal instanceof Dog dog) {
+            dog.bark();
+        } else if (animal instanceof Cat cat) {
+            cat.meow();
+        } else {
+            System.out.println("Unknown animal");
+        }
+    }
+
+    public static void main(String[] args) {
+        describe(new Dog());  // Dog barking
+        describe(new Cat());  // Cat meowing
+        describe(new Animal());  // Unknown animal
+    }
+}
+```
+
+**Expected Output:**
+```
+Dog barking
+Cat meowing
+Unknown animal
+```
+
+**Step-by-Step Explanation:**
+
+1. `describe` takes an `Animal` parameter.
+2. `animal instanceof Dog dog` checks if `animal` is a `Dog` and binds it to `dog`.
+3. If true, `dog.bark()` is called without an explicit cast.
+4. Similarly for `Cat`.
+5. The final `else` handles the case where the animal is neither a `Dog` nor a `Cat`.
+
+### Real-World Cases
+
+- **Visitor Pattern:** Pattern matching simplifies type-specific processing.
+- **Event Handling:** Dispatching events to different handlers based on type.
+- **Parsing:** Processing different token types in a parser.
+
+---
+
+## 11. Polymorphism Best Practices
+
+### Definitions
+
+**Core Definition:** Polymorphism best practices are guidelines for using polymorphism effectively and avoiding common pitfalls.
+
+**Technical Definition:** Best practices derive from *Effective Java* and object-oriented design principles. Key practices include programming to interfaces, using abstract classes for shared code, favouring composition over inheritance, and avoiding downcasting when possible.
+
+**Beginner-Friendly Explanation:** Polymorphism best practices are like the rules for using a universal remote — program to the interface, not the implementation, and don't force devices to do things they weren't designed for.
+
+### Purposes
+
+- To write flexible, maintainable, and extensible code
+- To reduce coupling between components
+- To avoid runtime errors from unsafe downcasting
+- To leverage the full power of object-oriented design
+
+### Syntax Rules and Structure
+
+**Key Best Practices:**
+
+| Practice | Description |
+|----------|-------------|
+| Program to interfaces | Use `List` instead of `ArrayList` as variable types. |
+| Use abstract classes for shared code | Put common implementation in abstract base classes. |
+| Favour composition over inheritance | Use "has-a" instead of "is-a" when possible. |
+| Avoid downcasting | If you need to downcast, reconsider the design. |
+| Use `@Override` | Catch errors at compile time. |
+| Document the contract | Specify behaviour that subclasses must follow. |
+| Keep hierarchies shallow | Deep hierarchies are hard to understand. |
+| Use the Liskov Substitution Principle | Subtypes must be substitutable for their base types. |
+
+**Syntax Rules:**
+
+- Declare variables using the most general type that supports the required operations.
+- Use interfaces for defining contracts.
+- Use abstract classes for partial implementations.
+
+**Constraints and Limitations:**
+
+- Overusing polymorphism can lead to complex designs.
+- Programming to interfaces adds a level of indirection.
+
+### Annotated Code Example
+
+```java
+// File: PolymorphismBestPractices.java
+import java.util.ArrayList;
+import java.util.List;
+
+// GOOD: Program to the interface
+public class PolymorphismBestPractices {
+
+    // Method takes List (interface) not ArrayList (implementation)
+    public static double sumAll(List<? extends Number> numbers) {
+        double total = 0;
+        for (Number n : numbers) {
+            total += n.doubleValue();
+        }
+        return total;
+    }
+
+    public static void main(String[] args) {
+        // GOOD: Use interface type for variable
+        List<Integer> intList = new ArrayList<>();
+        intList.add(1);
+        intList.add(2);
+        intList.add(3);
+
+        System.out.println("Sum: " + sumAll(intList));  // Sum: 6.0
+
+        // BAD: Using concrete type (less flexible)
+        // ArrayList<Integer> badList = new ArrayList<>();
+    }
+}
+```
+
+**Expected Output:**
+```
+Sum: 6.0
+```
+
+**Step-by-Step Explanation:**
+
+1. `sumAll` takes `List<? extends Number>`, making it flexible for any list of numbers.
+2. `intList` is declared as `List<Integer>`, not `ArrayList<Integer>`.
+3. This allows switching to a different `List` implementation without changing the code.
+4. The method works with `Integer`, `Double`, `Float`, etc.
+
+### Real-World Cases
+
+- **Spring Framework:** Uses interfaces extensively for dependency injection.
+- **JDBC:** `Connection`, `Statement`, `ResultSet` are all interfaces.
+- **Collections Framework:** `List`, `Set`, `Map` are interfaces; `ArrayList`, `HashSet`, `HashMap` are implementations.
+
+---
+
+## References Links
+
+- Polymorphism — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/java/IandI/polymorphism.html
+- Java Language Specification, §8.4.8: Inheritance, Overriding, and Hiding - https://docs.oracle.com/javase/specs/jls/se21/html/jls-8.html
+- Java Language Specification, §15.12.4: Run-Time Evaluation of Method Invocation - https://docs.oracle.com/javase/specs/jls/se23/jls23.pdf
+- The Java Virtual Machine Specification: Dynamic Dispatch - https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-2.html
+- Overriding and Hiding Methods — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/java/IandI/override.html
+- Using the Keyword super — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/java/IandI/super.html
+- Pattern Matching for instanceof — Oracle Java Documentation - https://docs.oracle.com/en/java/javase/16/language/pattern-matching-instanceof.html
+- Effective Java (3rd Edition) by Joshua Bloch — Items 64: Refer to objects by their interfaces
+- SEI CERT Oracle Coding Standard — MET33-J: Do not subject overloaded methods to polymorphic invocations - https://wiki.sei.cmu.edu/confluence/display/java/MET33-J.+Do+not+subject+overloaded+methods+to+polymorphic+invocations
+- Static vs Dynamic Binding in Java — GeeksforGeeks - https://www.geeksforgeeks.org/static-vs-dynamic-binding-in-java/
+- Java Polymorphism — Baeldung - https://www.baeldung.com/java-polymorphism

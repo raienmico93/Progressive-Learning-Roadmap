@@ -1,1559 +1,1103 @@
-# Java Iteration: A Comprehensive Programming Cheat Sheet
+# Java Iterators: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** Java iteration is the process of traversing the elements of a collection, array, or other aggregate data structure in a sequential or partitioned manner, applying an operation to each element or examining elements one by one.
+**Core Definition:** An Iterator is an object that enables sequential traversal of a collection, providing a standard way to access elements one at a time without exposing the underlying data structure.
 
-**Technical Definition:** Java iteration encompasses the language constructs (`for`, enhanced `for`), interfaces (`Iterable`, `Iterator`, `ListIterator`, `Spliterator`, `Enumeration`), and library methods (`forEach`, Stream API) that enable systematic traversal of data sources. The framework distinguishes between external iteration, where the client controls the traversal loop, and internal iteration, where the data structure or library controls the traversal and the client supplies a behavioral parameter. It also distinguishes between fail-fast iterators, which detect concurrent structural modification and throw `ConcurrentModificationException`, and fail-safe (weakly consistent) iterators, which operate on a snapshot or tolerate concurrent modification.
+**Technical Definition:** Per the Java API specification, "An iterator over a collection. `Iterator` takes the place of `Enumeration` in the Java Collections Framework. Iterators differ from enumerations in two ways: Iterators allow the caller to remove elements from the underlying collection during the iteration with well-defined semantics; Method names have been improved". The `Iterator` interface provides three core methods: `hasNext()` (returns `true` if more elements exist), `next()` (returns the next element and advances the cursor), and `remove()` (removes the last element returned by the iterator). Since Java 8, the `forEachRemaining()` default method allows processing remaining elements using a lambda or method reference. The `ListIterator` interface extends `Iterator` for lists, allowing bidirectional traversal, modification during iteration, and access to the current position. The `Spliterator` interface, introduced in Java 8, is designed for traversing and partitioning elements of a source, supporting both sequential and parallel traversal. The `Iterable` interface, introduced in Java 5, allows an object to be the target of the enhanced for statement (for-each loop).
 
-**Beginner-Friendly Explanation:** Iteration is simply going through a list of items one by one. In Java, you can do this with a classic `for` loop, a simplified `for-each` loop, an `Iterator` object, or modern functional methods like `forEach` and `stream()`. Each approach has its own strengths, and Java provides many tools so you can choose the one that fits your situation.
+**Beginner-Friendly Explanation:** An Iterator is like a bookmark that moves through a book page by page. You can check if there are more pages (`hasNext()`), read the next page (`next()`), and even tear out the page you just read (`remove()`). Different types of iterators exist for different needs: a basic Iterator for simple traversal, a ListIterator for going back and forth, and a Spliterator for splitting work across multiple threads. The Iterable interface is what makes the for-each loop work — if a class implements Iterable, you can use the convenient `for (Item item : collection)` syntax.
 
 ### Key Characteristics
 
-- The Java iteration framework is built around the `Iterable` interface, which enables the enhanced `for` loop. 
-- The `Iterator` interface provides the universal traversal mechanism for collections, while `ListIterator` adds bidirectional traversal and element modification for lists. 
-- The `forEach()` method, introduced in Java 8, enables internal iteration with lambda expressions. 
-- The Stream API provides functional-style traversal with lazy evaluation and parallel execution. 
-- `Spliterator` supports efficient parallel traversal by partitioning elements. 
-- The framework distinguishes fail-fast iterators (which throw `ConcurrentModificationException` on concurrent structural modification) from fail-safe iterators (which use snapshots or weakly consistent semantics). 
-- The legacy `Enumeration` interface predates `Iterator` and is retained for compatibility with legacy classes such as `Vector` and `Hashtable`.
+- **Sequential Access:** Iterators provide a way to access elements one at a time, without exposing the underlying data structure.
+- **Well-Defined Removal:** Unlike `Enumeration`, `Iterator` allows safe removal of elements during iteration via the `remove()` method.
+- **Fail-Fast Behaviour:** Most collection iterators in `java.util` are fail-fast — they throw `ConcurrentModificationException` if the collection is structurally modified during iteration.
+- **Weakly Consistent Alternatives:** Iterators in `java.util.concurrent` are weakly consistent, meaning they don't throw `ConcurrentModificationException` but may not reflect all modifications.
+- **Bidirectional and Positional:** `ListIterator` adds `hasPrevious()`, `previous()`, `nextIndex()`, and `previousIndex()` for bidirectional traversal and position tracking.
+- **Parallel-Ready:** `Spliterator` supports partitioning for parallel traversal, making it the foundation for the Stream API.
 
 ### Prerequisites
 
-- Readers should be familiar with Java generics.
-- The Java Collections Framework (particularly `List`, `Set`, and `Collection`). 
-- Basic exception handling, and the `Comparable` and `Comparator` interfaces. 
-- For modern iteration, familiarity with lambda expressions and functional interfaces (such as `Consumer`) is assumed. 
-- For parallel traversal, a basic understanding of threads and concurrency is helpful.
+- Basic understanding of Java classes, objects, and interfaces
+- Familiarity with the Java Collections Framework (`List`, `Set`, `Map`, etc.)
+- Knowledge of the for-each loop (enhanced for statement)
+- Awareness of `java.util` and `java.util.concurrent` packages
+- Understanding of exceptions and exception handling
 
-### Related Programming Areas with Explanation
+### Related Programming Areas
 
-- Iteration is related to data structures and algorithms (traversal of trees, graphs, and linear structures).
-- Functional programming (through the Stream API and lambda expressions)
-- Concurrent programming (through fail-fast versus fail-safe semantics and parallel streams).
-- Software design patterns (such as the Iterator pattern, which is a behavioral design pattern that provides a way to access elements of an aggregate object sequentially without exposing its underlying representation).
+- **Collections Framework:** Iterators are the standard mechanism for traversing collections.
+- **Stream API:** `Spliterator` is the foundation for Java 8 Streams and parallel processing.
+- **Concurrency:** Weakly consistent iterators in `java.util.concurrent` enable safe traversal in multi-threaded environments.
+- **Custom Collections:** Implementing `Iterable` allows custom data structures to be used in for-each loops.
+- **Design Patterns:** The Iterator pattern is a behavioural pattern that decouples traversal algorithms from data structures.
 
-## Core Concepts and Key Features
+---
 
-### 1. Traditional for Loop
+## Core Concepts / Features
 
-#### Core Definitions
+---
 
-**Core Definition:** An index-based loop that repeatedly executes a block of code while incrementing or decrementing a counter variable.
+## 1. Iterator
 
-**Technical Definition:** The basic `for` statement in Java, defined in the Java Language Specification §14.14.1, has the form `for ( [ForInit] ; [Expression] ; [ForUpdate] ) Statement`. The `ForInit` typically declares and initializes a loop variable, the `Expression` is a boolean condition evaluated before each iteration, and the `ForUpdate` is executed after each iteration.
+### Definitions
 
-**Beginner-Friendly Explanation:** The traditional `for` loop is the classic way to go through a list. You start at index 0, keep going while the index is less than the list's size, and increment the index each time. It is especially useful when you need to know the index of each element.
+**Core Definition:** `Iterator` is an interface that provides a standard way to traverse a collection element by element, with the ability to remove elements during iteration.
 
-#### 1.1 Index-Based Traversal
+**Technical Definition:** `Iterator<E>` is a generic interface in the `java.util` package. It was introduced in Java 1.2 as a replacement for `Enumeration`. The interface declares four methods: `hasNext()`, `next()`, `remove()` (default since Java 8), and `forEachRemaining(Consumer<? super E>)` (default since Java 8). The `remove()` method can be called only once per call to `next()` and removes the last element returned by the iterator from the underlying collection.
 
-**Definitions**
+**Beginner-Friendly Explanation:** An `Iterator` is like a TV remote for your collection — you can flip to the next channel (`next()`), check if there are more channels (`hasNext()`), and even delete the channel you're currently watching (`remove()`).
 
-- **Core Definition:** Traversing a collection or array using a numeric index that advances from the first position to the last.
-- **Technical Definition:** Index-based traversal uses `list.get(i)` or `array[i]` to access elements, with `i` ranging from `0` to `size() - 1` or `length - 1`. The loop condition checks `i < list.size()` or `i < array.length`.
-- **Beginner-Friendly Explanation:** You use the element's position number (index) to fetch it. For example, to go through an array of names, you start at position 0 and keep going until you have visited every position.
+### Purposes
 
-**Purposes**
+- To provide a standard mechanism for traversing collections
+- To allow safe removal of elements during iteration
+- To decouple traversal logic from the underlying data structure
+- To enable uniform traversal across different collection types
 
-- To traverse a collection or array while having access to the index of each element.
-- To perform index-dependent operations, such as inserting elements at specific positions.
-- To traverse arrays, which do not implement the `Iterable` interface.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
+### Syntax Rules and Structure
 
 ```java
-for (int i = 0; i < collection.size(); i++) {
-    E element = collection.get(i);
-    // process element
+public interface Iterator<E> {
+    boolean hasNext();
+    E next();
+    default void remove();
+    default void forEachRemaining(Consumer<? super E> action);
 }
 ```
 
-Component breakdown:
+**Component Breakdown:**
 
-- `int i = 0`: initializes the loop variable.
-- `i < collection.size()`: the loop condition.
-- `i++`: the update expression.
-- `collection.get(i)`: retrieves the element at index `i`.
+| Method | Description |
+|--------|-------------|
+| `hasNext()` | Returns `true` if the iteration has more elements. |
+| `next()` | Returns the next element in the iteration. |
+| `remove()` | Removes the last element returned by `next()`. |
+| `forEachRemaining(Consumer)` | Performs the action for each remaining element. |
 
-Syntax rules: The loop variable must be declared before or in the `ForInit`. The condition must be a boolean expression. The update expression must modify the loop variable.
+**Syntax Rules:**
 
-Constraints and limitations: For linked structures such as `LinkedList`, `get(i)` is an O(n) operation, making index-based traversal O(n²). Index-based traversal is not suitable for collections that do not support positional access (e.g., `Set`).
+- `Iterator` is a generic interface (`Iterator<E>`).
+- `next()` throws `NoSuchElementException` if no more elements exist.
+- `remove()` throws `IllegalStateException` if called before `next()` or after a previous `remove()`.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
+**Constraints and Limitations:**
 
-**Example 1: Index-based traversal of an array**
+- Iterators for general-purpose collections are fail-fast.
+- Iteration order is not guaranteed unless the collection specifies it.
+
+### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Basic Iterator Usage**
 
 ```java
-public class ForLoopArrayExample {
+// File: IteratorDemo.java
+import java.util.*;
+
+public class IteratorDemo {
     public static void main(String[] args) {
-        // Step 1: Declare an array
-        String[] names = {"Alice", "Bob", "Charlie"};
+        List<String> list = new ArrayList<>(Arrays.asList("Apple", "Banana", "Cherry"));
 
-        // Step 2: Use a traditional for loop with index
-        for (int i = 0; i < names.length; i++) {
-            // Step 3: Access element by index and print with position
-            System.out.println("Index " + i + ": " + names[i]);
-        }
-    }
-}
-```
+        // Obtain an Iterator
+        Iterator<String> iterator = list.iterator();
 
-Expected Output:
-
-```
-Index 0: Alice
-Index 1: Bob
-Index 2: Charlie
-```
-
-**Why the code produces this result:** The loop variable `i` starts at 0 and increments until it reaches `names.length` (3). At each iteration, `names[i]` accesses the element at the current index.
-
-**Example 2: Index-based traversal of an ArrayList**
-
-```java
-import java.util.ArrayList;
-import java.util.List;
-
-public class ForLoopListExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("Apple");
-        list.add("Banana");
-        list.add("Cherry");
-
-        for (int i = 0; i < list.size(); i++) {
-            System.out.println(list.get(i));
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-Apple
-Banana
-Cherry
-```
-
-**Example 3: Removing elements during index-based traversal**
-
-```java
-import java.util.ArrayList;
-import java.util.List;
-
-public class ForLoopRemoveExample {
-    public static void main(String[] args) {
-        List<Integer> numbers = new ArrayList<>();
-        numbers.add(1);
-        numbers.add(2);
-        numbers.add(3);
-        numbers.add(4);
-
-        // Remove even numbers using index-based traversal
-        for (int i = 0; i < numbers.size(); i++) {
-            if (numbers.get(i) % 2 == 0) {
-                numbers.remove(i);
-                i--; // Adjust index after removal
-            }
-        }
-        System.out.println(numbers);
-    }
-}
-```
-
-Expected Output:
-
-```
-[1, 3]
-```
-
-**Why the code produces this result:** After removing an element at index `i`, all subsequent elements shift left by one position. Decrementing `i` ensures the element that shifted into position `i` is examined.
-
-**Real-World Cases with Explanation**
-
-Index-based `for` loops are used when the index is needed for computation, such as computing a weighted sum where the weight depends on position, or when elements must be inserted or removed at specific indices.
-
-**References Links**
-
-- The for Statement (Java Language Specification, Java SE 21) – https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.14
-- ArrayList (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html
-
-### 2. Enhanced for Loop (for-each)
-
-#### Core Definitions
-
-**Core Definition:** A simplified loop construct that iterates over arrays and `Iterable` types without requiring an explicit index or iterator.
-
-**Technical Definition:** The enhanced `for` statement, defined in the Java Language Specification §14.14.2, has the form `for ( FormalParameter : Expression ) Statement`. The `Expression` must be of type `Iterable` or an array type. The enhanced `for` is equivalent to a basic `for` loop using an `Iterator` for `Iterable` types, or an index for arrays.
-
-**Beginner-Friendly Explanation:** The for-each loop is a shortcut that says “for each item in this collection, do something.” You do not need to manage an index or an iterator; Java handles that behind the scenes.
-
-#### 2.1 Traversal of Iterable Types
-
-**Definitions**
-
-- **Core Definition:** Using the enhanced `for` loop to traverse any object that implements the `Iterable` interface.
-- **Technical Definition:** For an `Iterable` expression, the enhanced `for` statement is equivalent to obtaining an `Iterator` via `iterator()` and repeatedly calling `hasNext()` and `next()` until the iterator is exhausted.
-- **Beginner-Friendly Explanation:** Any collection (like `ArrayList`, `HashSet`) that implements `Iterable` can be traversed with `for (Type item : collection)`.
-
-**Purposes**
-
-- To traverse `Iterable` collections concisely without managing an iterator.
-- To improve code readability by eliminating boilerplate iterator code.
-- To reduce the risk of errors associated with manual index management.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-for (Type var : iterableExpression) {
-    // process var
-}
-```
-
-Component breakdown:
-
-- `Type var`: the loop variable, which receives each element.
-- `iterableExpression`: an expression of type `Iterable` or an array.
-
-Syntax rules: The loop variable is assigned each element in turn. The loop terminates when the iterator is exhausted. The loop variable must be declared in the `FormalParameter`.
-
-Constraints and limitations: The enhanced `for` loop does not expose the index or the iterator. The collection must not be structurally modified during iteration (except via the iterator's own `remove()` method, which is not accessible through the enhanced `for`). Arrays are also supported.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Traversing a List**
-
-```java
-import java.util.ArrayList;
-import java.util.List;
-
-public class ForEachListExample {
-    public static void main(String[] args) {
-        List<String> fruits = new ArrayList<>();
-        fruits.add("Apple");
-        fruits.add("Banana");
-        fruits.add("Cherry");
-
-        // Enhanced for loop
-        for (String fruit : fruits) {
-            System.out.println(fruit);
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-Apple
-Banana
-Cherry
-```
-
-**Why the code produces this result:** The enhanced `for` loop obtains an iterator from the `ArrayList` and iterates through each element, assigning it to the variable `fruit`.
-
-**Example 2: Traversing a Set**
-
-```java
-import java.util.HashSet;
-import java.util.Set;
-
-public class ForEachSetExample {
-    public static void main(String[] args) {
-        Set<Integer> numbers = new HashSet<>();
-        numbers.add(10);
-        numbers.add(20);
-        numbers.add(30);
-
-        for (int n : numbers) {
-            System.out.println(n);
-        }
-    }
-}
-```
-
-Expected Output (order may vary):
-
-```
-10
-20
-30
-```
-
-**Example 3: Traversing an array**
-
-```java
-public class ForEachArrayExample {
-    public static void main(String[] args) {
-        int[] values = {5, 10, 15};
-        for (int v : values) {
-            System.out.println(v);
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-5
-10
-15
-```
-
-**Real-World Cases with Explanation**
-
-The enhanced `for` loop is used wherever a collection needs to be traversed without modification, such as printing all elements, computing a sum, or applying a read-only operation to each element.
-
-**References Links**
-
-- The Enhanced for Statement (Java Language Specification, Java SE 21) – https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.14.2
-- Iterable (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Iterable.html
-
-### 3. Iterator Interface
-
-#### Core Definitions
-
-**Core Definition:** An object that enables sequential traversal of a collection, with the ability to remove elements from the underlying collection during iteration.
-
-**Technical Definition:** `public interface Iterator<E>` is the universal iterator for the Java Collections Framework. It declares `boolean hasNext()`, `E next()`, `default void remove()`, and (since Java 8) `default void forEachRemaining(Consumer<? super E> action)`. `Iterator` takes the place of `Enumeration` and differs from it in two ways: it allows the caller to remove elements from the underlying collection during iteration with well-defined semantics, and its method names are improved.
-
-**Beginner-Friendly Explanation:** An `Iterator` is like a bookmark that moves through a collection. You ask “is there another element?” with `hasNext()`, and “give me the next element” with `next()`. You can also remove the last element you retrieved using `remove()`.
-
-#### 3.1 `hasNext()` and `next()`
-
-**Definitions**
-
-- **Core Definition:** Methods for checking whether more elements exist and retrieving the next element.
-- **Technical Definition:** `boolean hasNext()` returns `true` if the iteration has more elements. `E next()` returns the next element in the iteration and advances the cursor. `next()` throws `NoSuchElementException` if the iteration has no more elements.
-- **Beginner-Friendly Explanation:** `hasNext()` is like asking “is there another item?” and `next()` is like saying “give me the next item.”
-
-**Purposes**
-
-- To check whether the iteration has more elements.
-- To retrieve the next element and advance the cursor.
-- To provide a safe way to traverse a collection without relying on indices.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-Iterator<E> it = collection.iterator();
-while (it.hasNext()) {
-    E element = it.next();
-    // process element
-}
-```
-
-Component breakdown:
-
-- `collection.iterator()`: obtains an iterator.
-- `it.hasNext()`: checks for more elements.
-- `it.next()`: retrieves the next element.
-
-Syntax rules: `hasNext()` must be called before `next()` to avoid `NoSuchElementException`. `next()` advances the cursor.
-
-Constraints and limitations: `next()` throws `NoSuchElementException` if no more elements exist. The iterator is only valid for a single traversal.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Basic Iterator usage**
-
-```java
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-public class IteratorExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add("B");
-        list.add("C");
-
-        Iterator<String> it = list.iterator();
-        while (it.hasNext()) {
-            String element = it.next();
+        // Traverse using while loop
+        while (iterator.hasNext()) {
+            String element = iterator.next();
             System.out.println(element);
         }
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-A
-B
-C
+Apple
+Banana
+Cherry
 ```
 
-**Why the code produces this result:** The iterator traverses the list from the first element to the last, calling `hasNext()` and `next()` in a loop.
+**Step-by-Step Explanation:**
 
-**Example 2: `NoSuchElementException` without `hasNext()`**
+1. `list.iterator()` returns an `Iterator` for the list.
+2. `iterator.hasNext()` checks if more elements exist.
+3. `iterator.next()` returns the next element and advances the cursor.
+4. The loop continues until `hasNext()` returns `false`.
+
+**Example 2: Safe Removal with Iterator**
 
 ```java
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+// File: IteratorRemoveDemo.java
+import java.util.*;
 
-public class IteratorNoSuchElementExample {
+public class IteratorRemoveDemo {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("Only");
-        Iterator<String> it = list.iterator();
-        System.out.println(it.next()); // "Only"
-        try {
-            it.next(); // No more elements
-        } catch (java.util.NoSuchElementException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
-        }
-    }
-}
-```
+        List<String> list = new ArrayList<>(Arrays.asList("Apple", "Banana", "Cherry"));
 
-Expected Output:
-
-```
-Only
-Caught: NoSuchElementException
-```
-
-**Real-World Cases with Explanation**
-
-`Iterator` is used whenever a collection must be traversed with the option to remove elements safely, such as filtering a list in place or processing a queue of tasks.
-
-**References Links**
-
-- Iterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Iterator.html
-- Iterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html
-
-#### 3.2 `remove()`
-
-**Definitions**
-
-- **Core Definition:** Removes the last element returned by the iterator from the underlying collection.
-- **Technical Definition:** `default void remove()` removes from the underlying collection the last element returned by this iterator (optional operation). This method can be called only once per call to `next()`. The behavior of an iterator is unspecified if the underlying collection is modified while the iteration is in progress in any way other than by calling this method. The default implementation throws `UnsupportedOperationException`.
-- **Beginner-Friendly Explanation:** `remove()` lets you delete the element you just retrieved with `next()`. You can only call it once per `next()` call.
-
-**Purposes**
-
-- To remove elements from the underlying collection during iteration.
-- To provide a safe alternative to modifying the collection directly, which would cause `ConcurrentModificationException`.
-- To support in-place filtering of collections.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-it.remove();
-```
-
-Component breakdown:
-
-- `it`: the iterator.
-
-Syntax rules: `remove()` can only be called after `next()`. It removes the element last returned by `next()`. It can be called only once per `next()` call.
-
-Constraints and limitations: `remove()` may throw `UnsupportedOperationException` if the iterator does not support removal. It throws `IllegalStateException` if `next()` has not been called or if `remove()` has already been called after the last `next()`.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Removing elements during iteration**
-
-```java
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-public class IteratorRemoveExample {
-    public static void main(String[] args) {
-        List<Integer> numbers = new ArrayList<>();
-        numbers.add(1);
-        numbers.add(2);
-        numbers.add(3);
-        numbers.add(4);
-
-        Iterator<Integer> it = numbers.iterator();
-        while (it.hasNext()) {
-            int n = it.next();
-            if (n % 2 == 0) {
-                it.remove(); // Remove even numbers
+        Iterator<String> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            String element = iterator.next();
+            if (element.equals("Banana")) {
+                iterator.remove(); // Safe removal
             }
         }
-        System.out.println(numbers);
+        System.out.println("After removal: " + list);
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-[1, 3]
+After removal: [Apple, Cherry]
 ```
 
-**Why the code produces this result:** The iterator traverses the list and removes even numbers using `it.remove()`. This is safe because the iterator is aware of the removal.
+**Step-by-Step Explanation:**
 
-**Example 2: `IllegalStateException` when calling `remove()` twice**
+1. `iterator.next()` returns "Banana".
+2. `iterator.remove()` removes "Banana" from the list safely.
+3. The iterator continues without throwing `ConcurrentModificationException`.
+
+### Real-World Cases
+
+- **Filtering Collections:** Removing elements that match a condition during iteration.
+- **Custom Data Structures:** Implementing `Iterable` to allow for-each traversal.
+- **Lazy Processing:** Processing elements one at a time without loading all into memory.
+
+---
+
+## 2. ListIterator
+
+### Definitions
+
+**Core Definition:** `ListIterator` is an extension of `Iterator` for lists that allows bidirectional traversal, modification during iteration, and access to the current position.
+
+**Technical Definition:** `ListIterator<E>` extends `Iterator<E>` and adds methods for traversing the list in either direction, modifying the list during iteration, and obtaining the iterator's current position in the list. A `ListIterator` has no current element; its cursor position always lies between the element that would be returned by `previous()` and the element that would be returned by `next()`.
+
+**Beginner-Friendly Explanation:** A `ListIterator` is like a cursor in a text editor — you can move forward, backward, insert, delete, and replace text at the cursor position.
+
+### Purposes
+
+- To provide bidirectional traversal of a list
+- To allow modification of the list during iteration (add, set, remove)
+- To enable access to the current position in the list
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-public class IteratorRemoveTwiceExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        Iterator<String> it = list.iterator();
-        it.next();
-        it.remove();
-        try {
-            it.remove(); // Second remove without next()
-        } catch (IllegalStateException e) {
-            System.out.println("Caught: " + e.getClass().getSimpleName());
-        }
-    }
+public interface ListIterator<E> extends Iterator<E> {
+    boolean hasNext();
+    E next();
+    boolean hasPrevious();
+    E previous();
+    int nextIndex();
+    int previousIndex();
+    void remove();
+    void set(E e);
+    void add(E e);
 }
 ```
 
-Expected Output:
+**Component Breakdown:**
 
-```
-Caught: IllegalStateException
-```
+| Method | Description |
+|--------|-------------|
+| `hasPrevious()` | Returns `true` if there are elements before the cursor. |
+| `previous()` | Returns the previous element and moves the cursor backward. |
+| `nextIndex()` | Returns the index of the next element. |
+| `previousIndex()` | Returns the index of the previous element. |
+| `set(E e)` | Replaces the last element returned by `next()` or `previous()`. |
+| `add(E e)` | Inserts an element immediately before the cursor. |
 
-**Real-World Cases with Explanation**
+**Syntax Rules:**
 
-`Iterator.remove()` is used in data-cleaning pipelines where invalid or unwanted elements must be removed from a collection during traversal.
+- `ListIterator` is only available for `List` implementations.
+- `set()` and `remove()` can only be called after `next()` or `previous()`.
+- `add()` inserts before the cursor and is not affected by `remove()`.
 
-**References Links**
+**Constraints and Limitations:**
 
-- Iterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Iterator.html
-- Iterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html
+- Not all lists support all operations (e.g., unmodifiable lists throw `UnsupportedOperationException`).
 
-#### 3.3 `forEachRemaining()`
-
-**Definitions**
-
-- **Core Definition:** Performs a given action for each remaining element until all elements have been processed.
-- **Technical Definition:** `default void forEachRemaining(Consumer<? super E> action)` performs the given action for each remaining element until all elements have been processed or the action throws an exception. Actions are performed in the order of iteration, if that order is specified.
-- **Beginner-Friendly Explanation:** `forEachRemaining` lets you process all remaining elements with a single method call, using a lambda expression.
-
-**Purposes**
-
-- To process all remaining elements with a single method call.
-- To combine iteration and action application in a concise form.
-- To support internal iteration with lambda expressions.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
+### Annotated Code Example
 
 ```java
-it.forEachRemaining(element -> { /* action */ });
-```
+// File: ListIteratorDemo.java
+import java.util.*;
 
-Component breakdown:
-
-- `action`: a `Consumer` that is applied to each remaining element.
-
-Syntax rules: The action is applied to each remaining element in iteration order. If the action throws an exception, iteration stops and the exception is propagated.
-
-Constraints and limitations: The action must not modify the collection structurally.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `forEachRemaining` with lambda**
-
-```java
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-public class ForEachRemainingExample {
+public class ListIteratorDemo {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("X");
-        list.add("Y");
-        list.add("Z");
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C", "D"));
 
-        Iterator<String> it = list.iterator();
-        it.forEachRemaining(s -> System.out.println(s));
-    }
-}
-```
+        ListIterator<String> iterator = list.listIterator();
 
-Expected Output:
-
-```
-X
-Y
-Z
-```
-
-**Real-World Cases with Explanation**
-
-`forEachRemaining` is used when a partial traversal has already been performed and the remaining elements need to be processed in bulk.
-
-**References Links**
-
-- Iterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Iterator.html
-- Iterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html
-
-### 4. ListIterator Interface
-
-#### Core Definitions
-
-**Core Definition:** A specialized iterator for lists that allows bidirectional traversal, element modification, and position retrieval.
-
-**Technical Definition:** `public interface ListIterator<E> extends Iterator<E>` is an iterator for lists that allows the programmer to traverse the list in either direction, modify the list during iteration, and obtain the iterator's current position in the list. A `ListIterator` has no current element; its cursor position always lies between the element that would be returned by `previous()` and the element that would be returned by `next()`.
-
-**Beginner-Friendly Explanation:** `ListIterator` is like a super-powered iterator for lists. You can go forward and backward, add elements, replace elements, and find out your current position.
-
-#### 4.1 Bidirectional Traversal
-
-**Definitions**
-
-- **Core Definition:** The ability to traverse a list in both forward and backward directions.
-- **Technical Definition:** `boolean hasPrevious()` returns `true` if this list iterator has more elements when traversing the list in the reverse direction. `E previous()` returns the previous element in the list and moves the cursor position backwards.
-- **Beginner-Friendly Explanation:** You can move forward with `next()` and backward with `previous()`. `hasPrevious()` tells you if there is an element behind the cursor.
-
-**Purposes**
-
-- To traverse a list in both directions.
-- To support algorithms that require backward traversal, such as reverse iteration.
-- To examine elements before and after the current position.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-ListIterator<E> it = list.listIterator();
-while (it.hasNext()) { E e = it.next(); }
-while (it.hasPrevious()) { E e = it.previous(); }
-```
-
-Component breakdown:
-
-- `list.listIterator()`: obtains a `ListIterator`.
-- `hasNext()` / `next()`: forward traversal.
-- `hasPrevious()` / `previous()`: backward traversal.
-
-Syntax rules: The cursor position is between `previous()` and `next()`. Calling `next()` advances the cursor; calling `previous()` moves it back.
-
-Constraints and limitations: `previous()` throws `NoSuchElementException` if there is no previous element.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Forward and backward traversal**
-
-```java
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
-public class ListIteratorBidirectionalExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add("B");
-        list.add("C");
-
-        ListIterator<String> it = list.listIterator();
+        // Forward traversal
         System.out.println("Forward:");
-        while (it.hasNext()) {
-            System.out.println(it.next());
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
         }
+
+        // Backward traversal
         System.out.println("Backward:");
-        while (it.hasPrevious()) {
-            System.out.println(it.previous());
+        while (iterator.hasPrevious()) {
+            System.out.println(iterator.previous());
         }
+
+        // Modify during iteration
+        iterator = list.listIterator();
+        while (iterator.hasNext()) {
+            String element = iterator.next();
+            if (element.equals("B")) {
+                iterator.set("B-Modified"); // Replace
+            }
+        }
+        System.out.println("Modified list: " + list);
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
 Forward:
 A
 B
 C
+D
 Backward:
+D
 C
 B
 A
+Modified list: [A, B-Modified, C, D]
 ```
 
-**Why the code produces this result:** After the forward traversal, the cursor is at the end of the list. The backward traversal then moves the cursor back through the list.
+**Step-by-Step Explanation:**
 
-**Real-World Cases with Explanation**
+1. Forward traversal uses `hasNext()` and `next()`.
+2. Backward traversal uses `hasPrevious()` and `previous()`.
+3. `iterator.set("B-Modified")` replaces "B" with "B-Modified".
 
-`ListIterator` bidirectional traversal is used in text editors (moving the cursor forward and backward), undo–redo systems, and algorithms that require scanning a list in both directions.
+### Real-World Cases
 
-**References Links**
+- **Undo/Redo:** Traversing a list of commands backward and forward.
+- **Text Editing:** Inserting, deleting, and replacing characters in a document.
+- **Bidirectional Search:** Searching a list from both ends.
 
-- ListIterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ListIterator.html
-- ListIterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/ListIterator.html
+---
 
-#### 4.2 Element Modification (`add`, `set`, `remove`)
+## 3. Spliterator
 
-**Definitions**
+### Definitions
 
-- **Core Definition:** Methods that allow the list to be modified during iteration.
-- **Technical Definition:** `void add(E e)` inserts the specified element into the list (optional operation). `void set(E e)` replaces the last element returned by `next()` or `previous()` with the specified element (optional operation). `void remove()` removes from the list the last element returned by `next()` or `previous()` (optional operation).
-- **Beginner-Friendly Explanation:** `add` inserts an element at the cursor position. `set` replaces the last element you retrieved. `remove` deletes the last element you retrieved.
+**Core Definition:** `Spliterator` is an object for traversing and partitioning elements of a source, designed to support efficient parallel traversal.
 
-**Purposes**
+**Technical Definition:** `Spliterator<T>` is an interface introduced in Java 8. "An object for traversing and partitioning elements of a source. The source of elements covered by a `Spliterator` could be, for example, an array, a `Collection`, an IO channel, or a generator function. A `Spliterator` may traverse elements individually (`tryAdvance()`) or sequentially in bulk (`forEachRemaining()`). A `Spliterator` may also partition off some of its elements (using `trySplit()`) as another `Spliterator`, to be used in possibly-parallel operations".
 
-- To insert elements during iteration.
-- To replace elements during iteration.
-- To remove elements during iteration.
+**Beginner-Friendly Explanation:** A `Spliterator` is like a deck of cards that can be split into smaller decks for multiple players to process simultaneously. It's designed for parallel processing, allowing work to be divided among multiple threads.
 
-**Syntax Structures and Rules**
+### Purposes
 
-Complete general syntax:
+- To provide efficient parallel traversal of data sources
+- To enable partitioning of elements for parallel processing
+- To serve as the foundation for the Stream API
+- To report characteristics of the source (ordered, distinct, sorted, sized, etc.)
+
+### Syntax Rules and Structure
 
 ```java
-it.add(element);   // Insert at cursor
-it.set(element);   // Replace last returned
-it.remove();       // Remove last returned
+public interface Spliterator<T> {
+    boolean tryAdvance(Consumer<? super T> action);
+    Spliterator<T> trySplit();
+    long estimateSize();
+    int characteristics();
+    // ... plus default methods
+}
 ```
 
-Component breakdown:
+**Component Breakdown:**
 
-- `add`: inserts before the element that would be returned by `next()`.
-- `set`: replaces the last element returned by `next()` or `previous()`.
-- `remove`: removes the last element returned by `next()` or `previous()`.
+| Method | Description |
+|--------|-------------|
+| `tryAdvance(Consumer)` | Processes the next element, if present. |
+| `trySplit()` | Partitions off some elements as a new `Spliterator`. |
+| `estimateSize()` | Returns an estimate of the number of remaining elements. |
+| `characteristics()` | Returns a set of characteristics of this `Spliterator`. |
 
-Syntax rules: `set` and `remove` can only be called after `next()` or `previous()`. `add` can be called at any time.
+**Syntax Rules:**
 
-Constraints and limitations: These methods may throw `UnsupportedOperationException` if the list does not support modification. `set` and `remove` throw `IllegalStateException` if neither `next()` nor `previous()` has been called.
+- `Spliterator` is a generic interface (`Spliterator<T>`).
+- `trySplit()` returns `null` if the spliterator cannot be split.
+- Characteristics include `ORDERED`, `DISTINCT`, `SORTED`, `SIZED`, `NONNULL`, `IMMUTABLE`, `CONCURRENT`, and `SUBSIZED`.
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
+**Constraints and Limitations:**
 
-**Example 1: Replacing elements during iteration**
+- A `Spliterator` is useful for only a single bulk computation.
+- Splitting in a highly imbalanced manner may not benefit from parallelism.
+
+### Annotated Code Example
 
 ```java
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
+// File: SpliteratorDemo.java
+import java.util.*;
 
-public class ListIteratorSetExample {
+public class SpliteratorDemo {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("apple");
-        list.add("banana");
-        list.add("cherry");
+        List<String> list = Arrays.asList("A", "B", "C", "D", "E", "F");
 
-        ListIterator<String> it = list.listIterator();
-        while (it.hasNext()) {
-            String s = it.next();
-            it.set(s.toUpperCase());
-        }
-        System.out.println(list);
+        Spliterator<String> spliterator = list.spliterator();
+
+        // Sequential traversal
+        System.out.println("Sequential:");
+        spliterator.forEachRemaining(System.out::println);
+
+        // Split for parallel processing
+        Spliterator<String> s1 = list.spliterator();
+        Spliterator<String> s2 = s1.trySplit();
+
+        System.out.println("First half:");
+        s1.forEachRemaining(System.out::println);
+
+        System.out.println("Second half:");
+        s2.forEachRemaining(System.out::println);
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-[APPLE, BANANA, CHERRY]
+Sequential:
+A
+B
+C
+D
+E
+F
+First half:
+D
+E
+F
+Second half:
+A
+B
+C
 ```
 
-**Example 2: Adding elements during iteration**
+**Step-by-Step Explanation:**
+
+1. `list.spliterator()` creates a `Spliterator`.
+2. `forEachRemaining()` processes all elements sequentially.
+3. `trySplit()` divides the spliterator into two halves.
+4. The first spliterator processes the first half; the second processes the second half.
+
+### Real-World Cases
+
+- **Parallel Streams:** `Spliterator` is the foundation for `Stream.parallel()`.
+- **Large Data Processing:** Splitting work across multiple threads for faster processing.
+- **Custom Data Sources:** Implementing `Spliterator` for custom data sources to enable stream processing.
+
+---
+
+## 4. Iterable
+
+### Definitions
+
+**Core Definition:** `Iterable` is an interface that allows an object to be the target of the enhanced for statement (for-each loop).
+
+**Technical Definition:** `Iterable<T>` is a generic interface in the `java.lang` package. "Implementing this interface allows an object to be the target of the 'for-each loop' statement". It declares one abstract method: `iterator()`, which returns an `Iterator<T>`. Since Java 8, it also provides default methods `forEach(Consumer)` and `spliterator()`.
+
+**Beginner-Friendly Explanation:** If a class implements `Iterable`, you can use the convenient `for (Item item : collection)` syntax to loop over it.
+
+### Purposes
+
+- To enable the for-each loop for custom classes
+- To provide a standard way to obtain an iterator
+- To serve as the root interface of the Collection hierarchy
+
+### Syntax Rules and Structure
 
 ```java
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ListIterator;
-
-public class ListIteratorAddExample {
-    public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        list.add(1);
-        list.add(3);
-
-        ListIterator<Integer> it = list.listIterator();
-        while (it.hasNext()) {
-            int n = it.next();
-            if (n == 1) {
-                it.add(2); // Insert 2 after 1
-            }
-        }
-        System.out.println(list);
-    }
+public interface Iterable<T> {
+    Iterator<T> iterator();
+    default void forEach(Consumer<? super T> action);
+    default Spliterator<T> spliterator();
 }
 ```
 
-Expected Output:
+**Component Breakdown:**
 
-```
-[1, 2, 3]
-```
+| Method | Description |
+|--------|-------------|
+| `iterator()` | Returns an iterator over elements of type T. |
+| `forEach(Consumer)` | Performs the given action for each element. |
+| `spliterator()` | Creates a `Spliterator` over the elements. |
 
-**Real-World Cases with Explanation**
+**Syntax Rules:**
 
-`ListIterator` modification is used in in-place data transformations, such as normalizing a list of strings to uppercase or inserting derived elements during traversal.
+- Any class implementing `Iterable` can be used in a for-each loop.
+- `Collection` extends `Iterable`, so all collections are iterable.
+- Arrays are not `Iterable`, but the for-each loop works on arrays as a special case.
 
-**References Links**
+**Constraints and Limitations:**
 
-- ListIterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ListIterator.html
-- ListIterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/ListIterator.html
+- The `Iterator` returned must support `hasNext()` and `next()`.
+- `forEach()` processes elements in iteration order (if an order is specified).
 
-### 5. Iterable Interface
-
-#### Core Definitions
-
-**Core Definition:** The root interface that enables an object to be the target of the enhanced `for` loop.
-
-**Technical Definition:** `public interface Iterable<T>` is a functional interface that declares `Iterator<T> iterator()`, `default void forEach(Consumer<? super T> action)`, and `default Spliterator<T> spliterator()`. Implementing this interface allows an object to be the target of the enhanced `for` statement.
-
-**Beginner-Friendly Explanation:** If a class implements `Iterable`, it means “you can loop over me with a for-each loop.” It is the contract that makes an object traversable.
-
-#### 5.1 `iterator()`
-
-**Definitions**
-
-- **Core Definition:** Returns an iterator over elements of type `T`.
-- **Technical Definition:** `Iterator<T> iterator()` returns an iterator over elements of type `T`. This is the only abstract method of `Iterable`.
-- **Beginner-Friendly Explanation:** `iterator()` gives you an `Iterator` that you can use to traverse the object.
-
-**Purposes**
-
-- To provide an `Iterator` for the enhanced `for` loop.
-- To allow custom classes to be traversed with the for-each construct.
-- To serve as the foundation of the Java Collections Framework.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
+### Annotated Code Example
 
 ```java
-public class MyCollection<T> implements Iterable<T> {
-    @Override
-    public Iterator<T> iterator() {
-        return new MyIterator();
-    }
-}
-```
+// File: IterableDemo.java
+import java.util.*;
 
-Component breakdown:
-
-- `implements Iterable<T>`: declares that the class is iterable.
-- `iterator()`: returns an `Iterator`.
-
-Syntax rules: Any class implementing `Iterable` must provide an implementation of `iterator()`.
-
-Constraints and limitations: The returned iterator must not return `null`.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Custom `Iterable` class**
-
-```java
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-public class MyIterable implements Iterable<Integer> {
-    private final int[] data = {10, 20, 30};
+class NumberList implements Iterable<Integer> {
+    private List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
 
     @Override
     public Iterator<Integer> iterator() {
-        return new Iterator<Integer>() {
-            private int index = 0;
-
-            @Override
-            public boolean hasNext() {
-                return index < data.length;
-            }
-
-            @Override
-            public Integer next() {
-                if (!hasNext()) throw new NoSuchElementException();
-                return data[index++];
-            }
-        };
+        return numbers.iterator();
     }
+}
 
+public class IterableDemo {
     public static void main(String[] args) {
-        MyIterable iterable = new MyIterable();
-        for (int value : iterable) {
+        NumberList numberList = new NumberList();
+
+        // Enhanced for loop (uses Iterable)
+        for (int number : numberList) {
+            System.out.println(number);
+        }
+
+        // forEach with lambda
+        numberList.forEach(n -> System.out.println("Lambda: " + n));
+    }
+}
+```
+
+**Expected Output:**
+```
+1
+2
+3
+4
+5
+Lambda: 1
+Lambda: 2
+Lambda: 3
+Lambda: 4
+Lambda: 5
+```
+
+**Step-by-Step Explanation:**
+
+1. `NumberList` implements `Iterable<Integer>`.
+2. The for-each loop calls `iterator()` internally.
+3. `forEach()` processes each element with the lambda.
+
+### Real-World Cases
+
+- **Custom Collections:** Making custom data structures work with for-each loops.
+- **Framework Integration:** Allowing frameworks to iterate over custom types.
+- **Data Processing:** Providing a standard way to traverse custom data sources.
+
+---
+
+## 5. forEach()
+
+### Definitions
+
+**Core Definition:** `forEach()` is a method that performs a given action for each element of a collection or stream, using a functional programming style.
+
+**Technical Definition:** `forEach(Consumer<? super T> action)` is a default method on `Iterable` (since Java 8) and a method on `Map` (since Java 8) and `Stream`. It performs the specified action for each element until all elements have been processed or the action throws an exception. The default implementation behaves as if: `for (T t : this) action.accept(t);`.
+
+**Beginner-Friendly Explanation:** `forEach()` is a shortcut for looping over a collection and doing something with each element, without writing a full loop.
+
+### Purposes
+
+- To provide a concise, functional-style way to process each element
+- To enable lambda expressions and method references in iteration
+- To simplify collection processing code
+
+### Syntax Rules and Structure
+
+```java
+// On Iterable (List, Set, etc.)
+collection.forEach(element -> { /* action */ });
+
+// On Map
+map.forEach((key, value) -> { /* action */ });
+```
+
+**Syntax Rules:**
+
+- `forEach()` takes a `Consumer` functional interface.
+- The action is performed in iteration order (if specified).
+- Exceptions thrown by the action are relayed to the caller.
+
+**Constraints and Limitations:**
+
+- Cannot use `break` or `continue` in a `forEach()` lambda.
+- Not suitable for modifying the collection during iteration (may throw `ConcurrentModificationException`).
+
+### Annotated Code Example
+
+```java
+// File: ForEachDemo.java
+import java.util.*;
+
+public class ForEachDemo {
+    public static void main(String[] args) {
+        List<String> list = Arrays.asList("Apple", "Banana", "Cherry");
+
+        // forEach with lambda
+        list.forEach(item -> System.out.println(item));
+
+        // forEach with method reference
+        list.forEach(System.out::println);
+
+        // Map forEach
+        Map<String, Integer> map = new HashMap<>();
+        map.put("Alice", 30);
+        map.put("Bob", 25);
+        map.forEach((key, value) -> System.out.println(key + " -> " + value));
+    }
+}
+```
+
+**Expected Output:**
+```
+Apple
+Banana
+Cherry
+Apple
+Banana
+Cherry
+Alice -> 30
+Bob -> 25
+```
+
+**Step-by-Step Explanation:**
+
+1. `list.forEach(item -> System.out.println(item))` processes each element.
+2. `list.forEach(System.out::println)` uses a method reference.
+3. `map.forEach((key, value) -> ...)` processes each map entry.
+
+### Real-World Cases
+
+- **Logging:** Logging each element in a collection.
+- **Data Transformation:** Applying a transformation to each element.
+- **Map Processing:** Iterating over map entries with both keys and values.
+
+---
+
+## 6. Enhanced for Loop
+
+### Definitions
+
+**Core Definition:** The enhanced for loop (also called the for-each loop) is a Java language construct that simplifies iteration over arrays and `Iterable` objects.
+
+**Technical Definition:** "The enhanced for statement is a syntactic sugar for iteration over arrays and `Iterable` objects. The type of the Expression must be `Iterable` or an array type, or a compile-time error occurs". It was introduced in Java 5 and transforms internally into a standard iterator-based loop.
+
+**Beginner-Friendly Explanation:** The enhanced for loop is the easiest way to loop over a collection or array — you just say "for each item in this collection, do something."
+
+### Purposes
+
+- To provide a concise, readable syntax for iterating over collections and arrays
+- To eliminate the boilerplate of explicit iterator management
+- To reduce the likelihood of off-by-one errors
+
+### Syntax Rules and Structure
+
+```java
+for (ElementType element : iterableOrArray) {
+    // process element
+}
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `ElementType` | The type of elements in the collection or array. |
+| `element` | A variable that receives each element. |
+| `iterableOrArray` | An `Iterable` object or an array. |
+
+**Syntax Rules:**
+
+- The expression must be an `Iterable` or an array.
+- The loop variable is scoped to the loop body.
+- Cannot use `remove()` on the underlying collection during iteration (throws `ConcurrentModificationException`).
+
+**Constraints and Limitations:**
+
+- Cannot access the index during iteration (unless you maintain a separate counter).
+- Cannot modify the collection during iteration (except via the iterator's `remove()`, which is not accessible in the for-each loop).
+
+### Annotated Code Example
+
+```java
+// File: EnhancedForDemo.java
+import java.util.*;
+
+public class EnhancedForDemo {
+    public static void main(String[] args) {
+        // Array
+        int[] numbers = {1, 2, 3, 4, 5};
+        for (int number : numbers) {
+            System.out.println(number);
+        }
+
+        // List
+        List<String> names = Arrays.asList("Alice", "Bob", "Charlie");
+        for (String name : names) {
+            System.out.println(name);
+        }
+
+        // Set
+        Set<Integer> set = new HashSet<>(Arrays.asList(10, 20, 30));
+        for (int value : set) {
             System.out.println(value);
         }
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
+1
+2
+3
+4
+5
+Alice
+Bob
+Charlie
 10
 20
 30
 ```
 
-**Real-World Cases with Explanation**
+**Step-by-Step Explanation:**
 
-Custom `Iterable` implementations are used in domain-specific collections, such as a tree that can be traversed in-order, or a database result set that can be iterated row by row.
+1. The for-each loop over an array works directly.
+2. The for-each loop over a `List` uses the list's iterator internally.
+3. The for-each loop over a `Set` uses the set's iterator.
 
-**References Links**
+### Real-World Cases
 
-- Iterable (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Iterable.html
-- Iterable (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/lang/Iterable.html
+- **Data Processing:** Processing each element of a collection.
+- **GUI Programming:** Iterating over components in a container.
+- **Algorithm Implementation:** Traversing arrays and collections in algorithms.
 
-### 6. forEach() Method (Java 8+)
+---
 
-#### Core Definitions
+## 7. Concurrent Modification
 
-**Core Definition:** A default method on `Iterable` that performs a given action for each element using internal iteration.
+### Definitions
 
-**Technical Definition:** `default void forEach(Consumer<? super T> action)` performs the given action for each element of the `Iterable` until all elements have been processed or the action throws an exception. The default implementation behaves as if `for (T t : this) action.accept(t);`.
+**Core Definition:** Concurrent modification occurs when a collection is structurally modified while an iteration is in progress, potentially causing unpredictable behaviour or exceptions.
 
-**Beginner-Friendly Explanation:** `forEach` is a concise way to say “do this for every element.” You pass a lambda expression or method reference, and Java handles the loop for you.
+**Technical Definition:** "If a thread modifies a collection directly while it is iterating over the collection with a fail-fast iterator, the iterator will throw this exception". The `ConcurrentModificationException` is thrown by methods that have detected concurrent modification of an object when such modification is not permissible.
 
-#### 6.1 Lambda Expressions and Method References
+**Beginner-Friendly Explanation:** Concurrent modification is like trying to change the number of pages in a book while someone is reading it — the reader might get confused or lose their place.
 
-**Definitions**
+### Purposes
 
-- **Core Definition:** Functional parameters passed to `forEach` that specify the action to be performed on each element.
-- **Technical Definition:** A `Consumer<? super T>` is a functional interface with `void accept(T t)`. Lambda expressions such as `x -> System.out.println(x)` or method references such as `System.out::println` can be used.
-- **Beginner-Friendly Explanation:** You can write `list.forEach(System.out::println)` to print every element, or `list.forEach(s -> System.out.println(s.toUpperCase()))` to print each element in uppercase.
+- To detect and prevent unpredictable behaviour caused by unsafe concurrent modification
+- To ensure the integrity of iteration operations
+- To alert developers to potential bugs in their code
 
-**Purposes**
+### Syntax Rules and Structure
 
-- To perform an action on each element of an `Iterable` concisely.
-- To support internal iteration with lambda expressions and method references.
-- To improve code readability.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
+**The Problem:**
 
 ```java
-iterable.forEach(element -> { /* action */ });
-```
-
-Component breakdown:
-
-- `element`: the loop variable.
-- `action`: the lambda body.
-
-Syntax rules: The action must be a `Consumer`. It is applied to each element in iteration order.
-
-Constraints and limitations: The action must not modify the collection structurally. External iteration (e.g., `break`, `continue`, `return`) is not supported within `forEach`.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `forEach` with lambda**
-
-```java
-import java.util.ArrayList;
-import java.util.List;
-
-public class ForEachMethodExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("Java");
-        list.add("Python");
-        list.add("C++");
-
-        list.forEach(lang -> System.out.println(lang));
+List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C"));
+for (String item : list) {
+    if (item.equals("B")) {
+        list.remove(item); // ConcurrentModificationException!
     }
 }
 ```
 
-Expected Output:
-
-```
-Java
-Python
-C++
-```
-
-**Example 2: `forEach` with method reference**
+**The Solution:**
 
 ```java
-import java.util.ArrayList;
-import java.util.List;
+Iterator<String> iterator = list.iterator();
+while (iterator.hasNext()) {
+    String item = iterator.next();
+    if (item.equals("B")) {
+        iterator.remove(); // Safe removal
+    }
+}
+```
 
-public class ForEachMethodRefExample {
+**Syntax Rules:**
+
+- Never modify a collection directly (via `add()`, `remove()`, `clear()`) during iteration with a fail-fast iterator.
+- Use `Iterator.remove()` for safe removal.
+- Use concurrent collections (`CopyOnWriteArrayList`, `ConcurrentHashMap`) for concurrent modification.
+
+**Constraints and Limitations:**
+
+- Fail-fast behaviour cannot be guaranteed; it is a best-effort mechanism for bug detection.
+- `ConcurrentModificationException` should be used only to detect bugs, not for correctness.
+
+### Annotated Code Example
+
+```java
+// File: ConcurrentModificationDemo.java
+import java.util.*;
+
+public class ConcurrentModificationDemo {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("Hello");
-        list.add("World");
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C"));
 
+        // BAD: Modifying directly during for-each
+        try {
+            for (String item : list) {
+                if (item.equals("B")) {
+                    list.remove(item); // Throws ConcurrentModificationException
+                }
+            }
+        } catch (ConcurrentModificationException e) {
+            System.out.println("Caught: " + e.getClass().getSimpleName());
+        }
+
+        // GOOD: Using Iterator.remove()
+        list = new ArrayList<>(Arrays.asList("A", "B", "C"));
+        Iterator<String> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            String item = iterator.next();
+            if (item.equals("B")) {
+                iterator.remove(); // Safe
+            }
+        }
+        System.out.println("After safe removal: " + list);
+    }
+}
+```
+
+**Expected Output:**
+```
+Caught: ConcurrentModificationException
+After safe removal: [A, C]
+```
+
+**Step-by-Step Explanation:**
+
+1. The for-each loop uses a fail-fast iterator internally.
+2. Modifying the list directly triggers `ConcurrentModificationException`.
+3. Using `iterator.remove()` modifies the list safely during iteration.
+
+### Real-World Cases
+
+- **Filtering Collections:** Removing elements that match a condition.
+- **Data Cleanup:** Removing invalid entries from collections.
+- **Concurrent Systems:** Using concurrent collections to avoid exceptions.
+
+---
+
+## 8. ConcurrentModificationException
+
+### Definitions
+
+**Core Definition:** `ConcurrentModificationException` is a runtime exception thrown by fail-fast iterators when a collection is structurally modified during iteration.
+
+**Technical Definition:** `ConcurrentModificationException` extends `RuntimeException` and implements `Serializable`. "This exception may be thrown by methods that have detected concurrent modification of an object when such modification is not permissible. For example, it is not generally permissible for one thread to modify a Collection while another thread is iterating over it". "Iterators that do this are known as fail-fast iterators, as they fail quickly and cleanly, rather that risking arbitrary, non-deterministic behavior at an undetermined time in the future".
+
+**Beginner-Friendly Explanation:** `ConcurrentModificationException` is Java's way of saying "You changed the collection while I was still reading it — that's not allowed!"
+
+### Purposes
+
+- To detect and signal unsafe concurrent modification
+- To prevent unpredictable behaviour from unsafe iteration
+- To help developers find and fix concurrency bugs
+
+### Syntax Rules and Structure
+
+```java
+public class ConcurrentModificationException extends RuntimeException {
+    public ConcurrentModificationException();
+    public ConcurrentModificationException(String message);
+    public ConcurrentModificationException(Throwable cause);
+    public ConcurrentModificationException(String message, Throwable cause);
+}
+```
+
+**Syntax Rules:**
+
+- Thrown by fail-fast iterators when `modCount` changes during iteration.
+- Can be thrown even by a single thread if the collection is modified directly during iteration.
+- Not guaranteed to be thrown in all cases of concurrent modification.
+
+**Constraints and Limitations:**
+
+- Fail-fast behaviour is best-effort; it cannot detect all concurrent modifications.
+- Programs should not rely on this exception for correctness.
+
+### Annotated Code Example
+
+See the example in Section 7.
+
+### Real-World Cases
+
+- **Multi-threaded Applications:** Detecting unsafe concurrent access.
+- **Collection Modification:** Preventing bugs caused by modifying collections during iteration.
+- **Code Review:** Identifying code that modifies collections during iteration.
+
+---
+
+## 9. Fail-Fast Iterators
+
+### Definitions
+
+**Core Definition:** Fail-fast iterators are iterators that immediately throw `ConcurrentModificationException` if the underlying collection is structurally modified during iteration.
+
+**Technical Definition:** "Fail-fast iterators in Java don't play along when the underlying collection gets modified. Collections maintain an internal counter called `modCount`. Each time an item is added or removed from the Collection, this counter gets incremented. When iterating, on each `next()` call, the current value of `modCount` gets compared with the initial value. If there's a mismatch, it throws `ConcurrentModificationException` which aborts the entire operation. Default iterators for Collections from `java.util` package such as `ArrayList`, `HashMap`, etc. are Fail-Fast".
+
+**Beginner-Friendly Explanation:** Fail-fast iterators are like a strict teacher who immediately stops the class if someone walks in late. They don't wait to see what happens — they fail immediately and loudly.
+
+### Purposes
+
+- To detect concurrent modification as early as possible
+- To prevent unpredictable behaviour from unsafe iteration
+- To help developers identify and fix bugs
+
+### Syntax Rules and Structure
+
+**Implementation Mechanism:**
+
+- Collections maintain a `modCount` field.
+- Each structural modification increments `modCount`.
+- Iterators store the expected `modCount` at creation.
+- On each `next()` or `hasNext()`, the iterator checks if `modCount` has changed.
+- If changed, `ConcurrentModificationException` is thrown.
+
+**Syntax Rules:**
+
+- Fail-fast iterators are used by `ArrayList`, `HashMap`, `HashSet`, `LinkedList`, etc..
+- `Iterator.remove()` is the only safe way to modify the collection during iteration.
+
+**Constraints and Limitations:**
+
+- Fail-fast behaviour is not guaranteed in all scenarios.
+- `ConcurrentModificationException` is thrown on a best-effort basis.
+
+### Annotated Code Example
+
+See the example in Section 7.
+
+### Real-World Cases
+
+- **Standard Collections:** `ArrayList`, `HashMap`, `HashSet` all use fail-fast iterators.
+- **Bug Detection:** Catching unsafe modification early in development.
+
+---
+
+## 10. Fail-Safe Iterators
+
+### Definitions
+
+**Core Definition:** Fail-safe iterators (more accurately called weakly consistent iterators) do not throw `ConcurrentModificationException` when the underlying collection is modified during iteration.
+
+**Technical Definition:** "Fail-Safe iterators favor lack of failures over the inconvenience of exception handling. Those iterators create a clone of the actual Collection and iterate over it. If any modification happens after the iterator is created, the copy still remains untouched. Hence, these Iterators continue looping over the Collection even if it's modified. However, it's important to remember that there's no such thing as a truly Fail-Safe iterator. The correct term is Weakly Consistent. That means, if a Collection is modified while being iterated over, what the Iterator sees is weakly guaranteed". Iterators on Collections from `java.util.concurrent` package such as `ConcurrentHashMap`, `CopyOnWriteArrayList`, etc. are fail-safe in nature.
+
+**Beginner-Friendly Explanation:** Fail-safe iterators are like a polite reader who keeps reading the original copy even if someone edits the original book. They don't get confused or stop — they just keep going with the copy they have.
+
+### Purposes
+
+- To allow safe iteration in concurrent environments
+- To avoid `ConcurrentModificationException` in multi-threaded code
+- To provide a snapshot-based view of the collection
+
+### Syntax Rules and Structure
+
+**Implementation Mechanism:**
+
+- Iterators work on a snapshot (copy) of the collection.
+- Modifications to the original collection are not reflected in the snapshot.
+- No `modCount` checking is performed.
+
+**Syntax Rules:**
+
+- Fail-safe iterators are used by `ConcurrentHashMap`, `CopyOnWriteArrayList`, `ConcurrentLinkedQueue`, etc..
+- They do not support `remove()` (usually throw `UnsupportedOperationException`).
+
+**Constraints and Limitations:**
+
+- May not reflect the most recent modifications.
+- Overhead of copying the collection (for `CopyOnWriteArrayList`).
+- Not truly "fail-safe" — the correct term is "weakly consistent".
+
+### Annotated Code Example
+
+```java
+// File: FailSafeIteratorDemo.java
+import java.util.concurrent.*;
+
+public class FailSafeIteratorDemo {
+    public static void main(String[] args) {
+        CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>(
+            new String[]{"A", "B", "C"}
+        );
+
+        // Iteration continues even if the list is modified
+        for (String item : list) {
+            System.out.println(item);
+            if (item.equals("B")) {
+                list.add("D"); // No exception!
+            }
+        }
+
+        System.out.println("After iteration: " + list);
+    }
+}
+```
+
+**Expected Output:**
+```
+A
+B
+C
+After iteration: [A, B, C, D]
+```
+
+**Step-by-Step Explanation:**
+
+1. `CopyOnWriteArrayList` creates a snapshot for iteration.
+2. Adding "D" during iteration does not throw an exception.
+3. The iterator sees the original snapshot: A, B, C.
+4. The final list contains the added element: A, B, C, D.
+
+### Real-World Cases
+
+- **Concurrent Systems:** Iterating over collections in multi-threaded environments.
+- **Event Listeners:** Iterating over listener lists that may be modified concurrently.
+- **Caching:** Iterating over cached data that may be refreshed concurrently.
+
+---
+
+## 11. Iterator Best Practices
+
+### Definitions
+
+**Core Definition:** Iterator best practices are guidelines for using iterators effectively, safely, and efficiently in Java applications.
+
+**Technical Definition:** Best practices include using `Iterator` in preference to `Enumeration`, calling `hasNext()` before `next()`, using `Iterator.remove()` for safe removal, preferring the enhanced for loop for simple traversal, and being aware of fail-fast vs. fail-safe behaviour. "New implementations should consider using `Iterator` in preference to `Enumeration`". Iterators are superior to enumerations because they use simpler method names, and unlike enumerations, iterators have well-defined semantics when elements in a collection are removed while iterating over the collection.
+
+**Beginner-Friendly Explanation:** Best practices help you use iterators correctly and avoid common mistakes like modifying a collection during iteration or using the wrong type of iterator.
+
+### Key Best Practices
+
+| Practice | Description |
+|----------|-------------|
+| **Prefer `Iterator` over `Enumeration`** | `Iterator` has better method names and well-defined removal semantics. |
+| **Call `hasNext()` before `next()`** | Prevents `NoSuchElementException`. |
+| **Use `Iterator.remove()` for removal** | Safe removal during iteration; avoids `ConcurrentModificationException`. |
+| **Prefer for-each for simple traversal** | Cleaner and less error-prone than explicit iterators. |
+| **Use `ListIterator` for bidirectional traversal** | Provides `hasPrevious()`, `previous()`, and index methods. |
+| **Use `Spliterator` for parallel processing** | Enables efficient parallel traversal with the Stream API. |
+| **Be aware of fail-fast vs. fail-safe** | Know whether your collection's iterator will throw on modification. |
+| **Use concurrent collections for concurrent access** | `ConcurrentHashMap`, `CopyOnWriteArrayList` provide fail-safe iterators. |
+| **Don't call `remove()` twice in a row** | `Iterator.remove()` can only be called once per `next()`. |
+| **Don't rely on `ConcurrentModificationException` for correctness** | It should be used only to detect bugs. |
+
+### Annotated Code Example
+
+```java
+// File: IteratorBestPractices.java
+import java.util.*;
+
+public class IteratorBestPractices {
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C", "D"));
+
+        // GOOD: Use for-each for simple traversal
+        for (String item : list) {
+            System.out.println(item);
+        }
+
+        // GOOD: Use Iterator for safe removal
+        Iterator<String> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            String item = iterator.next();
+            if (item.equals("B")) {
+                iterator.remove();
+            }
+        }
+        System.out.println("After removal: " + list);
+
+        // GOOD: Use ListIterator for bidirectional traversal
+        ListIterator<String> listIterator = list.listIterator(list.size());
+        while (listIterator.hasPrevious()) {
+            System.out.println(listIterator.previous());
+        }
+
+        // GOOD: Use forEach with lambda
         list.forEach(System.out::println);
     }
 }
 ```
 
-Expected Output:
-
-```
-Hello
-World
-```
-
-**Real-World Cases with Explanation**
-
-`forEach` is used in logging, printing, and applying side-effect operations to each element in a collection. It is also used in streams as a terminal operation.
-
-**References Links**
-
-- Iterable (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Iterable.html
-- Iterable (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/lang/Iterable.html
-
-### 7. Stream API (Java 8+)
-
-#### Core Definitions
-
-**Core Definition:** A sequence of elements supporting sequential and parallel aggregate operations.
-
-**Technical Definition:** `public interface Stream<T> extends BaseStream<T, Stream<T>>` is a sequence of elements supporting sequential and parallel aggregate operations. A stream pipeline consists of a source, zero or more intermediate operations, and a terminal operation. Streams are lazy: computation on the source data is only performed when the terminal operation is initiated.
-
-**Beginner-Friendly Explanation:** A stream is like a pipeline: you put data in at one end, apply transformations in the middle, and produce a result at the other end. It is a modern, functional way to process collections.
-
-#### 7.1 Stream Creation and Intermediate Operations
-
-**Definitions**
-
-- **Core Definition:** Creating a stream from a source and applying operations such as `filter`, `map`, and `sorted`.
-- **Technical Definition:** `Collection.stream()` and `Collection.parallelStream()` create sequential and parallel streams, respectively. Intermediate operations are lazy and return a new stream.
-- **Beginner-Friendly Explanation:** You start with `list.stream()`, then chain operations like `.filter(x -> x > 0)` and `.map(x -> x * 2)`.
-
-**Purposes**
-
-- To process collections declaratively.
-- To support lazy evaluation and short-circuiting.
-- To enable parallel processing with minimal code changes.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-collection.stream()
-    .filter(predicate)
-    .map(function)
-    .forEach(consumer);
-```
-
-Component breakdown:
-
-- `stream()`: creates a stream.
-- `filter`: retains elements matching a predicate.
-- `map`: transforms each element.
-- `forEach`: terminal operation.
-
-Syntax rules: Intermediate operations are lazy. Terminal operations trigger computation. A stream can be used only once.
-
-Constraints and limitations: Streams do not modify the source. Behavioral parameters must be non-interfering and stateless.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Filter and map**
-
-```java
-import java.util.Arrays;
-import java.util.List;
-
-public class StreamExample {
-    public static void main(String[] args) {
-        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6);
-
-        numbers.stream()
-               .filter(n -> n % 2 == 0)
-               .map(n -> n * n)
-               .forEach(System.out::println);
-    }
-}
-```
-
-Expected Output:
-
-```
-4
-16
-36
-```
-
-**Why the code produces this result:** The stream filters even numbers (2, 4, 6), then maps each to its square (4, 16, 36), and prints them.
-
-**Example 2: Parallel stream**
-
-```java
-import java.util.Arrays;
-import java.util.List;
-
-public class ParallelStreamExample {
-    public static void main(String[] args) {
-        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
-        int sum = numbers.parallelStream()
-                         .mapToInt(Integer::intValue)
-                         .sum();
-        System.out.println("Sum: " + sum);
-    }
-}
-```
-
-Expected Output:
-
-```
-Sum: 15
-```
-
-**Real-World Cases with Explanation**
-
-Streams are used in data processing pipelines, such as filtering a list of transactions, computing aggregates, or transforming data for reporting.
-
-**References Links**
-
-- Stream (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html
-- Stream (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html
-
-### 8. Spliterator Interface
-
-#### Core Definitions
-
-**Core Definition:** An object for traversing and partitioning elements of a source, designed for efficient parallel traversal.
-
-**Technical Definition:** `public interface Spliterator<T>` is an object for traversing and partitioning elements of a source. A `Spliterator` may traverse elements individually (`tryAdvance()`) or sequentially in bulk (`forEachRemaining()`). It may also partition off some of its elements (`trySplit()`) as another `Spliterator` for parallel processing.
-
-**Beginner-Friendly Explanation:** A `Spliterator` is like an iterator that can split itself into two parts, so multiple threads can process different parts of the data simultaneously.
-
-
-#### 8.1 `tryAdvance()` and `trySplit()`
-
-**Definitions**
-
-- **Core Definition:** Methods for single-element traversal and partitioning.
-- **Technical Definition:** `boolean tryAdvance(Consumer<? super T> action)` performs the action on the next element if one exists, returning `true`; otherwise returns `false`. `Spliterator<T> trySplit()` partitions off some elements as another `Spliterator`.
-- **Beginner-Friendly Explanation:** `tryAdvance` processes one element. `trySplit` splits the spliterator into two, so parallel processing is possible.
-
-**Purposes**
-
-- To traverse elements one by one.
-- To partition elements for parallel processing.
-- To provide efficient parallel traversal.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-Spliterator<T> spliterator = collection.spliterator();
-spliterator.tryAdvance(element -> { /* action */ });
-Spliterator<T> secondHalf = spliterator.trySplit();
-```
-
-Component breakdown:
-
-- `tryAdvance`: processes the next element.
-- `trySplit`: splits the spliterator.
-
-Syntax rules: `trySplit` returns `null` if the spliterator cannot be split.
-
-Constraints and limitations: Spliterators are designed for single-use.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Basic `tryAdvance`**
-
-```java
-import java.util.Arrays;
-import java.util.List;
-import java.util.Spliterator;
-
-public class SpliteratorExample {
-    public static void main(String[] args) {
-        List<String> list = Arrays.asList("A", "B", "C");
-        Spliterator<String> spliterator = list.spliterator();
-
-        spliterator.tryAdvance(s -> System.out.println("First: " + s));
-        spliterator.forEachRemaining(s -> System.out.println("Remaining: " + s));
-    }
-}
-```
-
-Expected Output:
-
-```
-First: A
-Remaining: B
-Remaining: C
-```
-
-**Real-World Cases with Explanation**
-
-`Spliterator` is used internally by the Stream API for parallel stream processing. It is also used in custom parallel algorithms that need to partition data across threads.
-
-**References Links**
-
-- Spliterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Spliterator.html
-- Spliterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Spliterator.html
-
-### 9. Safe Modification and Fail-Fast vs. Fail-Safe Iterators
-
-#### Core Definitions
-
-**Core Definition:** Safe modification refers to techniques for modifying a collection during iteration without causing `ConcurrentModificationException`.
-
-**Technical Definition:** Fail-fast iterators detect structural modification of the underlying collection (such as adding or removing elements, which changes the modification count) and throw `ConcurrentModificationException` on a best-effort basis. Fail-safe iterators either operate on a snapshot of the collection or use weakly consistent semantics that tolerate concurrent modification. The `Iterator.remove()` method provides a safe way to remove elements during iteration for fail-fast iterators.
-
-**Beginner-Friendly Explanation:** If you try to modify a collection while looping over it with a normal iterator, Java may throw a `ConcurrentModificationException`. To avoid this, you can use `Iterator.remove()`, use a concurrent collection like `CopyOnWriteArrayList`, or use a fail-safe iterator.
-
-#### 9.1 Fail-Fast Iterators
-
-**Definitions**
-
-- **Core Definition:** Iterators that detect concurrent structural modification and throw `ConcurrentModificationException`.
-- **Technical Definition:** Fail-fast iterators are implemented by associating a modification count with the collection. If the modification count changes during iteration (other than via the iterator's own `remove()` method), the iterator throws `ConcurrentModificationException`. Fail-fast behavior is not guaranteed in the presence of unsynchronized concurrent modification.
-- **Beginner-Friendly Explanation:** Fail-fast iterators are like a referee that blows the whistle immediately if someone changes the game while it is being played.
-
-**Purposes**
-
-- To detect concurrent modification early and fail cleanly.
-- To prevent unpredictable behavior from unsynchronized modification.
-- To provide well-defined semantics for `Iterator.remove()`.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-Iterator<E> it = collection.iterator();
-while (it.hasNext()) {
-    E e = it.next();
-    if (condition) {
-        it.remove(); // Safe removal
-    }
-    // collection.add(...) // Would throw ConcurrentModificationException
-}
-```
-
-Component breakdown:
-
-- `it.remove()`: safe removal during iteration.
-- Direct collection modification: unsafe during fail-fast iteration.
-
-Syntax rules: Only `Iterator.remove()` is permitted for structural modification during fail-fast iteration.
-
-Constraints and limitations: Fail-fast behavior is best-effort and cannot be guaranteed in the presence of unsynchronized concurrency.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `ConcurrentModificationException`**
-
-```java
-import java.util.ArrayList;
-import java.util.List;
-
-public class FailFastExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add("B");
-        list.add("C");
-
-        for (String s : list) {
-            if (s.equals("B")) {
-                list.remove(s); // Modifying during for-each
-            }
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-Exception in thread "main" java.util.ConcurrentModificationException
-```
-
-**Why the code produces this result:** The enhanced `for` loop uses a fail-fast iterator. Directly modifying the list during iteration changes the modification count, causing the iterator to throw `ConcurrentModificationException` on the next `next()` call.
-
-**Example 2: Safe removal with `Iterator.remove()`**
-
-```java
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-public class FailFastSafeExample {
-    public static void main(String[] args) {
-        List<String> list = new ArrayList<>();
-        list.add("A");
-        list.add("B");
-        list.add("C");
-
-        Iterator<String> it = list.iterator();
-        while (it.hasNext()) {
-            String s = it.next();
-            if (s.equals("B")) {
-                it.remove(); // Safe
-            }
-        }
-        System.out.println(list);
-    }
-}
-```
-
-Expected Output:
-
-```
-[A, C]
-```
-
-**Real-World Cases with Explanation**
-
-Fail-fast iterators are used in single-threaded contexts where accidental concurrent modification should be detected. They are the default for most `java.util` collections.
-
-**References Links**
-
-- ConcurrentModificationException (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ConcurrentModificationException.html
-- Iterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Iterator.html
-
-#### 9.2 Fail-Safe Iterators
-
-**Definitions**
-
-- **Core Definition:** Iterators that tolerate concurrent modification by operating on a snapshot or using weakly consistent semantics.
-- **Technical Definition:** Fail-safe iterators are used by concurrent collections such as `CopyOnWriteArrayList` and `ConcurrentHashMap`. `CopyOnWriteArrayList` uses a snapshot-style iterator that operates on a reference to the array at the time the iterator was created. `ConcurrentHashMap` uses weakly consistent iterators that do not throw `ConcurrentModificationException`.
-- **Beginner-Friendly Explanation:** Fail-safe iterators are like a photograph of the collection taken when iteration starts. Changes made after the photograph do not affect the iteration.
-
-**Purposes**
-
-- To allow concurrent modification without throwing exceptions.
-- To support thread-safe iteration in concurrent collections.
-- To provide weakly consistent semantics for concurrent traversal.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
-list.add("A");
-for (String s : list) {
-    list.add("B"); // Safe; iterator sees snapshot
-}
-```
-
-Component breakdown:
-
-- `CopyOnWriteArrayList`: creates a copy-on-write list.
-- Iteration: operates on a snapshot.
-
-Syntax rules: Fail-safe iterators may not reflect the latest state of the collection. `CopyOnWriteArrayList` iterators do not support `remove()`.
-
-Constraints and limitations: Snapshot iterators may be stale. Copy-on-write is expensive for write-heavy workloads.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: `CopyOnWriteArrayList` safe iteration**
-
-```java
-import java.util.concurrent.CopyOnWriteArrayList;
-
-public class FailSafeExample {
-    public static void main(String[] args) {
-        CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
-        list.add("A");
-        list.add("B");
-
-        for (String s : list) {
-            System.out.println(s);
-            list.add("C"); // Safe; iterator uses snapshot
-        }
-        System.out.println("Final list: " + list);
-    }
-}
-```
-
-Expected Output:
-
-```
-A
-B
-Final list: [A, B, C, C]
-```
-
-**Why the code produces this result:** The iterator uses a snapshot of the list at the time of creation, so it only sees “A” and “B”. The additions of “C” are made to the underlying list and are visible in the final list.
-
-**Real-World Cases with Explanation**
-
-`CopyOnWriteArrayList` is used in scenarios where reads vastly outnumber writes, such as maintaining a list of event listeners that is occasionally modified but frequently iterated.
-
-**References Links**
-
-- CopyOnWriteArrayList (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CopyOnWriteArrayList.html
-- ConcurrentHashMap (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html
-
-### 10. Enumeration Interface (Legacy)
-
-#### Core Definitions
-
-**Core Definition:** A legacy iteration interface that generates a series of elements, one at a time.
-
-**Technical Definition:** `public interface Enumeration<E>` is a legacy iteration interface. New code should use `Iterator` instead. `Enumeration` declares `boolean hasMoreElements()` and `E nextElement()`. It is used by legacy classes such as `Vector`, `Hashtable`, and `Properties`. Since Java 9, `Enumeration` provides a default `asIterator()` method to convert an `Enumeration` to an `Iterator`.
-
-**Beginner-Friendly Explanation:** `Enumeration` is the old way of iterating. It is still used by some legacy classes, but new code should use `Iterator` instead.
-
-#### 10.1 `hasMoreElements()` and `nextElement()`
-
-**Definitions**
-
-- **Core Definition:** Methods for checking whether more elements exist and retrieving the next element.
-- **Technical Definition:** `boolean hasMoreElements()` returns `true` if there are more elements. `E nextElement()` returns the next element. It throws `NoSuchElementException` if there are no more elements.
-- **Beginner-Friendly Explanation:** `hasMoreElements` is like `hasNext` and `nextElement` is like `next`, but with longer names.
-
-**Purposes**
-
-- To provide iteration for legacy classes.
-- To support conversion to `Iterator` via `asIterator()`.
-- To maintain backward compatibility.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-Enumeration<E> e = vector.elements();
-while (e.hasMoreElements()) {
-    E element = e.nextElement();
-}
-```
-
-Component breakdown:
-
-- `hasMoreElements()`: checks for more elements.
-- `nextElement()`: retrieves the next element.
-
-Syntax rules: `nextElement()` throws `NoSuchElementException` if no more elements exist.
-
-Constraints and limitations: Does not support element removal. New code should use `Iterator`.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Enumeration with `Vector`**
-
-```java
-import java.util.Enumeration;
-import java.util.Vector;
-
-public class EnumerationExample {
-    public static void main(String[] args) {
-        Vector<String> vector = new Vector<>();
-        vector.add("A");
-        vector.add("B");
-        vector.add("C");
-
-        Enumeration<String> e = vector.elements();
-        while (e.hasMoreElements()) {
-            System.out.println(e.nextElement());
-        }
-    }
-}
-```
-
-Expected Output:
-
+**Expected Output:**
 ```
 A
 B
 C
+D
+After removal: [A, C, D]
+D
+C
+A
+A
+C
+D
 ```
 
-**Example 2: Converting `Enumeration` to `Iterator`**
+**Step-by-Step Explanation:**
 
-```java
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Vector;
+1. The for-each loop is used for simple traversal.
+2. `Iterator.remove()` safely removes "B".
+3. `ListIterator` traverses backward from the end.
+4. `forEach()` with a method reference processes each element.
 
-public class EnumerationToIteratorExample {
-    public static void main(String[] args) {
-        Vector<String> vector = new Vector<>();
-        vector.add("X");
-        vector.add("Y");
+### Real-World Cases
 
-        Enumeration<String> e = vector.elements();
-        Iterator<String> it = e.asIterator();
-        while (it.hasNext()) {
-            System.out.println(it.next());
-        }
-    }
-}
-```
+- **API Design:** Using `Iterable` to allow for-each loops in custom classes.
+- **Data Processing:** Using iterators for filtering and transforming collections.
+- **Concurrent Systems:** Using fail-safe iterators for thread-safe traversal.
 
-Expected Output:
+---
 
-```
-X
-Y
-```
+## Comparison Table: Iterator, ListIterator, Spliterator
 
-**Real-World Cases with Explanation**
+| Feature | Iterator | ListIterator | Spliterator |
+|---------|----------|--------------|-------------|
+| **Introduced** | Java 1.2 | Java 1.2 | Java 8 |
+| **Traversal Direction** | Forward only | Bidirectional | Forward (with splitting) |
+| **Remove Support** | Yes (`remove()`) | Yes (`remove()`) | No |
+| **Add Support** | No | Yes (`add()`) | No |
+| **Set Support** | No | Yes (`set()`) | No |
+| **Index Access** | No | Yes (`nextIndex()`, `previousIndex()`) | No |
+| **Parallel Support** | No | No | Yes (`trySplit()`) |
+| **Available For** | All collections | Lists only | All collections and streams |
+| **Primary Use** | General traversal | List manipulation | Parallel processing |
 
-`Enumeration` is encountered when working with legacy codebases that use `Vector`, `Hashtable`, or `Properties`. The `asIterator()` method allows legacy enumerations to be used with modern iterator-based APIs.
+---
 
-**References Links**
+## References Links
 
-- Enumeration (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Enumeration.html
-- Enumeration (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Enumeration.html
-
-## Summary Table of Iteration Mechanisms
-
-| Mechanism | External/Internal | Bidirectional | Modification | Parallel | Fail-Fast |
-|---|---|---|---|---|---|
-| Traditional for | External | No | Index-based | No | N/A |
-| Enhanced for | External | No | No | No | Yes (via iterator) |
-| Iterator | External | No | `remove()` | No | Yes |
-| ListIterator | External | Yes | `add`, `set`, `remove` | No | Yes |
-| `forEach()` | Internal | No | No | No | N/A |
-| Stream API | Internal | No | No | Yes | N/A |
-| Spliterator | External | No | No | Yes | N/A |
-| Enumeration | External | No | No | No | No |
-
-## Deprecated, Unsafe, and Version-Specific Notes
-
-- The `Enumeration` interface is legacy and should not be used in new code. Prefer `Iterator`.
-- `Iterator.remove()` is the only safe way to remove elements during fail-fast iteration. Directly modifying the collection during iteration causes `ConcurrentModificationException`.
-- The enhanced `for` loop does not expose the iterator, so `remove()` cannot be called within a for-each loop. A `ConcurrentModificationException` will be thrown if the collection is modified during a for-each loop.
-- `ListIterator` is only available for `List` implementations, not for `Set` or `Queue`.
-- Streams are single-use. A stream that has been operated on cannot be reused.
-- `Spliterator` is designed for single bulk computation and should not be reused.
-- `forEach()` and the Stream API were introduced in Java 8. `Iterator.forEachRemaining()` was introduced in Java 8. `Enumeration.asIterator()` was introduced in Java 9.
-- The enhanced `for` loop was introduced in Java 5.
-
-## References
-
-- Iterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Iterator.html
-- Iterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html
-- ListIterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ListIterator.html
-- ListIterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/ListIterator.html
-- Iterable (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Iterable.html
-- Iterable (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/lang/Iterable.html
-- Stream (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html
-- Stream (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html
-- Spliterator (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Spliterator.html
-- Spliterator (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Spliterator.html
-- Enumeration (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Enumeration.html
-- Enumeration (Java Platform SE 8) – https://docs.oracle.com/javase/8/docs/api/java/util/Enumeration.html
-- ConcurrentModificationException (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ConcurrentModificationException.html
-- CopyOnWriteArrayList (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CopyOnWriteArrayList.html
-- The for Statement (Java Language Specification, Java SE 21) – https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.14
-- The Enhanced for Statement (Java Language Specification, Java SE 21) – https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html#jls-14.14.2
+- Iterator (Java SE 21 & JDK 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Iterator.html
+- ListIterator (Java SE 9) — Oracle API Documentation - https://cr.openjdk.org/~iris/se/9/latestSpec/api/java.base/java/util/ListIterator.html
+- Spliterator (Java SE 21 & JDK 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Spliterator.html
+- Iterable (Java SE 8) — Oracle API Documentation - https://docs.oracle.com/javase/8/docs/api/java/lang/Iterable.html
+- ConcurrentModificationException (Java SE 21 & JDK 21) — Oracle API Documentation - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ConcurrentModificationException.html
+- Fail-Safe Iterator vs Fail-Fast Iterator — Baeldung - https://www.baeldung.com/java-fail-safe-vs-fail-fast-iterator
+- A Guide to Iterator in Java — Baeldung - https://www.baeldung.com/java-iterator
+- MSC06-J. Do not modify the underlying collection when an iteration is in progress — SEI CERT Oracle Coding Standard for Java - https://cmu-sei.github.io/secure-coding/sei-cert-java/rule/msc06-j/
+- Enhanced For Loop — Oracle Java Tutorials - https://docs.oracle.com/javase/8/docs/technotes/guides/language/foreach.html
+- Java Language Specification, §14.14.2: The enhanced for statement - https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html
+- Iterator Design Pattern — Refactoring Guru - https://refactoring.guru/design-patterns/iterator
