@@ -549,7 +549,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Tuples vs lists
   - Tuple best practices
 
-- **23. Sets**
+- [**23. Sets**](/Programming%20Languages/Python/Collections/Sets.md)
   - Sets
   - Set literals
   - Set creation
@@ -573,7 +573,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Set performance
   - Set best practices
 
-- **24. Dictionaries**
+- [**24. Dictionaries**](/Programming%20Languages/Python/Collections/Dictionaries.md)
   - Dictionaries
   - Dictionary literals
   - Dictionary creation

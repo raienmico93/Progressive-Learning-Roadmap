@@ -552,27 +552,27 @@
 
 # XV. Accessibility and Inclusive HTML
 
-- [**56. Web Accessibility Fundamentals**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/WebAccessibility.md)
+- **56. Web Accessibility Fundamentals**
   - Accessibility definition
   - Assistive technologies
   - Keyboard access
   - Screen readers
   - Semantic structure
 
-- [**57. Accessible Structure**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/AccessibleStructure.md)
+- **57. Accessible Structure**
   - Proper heading hierarchy
   - Landmark elements
   - Semantic controls
   - Meaningful link text
 
-- [**58. Accessible Forms**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/AccessibleForms.md)
+- **58. Accessible Forms**
   - Labels
   - Instructions
   - Error identification
   - Focus management
   - Grouping controls
 
-- [**59. ARIA Fundamentals**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/ARIA.md)
+- **59. ARIA Fundamentals**
   - Accessible Rich Internet Applications
   - Roles
   - States
@@ -581,7 +581,7 @@
   - Native HTML versus ARIA
   - Avoiding unnecessary ARIA
 
-- [**60. Accessibility Standards**](/Web%20Development/HTML/Accessibility%20and%20Inclusive%20HTML/AccessibilityStandards.md)
+- **60. Accessibility Standards**
   - WCAG concepts
   - Perceivable content
   - Operable interfaces
