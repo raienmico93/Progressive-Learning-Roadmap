@@ -305,9 +305,7 @@ class PostController extends Controller
 
 **Expected Output**
 
-```
-// Authorized only if the user is an editor, the category is active, and $extraFlag is true
-```
+- Authorized only if the user is an editor, the category is active, and $extraFlag is true
 
 **Why This Output Occurs**
 

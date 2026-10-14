@@ -222,7 +222,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
     - `:last`
     - `:header`
 
-- **7. Selector Performance**
+- [**7. Selector Performance**](/Web%20Development/JQuery/Selectors/Performance.md)
   - Selector performance
   - ID selectors
   - Class selectors
@@ -241,7 +241,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Selector best practices
   - Selector anti-patterns
 
-- **8. Advanced Selectors**
+- [**8. Advanced Selectors**](/Web%20Development/JQuery/Selectors/AdvancedSelectors.md)
   - Custom selectors
   - `$.expr[":"]`
   - Custom pseudo-selectors
@@ -580,7 +580,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Dynamic elements
   - Event delegation best practices
 
-- **28. Event Object**
+- [**28. Event Object**](/Web%20Development/JQuery/Event%20Handling/EventObject.md)
   - Event object
   - `event.target`
   - `event.currentTarget`
@@ -610,7 +610,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - `event.isImmediatePropagationStopped()`
   - Event object best practices
 
-- **29. Event Namespacing**
+- [**29. Event Namespacing**](/Web%20Development/JQuery/Event%20Handling/EventNamespacing.md)
   - Event namespaces
   - `.on('click.namespace')`
   - `.off('click.namespace')`
@@ -618,7 +618,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Namespace benefits
   - Namespace best practices
 
-- **30. Custom Events**
+- [**30. Custom Events**](/Web%20Development/JQuery/Event%20Handling/CustomEvents.md)
   - Custom events
   - `.trigger()`
   - `.triggerHandler()`
@@ -628,7 +628,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Event delegation
   - Custom event best practices
 
-- **31. Event Performance**
+- [**31. Event Performance**](/Web%20Development/JQuery/Event%20Handling/EventPerformance.md)
   - Event binding performance
   - Event delegation performance
   - Event unbinding
@@ -726,7 +726,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # VII. AJAX
 
-- **40. AJAX Fundamentals**
+- [**40. AJAX Fundamentals**](/Web%20Development/JQuery/AJAX/AJAX.md)
   - AJAX
   - Asynchronous JavaScript
   - XMLHttpRequest
@@ -739,7 +739,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - AJAX deferred objects
   - AJAX best practices
 
-- **41. AJAX Methods**
+- [**41. AJAX Methods**](/Web%20Development/JQuery/AJAX/HTTPMethods.md)
   - `$.ajax()`
   - `$.get()`
   - `$.post()`
@@ -784,7 +784,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - `traditional`
   - AJAX configuration best practices
 
-- **43. AJAX Events**
+- [**43. AJAX Events**](/Web%20Development/JQuery/AJAX/AJAXEvents.md)
   - Global AJAX events
     - `ajaxStart`
     - `ajaxStop`
@@ -797,7 +797,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Event unbinding
   - Event best practices
 
-- **44. AJAX Promises**
+- [**44. AJAX Promises**](/Web%20Development/JQuery/AJAX/AJAXPromiseBased.md)
   - jQuery promises
   - Deferred objects
   - `.done()`

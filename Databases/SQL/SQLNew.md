@@ -69,39 +69,6 @@ SQL is best learned as more than "SELECT statements." The progression should cov
   - Declarative vs imperative
   - Set-based thinking
 
-- **4. Data Types**
-  - Numeric types
-    - `INTEGER`
-    - `SMALLINT`
-    - `BIGINT`
-    - `DECIMAL`
-    - `NUMERIC`
-    - `FLOAT`
-    - `REAL`
-    - `DOUBLE PRECISION`
-  - Character types
-    - `CHAR`
-    - `VARCHAR`
-    - `TEXT`
-  - Date and time types
-    - `DATE`
-    - `TIME`
-    - `TIMESTAMP`
-    - `TIMESTAMPTZ`
-    - `INTERVAL`
-  - Boolean type
-  - Binary types
-    - `BYTEA`
-    - `BLOB`
-  - UUID
-  - JSON and JSONB
-  - XML
-  - Arrays
-  - Enumerated types
-  - Custom types
-  - Type conversion
-  - Type casting
-
 - **5. NULL Semantics**
   - What NULL means
   - NULL vs empty string
@@ -120,7 +87,289 @@ SQL is best learned as more than "SELECT statements." The progression should cov
 
 ---
 
-# II. SQL Fundamentals
+# II. Data Types
+
+- **10. Data Type Fundamentals**
+  - Data types
+  - Type categories
+  - Type selection
+  - Data type best practices
+
+- **11. Numeric Types**
+  - `SMALLINT`
+  - `INTEGER`
+  - `INT`
+  - `BIGINT`
+  - `DECIMAL`
+  - `NUMERIC`
+  - `REAL`
+  - `DOUBLE PRECISION`
+  - `SMALLSERIAL`
+  - `SERIAL`
+  - `BIGSERIAL`
+  - Numeric type best practices
+
+- **12. Character Types**
+  - `CHAR`
+  - `CHARACTER`
+  - `VARCHAR`
+  - `CHARACTER VARYING`
+  - `TEXT`
+  - Character type best practices
+
+- **13. Date and Time Types**
+  - `DATE`
+  - `TIME`
+  - `TIME WITH TIME ZONE`
+  - `TIMETZ`
+  - `TIMESTAMP`
+  - `TIMESTAMP WITH TIME ZONE`
+  - `TIMESTAMPTZ`
+  - `INTERVAL`
+  - Date and time best practices
+
+- **14. Boolean Type**
+  - `BOOLEAN`
+  - `TRUE`
+  - `FALSE`
+  - `NULL`
+  - Boolean best practices
+
+- **15. Binary Types**
+  - `BYTEA`
+  - Binary operations
+  - Binary best practices
+
+- **16. UUID Type**
+  - `UUID`
+  - UUID generation
+  - `gen_random_uuid()`
+  - `uuid-ossp`
+  - `pgcrypto`
+  - UUID best practices
+
+- **17. JSON Types**
+  - `JSON`
+  - `JSONB`
+  - JSON vs JSONB
+  - JSON operations
+  - JSON functions
+  - `json_build_object()`
+  - `jsonb_build_object()`
+  - `json_agg()`
+  - `jsonb_agg()`
+  - `json_object_agg()`
+  - `jsonb_object_agg()`
+  - `jsonb_set()`
+  - `jsonb_insert()`
+  - `jsonb_pretty()`
+  - `jsonb_path_query()`
+  - JSON best practices
+
+- **18. Array Types**
+  - Arrays
+  - Array creation
+  - Array operations
+  - Array functions
+    - `array_agg()`
+    - `array_append()`
+    - `array_prepend()`
+    - `array_cat()`
+    - `array_length()`
+    - `array_position()`
+    - `array_remove()`
+    - `array_replace()`
+    - `unnest()`
+  - Array best practices
+
+- **19. Range Types**
+  - Range types
+  - `int4range`
+  - `int8range`
+  - `numrange`
+  - `tsrange`
+  - `tstzrange`
+  - `daterange`
+  - Range operations
+  - Range best practices
+
+- **20. Network Address Types**
+  - `INET`
+  - `CIDR`
+  - `MACADDR`
+  - `MACADDR8`
+  - Network address best practices
+
+- **21. Bit String Types**
+  - `BIT`
+  - `BIT VARYING`
+  - Bit string operations
+  - Bit string best practices
+
+- **22. Text Search Types**
+  - `TSVECTOR`
+  - `TSQUERY`
+  - Text search operations
+  - Text search best practices
+
+- **23. Geometric Types**
+  - `POINT`
+  - `LINE`
+  - `LSEG`
+  - `BOX`
+  - `PATH`
+  - `POLYGON`
+  - `CIRCLE`
+  - Geometric operations
+  - Geometric best practices
+
+- **24. Enumerated Types**
+  - `ENUM`
+  - Enum creation
+  - Enum operations
+  - Enum best practices
+
+- **25. Composite Types**
+  - Composite types
+  - Composite creation
+  - Composite operations
+  - Composite best practices
+
+- **26. Domain Types**
+  - Domains
+  - Domain creation
+  - Domain constraints
+  - Domain best practices
+
+- **27. Custom Types**
+  - Custom types
+  - `CREATE TYPE`
+  - Custom type operations
+  - Custom type best practices
+
+---
+
+# IX. Data Definition Language (DDL)
+
+- **46. Creating Tables**
+  - `CREATE TABLE`
+  - Column definitions
+  - Data types
+  - Column constraints
+  - Table constraints
+  - Default values
+  - Generated columns
+  - Computed columns
+  - Identity columns
+  - Sequences
+  - Temporary tables
+  - Unlogged tables
+  - Partitioned tables
+
+- **47. Altering Tables**
+  - `ALTER TABLE`
+  - Adding columns
+  - Dropping columns
+  - Renaming columns
+  - Changing data types
+  - Adding constraints
+  - Dropping constraints
+  - Renaming tables
+  - Moving tables
+  - Alter performance
+  - Online DDL
+  - Locking considerations
+
+- **48. Dropping Tables**
+  - `DROP TABLE`
+  - `IF EXISTS`
+  - `CASCADE`
+  - `RESTRICT`
+  - Dependency handling
+  - Data recovery
+
+- **49. Constraints**
+  - `NOT NULL`
+  - `UNIQUE`
+  - `PRIMARY KEY`
+  - `FOREIGN KEY`
+  - `CHECK`
+  - `DEFAULT`
+  - `EXCLUDE`
+  - Deferrable constraints
+  - Constraint timing
+  - Constraint validation
+  - Constraint performance
+
+---
+
+# VIII. SQL DML
+
+- **41. Inserting Data**
+  - `INSERT INTO`
+  - Single-row insert
+  - Multi-row insert
+  - `INSERT ... SELECT`
+  - `INSERT ... VALUES`
+  - `DEFAULT` values
+  - `RETURNING`
+  - `ON CONFLICT`
+  - `ON DUPLICATE KEY`
+  - `MERGE`
+  - Upsert patterns
+  - Bulk inserts
+  - Insert performance
+
+- **42. Updating Data**
+  - `UPDATE`
+  - Single-column update
+  - Multi-column update
+  - Update with `FROM`
+  - Update with subqueries
+  - Update with CTEs
+  - `RETURNING`
+  - Conditional updates
+  - Update performance
+  - Locking considerations
+
+- **43. Deleting Data**
+  - `DELETE`
+  - `DELETE` with `WHERE`
+  - `DELETE` with `USING`
+  - `DELETE` with subqueries
+  - `DELETE` with CTEs
+  - `RETURNING`
+  - `TRUNCATE`
+  - `TRUNCATE` vs `DELETE`
+  - `DROP` vs `TRUNCATE` vs `DELETE`
+  - Delete performance
+  - Cascading deletes
+
+- **44. Merging Data**
+  - `MERGE`
+  - `WHEN MATCHED`
+  - `WHEN NOT MATCHED`
+  - `WHEN NOT MATCHED BY SOURCE`
+  - Upsert patterns
+  - Synchronization
+  - Performance
+  - Concurrency
+
+- **45. Bulk Operations**
+  - Bulk insert
+  - Bulk update
+  - Bulk delete
+  - `COPY`
+  - `\copy`
+  - `BULK INSERT`
+  - `LOAD DATA`
+  - Staging tables
+  - Batch processing
+  - Performance optimization
+
+---
+
+# II. SQL DQL
 
 - **6. Basic Query Structure**
   - `SELECT`
@@ -530,122 +779,7 @@ SQL is best learned as more than "SELECT statements." The progression should cov
 
 ---
 
-# VIII. Data Modification
-
-- **41. Inserting Data**
-  - `INSERT INTO`
-  - Single-row insert
-  - Multi-row insert
-  - `INSERT ... SELECT`
-  - `INSERT ... VALUES`
-  - `DEFAULT` values
-  - `RETURNING`
-  - `ON CONFLICT`
-  - `ON DUPLICATE KEY`
-  - `MERGE`
-  - Upsert patterns
-  - Bulk inserts
-  - Insert performance
-
-- **42. Updating Data**
-  - `UPDATE`
-  - Single-column update
-  - Multi-column update
-  - Update with `FROM`
-  - Update with subqueries
-  - Update with CTEs
-  - `RETURNING`
-  - Conditional updates
-  - Update performance
-  - Locking considerations
-
-- **43. Deleting Data**
-  - `DELETE`
-  - `DELETE` with `WHERE`
-  - `DELETE` with `USING`
-  - `DELETE` with subqueries
-  - `DELETE` with CTEs
-  - `RETURNING`
-  - `TRUNCATE`
-  - `TRUNCATE` vs `DELETE`
-  - `DROP` vs `TRUNCATE` vs `DELETE`
-  - Delete performance
-  - Cascading deletes
-
-- **44. Merging Data**
-  - `MERGE`
-  - `WHEN MATCHED`
-  - `WHEN NOT MATCHED`
-  - `WHEN NOT MATCHED BY SOURCE`
-  - Upsert patterns
-  - Synchronization
-  - Performance
-  - Concurrency
-
-- **45. Bulk Operations**
-  - Bulk insert
-  - Bulk update
-  - Bulk delete
-  - `COPY`
-  - `\copy`
-  - `BULK INSERT`
-  - `LOAD DATA`
-  - Staging tables
-  - Batch processing
-  - Performance optimization
-
----
-
-# IX. Data Definition Language (DDL)
-
-- **46. Creating Tables**
-  - `CREATE TABLE`
-  - Column definitions
-  - Data types
-  - Column constraints
-  - Table constraints
-  - Default values
-  - Generated columns
-  - Computed columns
-  - Identity columns
-  - Sequences
-  - Temporary tables
-  - Unlogged tables
-  - Partitioned tables
-
-- **47. Altering Tables**
-  - `ALTER TABLE`
-  - Adding columns
-  - Dropping columns
-  - Renaming columns
-  - Changing data types
-  - Adding constraints
-  - Dropping constraints
-  - Renaming tables
-  - Moving tables
-  - Alter performance
-  - Online DDL
-  - Locking considerations
-
-- **48. Dropping Tables**
-  - `DROP TABLE`
-  - `IF EXISTS`
-  - `CASCADE`
-  - `RESTRICT`
-  - Dependency handling
-  - Data recovery
-
-- **49. Constraints**
-  - `NOT NULL`
-  - `UNIQUE`
-  - `PRIMARY KEY`
-  - `FOREIGN KEY`
-  - `CHECK`
-  - `EXCLUDE`
-  - Deferrable constraints
-  - Constraint timing
-  - Constraint validation
-  - Constraint performance
+# IX. Data Definition Language (DDL) Intermediate
 
 - **50. Indexes**
   - What indexes are

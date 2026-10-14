@@ -249,7 +249,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Controller testing
   - Controller best practices
 
-- **13. Middleware**
+- [**13. Middleware**](/Web%20Development/Laravel/Middleware/Middleware.md)
   - Middleware
   - Middleware creation
   - `artisan make:middleware`
@@ -647,7 +647,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # VII. Database and Migrations
 
-- **26. Database Configuration**
+- [**26. Database Configuration**](/Web%20Development/Laravel/EloquentORM/DBConfig.md)
   - Database drivers
     - MySQL
     - PostgreSQL
@@ -775,7 +775,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Migration squashing
   - Migration best practices
 
-- **28. Seeders**
+- [**28. Seeders**](/Web%20Development/Laravel/EloquentORM/Seeders.md)
   - Seeders
   - Seeder creation
   - `artisan make:seeder`
@@ -784,7 +784,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Seeder factories
   - Seeder best practices
 
-- **29. Factories**
+- [**29. Factories**](/Web%20Development/Laravel/EloquentORM/Factories.md)
   - Factories
   - Factory creation
   - `artisan make:factory`
@@ -917,13 +917,15 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Form request attributes
   - Form request best practices
 
-- **34. API Validation**
+- [**34. API Validation**](/Web%20Development/Laravel/Validation/APIValidation.md)
   - API validation
   - Validation errors
   - Error responses
   - Error formatting
   - Error status codes
   - API validation best practices
+
+  [**Advanced Validation**](/Web%20Development/Laravel/Validation/AdvancedValidation.md)
 
 ---
 
@@ -1024,7 +1026,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - APIs
   - REST APIs
   - API resources
-  - API routes
+  - [API routes](/Web%20Development/Laravel/API%20Development/APIRouting.md)
   - API authentication
   - API versioning
   - API rate limiting
@@ -1053,7 +1055,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Token refresh
   - API authentication best practices
 
-- **44. API Rate Limiting**
+- [**44. API Rate Limiting**](/Web%20Development/Laravel/API%20Development/APIRateLimiting.md)
   - Rate limiting
   - Rate limiter configuration
   - Rate limit responses
