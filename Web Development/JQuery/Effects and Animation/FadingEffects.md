@@ -1,4 +1,4 @@
-# jQuery Fading Mechanics: A Comprehensive Programming Cheat Sheet
+# jQuery Fading Effects — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,37 +6,41 @@
 
 ### Definitions
 
-**Core Definition**
-jQuery Fading Mechanics is a set of four effects methods — `.fadeIn()`, `.fadeOut()`, `.fadeToggle()`, and `.fadeTo()` — that control element visibility by animating the CSS `opacity` property.
+**Core Definition:**
+jQuery Fading Effects are a set of methods (`.fadeIn()`, `.fadeOut()`, `.fadeToggle()`, `.fadeTo()`) that animate an element's opacity (and, for `fadeIn`/`fadeOut`, its `display` property) to create smooth appear/disappear transitions.
 
-**Technical Definition**
-These methods are members of the jQuery fading effects suite. They manipulate the `opacity` CSS property over a specified duration, transitioning elements between fully transparent (`opacity: 0`) and fully opaque (`opacity: 1`). `.fadeIn()`, `.fadeOut()`, and `.fadeToggle()` additionally manipulate the `display` property: `.fadeOut()` sets `display: none` when opacity reaches zero, while `.fadeIn()` removes `display: none` before animating opacity upward. `.fadeTo()` adjusts opacity to a specific value without altering the `display` state .
+**Technical Definition:**
+Fading effects are implemented on top of jQuery's animation engine and the `"fx"` queue. `.fadeIn()` animates `opacity` from 0 to 1 and sets `display` to its original value. `.fadeOut()` animates `opacity` from 1 to 0, then sets `display: none`. `.fadeToggle()` chooses between them based on current visibility. `.fadeTo(duration, opacity)` animates `opacity` to a specific target value (0–1) without changing `display`. All accept duration, easing, and a `complete` callback. jQuery stores the original `display` value in `jQuery._data(elem, "olddisplay")` so fading in restores the correct display type.
 
-**Beginner-Friendly Explanation**
-Think of fading as a dimmer switch for your HTML elements. `.fadeOut()` slowly turns the lights down until the element disappears; `.fadeIn()` slowly turns them back up. `.fadeToggle()` is a smart dimmer that flips itself — if the element is bright, it dims; if dim, it brightens. `.fadeTo()` is a precise dimmer that lets you set the exact brightness level you want — like 50% — without turning the element completely off .
+**Beginner-Friendly Explanation:**
+Fading effects make elements appear or disappear gradually by changing their transparency. `.fadeOut()` makes an element slowly become invisible, `.fadeIn()` brings it back, `.fadeToggle()` switches between the two, and `.fadeTo()` fades an element to a specific transparency level (like 50%).
 
 ### Key Characteristics
 
-- **Opacity Animation**: All four methods animate the CSS `opacity` property, unlike sliding methods which animate height .
-- **Display Coupling**: `.fadeIn()` and `.fadeOut()` also manipulate `display` to add or remove elements from the document flow .
-- **Duration-Based**: All methods accept a `speed` parameter controlling animation length; default is 400ms .
-- **Implicit Iteration**: Each method applies to every element in the matched jQuery collection.
-- **Chainable**: All return the jQuery object, enabling method chaining.
-- **Callback Support**: Each accepts an optional callback function executed after the animation completes .
+- **Opacity-Based:** Fading effects animate the CSS `opacity` property (0 = fully transparent, 1 = fully opaque).
+- **Display Management:** `.fadeIn()` and `.fadeOut()` also manage the `display` property; `.fadeTo()` does not.
+- **Queue Integration:** All fading animations are added to the element's `"fx"` queue and run sequentially.
+- **Callback Support:** Every fading method accepts a `complete` callback that fires when the animation finishes.
+- **Easing Support:** Fading animations accept an `easing` argument (`"swing"` or `"linear"`).
+- **Return Value:** All four methods return the jQuery object for chaining.
+- **Queue Control:** Use `.stop(true, true)` before starting a new fade to prevent animation buildup.
 
 ### Prerequisites
 
-- Basic HTML, CSS, and JavaScript knowledge.
-- Understanding of the CSS `opacity` property and values between 0 and 1.
-- jQuery library included via CDN or local file.
-- Familiarity with jQuery selectors and the jQuery object model.
+- Basic knowledge of jQuery selectors and DOM manipulation
+- Understanding of CSS `opacity` and `display` properties
+- Familiarity with JavaScript callbacks
+- Basic knowledge of the `"fx"` queue (see Effects Fundamentals)
+- Familiarity with basic effects (`.show()`, `.hide()`, `.toggle()`)
 
 ### Related Programming Areas
 
-- **jQuery Effects Suite**: `.slideUp()`, `.slideDown()`, `.animate()` .
-- **Animation Queuing**: Fading methods are queued like other animations.
-- **jQuery UI**: Extends fading methods with additional effects.
-- **CSS Transitions**: Modern alternatives for achieving similar effects natively.
+- **Effects Fundamentals:** The broader animation engine that powers fading.
+- **Basic Effects:** `.show()`, `.hide()`, `.toggle()` combine opacity and dimension animations.
+- **Sliding Effects:** `.slideUp()`, `.slideDown()`, `.slideToggle()` for height-based animations.
+- **Custom Animations:** `.animate()` can animate `opacity` directly for finer control.
+- **CSS Transitions:** Native alternative for simple opacity transitions.
+- **Accessibility:** Respecting `prefers-reduced-motion` for users sensitive to motion.
 
 ### Core Concepts / Features
 
@@ -44,794 +48,533 @@ Think of fading as a dimmer switch for your HTML elements. `.fadeOut()` slowly t
 2. `.fadeOut()`
 3. `.fadeToggle()`
 4. `.fadeTo()`
+5. Fading Effects Best Practices
 
 ---
 
-## Core Concept 1: `.fadeIn()`
+## 1. `.fadeIn()`
 
 ### Definitions
 
-**Core Definition**
-`.fadeIn()` displays matched elements by animating their opacity from 0 to 1.
+**Core Definition:** `.fadeIn()` displays the matched elements by animating their opacity from 0 to 1.
 
-**Technical Definition**
-`.fadeIn()` is a jQuery effects method that first ensures the element's `display` property is no longer `none`, then animates the `opacity` CSS property from its current value (typically 0) to 1 over the specified duration. It is equivalent to `.fadeTo(duration, 1)` except that it also manages the `display` state .
+**Technical Definition:** `.fadeIn([duration][, easing][, complete])` sets the element's `display` to its original value (from `jQuery._data(elem, "olddisplay")` or inferred), then animates `opacity` from 0 to 1 over the specified duration. The animation is queued on `"fx"`. With no duration, it makes the element instantly visible with `opacity: 1`.
 
-**Beginner-Friendly Explanation**
-`.fadeIn()` is the "appear" command. If an element was hidden, this method brings it back by slowly increasing its brightness from invisible to fully visible. The element takes up space on the page as soon as the fading begins .
+**Beginner-Friendly Explanation:** `.fadeIn()` makes a hidden element gradually appear by increasing its opacity from invisible to fully visible.
 
 ### Purposes
 
-- To display hidden elements with a smooth opacity transition.
-- To reveal content without abrupt visibility changes.
-- To animate elements into view after a `.fadeOut()` or `display: none`.
-- To create polished user interface transitions.
-- To chain with other effects for sequenced animations.
+- To reveal hidden content with a smooth transition.
+- To draw attention to newly displayed elements.
+- To provide visual feedback without abrupt changes.
+- To chain with other animations for sequences.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntaxes**
-
-**Syntax 1: Basic Fade In**
 ```javascript
-.fadeIn( [duration ] [, complete ] )
+$(selector).fadeIn();
+$(selector).fadeIn(duration);
+$(selector).fadeIn(duration, easing);
+$(selector).fadeIn(duration, easing, complete);
+$(selector).fadeIn(options);
 ```
-- `duration` (Number or String): Animation duration in milliseconds, or `"slow"` (600ms) or `"fast"` (200ms). Default is `400` .
-- `complete` (Function): Optional callback executed after fading completes.
 
-**Syntax 2: With Easing**
-```javascript
-.fadeIn( [duration ] [, easing ] [, complete ] )
-```
-- `easing` (String): `"swing"` (default) or `"linear"` .
+**Component Breakdown:**
 
-**Syntax 3: With Options Object**
-```javascript
-.fadeIn( options )
-```
-- `options` (PlainObject): Animation settings including `duration`, `easing`, `queue`, `complete`.
+| Component | Description |
+|-----------|-------------|
+| `duration` | Number (ms) or `"slow"`/`"fast"`. Default 400ms. |
+| `easing` | `"swing"` (default) or `"linear"`. |
+| `complete` | Callback fired when animation finishes. |
+| `options` | Object with `duration`, `easing`, `complete`, `queue`, `step`, `progress`. |
 
-**Component Breakdown**
+**Syntax Rules:**
+1. No arguments = instant visibility (opacity 1).
+2. Duration triggers the fade animation.
+3. Returns the jQuery object for chaining.
+4. `this` in the callback is the animated element.
 
-- `.fadeIn()` : The method call.
-- `duration` : Controls animation length.
-- `complete` : Executes after opacity reaches 1.
+**Constraints and Limitations:**
+- Elements already visible are unaffected (no visible change).
+- Animating many elements simultaneously can impact performance.
+- Does not work correctly with `visibility: hidden` (use `display: none` instead).
 
-**Syntax Rules**
-
-1. `.fadeIn()` only works on elements with `display: none` or `opacity: 0` .
-2. The element's `display` property is set to its default (or cached value) before opacity animates .
-3. If called on an already visible element, `.fadeIn()` completes immediately with no visual change.
-4. The callback fires once per matched element, with `this` bound to the DOM element .
-
-**Constraints and Limitations**
-
-- Elements with `display: none !important` cannot be faded in.
-- Fading in from `opacity: 0` (but visible display) works differently than from `display: none`.
-- Performance concerns when fading many elements simultaneously .
-
-### Multiple Annotated Complete Code Examples
+### Multiple Annotated Complete Step by Step Code Examples
 
 **Example 1: Basic Fade In**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.fadeIn() — Basic</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>.fadeIn() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        #box { width: 150px; height: 150px; background: green;
+               display: none; color: white; padding: 10px; }
+    </style>
 </head>
 <body>
-  <div id="box" style="display:none; padding:20px; background:lightblue;">
-    Fading in...
-  </div>
-  <button id="showBtn">Fade In</button>
+    <button id="show">Fade In</button>
+    <div id="box">Fading Box</div>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      // Step 1: Bind click handler
-      $("#showBtn").on("click", function () {
-        // Step 2: Fade in the hidden box with default duration (400ms)
-        $("#box").fadeIn();
-      });
-    });
-  </script>
+    <script>
+        // Step 1: Fade in over 1 second
+        $("#show").on("click", function() {
+            $("#box").fadeIn(1000, "swing", function() {
+                // Step 2: Callback fires after animation
+                $("#output").text("Fade in complete. Opacity: " + $(this).css("opacity"));
+                console.log("this is:", this.id); // "box"
+            });
+        });
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- The blue box is initially invisible.
-- Clicking "Fade In" causes the box to fade into view over 400 milliseconds.
+**Expected Output:** Clicking "Fade In" makes the green box gradually appear over 1 second. The output displays "Fade in complete. Opacity: 1".
 
-**Why This Output Occurs**
-The box has `display:none`. `.fadeIn()` removes this display restriction and animates `opacity` from 0 to 1 over the default 400ms duration .
-
----
-
-**Example 2: Fade In with Duration and Callback**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.fadeIn() — With Callback</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="card" style="display:none; padding:20px; background:#f0f0f0;">
-    Card content revealed.
-  </div>
-  <button id="reveal">Reveal Card (Slow)</button>
-
-  <script>
-    $(function () {
-      $("#reveal").on("click", function () {
-        // Step 1: Fade in with 'slow' (600ms) and callback
-        $("#card").fadeIn("slow", function () {
-          // Step 2: 'this' refers to the card DOM element
-          console.log("Card fully visible:", this.id);
-
-          // Step 3: Additional action after fade completes
-          $(this).css("border", "2px solid green");
-        });
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- Clicking "Reveal Card" fades the card in over 600 milliseconds.
-- Console logs `"Card fully visible: card"` after fading completes.
-- The card gains a green border after fading.
-
-**Why This Output Occurs**
-`"slow"` sets duration to 600ms. The callback fires once opacity reaches 1, with `this` bound to the card element .
-
----
-
-**Example 3: Fade In with Specific Opacity Target**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.fadeIn() — vs fadeTo()</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="panel" style="display:none; padding:15px; background:lightyellow;">
-    Fading in to full opacity.
-  </div>
-  <button id="fadeInBtn">Fade In</button>
-  <button id="fadeToBtn">Fade To 50%</button>
-
-  <script>
-    $(function () {
-      // FadeIn always reaches opacity 1
-      $("#fadeInBtn").on("click", function () {
-        $("#panel").fadeIn(500, function () {
-          console.log("Opacity:", $(this).css("opacity")); // "1"
-        });
-      });
-
-      // FadeTo can target a specific opacity
-      $("#fadeToBtn").on("click", function () {
-        $("#panel").fadeTo(500, 0.5, function () {
-          console.log("Opacity:", $(this).css("opacity")); // "0.5"
-        });
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- "Fade In" makes the panel fully opaque; console logs `"Opacity: 1"`.
-- "Fade To 50%" makes the panel 50% transparent; console logs `"Opacity: 0.5"`.
-
-**Why This Output Occurs**
-`.fadeIn()` always animates to opacity 1. `.fadeTo(500, 0.5)` animates to the specified opacity of 0.5 .
+**Why This Code Produces That Result:** `.fadeIn(1000)` first sets `display` to its original value (block), then animates `opacity` from 0 to 1 over 1000ms. The `complete` callback fires with `this` bound to the element, and `.css("opacity")` returns `1`.
 
 ### Real-World Cases
-
-- **Modal Dialogs**: Fading in a modal window after a trigger button is clicked.
-- **Notification Toasts**: Fading in a success message that was previously hidden.
-- **Image Galleries**: Fading in images as they load or are selected.
-- **Dropdown Menus**: Fading in menu items when a trigger is activated.
-
-### References
-
-- jQuery API — .fadeIn() – https://api.jquery.com/fadeIn/
-- W3Schools — jQuery Fading – https://www.w3schools.com/jquery/jquery_fade.asp
+- **Notifications:** Fading in success messages after form submission.
+- **Content Reveal:** Showing hidden sections when a user expands them.
+- **Image Galleries:** Fading in images after they load.
+- **Modals:** Fading in modal dialogs.
 
 ---
 
-## Core Concept 2: `.fadeOut()`
+## 2. `.fadeOut()`
 
 ### Definitions
 
-**Core Definition**
-`.fadeOut()` hides matched elements by animating their opacity from 1 to 0, then setting `display: none`.
+**Core Definition:** `.fadeOut()` hides the matched elements by animating their opacity from 1 to 0.
 
-**Technical Definition**
-`.fadeOut()` is a jQuery effects method that animates the `opacity` CSS property from its current value (typically 1) to 0 over the specified duration. When opacity reaches 0, the method sets the element's `display` property to `none`, removing it from the document flow .
+**Technical Definition:** `.fadeOut([duration][, easing][, complete])` animates `opacity` from 1 to 0 over the specified duration, then sets `display: none`. The original `display` value is stored in `jQuery._data(elem, "olddisplay")` for later restoration by `.fadeIn()` or `.show()`. The animation is queued on `"fx"`. With no duration, it instantly sets `opacity: 0` and `display: none`.
 
-**Beginner-Friendly Explanation**
-`.fadeOut()` is the "disappear" command. The element slowly becomes transparent until it vanishes completely. Unlike `.hide()`, which removes the element instantly, `.fadeOut()` provides a smooth visual transition .
+**Beginner-Friendly Explanation:** `.fadeOut()` makes a visible element gradually disappear by decreasing its opacity to zero, then removes it from the layout.
 
 ### Purposes
 
-- To hide visible elements with a smooth opacity transition.
-- To remove elements from view without abrupt disappearance.
-- To animate elements out of view before removing or replacing them.
-- To create polished transitions when dismissing content.
-- To chain with other effects for sequenced animations.
+- To hide content with a smooth transition.
+- To dismiss notifications, alerts, or modals gracefully.
+- To prepare elements for later `.fadeIn()` calls.
+- To create polished UI transitions.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntaxes**
-
-**Syntax 1: Basic Fade Out**
 ```javascript
-.fadeOut( [duration ] [, complete ] )
-```
-- `duration` (Number or String): Animation duration in milliseconds, or `"slow"` (600ms) or `"fast"` (200ms). Default is `400` .
-- `complete` (Function): Optional callback after fading completes.
-
-**Syntax 2: With Easing**
-```javascript
-.fadeOut( [duration ] [, easing ] [, complete ] )
-```
-- `easing` (String): `"swing"` (default) or `"linear"` .
-
-**Syntax 3: With Options Object**
-```javascript
-.fadeOut( options )
+$(selector).fadeOut();
+$(selector).fadeOut(duration);
+$(selector).fadeOut(duration, easing, complete);
 ```
 
-**Component Breakdown**
+**Component Breakdown:**
 
-- `.fadeOut()` : The method call.
-- `duration` : Controls how long the fade takes.
-- `complete` : Executes after opacity reaches 0 and `display: none` is applied.
+| Component | Description |
+|-----------|-------------|
+| `duration` | Number (ms) or `"slow"`/`"fast"`. Default 400ms. |
+| `easing` | `"swing"` (default) or `"linear"`. |
+| `complete` | Callback fired when animation finishes. |
 
-**Syntax Rules**
+**Syntax Rules:**
+1. No arguments = instant hide.
+2. Duration triggers the fade animation.
+3. Stores original `display` for later restoration.
+4. Returns the jQuery object.
 
-1. `.fadeOut()` animates opacity to 0, then sets `display: none` .
-2. The element is removed from the layout only after opacity reaches 0.
-3. The callback fires once per element after the element is fully hidden.
-4. `.fadeOut()` caches the element's display value for later restoration by `.fadeIn()` .
+**Constraints and Limitations:**
+- Animating many elements simultaneously can impact performance.
+- Fading out an already-hidden element has no visible effect.
 
-**Constraints and Limitations**
+### Multiple Annotated Complete Step by Step Code Examples
 
-- Elements cannot be faded out if they have `display: none !important`.
-- The element remains in the DOM after fading, just invisible.
-- Rapid successive calls can queue multiple animations; use `.stop()` to prevent queuing .
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Basic Fade Out**
+**Example 1: Fade Out with Cleanup**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.fadeOut() — Basic</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>.fadeOut() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .notification { padding: 15px; margin: 10px; background: #f0f0f0;
+                        border-left: 4px solid green; }
+    </style>
 </head>
 <body>
-  <div id="notice" style="padding:15px; background:orange;">
-    Dismissible notice.
-  </div>
-  <button id="dismiss">Dismiss</button>
+    <div class="notification" id="note1">Success! Your changes were saved.</div>
+    <div class="notification" id="note2">Info: New update available.</div>
+    <button id="dismiss">Dismiss All</button>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      $("#dismiss").on("click", function () {
-        // Step 1: Fade out the notice with default duration
-        $("#notice").fadeOut();
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- Clicking "Dismiss" causes the orange notice to fade out over 400 milliseconds, then disappear completely.
-
-**Why This Output Occurs**
-`.fadeOut()` animates opacity from 1 to 0, then sets `display: none`, removing the notice from the layout .
-
----
-
-**Example 2: Fade Out with Callback**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.fadeOut() — With Callback</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="banner" style="padding:20px; background:lightcoral;">
-    Banner that fades and logs.
-  </div>
-  <button id="fadeBtn">Fade Out</button>
-
-  <script>
-    $(function () {
-      $("#fadeBtn").on("click", function () {
-        // Step 1: Fade out over 800ms with callback
-        $("#banner").fadeOut(800, function () {
-          // Step 2: Callback after banner is hidden
-          console.log("Banner hidden:", this.id);
-
-          // Step 3: Remove the element from DOM after fading
-          $(this).remove();
+    <script>
+        // Step 1: Fade out all notifications over 800ms
+        $("#dismiss").on("click", function() {
+            $(".notification").fadeOut(800, "swing", function() {
+                // Step 2: Callback fires for each element
+                $("#output").append(this.id + " hidden<br>");
+                console.log("Hidden:", this.id);
+            });
         });
-      });
-    });
-  </script>
+
+        // Step 3: Auto-dismiss after 5 seconds
+        setTimeout(function() {
+            $("#note2").fadeOut(500);
+        }, 5000);
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- Clicking "Fade Out" fades the banner over 800ms.
-- Console logs `"Banner hidden: banner"` after fading.
-- The banner is removed from the DOM entirely.
+**Expected Output:** Clicking "Dismiss All" fades both notifications out over 800ms and appends "note1 hidden" and "note2 hidden" to the output. The second notification also auto-dismisses after 5 seconds.
 
-**Why This Output Occurs**
-The callback fires after opacity reaches 0 and `display: none` is applied. `this` refers to the banner element .
-
----
-
-**Example 3: Fade Out with Linear Easing**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.fadeOut() — Linear Easing</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="message" style="padding:15px; background:lightgreen;">
-    Linear fade out.
-  </div>
-  <button id="fadeLinear">Fade Out (Linear)</button>
-
-  <script>
-    $(function () {
-      $("#fadeLinear").on("click", function () {
-        // Fade out with 1000ms linear easing
-        $("#message").fadeOut(1000, "linear", function () {
-          console.log("Linear fade complete.");
-        });
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- The message fades out over 1 second at a constant rate.
-- Console logs `"Linear fade complete."` after completion.
-
-**Why This Output Occurs**
-`"linear"` easing provides constant-speed fading, unlike the default `"swing"` which accelerates then decelerates .
+**Why This Code Produces That Result:** `.fadeOut(800)` animates each element's opacity to 0, then sets `display: none`. The callback fires once per element, with `this` bound to each.
 
 ### Real-World Cases
-
-- **Dismissing Alerts**: Fading out a success or error message after the user acknowledges it.
-- **Modal Close**: Fading out a modal dialog when the user clicks the close button.
-- **Loading Spinner**: Fading out a loading indicator once data arrives.
-- **Image Transitions**: Fading out one image before fading in the next in a carousel.
-
-### References
-
-- jQuery API — .fadeOut() – https://api.jquery.com/fadeOut/
-- W3Schools — jQuery Fading – https://www.w3schools.com/jquery/jquery_fade.asp
+- **Alert Dismissal:** Fading out error/success messages.
+- **Modal Close:** Fading out modal dialogs.
+- **Auto-Hide:** Fading out notifications after a delay.
+- **Loading States:** Fading out loading spinners.
 
 ---
 
-## Core Concept 3: `.fadeToggle()`
+## 3. `.fadeToggle()`
 
 ### Definitions
 
-**Core Definition**
-`.fadeToggle()` toggles between fading in and fading out based on the element's current visibility state.
+**Core Definition:** `.fadeToggle()` displays or hides the matched elements by fading them in or out, depending on their current visibility.
 
-**Technical Definition**
-`.fadeToggle()` is a jQuery effects method that inspects the current `display` and `opacity` of matched elements. If the element is visible (`display` is not `none`), it performs a fade out. If the element is hidden (`display: none`), it performs a fade in. The method animates the `opacity` property in the appropriate direction and manages `display` accordingly .
+**Technical Definition:** `.fadeToggle([duration][, easing][, complete])` checks each element's current visibility (using `.is(":hidden")`). If hidden, it calls `.fadeIn()`; if visible, it calls `.fadeOut()`. The corresponding animation is queued on `"fx"`. With no duration, the toggle is instantaneous.
 
-**Beginner-Friendly Explanation**
-`.fadeToggle()` is the "flip-flop" command. One click fades the element out; the next click fades it back in. It saves you from writing `if (visible) { fadeOut(); } else { fadeIn(); }` .
+**Beginner-Friendly Explanation:** `.fadeToggle()` is like a fade switch — if the element is visible, it fades out; if hidden, it fades in.
 
 ### Purposes
 
-- To alternate element visibility with a single method call.
-- To simplify toggle logic in user interfaces.
-- To animate elements in and out with one consistent method.
-- To reduce code duplication when implementing show/hide toggles.
-- To chain toggles with other animations.
+- To toggle visibility with a fade transition using one method.
+- To implement show/hide buttons with smooth fading.
+- To simplify conditional fade logic.
+- To create interactive UI elements.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntaxes**
-
-**Syntax 1: Basic Toggle**
 ```javascript
-.fadeToggle( [duration ] [, complete ] )
-```
-- `duration` (Number or String): Default is `400` .
-- `complete` (Function): Optional callback after animation.
-
-**Syntax 2: With Easing**
-```javascript
-.fadeToggle( [duration ] [, easing ] [, complete ] )
+$(selector).fadeToggle();
+$(selector).fadeToggle(duration);
+$(selector).fadeToggle(duration, easing, complete);
 ```
 
-**Syntax 3: With Options Object**
-```javascript
-.fadeToggle( options )
-```
+**Component Breakdown:**
 
-**Component Breakdown**
+| Component | Description |
+|-----------|-------------|
+| `duration` | Number (ms) or `"slow"`/`"fast"`. Default 400ms. |
+| `easing` | `"swing"` (default) or `"linear"`. |
+| `complete` | Callback fired after animation. |
 
-- `.fadeToggle()` : The method call.
-- `duration` : Controls animation length.
-- `complete` : Executes after animation completes.
+**Syntax Rules:**
+1. No arguments = instant toggle.
+2. Duration triggers fade animation.
+3. Determines action per element based on visibility.
+4. Returns the jQuery object.
 
-**Syntax Rules**
+**Constraints and Limitations:**
+- In a collection, elements with different visibility states are toggled independently.
+- Does not toggle CSS classes (use `.toggleClass()` for that).
 
-1. `.fadeToggle()` checks current visibility: visible triggers fade out; hidden triggers fade in .
-2. The direction is determined per element in the collection.
-3. Callback fires after the animation completes, regardless of direction.
-4. Returns the jQuery object for chaining.
+### Multiple Annotated Complete Step by Step Code Examples
 
-**Constraints and Limitations**
-
-- In mixed collections, some elements may fade in while others fade out, which may not be desired.
-- Rapid successive calls can cause animation queuing.
-- No Boolean force signature (unlike `.toggle()`).
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Basic Fade Toggle**
+**Example 1: Fade Toggle Panel**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.fadeToggle() — Basic</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>.fadeToggle() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        #panel { width: 250px; padding: 15px; background: lightblue;
+                 border: 1px solid #333; }
+    </style>
 </head>
 <body>
-  <div id="content" style="padding:20px; background:lightblue;">
-    Toggle my fading visibility.
-  </div>
-  <button id="toggleBtn">Fade Toggle</button>
+    <button id="toggle">Toggle Panel</button>
+    <div id="panel">Panel Content: Settings, Info, etc.</div>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      $("#toggleBtn").on("click", function () {
-        // Step 1: Toggle fade state
-        $("#content").fadeToggle();
-
-        // Step 2: Log current state after toggle
-        var isHidden = $("#content").css("display") === "none";
-        console.log("After toggle, hidden:", isHidden);
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- First click: content fades out; console logs `"After toggle, hidden: true"`.
-- Second click: content fades in; console logs `"After toggle, hidden: false"`.
-
-**Why This Output Occurs**
-`.fadeToggle()` checks the current display state and performs the opposite action .
-
----
-
-**Example 2: Fade Toggle with Duration and Callback**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.fadeToggle() — Animated</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="panel" style="padding:20px; background:lightyellow;">
-    Panel content.
-  </div>
-  <button id="toggleSlow">Toggle (Slow)</button>
-
-  <script>
-    $(function () {
-      $("#toggleSlow").on("click", function () {
-        // Step 1: Toggle with 600ms animation
-        $("#panel").fadeToggle("slow", function () {
-          // Step 2: Log after each toggle
-          var state = $(this).css("display") === "none" ? "hidden" : "visible";
-          console.log("Panel is now:", state);
+    <script>
+        // Step 1: Toggle the panel with a fade
+        $("#toggle").on("click", function() {
+            $("#panel").fadeToggle(600, "swing", function() {
+                // Step 2: Report new state
+                var visible = $(this).is(":visible");
+                $("#output").text("Panel is now " + (visible ? "visible" : "hidden"));
+                console.log("Toggled, visible:", visible);
+            });
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- First click: panel fades out over 600ms; console logs `"Panel is now: hidden"`.
-- Second click: panel fades in; console logs `"Panel is now: visible"`.
+**Expected Output:** Each click fades the panel in or out over 600ms. The output text updates to "visible" or "hidden".
 
-**Why This Output Occurs**
-`"slow"` sets duration to 600ms. The callback inspects the display state after the animation .
+**Why This Code Produces That Result:** `.fadeToggle(600)` checks the panel's visibility and calls the appropriate fade method. The callback checks `.is(":visible")` to determine the new state.
 
 ### Real-World Cases
-
-- **Collapsible Sections**: Clicking a header fades content in and out.
-- **Mobile Menus**: A hamburger icon toggles the fade visibility of a navigation drawer.
-- **Image Previews**: Toggling the fade visibility of a larger image preview.
-- **Debug Panels**: A developer button toggles a debug information panel.
-
-### References
-
-- jQuery API — .fadeToggle() – https://api.jquery.com/fadeToggle/
-- W3Schools — jQuery Fading – https://www.w3schools.com/jquery/jquery_fade.asp
+- **Settings Panels:** Toggling preferences panels.
+- **FAQ Sections:** Expanding/collapsing answers with fades.
+- **Mobile Menus:** Fading navigation menus in/out.
+- **Tooltips:** Toggling tooltip visibility.
 
 ---
 
-## Core Concept 4: `.fadeTo()`
+## 4. `.fadeTo()`
 
 ### Definitions
 
-**Core Definition**
-`.fadeTo()` animates the opacity of matched elements to a specific target value between 0 and 1 without changing their `display` state.
+**Core Definition:** `.fadeTo()` adjusts the opacity of the matched elements to a specific target value with an animation.
 
-**Technical Definition**
-`.fadeTo()` is a jQuery effects method that animates the `opacity` CSS property from its current value to a specified target opacity over a given duration. Unlike `.fadeIn()` and `.fadeOut()`, it does not modify the `display` property, so the element remains in the document flow regardless of the target opacity .
+**Technical Definition:** `.fadeTo(duration, opacity[, easing][, complete])` animates the `opacity` CSS property from its current value to the specified `opacity` (0–1) over the given duration. Unlike `.fadeIn()` and `.fadeOut()`, it does not modify the `display` property. If the element is hidden (`display: none`), `.fadeTo()` will make it visible (by setting `display` to its original value) and then animate to the target opacity.
 
-**Beginner-Friendly Explanation**
-`.fadeTo()` is the "dim to a specific level" command. Unlike `.fadeOut()` which fades all the way to invisible, `.fadeTo()` lets you say "fade to 50% opacity" or "fade to 30%." The element stays in place and takes up space, but its transparency changes to exactly what you specify .
+**Beginner-Friendly Explanation:** `.fadeTo()` fades an element to a specific transparency level — like making it 50% transparent — without fully hiding it.
 
 ### Purposes
 
-- To animate opacity to a specific value (e.g., 0.5 for 50% transparency).
-- To create dimming effects without hiding elements entirely.
-- To adjust opacity for visual emphasis or de-emphasis.
-- To create overlays or watermarks with controlled transparency.
-- To animate opacity back to full from a partially faded state.
+- To fade an element to a specific opacity (e.g., 50% for disabled state).
+- To dim elements while keeping them interactive.
+- To create overlay effects.
+- To animate opacity without changing visibility.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
-
 ```javascript
-.fadeTo( duration, opacity [, complete ] )
+$(selector).fadeTo(duration, opacity);
+$(selector).fadeTo(duration, opacity, easing);
+$(selector).fadeTo(duration, opacity, easing, complete);
 ```
 
-**Component Breakdown**
+**Component Breakdown:**
 
-- `duration` (Number or String): **Required** duration in milliseconds, or `"slow"` (600ms) or `"fast"` (200ms) .
-- `opacity` (Number): **Required** target opacity between 0 and 1. `0` = fully transparent, `1` = fully opaque, `0.5` = 50% transparent .
-- `complete` (Function): Optional callback after animation.
+| Component | Description |
+|-----------|-------------|
+| `duration` | **Required.** Number (ms) or `"slow"`/`"fast"`. |
+| `opacity` | **Required.** Target opacity (0–1). |
+| `easing` | `"swing"` (default) or `"linear"`. |
+| `complete` | Callback fired when animation finishes. |
 
-**Syntax Rules**
+**Syntax Rules:**
+1. `duration` and `opacity` are both required.
+2. `opacity` must be between 0 and 1.
+3. Does not change `display` (but makes hidden elements visible).
+4. Returns the jQuery object.
 
-1. Both `duration` and `opacity` are **required** parameters .
-2. `.fadeTo()` does **not** change `display`; the element remains visible in layout .
-3. The `opacity` value must be between 0 and 1 inclusive.
-4. If the element is hidden (`display: none`), `.fadeTo()` may not produce visible results.
-5. The callback fires after opacity reaches the target value.
+**Constraints and Limitations:**
+- Unlike other fade methods, `duration` cannot be omitted.
+- `opacity` values outside 0–1 may cause unexpected behavior.
+- Does not remove elements from the layout.
 
-**Constraints and Limitations**
+### Multiple Annotated Complete Step by Step Code Examples
 
-- **Required parameters**: Unlike other fading methods, `.fadeTo()` cannot be called without a duration .
-- **No display management**: Elements remain in the flow; use `.fadeOut()` if removal from layout is desired.
-- **Opacity range**: Values outside 0–1 are invalid and may be clamped or ignored.
-- **Visibility dependency**: A `display: none` element cannot be faded to a visible opacity with `.fadeTo()` alone.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Basic Fade To 50%**
+**Example 1: Fading to Specific Opacity**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.fadeTo() — Basic</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>.fadeTo() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        #box { width: 150px; height: 150px; background: orange;
+               padding: 10px; color: white; }
+        button { margin: 5px; }
+    </style>
 </head>
 <body>
-  <div id="box" style="padding:20px; background:lightblue;">
-    Fade me to 50% opacity.
-  </div>
-  <button id="fadeHalf">Fade To 50%</button>
+    <div id="box">Interactive Box</div>
+    <button id="dim">Dim to 30%</button>
+    <button id="restore">Restore to 100%</button>
+    <button id="half">Half (50%)</button>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      $("#fadeHalf").on("click", function () {
-        // Step 1: Fade to 0.5 opacity over 800ms
-        $("#box").fadeTo(800, 0.5);
+    <script>
+        // Step 1: Fade to 30% opacity
+        $("#dim").on("click", function() {
+            $("#box").fadeTo(500, 0.3, function() {
+                $("#output").text("Opacity: " + $(this).css("opacity"));
+                console.log("Dimmed to 0.3");
+            });
+        });
 
-        // Step 2: Log the resulting opacity after animation
-        setTimeout(function () {
-          console.log("Opacity:", $("#box").css("opacity")); // "0.5"
-        }, 900);
-      });
-    });
-  </script>
+        // Step 2: Restore to full opacity
+        $("#restore").on("click", function() {
+            $("#box").fadeTo(500, 1.0, function() {
+                $("#output").text("Opacity: " + $(this).css("opacity"));
+            });
+        });
+
+        // Step 3: Fade to 50%
+        $("#half").on("click", function() {
+            $("#box").fadeTo(300, 0.5);
+        });
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- The blue box fades to 50% transparency over 800 milliseconds.
-- Console logs `"Opacity: 0.5"` after the animation.
+**Expected Output:** Clicking "Dim to 30%" fades the box to 30% opacity over 500ms. "Restore to 100%" brings it back to full opacity. "Half (50%)" fades to 50%. The output shows the current opacity.
 
-**Why This Output Occurs**
-`.fadeTo(800, 0.5)` animates opacity from 1 to 0.5 over 800ms. The element remains in the layout, just partially transparent .
+**Why This Code Produces That Result:** `.fadeTo(500, 0.3)` animates `opacity` to 0.3 without changing `display`. The element remains in the layout and interactive. The callback reads the final opacity.
+
+### Real-World Cases
+- **Disabled States:** Dimming form fields or buttons.
+- **Image Overlays:** Fading thumbnails to show metadata.
+- **Loading States:** Dimming content while loading.
+- **Hover Effects:** Dimming non-hovered items.
 
 ---
 
-**Example 2: Fade To with Callback and Restoration**
+## 5. Fading Effects Best Practices
+
+### Definitions
+
+**Core Definition:** Fading Effects Best Practices are guidelines for using jQuery's fading methods effectively, performantly, and accessibly.
+
+**Technical Definition:** Best practices encompass stopping pending animations before starting new ones, respecting `prefers-reduced-motion`, preferring CSS transitions for simple opacity changes, avoiding animating many elements simultaneously, using `.fadeTo()` for partial opacity (not `.fadeOut()`/`.fadeIn()`), cleaning up completed animations, and understanding the interaction between `display` and `opacity`.
+
+### Purposes
+
+- To create smooth, performant fading effects.
+- To prevent animation buildup and jank.
+- To respect accessibility preferences.
+- To maintain clean, readable code.
+
+### Syntax Rules and Structure
+
+**Key Best Practices:**
+
+| # | Practice | Bad Example | Good Example |
+|---|----------|-------------|--------------|
+| 1 | Stop before re-fading | Rapid clicks queue fades | `.stop(true, true).fadeToggle()` |
+| 2 | Use `.fadeTo()` for partial opacity | `.fadeOut().fadeIn()` for dimming | `.fadeTo(500, 0.5)` |
+| 3 | Respect reduced motion | Always animate | Check `prefers-reduced-motion` |
+| 4 | Prefer CSS for simple fades | jQuery for hover opacity | CSS `transition: opacity` |
+| 5 | Avoid many simultaneous fades | Fade 100 elements at once | Batch or use CSS |
+| 6 | Use `.finish()` for instant completion | `.stop()` leaves partial opacity | `.finish()` |
+| 7 | Cache selectors | `$("#x").fadeIn(); $("#x").fadeOut()` | `var $x = $("#x");` |
+| 8 | Handle callbacks carefully | Assuming order in collections | Iterate explicitly if needed |
+
+**Syntax Rules:**
+1. Call `.stop(true, true)` before starting a new fade on the same element.
+2. Use `.fadeTo()` when you need a specific opacity without changing `display`.
+3. Check `window.matchMedia("(prefers-reduced-motion: reduce)")` and disable animations when appropriate.
+4. Prefer CSS `transition: opacity` for simple hover/focus fades.
+5. Use `.finish()` when you need an animation to complete immediately.
+
+**Constraints and Limitations:**
+- `.stop()` may leave elements in intermediate opacity states.
+- Repeated rapid fades can cause performance issues.
+- Fading is not GPU-accelerated in all browsers (though opacity generally is).
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Applying Fading Best Practices**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.fadeTo() — Callback and Restore</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>Fading Best Practices</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        #notification { padding: 15px; background: #dff0d8; border: 1px solid #3c763d;
+                        color: #3c763d; display: none; margin: 10px 0; }
+        #content { padding: 10px; background: #f5f5f5; }
+    </style>
 </head>
 <body>
-  <div id="image" style="padding:20px; background:lightgreen;">
-    Dim, then restore.
-  </div>
-  <button id="dim">Dim to 30%</button>
-  <button id="restore">Restore to 100%</button>
+    <button id="showNote">Show Notification</button>
+    <button id="dimContent">Dim Content</button>
+    <div id="notification">Your changes have been saved!</div>
+    <div id="content">Main content area</div>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      // Dim to 0.3 opacity
-      $("#dim").on("click", function () {
-        $("#image").fadeTo("slow", 0.3, function () {
-          console.log("Dimmed to 0.3");
-        });
-      });
+    <script>
+        // ✅ BEST PRACTICE: Respect reduced motion
+        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduceMotion) {
+            $.fx.off = true;
+        }
 
-      // Restore to full opacity
-      $("#restore").on("click", function () {
-        $("#image").fadeTo("slow", 1, function () {
-          console.log("Restored to 1");
+        // ✅ BEST PRACTICE: Cache selectors
+        var $note = $("#notification");
+        var $content = $("#content");
+
+        // ✅ BEST PRACTICE: Stop before re-fading
+        $("#showNote").on("click", function() {
+            $note.stop(true, true).fadeIn(400, function() {
+                $("#output").text("Notification shown");
+            });
+
+            // Auto-hide after 3 seconds
+            setTimeout(function() {
+                $note.stop(true, true).fadeOut(400);
+            }, 3000);
         });
-      });
-    });
-  </script>
+
+        // ✅ BEST PRACTICE: Use .fadeTo() for partial opacity
+        var dimmed = false;
+        $("#dimContent").on("click", function() {
+            dimmed = !dimmed;
+            $content.fadeTo(300, dimmed ? 0.4 : 1.0, function() {
+                $("#output").text("Content opacity: " + (dimmed ? "40%" : "100%"));
+            });
+        });
+
+        // ✅ BEST PRACTICE: Clean up with .finish() if needed
+        // $note.finish().hide();
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- "Dim to 30%" fades the element to 30% opacity; console logs `"Dimmed to 0.3"`.
-- "Restore to 100%" fades back to full opacity; console logs `"Restored to 1"`.
-- The element never leaves the layout.
+**Expected Output:** Clicking "Show Notification" fades the notification in, then it auto-hides after 3 seconds. Clicking "Dim Content" fades the content to 40% opacity, then back to 100%. On reduced-motion systems, all changes are instant.
 
-**Why This Output Occurs**
-`.fadeTo("slow", 0.3)` animates to opacity 0.3. `.fadeTo("slow", 1)` animates back to 1. `display` is never modified .
-
----
-
-**Example 3: Fade To Different Values**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.fadeTo() — Different Opacity Values</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="box1" style="padding:10px; background:red; margin:5px;">Box 1</div>
-  <div id="box2" style="padding:10px; background:green; margin:5px;">Box 2</div>
-  <div id="box3" style="padding:10px; background:blue; margin:5px;">Box 3</div>
-
-  <button id="fadeAll">Fade All to Different Levels</button>
-
-  <script>
-    $(function () {
-      $("#fadeAll").on("click", function () {
-        // Step 1: Fade each box to a different opacity
-        $("#box1").fadeTo("slow", 0.15); // 15% opacity
-        $("#box2").fadeTo("slow", 0.4);  // 40% opacity
-        $("#box3").fadeTo("slow", 0.7);  // 70% opacity
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- Box 1 becomes 15% opaque (nearly invisible).
-- Box 2 becomes 40% opaque.
-- Box 3 becomes 70% opaque.
-- All three boxes remain in their original layout positions.
-
-**Why This Output Occurs**
-Each `.fadeTo()` call targets a different opacity value. Because `display` is not modified, the boxes remain in the flow .
+**Why This Code Produces That Result:** The code respects reduced motion, caches selectors, stops pending animations before starting new ones, uses `.fadeTo()` for partial opacity, and provides cleanup guidance. This results in smooth, accessible, performant fading effects.
 
 ### Real-World Cases
 
-- **Overlay Effects**: Fading a background image to 30% opacity behind text.
-- **Disabled State**: Fading a form or button to 50% opacity to indicate it is disabled.
-- **Hover Effects**: Fading images to 80% opacity on hover.
-- **Watermarks**: Setting a logo to 10% opacity in the background.
-- **Loading States**: Fading content to 50% while loading new data.
-
-### References
-
-- jQuery API — .fadeTo() – https://api.jquery.com/fadeTo/
-- W3Schools — jQuery Fading – https://www.w3schools.com/jquery/jquery_fade.asp
+- **Accessible UIs:** Respecting reduced-motion preferences.
+- **Notification Systems:** Fading in messages and auto-dismissing them.
+- **Loading States:** Dimming content while data loads.
+- **Interactive Dashboards:** Fading to indicate disabled or loading states.
 
 ---
 
-## Summary Comparison Table
+## Comparison of Fading Methods
 
-| Feature | `.fadeIn()` | `.fadeOut()` | `.fadeToggle()` | `.fadeTo()` |
-|---|---|---|---|---|
-| **Primary Action** | Fade to visible | Fade to hidden | Toggle fade state | Fade to specific opacity |
-| **Animates Opacity To** | 1 | 0 | 0 or 1 | User-specified (0–1) |
-| **Modifies `display`** | Yes (removes `none`) | Yes (sets `none`) | Yes | **No** |
-| **Duration Required** | No (default 400ms) | No (default 400ms) | No (default 400ms) | **Yes** |
-| **Opacity Required** | No | No | No | **Yes** |
-| **Default Duration** | 400ms | 400ms | 400ms | None (required) |
-| **Returns** | jQuery object | jQuery object | jQuery object | jQuery object |
-
----
-
-## Important Notes on Version-Specific Behaviour
-
-1. **Default Duration**: All fading methods default to `400` milliseconds when no duration is specified, except `.fadeTo()` which requires an explicit duration .
-2. **Easing Options**: Built-in easings are `"swing"` (default, accelerates then decelerates) and `"linear"` (constant speed). jQuery UI adds more easing options.
-3. **Callback Binding**: The `complete` callback is bound to the DOM element being animated (`this` = element) .
-4. **Animation Queuing**: All fading methods are queued by default. Use `.stop(true, true)` to clear queues and jump to end states .
-5. **jQuery UI Extensions**: jQuery UI extends fading methods with additional effect signatures; these do not work without jQuery UI loaded.
+| Method | Changes `display`? | Target Opacity | Duration Required? | Use Case |
+|--------|-------------------|----------------|-------------------|----------|
+| `.fadeIn()` | Yes (restores) | 1 (fully visible) | No | Reveal hidden element |
+| `.fadeOut()` | Yes (`none`) | 0 (fully transparent) | No | Hide element |
+| `.fadeToggle()` | Yes | 1 or 0 | No | Toggle visibility |
+| `.fadeTo()` | Only if hidden | User-specified (0–1) | Yes | Partial opacity without hiding |
 
 ---
 
 ## References
 
-- jQuery API — Fading Category – https://api.jquery.com/category/effects/fading/
-- jQuery API — .fadeIn() – https://api.jquery.com/fadeIn/
-- jQuery API — .fadeOut() – https://api.jquery.com/fadeOut/
-- jQuery API — .fadeToggle() – https://api.jquery.com/fadeToggle/
-- jQuery API — .fadeTo() – https://api.jquery.com/fadeTo/
-- W3Schools — jQuery Fading – https://www.w3schools.com/jquery/jquery_fade.asp
-- W3Schools — jQuery Effect Methods – https://www.w3schools.com/jquery/jquery_ref_effects.asp
+- jQuery API Documentation — .fadeIn() - https://api.jquery.com/fadeIn/
+- jQuery API Documentation — .fadeOut() - https://api.jquery.com/fadeOut/
+- jQuery API Documentation — .fadeToggle() - https://api.jquery.com/fadeToggle/
+- jQuery API Documentation — .fadeTo() - https://api.jquery.com/fadeTo/
+- jQuery API Documentation — Fading Category - https://api.jquery.com/category/effects/fading/
+- jQuery API Documentation — Effects Category - https://api.jquery.com/category/effects/
+- jQuery API Documentation — .stop() - https://api.jquery.com/stop/
+- jQuery API Documentation — .finish() - https://api.jquery.com/finish/
+- jQuery API Documentation — jQuery.fx.off - https://api.jquery.com/jQuery.fx.off/
+- jQuery Learning Center — Custom Effects - https://learn.jquery.com/effects/custom-effects/
+- MDN Web Docs — prefers-reduced-motion - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+- MDN Web Docs — CSS Opacity - https://developer.mozilla.org/en-US/docs/Web/CSS/opacity
+- MDN Web Docs — CSS Transitions - https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions

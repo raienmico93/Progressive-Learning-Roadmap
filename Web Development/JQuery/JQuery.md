@@ -601,28 +601,28 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
 
 # XI. jQuery Utilities
 
-* [**52. Iteration Utilities**](/Web%20Development/JQuery/Utilities/Iteration.md)
+* **52. Iteration Utilities**
 
   * `$.each()`
   * `.each()`
   * Collection iteration
   * Object iteration
 
-* [**53. Array Utilities**](/Web%20Development/JQuery/Utilities/ArrayUtilities.md)
+* **53. Array Utilities**
 
   * `$.map()`
   * `$.grep()`
   * `$.inArray()`
   * `$.merge()`
 
-* [**54. Object Utilities**](/Web%20Development/JQuery/Utilities/ObjectUtilities.md)
+* **54. Object Utilities**
 
   * `$.extend()`
   * Object merging
   * Shallow copying
   * Deep-copy considerations
 
-* [**55. Type and Value Utilities**](/Web%20Development/JQuery/Utilities/TypeAndValueUtilities.md)
+* **55. Type and Value Utilities**
 
   * `$.isArray()`
   * `$.isFunction()`

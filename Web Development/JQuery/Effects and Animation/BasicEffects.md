@@ -1,4 +1,4 @@
-# jQuery Basic Visibility: A Comprehensive Programming Cheat Sheet
+# jQuery Basic Effects — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,745 +6,859 @@
 
 ### Definitions
 
-**Core Definition**
-jQuery Basic Visibility is a set of three core effects methods — `.show()`, `.hide()`, and `.toggle()` — that control whether matched elements are displayed on the page by manipulating the CSS `display` property.
+**Core Definition:**
+jQuery Basic Effects are the `.show()`, `.hide()`, and `.toggle()` methods that animate an element's visibility by simultaneously adjusting its `display`, `width`, `height`, `opacity`, `padding`, and `margin` properties.
 
-**Technical Definition**
-These methods are members of the jQuery effects suite. When called without arguments, they synchronously modify the `display` CSS property of each matched element: `.hide()` sets `display: none` and caches the element's original display value; `.show()` restores the cached display value; `.toggle()` alternates between the two based on the element's current visibility state. When provided with a duration or options object, they transition into asynchronous animation methods that animate `width`, `height`, and `opacity` simultaneously .
+**Technical Definition:**
+`.show()`, `.hide()`, and `.toggle()` are implemented on top of jQuery's animation engine and the `"fx"` queue. When called without a duration (or with `duration: 0`), they instantly set the `display` CSS property (`""` or the element's default display for `.show()`, `"none"` for `.hide()`). When called with a duration, they animate the element's dimensions, padding, margin, and opacity from their current values to the target state. jQuery stores the original `display` value in internal data (`jQuery._data(elem, "olddisplay")`) so `.show()` can restore the correct display type (e.g., `"inline-block"` vs. `"block"`).
 
-**Beginner-Friendly Explanation**
-Think of these three methods as a light switch for your HTML elements. `.hide()` turns the light off (the element disappears and takes up no space on the page). `.show()` turns it back on (the element reappears exactly as it was). `.toggle()` is a smart switch that flips itself — if the light is on, it turns it off; if it is off, it turns it on. You can flip the switch instantly or gradually with an animation.
+**Beginner-Friendly Explanation:**
+`.show()`, `.hide()`, and `.toggle()` are the simplest jQuery effects. `.hide()` makes an element disappear, `.show()` makes it reappear, and `.toggle()` switches between the two. Without a duration, they happen instantly. With a duration, the element smoothly shrinks or grows and fades in or out.
 
 ### Key Characteristics
 
-- **Display Property Manipulation**: All three methods operate by changing the CSS `display` property, not `visibility` or `opacity` .
-- **State Preservation**: `.hide()` saves the original `display` value in jQuery's internal data cache so `.show()` can restore it faithfully (e.g., `inline` stays `inline`, not `block`) .
-- **Instant by Default**: Without a duration argument, the change happens immediately, with no animation .
-- **Animation-Capable**: Providing a duration, easing string, or options object triggers an animated transition of width, height, and opacity .
-- **Implicit Iteration**: All three methods apply to every element in the matched jQuery collection .
-- **Chainable**: Each method returns the jQuery object, enabling method chaining .
+- **Dual Behavior:** Without a duration, these methods are instant CSS changes (no animation). With a duration, they animate dimensions and opacity.
+- **Display Preservation:** jQuery remembers the original `display` value so `.show()` restores the correct display type.
+- **Queue Integration:** Animated versions are added to the `"fx"` queue and run sequentially.
+- **Callback Support:** Each method accepts a `complete` callback that fires when the animation finishes.
+- **Easing Support:** Animations accept an `easing` argument (`"swing"` or `"linear"`).
+- **Return Value:** All three methods return the jQuery object for chaining.
+- **Version Behavior:** In jQuery 3.x, `.show()`/`.hide()` with no duration are instantaneous; only the animated versions trigger the `"fx"` queue.
 
 ### Prerequisites
 
-- Basic HTML and CSS knowledge, particularly the `display` property.
-- JavaScript fundamentals: functions, objects, and callbacks.
-- A working jQuery setup (library included via CDN or local file).
-- Familiarity with jQuery selectors and the jQuery object model.
+- Basic knowledge of jQuery selectors and DOM manipulation
+- Understanding of CSS `display` property and its values (`block`, `inline`, `inline-block`, `none`)
+- Familiarity with JavaScript callbacks
+- Basic knowledge of the `"fx"` queue (see Effects Fundamentals)
 
 ### Related Programming Areas
 
-- **CSS Display Property**: Understanding `block`, `inline`, `inline-block`, and `none` is essential for predicting behaviour.
-- **jQuery Effects Suite**: Related methods include `.fadeIn()`, `.fadeOut()`, `.slideDown()`, and `.slideUp()` .
-- **Animation Queuing**: The `queue` option and `.dequeue()` interact with these methods when animations are chained .
-- **jQuery Data Cache**: `.hide()` stores state in `jQuery.data()`, which is relevant for debugging and plugin development.
+- **Effects Fundamentals:** The broader animation engine that powers these methods.
+- **Fading Effects:** `.fadeIn()`, `.fadeOut()`, `.fadeToggle()` for opacity-only animations.
+- **Sliding Effects:** `.slideUp()`, `.slideDown()`, `.slideToggle()` for height-only animations.
+- **Queue Utilities:** `.queue()`, `.dequeue()`, `.stop()`, `.finish()` for managing animations.
+- **CSS Display:** The underlying property these effects manipulate.
 
 ### Core Concepts / Features
 
 1. `.show()`
 2. `.hide()`
 3. `.toggle()`
+4. Effect Durations
+5. `slow`
+6. `fast`
+7. Milliseconds
+8. Effect Callbacks
+9. Effect Easing
+10. Basic Effects Best Practices
 
 ---
 
-## Core Concept 1: `.show()`
+## 1. `.show()`
 
 ### Definitions
 
-**Core Definition**
-`.show()` displays matched elements by restoring their natural or previously cached `display` state.
+**Core Definition:** `.show()` displays the matched elements, either instantly or with an animation.
 
-**Technical Definition**
-`.show()` is a jQuery effects method that removes the `display: none` restriction from matched elements. When called without arguments, it synchronously sets the element's `display` property to the value cached by a prior `.hide()` call, or to the browser's default display value if no cached value exists. When called with a duration, it animates `width`, `height`, and `opacity` from zero to their natural values, then restores the original `display` value .
+**Technical Definition:** `.show([duration][, easing][, complete])` sets the element's `display` to its original value (stored in `jQuery._data(elem, "olddisplay")` or inferred from the tag). With a duration, it animates `width`, `height`, `padding`, `margin`, and `opacity` from their hidden state to their natural values. The animation is queued on `"fx"`.
 
-**Beginner-Friendly Explanation**
-`.show()` is the "reveal" command. If an element has been hidden, `.show()` brings it back exactly as it was — same size, same position, same display style. If you provide a number (like `500`), the element grows and fades into view over half a second instead of appearing instantly.
+**Beginner-Friendly Explanation:** `.show()` makes a hidden element visible. Without a duration, it appears instantly. With a duration, it grows and fades in.
 
 ### Purposes
 
-- To display elements that were previously hidden with `.hide()` or `display: none`.
-- To restore an element's original display style (e.g., `inline`, `flex`, `grid`) without manually specifying it.
-- To animate elements into view with a fade-and-slide effect.
-- To conditionally reveal content based on user interaction (e.g., expanding a panel).
-- To chain with other jQuery methods for sequenced animations.
+- To make a hidden element visible.
+- To reveal content with a smooth transition.
+- To restore elements hidden by `.hide()` or `display: none`.
+- To chain into a sequence of animations.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntaxes**
-
-**Syntax 1: Instant Show (No Arguments)**
 ```javascript
-.show()
+$(selector).show();
+$(selector).show(duration);
+$(selector).show(duration, easing);
+$(selector).show(duration, easing, complete);
+$(selector).show(options);
 ```
-- No arguments. Displays matched elements immediately, with no animation .
 
-**Syntax 2: Show with Duration and Callback**
-```javascript
-.show( duration [, complete ] )
-```
-- `duration` (Number or String): Animation duration in milliseconds, or `"fast"` (200ms) or `"slow"` (600ms). Default is `400` .
-- `complete` (Function): Optional callback fired once the animation completes, once per matched element. `this` is set to the DOM element being animated .
+**Component Breakdown:**
 
-**Syntax 3: Show with Duration, Easing, and Callback**
-```javascript
-.show( duration [, easing ] [, complete ] )
-```
-- `easing` (String): `"swing"` (default) or `"linear"`. Added in jQuery 1.4.3 .
+| Component | Description |
+|-----------|-------------|
+| `duration` | Number (ms) or `"slow"`/`"fast"`. |
+| `easing` | `"swing"` (default) or `"linear"`. |
+| `complete` | Callback fired when animation finishes. |
+| `options` | Object with `duration`, `easing`, `complete`, `queue`, `specialEasing`, `step`, `progress`. |
 
-**Syntax 4: Show with Options Object**
-```javascript
-.show( options )
-```
-- `options` (PlainObject): A map of animation settings including `duration`, `easing`, `queue`, `complete`, `step`, `progress`, `start`, `done`, `fail`, and `always` .
+**Syntax Rules:**
+1. No arguments = instant display.
+2. Duration triggers animation.
+3. Returns the jQuery object for chaining.
+4. `this` in the callback is the animated element.
 
-**Syntax 5: Show with Boolean (Toggle Signature)**
-```javascript
-.show( display )
-```
-- Not a native `.show()` signature; the Boolean form belongs to `.toggle(display)` .
+**Constraints and Limitations:**
+- Cannot animate elements with `display: none` if their original display is unknown (jQuery infers from tag name).
+- Does not work correctly on elements with `visibility: hidden` (use CSS instead).
+- Animations on many elements simultaneously can impact performance.
 
-**Component Breakdown**
+### Multiple Annotated Complete Step by Step Code Examples
 
-- `.show()` : The method call.
-- `duration` : Controls animation length. Larger numbers = slower animation.
-- `easing` : Controls the rate of change during the animation.
-- `complete` : Executes after all animated properties reach their final values.
-- `options` : A single object consolidating all animation settings.
-
-**Syntax Rules**
-
-1. `.show()` restores the **cached** display value from a prior `.hide()`, not always `block` .
-2. If no cached value exists, `.show()` uses the browser's default display for that element type.
-3. With no arguments, `.show()` is roughly equivalent to `.css("display", cachedValue)` but without manual cache management .
-4. `display: none !important` in a stylesheet cannot be overridden by `.show()` .
-5. When animating, `.show()` animates `width`, `height`, and `opacity` simultaneously .
-
-**Constraints and Limitations**
-
-- **`!important` Conflict**: `.show()` cannot override `display: none !important` in CSS. Use `.addClass()`/`.removeClass()` or `.attr("style", "display: block !important;")` as alternatives .
-- **Performance**: Animating many elements simultaneously can cause performance issues, especially on low-powered devices .
-- **Responsive Layouts**: If display value differs across viewport sizes, cached values may be incorrect after a resize .
-- **jQuery UI Extension**: jQuery UI extends `.show()` with custom effects via `.show(effect, options, duration, complete)`. Without jQuery UI, these signatures do not work .
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Instant Show**
+**Example 1: Instant vs. Animated Show**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.show() — Instant</title>
-  <!-- Step 1: Load jQuery -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <style>
-    .box { padding: 20px; background: lightblue; margin: 10px; }
-  </style>
+    <title>.show() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box { width: 100px; height: 100px; background: green; margin: 5px; }
+    </style>
 </head>
 <body>
-  <!-- Step 2: Element initially hidden via inline style -->
-  <div id="panel" class="box" style="display: none;">
-    This panel was hidden.
-  </div>
-
-  <button id="showBtn">Show Panel</button>
-
-  <script>
-    $(function () {
-      // Step 3: Bind click handler to the button
-      $("#showBtn").on("click", function () {
-        // Step 4: Show the panel instantly (no animation)
-        $("#panel").show();
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- Initially, the blue panel is invisible.
-- After clicking "Show Panel", the panel appears immediately, with no animation.
-
-**Why This Output Occurs**
-The panel has `style="display: none;"`. Calling `.show()` without arguments removes that inline style and restores the element to its default display value (`block` for a `<div>`). No transition occurs because no duration was specified .
-
----
-
-**Example 2: Animated Show with Callback**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.show() — Animated with Callback</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <style>
-    .card { padding: 20px; background: #f0f0f0; border: 1px solid #ccc; margin: 10px; }
-  </style>
-</head>
-<body>
-  <div id="card" class="card" style="display: none;">
-    Animated content here.
-  </div>
-
-  <button id="animateBtn">Reveal Card (Slow)</button>
-
-  <script>
-    $(function () {
-      $("#animateBtn").on("click", function () {
-        // Step 1: Show with 'slow' (600ms) and a completion callback
-        $("#card").show("slow", function () {
-          // Step 2: 'this' refers to the DOM element being animated
-          console.log("Animation complete for:", this.id);
-
-          // Step 3: Chain additional changes after reveal
-          $(this).css("border-color", "green");
+    <div class="box" id="instant" style="display:none;">Instant</div>
+    <div class="box" id="animated" style="display:none;">Animated</div>
+    <button id="showInstant">Show Instant</button>
+    <button id="showAnimated">Show Animated</button>
+    <div id="output"></div>
+    
+    <script>
+        // Step 1: Instant show
+        $("#showInstant").on("click", function() {
+            $("#instant").show();
+            $("#output").append("Instant show<br>");
         });
-      });
-    });
-  </script>
-</body>
-</html>
-```
 
-**Expected Output**
-- Clicking the button causes the card to grow and fade into view over 600 milliseconds.
-- After the animation finishes, the console logs `"Animation complete for: card"` and the border turns green.
-
-**Why This Output Occurs**
-Providing `"slow"` as the duration converts `.show()` into an animation method. jQuery animates the card's `width`, `height`, and `opacity` from zero to their natural values. The callback fires once per matched element after all animated properties complete, with `this` bound to the DOM element .
-
----
-
-**Example 3: Show with Options Object**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.show() — Options Object</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="box" style="display:none; padding:15px; background:lightyellow;">
-    Options-based reveal.
-  </div>
-  <button id="go">Show with Linear Easing</button>
-
-  <script>
-    $(function () {
-      $("#go").on("click", function () {
-        $("#box").show({
-          duration: 800,
-          easing: "linear",
-          complete: function () {
-            console.log("Done with linear easing.");
-          }
+        // Step 2: Animated show over 1 second
+        $("#showAnimated").on("click", function() {
+            $("#animated").show(1000, "swing", function() {
+                $("#output").append("Animated show complete<br>");
+                console.log("this is:", this.id); // "animated"
+            });
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- The box expands and fades in over 800 milliseconds with a constant-rate (linear) transition.
-- Console logs `"Done with linear easing."` after completion.
+**Expected Output:** Clicking "Show Instant" reveals the first box immediately. Clicking "Show Animated" reveals the second box over 1 second, then logs completion.
 
-**Why This Output Occurs**
-The options object provides `duration: 800` (milliseconds), `easing: "linear"` (constant speed), and a `complete` callback. jQuery reads these settings and applies them to the animation sequence .
+**Why This Code Produces That Result:** `.show()` without a duration sets `display` instantly. With `1000`, jQuery animates dimensions and opacity over 1 second, then fires the `complete` callback with `this` bound to the element.
 
 ### Real-World Cases
-
-- **Accordion Panels**: Revealing the content of a collapsed accordion section with a smooth animation.
-- **Modal Dialogs**: Showing a previously hidden modal after a trigger button is clicked.
-- **Error Messages**: Displaying validation error messages that were pre-rendered but hidden.
-- **Lazy Loading Indicators**: Showing a loading spinner before an AJAX request and hiding it afterward.
-
-### References
-
-- jQuery API — .show() – https://api.jquery.com/show/
-- jQuery Learning Center — Intro to Effects – https://learn.jquery.com/effects/intro-to-effects/
-- jQuery UI API — .show() (Extended) – https://api.jqueryui.com/1.11/show/
+- **Revealing Content:** Showing hidden form fields or error messages.
+- **Accordion Panels:** Expanding collapsed sections.
+- **Modal Dialogs:** Displaying modal content.
 
 ---
 
-## Core Concept 2: `.hide()`
+## 2. `.hide()`
 
 ### Definitions
 
-**Core Definition**
-`.hide()` hides matched elements by setting their CSS `display` property to `none`, while caching the original display value for later restoration.
+**Core Definition:** `.hide()` hides the matched elements, either instantly or with an animation.
 
-**Technical Definition**
-`.hide()` is a jQuery effects method that removes matched elements from the visual flow of the document. When called without arguments, it synchronously sets `display: none` and stores the element's prior `display` value in jQuery's internal data cache. When called with a duration, it animates `width`, `height`, and `opacity` to zero, then sets `display: none` to remove the element from layout .
+**Technical Definition:** `.hide([duration][, easing][, complete])` sets the element's `display` to `"none"`. Before hiding, jQuery stores the current `display` value in `jQuery._data(elem, "olddisplay")` so it can be restored later. With a duration, it animates dimensions, padding, margin, and opacity to zero before setting `display: none`.
 
-**Beginner-Friendly Explanation**
-`.hide()` is the "disappear" command. The element vanishes and leaves no empty gap — the page closes up as if the element was never there. But jQuery remembers what the element looked like before, so when you call `.show()` later, it comes back exactly right. With a duration, the element shrinks and fades away instead of vanishing instantly.
+**Beginner-Friendly Explanation:** `.hide()` makes an element disappear. Without a duration, it vanishes instantly. With a duration, it shrinks and fades out.
 
 ### Purposes
 
-- To hide elements without removing them from the DOM.
-- To collapse content sections and reclaim their layout space.
-- To animate elements out of view with a fade-and-shrink effect.
-- To cache the original display value for faithful restoration.
-- To prepare elements for later revelation via `.show()` or `.toggle()`.
+- To hide elements from view.
+- To remove content with a smooth transition.
+- To prepare elements for later `.show()` calls.
+- To clean up UI state.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntaxes**
-
-**Syntax 1: Instant Hide (No Arguments)**
 ```javascript
-.hide()
+$(selector).hide();
+$(selector).hide(duration);
+$(selector).hide(duration, easing, complete);
 ```
-- No arguments. Hides matched elements immediately, with no animation .
 
-**Syntax 2: Hide with Duration and Callback**
-```javascript
-.hide( duration [, complete ] )
-```
-- `duration` (Number or String): Animation duration in milliseconds, or `"fast"` (200ms) or `"slow"` (600ms). Default is `400` .
-- `complete` (Function): Optional callback fired once per matched element after animation .
+**Component Breakdown:**
 
-**Syntax 3: Hide with Duration, Easing, and Callback**
-```javascript
-.hide( duration [, easing ] [, complete ] )
-```
-- `easing` (String): `"swing"` (default) or `"linear"`. Added in jQuery 1.4.3 .
+| Component | Description |
+|-----------|-------------|
+| `duration` | Number (ms) or `"slow"`/`"fast"`. |
+| `easing` | `"swing"` (default) or `"linear"`. |
+| `complete` | Callback fired when animation finishes. |
 
-**Syntax 4: Hide with Options Object**
-```javascript
-.hide( options )
-```
-- `options` (PlainObject): Animation settings including `duration`, `easing`, `queue`, `complete`, `step`, `progress`, and Promise-related callbacks .
+**Syntax Rules:**
+1. No arguments = instant hide.
+2. Duration triggers animation.
+3. Stores original `display` for later `.show()`.
+4. Returns the jQuery object.
 
-**Component Breakdown**
+**Constraints and Limitations:**
+- Hiding an already-hidden element with animation has no visible effect.
+- Does not remove elements from the DOM (use `.remove()` or `.detach()`).
 
-- `.hide()` : The method call.
-- `duration` : Controls how long the element takes to disappear.
-- `easing` : Controls acceleration during the animation.
-- `complete` : Executes after the element is fully hidden.
-- `options` : Consolidates all animation settings into one object.
+### Multiple Annotated Complete Step by Step Code Examples
 
-**Syntax Rules**
-
-1. `.hide()` caches the element's current `display` value before setting it to `none` .
-2. Without a duration, `.hide()` executes immediately and **overrides the animation queue** .
-3. When animating, `.hide()` reduces `width`, `height`, and `opacity` to zero, then sets `display: none` .
-4. The callback receives no arguments, but `this` is the DOM element being hidden .
-5. If multiple elements are matched, the callback fires once per element, not once for the whole collection .
-
-**Constraints and Limitations**
-
-- **Performance**: Hiding many elements with animation can be slow; test with performance tools .
-- **Responsive Layouts**: Cached display values may not match the display value required at a different viewport size .
-- **No `!important` Override**: `.hide()` cannot hide an element whose CSS rule uses `display: block !important` .
-- **Callback Repetition**: In a multi-element collection, the callback fires for each element, which can lead to unexpected repetition if not anticipated .
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Instant Hide**
+**Example 1: Instant vs. Animated Hide**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.hide() — Instant</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>.hide() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box { width: 100px; height: 100px; background: red; margin: 5px; }
+    </style>
 </head>
 <body>
-  <p id="notice">This notice will be hidden.</p>
-  <button id="hideBtn">Hide Notice</button>
-
-  <script>
-    $(function () {
-      $("#hideBtn").on("click", function () {
-        // Step 1: Hide the paragraph instantly
-        $("#notice").hide();
-
-        // Step 2: Verify it is no longer visible
-        console.log("Display:", $("#notice").css("display")); // "none"
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- Clicking the button makes the paragraph disappear immediately.
-- Console logs `"Display: none"`.
-
-**Why This Output Occurs**
-`.hide()` with no arguments sets the paragraph's inline `display` style to `none`. The element remains in the DOM but is removed from the rendered layout. jQuery has cached its original `display` value (`block`) for future restoration .
-
----
-
-**Example 2: Animated Hide with Callback**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.hide() — Animated</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="banner" style="padding:20px; background:orange;">
-    This banner will slide away.
-  </div>
-  <button id="dismiss">Dismiss Banner</button>
-
-  <script>
-    $(function () {
-      $("#dismiss").on("click", function () {
-        // Step 1: Hide with animation over 1 second
-        $("#banner").hide(1000, function () {
-          // Step 2: Callback runs after banner is fully hidden
-          console.log("Banner hidden:", this.id);
-
-          // Step 3: Remove the button as well
-          $("#dismiss").hide();
+    <div class="box" id="box1">Box 1</div>
+    <div class="box" id="box2">Box 2</div>
+    <button id="hideInstant">Hide Instant</button>
+    <button id="hideAnimated">Hide Animated</button>
+    <div id="output"></div>
+    <script>
+        // Step 1: Instant hide
+        $("#hideInstant").on("click", function() {
+            $("#box1").hide();
+            $("#output").append("Box 1 hidden instantly<br>");
         });
-      });
-    });
-  </script>
-</body>
-</html>
-```
 
-**Expected Output**
-- Clicking "Dismiss Banner" causes the orange banner to shrink and fade out over 1 second.
-- After the banner is hidden, the console logs `"Banner hidden: banner"` and the dismiss button also disappears.
-
-**Why This Output Occurs**
-The duration `1000` triggers the animation sequence: width, height, and opacity reduce to zero over one second, then `display: none` is applied. The callback fires once the banner is fully hidden, with `this` bound to the banner element .
-
----
-
-**Example 3: Hide with Options and Easing**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.hide() — Options Object</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="message" style="padding:15px; background:lightcoral;">
-    This message will fade out linearly.
-  </div>
-  <button id="fade">Fade Out</button>
-
-  <script>
-    $(function () {
-      $("#fade").on("click", function () {
-        $("#message").hide({
-          duration: 1200,
-          easing: "linear",
-          complete: function () {
-            console.log("Message hidden with linear easing.");
-          }
+        // Step 2: Animated hide over 800ms
+        $("#hideAnimated").on("click", function() {
+            $("#box2").hide(800, "linear", function() {
+                $("#output").append("Box 2 hide animation complete<br>");
+            });
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- The message box fades and shrinks away over 1.2 seconds at a constant rate.
-- Console logs `"Message hidden with linear easing."` after completion.
+**Expected Output:** Clicking "Hide Instant" makes Box 1 vanish immediately. Clicking "Hide Animated" shrinks and fades Box 2 over 800ms.
 
-**Why This Output Occurs**
-The options object specifies a 1200ms duration with `linear` easing, meaning the animation progresses at a constant speed rather than the default `swing` (which accelerates then decelerates). The callback confirms completion .
+**Why This Code Produces That Result:** `.hide()` with no duration sets `display: none` instantly. With `800`, jQuery animates dimensions and opacity, then sets `display: none` and fires the callback.
 
 ### Real-World Cases
-
-- **Dismissible Alerts**: Hiding a notification banner after the user clicks a close button.
-- **Collapsible Sidebars**: Hiding a navigation sidebar to reclaim screen space.
-- **Loading States**: Hiding a loading spinner once data has been fetched.
-- **Form Field Clearing**: Hiding conditional form fields when a controlling checkbox is unchecked.
-
-### References
-
-- jQuery API — .hide() – https://api.jquery.com/hide/
-- jQuery Learning Center — Intro to Effects – https://learn.jquery.com/effects/intro-to-effects/
-- jQuery API — Version 1.4.3 Changes – https://api.jquery.com/category/version/1.4.3/
+- **Dismissing Notifications:** Fading out alert banners.
+- **Collapsing Sections:** Hiding accordion content.
+- **Form Validation:** Hiding error messages after correction.
 
 ---
 
-## Core Concept 3: `.toggle()`
+## 3. `.toggle()`
 
 ### Definitions
 
-**Core Definition**
-`.toggle()` displays or hides matched elements based on their current visibility state, flipping between shown and hidden with each invocation.
+**Core Definition:** `.toggle()` displays or hides the matched elements, depending on their current visibility state.
 
-**Technical Definition**
-`.toggle()` is a jQuery effects method that inspects the current computed `display` value of each matched element. If the element is visible (`display` is not `none`), `.toggle()` hides it; if the element is hidden (`display: none`), `.toggle()` shows it. When called without arguments, the change is instantaneous. When a duration, options object, or single callback function is provided, `.toggle()` becomes an animation method that animates `width`, `height`, and `opacity` in the appropriate direction .
+**Technical Definition:** `.toggle([duration][, easing][, complete])` checks each element's current visibility (using `.is(":hidden")`) and calls `.show()` if hidden or `.hide()` if visible. With a duration, the corresponding animation runs. This method is the visibility toggle counterpart to `.fadeToggle()` and `.slideToggle()`.
 
-**Beginner-Friendly Explanation**
-`.toggle()` is the "flip-flop" command. One click hides; the next click shows. It saves you from writing `if (visible) { hide(); } else { show(); }`. With a duration, the element shrinks away or grows into view with animation, depending on its current state.
+**Beginner-Friendly Explanation:** `.toggle()` is like a light switch — if the element is visible, it hides it; if hidden, it shows it.
 
 ### Purposes
 
-- To alternate an element's visibility with a single method call.
-- To simplify code that would otherwise require conditional visibility checks.
-- To animate elements in and out with one consistent method.
-- To support Boolean-forced display states via `.toggle(true)` or `.toggle(false)`.
-- To chain visibility toggles with other animations.
+- To toggle visibility with a single method call.
+- To implement show/hide buttons.
+- To create expandable/collapsible UI elements.
+- To simplify conditional visibility logic.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntaxes**
-
-**Syntax 1: Instant Toggle (No Arguments)**
 ```javascript
-.toggle()
+$(selector).toggle();
+$(selector).toggle(duration);
+$(selector).toggle(duration, easing, complete);
 ```
-- No arguments. Flips visibility immediately, with no animation .
 
-**Syntax 2: Toggle with Duration and Callback**
-```javascript
-.toggle( duration [, complete ] )
-```
-- `duration` (Number or String): Animation duration in milliseconds, or `"fast"` (200ms) or `"slow"` (600ms). Default is `400` .
-- `complete` (Function): Optional callback fired once per matched element after animation .
+**Component Breakdown:**
 
-**Syntax 3: Toggle with Duration, Easing, and Callback**
-```javascript
-.toggle( duration [, easing ] [, complete ] )
-```
-- `easing` (String): `"swing"` (default) or `"linear"`. Added in jQuery 1.4.3 .
+| Component | Description |
+|-----------|-------------|
+| `duration` | Number (ms) or `"slow"`/`"fast"`. |
+| `easing` | `"swing"` (default) or `"linear"`. |
+| `complete` | Callback fired after animation. |
 
-**Syntax 4: Toggle with Options Object**
-```javascript
-.toggle( options )
-```
-- `options` (PlainObject): Animation settings including `duration`, `easing`, `queue`, `complete`, and Promise callbacks .
+**Syntax Rules:**
+1. No arguments = instant toggle.
+2. Duration triggers animation.
+3. Determines action per element based on current visibility.
+4. Returns the jQuery object.
 
-**Syntax 5: Toggle with Boolean Force**
-```javascript
-.toggle( display )
-```
-- `display` (Boolean): `true` shows the element; `false` hides it. Added in jQuery 1.3 .
+**Constraints and Limitations:**
+- In a collection, elements with different visibility states are toggled independently.
+- Does not toggle CSS classes (use `.toggleClass()` for that).
 
-**Component Breakdown**
+### Multiple Annotated Complete Step by Step Code Examples
 
-- `.toggle()` : The method call.
-- `duration` : Animation length.
-- `easing` : Animation acceleration profile.
-- `complete` : Post-animation callback.
-- `options` : Consolidated animation settings.
-- `display` : Boolean that forces the state rather than toggling.
-
-**Syntax Rules**
-
-1. `.toggle()` checks the current `display` value: `none` triggers a show; anything else triggers a hide .
-2. The Boolean signature `.toggle(true)` always shows; `.toggle(false)` always hides, regardless of current state .
-3. Passing a **single function** as the first argument triggers the animation signature, **not** the deprecated event-binding signature .
-4. The deprecated event signature `.toggle(handler, handler)` was removed in jQuery 1.9 .
-5. When animating, the direction of the animation (grow/shrink) depends on the current state.
-
-**Constraints and Limitations**
-
-- **Deprecated Event Overload**: The `.toggle(handler, handler)` event-binding signature was deprecated in jQuery 1.8 and **removed in 1.9**. Do not use it .
-- **Function Ambiguity**: A single function argument triggers the animation callback, not event binding. This can confuse developers migrating from the old event signature .
-- **Performance**: Same concerns as `.show()` and `.hide()` when animating many elements .
-- **No Cached State for Booleans**: The Boolean force signature does not rely on cached values; it directly sets `display` .
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Instant Toggle**
+**Example 1: Toggle Visibility**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.toggle() — Instant</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>.toggle() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        #panel { width: 200px; height: 100px; background: lightblue; padding: 10px; }
+    </style>
 </head>
 <body>
-  <div id="content" style="padding:20px; background:lightgreen;">
-    Toggle me on and off.
-  </div>
-  <button id="toggleBtn">Toggle Content</button>
+    <button id="toggleBtn">Toggle Panel</button>
+    <div id="panel">Panel Content</div>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      $("#toggleBtn").on("click", function () {
-        // Step 1: Toggle visibility instantly
-        $("#content").toggle();
-
-        // Step 2: Log the current state
-        var state = $("#content").css("display") === "none" ? "hidden" : "visible";
-        console.log("Content is now:", state);
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- First click: the green content box disappears; console logs `"Content is now: hidden"`.
-- Second click: the box reappears; console logs `"Content is now: visible"`.
-- Subsequent clicks alternate between these states.
-
-**Why This Output Occurs**
-`.toggle()` inspects the current `display` value. Initially, the box is visible (`display: block`), so the first click hides it. On the second click, `display` is `none`, so `.toggle()` shows it again .
-
----
-
-**Example 2: Animated Toggle with Callback**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>.toggle() — Animated</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="slide" style="padding:20px; background:lightblue;">
-    Click the button to animate my visibility.
-  </div>
-  <button id="animToggle">Toggle with Animation</button>
-
-  <script>
-    $(function () {
-      $("#animToggle").on("click", function () {
-        // Step 1: Toggle with 500ms animation and callback
-        $("#slide").toggle(500, function () {
-          // Step 2: Log the element's ID after animation
-          console.log("Animation finished for:", this.id);
-
-          // Step 3: Check final display state
-          var isHidden = $(this).css("display") === "none";
-          console.log("Is hidden:", isHidden);
+    <script>
+        // Step 1: Toggle panel visibility with animation
+        $("#toggleBtn").on("click", function() {
+            $("#panel").toggle(500, "swing", function() {
+                var isVisible = $(this).is(":visible");
+                $("#output").text("Panel is now " + (isVisible ? "visible" : "hidden"));
+                console.log("Toggled, visible:", isVisible);
+            });
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- First click: the blue box shrinks and fades away over 500ms; console logs `"Animation finished for: slide"` and `"Is hidden: true"`.
-- Second click: the box grows and fades back in; console logs the same message but `"Is hidden: false"`.
+**Expected Output:** Each click toggles the panel; the output text updates to "visible" or "hidden".
 
-**Why This Output Occurs**
-Providing the duration `500` converts `.toggle()` into an animation method. The direction of the animation depends on the current state. The callback fires after the animation completes, with `this` bound to the animated DOM element .
+**Why This Code Produces That Result:** `.toggle()` checks the panel's visibility and calls the appropriate animation. The callback checks `.is(":visible")` to determine the new state.
+
+### Real-World Cases
+- **Expand/Collapse Buttons:** Toggling detail sections.
+- **Menu Toggles:** Showing/hiding navigation menus.
+- **Dark Mode Panels:** Toggling settings panels.
 
 ---
 
-**Example 3: Boolean-Forced Toggle**
+## 4. Effect Durations
+
+### Definitions
+
+**Core Definition:** Effect duration is the time (in milliseconds or named alias) over which an animation completes.
+
+**Technical Definition:** Duration can be a number (milliseconds), `"slow"` (600ms), or `"fast"` (200ms). Default is 400ms. `$.fx.speeds` defines these aliases and can be customized. Duration `0` makes the effect instantaneous.
+
+**Beginner-Friendly Explanation:** Duration is how long the animation takes. `"fast"` is quick, `"slow"` is leisurely, and numbers give you exact control.
+
+### Purposes
+- To control animation speed.
+- To match the pace of user interactions.
+- To create subtle or dramatic effects.
+
+### Syntax Rules and Structure
+
+```javascript
+$(el).show(1000);       // 1 second
+$(el).show("slow");     // 600ms
+$(el).show("fast");     // 200ms
+$(el).show();           // 400ms (default)
+$(el).show(0);          // instant
+```
+
+**Syntax Rules:**
+1. Number = milliseconds.
+2. `"slow"` = 600ms, `"fast"` = 200ms.
+3. Default = 400ms.
+4. `0` = instant.
+
+**Constraints and Limitations:**
+- Aliases can be customized via `$.fx.speeds`.
+- Very short durations may appear instant.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Comparing Durations**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>.toggle() — Boolean Force</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>Effect Durations</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box { width: 80px; height: 80px; background: purple; margin: 5px; }
+    </style>
 </head>
 <body>
-  <div id="indicator" style="padding:10px; background:red; color:white;">
-    Status Indicator
-  </div>
-  <button id="showIt">Show</button>
-  <button id="hideIt">Hide</button>
-
-  <script>
-    $(function () {
-      // Step 1: Force show with .toggle(true)
-      $("#showIt").on("click", function () {
-        $("#indicator").toggle(true);
-        console.log("Forced show.");
-      });
-
-      // Step 2: Force hide with .toggle(false)
-      $("#hideIt").on("click", function () {
-        $("#indicator").toggle(false);
-        console.log("Forced hide.");
-      });
-    });
-  </script>
+    <div class="box" id="fastBox">Fast</div>
+    <div class="box" id="slowBox">Slow</div>
+    <div class="box" id="msBox">1500ms</div>
+    <button id="go">Hide All</button>
+    <script>
+        $("#go").on("click", function() {
+            // Step 1: Different durations
+            $("#fastBox").hide("fast");        // 200ms
+            $("#slowBox").hide("slow");        // 600ms
+            $("#msBox").hide(1500);            // 1.5s
+        });
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- Clicking "Show" always displays the red indicator, even if it is already visible.
-- Clicking "Hide" always hides the indicator, even if it is already hidden.
+**Expected Output:** The three boxes hide at different speeds — fast, slow, and 1.5 seconds.
 
-**Why This Output Occurs**
-The Boolean signature `.toggle(true)` explicitly shows the element without checking its current state. `.toggle(false)` explicitly hides it. This is useful when the desired state is known in advance and should not depend on the current visibility .
+**Why This Code Produces That Result:** Each element animates independently with its own duration.
+
+### Real-World Cases
+- **Hover Effects:** `"fast"` for responsiveness.
+- **Modal Animations:** `"slow"` for drama.
+- **Precise Timing:** Milliseconds for choreographed sequences.
+
+---
+
+## 5. `slow`
+
+### Definitions
+
+**Core Definition:** `"slow"` is a duration alias representing 600 milliseconds.
+
+**Technical Definition:** `$.fx.speeds.slow = 600`. Can be customized globally.
+
+**Beginner-Friendly Explanation:** `"slow"` means 600 milliseconds (0.6 seconds).
+
+### Purposes
+- To use a readable, memorable duration.
+- To apply a consistent "slow" speed across animations.
+
+### Syntax Rules and Structure
+
+```javascript
+$(el).hide("slow");
+$.fx.speeds.slow = 1000; // customize
+```
+
+**Syntax Rules:**
+1. Default 600ms.
+2. Customizable via `$.fx.speeds`.
+
+**Constraints and Limitations:**
+- Changing `$.fx.speeds.slow` affects all animations using `"slow"`.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Using "slow"**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>slow Duration</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div id="box" style="width:100px;height:100px;background:green;"></div>
+    <button id="go">Hide Slowly</button>
+    <script>
+        $("#go").on("click", function() {
+            $("#box").hide("slow", function() {
+                console.log("Hidden after ~600ms");
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:** The box fades/shrinks over ~600ms.
+
+**Why This Code Produces That Result:** `"slow"` maps to `$.fx.speeds.slow`, which defaults to 600ms.
+
+### Real-World Cases
+- **Noticeable Transitions:** Slow fades for emphasis.
+- **Consistent Timing:** Using `"slow"` across a project.
+
+---
+
+## 6. `fast`
+
+### Definitions
+
+**Core Definition:** `"fast"` is a duration alias representing 200 milliseconds.
+
+**Technical Definition:** `$.fx.speeds.fast = 200`. Can be customized globally.
+
+**Beginner-Friendly Explanation:** `"fast"` means 200 milliseconds (0.2 seconds).
+
+### Purposes
+- To use a readable, memorable quick duration.
+- To apply snappy animations.
+
+### Syntax Rules and Structure
+
+```javascript
+$(el).hide("fast");
+$.fx.speeds.fast = 100; // customize
+```
+
+**Syntax Rules:**
+1. Default 200ms.
+2. Customizable via `$.fx.speeds`.
+
+**Constraints and Limitations:**
+- Very short durations may not be perceptible.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Using "fast"**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>fast Duration</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div id="box" style="width:100px;height:100px;background:orange;"></div>
+    <button id="go">Hide Fast</button>
+    <script>
+        $("#go").on("click", function() {
+            $("#box").hide("fast", function() {
+                console.log("Hidden after ~200ms");
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:** The box hides quickly over ~200ms.
+
+**Why This Code Produces That Result:** `"fast"` maps to `$.fx.speeds.fast`, which defaults to 200ms.
+
+### Real-World Cases
+- **Snappy UI:** Fast feedback for clicks.
+- **Hover Transitions:** Quick show/hide on hover.
+
+---
+
+## 7. Milliseconds
+
+### Definitions
+
+**Core Definition:** Milliseconds is the numeric duration unit for jQuery effects, providing precise control over animation timing.
+
+**Technical Definition:** Any number passed as the duration argument is interpreted as milliseconds. `0` makes the effect instantaneous. The animation engine steps through values at intervals defined by `$.fx.interval` (default 13ms).
+
+**Beginner-Friendly Explanation:** Milliseconds let you set the exact duration — like 1500 for 1.5 seconds.
+
+### Purposes
+- To precisely control animation timing.
+- To match animation duration to task duration.
+- To create choreographed sequences.
+
+### Syntax Rules and Structure
+
+```javascript
+$(el).show(1000);    // 1 second
+$(el).hide(500);     // half a second
+$(el).toggle(2000);  // 2 seconds
+```
+
+**Syntax Rules:**
+1. Number = milliseconds.
+2. `0` = instant.
+3. Affects both duration and queue timing.
+
+**Constraints and Limitations:**
+- Very long durations may feel sluggish.
+- Extremely short durations may not animate visually.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Precise Millisecond Timing**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Millisecond Durations</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div id="box" style="width:100px;height:100px;background:blue;"></div>
+    <button id="go">Hide in 2500ms</button>
+    <script>
+        $("#go").on("click", function() {
+            var start = Date.now();
+            $("#box").hide(2500, function() {
+                var elapsed = Date.now() - start;
+                console.log("Animation took ~" + elapsed + "ms");
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:** The box hides over approximately 2500ms. Console logs the actual elapsed time.
+
+**Why This Code Produces That Result:** The numeric duration `2500` tells jQuery to animate over 2.5 seconds. The actual time may vary slightly due to frame timing.
+
+### Real-World Cases
+- **Progress Bars:** Duration matching known task time.
+- **Choreographed Sequences:** Precise multi-element timing.
+- **Testing:** Measuring animation duration.
+
+---
+
+## 8. Effect Callbacks
+
+### Definitions
+
+**Core Definition:** Effect callbacks are functions passed as the final argument to effect methods, executed when the animation completes.
+
+**Technical Definition:** The `complete` callback is invoked after the animation finishes, with `this` bound to the animated DOM element. It fires once per element in the collection. The callback is queued after the animation on the `"fx"` queue.
+
+**Beginner-Friendly Explanation:** Effect callbacks let you run code when an animation finishes.
+
+### Purposes
+- To chain actions after an animation.
+- To update UI state when transitions complete.
+- To coordinate sequences.
+
+### Syntax Rules and Structure
+
+```javascript
+$(el).hide(500, function() {
+    // `this` is the animated element
+    console.log("Done");
+});
+```
+
+**Syntax Rules:**
+1. Callback is the last argument.
+2. `this` refers to the animated element.
+3. Fires once per element.
+4. Runs after the animation completes.
+
+**Constraints and Limitations:**
+- Does not fire if the animation is stopped with `.stop()` (unless `.stop(true, true)`).
+- Runs on the main thread.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Chaining via Callbacks**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Effect Callbacks</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div id="box" style="width:100px;height:100px;background:red;"></div>
+    <div id="output"></div>
+    <script>
+        // Step 1: Hide, then show, then report
+        $("#box").hide(500, function() {
+            $(this).css("background", "blue");
+            $(this).show(500, function() {
+                $("#output").text("Sequence complete, color is blue");
+                console.log("this is box:", this.id);
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:** The box hides, turns blue, shows again, then the output displays "Sequence complete, color is blue".
+
+**Why This Code Produces That Result:** The first callback fires after hide, changes the color, and starts show with a nested callback that updates the output.
+
+### Real-World Cases
+- **Multi-Step UI:** Chaining hide/show with state updates.
+- **Notifications:** Showing a message after a fade-out.
+
+---
+
+## 9. Effect Easing
+
+### Definitions
+
+**Core Definition:** Effect easing is the function that determines the acceleration and deceleration of an animation over time.
+
+**Technical Definition:** jQuery provides two built-in easings: `"swing"` (default) and `"linear"`. `"swing"` applies a sine-based acceleration curve; `"linear"` applies constant speed. Custom easings require jQuery UI or a plugin.
+
+**Beginner-Friendly Explanation:** Easing controls how the animation speeds up or slows down. "Swing" starts slow, speeds up, then slows; "linear" is constant.
+
+### Purposes
+- To make animations feel natural.
+- To create dramatic or subtle effects.
+- To match motion to context.
+
+### Syntax Rules and Structure
+
+```javascript
+$(el).hide(500, "swing");
+$(el).show(500, "linear");
+```
+
+**Syntax Rules:**
+1. Default is `"swing"`.
+2. `"linear"` is constant speed.
+3. Custom easings require a plugin.
+
+**Constraints and Limitations:**
+- Only two built-in easings.
+- Invalid easing names may cause errors or fall back to default.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Comparing Swing and Linear**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Effect Easing</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box { width:80px;height:80px;margin:5px; }
+    </style>
+</head>
+<body>
+    <div class="box" id="swing" style="background:red;"></div>
+    <div class="box" id="linear" style="background:blue;"></div>
+    <button id="go">Hide</button>
+    <script>
+        $("#go").on("click", function() {
+            $("#swing").hide(1500, "swing");
+            $("#linear").hide(1500, "linear");
+        });
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:** Both boxes hide over 1.5 seconds; the red box (swing) accelerates/decelerates, the blue box (linear) shrinks at constant speed.
+
+**Why This Code Produces That Result:** The easing function controls the rate of change per frame.
+
+### Real-World Cases
+- **Natural Motion:** `"swing"` for most UI effects.
+- **Progress Bars:** `"linear"` for constant speed.
+
+---
+
+## 10. Basic Effects Best Practices
+
+### Definitions
+
+**Core Definition:** Basic Effects Best Practices are guidelines for using `.show()`, `.hide()`, and `.toggle()` effectively, performantly, and accessibly.
+
+**Technical Definition:** Best practices encompass stopping pending animations before starting new ones, using instant versions for initial state, respecting reduced-motion preferences, preferring CSS transitions for simple cases, avoiding animating many elements simultaneously, and using `.finish()` to complete animations instantly.
+
+### Purposes
+
+- To create smooth, performant effects.
+- To prevent animation buildup.
+- To respect accessibility preferences.
+- To maintain clean, readable code.
+
+### Syntax Rules and Structure
+
+**Key Best Practices:**
+
+| # | Practice | Bad Example | Good Example |
+|---|----------|-------------|--------------|
+| 1 | Stop before re-animating | Rapid clicks queue effects | `.stop(true, true).toggle()` |
+| 2 | Use instant for initial state | `$(el).hide(500)` on load | `$(el).hide()` |
+| 3 | Respect reduced motion | Always animate | Check `prefers-reduced-motion` |
+| 4 | Prefer CSS transitions | jQuery for hover | CSS `transition` |
+| 5 | Avoid many simultaneous animations | Animate 100 elements | Batch or use CSS |
+| 6 | Use `.finish()` for instant completion | `.stop()` leaves partial state | `.finish()` |
+| 7 | Cache selectors | `$("#x").hide(); $("#x").show()` | `var $x = $("#x");` |
+| 8 | Use callbacks over `.delay()` for logic | `.delay(500).show()` | `setTimeout(fn, 500)` |
+
+**Syntax Rules:**
+1. Call `.stop(true, true)` before starting a new animation on the same element.
+2. Use instant effects for initial page state.
+3. Check `prefers-reduced-motion` and disable animations when appropriate.
+4. Prefer CSS transitions for simple hover/focus effects.
+5. Use `.finish()` when you need an animation to complete immediately.
+
+**Constraints and Limitations:**
+- `.stop()` may leave elements in intermediate states.
+- Repeated rapid animations can cause performance issues.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Applying Best Practices**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Effects Best Practices</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        #panel { width:200px;padding:10px;background:#eee;display:none; }
+    </style>
+</head>
+<body>
+    <button id="toggle">Toggle Panel</button>
+    <div id="panel">Panel Content</div>
+    <div id="output"></div>
+
+    <script>
+        // ✅ BEST PRACTICE: Respect reduced motion
+        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduceMotion) {
+            $.fx.off = true;
+        }
+
+        // ✅ BEST PRACTICE: Cache selectors
+        var $panel = $("#panel");
+
+        // ✅ BEST PRACTICE: Instant initial state
+        // Panel starts with display:none in CSS (no animation on load)
+
+        $("#toggle").on("click", function() {
+            // ✅ BEST PRACTICE: Stop before re-animating
+            $panel.stop(true, true).toggle(400, function() {
+                var visible = $(this).is(":visible");
+                $("#output").text("Panel is " + (visible ? "open" : "closed"));
+                console.log("Toggled, visible:", visible);
+            });
+        });
+
+        // ✅ BEST PRACTICE: Use .finish() when needed
+        // $panel.finish().hide();
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:** Each click toggles the panel smoothly; rapid clicks don't queue up. The output text updates. On reduced-motion systems, toggling is instant.
+
+**Why This Code Produces That Result:** The code respects reduced motion, caches selectors, uses instant initial state, and stops pending animations before starting new ones. This results in smooth, accessible, performant effects.
 
 ### Real-World Cases
 
-- **FAQ Accordions**: Clicking a question toggles the visibility of its answer.
-- **Mobile Navigation Menus**: A hamburger icon toggles the visibility of the navigation drawer.
-- **Dark Mode Toggles**: Toggling the visibility of certain themed elements.
-- **Debug Panels**: A developer tool button toggles a debug information panel.
-- **Show/Hide Password Fields**: Toggling the visibility of a password input's plain-text counterpart.
-
-### References
-
-- jQuery API — .toggle() (Effects) – https://api.jquery.com/toggle/
-- jQuery API — .toggle() (Event, Removed) – https://api.jquery.com/toggle-event/
-- jQuery API — Deprecated 1.8 – https://api.jquery.com/category/deprecated/deprecated-1.8/
-- jQuery Learning Center — Intro to Effects – https://learn.jquery.com/effects/intro-to-effects/
-
----
-
-## Summary Comparison Table
-
-| Feature | `.show()` | `.hide()` | `.toggle()` |
-|---|---|---|---|
-| **Primary Action** | Displays hidden elements | Hides visible elements | Alternates visibility |
-| **Cache Behaviour** | Restores cached `display` | Caches current `display` | Uses cached value |
-| **Default Animation** | None (instant) | None (instant) | None (instant) |
-| **Duration Default** | 400ms (when animating) | 400ms (when animating) | 400ms (when animating) |
-| **Boolean Signature** | No | No | Yes (`.toggle(true/false)`) |
-| **Deprecated Overload** | No | No | Yes (event binding, removed 1.9) |
-| **Return Value** | jQuery object | jQuery object | jQuery object |
-| **Chainable** | Yes | Yes | Yes |
-
----
-
-## Important Notes on Deprecation and Version-Specific Behaviour
-
-1. **Event `.toggle()` Deprecated**: The `.toggle(handler, handler)` signature for binding alternating click handlers was deprecated in jQuery 1.8 and **removed in jQuery 1.9** . Do not use it in modern code.
-2. **Easing Parameter Added**: The optional `easing` string parameter was added in jQuery 1.4.3 .
-3. **Boolean Toggle Added**: The `.toggle(display)` Boolean signature was added in jQuery 1.3 .
-4. **jQuery UI Extension**: jQuery UI extends all three methods with custom effect signatures. These do not work without jQuery UI loaded .
-5. **Performance Warning**: Official documentation notes that animating many elements with these methods may cause performance issues and recommends performance testing .
+- **Accessible UIs:** Respecting reduced-motion preferences.
+- **Responsive Interactions:** Preventing animation buildup on rapid clicks.
+- **Performance-Critical Apps:** Using CSS transitions and instant initial states.
 
 ---
 
 ## References
 
-- jQuery API — .show() – https://api.jquery.com/show/
-- jQuery API — .hide() – https://api.jquery.com/hide/
-- jQuery API — .toggle() (Effects) – https://api.jquery.com/toggle/
-- jQuery API — .toggle() (Event, Removed) – https://api.jquery.com/toggle-event/
-- jQuery API — Deprecated 1.8 – https://api.jquery.com/category/deprecated/deprecated-1.8/
-- jQuery Learning Center — Intro to Effects – https://learn.jquery.com/effects/intro-to-effects/
-- jQuery UI API — .show() – https://api.jqueryui.com/1.11/show/
-- jQuery API — Version 1.4.3 – https://api.jquery.com/category/version/1.4.3/
-- MDN Web Docs — display (CSS) – https://developer.mozilla.org/en-US/docs/Web/CSS/display
+- jQuery API Documentation — .show() - https://api.jquery.com/show/
+- jQuery API Documentation — .hide() - https://api.jquery.com/hide/
+- jQuery API Documentation — .toggle() - https://api.jquery.com/toggle/
+- jQuery API Documentation — Effects Category - https://api.jquery.com/category/effects/
+- jQuery API Documentation — Basics - https://api.jquery.com/category/effects/basics/
+- jQuery API Documentation — jQuery.fx.speeds - https://api.jquery.com/jQuery.fx.speeds/
+- jQuery API Documentation — jQuery.fx.off - https://api.jquery.com/jQuery.fx.off/
+- jQuery API Documentation — .stop() - https://api.jquery.com/stop/
+- jQuery API Documentation — .finish() - https://api.jquery.com/finish/
+- jQuery Learning Center — Custom Effects - https://learn.jquery.com/effects/custom-effects/
+- MDN Web Docs — prefers-reduced-motion - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+- MDN Web Docs — CSS Transitions - https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions/Using_CSS_transitions
+- W3C — CSS Easing Functions Level 1 - https://www.w3.org/TR/css-easing-1/

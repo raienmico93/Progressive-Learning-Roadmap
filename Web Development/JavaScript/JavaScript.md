@@ -282,7 +282,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
 
 # III. Operators
 
-- **14. Arithmetic Operators**
+- [**14. Arithmetic Operators**](/Web%20Development/JavaScript/Operators/Arithmetic.md)
   - `+`
   - `-`
   - `*`
@@ -296,7 +296,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Operator precedence
   - Associativity
 
-- **15. Assignment Operators**
+- [**15. Assignment Operators**](/Web%20Development/JavaScript/Operators/Assignment.md)
   - `=`
   - `+=`
   - `-=`
@@ -310,7 +310,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Chained assignment
   - Destructuring assignment
 
-- **16. Comparison Operators**
+- [**16. Comparison Operators**](/Web%20Development/JavaScript/Operators/Comparison.md)
   - `==`
   - `===`
   - `!=`
@@ -326,7 +326,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Comparison of objects
   - Comparison of arrays
 
-- **17. Logical Operators**
+- [**17. Logical Operators**](/Web%20Development/JavaScript/Operators/Logical.md)
   - `&&`
   - `||`
   - `!`
@@ -337,7 +337,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Logical patterns
   - Default values
 
-- **18. Bitwise Operators**
+- [**18. Bitwise Operators**](/Web%20Development/JavaScript/Operators/Bitwise.md)
   - `&`
   - `|`
   - `^`
@@ -583,7 +583,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
 
 # VI. Scope and Execution
 
-- **38. Scope**
+- [**38. Scope**](/Web%20Development/JavaScript/Scope%20and%20Execution/Scope.md)
   - Global scope
   - Function scope
   - Block scope
@@ -595,7 +595,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Variable leakage
   - Scope pollution
 
-- **39. Hoisting**
+- [**39. Hoisting**](/Web%20Development/JavaScript/Scope%20and%20Execution/Hoisting.md)
   - Hoisting
   - Variable hoisting
   - Function hoisting
@@ -605,7 +605,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Hoisting pitfalls
   - Hoisting best practices
 
-- **40. Execution Context**
+- [**40. Execution Context**](/Web%20Development/JavaScript/Scope%20and%20Execution/ExecutionContent.md)
   - Execution context
   - Global execution context
   - Function execution context
@@ -617,7 +617,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - `this` binding
   - Outer environment reference
 
-- **41. Call Stack**
+- [**41. Call Stack**](/Web%20Development/JavaScript/Scope%20and%20Execution/CallStack.md)
   - Call stack
   - Stack frames
   - Push and pop
@@ -625,7 +625,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Stack traces
   - Debugging with stack traces
 
-- **42. Memory Management**
+- [**42. Memory Management**](/Web%20Development/JavaScript/Scope%20and%20Execution/MemoryManagement.md)
   - Memory lifecycle
   - Allocation
   - Usage
@@ -645,7 +645,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
 
 # VII. Objects
 
-- **43. Object Fundamentals**
+- [**43. Object Fundamentals**](/Web%20Development/JavaScript/Objects/Objects.md)
   - Objects
   - Object literals
   - Object properties
@@ -661,7 +661,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - `new Object()`
   - `Object.create()`
 
-- **44. Object Properties**
+- [**44. Object Properties**](/Web%20Development/JavaScript/Objects/Properties.md)
   - Own properties
   - Inherited properties
   - Enumerable properties
@@ -676,7 +676,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - `Object.getOwnPropertyNames()`
   - `Object.getOwnPropertySymbols()`
 
-- **45. Object Methods**
+- [**45. Object Methods**](/Web%20Development/JavaScript/Objects/Methods.md)
   - `Object.keys()`
   - `Object.values()`
   - `Object.entries()`
@@ -697,7 +697,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - `Object.prototype.isPrototypeOf()`
   - `Object.prototype.propertyIsEnumerable()`
 
-- **46. Object Destructuring**
+- [**46. Object Destructuring**](/Web%20Development/JavaScript/Objects/Destructuring.md)
   - Object destructuring
   - Default values
   - Renaming
@@ -707,14 +707,14 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Destructuring in loops
   - Destructuring pitfalls
 
-- **47. Object Spread**
+- [**47. Object Spread**](/Web%20Development/JavaScript/Objects/Spread.md)
   - Spread in objects
   - Shallow copy
   - Merging objects
   - Overriding properties
   - Spread vs `Object.assign()`
 
-- **48. Getters and Setters**
+- [**48. Getters and Setters**](/Web%20Development/JavaScript/Objects/GettersAndSetters.md)
   - Getters
   - Setters
   - `get` syntax
@@ -724,14 +724,14 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Performance
   - Pitfalls
 
-- **49. Property Shorthand and Computed Properties**
+- [**49. Property Shorthand and Computed Properties**](/Web%20Development/JavaScript/Objects/Shorthand.md)
   - Shorthand properties
   - Shorthand methods
   - Computed property names
   - Dynamic property names
   - Use cases
 
-- **50. Object Patterns**
+- [**50. Object Patterns**](/Web%20Development/JavaScript/Objects/Patterns.md)
   - Namespace pattern
   - Module pattern
   - Singleton pattern
@@ -744,7 +744,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
 
 # VIII. Prototypes and Inheritance
 
-- **51. Prototype Fundamentals**
+- [**51. Prototype Fundamentals**](/Web%20Development/JavaScript/Prototype/Prototype.md)
   - Prototypes
   - `[[Prototype]]`
   - `__proto__`
@@ -754,7 +754,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Prototype lookup
   - Prototype shadowing
 
-- **52. Constructor Functions**
+- [**52. Constructor Functions**](/Web%20Development/JavaScript/Prototype/ConstructorFunc.md)
   - Constructor functions
   - `new` operator
   - `new.target`
@@ -764,7 +764,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Prototype properties
   - Constructor inheritance
 
-- **53. Prototypal Inheritance**
+- [**53. Prototypal Inheritance**](/Web%20Development/JavaScript/Prototype/PrototypalInt.md)
   - Prototypal inheritance
   - Prototype chain
   - Inheritance patterns
@@ -815,7 +815,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
 
 # IX. Arrays
 
-- **57. Array Fundamentals**
+- [**57. Array Fundamentals**](/Web%20Development/JavaScript/Arrays/Arrays.md)
   - Arrays
   - Array literals
   - `Array` constructor
@@ -867,7 +867,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
     - `toSpliced()`
     - `with()`
 
-- **59. Array Iteration**
+- [**59. Array Iteration**](/Web%20Development/JavaScript/Arrays/Iteration.md)
   - `for` loop
   - `for...of`
   - `for...in`
@@ -878,7 +878,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Iteration performance
   - Iteration best practices
 
-- **60. Array Destructuring**
+- [**60. Array Destructuring**](/Web%20Development/JavaScript/Arrays/Destructuring.md)
   - Array destructuring
   - Default values
   - Skipping elements
@@ -887,21 +887,21 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Swapping variables
   - Destructuring in parameters
 
-- **61. Array Spread**
+- [**61. Array Spread**](/Web%20Development/JavaScript/Arrays/Spread.md)
   - Spread in arrays
   - Copying arrays
   - Merging arrays
   - Spreading iterables
   - Spread in function calls
 
-- **62. Multidimensional Arrays**
+- [**62. Multidimensional Arrays**](/Web%20Development/JavaScript/Arrays/Multidimensional.md)
   - Nested arrays
   - Matrix representation
   - Matrix operations
   - Flattening arrays
   - Deep flattening
 
-- **63. Typed Arrays**
+- [**63. Typed Arrays**](/Web%20Development/JavaScript/Arrays/Typed.md)
   - Typed arrays
   - `Int8Array`
   - `Uint8Array`
@@ -920,7 +920,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Typed array performance
   - Binary data handling
 
-- **64. Array Performance**
+- [**64. Array Performance**](/Web%20Development/JavaScript/Arrays/Performance.md)
   - Array performance characteristics
   - Sparse arrays
   - Array resizing
@@ -1708,7 +1708,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Error logging
   - Error monitoring
 
-- **106. Debugging Fundamentals**
+- [**106. Debugging Fundamentals**](/Web%20Development/JavaScript/Error%20Handling/Debugging.md)
   - Debugging
   - Debugging tools
   - Browser DevTools
@@ -1728,7 +1728,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - `debugger`
   - Debugging best practices
 
-- **107. Error Handling Patterns**
+- [**107. Error Handling Patterns**](/Web%20Development/JavaScript/Error%20Handling/ExceptionPatterns.md)
   - `try/catch/finally`
   - Error propagation
   - Custom errors
@@ -1743,7 +1743,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Error recovery
   - Graceful degradation
 
-- **108. Console Debugging**
+- [**108. Console Debugging**](/Web%20Development/JavaScript/Error%20Handling/ConsoleDebugging.md)
   - `console.log()`
   - `console.error()`
   - `console.warn()`
@@ -1766,7 +1766,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Console styling
   - Console best practices
 
-- **109. Performance Debugging**
+- [**109. Performance Debugging**](/Web%20Development/JavaScript/Error%20Handling/PerformanceDebugging.md)
   - Performance panel
   - Performance profiling
   - Flame charts
@@ -1787,7 +1787,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
 
 # XVI. Testing JavaScript
 
-- **110. Testing Fundamentals**
+- [**110. Testing Fundamentals**](/Web%20Development/JavaScript/Testing/Testing.md)
   - Why testing matters
   - Test types
     - Unit tests
@@ -1809,7 +1809,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Test runners
   - Test frameworks
 
-- **111. Unit Testing**
+- [**111. Unit Testing**](/Web%20Development/JavaScript/Testing/Unit.md)
   - Testing functions
   - Testing modules
   - Testing classes
@@ -1823,7 +1823,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Test naming
   - Test best practices
 
-- **112. Integration Testing**
+- [**112. Integration Testing**](/Web%20Development/JavaScript/Testing/Integration.md)
   - Testing components
   - Testing modules together
   - Testing with real dependencies
@@ -1832,7 +1832,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Testing DOM interactions
   - Testing browser APIs
 
-- **113. End-to-End Testing**
+- [**113. End-to-End Testing**](/Web%20Development/JavaScript/Testing/EndToEnd.md)
   - E2E testing
   - Cypress
   - Playwright
@@ -1845,7 +1845,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Test environments
   - E2E best practices
 
-- **114. Testing Tools**
+- [**114. Testing Tools**](/Web%20Development/JavaScript/Testing/Tools.md)
   - Jest
   - Vitest
   - Mocha
@@ -1865,7 +1865,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - c8
   - nyc
 
-- **115. Test Automation**
+- [**115. Test Automation**](/Web%20Development/JavaScript/Testing/Automation.md)
   - CI integration
   - Test pipelines
   - Parallel testing

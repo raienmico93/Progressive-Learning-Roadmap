@@ -473,7 +473,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # V. Events
 
-- **24. Event Fundamentals**
+- [**24. Event Fundamentals**](/Web%20Development/JQuery/Event%20Handling/Event.md)
   - Events
   - Event handling
   - Event binding
@@ -489,7 +489,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Event performance
   - Event best practices
 
-- **25. Event Binding**
+- [**25. Event Binding**](/Web%20Development/JQuery/Event%20Handling/BindingEvents.md)
   - `.on()`
   - `.off()`
   - `.one()`
@@ -641,7 +641,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # VI. Effects and Animations
 
-- **32. Effects Fundamentals**
+- [**32. Effects Fundamentals**](/Web%20Development/JQuery/Effects%20and%20Animation/Effects.md)
   - Effects
   - Animations
   - jQuery effects
@@ -654,7 +654,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Effect performance
   - Effect best practices
 
-- **33. Basic Effects**
+- [**33. Basic Effects**](/Web%20Development/JQuery/Effects%20and%20Animation/BasicEffects.md)
   - `.show()`
   - `.hide()`
   - `.toggle()`
@@ -666,20 +666,20 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Effect easing
   - Basic effects best practices
 
-- **34. Fading Effects**
+- [**34. Fading Effects**](/Web%20Development/JQuery/Effects%20and%20Animation/FadingEffects.md)
   - `.fadeIn()`
   - `.fadeOut()`
   - `.fadeToggle()`
   - `.fadeTo()`
   - Fading effects best practices
 
-- **35. Sliding Effects**
+- [**35. Sliding Effects**](/Web%20Development/JQuery/Effects%20and%20Animation/SlidingEffects.md)
   - `.slideDown()`
   - `.slideUp()`
   - `.slideToggle()`
   - Sliding effects best practices
 
-- **36. Custom Animations**
+- [**36. Custom Animations**](/Web%20Development/JQuery/Effects%20and%20Animation/CustomAnimation.md)
   - `.animate()`
   - Animation properties
   - Animation duration
@@ -691,7 +691,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Predefined values
   - Custom animations best practices
 
-- **37. Animation Queue**
+- [**37. Animation Queue**](/Web%20Development/JQuery/Effects%20and%20Animation/AnimationControl.md)
   - Animation queue
   - `.queue()`
   - `.dequeue()`
@@ -702,7 +702,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Queue management
   - Queue best practices
 
-- **38. Animation Easing**
+- [**38. Animation Easing**](/Web%20Development/JQuery/Effects%20and%20Animation/AnimationEasing.md)
   - Easing functions
   - `swing`
   - `linear`
@@ -711,7 +711,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - jQuery UI easing
   - Easing best practices
 
-- **39. Animation Performance**
+- [**39. Animation Performance**](/Web%20Development/JQuery/Effects%20and%20Animation/ModernAnimation.md)
   - Animation performance
   - CSS animations
   - CSS transitions
@@ -811,7 +811,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - `$.when()`
   - Promise best practices
 
-- **45. AJAX Data Formats**
+- [**45. AJAX Data Formats**](/Web%20Development/JQuery/AJAX/AJAXDataFormats.md)
   - JSON
   - XML
   - HTML
@@ -822,7 +822,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Form data
   - Data format best practices
 
-- **46. AJAX Security**
+- [**46. AJAX Security**](/Web%20Development/JQuery/AJAX/AJAXandSecurity.md)
   - CSRF
   - CORS
   - XSS
@@ -832,7 +832,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Authorization
   - AJAX security best practices
 
-- **47. AJAX Performance**
+- [**47. AJAX Performance**](/Web%20Development/JQuery/AJAX/AJAXPerformance.md)
   - Request batching
   - Request caching
   - Request debouncing
@@ -841,7 +841,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Request aborting
   - AJAX performance best practices
 
-- **48. AJAX Patterns**
+- [**48. AJAX Patterns**](/Web%20Development/JQuery/AJAX/AJAXPatterns.md)
   - Form submission
   - Autocomplete
   - Infinite scroll
@@ -856,7 +856,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # VIII. Utilities
 
-- **49. jQuery Utilities**
+- [**49. jQuery Utilities**](/Web%20Development/JQuery/Utilities/Utilities.md)
   - `$.each()`
   - `$.map()`
   - `$.grep()`
@@ -888,7 +888,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - `$.Deferred()`
   - Utility best practices
 
-- **50. Deferred Objects**
+- [**50. Deferred Objects**](/Web%20Development/JQuery/Utilities/Deffered.md)
   - Deferred objects
   - `$.Deferred()`
   - Deferred states
@@ -915,7 +915,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Deferred composition
   - Deferred best practices
 
-- **51. Data Storage**
+- [**51. Data Storage**](/Web%20Development/JQuery/Utilities/DataStorage.md)
   - `.data()`
   - `.removeData()`
   - `$.data()`
@@ -927,7 +927,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Data performance
   - Data best practices
 
-- **52. Queue Utilities**
+- [**52. Queue Utilities**](/Web%20Development/JQuery/Utilities/QueueUtilities.md)
   - `.queue()`
   - `.dequeue()`
   - `.clearQueue()`
@@ -940,7 +940,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # IX. Plugins
 
-- **53. Plugin Fundamentals**
+- [**53. Plugin Fundamentals**](/Web%20Development/JQuery/Plugins/Plugin.md)
   - jQuery plugins
   - Plugin patterns
   - Plugin structure
@@ -954,7 +954,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Plugin callbacks
   - Plugin best practices
 
-- **54. Writing Plugins**
+- [**54. Writing Plugins**](/Web%20Development/JQuery/Plugins/CreatingPlugins.md)
   - `$.fn.pluginName`
   - Plugin function
   - Plugin context
@@ -973,7 +973,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Plugin publishing
   - Plugin best practices
 
-- **55. Plugin Patterns**
+- [**55. Plugin Patterns**](/Web%20Development/JQuery/Plugins/PluginPatterns.md)
   - Basic plugin pattern
   - Namespaced plugin pattern
   - Options pattern
@@ -1061,7 +1061,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - jQuery MixItUp
   - jQuery Filterizr
 
-- **57. Plugin Development Best Practices**
+- [**57. Plugin Development Best Practices**](/Web%20Development/JQuery/Plugins/DevelopmentBP.md)
   - Plugin structure
   - Plugin naming
   - Plugin documentation
