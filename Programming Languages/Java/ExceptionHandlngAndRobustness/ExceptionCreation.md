@@ -1,633 +1,902 @@
-# Java Creating Exceptions: A Comprehensive Programming Cheat Sheet
+# Java Custom Exceptions: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** Creating exceptions in Java is the practice of defining custom exception classes that extend either `Exception` (for checked exceptions) or `RuntimeException` (for unchecked exceptions), enabling developers to represent domain-specific error conditions with meaningful names, contextual data, and appropriate recovery semantics.
+**Core Definition:** A custom exception is a user-defined exception class that extends either `Exception` (for checked exceptions) or `RuntimeException` (for unchecked exceptions), created to represent application-specific error conditions that are not adequately covered by Java's built-in exception classes.
 
-**Technical Definition:** A custom exception class is a user-defined subclass of `Throwable` (typically `Exception` or `RuntimeException`) that provides constructors matching the standard `Throwable` constructor signatures: a no-argument constructor, a message-only constructor, a cause-only constructor, and a message-and-cause constructor. When extending `Exception`, the class is checked and subject to the Catch or Specify Requirement (JLS §11.2). When extending `RuntimeException`, the class is unchecked and exempt from this requirement. Custom exceptions may declare additional instance fields to carry contextual error information, and must declare a `serialVersionUID` if they are intended to be serializable.
+**Technical Definition:** "You should write your own exception classes if you answer yes to any of the following questions: Do you need an exception type that isn't represented by those in the Java platform? Would it help users if they could differentiate your exceptions from those thrown by classes written by other vendors? Does your code throw more than one related exception?". A custom exception typically provides constructors that mirror those of its superclass, delegating to `super(message)`, `super(cause)`, or `super(message, cause)`.
 
-**Beginner-Friendly Explanation:** Sometimes the built-in exceptions like `NullPointerException` or `IOException` do not describe your specific problem well enough. You might want an exception called `InsufficientFundsException` or `InvalidCustomerAgeException`. Creating your own exception class lets you give a meaningful name to your error, attach useful information (like the account number that had insufficient funds), and decide whether callers are forced to handle it (checked) or not (unchecked).
+**Beginner-Friendly Explanation:** Think of built-in exceptions as generic bandages — they work for common injuries but don't tell you much about what specifically went wrong. A custom exception is like a specialised medical kit labelled "Broken Arm" or "Allergic Reaction." It tells you exactly what problem occurred, making it easier to handle and debug. Instead of throwing a vague `Exception`, you throw a `PaymentDeclinedException` or `InsufficientFundsException` that speaks your application's language.
 
 ### Key Characteristics
 
-- Custom exceptions are characterized by their **Domain specificity** (they name the exact failure mode rather than using a generic type).
-- **Hierarchical organization** (related exceptions can share a common superclass for broad catching).
-- **Constructual consistency** (they mirror the standard `Throwable` constructor signatures), **contextual richness** (they can carry additional fields with diagnostic data).
-- **Serialization compatibility** (they declare `serialVersionUID` when serializable). 
-- The choice between checked and unchecked is a design decision: checked exceptions force callers to acknowledge and handle the failure, while unchecked exceptions propagate freely and are suitable for programming errors or unrecoverable conditions.
+- **Domain-Specific:** Custom exceptions convey application-specific error conditions with meaningful names.
+- **Hierarchical:** They fit into the existing `Throwable` hierarchy, extending `Exception` or `RuntimeException`.
+- **Constructor Parity:** They typically provide the same four constructors as `Exception` (no-arg, message, cause, message+cause).
+- **Serializable:** Since `Throwable` implements `Serializable`, custom exceptions should declare a `serialVersionUID`.
+- **Checked or Unchecked:** The choice of superclass determines whether the compiler enforces handling.
+- **Failure-Capture Information:** Custom exceptions can carry additional fields (e.g., `amount`, `customerId`) to capture failure context.
 
 ### Prerequisites
 
-- Readers should be familiar with Java's exception hierarchy (`Throwable`, `Exception`, `Error`, `RuntimeException`). 
-- The difference between checked and unchecked exceptions, and basic `try`-`catch`-`finally` syntax. 
-- A basic understanding of constructors, inheritance, and the `super` keyword is assumed. Knowledge of `serialVersionUID` is helpful for the serialization section.
+- Basic understanding of Java exceptions and the exception hierarchy
+- Familiarity with checked and unchecked exceptions
+- Knowledge of `try-catch` and `throws` clauses
+- Understanding of inheritance and constructors
 
-### Related Programming Areas with Explanation
+### Related Programming Areas
 
-- Custom exceptions are related to **API design** (they form part of a library's public contract. 
-- Communicating what can go wrong), **domain-driven design** (they express business rules as first-class types).
-- **Error handling architecture** (they enable layered error translation).
-- **Testing** (they allow precise assertions on failure modes).
-- **Software reliability engineering** (they provide actionable diagnostic information for production incidents).
+- **Exception Handling:** Custom exceptions are part of a broader error-handling strategy.
+- **API Design:** Custom exceptions form part of a library's public error contract.
+- **Domain-Driven Design:** Business rules are often expressed as domain-specific exceptions.
+- **Testing:** Custom exceptions enable precise test assertions for error conditions.
+- **Logging:** Custom exceptions provide structured error information for logging frameworks.
 
+### Core Concepts / Features
 
-## 1. Custom Checked Exceptions (Extending Exception)
+---
 
-**Core Definition:** A checked exception is a custom exception class that extends `Exception` but not `RuntimeException`; the compiler forces callers to either catch it or declare it in their `throws` clause.
+## 1. Custom Exceptions
 
-**Technical Definition:** A class `MyException extends Exception` is a checked exception. Any method that can throw such an exception must declare it via a `throws` clause or catch it within a `try`-`catch` block. The compiler enforces this at compile time (JLS §11.2.3). Checked exceptions are appropriate when the caller can reasonably be expected to recover from the exceptional condition, such as a file not being found, a network timeout, or invalid user input.
+### Definitions
 
-**Beginner-Friendly Explanation:** A checked exception is like a warning label: “This method might fail in this specific way, and you must deal with it.” The compiler will not let you ignore it. You use checked exceptions when the caller has a realistic chance of doing something useful about the problem.
+**Core Definition:** A custom exception is a class that extends `Exception` or `RuntimeException` to represent a specific error condition in an application.
 
-### 1.1 When to Use Checked Exceptions
+**Technical Definition:** "To create a custom exception, we have to extend the `java.lang.Exception` class". For unchecked exceptions, extend `java.lang.RuntimeException`. The class should provide constructors that delegate to the superclass constructors.
 
-**Definitions**
+**Beginner-Friendly Explanation:** A custom exception is your own error type. Instead of saying "something went wrong," you say exactly what went wrong in your application's terms.
 
-- **Core Definition:** Checked exceptions are appropriate when the failure is recoverable and the caller should be forced to acknowledge it.
-- **Technical Definition:** The Java Language Specification states that checked exceptions represent conditions from which the caller can reasonably be expected to recover. The Catch or Specify Requirement forces the caller to either handle the exception or declare it. Oracle's guidance: “If a client can reasonably be expected to recover from an exception, make it a checked exception.”
-- **Beginner-Friendly Explanation:** Use a checked exception when the error is predictable and the caller might know what to do about it—for example, “the file was not found, so I will use a default configuration.”
+### Purposes
 
-**Purposes**
+- To represent domain-specific error conditions that built-in exceptions cannot adequately describe
+- To differentiate your application's exceptions from those thrown by third-party libraries
+- To provide meaningful error messages tailored to your application
+- To carry additional failure-capture information (e.g., invalid values, context data)
+- To enable precise exception handling by type rather than by message string
 
-- To force the caller to acknowledge and handle a recoverable failure mode.
-- To make the method's contract explicit about what can go wrong.
-- To enable the compiler to verify error handling.
+### Syntax Rules and Structure
 
-**Syntax Structures and Rules**
+**Complete General Syntax:**
 
-Complete general syntax:
+```java
+public class CustomException extends Exception {  // or RuntimeException
+    private static final long serialVersionUID = 1L;
+
+    public CustomException() {
+        super();
+    }
+
+    public CustomException(String message) {
+        super(message);
+    }
+
+    public CustomException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public CustomException(Throwable cause) {
+        super(cause);
+    }
+}
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `extends Exception` | Creates a checked exception. |
+| `extends RuntimeException` | Creates an unchecked exception. |
+| `serialVersionUID` | Required for serializable classes; prevents deserialization issues. |
+| Constructors | Mirror the four standard `Exception` constructors. |
+| Additional fields | Optional; capture failure-specific data. |
+
+**Syntax Rules:**
+
+- The class name should end with `Exception` (convention).
+- The class should be `public` if used across packages.
+- Constructors should delegate to `super()` with appropriate arguments.
+- The `serialVersionUID` should be declared as `private static final long`.
+
+**Constraints and Limitations:**
+
+- Custom exceptions should not be created for every possible error; prefer standard exceptions when they fit.
+- Adding custom fields increases the exception's footprint and serialization complexity.
+- Checked custom exceptions pollute method signatures.
+
+### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Custom Checked Exception**
+
+```java
+// File: InsufficientFundsException.java
+public class InsufficientFundsException extends Exception {
+    private static final long serialVersionUID = 1L;
+
+    private final double shortfall;  // Additional failure-capture field
+
+    public InsufficientFundsException(double shortfall) {
+        super("Insufficient funds: need an additional $" + shortfall);
+        this.shortfall = shortfall;
+    }
+
+    public InsufficientFundsException(String message, Throwable cause) {
+        super(message, cause);
+        this.shortfall = 0;
+    }
+
+    public double getShortfall() {
+        return shortfall;
+    }
+}
+```
+
+```java
+// File: BankAccount.java
+public class BankAccount {
+    private double balance;
+
+    public BankAccount(double initialBalance) {
+        this.balance = initialBalance;
+    }
+
+    public void withdraw(double amount) throws InsufficientFundsException {
+        if (amount > balance) {
+            throw new InsufficientFundsException(amount - balance);
+        }
+        balance -= amount;
+        System.out.println("Withdrew $" + amount + ". Remaining: $" + balance);
+    }
+
+    public static void main(String[] args) {
+        BankAccount account = new BankAccount(100.0);
+        try {
+            account.withdraw(150.0);
+        } catch (InsufficientFundsException e) {
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Shortfall: $" + e.getShortfall());
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Error: Insufficient funds: need an additional $50.0
+Shortfall: $50.0
+```
+
+**Step-by-Step Explanation:**
+
+1. `InsufficientFundsException` extends `Exception`, making it a checked exception.
+2. It declares a `serialVersionUID` for serialization compatibility.
+3. The constructor takes a `shortfall` amount, builds a descriptive message, and calls `super(message)`.
+4. `BankAccount.withdraw()` throws the custom exception when the withdrawal amount exceeds the balance.
+5. The `main` method catches the exception and accesses both the message and the `shortfall` field.
+
+**Example 2: Custom Unchecked Exception**
+
+```java
+// File: InvalidConfigurationException.java
+public class InvalidConfigurationException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
+    public InvalidConfigurationException(String message) {
+        super(message);
+    }
+
+    public InvalidConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+```
+
+```java
+// File: ConfigLoader.java
+public class ConfigLoader {
+    public static String loadConfig(String key) {
+        if (key == null || key.isEmpty()) {
+            throw new InvalidConfigurationException("Configuration key cannot be empty");
+        }
+        return "value-for-" + key;
+    }
+
+    public static void main(String[] args) {
+        // Unchecked: no try-catch required by compiler
+        String value = loadConfig("database.url");
+        System.out.println("Loaded: " + value);
+
+        try {
+            loadConfig("");
+        } catch (InvalidConfigurationException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Loaded: value-for-database.url
+Error: Configuration key cannot be empty
+```
+
+**Step-by-Step Explanation:**
+
+1. `InvalidConfigurationException` extends `RuntimeException`, making it unchecked.
+2. The compiler does not require callers to catch or declare it.
+3. `loadConfig` throws the exception for invalid input.
+4. The `main` method demonstrates that catching is optional but can be done for graceful handling.
+
+### Real-World Cases
+
+- **Banking:** `InsufficientFundsException`, `AccountLockedException`.
+- **E-commerce:** `PaymentDeclinedException`, `OutOfStockException`.
+- **Authentication:** `InvalidCredentialsException`, `AccountExpiredException`.
+- **Configuration:** `InvalidConfigurationException`, `MissingPropertyException`.
+- **File Processing:** `IncorrectFileNameException`.
+
+---
+
+## 2. Checked Custom Exceptions
+
+### Definitions
+
+**Core Definition:** A checked custom exception is a custom exception that extends `Exception` (but not `RuntimeException`), requiring callers to handle or declare it.
+
+**Technical Definition:** "Checked Exceptions: Extend `Exception`. The compiler forces you to handle them using try-catch blocks or declare them in the method signature with `throws`".
+
+**Beginner-Friendly Explanation:** A checked exception is like a formal contract. When a method says it might throw a checked exception, the compiler forces every caller to either handle the problem or pass the responsibility up the chain. This ensures no one forgets about potential errors.
+
+### Purposes
+
+- To force callers to acknowledge and handle recoverable error conditions
+- To document a method's error contract in its signature
+- To represent errors that the caller can realistically recover from (e.g., file not found, network timeout)
+
+### Syntax Rules and Structure
 
 ```java
 public class MyCheckedException extends Exception {
-    public MyCheckedException() { super(); }
-    public MyCheckedException(String message) { super(message); }
-    public MyCheckedException(Throwable cause) { super(cause); }
-    public MyCheckedException(String message, Throwable cause) { super(message, cause); }
+    public MyCheckedException(String message) {
+        super(message);
+    }
 }
 ```
 
-Component breakdown:
+**Syntax Rules:**
 
-- `extends Exception`: makes this a checked exception.
-- Four constructors mirror the standard `Throwable` signatures.
-- Each constructor delegates to the corresponding `super` constructor.
+- Must extend `Exception` directly (not `RuntimeException`).
+- Callers must either catch it with `try-catch` or declare it with `throws`.
+- Should be used when the caller can reasonably recover from the error.
 
-Syntax rules: A checked exception must be declared in the `throws` clause of any method that throws it, or caught within that method.
+**Constraints and Limitations:**
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
+- Checked exceptions pollute method signatures and propagate up the call stack.
+- They are incompatible with lambda expressions and streams, which cannot throw checked exceptions.
+- Overuse leads to "throws pollution" where every method declares many checked exceptions.
 
-**Example 1: A checked exception for configuration errors**
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-// Step 1: Define the checked exception
-public class ConfigNotFoundException extends Exception {
-    public ConfigNotFoundException() { super(); }
-    public ConfigNotFoundException(String message) { super(message); }
-    public ConfigNotFoundException(Throwable cause) { super(cause); }
-    public ConfigNotFoundException(String message, Throwable cause) { super(message, cause); }
-}
+// File: CheckedCustomDemo.java
+public class CheckedCustomDemo {
 
-// Step 2: Use it in a method that declares throws
-public class ConfigLoader {
-    public static String loadConfig(String name) throws ConfigNotFoundException {
-        if (name == null || name.isEmpty()) {
-            throw new ConfigNotFoundException("Configuration name cannot be empty");
+    static class ValidationException extends Exception {
+        public ValidationException(String message) {
+            super(message);
         }
-        return "config-value";
+    }
+
+    static void validateEmail(String email) throws ValidationException {
+        if (email == null || !email.contains("@")) {
+            throw new ValidationException("Invalid email: " + email);
+        }
+        System.out.println("Email valid: " + email);
     }
 
     public static void main(String[] args) {
         try {
-            String value = loadConfig("");
-        } catch (ConfigNotFoundException e) {
-            System.out.println("Handled: " + e.getMessage());
-        }
-    }
-}
-```
-
-Expected Output:
-
-```
-Handled: Configuration name cannot be empty
-```
-
-**Why the code produces this result:** `loadConfig` declares `throws ConfigNotFoundException`. The caller (`main`) is forced by the compiler to either catch it or declare it. Since `main` catches it, the exception is handled gracefully.
-
-**Real-World Cases with Explanation**
-
-In a banking application, `InsufficientFundsException extends Exception` is thrown when a withdrawal exceeds the balance. The caller (the ATM service) can catch it and display a specific message to the user. In a file-processing library, `FileFormatException extends Exception` is thrown when a file does not conform to the expected format; the caller can decide whether to skip the file, log an error, or attempt recovery.
-
-**References Links**
-
-- Creating Exception Classes (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/essential/exceptions/creating.html
-- The Catch or Specify Requirement (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/essential/exceptions/catchOrDeclare.html
-- JLS §11.2: Compile-Time Checking of Exceptions – https://docs.oracle.com/javase/specs/jls/se21/html/jls-11.html#jls-11.2
-
-
-## 2. Custom Unchecked Exceptions (Extending RuntimeException)
-
-**Core Definition:** An unchecked exception is a custom exception class that extends `RuntimeException`; the compiler does not force callers to catch or declare it.
-
-**Technical Definition:** A class `MyException extends RuntimeException` is an unchecked exception. Unchecked exceptions are exempt from the Catch or Specify Requirement. They are appropriate for programming errors (such as invalid arguments, null values, or illegal state) and for conditions from which the caller cannot reasonably be expected to recover. Oracle's guidance: “If a client cannot do anything to recover from the exception, make it an unchecked exception.”
-
-**Beginner-Friendly Explanation:** An unchecked exception is like a runtime surprise: the compiler does not force you to handle it, but it can still occur. You use unchecked exceptions for things that are usually programming mistakes—like passing `null` where a value is required, or calling a method in the wrong state.
-
-### 2.1 When to Use Unchecked Exceptions
-
-**Definitions**
-
-- **Core Definition:** Unchecked exceptions are appropriate when the failure represents a programming error or an unrecoverable condition.
-- **Technical Definition:** The Java documentation states that unchecked exceptions “represent the problems that arise from a programming error, such as a null pointer exception, an array index out of bounds, or a class cast exception.” The Tuscany Java Coding Guidelines recommend: “Unchecked exceptions should be used when an error condition is not recoverable.”
-- **Beginner-Friendly Explanation:** Use an unchecked exception when the caller cannot do anything useful about the error—it is likely a bug in the code, not a condition the caller can handle.
-
-**Purposes**
-
-- To signal programming errors such as invalid arguments or illegal state.
-- To avoid cluttering method signatures with exceptions the caller cannot handle.
-- To propagate failures to a global error handler or the JVM.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: An unchecked exception for invalid arguments**
-
-```java
-// Step 1: Define the unchecked exception
-public class InvalidAgeException extends RuntimeException {
-    public InvalidAgeException() { super(); }
-    public InvalidAgeException(String message) { super(message); }
-    public InvalidAgeException(Throwable cause) { super(cause); }
-    public InvalidAgeException(String message, Throwable cause) { super(message, cause); }
-}
-
-// Step 2: Use it without declaring throws
-public class UserRegistration {
-    public static void register(String name, int age) {
-        if (age < 0 || age > 150) {
-            throw new InvalidAgeException("Age must be between 0 and 150: " + age);
-        }
-        System.out.println("Registered " + name + " with age " + age);
-    }
-
-    public static void main(String[] args) {
-        try {
-            register("Alice", 200);
-        } catch (InvalidAgeException e) {
+            validateEmail("alice@example.com");  // Output: Email valid: alice@example.com
+            validateEmail("invalid-email");       // Throws ValidationException
+        } catch (ValidationException e) {
             System.out.println("Caught: " + e.getMessage());
         }
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Caught: Age must be between 0 and 150: 200
+Email valid: alice@example.com
+Caught: Invalid email: invalid-email
 ```
 
-**Why the code produces this result:** `InvalidAgeException` extends `RuntimeException`, so it is unchecked. The `register` method does not need a `throws` clause. The caller may optionally catch it, but is not forced to.
+**Step-by-Step Explanation:**
 
-**Real-World Cases with Explanation**
+1. `ValidationException` extends `Exception`, making it checked.
+2. `validateEmail` declares `throws ValidationException`, so callers must handle it.
+3. The compiler enforces the `try-catch` in `main`.
+4. The first call succeeds; the second throws the exception, which is caught and handled.
 
-In a JSON parser, `InvalidJsonException extends RuntimeException` is thrown when the input is malformed. The library does not force callers to handle it because malformed JSON is typically a programming error or data corruption issue. In a Spring application, `IllegalArgumentException` (a standard unchecked exception) is often thrown for invalid method parameters, and Spring's `@Valid` annotation handles them at the framework level.
+### Real-World Cases
 
-**References Links**
+- **File I/O:** `IOException` and its subclasses are checked.
+- **Database:** `SQLException` is checked.
+- **Reflection:** `ClassNotFoundException`, `NoSuchMethodException` are checked.
+- **Custom APIs:** Libraries that want to force callers to handle domain-specific errors.
 
-- Unchecked Exceptions — The Controversy (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/essential/exceptions/runtime.html
-- Tuscany Java Coding Guidelines: Checked vs. unchecked exceptions – https://svn.apache.org/repos/asf/tuscany/java/sca/trunk/CodingGuidelines.txt
-- SEI CERT ERR51-J: Prefer user-defined exceptions over more general exception types – https://wiki.sei.cmu.edu/confluence/display/java/ERR51-J.+Prefer+user-defined+exceptions+over+more+general+exception+types
+---
 
+## 3. Unchecked Custom Exceptions
 
-## 3. Best Practices for Custom Exception Constructors
+### Definitions
 
-**Core Definition:** The standard constructor pattern for a custom exception mirrors the four `Throwable` constructors: no-argument, message-only, cause-only, and message-and-cause.
+**Core Definition:** An unchecked custom exception is a custom exception that extends `RuntimeException`, which the compiler does not require to be caught or declared.
 
-**Technical Definition:** Josh Bloch's Effective Java (Item 75) recommends that custom exceptions should provide the same constructors as the base `Exception` class. The four constructors delegate to the corresponding `super` constructors. The no-argument constructor is optional but recommended for serialization frameworks. Each constructor should call the appropriate `super` constructor with the matching parameters.
+**Technical Definition:** "Unchecked Exceptions: Extend `RuntimeException`. They don't need to be explicitly caught or declared".
 
-**Beginner-Friendly Explanation:** When you create a custom exception, it is polite to give it the same set of constructors that the standard `Exception` class has. That way, users of your exception can create it with a message, with a cause, with both, or with neither—just like they can with standard exceptions.
+**Beginner-Friendly Explanation:** An unchecked exception is like an unexpected event that the compiler doesn't force you to plan for. They usually indicate programming mistakes (like invalid arguments) that should be fixed in the code rather than caught at runtime.
 
-### 3.1 The Four Standard Constructors
+### Purposes
 
-**Definitions**
+- To signal programming errors (bugs) that should be fixed rather than caught
+- To avoid cluttering method signatures with exceptions that callers cannot recover from
+- To work seamlessly with lambda expressions and streams
+- To enable fail-fast behaviour for invalid state or arguments
 
-- **Core Definition:** A well-designed custom exception provides four constructors that mirror the standard `Throwable` signatures.
-- **Technical Definition:** The four constructors are: `MyException()` (no arguments), `MyException(String message)` (message only), `MyException(Throwable cause)` (cause only), and `MyException(String message, Throwable cause)` (message and cause). Each delegates to the corresponding `super` constructor. The cause-only constructor passes the cause to `super(cause)`, which sets the detail message to `cause.toString()` if the cause is non-null.
-
-**Purposes**
-
-- To provide a consistent API that mirrors the standard exception classes.
-- To allow callers to supply as much or as little diagnostic information as needed.
-- To support exception chaining with a cause.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Complete constructor set**
+### Syntax Rules and Structure
 
 ```java
-public class PaymentException extends Exception {
-    private static final long serialVersionUID = 1L;
+public class MyUncheckedException extends RuntimeException {
+    public MyUncheckedException(String message) {
+        super(message);
+    }
+}
+```
 
-    public PaymentException() {
+**Syntax Rules:**
+
+- Must extend `RuntimeException`.
+- The compiler does not require handling.
+- Should be used for programming errors (invalid arguments, illegal state transitions).
+
+**Constraints and Limitations:**
+
+- Not suitable for recoverable conditions.
+- "Do not throw a `RuntimeException` or create a subclass of `RuntimeException` simply because you don't want to be bothered with specifying the exceptions your methods can throw" (Effective Java).
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: UncheckedCustomDemo.java
+public class UncheckedCustomDemo {
+
+    static class InvalidOrderException extends RuntimeException {
+        public InvalidOrderException(String message) {
+            super(message);
+        }
+        public InvalidOrderException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    static void processOrder(String orderId, double amount) {
+        if (orderId == null || orderId.isEmpty()) {
+            throw new InvalidOrderException("Order ID cannot be empty");
+        }
+        if (amount <= 0) {
+            throw new InvalidOrderException("Amount must be positive: " + amount);
+        }
+        System.out.println("Order " + orderId + " processed for $" + amount);
+    }
+
+    public static void main(String[] args) {
+        processOrder("ORD-001", 99.99);  // Output: Order ORD-001 processed for $99.99
+
+        try {
+            processOrder("", 50.0);
+        } catch (InvalidOrderException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Order ORD-001 processed for $99.99
+Error: Order ID cannot be empty
+```
+
+**Step-by-Step Explanation:**
+
+1. `InvalidOrderException` extends `RuntimeException`, making it unchecked.
+2. The compiler does not require a `try-catch` for `processOrder`.
+3. The first call succeeds; the second throws the exception, which is caught optionally.
+4. The `try-catch` is used for graceful error handling, not because the compiler requires it.
+
+### Real-World Cases
+
+- **Argument Validation:** `IllegalArgumentException` is the standard unchecked exception.
+- **State Validation:** `IllegalStateException` for invalid object state.
+- **Domain Errors:** `InvalidOrderException`, `PaymentDeclinedException` when the caller cannot recover.
+
+---
+
+## 4. Exception Constructors
+
+### Definitions
+
+**Core Definition:** Exception constructors are the constructors provided by a custom exception class that initialise the exception with a message, a cause, or both.
+
+**Technical Definition:** The four standard constructors are: no-argument, message-only, cause-only, and message+cause. "So yes, providing the same constructors as `Exception`, and delegating to the corresponding super constructor, is a good rule of thumb".
+
+**Beginner-Friendly Explanation:** Exception constructors are like different ways to fill out an incident report. You can write just the "what happened" (message), just the "why it happened" (cause), both, or leave it blank.
+
+### Purposes
+
+- To provide flexibility in how the exception is created
+- To ensure the exception carries all necessary information (message, cause)
+- To maintain consistency with the standard `Exception` class
+
+### Syntax Rules and Structure
+
+```java
+public class CustomException extends Exception {
+    // 1. No-argument constructor
+    public CustomException() {
         super();
     }
 
-    public PaymentException(String message) {
+    // 2. Message-only constructor
+    public CustomException(String message) {
         super(message);
     }
 
-    public PaymentException(Throwable cause) {
+    // 3. Message + cause constructor
+    public CustomException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    // 4. Cause-only constructor
+    public CustomException(Throwable cause) {
+        super(cause);
+    }
+}
+```
+
+**Component Breakdown:**
+
+| Constructor | Description |
+|-------------|-------------|
+| `CustomException()` | Creates an exception with no message or cause. |
+| `CustomException(String message)` | Creates an exception with a message. |
+| `CustomException(String message, Throwable cause)` | Creates an exception with a message and a cause. |
+| `CustomException(Throwable cause)` | Creates an exception with a cause; message is derived from cause. |
+
+**Syntax Rules:**
+
+- Each constructor should delegate to the corresponding `super()` constructor.
+- The `serialVersionUID` should be declared as `private static final long`.
+- Additional fields should be initialised in the constructors.
+
+**Constraints and Limitations:**
+
+- The no-argument constructor provides minimal debugging information.
+- The cause-only constructor derives the message from `cause.toString()`, which may not be ideal.
+- Lombok's `@StandardException` can generate all four constructors automatically.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: FullConstructorException.java
+public class FullConstructorException extends Exception {
+    private static final long serialVersionUID = 1L;
+
+    public FullConstructorException() {
+        super();
+    }
+
+    public FullConstructorException(String message) {
+        super(message);
+    }
+
+    public FullConstructorException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public FullConstructorException(Throwable cause) {
         super(cause);
     }
 
-    public PaymentException(String message, Throwable cause) {
-        super(message, cause);
-    }
-}
-```
-
-**Example 2: Using all four constructors**
-
-```java
-public class PaymentExceptionDemo {
     public static void main(String[] args) {
-        // No-arg constructor
-        PaymentException e1 = new PaymentException();
-        System.out.println("No-arg: " + e1.getMessage()); // null
+        // Using each constructor
+        FullConstructorException e1 = new FullConstructorException();
+        FullConstructorException e2 = new FullConstructorException("Message only");
+        FullConstructorException e3 = new FullConstructorException("Message and cause",
+            new RuntimeException("Root cause"));
+        FullConstructorException e4 = new FullConstructorException(
+            new RuntimeException("Cause only"));
 
-        // Message-only constructor
-        PaymentException e2 = new PaymentException("Payment declined");
-        System.out.println("Message: " + e2.getMessage()); // Payment declined
-
-        // Cause-only constructor
-        PaymentException e3 = new PaymentException(new RuntimeException("Timeout"));
-        System.out.println("Cause: " + e3.getCause().getMessage()); // Timeout
-
-        // Message-and-cause constructor
-        PaymentException e4 = new PaymentException("Payment declined",
-                new RuntimeException("Insufficient funds"));
-        System.out.println("Full: " + e4.getMessage() + " / "
-                + e4.getCause().getMessage());
+        System.out.println("e1 message: " + e1.getMessage());
+        System.out.println("e2 message: " + e2.getMessage());
+        System.out.println("e3 message: " + e3.getMessage());
+        System.out.println("e3 cause: " + e3.getCause().getMessage());
+        System.out.println("e4 message: " + e4.getMessage());
+        System.out.println("e4 cause: " + e4.getCause().getMessage());
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-No-arg: null
-Message: Payment declined
-Cause: Timeout
-Full: Payment declined / Insufficient funds
+e1 message: null
+e2 message: Message only
+e3 message: Message and cause
+e3 cause: Root cause
+e4 message: java.lang.RuntimeException: Cause only
+e4 cause: Cause only
 ```
 
-**Why the code produces this result:** Each constructor delegates to the corresponding `super` constructor. The no-arg constructor produces `null` message. The cause-only constructor sets the cause, and `getMessage()` returns `cause.toString()` (which for `RuntimeException` includes the message “Timeout”). The message-and-cause constructor sets both independently.
+**Step-by-Step Explanation:**
 
-**Real-World Cases with Explanation**
+1. The class provides all four standard constructors.
+2. `e1` has no message or cause.
+3. `e2` has a message only.
+4. `e3` has both a message and a cause.
+5. `e4` has a cause only; the message is derived from `cause.toString()`.
 
-In a persistence framework, a `DataAccessException` provides all four constructors so that DAO implementations can wrap `SQLException` causes with domain-specific messages. In a service layer, a `ServiceException` provides all four constructors to support different levels of diagnostic detail.
+### Real-World Cases
 
-**References Links**
+- **Library Design:** Public exceptions should provide all four constructors for maximum flexibility.
+- **Lombok Users:** `@StandardException` generates all four constructors automatically.
+- **Framework Integration:** Frameworks may require specific constructors for exception mapping.
 
-- Creating Exception Classes (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/essential/exceptions/creating.html
-- Throwable (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Throwable.html
-- Lombok @StandardException (Baeldung) – https://www.baeldung.com/lombok-standardexception-annotation
+---
 
-### 3.2 serialVersionUID
+## 5. Exception Messages
 
-**Definitions**
+### Definitions
 
-- **Core Definition:** A unique identifier for a serializable class used during deserialization to verify that the sender and receiver of a serialized object have loaded classes for that object that are compatible with respect to serialization.
-- **Technical Definition:** `serialVersionUID` is a `static final long` field. If a serializable class does not explicitly declare a `serialVersionUID`, the serialization runtime calculates a default value based on various aspects of the class. Oracle strongly recommends that all serializable classes explicitly declare `serialVersionUID` values because the default process is highly sensitive to compiler implementation details, which can cause unexpected `InvalidClassException` during deserialization.
-- **Beginner-Friendly Explanation:** If you plan to send your exception over a network or save it to a file, you should give it a version number. This ensures that when the exception is read back, Java can verify that the class definition has not changed in an incompatible way.
+**Core Definition:** An exception message is a human-readable string that describes the error condition.
 
-**Syntax Structures and Rules**
+**Technical Definition:** "The detail message is saved for later retrieval by the `getMessage()` method". The message should contain all relevant data that contributed to the exception.
 
-Complete general syntax:
+**Beginner-Friendly Explanation:** The exception message is the "what happened" part of the error report. It should tell you enough to understand the problem without needing to read the code.
+
+### Purposes
+
+- To provide a human-readable description of the error
+- To include failure-capture information (values, context)
+- To aid debugging and logging
+- To communicate the problem to users or developers
+
+### Syntax Rules and Structure
 
 ```java
-private static final long serialVersionUID = 1L;
+throw new CustomException("Invalid value: " + value + " (expected: " + expected + ")");
 ```
 
-Component breakdown:
+**Component Breakdown:**
 
-- Must be `static`, `final`, and of type `long`.
-- The value is arbitrary but should be changed when the class definition changes in an incompatible way.
-- If serialization is not required, this field may be omitted.
+| Component | Description |
+|-----------|-------------|
+| Literal text | Describes the error condition. |
+| Variable values | Captures the actual values that caused the error. |
+| Context | Additional information (expected values, ranges). |
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
+**Syntax Rules:**
 
-**Example 1: Exception with serialVersionUID**
+- Include all relevant data: the invalid value, the expected condition, and context.
+- Avoid including sensitive information (passwords, keys).
+- Use clear, descriptive language.
+- Prefer including values in the message rather than requiring the caller to inspect fields.
+
+**Constraints and Limitations:**
+
+- Messages should not be parsed programmatically; use exception types for programmatic handling.
+- Messages should not expose sensitive information.
+- Very long messages may be truncated in logs.
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
+// File: MessageDemo.java
+public class MessageDemo {
+
+    static class RangeException extends RuntimeException {
+        public RangeException(int value, int min, int max) {
+            super("Value " + value + " is outside the allowed range [" + min + ", " + max + "]");
+        }
+    }
+
+    static void checkRange(int value) {
+        if (value < 0 || value > 100) {
+            throw new RangeException(value, 0, 100);
+        }
+        System.out.println("Value accepted: " + value);
+    }
+
+    public static void main(String[] args) {
+        checkRange(50);   // Output: Value accepted: 50
+        try {
+            checkRange(150);
+        } catch (RangeException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Value accepted: 50
+Error: Value 150 is outside the allowed range [0, 100]
+```
+
+**Step-by-Step Explanation:**
+
+1. `RangeException` builds a message that includes the invalid value and the allowed range.
+2. `checkRange` throws the exception when the value is out of range.
+3. The message provides all the information needed to understand the error without inspecting the exception object.
+
+### Real-World Cases
+
+- **Validation:** "Age -5 is invalid; must be between 0 and 150."
+- **File Processing:** "File '/data/input.csv' not found."
+- **Network:** "Connection to 'api.example.com:443' timed out after 30 seconds."
+
+---
+
+## 6. Exception Causes
+
+### Definitions
+
+**Core Definition:** An exception cause is the original exception that triggered the creation of a new exception, preserved for diagnostic purposes.
+
+**Technical Definition:** "The `Throwable` argument to `initCause` and the `Throwable` constructors is the exception that caused the current exception. `getCause` returns the exception that caused the current exception". "Note that the detail message associated with `cause` is not automatically incorporated in this exception's detail message".
+
+**Beginner-Friendly Explanation:** A cause is like a chain of dominoes. When one exception triggers another, the original exception is preserved as the cause so you can trace the problem back to its source.
+
+### Purposes
+
+- To preserve the original exception when wrapping it in a higher-level exception
+- To provide a complete chain of errors for debugging
+- To translate low-level exceptions into domain-specific exceptions while retaining context
+- To enable root-cause analysis in logs
+
+### Syntax Rules and Structure
+
+```java
+try {
+    // risky code
+} catch (LowLevelException e) {
+    throw new HighLevelException("Context message", e);  // e is the cause
+}
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `HighLevelException` | The wrapping exception. |
+| `e` | The original cause. |
+| `getCause()` | Retrieves the original exception. |
+
+**Syntax Rules:**
+
+- The cause is set via the constructor `(String message, Throwable cause)` or `initCause()`.
+- `getCause()` returns the original exception, or `null` if unknown.
+- Chained exceptions form a linked list accessible via repeated `getCause()` calls.
+
+**Constraints and Limitations:**
+
+- The cause's message is not automatically included in the wrapper's message.
+- Cause chains can become deep; use `getCause()` iteratively to traverse.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: CauseDemo.java
 import java.io.*;
 
-public class SerializableException extends Exception implements Serializable {
-    private static final long serialVersionUID = 1L;
+public class CauseDemo {
 
-    public SerializableException(String message) {
-        super(message);
+    static class ProcessingException extends RuntimeException {
+        public ProcessingException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
-    public static void main(String[] args) throws Exception {
-        SerializableException original = new SerializableException("Test");
-
-        // Serialize
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(original);
-        oos.close();
-
-        // Deserialize
-        ObjectInputStream ois = new ObjectInputStream(
-                new ByteArrayInputStream(baos.toByteArray()));
-        SerializableException restored = (SerializableException) ois.readObject();
-        ois.close();
-
-        System.out.println("Restored: " + restored.getMessage());
+    static void processFile(String path) {
+        try {
+            throw new IOException("File not found: " + path);
+        } catch (IOException e) {
+            throw new ProcessingException("Failed to process: " + path, e);
+        }
     }
-}
-```
-
-Expected Output:
-
-```
-Restored: Test
-```
-
-**Real-World Cases with Explanation**
-
-In an RPC framework, exceptions are serialized and sent across the network. Declaring `serialVersionUID` ensures that both client and server agree on the exception class version. In a distributed system using Java serialization, omitting `serialVersionUID` can cause `InvalidClassException` after a minor code change.
-
-**References Links**
-
-- Serializable (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html
-- Java Object Serialization Specification – https://docs.oracle.com/en/java/javase/21/docs/specs/serialization/index.html
-
-### 3.3 Naming Conventions
-
-**Definitions**
-
-- **Core Definition:** Custom exception classes should be named with a descriptive noun followed by the suffix “Exception.”
-- **Technical Definition:** Oracle's Java Tutorials recommend: “For readable code, it's good practice to append the string Exception to the names of all classes that inherit (directly or indirectly) from the Exception class.” Standard Java naming conventions apply: class names use CamelCase with an initial capital letter.
-- **Beginner-Friendly Explanation:** Name your exception after the problem it represents, and end the name with “Exception.” For example, `InsufficientFundsException`, not `InsufficientFundsError` or `FundsProblem`.
-
-**Syntax Structures and Rules**
-
-```java
-public class InsufficientFundsException extends Exception { ... }
-public class InvalidCustomerAgeException extends RuntimeException { ... }
-```
-
-**References Links**
-
-- Creating Exception Classes (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/essential/exceptions/creating.html
-- Java Code Conventions: Naming Conventions – https://www.oracle.com/java/technologies/javase/codeconventions-namingconventions.html
-
-
-## 4. Adding Contextual Error Information and Custom State/Fields
-
-**Core Definition:** Adding contextual information to a custom exception means declaring additional instance fields that carry diagnostic data (such as IDs, values, or timestamps) beyond the standard message and cause.
-
-**Technical Definition:** A custom exception may declare instance fields for domain-specific contextual data. These fields are initialized in the exception's constructors and exposed via getter methods. Because the additional fields cannot be passed to the `superclass` constructors, the exception class manages them itself. The `getMessage()` method may be overridden to include the contextual data in the formatted message, or the fields may be exposed separately for programmatic access.
-
-**Beginner-Friendly Explanation:** Sometimes a simple message like “Payment failed” is not enough. You might want to know the account number, the amount, and the timestamp of the failure. You can add these as fields to your exception class so that whoever catches it can read them and decide what to do.
-
-### 4.1 Adding Custom Fields
-
-**Definitions**
-
-- **Core Definition:** Instance fields that store domain-specific data about the error condition.
-- **Technical Definition:** Fields are declared as `private final` (or at least `private`) and initialized in the constructor. Getter methods expose the values. Because `Throwable` does not provide a mechanism to pass arbitrary fields to the superclass, the custom exception class is responsible for managing them. The `getMessage()` method may be overridden to incorporate these fields into the message.
-- **Beginner-Friendly Explanation:** You add fields like `accountNumber`, `amount`, or `timestamp` to your exception class. When you throw the exception, you fill in these fields. When someone catches it, they can call getter methods to read the values.
-
-**Purposes**
-
-- To provide diagnostic information that is not captured by the message alone.
-- To enable programmatic recovery based on the contextual data.
-- To support logging and monitoring systems that need structured error data.
-
-**Syntax Structures and Rules**
-
-Complete general syntax:
-
-```java
-public class InsufficientFundsException extends Exception {
-    private final String accountNumber;
-    private final double requestedAmount;
-    private final double availableBalance;
-
-    public InsufficientFundsException(String accountNumber,
-                                      double requestedAmount,
-                                      double availableBalance) {
-        super("Insufficient funds in account " + accountNumber
-                + ": requested " + requestedAmount
-                + ", available " + availableBalance);
-        this.accountNumber = accountNumber;
-        this.requestedAmount = requestedAmount;
-        this.availableBalance = availableBalance;
-    }
-
-    public String getAccountNumber() { return accountNumber; }
-    public double getRequestedAmount() { return requestedAmount; }
-    public double getAvailableBalance() { return availableBalance; }
-}
-```
-
-Component breakdown:
-
-- Fields are `private final` for immutability.
-- The `super` constructor is called with a formatted message that includes the contextual data.
-- The fields are assigned after the `super` call.
-- Getter methods expose the fields.
-
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
-
-**Example 1: Exception with multiple context fields**
-
-```java
-public class InsufficientFundsException extends Exception {
-    private final String accountNumber;
-    private final double requestedAmount;
-    private final double availableBalance;
-
-    public InsufficientFundsException(String accountNumber,
-                                      double requestedAmount,
-                                      double availableBalance) {
-        super("Insufficient funds in account " + accountNumber
-                + ": requested " + requestedAmount
-                + ", available " + availableBalance);
-        this.accountNumber = accountNumber;
-        this.requestedAmount = requestedAmount;
-        this.availableBalance = availableBalance;
-    }
-
-    public String getAccountNumber() { return accountNumber; }
-    public double getRequestedAmount() { return requestedAmount; }
-    public double getAvailableBalance() { return availableBalance; }
 
     public static void main(String[] args) {
         try {
-            withdraw("ACC-123", 500.00, 200.00);
-        } catch (InsufficientFundsException e) {
+            processFile("data.txt");
+        } catch (ProcessingException e) {
             System.out.println("Error: " + e.getMessage());
-            System.out.println("Account: " + e.getAccountNumber());
-            System.out.println("Shortfall: $" +
-                    (e.getRequestedAmount() - e.getAvailableBalance()));
-        }
-    }
-
-    public static void withdraw(String account, double amount, double balance)
-            throws InsufficientFundsException {
-        if (amount > balance) {
-            throw new InsufficientFundsException(account, amount, balance);
+            System.out.println("Cause: " + e.getCause().getMessage());
         }
     }
 }
 ```
 
-Expected Output:
-
+**Expected Output:**
 ```
-Error: Insufficient funds in account ACC-123: requested 500.0, available 200.0
-Account: ACC-123
-Shortfall: $300.0
+Error: Failed to process: data.txt
+Cause: File not found: data.txt
 ```
 
-**Why the code produces this result:** The exception carries three pieces of contextual data: the account number, the requested amount, and the available balance. The `getMessage()` returns a formatted string that includes all three. The catch block can also access the fields programmatically to compute the shortfall.
+**Step-by-Step Explanation:**
 
-**Real-World Cases with Explanation**
+1. `processFile` catches an `IOException` and wraps it in a `ProcessingException`.
+2. The original `IOException` is preserved as the cause via the constructor.
+3. `getCause()` retrieves the original exception for diagnostic purposes.
+4. The output shows both the wrapper message and the root cause.
 
-In a payment processing system, a `PaymentDeclinedException` carries the transaction ID, the decline reason code, and the timestamp. In a file-processing system, a `FileParseException` carries the file name, the line number, and the offending content. In a validation framework, a `ValidationException` carries a list of field-level validation errors.
+### Real-World Cases
 
-**References Links**
+- **Service Layers:** Wrapping `SQLException` in a domain-specific `DataAccessException`.
+- **API Clients:** Wrapping `IOException` in a `ServiceException`.
+- **Framework Integration:** Translating framework exceptions to application exceptions.
+- **Logging:** Logging full cause chains for root-cause analysis.
 
-- How to create exception with specific fields? (Stack Overflow) – https://stackoverflow.com/questions/75672719/how-to-create-exception-with-specific-fields
-- Adding custom fields to Java exception (Stack Overflow) – https://stackoverflow.com/questions/22839961/adding-custom-fields-to-java-exception
+---
 
-### 4.2 ContextedException Pattern (Apache Commons Lang)
+## 7. Exception Best Practices
 
-**Definitions**
+### Definitions
 
-- **Core Definition:** A pattern for adding contextual information to any exception without creating a new subclass, using the `ContextedException` and `ContextedRuntimeException` classes from Apache Commons Lang.
-- **Technical Definition:** `ContextedException` and `ContextedRuntimeException` provide a mechanism to attach label-value pairs to an exception. The contextual data is automatically included in the message and the printed stack trace. The `addContextValue(String label, Object value)` method adds a pair, and `getContextValues(String label)` retrieves values.
-- **Beginner-Friendly Explanation:** If you do not want to create a custom exception class just to add a few pieces of context, the Apache Commons Lang library provides ready-made exception classes that can carry contextual data. You create one, add label-value pairs, and the data is automatically included in the stack trace.
+**Core Definition:** Exception best practices are guidelines for creating, throwing, catching, and documenting custom exceptions effectively.
 
-**Purposes**
+**Technical Definition:** Best practices derive from authoritative sources including *Effective Java* by Joshua Bloch, the SEI CERT Oracle Coding Standard for Java, and Oracle's Java Tutorials. Key principles include using exceptions only for exceptional conditions, favouring standard exceptions when possible, and preserving failure-capture information.
 
-- To add contextual data to exceptions without creating custom subclasses.
-- To produce richer stack traces for debugging and logging.
-- To allow contextual data to be added at multiple levels of the call stack.
+**Beginner-Friendly Explanation:** Best practices help you use exceptions correctly without making your code hard to read or maintain. They're like traffic rules for exceptions — they keep things orderly and prevent accidents.
 
-**Syntax Structures and Rules**
+### Purposes
 
-Complete general syntax:
+- To improve code readability and maintainability
+- To ensure exceptions are used for their intended purpose
+- To provide meaningful error information
+- To avoid common pitfalls
+
+### Key Best Practices
+
+| Practice | Description |
+|----------|-------------|
+| Prefer User-Defined Exceptions Over General Types | "Because an exception is caught by its type, it is better to define exceptions for specific purposes than to use the general exception types". |
+| Use Exceptions Only for Exceptional Conditions | Do not use exceptions for control flow. |
+| Use Checked Exceptions for Recoverable Conditions | Use unchecked for programming errors. |
+| Favor Standard Exceptions | Use `IllegalArgumentException`, `IllegalStateException`, etc., when they fit. |
+| Document Exceptions with Javadoc | Use `@throws` tags to document conditions. |
+| Include Failure-Capture Information | Exception messages should contain all relevant data. |
+| Preserve the Cause | Always pass the original exception when wrapping. |
+| Provide All Four Constructors | Mirror the standard `Exception` constructors. |
+| Declare `serialVersionUID` | Since `Throwable` is `Serializable`, declare `private static final long serialVersionUID = 1L`. |
+| Name with "Exception" Suffix | End the class name with `Exception` for easy identification. |
+| Avoid Exposing Sensitive Information | Do not include passwords, keys, or internal paths in messages. |
+| Use Lombok's `@StandardException` | Generate all four constructors automatically. |
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-throw new ContextedRuntimeException("Error message", cause)
-    .addContextValue("Label1", value1)
-    .addContextValue("Label2", value2);
-```
+// File: BestPracticesCustomException.java
+import java.util.*;
 
-Component breakdown:
+public class BestPracticesCustomException {
 
-- `ContextedRuntimeException` or `ContextedException`: the wrapper exception.
-- `.addContextValue(label, value)`: adds a label-value pair. Returns the same exception for chaining.
-- The contextual data is included in the message when `printStackTrace()` or `getMessage()` is called.
+    // GOOD: Descriptive name ending with "Exception"
+    // GOOD: All four constructors
+    // GOOD: serialVersionUID declared
+    // GOOD: Additional failure-capture field
+    public static class InvalidOrderException extends Exception {
+        private static final long serialVersionUID = 1L;
 
-**Multiple Annotated Complete Code Examples and Their Expected Outputs**
+        private final String orderId;
+        private final double amount;
 
-**Example 1: ContextedRuntimeException with contextual data**
+        public InvalidOrderException() {
+            this(null, 0.0, "Invalid order");
+        }
 
-```java
-import org.apache.commons.lang3.exception.ContextedRuntimeException;
+        public InvalidOrderException(String message) {
+            this(null, 0.0, message);
+        }
 
-public class ContextedExceptionExample {
+        public InvalidOrderException(String message, Throwable cause) {
+            this(null, 0.0, message, cause);
+        }
+
+        public InvalidOrderException(Throwable cause) {
+            this(null, 0.0, cause.getMessage(), cause);
+        }
+
+        public InvalidOrderException(String orderId, double amount, String message) {
+            super(message);
+            this.orderId = orderId;
+            this.amount = amount;
+        }
+
+        public InvalidOrderException(String orderId, double amount, String message, Throwable cause) {
+            super(message, cause);
+            this.orderId = orderId;
+            this.amount = amount;
+        }
+
+        public String getOrderId() { return orderId; }
+        public double getAmount() { return amount; }
+    }
+
+    // GOOD: Validate and throw with failure-capture information
+    public static void processOrder(String orderId, double amount) throws InvalidOrderException {
+        if (orderId == null || orderId.isEmpty()) {
+            throw new InvalidOrderException(orderId, amount, "Order ID cannot be empty");
+        }
+        if (amount <= 0) {
+            throw new InvalidOrderException(orderId, amount,
+                "Amount must be positive: " + amount);
+        }
+        System.out.println("Order " + orderId + " processed for $" + amount);
+    }
+
     public static void main(String[] args) {
         try {
-            processTransaction("ACC-456", 1500.00);
-        } catch (ContextedRuntimeException e) {
-            e.printStackTrace();
-        }
-    }
+            processOrder("ORD-001", 99.99);
+            // Output: Order ORD-001 processed for $99.99
 
-    public static void processTransaction(String account, double amount) {
-        try {
-            throw new RuntimeException("Insufficient funds");
-        } catch (RuntimeException cause) {
-            throw new ContextedRuntimeException("Transaction failed", cause)
-                    .addContextValue("Account Number", account)
-                    .addContextValue("Amount", amount)
-                    .addContextValue("Timestamp", System.currentTimeMillis());
+            processOrder("", 50.0);
+        } catch (InvalidOrderException e) {
+            System.out.println("Error: " + e.getMessage());
+            System.out.println("Order ID: " + e.getOrderId());
+            System.out.println("Amount: " + e.getAmount());
         }
     }
 }
 ```
 
-Expected Output (approximate):
-
+**Expected Output:**
 ```
-org.apache.commons.lang3.exception.ContextedRuntimeException: Transaction failed
-Exception Context:
-    [1:Account Number=ACC-456]
-    [2:Amount=1500.0]
-    [3:Timestamp=1700000000000]
-    at ContextedExceptionExample.processTransaction(ContextedExceptionExample.java:14)
-    at ContextedExceptionExample.main(ContextedExceptionExample.java:5)
-Caused by: java.lang.RuntimeException: Insufficient funds
-    at ContextedExceptionExample.processTransaction(ContextedExceptionExample.java:12)
-    ... 1 more
+Order ORD-001 processed for $99.99
+Error: Order ID cannot be empty
+Order ID: 
+Amount: 50.0
 ```
 
-**Why the code produces this result:** The `ContextedRuntimeException` wraps the original `RuntimeException` and attaches three label-value pairs. The `printStackTrace()` method formats the contextual data into the output.
+**Step-by-Step Explanation:**
 
-**Real-World Cases with Explanation**
+1. `InvalidOrderException` follows the naming convention (ends with `Exception`).
+2. It declares `serialVersionUID` for serialization compatibility.
+3. It provides all four standard constructors plus additional constructors with failure-capture fields.
+4. `processOrder` throws the exception with the invalid order ID and amount.
+5. The `catch` block accesses both the message and the custom fields.
 
-In a microservices architecture, a `ContextedRuntimeException` is used to attach correlation IDs, user IDs, and request paths to exceptions before they are logged or propagated. In a batch processing system, each record's failure is wrapped in a contexted exception carrying the record's identifier and position.
+### Real-World Cases
 
-**References Links**
+- **Library APIs:** Public exceptions should provide all four constructors and document their conditions.
+- **Domain Models:** Business exceptions should carry context (order ID, customer ID, amounts).
+- **Framework Integration:** Custom exceptions should preserve causes for root-cause analysis.
+- **Code Reviews:** Best practices form the basis for reviewing exception handling code.
 
-- ContextedRuntimeException (Apache Commons Lang API) – https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/exception/ContextedRuntimeException.html
-- ContextedException (Apache Commons Lang API) – https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/exception/ContextedException.html
+---
 
+## References Links
 
-## Summary Table of Custom Exception Design
-
-| Aspect | Checked Exception | Unchecked Exception | Context-Rich Exception |
-|---|---|---|---|
-| **Superclass** | `Exception` | `RuntimeException` | Either |
-| **Compiler enforcement** | Must catch or declare | No enforcement | Depends on superclass |
-| **When to use** | Recoverable, caller can handle | Programming error, unrecoverable | When diagnostic data is needed |
-| **Standard constructors** | 4 (no-arg, message, cause, both) | 4 (same) | Custom + context |
-| **serialVersionUID** | Required if serializable | Required if serializable | Required if serializable |
-| **Naming** | `SomethingException` | `SomethingException` | `SomethingException` |
-| **Context fields** | Optional | Optional | Required |
-
-
-## Version-Specific Notes
-
-- The `Throwable` cause-chaining mechanism (constructors accepting `Throwable cause`, `initCause()`, `getCause()`) was introduced in Java 1.4. Custom exceptions that predate Java 1.4 used only the message and no cause.
-- `ContextedException` and `ContextedRuntimeException` are provided by Apache Commons Lang, not the JDK. They require the Commons Lang dependency.
-- Lombok's `@StandardException` annotation (experimental, Lombok v1.18.21+) generates the four standard constructors automatically.
-- `serialVersionUID` is recommended for all serializable classes, including exceptions, per the `Serializable` interface documentation.
-- The Java Tutorials recommend appending “Exception” to the names of all classes that inherit from `Exception`.
-
-
-## References
-
-- Creating Exception Classes (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/essential/exceptions/creating.html
-- Unchecked Exceptions — The Controversy (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/essential/exceptions/runtime.html
-- The Catch or Specify Requirement (The Java Tutorials) – https://docs.oracle.com/javase/tutorial/essential/exceptions/catchOrDeclare.html
-- JLS §11.2: Compile-Time Checking of Exceptions – https://docs.oracle.com/javase/specs/jls/se21/html/jls-11.html#jls-11.2
-- Throwable (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Throwable.html
-- Serializable (Java SE 21) – https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/Serializable.html
-- Java Object Serialization Specification – https://docs.oracle.com/en/java/javase/21/docs/specs/serialization/index.html
-- SEI CERT ERR51-J: Prefer user-defined exceptions over more general exception types – https://wiki.sei.cmu.edu/confluence/display/java/ERR51-J.+Prefer+user-defined+exceptions+over+more+general+exception+types
-- Tuscany Java Coding Guidelines: Checked vs. unchecked exceptions – https://svn.apache.org/repos/asf/tuscany/java/sca/trunk/CodingGuidelines.txt
-- ContextedRuntimeException (Apache Commons Lang API) – https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/exception/ContextedRuntimeException.html
-- ContextedException (Apache Commons Lang API) – https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/exception/ContextedException.html
-- Lombok @StandardException (Baeldung) – https://www.baeldung.com/lombok-standardexception-annotation
-- How to create exception with specific fields? (Stack Overflow) – https://stackoverflow.com/questions/75672719/how-to-create-exception-with-specific-fields
-- Adding custom fields to Java exception (Stack Overflow) – https://stackoverflow.com/questions/22839961/adding-custom-fields-to-java-exception
-- Java Code Conventions: Naming Conventions – https://www.oracle.com/java/technologies/javase/codeconventions-namingconventions.html
+- Creating Exception Classes — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/essential/exceptions/creating.html
+- Create a Custom Exception in Java — Baeldung - https://www.baeldung.com/java-new-custom-exception
+- ERR51-J. Prefer user-defined exceptions over more general exception types — SEI CERT Oracle Coding Standard for Java - https://wiki.sei.cmu.edu/confluence/display/java/ERR51-J.+Prefer+user-defined+exceptions+over+more+general+exception+types
+- Java Custom Exceptions — Compile-N-Run (GitHub) - https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/language/java/5-java-exception-handling/2-java-custom-exceptions.mdx
+- Class Exception — Java Platform SE API Specification - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Exception.html
+- @StandardException Annotation — Project Lombok - https://projectlombok.org/features/StandardException
+- @StandardException Annotation in Lombok — Baeldung - https://www.baeldung.com/java-lombok-standard-exception
+- Effective Java (3rd Edition) by Joshua Bloch — Chapter 10: Exceptions
+- Java Exceptions Tutorial: Try-Catch, Throws, Checked vs Unchecked, Best Practices — Cleverence - https://www.cleverence.com/articles/oracle-documentation/java-exceptions-tutorial-4821/

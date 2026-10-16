@@ -783,14 +783,14 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Critical sections
   - Mutual exclusion
 
-- [**85. Java Memory Model**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/MemoryModel.md)
+- [**85. Java Memory Model**](/Programming%20Languages/Java/Memory%20Management/MemoryModel.md)
   - Visibility
   - Atomicity
   - Ordering
   - Happens-before relationships
   - Shared mutable state
 
-- [**86. Concurrency Utilities**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ConcurrencyUtilities.md)
+- **86. Concurrency Utilities**
   - `Executor`
   - `ExecutorService`
   - Thread pools
@@ -804,7 +804,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Blocking queues
   - Concurrent queues
 
-- [**88. Synchronization Utilities**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/SynchronizationUtilities.md)
+- **88. Synchronization Utilities**
   - Locks
   - `ReentrantLock`
   - Read/write locks
@@ -813,14 +813,14 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Barriers
   - Atomic variables
 
-- [**89. Concurrency Problems**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ConcurrencyProblems.md)
+- **89. Concurrency Problems**
   - Race conditions
   - Deadlocks
   - Starvation
   - Livelocks
   - Thread contention
 
-- [**90. Modern Concurrency**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ModernConcurrency.md)
+- **90. Modern Concurrency**
   - Virtual threads
   - Structured concurrency concepts
   - High-throughput task execution

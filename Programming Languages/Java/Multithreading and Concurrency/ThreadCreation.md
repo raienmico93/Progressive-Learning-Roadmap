@@ -1,1134 +1,1245 @@
-# Java Thread Creation & Basic Management: A Comprehensive Research Cheat Sheet
+# Java Threads: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition**
-Java thread creation and basic management is the set of language and API facilities for creating, starting, coordinating, and interrupting threads of execution within a Java program.
+**Core Definition:** A thread is the smallest unit of execution within a process, representing an independent path of execution through a program's code. Java threads allow a program to perform multiple tasks concurrently, sharing the same memory space and system resources.
 
-**Technical Definition**
-The `java.lang.Thread` class defines the fundamental abstraction for a thread of execution in Java. A thread is a unit of execution within a process that shares memory and resources with other threads in the same process but executes independently. The Java Virtual Machine allows an application to have multiple threads of execution running concurrently. Threads may be *platform threads* (mapped one-to-one to OS kernel threads) or *virtual threads* (scheduled by the Java runtime, introduced in Java 21).
+**Technical Definition:** "A thread is a thread of execution in a program. The Java virtual machine allows an application to have multiple threads of execution running concurrently". "Thread defines constructors and a Thread.Builder to create threads. Starting a thread schedules it to execute its run method. The newly started thread executes concurrently with the thread that caused it to start". "A thread terminates if either its run method completes normally, or if its run method completes abruptly and the appropriate uncaught exception handler completes normally or abruptly". Threads share the process's resources, including memory and open files, making communication between threads efficient but requiring synchronization to prevent data corruption.
 
-**Beginner-Friendly Explanation**
-Imagine a restaurant kitchen. One cook (a single-threaded program) can prepare only one dish at a time. With multiple cooks (multiple threads), many dishes can be prepared simultaneously. Java lets you create these "cooks" in several ways: by extending the `Thread` class, by implementing `Runnable`, or by using `Callable` when you need the cook to bring back a result. You can also tell a cook to stop what they're doing (interruption), wait for another cook to finish (joining), and configure how much counter space each cook gets (stack size).
+**Beginner-Friendly Explanation:** A thread is like a worker on an assembly line. The assembly line (the process) has a shared workspace, tools, and materials. Each worker (thread) performs their own task, and multiple workers can be active at the same time, coordinating their efforts. When you write a simple Java program, you're already using one worker — the main thread. Creating additional threads is like hiring more workers to get more done simultaneously. For example, one worker can download a file while another updates the user interface, so the program doesn't freeze.
 
 ### Key Characteristics
 
-- **Two Creation Approaches**: Threads can be created by extending `Thread` or by implementing `Runnable`; `Callable` extends the model to return results and throw checked exceptions.
-- **Cooperative Interruption**: Java does not forcibly stop threads. Interruption is a cooperative mechanism in which a thread must poll `isInterrupted()` or handle `InterruptedException` to respond.
-- **Thread Lifecycle States**: Threads transition through NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, and TERMINATED states.
-- **Thread Groups**: Every thread belongs to a `ThreadGroup`, used for bulk operations and uncaught exception handling; groups form a tree structure.
-- **Platform vs. Virtual Threads**: Platform threads map 1:1 to OS threads with large stacks; virtual threads are lightweight, JVM-scheduled, and designed for massive concurrency.
-- **Daemon Status**: Daemon threads do not prevent the JVM from exiting; non-daemon threads do. The JVM shutdown sequence begins when all non-daemon threads terminate.
+- **Concurrent Execution:** Multiple threads within a process can run concurrently, interleaving their execution.
+- **Shared Memory:** Threads share the process's memory space, enabling efficient communication but requiring synchronization.
+- **Independent Paths:** Each thread has its own call stack, program counter, and local variables.
+- **Lightweight:** Creating a thread is less expensive than creating a process.
+- **Platform Threads:** Mapped 1:1 to OS kernel threads, scheduled by the operating system.
+- **Virtual Threads (Java 21+):** JVM-managed lightweight threads suitable for I/O-bound tasks; a single JVM may support millions.
+- **Daemon Status:** Daemon threads do not prevent the JVM from shutting down when all non-daemon threads terminate.
+- **Priority Hints:** Thread priorities (1–10) provide hints to the scheduler but are platform-dependent.
+- **Thread Groups:** Threads can be organised into groups for bulk operations and exception handling.
 
 ### Prerequisites
 
-- Basic Java syntax (classes, interfaces, method overriding)
-- Understanding of the `main` method and program entry point
-- Familiarity with exception handling (`try-catch`, `throws`)
-- Basic awareness of the `java.util.concurrent` package
+- Basic understanding of Java classes, objects, and interfaces
+- Familiarity with the `java.lang` package
+- Knowledge of exceptions and try-catch-finally
+- Understanding of the `Runnable` interface (or willingness to learn)
 
 ### Related Programming Areas
 
-- **Concurrency and Parallelism**: Threads are the foundation for concurrent execution.
-- **Executor Framework**: `ExecutorService` manages thread pools, abstracting direct thread creation.
-- **Synchronization**: Shared mutable state requires synchronized access across threads.
-- **Asynchronous Programming**: `CompletableFuture` builds on `Callable` and `Future` for non-blocking pipelines.
-- **Structured Concurrency**: Java 21+ introduces structured task scopes for managing related concurrent tasks as a unit.
+- **Concurrency Fundamentals:** The broader topic of concurrent and parallel programming.
+- **Synchronization:** Coordinating access to shared resources (`synchronized`, locks).
+- **Thread Pools:** Reusing threads via `ExecutorService` for efficiency.
+- **Concurrent Collections:** Thread-safe data structures in `java.util.concurrent`.
+- **Asynchronous Programming:** `CompletableFuture`, reactive streams.
+- **Virtual Threads (Project Loom):** Lightweight threads for high-throughput concurrency.
 
 ### Core Concepts / Features
 
-Five core concepts are covered: (1) Thread vs. Runnable, (2) Callable and Future, (3) thread configuration (stack size, thread groups, execution overrides), (4) thread management (start, active threads, join), and (5) cooperative interruption.
-
 ---
 
-## Core Concept 1: Creating Explicit Tasks — Extending `Thread` vs. Implementing `Runnable`
+## 1. `Thread` Class
 
 ### Definitions
 
-**Core Definition**
-Java provides two primary mechanisms for defining a task to be executed by a new thread: extending the `Thread` class and overriding its `run` method, or implementing the `Runnable` interface and passing an instance to a `Thread` constructor.
+**Core Definition:** The `Thread` class in `java.lang` represents a thread of execution and provides the API for creating, starting, and managing threads.
 
-**Technical Definition**
-The `Thread` class itself implements `Runnable` and its `run()` method performs no action by default. A class that extends `Thread` can override `run()` to define the thread's execution body. Alternatively, a class that implements `Runnable` defines `run()` and is passed as the `target` to a `Thread` constructor; the thread's `run()` method then invokes the target's `run()` method. Per the `Thread` API documentation, if the `target` is null, the thread's own `run` method is called.
+**Technical Definition:** "A thread is a thread of execution in a program. The Java virtual machine allows an application to have multiple threads of execution running concurrently. Thread defines constructors and a Thread.Builder to create threads". The `Thread` class implements `Runnable` and provides methods for starting (`start()`), pausing (`sleep()`), waiting (`join()`), interrupting (`interrupt()`), and querying state (`getState()`). "Threads have a unique identifier and a name. The identifier is generated when a Thread is created and cannot be changed. The thread name can be specified when creating a thread or can be changed at a later time".
 
-**Beginner-Friendly Explanation**
-Think of a `Thread` as a worker and a `Runnable` as a job description. You can either create a worker who already knows their job (extending `Thread`), or you can write a job description and hand it to a generic worker (implementing `Runnable`). The second approach is more flexible because the worker and the job are separate.
+**Beginner-Friendly Explanation:** The `Thread` class is the blueprint for creating workers in Java. You create a `Thread` object, give it a task (via `run()` or a `Runnable`), and then call `start()` to hire the worker. The worker then executes the task in parallel with your main program. The `Thread` class also provides tools to manage workers — pausing them, waiting for them to finish, and asking them to stop.
 
 ### Purposes
 
-- To define the code that a new thread of execution will run when started.
-- To choose between tight coupling of task and thread (extending `Thread`) or separation of task from execution mechanism (implementing `Runnable`).
-- To enable a single task definition to be executed by multiple threads or an executor service.
-- To avoid Java's single inheritance limitation when the task class needs to extend another class.
+- To create and manage threads of execution within a Java program
+- To execute tasks concurrently, improving responsiveness and throughput
+- To provide lifecycle methods for controlling thread execution
+- To support thread naming, prioritisation, daemon status, and grouping
+- To serve as the foundation for higher-level concurrency utilities
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax — Extending Thread**
+**Complete General Syntax (Creating a Thread):**
 
 ```java
+// Approach 1: Extend Thread
 class MyThread extends Thread {
-    @Override
     public void run() {
-        // code to execute in the new thread
+        // task code
     }
 }
+new MyThread().start();
 
-// Usage:
-MyThread t = new MyThread();
-t.start();  // NOT t.run()
+// Approach 2: Implement Runnable (preferred)
+Runnable task = () -> { /* task code */ };
+new Thread(task).start();
+
+// Approach 3: Thread.Builder (Java 21+)
+Thread thread = Thread.ofPlatform().name("worker").start(() -> { /* task */ });
 ```
 
-**Complete General Syntax — Implementing Runnable**
-
-```java
-class MyTask implements Runnable {
-    @Override
-    public void run() {
-        // code to execute in the new thread
-    }
-}
-
-// Usage:
-Thread t = new Thread(new MyTask());
-t.start();
-```
-
-**Component Breakdown**
+**Component Breakdown:**
 
 | Component | Description |
 |-----------|-------------|
-| `extends Thread` | Inherits the `Thread` class; `run()` is overridden |
-| `implements Runnable` | Implements the functional interface `Runnable` |
-| `run()` | The entry point for the thread's execution; no parameters, no return value |
-| `start()` | Schedules the thread to begin execution; JVM calls `run()` internally |
+| `Thread` | The class representing a thread of execution |
+| `start()` | Schedules the thread to begin execution |
+| `run()` | Contains the thread's task |
+| `Runnable` | A functional interface for the task |
+| `Thread.Builder` | Modern API for creating threads (Java 21+) |
 
-**Syntax Rules**
+**Syntax Rules:**
 
-1. Always call `start()`, never `run()` directly; calling `run()` directly executes in the current thread without creating a new thread.
-2. A single `Thread` instance can be started only once; attempting to restart throws `IllegalThreadStateException`.
-3. `Runnable` is a functional interface (single abstract method `run()`), so lambda expressions can be used since Java 8: `new Thread(() -> { ... })`.
-4. Extending `Thread` consumes the single inheritance slot; implementing `Runnable` leaves inheritance free.
+- Calling `start()` schedules the thread; the JVM invokes `run()` when the thread executes.
+- Calling `run()` directly (instead of `start()`) executes the task in the current thread — a common mistake.
+- A thread can be started only once; calling `start()` twice throws `IllegalThreadStateException`.
+- Threads support `ThreadLocal` variables, which are local to each thread.
 
-**Constraints and Limitations**
+**Constraints and Limitations:**
 
-- Extending `Thread` tightly couples the task to the thread mechanism and limits inheritance.
-- Implementing `Runnable` requires an additional `Thread` object to execute the task.
-- Neither approach allows returning a result or throwing checked exceptions from `run()`.
+- Platform threads are a limited resource; creating too many causes resource exhaustion.
+- Virtual threads (Java 21+) are suitable for I/O-bound tasks, not CPU-intensive operations.
+- "Thread may be extended for customization and other advanced reasons although most applications should have little need to do this".
 
-### Annotated Code Examples
+### Annotated Complete Step-by-Step Code Examples
 
-**Example 1: Extending Thread**
+**Example 1: Creating and Starting a Thread**
 
 ```java
-class CounterThread extends Thread {
-    private final String name;
-
-    CounterThread(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public void run() {
-        for (int i = 1; i <= 3; i++) {
-            System.out.println(name + " -> " + i);
-            try {
-                Thread.sleep(100); // simulate work
-            } catch (InterruptedException e) {
-                System.out.println(name + " interrupted");
-                return;
-            }
-        }
-    }
-}
-
-public class ThreadExtendDemo {
+// File: ThreadBasicDemo.java
+public class ThreadBasicDemo {
     public static void main(String[] args) {
-        CounterThread t1 = new CounterThread("A");
-        CounterThread t2 = new CounterThread("B");
-        
-        t1.start(); // new thread begins
-        t2.start(); // another new thread begins
+        // Step 1: Create a Runnable task
+        Runnable task = () -> {
+            for (int i = 1; i <= 3; i++) {
+                System.out.println(Thread.currentThread().getName() + ": " + i);
+                try { Thread.sleep(500); } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        };
+
+        // Step 2: Create a Thread with a name
+        Thread worker = new Thread(task, "Worker-A");
+
+        // Step 3: Start the thread
+        worker.start();
+
+        // Step 4: Main thread continues concurrently
+        System.out.println("Main thread: running concurrently");
     }
 }
 ```
 
-**Expected Output (order may vary due to scheduling)**
-
+**Expected Output (order may vary):**
 ```
-A -> 1
-B -> 1
-A -> 2
-B -> 2
-A -> 3
-B -> 3
+Main thread: running concurrently
+Worker-A: 1
+Worker-A: 2
+Worker-A: 3
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-Each `CounterThread` instance overrides `run()`. `start()` creates a new thread and invokes `run()` on that thread. The two threads execute concurrently; the interleaving of outputs depends on the thread scheduler. The `sleep(100)` call suspends each thread briefly, allowing the other to run.
+1. A `Runnable` is defined with a lambda that prints the current thread's name and a counter.
+2. A `Thread` is created with the `Runnable` and a descriptive name `"Worker-A"`.
+3. `start()` schedules the thread for execution; the JVM invokes `run()` concurrently.
+4. The main thread continues immediately, printing its message.
+5. The worker thread executes its loop, interleaving with the main thread.
+
+### Real-World Cases
+
+- **Web Servers:** Handling each client request in a separate thread.
+- **Background Tasks:** Performing logging, cleanup, or scheduled jobs without blocking the main thread.
+- **GUI Applications:** Keeping the UI responsive while background work runs.
+- **Parallel Processing:** Dividing a large computation across multiple threads.
 
 ---
 
-**Example 2: Implementing Runnable**
+## 2. `Runnable` Interface
+
+### Definitions
+
+**Core Definition:** `Runnable` is a functional interface with a single abstract method `run()` that represents a task to be executed by a thread.
+
+**Technical Definition:** "The Runnable interface should be implemented by any class whose instances are intended to be executed by a thread. The class must define a method of no arguments called run. This interface is designed to provide a common protocol for objects that wish to execute code while they are active". "Runnable provides the means for a class to be active while not subclassing Thread". "In most cases, the Runnable interface should be used if you are only planning to override the run() method and no other Thread methods".
+
+**Beginner-Friendly Explanation:** `Runnable` is a job description. It says "whoever implements this interface must know how to perform this task." When you give a `Runnable` to a `Thread`, you're hiring a worker and handing them the job description. The worker will follow the instructions in `run()`.
+
+### Purposes
+
+- To define a task that can be executed by a thread without subclassing `Thread`
+- To separate the task (what to do) from the thread (how to execute it)
+- To allow a class to be active while still extending another class
+- To enable lambda expressions for defining tasks concisely
+- To serve as the target type for thread creation
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
 
 ```java
-class CounterTask implements Runnable {
-    private final String name;
-
-    CounterTask(String name) {
-        this.name = name;
-    }
-
+// Approach 1: Implement Runnable
+public class MyTask implements Runnable {
     @Override
     public void run() {
-        for (int i = 1; i <= 3; i++) {
-            System.out.println(name + " -> " + i);
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                System.out.println(name + " interrupted");
-                return;
-            }
-        }
+        // task code
     }
 }
+new Thread(new MyTask()).start();
 
+// Approach 2: Lambda (Runnable is a functional interface)
+Runnable task = () -> { /* task code */ };
+new Thread(task).start();
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `Runnable` | The functional interface |
+| `run()` | The single abstract method containing the task |
+| `Thread(Runnable)` | Constructor that accepts a `Runnable` target |
+
+**Syntax Rules:**
+
+- `Runnable` is a `@FunctionalInterface`, so it can be implemented with a lambda or method reference.
+- The `run()` method takes no arguments and returns `void`.
+- "Runnable is implemented by class Thread".
+
+**Constraints and Limitations:**
+
+- `run()` cannot return a value or throw checked exceptions (use `Callable` for that).
+- "Do not subclass Thread if you can use a Runnable instead" (SEI CERT).
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: RunnableDemo.java
 public class RunnableDemo {
     public static void main(String[] args) {
-        Runnable task1 = new CounterTask("X");
-        Runnable task2 = new CounterTask("Y");
-
-        Thread t1 = new Thread(task1);
-        Thread t2 = new Thread(task2);
-
-        t1.start();
-        t2.start();
-    }
-}
-```
-
-**Expected Output (order may vary)**
-
-```
-X -> 1
-Y -> 1
-X -> 2
-Y -> 2
-X -> 3
-Y -> 3
-```
-
-**Why This Output Occurs**
-
-`CounterTask` implements `Runnable` and defines the task logic. Two `Thread` objects are created, each wrapping a `Runnable` instance. The task logic is decoupled from the thread mechanism. Identical behavior to Example 1 but with cleaner separation of concerns.
-
----
-
-**Example 3: Lambda Runnable (Java 8+)**
-
-```java
-public class LambdaRunnableDemo {
-    public static void main(String[] args) {
-        Thread t = new Thread(() -> {
-            for (int i = 1; i <= 3; i++) {
-                System.out.println("Lambda -> " + i);
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    return;
-                }
+        // Approach 1: Implement Runnable with a named class
+        Runnable task1 = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Task 1 running in: " +
+                    Thread.currentThread().getName());
             }
-        });
-        t.start();
+        };
+
+        // Approach 2: Lambda expression (preferred)
+        Runnable task2 = () -> System.out.println("Task 2 running in: " +
+            Thread.currentThread().getName());
+
+        // Create and start threads
+        new Thread(task1, "Thread-1").start();
+        new Thread(task2, "Thread-2").start();
+
+        System.out.println("Main thread: " + Thread.currentThread().getName());
     }
 }
 ```
 
-**Expected Output**
-
+**Expected Output (order may vary):**
 ```
-Lambda -> 1
-Lambda -> 2
-Lambda -> 3
+Main thread: main
+Task 1 running in: Thread-1
+Task 2 running in: Thread-2
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-Since `Runnable` is a functional interface, a lambda expression can supply the `run()` implementation. The `Thread` constructor accepts the lambda as a `Runnable` target.
+1. `task1` is an anonymous `Runnable` implementation that prints the current thread's name.
+2. `task2` is a lambda `Runnable` that does the same thing more concisely.
+3. Two threads are created with the tasks and started.
+4. The main thread prints its own name and continues.
 
 ### Real-World Cases
 
-- **Runnable in ExecutorService**: `executor.submit(runnableTask)` and `executor.execute(runnableTask)` accept `Runnable` instances, decoupling task definition from thread management.
-- **Thread subclass for custom behavior**: Extending `Thread` is useful when the thread needs to carry additional state or override lifecycle methods beyond `run()`, though this is rare in modern Java.
-- **Lambda for one-off tasks**: Logging, background cleanup, or fire-and-forget operations benefit from concise lambda syntax.
+- **Event Handlers:** `button.addActionListener(e -> { /* handle click */ })` uses a functional interface similar to `Runnable`.
+- **Background Tasks:** `executor.submit(() -> { /* task */ })` accepts a `Runnable`.
+- **Thread Pools:** `ExecutorService.execute(Runnable)` executes tasks.
 
 ---
 
-## Core Concept 2: Returning Computational Results — The `Callable<V>` Interface
+## 3. Thread Creation
 
 ### Definitions
 
-**Core Definition**
-`Callable<V>` is a functional interface representing a task that returns a result of type `V` and may throw a checked exception. It is used with executor services to obtain results asynchronously through a `Future<V>`.
+**Core Definition:** Thread creation is the process of instantiating a `Thread` object with a task to be executed.
 
-**Technical Definition**
-The `Callable<V>` interface declares a single method `V call() throws Exception`. It is similar to `Runnable` in that both are designed for classes whose instances are potentially executed by another thread, but `Callable` can return a value and throw exceptions. The `Future<V>` interface represents the result of an asynchronous computation, providing methods to check completion, wait for completion, and retrieve the result via `get()`.
+**Technical Definition:** Threads can be created by extending `Thread` or by implementing `Runnable` and passing it to a `Thread` constructor. "Thread defines public constructors for creating platform threads and the start method to schedule threads to execute. Thread may be extended for customization and other advanced reasons although most applications should have little need to do this". "Thread defines a Thread.Builder API for creating and starting both platform and virtual threads".
 
-**Beginner-Friendly Explanation**
-`Runnable` is like telling a chef "cook something" — you don't get a dish back. `Callable` is like ordering a specific dish — the chef cooks it and brings it to your table (the `Future`). You can also check if it's ready yet or wait until it is.
+**Beginner-Friendly Explanation:** Creating a thread is like hiring a new worker. You can either hire someone who already knows the job (extend `Thread` and override `run()`), or you can write a job description (`Runnable`) and hire a general worker to follow it. The second approach is more flexible because the worker isn't defined by the job.
 
 ### Purposes
 
-- To define tasks that produce a result that must be retrieved by the submitting thread.
-- To allow tasks to throw checked exceptions, which `Runnable.run()` cannot do.
-- To enable asynchronous computation where the caller can continue working while the task executes and retrieve the result later.
-- To support cancellation and timeout-based result retrieval through the `Future` interface.
+- To create a new thread of execution for a specific task
+- To enable concurrent execution of multiple tasks
+- To support different threading models (platform vs virtual)
+- To provide flexibility through multiple creation approaches
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
+**Thread Creation Approaches:**
+
+| Approach | Syntax | Pros | Cons |
+|----------|--------|------|------|
+| Extend `Thread` | `class MyThread extends Thread` | Simple | Cannot extend other classes |
+| Implement `Runnable` | `new Thread(new MyTask())` | Flexible, functional | Slightly more verbose |
+| Lambda `Runnable` | `new Thread(() -> {})` | Concise | Limited to simple tasks |
+| `Thread.Builder` | `Thread.ofPlatform().start(...)` | Modern, named, flexible | Java 21+ |
+
+**Syntax Rules:**
+
+- The `Thread` constructor accepts a `Runnable` or a thread name.
+- `Thread.Builder` allows configuration of name, daemon status, priority, and thread group.
+- Virtual threads are created with `Thread.ofVirtual()`.
+
+**Constraints and Limitations:**
+
+- A thread can be started only once.
+- Extending `Thread` prevents extending other classes.
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-// Define a Callable
-Callable<V> task = () -> {
-    // compute
-    return result; // of type V
-};
-
-// Submit to an ExecutorService
-ExecutorService executor = Executors.newSingleThreadExecutor();
-Future<V> future = executor.submit(task);
-
-// Retrieve the result (blocks until ready)
-V result = future.get();
-
-// Retrieve with timeout
-V result = future.get(5, TimeUnit.SECONDS);
-
-// Check completion
-if (future.isDone()) { ... }
-
-// Cancel
-future.cancel(true);
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|-----------|-------------|
-| `Callable<V>` | Generic interface; `V` is the result type |
-| `call()` | The task's execution method; returns `V`, throws `Exception` |
-| `ExecutorService` | Manages thread pools and task submission |
-| `Future<V>` | Handle to the pending result; provides `get()`, `isDone()`, `cancel()` |
-| `submit(Callable)` | Submits a `Callable` and returns a `Future` |
-
-**Syntax Rules**
-
-1. `Callable<V>` is a functional interface; lambda expressions and method references can implement it.
-2. `Future.get()` blocks the calling thread until the result is available; it throws `ExecutionException` if the task threw an exception.
-3. `Future.get(timeout, unit)` throws `TimeoutException` if the result is not ready within the specified time.
-4. `cancel(true)` attempts to interrupt the running task; `cancel(false)` cancels only if not yet started.
-5. `Callable` tasks are submitted to an `ExecutorService`; they cannot be passed directly to a `Thread` constructor.
-
-**Constraints and Limitations**
-
-- `Future.get()` is a blocking call; it may reduce concurrency benefits if called immediately.
-- A `Future` cannot be manually completed (unlike `CompletableFuture`).
-- `Callable` cannot be executed by a bare `Thread` object; an executor or `FutureTask` is required.
-- Results are retrieved only once in older `Future` implementations; `CompletableFuture` addresses this.
-
-### Annotated Code Examples
-
-**Example 1: Callable with Future**
-
-```java
-import java.util.concurrent.*;
-
-public class CallableDemo {
-    public static void main(String[] args) throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        // Define a Callable that computes a sum
-        Callable<Integer> sumTask = () -> {
-            int sum = 0;
-            for (int i = 1; i <= 100; i++) {
-                sum += i;
-                Thread.sleep(10); // simulate work
-            }
-            return sum;
-        };
-
-        System.out.println("Submitting task...");
-        Future<Integer> future = executor.submit(sumTask); // non-blocking
-
-        System.out.println("Task submitted. Doing other work...");
-        Thread.sleep(500); // simulate other work
-
-        System.out.println("Retrieving result...");
-        Integer result = future.get(); // blocks until ready
-        System.out.println("Sum = " + result);
-
-        executor.shutdown();
-    }
-}
-```
-
-**Expected Output**
-
-```
-Submitting task...
-Task submitted. Doing other work...
-Retrieving result...
-Sum = 5050
-```
-
-**Why This Output Occurs**
-
-`submit()` returns immediately with a `Future`, allowing the main thread to continue. After 500 ms, the main thread calls `get()`, which blocks until the `Callable` completes. The sum of 1 to 100 is 5050, computed over approximately 1 second (100 × 10 ms).
-
----
-
-**Example 2: Callable with Timeout and Exception**
-
-```java
-import java.util.concurrent.*;
-
-public class CallableExceptionDemo {
+// File: ThreadCreationDemo.java
+public class ThreadCreationDemo {
     public static void main(String[] args) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-
-        Callable<String> failingTask = () -> {
-            Thread.sleep(2000);
-            throw new RuntimeException("Task failed intentionally");
-        };
-
-        Future<String> future = executor.submit(failingTask);
-
-        try {
-            String result = future.get(1, TimeUnit.SECONDS); // 1-second timeout
-            System.out.println("Result: " + result);
-        } catch (TimeoutException e) {
-            System.out.println("Task timed out after 1 second");
-            future.cancel(true);
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Task exception: " + e.getCause().getMessage());
-        } finally {
-            executor.shutdown();
-        }
-    }
-}
-```
-
-**Expected Output**
-
-```
-Task timed out after 1 second
-```
-
-**Why This Output Occurs**
-
-The task sleeps for 2 seconds before throwing an exception, but `get(1, TimeUnit.SECONDS)` waits only 1 second. The `TimeoutException` is caught, and the task is cancelled with `cancel(true)`, which interrupts the sleeping thread.
-
----
-
-**Example 3: Multiple Callables with CompletionService**
-
-```java
-import java.util.concurrent.*;
-
-public class CompletionServiceDemo {
-    public static void main(String[] args) throws Exception {
-        ExecutorService executor = Executors.newFixedThreadPool(3);
-        CompletionService<String> cs = new ExecutorCompletionService<>(executor);
-
-        // Submit tasks with different completion times
-        cs.submit(() -> { Thread.sleep(300); return "Fast"; });
-        cs.submit(() -> { Thread.sleep(100); return "Fastest"; });
-        cs.submit(() -> { Thread.sleep(500); return "Slow"; });
-
-        // Retrieve results in completion order
-        for (int i = 0; i < 3; i++) {
-            Future<String> f = cs.take(); // blocks until any task completes
-            System.out.println(f.get());
-        }
-
-        executor.shutdown();
-    }
-}
-```
-
-**Expected Output**
-
-```
-Fastest
-Fast
-Slow
-```
-
-**Why This Output Occurs**
-
-`ExecutorCompletionService` wraps the executor and maintains a queue of completed futures. `take()` returns the future of the next task to finish, regardless of submission order. The task sleeping for 100 ms finishes first, then 300 ms, then 500 ms.
-
-### Real-World Cases
-
-- **Parallel data processing**: A `Callable` computes a partial result (e.g., a chunk of a large dataset) and the main thread aggregates results via `Future.get()`.
-- **Remote API calls**: Multiple `Callable` tasks fetch data from different endpoints concurrently; `Future.get()` collects responses.
-- **Image rendering**: A `Callable` renders a tile of an image; the UI thread retrieves rendered tiles as they complete using `CompletionService`.
-
----
-
-## Core Concept 3: Core Thread Configurations — Stack Sizes, Thread Groups, and Execution Overrides
-
-### Definitions
-
-**Core Definition**
-Java threads can be configured with specific stack sizes, assigned to thread groups for organizational and bulk-control purposes, and customized through subclassing to override lifecycle behavior.
-
-**Technical Definition**
-The `Thread` class provides constructors that accept a `ThreadGroup`, a `Runnable` target, a thread name, and a `stackSize` parameter (a hint for the desired stack size in bytes). Thread groups (`ThreadGroup`) represent sets of threads and other thread groups in a tree structure, enabling bulk operations such as interruption and uncaught exception handling. The `stackSize` parameter, when non-zero, suggests the address space size for the thread's stack; its effect is platform-dependent and may be ignored.
-
-**Beginner-Friendly Explanation**
-Stack size is like the amount of counter space a cook gets — more space allows more complex recipes (deeper recursion), but too much space limits how many cooks can work simultaneously. Thread groups are like kitchen teams — you can assign cooks to teams and give instructions to an entire team at once.
-
-### Purposes
-
-- To control the stack size of a thread to balance recursion depth against the maximum number of concurrent threads.
-- To organize threads into logical groups for bulk operations, such as interrupting all threads in a group or applying a common uncaught exception handler.
-- To override default thread behavior by subclassing `Thread` and customizing initialization, naming, or lifecycle methods.
-- To set thread names for debugging and profiling purposes.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax — Thread Constructors**
-
-```java
-// Basic constructors
-Thread()
-Thread(Runnable target)
-Thread(String name)
-Thread(Runnable target, String name)
-
-// With thread group
-Thread(ThreadGroup group, Runnable target)
-Thread(ThreadGroup group, String name)
-Thread(ThreadGroup group, Runnable target, String name)
-
-// With stack size (platform-dependent hint)
-Thread(ThreadGroup group, Runnable target, String name, long stackSize)
-```
-
-**Complete General Syntax — ThreadGroup**
-
-```java
-ThreadGroup group = new ThreadGroup("MyGroup");
-Thread t = new Thread(group, runnableTask, "Worker-1", 1_000_000);
-group.interrupt(); // interrupts all threads in group
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|-----------|-------------|
-| `ThreadGroup group` | The group to which the new thread belongs |
-| `Runnable target` | The task to execute |
-| `String name` | The thread's name (useful for debugging) |
-| `long stackSize` | Desired stack size in bytes; 0 means ignore (use platform default) |
-| `group.interrupt()` | Interrupts every thread in the group |
-
-**Syntax Rules**
-
-1. Every thread belongs to a `ThreadGroup`. If not specified, the new thread inherits the group of the thread that created it.
-2. A `ThreadGroup` can contain both threads and child `ThreadGroup` instances, forming a tree.
-3. The `stackSize` parameter is a hint; the JVM may ignore it or round it to platform-specific minimum or maximum values.
-4. `ThreadGroup.interrupt()` calls `interrupt()` on every active thread in the group and its subgroups.
-5. `ThreadGroup.uncaughtException(Thread, Throwable)` is called when a thread in the group terminates due to an uncaught exception.
-
-**Constraints and Limitations**
-
-- Stack size effects are **platform-dependent**; some platforms ignore the parameter entirely.
-- `ThreadGroup` is considered a **legacy class**; the Java API documentation discourages its use in new code, as most of its methods are deprecated or intended for diagnostic purposes only.
-- A thread cannot be moved between thread groups after creation.
-- Overriding `Thread` methods beyond `run()` is discouraged; composition (using `Runnable`) is generally preferred.
-- The `stackSize` parameter does not guarantee a specific maximum recursion depth.
-
-### Annotated Code Examples
-
-**Example 1: Custom Stack Size**
-
-```java
-public class StackSizeDemo {
-    // Recursive method to test stack depth
-    static int depth = 0;
-    static void recurse() {
-        depth++;
-        recurse(); // will eventually throw StackOverflowError
-    }
-
-    public static void main(String[] args) {
-        // Default stack size
-        Thread defaultThread = new Thread(() -> {
-            try { recurse(); }
-            catch (StackOverflowError e) {
-                System.out.println("Default stack depth: " + depth);
-            }
-        });
-
-        // Larger stack size (1 MB hint)
-        Thread largeStack = new Thread(null, () -> {
-            depth = 0;
-            try { recurse(); }
-            catch (StackOverflowError e) {
-                System.out.println("Large stack depth: " + depth);
-            }
-        }, "LargeStack", 1_000_000);
-
-        defaultThread.start();
-        largeStack.start();
-
-        try {
-            defaultThread.join();
-            largeStack.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-}
-```
-
-**Expected Output (approximate; platform-dependent)**
-
-```
-Default stack depth: 11421
-Large stack depth: 31208
-```
-
-**Why This Output Occurs**
-
-The `largeStack` thread is created with a 1 MB stack size hint. On most platforms, this results in a deeper recursion limit before `StackOverflowError`. The exact depths vary by JVM implementation and platform. The `stackSize` parameter is not guaranteed to be honored exactly.
-
----
-
-**Example 2: Thread Groups and Bulk Interruption**
-
-```java
-public class ThreadGroupDemo {
-    public static void main(String[] args) throws InterruptedException {
-        ThreadGroup group = new ThreadGroup("Workers");
-
-        Runnable task = () -> {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    System.out.println(Thread.currentThread().getName() + " working...");
-                    Thread.sleep(200);
-                }
-            } catch (InterruptedException e) {
-                System.out.println(Thread.currentThread().getName() + " interrupted");
+        // Approach 1: Extend Thread
+        Thread t1 = new Thread() {
+            @Override
+            public void run() {
+                System.out.println("Thread 1 (extended): " + getName());
             }
         };
-
-        Thread t1 = new Thread(group, task, "Worker-1");
-        Thread t2 = new Thread(group, task, "Worker-2");
-        Thread t3 = new Thread(group, task, "Worker-3");
-
         t1.start();
+
+        // Approach 2: Implement Runnable
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Thread 2 (Runnable): " +
+                    Thread.currentThread().getName());
+            }
+        }, "Runnable-Thread");
         t2.start();
+
+        // Approach 3: Lambda
+        Thread t3 = new Thread(() -> System.out.println("Thread 3 (lambda): " +
+            Thread.currentThread().getName()), "Lambda-Thread");
         t3.start();
 
-        Thread.sleep(500); // let them work
-        System.out.println("Interrupting group...");
-        group.interrupt(); // interrupts all three threads
-
-        t1.join();
-        t2.join();
-        t3.join();
-        System.out.println("All workers stopped");
+        // Approach 4: Thread.Builder (Java 21+)
+        Thread t4 = Thread.ofPlatform().name("Builder-Thread")
+            .start(() -> System.out.println("Thread 4 (builder): " +
+                Thread.currentThread().getName()));
     }
 }
 ```
 
-**Expected Output (order may vary)**
-
+**Expected Output (order may vary):**
 ```
-Worker-1 working...
-Worker-2 working...
-Worker-3 working...
-Worker-1 working...
-Worker-2 working...
-Worker-3 working...
-Interrupting group...
-Worker-1 interrupted
-Worker-2 interrupted
-Worker-3 interrupted
-All workers stopped
+Thread 1 (extended): Thread-0
+Thread 2 (Runnable): Runnable-Thread
+Thread 3 (lambda): Lambda-Thread
+Thread 4 (builder): Builder-Thread
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-All three threads are created with the same `ThreadGroup`. `group.interrupt()` calls `interrupt()` on each thread in the group. The threads are sleeping in `Thread.sleep(200)`, which throws `InterruptedException` when interrupted. Each thread catches the exception and prints a message. The `join()` calls ensure the main thread waits for all workers to finish.
+1. Approach 1 uses an anonymous subclass of `Thread` with an overridden `run()`.
+2. Approach 2 uses an anonymous `Runnable` implementation passed to a `Thread` constructor.
+3. Approach 3 uses a lambda expression with a custom thread name.
+4. Approach 4 uses `Thread.ofPlatform().name(...).start(...)` for a modern, fluent API.
 
 ### Real-World Cases
 
-- **Server thread groups**: An application server may create a `ThreadGroup` per deployed application, allowing the container to interrupt all threads when an application is undeployed.
-- **Uncaught exception handling**: A custom `ThreadGroup` overrides `uncaughtException()` to log exceptions from any thread in the group, providing centralized error reporting.
-- **Diagnostic tooling**: `ThreadGroup.enumerate(Thread[])` allows monitoring tools to list all threads in a group for debugging.
-- **Stack tuning**: Applications with deep recursion (e.g., parsers, graph traversal) may increase stack size via `-Xss` (JVM-wide) or the `Thread` constructor (per-thread).
+- **Web Servers:** Each request handled by a thread created from a pool.
+- **Background Processing:** Threads created for logging, cleanup, and scheduled tasks.
+- **Parallel Algorithms:** Multiple threads created to divide work.
 
 ---
 
-## Core Concept 4: Thread Management — Starting, Identifying Active Runners, and `join()` Orchestration
+## 4. Thread Start
 
 ### Definitions
 
-**Core Definition**
-Thread management encompasses starting threads, identifying which threads are currently running, and coordinating thread completion using the `join()` method.
+**Core Definition:** `start()` is the method that schedules a thread to begin execution, causing the JVM to invoke the thread's `run()` method in a new thread of control.
 
-**Technical Definition**
-`Thread.start()` schedules the thread to begin execution; the JVM calls the thread's `run()` method on a new execution context. `Thread.isAlive()` tests whether a thread has been started and has not yet terminated. `Thread.join()` causes the calling thread to wait until the target thread terminates, optionally with a timeout. The static `Thread.activeCount()` returns an estimate of the number of active threads in the current thread's thread group and its subgroups. `Thread.enumerate(Thread[])` copies active threads into an array.
+**Technical Definition:** "Starting a thread schedules it to execute its run method. The newly started thread executes concurrently with the thread that caused it to start". "The start method can be called only once; calling it a second time throws an IllegalThreadStateException".
 
-**Beginner-Friendly Explanation**
-Starting a thread is like telling a cook to begin. Checking `isAlive()` is like glancing to see if the cook is still working. `join()` is like waiting by the kitchen door until the cook finishes before you do the next step. You can also count how many cooks are currently in the kitchen with `activeCount()`.
+**Beginner-Friendly Explanation:** `start()` is like clocking in a worker. The worker doesn't begin until you press the clock-in button. Once clocked in, the worker starts doing their job (`run()`) while you continue with your own work. Without `start()`, the worker just stands there doing nothing.
 
 ### Purposes
 
-- To initiate thread execution via `start()`, ensuring the JVM creates a new execution context.
-- To determine whether a thread has completed or is still running using `isAlive()`.
-- To coordinate the completion of one thread with the progress of another using `join()`, enabling sequential orchestration of concurrent tasks.
-- To identify currently active threads for monitoring, debugging, or resource management.
+- To schedule a thread for execution
+- To begin concurrent execution of a task
+- To transition a thread from the `NEW` state to `RUNNABLE`
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
-
 ```java
-// Starting
-Thread t = new Thread(task);
-t.start();
-
-// Checking status
-boolean alive = t.isAlive();
-
-// Joining (wait indefinitely)
-t.join();
-
-// Joining with timeout
-t.join(5000); // wait up to 5 seconds
-t.join(5000, 500000); // 5 seconds + 500,000 nanoseconds
-
-// Counting active threads
-int count = Thread.activeCount();
-
-// Enumerating active threads
-Thread[] threads = new Thread[count];
-int actualCount = Thread.enumerate(threads);
+Thread thread = new Thread(task);
+thread.start();  // Schedules the thread
 ```
 
-**Component Breakdown**
+**Syntax Rules:**
 
-| Component | Description |
-|-----------|-------------|
-| `start()` | Schedules the thread; JVM invokes `run()` in a new thread |
-| `isAlive()` | Returns `true` if the thread has been started and has not terminated |
-| `join()` | Blocks the calling thread until the target terminates |
-| `join(long millis)` | Blocks for at most the specified milliseconds |
-| `activeCount()` | Estimate of active threads in the current group and subgroups |
-| `enumerate(Thread[])` | Copies active thread references into the array |
+- `start()` can be called only once per thread.
+- Calling `start()` a second time throws `IllegalThreadStateException`.
+- Calling `run()` directly executes the task in the current thread — it does not create a new thread.
 
-**Syntax Rules**
+**Constraints and Limitations:**
 
-1. `start()` can be called at most once per `Thread` instance; a second call throws `IllegalThreadStateException`.
-2. `join()` is `final` and throws `InterruptedException` if the calling thread is interrupted while waiting.
-3. `join()` returns immediately if the target thread has not been started or has already terminated.
-4. `activeCount()` returns an estimate because thread counts may change during the call.
-5. `enumerate()` returns the number of threads actually placed in the array, which may be less than the array length.
+- A thread can be started only once.
+- The order in which started threads execute is not deterministic.
 
-**Constraints and Limitations**
-
-- `join()` without a timeout can block indefinitely if the target thread never terminates.
-- `activeCount()` and `enumerate()` are **estimates** and are intended for diagnostic purposes, not for synchronization.
-- After `join()` returns, `isAlive()` should be checked to determine whether the thread actually terminated or the timeout expired.
-- The `join(long millis)` method does not distinguish between "thread terminated" and "timeout expired" in its return value (it returns `void`).
-
-### Annotated Code Examples
-
-**Example 1: Basic join() Orchestration**
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-public class JoinDemo {
+// File: ThreadStartDemo.java
+public class ThreadStartDemo {
+    public static void main(String[] args) {
+        Thread thread = new Thread(() -> {
+            System.out.println("Thread running: " +
+                Thread.currentThread().getName());
+        }, "MyThread");
+
+        System.out.println("Before start: " + thread.getState());  // NEW
+        thread.start();
+        System.out.println("After start: " + thread.getState());   // RUNNABLE
+    }
+}
+```
+
+**Expected Output (order may vary):**
+```
+Before start: NEW
+After start: RUNNABLE
+Thread running: MyThread
+```
+
+**Step-by-Step Explanation:**
+
+1. A thread is created with a lambda task and a name.
+2. Before `start()`, the thread is in the `NEW` state.
+3. `start()` schedules the thread; it transitions to `RUNNABLE`.
+4. The JVM invokes `run()` in the new thread, printing the message.
+
+### Real-World Cases
+
+- **Task Execution:** Starting threads to handle background jobs.
+- **Parallel Processing:** Starting multiple threads to divide work.
+- **Server Request Handling:** Starting a thread for each incoming connection.
+
+---
+
+## 5. Thread Join
+
+### Definitions
+
+**Core Definition:** `join()` is a method that causes the calling thread to wait until the target thread terminates.
+
+**Technical Definition:** "The join method allows one thread to wait for the completion of another. If t is a Thread object whose thread is currently executing, t.join(); causes the current thread to pause execution until t's thread terminates. Overloads of join allow the programmer to specify a waiting period. However, as with sleep, join is dependent on the OS for timing, so you should not assume that join will wait exactly as long as you specify. Like sleep, join responds to an interrupt by exiting with an InterruptedException".
+
+**Beginner-Friendly Explanation:** `join()` is like waiting for a colleague to finish their part of a project before you can continue with yours. You say "I'll wait here until you're done." This is useful when you need the results of another thread before proceeding.
+
+### Purposes
+
+- To synchronise the completion of multiple threads
+- To ensure a thread has finished before proceeding
+- To implement a simple form of coordination between threads
+- To collect results from worker threads
+
+### Syntax Rules and Structure
+
+```java
+// Wait indefinitely for the thread to die
+targetThread.join();
+
+// Wait at most 1000 milliseconds
+targetThread.join(1000);
+
+// Wait at most 1000 milliseconds + 500 nanoseconds
+targetThread.join(1000, 500);
+```
+
+**Syntax Rules:**
+
+- `join()` without arguments waits indefinitely.
+- `join(long millis)` waits up to the specified milliseconds.
+- `join(long millis, int nanos)` provides nanosecond precision.
+- `join()` throws `InterruptedException` if the current thread is interrupted while waiting.
+
+**Constraints and Limitations:**
+
+- Timing is not precise; it depends on the OS scheduler.
+- A thread that has already terminated returns immediately from `join()`.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ThreadJoinDemo.java
+public class ThreadJoinDemo {
     public static void main(String[] args) throws InterruptedException {
         Thread worker = new Thread(() -> {
-            System.out.println("Worker starting");
+            System.out.println("Worker started");
             try {
-                Thread.sleep(1500); // simulate long computation
+                Thread.sleep(2000);  // Simulate work
             } catch (InterruptedException e) {
-                System.out.println("Worker interrupted");
-                return;
+                Thread.currentThread().interrupt();
             }
             System.out.println("Worker finished");
-        });
+        }, "Worker");
 
-        System.out.println("Main: starting worker");
         worker.start();
-        System.out.println("Main: waiting for worker");
-        worker.join(); // blocks until worker terminates
-        System.out.println("Main: worker is done, proceeding");
+
+        System.out.println("Main: waiting for worker...");
+        worker.join();  // Main thread waits here
+        System.out.println("Main: worker has finished, proceeding");
     }
 }
 ```
 
-**Expected Output**
-
+**Expected Output:**
 ```
-Main: starting worker
-Main: waiting for worker
-Worker starting
+Worker started
+Main: waiting for worker...
 Worker finished
-Main: worker is done, proceeding
+Main: worker has finished, proceeding
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-The main thread calls `worker.join()`, which blocks until the worker thread terminates. The worker sleeps for 1500 ms, so "Main: waiting for worker" is printed before "Worker starting" because the worker thread may not have started executing yet. After the worker finishes, `join()` returns and the main thread continues.
-
----
-
-**Example 2: join() with Timeout**
-
-```java
-public class JoinTimeoutDemo {
-    public static void main(String[] args) throws InterruptedException {
-        Thread longTask = new Thread(() -> {
-            try {
-                System.out.println("Long task started");
-                Thread.sleep(5000); // 5 seconds
-                System.out.println("Long task completed");
-            } catch (InterruptedException e) {
-                System.out.println("Long task interrupted");
-            }
-        });
-
-        longTask.start();
-        System.out.println("Waiting up to 2 seconds...");
-        longTask.join(2000); // wait at most 2 seconds
-
-        if (longTask.isAlive()) {
-            System.out.println("Task still running after timeout");
-        } else {
-            System.out.println("Task completed within timeout");
-        }
-    }
-}
-```
-
-**Expected Output**
-
-```
-Long task started
-Waiting up to 2 seconds...
-Task still running after timeout
-Long task completed
-```
-
-**Why This Output Occurs**
-
-The main thread calls `join(2000)`, which waits up to 2 seconds. The task sleeps for 5 seconds, so `join(2000)` returns after 2 seconds while the task is still running. `isAlive()` returns `true`, confirming the task is still active. The task then completes its 5-second sleep and prints "Long task completed" before the program exits.
-
----
-
-**Example 3: Active Thread Enumeration**
-
-```java
-public class ActiveThreadsDemo {
-    public static void main(String[] args) throws InterruptedException {
-        Thread t1 = new Thread(() -> sleepQuietly(2000), "Alpha");
-        Thread t2 = new Thread(() -> sleepQuietly(2000), "Beta");
-        Thread t3 = new Thread(() -> sleepQuietly(2000), "Gamma");
-
-        t1.start(); t2.start(); t3.start();
-
-        Thread.sleep(500); // let threads start
-
-        int count = Thread.activeCount();
-        System.out.println("Active thread count estimate: " + count);
-
-        Thread[] threads = new Thread[count];
-        int actual = Thread.enumerate(threads);
-        System.out.println("Enumerated " + actual + " threads:");
-        for (int i = 0; i < actual; i++) {
-            System.out.println("  - " + threads[i].getName()
-                + " (alive=" + threads[i].isAlive() + ")");
-        }
-
-        t1.join(); t2.join(); t3.join();
-    }
-
-    static void sleepQuietly(long millis) {
-        try { Thread.sleep(millis); }
-        catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-    }
-}
-```
-
-**Expected Output (count may include main thread)**
-
-```
-Active thread count estimate: 4
-Enumerated 4 threads:
-  - main (alive=true)
-  - Alpha (alive=true)
-  - Beta (alive=true)
-  - Gamma (alive=true)
-```
-
-**Why This Output Occurs**
-
-`activeCount()` returns an estimate that includes the main thread plus the three worker threads. `enumerate()` fills the array with references to these threads. The exact count and order are not deterministic because thread scheduling and creation timing affect when threads appear in the group.
+1. The worker thread starts and prints "Worker started".
+2. The main thread prints "Main: waiting for worker..." and calls `worker.join()`.
+3. The main thread blocks until the worker finishes (after 2 seconds).
+4. The worker prints "Worker finished" and terminates.
+5. `join()` returns, and the main thread continues.
 
 ### Real-World Cases
 
-- **Multi-stage pipeline**: Each stage runs in its own thread; `join()` ensures stage N completes before stage N+1 begins.
-- **Parallel download then merge**: Multiple download threads run concurrently; the main thread joins all of them before merging downloaded chunks.
-- **Graceful shutdown**: A server's main thread joins all worker threads after signaling shutdown, ensuring no tasks are abandoned mid-execution.
+- **Result Collection:** Waiting for worker threads to finish computing results.
+- **Sequential Dependencies:** Ensuring a thread completes before starting the next stage.
+- **Testing:** Waiting for threads to finish before asserting results.
 
 ---
 
-## Core Concept 5: Cooperatively Interrupting Threads — Status Polling, Flag Resets, and `InterruptedException`
+## 6. Thread Sleep
 
 ### Definitions
 
-**Core Definition**
-Interruption is a cooperative mechanism for requesting that a thread stop what it is doing. The target thread must check its interrupted status or handle `InterruptedException` to respond appropriately.
+**Core Definition:** `Thread.sleep()` is a static method that causes the currently executing thread to pause its execution for a specified duration.
 
-**Technical Definition**
-`Thread.interrupt()` sets the interrupted status of the target thread. If the target thread is blocked in `Object.wait()`, `Thread.sleep()`, or `Thread.join()`, the blocking call throws `InterruptedException` and the interrupted status is cleared. If the thread is not blocked, only the status flag is set; the thread must poll `isInterrupted()` or `Thread.interrupted()` to detect it. `isInterrupted()` returns the status without clearing it; `Thread.interrupted()` returns and clears the status. According to the API documentation, code that catches `InterruptedException` should either re-throw it or restore the interrupted status via `Thread.currentThread().interrupt()`.
+**Technical Definition:** "Thread.sleep causes the current thread to suspend execution for a specified period. This is an efficient means of making processor time available to the other threads of an application or other applications that might be running on a computer system. The sleep method can also be used for pacing... Two overloaded versions of sleep are provided: one that specifies the sleep time to the millisecond and one that specifies the sleep time to the nanosecond. However, these sleep times are not guaranteed to be precise, because they are limited by the facilities provided by the underlying OS. Also, the sleep period can be terminated by interrupts". "The thread does not lose ownership of any monitors".
 
-**Beginner-Friendly Explanation**
-Interruption is like tapping someone on the shoulder and saying "please stop." They might be in the middle of a nap (blocked in `sleep`), in which case they wake up immediately (`InterruptedException`), or they might be busy working, in which case they'll notice the tap when they next check (`isInterrupted()`). They are never forced to stop — they must choose to respond.
+**Beginner-Friendly Explanation:** `sleep()` is like taking a nap. You tell your worker to rest for a specified time. During the nap, the worker isn't using the CPU, so other workers can get more done. But the worker still holds onto any resources they were using (like locks). When the nap is over, the worker wakes up and continues.
 
 ### Purposes
 
-- To request that a thread terminate its current activity gracefully, allowing it to clean up resources and exit safely.
-- To wake a thread that is blocked in `sleep()`, `wait()`, or `join()` so it can check for cancellation.
-- To provide a cooperative cancellation mechanism that avoids the dangers of forced thread termination (`Thread.stop()`).
-- To propagate cancellation requests through nested blocking calls by restoring the interrupt status.
+- To pause the current thread for a specified duration
+- To yield processor time to other threads
+- To implement pacing (e.g., polling intervals)
+- To simulate delays in testing
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
-
 ```java
-// Requesting interruption
-targetThread.interrupt();
+// Sleep for 1000 milliseconds (1 second)
+Thread.sleep(1000);
 
-// Polling status (does NOT clear flag)
-boolean interrupted = targetThread.isInterrupted();
+// Sleep for 1000 milliseconds + 500 nanoseconds
+Thread.sleep(1000, 500);
 
-// Polling status (CLEARS flag) — static method
-boolean wasInterrupted = Thread.interrupted();
-
-// Handling InterruptedException
+// With interrupt handling
 try {
     Thread.sleep(1000);
 } catch (InterruptedException e) {
-    // Option 1: Restore status and exit
-    Thread.currentThread().interrupt();
-    return;
-    // Option 2: Re-throw
-    // throw e;
+    Thread.currentThread().interrupt();  // Restore interrupted status
 }
 ```
 
-**Component Breakdown**
+**Syntax Rules:**
 
-| Component | Description |
-|-----------|-------------|
-| `interrupt()` | Sets the target thread's interrupted status |
-| `isInterrupted()` | Returns the status without clearing it |
-| `Thread.interrupted()` | Returns and clears the current thread's status (static) |
-| `InterruptedException` | Thrown by blocking methods when interrupted; clears status |
+- `sleep()` is a static method — it always affects the current thread.
+- `sleep()` throws `InterruptedException` if another thread interrupts the sleeping thread.
+- "The interrupted status of the current thread is cleared when this exception is thrown".
+- "The thread does not lose ownership of any monitors".
 
-**Syntax Rules**
+**Constraints and Limitations:**
 
-1. `interrupt()` on a thread that is not alive has no effect.
-2. `isInterrupted()` is an instance method; it does not clear the flag.
-3. `Thread.interrupted()` is a static method; it clears the flag.
-4. `InterruptedException` is thrown by `Object.wait()`, `Thread.sleep()`, `Thread.join()`, and interruptible I/O operations when the thread is interrupted while blocked.
-5. A thread that catches `InterruptedException` and does not re-throw should restore the interrupted status with `Thread.currentThread().interrupt()` so that callers further up the stack can observe it.
-6. `Thread.interrupt()` is the only way to interrupt a thread; there is no force-stop mechanism in modern Java ( `Thread.stop()` is deprecated and removed in recent JDKs ).
+- Sleep duration is not guaranteed to be precise; it depends on the OS timer.
+- Sleep can be interrupted, so you must handle `InterruptedException`.
+- Do not use `sleep()` for synchronisation — use `wait()`/`notify()` or higher-level constructs.
 
-**Constraints and Limitations**
-
-- Interruption is **cooperative**; a thread that never checks its status will never stop.
-- `InterruptedException` is a checked exception; it must be caught or declared.
-- Blocking methods that are not interruptible (e.g., some I/O operations) will not throw `InterruptedException`.
-- The `interrupt()` method itself can throw `SecurityException` if the current thread cannot modify the target thread.
-- Virtual threads (Java 21+) respond to interruption similarly but have different blocking characteristics.
-
-### Annotated Code Examples
-
-**Example 1: Interrupting a Sleeping Thread**
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-public class InterruptSleepDemo {
+// File: ThreadSleepDemo.java
+public class ThreadSleepDemo {
     public static void main(String[] args) throws InterruptedException {
-        Thread worker = new Thread(() -> {
-            System.out.println("Worker: going to sleep");
-            try {
-                Thread.sleep(10_000); // sleep 10 seconds
-                System.out.println("Worker: woke up normally");
-            } catch (InterruptedException e) {
-                System.out.println("Worker: interrupted while sleeping");
-                // Restore interrupted status for callers
-                Thread.currentThread().interrupt();
-                return;
-            }
-            System.out.println("Worker: finished");
-        });
+        System.out.println("Starting...");
 
-        worker.start();
-        Thread.sleep(1000); // let worker start sleeping
-        System.out.println("Main: interrupting worker");
-        worker.interrupt();
+        for (int i = 1; i <= 3; i++) {
+            System.out.println("Tick " + i);
+            Thread.sleep(1000);  // Pause for 1 second
+        }
 
-        worker.join(); // wait for worker to finish
-        System.out.println("Main: worker joined");
+        System.out.println("Done!");
     }
 }
 ```
 
-**Expected Output**
-
+**Expected Output (with 1-second intervals):**
 ```
-Worker: going to sleep
-Main: interrupting worker
-Worker: interrupted while sleeping
-Main: worker joined
+Starting...
+Tick 1
+Tick 2
+Tick 3
+Done!
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-The worker thread calls `Thread.sleep(10_000)` and blocks. The main thread calls `worker.interrupt()` after 1 second. The `sleep` call throws `InterruptedException`, which the worker catches. The worker prints the interruption message, restores the interrupted status, and returns. `join()` then completes and the main thread prints its final message.
+1. The main thread prints "Starting...".
+2. In each iteration, it prints "Tick N" and then sleeps for 1000 ms.
+3. During sleep, other threads (if any) can execute.
+4. After three ticks, it prints "Done!".
+
+### Real-World Cases
+
+- **Polling:** Checking a resource periodically with a sleep between checks.
+- **Rate Limiting:** Pacing API calls to avoid overwhelming a service.
+- **Testing:** Simulating delays in tests.
 
 ---
 
-**Example 2: Polling with `isInterrupted()`**
+## 7. Thread Interruption
+
+### Definitions
+
+**Core Definition:** Thread interruption is a cooperative mechanism for requesting that a thread stop what it is doing and terminate or handle the request appropriately.
+
+**Technical Definition:** "Interrupting a thread sets its interrupt status. If the thread is blocked in a method such as sleep, wait, or join, the block is cleared and an InterruptedException is thrown. If the thread is blocked in an I/O operation or a Selector, the interrupt status is set and the operation returns immediately. If none of the previous conditions hold, the interrupt status is set". "Interrupting a thread that is not alive need not have any effect". "A thread interruption ignored because a thread was not alive at the time of the interrupt will be reflected by this method returning false".
+
+**Beginner-Friendly Explanation:** Interruption is like tapping a colleague on the shoulder while they're working. You're not forcing them to stop — you're just letting them know they should stop when they can. If they're in the middle of a nap (`sleep()`), the tap wakes them up and they throw an `InterruptedException`. If they're doing something that can't be interrupted immediately, they finish what they're doing and then notice the tap.
+
+### Purposes
+
+- To request that a thread stop what it is doing
+- To wake up a sleeping or waiting thread
+- To implement graceful shutdown of threads
+- To cancel long-running tasks
+
+### Syntax Rules and Structure
 
 ```java
-public class InterruptPollDemo {
+// Interrupt a thread
+targetThread.interrupt();
+
+// Check if the current thread is interrupted (clears flag)
+boolean wasInterrupted = Thread.interrupted();
+
+// Check if a thread is interrupted (does not clear flag)
+boolean isInterrupted = targetThread.isInterrupted();
+
+// Handle InterruptedException
+try {
+    Thread.sleep(1000);
+} catch (InterruptedException e) {
+    Thread.currentThread().interrupt();  // Restore interrupted status
+    // Clean up and exit
+}
+```
+
+**Key Methods:**
+
+| Method | Description |
+|--------|-------------|
+| `interrupt()` | Sets the interrupt status of the thread |
+| `interrupted()` | Tests and clears the current thread's interrupt status |
+| `isInterrupted()` | Tests a thread's interrupt status without clearing |
+
+**Syntax Rules:**
+
+- `interrupt()` sets the interrupt flag; it does not forcibly stop the thread.
+- When a thread is blocked in `sleep()`, `wait()`, or `join()`, interruption causes `InterruptedException`.
+- When `InterruptedException` is caught, the interrupt status is cleared; call `Thread.currentThread().interrupt()` to restore it.
+
+**Constraints and Limitations:**
+
+- Interruption is cooperative; threads must check for it.
+- "Do not use Thread.stop() to terminate threads" (SEI CERT).
+- Tasks must support interruption to be cancellable in thread pools.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ThreadInterruptDemo.java
+public class ThreadInterruptDemo {
     public static void main(String[] args) throws InterruptedException {
         Thread worker = new Thread(() -> {
-            long sum = 0;
-            long iterations = 0;
-            // Busy computation loop that polls for interruption
-            while (!Thread.currentThread().isInterrupted()) {
-                sum += iterations;
-                iterations++;
-                // Periodically check — no blocking call here
-                if (iterations % 1_000_000 == 0) {
-                    System.out.println("Worker: " + iterations + " iterations");
-                }
+            try {
+                System.out.println("Worker: sleeping for 10 seconds...");
+                Thread.sleep(10000);  // Will be interrupted
+                System.out.println("Worker: woke up normally");
+            } catch (InterruptedException e) {
+                System.out.println("Worker: interrupted!");
+                Thread.currentThread().interrupt();  // Restore status
             }
-            System.out.println("Worker: interrupted after " + iterations + " iterations");
-        });
+            System.out.println("Worker: exiting");
+        }, "Worker");
 
         worker.start();
-        Thread.sleep(100); // let worker run for a bit
-        System.out.println("Main: interrupting worker");
-        worker.interrupt();
+
+        Thread.sleep(2000);  // Main thread waits 2 seconds
+        System.out.println("Main: interrupting worker...");
+        worker.interrupt();  // Interrupt the worker
+
         worker.join();
         System.out.println("Main: done");
     }
 }
 ```
 
-**Expected Output (iteration counts may vary)**
-
+**Expected Output:**
 ```
-Worker: 1000000 iterations
-Worker: 2000000 iterations
-...
-Main: interrupting worker
-Worker: interrupted after N iterations
+Worker: sleeping for 10 seconds...
+Main: interrupting worker...
+Worker: interrupted!
+Worker: exiting
 Main: done
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-The worker runs a busy loop that checks `isInterrupted()` on each iteration. When the main thread calls `interrupt()`, the status flag is set. On the next loop condition check, `isInterrupted()` returns `true` and the loop exits. Because there is no blocking call, `InterruptedException` is not thrown; the flag is detected by polling.
+1. The worker thread starts and calls `Thread.sleep(10000)`.
+2. After 2 seconds, the main thread calls `worker.interrupt()`.
+3. The worker's `sleep()` throws `InterruptedException`.
+4. The worker catches the exception, prints "interrupted!", and restores the interrupt status.
+5. The worker exits its `run()` method and terminates.
+6. `worker.join()` returns, and the main thread prints "done".
+
+### Real-World Cases
+
+- **Graceful Shutdown:** Interrupting worker threads during application shutdown.
+- **Task Cancellation:** Cancelling long-running tasks in thread pools.
+- **Timeout Handling:** Interrupting a thread that exceeds a time limit.
 
 ---
 
-**Example 3: Restoring Interrupt Status**
+## 8. Thread Priorities
+
+### Definitions
+
+**Core Definition:** Thread priority is a hint to the scheduler about the relative importance of a thread, represented as an integer from 1 (minimum) to 10 (maximum).
+
+**Technical Definition:** "Every thread has a priority. Threads with higher priority are executed in preference to threads with lower priority. Each thread may or may not also be marked as a daemon. When code running in some thread creates a new Thread object, the new thread has its priority initially set equal to the priority of the creating thread". "The JVM defines a range of ten logical priorities for Java threads: MIN_PRIORITY = 1, NORM_PRIORITY = 5, MAX_PRIORITY = 10". "On Linux thread priorities are ignored because the OS does not support static priority in SCHED_OTHER scheduling class".
+
+**Beginner-Friendly Explanation:** Thread priority is like setting the volume on different workers' voices. A higher priority means "I want to be heard more often." But the actual effect depends on the operating system — some systems listen carefully, others ignore it. You shouldn't rely on priorities to guarantee correct behaviour.
+
+### Purposes
+
+- To provide a hint to the scheduler about relative thread importance
+- To influence scheduling decisions on platforms that support priorities
+- To differentiate critical tasks from background tasks
+
+### Syntax Rules and Structure
 
 ```java
-public class InterruptRestoreDemo {
-    static void cleanup() throws InterruptedException {
-        System.out.println("Cleaning up...");
-        Thread.sleep(500); // cleanup may itself block
-        System.out.println("Cleanup done");
-    }
+Thread t = new Thread(task);
+t.setPriority(Thread.MAX_PRIORITY);  // 10
+int priority = t.getPriority();
 
+// Constants
+Thread.MIN_PRIORITY  // 1
+Thread.NORM_PRIORITY // 5
+Thread.MAX_PRIORITY  // 10
+```
+
+**Syntax Rules:**
+
+- Priority must be between `MIN_PRIORITY` and `MAX_PRIORITY`; otherwise `IllegalArgumentException` is thrown.
+- A new thread inherits the priority of its creating thread.
+- Priority is a hint; its effect is platform-dependent.
+
+**Constraints and Limitations:**
+
+- "On Linux thread priorities are ignored".
+- Do not rely on priorities for correctness.
+- Priority inversion can occur when a high-priority thread waits for a low-priority thread.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ThreadPriorityDemo.java
+public class ThreadPriorityDemo {
     public static void main(String[] args) {
-        Thread worker = new Thread(() -> {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(1000);
-                    System.out.println("Working...");
-                }
-            } catch (InterruptedException e) {
-                System.out.println("Worker interrupted");
-                try {
-                    cleanup(); // cleanup should know about interruption
-                } catch (InterruptedException ce) {
-                    System.out.println("Cleanup interrupted too");
-                }
-                // Restore status so caller knows
-                Thread.currentThread().interrupt();
+        Runnable task = () -> {
+            for (int i = 0; i < 3; i++) {
+                System.out.println(Thread.currentThread().getName() +
+                    " (priority=" + Thread.currentThread().getPriority() + "): " + i);
             }
-        });
+        };
 
-        worker.start();
-        try { Thread.sleep(2500); } catch (InterruptedException e) { }
-        worker.interrupt();
+        Thread low = new Thread(task, "Low");
+        Thread normal = new Thread(task, "Normal");
+        Thread high = new Thread(task, "High");
+
+        low.setPriority(Thread.MIN_PRIORITY);
+        normal.setPriority(Thread.NORM_PRIORITY);
+        high.setPriority(Thread.MAX_PRIORITY);
+
+        low.start();
+        normal.start();
+        high.start();
     }
 }
 ```
 
-**Expected Output**
-
+**Expected Output (order may vary; priorities may have no effect on some platforms):**
 ```
-Working...
-Working...
-Worker interrupted
-Cleaning up...
-Cleanup done
+High (priority=10): 0
+Normal (priority=5): 0
+Low (priority=1): 0
+High (priority=10): 1
+Normal (priority=5): 1
+Low (priority=1): 1
+High (priority=10): 2
+Normal (priority=5): 2
+Low (priority=1): 2
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-The worker is interrupted during `Thread.sleep(1000)`. It catches `InterruptedException` and calls `cleanup()`, which itself sleeps. Since the interrupted status was cleared by the `sleep` call that threw, `cleanup()`'s `sleep` completes normally (no `InterruptedException`). The worker then restores the interrupted status with `Thread.currentThread().interrupt()` before exiting. This pattern ensures that the interruption is not "lost" and can be detected by any code that joins the worker and inspects its status.
+1. Three threads are created with the same task.
+2. `setPriority()` assigns different priorities to each thread.
+3. The threads are started; the scheduler decides the execution order.
+4. Higher-priority threads may run more often, but the exact behaviour depends on the OS.
 
 ### Real-World Cases
 
-- **Graceful server shutdown**: A shutdown hook calls `interrupt()` on all worker threads; each worker checks `isInterrupted()` in its task loop and finishes its current task before exiting.
-- **Cancellable file downloads**: A download thread periodically checks `isInterrupted()`; if interrupted, it closes the connection and deletes partial files.
-- **Timeout implementation**: A framework calls `interrupt()` on a task that exceeds its deadline; the task's `catch (InterruptedException)` block performs cleanup and returns.
-- **ExecutorService shutdownNow()**: `shutdownNow()` interrupts all actively executing tasks and returns a list of tasks that never commenced execution.
+- **GUI Applications:** Giving the UI thread higher priority for responsiveness.
+- **Background Tasks:** Using lower priorities for non-critical work.
+- **Real-Time Systems:** Prioritising critical tasks (where the OS supports it).
 
 ---
 
-## References
+## 9. Thread Daemon
 
-- Thread (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html
-- Runnable (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html
-- Callable (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Callable.html
-- Future (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/Future.html
-- InterruptedException (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/InterruptedException.html
-- ThreadGroup (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/ThreadGroup.html
-- Oracle Java Tutorials: Concurrency - https://docs.oracle.com/javase/tutorial/essential/concurrency/
-- Oracle Java Tutorials: Defining and Starting a Thread - https://docs.oracle.com/javase/tutorial/essential/concurrency/runthread.html
-- Oracle Java Tutorials: Interrupts - https://docs.oracle.com/javase/tutorial/essential/concurrency/interrupt.html
-- Oracle Java Tutorials: Joins - https://docs.oracle.com/javase/tutorial/essential/concurrency/join.html
-- Java Language Specification, Chapter 17: Threads and Locks - https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html
-- Goetz, Brian, et al. *Java Concurrency in Practice*. Addison-Wesley, 2006.
+### Definitions
+
+**Core Definition:** A daemon thread is a thread that does not prevent the JVM from terminating when all non-daemon threads have finished.
+
+**Technical Definition:** "The Java virtual machine continues to execute threads until either of the following occurs: the exit method of class Runtime has been called and the security manager has permitted the exit operation to take place; or all threads that are not daemon threads have died, either by returning from the call to the run method or by throwing an exception that propagates beyond the run method". "The shutdown sequence begins when all started non-daemon threads have terminated". "Virtual threads are daemon threads and so do not prevent the shutdown sequence from beginning".
+
+**Beginner-Friendly Explanation:** A daemon thread is like a background helper that doesn't keep the office open. When all the regular employees (non-daemon threads) go home, the janitor (daemon thread) stops working too. The program ends, and the daemon thread is terminated automatically. Daemon threads are useful for background services like garbage collection or logging.
+
+### Purposes
+
+- To provide background services without preventing JVM shutdown
+- To run tasks that should not keep the application alive
+- To implement system-level services (e.g., garbage collection, finalisation)
+
+### Syntax Rules and Structure
+
+```java
+Thread daemon = new Thread(task);
+daemon.setDaemon(true);  // Must be called before start()
+daemon.start();
+
+boolean isDaemon = daemon.isDaemon();
+```
+
+**Syntax Rules:**
+
+- `setDaemon(true)` must be called before `start()`; otherwise `IllegalThreadStateException` is thrown.
+- A new thread inherits daemon status from its creating thread.
+- "Virtual threads are daemon threads and so do not prevent the shutdown sequence from beginning".
+- "The daemon status of a virtual thread is always true and cannot be changed to false".
+
+**Constraints and Limitations:**
+
+- Daemon threads are terminated abruptly when the JVM shuts down; they may not complete their work.
+- "Daemon threads should NOT perform I/O or hold resources" (GitHub).
+- Do not use daemon threads for tasks that must complete.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ThreadDaemonDemo.java
+public class ThreadDaemonDemo {
+    public static void main(String[] args) {
+        // Create a daemon thread
+        Thread daemon = new Thread(() -> {
+            while (true) {
+                System.out.println("Daemon: still running...");
+                try { Thread.sleep(1000); } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }, "Daemon-Thread");
+
+        daemon.setDaemon(true);  // Set before start
+        daemon.start();
+
+        System.out.println("Daemon: " + daemon.isDaemon());  // true
+
+        // Main thread sleeps briefly, then exits
+        try { Thread.sleep(3000); } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        System.out.println("Main thread exiting — daemon will be terminated");
+    }
+}
+```
+
+**Expected Output:**
+```
+Daemon: true
+Daemon: still running...
+Daemon: still running...
+Daemon: still running...
+Main thread exiting — daemon will be terminated
+```
+
+**Step-by-Step Explanation:**
+
+1. A daemon thread is created with an infinite loop that prints a message every second.
+2. `setDaemon(true)` is called before `start()`.
+3. The daemon thread starts and prints its status.
+4. The main thread sleeps for 3 seconds, allowing the daemon to run.
+5. The main thread exits, and the JVM terminates the daemon thread.
+
+### Real-World Cases
+
+- **Garbage Collection:** JVM internal threads are daemon threads.
+- **Background Logging:** A logging thread that writes to disk periodically.
+- **Monitoring:** A thread that reports system metrics at intervals.
+
+---
+
+## 10. Thread Groups
+
+### Definitions
+
+**Core Definition:** A `ThreadGroup` represents a set of threads and can also include other thread groups, forming a tree structure.
+
+**Technical Definition:** "A thread group represents a set of threads. In addition, a thread group can also include other thread groups. The thread groups form a tree in which every thread group except the initial thread group has a parent. A thread group has a name and maximum priority. The name is specified when creating the group and cannot be changed". "A thread group is weakly reachable from its parent group so that it is eligible for garbage collection when there are no live threads in the group and the thread group is otherwise unreachable". "The Java runtime creates a special thread group for virtual threads. This group is returned by the Thread.getThreadGroup method when invoked on a virtual thread".
+
+**Beginner-Friendly Explanation:** A thread group is like a department in a company. It's a way to organise threads into related teams. You can perform operations on the entire group at once (like interrupting all threads in a group) and set a maximum priority for the group. However, thread groups are largely obsolete — modern applications should use thread pools and executors instead.
+
+### Purposes
+
+- To organise threads into logical groups
+- To perform bulk operations (interrupt, enumerate) on a group
+- To set a maximum priority for all threads in a group
+- To provide a default uncaught exception handler for group members
+
+### Syntax Rules and Structure
+
+```java
+// Create a thread group
+ThreadGroup group = new ThreadGroup("MyGroup");
+
+// Create a thread in the group
+Thread t = new Thread(group, task, "Thread-1");
+
+// Bulk operations
+group.interrupt();  // Interrupt all threads in the group
+int count = group.activeCount();
+
+// Set maximum priority
+group.setMaxPriority(Thread.MAX_PRIORITY);
+```
+
+**Key Methods:**
+
+| Method | Description |
+|--------|-------------|
+| `ThreadGroup(String name)` | Creates a new thread group |
+| `activeCount()` | Returns the estimated number of active threads |
+| `interrupt()` | Interrupts all threads in the group |
+| `setMaxPriority(int)` | Sets the maximum priority for the group |
+| `getParent()` | Returns the parent group |
+
+**Syntax Rules:**
+
+- Every thread belongs to a thread group; if not specified, the current thread's group is used.
+- The initial thread group has no parent.
+- "Thread groups provided a way in early Java releases to group threads and provide a form of job control" (API Note).
+
+**Constraints and Limitations:**
+
+- "Do not invoke ThreadGroup methods" (SEI CERT THI01-J) — thread groups are largely obsolete and error-prone.
+- Thread groups do not provide reliable bulk operation guarantees.
+- Virtual threads are not included in `activeCount()` or `enumerate()`.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ThreadGroupDemo.java
+public class ThreadGroupDemo {
+    public static void main(String[] args) {
+        // Create a thread group
+        ThreadGroup group = new ThreadGroup("Workers");
+
+        // Create threads in the group
+        Thread t1 = new Thread(group, () -> {
+            System.out.println("Worker 1 in group: " +
+                Thread.currentThread().getThreadGroup().getName());
+        }, "Worker-1");
+
+        Thread t2 = new Thread(group, () -> {
+            System.out.println("Worker 2 in group: " +
+                Thread.currentThread().getThreadGroup().getName());
+        }, "Worker-2");
+
+        t1.start();
+        t2.start();
+
+        // Group information
+        System.out.println("Active threads: " + group.activeCount());
+        System.out.println("Group name: " + group.getName());
+        System.out.println("Max priority: " + group.getMaxPriority());
+    }
+}
+```
+
+**Expected Output (order may vary):**
+```
+Worker 1 in group: Workers
+Worker 2 in group: Workers
+Active threads: 2
+Group name: Workers
+Max priority: 10
+```
+
+**Step-by-Step Explanation:**
+
+1. A `ThreadGroup` named `"Workers"` is created.
+2. Two threads are created with the group as the first constructor argument.
+3. The threads start and print their group name.
+4. `activeCount()` returns the number of active threads in the group.
+
+### Real-World Cases
+
+- **Legacy Code:** Older applications may use thread groups; new code should use executors.
+- **Debugging:** Thread dumps show thread groups for organisation.
+- **Applet Sandboxing:** Thread groups were used in applets for security (obsolete).
+
+---
+
+## 11. Thread Naming
+
+### Definitions
+
+**Core Definition:** Thread naming is the practice of assigning descriptive names to threads for debugging, monitoring, and logging purposes.
+
+**Technical Definition:** "Threads have a unique identifier and a name. The identifier is generated when a Thread is created and cannot be changed. The thread name can be specified when creating a thread or can be changed at a later time". "Platform threads get an automatically generated thread name by default. Virtual threads do not have a thread name by default; the getName method returns the empty string if a thread name is not set".
+
+**Beginner-Friendly Explanation:** Naming threads is like giving employees name badges. Without names, all workers are just "Thread-145" — impossible to tell apart. With meaningful names like "OrderProcessor" or "HttpListener", you can instantly see what each thread is doing in logs and debuggers.
+
+### Purposes
+
+- To identify threads in logs, debuggers, and thread dumps
+- To distinguish between different types of worker threads
+- To simplify debugging and performance analysis
+- To provide context in error messages
+
+### Syntax Rules and Structure
+
+```java
+// Set name in constructor
+Thread t = new Thread(task, "Worker-1");
+
+// Set or change name later
+t.setName("NewName");
+
+// Get name
+String name = t.getName();
+```
+
+**Syntax Rules:**
+
+- Thread names are not required to be unique.
+- "More than one thread may have the same name. Giving multiple threads the same name may make things worse and cause confusion instead of helping debugging".
+- Virtual threads have no default name; `getName()` returns an empty string.
+
+**Naming Conventions:**
+
+| Convention | Example | Use Case |
+|------------|---------|----------|
+| Component-based | `http-listener-1` | Server components |
+| Pool-based | `pool-1-thread-3` | Thread pools |
+| Task-based | `order-processor-1` | Task-specific workers |
+| Module-based | `billing-worker-1` | Module-specific threads |
+
+**Constraints and Limitations:**
+
+- Names should be short but meaningful.
+- Avoid extremely long names with irrelevant clauses.
+- "Put the most significant part first" — e.g., `Listener-http-01` rather than `01-http-Listener`.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ThreadNamingDemo.java
+public class ThreadNamingDemo {
+    public static void main(String[] args) {
+        // Named thread via constructor
+        Thread t1 = new Thread(() -> {
+            System.out.println("Running: " + Thread.currentThread().getName());
+        }, "OrderProcessor-1");
+
+        // Named thread via Thread.Builder (Java 21+)
+        Thread t2 = Thread.ofPlatform().name("HttpListener-1")
+            .start(() -> {
+                System.out.println("Running: " + Thread.currentThread().getName());
+            });
+
+        // Rename a thread
+        Thread t3 = new Thread(() -> {
+            System.out.println("Running: " + Thread.currentThread().getName());
+        }, "TempName");
+        t3.setName("DatabaseWorker-1");
+
+        t1.start();
+        t3.start();
+    }
+}
+```
+
+**Expected Output (order may vary):**
+```
+Running: OrderProcessor-1
+Running: DatabaseWorker-1
+Running: HttpListener-1
+```
+
+**Step-by-Step Explanation:**
+
+1. `t1` is created with the name `"OrderProcessor-1"`.
+2. `t2` uses `Thread.ofPlatform().name(...)` for a fluent naming API.
+3. `t3` is initially named `"TempName"` but renamed to `"DatabaseWorker-1"` before starting.
+4. Each thread prints its name when running.
+
+### Real-World Cases
+
+- **Web Servers:** Naming threads after the request type (`http-worker-1`, `admin-worker-1`).
+- **Thread Pools:** Using `ThreadFactory` to name pool threads (`pool-1-thread-1`).
+- **Logging:** Identifying which thread produced a log entry.
+
+---
+
+## 12. Thread Best Practices
+
+### Definitions
+
+**Core Definition:** Thread best practices are guidelines for creating, managing, and using threads safely, efficiently, and maintainably.
+
+**Technical Definition:** Best practices derive from authoritative sources including the SEI CERT Oracle Coding Standard for Java. Key principles include preferring `Runnable` over extending `Thread`, using thread pools instead of creating threads ad-hoc, ensuring tasks are interruptible, and avoiding deprecated methods like `Thread.stop()`.
+
+**Beginner-Friendly Explanation:** Thread best practices help you avoid common pitfalls like deadlocks, resource exhaustion, and unpredictable behaviour. They're like a safety manual for multithreaded programming.
+
+### Purposes
+
+- To prevent deadlocks, race conditions, and resource exhaustion
+- To ensure correct and predictable concurrent behaviour
+- To improve performance and scalability
+- To write maintainable concurrent code
+
+### Key Best Practices Table
+
+| Practice | Description | Source |
+|----------|-------------|--------|
+| Prefer `Runnable` over extending `Thread` | "Do not subclass Thread if you can use a Runnable instead". | SEI CERT |
+| Use thread pools | "Facilitate thread reuse by using Thread Pools". | SEI CERT |
+| Ensure tasks are interruptible | "Ensure that tasks submitted to a thread pool are interruptible". | SEI CERT |
+| Do not use `Thread.stop()` | "Do not use Thread.stop() to terminate threads". | SEI CERT |
+| Name threads meaningfully | Choose short, meaningful, unique names for debugging. | Community |
+| Use `join()` for synchronisation | "The join method allows one thread to wait for the completion of another". | Oracle |
+| Restore interrupt status | Call `Thread.currentThread().interrupt()` when catching `InterruptedException`. | Best practice |
+| Avoid `Thread.sleep()` for synchronisation | Use `wait()`/`notify()` or higher-level constructs. | Best practice |
+| Use daemon threads for background services | Daemon threads do not prevent JVM shutdown. | Oracle |
+| Avoid thread groups | "Do not invoke ThreadGroup methods". | SEI CERT |
+| Set daemon status before start | `setDaemon()` must be called before `start()`. | Oracle |
+| Use `Thread.Builder` (Java 21+) | Modern API for creating platform and virtual threads. | Oracle |
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ThreadBestPracticesDemo.java
+public class ThreadBestPracticesDemo {
+    public static void main(String[] args) throws InterruptedException {
+        // BEST PRACTICE: Use Runnable, not Thread subclassing
+        Runnable task = () -> {
+            try {
+                System.out.println(Thread.currentThread().getName() +
+                    " is working");
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // BEST PRACTICE: Restore interrupt status
+                Thread.currentThread().interrupt();
+                System.out.println(Thread.currentThread().getName() +
+                    " was interrupted");
+            }
+            System.out.println(Thread.currentThread().getName() + " finished");
+        };
+
+        // BEST PRACTICE: Name threads meaningfully
+        Thread worker = new Thread(task, "DataProcessor-1");
+        worker.start();
+
+        // BEST PRACTICE: Use join for synchronisation
+        worker.join();
+
+        System.out.println("Main: all workers completed");
+    }
+}
+```
+
+**Expected Output:**
+```
+DataProcessor-1 is working
+DataProcessor-1 finished
+Main: all workers completed
+```
+
+**Step-by-Step Explanation:**
+
+1. A `Runnable` task is defined instead of extending `Thread`.
+2. The thread is named `"DataProcessor-1"` for clarity.
+3. `InterruptedException` is caught and the interrupt status is restored.
+4. `join()` is used to wait for the worker to complete before proceeding.
+
+### Real-World Cases
+
+- **Web Servers:** Thread pools handle requests without creating threads ad-hoc.
+- **Background Processing:** Named daemon threads handle logging and cleanup.
+- **Task Cancellation:** Interruptible tasks respond to shutdown requests.
+
+---
+
+## References Links
+
+- Class Thread — Java Platform SE 27 API Specification - https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/lang/Thread.html
+- Interface Runnable — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/lang/Runnable.html
+- Enum Thread.State — Java Platform SE 11 API Specification - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Thread.State.html
+- Pausing Execution with Sleep — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/essential/concurrency/sleep.html
+- Joins — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/essential/concurrency/join.html
+- Class ThreadGroup — Java Platform SE 21 API Specification - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/ThreadGroup.html
+- 13. Thread APIs (THI) — SEI CERT Oracle Coding Standard for Java - https://wiki.sei.cmu.edu/confluence/pages/viewpage.action?pageId=88491697
+- CON31-J. Ensure that tasks submitted to a thread pool are interruptible — SEI CERT - https://wiki.sei.cmu.edu/confluence/display/java/CON31-J.+Ensure+that+tasks+submitted+to+a+thread+pool+are+interruptible
+- Java Thread.interrupt() Method — OpenJDK Source — https://cr.openjdk.org/~alanb/8198841/webrev/src/java.base/share/classes/java/lang/Thread.java.sdiff.html
+- Should threads in Java be named for easier debugging? — Stack Overflow - https://stackoverflow.com/questions/3157852/should-threads-in-java-be-named-for-easier-debugging
+- Daemon Threads in Java — Baeldung - https://www.baeldung.com/java-daemon-thread

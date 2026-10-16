@@ -1,999 +1,859 @@
-# XML Processing & Modern Alternatives: A Comprehensive Programming Cheat Sheet
+# Java XML: A Comprehensive Programming Cheat Sheet
 
 ---
 
 ## Topic Overview
 
-### Core Definition
-XML Processing in Java encompasses the APIs and techniques used to parse, manipulate, validate, and transform XML documents, ranging from in-memory tree models (DOM) to event-driven streaming parsers (StAX) and object-XML binding frameworks (JAXB).
+### Definitions
 
-### Technical Definition
-Java provides multiple XML processing APIs under the Java API for XML Processing (JAXP) umbrella. These include the **DOM** (Document Object Model) API, which builds an in-memory tree representation of an XML document; the **StAX** (Streaming API for XML) pull-parser, which processes XML as a stream of events with low memory overhead; **JAXB** (Jakarta XML Binding), which maps Java objects to XML through annotations; **JAXP Validation**, which enforces XML Schema (XSD) constraints; and **JAXP Transformation (XSLT)** , which converts XML documents into other formats using stylesheets. Modern alternatives include Jackson XML for annotation-based XML binding and streaming libraries like azure-xml.
+**Core Definition:** XML (Extensible Markup Language) is a text-based, platform-independent markup language for encoding documents in a format that is both human-readable and machine-readable. Java provides multiple APIs for processing XML, including DOM, SAX, StAX, and JAXB.
 
-### Beginner-Friendly Explanation
-XML is a structured text format used for configuration, data exchange, and document storage. Java offers different tools for different jobs: DOM is like reading an entire book into memory so you can flip to any page; StAX is like reading a book page by page without memorizing everything; JAXB is like translating a book into another language automatically. Choosing the right tool depends on document size, memory constraints, and whether you need random access or sequential processing.
+**Technical Definition:** Java XML processing is governed by the Java API for XML Processing (JAXP), which comprises a set of APIs built upon XML technologies and standards essential for XML processing. These include parsing based on Document Object Model (DOM), Simple API for XML Parsing (SAX), and Streaming API for XML (StAX); serializing via StAX and XSLT; validation via the JAXP Validation API; transformation via XSLT; querying via XPath; and resolving external resources via the XML Catalog API. JAXB (Java Architecture for XML Binding) provides a fast and convenient way to bind XML schemas and Java representations, enabling Java applications to read, process, and output XML data.
+
+**Beginner-Friendly Explanation:** XML is a way to structure data using tags, similar to HTML. It's like a well-organised filing cabinet where each folder (element) can contain other folders or documents (text). Java gives you four main tools to work with XML: DOM (loads the whole document like a tree — powerful but memory-hungry), SAX (reads the document start to finish, notifying you of each item — lightweight but one-way), StAX (like SAX but you ask for the next item instead of being interrupted), and JAXB (automatically converts between XML and Java objects). Choosing the right tool depends on your document size, memory constraints, and whether you need to modify the data.
 
 ### Key Characteristics
-- **Multiple APIs**: DOM, SAX, StAX, JAXB, XSLT, and validation
-- **Memory vs. Speed Trade-offs**: DOM loads everything; StAX streams
-- **Declarative Binding**: JAXB maps objects to XML with annotations
-- **Schema-Driven**: XSD validation enforces structure and constraints
-- **Transformative**: XSLT converts XML to HTML, text, or other XML
+
+- **Hierarchical Structure:** XML documents are tree-structured, with nested elements.
+- **Platform-Independent:** XML is portable across operating systems and programming languages.
+- **Multiple Parsing Models:** DOM (tree-based, full document in memory), SAX (event-based, streaming, read-only), StAX (pull-based, streaming, bidirectional).
+- **Data Binding:** JAXB maps XML schemas to Java classes, enabling automatic marshalling and unmarshalling.
+- **Security-Sensitive:** XML processing is vulnerable to XXE (XML External Entity) injection and billion laughs attacks, requiring secure configuration.
+- **Standardised:** DOM, SAX, and StAX are W3C and JSR standards; JAXB is a Jakarta EE specification.
 
 ### Prerequisites
-- Basic Java programming (classes, interfaces, annotations)
-- Familiarity with XML syntax and structure
-- Understanding of Java I/O streams
-- Maven or Gradle for dependency management
+
+- Basic understanding of Java classes and objects
+- Familiarity with Java I/O streams
+- Knowledge of the `javax.xml` package structure
+- Understanding of annotations (for JAXB)
 
 ### Related Programming Areas
-- **JSON Processing**: Jackson JSON as a lightweight alternative
-- **REST APIs**: XML payloads in SOAP and legacy web services
-- **Configuration Management**: XML-based configuration files
-- **Data Integration**: ETL pipelines with XML as source/target
 
-### Core Concepts Overview
-1. **DOM Parsing**: Building, traversing, and modifying XML in-memory
-2. **StAX Streaming**: Event-driven, pull-parsing for large XML datasets
-3. **JAXB (Jakarta XML Binding)** : Marshalling and unmarshalling Java objects to XML
-4. **XML Validation**: Enforcing document structures with XSD
-5. **XSLT Transformations**: Converting XML to HTML, text, or alternative XML
+- **Web Services:** SOAP and REST APIs use XML for message payloads.
+- **Configuration:** Many applications use XML configuration files.
+- **Data Interchange:** XML is used for data exchange between heterogeneous systems.
+- **Document Processing:** XML is used in publishing, office documents, and SVG.
+- **JSON:** JSON is a more modern alternative to XML for data interchange.
+
+### Core Concepts / Features
 
 ---
 
-## Core Concept 1: DOM Parsing
+## 1. XML
 
 ### Definitions
-**Core Definition**: DOM (Document Object Model) parsing is an in-memory tree-based API that loads an entire XML document into memory, representing it as a hierarchical tree of nodes that can be navigated, queried, and modified.
 
-**Technical Definition**: The DOM parser loads a document and creates an entire hierarchical tree in memory. The `javax.xml.parsers.DocumentBuilderFactory` class is used to obtain a `DocumentBuilder` instance, which produces a `Document` object conforming to the DOM specification. The `Document` object represents the XML document as a tree of `Node` objects, where elements, attributes, and text are all nodes. The `normalize()` method ensures that the document hierarchy isn't affected by extra white spaces or new lines within nodes.
+**Core Definition:** XML is a markup language that defines a set of rules for encoding documents in a format that is both human-readable and machine-readable.
 
-**Beginner-Friendly Explanation**: DOM parsing is like scanning an entire book into a computer so you can search, read, and edit any page instantly. It's powerful but uses a lot of memory—if the book is huge, your computer might run out of space.
+**Technical Definition:** XML is a subset of SGML (Standard Generalized Markup Language) that describes a class of data objects called XML documents and partially describes the behaviour of computer programs which process them. An XML document consists of a prolog (XML declaration, DTD/schema references) and a document element containing nested elements, attributes, text content, comments, and processing instructions.
+
+**Beginner-Friendly Explanation:** XML is like a labelled box system. You use tags like `<name>Alice</name>` to label data. Tags can be nested inside other tags to create hierarchies. Attributes add extra information to tags, like `<person id="1">`. The whole document is a tree of elements, starting from a single root.
 
 ### Purposes
-- To load an entire XML document into memory for random access
-- To traverse and query XML structure using XPath or DOM methods
-- To modify XML documents programmatically (add, remove, update nodes)
-- To support small to medium-sized XML documents where memory is not a constraint
-- To enable tree-based processing where the full document context is needed
+
+- To represent structured data in a human-readable format
+- To exchange data between heterogeneous systems
+- To serve as the basis for configuration files and web service messages
+- To enable document-centric markup (text with embedded structure)
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntax: DOM Parsing Workflow
-```
-DOM PARSING WORKFLOW
-│
-├── 1. Create DocumentBuilderFactory
-│   └── DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance()
-│
-├── 2. Create DocumentBuilder
-│   └── DocumentBuilder builder = factory.newDocumentBuilder()
-│
-├── 3. Parse XML Document
-│   ├── Document doc = builder.parse(new File("example.xml"))
-│   └── Document doc = builder.parse(new InputSource(reader))
-│
-├── 4. Normalize Document
-│   └── doc.getDocumentElement().normalize()
-│
-├── 5. Navigate / Query
-│   ├── doc.getElementsByTagName("tutorial")
-│   ├── node.getAttributes()
-│   └── node.getChildNodes()
-│
-└── 6. Modify (optional)
-    ├── doc.createElement("newElement")
-    ├── parent.appendChild(newElement)
-    └── parent.removeChild(oldElement)
+**XML Document Structure:**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<bookstore>
+    <book id="1" category="fiction">
+        <title>Effective Java</title>
+        <author>Joshua Bloch</author>
+        <price>45.99</price>
+    </book>
+    <book id="2" category="technical">
+        <title>Java Concurrency in Practice</title>
+        <author>Brian Goetz</author>
+        <price>39.99</price>
+    </book>
+</bookstore>
 ```
 
-#### Component Breakdown
-| Component | Class | Purpose |
-|-----------|-------|---------|
-| Factory | `DocumentBuilderFactory` | Creates `DocumentBuilder` instances |
-| Builder | `DocumentBuilder` | Parses XML into `Document` |
-| Document | `org.w3c.dom.Document` | Root of the DOM tree |
-| Node | `org.w3c.dom.Node` | Primary datatype for DOM components |
-| NodeList | `org.w3c.dom.NodeList` | Ordered collection of nodes |
-| NamedNodeMap | `org.w3c.dom.NamedNodeMap` | Collection of attributes |
+**Component Breakdown:**
 
-#### Syntax Rules
-- Use `DocumentBuilderFactory.newInstance()` to create a factory
-- Use `builder.parse()` to load XML from a `File`, `InputStream`, or `InputSource`
-- Call `normalize()` to clean up whitespace and adjacent text nodes
-- Use `getElementsByTagName()` for element retrieval
-- Use `getAttributes()` for attribute retrieval
-- `Node` is the primary datatype; all elements, attributes, and text are nodes
+| Component | Description |
+|-----------|-------------|
+| `<?xml version="1.0"?>` | XML declaration (optional but recommended) |
+| `<bookstore>` | Root element (exactly one per document) |
+| `<book>` | Child element |
+| `id="1"` | Attribute |
+| `Effective Java` | Text content |
 
-#### Constraints and Limitations
-- DOM loads the entire document into memory; large documents can cause `OutOfMemoryError`
-- Not suitable for streaming or very large XML files
-- DOM parsing is slower than StAX for large documents
-- Memory usage is proportional to document size
+**Syntax Rules:**
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
+- All elements must be properly nested and closed.
+- Attribute values must be quoted.
+- Element and attribute names are case-sensitive.
+- Exactly one root element is allowed.
+- XML is text-based and uses Unicode encoding.
 
-#### Example 1: DOM Parsing and Traversal
+**Constraints and Limitations:**
+
+- XML is verbose compared to JSON.
+- Whitespace handling can be tricky.
+- DTDs and schemas add complexity.
+
+### Real-World Cases
+
+- **Web Services:** SOAP messages are XML documents.
+- **Configuration:** Maven `pom.xml`, Spring application context.
+- **Office Documents:** Microsoft Office Open XML, OpenDocument Format.
+- **Data Exchange:** B2B data interchange, RSS feeds.
+
+---
+
+## 2. DOM (Document Object Model)
+
+### Definitions
+
+**Core Definition:** DOM is a tree-based API that parses an entire XML document into an in-memory tree structure, allowing navigation and modification.
+
+**Technical Definition:** "The DOM API parses the *entire* XML document and converts it into a DOM tree before you can begin processing it. This cost might be beneficial if you know that you need to access the entire document". The DOM API is good for small documents, or those that contain under a thousand elements. Because DOM constructs a tree of your XML data, it is ideal for editing the structure of your XML document by adding or deleting elements.
+
+**Beginner-Friendly Explanation:** DOM loads the entire XML document into memory as a tree of nodes. You can then walk through the tree, read any element, change values, add new elements, or delete existing ones. It's like taking a paper document and building a complete model of it that you can freely edit. The downside: large documents consume a lot of memory.
+
+### Purposes
+
+- To read and navigate XML documents in a tree-structured way
+- To modify XML documents (add, delete, edit elements and attributes)
+- To access any part of the document at any time (random access)
+- To serve as a foundation for XSLT transformations
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
+
 ```java
-// DomParsingDemo.java
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
-import java.io.*;
+DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+DocumentBuilder builder = factory.newDocumentBuilder();
+Document document = builder.parse(new File("input.xml"));
 
-public class DomParsingDemo {
+Element root = document.getDocumentElement();
+NodeList nodes = root.getElementsByTagName("book");
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `DocumentBuilderFactory` | Factory for creating DOM parsers |
+| `DocumentBuilder` | Parses XML into a `Document` |
+| `Document` | The root of the DOM tree |
+| `Element` / `Node` | Tree nodes |
+| `NodeList` | A list of nodes |
+
+**Syntax Rules:**
+
+- The entire document is loaded into memory.
+- DOM is read/write capable.
+- Navigation can go in any direction (parent, child, sibling).
+
+**Constraints and Limitations:**
+
+- "DOM can be very expensive both in terms of memory and CPU resource".
+- Not suitable for large documents.
+- Requires more code for simple tasks compared to SAX/StAX.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: DomParserDemo.java
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import java.io.File;
+
+public class DomParserDemo {
     public static void main(String[] args) throws Exception {
-        // Step 1: Create factory and builder
+        // Step 1: Create the factory and builder
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        
-        // Step 2: Parse XML string
-        String xml = """
-            <tutorials>
-                <tutorial tutId="01" type="java">
-                    <title>Guava</title>
-                    <author>GuavaAuthor</author>
-                </tutorial>
-                <tutorial tutId="02" type="java">
-                    <title>Jackson</title>
-                    <author>JacksonAuthor</author>
-                </tutorial>
-            </tutorials>
-            """;
-        
-        Document doc = builder.parse(new ByteArrayInputStream(xml.getBytes()));
-        doc.getDocumentElement().normalize();
-        
-        // Step 3: Query elements by tag name
-        NodeList tutorials = doc.getElementsByTagName("tutorial");
-        System.out.println("Found " + tutorials.getLength() + " tutorials");
-        
-        // Step 4: Traverse nodes and extract data
-        for (int i = 0; i < tutorials.getLength(); i++) {
-            Node tutorial = tutorials.item(i);
-            
-            // Get attributes
-            NamedNodeMap attrs = tutorial.getAttributes();
-            String tutId = attrs.getNamedItem("tutId").getNodeValue();
-            String type = attrs.getNamedItem("type").getNodeValue();
-            
-            // Get child elements
-            Element elem = (Element) tutorial;
-            String title = elem.getElementsByTagName("title")
+
+        // Step 2: Parse the XML file into a DOM tree
+        Document document = builder.parse(new File("books.xml"));
+
+        // Step 3: Get the root element
+        Element root = document.getDocumentElement();
+        System.out.println("Root element: " + root.getNodeName());
+
+        // Step 4: Find all <book> elements
+        NodeList books = root.getElementsByTagName("book");
+
+        // Step 5: Iterate over the books
+        for (int i = 0; i < books.getLength(); i++) {
+            Element book = (Element) books.item(i);
+            String id = book.getAttribute("id");
+
+            String title = book.getElementsByTagName("title")
                 .item(0).getTextContent();
-            String author = elem.getElementsByTagName("author")
-                .item(0).getTextContent();
-            
-            System.out.printf("Tutorial %s [%s]: %s by %s%n",
-                tutId, type, title, author);
+
+            System.out.println("Book " + id + ": " + title);
         }
     }
 }
 ```
-**Expected Output**:
-```
-Found 2 tutorials
-Tutorial 01 [java]: Guava by GuavaAuthor
-Tutorial 02 [java]: Jackson by JacksonAuthor
-```
-**Why This Output**: The DOM parser loads the XML into a tree. `getElementsByTagName()` retrieves all `tutorial` elements. `getAttributes()` retrieves the `tutId` and `type` attributes. `getTextContent()` extracts the text content of child elements. The tree structure allows random access to any node.
 
----
-
-#### Example 2: Creating and Modifying DOM
-```java
-// DomModifyDemo.java
-import org.w3c.dom.*;
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-
-public class DomModifyDemo {
-    public static void main(String[] args) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        
-        // Create a new document
-        Document doc = builder.newDocument();
-        
-        // Build tree: <catalog><book id="1"><title>Java</title></book></catalog>
-        Element catalog = doc.createElement("catalog");
-        doc.appendChild(catalog);
-        
-        Element book = doc.createElement("book");
-        book.setAttribute("id", "1");
-        catalog.appendChild(book);
-        
-        Element title = doc.createElement("title");
-        title.setTextContent("Java Programming");
-        book.appendChild(title);
-        
-        // Add another book
-        Element book2 = doc.createElement("book");
-        book2.setAttribute("id", "2");
-        Element title2 = doc.createElement("title");
-        title2.setTextContent("XML Processing");
-        book2.appendChild(title2);
-        catalog.appendChild(book2);
-        
-        // Serialize to string
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        
-        StringWriter writer = new StringWriter();
-        transformer.transform(new DOMSource(doc), new StreamResult(writer));
-        
-        System.out.println("Generated XML:");
-        System.out.println(writer.toString());
-    }
-}
+**Expected Output (for the sample XML):**
 ```
-**Expected Output**:
+Root element: bookstore
+Book 1: Effective Java
+Book 2: Java Concurrency in Practice
 ```
-Generated XML:
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<catalog>
-    <book id="1">
-        <title>Java Programming</title>
-    </book>
-    <book id="2">
-        <title>XML Processing</title>
-    </book>
-</catalog>
-```
-**Why This Output**: `builder.newDocument()` creates an empty document. `createElement()` and `appendChild()` build the tree programmatically. `setAttribute()` and `setTextContent()` set values. `Transformer` serializes the DOM tree back to XML.
 
----
+**Step-by-Step Explanation:**
+
+1. `DocumentBuilderFactory.newInstance()` creates the factory.
+2. `factory.newDocumentBuilder()` creates the DOM parser.
+3. `builder.parse(file)` reads the XML and builds the DOM tree.
+4. `getDocumentElement()` returns the root element.
+5. `getElementsByTagName("book")` returns a `NodeList` of all book elements.
+6. `getAttribute("id")` retrieves the attribute value.
+7. `getTextContent()` returns the text content of the title element.
 
 ### Real-World Cases
-- **Configuration Files**: Reading and modifying XML config files in desktop applications
-- **Small Data Exchange**: Processing small XML payloads from REST/SOAP APIs
-- **Testing**: Parsing XML test fixtures and asserting structure
-- **Document Editing**: UI applications that allow users to edit XML documents
 
-### References
-- Working with XML Files in Java Using DOM Parsing - Baeldung - https://www.baeldung.com/java-xerces-dom-parsing
-- Document Object Model APIs - Oracle - https://docs.oracle.com/javase/tutorial/jaxp/dom/
-- DOM Parser API - Oracle - https://docs.oracle.com/javase/8/docs/api/org/w3c/dom/package-summary.html
+- **Configuration Editors:** Applications that need to read and modify XML config.
+- **Small Data Files:** Parsing small XML payloads where random access is needed.
+- **XSLT Transformations:** DOM trees are often transformed using XSLT.
 
 ---
 
-## Core Concept 2: StAX Streaming
+## 3. SAX (Simple API for XML)
 
 ### Definitions
-**Core Definition**: StAX (Streaming API for XML) is a pull-parsing API that processes XML as a stream of events, allowing applications to request events from the parser on demand, with minimal memory overhead.
 
-**Technical Definition**: StAX provides two APIs: a **cursor API** (`XMLStreamReader`) and an **iterator API** (`XMLEventReader`). The cursor API is more memory-efficient, using an integer event type returned by `next()` to advance the parser. The `XMLInputFactory` is used to create `XMLStreamReader` instances, which pull events from the XML input stream. Unlike SAX, where the parser actively invokes event handlers, StAX allows the programmer to pull events from the parser. CDATA events are not reported by default in some implementations; the `report-cdata-event` property can be set to `Boolean.TRUE` to enable them.
+**Core Definition:** SAX is an event-driven, streaming API that parses XML documents sequentially, notifying the application of parsing events via callbacks.
 
-**Beginner-Friendly Explanation**: StAX is like reading a book page by page, deciding when to turn each page. You don't memorize the whole book; you process each word as you read. This makes it perfect for huge XML files that won't fit in memory.
+**Technical Definition:** "SAX is an event based parsing API, it provides a low level access, is memory efficient and faster than DOM since it doesn't load the whole document tree in memory but it doesn't provide support for navigation". "The SAX API is the most lightweight of the APIs. It is ideal for parsing shallow documents (documents that do not contain much nesting of elements) with unique element names". "SAX uses a callback structure; this means that programmers handle parsing events as the API is reading an XML document".
+
+**Beginner-Friendly Explanation:** SAX is like reading a book aloud from start to finish, telling a listener whenever you encounter a chapter title, a paragraph, or a footnote. The listener (your code) reacts to each event. It's very memory-efficient because you never store the whole book — you just process events as they come. But you can't go back to a previous page.
 
 ### Purposes
-- To parse very large XML documents with minimal memory footprint
-- To process XML streams in real-time without loading the entire document
-- To provide pull-based parsing for better control over processing
-- To filter or extract specific elements from large XML datasets
-- To avoid the memory overhead of DOM parsing
+
+- To parse large XML documents with minimal memory
+- To extract specific data from XML streams
+- To process XML documents sequentially
+- To serve as a lightweight parsing option
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntax: StAX Cursor API
-```
-STAX CURSOR API WORKFLOW
-│
-├── 1. Create XMLInputFactory
-│   └── XMLInputFactory factory = XMLInputFactory.newInstance()
-│
-├── 2. Create XMLStreamReader
-│   ├── XMLStreamReader reader = factory.createXMLStreamReader(inputStream)
-│   └── XMLStreamReader reader = factory.createXMLStreamReader(fileName, inputStream)
-│
-├── 3. Iterate Events
-│   └── while (reader.hasNext()) {
-│         int event = reader.next();
-│         switch (event) {
-│             case XMLStreamConstants.START_ELEMENT: ...
-│             case XMLStreamConstants.CHARACTERS: ...
-│             case XMLStreamConstants.END_ELEMENT: ...
-│         }
-│       }
-│
-├── 4. Access Data
-│   ├── reader.getLocalName()
-│   ├── reader.getAttributeCount()
-│   ├── reader.getAttributeValue(i)
-│   └── reader.getText()
-│
-└── 5. Close Reader
-    └── reader.close()
-```
-
-#### Component Breakdown
-| Event Type | Constant | Trigger |
-|------------|----------|---------|
-| Start Element | `START_ELEMENT` | `<element>` |
-| End Element | `END_ELEMENT` | `</element>` |
-| Characters | `CHARACTERS` | Text content |
-| Start Document | `START_DOCUMENT` | Beginning |
-| End Document | `END_DOCUMENT` | End |
-| Attribute | `ATTRIBUTE` | Attribute (cursor API) |
-
-#### Syntax Rules
-- Use `XMLInputFactory.newInstance()` to create the factory
-- Use `createXMLStreamReader()` to create a reader from a `File`, `InputStream`, or `Reader`
-- Call `hasNext()` and `next()` to iterate events
-- Use `getLocalName()` for element names, `getAttributeValue()` for attributes
-- Always close the reader in a `finally` block or try-with-resources
-- Set `report-cdata-event` to `Boolean.TRUE` to receive CDATA events
-
-#### Constraints and Limitations
-- StAX is forward-only; no random access to previous elements
-- Requires manual state management for complex parsing logic
-- Not all implementations report CDATA events by default
-- More complex to code than DOM for simple tasks
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-#### Example 1: StAX Cursor API Parsing
 ```java
-// StaxCursorDemo.java
-import javax.xml.stream.*;
-import java.io.*;
+SAXParserFactory factory = SAXParserFactory.newInstance();
+SAXParser parser = factory.newSAXParser();
+DefaultHandler handler = new MyHandler();
+parser.parse(new File("input.xml"), handler);
+```
 
-public class StaxCursorDemo {
+**`DefaultHandler` Callback Methods:**
+
+| Method | Called When |
+|--------|-------------|
+| `startDocument()` | Document parsing begins |
+| `startElement(uri, localName, qName, attrs)` | Start tag encountered |
+| `characters(ch, start, length)` | Character data encountered |
+| `endElement(uri, localName, qName)` | End tag encountered |
+| `endDocument()` | Document parsing ends |
+
+**Syntax Rules:**
+
+- Parsing is forward-only and read-only.
+- The application provides callback handlers.
+- The entire document is not stored in memory.
+
+**Constraints and Limitations:**
+
+- "The callback nature of SAX also means that it is not the best API to use if you want to modify the structure of your XML data. Additionally, programming your application to handle callbacks is not always straightforward and intuitive".
+- No random access, no document modification.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: SaxParserDemo.java
+import javax.xml.parsers.*;
+import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
+import java.io.File;
+
+public class SaxParserDemo {
     public static void main(String[] args) throws Exception {
-        String xml = """
-            <catalog>
-                <book id="1"><title>Java</title><price>29.99</price></book>
-                <book id="2"><title>XML</title><price>39.99</price></book>
-            </catalog>
-            """;
-        
-        // Step 1: Create factory and reader
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        SAXParser parser = factory.newSAXParser();
+
+        // Handler that reacts to SAX events
+        DefaultHandler handler = new DefaultHandler() {
+            boolean inTitle = false;
+
+            @Override
+            public void startElement(String uri, String localName,
+                    String qName, Attributes attrs) {
+                if (qName.equals("title")) {
+                    inTitle = true;
+                    System.out.print("Title: ");
+                }
+                if (qName.equals("book")) {
+                    System.out.println("--- Book (id=" +
+                        attrs.getValue("id") + ") ---");
+                }
+            }
+
+            @Override
+            public void characters(char[] ch, int start, int length) {
+                if (inTitle) {
+                    System.out.println(new String(ch, start, length));
+                }
+            }
+
+            @Override
+            public void endElement(String uri, String localName, String qName) {
+                if (qName.equals("title")) {
+                    inTitle = false;
+                }
+            }
+        };
+
+        parser.parse(new File("books.xml"), handler);
+    }
+}
+```
+
+**Expected Output:**
+```
+--- Book (id=1) ---
+Title: Effective Java
+--- Book (id=2) ---
+Title: Java Concurrency in Practice
+```
+
+**Step-by-Step Explanation:**
+
+1. `SAXParserFactory.newInstance()` creates the factory.
+2. `factory.newSAXParser()` creates the SAX parser.
+3. A `DefaultHandler` is created with overridden callback methods.
+4. `startElement` is called for each start tag; the handler checks if it's a `book` or `title`.
+5. `characters` is called with text content when inside a `title`.
+6. `endElement` resets the `inTitle` flag.
+7. `parser.parse()` begins parsing and invokes the callbacks.
+
+### Real-World Cases
+
+- **Log Processing:** Extracting specific fields from large XML logs.
+- **Data Import:** Streaming large XML data exports into a database.
+- **RSS/Atom Feeds:** Parsing feed items sequentially.
+- **Configuration Validation:** Quickly scanning configuration files.
+
+---
+
+## 4. StAX (Streaming API for XML)
+
+### Definitions
+
+**Core Definition:** StAX is a pull-based, streaming API that allows the application to request parsing events one at a time, giving the programmer control over the parsing process.
+
+**Technical Definition:** "The StAX API is based on SAX, so all the reasons for using SAX also apply to the StAX API. In addition, the StAX API is more intuitive to use than SAX, because programmers ask for events rather than react to them as they happen". "StAX includes two APIs, the cursor API and the event-iterator API, either of which can be used for reading and writing XML". "The StAX API is also best if you plan to pass the entire XML document as a parameter".
+
+**Beginner-Friendly Explanation:** StAX is like reading a book page by page at your own pace. You say "next page" and the parser gives you the next event. You can stop whenever you want, skip ahead, or process events in your own order. It combines the efficiency of SAX with the ease of use of DOM. There are two flavours: cursor API (simple, forward-only) and event-iterator API (more flexible, allows peeking).
+
+### Purposes
+
+- To parse large XML documents with low memory footprint
+- To generate XML documents programmatically
+- To have precise control over the parsing process
+- To filter and process XML events selectively
+- To bind XML data to Java objects (as a foundation for JAXB)
+
+### Syntax Rules and Structure
+
+**Complete General Syntax (Cursor API):**
+
+```java
+XMLInputFactory factory = XMLInputFactory.newInstance();
+XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream("input.xml"));
+
+while (reader.hasNext()) {
+    int event = reader.next();
+    if (event == XMLStreamConstants.START_ELEMENT) {
+        System.out.println("Start: " + reader.getLocalName());
+    }
+}
+reader.close();
+```
+
+**Complete General Syntax (Event Iterator API):**
+
+```java
+XMLEventReader reader = factory.createXMLEventReader(new FileInputStream("input.xml"));
+while (reader.hasNext()) {
+    XMLEvent event = reader.nextEvent();
+    if (event.isStartElement()) {
+        StartElement start = event.asStartElement();
+        System.out.println("Start: " + start.getName());
+    }
+}
+reader.close();
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `XMLInputFactory` | Factory for creating StAX readers |
+| `XMLStreamReader` | Cursor-based reader (forward-only) |
+| `XMLEventReader` | Event-iterator reader (peekable) |
+| `XMLOutputFactory` | Factory for creating StAX writers |
+| `XMLStreamWriter` | Writes XML documents |
+
+**Syntax Rules:**
+
+- Pull-based: the application requests the next event.
+- Cursor API is more efficient; Event Iterator API is more flexible.
+- StAX supports both reading and writing.
+
+**Constraints and Limitations:**
+
+- Cursor API is forward-only.
+- Event Iterator API allows peeking but uses more memory.
+- Not suitable for random document modification.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: StaxParserDemo.java
+import javax.xml.stream.*;
+import java.io.FileInputStream;
+
+public class StaxParserDemo {
+    public static void main(String[] args) throws Exception {
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLStreamReader reader = factory.createXMLStreamReader(
-            new ByteArrayInputStream(xml.getBytes()));
-        
+            new FileInputStream("books.xml"));
+
         String currentElement = "";
-        String bookId = "";
-        
-        // Step 2: Iterate events
         while (reader.hasNext()) {
             int event = reader.next();
-            
+
             switch (event) {
                 case XMLStreamConstants.START_ELEMENT:
                     currentElement = reader.getLocalName();
-                    if ("book".equals(currentElement)) {
-                        bookId = reader.getAttributeValue(null, "id");
-                        System.out.println("Book ID: " + bookId);
+                    if (currentElement.equals("book")) {
+                        System.out.println("--- Book (id=" +
+                            reader.getAttributeValue(null, "id") + ") ---");
                     }
                     break;
-                    
+
                 case XMLStreamConstants.CHARACTERS:
-                    String text = reader.getText().trim();
-                    if (!text.isEmpty()) {
-                        System.out.println("  " + currentElement + ": " + text);
+                    if (currentElement.equals("title")) {
+                        System.out.println("Title: " + reader.getText());
                     }
                     break;
-                    
+
                 case XMLStreamConstants.END_ELEMENT:
-                    if ("book".equals(reader.getLocalName())) {
-                        System.out.println("---");
-                    }
+                    currentElement = "";
                     break;
             }
         }
-        
         reader.close();
     }
 }
 ```
-**Expected Output**:
-```
-Book ID: 1
-  title: Java
-  price: 29.99
----
-Book ID: 2
-  title: XML
-  price: 39.99
----
-```
-**Why This Output**: `next()` advances the parser to the next event. `START_ELEMENT` triggers attribute reading. `CHARACTERS` captures text content. `END_ELEMENT` marks the end of a book. The parser processes events sequentially without loading the entire document into memory.
 
----
-
-#### Example 2: StAX with Large File Processing
-```java
-// StaxLargeFileDemo.java
-import javax.xml.stream.*;
-import java.io.*;
-
-public class StaxLargeFileDemo {
-    public static void main(String[] args) throws Exception {
-        // Generate a large XML file (10,000 records)
-        File xmlFile = File.createTempFile("large", ".xml");
-        try (PrintWriter pw = new PrintWriter(xmlFile)) {
-            pw.println("<records>");
-            for (int i = 0; i < 10_000; i++) {
-                pw.printf("<record id=\"%d\"><value>%d</value></record>%n", i, i * 10);
-            }
-            pw.println("</records>");
-        }
-        
-        System.out.println("File size: " + xmlFile.length() / 1024 + " KB");
-        
-        // Parse with StAX — constant memory usage
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(xmlFile));
-        
-        long sum = 0;
-        int count = 0;
-        
-        while (reader.hasNext()) {
-            int event = reader.next();
-            if (event == XMLStreamConstants.START_ELEMENT 
-                    && "value".equals(reader.getLocalName())) {
-                reader.next(); // Move to CHARACTERS
-                sum += Long.parseLong(reader.getText());
-                count++;
-            }
-        }
-        reader.close();
-        
-        System.out.println("Processed " + count + " records");
-        System.out.println("Sum of values: " + sum);
-        System.out.println("Memory-efficient: entire file not loaded");
-        
-        xmlFile.delete();
-    }
-}
+**Expected Output:**
 ```
-**Expected Output**:
+--- Book (id=1) ---
+Title: Effective Java
+--- Book (id=2) ---
+Title: Java Concurrency in Practice
 ```
-File size: 456 KB
-Processed 10000 records
-Sum of values: 499950000
-Memory-efficient: entire file not loaded
-```
-**Why This Output**: StAX streams through the file, processing each `value` element as it encounters it. The entire 456 KB file is never loaded into memory. Memory usage remains constant regardless of file size. This makes StAX ideal for processing multi-gigabyte XML files.
 
----
+**Step-by-Step Explanation:**
+
+1. `XMLInputFactory.newInstance()` creates the factory.
+2. `factory.createXMLStreamReader()` creates a cursor-based reader.
+3. `reader.next()` advances to the next parsing event.
+4. `reader.getLocalName()` returns the current element name.
+5. `reader.getAttributeValue()` retrieves attribute values.
+6. `reader.getText()` returns character data.
+7. `reader.close()` releases resources.
 
 ### Real-World Cases
-- **Log Processing**: Parsing huge XML log files in real-time
-- **Data Feeds**: Processing RSS/Atom feeds with thousands of entries
-- **ETL Pipelines**: Extracting records from large XML data dumps
-- **SOAP Web Services**: Streaming large SOAP responses
 
-### References
-- Streaming API for XML (StAX) - Oracle - https://docs.oracle.com/javase/tutorial/jaxp/stax/
-- Sun's Streaming Parser Implementation - Oracle - https://docs.oracle.com/cd/E17802_01/webservices/webservices/docs/2.0/tutorial/doc/StAX5.html
-- XMLStreamReader Javadoc - https://docs.oracle.com/javase/8/docs/api/javax/xml/stream/XMLStreamReader.html
+- **Large File Processing:** Streaming huge XML files with constant memory.
+- **XML Generation:** Writing XML documents programmatically.
+- **Message Transformation:** Reading from one XML stream and writing to another.
+- **JAXB Integration:** StAX is the underlying parser for JAXB.
 
 ---
 
-## Core Concept 3: JAXB (Jakarta XML Binding)
+## 5. JAXB (Java Architecture for XML Binding)
 
 ### Definitions
-**Core Definition**: JAXB (Jakarta XML Binding) is an annotation-driven framework that maps Java objects to XML documents, providing automatic marshalling (Java → XML) and unmarshalling (XML → Java).
 
-**Technical Definition**: JAXB bridges XML documents and Java classes through annotations, eliminating the need for hand-written parsers or DOM traversals. At its core, a `JAXBContext` knows which classes it can marshal and unmarshal; `Marshaller` and `Unmarshaller` perform the actual conversions. Starting with Java 11, JAXB was removed from the JDK and now lives as the independent Jakarta XML Binding API under the `jakarta.xml.bind` namespace.
+**Core Definition:** JAXB is a framework that maps XML schemas and Java classes, allowing Java objects to be marshalled to XML and XML to be unmarshalled to Java objects.
 
-**Beginner-Friendly Explanation**: JAXB is like having a translator that automatically converts between Java objects and XML. You annotate your classes to tell JAXB how they should look in XML, and JAXB handles the rest—no manual parsing required.
+**Technical Definition:** "Java Architecture for XML Binding (JAXB) provides a fast and convenient way to bind XML schemas and Java representations, making it easy for Java developers to incorporate XML data and processing functions in Java applications". "As part of this process, JAXB provides methods for unmarshalling XML instance documents into Java content trees, and then marshalling Java content trees back into XML instance documents". JAXB also provides a way to generate XML schema from Java objects. JAXB is part of the Jakarta EE platform and is now known as Jakarta XML Binding.
+
+**Beginner-Friendly Explanation:** JAXB is like a translator between XML and Java. You define Java classes with annotations that describe how they map to XML elements. Then JAXB can take an XML file and create Java objects from it (unmarshalling), or take Java objects and produce an XML file (marshalling). It's the most convenient way to work with XML in Java when you have a well-defined schema.
 
 ### Purposes
-- To eliminate manual XML parsing and serialization code
-- To provide type-safe XML binding through annotations
-- To enable schema-driven development with XSD generation
-- To integrate with JAX-RS/JAX-WS for XML payloads
-- To support declarative XML mapping with minimal boilerplate
+
+- To convert XML documents to Java objects and vice versa
+- To eliminate the need for manual XML parsing and generation
+- To provide compile-time type safety for XML data
+- To generate Java classes from XML schemas (XSD)
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntax: JAXB Marshalling/Unmarshalling
-```
-JAXB WORKFLOW
-│
-├── 1. Annotate Java Classes
-│   ├── @XmlRootElement — maps class to root XML element
-│   ├── @XmlElement — maps field to XML element
-│   ├── @XmlAttribute — maps field to XML attribute
-│   ├── @XmlAccessorType — controls field/property access
-│   └── @XmlElementWrapper — wraps collections
-│
-├── 2. Create JAXBContext
-│   └── JAXBContext context = JAXBContext.newInstance(Class.class)
-│
-├── 3. Marshalling (Java → XML)
-│   ├── Marshaller marshaller = context.createMarshaller()
-│   ├── marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
-│   └── marshaller.marshal(object, outputStream)
-│
-├── 4. Unmarshalling (XML → Java)
-│   ├── Unmarshaller unmarshaller = context.createUnmarshaller()
-│   └── Object obj = unmarshaller.unmarshal(inputStream)
-│
-└── 5. Validation (optional)
-    └── unmarshaller.setSchema(schema)
+**Maven Dependency:**
+
+```xml
+<dependency>
+    <groupId>jakarta.xml.bind</groupId>
+    <artifactId>jakarta.xml.bind-api</artifactId>
+    <version>4.0.0</version>
+</dependency>
+<dependency>
+    <groupId>org.glassfish.jaxb</groupId>
+    <artifactId>jaxb-runtime</artifactId>
+    <version>4.0.2</version>
+</dependency>
 ```
 
-#### Component Breakdown
-| Annotation | Target | Purpose |
-|------------|--------|---------|
-| `@XmlRootElement` | Class | Maps class to root element |
-| `@XmlElement` | Field/Method | Maps to XML element |
-| `@XmlAttribute` | Field/Method | Maps to XML attribute |
-| `@XmlAccessorType` | Class | Controls field/property access |
-| `@XmlElementWrapper` | Field | Wraps collections |
-| `@XmlTransient` | Field | Excludes from XML |
+**Key Annotations:**
 
-#### Syntax Rules
-- Add `jakarta.xml.bind-api` and `jaxb-runtime` dependencies (Maven/Gradle)
-- Annotate classes with `@XmlRootElement` for root elements
-- Use `JAXBContext.newInstance()` to create a context
-- Use `Marshaller.marshal()` for Java → XML
-- Use `Unmarshaller.unmarshal()` for XML → Java
-- For Java 11+, JAXB is no longer in the JDK; add explicit dependencies
+| Annotation | Description |
+|------------|-------------|
+| `@XmlRootElement` | Marks a class as the root element |
+| `@XmlElement` | Maps a field/property to an XML element |
+| `@XmlAttribute` | Maps a field/property to an XML attribute |
+| `@XmlTransient` | Excludes a field from XML mapping |
+| `@XmlType` | Controls schema type generation |
 
-#### Constraints and Limitations
-- Requires `-parameters` compiler flag for Records
-- No-arg constructor required for unmarshalling (POJOs)
-- JAXB is not thread-safe; create a new Marshaller per operation
-- Jakarta namespace migration required for Java 11+
+**Basic Usage:**
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-#### Example 1: JAXB Marshalling and Unmarshalling
 ```java
-// JaxbDemo.java
+// Unmarshalling (XML → Java)
+JAXBContext context = JAXBContext.newInstance(Book.class);
+Unmarshaller unmarshaller = context.createUnmarshaller();
+Book book = (Book) unmarshaller.unmarshal(new File("book.xml"));
+
+// Marshalling (Java → XML)
+Marshaller marshaller = context.createMarshaller();
+marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+marshaller.marshal(book, new File("book.xml"));
+```
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: JaxbDemo.java
 import jakarta.xml.bind.*;
 import jakarta.xml.bind.annotation.*;
+import java.io.File;
+import java.util.List;
+
+// Step 1: Define the Java classes with JAXB annotations
+@XmlRootElement(name = "bookstore")
+@XmlAccessorType(XmlAccessType.FIELD)
+class Bookstore {
+    @XmlElement(name = "book")
+    private List<Book> books;
+
+    public List<Book> getBooks() { return books; }
+    public void setBooks(List<Book> books) { this.books = books; }
+}
+
+@XmlAccessorType(XmlAccessType.FIELD)
+class Book {
+    @XmlAttribute
+    private String id;
+    @XmlElement
+    private String title;
+    @XmlElement
+    private String author;
+
+    public Book() {}
+    public Book(String id, String title, String author) {
+        this.id = id; this.title = title; this.author = author;
+    }
+}
 
 public class JaxbDemo {
-    
-    @XmlRootElement(name = "product")
-    @XmlAccessorType(XmlAccessType.FIELD)
-    static class Product {
-        @XmlAttribute
-        private int id;
-        @XmlElement
-        private String name;
-        @XmlElement
-        private double price;
-        
-        Product() {} // Required for JAXB
-        Product(int id, String name, double price) {
-            this.id = id; this.name = name; this.price = price;
-        }
-        @Override public String toString() {
-            return "Product{" + id + ", " + name + ", " + price + "}";
-        }
-    }
-    
     public static void main(String[] args) throws Exception {
-        // Step 1: Create context
-        JAXBContext context = JAXBContext.newInstance(Product.class);
-        
-        // Step 2: Marshal (Java → XML)
+        // Step 2: Create JAXB context
+        JAXBContext context = JAXBContext.newInstance(Bookstore.class);
+
+        // Step 3: Unmarshal XML → Java
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+        Bookstore store = (Bookstore) unmarshaller.unmarshal(new File("books.xml"));
+
+        for (Book book : store.getBooks()) {
+            System.out.println("Book: " + book.title + " by " + book.author);
+        }
+
+        // Step 4: Marshal Java → XML
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        
-        Product product = new Product(1, "Laptop", 1299.99);
-        StringWriter xmlWriter = new StringWriter();
-        marshaller.marshal(product, xmlWriter);
-        
-        System.out.println("Marshalled XML:");
-        System.out.println(xmlWriter.toString());
-        
-        // Step 3: Unmarshal (XML → Java)
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-        Product parsed = (Product) unmarshaller.unmarshal(
-            new StringReader(xmlWriter.toString()));
-        
-        System.out.println("Unmarshalled: " + parsed);
+        marshaller.marshal(store, System.out);
     }
 }
 ```
-**Expected Output**:
+
+**Expected Output:**
 ```
-Marshalled XML:
+Book: Effective Java by Joshua Bloch
+Book: Java Concurrency in Practice by Brian Goetz
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<product id="1">
-    <name>Laptop</name>
-    <price>1299.99</price>
-</product>
-
-Unmarshalled: Product{1, Laptop, 1299.99}
+<bookstore>
+    <book id="1">
+        <title>Effective Java</title>
+        <author>Joshua Bloch</author>
+    </book>
+    ...
+</bookstore>
 ```
-**Why This Output**: `@XmlRootElement` maps the class to the `<product>` element. `@XmlAttribute` maps `id` to an XML attribute. `@XmlElement` maps `name` and `price` to child elements. `Marshaller` converts the object to XML; `Unmarshaller` converts XML back to an object.
 
----
+**Step-by-Step Explanation:**
+
+1. The `Bookstore` and `Book` classes are annotated with JAXB annotations.
+2. `JAXBContext.newInstance()` creates a context for the root class.
+3. `Unmarshaller.unmarshal()` reads XML and creates Java objects.
+4. `Marshaller.marshal()` writes Java objects as XML.
+5. `JAXB_FORMATTED_OUTPUT` enables pretty-printing.
 
 ### Real-World Cases
-- **SOAP Web Services**: JAX-WS uses JAXB for XML payloads
-- **REST APIs**: JAX-RS providers use JAXB for XML serialization
-- **Configuration**: Mapping XML config files to Java objects
-- **Legacy Integration**: Exchanging XML with enterprise systems
 
-### References
-- Jakarta XML Binding Specification - https://jakarta.ee/specifications/xml-binding/
-- JAXB Tutorial - Cleverence - https://www.cleverence.com/articles/oracle-documentation/lesson-introduction-to-jaxb-the-java-tutorials-4837/
-- Jakarta XML Binding API Documentation - https://jakarta.ee/specifications/xml-binding/4.0/apidocs/
+- **REST/SOAP Web Services:** JAXB is used for XML payload binding in JAX-RS and JAX-WS.
+- **Configuration Management:** Reading and writing XML configuration files.
+- **Data Import/Export:** Converting between XML and Java domain objects.
+- **Schema-First Development:** Generating Java classes from XSD schemas.
 
 ---
 
-## Core Concept 4: XML Validation
+## 6. XML Parsing and Generation
 
 ### Definitions
-**Core Definition**: XML validation is the process of enforcing document structure and constraints against an XML Schema Definition (XSD), ensuring that XML documents conform to a predefined format.
 
-**Technical Definition**: The JAXP Validation API uses `SchemaFactory` to load XSD schemas and create `Schema` objects, from which `Validator` instances are created to validate XML documents. For XML Schema 1.1 validation, the factory is instantiated with `"http://www.w3.org/XML/XMLSchema/v1.1"`. The `Validator.validate()` method takes a `Source` and throws `SAXParseException` if the XML violates the schema. An `ErrorHandler` can be registered to capture validation warnings and errors.
+**Core Definition:** XML parsing is the process of reading an XML document and extracting data from it; XML generation is the process of creating an XML document from Java data.
 
-**Beginner-Friendly Explanation**: XSD validation is like a spell-checker for XML. The XSD defines the rules (what elements are allowed, what order they appear in, what data types they hold). The validator checks your XML against those rules and reports any violations.
+**Technical Definition:** Parsing can be performed using DOM (tree-based), SAX (event-based), or StAX (pull-based). Generation can be performed using DOM with a `Transformer`, StAX with `XMLStreamWriter`, or JAXB with a `Marshaller`.
+
+**Beginner-Friendly Explanation:** Parsing is like reading an XML document and understanding its structure. Generation is like writing an XML document from your data. You have multiple tools for each job, and the right one depends on your needs.
 
 ### Purposes
-- To enforce XML document structure and data types
-- To prevent malformed data from entering downstream systems
-- To validate incoming XML from external partners
-- To enable schema-driven development with contract enforcement
-- To catch errors early before processing
+
+- To read and process XML data from files, streams, or strings
+- To create XML documents programmatically
+- To transform XML between formats
+- To validate XML against schemas
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntax: XSD Validation
-```
-XSD VALIDATION WORKFLOW
-│
-├── 1. Create SchemaFactory
-│   ├── SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-│   └── For XSD 1.1: SchemaFactory.newInstance("http://www.w3.org/XML/XMLSchema/v1.1")
-│
-├── 2. Load Schema
-│   └── Schema schema = sf.newSchema(new StreamSource(xsdStream))
-│
-├── 3. Create Validator
-│   └── Validator validator = schema.newValidator()
-│
-├── 4. Set ErrorHandler (optional)
-│   └── validator.setErrorHandler(new ErrorHandler() { ... })
-│
-├── 5. Validate XML
-│   └── validator.validate(new StreamSource(xmlStream))
-│
-└── 6. Handle Exceptions
-    └── catch (SAXParseException e) { ... }
-```
+**Parsing Approaches:**
 
-#### Component Breakdown
-| Component | Class | Purpose |
-|-----------|-------|---------|
-| SchemaFactory | `javax.xml.validation.SchemaFactory` | Creates Schema objects |
-| Schema | `javax.xml.validation.Schema` | Compiled XSD schema |
-| Validator | `javax.xml.validation.Validator` | Validates XML against Schema |
-| ErrorHandler | `org.xml.sax.ErrorHandler` | Captures validation warnings/errors |
+| Approach | Best For | Memory | Speed |
+|----------|----------|--------|-------|
+| DOM | Small docs, modification | High | Slow |
+| SAX | Large docs, read-only | Low | Fast |
+| StAX | Large docs, read/write | Low | Fast |
+| JAXB | Schema-based binding | Medium | Medium |
 
-#### Syntax Rules
-- Use `SchemaFactory.newInstance()` with the XSD namespace URI
-- For XSD 1.1, use `"http://www.w3.org/XML/XMLSchema/v1.1"`
-- Load XSD with `sf.newSchema(new StreamSource(xsdInputStream))`
-- Call `validator.validate(new StreamSource(xmlInputStream))`
-- Register an `ErrorHandler` to capture all validation messages
-- Validation throws `SAXParseException` on failure
+**Generation Approaches:**
 
-#### Constraints and Limitations
-- XSD 1.1 requires additional libraries (e.g., Xerces 1.1)
-- Validation adds processing overhead
-- Complex schemas can be slow to compile
-- Error messages may be verbose and difficult to parse
+| Approach | Method |
+|----------|--------|
+| DOM | `Transformer.transform(new DOMSource(doc), new StreamResult(...))` |
+| StAX | `XMLStreamWriter.writeStartElement()` etc. |
+| JAXB | `Marshaller.marshal(obj, output)` |
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
+### Annotated Complete Step-by-Step Code Examples
 
-#### Example 1: XSD Validation
 ```java
-// XsdValidationDemo.java
-import javax.xml.XMLConstants;
-import javax.xml.validation.*;
-import javax.xml.transform.stream.StreamSource;
-import java.io.*;
-
-public class XsdValidationDemo {
-    public static void main(String[] args) throws Exception {
-        // Define XSD
-        String xsd = """
-            <?xml version="1.0"?>
-            <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-                <xs:element name="person">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element name="name" type="xs:string"/>
-                            <xs:element name="age" type="xs:integer"/>
-                        </xs:sequence>
-                    </xs:complexType>
-                </xs:element>
-            </xs:schema>
-            """;
-        
-        // Step 1: Create SchemaFactory
-        SchemaFactory factory = SchemaFactory.newInstance(
-            XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        
-        // Step 2: Load Schema
-        Schema schema = factory.newSchema(
-            new StreamSource(new ByteArrayInputStream(xsd.getBytes())));
-        
-        // Step 3: Create Validator
-        Validator validator = schema.newValidator();
-        
-        // Step 4: Validate valid XML
-        String validXml = """
-            <person><name>Alice</name><age>30</age></person>
-            """;
-        System.out.println("Validating valid XML...");
-        validator.validate(new StreamSource(
-            new ByteArrayInputStream(validXml.getBytes())));
-        System.out.println("✓ Valid XML passed validation");
-        
-        // Step 5: Validate invalid XML (age is string, not integer)
-        String invalidXml = """
-            <person><name>Bob</name><age>thirty</age></person>
-            """;
-        System.out.println("\nValidating invalid XML...");
-        try {
-            validator.validate(new StreamSource(
-                new ByteArrayInputStream(invalidXml.getBytes())));
-        } catch (org.xml.sax.SAXParseException e) {
-            System.out.println("✗ Validation failed: " + e.getMessage());
-        }
-    }
-}
-```
-**Expected Output**:
-```
-Validating valid XML...
-✓ Valid XML passed validation
-
-Validating invalid XML...
-✗ Validation failed: cvc-datatype-valid.1.2.1: 'thirty' is not a valid value for 'integer'.
-```
-**Why This Output**: The XSD defines `age` as `xs:integer`. The valid XML passes validation. The invalid XML (with `thirty` as age) throws `SAXParseException` because the value doesn't match the expected type. The validator enforces the schema's type constraints.
-
----
-
-### Real-World Cases
-- **Financial Data**: Validating XBRL financial reports against XSD schemas
-- **Healthcare**: Validating HL7/FHIR XML messages
-- **Configuration**: Validating XML config files before loading
-- **Data Exchange**: Verifying XML payloads from external partners
-
-### References
-- Java: XSD 1.1 Schema Validation - Stack Overflow - https://stackoverflow.com/questions/79275585/java-xsd-1-1-schema-validation-of-xml-with-asserts
-- Using XML Schemas - Apache - https://svn.apache.org/repos/asf/xerces/java/trunk/docs/faq-xs.xml
-- Validating XML with XSD in Java - Cleverence - https://www.cleverence.com/articles/oracle-documentation/
-
----
-
-## Core Concept 5: XSLT Transformations
-
-### Definitions
-**Core Definition**: XSLT (Extensible Stylesheet Language Transformations) is an XML-based language for transforming XML documents into other formats (HTML, plain text, or alternative XML) using stylesheets that define template rules.
-
-**Technical Definition**: XSLT operates on an input XML document and an XSLT stylesheet. The stylesheet defines templates that match specific nodes in the input document and specify how they should be transformed. In Java, the transformation is performed using the `Transformer` object, obtained from `TransformerFactory.newTransformer(xsltSource)`. The `transform()` method takes a `Source` (input) and a `Result` (output). Precompiled `Templates` objects can be created via `newTemplates()` for better performance when reusing stylesheets.
-
-**Beginner-Friendly Explanation**: XSLT is like a recipe for converting XML into something else. The stylesheet says "when you see this XML element, output this HTML" or "when you see that element, output this text." Java's Transformer applies the recipe to your XML and produces the output.
-
-### Purposes
-- To convert XML to HTML for web display
-- To transform XML to plain text or CSV
-- To restructure XML from one schema to another
-- To extract and format data from XML documents
-- To enable separation of content and presentation
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax: XSLT Transformation
-```
-XSLT TRANSFORMATION WORKFLOW
-│
-├── 1. Create TransformerFactory
-│   └── TransformerFactory factory = TransformerFactory.newInstance()
-│
-├── 2. Load XSLT Stylesheet
-│   ├── Source xsltSource = new StreamSource("stylesheet.xslt")
-│   └── Transformer transformer = factory.newTransformer(xsltSource)
-│
-├── 3. Load XML Source
-│   └── Source xmlSource = new StreamSource("input.xml")
-│
-├── 4. Create Result
-│   └── Result result = new StreamResult("output.html")
-│
-├── 5. Transform
-│   └── transformer.transform(xmlSource, result)
-│
-└── 6. Reuse (optional)
-    ├── Templates templates = factory.newTemplates(xsltSource)
-    └── Transformer transformer = templates.newTransformer()
-```
-
-#### Component Breakdown
-| Component | Class | Purpose |
-|-----------|-------|---------|
-| Factory | `TransformerFactory` | Creates Transformer instances |
-| Transformer | `javax.xml.transform.Transformer` | Performs the transformation |
-| Templates | `javax.xml.transform.Templates` | Precompiled stylesheet |
-| Source | `javax.xml.transform.Source` | XML input |
-| Result | `javax.xml.transform.Result` | Output destination |
-
-#### Syntax Rules
-- Use `TransformerFactory.newInstance()` to create the factory
-- Use `newTransformer(xsltSource)` to compile the stylesheet
-- Use `newTemplates(xsltSource)` for reusable precompiled templates
-- `transform(xmlSource, result)` performs the transformation
-- Set output properties (e.g., `INDENT`) on the Transformer
-- Use `StreamSource` and `StreamResult` for file/stream I/O
-
-#### Constraints and Limitations
-- XSLT transformations can be CPU-intensive
-- Precompiled `Templates` improve performance for repeated transformations
-- XSLT 1.0 is supported by the JDK; XSLT 2.0+ requires Saxon
-- Complex stylesheets can be difficult to debug
-- Security: disable external entity processing to prevent XXE
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-#### Example 1: XSLT Transformation
-```java
-// XsltTransformDemo.java
+// File: XmlGenerationDemo.java
+import javax.xml.stream.*;
 import javax.xml.transform.*;
-import javax.xml.transform.stream.*;
-import java.io.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
 
-public class XsltTransformDemo {
+public class XmlGenerationDemo {
     public static void main(String[] args) throws Exception {
-        // Input XML
-        String xml = """
-            <catalog>
-                <book id="1"><title>Java</title><price>29.99</price></book>
-                <book id="2"><title>XML</title><price>39.99</price></book>
-            </catalog>
-            """;
-        
-        // XSLT Stylesheet: transform XML to HTML
-        String xslt = """
-            <?xml version="1.0"?>
-            <xsl:stylesheet version="1.0"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-                <xsl:output method="html" indent="yes"/>
-                <xsl:template match="/">
-                    <html>
-                        <body>
-                            <h1>Book Catalog</h1>
-                            <table border="1">
-                                <tr><th>Title</th><th>Price</th></tr>
-                                <xsl:for-each select="catalog/book">
-                                    <tr>
-                                        <td><xsl:value-of select="title"/></td>
-                                        <td>$<xsl:value-of select="price"/></td>
-                                    </tr>
-                                </xsl:for-each>
-                            </table>
-                        </body>
-                    </html>
-                </xsl:template>
-            </xsl:stylesheet>
-            """;
-        
-        // Step 1: Create factory
-        TransformerFactory factory = TransformerFactory.newInstance();
-        
-        // Step 2: Compile stylesheet
-        Transformer transformer = factory.newTransformer(
-            new StreamSource(new StringReader(xslt)));
-        
-        // Step 3: Transform
-        StringWriter output = new StringWriter();
-        transformer.transform(
-            new StreamSource(new StringReader(xml)),
-            new StreamResult(output));
-        
-        System.out.println("Transformed HTML:");
-        System.out.println(output.toString());
+        // Generation using StAX
+        XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
+        XMLStreamWriter writer = outputFactory.createXMLStreamWriter(System.out);
+
+        writer.writeStartDocument();
+        writer.writeStartElement("bookstore");
+        writer.writeStartElement("book");
+        writer.writeAttribute("id", "1");
+        writer.writeStartElement("title");
+        writer.writeCharacters("Effective Java");
+        writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndElement();
+        writer.writeEndDocument();
+        writer.close();
+
+        System.out.println("\n--- DOM Generation ---");
+
+        // Generation using DOM + Transformer
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document doc = db.newDocument();
+
+        Element root = doc.createElement("bookstore");
+        doc.appendChild(root);
+
+        Element book = doc.createElement("book");
+        book.setAttribute("id", "1");
+        root.appendChild(book);
+
+        Element title = doc.createElement("title");
+        title.setTextContent("Effective Java");
+        book.appendChild(title);
+
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.transform(new DOMSource(doc), new StreamResult(System.out));
     }
 }
 ```
-**Expected Output**:
-```
-Transformed HTML:
-<html>
-<body>
-<h1>Book Catalog</h1>
-<table border="1">
-<tr><th>Title</th><th>Price</th></tr>
-<tr><td>Java</td><td>$29.99</td></tr>
-<tr><td>XML</td><td>$39.99</td></tr>
-</table>
-</body>
-</html>
-```
-**Why This Output**: The XSLT stylesheet matches the root (`/`) and outputs an HTML structure. `xsl:for-each` iterates over each `book` element. `xsl:value-of` extracts the `title` and `price` values. The `Transformer` applies the stylesheet to the XML, producing the HTML output.
 
----
+**Expected Output:**
+```
+<?xml version="1.0"?><bookstore><book id="1"><title>Effective Java</title></book></bookstore>
+--- DOM Generation ---
+<?xml version="1.0" encoding="UTF-8"?>
+<bookstore>
+    <book id="1">
+        <title>Effective Java</title>
+    </book>
+</bookstore>
+```
+
+**Step-by-Step Explanation:**
+
+1. StAX generation uses `XMLOutputFactory` to create a writer and calls `writeStartElement`, `writeCharacters`, etc.
+2. DOM generation creates a `Document`, builds the tree with `createElement` and `appendChild`.
+3. The `Transformer` serializes the DOM tree to XML.
+4. `OutputKeys.INDENT` enables pretty-printing.
 
 ### Real-World Cases
-- **Web Publishing**: Transforming XML content into HTML for websites
-- **Report Generation**: Converting XML data into formatted reports
-- **Data Migration**: Transforming XML from one schema to another
-- **Document Processing**: Converting XML to PDF, CSV, or plain text
 
-### References
-- Understanding XSLT Processing in Java - Baeldung - https://www.baeldung.com/java-extensible-stylesheet-language-transformations
-- Extensible Stylesheet Language Transformations APIs - Oracle - https://docs.oracle.com/javase/tutorial/jaxp/xslt/
-- Transformer API Javadoc - https://docs.oracle.com/javase/8/docs/api/javax/xml/transform/Transformer.html
+- **Configuration Files:** Generating XML config from application settings.
+- **Report Generation:** Creating XML reports from database queries.
+- **Data Export:** Exporting Java objects as XML for external systems.
+- **SOAP Messages:** Building SOAP envelopes for web service calls.
 
 ---
 
-## Modern Alternatives
+## 7. XML Best Practices
 
-### Jackson XML
-Jackson XML provides annotation-based XML binding similar to JAXB but with the familiar Jackson `ObjectMapper` API. It supports both streaming and databinding, making it a modern alternative for XML processing. For users who require an XML-based format, it is recommended to use Jackson with the `jackson-dataformat-xml` artifact.
+### Definitions
 
-### Azure JSON/XML
-The Azure SDK for Java offers `azure-json` and `azure-xml` libraries that provide streaming readers and writers, replacing Jackson for serialization in Azure SDK components.
+**Core Definition:** XML best practices are guidelines for processing XML safely, efficiently, and maintainably in Java applications.
 
-### XStream
-XStream is a simple library for serializing objects to XML and back. However, it is nearing end-of-life, and the framework has moved toward Jackson as the default and recommended conversion library.
+**Technical Definition:** Best practices derive from authoritative sources including Oracle's JAXP Security Guide. Key principles include disabling DTDs and external entities to prevent XXE attacks, choosing the right parser for the task, and validating XML against schemas.
 
-| Alternative | Type | Strengths | Weaknesses |
-|-------------|------|-----------|------------|
-| Jackson XML | Databinding/Streaming | Familiar Jackson API, active development | Requires `jackson-dataformat-xml` |
-| Azure XML | Streaming | High performance, Azure-optimized | Azure-specific |
-| XStream | Databinding | Simple API | End-of-life, security concerns |
-| JiBX | Databinding | Fast, flexible | Complex setup, less active |
+**Beginner-Friendly Explanation:** XML best practices help you avoid security vulnerabilities like XXE attacks (where an attacker tricks your parser into reading sensitive files) and performance problems (like loading huge files into memory when you don't need to).
 
-### References
-- Replacing jackson-databind with azure-json and azure-xml - Microsoft - https://devblogs.microsoft.com
-- Jackson XML GitHub - https://github.com/FasterXML/jackson-dataformat-xml
-- Serializer Migration - Axoniq - https://docs.axoniq.io
+### Purposes
+
+- To prevent XXE and billion laughs attacks
+- To optimise memory and CPU usage
+- To ensure correct and maintainable XML processing
+- To choose the right parser for the task
+
+### Key Best Practices Table
+
+| Practice | Description | Source |
+|----------|-------------|--------|
+| Disable DTDs | Set `disallow-doctype-decl` to `true` to prevent XXE attacks. | Oracle |
+| Disable External Entities | Set `XMLConstants.FEATURE_SECURE_PROCESSING` and external entity features to `false`. | Oracle |
+| Choose the Right Parser | DOM for small docs, SAX/StAX for large docs. | Oracle |
+| Validate with Schemas | "The current trend is to use Schemas to describe XML documents". | Oracle |
+| Use StAX for Binding | "The StAX API was designed to be used when binding XML data to Java objects". | Oracle |
+| Avoid DOM for Large Files | "DOM can be very expensive both in terms of memory and CPU resource". | Oracle |
+| Use JAXB for POJO Mapping | JAXB provides fast and convenient binding. | Oracle |
+| Close Resources | Always close readers, writers, and streams. | Best practice |
+| Handle Exceptions | Catch specific exceptions (`SAXException`, `ParserConfigurationException`, etc.). | Best practice |
+| Validate Input | Never parse untrusted XML without security measures. | Security best practice |
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: SecureXmlParsingDemo.java
+import javax.xml.XMLConstants;
+import javax.xml.parsers.*;
+import org.w3c.dom.Document;
+import java.io.File;
+
+public class SecureXmlParsingDemo {
+    public static void main(String[] args) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+        // BEST PRACTICE: Disable DTDs entirely
+        factory.setFeature(
+            "http://apache.org/xml/features/disallow-doctype-decl", true);
+
+        // BEST PRACTICE: Disable external entities
+        factory.setFeature(
+            "http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature(
+            "http://xml.org/sax/features/external-parameter-entities", false);
+
+        // BEST PRACTICE: Enable secure processing
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+        // BEST PRACTICE: Disable XInclude
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(new File("input.xml"));
+        System.out.println("Parsed securely: " + doc.getDocumentElement().getNodeName());
+    }
+}
+```
+
+**Expected Output:**
+```
+Parsed securely: bookstore
+```
+
+**Step-by-Step Explanation:**
+
+1. `disallow-doctype-decl` prevents DTD declarations entirely, blocking XXE.
+2. `external-general-entities` and `external-parameter-entities` disable external entity resolution.
+3. `FEATURE_SECURE_PROCESSING` enables the JAXP secure processing mode.
+4. `setXIncludeAware(false)` disables XInclude processing.
+5. `setExpandEntityReferences(false)` prevents entity expansion.
+
+### Real-World Cases
+
+- **Web Applications:** Secure XML parsing for REST/SOAP endpoints.
+- **File Processing:** Parsing untrusted XML uploads safely.
+- **Configuration Loading:** Reading configuration XML with security constraints.
+- **Data Import:** Processing external XML data feeds securely.
 
 ---
 
-## Deprecation and Safety Notes
+## References Links
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| `javax.xml.bind` (JAXB) | Removed from JDK 11+ | Migrate to `jakarta.xml.bind` |
-| DOM Parsing | Active | Memory-intensive; use StAX for large files |
-| StAX | Active | Preferred for streaming large XML |
-| XSD 1.1 | Active (with Xerces) | Requires extra dependency |
-| XSLT 1.0 | Active (JDK) | XSLT 2.0+ requires Saxon |
-| XStream | End-of-life | Migrate to Jackson XML |
-| `DocumentBuilderFactory` | Active | Disable external entities to prevent XXE |
-
----
-
-## References
-
-### Official Documentation
-- Java API for XML Processing (JAXP) - Oracle - https://docs.oracle.com/javase/tutorial/jaxp/
-- DOM Parser API - Oracle - https://docs.oracle.com/javase/tutorial/jaxp/dom/
-- Streaming API for XML (StAX) - Oracle - https://docs.oracle.com/javase/tutorial/jaxp/stax/
-- Jakarta XML Binding Specification - https://jakarta.ee/specifications/xml-binding/
-- JAXP Validation API - Oracle - https://docs.oracle.com/javase/tutorial/jaxp/validation/
-- JAXP XSLT API - Oracle - https://docs.oracle.com/javase/tutorial/jaxp/xslt/
-
-### Tutorials and Guides
-- Working with XML Files in Java Using DOM Parsing - Baeldung - https://www.baeldung.com/java-xerces-dom-parsing
-- Understanding XSLT Processing in Java - Baeldung - https://www.baeldung.com/java-extensible-stylesheet-language-transformations
-- JAXB Tutorial - Cleverence - https://www.cleverence.com/articles/oracle-documentation/lesson-introduction-to-jaxb-the-java-tutorials-4837/
-- Java: XSD 1.1 Schema Validation - Stack Overflow - https://stackoverflow.com/questions/79275585/java-xsd-1-1-schema-validation-of-xml-with-asserts
-
-### Modern Alternatives
-- Jackson XML GitHub - https://github.com/FasterXML/jackson-dataformat-xml
-- Replacing jackson-databind with azure-json and azure-xml - Microsoft - https://devblogs.microsoft.com
-- Serializer Migration - Axoniq - https://docs.axoniq.io
-
-### Security
-- OWASP XML External Entity (XXE) Prevention Cheat Sheet - https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html
+- Module java.xml — Java Platform SE 21 API Specification - https://docs.oracle.com/en/java/javase/21/docs/api/java.xml/module-summary.html
+- When to Use the DOM, SAX, and StAX APIs — Oracle WebLogic Documentation - https://docs.oracle.com/en/middleware/fusion-middleware/weblogic-server/14.1.2/xmlpg/developing-xml-applications-oracle-weblogic-server.pdf
+- Using the Streaming API for XML (StAX) — Oracle WebLogic Documentation - https://docs.oracle.com/en/middleware/standalone/weblogic-server/15.1.1/xmlpg/stax.html
+- Trail: Java Architecture for XML Binding — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/jaxb/
+- Java API for XML Processing (JAXP) Security Guide — Oracle - https://docs.oracle.com/en/java/javase/11/security/java-api-xml-processing-jaxp-security-guide.html
+- XML Libraries Support in Java — Baeldung - https://www.baeldung.com/java-xml-libraries
+- JAXP properties for external access restrictions — Oracle - https://docs.oracle.com/en/java/javase/11/security/java-api-xml-processing-jaxp-security-guide.html
+- Basic JAXB Examples — Oracle - https://docs.oracle.com/javase/tutorial/jaxb/intro/basic.html
+- Reading XML Data into a DOM — Oracle - https://docs.oracle.com/javase/tutorial/jaxp/dom/readingXML.html
+- Parsing an XML File Using SAX — Oracle - https://docs.oracle.com/javase/tutorial/jaxp/sax/parsing.html
+- Cursor Example — Oracle - https://docs.oracle.com/javaee/5/tutorial/doc/bnbfl.html

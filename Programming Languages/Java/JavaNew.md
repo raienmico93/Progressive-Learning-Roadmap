@@ -184,7 +184,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # II. Variables and Data Types
 
-- **6. Variables**
+- [**6. Variables**](/Programming%20Languages/Java/Basics/Variables.md)
   - Variables
   - Variable declaration
   - Variable initialization
@@ -1264,7 +1264,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # X. Exception Handling
 
-- **63. Exception Fundamentals**
+- [**63. Exception Fundamentals**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/Exception.md)
   - Exceptions
   - Exception hierarchy
   - `Throwable`
@@ -1274,17 +1274,17 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Checked exceptions
   - Unchecked exceptions
   - Errors
-  - Exception propagation
+  - [Exception propagation](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/ExceptionPropagation.md)
   - Exception handling
   - Exception best practices
 
-- **64. Try-Catch-Finally**
+- [**64. Try-Catch-Finally**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/ExceptionHandling.md)
   - `try`
   - `catch`
   - `finally`
   - Multiple catch blocks
   - Multi-catch
-  - Try-with-resources
+  - [Try-with-resources](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/TryWithResources.md)
   - `AutoCloseable`
   - `Closeable`
   - Suppressed exceptions
@@ -1294,7 +1294,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Re-throwing exceptions
   - Exception best practices
 
-- **65. Custom Exceptions**
+- [**65. Custom Exceptions**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/ExceptionCreation.md)
   - Custom exceptions
   - Checked custom exceptions
   - Unchecked custom exceptions
@@ -1303,7 +1303,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Exception causes
   - Exception best practices
 
-- **66. Exception Patterns**
+- [**66. Exception Patterns**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/ExceptionDesign.md)
   - Fail fast
   - Fail safe
   - Graceful degradation
@@ -1313,7 +1313,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Error monitoring
   - Exception best practices
 
-- **67. Assertions**
+- [**67. Assertions**](/Programming%20Languages/Java/ExceptionHandlngAndRobustness/Assetions.md)
   - `assert`
   - Assertion statements
   - Assertion messages
@@ -1327,7 +1327,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # XI. Input/Output and NIO
 
-- **68. I/O Fundamentals**
+- [**68. I/O Fundamentals**](/Programming%20Languages/Java/IO%20and%20File%20Processing/IO.md)
   - I/O
   - Streams
   - Byte streams
@@ -1340,7 +1340,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - File streams
   - I/O best practices
 
-- **69. File I/O**
+- [**69. File I/O**](/Programming%20Languages/Java/IO%20and%20File%20Processing/FileIO.md)
   - `File` class
   - File operations
   - File paths
@@ -1352,7 +1352,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - File permissions
   - File I/O best practices
 
-- **70. NIO**
+- [**70. NIO**](/Programming%20Languages/Java/IO%20and%20File%20Processing/NIO.md)
   - NIO
   - New I/O
   - Channels
@@ -1375,7 +1375,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - SelectionKey
   - NIO best practices
 
-- **71. NIO.2**
+- [**71. NIO.2**](/Programming%20Languages/Java/IO%20and%20File%20Processing/NIO2.md)
   - NIO.2
   - Java 7 NIO.2
   - `Path`
@@ -1391,7 +1391,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - `SimpleFileVisitor`
   - NIO.2 best practices
 
-- **72. Serialization**
+- [**72. Serialization**](/Programming%20Languages/Java/IO%20and%20File%20Processing/Serialization.md)
   - Serialization
   - `Serializable`
   - `Externalizable`
@@ -1407,7 +1407,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Serialization security
   - Serialization best practices
 
-- **73. JSON**
+- [**73. JSON**](/Programming%20Languages/Java/Miscellaneous/JSON.md)
   - JSON
   - Jackson
   - Gson
@@ -1417,7 +1417,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - JSON generation
   - JSON best practices
 
-- **74. XML**
+- [**74. XML**](/Programming%20Languages/Java/Miscellaneous/XML.md)
   - XML
   - DOM
   - SAX
@@ -1427,7 +1427,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - XML generation
   - XML best practices
 
-- **75. Properties**
+- [**75. Properties**](/Programming%20Languages/Java/IO%20and%20File%20Processing/Properties.md)
   - `Properties`
   - Properties file
   - `.properties`
@@ -1439,7 +1439,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # XII. Concurrency and Multithreading
 
-- **76. Concurrency Fundamentals**
+- [**76. Concurrency Fundamentals**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/Concurrency.md)
   - Concurrency
   - Parallelism
   - Threads
@@ -1450,7 +1450,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Context switching
   - Concurrency best practices
 
-- **77. Threads**
+- [**77. Threads**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ThreadCreation.md)
   - `Thread` class
   - `Runnable` interface
   - Thread creation
@@ -1464,7 +1464,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Thread naming
   - Thread best practices
 
-- **78. Synchronization**
+- [**78. Synchronization**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/Synchronization.md)
   - `synchronized`
   - Synchronized methods
   - Synchronized blocks
@@ -1482,7 +1482,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Thread safety
   - Synchronization best practices
 
-- **79. Volatile and Atomics**
+- [**79. Volatile and Atomics**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/VolatileAndAtomics.md)
   - `volatile`
   - Memory visibility
   - Happens-before relationship
@@ -1502,7 +1502,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - CAS
   - Atomic best practices
 
-- **80. Locks**
+- [**80. Locks**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/Locks.md)
   - `Lock` interface
   - `ReentrantLock`
   - `ReentrantReadWriteLock`
@@ -1511,7 +1511,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Lock vs synchronized
   - Lock best practices
 
-- **81. Concurrent Collections**
+- [**81. Concurrent Collections**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ConcurrentCollections.md)
   - `ConcurrentHashMap`
   - `ConcurrentLinkedQueue`
   - `ConcurrentLinkedDeque`
@@ -1528,7 +1528,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - `ConcurrentSkipListSet`
   - Concurrent collections best practices
 
-- **82. Executors**
+- [**82. Executors**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/Executors.md)
   - `Executor`
   - `ExecutorService`
   - `Executors`
@@ -1543,7 +1543,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - `ForkJoinPool`
   - Executor best practices
 
-- **83. Futures and CompletableFuture**
+- [**83. Futures and CompletableFuture**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/Futures.md)
   - `Future`
   - `Callable`
   - `FutureTask`
@@ -1567,7 +1567,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - `whenComplete()`
   - CompletableFuture best practices
 
-- **84. Fork/Join Framework**
+- [**84. Fork/Join Framework**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ForkOrJoin.md)
   - Fork/Join framework
   - `ForkJoinPool`
   - `ForkJoinTask`
@@ -1577,7 +1577,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Parallelism
   - Fork/Join best practices
 
-- **85. Virtual Threads**
+- [**85. Virtual Threads**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/VirtualThreads.md)
   - Virtual threads
   - Java 21 virtual threads
   - `Thread.ofVirtual()`
@@ -1588,7 +1588,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Structured concurrency
   - `StructuredTaskScope`
 
-- **86. Concurrency Patterns**
+- [**86. Concurrency Patterns**](/Programming%20Languages/Java/Multithreading%20and%20Concurrency/ConcurrencyPatterns.md)
   - Producer-consumer
   - Reader-writer
   - Worker pool

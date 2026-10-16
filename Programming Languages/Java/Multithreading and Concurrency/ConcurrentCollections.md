@@ -1,859 +1,1025 @@
-# Concurrent Collections & Structural Thread-Safety: A Comprehensive Research Cheat Sheet
+# Java Concurrent Collections: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition**
-Concurrent collections are data structures in the `java.util.concurrent` package designed for safe, efficient access by multiple threads simultaneously without external synchronization. They provide structural thread-safety—the collection's internal state remains consistent under concurrent access.
+**Core Definition:** Concurrent collections are thread-safe collection implementations in the `java.util.concurrent` package designed for safe, efficient access by multiple threads without external synchronization.
 
-**Technical Definition**
-The `java.util.concurrent` package provides a set of collection implementations that extend the Java Collections Framework with thread-safe semantics. These implementations are optimized for concurrent access patterns and avoid the coarse-grained locking of synchronized wrappers (`Collections.synchronizedMap`). They achieve thread safety through lock striping, copy-on-write semantics, blocking queues, and lock-free algorithms based on compare-and-swap (CAS) operations. Concurrent collections establish happens-before relationships that guarantee memory visibility: actions in a thread prior to placing an object into a concurrent collection happen-before actions subsequent to the access or removal of that element from the collection in another thread.
+**Technical Definition:** "The `java.util.concurrent` package includes a number of additions to the Java Collections Framework. These are most easily categorized by the collection interfaces provided: `BlockingQueue` defines a first-in-first-out data structure that blocks or times out when you attempt to add to a full queue, or to retrieve from an empty queue. `ConcurrentMap` is a subinterface of `java.util.Map` that defines useful atomic operations. `ConcurrentNavigableMap` is a subinterface of `ConcurrentMap` that supports approximate matches. The `java.util.concurrent` package also includes a `ConcurrentLinkedQueue` class, which is an unbounded thread-safe queue based on linked nodes, as well as a `ConcurrentLinkedDeque` class. The `java.util.concurrent` package also includes a `CopyOnWriteArrayList` and `CopyOnWriteArraySet` class"【1†L23-L31】.
 
-**Beginner-Friendly Explanation**
-Imagine a library with multiple librarians (threads) and one shared catalog (collection). A regular HashMap is like a single notebook that only one librarian can write in at a time—everyone else must wait. A concurrent collection is like a well-organized card catalog where multiple librarians can read different drawers simultaneously, and writes are coordinated so no librarian ever sees a torn or missing card. Some catalogs (CopyOnWriteArrayList) work by photocopying the entire catalog whenever a change is needed, which is wasteful if changes are frequent but brilliant when most librarians are just reading.
+**Beginner-Friendly Explanation:** Imagine a regular collection (like `ArrayList` or `HashMap`) as a single-lane road where only one car can drive at a time. If two cars try to enter simultaneously, they crash. Concurrent collections are like multi-lane highways with traffic rules — multiple cars can enter and drive safely at the same time. The highway system (the collection) handles all the coordination automatically, so you don't need to put up your own traffic lights (synchronization). This makes your program faster and less error-prone.
 
 ### Key Characteristics
 
-- **Fine-Grained Locking**: Instead of a single lock for the entire collection, concurrent collections use lock striping (partitioning the collection into independently locked segments) to allow concurrent access to different parts.
-- **Lock-Free Algorithms**: Some implementations (`ConcurrentLinkedQueue`, `ConcurrentHashMap` in Java 8+) use CAS operations and volatile fields instead of locks, avoiding blocking entirely.
-- **Weakly Consistent Iterators**: Iterators on concurrent collections are weakly consistent—they never throw `ConcurrentModificationException` and may reflect some but not all modifications made after creation.
-- **No Null Elements**: Most concurrent collections (with the exception of `ConcurrentHashMap` values) do not permit `null` elements.
-- **Snapshot Semantics**: `CopyOnWriteArrayList` provides immutable snapshots for iteration, guaranteeing no interference during traversal.
-- **Happens-Before Guarantees**: Placing an element into a concurrent collection establishes a happens-before relationship with its subsequent removal by another thread.
+- **Thread-Safe by Design:** All operations are safe for concurrent use without external synchronization.
+- **Lock-Free and Lock-Based:** Some use lock-free algorithms (e.g., `ConcurrentLinkedQueue`), others use fine-grained locking (e.g., `ConcurrentHashMap`), and some use copy-on-write strategies (e.g., `CopyOnWriteArrayList`).
+- **Atomic Compound Operations:** Many provide atomic compound operations like `putIfAbsent`, `computeIfAbsent`, `merge`, and `compareAndSet`.
+- **Weakly Consistent Iterators:** Iterators are weakly consistent — they reflect the state at some point at or since the iterator was created and never throw `ConcurrentModificationException`【1†L17-L19】.
+- **Blocking Support:** `BlockingQueue` implementations support blocking operations that wait for the queue to become non-empty or non-full.
+- **Null Restrictions:** Most concurrent collections do not permit `null` elements; `ConcurrentHashMap` restricts `null` keys and values.
+- **Scalability:** Designed for high-concurrency scenarios with better scalability than `synchronized` wrappers (e.g., `Collections.synchronizedMap()`).
 
 ### Prerequisites
 
-- Understanding of the Java Collections Framework (`List`, `Map`, `Queue` interfaces)
-- Familiarity with Java threads and the `Runnable`/`Callable` interfaces
-- Knowledge of the Java Memory Model and happens-before relationships
-- Awareness of `synchronized` and `volatile` as synchronization primitives
+- Solid understanding of Java collections (`List`, `Set`, `Map`, `Queue`)
+- Familiarity with threads, `Runnable`, and the `Thread` class
+- Knowledge of synchronization and locks
+- Understanding of the Java Memory Model (visibility, happens-before)
 
 ### Related Programming Areas
 
-- **Producer-Consumer Pattern**: Blocking queues are the canonical implementation of this pattern.
-- **Thread Pools**: `ThreadPoolExecutor` uses `BlockingQueue` for its work queue.
-- **Caching**: `ConcurrentHashMap` is widely used for thread-safe caches.
-- **Event Processing**: `ConcurrentLinkedQueue` is used for lock-free event queues.
-- **Read-Heavy Systems**: `CopyOnWriteArrayList` excels in listener registries and configuration stores.
+- **Concurrency Fundamentals:** The broader topic of multithreaded programming.
+- **Synchronization:** `synchronized` and `Lock` for explicit synchronization.
+- **Atomic Classes:** Lock-free operations on single variables.
+- **Thread Pools:** `ExecutorService` for managing worker threads.
+- **Blocking Queues:** Producer-consumer patterns and task scheduling.
+- **Parallel Streams:** Concurrent collections integrate with parallel streams.
 
 ### Core Concepts / Features
 
-Four core concepts are covered: (1) `ConcurrentHashMap`, (2) `CopyOnWriteArrayList`, (3) blocking queues, and (4) lock-free concurrent queues.
-
 ---
 
-## Core Concept 1: Thread-Safe Key-Value Structures — ConcurrentHashMap
+## 1. `ConcurrentHashMap`
 
 ### Definitions
 
-**Core Definition**
-`ConcurrentHashMap<K,V>` is a hash table supporting full concurrency for retrievals and high expected concurrency for updates. It is the thread-safe replacement for `Hashtable` and `Collections.synchronizedMap`.
+**Core Definition:** `ConcurrentHashMap` is a thread-safe implementation of the `ConcurrentMap` interface that supports full concurrency for retrievals and adjustable expected concurrency for updates.
 
-**Technical Definition**
-Per the Java API documentation, `ConcurrentHashMap` is a hash table supporting full concurrency of retrievals and high expected concurrency for updates. Retrieval operations (including `get`) generally do not block, so they may overlap with update operations (including `put` and `remove`). Retrievals reflect the results of the most recently completed update operations holding upon their onset. For aggregate operations such as `putAll` and `clear`, concurrent retrievals may reflect insertion or removal of only some entries. Iterators, Spliterators, and Enumerations return elements reflecting the state of the hash table at some point at or since the creation of the iterator/enumeration; they do not throw `ConcurrentModificationException`. The table is dynamically expanded when there are too many collisions.
+**Technical Definition:** "The `ConcurrentHashMap` class is a hash table supporting full concurrency of retrievals and high expected concurrency for updates. Retrieval operations (including `get`) generally do not block, so they may overlap with update operations (including `put` and `remove`). Retrievals reflect the results of the most recently completed update operations"【2†L20-L28】. "ConcurrentHashMap has a more fine-grained locking mechanism, allowing multiple threads to read and write concurrently"【3†L25-L26】.
 
-**Beginner-Friendly Explanation**
-`ConcurrentHashMap` is like a well-staffed registration desk at a large conference. Multiple attendees (threads) can check in simultaneously at different stations. When one station is busy, others can still work. The registration book is organized into sections, so locking one section doesn't block the entire desk. Unlike older synchronized maps where the entire book had to be locked for every write, `ConcurrentHashMap` only locks the section being modified.
+**Beginner-Friendly Explanation:** `ConcurrentHashMap` is like a filing cabinet with multiple drawers. When someone needs to update one drawer, they only lock that drawer, not the whole cabinet. Other people can still access different drawers simultaneously. For reading, no lock is needed at all — readers always see the most recently completed updates.
 
 ### Purposes
 
-- To provide a thread-safe map implementation that allows concurrent reads and high-concurrency writes without coarse-grained locking.
-- To replace `Hashtable` and `Collections.synchronizedMap` in high-concurrency applications where performance is critical.
-- To support atomic compound operations (`computeIfAbsent`, `merge`, `putIfAbsent`, `compute`, `computeIfPresent`) for atomic read-modify-write semantics.
-- To serve as the foundation for concurrent caches, registries, and shared configuration stores.
+- To provide a thread-safe map with high concurrency for concurrent reads and updates
+- To support atomic compound operations like `putIfAbsent`, `computeIfAbsent`, and `merge`
+- To serve as a scalable alternative to `Hashtable` and `Collections.synchronizedMap()`
+- To enable lock-free retrievals that do not block writers
+- To support weakly consistent iterators that never throw `ConcurrentModificationException`
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
+**Complete General Syntax:**
 
 ```java
-// Constructors
-ConcurrentHashMap<K,V> map = new ConcurrentHashMap<>();
-ConcurrentHashMap<K,V> map = new ConcurrentHashMap<>(int initialCapacity);
-ConcurrentHashMap<K,V> map = new ConcurrentHashMap<>(int initialCapacity, float loadFactor);
-ConcurrentHashMap<K,V> map = new ConcurrentHashMap<>(int initialCapacity, float loadFactor, int concurrencyLevel);
-ConcurrentHashMap<K,V> map = new ConcurrentHashMap<>(Map<? extends K, ? extends V> m);
+ConcurrentMap<String, Integer> map = new ConcurrentHashMap<>();
 
-// Core operations
-V put(K key, V value);                    // atomic write
-V get(Object key);                         // lock-free read
-V remove(Object key);                      // atomic remove
-V putIfAbsent(K key, V value);            // atomic insert if absent
-boolean remove(Object key, Object value);  // atomic remove if mapped to value
-boolean replace(K key, V oldValue, V newValue); // atomic replace
-V computeIfAbsent(K key, Function<K,V> mappingFunction); // atomic compute if absent
-V compute(K key, BiFunction<K,V,V> remappingFunction);   // atomic compute
-V merge(K key, V value, BiFunction<V,V,V> remappingFunction); // atomic merge
+// Basic operations
+map.put("key", 1);
+Integer value = map.get("key");
+map.remove("key");
+
+// Atomic operations
+map.putIfAbsent("key", 1);
+map.computeIfAbsent("key", k -> 1);
+map.computeIfPresent("key", (k, v) -> v + 1);
+map.merge("key", 1, Integer::sum);
 ```
 
-**Component Breakdown**
+**Key Methods:**
 
-| Component | Description |
-|-----------|-------------|
-| `initialCapacity` | Initial table size (default 16) |
-| `loadFactor` | Table density threshold for resizing (default 0.75) |
-| `concurrencyLevel` | Estimated number of concurrently updating threads (default 16) |
-| `putIfAbsent` | Atomic operation: insert only if key is not already mapped |
-| `computeIfAbsent` | Atomic operation: compute value if absent and insert |
-| `merge` | Atomic operation: merge existing value with new value |
+| Method | Description |
+|--------|-------------|
+| `putIfAbsent(K, V)` | Adds if absent; returns existing or null |
+| `computeIfAbsent(K, Function)` | Computes and adds if absent |
+| `computeIfPresent(K, BiFunction)` | Computes and updates if present |
+| `merge(K, V, BiFunction)` | Merges value with existing |
+| `forEach(BiConsumer)` | Performs action for each entry |
 
-**Syntax Rules**
+**Syntax Rules:**
 
-1. `ConcurrentHashMap` does not permit `null` keys or `null` values.
-2. Retrieval operations (`get`, `containsKey`) are lock-free and do not block.
-3. `size()`, `isEmpty()`, and `containsValue()` are approximate and should only be used for monitoring or estimation, not for program control.
-4. Iterators are weakly consistent and never throw `ConcurrentModificationException`.
-5. Atomic compound operations (`computeIfAbsent`, `merge`, etc.) are guaranteed to execute atomically with respect to other operations on the same key.
-6. `putAll` and `clear` are aggregate operations; concurrent retrievals may reflect partial results.
+- `ConcurrentHashMap` does not permit `null` keys or values【2†L30-L31】.
+- Iterators are weakly consistent and never throw `ConcurrentModificationException`【1†L17-L19】.
+- Size-related methods (`size()`, `isEmpty()`) are not accurate under concurrent modification.
 
-**Constraints and Limitations**
+**Constraints and Limitations:**
 
-- `size()` and `isEmpty()` are approximations; they do not reflect a frozen snapshot.
-- There is no built-in way to lock the entire map.
-- The map dynamically expands when collisions are too frequent, which can be a relatively slow operation.
-- Using many keys with exactly the same `hashCode()` will degrade performance.
+- "ConcurrentHashMap doesn't allow null key or value"【3†L44-L45】.
+- "size() and isEmpty() are not accurate because of concurrent changes"【3†L45-L46】.
+- "Does not provide a way to lock the entire map for exclusive access".
 
-### Annotated Code Examples
+### Annotated Complete Step-by-Step Code Examples
 
-**Example 1: Basic ConcurrentHashMap Operations**
+**Example 1: Atomic Operations in ConcurrentHashMap**
 
 ```java
-import java.util.concurrent.ConcurrentHashMap;
+// File: ConcurrentHashMapDemo.java
+import java.util.concurrent.*;
 
 public class ConcurrentHashMapDemo {
     public static void main(String[] args) throws InterruptedException {
-        ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+        ConcurrentMap<String, Integer> map = new ConcurrentHashMap<>();
 
-        // Atomic putIfAbsent
-        map.putIfAbsent("Alice", 100);
-        map.putIfAbsent("Bob", 200);
-        map.putIfAbsent("Alice", 999); // ignored: Alice already mapped
-
-        System.out.println("Alice: " + map.get("Alice")); // 100
-        System.out.println("Bob: " + map.get("Bob"));     // 200
-
-        // Atomic computeIfAbsent
-        map.computeIfAbsent("Charlie", k -> 300);
-        System.out.println("Charlie: " + map.get("Charlie")); // 300
-
-        // Atomic merge
-        map.merge("Alice", 50, Integer::sum); // 100 + 50 = 150
-        System.out.println("Alice after merge: " + map.get("Alice")); // 150
-
-        // Concurrent access from multiple threads
+        // Multiple threads updating the same key atomically
         Runnable task = () -> {
-            for (int i = 0; i < 1000; i++) {
-                map.merge("Counter", 1, Integer::sum);
+            for (int i = 0; i < 10000; i++) {
+                map.merge("counter", 1, Integer::sum);
             }
         };
 
         Thread t1 = new Thread(task);
         Thread t2 = new Thread(task);
-        t1.start(); t2.start();
-        t1.join(); t2.join();
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
 
-        System.out.println("Counter: " + map.get("Counter")); // 2000
+        System.out.println("Counter: " + map.get("counter"));  // 20000
+
+        // computeIfAbsent: atomic creation
+        map.computeIfAbsent("hello", k -> k.length());
+        System.out.println("Length: " + map.get("hello"));  // 5
     }
 }
 ```
 
-**Expected Output**
-
+**Expected Output:**
 ```
-Alice: 100
-Bob: 200
-Charlie: 300
-Alice after merge: 150
-Counter: 2000
+Counter: 20000
+Length: 5
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-`putIfAbsent("Alice", 999)` does nothing because "Alice" is already mapped to 100. `computeIfAbsent` atomically inserts 300 for "Charlie". `merge("Alice", 50, Integer::sum)` atomically adds 50 to the existing value. The concurrent merge operations from two threads result in exactly 2000 because `merge` is atomic; no increments are lost.
-
----
-
-**Example 2: Lock Striping Performance Comparison**
-
-```java
-import java.util.*;
-import java.util.concurrent.*;
-
-public class LockStripingDemo {
-    public static void main(String[] args) throws InterruptedException {
-        int iterations = 100_000;
-        int threads = 8;
-
-        // Coarse-grained: synchronized HashMap
-        Map<String, Integer> syncMap =
-            Collections.synchronizedMap(new HashMap<>());
-        long syncTime = timeOperations(syncMap, threads, iterations);
-
-        // Fine-grained: ConcurrentHashMap
-        ConcurrentHashMap<String, Integer> concurrentMap =
-            new ConcurrentHashMap<>();
-        long concurrentTime = timeOperations(concurrentMap, threads, iterations);
-
-        System.out.println("SynchronizedMap time: " + syncTime + " ms");
-        System.out.println("ConcurrentHashMap time: " + concurrentTime + " ms");
-    }
-
-    static long timeOperations(Map<String, Integer> map, int threads, int iterations)
-            throws InterruptedException {
-        ExecutorService pool = Executors.newFixedThreadPool(threads);
-        long start = System.currentTimeMillis();
-
-        for (int t = 0; t < threads; t++) {
-            final int threadId = t;
-            pool.submit(() -> {
-                for (int i = 0; i < iterations; i++) {
-                    String key = "key-" + (threadId * iterations + i) % 1000;
-                    map.merge(key, 1, Integer::sum);
-                }
-            });
-        }
-
-        pool.shutdown();
-        pool.awaitTermination(30, TimeUnit.SECONDS);
-        return System.currentTimeMillis() - start;
-    }
-}
-```
-
-**Expected Output (timing varies)**
-
-```
-SynchronizedMap time: 1250 ms
-ConcurrentHashMap time: 180 ms
-```
-
-**Why This Output Occurs**
-
-`SynchronizedMap` uses a single lock for the entire map, so all threads compete for the same monitor. `ConcurrentHashMap` uses lock striping (internally partitioning the table into segments or bins), allowing multiple threads to update different parts of the map concurrently. The concurrent version is typically 5–10× faster under contention.
+1. Two threads each merge 10,000 increments into the `"counter"` key.
+2. `merge("counter", 1, Integer::sum)` atomically adds 1 to the existing value.
+3. The final counter is 20,000 — no lost updates.
+4. `computeIfAbsent` atomically computes and stores the value if the key is absent.
 
 ### Real-World Cases
 
-- **Web Session Stores**: `ConcurrentHashMap` stores session data keyed by session ID; multiple requests read and write concurrently.
-- **Cache Implementations**: `computeIfAbsent` provides atomic cache population without explicit locking.
-- **Word Count in MapReduce**: Multiple reducer threads merge word counts into a shared `ConcurrentHashMap` using `merge`.
-- **Configuration Registry**: A thread-safe registry of configuration properties updated dynamically.
+- **Caching:** Storing computed values with thread-safe access.
+- **Session Management:** Tracking user sessions in web applications.
+- **Word Counters:** Counting word occurrences in concurrent text processing.
+- **Rate Limiting:** Tracking request counts per user or IP.
 
 ---
 
-## Core Concept 2: Read-Heavy Atomic Data Storage — CopyOnWriteArrayList
+## 2. `ConcurrentLinkedQueue`
 
 ### Definitions
 
-**Core Definition**
-`CopyOnWriteArrayList<E>` is a thread-safe `List` implementation in which all mutative operations (`add`, `set`, `remove`) are implemented by making a fresh copy of the underlying array.
+**Core Definition:** `ConcurrentLinkedQueue` is an unbounded thread-safe queue based on linked nodes, using a lock-free algorithm for high concurrency.
 
-**Technical Definition**
-Per the Java API documentation, `CopyOnWriteArrayList` is a thread-safe variant of `ArrayList` in which all mutative operations are implemented by making a fresh copy of the underlying array. This is ordinarily too costly, but may be more efficient than alternatives when traversal operations vastly outnumber mutations, and is useful when you cannot or don't want to synchronize traversals, yet need to preclude interference among concurrent threads. The "snapshot" style iterator method uses a reference to the state of the array at the point that the iterator was created. This array never changes during the lifetime of the iterator, so interference is impossible and the iterator is guaranteed not to throw `ConcurrentModificationException`. The iterator will not reflect additions, removals, or changes to the list since the iterator was created. Element-changing operations on iterators themselves (`remove`, `set`, `add`) are not supported.
+**Technical Definition:** "An unbounded thread-safe queue based on linked nodes. This queue orders elements FIFO (first-in-first-out). The head of the queue is that element that has been on the queue the longest time. The tail of the queue is that element that has been on the queue the shortest time. New elements are inserted at the tail of the queue, and the queue retrieval operations obtain elements at the head of the queue"【4†L9-L14】. "This class and its iterator implement all of the optional methods of the Queue and Iterator interfaces. This implementation employs an efficient non-blocking algorithm based on one described in Simple, Fast, and Practical Non-Blocking and Blocking Concurrent Queue Algorithms"【4†L20-L24】.
 
-**Beginner-Friendly Explanation**
-`CopyOnWriteArrayList` is like a shared photo album that works on a simple principle: whenever someone wants to add or remove a photo, they make a complete photocopy of the entire album, make the change on the copy, and then swap it in as the new album. Readers who are looking at the old album continue to see the old version. This is wasteful if many people are adding photos, but brilliant if hundreds of people are constantly browsing and only one person occasionally adds a photo.
+**Beginner-Friendly Explanation:** `ConcurrentLinkedQueue` is like a lock-free checkout line at a store. People can join the line from the back and leave from the front without anyone needing to "lock" the line. It uses clever atomic operations to keep everything consistent without locks.
 
 ### Purposes
 
-- To provide a thread-safe `List` optimized for read-heavy workloads where mutations are rare.
-- To enable lock-free iteration with snapshot isolation—iterators never throw `ConcurrentModificationException`.
-- To support event listener registries where listeners are added/removed infrequently but the list is traversed frequently.
-- To eliminate the need for synchronized traversal in concurrent read-heavy scenarios.
+- To provide a thread-safe FIFO queue with high concurrency
+- To serve as a lock-free alternative to `LinkedBlockingQueue` for non-blocking scenarios
+- To enable producer-consumer patterns without blocking
+- To support unbounded queue growth
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
-
 ```java
-// Constructors
-CopyOnWriteArrayList<E> list = new CopyOnWriteArrayList<>();
-CopyOnWriteArrayList<E> list = new CopyOnWriteArrayList<>(Collection<? extends E> c);
-CopyOnWriteArrayList<E> list = new CopyOnWriteArrayList<>(E[] toCopyIn);
-
-// Core operations (all mutative operations copy the array)
-boolean add(E e);
-void add(int index, E element);
-E remove(int index);
-boolean remove(Object o);
-E set(int index, E element);
-boolean addIfAbsent(E e);
-int addAllAbsent(Collection<? extends E> c);
-
-// Snapshot-style iteration (never throws ConcurrentModificationException)
-Iterator<E> iterator();
+Queue<String> queue = new ConcurrentLinkedQueue<>();
+queue.offer("A");      // Add at tail
+queue.add("B");        // Add at tail
+String head = queue.poll();   // Remove from head
+String peek = queue.peek();   // View head without removing
 ```
 
-**Component Breakdown**
+**Key Methods:**
 
-| Component | Description |
-|-----------|-------------|
-| `add`, `set`, `remove` | Mutative operations; each creates a new copy of the array |
-| `addIfAbsent` | Atomically adds element only if not already present |
-| `addAllAbsent` | Atomically adds all elements not already present |
-| Iterator | Snapshot-based; reflects state at iterator creation |
+| Method | Description |
+|--------|-------------|
+| `offer(E)` | Inserts at tail; returns true |
+| `poll()` | Removes and returns head; null if empty |
+| `peek()` | Returns head without removing; null if empty |
+| `size()` | Returns number of elements (traverses) |
 
-**Syntax Rules**
+**Syntax Rules:**
 
-1. All mutative operations are implemented by creating a fresh copy of the underlying array.
-2. The iterator uses a snapshot of the array at creation time; it never reflects changes made after creation.
-3. Iterator element-changing operations (`remove`, `set`, `add`) throw `UnsupportedOperationException`.
-4. `null` elements are permitted.
-5. Memory consistency: actions in a thread prior to placing an object into a `CopyOnWriteArrayList` happen-before actions subsequent to the access or removal of that element from the list in another thread.
-6. Writing is expensive (O(n) per mutation); reading is cheap and lock-free.
+- Does not permit `null` elements【4†L32-L33】.
+- Iterators are weakly consistent【4†L31-L32】.
+- Uses a lock-free algorithm based on CAS【4†L24-L25】.
 
-**Constraints and Limitations**
-
-- Write operations are O(n) because they copy the entire array; unsuitable for write-heavy workloads.
-- The iterator does not reflect changes made after its creation; it operates on an immutable snapshot.
-- Memory overhead can be significant if the list is large and mutations are frequent.
-- No support for atomic compound operations beyond `addIfAbsent` and `addAllAbsent`.
-
-### Annotated Code Examples
-
-**Example 1: Snapshot Iteration**
+### Annotated Code Example
 
 ```java
-import java.util.concurrent.CopyOnWriteArrayList;
+// File: ConcurrentLinkedQueueDemo.java
+import java.util.concurrent.*;
 
-public class CopyOnWriteDemo {
+public class ConcurrentLinkedQueueDemo {
     public static void main(String[] args) throws InterruptedException {
+        ConcurrentLinkedQueue<Integer> queue = new ConcurrentLinkedQueue<>();
+
+        Runnable producer = () -> {
+            for (int i = 1; i <= 1000; i++) {
+                queue.offer(i);
+            }
+        };
+
+        Thread p1 = new Thread(producer);
+        Thread p2 = new Thread(producer);
+        p1.start();
+        p2.start();
+        p1.join();
+        p2.join();
+
+        System.out.println("Queue size: " + queue.size());  // 2000
+
+        int count = 0;
+        while (queue.poll() != null) count++;
+        System.out.println("Polled: " + count);  // 2000
+    }
+}
+```
+
+**Expected Output:**
+```
+Queue size: 2000
+Polled: 2000
+```
+
+### Real-World Cases
+
+- **Task Queues:** High-throughput task distribution.
+- **Event Processing:** Storing events from multiple producers.
+- **Message Passing:** Non-blocking message queues.
+
+---
+
+## 3. `ConcurrentLinkedDeque`
+
+### Definitions
+
+**Core Definition:** `ConcurrentLinkedDeque` is an unbounded thread-safe deque (double-ended queue) based on linked nodes.
+
+**Technical Definition:** "An unbounded concurrent deque based on linked nodes. Concurrent insertion, removal, and access operations execute safely across multiple threads. A `ConcurrentLinkedDeque` is an appropriate choice when many threads will share access to a common collection. Like most other concurrent collection implementations, this class does not permit the use of `null` elements"【5†L9-L14】.
+
+**Beginner-Friendly Explanation:** `ConcurrentLinkedDeque` is like a queue where you can add or remove items from both ends. It's thread-safe and lock-free, making it ideal for work-stealing algorithms.
+
+### Purposes
+
+- To provide a thread-safe double-ended queue
+- To support work-stealing patterns
+- To enable both FIFO and LIFO operations
+- To serve as a lock-free alternative for deque operations
+
+### Syntax Rules and Structure
+
+```java
+Deque<String> deque = new ConcurrentLinkedDeque<>();
+deque.addFirst("A");   // Add at front
+deque.addLast("B");    // Add at back
+String first = deque.pollFirst();  // Remove from front
+String last = deque.pollLast();    // Remove from back
+```
+
+### Annotated Code Example
+
+```java
+// File: ConcurrentLinkedDequeDemo.java
+import java.util.concurrent.*;
+
+public class ConcurrentLinkedDequeDemo {
+    public static void main(String[] args) {
+        ConcurrentLinkedDeque<String> deque = new ConcurrentLinkedDeque<>();
+
+        deque.addFirst("Middle");
+        deque.addFirst("Front");
+        deque.addLast("Back");
+
+        System.out.println("First: " + deque.pollFirst());  // Front
+        System.out.println("Last: " + deque.pollLast());    // Back
+        System.out.println("Remaining: " + deque.poll());   // Middle
+    }
+}
+```
+
+**Expected Output:**
+```
+First: Front
+Last: Back
+Remaining: Middle
+```
+
+### Real-World Cases
+
+- **Work Stealing:** `ForkJoinPool` uses concurrent deques.
+- **Task Scheduling:** Both FIFO and LIFO task processing.
+- **Undo/Redo Stacks:** Managing edit history.
+
+---
+
+## 4. `CopyOnWriteArrayList`
+
+### Definitions
+
+**Core Definition:** `CopyOnWriteArrayList` is a thread-safe variant of `ArrayList` where all mutative operations create a fresh copy of the underlying array.
+
+**Technical Definition:** "A thread-safe variant of `ArrayList` in which all mutative operations (add, set, and so on) are implemented by making a fresh copy of the underlying array"【6†L9-L11】. "This is ordinarily too costly, but may be more efficient than alternatives when traversal operations vastly outnumber mutations, and is useful when you cannot or don't want to synchronize traversals, yet need to preclude interference among concurrent threads. The 'snapshot' style iterator method uses a reference to the state of the array at the point that the iterator was created. This array never changes during the lifetime of the iterator, so interference is impossible and the iterator is guaranteed not to throw `ConcurrentModificationException`"【6†L12-L19】.
+
+**Beginner-Friendly Explanation:** `CopyOnWriteArrayList` is like a shared photo album. When someone wants to add a photo, they make a complete copy of the album, add the photo to the copy, and then swap it in. Readers who started looking at the old album still see the old version, while new readers see the new version. This is great when many people are reading and few are writing.
+
+### Purposes
+
+- To provide a thread-safe list optimised for read-heavy, write-rare scenarios
+- To guarantee that iterators never throw `ConcurrentModificationException`
+- To enable safe traversal without locking
+- To provide a simple, correct implementation for observer lists and listener registries
+
+### Syntax Rules and Structure
+
+```java
+List<String> list = new CopyOnWriteArrayList<>();
+list.add("A");
+list.add("B");
+list.forEach(System.out::println);  // Safe traversal
+```
+
+**Key Characteristics:**
+
+| Aspect | Description |
+|--------|-------------|
+| Read performance | Excellent (no locking) |
+| Write performance | Poor (copies entire array) |
+| Iterator | Snapshot-based, never throws `ConcurrentModificationException` |
+| Memory | High during writes (duplicates array) |
+
+**Syntax Rules:**
+
+- All mutative operations create a new array copy.
+- Iterators operate on a snapshot and never change.
+- Not suitable for write-heavy workloads.
+
+### Annotated Code Example
+
+```java
+// File: CopyOnWriteArrayListDemo.java
+import java.util.concurrent.*;
+
+public class CopyOnWriteArrayListDemo {
+    public static void main(String[] args) {
         CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
         list.add("A");
         list.add("B");
         list.add("C");
 
-        // Create iterator: captures snapshot [A, B, C]
-        Thread reader = new Thread(() -> {
-            for (String s : list) {
-                System.out.println("Reader sees: " + s);
-                try { Thread.sleep(200); } catch (InterruptedException e) { }
+        // Safe iteration while modifying
+        for (String item : list) {
+            System.out.println(item);
+            if (item.equals("B")) {
+                list.add("D");  // Safe — no ConcurrentModificationException
             }
-        });
-
-        Thread writer = new Thread(() -> {
-            try { Thread.sleep(100); } catch (InterruptedException e) { }
-            list.add("D"); // creates a new array [A, B, C, D]
-            System.out.println("Writer added D");
-        });
-
-        reader.start();
-        writer.start();
-        reader.join();
-        writer.join();
-        System.out.println("Final list: " + list);
-    }
-}
-```
-
-**Expected Output**
-
-```
-Reader sees: A
-Writer added D
-Reader sees: B
-Reader sees: C
-Final list: [A, B, C, D]
-```
-
-**Why This Output Occurs**
-
-The reader's iterator is backed by the snapshot `[A, B, C]` captured at the moment the enhanced `for` loop began. When the writer adds "D", a new array `[A, B, C, D]` is created and swapped in. The reader continues iterating over the old snapshot and never sees "D". The final list contains all four elements.
-
----
-
-**Example 2: Listener Registry (Read-Heavy Use Case)**
-
-```java
-import java.util.concurrent.CopyOnWriteArrayList;
-
-public class ListenerRegistry {
-    // CopyOnWriteArrayList: perfect for listener registries
-    private final CopyOnWriteArrayList<Runnable> listeners =
-        new CopyOnWriteArrayList<>();
-
-    public void addListener(Runnable listener) {
-        listeners.add(listener); // rare: copy-on-write
-    }
-
-    public void removeListener(Runnable listener) {
-        listeners.remove(listener); // rare: copy-on-write
-    }
-
-    public void fireEvent() {
-        // Frequent: lock-free traversal, no synchronization needed
-        for (Runnable listener : listeners) {
-            listener.run();
         }
-    }
 
-    public static void main(String[] args) {
-        ListenerRegistry registry = new ListenerRegistry();
-
-        registry.addListener(() -> System.out.println("Listener 1 fired"));
-        registry.addListener(() -> System.out.println("Listener 2 fired"));
-        registry.addListener(() -> System.out.println("Listener 3 fired"));
-
-        // Fire events from multiple threads concurrently
-        Runnable eventTask = registry::fireEvent;
-        Thread t1 = new Thread(eventTask);
-        Thread t2 = new Thread(eventTask);
-        t1.start(); t2.start();
+        System.out.println("After: " + list);
     }
 }
 ```
 
-**Expected Output (order may vary)**
-
+**Expected Output:**
 ```
-Listener 1 fired
-Listener 2 fired
-Listener 3 fired
-Listener 1 fired
-Listener 2 fired
-Listener 3 fired
+A
+B
+C
+After: [A, B, C, D]
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-Listeners are added only at startup (rare mutation), but `fireEvent()` traverses the list on every event (frequent read). `CopyOnWriteArrayList` provides lock-free traversal, so two threads can fire events simultaneously without any synchronization overhead. Each thread iterates over its own snapshot of the listener list.
+1. The list is created and populated with A, B, C.
+2. The for-each loop iterates over a snapshot of the list.
+3. Adding "D" during iteration does not affect the current iteration.
+4. The final list contains D because the add operation succeeded.
 
 ### Real-World Cases
 
-- **Event Listener Registries**: Swing/AWT listeners, Spring application event listeners.
-- **Configuration Stores**: A list of configuration objects that is read frequently but modified rarely.
-- **Routing Tables**: A list of network routes that is read for every packet but updated only when topology changes.
-- **Whitelists/Blacklists**: Security filters that are consulted on every request but updated only by administrators.
+- **Listener Lists:** Managing event listeners in GUI frameworks.
+- **Observer Patterns:** Notifying observers where reads vastly outnumber writes.
+- **Configuration Snapshots:** Providing consistent views during updates.
 
 ---
 
-## Core Concept 3: Thread-Safe Producer-Consumer Pipelines — Blocking Queues
+## 5. `CopyOnWriteArraySet`
 
 ### Definitions
 
-**Core Definition**
-`BlockingQueue` is an interface representing a queue that additionally supports operations that wait for the queue to become non-empty when retrieving an element, and wait for space to become available in the queue when storing an element.
+**Core Definition:** `CopyOnWriteArraySet` is a thread-safe `Set` implementation backed by a `CopyOnWriteArrayList`.
 
-**Technical Definition**
-`BlockingQueue` implementations are designed primarily for producer-consumer queues. `ArrayBlockingQueue` is a bounded blocking queue backed by an array; it orders elements FIFO. `LinkedBlockingQueue` is an optionally-bounded blocking queue based on linked nodes; it typically has higher throughput than array-based queues but less predictable performance. `SynchronousQueue` is a blocking queue in which each insert operation must wait for a corresponding remove operation by another thread, and vice versa; it has no internal capacity, not even a capacity of one. All three support optional fairness policies.
+**Technical Definition:** "A `Set` that uses an internal `CopyOnWriteArrayList` for all of its operations. Thus, it shares the same basic properties: It is best suited for applications in which set sizes generally stay small, read-only operations vastly outnumber mutative operations, and you need to prevent interference among threads during traversal. It is thread-safe. Mutative operations (add, set, remove, etc.) are expensive since they usually entail copying the entire underlying array. Iterators do not support the mutative remove operation"【7†L9-L17】.
 
-**Beginner-Friendly Explanation**
-A `BlockingQueue` is like a conveyor belt between a factory (producer) and a shipping dock (consumer). If the belt is full, the factory worker waits (`put()` blocks). If the belt is empty, the shipping worker waits (`take()` blocks). `ArrayBlockingQueue` is a fixed-length belt. `LinkedBlockingQueue` is an expandable belt with an optional maximum length. `SynchronousQueue` is not a belt at all—it's a direct handoff, where the factory worker cannot place an item unless a shipping worker is immediately ready to take it.
-
-### Purposes
-
-- To implement the Producer-Consumer pattern without explicit `wait()`/`notify()` coordination.
-- To provide backpressure: producers block when the queue is full, preventing unbounded memory growth.
-- To decouple producers and consumers, allowing them to operate at different rates.
-- To serve as the work queue for thread pools (`ThreadPoolExecutor`).
+**Beginner-Friendly Explanation:** `CopyOnWriteArraySet` is like a guest list that is copied every time someone is added or removed. It's perfect for small sets that are read often but changed rarely.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
-
 ```java
-// ArrayBlockingQueue: bounded, array-backed
-BlockingQueue<E> queue = new ArrayBlockingQueue<>(int capacity);
-BlockingQueue<E> queue = new ArrayBlockingQueue<>(int capacity, boolean fair);
-
-// LinkedBlockingQueue: optionally bounded, linked nodes
-BlockingQueue<E> queue = new LinkedBlockingQueue<>(); // capacity = Integer.MAX_VALUE
-BlockingQueue<E> queue = new LinkedBlockingQueue<>(int capacity);
-
-// SynchronousQueue: zero capacity, direct handoff
-BlockingQueue<E> queue = new SynchronousQueue<>();
-BlockingQueue<E> queue = new SynchronousQueue<>(boolean fair);
-
-// Blocking operations
-void put(E e) throws InterruptedException;      // blocks if full
-E take() throws InterruptedException;           // blocks if empty
-boolean offer(E e, long timeout, TimeUnit unit); // blocks up to timeout
-E poll(long timeout, TimeUnit unit);            // blocks up to timeout
+Set<String> set = new CopyOnWriteArraySet<>();
+set.add("A");
+set.add("B");
+set.add("A");  // Duplicate — ignored
 ```
 
-**Component Breakdown**
-
-| Component | Description |
-|-----------|-------------|
-| `put(E e)` | Inserts element, blocking if necessary until space is available |
-| `take()` | Retrieves and removes head, blocking if necessary until element is available |
-| `offer(E, timeout, unit)` | Inserts element if possible within timeout; returns false on timeout |
-| `poll(timeout, unit)` | Retrieves element if available within timeout; returns null on timeout |
-
-**Comparison Table**
-
-| Queue Type | Bounded? | Backing | Throughput | Use Case |
-|------------|----------|---------|------------|----------|
-| `ArrayBlockingQueue` | Yes (fixed) | Array | Moderate | Fixed-capacity pipelines |
-| `LinkedBlockingQueue` | Optional | Linked nodes | High | General producer-consumer |
-| `SynchronousQueue` | Zero capacity | — | High (handoff) | Direct handoff, thread pools |
-
-**Syntax Rules**
-
-1. `put()` blocks until space is available; `take()` blocks until an element is available.
-2. `offer()` and `poll()` with timeout provide bounded waiting.
-3. `ArrayBlockingQueue` capacity cannot be changed after creation.
-4. `LinkedBlockingQueue` default capacity is `Integer.MAX_VALUE`; specify a capacity to prevent unbounded growth.
-5. `SynchronousQueue` cannot be peeked (`peek()` always returns `null`) and has no internal capacity.
-6. Fairness (when enabled) ensures FIFO ordering for blocked threads; it typically reduces throughput.
-
-**Constraints and Limitations**
-
-- `put()` and `take()` throw `InterruptedException` if interrupted while waiting.
-- `SynchronousQueue` requires a consumer to be waiting when a producer offers an element (or vice versa).
-- `LinkedBlockingQueue` with unbounded capacity can lead to memory exhaustion if producers outpace consumers.
-- Fairness reduces throughput but prevents starvation.
-
-### Annotated Code Examples
-
-**Example 1: Producer-Consumer with LinkedBlockingQueue**
+### Annotated Code Example
 
 ```java
+// File: CopyOnWriteArraySetDemo.java
 import java.util.concurrent.*;
 
-public class ProducerConsumerDemo {
+public class CopyOnWriteArraySetDemo {
     public static void main(String[] args) {
-        BlockingQueue<Integer> queue = new LinkedBlockingQueue<>(5);
+        CopyOnWriteArraySet<String> set = new CopyOnWriteArraySet<>();
+        set.add("A");
+        set.add("B");
+        set.add("A");  // Duplicate
 
+        System.out.println("Size: " + set.size());  // 2
+        System.out.println("Contains A: " + set.contains("A"));  // true
+    }
+}
+```
+
+**Expected Output:**
+```
+Size: 2
+Contains A: true
+```
+
+### Real-World Cases
+
+- **Small Caches:** Caching small sets of configuration values.
+- **Tag Sets:** Managing tags on objects where reads dominate.
+
+---
+
+## 6. `BlockingQueue`
+
+### Definitions
+
+**Core Definition:** `BlockingQueue` is an interface representing a thread-safe queue that supports operations that wait for the queue to become non-empty or non-full.
+
+**Technical Definition:** "A `Queue` that additionally supports operations that wait for the queue to become non-empty when retrieving an element, and wait for space to become available in the queue when storing an element"【8†L9-L11】. "`BlockingQueue` methods come in four forms, with different ways of handling operations that cannot be satisfied immediately but may be satisfied at some point in the future: one throws an exception, the second returns a special value (either null or false, depending on the operation), the third blocks the current thread indefinitely until the operation can succeed, and the fourth blocks for only a given maximum time limit before giving up"【8†L13-L19】.
+
+**Beginner-Friendly Explanation:** `BlockingQueue` is like a checkout counter with a limited conveyor belt. When the belt is full, the cashier blocks (waits) until space is available. When the belt is empty, the bagger blocks until an item arrives. This makes it perfect for producer-consumer patterns.
+
+### Purposes
+
+- To coordinate producers and consumers with automatic blocking
+- To provide backpressure when queues are full
+- To eliminate the need for `wait()`/`notify()` in producer-consumer patterns
+- To serve as the backbone of `ThreadPoolExecutor`
+
+### Methods Table
+
+| Operation | Throws Exception | Returns Special Value | Blocks | Times Out |
+|-----------|-----------------|----------------------|--------|-----------|
+| Insert | `add(e)` | `offer(e)` | `put(e)` | `offer(e, time, unit)` |
+| Remove | `remove()` | `poll()` | `take()` | `poll(time, unit)` |
+| Examine | `element()` | `peek()` | — | — |
+
+### Annotated Code Example
+
+```java
+// File: BlockingQueueDemo.java
+import java.util.concurrent.*;
+
+public class BlockingQueueDemo {
+    public static void main(String[] args) throws InterruptedException {
+        BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(5);
+
+        // Producer
         Thread producer = new Thread(() -> {
             try {
                 for (int i = 1; i <= 10; i++) {
-                    queue.put(i); // blocks if queue is full
+                    queue.put(i);
                     System.out.println("Produced: " + i);
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
 
+        // Consumer
         Thread consumer = new Thread(() -> {
             try {
                 for (int i = 0; i < 10; i++) {
-                    int value = queue.take(); // blocks if queue is empty
+                    int value = queue.take();
                     System.out.println("Consumed: " + value);
-                    Thread.sleep(150); // simulate slow consumer
+                    Thread.sleep(200);
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
 
         producer.start();
         consumer.start();
+        producer.join();
+        consumer.join();
     }
 }
 ```
 
-**Expected Output (interleaving varies)**
-
+**Expected Output (interleaved):**
 ```
 Produced: 1
-Produced: 2
-Produced: 3
-Produced: 4
-Produced: 5
 Consumed: 1
+Produced: 2
 Consumed: 2
-Consumed: 3
-Consumed: 4
-Consumed: 5
-Produced: 6
 ...
 ```
 
-**Why This Output Occurs**
+---
 
-The producer fills the queue to its capacity of 5, then blocks on `put(6)` until the consumer removes an element. The consumer takes elements and sleeps, creating backpressure. The interleaving shows that the producer cannot outpace the consumer beyond the queue's capacity.
+## 7. `ArrayBlockingQueue`
+
+### Definitions
+
+**Core Definition:** `ArrayBlockingQueue` is a bounded blocking queue backed by an array.
+
+**Technical Definition:** "A bounded blocking queue backed by an array. This queue orders elements FIFO (first-in-first-out). The head of the queue is that element that has been on the queue the longest time. The tail of the queue is that element that has been on the queue the shortest time. New elements are inserted at the tail of the queue, and the queue retrieval operations obtain elements at the head of the queue. This is a classic 'bounded buffer' in which a fixed-sized array holds elements inserted by producers and extracted by consumers. Once created, the capacity cannot be changed"【9†L9-L16】.
+
+**Beginner-Friendly Explanation:** `ArrayBlockingQueue` is a queue with a fixed size. Once full, producers must wait; once empty, consumers must wait. It's simple, predictable, and memory-efficient.
+
+### Annotated Code Example
+
+```java
+// File: ArrayBlockingQueueDemo.java
+import java.util.concurrent.*;
+
+public class ArrayBlockingQueueDemo {
+    public static void main(String[] args) throws InterruptedException {
+        BlockingQueue<String> queue = new ArrayBlockingQueue<>(3);
+
+        queue.put("A");
+        queue.put("B");
+        queue.put("C");
+        System.out.println("Queue full. Size: " + queue.size());  // 3
+
+        // This would block if we called queue.put("D")
+        boolean offered = queue.offer("D");
+        System.out.println("Offered D: " + offered);  // false
+    }
+}
+```
+
+**Expected Output:**
+```
+Queue full. Size: 3
+Offered D: false
+```
 
 ---
 
-**Example 2: SynchronousQueue Direct Handoff**
+## 8. `LinkedBlockingQueue`
+
+### Definitions
+
+**Core Definition:** `LinkedBlockingQueue` is an optionally bounded blocking queue based on linked nodes.
+
+**Technical Definition:** "An optionally-bounded blocking queue based on linked nodes. This queue orders elements FIFO (first-in-first-out). The head of the queue is that element that has been on the queue the longest time. The tail of the queue is that element that has been on the queue the shortest time. New elements are inserted at the tail of the queue, and the queue retrieval operations obtain elements at the head of the queue. Linked queues typically have higher throughput than array-based queues but less predictable performance in most concurrent applications. The optional capacity bound constructor argument serves as a way to prevent excessive queue expansion. The capacity, if unspecified, is equal to `Integer.MAX_VALUE`"【10†L9-L18】.
+
+**Beginner-Friendly Explanation:** `LinkedBlockingQueue` is like `ArrayBlockingQueue` but with linked nodes instead of an array. It can be bounded (with a maximum size) or unbounded (grows as needed). Higher throughput than array-based queues.
+
+### Annotated Code Example
 
 ```java
+// File: LinkedBlockingQueueDemo.java
+import java.util.concurrent.*;
+
+public class LinkedBlockingQueueDemo {
+    public static void main(String[] args) throws InterruptedException {
+        // Bounded queue with capacity 100
+        BlockingQueue<Integer> queue = new LinkedBlockingQueue<>(100);
+
+        queue.put(1);
+        queue.put(2);
+        queue.put(3);
+
+        System.out.println("Take: " + queue.take());  // 1
+        System.out.println("Take: " + queue.take());  // 2
+    }
+}
+```
+
+**Expected Output:**
+```
+Take: 1
+Take: 2
+```
+
+---
+
+## 9. `PriorityBlockingQueue`
+
+### Definitions
+
+**Core Definition:** `PriorityBlockingQueue` is an unbounded blocking queue that uses the same ordering rules as `PriorityQueue`.
+
+**Technical Definition:** "An unbounded blocking queue that uses the same ordering rules as class `PriorityQueue` and supplies blocking retrieval operations. While this queue is logically unbounded, attempted additions may fail due to resource exhaustion (causing `OutOfMemoryError`). This class does not permit `null` elements. A priority queue relying on natural ordering also does not permit insertion of non-comparable objects"【11†L9-L15】.
+
+**Beginner-Friendly Explanation:** `PriorityBlockingQueue` is like a hospital emergency room — patients with more urgent conditions are treated first, regardless of arrival order. It's thread-safe and blocking.
+
+### Annotated Code Example
+
+```java
+// File: PriorityBlockingQueueDemo.java
+import java.util.concurrent.*;
+
+public class PriorityBlockingQueueDemo {
+    public static void main(String[] args) {
+        PriorityBlockingQueue<Integer> queue = new PriorityBlockingQueue<>();
+        queue.add(30);
+        queue.add(10);
+        queue.add(20);
+
+        System.out.println(queue.poll());  // 10 (smallest first)
+        System.out.println(queue.poll());  // 20
+        System.out.println(queue.poll());  // 30
+    }
+}
+```
+
+**Expected Output:**
+```
+10
+20
+30
+```
+
+---
+
+## 10. `SynchronousQueue`
+
+### Definitions
+
+**Core Definition:** `SynchronousQueue` is a blocking queue where each insert operation must wait for a corresponding remove operation by another thread.
+
+**Technical Definition:** "A blocking queue in which each insert operation must wait for a corresponding remove operation by another thread, and vice versa. A synchronous queue does not have any internal capacity, not even a capacity of one. You cannot peek at a synchronous queue because an element is only present when you try to remove it; you cannot insert an element (using any method) unless another thread is trying to remove it; you cannot iterate as there is nothing to iterate"【12†L9-L14】. "This queue does not permit `null` elements"【12†L16-L17】.
+
+**Beginner-Friendly Explanation:** `SynchronousQueue` is like a handshake between two people. The producer must wait until the consumer is ready to receive, and the consumer must wait until the producer is ready to give. There is no storage — it's a direct handoff.
+
+### Annotated Code Example
+
+```java
+// File: SynchronousQueueDemo.java
 import java.util.concurrent.*;
 
 public class SynchronousQueueDemo {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         SynchronousQueue<String> queue = new SynchronousQueue<>();
+
+        // Producer
+        Thread producer = new Thread(() -> {
+            try {
+                System.out.println("Producer: putting...");
+                queue.put("Hello");
+                System.out.println("Producer: put completed");
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        });
+
+        // Consumer
+        Thread consumer = new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+                System.out.println("Consumer: taking...");
+                String value = queue.take();
+                System.out.println("Consumer: took " + value);
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        });
+
+        producer.start();
+        consumer.start();
+        producer.join();
+        consumer.join();
+    }
+}
+```
+
+**Expected Output:**
+```
+Producer: putting...
+Consumer: taking...
+Consumer: took Hello
+Producer: put completed
+```
+
+---
+
+## 11. `DelayQueue`
+
+### Definitions
+
+**Core Definition:** `DelayQueue` is an unbounded blocking queue of `Delayed` elements, where an element can only be taken when its delay has expired.
+
+**Technical Definition:** "An unbounded blocking queue of Delayed elements, in which an element can only be taken when its delay has expired. The head of the queue is that Delayed element whose delay expired furthest in the past. If no delay has expired there is no head and poll will return null. Expiration occurs when an element's `getDelay(TimeUnit.NANOSECONDS)` method returns a value less than or equal to zero. Even though unexpired elements cannot be removed using take or poll, they are otherwise treated as normal elements. For example, the size method returns the count of both expired and unexpired elements. This queue does not permit null elements"【13†L9-L18】.
+
+**Beginner-Friendly Explanation:** `DelayQueue` is like a to-do list where each task has a "not before" time. You can only take a task when its time has come. Tasks that are not yet ready stay in the queue.
+
+### Annotated Code Example
+
+```java
+// File: DelayQueueDemo.java
+import java.util.concurrent.*;
+
+public class DelayQueueDemo {
+    static class DelayedTask implements Delayed {
+        private final String name;
+        private final long expireTime;
+
+        DelayedTask(String name, long delayMs) {
+            this.name = name;
+            this.expireTime = System.currentTimeMillis() + delayMs;
+        }
+
+        @Override
+        public long getDelay(TimeUnit unit) {
+            return unit.convert(expireTime - System.currentTimeMillis(),
+                TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public int compareTo(Delayed o) {
+            return Long.compare(this.expireTime,
+                ((DelayedTask) o).expireTime);
+        }
+
+        @Override
+        public String toString() { return name; }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        DelayQueue<DelayedTask> queue = new DelayQueue<>();
+        queue.put(new DelayedTask("Task-2s", 2000));
+        queue.put(new DelayedTask("Task-1s", 1000));
+        queue.put(new DelayedTask("Task-3s", 3000));
+
+        while (!queue.isEmpty()) {
+            DelayedTask task = queue.take();  // Blocks until delay expires
+            System.out.println("Taken: " + task + " at " +
+                System.currentTimeMillis());
+        }
+    }
+}
+```
+
+**Expected Output (timestamps vary):**
+```
+Taken: Task-1s at 1700000001000
+Taken: Task-2s at 1700000002000
+Taken: Task-3s at 1700000003000
+```
+
+---
+
+## 12. `LinkedTransferQueue`
+
+### Definitions
+
+**Core Definition:** `LinkedTransferQueue` is an unbounded `TransferQueue` based on linked nodes, supporting both blocking and non-blocking transfer operations.
+
+**Technical Definition:** "An unbounded `TransferQueue` based on linked nodes. This queue orders elements FIFO (first-in-first-out) with respect to any given producer. The head of the queue is that element that has been on the queue the longest time for some producer. The tail of the queue is that element that has been on the queue the shortest time for some producer"【14†L9-L14】. "Beware that, unlike in most collections, the size method is NOT a constant-time operation"【14†L16-L17】.
+
+**Beginner-Friendly Explanation:** `LinkedTransferQueue` combines the features of `LinkedBlockingQueue` and `SynchronousQueue`. It supports both regular queue operations and direct handoff (transfer) operations.
+
+### Annotated Code Example
+
+```java
+// File: LinkedTransferQueueDemo.java
+import java.util.concurrent.*;
+
+public class LinkedTransferQueueDemo {
+    public static void main(String[] args) throws InterruptedException {
+        LinkedTransferQueue<String> queue = new LinkedTransferQueue<>();
+
+        // Producer
+        Thread producer = new Thread(() -> {
+            try {
+                System.out.println("Producer: transferring...");
+                queue.transfer("Hello");  // Blocks until consumed
+                System.out.println("Producer: transfer completed");
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        });
+
+        // Consumer
+        Thread consumer = new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+                System.out.println("Consumer: taking...");
+                String value = queue.take();
+                System.out.println("Consumer: took " + value);
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        });
+
+        producer.start();
+        consumer.start();
+        producer.join();
+        consumer.join();
+    }
+}
+```
+
+**Expected Output:**
+```
+Producer: transferring...
+Consumer: taking...
+Consumer: took Hello
+Producer: transfer completed
+```
+
+---
+
+## 13. `ConcurrentSkipListMap`
+
+### Definitions
+
+**Core Definition:** `ConcurrentSkipListMap` is a scalable concurrent `ConcurrentNavigableMap` implementation based on a skip list.
+
+**Technical Definition:** "A scalable concurrent `ConcurrentNavigableMap` implementation. The map is sorted according to the natural ordering of its keys, or by a `Comparator` provided at map creation time, depending on which constructor is used. This class implements a concurrent variant of SkipLists providing expected average log(n) time cost for the containsKey, get, put and remove operations and their variants. Insertion, removal, update, and access operations safely execute concurrently by multiple threads"【15†L9-L16】.
+
+**Beginner-Friendly Explanation:** `ConcurrentSkipListMap` is a sorted, thread-safe map. It's like a phone book that stays sorted alphabetically and can be updated by multiple people simultaneously.
+
+### Annotated Code Example
+
+```java
+// File: ConcurrentSkipListMapDemo.java
+import java.util.concurrent.*;
+
+public class ConcurrentSkipListMapDemo {
+    public static void main(String[] args) {
+        ConcurrentSkipListMap<Integer, String> map = new ConcurrentSkipListMap<>();
+        map.put(3, "C");
+        map.put(1, "A");
+        map.put(2, "B");
+
+        System.out.println("First: " + map.firstEntry());   // 1=A
+        System.out.println("Last: " + map.lastEntry());     // 3=C
+        System.out.println("HeadMap: " + map.headMap(3));   // {1=A, 2=B}
+        System.out.println("Ceiling: " + map.ceilingEntry(2));  // 2=B
+    }
+}
+```
+
+**Expected Output:**
+```
+First: 1=A
+Last: 3=C
+HeadMap: {1=A, 2=B}
+Ceiling: 2=B
+```
+
+---
+
+## 14. `ConcurrentSkipListSet`
+
+### Definitions
+
+**Core Definition:** `ConcurrentSkipListSet` is a scalable concurrent `NavigableSet` implementation based on a `ConcurrentSkipListMap`.
+
+**Technical Definition:** "A scalable concurrent `NavigableSet` implementation based on a `ConcurrentSkipListMap`. The elements of the set are kept sorted according to their natural ordering, or by a `Comparator` provided at set creation time, depending on which constructor is used. This implementation provides expected average log(n) time cost for the contains, add, and remove operations and their variants. Insertion, removal, and access operations safely execute concurrently by multiple threads"【16†L9-L15】.
+
+**Beginner-Friendly Explanation:** `ConcurrentSkipListSet` is a sorted, thread-safe set. It's like a sorted guest list that multiple people can update at once.
+
+### Annotated Code Example
+
+```java
+// File: ConcurrentSkipListSetDemo.java
+import java.util.concurrent.*;
+
+public class ConcurrentSkipListSetDemo {
+    public static void main(String[] args) {
+        ConcurrentSkipListSet<Integer> set = new ConcurrentSkipListSet<>();
+        set.add(30);
+        set.add(10);
+        set.add(20);
+
+        System.out.println("Set: " + set);  // [10, 20, 30]
+        System.out.println("First: " + set.first());  // 10
+        System.out.println("Ceiling(15): " + set.ceiling(15));  // 20
+    }
+}
+```
+
+**Expected Output:**
+```
+Set: [10, 20, 30]
+First: 10
+Ceiling(15): 20
+```
+
+---
+
+## 15. Concurrent Collections Best Practices
+
+### Definitions
+
+**Core Definition:** Concurrent collections best practices are guidelines for choosing and using thread-safe collections correctly and efficiently.
+
+**Technical Definition:** Best practices derive from authoritative sources including the SEI CERT Oracle Coding Standard for Java and Oracle's Java documentation. Key principles include choosing the right collection for the workload, avoiding compound operations that require external synchronization, and understanding the consistency guarantees of each implementation.
+
+**Beginner-Friendly Explanation:** Best practices help you pick the right tool for the job. Using the wrong concurrent collection can lead to poor performance, bugs, or both.
+
+### Key Best Practices Table
+
+| Practice | Description | Source |
+|----------|-------------|--------|
+| Choose the right collection | Use `ConcurrentHashMap` for maps, `CopyOnWriteArrayList` for read-heavy lists, `BlockingQueue` for producer-consumer. | Oracle |
+| Understand weakly consistent iterators | Iterators reflect state at some point and never throw `ConcurrentModificationException`. | Oracle |
+| Avoid compound operations without atomic methods | Use `putIfAbsent`, `computeIfAbsent`, `merge` instead of check-then-act. | Best practice |
+| Prefer `ConcurrentHashMap` over `Hashtable` | `ConcurrentHashMap` offers better scalability and is the recommended replacement. | Oracle |
+| Do not synchronize on concurrent collections | Use the collection's own atomic methods instead. | Best practice |
+| Use `BlockingQueue` for producer-consumer | Eliminates need for `wait()`/`notify()`. | Oracle |
+| Consider memory overhead of `CopyOnWriteArrayList` | Writes copy the entire array; use only for read-heavy scenarios. | Oracle |
+| Use `ConcurrentSkipListMap` for sorted concurrent maps | Provides ordered traversal with concurrent access. | Oracle |
+| Use `LinkedTransferQueue` for direct handoff | Combines queue and synchronous handoff semantics. | Oracle |
+| Test with realistic concurrency levels | Concurrent bugs may not appear under light load. | Best practice |
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ConcurrentCollectionsBestPractices.java
+import java.util.concurrent.*;
+
+public class ConcurrentCollectionsBestPractices {
+    public static void main(String[] args) throws InterruptedException {
+        // BEST PRACTICE: Use ConcurrentHashMap for maps
+        ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+
+        // BEST PRACTICE: Use atomic operations, not check-then-act
+        map.computeIfAbsent("counter", k -> 0);
+        map.merge("counter", 1, Integer::sum);
+        System.out.println("Counter: " + map.get("counter"));  // 1
+
+        // BEST PRACTICE: Use BlockingQueue for producer-consumer
+        BlockingQueue<String> queue = new LinkedBlockingQueue<>(10);
 
         Thread producer = new Thread(() -> {
             try {
-                System.out.println("Producer: offering A");
-                queue.put("A"); // blocks until consumer takes
-                System.out.println("Producer: A handed off");
-
-                System.out.println("Producer: offering B");
-                queue.put("B");
-                System.out.println("Producer: B handed off");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+                for (int i = 0; i < 5; i++) {
+                    queue.put("Item-" + i);
+                }
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
 
         Thread consumer = new Thread(() -> {
             try {
-                Thread.sleep(500);
-                System.out.println("Consumer: taking");
-                String value = queue.take(); // takes A
-                System.out.println("Consumer: got " + value);
-
-                Thread.sleep(500);
-                System.out.println("Consumer: taking again");
-                String value2 = queue.take(); // takes B
-                System.out.println("Consumer: got " + value2);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+                for (int i = 0; i < 5; i++) {
+                    System.out.println("Consumed: " + queue.take());
+                }
+            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         });
 
         producer.start();
         consumer.start();
+        producer.join();
+        consumer.join();
+
+        // BEST PRACTICE: Use CopyOnWriteArrayList for read-heavy lists
+        CopyOnWriteArrayList<String> listeners = new CopyOnWriteArrayList<>();
+        listeners.add("Listener-1");
+        listeners.add("Listener-2");
+        for (String listener : listeners) {
+            System.out.println("Notifying: " + listener);
+        }
     }
 }
 ```
 
-**Expected Output**
-
+**Expected Output:**
 ```
-Producer: offering A
-Consumer: taking
-Consumer: got A
-Producer: A handed off
-Producer: offering B
-Consumer: taking again
-Consumer: got B
-Producer: B handed off
+Counter: 1
+Consumed: Item-0
+Consumed: Item-1
+Consumed: Item-2
+Consumed: Item-3
+Consumed: Item-4
+Notifying: Listener-1
+Notifying: Listener-2
 ```
-
-**Why This Output Occurs**
-
-`SynchronousQueue` has no internal capacity. The producer's `put("A")` blocks until the consumer calls `take()`. The handoff is direct: the producer's "A handed off" message appears only after the consumer has received "A". This is the rendezvous pattern.
 
 ### Real-World Cases
 
-- **Thread Pool Work Queues**: `ThreadPoolExecutor` uses `BlockingQueue` implementations to hold pending tasks.
-- **Log Processing Pipelines**: Log producers write to a blocking queue; log writers consume asynchronously.
-- **Data Ingestion Systems**: Sensor data is queued for processing, with backpressure preventing overload.
-- **CSP-Style Message Passing**: `SynchronousQueue` implements rendezvous channels similar to Go's unbuffered channels.
+- **Web Servers:** `ConcurrentHashMap` for session caches, `BlockingQueue` for request handling.
+- **Event Systems:** `CopyOnWriteArrayList` for listener registries.
+- **Task Scheduling:** `PriorityBlockingQueue` for priority-based task execution.
+- **Real-Time Systems:** `DelayQueue` for scheduled tasks.
 
 ---
 
-## Core Concept 4: Lock-Free Non-Blocking Structures — Concurrent Queues
+## References Links
 
-### Definitions
-
-**Core Definition**
-`ConcurrentLinkedQueue<E>` and `ConcurrentLinkedDeque<E>` are unbounded thread-safe queues based on linked nodes that use lock-free algorithms (compare-and-swap) for insertion, removal, and access.
-
-**Technical Definition**
-`ConcurrentLinkedQueue` is an unbounded thread-safe queue based on linked nodes. This queue orders elements FIFO (first-in-first-out). This implementation employs an efficient non-blocking algorithm based on the Michael-Scott algorithm. `ConcurrentLinkedDeque` is an unbounded concurrent deque based on linked nodes; concurrent insertion, removal, and access operations execute safely across multiple threads. Unlike most collections, the `size` method is **not** a constant-time operation; it traverses the queue to determine the current element count, and may report inaccurate results if the collection is modified during traversal. Bulk operations (`addAll`, `removeIf`, `forEach`) are not guaranteed to be atomic.
-
-**Beginner-Friendly Explanation**
-A lock-free queue is like a busy restaurant with no hostess and no lock on the door. Customers (threads) use a simple protocol: to add themselves to the end of the line, they find the last person and try to stand behind them. If someone else got there first, they try again. No one ever blocks anyone else—everyone is always making progress. This is what "lock-free" means: even if one thread is delayed, others continue.
-
-### Purposes
-
-- To provide thread-safe queues without the overhead and contention of locks.
-- To support high-throughput, low-latency inter-thread communication.
-- To implement non-blocking algorithms where no thread can be blocked by another.
-- To serve as building blocks for more complex lock-free data structures.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```java
-// ConcurrentLinkedQueue: FIFO, lock-free
-ConcurrentLinkedQueue<E> queue = new ConcurrentLinkedQueue<>();
-queue.add(E e);       // inserts at tail
-queue.offer(E e);     // same as add
-E poll();             // retrieves and removes head; returns null if empty
-E peek();             // retrieves but does not remove head; returns null if empty
-
-// ConcurrentLinkedDeque: double-ended, lock-free
-ConcurrentLinkedDeque<E> deque = new ConcurrentLinkedDeque<>();
-deque.addFirst(E e);  // insert at front
-deque.addLast(E e);   // insert at back
-deque.pollFirst();    // remove from front
-deque.pollLast();     // remove from back
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|-----------|-------------|
-| `add` / `offer` | Inserts element at tail using CAS loop |
-| `poll` | Retrieves and removes head using CAS; returns `null` if empty |
-| `peek` | Retrieves head without removal; returns `null` if empty |
-| `addFirst` / `addLast` | Deque operations for front/back insertion |
-| `pollFirst` / `pollLast` | Deque operations for front/back removal |
-
-**Syntax Rules**
-
-1. `ConcurrentLinkedQueue` and `ConcurrentLinkedDeque` do **not** permit `null` elements.
-2. `size()` is **not** a constant-time operation; it traverses the entire queue.
-3. Iterators are weakly consistent and never throw `ConcurrentModificationException`.
-4. Bulk operations (`addAll`, `removeIf`, `forEach`) are not guaranteed to be atomic.
-5. `ConcurrentLinkedDeque` supports both FIFO and LIFO access patterns.
-6. Lock-free algorithms use CAS (compare-and-swap) and volatile fields instead of locks.
-
-**Constraints and Limitations**
-
-- `size()` is O(n), not O(1); avoid calling it in performance-critical loops.
-- Bulk operations are not atomic; concurrent modifications may result in partial visibility.
-- Lock-free algorithms may retry under high contention, potentially increasing CPU usage.
-- No blocking operations; consumers must poll or use a separate blocking mechanism.
-
-### Annotated Code Examples
-
-**Example 1: Lock-Free Event Logger**
-
-```java
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-public class LockFreeLogger {
-    private final ConcurrentLinkedQueue<String> logQueue =
-        new ConcurrentLinkedQueue<>();
-
-    public void log(String message) {
-        logQueue.offer(message); // lock-free insert
-    }
-
-    public void drainLogs() {
-        String message;
-        while ((message = logQueue.poll()) != null) {
-            System.out.println("LOG: " + message);
-        }
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        LockFreeLogger logger = new LockFreeLogger();
-
-        // Multiple producers logging concurrently
-        Runnable producer = () -> {
-            for (int i = 0; i < 100; i++) {
-                logger.log(Thread.currentThread().getName() + " - " + i);
-            }
-        };
-
-        Thread t1 = new Thread(producer, "Worker-1");
-        Thread t2 = new Thread(producer, "Worker-2");
-        t1.start(); t2.start();
-        t1.join(); t2.join();
-
-        System.out.println("Total logs: " + logger.logQueue.size()); // O(n) traversal
-        logger.drainLogs();
-    }
-}
-```
-
-**Expected Output (order may vary)**
-
-```
-Total logs: 200
-LOG: Worker-1 - 0
-LOG: Worker-2 - 0
-LOG: Worker-1 - 1
-...
-```
-
-**Why This Output Occurs**
-
-`offer()` is lock-free and concurrent, so both workers can log simultaneously without blocking. `size()` traverses the entire queue (O(n)) to count elements. `poll()` drains the queue in FIFO order. The lock-free nature ensures that no worker is ever blocked by another.
-
----
-
-**Example 2: ConcurrentLinkedDeque as Work-Stealing Deque**
-
-```java
-import java.util.concurrent.ConcurrentLinkedDeque;
-
-public class WorkStealingDeque {
-    private final ConcurrentLinkedDeque<Runnable> deque =
-        new ConcurrentLinkedDeque<>();
-
-    // Owner pushes work to the front (LIFO for owner)
-    public void pushOwnWork(Runnable task) {
-        deque.addFirst(task);
-    }
-
-    // Owner pops work from the front (LIFO: most recent first)
-    public Runnable popOwnWork() {
-        return deque.pollFirst();
-    }
-
-    // Thief steals work from the back (FIFO: oldest first)
-    public Runnable stealWork() {
-        return deque.pollLast();
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        WorkStealingDeque ws = new WorkStealingDeque();
-
-        // Owner pushes tasks
-        for (int i = 1; i <= 5; i++) {
-            final int id = i;
-            ws.pushOwnWork(() -> System.out.println("Task " + id));
-        }
-
-        // Owner pops from front (LIFO: gets Task 5 first)
-        System.out.println("Owner pops: ");
-        ws.popOwnWork().run(); // Task 5
-
-        // Thief steals from back (FIFO: gets Task 1 first)
-        System.out.println("Thief steals: ");
-        ws.stealWork().run(); // Task 1
-    }
-}
-```
-
-**Expected Output**
-
-```
-Owner pops:
-Task 5
-Thief steals:
-Task 1
-```
-
-**Why This Output Occurs**
-
-The owner pushes tasks to the front (LIFO) and pops from the front, retrieving the most recently added task first (Task 5). A thief steals from the back (FIFO), retrieving the oldest task first (Task 1). This is the work-stealing pattern used by `ForkJoinPool`: owners work on the most recent tasks (likely still in cache), while thieves steal the oldest tasks to balance load.
-
-### Real-World Cases
-
-- **Logging Frameworks**: Async loggers use `ConcurrentLinkedQueue` to decouple log producers from writers.
-- **Event Buses**: Lock-free event queues for high-frequency event delivery.
-- **Task Scheduling**: Work-stealing deques in fork-join frameworks.
-- **Message Brokers**: Non-blocking inter-thread message passing in high-throughput systems.
-
----
-
-## Comparison Summary
-
-| Collection | Thread-Safety Mechanism | Bounded? | Null? | Iterator | Best For |
-|------------|------------------------|----------|-------|----------|----------|
-| `ConcurrentHashMap` | Lock striping + CAS | No | No | Weakly consistent | Concurrent key-value storage |
-| `CopyOnWriteArrayList` | Copy-on-write | No | Yes | Snapshot | Read-heavy lists |
-| `ArrayBlockingQueue` | Single lock + conditions | Yes | No | Weakly consistent | Fixed-capacity pipelines |
-| `LinkedBlockingQueue` | Two locks (put/take) | Optional | No | Weakly consistent | General producer-consumer |
-| `SynchronousQueue` | Lock-free + CAS | Zero | No | None | Direct handoff |
-| `ConcurrentLinkedQueue` | Lock-free CAS | No | No | Weakly consistent | High-throughput non-blocking |
-| `ConcurrentLinkedDeque` | Lock-free CAS | No | No | Weakly consistent | Work-stealing deques |
-
----
-
-## References
-
-- ConcurrentHashMap (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html
-- CopyOnWriteArrayList (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/CopyOnWriteArrayList.html
-- ArrayBlockingQueue (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ArrayBlockingQueue.html
-- LinkedBlockingQueue (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/LinkedBlockingQueue.html
-- SynchronousQueue (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/SynchronousQueue.html
-- ConcurrentLinkedQueue (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentLinkedQueue.html
-- ConcurrentLinkedDeque (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ConcurrentLinkedDeque.html
-- Introduction to Lock Striping (Baeldung) - https://www.baeldung.com/java-lock-stripping
-- BlockingQueue (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/BlockingQueue.html
-- Java Concurrency in Practice (Chapter 5: Building Blocks) - https://www.oreilly.com/library/view/java-concurrency-in/0321349601/
-- Michael, Maged M., and Michael L. Scott. "Simple, Fast, and Practical Non-Blocking and Blocking Concurrent Queue Algorithms." PODC 1996 - https://www.cs.rochester.edu/~scott/papers/1996_PODC_queues.pdf
-- Goetz, Brian. "Java Theory and Practice: Concurrent Collections Classes." IBM developerWorks, 2003. - https://developer.ibm.com/articles/j-jtp07233/
+- Package java.util.concurrent — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html
+- Class ConcurrentHashMap — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html
+- Class ConcurrentLinkedQueue — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentLinkedQueue.html
+- Class ConcurrentLinkedDeque — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html
+- Class CopyOnWriteArrayList — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CopyOnWriteArrayList.html
+- Class CopyOnWriteArraySet — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CopyOnWriteArraySet.html
+- Interface BlockingQueue — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/BlockingQueue.html
+- Class ArrayBlockingQueue — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ArrayBlockingQueue.html
+- Class LinkedBlockingQueue — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/LinkedBlockingQueue.html
+- Class PriorityBlockingQueue — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/PriorityBlockingQueue.html
+- Class SynchronousQueue — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/SynchronousQueue.html
+- Class DelayQueue — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/DelayQueue.html
+- Class LinkedTransferQueue — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/LinkedTransferQueue.html
+- Class ConcurrentSkipListMap — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentSkipListMap.html
+- Class ConcurrentSkipListSet — Java Platform SE 8 API Specification - https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentSkipListSet.html
+- Concurrent Collections in Java — Baeldung - https://www.baeldung.com/java-concurrent-collections
+- ConcurrentHashMap in Java — Baeldung - https://www.baeldung.com/java-concurrent-map
+- Guide to BlockingQueue — Baeldung - https://www.baeldung.com/java-blocking-queue
+- CopyOnWriteArrayList — Baeldung - https://www.baeldung.com/java-copy-on-write-arraylist
+- ConcurrentSkipListMap — Baeldung - https://www.baeldung.com/java-concurrent-skip-list-map
+- 14. Concurrency (CON) — SEI CERT Oracle Coding Standard for Java - https://wiki.sei.cmu.edu/confluence/display/java/14.+Concurrency+%28CON%29

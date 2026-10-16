@@ -1,1271 +1,1226 @@
-# Java Variables and Constants: A Comprehensive Programming Cheat Sheet
+# Java Variables: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** Java variables are named storage locations in memory that hold values of a specified data type. Constants are variables whose values cannot be changed after initialization. Together, they form the fundamental mechanism by which Java programs store, manipulate, and share state.
+**Core Definition:** A variable is a named container that holds a value of a specific data type during program execution. In Java, variables are strongly typed, meaning every variable must be declared with a type before use.
 
-**Technical Definition:** According to the Java Language Specification, a _variable_ is a storage location and has an associated _type_, sometimes called its _compile-time type_. Every variable must be declared before use. A _final variable_ may only be assigned once; if it is also of primitive type or type `String` and initialized with a constant expression, it is termed a _constant variable_.
+**Technical Definition:** "A variable is a container that holds a value while a Java program is running. A variable is assigned a data type that designates the type and quantity of value it can hold". "The Java programming language defines the following kinds of variables: Instance Variables (Non-Static Fields), Class Variables (Static Fields), Local Variables, and Parameters". "Every variable in Java has a data type. The data type determines the values that the variable can hold, the operations that can be performed on the variable, and the amount of memory allocated".
 
-**Beginner-Friendly Explanation:** Think of a variable as a labeled box where your program keeps information. The label is the variable name, the size of the box is determined by the data type, and the contents are the value. A constant is a box that is sealed shut after you put something in it—you can look inside, but you can never swap the contents.
+**Beginner-Friendly Explanation:** Think of a variable as a labelled box where you can store things. The label is the variable name, and the type of box determines what you can put inside — a box labelled "int" can only hold whole numbers, a box labelled "String" can only hold text. You can put something in the box (assignment), look inside (access), or replace what's in the box (reassignment). Java is strict: once you declare a box as "int", you can't put a "String" in it.
 
 ### Key Characteristics
 
-- **Statically Typed:** Every variable’s type is known at compile time; type mismatches are compile-time errors.
-- **Explicit Declaration Required:** Variables must be declared before they can be used.
-- **Scope Determines Visibility:** Where a variable is declared determines which parts of the program can access it.
-- **Default Values for Fields:** Instance and static variables receive default values; local variables do not.
-- **Finality for Immutability:** The `final` keyword prevents reassignment, though the referenced object (if any) may remain mutable.
+- **Strongly Typed:** Every variable must have a declared type.
+- **Named:** Variables are identified by valid Java identifiers.
+- **Scoped:** Variables have a limited region of visibility.
+- **Typed:** The type determines the size, range, and operations.
+- **Stored:** Variables are stored on the stack (local) or heap (instance/static).
+- **Initialised:** Variables must be initialised before use (local variables explicitly; others get defaults).
+- **Immutable Option:** `final` variables cannot be reassigned after initialisation.
+- **Type-Inferred Option:** `var` (Java 10+) infers the type from the initialiser.
 
 ### Prerequisites
 
-Before mastering variables and constants, you should understand:
-
-- Basic Java program structure (classes, methods, `main`)
-- Primitive data types and reference types
-- Compilation and execution workflow of Java programs
-- Basic object-oriented concepts (classes, instances, fields)
+- Basic understanding of Java syntax
+- Familiarity with data types (primitives and references)
+- Knowledge of classes and methods
+- Understanding of scope and lifetime concepts
 
 ### Related Programming Areas
 
-| Area                       | Explanation                                                                                                              |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **Memory Management**      | Variables occupy stack or heap memory; understanding this clarifies lifetime and garbage collection behavior.            |
-| **Object-Oriented Design** | Instance variables define object state; static variables define class-level state.                                       |
-| **Concurrency**            | Static and instance fields shared across threads require synchronization; final fields have safe publication guarantees. |
-| **API Design**             | Public constants communicate intent and prevent misuse; `public static final` fields are standard API practice.          |
-| **JVM Internals**          | Constant variables are inlined at compile time, affecting binary compatibility.                                          |
+- **Data Types:** Primitive types (`int`, `double`, `boolean`, etc.) and reference types.
+- **Methods:** Parameters are a special kind of local variable.
+- **Classes and Objects:** Instance and static variables are members of classes.
+- **Memory Management:** Stack vs heap allocation.
+- **Immutability:** `final` variables and constants.
+
+### Core Concepts / Features
 
 ---
 
-## Core Concepts / Key Features
+## 1. Variables
 
-### 1. Variable Lifecycle
+### Definitions
 
-#### Definitions
+**Core Definition:** A variable is a named storage location in memory that holds a value of a specific type.
 
-**Core Definition:** The variable lifecycle encompasses the three sequential phases a variable undergoes: declaration, initialization, and assignment/reassignment.
+**Technical Definition:** "A variable is a container that holds a value while a Java program is running. A variable is assigned a data type that designates the type and quantity of value it can hold". "The Java programming language is statically-typed, which means that every variable must have a data type before it can be used".
 
-**Technical Definition:** Declaration introduces the variable name and type. Initialization is the first assignment that gives the variable a value. Reassignment updates an already-initialized variable (except `final` variables, which cannot be reassigned).
+**Beginner-Friendly Explanation:** A variable is like a labelled jar. The label is the name, the jar's shape is the type, and the contents are the value. You can label a jar "cookies" (int) and put cookies in it, but you can't put soup (String) in a cookie jar.
 
-**Beginner-Friendly Explanation:** First you announce that a box exists (declaration), then you put something in it for the first time (initialization), then you might replace what’s inside (reassignment).
+### Purposes
 
-###s
+- To store data values for use during program execution
+- To give meaningful names to values for readability
+- To allow values to be changed (mutability) or fixed (immutability)
+- To manage memory allocation for data
+- To enable data sharing between methods and objects
 
-##### Variable Declaration (Syntax and Data Types)
-
-**Definitions:**
-
-- **Core Definition:** Declaration creates a named variable of a specified type in the current scope.
-- **Technical Definition:** A local variable declaration statement consists of a type followed by a declarator list; each declarator may include an initializer.
-- **Beginner Explanation:** You tell Java the name of your box and what kind of things it can hold.
-
-**Purposes:**
-
-- **To** reserve memory space for storing a value.
-- **To** associate a human-readable name with a storage location.
-- **To** enforce type safety by specifying what values are permitted.
-
-**Syntax Structures and Rules:**
+### Syntax Rules and Structure
 
 **Complete General Syntax:**
 
-```
+```java
+// Declaration
 type variableName;
-type variableName = initialValue;
+
+// Initialization
+variableName = value;
+
+// Declaration + Initialization
+type variableName = value;
+
+// Multiple declarations
 type var1, var2, var3;
-type var1 = init1, var2 = init2;
 ```
 
 **Component Breakdown:**
 
-- `type`: A primitive type (`int`, `double`, `boolean`, etc.) or a reference type (`String`, `ArrayList`, or any class/interface).
-- `variableName`: A valid Java identifier following naming conventions.
-- `initialValue`: An expression assignable to the declared type.
-- `;`: Statement terminator.
+| Component | Description |
+|-----------|-------------|
+| `type` | The data type (e.g., `int`, `String`, `var`). |
+| `variableName` | A valid Java identifier. |
+| `value` | An expression compatible with the type. |
 
 **Syntax Rules:**
 
-- Variable names are case-sensitive.
-- Names must begin with a letter, `$`, or `_`; subsequent characters may include digits.
-- Reserved keywords cannot be used as variable names.
-- Convention: begin with a lowercase letter; use camelCase for multi-word names.
+- Variable names must be valid Java identifiers (letters, digits, `_`, `$`, not starting with a digit).
+- Variable names are case-sensitive (`count` and `Count` are different).
+- Variables must be declared before use.
+- Local variables must be explicitly initialised before use.
+- Instance and static variables get default values if not initialised.
 
 **Constraints and Limitations:**
 
-- Local variables have no default value and must be definitely assigned before use.
-- Instance and static variables receive default values if not explicitly initialized.
-- The type cannot be omitted (except with `var`, discussed later).
+- Reserved keywords (e.g., `int`, `class`, `if`) cannot be used as variable names.
+- Variable names cannot contain spaces or special characters (except `_` and `$`).
+- The type of a variable cannot be changed after declaration.
 
-**Annotated Code Examples:**
+### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Basic Variable Declaration and Initialization**
 
 ```java
-// Example 1: Declaring primitive and reference types
+// File: VariableBasicDemo.java
+public class VariableBasicDemo {
+    public static void main(String[] args) {
+        // Declaration
+        int age;
+
+        // Initialization
+        age = 25;
+
+        // Declaration + Initialization
+        String name = "Alice";
+
+        // Multiple variables of the same type
+        int x = 10, y = 20, z = 30;
+
+        // Using the variables
+        System.out.println("Name : " + name);    // Name: Alice
+        System.out.println("Age  : " + age);      // Age: 25
+        System.out.println("Sum  : " + (x + y + z));  // Sum: 60
+    }
+}
+```
+
+**Expected Output:**
+```
+Name : Alice
+Age  : 25
+Sum  : 60
+```
+
+**Step-by-Step Explanation:**
+
+1. `int age;` declares a variable of type `int` without initialising it.
+2. `age = 25;` assigns the value `25` to `age`.
+3. `String name = "Alice";` declares and initialises a `String` variable.
+4. `int x = 10, y = 20, z = 30;` declares and initialises three `int` variables.
+5. The variables are used in `System.out.println()` statements.
+
+### Real-World Cases
+
+- **Configuration Values:** Storing database URLs, port numbers, and API keys.
+- **User Input:** Storing values entered by users.
+- **Computed Results:** Storing the output of calculations.
+- **State Tracking:** Storing the current state of an object or application.
+
+---
+
+## 2. Variable Declaration
+
+### Definitions
+
+**Core Definition:** Variable declaration is the statement that introduces a variable by specifying its type and name.
+
+**Technical Definition:** "A variable declaration specifies the type of the variable and its name". The declaration tells the compiler to reserve memory for the variable and associate it with the given name and type.
+
+**Beginner-Friendly Explanation:** Declaring a variable is like buying a new labelled box. You tell the compiler "I need a box for whole numbers, and I'll call it `count`." From that point on, the compiler knows about `count` and what kind of data it can hold.
+
+### Purposes
+
+- To introduce a new variable into the program
+- To allocate memory for the variable
+- To associate a name with a type
+- To enable type checking by the compiler
+
+### Syntax Rules and Structure
+
+```java
+type variableName;
+type variableName1, variableName2, ...;
+```
+
+**Syntax Rules:**
+
+- The type must be a valid Java type (primitive or reference).
+- The variable name must be a valid identifier.
+- Multiple variables of the same type can be declared in one statement, separated by commas.
+- Declaration without initialisation is allowed for instance and static variables (they get default values) but not for local variables.
+
+### Annotated Code Example
+
+```java
+// File: DeclarationDemo.java
 public class DeclarationDemo {
+    // Instance variables: declared without initialization
+    private int instanceCount;
+    private String instanceName;
+
+    // Static variable: declared without initialization
+    private static double staticValue;
+
     public static void main(String[] args) {
-        // Declaration without initialization (local variable)
-        int counter;              // Declares an int named counter
-        String message;           // Declares a String reference named message
+        // Local variable: must be initialized before use
+        int localVar = 10;
 
-        // Declaration with initialization
-        int maxSize = 100;        // Declares and initializes an int
-        double ratio = 3.14159;   // double literal
-        boolean isActive = true;  // boolean literal
-        char grade = 'A';         // char literal
+        // Multiple declarations
+        int a, b, c;
+        a = 1; b = 2; c = 3;
 
-        // Multiple declarations on one line
-        int x = 1, y = 2, z = 3;  // All initialized
-
-        System.out.println("maxSize: " + maxSize);
-        System.out.println("ratio: " + ratio);
-        System.out.println("isActive: " + isActive);
-        System.out.println("grade: " + grade);
-        System.out.println("x+y+z: " + (x + y + z));
+        System.out.println("Local: " + localVar);
+        System.out.println("Instance count: " + new DeclarationDemo().instanceCount);  // 0
+        System.out.println("Static value: " + staticValue);  // 0.0
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-maxSize: 100
-ratio: 3.14159
-isActive: true
-grade: A
-x+y+z: 6
+Local: 10
+Instance count: 0
+Static value: 0.0
 ```
 
-**Why This Output:** Each variable holds the literal value assigned to it. The `+` operator concatenates strings and numeric values; arithmetic is performed before concatenation due to parentheses.
+### Real-World Cases
 
-**Execution Flow:** The JVM allocates stack space for local variables, assigns the literal values, then executes `System.out.println` calls sequentially.
-
-**Real-World Case:** A banking application declares `double accountBalance;` and `String accountHolder;` to represent the essential state of a bank account object.
+- **Class Fields:** Declaring instance variables in a class.
+- **Method Locals:** Declaring temporary variables in methods.
+- **Configuration:** Declaring static constants.
 
 ---
 
-##### Variable Initialization (First-Time Assignment)
+## 3. Variable Initialization
 
-**Definitions:**
+### Definitions
 
-- **Core Definition:** Initialization is the assignment of a value to a variable for the first time after declaration.
-- **Technical Definition:** A variable is initialized when an assignment expression targets it while it is definitely unassigned.
-- **Beginner Explanation:** Putting something in the box for the first time.
+**Core Definition:** Variable initialization is the process of assigning an initial value to a variable.
 
-**Purposes:**
+**Technical Definition:** "Initialization is the process of assigning a value to a variable for the first time". Local variables must be explicitly initialised before use; instance and static variables are automatically initialised to default values.
 
-- **To** provide a meaningful starting value for computation.
-- **To** satisfy Java’s definite assignment rules for local variables.
-- **To** establish object state in constructors.
+**Beginner-Friendly Explanation:** Initialization is putting something in the box for the first time. You can either put something in when you buy the box (declaration + initialization) or buy an empty box and fill it later (declaration then initialization).
 
-**Syntax Structures and Rules:**
+### Purposes
 
-**Complete General Syntax:**
+- To give a variable its starting value
+- To ensure the variable has a known value before use
+- To avoid `NullPointerException` and undefined behaviour
+- To set up the initial state of an object
 
+### Syntax Rules and Structure
+
+```java
+// Declaration + initialization
+int x = 10;
+
+// Separate initialization
+int y;
+y = 20;
+
+// Initialization with an expression
+int z = x + y;
+
+// Multiple initialization
+int a = 1, b = 2, c = 3;
 ```
-type variableName = expression;
-variableName = expression;   // standalone initialization
-```
+
+**Default Values Table:**
+
+| Type | Default Value |
+|------|---------------|
+| `byte`, `short`, `int`, `long` | `0` |
+| `float`, `double` | `0.0` |
+| `char` | `'\u0000'` |
+| `boolean` | `false` |
+| Reference types | `null` |
 
 **Syntax Rules:**
 
-- The initializer expression must be assignable to the declared type (assignment compatibility).
-- For local variables, the initializer must appear before any use of the variable.
-- Instance and static variables are initialized to default values automatically.
+- Local variables must be initialised before use; otherwise, a compile-time error occurs.
+- Instance and static variables are automatically initialised to default values.
+- Initialisation can happen at declaration or in a constructor/initialiser block.
 
-**Constraints and Limitations:**
-
-- Local variables are _not_ automatically initialized to default values.
-- The compiler performs _definite assignment analysis_ to ensure a variable cannot be read before initialization.
-
-**Annotated Code Examples:**
+### Annotated Code Example
 
 ```java
-// Example 2: Initialization requirements for local variables
+// File: InitializationDemo.java
 public class InitializationDemo {
+    // Instance variable: initialized at declaration
+    private int count = 10;
+
+    // Instance variable: initialized in constructor
+    private String name;
+
+    // Static variable: initialized at declaration
+    private static final double PI = 3.14159;
+
+    public InitializationDemo(String name) {
+        this.name = name;  // Initialized in constructor
+    }
+
     public static void main(String[] args) {
-        // Correct: initialized at declaration
-        int initializedAtDeclaration = 42;
-        System.out.println("Value: " + initializedAtDeclaration);
+        InitializationDemo demo = new InitializationDemo("Test");
+        System.out.println("Count: " + demo.count);   // 10
+        System.out.println("Name: " + demo.name);     // Test
+        System.out.println("PI: " + PI);               // 3.14159
 
-        // Correct: declared then initialized before use
-        int declaredThenInitialized;
-        declaredThenInitialized = 100;  // First assignment
-        System.out.println("Value: " + declaredThenInitialized);
-
-        // INCORRECT: This would cause a compile-time error
-        // int neverInitialized;
-        // System.out.println(neverInitialized);  // error: variable might not have been initialized
+        // Local variable: must be initialized
+        int local;
+        // System.out.println(local);  // Compile error!
+        local = 42;
+        System.out.println("Local: " + local);         // 42
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Value: 42
-Value: 100
+Count: 10
+Name: Test
+PI: 3.14159
+Local: 42
 ```
 
-**Why This Output:** Both variables are assigned before being read. The commented code would fail to compile because Java’s definite assignment rules forbid reading a local variable before initialization.
+### Real-World Cases
 
-**Real-World Case:** In a method that calculates shipping cost, a local `double totalCost;` must be initialized (e.g., `totalCost = basePrice + tax;`) before being returned.
+- **Object Construction:** Initialising fields in constructors.
+- **Configuration:** Initialising constants and configuration values.
+- **Computation:** Initialising accumulators and counters.
 
 ---
 
-##### Variable Assignment and Reassignment
+## 4. Variable Assignment
 
-**Definitions:**
+### Definitions
 
-- **Core Definition:** Assignment updates the value stored in a variable after it has already been initialized.
-- **Technical Definition:** An assignment expression stores the value of the right-hand operand into the variable denoted by the left-hand operand, provided the variable is not `final`.
-- **Beginner Explanation:** Replacing the contents of the box with something else.
+**Core Definition:** Variable assignment is the operation of changing the value stored in a variable.
 
-**Purposes:**
+**Technical Definition:** "Assignment is the process of storing a value in a variable". The assignment operator `=` evaluates the right-hand expression and stores the result in the left-hand variable.
 
-- **To** update program state as computation progresses.
-- **To** accumulate results (e.g., `sum += value`).
-- **To** implement counters and loops.
+**Beginner-Friendly Explanation:** Assignment is replacing what's in the box with something new. You can do this as many times as you want (unless the variable is `final`). The old value is discarded, and the new value takes its place.
 
-**Syntax Structures and Rules:**
+### Purposes
 
-**Complete General Syntax:**
+- To change the value of a variable during program execution
+- To update counters, accumulators, and state variables
+- To store computed results
+- To swap values between variables
 
-```
+### Syntax Rules and Structure
+
+```java
 variableName = expression;
-variableName op= expression;   // compound assignment
 ```
+
+**Compound Assignment Operators:**
+
+| Operator | Equivalent To |
+|----------|---------------|
+| `+=` | `x = x + y` |
+| `-=` | `x = x - y` |
+| `*=` | `x = x * y` |
+| `/=` | `x = x / y` |
+| `%=` | `x = x % y` |
+| `&=` | `x = x & y` |
+| `\|=` | `x = x \| y` |
+| `^=` | `x = x ^ y` |
+| `<<=` | `x = x << y` |
+| `>>=` | `x = x >> y` |
 
 **Syntax Rules:**
 
-- The variable must already be declared and initialized (for local variables).
-- The expression must be assignment-compatible with the variable’s type.
-- Compound operators (`+=`, `-=`, `*=`, `/=`, `%=`, etc.) perform the operation and assign the result.
+- The left-hand side must be a variable (not an expression).
+- The right-hand side must be compatible with the variable's type.
+- Compound assignment operators combine an operation with assignment.
+- The assignment expression itself has a value (the assigned value).
 
-**Constraints and Limitations:**
-
-- `final` variables cannot be reassigned.
-- Assignment expressions themselves have a value (the assigned value), enabling chaining like `a = b = c = 0;`.
-
-**Annotated Code Examples:**
+### Annotated Code Example
 
 ```java
-// Example 3: Reassignment and compound assignment
-public class ReassignmentDemo {
+// File: AssignmentDemo.java
+public class AssignmentDemo {
     public static void main(String[] args) {
-        int score = 10;
-        System.out.println("Initial score: " + score);
+        int x = 10;
 
-        score = 25;                    // Simple reassignment
-        System.out.println("After reassignment: " + score);
+        // Simple assignment
+        x = 20;
+        System.out.println("x = " + x);  // 20
 
-        score += 5;                    // Compound assignment: score = score + 5
-        System.out.println("After += 5: " + score);
+        // Compound assignment
+        x += 5;
+        System.out.println("x += 5: " + x);  // 25
 
-        score *= 2;                    // score = score * 2
-        System.out.println("After *= 2: " + score);
+        x -= 3;
+        System.out.println("x -= 3: " + x);  // 22
+
+        x *= 2;
+        System.out.println("x *= 2: " + x);  // 44
+
+        x /= 4;
+        System.out.println("x /= 4: " + x);  // 11
 
         // Chained assignment
         int a, b, c;
-        a = b = c = 99;                // Assigns 99 to c, then b, then a
-        System.out.println("a=" + a + " b=" + b + " c=" + c);
+        a = b = c = 100;
+        System.out.println("a=" + a + ", b=" + b + ", c=" + c);  // 100, 100, 100
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Initial score: 10
-After reassignment: 25
-After += 5: 30
-After *= 2: 60
-a=99 b=99 c=99
+x = 20
+x += 5: 25
+x -= 3: 22
+x *= 2: 44
+x /= 4: 11
+a=100, b=100, c=100
 ```
 
-**Why This Output:** Each assignment replaces the prior value. Compound operators combine arithmetic with assignment. Chained assignment works because the assignment expression evaluates to the assigned value.
+### Real-World Cases
 
-**Real-World Case:** A game loop tracks player score: `playerScore += pointsEarned;` after each enemy defeat.
+- **Counters:** `count++` or `count += 1`.
+- **Accumulators:** `total += price`.
+- **State Updates:** Changing object state.
+- **Swap Operations:** Exchanging values between variables.
 
 ---
 
-### 2. Types of Variables (By Scope and Memory)
+## 5. Local Variables
 
-#### Definitions
+### Definitions
 
-**Core Definition:** Java classifies variables by where they are declared and how they are stored in memory, which determines their scope, lifetime, and default values.
+**Core Definition:** Local variables are variables declared inside a method, constructor, or block, accessible only within that scope.
 
-**Technical Definition:** The JLS recognizes four kinds of variables: local variables, instance variables (non-static fields), static variables (class variables), and parameters.
+**Technical Definition:** "Local Variables: Similar to how an object stores its state in fields, a method will often store its temporary state in local variables. The syntax for declaring a local variable is similar to declaring a field (for example, `int count = 0;`). There is no special keyword designating a variable as local; that determination comes entirely from the location in which the variable is declared — which is between the opening and closing braces of a method. As such, local variables are only visible to the methods in which they are declared; they are not accessible from the rest of the class".
 
-**Beginner-Friendly Explanation:** Variables can live in different “neighborhoods” of your program—some belong to the whole class, some to individual objects, some just to a single method, and some are passed in as information.
+**Beginner-Friendly Explanation:** Local variables are like scratch paper used inside a single method. They're created when the method starts, used during the method, and thrown away when the method ends. No other method can see them.
 
-###s
+### Purposes
 
-##### Local Variables
+- To store temporary values during method execution
+- To hold intermediate results of computations
+- To store method parameters
+- To keep method state private to the method
 
-**Definitions:**
+### Syntax Rules and Structure
 
-- **Core Definition:** Local variables are variables declared inside a method, constructor, or block.
-- **Technical Definition:** A local variable is a variable declared by a local variable declaration statement within a block (§14.4).
-- **Beginner Explanation:** Temporary storage that exists only while a method or block is running.
-
-**Purposes:**
-
-- **To** hold temporary computation results within a method.
-- **To** avoid polluting class-level state with method-specific data.
-- **To** implement loop counters and intermediate values.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
+```java
+void myMethod() {
+    int localVar = 10;  // Local variable
+    // Only accessible within myMethod
+}
 ```
-type variableName = initializer;
-```
-
-(Declared inside a method, constructor, or block.)
 
 **Syntax Rules:**
 
-- Must be definitely assigned before use.
-- Cannot use access modifiers (`public`, `private`, etc.).
-- Scope extends from declaration to the end of the enclosing block.
+- Local variables are declared inside a method, constructor, or block.
+- They must be initialised before use.
+- They are not accessible outside their scope.
+- They cannot use access modifiers (`public`, `private`, etc.).
+- They are stored on the stack.
 
 **Constraints and Limitations:**
 
-- No default values; must be explicitly initialized.
-- Not accessible outside the declaring block.
-- Stored on the stack (for primitives) or stack reference to heap (for objects).
+- Local variables are not automatically initialised.
+- They cannot be `static`.
+- They are destroyed when the method/block exits.
 
-**Annotated Code Examples:**
+### Annotated Code Example
 
 ```java
-// Example 4: Local variable scope
+// File: LocalVariableDemo.java
 public class LocalVariableDemo {
     public static void main(String[] args) {
-        int outer = 10;  // Local to main
-
-        if (outer > 5) {
-            int inner = 20;  // Local to the if-block
-            System.out.println("Inner: " + inner);
-            System.out.println("Outer accessible: " + outer);
-        }
-
-        // System.out.println(inner);  // ERROR: inner not in scope
-
-        for (int i = 0; i < 3; i++) {  // i is local to the for loop
-            System.out.println("i = " + i);
-        }
-        // System.out.println(i);  // ERROR: i not in scope
-    }
-}
-```
-
-**Expected Output:**
-
-```
-Inner: 20
-Outer accessible: 10
-i = 0
-i = 1
-i = 2
-```
-
-**Why This Output:** `outer` is visible throughout `main`. `inner` is visible only inside the `if` block. `i` is visible only inside the `for` loop. Attempts to access them outside their scope would cause compile errors.
-
-**Real-World Case:** A method that parses a date string uses several local `int` variables (`year`, `month`, `day`) that are discarded once the method returns.
-
----
-
-##### Instance Variables (Non-Static Fields)
-
-**Definitions:**
-
-- **Core Definition:** Instance variables are fields declared without the `static` keyword; each object has its own copy.
-- **Technical Definition:** Non-static fields are members of a class that store object-specific state.
-- **Beginner Explanation:** Information that each individual object remembers about itself.
-
-**Purposes:**
-
-- **To** represent the unique state of each object.
-- **To** persist data across method calls on the same object.
-- **To** enable object-oriented encapsulation of state.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```
-accessModifier type variableName = initializer;
-```
-
-(Declared inside a class but outside any method.)
-
-**Syntax Rules:**
-
-- May have access modifiers (`private`, `public`, `protected`, or package-private).
-- Automatically initialized to default values if no initializer.
-- Accessed via `objectName.fieldName` or `this.fieldName` inside the class.
-
-**Constraints and Limitations:**
-
-- Default values: `0` for numeric types, `false` for `boolean`, `null` for references.
-- Stored on the heap as part of the object.
-- Lifetime tied to the object’s lifetime; eligible for garbage collection when the object is unreachable.
-
-**Annotated Code Examples:**
-
-```java
-// Example 5: Instance variables
-public class Bicycle {
-    // Instance variables (each Bicycle object gets its own copies)
-    private int cadence;   // default 0
-    private int speed;     // default 0
-    private int gear;      // default 0
-
-    // Constructor initializes instance variables
-    public Bicycle(int startCadence, int startSpeed, int startGear) {
-        this.cadence = startCadence;
-        this.speed = startSpeed;
-        this.gear = startGear;
-    }
-
-    public void printStates() {
-        System.out.println("cadence:" + cadence + " speed:" + speed + " gear:" + gear);
-    }
-
-    public static void main(String[] args) {
-        Bicycle bike1 = new Bicycle(10, 0, 1);
-        Bicycle bike2 = new Bicycle(20, 5, 3);
-
-        bike1.printStates();  // bike1's own values
-        bike2.printStates();  // bike2's own values
-    }
-}
-```
-
-**Expected Output:**
-
-```
-cadence:10 speed:0 gear:1
-cadence:20 speed:5 gear:3
-```
-
-**Why This Output:** Each `Bicycle` instance has its own `cadence`, `speed`, and `gear` fields. The constructor uses `this` to distinguish parameters from fields. Modifying one bike’s state does not affect the other.
-
-**Real-World Case:** A `BankAccount` class has instance variables `balance`, `accountNumber`, and `owner`; each account object maintains its own values.
-
----
-
-##### Static Variables (Class Variables)
-
-**Definitions:**
-
-- **Core Definition:** Static variables are fields declared with the `static` modifier; there is exactly one copy shared by all instances of the class.
-- **Technical Definition:** A class variable is a field declared with the `static` keyword, created when the class is initialized and shared across all instances.
-- **Beginner Explanation:** Information that belongs to the class itself, not to any individual object—like a shared whiteboard that all objects can read and write.
-
-**Purposes:**
-
-- **To** store data common to all instances of a class.
-- **To** implement counters that track how many objects have been created.
-- **To** define constants shared across the class.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```
-static type variableName = initializer;
-```
-
-**Syntax Rules:**
-
-- Accessed via `ClassName.variableName` (preferred) or `objectName.variableName`.
-- Initialized when the class is first loaded.
-- Automatically initialized to default values if no initializer.
-
-**Constraints and Limitations:**
-
-- One copy per class, regardless of instance count.
-- Stored in the method area / heap (JVM implementation-dependent).
-- Lifetime tied to the class; garbage collected only if the class is unloaded.
-
-**Annotated Code Examples:**
-
-```java
-// Example 6: Static variables shared across instances
-public class Bicycle {
-    // Static variable: shared by ALL Bicycle objects
-    private static int numberOfBicycles = 0;
-
-    private int cadence;
-
-    public Bicycle(int startCadence) {
-        this.cadence = startCadence;
-        numberOfBicycles++;  // Increment shared counter
-    }
-
-    public static int getNumberOfBicycles() {
-        return numberOfBicycles;
-    }
-
-    public static void main(String[] args) {
-        System.out.println("Before: " + Bicycle.getNumberOfBicycles());
-
-        Bicycle bike1 = new Bicycle(10);
-        Bicycle bike2 = new Bicycle(20);
-        Bicycle bike3 = new Bicycle(30);
-
-        System.out.println("After creating 3 bikes: " + Bicycle.getNumberOfBicycles());
-    }
-}
-```
-
-**Expected Output:**
-
-```
-Before: 0
-After creating 3 bikes: 3
-```
-
-**Why This Output:** `numberOfBicycles` is a single shared counter. Each constructor increments it. The static method `getNumberOfBicycles()` accesses the class variable without needing an instance.
-
-**Real-World Case:** A `DatabaseConnection` class might have a static `connectionCount` field tracking active connections across the entire application.
-
----
-
-##### Parameters / Arguments
-
-**Definitions:**
-
-- **Core Definition:** Parameters are variables that receive values passed to methods or constructors.
-- **Technical Definition:** Parameters are formal variables declared in a method or constructor signature; arguments are the actual values supplied at the call site.
-- **Beginner Explanation:** Information you hand to a method so it knows what to work on.
-
-**Purposes:**
-
-- **To** pass data into methods for processing.
-- **To** allow methods to operate on different inputs.
-- **To** enable constructors to initialize object state.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```
-returnType methodName(type param1, type param2) { ... }
-```
-
-**Syntax Rules:**
-
-- Parameters are declared in the method signature, separated by commas.
-- Each parameter has a type and name.
-- The number and types of arguments must match the parameters at the call site.
-
-**Constraints and Limitations:**
-
-- Parameters are local to the method; modifications do not affect the caller’s variable (for primitives).
-- For reference types, the reference is passed by value; the object’s state can be modified but the reference itself cannot be reassigned to affect the caller.
-
-**Annotated Code Examples:**
-
-```java
-// Example 7: Method parameters
-public class ParameterDemo {
-    // Method with two parameters
-    public static int add(int a, int b) {
-        return a + b;  // a and b are local to this method
-    }
-
-    // Method with object parameter
-    public static void modifyArray(int[] arr) {
-        arr[0] = 999;  // Modifies the object's state
-    }
-
-    public static void main(String[] args) {
-        int result = add(5, 3);  // 5 and 3 are arguments
-        System.out.println("Sum: " + result);
-
-        int[] numbers = {1, 2, 3};
-        System.out.println("Before: " + numbers[0]);
-        modifyArray(numbers);  // Passes the reference
-        System.out.println("After: " + numbers[0]);
-    }
-}
-```
-
-**Expected Output:**
-
-```
-Sum: 8
-Before: 1
-After: 999
-```
-
-**Why This Output:** `add(5, 3)` passes values 5 and 3 into parameters `a` and `b`. `modifyArray` receives a copy of the reference `numbers`; both refer to the same array object, so modifying `arr[0]` changes `numbers[0]`.
-
-**Real-World Case:** A `calculateInterest(double principal, double rate, int years)` method receives three parameters to compute compound interest.
-
----
-
-### 3. Scope and Lifetime
-
-#### Definitions
-
-**Core Definition:** Scope determines where a variable’s name is visible; lifetime determines how long the variable’s storage persists.
-
-**Technical Definition:** The scope of a declaration is the region of the program within which the entity declared by the declaration can be referred to using a simple name.
-
-**Beginner Explanation:** Scope is “where can I use this variable’s name?” Lifetime is “how long does the variable exist in memory?”
-
-###s
-
-##### Method Scope vs. Class Scope
-
-**Definitions:**
-
-- **Core Definition:** Method scope means the variable is visible only within the method. Class scope means the variable is visible throughout the class.
-- **Technical Definition:** Class-scope variables (fields) are accessible by all methods of the class; method-scope variables (locals) are accessible only within the declaring method.
-- **Beginner Explanation:** Class-scope variables are like a house’s shared rooms; method-scope variables are like items you use only while in the kitchen.
-
-**Purposes:**
-
-- **To** encapsulate state appropriately—fields for persistent state, locals for temporary values.
-- **To** prevent unintended interference between methods.
-- **To** control access granularity.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```
-class MyClass {
-    type classScopedVariable;              // Class scope
-
-    void myMethod() {
-        type methodScopedVariable;         // Method scope
-    }
-}
-```
-
-**Syntax Rules:**
-
-- Fields are declared directly in the class body.
-- Locals are declared inside method bodies or blocks.
-- Fields may be accessed by any method; locals only by their declaring method.
-
-**Constraints and Limitations:**
-
-- Method-scoped variables cannot be accessed by other methods.
-- Class-scoped variables exist for the lifetime of the object (instance) or class (static).
-
-**Annotated Code Examples:**
-
-```java
-// Example 8: Class scope vs. method scope
-public class ScopeDemo {
-    private int classScoped = 100;  // Class scope: accessible everywhere in this class
-
-    public void methodA() {
-        int methodScoped = 200;     // Method scope: only in methodA
-        System.out.println("methodA sees: " + classScoped + ", " + methodScoped);
-    }
-
-    public void methodB() {
-        System.out.println("methodB sees: " + classScoped);
-        // System.out.println(methodScoped);  // ERROR: not in scope
-    }
-
-    public static void main(String[] args) {
-        ScopeDemo obj = new ScopeDemo();
-        obj.methodA();
-        obj.methodB();
-    }
-}
-```
-
-**Expected Output:**
-
-```
-methodA sees: 100, 200
-methodB sees: 100
-```
-
-**Why This Output:** `classScoped` is visible in both methods. `methodScoped` is only visible inside `methodA`. `methodB` cannot access `methodScoped`.
-
-**Real-World Case:** A `ShoppingCart` class has a field `totalPrice` (class scope) and a local `itemSubtotal` inside `addItem()` (method scope).
-
----
-
-##### Block Scope
-
-**Definitions:**
-
-- **Core Definition:** Block scope restricts variable visibility to the enclosing `{ }` block.
-- **Technical Definition:** The scope of a local variable declaration in a block is the rest of the block in which the declaration appears, starting with its own initializer and including any further declarators to the right.
-- **Beginner Explanation:** Variables declared inside `{ }` are only known inside those braces.
-
-**Purposes:**
-
-- **To** limit variable visibility to where it is needed.
-- **To** enable reuse of variable names in different blocks.
-- **To** improve code clarity and reduce naming conflicts.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```
-{
-    type variableName = initializer;
-    // variableName is visible only here
-}
-// variableName is not visible here
-```
-
-**Syntax Rules:**
-
-- A block is denoted by `{ }`.
-- The scope extends from the declaration to the end of the block.
-- Nested blocks create nested scopes.
-
-**Constraints and Limitations:**
-
-- Cannot redeclare a variable with the same name in the same block.
-- Variables in inner blocks shadow variables with the same name in outer blocks.
-
-**Annotated Code Examples:**
-
-```java
-// Example 9: Block scope
-public class BlockScopeDemo {
-    public static void main(String[] args) {
-        int x = 10;  // Visible in main's block
-
+        // Local variable in main method
+        int mainVar = 10;
+        System.out.println("Main variable: " + mainVar);
+
+        // Local variable in a block
         {
-            int y = 20;  // Visible only in this inner block
-            System.out.println("Inside block: x=" + x + ", y=" + y);
-
-            {
-                int z = 30;  // Nested block
-                System.out.println("Nested: x=" + x + ", y=" + y + ", z=" + z);
-            }
-            // z is no longer visible
+            int blockVar = 20;
+            System.out.println("Block variable: " + blockVar);
         }
+        // System.out.println(blockVar);  // Compile error: out of scope
 
-        // y is no longer visible
-        System.out.println("Outside block: x=" + x);
+        // Local variable in a loop
+        for (int i = 0; i < 3; i++) {
+            int loopVar = i * 10;
+            System.out.println("Loop variable: " + loopVar);
+        }
+        // System.out.println(i);  // Compile error: out of scope
+    }
+
+    static void anotherMethod() {
+        // mainVar is not accessible here
+        int anotherVar = 30;
+        System.out.println("Another method: " + anotherVar);
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Inside block: x=10, y=20
-Nested: x=10, y=20, z=30
-Outside block: x=10
+Main variable: 10
+Block variable: 20
+Loop variable: 0
+Loop variable: 10
+Loop variable: 20
 ```
 
-**Why This Output:** `x` is visible throughout `main`. `y` is visible only in the first inner block. `z` is visible only in the nested block. After each block closes, its variables go out of scope.
+### Real-World Cases
 
-**Real-World Case:** In a method processing form input, an `if` block declares a local `String trimmedInput` that is discarded after validation.
+- **Method Parameters:** Variables passed to methods.
+- **Loop Counters:** `for (int i = 0; ...)`.
+- **Temporary Storage:** Holding values during calculations.
+- **Exception Handling:** Variables in `try`/`catch` blocks.
 
 ---
 
-##### Shadowing Variables
+## 6. Instance Variables
 
-**Definitions:**
+### Definitions
 
-- **Core Definition:** Shadowing occurs when a variable declared in an inner scope hides a variable of the same name in an outer scope.
-- **Technical Definition:** A declaration _d_ of a variable named _n_ shadows a declaration of a variable named _n_ throughout the scope of _d_, unless the shadowed declaration is itself shadowed.
-- **Beginner Explanation:** When you reuse a name inside a smaller box, it temporarily hides the bigger box’s variable with that name.
+**Core Definition:** Instance variables (non-static fields) are variables declared in a class but outside any method, constructor, or block, with each instance of the class having its own copy.
 
-**Purposes:**
+**Technical Definition:** "Instance Variables (Non-Static Fields): Technically speaking, objects store their individual states in 'non-static fields', that is, fields declared without the `static` keyword. Non-static fields are also known as instance variables because their values are unique to each instance of a class". "Instance variables are initialized when the class is instantiated. They are accessible from any method, constructor, or block in the class".
 
-- **To** allow method parameters to have the same names as fields for readability.
-- **To** prevent accidental modification of outer variables.
-- **To** enable concise naming in localized contexts.
+**Beginner-Friendly Explanation:** Instance variables are like personal belongings of each object. Each `Person` object has its own `name` and `age` — changing one person's name doesn't affect another's.
 
-**Syntax Structures and Rules:**
+### Purposes
 
-**Complete General Syntax:**
+- To store the state of an object
+- To give each object its own copy of data
+- To define the properties of a class
+- To enable object-specific behaviour
 
-```
-class MyClass {
-    int value;  // Field
+### Syntax Rules and Structure
 
-    void setValue(int value) {  // Parameter shadows field
-        this.value = value;      // Use 'this' to access the field
-    }
+```java
+public class MyClass {
+    // Instance variables
+    private int count;
+    private String name;
+    protected double value;
+    public boolean flag;
 }
 ```
 
 **Syntax Rules:**
 
-- Shadowing is allowed (with some restrictions on local variable shadowing other locals in enclosing blocks).
-- Use `this.fieldName` to access a shadowed instance field.
-- Use `ClassName.staticField` to access a shadowed static field.
+- Declared in a class but outside methods, constructors, and blocks.
+- Can have access modifiers (`public`, `protected`, `private`, or default).
+- Can be `final`, `volatile`, or `transient`.
+- Are automatically initialised to default values.
+- Are created when an object is instantiated.
+- Are destroyed when the object is garbage collected.
 
-**Constraints and Limitations:**
-
-- A local variable cannot shadow another local variable in the same method (compile error).
-- Parameters can shadow fields.
-- Shadowing can lead to bugs if `this` is forgotten.
-
-**Annotated Code Examples:**
+### Annotated Code Example
 
 ```java
-// Example 10: Shadowing instance variables with parameters
-public class ShadowDemo {
-    private int number = 100;  // Instance variable
+// File: InstanceVariableDemo.java
+public class InstanceVariableDemo {
+    // Instance variables
+    private String name;
+    private int age;
+    private double salary;
 
-    public void setNumber(int number) {  // Parameter shadows field
-        System.out.println("Parameter: " + number);       // Refers to parameter
-        System.out.println("Field before: " + this.number); // Refers to field
-        this.number = number;  // Assigns parameter to field
-        System.out.println("Field after: " + this.number);
+    public InstanceVariableDemo(String name, int age, double salary) {
+        this.name = name;
+        this.age = age;
+        this.salary = salary;
+    }
+
+    public void display() {
+        System.out.println(name + ", " + age + ", $" + salary);
     }
 
     public static void main(String[] args) {
-        ShadowDemo obj = new ShadowDemo();
-        obj.setNumber(42);
+        // Each instance has its own copy of instance variables
+        InstanceVariableDemo alice = new InstanceVariableDemo("Alice", 30, 50000);
+        InstanceVariableDemo bob = new InstanceVariableDemo("Bob", 25, 45000);
+
+        alice.display();  // Alice, 30, $50000.0
+        bob.display();    // Bob, 25, $45000.0
+
+        // Changing alice's state doesn't affect bob
+        alice.name = "Alice Smith";
+        alice.display();  // Alice Smith, 30, $50000.0
+        bob.display();    // Bob, 25, $45000.0
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Parameter: 42
-Field before: 100
-Field after: 42
+Alice, 30, $50000.0
+Bob, 25, $45000.0
+Alice Smith, 30, $50000.0
+Bob, 25, $45000.0
 ```
 
-**Why This Output:** The parameter `number` shadows the field `number` inside `setNumber`. `number` refers to the parameter; `this.number` refers to the field. The assignment `this.number = number` copies the parameter’s value into the field.
+### Real-World Cases
 
-**Real-World Case:** A `Person` class with a field `name` and constructor parameter `String name` uses `this.name = name` to avoid naming confusion.
+- **Entity Objects:** Representing database rows.
+- **Value Objects:** Representing domain concepts (Money, Date).
+- **GUI Components:** Storing component state (text, size, position).
+- **Game Objects:** Storing position, health, and score.
 
 ---
 
-##### Variable Lifetime
+## 7. Class Variables (Static Variables)
 
-**Definitions:**
+### Definitions
 
-- **Core Definition:** Lifetime describes how long a variable’s storage exists in memory.
-- **Technical Definition:** Local variables live on the stack and are removed when their block/method exits; instance variables live on the heap as long as their object is reachable; static variables live as long as the class is loaded.
-- **Beginner Explanation:** Local variables vanish when the method finishes; object variables vanish when the object is no longer used; static variables last until the program ends.
+**Core Definition:** Class variables (static fields) are variables declared with the `static` keyword, shared by all instances of a class.
 
-**Purposes:**
+**Technical Definition:** "Class Variables (Static Fields): A class variable is any field declared with the `static` modifier; this tells the compiler that there is exactly one copy of this variable in existence, regardless of how many times the class has been instantiated. A `static` field is also known as a class variable because it is shared by all instances of the class". "Static variables are initialized when the class is loaded and are accessible without creating an instance of the class".
 
-- **To** understand memory usage and garbage collection eligibility.
-- **To** reason about object state persistence.
-- **To** avoid memory leaks by releasing references.
+**Beginner-Friendly Explanation:** Static variables are like shared equipment in an office. No matter how many employees (objects) there are, there's only one coffee machine (static variable). All employees share it, and if one changes it, everyone sees the change.
 
-**Syntax Structures and Rules:**
+### Purposes
 
-No special syntax; lifetime is determined by declaration location and usage.
+- To store values shared by all instances of a class
+- To define constants (with `static final`)
+- To maintain class-level state (e.g., counters)
+- To implement the Singleton pattern
+- To provide utility methods and constants
 
-**Constraints and Limitations:**
-
-- Stack variables are automatically reclaimed when the method returns.
-- Heap objects become eligible for GC when no references point to them.
-- Static variables persist for the JVM’s lifetime (unless the class is unloaded).
-
-**Annotated Code Examples:**
+### Syntax Rules and Structure
 
 ```java
-// Example 11: Variable lifetime demonstration
-public class LifetimeDemo {
-    private static int staticCounter = 0;  // Class lifetime
-    private int instanceCounter = 0;       // Object lifetime
-
-    public LifetimeDemo() {
-        instanceCounter++;  // Each object gets its own copy
-        staticCounter++;    // Shared across all objects
-    }
-
-    public void localLifetime() {
-        int local = 0;  // Created on each method call, destroyed on return
-        local++;
-        System.out.println("Local value: " + local);
-    }
-
-    public static void main(String[] args) {
-        LifetimeDemo obj1 = new LifetimeDemo();  // staticCounter=1, obj1.instance=1
-        LifetimeDemo obj2 = new LifetimeDemo();  // staticCounter=2, obj2.instance=1
-
-        obj1.localLifetime();  // local=1
-        obj1.localLifetime();  // local=1 again (new variable each call)
-
-        System.out.println("Static counter: " + staticCounter);
-        System.out.println("Obj1 instance: " + obj1.instanceCounter);
-        System.out.println("Obj2 instance: " + obj2.instanceCounter);
-    }
+public class MyClass {
+    // Static variable
+    private static int count;
+    private static final double PI = 3.14159;
 }
-```
-
-**Expected Output:**
-
-```
-Local value: 1
-Local value: 1
-Static counter: 2
-Obj1 instance: 1
-Obj2 instance: 1
-```
-
-**Why This Output:** The local variable `local` is recreated with value 0 on each call, then incremented to 1. `staticCounter` accumulates across both constructor calls. Each object’s `instanceCounter` is incremented once in its own constructor.
-
-**Real-World Case:** A method that processes a file uses a local `BufferedReader` that is eligible for garbage collection when the method returns; a `static` logger instance persists for the application’s lifetime.
-
----
-
-### 4. Constants
-
-#### Definitions
-
-**Core Definition:** Constants are variables declared with `final` that cannot be reassigned after initialization.
-
-**Technical Definition:** A `final` variable may only be assigned once. It is a compile-time error if a `final` variable is assigned unless it is definitely unassigned immediately prior to the assignment. A _constant variable_ is a `final` variable of primitive type or type `String` initialized with a constant expression.
-
-**Beginner-Friendly Explanation:** A constant is a variable whose value is locked in place after you set it—like a permanent marker label that cannot be changed.
-
-###s
-
-##### Declaring Constants with `final`
-
-**Definitions:**
-
-- **Core Definition:** The `final` keyword prevents reassignment of a variable.
-- **Technical Definition:** A variable can be declared `final`; once assigned, it always contains the same value.
-- **Beginner Explanation:** You promise Java that you will never change this variable’s value after setting it.
-
-**Purposes:**
-
-- **To** document that a value should never change.
-- **To** enable compiler optimizations (inlining for constant variables).
-- **To** prevent programming errors from accidental modification.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```
-final type variableName = initializer;   // Constant variable (if constant expression)
-final type variableName;                 // Blank final
 ```
 
 **Syntax Rules:**
 
-- `final` is a modifier placed before the type.
-- For local variables, `final` can be applied to any local variable.
-- For fields, `final` can be applied to instance or static fields.
-- The variable must be assigned exactly once.
+- Declared with the `static` keyword.
+- Shared by all instances of the class.
+- Initialised when the class is loaded.
+- Accessed via `ClassName.variableName` or (less preferred) `instanceName.variableName`.
+- Automatically initialised to default values.
 
-**Constraints and Limitations:**
-
-- A `final` reference variable cannot be reassigned to refer to a different object, but the object’s internal state can be modified.
-- A `final` array reference cannot be reassigned, but elements can be modified.
-- Blank finals must be assigned before use (definite assignment).
-
-**Annotated Code Examples:**
+### Annotated Code Example
 
 ```java
-// Example 12: Final variables and mutable state
+// File: StaticVariableDemo.java
+public class StaticVariableDemo {
+    // Static variable: shared by all instances
+    private static int instanceCount = 0;
+
+    // Static constant
+    public static final String APP_NAME = "MyApp";
+
+    // Instance variable
+    private String name;
+
+    public StaticVariableDemo(String name) {
+        this.name = name;
+        instanceCount++;  // Increment shared counter
+    }
+
+    public static void main(String[] args) {
+        StaticVariableDemo a = new StaticVariableDemo("A");
+        StaticVariableDemo b = new StaticVariableDemo("B");
+        StaticVariableDemo c = new StaticVariableDemo("C");
+
+        // Access via class name (preferred)
+        System.out.println("Instances: " + StaticVariableDemo.instanceCount);  // 3
+        System.out.println("App: " + StaticVariableDemo.APP_NAME);  // MyApp
+
+        // Access via instance (works but discouraged)
+        System.out.println("Via instance: " + a.instanceCount);  // 3
+    }
+}
+```
+
+**Expected Output:**
+```
+Instances: 3
+App: MyApp
+Via instance: 3
+```
+
+### Real-World Cases
+
+- **Constants:** `Math.PI`, `Integer.MAX_VALUE`.
+- **Counters:** Tracking the number of instances created.
+- **Configuration:** Application-wide settings.
+- **Singleton:** `private static Singleton instance`.
+
+---
+
+## 8. Constants and `final` Keyword
+
+### Definitions
+
+**Core Definition:** A constant is a variable whose value cannot be changed after initialisation. In Java, constants are declared using the `final` keyword.
+
+**Technical Definition:** "The `final` keyword is used to declare a variable that cannot be reassigned. A `final` variable must be initialised exactly once. `static final` variables are compile-time constants if the initialiser is a constant expression". "A `final` variable can be assigned only once. If it's a reference variable, the reference cannot be changed, but the object's contents can".
+
+**Beginner-Friendly Explanation:** A `final` variable is like a permanent marker — once you write the value, you can't erase it. If it's a `static final` variable, it's a true constant shared by everyone and never changes.
+
+### Purposes
+
+- To define constants that should never change
+- To prevent accidental reassignment
+- To improve code readability (named constants instead of magic numbers)
+- To enable compiler optimisations
+- To enforce immutability for references
+
+### Syntax Rules and Structure
+
+```java
+// Instance final
+private final int id;
+
+// Static final (constant)
+public static final double PI = 3.14159;
+
+// Local final
+final int x = 10;
+```
+
+**Syntax Rules:**
+
+- `final` variables must be initialised exactly once.
+- `static final` variables are class-level constants.
+- `final` reference variables cannot be reassigned, but the referenced object's contents can be modified.
+- `final` parameters cannot be reassigned inside the method.
+
+**Naming Convention:**
+
+- `static final` constants: `UPPER_SNAKE_CASE` (e.g., `MAX_VALUE`, `PI`).
+- `final` instance/local variables: camelCase.
+
+### Annotated Code Example
+
+```java
+// File: FinalDemo.java
 public class FinalDemo {
-    // Constant variable: final + primitive + constant expression
-    public static final double PI = 3.14159;
+    // Static final constant
+    public static final double TAX_RATE = 0.08;
 
-    // Final reference: object state is mutable
-    public static final StringBuilder MESSAGE = new StringBuilder("Hello");
+    // Final instance variable (initialized in constructor)
+    private final String id;
+
+    // Final local variable
+    public void method() {
+        final int localConstant = 100;
+        // localConstant = 200;  // Compile error
+        System.out.println("Local: " + localConstant);
+    }
+
+    public FinalDemo(String id) {
+        this.id = id;  // Must be initialized in constructor
+    }
 
     public static void main(String[] args) {
-        // PI = 3.14;  // ERROR: cannot assign a value to final variable PI
+        FinalDemo demo = new FinalDemo("ABC123");
+        System.out.println("ID: " + demo.id);           // ABC123
+        System.out.println("Tax: " + TAX_RATE);          // 0.08
+        demo.method();                                   // Local: 100
 
-        System.out.println("PI: " + PI);
-
-        // MESSAGE = new StringBuilder("World");  // ERROR: cannot reassign reference
-        MESSAGE.append(" World");  // OK: modifying object state
-        System.out.println("MESSAGE: " + MESSAGE);
-
-        // Final local variable
-        final int MAX = 100;
-        // MAX = 200;  // ERROR
-        System.out.println("MAX: " + MAX);
+        // Final reference: reference cannot change, object can
+        final StringBuilder sb = new StringBuilder("Hello");
+        sb.append(" World");  // OK — modifying the object
+        System.out.println(sb);  // Hello World
+        // sb = new StringBuilder();  // Compile error — cannot reassign
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-PI: 3.14159
-MESSAGE: Hello World
-MAX: 100
+ID: ABC123
+Tax: 0.08
+Local: 100
+Hello World
 ```
 
-**Why This Output:** `PI` is a constant variable and cannot be reassigned. `MESSAGE` is a `final` reference; the reference cannot change, but the `StringBuilder` object it points to can be modified. `MAX` is a local `final` variable.
+### Real-World Cases
 
-**Real-World Case:** A `MathUtils` class defines `public static final double E = 2.71828;` as a mathematical constant.
+- **Mathematical Constants:** `Math.PI`, `Math.E`.
+- **Configuration Values:** `MAX_CONNECTIONS`, `DEFAULT_TIMEOUT`.
+- **Error Codes:** `ERROR_NOT_FOUND = 404`.
+- **Immutability:** Final fields in immutable classes.
 
 ---
 
-##### Compile-Time Constants vs. Runtime Constants
+## 9. `var` Keyword and Java 10 Type Inference
 
-**Definitions:**
+### Definitions
 
-- **Core Definition:** Compile-time constants have values known at compile time; runtime constants are `final` but initialized at runtime.
-- **Technical Definition:** A _constant variable_ is a `final` variable of primitive type or type `String` initialized with a constant expression. Other `final` variables are runtime constants.
-- **Beginner Explanation:** Some constants are so simple that Java can bake them into the code at compile time; others can only be set when the program runs.
+**Core Definition:** `var` is a reserved type name introduced in Java 10 that allows local variable type inference, letting the compiler infer the type from the initialiser.
 
-**Purposes:**
+**Technical Definition:** "Local variable type inference is a Java 10 feature that allows you to declare local variables without explicitly specifying their type. The compiler infers the type from the initialiser expression. The `var` keyword is not a keyword; it's a reserved type name, meaning it can still be used as a variable name, method name, or package name". "`var` can only be used for local variables, not for fields, method parameters, or return types".
 
-- **To** enable compile-time optimization and inlining.
-- **To** support `switch` statements with constant labels.
-- **To** distinguish between values fixed at development time and those determined at runtime.
+**Beginner-Friendly Explanation:** `var` is like telling the compiler "you figure out the type — I'll just show you the value." Instead of writing `String name = "Alice";`, you write `var name = "Alice";` and the compiler sees the string and knows `name` is a `String`.
 
-**Syntax Structures and Rules:**
+### Purposes
 
-**Complete General Syntax:**
+- To reduce boilerplate in local variable declarations
+- To improve readability when the type is obvious from the initialiser
+- To simplify code with complex generic types
+- To keep variable declarations concise
 
-```
-static final int COMPILE_TIME = 10;                    // Compile-time constant
-static final int RUNTIME = computeValue();             // Runtime constant
+### Syntax Rules and Structure
+
+```java
+// Instead of:
+Map<String, List<String>> map = new HashMap<>();
+
+// You can write:
+var map = new HashMap<String, List<String>>();
 ```
 
 **Syntax Rules:**
 
-- A compile-time constant expression consists of literals, `final` variables initialized with constant expressions, and certain operators.
-- The type must be primitive or `String`.
-- Runtime constants are `final` variables whose initializer is not a constant expression.
+- `var` can only be used for local variables with an initialiser.
+- `var` cannot be used for fields, method parameters, or return types.
+- `var` cannot be used without an initialiser.
+- `var` cannot be assigned `null` without a type.
+- `var` is not a keyword; it's a reserved type name.
 
 **Constraints and Limitations:**
 
-- Compile-time constants are inlined at usage sites; changing them requires recompilation of dependent code.
-- `switch` case labels must be compile-time constants.
+- "`var` cannot be used for lambda parameters without explicit types".
+- "`var` cannot be used in a catch block".
+- "Excessive use of `var` can reduce readability if the type is not obvious".
 
-**Annotated Code Examples:**
-
-```java
-// Example 13: Compile-time vs. runtime constants
-public class ConstantTypesDemo {
-    // Compile-time constant: value known at compile time
-    public static final int MAX_USERS = 100;
-
-    // Runtime constant: value determined at runtime
-    public static final long START_TIME = System.currentTimeMillis();
-
-    // Runtime constant: initialized via method call
-    public static final String VERSION = getVersion();
-
-    private static String getVersion() {
-        return "1.0.0";
-    }
-
-    public static void main(String[] args) {
-        // Compile-time constant can be used in switch
-        int choice = 1;
-        switch (choice) {
-            case MAX_USERS:  // Valid: MAX_USERS is compile-time constant
-                System.out.println("Max users selected");
-                break;
-            default:
-                System.out.println("Other choice");
-        }
-
-        System.out.println("Start time: " + START_TIME);
-        System.out.println("Version: " + VERSION);
-    }
-}
-```
-
-**Expected Output (example):**
-
-```
-Other choice
-Start time: 1699999999999
-Version: 1.0.0
-```
-
-**Why This Output:** `MAX_USERS` is a compile-time constant, so it can be used as a `case` label. `START_TIME` and `VERSION` are runtime constants; their values are determined when the class is initialized.
-
-**Real-World Case:** A `Config` class might have `public static final String API_URL = System.getenv("API_URL");` as a runtime constant.
-
----
-
-##### Blank Finals
-
-**Definitions:**
-
-- **Core Definition:** A blank final is a `final` variable without an initializer, assigned exactly once later.
-- **Technical Definition:** A _blank final_ is a `final` variable whose declaration lacks an initializer. A blank final instance variable must be definitely assigned at the end of every constructor.
-- **Beginner Explanation:** You declare a constant but don’t give it a value yet—you must set it exactly once, usually in the constructor.
-
-**Purposes:**
-
-- **To** allow `final` fields to be initialized based on constructor parameters.
-- **To** support dependency injection and configuration.
-- **To** enforce immutability while allowing flexible initialization.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```
-final type variableName;   // Blank final declaration
-// In constructor:
-variableName = value;      // Single assignment
-```
-
-**Syntax Rules:**
-
-- Blank finals must be assigned exactly once before use.
-- Instance blank finals must be assigned in every constructor.
-- Static blank finals must be assigned in a static initializer.
-
-**Constraints and Limitations:**
-
-- Cannot be read before assignment.
-- Cannot be assigned more than once.
-- Must be assigned on all code paths through the constructor.
-
-**Annotated Code Examples:**
+### Annotated Code Example
 
 ```java
-// Example 14: Blank final instance variable
-public class Employee {
-    private final String name;      // Blank final
-    private final int id;           // Blank final
-    private static final int BASE_ID;  // Static blank final
-
-    static {
-        BASE_ID = 1000;  // Static blank final assigned in static initializer
-    }
-
-    public Employee(String name, int idOffset) {
-        this.name = name;                    // Assign blank final
-        this.id = BASE_ID + idOffset;        // Assign blank final
-    }
-
-    public static void main(String[] args) {
-        Employee emp = new Employee("Alice", 42);
-        System.out.println("Name: " + emp.name);
-        System.out.println("ID: " + emp.id);
-    }
-}
-```
-
-**Expected Output:**
-
-```
-Name: Alice
-ID: 1042
-```
-
-**Why This Output:** `name` and `id` are blank finals assigned in the constructor. `BASE_ID` is a static blank final assigned in a static initializer. Each blank final receives exactly one value.
-
-**Real-World Case:** An immutable `Point` class with `final int x, y` assigned in a constructor based on parameters.
-
----
-
-### 5. Modern Java Additions
-
-#### Local Variable Type Inference (`var`)
-
-**Definitions:**
-
-- **Core Definition:** The `var` keyword allows local variable types to be inferred from the initializer.
-- **Technical Definition:** In JDK 10 and later, `var` can be used for local variable declarations with initializers, enhanced `for` loop indices, traditional `for` loop indices, and try-with-resources variables.
-- **Beginner Explanation:** Instead of writing the type twice, you can say `var` and let Java figure it out from the value you assign.
-
-**Purposes:**
-
-- **To** reduce boilerplate in local variable declarations.
-- **To** improve readability when the type is obvious from the initializer.
-- **To** make code more concise without sacrificing static typing.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```
-var variableName = initializer;
-```
-
-**Syntax Rules:**
-
-- `var` can only be used for local variables with initializers.
-- `var` cannot be used for fields, method parameters (except lambda), or return types.
-- The initializer must be present; `var x;` is illegal.
-- The inferred type is the static type of the initializer.
-
-**Constraints and Limitations:**
-
-- Cannot use `var` without an initializer.
-- Cannot use `var` with `null` as the initializer (ambiguous type).
-- Cannot mix `var` and explicit types in lambda parameters.
-- `var` is a reserved type name, not a keyword; existing code using `var` as a variable name still works.
-
-**Annotated Code Examples:**
-
-```java
-// Example 15: Local variable type inference with var
-import java.util.ArrayList;
-import java.util.List;
+// File: VarDemo.java
+import java.util.*;
 
 public class VarDemo {
     public static void main(String[] args) {
-        // Without var: redundant
-        ArrayList<String> list1 = new ArrayList<String>();
+        // Simple type inference
+        var name = "Alice";           // String
+        var age = 30;                  // int
+        var salary = 50000.0;          // double
+        var active = true;             // boolean
 
-        // With var: type inferred
-        var list2 = new ArrayList<String>();  // infers ArrayList<String>
+        System.out.println(name + ", " + age + ", $" + salary + ", " + active);
 
-        // Enhanced for loop
-        var numbers = List.of(1, 2, 3, 4, 5);
-        for (var num : numbers) {             // infers Integer
-            System.out.print(num + " ");
+        // Complex generic types
+        var list = new ArrayList<String>();
+        list.add("Hello");
+        list.add("World");
+        System.out.println(list);  // [Hello, World]
+
+        var map = new HashMap<String, List<Integer>>();
+        map.put("evens", List.of(2, 4, 6));
+        map.put("odds", List.of(1, 3, 5));
+        System.out.println(map);  // {evens=[2, 4, 6], odds=[1, 3, 5]}
+
+        // In loops
+        for (var i = 0; i < 3; i++) {
+            System.out.print(i + " ");
         }
         System.out.println();
 
-        // Traditional for loop
-        for (var i = 0; i < 3; i++) {         // infers int
-            System.out.println("i = " + i);
+        // With enhanced for
+        var names = List.of("Alice", "Bob", "Charlie");
+        for (var n : names) {
+            System.out.print(n + " ");
         }
-
-        // Try-with-resources
-        // var reader = new java.io.FileReader("file.txt");  // infers FileReader
-
-        // var with lambda (JDK 11+)
-        // BiFunction<Integer, Integer, Integer> f = (var a, var b) -> a + b;
+        System.out.println();
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-1 2 3 4 5
-i = 0
-i = 1
-i = 2
+Alice, 30, $50000.0, true
+[Hello, World]
+{evens=[2, 4, 6], odds=[1, 3, 5]}
+0 1 2 
+Alice Bob Charlie 
 ```
 
-**Why This Output:** `var list2` infers `ArrayList<String>` from the `new ArrayList<String>()` expression. `var num` infers `Integer` from the list’s element type. `var i` infers `int` from the literal `0`.
+### Real-World Cases
 
-**Real-World Case:** Processing a stream of data: `var result = data.stream().filter(x -> x > 0).collect(Collectors.toList());` — the type is clear from the context and `var` reduces verbosity.
+- **Collections:** `var list = new ArrayList<String>();`
+- **Streams:** `var stream = list.stream();`
+- **Try-with-Resources:** `try (var reader = Files.newBufferedReader(path))`.
+- **Complex Generics:** `var map = new HashMap<String, List<String>>();`
 
 ---
 
-## References
+## 10. Variable Scope and Lifetime
 
-- Java Language Specification, Chapter 4: Types, Values, and Variables - https://docs.oracle.com/javase/specs/jls/se23/html/jls-4.html
-- Java Language Specification, Section 4.12.4: final Variables - https://docs.oracle.com/javase/specs/jls/se6/html/typesValues.html#4.12.4
-- Java Tutorials: Variables - https://docs.oracle.com/javase/tutorial/java/nutsandbolts/variables.html
-- Dev.java: Creating Primitive Type Variables in Your Programs - https://dev.java/learn/language-basics/primitive-types/
-- Java Language Updates: Local Variable Type Inference - https://docs.oracle.com/en/java/javase/26/language/local-variable-type-inference.html
-- Java Language Specification, Section 6.4: Shadowing and Obscuring - https://docs.oracle.com/javase/specs/jls/se23/html/jls-6.html#jls-6.4
-- OpenJDK: Blank Final Assignment (JLS 8.3.1.2) - https://stackoverflow.com/revisions/e422c68f-5075-4456-b5a5-cb81b8626be1/view-source
-- OpenJDK: Lazy Finals Proposal - https://cr.openjdk.org/~jrose/draft/lazy-final.md
+### Definitions
+
+**Core Definition:** Scope is the region of code where a variable is accessible; lifetime is the period during which the variable exists in memory.
+
+**Technical Definition:** "The scope of a variable determines where in the program the variable can be accessed. The lifetime of a variable determines how long the variable exists in memory". Local variables have block scope and method lifetime; instance variables have class scope and object lifetime; static variables have class scope and program lifetime.
+
+**Beginner-Friendly Explanation:** Scope is like the visibility of a variable — who can see it. Lifetime is how long it exists. A local variable in a method is like a note written on a whiteboard — it's only visible in that room (scope) and gets erased when the meeting ends (lifetime).
+
+### Scope and Lifetime Table
+
+| Variable Type | Scope | Lifetime |
+|---------------|-------|----------|
+| Local | Block/method | Method/block execution |
+| Instance | Class | Object lifetime |
+| Static | Class | Program lifetime |
+| Parameter | Method | Method execution |
+
+### Annotated Code Example
+
+```java
+// File: ScopeLifetimeDemo.java
+public class ScopeLifetimeDemo {
+    // Instance variable: class scope, object lifetime
+    private int instanceVar = 10;
+
+    // Static variable: class scope, program lifetime
+    private static int staticVar = 20;
+
+    public void method() {
+        // Local variable: method scope, method lifetime
+        int localVar = 30;
+
+        // Block scope
+        if (true) {
+            int blockVar = 40;
+            System.out.println("Block: " + blockVar);  // 40
+            System.out.println("Access outer: " + localVar);  // 30
+        }
+        // blockVar is out of scope here
+
+        System.out.println("Instance: " + instanceVar);  // 10
+        System.out.println("Static: " + staticVar);      // 20
+    }
+
+    public static void main(String[] args) {
+        ScopeLifetimeDemo demo = new ScopeLifetimeDemo();
+        demo.method();
+
+        // Static accessible via class
+        System.out.println("Static: " + ScopeLifetimeDemo.staticVar);  // 20
+    }
+}
+```
+
+**Expected Output:**
+```
+Block: 40
+Access outer: 30
+Instance: 10
+Static: 20
+Static: 20
+```
+
+### Real-World Cases
+
+- **Encapsulation:** Limiting variable scope to prevent unintended access.
+- **Memory Management:** Understanding when objects become eligible for GC.
+- **Thread Safety:** Local variables are thread-safe; instance/static may need synchronization.
+
+---
+
+## 11. Variable Shadowing
+
+### Definitions
+
+**Core Definition:** Variable shadowing occurs when a variable in an inner scope has the same name as a variable in an outer scope, hiding the outer variable.
+
+**Technical Definition:** "Shadowing occurs when a variable declared in an inner scope has the same name as a variable declared in an outer scope. The inner variable shadows the outer variable, making the outer variable inaccessible within the inner scope". In Java, local variables can shadow instance variables, and method parameters can shadow instance variables.
+
+**Beginner-Friendly Explanation:** Shadowing is like having two people named "Alex" in the same office. When you call "Alex", the person closest to you answers. The outer Alex is still there, but you can't reach them by name from inside the inner room.
+
+### Purposes
+
+- (Often unintentional — a source of bugs)
+- To allow parameter names to match field names (using `this` to disambiguate)
+- To reuse common variable names in different scopes
+
+### Syntax Rules and Structure
+
+```java
+public class ShadowDemo {
+    private int value = 10;  // Instance variable
+
+    public void method(int value) {  // Parameter shadows instance variable
+        System.out.println(value);         // Parameter
+        System.out.println(this.value);    // Instance variable
+    }
+}
+```
+
+**Syntax Rules:**
+
+- Local variables can shadow instance variables.
+- Method parameters can shadow instance variables.
+- Local variables cannot shadow other local variables in the same scope.
+- Use `this.fieldName` to access a shadowed instance variable.
+- Use `ClassName.staticField` to access a shadowed static variable.
+
+### Annotated Code Example
+
+```java
+// File: ShadowingDemo.java
+public class ShadowingDemo {
+    private int value = 100;           // Instance variable
+    private static int count = 0;      // Static variable
+
+    public void method(int value) {     // Parameter shadows instance variable
+        System.out.println("Parameter: " + value);        // 50
+        System.out.println("Instance: " + this.value);    // 100
+        System.out.println("Static: " + ShadowingDemo.count);  // 0
+
+        int localVar = value * 2;       // Local variable
+        System.out.println("Local: " + localVar);          // 100
+
+        // Block shadowing
+        {
+            int value2 = 200;            // Different name, no shadowing
+            System.out.println("Block: " + value2);         // 200
+        }
+    }
+
+    public static void main(String[] args) {
+        new ShadowingDemo().method(50);
+    }
+}
+```
+
+**Expected Output:**
+```
+Parameter: 50
+Instance: 100
+Static: 0
+Local: 100
+Block: 200
+```
+
+### Real-World Cases
+
+- **Constructor Parameters:** `this.name = name;` to distinguish parameter from field.
+- **Setter Methods:** Same pattern as constructors.
+- **Nested Scopes:** Avoiding accidental shadowing in loops and blocks.
+
+---
+
+## 12. Variable Naming### Definitions
+
+**Core Definition:** Variable naming refers to the conventions and rules for choosing identifiers for variables.
+
+**Technical Definition:** "Variable names must be valid Java identifiers: they must begin with a letter, underscore, or dollar sign, and can contain letters, digits, underscores, and dollar signs. By convention, variable names use camelCase (e.g., `firstName`, `totalCount`). Constants use UPPER_SNAKE_CASE (e.g., `MAX_VALUE`). Variable names should be descriptive and meaningful".
+
+**Beginner-Friendly Explanation:** Variable naming is like choosing good labels for your boxes. A label like "x" doesn't tell you anything, but "customerAge" tells you exactly what's inside. Good names make code self-documenting.
+
+### Naming Conventions Table
+
+| Variable Type | Convention | Example |
+|---------------|-----------|---------|
+| Local variables | camelCase | `firstName`, `totalCount` |
+| Instance variables | camelCase | `name`, `balance` |
+| Static variables | camelCase | `instanceCount` |
+| Constants (`static final`) | UPPER_SNAKE_CASE | `MAX_VALUE`, `PI` |
+| Parameters | camelCase | `userName`, `orderId` |
+| Type parameters | Single uppercase | `T`, `E`, `K`, `V` |
+
+### Syntax Rules and Best Practices
+
+- Use descriptive names that convey meaning.
+- Avoid single-letter names (except loop counters `i`, `j`, `k`).
+- Avoid abbreviations and acronyms.
+- Avoid names that differ only in case.
+- Use `is`/`has` prefixes for booleans (e.g., `isActive`, `hasPermission`).
+- Do not use `$` in variable names (reserved for generated code).
+- Avoid Java reserved keywords.
+
+### Annotated Code Example
+
+```java
+// File: NamingDemo.java
+public class NamingDemo {
+    // GOOD: Descriptive names
+    private String customerName;
+    private int orderCount;
+    private boolean isActive;
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+
+    // BAD: Non-descriptive names (for illustration)
+    // private String cn;
+    // private int oc;
+    // private boolean f;
+
+    public void processOrder(String customerName, int orderId) {
+        // GOOD: Meaningful local variables
+        double orderTotal = 0.0;
+        int itemCount = 0;
+
+        for (int i = 0; i < 5; i++) {
+            itemCount++;
+            orderTotal += i * 10.0;
+        }
+
+        System.out.println("Customer: " + customerName);
+        System.out.println("Order ID: " + orderId);
+        System.out.println("Items: " + itemCount);
+        System.out.println("Total: $" + orderTotal);
+    }
+
+    public static void main(String[] args) {
+        NamingDemo demo = new NamingDemo();
+        demo.processOrder("Alice", 1001);
+    }
+}
+```
+
+**Expected Output:**
+```
+Customer: Alice
+Order ID: 1001
+Items: 5
+Total: $100.0
+```
+
+### Real-World Cases
+
+- **API Design:** Public field names become part of the API.
+- **Code Reviews:** Good names reduce the need for comments.
+- **Maintenance:** Descriptive names make code easier to understand and modify.
+
+---
+
+## 13. Variable Best Practices
+
+### Definitions
+
+**Core Definition:** Variable best practices are guidelines for declaring, initialising, using, and naming variables to write clean, maintainable, and bug-free code.
+
+**Technical Definition:** Best practices derive from authoritative sources including *Effective Java* by Joshua Bloch and the Java Language Specification. Key principles include declaring variables as close to their use as possible, minimising scope, preferring immutability with `final`, using meaningful names, and avoiding magic numbers.
+
+**Beginner-Friendly Explanation:** Best practices help you avoid common mistakes like using confusing names, declaring variables too early, or forgetting to initialise them. They're like a checklist for writing clean, professional code.
+
+### Key Best Practices Table
+
+| Practice | Description |
+|----------|-------------|
+| Declare Close to Use | Declare variables as close to their first use as possible. |
+| Minimise Scope | Keep variable scope as small as possible. |
+| Prefer `final` | Use `final` for variables that don't need to change. |
+| Initialise at Declaration | Initialise variables when you declare them whenever possible. |
+| Use Descriptive Names | Choose names that clearly convey the variable's purpose. |
+| Avoid Magic Numbers | Use named constants instead of hard-coded values. |
+| Use `var` Judiciously | Use `var` when the type is obvious from the initialiser. |
+| Avoid Shadowing | Don't reuse names in nested scopes; it causes confusion. |
+| One Variable Per Declaration | Declare one variable per line for clarity. |
+| Use `this` for Fields | Use `this.fieldName` to distinguish fields from parameters. |
+| Prefer Local Variables | Prefer local variables over instance/static when possible. |
+| Avoid Global Mutable State | Minimise static mutable variables. |
+
+### Annotated Code Example
+
+```java
+// File: VariableBestPractices.java
+public class VariableBestPractices {
+    // BEST PRACTICE: Named constant instead of magic number
+    private static final double TAX_RATE = 0.08;
+    private static final int MAX_ITEMS = 100;
+
+    // BEST PRACTICE: Descriptive instance variable names
+    private final String customerName;
+    private int itemCount;
+
+    public VariableBestPractices(String customerName) {
+        // BEST PRACTICE: Use 'this' to distinguish field from parameter
+        this.customerName = customerName;
+        this.itemCount = 0;
+    }
+
+    public double calculateTotal(double subtotal) {
+        // BEST PRACTICE: Declare close to use, use final for constants
+        final double tax = subtotal * TAX_RATE;
+        final double total = subtotal + tax;
+        return total;
+    }
+
+    public static void main(String[] args) {
+        // BEST PRACTICE: Initialise at declaration
+        var demo = new VariableBestPractices("Alice");
+        double subtotal = 100.0;
+
+        // BEST PRACTICE: Meaningful variable names
+        double totalWithTax = demo.calculateTotal(subtotal);
+
+        System.out.println("Customer: " + demo.customerName);
+        System.out.println("Subtotal: $" + subtotal);
+        System.out.println("Total: $" + totalWithTax);
+    }
+}
+```
+
+**Expected Output:**
+```
+Customer: Alice
+Subtotal: $100.0
+Total: $108.0
+```
+
+### Real-World Cases
+
+- **Enterprise Applications:** Consistent naming and scoping conventions across teams.
+- **Library Design:** Public constants with descriptive names.
+- **Code Reviews:** Best practices form the basis for review checklists.
+- **Static Analysis:** Tools like Checkstyle and PMD enforce best practices.
+
+---
+
+## References Links
+
+- Variables — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/java/nutsandbolts/variables.html
+- Primitive Data Types — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html
+- Local Variable Type Inference — Oracle Java 10 Documentation - https://docs.oracle.com/javase/10/language/local-variable-type-inference.html
+- var Keyword in Java — Baeldung - https://www.baeldung.com/java-var-keyword
+- Java Language Specification, Chapter 4: Types, Values, and Variables - https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html
+- Java Language Specification, Chapter 6: Names - https://docs.oracle.com/javase/specs/jls/se21/html/jls-6.html
+- Java Code Conventions — Oracle - https://www.oracle.com/java/technologies/javase/codeconventions-namingconventions.html
+- Effective Java (3rd Edition) by Joshua Bloch — Chapter 2: Creating and Destroying Objects, Chapter 4: Classes and Interfaces
+- Java Variables — W3Schools - https://www.w3schools.com/java/java_variables.asp
+- Java Variables — GeeksforGeeks - https://www.geeksforgeeks.org/variables-in-java/

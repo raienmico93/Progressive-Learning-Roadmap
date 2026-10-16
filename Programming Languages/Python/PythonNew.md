@@ -699,7 +699,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Scope pitfalls
   - Scope best practices
 
-- **29. Lambda Functions**
+- [**29. Lambda Functions**](/Programming%20Languages/Python/Functions/LambdaFunc.md)
   - Lambda functions
   - Anonymous functions
   - Lambda syntax
@@ -708,7 +708,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Lambda vs def
   - Lambda best practices
 
-- **30. Closures**
+- [**30. Closures**](/Programming%20Languages/Python/Functions/Closures.md)
   - Closures
   - Nested functions
   - Free variables
@@ -717,7 +717,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Closure pitfalls
   - Closure examples
 
-- **31. Decorators**
+- [**31. Decorators**](/Programming%20Languages/Python/Functions/Decorators.md)
   - Decorators
   - Decorator syntax
   - `@decorator`
@@ -744,7 +744,7 @@ Python is best learned as more than "a scripting language." The progression shou
     - `@contextmanager`
     - `@atexit`
 
-- **32. Recursion**
+- [**32. Recursion**](/Programming%20Languages/Python/Functions/Recursion.md)
   - Recursion
   - Base case
   - Recursive case
@@ -1023,7 +1023,7 @@ Python is best learned as more than "a scripting language." The progression shou
 
 # VII. Modules and Packages
 
-- **45. Modules**
+- [**45. Modules**](/Programming%20Languages/Python/Modules/Modules.md)
   - Modules
   - Module creation
   - Module import
@@ -1044,7 +1044,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - `if __name__ == "__main__"`
   - Module best practices
 
-- **46. Packages**
+- [**46. Packages**](/Programming%20Languages/Python/Modules/Packages.md)
   - Packages
   - Package creation
   - `__init__.py`

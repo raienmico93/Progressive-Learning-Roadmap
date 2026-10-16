@@ -1,422 +1,520 @@
-# Java Concurrency Fundamentals: A Comprehensive Research Cheat Sheet
+# Java Concurrency Fundamentals: A Comprehensive Programming Cheat Sheet
+
+---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition**
-Java concurrency fundamentals encompass the mechanisms by which multiple threads of execution coexist, share resources, and are managed by the Java Virtual Machine (JVM) and the underlying operating system. These fundamentals include the distinction between processes and threads, the difference between concurrency and parallelism, the formal thread lifecycle, thread identification and configuration, and the routing of uncaught thread-level exceptions.
+**Core Definition:** Concurrency is the ability of a program to execute multiple tasks in overlapping time periods, while parallelism is the simultaneous execution of multiple tasks on multiple processing units. Java provides first-class support for concurrency through its threading model, built into the `java.lang.Thread` class and the `java.util.concurrent` package.
 
-**Technical Definition**
-A thread is a thread of execution in a program; the JVM allows an application to have multiple threads of execution running concurrently. Platform threads are typically mapped 1:1 to kernel threads scheduled by the operating system and usually have a large stack and other resources maintained by the operating system. Virtual threads are user-mode threads scheduled by the Java runtime rather than the operating system, require few resources, and are suitable for executing tasks that spend most of the time blocked. Every thread has a unique identifier and a name, and platform threads additionally have a thread priority and are members of a thread group. Threads transition through six states defined by `Thread.State`: NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, and TERMINATED. When a thread terminates due to an uncaught exception, the JVM queries the thread for its `UncaughtExceptionHandler` and invokes the handler's `uncaughtException` method.
+**Technical Definition:** "A thread is a thread of execution in a program. The Java Virtual Machine allows an application to have multiple threads of execution running concurrently". "A process has a self-contained execution environment. A process generally has a complete, private set of basic run-time resources; in particular, each process has its own memory space". "Threads are sometimes called lightweight processes. Both processes and threads provide an execution environment, but creating a new thread requires fewer resources than creating a new process. Threads exist within a process — every process has at least one. Threads share the process's resources, including memory and open files".
 
-**Beginner-Friendly Explanation**
-Imagine a large office building. The building itself is a **process**—it has its own address, its own resources, and it's isolated from other buildings. Inside the building, several **workers** (threads) share the same office space, the same filing cabinets (heap memory), and the same coffee machine. Each worker has their own desk and notebook (stack memory) to keep track of their personal tasks. The building manager (operating system) decides which worker gets to use the shared printer (CPU) at any given moment. If a worker encounters an unresolvable problem (uncaught exception), the building's emergency protocol (UncaughtExceptionHandler) determines what happens next.
+**Beginner-Friendly Explanation:** Imagine a restaurant kitchen. A **process** is like the entire kitchen — it has its own space, equipment, and staff. A **thread** is like an individual chef working in that kitchen. Multiple chefs (threads) can work simultaneously, sharing the same kitchen space (memory), but each doing their own task. **Concurrency** is when the chefs take turns using the stove, giving the impression that everything is happening at once. **Parallelism** is when there are multiple stoves, so chefs can actually cook at the same time. Most Java programs start with one chef (the main thread), but you can hire more chefs (create threads) to get more work done.
 
 ### Key Characteristics
 
-- **Shared Heap, Private Stack**: All threads within a process share the process's heap memory, allowing them to access and modify the same objects, but each thread maintains its own private stack for local variables and method calls.
-- **OS-Level Scheduling**: Platform threads are scheduled by the operating system's scheduler; the JVM does not control when a thread runs, only when it is eligible to run.
-- **Lightweight Context Switching**: Thread context switching is less expensive than process context switching because threads share the same address space, requiring no change of memory mapping.
-- **Six Formal States**: The JVM defines exactly six thread states via the `Thread.State` enumeration; these are virtual machine states that do not necessarily map to operating system thread states.
-- **Daemon vs. User Threads**: The JVM shuts down when all started non-daemon threads have terminated; daemon threads do not prevent the shutdown sequence from beginning.
-- **Centralized Exception Routing**: Uncaught exceptions are routed through a handler chain: the thread's specific handler, then its `ThreadGroup`, then the global default handler.
+- **Two Units of Execution:** Processes (heavyweight, isolated) and threads (lightweight, shared memory).
+- **Shared Memory Model:** Threads within a process share the same address space, enabling efficient communication but requiring synchronization.
+- **Preemptive Scheduling:** The operating system (or JVM) decides when to switch between threads.
+- **Concurrency ≠ Parallelism:** Concurrency is about dealing with many things at once; parallelism is about doing many things at once.
+- **Platform vs Virtual Threads:** Platform threads are mapped 1:1 to OS threads; virtual threads (Java 21+) are lightweight, JVM-managed threads.
+- **Java Memory Model (JMM):** Defines the rules for how threads interact through memory, ensuring visibility and ordering.
 
 ### Prerequisites
 
-- Basic Java syntax (classes, methods, object instantiation)
-- Familiarity with the `main` method and program entry point
-- Awareness of the distinction between the call stack and the heap
-- Understanding of exception handling (`try-catch`, `throws`)
+- Basic understanding of Java classes and objects
+- Familiarity with the `java.lang` package
+- Knowledge of exceptions and try-catch-finally
+- Understanding of basic operating system concepts (processes, scheduling)
 
 ### Related Programming Areas
 
-- **Java Memory Model**: Defines happens-before relationships that govern visibility between threads.
-- **Executor Framework**: Higher-level abstraction for managing pools of threads and asynchronous task execution.
-- **Synchronization**: Mechanisms (`synchronized`, `volatile`, locks) for coordinating access to shared state.
-- **Operating Systems**: Process scheduling, context switching, and memory management concepts directly inform Java's threading behavior.
+- **Multithreading:** Creating and managing multiple threads of execution.
+- **Synchronization:** Coordinating access to shared resources.
+- **Thread Pools:** Reusing threads for efficient task execution.
+- **Concurrent Collections:** Thread-safe data structures in `java.util.concurrent`.
+- **Asynchronous Programming:** `CompletableFuture` and reactive programming.
+- **Virtual Threads (Project Loom):** Lightweight threads for high-throughput concurrency.
 
 ### Core Concepts / Features
 
-Five core concepts are covered: (1) process vs. thread, (2) concurrency vs. parallelism, (3) the thread lifecycle, (4) thread identification, naming, priorities, and daemon status, and (5) uncaught exception handling.
-
 ---
 
-## Core Concept 1: Process vs. Thread — OS-Level Scheduling, Memory Allocation, and Context Switching
+## 1. Concurrency
 
 ### Definitions
 
-**Core Definition**
-A process is an instance of a computer program being executed, with its own isolated memory space and resources. A thread is a smaller, lightweight unit of execution that lives inside a process and shares the process's memory and resources.
+**Core Definition:** Concurrency is the ability of a program to execute multiple tasks in overlapping time periods, where tasks may start, run, and complete in interleaved fashion.
 
-**Technical Definition**
-A process is an executable program that is loaded into memory and has its own logical memory address space allocated by the kernel. A thread is a single sequential flow that runs in the address space of its process; all threads within a single process share the process's heap memory. Each thread maintains its own private stack memory to track local variables and method calls. In Java, a platform thread is typically mapped 1:1 to a kernel thread scheduled by the operating system, while a virtual thread is scheduled by the Java runtime and may be multiplexed onto a small set of carrier platform threads.
+**Technical Definition:** "Concurrency, in contrast, is the problem of scheduling some computational resources to a set of largely independent tasks that compete over those resources. The main performance measure we care about when we speak of concurrency isn't the duration (latency) of any single task, but throughput — the number of tasks we can process per time-unit". "Concurrency is the simultaneous execution of multiple threads of execution". "Concurrency uses multi-threading in order to start several execution units, called threads".
 
-**Beginner-Friendly Explanation**
-A process is like a house: it has its own address, its own rooms, and its own furniture. Nobody from outside can walk in uninvited. A thread is like a person living in that house. Several people (threads) can live in the same house (process), share the same kitchen and living room (heap memory), but each person has their own bedroom (stack) where they keep their personal belongings. When the house is sold (process terminates), everyone inside must leave.
+**Beginner-Friendly Explanation:** Concurrency is like a single chef juggling multiple dishes. The chef chops vegetables for one dish, then stirs the pot for another, then checks the oven for a third. The chef isn't doing all three at exactly the same instant, but all three dishes are progressing. This is what concurrency looks like — multiple tasks making progress by sharing time.
 
 ### Purposes
 
-- To understand why processes provide isolation while threads enable shared-memory communication.
-- To recognize that thread creation and context switching are cheaper than process creation and switching.
-- To reason about memory safety: process isolation prevents accidental corruption across programs, while thread sharing enables efficient data exchange but requires synchronization.
-- To choose between multi-process and multi-threaded designs based on isolation, communication, and resource requirements.
+- To improve responsiveness in interactive applications
+- To increase throughput by overlapping I/O and computation
+- To model real-world systems that naturally have multiple activities
+- To make better use of multi-core processors
+- To handle multiple clients or requests simultaneously
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax — Process vs. Thread in Java**
+**Complete General Syntax (Creating a Thread):**
 
 ```java
-// A Java program runs as a process with at least one thread (the main thread)
-public class ProcessVsThread {
-    public static void main(String[] args) {
-        // The JVM process contains the main thread by default
-        Thread mainThread = Thread.currentThread();
-        System.out.println("Current thread: " + mainThread.getName());
-
-        // Additional threads share the process's heap
-        Thread worker = new Thread(() -> {
-            System.out.println("Worker thread: " + Thread.currentThread().getName());
-        });
-        worker.start();
+// Approach 1: Extend Thread
+class MyThread extends Thread {
+    public void run() {
+        // task code
     }
 }
+new MyThread().start();
+
+// Approach 2: Implement Runnable
+Runnable task = () -> {
+    // task code
+};
+new Thread(task).start();
+
+// Approach 3: Using Thread.Builder (Java 21+)
+Thread thread = Thread.ofPlatform().start(() -> {
+    // task code
+});
 ```
 
-**Component Breakdown**
+**Component Breakdown:**
 
 | Component | Description |
 |-----------|-------------|
-| Process | OS-level container with isolated address space and resources |
-| Thread | Lightweight execution unit within a process; shares heap, has private stack |
-| Heap memory | Shared among all threads in a process; stores objects |
-| Stack memory | Private to each thread; stores local variables and method call frames |
-| Context switch | The OS saving one thread's state and restoring another's |
+| `Thread` | The class representing a thread of execution |
+| `Runnable` | A functional interface for the task to be executed |
+| `start()` | Schedules the thread to begin execution |
+| `run()` | The method containing the thread's task |
+| `Thread.Builder` | Modern API for creating threads (Java 21+) |
 
-**Syntax Rules**
+**Syntax Rules:**
 
-1. Every Java program begins with a single non-daemon thread (the "main" thread) created by the JVM.
-2. Threads created within a process share the same heap memory; they can access and modify the same objects.
-3. Each thread has its own stack; local variables declared in one thread are not visible to other threads.
-4. Thread context switching does not require a change of address space, making it faster than process context switching.
+- `start()` schedules the thread; `run()` is called by the JVM when the thread executes.
+- A thread terminates when `run()` completes normally or abruptly.
+- Threads share the process's memory and resources.
 
-**Constraints and Limitations**
+**Constraints and Limitations:**
 
-- Threads within a process are not protected against each other by the operating system; a bug in one thread can corrupt shared data seen by all.
-- Creating a new process requires more resources (memory, file descriptors) than creating a new thread.
-- Process isolation means inter-process communication requires special mechanisms (pipes, sockets, shared memory segments).
-- Java does not provide direct APIs for creating new processes with shared heap memory; each Java process has its own independent JVM.
+- Creating a new thread for every task has significant overhead.
+- Excessive threads cause resource exhaustion and `OutOfMemoryError`.
+- Thread scheduling and context switching introduce overhead.
 
-### Annotated Code Examples
+### Annotated Complete Step-by-Step Code Examples
 
-**Example 1: Shared Heap vs. Private Stack**
+**Example 1: Creating and Starting Threads**
 
 ```java
-public class SharedHeapPrivateStack {
-    // Shared among all threads (heap memory)
-    static int sharedCounter = 0;
-
-    public static void main(String[] args) throws InterruptedException {
+// File: ConcurrencyDemo.java
+public class ConcurrencyDemo {
+    public static void main(String[] args) {
+        // Approach 1: Using a lambda with Runnable
         Runnable task = () -> {
-            // Local variable: private to this thread (stack memory)
-            int localCounter = 0;
-            for (int i = 0; i < 1000; i++) {
-                sharedCounter++;  // shared heap access
-                localCounter++;   // private stack access
+            for (int i = 0; i < 3; i++) {
+                System.out.println(Thread.currentThread().getName() + ": " + i);
             }
-            System.out.println(Thread.currentThread().getName()
-                + " local: " + localCounter);
         };
 
+        // Create two threads that run the same task
         Thread t1 = new Thread(task, "Thread-A");
         Thread t2 = new Thread(task, "Thread-B");
-        t1.start(); t2.start();
-        t1.join(); t2.join();
 
-        System.out.println("Shared counter: " + sharedCounter);
+        // Start both threads
+        t1.start();
+        t2.start();
+
+        System.out.println("Main thread continues...");
     }
 }
 ```
 
-**Expected Output (order may vary)**
-
+**Expected Output (order of thread output may vary):**
 ```
-Thread-A local: 1000
-Thread-B local: 1000
-Shared counter: 2000 (or less, due to race condition)
-```
-
-**Why This Output Occurs**
-
-`sharedCounter` is a static field stored on the heap and shared by both threads. `localCounter` is a local variable stored on each thread's private stack, so each thread has its own independent copy. The final value of `sharedCounter` may be less than 2000 because `sharedCounter++` is not atomic and the two threads can interleave their read-modify-write operations. This demonstrates the shared-heap, private-stack model.
-
----
-
-**Example 2: Main Thread as a Process's First Thread**
-
-```java
-public class MainThreadDemo {
-    public static void main(String[] args) {
-        Thread current = Thread.currentThread();
-        System.out.println("Main thread name: " + current.getName());
-        System.out.println("Main thread ID: " + current.threadId());
-        System.out.println("Is daemon: " + current.isDaemon());
-        System.out.println("Priority: " + current.getPriority());
-        System.out.println("Thread group: " + current.getThreadGroup().getName());
-    }
-}
+Main thread continues...
+Thread-A: 0
+Thread-B: 0
+Thread-A: 1
+Thread-B: 1
+Thread-A: 2
+Thread-B: 2
 ```
 
-**Expected Output (values vary)**
+**Step-by-Step Explanation:**
 
-```
-Main thread name: main
-Main thread ID: 1
-Is daemon: false
-Priority: 5
-Thread group: main
-```
-
-**Why This Output Occurs**
-
-The JVM creates the "main" thread to execute the `main()` method. It is a non-daemon thread with the default priority of 5 (`Thread.NORM_PRIORITY`) and belongs to the "main" thread group. This demonstrates that even the simplest Java program runs within a process that contains at least one thread.
+1. A `Runnable` is defined with a lambda that prints the current thread's name and a counter.
+2. Two `Thread` objects are created with the same `Runnable` but different names.
+3. `start()` is called on both threads, scheduling them for execution.
+4. The main thread continues immediately after calling `start()` (it does not wait).
+5. Both threads execute the `run()` method concurrently, interleaving their output.
 
 ### Real-World Cases
 
-- **Web Servers**: A single server process handles thousands of concurrent requests using a thread pool; threads share the server's heap for caching and session data.
-- **Database Systems**: A database server process uses multiple threads for query execution, transaction logging, and background maintenance, all sharing the buffer pool on the heap.
-- **IDE Applications**: The IDE process uses a main thread for the UI and background threads for compilation, indexing, and version control operations.
+- **Web Servers:** Handling multiple HTTP requests concurrently.
+- **GUI Applications:** Keeping the UI responsive while background tasks run.
+- **Data Processing:** Overlapping I/O operations with computation.
+- **Game Engines:** Managing rendering, physics, and input in parallel.
 
 ---
 
-## Core Concept 2: Concurrency vs. Parallelism — Interleaved Execution vs. Simultaneous Multi-Core Execution
+## 2. Parallelism
 
 ### Definitions
 
-**Core Definition**
-Concurrency is the ability to deal with multiple things at once, often through interleaved execution on a single core. Parallelism is the ability to do multiple things at once, using multiple cores to execute tasks simultaneously.
+**Core Definition:** Parallelism is the simultaneous execution of multiple tasks on multiple processing units (CPU cores), where tasks literally run at the same instant.
 
-**Technical Definition**
-Concurrency means that two or more calculations happen within the same time frame, and there is usually some sort of dependency between them. Concurrency describes a problem (two things need to happen together), while parallelism describes a solution (two processor cores are used to execute two things simultaneously). On a single-core CPU, concurrency is achieved by rapidly switching between tasks (time-slicing), creating the illusion of simultaneous execution; at any given nanosecond, only one task is actually running. Parallelism requires multiple processor cores to execute tasks truly simultaneously.
+**Technical Definition:** "Parallelism is the problem of doing a single job — say, inverting a matrix or sorting a list — faster by employing multiple processing units. This is done by breaking up the job into multiple cooperating subtasks, different subsets of which running on a different core". "Parallelism implies doing many things at once". "Parallelism is when different hardware units (e.g., cores) are doing work at the same time".
 
-**Beginner-Friendly Explanation**
-Concurrency is like a single chef juggling multiple dishes: chopping vegetables for one dish, then stirring a pot for another, then checking the oven for a third. The chef is making progress on all dishes, but only doing one thing at a time. Parallelism is like having three chefs, each working on a different dish simultaneously. Concurrency is about *dealing with* many things; parallelism is about *doing* many things.
+**Beginner-Friendly Explanation:** Parallelism is like having multiple chefs, each with their own stove, all cooking different dishes at exactly the same time. Unlike concurrency (one chef juggling tasks), parallelism requires multiple processing units. On a multi-core CPU, different threads can truly run simultaneously on different cores.
 
 ### Purposes
 
-- To distinguish between the design goal (concurrency: handling multiple tasks) and the implementation strategy (parallelism: using multiple cores).
-- To recognize that concurrent programs on a single core are still correct and useful, even without true parallelism.
-- To understand that parallelism is one way to implement concurrency, but not the only one (interleaved processing is another).
-- To reason about performance: concurrency can improve responsiveness, while parallelism can improve throughput for CPU-bound tasks.
+- To reduce latency of a single large computation
+- To exploit multi-core processors for performance
+- To speed up CPU-bound tasks
+- To divide a large job into cooperating subtasks
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax — Concurrency vs. Parallelism in Java**
+**Key Distinction:**
+
+| Aspect | Concurrency | Parallelism |
+|--------|-------------|-------------|
+| Goal | Handle many tasks (throughput) | Do one job faster (latency) |
+| Tasks | Largely independent, competing | Cooperating subtasks of one job |
+| Hardware | Can exist on a single core | Requires multiple cores |
+| Measure | Throughput | Latency reduction |
+| Example | Web server handling requests | Sorting a huge list |
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-// Concurrency: two tasks interleaved on a single thread (or single core)
-Thread t1 = new Thread(() -> {
-    for (int i = 0; i < 5; i++) System.out.println("Task A: " + i);
-});
-Thread t2 = new Thread(() -> {
-    for (int i = 0; i < 5; i++) System.out.println("Task B: " + i);
-});
-t1.start(); t2.start();
-
-// Parallelism: tasks explicitly submitted to a multi-core pool
-ExecutorService pool = Executors.newFixedThreadPool(4);
-Future<Integer> f1 = pool.submit(() -> computeHeavyTaskA());
-Future<Integer> f2 = pool.submit(() -> computeHeavyTaskB());
-// Both tasks may run simultaneously on different cores
-```
-
-**Component Breakdown**
-
-| Concept | Description |
-|---------|-------------|
-| Concurrency | Dealing with multiple tasks; interleaved execution |
-| Parallelism | Doing multiple tasks simultaneously; requires multiple cores |
-| Time-slicing | OS rapidly switches between threads on a single core |
-| Multi-core execution | Tasks run on different cores at the same instant |
-
-**Syntax Rules**
-
-1. Concurrency is a property of the program structure; parallelism is a property of the execution environment.
-2. Java threads can be concurrent without being parallel (e.g., on a single-core CPU).
-3. Java threads can be parallel only if the underlying hardware has multiple cores and the OS scheduler assigns threads to different cores.
-4. `Runtime.getRuntime().availableProcessors()` returns the number of processors available to the JVM, which bounds the degree of parallelism.
-
-**Constraints and Limitations**
-
-- Concurrency on a single core does not reduce total execution time for CPU-bound tasks; it may even increase it due to context-switching overhead.
-- Parallelism requires multiple cores; on a single-core system, parallel threads are executed concurrently (interleaved), not simultaneously.
-- Writing correct concurrent code is difficult regardless of whether parallelism is available.
-- Virtual threads (Java 21+) improve concurrency scalability but do not create additional CPU cores for parallelism.
-
-### Annotated Code Examples
-
-**Example 1: Concurrent Interleaving on a Single Core**
-
-```java
-public class ConcurrencyDemo {
-    public static void main(String[] args) throws InterruptedException {
-        Runnable taskA = () -> {
-            for (int i = 1; i <= 3; i++) {
-                System.out.println("A" + i);
-                Thread.yield(); // hint to scheduler: allow other threads to run
-            }
-        };
-        Runnable taskB = () -> {
-            for (int i = 1; i <= 3; i++) {
-                System.out.println("B" + i);
-                Thread.yield();
-            }
-        };
-
-        Thread t1 = new Thread(taskA);
-        Thread t2 = new Thread(taskB);
-        t1.start(); t2.start();
-        t1.join(); t2.join();
-    }
-}
-```
-
-**Expected Output (interleaving varies)**
-
-```
-A1
-B1
-A2
-B2
-A3
-B3
-```
-
-**Why This Output Occurs**
-
-The two threads are concurrent. On a single-core system, the OS scheduler interleaves their execution via time-slicing. `Thread.yield()` suggests that the current thread is willing to yield its current use of a processor, increasing the likelihood of interleaving. Even on a multi-core system, the output may be interleaved because both threads are making progress concurrently.
-
----
-
-**Example 2: Parallel Execution on Multiple Cores**
-
-```java
-import java.util.concurrent.*;
+// File: ParallelismDemo.java
+import java.util.stream.IntStream;
 
 public class ParallelismDemo {
-    static long computeSum(int start, int end) {
-        long sum = 0;
-        for (int i = start; i <= end; i++) sum += i;
-        return sum;
-    }
+    public static void main(String[] args) {
+        int n = 10_000_000;
+        int[] numbers = IntStream.rangeClosed(1, n).toArray();
 
-    public static void main(String[] args) throws Exception {
-        int cores = Runtime.getRuntime().availableProcessors();
-        System.out.println("Available processors: " + cores);
+        // Sequential sum
+        long start = System.nanoTime();
+        long sequentialSum = 0;
+        for (int num : numbers) {
+            sequentialSum += num;
+        }
+        long seqTime = System.nanoTime() - start;
 
-        ExecutorService pool = Executors.newFixedThreadPool(cores);
+        // Parallel sum using parallel streams
+        start = System.nanoTime();
+        long parallelSum = IntStream.of(numbers).parallel().sum();
+        long parTime = System.nanoTime() - start;
 
-        long startTime = System.nanoTime();
-        Future<Long> f1 = pool.submit(() -> computeSum(1, 500_000_000));
-        Future<Long> f2 = pool.submit(() -> computeSum(500_000_001, 1_000_000_000));
-
-        long sum = f1.get() + f2.get();
-        long endTime = System.nanoTime();
-
-        System.out.println("Sum: " + sum);
-        System.out.println("Time (ms): " + (endTime - startTime) / 1_000_000);
-        pool.shutdown();
+        System.out.println("Sequential: " + sequentialSum + " (" + seqTime / 1_000_000 + " ms)");
+        System.out.println("Parallel:   " + parallelSum + " (" + parTime / 1_000_000 + " ms)");
     }
 }
 ```
 
-**Expected Output (timing varies)**
-
+**Expected Output (times vary):**
 ```
-Available processors: 8
-Sum: 500000000500000000
-Time (ms): 350
+Sequential: 50000005000000 (45 ms)
+Parallel:   50000005000000 (12 ms)
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-The two halves of the sum are computed in parallel on different cores (if available). The total execution time is approximately half of what it would be if computed sequentially, demonstrating true parallelism. On a single-core system, the tasks would run concurrently (interleaved) and the total time would be roughly the same as sequential execution.
+1. An array of 10 million integers is created.
+2. The sequential sum iterates over the array using a loop.
+3. The parallel sum uses `IntStream.parallel()` to divide the work across cores.
+4. The parallel version is typically faster because multiple cores work simultaneously.
+5. The result is the same, but the execution time differs due to parallelism.
 
 ### Real-World Cases
 
-- **Web Servers**: Handle many concurrent requests on a limited number of cores; concurrency ensures responsiveness while parallelism accelerates CPU-bound request processing.
-- **Video Encoding**: A video is split into chunks, each encoded in parallel on a different core; this is true parallelism for CPU-bound work.
-- **UI Applications**: A background thread performs I/O concurrently with the UI thread, keeping the interface responsive even on a single-core device.
+- **Scientific Computing:** Matrix multiplication, Monte Carlo simulations.
+- **Image Processing:** Applying filters to large images in parallel.
+- **Big Data:** MapReduce operations across distributed clusters.
+- **Machine Learning:** Parallel gradient descent, batch processing.
 
 ---
 
-## Core Concept 3: Thread Lifecycle — Transition States (NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED)
+## 3. Processes
 
 ### Definitions
 
-**Core Definition**
-A Java thread exists in one of six states at any given moment: NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, or TERMINATED. These states are defined by the `Thread.State` enumeration.
+**Core Definition:** A process is an instance of a running program that has its own isolated memory space and system resources.
 
-**Technical Definition**
-The `Thread.State` enum defines the possible states of a thread. A thread can be in only one state at a given point in time. These states are virtual machine states that do not reflect any operating system thread states. NEW: a thread that has not yet started. RUNNABLE: a thread executing in the Java virtual machine. BLOCKED: a thread that is blocked waiting for a monitor lock. WAITING: a thread that is waiting indefinitely for another thread to perform a particular action. TIMED_WAITING: a thread that is waiting for another thread to perform an action for up to a specified waiting time. TERMINATED: a thread that has exited.
+**Technical Definition:** "A process has a self-contained execution environment. A process generally has a complete, private set of basic run-time resources; in particular, each process has its own memory space". "Processes are independent execution units that contain their own state information, use their own address spaces, and only interact via interprocess communication". "Most implementations of the Java virtual machine run as a single process".
 
-**Beginner-Friendly Explanation**
-Think of a thread's life like a person going through stages of a day. **NEW** is when you've just woken up but haven't gotten out of bed yet (the thread object is created but `start()` hasn't been called). **RUNNABLE** is when you're up and about, doing your tasks (the thread is executing or ready to execute). **BLOCKED** is when you're waiting for the bathroom key (waiting for a monitor lock). **WAITING** is when you're waiting for a phone call that has no set time (waiting indefinitely for another thread). **TIMED_WAITING** is when you're waiting for a timer to go off (waiting with a timeout). **TERMINATED** is when your day is over (the thread has finished).
+**Beginner-Friendly Explanation:** A process is like a separate house. It has its own address (memory space), its own utilities, and its own front door. Processes cannot directly access each other's memory — they must communicate through special channels (pipes, sockets). In Java, when you run a program, the JVM itself runs as a single process, and your Java code runs inside it.
 
 ### Purposes
 
-- To diagnose thread-related issues (deadlocks, starvation, excessive blocking) by inspecting thread states.
-- To understand which operations cause transitions between states (e.g., `start()`, `sleep()`, `wait()`, `notify()`).
-- To write correct concurrent code by knowing when a thread is blocked versus waiting versus runnable.
-- To use `Thread.getState()` for monitoring and debugging, especially in thread dumps.
+- To provide isolation between different applications
+- To enable multiple programs to run simultaneously
+- To allocate separate memory spaces for security and stability
+- To support inter-process communication (IPC) when needed
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax — Thread State Transitions**
+**Process vs Thread Comparison:**
+
+| Aspect | Process | Thread |
+|--------|---------|--------|
+| Memory | Own address space | Shared with other threads |
+| Creation cost | High | Low |
+| Communication | IPC (pipes, sockets) | Shared memory |
+| Isolation | Strong | None (shared memory) |
+| Crash impact | Isolated | Can crash entire process |
+
+**Constraints and Limitations:**
+
+- Creating a process is expensive (requires a new JVM if Java).
+- Inter-process communication is slower than thread communication.
+- Java applications can create additional processes using `ProcessBuilder`.
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-Thread t = new Thread(task);          // NEW
-t.start();                             // NEW -> RUNNABLE
-// RUNNABLE -> BLOCKED: waiting to acquire a monitor lock
-// RUNNABLE -> WAITING: calls Object.wait() or Thread.join() without timeout
-// RUNNABLE -> TIMED_WAITING: calls Thread.sleep(), Object.wait(timeout), or Thread.join(timeout)
-// BLOCKED/WAITING/TIMED_WAITING -> RUNNABLE: lock acquired, notify()/notifyAll(), timeout expires
-// RUNNABLE -> TERMINATED: run() completes or throws uncaught exception
+// File: ProcessDemo.java
+import java.io.IOException;
 
-Thread.State state = t.getState();     // query current state
+public class ProcessDemo {
+    public static void main(String[] args) throws IOException, InterruptedException {
+        // Create a new process (runs the OS 'echo' command)
+        ProcessBuilder pb = new ProcessBuilder("echo", "Hello from a separate process!");
+        Process process = pb.start();
+
+        // Read the output of the process
+        process.getInputStream().transferTo(System.out);
+
+        // Wait for the process to finish
+        int exitCode = process.waitFor();
+        System.out.println("\nProcess exited with code: " + exitCode);
+
+        // Information about the current JVM process
+        ProcessHandle current = ProcessHandle.current();
+        System.out.println("Current process PID: " + current.pid());
+    }
+}
 ```
 
-**Component Breakdown**
+**Expected Output:**
+```
+Hello from a separate process!
+Process exited with code: 0
+Current process PID: 12345
+```
 
-| State | Description | Entry Condition | Exit Condition |
-|-------|-------------|-----------------|----------------|
-| NEW | Not yet started | Thread object created | `start()` called |
-| RUNNABLE | Executing in JVM | `start()` called; or lock acquired; or timeout expired; or notified | Blocked on lock; waiting; terminated |
-| BLOCKED | Waiting for monitor lock | Attempts to enter `synchronized` block held by another | Lock acquired |
-| WAITING | Waiting indefinitely | `wait()`, `join()`, `park()` | `notify()`/`notifyAll()`, `join()` target terminates |
-| TIMED_WAITING | Waiting with timeout | `sleep()`, `wait(timeout)`, `join(timeout)` | Timeout expires, notified, target terminates |
-| TERMINATED | Exited | `run()` completes or throws | — |
+**Step-by-Step Explanation:**
 
-**Syntax Rules**
+1. `ProcessBuilder` is created with the `echo` command and an argument.
+2. `pb.start()` launches a new OS process.
+3. `getInputStream().transferTo()` reads the new process's output.
+4. `waitFor()` waits for the process to finish and returns its exit code.
+5. `ProcessHandle.current()` provides information about the JVM's own process.
 
-1. `Thread.getState()` returns a `Thread.State` enum value representing the thread's current state.
-2. A thread can be in only one state at any given time.
-3. A thread in the NEW state has not yet been started; calling `getState()` on it returns NEW.
-4. A thread in the TERMINATED state has completed execution; it cannot be restarted.
-5. A thread blocked in `synchronized` is in BLOCKED state; a thread blocked in `wait()` is in WAITING or TIMED_WAITING state.
+### Real-World Cases
 
-**Constraints and Limitations**
+- **Running External Tools:** Invoking compilers, scripts, or system commands.
+- **Microservices:** Independent processes communicating over the network.
+- **Sandboxing:** Isolating untrusted code in separate processes.
 
-- `Thread.getState()` is intended for monitoring and debugging, not for synchronization or control flow.
-- The JVM thread states are virtual machine states and do not necessarily correspond to operating system thread states.
-- A thread may transition between RUNNABLE and BLOCKED/WAITING/TIMED_WAITING many times during its lifetime.
-- `Thread.getState()` on a thread that has not been started returns NEW, not an error.
+---
 
-### Annotated Code Examples
+## 4. Threads
 
-**Example 1: Observing Thread State Transitions**
+### Definitions
+
+**Core Definition:** A thread is the smallest unit of execution within a process, sharing the process's memory and resources with other threads.
+
+**Technical Definition:** "A thread is a thread of execution in a program. The Java virtual machine allows an application to have multiple threads of execution running concurrently". "Threads are sometimes called lightweight processes... Threads share the process's resources, including memory and open files". "Every application has at least one thread — the main thread".
+
+**Beginner-Friendly Explanation:** A thread is like a worker inside a factory (the process). Multiple workers share the same factory floor (memory), tools, and materials. They can work on different tasks simultaneously, but they must coordinate when using shared resources.
+
+### Purposes
+
+- To execute multiple tasks concurrently within a single process
+- To keep applications responsive
+- To improve performance through overlapping I/O and computation
+- To take advantage of multi-core processors
+- To model naturally concurrent activities
+
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
 
 ```java
+// Approach 1: Extend Thread
+public class MyThread extends Thread {
+    @Override
+    public void run() {
+        // task code
+    }
+}
+
+// Approach 2: Implement Runnable
+public class MyTask implements Runnable {
+    @Override
+    public void run() {
+        // task code
+    }
+}
+new Thread(new MyTask()).start();
+
+// Approach 3: Lambda with Runnable
+new Thread(() -> { /* task code */ }).start();
+
+// Approach 4: Thread.Builder (Java 21+)
+Thread thread = Thread.ofVirtual().name("my-thread").start(() -> { /* task */ });
+```
+
+**Key Thread Methods:**
+
+| Method | Description |
+|--------|-------------|
+| `start()` | Schedules the thread to begin execution |
+| `run()` | Contains the thread's task |
+| `join()` | Waits for the thread to terminate |
+| `isAlive()` | Tests if a started thread has terminated |
+| `getName()` | Returns the thread's name |
+| `setName(String)` | Changes the thread's name |
+| `getId()` | Returns the unique thread identifier |
+| `sleep(long)` | Pauses the thread for the specified milliseconds |
+| `interrupt()` | Interrupts the thread |
+| `currentThread()` | Returns the currently executing thread |
+
+**Syntax Rules:**
+
+- A thread is created but not started until `start()` is called.
+- `start()` schedules the thread; the JVM calls `run()` when the thread executes.
+- A thread terminates when `run()` completes normally or abruptly.
+- Platform threads are mapped 1:1 to kernel threads; virtual threads are JVM-managed.
+
+**Constraints and Limitations:**
+
+- Platform threads are a limited resource (typically thousands at most).
+- Virtual threads are suitable for I/O-bound tasks, not CPU-intensive operations.
+- Threads share memory, requiring synchronization to avoid race conditions.
+
+### Annotated Complete Step-by-Step Code Examples
+
+**Example 1: Thread Lifecycle and Methods**
+
+```java
+// File: ThreadDemo.java
+public class ThreadDemo {
+    public static void main(String[] args) throws InterruptedException {
+        Thread worker = new Thread(() -> {
+            System.out.println("Worker thread running: " + Thread.currentThread().getName());
+            try {
+                Thread.sleep(1000);  // Simulate work
+            } catch (InterruptedException e) {
+                System.out.println("Worker interrupted");
+                Thread.currentThread().interrupt();  // Restore interrupt status
+            }
+            System.out.println("Worker thread finished");
+        }, "Worker-1");
+
+        System.out.println("Before start: " + worker.getState());  // NEW
+        worker.start();
+        System.out.println("After start: " + worker.getState());   // RUNNABLE or TIMED_WAITING
+
+        worker.join();  // Wait for the worker to finish
+        System.out.println("After join: " + worker.getState());    // TERMINATED
+        System.out.println("Main thread finished");
+    }
+}
+```
+
+**Expected Output:**
+```
+Before start: NEW
+After start: RUNNABLE
+Worker thread running: Worker-1
+Worker thread finished
+After join: TERMINATED
+Main thread finished
+```
+
+**Step-by-Step Explanation:**
+
+1. A `Thread` is created with a lambda `Runnable` and a name `"Worker-1"`.
+2. Before `start()`, the thread is in the `NEW` state.
+3. After `start()`, the thread transitions to `RUNNABLE` and begins execution.
+4. The worker sleeps for 1000 ms, entering the `TIMED_WAITING` state.
+5. `worker.join()` blocks the main thread until the worker terminates.
+6. After completion, the worker is in the `TERMINATED` state.
+
+### Real-World Cases
+
+- **Web Servers:** Each request handled by a separate thread.
+- **Background Tasks:** Logging, cleanup, and scheduled jobs.
+- **GUI Event Handling:** The Event Dispatch Thread processes UI events.
+- **Parallel Algorithms:** Dividing work across multiple threads.
+
+---
+
+## 5. Thread Lifecycle
+
+### Definitions
+
+**Core Definition:** The thread lifecycle is the sequence of states a thread passes through from creation to termination.
+
+**Technical Definition:** "A thread can be in one of the following states: NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED". "A thread can be in only one state at a given point in time. These states are virtual machine states which do not reflect any operating system thread states".
+
+**Beginner-Friendly Explanation:** A thread's life is like a person's day. It starts as NEW (born, not yet started), becomes RUNNABLE (ready to work), may become BLOCKED (waiting for a resource), WAITING (waiting indefinitely), TIMED_WAITING (waiting with a timeout), and finally TERMINATED (finished).
+
+### Purposes
+
+- To understand how threads progress through their existence
+- To diagnose thread-related issues (deadlocks, starvation)
+- To write correct code that handles thread state transitions
+- To use `Thread.getState()` for monitoring and debugging
+
+### Syntax Rules and Structure
+
+**Thread States Table:**
+
+| State | Description | How It's Entered |
+|-------|-------------|------------------|
+| `NEW` | Thread created but not started | `new Thread(...)` |
+| `RUNNABLE` | Executing or ready to execute | `start()` called |
+| `BLOCKED` | Waiting for a monitor lock | Waiting to enter `synchronized` |
+| `WAITING` | Waiting indefinitely for another thread | `wait()`, `join()` without timeout |
+| `TIMED_WAITING` | Waiting with a timeout | `sleep(ms)`, `wait(ms)`, `join(ms)` |
+| `TERMINATED` | Thread has exited | `run()` completes |
+
+**Syntax Rules:**
+
+- Only one state at a time.
+- JVM states do not map directly to OS thread states.
+- Use `Thread.getState()` to query the current state.
+
+**State Transition Diagram:**
+
+```
+NEW → start() → RUNNABLE → (scheduling) → RUNNABLE
+                    ↓
+              (lock contention) → BLOCKED → (lock acquired) → RUNNABLE
+                    ↓
+              (wait/join) → WAITING → (notify/join complete) → RUNNABLE
+                    ↓
+              (sleep/wait with timeout) → TIMED_WAITING → (timeout/notify) → RUNNABLE
+                    ↓
+              (run completes) → TERMINATED
+```
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ThreadStateDemo.java
 public class ThreadStateDemo {
     public static void main(String[] args) throws InterruptedException {
         Object lock = new Object();
@@ -424,514 +522,458 @@ public class ThreadStateDemo {
         Thread t = new Thread(() -> {
             synchronized (lock) {
                 try {
-                    System.out.println("Thread: acquiring lock, then waiting");
-                    lock.wait(2000); // TIMED_WAITING
-                    System.out.println("Thread: notified or timed out");
+                    System.out.println("Thread is in BLOCKED/WAITING state");
+                    lock.wait(2000);  // TIMED_WAITING
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
-        });
+            System.out.println("Thread finished");
+        }, "StateDemoThread");
 
-        System.out.println("State after creation: " + t.getState()); // NEW
+        System.out.println("1. After creation: " + t.getState());  // NEW
+
         t.start();
-        Thread.sleep(100); // let thread enter wait
-        System.out.println("State while waiting: " + t.getState()); // TIMED_WAITING
-
-        synchronized (lock) {
-            lock.notifyAll(); // wake the thread
-        }
+        Thread.sleep(100);  // Give the thread time to run
+        System.out.println("2. After start: " + t.getState());     // RUNNABLE or TIMED_WAITING
 
         t.join();
-        System.out.println("State after termination: " + t.getState()); // TERMINATED
+        System.out.println("3. After completion: " + t.getState()); // TERMINATED
     }
 }
 ```
 
-**Expected Output**
-
+**Expected Output:**
 ```
-State after creation: NEW
-Thread: acquiring lock, then waiting
-State while waiting: TIMED_WAITING
-Thread: notified or timed out
-State after termination: TERMINATED
+1. After creation: NEW
+Thread is in BLOCKED/WAITING state
+2. After start: TIMED_WAITING
+Thread finished
+3. After completion: TERMINATED
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-After creation, the thread is in NEW state. After `start()`, it enters RUNNABLE. It acquires the lock (RUNNABLE), then calls `wait(2000)`, transitioning to TIMED_WAITING. The main thread observes this state. `notifyAll()` wakes the thread, which reacquires the lock and returns to RUNNABLE. After `run()` completes, the thread transitions to TERMINATED.
+1. The thread is created but not started: state is `NEW`.
+2. After `start()`, the thread enters `RUNNABLE` and acquires the lock.
+3. `lock.wait(2000)` puts the thread into `TIMED_WAITING`.
+4. After the wait completes, the thread finishes and enters `TERMINATED`.
+5. `t.join()` waits for the thread to terminate.
+
+### Real-World Cases
+
+- **Debugging:** Diagnosing stuck threads via thread dumps.
+- **Monitoring:** Tracking the number of runnable vs blocked threads.
+- **Testing:** Verifying that a thread reaches a specific state.
 
 ---
 
-**Example 2: BLOCKED State Due to Monitor Contention**
+## 6. Thread States
+
+### Definitions
+
+**Core Definition:** Thread states are the distinct conditions a thread can be in at any moment, as defined by the `Thread.State` enum.
+
+**Technical Definition:** The `Thread.State` enum defines six states: `NEW`, `RUNNABLE`, `BLOCKED`, `WAITING`, `TIMED_WAITING`, and `TERMINATED`. "A thread in the runnable state is executing in the Java virtual machine but it may be waiting for other resources from the operating system such as processor". "A thread in the blocked state is waiting for a monitor lock to enter a synchronized block/method".
+
+**Beginner-Friendly Explanation:** Thread states are like traffic lights for threads. `NEW` means the car hasn't started. `RUNNABLE` means the car is moving or ready to move. `BLOCKED` means the car is waiting at a red light (waiting for a lock). `WAITING` means the car is parked indefinitely. `TIMED_WAITING` means the car is parked with a timer. `TERMINATED` means the car has reached its destination.
+
+### Purposes
+
+- To understand exactly what a thread is doing at any moment
+- To diagnose performance issues (e.g., many threads in BLOCKED state)
+- To write correct synchronization code
+- To use `Thread.getState()` for monitoring
+
+### Syntax Rules and Structure
+
+**State Details:**
+
+| State | Meaning | Common Causes |
+|-------|---------|---------------|
+| `NEW` | Not yet started | Just created |
+| `RUNNABLE` | Executing or ready to execute | Running, or waiting for CPU |
+| `BLOCKED` | Waiting for a monitor lock | Contending for `synchronized` |
+| `WAITING` | Waiting indefinitely | `wait()`, `join()`, `park()` |
+| `TIMED_WAITING` | Waiting with timeout | `sleep()`, `wait(ms)`, `join(ms)` |
+| `TERMINATED` | Exited | `run()` completed |
+
+**Syntax Rules:**
+
+- Use `Thread.getState()` to query the state.
+- States are JVM-level, not OS-level.
+- A thread can transition between states multiple times.
+
+### Annotated Complete Step-by-Step Code Examples
 
 ```java
-public class BlockedStateDemo {
+// File: ThreadStatesDemo.java
+public class ThreadStatesDemo {
     public static void main(String[] args) throws InterruptedException {
         Object lock = new Object();
 
-        Thread holder = new Thread(() -> {
+        Thread t = new Thread(() -> {
             synchronized (lock) {
                 try {
-                    System.out.println("Holder: holding lock for 2 seconds");
-                    Thread.sleep(2000); // keeps the lock while sleeping
-                } catch (InterruptedException e) { }
-            }
-        });
-
-        Thread waiter = new Thread(() -> {
-            synchronized (lock) {
-                System.out.println("Waiter: acquired lock");
-            }
-        });
-
-        holder.start();
-        Thread.sleep(100); // let holder acquire the lock
-        waiter.start();
-        Thread.sleep(100); // let waiter attempt to acquire
-
-        System.out.println("Waiter state: " + waiter.getState()); // BLOCKED
-
-        holder.join();
-        waiter.join();
-    }
-}
-```
-
-**Expected Output**
-
-```
-Holder: holding lock for 2 seconds
-Waiter state: BLOCKED
-Waiter: acquired lock
-```
-
-**Why This Output Occurs**
-
-The `holder` thread acquires the monitor of `lock` and sleeps for 2 seconds while holding it. The `waiter` thread attempts to enter the synchronized block but cannot acquire the monitor, so it transitions to BLOCKED. The main thread observes `waiter.getState()` returning `BLOCKED`. When the holder exits the synchronized block, the waiter acquires the lock and proceeds.
-
-### Real-World Cases
-
-- **Deadlock Diagnosis**: Thread dumps show thread states; a BLOCKED thread waiting for a lock held by a WAITING thread may indicate deadlock.
-- **Performance Monitoring**: JVM monitoring tools track the number of threads in each state to detect contention.
-- **Thread Pool Sizing**: Understanding how many threads are BLOCKED on I/O versus RUNNABLE helps tune pool sizes.
-
----
-
-## Core Concept 4: Thread Identification, Naming Conventions, Priorities, and Daemon vs. User Threads
-
-### Definitions
-
-**Core Definition**
-Every Java thread has a unique identifier (generated at creation and unchangeable) and a name (which can be set at creation or changed later). Platform threads additionally have a priority (an integer from 1 to 10) and are designated as either daemon or non-daemon (user) threads.
-
-**Technical Definition**
-Threads have a unique identifier and a name. The identifier is generated when a `Thread` is created and cannot be changed. The thread name can be specified when creating a thread or can be changed at a later time. Platform threads inherit the daemon status and thread priority from the thread that creates them. The shutdown sequence begins when all started non-daemon threads have terminated. Daemon threads are low-priority threads whose only role is to provide services to user threads. Virtual threads are always daemon threads and have a fixed priority that cannot be changed.
-
-**Beginner-Friendly Explanation**
-Think of threads as employees in a company. Each employee has a unique employee ID (thread ID) that never changes, and a name (thread name) that can be changed. Each employee also has a priority level (1 to 10) that hints at how urgently their work should be done. Some employees are permanent (user threads)—the company won't close until they all go home. Others are temporary contractors (daemon threads)—the company can close even if they're still working, because they're only there to support the permanent staff.
-
-### Purposes
-
-- To identify threads in logs, thread dumps, and debugging tools using meaningful names.
-- To distinguish between threads that keep the JVM alive (user threads) and background service threads (daemon threads).
-- To provide a scheduling hint to the operating system through thread priorities (though this is platform-dependent and unreliable).
-- To set up thread-local storage and inheritable thread-local storage for per-thread data.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax — Identification, Naming, Priority, and Daemon Status**
-
-```java
-// Thread identification
-Thread t = new Thread(task);
-long id = t.threadId();            // unique, unchangeable identifier
-String name = t.getName();         // name (may be auto-generated or set)
-
-// Naming
-Thread named = new Thread(task, "MyWorker");
-named.setName("RenamedWorker");
-
-// Priority
-Thread.MIN_PRIORITY;   // 1
-Thread.NORM_PRIORITY;  // 5 (default)
-Thread.MAX_PRIORITY;   // 10
-t.setPriority(Thread.MAX_PRIORITY);
-int priority = t.getPriority();
-
-// Daemon status
-t.setDaemon(true);     // must be called before start()
-boolean isDaemon = t.isDaemon();
-```
-
-**Component Breakdown**
-
-| Attribute | Description | Default | Changeable? |
-|-----------|-------------|---------|-------------|
-| Thread ID | Unique identifier generated at creation | Auto-generated | No |
-| Thread name | Human-readable label | Auto-generated ("Thread-N") | Yes |
-| Priority | Scheduling hint (1–10) | Inherited from creating thread (usually 5) | Yes |
-| Daemon status | Whether thread prevents JVM shutdown | Inherited from creating thread | Only before `start()` |
-
-**Syntax Rules**
-
-1. The thread ID is generated when the `Thread` is created and cannot be changed.
-2. The thread name can be set at creation via a constructor or changed later with `setName()`.
-3. Priority values range from `Thread.MIN_PRIORITY` (1) to `Thread.MAX_PRIORITY` (10); `Thread.NORM_PRIORITY` is 5.
-4. `setDaemon(true)` must be called before `start()`; otherwise `IllegalThreadStateException` is thrown.
-5. Virtual threads are always daemon threads and have a fixed priority that cannot be changed.
-6. A newly created platform thread inherits its priority and daemon status from the creating thread.
-
-**Constraints and Limitations**
-
-- Thread priorities are **not guaranteed** to affect scheduling; they are hints that the JVM and OS may ignore.
-- Setting a thread's priority to `MAX_PRIORITY` does not guarantee it will run before lower-priority threads.
-- Daemon threads are abruptly terminated when the JVM shuts down; they should not be used for tasks that require cleanup.
-- A daemon thread cannot be changed to a user thread after it has been started.
-
-### Annotated Code Examples
-
-**Example 1: Naming and Identifying Threads**
-
-```java
-public class ThreadNamingDemo {
-    public static void main(String[] args) {
-        Thread unnamed = new Thread(() ->
-            System.out.println("Unnamed thread: " + Thread.currentThread().getName()));
-        unnamed.start();
-
-        Thread named = new Thread(() ->
-            System.out.println("Named thread: " + Thread.currentThread().getName()),
-            "OrderProcessor");
-        named.start();
-
-        Thread renamed = new Thread(() ->
-            System.out.println("Renamed thread: " + Thread.currentThread().getName()));
-        renamed.setName("RenamedWorker");
-        renamed.start();
-    }
-}
-```
-
-**Expected Output (order may vary)**
-
-```
-Unnamed thread: Thread-0
-Named thread: OrderProcessor
-Renamed thread: RenamedWorker
-```
-
-**Why This Output Occurs**
-
-The first thread is created without a name, so the JVM assigns an auto-generated name ("Thread-0"). The second thread is created with the name "OrderProcessor" via the constructor. The third thread is created unnamed but renamed to "RenamedWorker" before `start()`. Meaningful names make debugging and monitoring easier.
-
----
-
-**Example 2: Daemon vs. User Threads**
-
-```java
-public class DaemonDemo {
-    public static void main(String[] args) {
-        // User thread: JVM will wait for this to finish
-        Thread userThread = new Thread(() -> {
-            try {
-                for (int i = 1; i <= 5; i++) {
-                    System.out.println("User thread working: " + i);
-                    Thread.sleep(400);
+                    lock.wait();  // WAITING
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-            } catch (InterruptedException e) { }
-            System.out.println("User thread finished");
-        });
+            }
+        }, "StatesDemo");
 
-        // Daemon thread: JVM will NOT wait for this
-        Thread daemonThread = new Thread(() -> {
-            try {
-                for (int i = 1; i <= 100; i++) {
-                    System.out.println("Daemon thread working: " + i);
-                    Thread.sleep(400);
-                }
-            } catch (InterruptedException e) { }
-            System.out.println("Daemon thread finished");
-        });
-        daemonThread.setDaemon(true); // must be before start()
-
-        userThread.start();
-        daemonThread.start();
-
-        System.out.println("Main thread finished");
-    }
-}
-```
-
-**Expected Output (daemon thread may be cut off)**
-
-```
-Main thread finished
-User thread working: 1
-Daemon thread working: 1
-User thread working: 2
-Daemon thread working: 2
-...
-User thread working: 5
-User thread finished
-```
-
-**Why This Output Occurs**
-
-The main thread finishes quickly, but the JVM waits for the user thread to complete (5 iterations × 400 ms = 2 seconds). The daemon thread runs in the background, but when the user thread finishes, the JVM shuts down and the daemon thread is terminated abruptly—it never reaches "Daemon thread finished." Daemon threads are suitable for background services (garbage collection, monitoring) but not for tasks that must complete.
-
----
-
-**Example 3: Priority Inheritance**
-
-```java
-public class PriorityDemo {
-    public static void main(String[] args) {
-        Thread.currentThread().setPriority(8); // set main thread priority
-        System.out.println("Main priority: " + Thread.currentThread().getPriority());
-
-        Thread child = new Thread(() ->
-            System.out.println("Child priority: " + Thread.currentThread().getPriority()));
-        child.start(); // child inherits priority 8 from main
-
-        Thread low = new Thread(() ->
-            System.out.println("Low priority thread running"));
-        low.setPriority(Thread.MIN_PRIORITY); // 1
-        low.start();
-    }
-}
-```
-
-**Expected Output**
-
-```
-Main priority: 8
-Child priority: 8
-Low priority thread running
-```
-
-**Why This Output Occurs**
-
-The main thread sets its priority to 8. The child thread is created after this change and inherits priority 8 from the creating thread. The low-priority thread is explicitly set to `MIN_PRIORITY` (1). The JVM may or may not schedule the high-priority child before the low-priority thread; priority is a hint, not a guarantee.
-
-### Real-World Cases
-
-- **Named Threads for Debugging**: Servers name threads after their roles ("HTTP-Worker-1", "DB-Connection-Pool") so thread dumps are readable.
-- **Daemon Threads for Background Services**: JVM garbage collection, JIT compilation, and finalizer threads are daemon threads.
-- **Priority for Responsiveness**: UI frameworks may give the event dispatch thread a higher priority than background workers to keep the interface responsive.
-- **Virtual Threads for Scalability**: Applications with millions of concurrent tasks use virtual threads (always daemon) instead of platform threads.
-
----
-
-## Core Concept 5: Core Exception Routing — Handling Uncaught Thread-Level Exceptions via UncaughtExceptionHandler
-
-### Definitions
-
-**Core Definition**
-`Thread.UncaughtExceptionHandler` is a functional interface for handlers invoked when a thread abruptly terminates due to an uncaught exception. When a thread is about to terminate due to an uncaught exception, the JVM queries the thread for its `UncaughtExceptionHandler` and invokes the handler's `uncaughtException` method, passing the thread and the exception as arguments.
-
-**Technical Definition**
-Interface for handlers invoked when a Thread abruptly terminates due to an uncaught exception. If a thread has not had its UncaughtExceptionHandler explicitly set, then its ThreadGroup object acts as its UncaughtExceptionHandler. If the ThreadGroup object has no special requirements for dealing with the exception, it can forward the invocation to the default uncaught exception handler. The exception routing order is: (1) the thread's specific `UncaughtExceptionHandler`, (2) the thread's `ThreadGroup`, (3) the global default `UncaughtExceptionHandler`. Any exception thrown by the `uncaughtException` method itself is ignored by the JVM.
-
-**Beginner-Friendly Explanation**
-Imagine an employee (thread) who encounters a problem they can't solve (uncaught exception). The company has a protocol: first, the employee checks if they have a personal emergency contact (their specific handler). If not, they report to their department manager (ThreadGroup). If the manager doesn't know what to do, they call the company's general emergency line (default handler). If nobody handles it, the employee's work simply stops, and the company logs the incident.
-
-### Purposes
-
-- To prevent silent thread termination by logging uncaught exceptions for diagnosis.
-- To implement centralized error reporting for all threads in an application.
-- To perform cleanup or fallback actions when a thread fails unexpectedly.
-- To customize the behavior of `ThreadGroup` for exception handling across groups of related threads.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax — UncaughtExceptionHandler**
-
-```java
-// Define a handler
-Thread.UncaughtExceptionHandler handler = (thread, exception) -> {
-    System.err.println("Thread " + thread.getName()
-        + " failed with: " + exception.getMessage());
-};
-
-// Set per-thread handler
-Thread t = new Thread(task);
-t.setUncaughtExceptionHandler(handler);
-
-// Set global default handler
-Thread.setDefaultUncaughtExceptionHandler(handler);
-
-// Custom ThreadGroup override
-class MyGroup extends ThreadGroup {
-    @Override
-    public void uncaughtException(Thread t, Throwable e) {
-        System.err.println("Group caught: " + e);
-    }
-}
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|-----------|-------------|
-| `UncaughtExceptionHandler` | Functional interface with `uncaughtException(Thread, Throwable)` |
-| `setUncaughtExceptionHandler` | Sets the handler for a specific thread |
-| `setDefaultUncaughtExceptionHandler` | Sets the global default handler for all threads |
-| `ThreadGroup.uncaughtException` | Default handler for threads in a group |
-
-**Syntax Rules**
-
-1. The exception routing order is: thread-specific handler → ThreadGroup → default handler.
-2. If a thread has not had its handler explicitly set, its `ThreadGroup` acts as its handler.
-3. `ThreadGroup.uncaughtException` can forward to the default handler or handle the exception itself.
-4. Any exception thrown by the `uncaughtException` method is ignored by the JVM.
-5. `Thread.setDefaultUncaughtExceptionHandler` sets the handler for all threads that do not have a specific handler.
-
-**Constraints and Limitations**
-
-- The `uncaughtException` method cannot prevent the thread from terminating.
-- Exceptions thrown within `uncaughtException` are silently ignored.
-- The handler is invoked only for uncaught exceptions that cause thread termination; it is not invoked for exceptions caught within the thread.
-- Thread pool tasks submitted via `ExecutorService` do not use `UncaughtExceptionHandler` for task exceptions; those are captured by the `Future`.
-
-### Annotated Code Examples
-
-**Example 1: Per-Thread UncaughtExceptionHandler**
-
-```java
-public class PerThreadHandlerDemo {
-    public static void main(String[] args) {
-        Thread t = new Thread(() -> {
-            System.out.println("Thread starting");
-            throw new RuntimeException("Intentional failure");
-        }, "FailingWorker");
-
-        // Set a handler for this specific thread
-        t.setUncaughtExceptionHandler((thread, ex) -> {
-            System.err.println("Handler caught exception from: " + thread.getName());
-            System.err.println("Exception: " + ex.getMessage());
-        });
+        // NEW
+        System.out.println("Before start: " + t.getState());
 
         t.start();
-    }
-}
-```
+        Thread.sleep(100);
 
-**Expected Output**
+        // RUNNABLE or WAITING
+        System.out.println("During wait: " + t.getState());
 
-```
-Thread starting
-Handler caught exception from: FailingWorker
-Exception: Intentional failure
-```
-
-**Why This Output Occurs**
-
-The thread throws a `RuntimeException` that is not caught. Before terminating, the JVM queries the thread's `UncaughtExceptionHandler`, which was set explicitly. The handler receives the thread reference and the exception, prints diagnostic information, and the thread terminates. Without the handler, the default behavior would print a stack trace to `System.err`.
-
----
-
-**Example 2: Global Default Handler**
-
-```java
-public class GlobalHandlerDemo {
-    public static void main(String[] args) {
-        // Set a global default handler for all threads
-        Thread.setDefaultUncaughtExceptionHandler((thread, ex) -> {
-            System.err.println("[GLOBAL] Thread " + thread.getName()
-                + " failed: " + ex.getClass().getSimpleName()
-                + " - " + ex.getMessage());
-        });
-
-        new Thread(() -> {
-            throw new IllegalArgumentException("Invalid input");
-        }, "Validator").start();
-
-        new Thread(() -> {
-            throw new NullPointerException("Missing object");
-        }, "Loader").start();
-    }
-}
-```
-
-**Expected Output (order may vary)**
-
-```
-[GLOBAL] Thread Validator failed: IllegalArgumentException - Invalid input
-[GLOBAL] Thread Loader failed: NullPointerException - Missing object
-```
-
-**Why This Output Occurs**
-
-Neither thread has a specific handler set, so the JVM falls back to the global default handler. The handler prints a formatted message with the thread name, exception class, and message. This provides centralized error reporting for all threads in the application.
-
----
-
-**Example 3: Custom ThreadGroup Exception Handling**
-
-```java
-public class ThreadGroupHandlerDemo {
-    static class LoggingGroup extends ThreadGroup {
-        LoggingGroup(String name) { super(name); }
-
-        @Override
-        public void uncaughtException(Thread t, Throwable e) {
-            System.err.println("[" + getName() + "] Thread " + t.getName()
-                + " died: " + e);
-            // Optionally forward to default handler
-            Thread.UncaughtExceptionHandler defaultHandler =
-                Thread.getDefaultUncaughtExceptionHandler();
-            if (defaultHandler != null) {
-                defaultHandler.uncaughtException(t, e);
-            }
+        // Wake up the thread
+        synchronized (lock) {
+            lock.notify();
         }
-    }
+        t.join();
 
-    public static void main(String[] args) {
-        Thread.setDefaultUncaughtExceptionHandler((thread, ex) ->
-            System.err.println("[DEFAULT] Also logging: " + ex.getMessage()));
-
-        ThreadGroup group = new LoggingGroup("CriticalWorkers");
-        Thread t = new Thread(group, () -> {
-            throw new OutOfMemoryError("Simulated resource exhaustion");
-        }, "ResourceLoader");
-
-        t.start();
+        // TERMINATED
+        System.out.println("After completion: " + t.getState());
     }
 }
 ```
 
-**Expected Output**
-
+**Expected Output:**
 ```
-[CriticalWorkers] Thread ResourceLoader died: java.lang.OutOfMemoryError: Simulated resource exhaustion
-[DEFAULT] Also logging: Simulated resource exhaustion
+Before start: NEW
+During wait: WAITING
+After completion: TERMINATED
 ```
 
-**Why This Output Occurs**
+**Step-by-Step Explanation:**
 
-The thread belongs to `LoggingGroup`, which overrides `uncaughtException`. When the thread throws an `OutOfMemoryError`, the group's handler is invoked first. It logs the error and then forwards it to the global default handler for additional logging. This demonstrates the handler chain: thread-specific → ThreadGroup → default.
+1. The thread is created: `NEW`.
+2. `start()` is called: the thread enters `RUNNABLE`.
+3. `lock.wait()` puts the thread into `WAITING`.
+4. `lock.notify()` wakes the thread, returning it to `RUNNABLE`.
+5. The thread completes: `TERMINATED`.
 
 ### Real-World Cases
 
-- **Server Logging**: A web server sets a global handler to log all uncaught exceptions with thread names and request context before the thread dies.
-- **Thread Pool Monitoring**: Executors can be wrapped to set uncaught exception handlers on worker threads for centralized error tracking.
-- **Crash Reporting**: A desktop application sets a global handler to save a crash report and display a user-friendly message when a background thread fails.
-- **ThreadGroup for Application Modules**: An application server assigns each deployed application to a `ThreadGroup` with a custom handler that logs exceptions with the application's context.
+- **Thread Dumps:** Analyzing states to find deadlocks (threads in `BLOCKED`).
+- **Performance Tuning:** Reducing time spent in `BLOCKED` or `WAITING`.
+- **Testing:** Asserting that a thread reaches a specific state.
 
 ---
 
-## References
+## 7. Thread Scheduling
 
-- Thread (Java Platform SE 21 & JDK 21) - https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html
-- Thread.State (Java SE 9 & JDK 9) - https://docs.oracle.com/javase/9/docs/api/java/lang/Thread.State.html
-- Thread States for a Thread Dump (Java SE 8 Troubleshooting Guide) - https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/tooldescr034.html
-- Thread.UncaughtExceptionHandler (Java Platform SE 11) - https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Thread.UncaughtExceptionHandler.html
-- Java Language Specification, Chapter 17: Threads and Locks - https://docs.oracle.com/javase/specs/jls/se23/html/jls-17.html
-- Oracle Java Tutorials: Concurrency - https://docs.oracle.com/javase/tutorial/essential/concurrency/
-- Oracle Java Tutorials: Processes and Threads - https://docs.oracle.com/javase/tutorial/essential/concurrency/procthread.html
-- Oracle Java Tutorials: Thread Objects - https://docs.oracle.com/javase/tutorial/essential/concurrency/threads.html
-- Oracle Java Tutorials: Thread States - https://docs.oracle.com/javase/tutorial/essential/concurrency/locksync.html
-- Java Concurrency in Practice (Chapter 1: Introduction, Chapter 6: Task Execution) - https://www.oreilly.com/library/view/java-concurrency-in/0321349601/
-- Goetz, Brian. "Java Theory and Practice: Going Atomic." IBM developerWorks, 2004. - https://developer.ibm.com/articles/j-jtp11234/
+### Definitions
+
+**Core Definition:** Thread scheduling is the process by which the operating system or JVM decides which thread to execute next and for how long.
+
+**Technical Definition:** "The JVM defines a range of ten logical priorities for Java threads, including: `java.lang.Thread.MIN_PRIORITY = 1`, `java.lang.Thread.NORM_PRIORITY = 5`". "On Linux thread priorities are ignored because the OS does not support static priority in `SCHED_OTHER` scheduling class". "Embodiments of the Java thread scheduler implement a high-level thread scheduling policy (e.g., round robin, priority-based, and/or negotiated multimedia)".
+
+**Beginner-Friendly Explanation:** Thread scheduling is like a referee deciding which player gets the ball. The referee can use different strategies — round-robin (everyone gets equal turns), priority-based (important players get more turns), or others. In Java, the JVM often delegates scheduling to the operating system, which means Java's thread priorities are sometimes just hints.
+
+### Purposes
+
+- To fairly allocate CPU time among threads
+- To prioritise important tasks
+- To maximise system throughput and responsiveness
+- To provide predictable behaviour
+
+### Syntax Rules and Structure
+
+**Thread Priorities:**
+
+| Priority | Constant | Value |
+|----------|----------|-------|
+| Minimum | `Thread.MIN_PRIORITY` | 1 |
+| Normal | `Thread.NORM_PRIORITY` | 5 |
+| Maximum | `Thread.MAX_PRIORITY` | 10 |
+
+**Setting Priority:**
+
+```java
+Thread t = new Thread(task);
+t.setPriority(Thread.MAX_PRIORITY);
+```
+
+**Syntax Rules:**
+
+- Priorities are hints; their effect is platform-dependent.
+- The JVM may ignore priorities on some operating systems.
+- Higher-priority threads are generally scheduled before lower-priority threads, but this is not guaranteed.
+
+**Constraints and Limitations:**
+
+- "On Linux thread priorities are ignored".
+- Relying on priorities for correctness is an anti-pattern.
+- Starvation can occur if high-priority threads monopolise the CPU.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: SchedulingDemo.java
+public class SchedulingDemo {
+    public static void main(String[] args) {
+        Runnable task = () -> {
+            for (int i = 0; i < 3; i++) {
+                System.out.println(Thread.currentThread().getName() +
+                    " [priority=" + Thread.currentThread().getPriority() + "]: " + i);
+            }
+        };
+
+        Thread low = new Thread(task, "Low");
+        Thread normal = new Thread(task, "Normal");
+        Thread high = new Thread(task, "High");
+
+        low.setPriority(Thread.MIN_PRIORITY);    // 1
+        normal.setPriority(Thread.NORM_PRIORITY); // 5
+        high.setPriority(Thread.MAX_PRIORITY);    // 10
+
+        low.start();
+        normal.start();
+        high.start();
+    }
+}
+```
+
+**Expected Output (order may vary):**
+```
+High [priority=10]: 0
+Normal [priority=5]: 0
+Low [priority=1]: 0
+High [priority=10]: 1
+Normal [priority=5]: 1
+Low [priority=1]: 1
+High [priority=10]: 2
+Normal [priority=5]: 2
+Low [priority=1]: 2
+```
+
+**Step-by-Step Explanation:**
+
+1. Three threads are created with different priorities.
+2. `setPriority()` sets the hint for the scheduler.
+3. The threads are started; the scheduler decides the execution order.
+4. Higher-priority threads may run more often, but the exact behaviour depends on the OS.
+
+### Real-World Cases
+
+- **Real-Time Systems:** Prioritising critical tasks.
+- **GUI Applications:** Giving the UI thread higher priority.
+- **Background Tasks:** Using lower priorities to avoid interfering with user interaction.
+
+---
+
+## 8. Context Switching
+
+### Definitions
+
+**Core Definition:** Context switching is the process of saving the state of one thread and restoring the state of another so that the CPU can switch between them.
+
+**Technical Definition:** "The context switch halts execution of the currently executing execution flow and saves its context. The context switch then restores and activates an execution flow context specified by the execution flow activation method". "Context switching is more costly as it has to be done in the operating system instead of only in the JVM. Another disadvantage is that every Java thread consumes more resources, because it requires an operating system thread of its own".
+
+**Beginner-Friendly Explanation:** Context switching is like switching between TV channels. When you change the channel, the TV saves your current position in the show (context) and loads the next channel's show from where you left off. This takes time and interrupts the flow. Similarly, when the CPU switches between threads, it must save the current thread's state and load another thread's state.
+
+### Purposes
+
+- To enable multiple threads to share a single CPU core
+- To give the illusion of parallelism on single-core systems
+- To respond to I/O events and interrupts
+- To implement preemptive scheduling
+
+### Syntax Rules and Structure
+
+**Causes of Context Switching:**
+
+| Cause | Description |
+|-------|-------------|
+| Time slice expiry | The OS preempts the running thread |
+| Blocking I/O | The thread waits for I/O to complete |
+| Synchronization | The thread waits for a lock |
+| Higher-priority thread | A higher-priority thread becomes runnable |
+| Interrupt | An interrupt handler runs |
+
+**Cost of Context Switching:**
+
+- "Context switch in the Linux kernel is pretty efficient compared with other Unix kernels, but still on the order of 20 to 40 microseconds".
+- "A context switch in Java (generally based) is around 100 instructions".
+- Frequent context switches reduce throughput.
+
+**Syntax Rules:**
+
+- Context switching is managed by the OS (for platform threads) or the JVM (for virtual threads).
+- Reduce context switching by using thread pools and avoiding excessive blocking.
+- Virtual threads have lower context-switching costs because they are JVM-managed.
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: ContextSwitchDemo.java
+public class ContextSwitchDemo {
+    public static void main(String[] args) throws InterruptedException {
+        // Simulate frequent context switching with many threads
+        Runnable task = () -> {
+            for (int i = 0; i < 1_000_000; i++) {
+                // Minimal work to encourage context switching
+                Math.sqrt(i);
+            }
+        };
+
+        long start = System.nanoTime();
+        Thread[] threads = new Thread[100];
+        for (int i = 0; i < 100; i++) {
+            threads[i] = new Thread(task);
+            threads[i].start();
+        }
+        for (Thread t : threads) {
+            t.join();
+        }
+        long elapsed = System.nanoTime() - start;
+
+        System.out.println("100 threads completed in " +
+            elapsed / 1_000_000 + " ms");
+        System.out.println("Excessive threads increase context switching overhead");
+    }
+}
+```
+
+**Expected Output (times vary):**
+```
+100 threads completed in 2500 ms
+Excessive threads increase context switching overhead
+```
+
+**Step-by-Step Explanation:**
+
+1. 100 threads are created, each performing a small amount of work.
+2. The OS must context-switch between these threads frequently.
+3. The overhead of context switching reduces overall throughput.
+4. Using a thread pool with fewer threads would reduce this overhead.
+
+### Real-World Cases
+
+- **Thread Pool Sizing:** Choosing the right number of threads to minimise context switching.
+- **Performance Tuning:** Monitoring context switches with OS tools (`vmstat`, `perf`).
+- **Virtual Threads:** Reducing context-switching overhead with JVM-managed threads.
+
+---
+
+## 9. Concurrency Best Practices
+
+### Definitions
+
+**Core Definition:** Concurrency best practices are guidelines for writing correct, efficient, and maintainable concurrent Java code.
+
+**Technical Definition:** Best practices derive from authoritative sources including the SEI CERT Oracle Coding Standard for Java. Key principles include using thread pools instead of creating threads ad-hoc, avoiding blocking operations while holding locks, and ensuring thread safety through proper synchronization.
+
+**Beginner-Friendly Explanation:** Concurrency best practices help you avoid common pitfalls like deadlocks, race conditions, and resource exhaustion. They're like a safety manual for multithreaded programming.
+
+### Purposes
+
+- To prevent deadlocks, race conditions, and data corruption
+- To improve performance and scalability
+- To ensure graceful degradation under load
+- To write maintainable concurrent code
+- To avoid resource exhaustion
+
+### Key Best Practices Table
+
+| Practice | Description | Source |
+|----------|-------------|--------|
+| Use Thread Pools | "Facilitate thread reuse by using Thread Pools". | SEI CERT |
+| Avoid Blocking While Holding Locks | "Do not perform operations that may block while holding a lock". | SEI CERT |
+| Use Bounded Queues | Prevent unbounded queue growth that can exhaust memory. | SEI CERT |
+| Do Not Execute Interdependent Tasks in a Bounded Pool | "Do not execute interdependent tasks in a bounded thread pool". | SEI CERT |
+| Ensure Tasks Are Interruptible | "Ensure that tasks submitted to a thread pool are interruptible". | SEI CERT |
+| Reinitialize ThreadLocal Variables | "Ensure ThreadLocal variables are reinitialized when using thread pools". | SEI CERT |
+| Use Consistent Locking Order | Prevent deadlocks by always acquiring locks in the same order. | Best practice |
+| Prefer Higher-Level Concurrency Utilities | Use `java.util.concurrent` instead of `wait()`/`notify()` directly. | Best practice |
+| Name Threads Meaningfully | Improves debugging and profiling. | Best practice |
+| Minimize Lock Contention | Reduce the scope of synchronized blocks. | Best practice |
+| Use Virtual Threads for I/O-Bound Tasks | "Virtual threads are suitable for executing tasks that spend most of the time blocked, often waiting for I/O". | Java documentation |
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: BestPracticesDemo.java
+import java.util.concurrent.*;
+
+public class BestPracticesDemo {
+    public static void main(String[] args) throws Exception {
+        // BEST PRACTICE: Use a thread pool instead of creating threads ad-hoc
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+
+        // BEST PRACTICE: Use meaningful thread names
+        ThreadFactory namedFactory = r -> {
+            Thread t = new Thread(r);
+            t.setName("Worker-" + t.getId());
+            return t;
+        };
+
+        // BEST PRACTICE: Use a bounded queue to prevent resource exhaustion
+        ExecutorService boundedPool = new ThreadPoolExecutor(
+            2, 4, 60L, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(100),  // Bounded queue
+            namedFactory,
+            new ThreadPoolExecutor.CallerRunsPolicy()  // Backpressure
+        );
+
+        // Submit tasks
+        Future<Integer> future = executor.submit(() -> {
+            // Task code
+            return 42;
+        });
+
+        System.out.println("Result: " + future.get());
+
+        // BEST PRACTICE: Shut down the executor properly
+        executor.shutdown();
+        executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        boundedPool.shutdown();
+        boundedPool.awaitTermination(5, TimeUnit.SECONDS);
+
+        System.out.println("All tasks completed");
+    }
+}
+```
+
+**Expected Output:**
+```
+Result: 42
+All tasks completed
+```
+
+**Step-by-Step Explanation:**
+
+1. A fixed thread pool is created with 4 threads.
+2. A named thread factory gives threads meaningful names.
+3. A bounded thread pool with a queue size of 100 prevents unbounded growth.
+4. `CallerRunsPolicy` provides backpressure when the queue is full.
+5. `shutdown()` and `awaitTermination()` ensure graceful shutdown.
+
+### Real-World Cases
+
+- **Web Servers:** Thread pools handle concurrent requests without resource exhaustion.
+- **Background Processing:** Bounded queues prevent memory overflow during traffic spikes.
+- **Database Connection Pools:** Reusing connections instead of creating new ones.
+
+---
+
+## References Links
+
+- Processes and Threads — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/essential/concurrency/procthread.html
+- Class Thread — Java Platform SE 27 API Specification - https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/lang/Thread.html
+- Enum Thread.State — Java SE 8 API Specification - https://cr.openjdk.org/~mr/se/8/java-se-8-pr-spec/apidiffs/java/lang/Thread.State-report.html
+- On Parallelism and Concurrency — Inside.java - https://inside.java/2021/11/30/on-parallelism-and-concurrency/
+- CON02-J. Facilitate thread reuse by using Thread Pools — SEI CERT - https://wiki.sei.cmu.edu/confluence/pages/viewpage.action?pageId=88502000
+- CON20-J. Do not perform operations that may block while holding a lock — SEI CERT - https://wiki.sei.cmu.edu/confluence/display/java/CON20-J.+Do+not+perform+operations+that+may+block+while+holding+a+lock
+- Chapter 17. Threads and Locks — Java Language Specification - https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html
+- Thread Priority on the Solaris Platform — Oracle - https://docs.oracle.com/cd/E19455-01/806-3461/6jck06gqm/index.html
+- Project Loom — OpenJDK - https://openjdk.org/projects/loom/
+- 14. Thread Pools (TPS) — SEI CERT - https://wiki.sei.cmu.edu/confluence/display/java/14.+Thread+Pools+%28TPS%29
+- Java Concurrency and Parallelism — Duke University Libraries - https://find.library.duke.edu/catalog/DUKE99119487065008501
