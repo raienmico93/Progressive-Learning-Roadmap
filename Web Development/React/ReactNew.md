@@ -1063,7 +1063,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # X. Styling
 
-- **66. Styling Fundamentals**
+- [**66. Styling Fundamentals**](/Web%20Development/React/Styling/Styling.md)
   - Styling
   - Inline styles
   - CSS stylesheets
@@ -1078,7 +1078,7 @@ React is best learned as more than "a library for building UIs." The progression
   - CSS container queries
   - CSS best practices
 
-- **67. Inline Styles**
+- [**67. Inline Styles**](/Web%20Development/React/Styling/InlineStyles.md)
   - Inline styles
   - `style` prop
   - Style objects
@@ -1089,7 +1089,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Inline style limitations
   - Inline style best practices
 
-- **68. CSS Stylesheets**
+- [**68. CSS Stylesheets**](/Web%20Development/React/Styling/CSS.md)
   - CSS stylesheets
   - Importing CSS
   - Global CSS
@@ -1102,7 +1102,7 @@ React is best learned as more than "a library for building UIs." The progression
   - OOCSS
   - CSS best practices
 
-- **69. CSS Modules**
+- [**69. CSS Modules**](/Web%20Development/React/Styling/CSSModules.md)
   - CSS Modules
   - Module scoping
   - Local class names
@@ -1111,7 +1111,7 @@ React is best learned as more than "a library for building UIs." The progression
   - CSS Modules with TypeScript
   - CSS Modules best practices
 
-- **70. CSS-in-JS**
+- [**70. CSS-in-JS**](/Web%20Development/React/Styling/CSSinJS.md)
   - CSS-in-JS
   - Styled Components
   - Emotion
@@ -1122,7 +1122,7 @@ React is best learned as more than "a library for building UIs." The progression
   - CSS-in-JS trade-offs
   - CSS-in-JS best practices
 
-- **71. Tailwind CSS**
+- [**71. Tailwind CSS**](/Web%20Development/React/Styling/TailwindCSS.md)
   - Tailwind CSS
   - Utility classes
   - Responsive design
@@ -1133,7 +1133,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Tailwind best practices
   - Tailwind pitfalls
 
-- **72. Component Libraries**
+- [**72. Component Libraries**](/Web%20Development/React/Styling/ComponentLibraries.md)
   - Material UI
   - Ant Design
   - Chakra UI
@@ -1148,7 +1148,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Component library selection
   - Component library best practices
 
-- **73. Styling Patterns**
+- [**73. Styling Patterns**](/Web%20Development/React/Styling/StylingPatterns.md)
   - Theming
   - Dark mode
   - Responsive design
@@ -1166,7 +1166,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # XI. Performance
 
-- **74. Performance Fundamentals**
+- [**74. Performance Fundamentals**](/Web%20Development/React/PerformanceOpt/Performance.md)
   - Performance
   - Rendering performance
   - Runtime performance
@@ -1182,7 +1182,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Performance profiling
   - Performance monitoring
 
-- **75. Rendering Performance**
+- [**75. Rendering Performance**](/Web%20Development/React/PerformanceOpt/RenderingPerformance.md)
   - Unnecessary re-renders
   - Re-render causes
   - Re-render optimization
@@ -1203,7 +1203,7 @@ React is best learned as more than "a library for building UIs." The progression
   - TanStack Virtual
   - Rendering best practices
 
-- **76. Code Splitting**
+- [**76. Code Splitting**](/Web%20Development/React/PerformanceOpt/CodeSpitting.md)
   - Code splitting
   - Dynamic imports
   - `React.lazy`
@@ -1216,7 +1216,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Prefetching
   - Code splitting best practices
 
-- **77. Bundle Optimization**
+- [**77. Bundle Optimization**](/Web%20Development/React/PerformanceOpt/Bundle.md)
   - Bundle size
   - Tree shaking
   - Dead code elimination
@@ -1228,7 +1228,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Vite Bundle Analyzer
   - Bundle optimization best practices
 
-- **78. Loading Performance**
+- [**78. Loading Performance**](/Web%20Development/React/PerformanceOpt/Loading.md)
   - Initial load
   - Above-the-fold content
   - Critical CSS
@@ -1241,7 +1241,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Service workers
   - Loading performance best practices
 
-- **79. Runtime Performance**
+- [**79. Runtime Performance**](/Web%20Development/React/PerformanceOpt/Runtime.md)
   - JavaScript execution
   - Memory usage
   - Memory leaks
@@ -1254,7 +1254,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Offloading work
   - Runtime performance best practices
 
-- **80. Concurrent Features**
+- [**80. Concurrent Features**](/Web%20Development/React/PerformanceOpt/ConcurrentFeatures.md)
   - Concurrent rendering
   - Transitions
   - `useTransition`
@@ -1264,7 +1264,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Selective hydration
   - Concurrent features best practices
 
-- **81. Performance Profiling**
+- [**81. Performance Profiling**](/Web%20Development/React/PerformanceOpt/Profiling.md)
   - React DevTools Profiler
   - Chrome DevTools Performance
   - Flame charts
@@ -1273,8 +1273,8 @@ React is best learned as more than "a library for building UIs." The progression
   - React Scan
   - Profiling best practices
 
-- **82. Performance Patterns**
-  - Memoization
+- [**82. Performance Patterns**](/Web%20Development/React/PerformanceOpt/Patterns.md)
+  - [Memoization](/Web%20Development/React/PerformanceOpt/Memoization.md)
   - Virtualization
   - Windowing
   - Debouncing

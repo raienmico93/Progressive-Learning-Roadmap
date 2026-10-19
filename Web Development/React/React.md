@@ -584,7 +584,7 @@
   * State variants
   * Design-token integration
 
-* [**51. UI Component Systems**](/Web%20Development/React/Styling/UIComponent.md)
+* **51. UI Component Systems**
 
   * Component libraries
   * Design systems

@@ -138,7 +138,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # II. Routing
 
-- **6. Routing Fundamentals**
+- [**6. Routing Fundamentals**](/Web%20Development/ExpressJS/Routing/Routing.md)
   - Routing
   - Routes
   - Route methods
@@ -159,7 +159,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Route matching
   - Routing best practices
 
-- **7. Route Paths**
+- [**7. Route Paths**](/Web%20Development/ExpressJS/Routing/RoutePaths.md)
   - String paths
     - `'/users'`
     - `'/users/list'`
@@ -180,7 +180,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Optional parameters
   - Route path best practices
 
-- **8. Route Parameters**
+- [**8. Route Parameters**](/Web%20Development/ExpressJS/Routing/RouteParameters.md)
   - `req.params`
   - Named parameters
   - Multiple parameters
@@ -189,7 +189,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Parameter transformation
   - Route parameter best practices
 
-- **9. Query Parameters**
+- [**9. Query Parameters**](/Web%20Development/ExpressJS/Routing/QueryParameters.md)
   - `req.query`
   - Query string parsing
   - Multiple values
@@ -198,7 +198,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Query parameter validation
   - Query parameter best practices
 
-- **10. Route Handlers**
+- [**10. Route Handlers**](/Web%20Development/ExpressJS/Routing/RouteHandlers.md)
   - Single handler
   - Multiple handlers
   - Handler arrays
@@ -208,7 +208,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Error handlers
   - Route handler best practices
 
-- **11. Router**
+- [**11. Router**](/Web%20Development/ExpressJS/Routing/Routers.md)
   - `express.Router()`
   - Router creation
   - Router mounting
@@ -218,7 +218,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Router organization
   - Router best practices
 
-- **12. Route Organization**
+- [**12. Route Organization**](/Web%20Development/ExpressJS/Routing/RouteOrganization.md)
   - Route files
   - Route modules
   - Route controllers
@@ -227,7 +227,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Route grouping
   - Route organization best practices
 
-- **13. Route Versioning**
+- [**13. Route Versioning**](/Web%20Development/ExpressJS/Routing/RouteVersioning.md)
   - URI versioning
     - `/v1/users`
     - `/v2/users`
@@ -709,7 +709,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # VIII. Authentication and Authorization
 
-- **51. Authentication Fundamentals**
+- [**51. Authentication Fundamentals**](/Web%20Development/ExpressJS/Authentication/Authentication.md)
   - Authentication
   - Identity
   - Credentials
@@ -717,7 +717,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Tokens
   - Authentication best practices
 
-- **52. Session Authentication**
+- [**52. Session Authentication**](/Web%20Development/ExpressJS/Authentication/SessionBased.md)
   - Session-based authentication
   - `express-session`
   - Login
@@ -771,9 +771,9 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Authorization best practices
 
 - **57. OAuth and OpenID Connect**
-  - OAuth
+  - [OAuth](/Web%20Development/ExpressJS/Authentication/OAuth.md)
   - OAuth2
-  - OpenID Connect
+  - [OpenID Connect](/Web%20Development/ExpressJS/Authentication/OpenID.md)
   - Authorization flows
   - Identity providers
   - OAuth best practices

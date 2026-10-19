@@ -6,868 +6,855 @@
 
 ### Definitions
 
-**Core Definition:** Route organization is the practice of structuring an Express.js application's routing layer into modular, resource-specific files and routers, mounted at distinct URL prefixes, to improve maintainability, scalability, and separation of concerns.
+**Core Definition**
+Route organization is the structural discipline of arranging an Express.js application's route definitions, handler logic, and supporting modules into a coherent, maintainable, and scalable architecture.
 
-**Technical Definition:** In Express, route organization is achieved by creating multiple `express.Router()` instances — each responsible for a specific domain (users, authentication, products, orders, admin) — and mounting them onto the main application via `app.use(path, router)`. Each router encapsulates its own middleware stack, parameter handlers, and HTTP method routes. API versioning is layered on top by mounting separate router instances at versioned prefixes (e.g., `/api/v1`, `/api/v2`) or by resolving the version from request headers.
+**Technical Definition**
+Route organization in Express.js encompasses the physical file layout, the modular composition of `express.Router()` instances, the separation of routing from controller and service logic, the application of route prefixes and versioning schemes, and the grouping of related endpoints under shared middleware. It determines how route definitions are discovered, mounted, and maintained as the application grows, and it directly influences testability, team collaboration, and deployment flexibility.
 
-**Beginner-Friendly Explanation:** Imagine your Express application as a large office building. Instead of having one giant room where everyone does everything, you create separate departments: a "Users" department, an "Auth" department, a "Products" department, and so on. Each department has its own staff (middleware) and its own set of responsibilities (routes). When a visitor (request) arrives, they are directed to the correct department based on the URL. This is route organization — keeping things tidy so you can find what you need and change one thing without breaking everything else.
+**Beginner-Friendly Explanation**
+Route organization is about where you put your route code and how you connect it. Instead of writing every route in one giant `app.js` file, you split them into smaller files—one for users, one for products, etc.—and plug them into your main app. Good organization makes it easy to find code, add features, and let multiple developers work without stepping on each other's toes.
+
+---
 
 ### Key Characteristics
 
-- **Resource-based separation:** Each domain resource (users, products, orders) has its own route file and router instance.
-- **Prefix-based mounting:** Routers are mounted at distinct URL prefixes (`/users`, `/products`, `/orders`) via `app.use()`.
-- **Middleware scoping:** Security guards, logging, and validation middleware can be scoped exclusively to a router.
-- **Version isolation:** Different API versions (`/api/v1`, `/api/v2`) are separate router instances, allowing independent evolution.
-- **Controller delegation:** Route handlers delegate business logic to controllers, keeping routing thin.
-- **Testability:** Each router can be imported and tested in isolation from the main application.
+- **Feature-first orientation** — Modern Express organization groups code by business domain (users, orders, products) rather than by technical layer (controllers, models).
+- **Router-centric modularity** — `express.Router()` is the primary vehicle for encapsulating route groups and mounting them at specific paths.
+- **Separation of concerns** — Routes define paths and middleware; controllers handle requests and responses; services contain business logic; repositories handle data access.
+- **Explicit versioning** — API versions are isolated through folder structure, router mounting, or header-based negotiation.
+- **Prefix-driven namespacing** — Mount paths such as `/api/v1/users` provide clear namespacing and enable independent evolution of route groups.
+
+---
 
 ### Prerequisites
 
-- **Node.js runtime** (v18 or higher for Express 5.x).
-- **Express.js installed:** `npm install express`.
-- **Basic JavaScript knowledge:** Functions, modules (`require`/`module.exports`), and asynchronous code.
-- **Understanding of Express routing and middleware.**
-- **Familiarity with REST API design principles.**
-- **Basic understanding of JWT or session-based authentication** (for auth routes).
+- Node.js and npm installed; Express 5 requires Node.js 18 or higher.
+- An Express application initialized with `const app = express()`.
+- Familiarity with `express.Router()`, middleware, and route handlers.
+- Basic understanding of project folder structures and module systems (CommonJS or ES Modules).
+- (Optional) A validation library such as Zod or Joi for request validation.
+
+---
 
 ### Related Programming Areas
 
-- **Middleware architecture:** Routers are middleware-aware containers with their own stacks.
-- **MVC pattern:** Routes (V) delegate to controllers (C) and models (M).
-- **API versioning:** A specialised application of route organization.
-- **Authentication and authorisation:** Auth routes and admin routes handle identity and permissions.
-- **E-commerce systems:** Product and order routes model the core business domain.
-- **Testing:** Isolated routers are unit-testable without starting the full application.
-
-### Core Concepts
-
-1. **User Routes** — profile management, account settings, and resource fetch endpoints.
-2. **Authentication Routes** — login, registration, token refreshes, password resets, and session termination.
-3. **Product Routes** — catalog browsing, inventory tracking, metadata lookups, and pricing APIs.
-4. **Order Routes** — checkout lifecycles, payment processing hooks, order status updates, and history logs.
-5. **Admin Routes** — high-privilege management consoles, system metrics, and analytical endpoints.
-6. **API Versioning** — `/api/v1`, `/api/v2`, and alternative versioning strategies.
+- **Routing** — Route organization structures the application's routing layer.
+- **Controllers and services** — Separation of routing from request handling and business logic.
+- **API versioning** — Isolating breaking changes across application generations.
+- **Middleware** — Shared preprocessing applied at the appropriate organizational level.
+- **Project architecture** — Feature-based modular monoliths and their evolution toward microservices.
 
 ---
 
-## Core Concept 1: User Routes
+## Core Concept 1: Route Files
 
 ### Definitions
 
-**Core Definition:** User routes handle all endpoints related to user identity, profile management, account settings, and user-specific resource retrieval.
+**Core Definition**
+Route files are dedicated JavaScript or TypeScript files that contain route definitions—method–path pairs and their middleware chains—for a specific feature or resource, exported as an `express.Router()` instance for mounting elsewhere.
 
-**Technical Definition:** User routes are typically mounted at `/users` or `/user` and handle CRUD operations on user profiles, account settings, and user-owned resources. They are protected by authentication middleware for most operations, with only registration and login handled by separate auth routes.
+**Technical Definition**
+A route file creates and configures a router instance, registers HTTP methods and paths with middleware and controller references, and exports the router via `module.exports` (CommonJS) or `export default` (ES Modules). Route files should contain **only** route paths, middleware registration, and controller delegation—no business logic, database access, or complex validation. They are imported by an application factory or a central route aggregator and mounted with `app.use(path, router)`.
 
-**Beginner-Friendly Explanation:** User routes are like the "HR department" of your application — they handle everything about a user's own account: viewing their profile, updating their email, changing their password, and fetching their personal data.
+**Beginner-Friendly Explanation**
+A route file is a file that says, “Here are the URLs this feature handles.” For example, a `users.routes.js` file lists `/users`, `/users/:id`, and so on, and connects each to a handler function. Then the main app file imports that route file and says “use it at `/api/users`.”
+
+---
 
 ### Purposes
 
-- To provide endpoints for profile management (view, edit, update).
-- To manage account settings (email, password, preferences).
-- To fetch user-owned resources (e.g., a user's posts, orders, or settings).
-- To separate user-facing identity operations from authentication flows.
+- To isolate route definitions by feature or resource, reducing cognitive load and merge conflicts.
+- To keep the main application file free of route clutter, improving readability and startup clarity.
+- To enable route files to be tested, linted, and reviewed independently.
+- To provide a consistent unit of modularity that can be mounted at different paths or reused across applications.
+
+---
 
 ### Syntax Rules and Structure
 
-```js
-// routes/users.js
+#### Complete General Syntax: A Route File
+
+```javascript
+// features/users/users.routes.js
 const express = require('express');
 const router = express.Router();
-const userController = require('../controllers/userController');
-const { requireAuth } = require('../middleware/auth');
+const controller = require('./users.controller');
+const validate = require('./users.validation');
 
-// Profile management (authenticated)
-router.get('/profile', requireAuth, userController.getProfile);
-router.put('/profile', requireAuth, userController.updateProfile);
-
-// Account settings (authenticated)
-router.put('/settings/password', requireAuth, userController.changePassword);
-router.put('/settings/email', requireAuth, userController.changeEmail);
-
-// User-specific resources (authenticated)
-router.get('/me/orders', requireAuth, userController.getMyOrders);
-
-// Public user profile (no auth)
-router.get('/:id', userController.getPublicProfile);
+router.get('/', controller.list);
+router.get('/:id', validate.id, controller.getById);
+router.post('/', validate.create, controller.create);
 
 module.exports = router;
 ```
 
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/profile` | GET | Retrieve the authenticated user's profile. |
-| `/profile` | PUT | Update the authenticated user's profile. |
-| `/settings/password` | PUT | Change password (requires current password). |
-| `/settings/email` | PUT | Update email address. |
-| `/me/orders` | GET | Fetch the user's order history. |
-| `/:id` | GET | Public profile view (sanitised fields only). |
+**Component Breakdown**
 
-### Annotated Code Example
+| Component | Role |
+|-----------|------|
+| `express.Router()` | Creates the modular router instance. |
+| `controller.*` | References handler functions imported from a controller file. |
+| `validate.*` | References validation middleware. |
+| `module.exports` | Exports the router for mounting. |
 
-```js
-// routes/users.js
+#### Syntax Rules
+
+- Route files **must only** define paths, register middleware, and delegate to controllers.
+- Business logic, database queries, and complex error handling belong in controllers or services.
+- The router should be exported as the module's default export (or a named export consistently).
+
+#### Constraints and Limitations
+
+- Route files that accumulate business logic become a maintenance burden and are difficult to test.
+- Circular dependencies can arise if route files import each other; a central aggregator avoids this.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Minimal Route File with Controller Delegation
+
+```javascript
+// features/users/users.controller.js
+exports.list = (req, res) => res.json({ users: [] });
+exports.getById = (req, res) => res.json({ id: req.params.id });
+
+// features/users/users.routes.js
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const controller = require('./users.controller');
 
-// Simulated user data
-let users = [
-  { id: 1, name: 'Alice', email: 'alice@example.com', role: 'user' }
-];
-
-// GET /users/profile — retrieve authenticated user's profile
-router.get('/profile', requireAuth, (req, res) => {
-  const user = users.find(u => u.id === req.userId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  res.json(user);
-});
-
-// PUT /users/profile — update user's profile
-router.put('/profile', requireAuth, (req, res) => {
-  const user = users.find(u => u.id === req.userId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  user.name = req.body.name || user.name;
-  res.json(user);
-});
-
-// PUT /users/settings/password — change password
-router.put('/settings/password', requireAuth, (req, res) => {
-  const { currentPassword, newPassword } = req.body;
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({ error: 'Both passwords required' });
-  }
-  // In production: verify currentPassword hash, hash newPassword
-  res.json({ message: 'Password updated successfully' });
-});
+router.get('/', controller.list);
+router.get('/:id', controller.getById);
 
 module.exports = router;
+
+// app.js
+const express = require('express');
+const app = express();
+const usersRouter = require('./features/users/users.routes');
+
+app.use('/api/users', usersRouter);
+
+app.listen(3000);
 ```
 
-**Expected Output (for `GET /users/profile` with valid token):**
+**Step-by-Step Explanation**
+
+1. **Controller** — Defines the actual request–response logic.
+2. **Route file** — Binds paths to controller functions and exports the router.
+3. **App** — Mounts the router at the `/api/users` prefix.
+
+**Expected Output**
+
 ```
-{"id":1,"name":"Alice","email":"alice@example.com","role":"user"}
+GET /api/users    → 200 { "users": [] }
+GET /api/users/42 → 200 { "id": "42" }
 ```
 
-**Why this output:** The `requireAuth` middleware verifies the JWT token and sets `req.userId`. The handler finds the user by ID and returns their profile. The `PUT` handler updates the `name` field only if provided.
+**Why This Output Occurs**
+
+- The router delegates to controller functions, which produce the responses.
+
+---
 
 ### Real-World Cases
 
-- **Social media:** `/users/profile`, `/users/:id` for public profiles.
-- **SaaS platforms:** `/users/settings/billing`, `/users/settings/notifications`.
-- **E-commerce:** `/users/me/orders`, `/users/me/addresses` for user-specific data.
-- **Healthcare:** `/patients/profile`, `/patients/settings` for HIPAA-compliant account management.
+- **Feature-based monoliths** — Each feature (auth, blog, comments) has its own route file.
+- **API versioning** — Version-specific route files isolate endpoint changes.
+- **Team ownership** — Different teams own different route files, reducing coordination overhead.
 
 ---
 
-## Core Concept 2: Authentication Routes
+## Core Concept 2: Route Modules
 
 ### Definitions
 
-**Core Definition:** Authentication routes handle identity verification, session establishment, and credential management — including login, registration, token refreshes, password resets, and logout.
+**Core Definition**
+Route modules are self-contained organizational units—typically folders or file groups—that bundle a feature's router, controller, service, validation schema, and data model into a cohesive module.
 
-**Technical Definition:** Auth routes are typically mounted at `/auth` and are the only routes accessible without prior authentication (except token refresh and logout, which require a valid refresh token). They issue access tokens (JWTs) and refresh tokens, validate credentials, and manage the lifecycle of user sessions.
+**Technical Definition**
+A route module (also called a feature module or domain module) encapsulates all code required to handle a specific business capability. It typically contains `*.routes.js`, `*.controller.js`, `*.service.js`, `*.repository.js`, `*.model.js`, and `*.validation.js` files, co-located in a single folder. This contrasts with technical-layer organization (all controllers in one folder, all models in another), which forces developers to jump across multiple directories to understand a single feature. Modules communicate through explicit service interfaces, keeping dependencies clean.
 
-**Beginner-Friendly Explanation:** Auth routes are like the "front door" of your application. They check who you are (login), let new people in (registration), give you a key (token), and handle what happens when you forget your key (password reset) or want to leave (logout).
+**Beginner-Friendly Explanation**
+A route module is a folder that contains everything about one feature—its routes, its controller, its database logic, and its validation rules—all in one place. If you want to understand or change how “users” work, you open the `users` folder and everything is right there.
+
+---
 
 ### Purposes
 
-- To register new users and create their accounts.
-- To authenticate users and issue access tokens.
-- To refresh expired access tokens using refresh tokens.
-- To initiate and complete password reset flows.
-- To terminate sessions (logout) and invalidate refresh tokens.
+- To co-locate all code for a feature, reducing navigation friction and improving comprehension.
+- To enable independent development, testing, and potential extraction of modules into microservices.
+- To enforce clear boundaries between features through explicit imports and service interfaces.
+- To scale team collaboration by assigning module ownership.
+
+---
 
 ### Syntax Rules and Structure
 
-```js
-// routes/auth.js
+#### Complete General Syntax: Feature Module Layout
+
+```text
+src/
+├── features/
+│   ├── users/
+│   │   ├── users.routes.js
+│   │   ├── users.controller.js
+│   │   ├── users.service.js
+│   │   ├── users.repository.js
+│   │   ├── users.model.js
+│   │   └── users.validation.js
+│   └── products/
+│       ├── products.routes.js
+│       └── ...
+├── common/
+│   ├── middleware/
+│   └── utils/
+├── app.js
+└── server.js
+```
+
+**Component Breakdown**
+
+| File / Folder | Responsibility |
+|---------------|----------------|
+| `*.routes.js` | Route definitions and middleware chains. |
+| `*.controller.js` | Request/response handling, validation invocation, response serialization. |
+| `*.service.js` | Business logic, orchestration, transactions. |
+| `*.repository.js` | Database queries and persistence logic. |
+| `*.model.js` | Schema definition. |
+| `*.validation.js` | Request validation schemas (Zod, Joi, etc.). |
+
+#### Syntax Rules
+
+- Each module should expose a router from its `*.routes.js` file.
+- Modules should import shared utilities from `common/` rather than reaching into other feature folders.
+- Service interfaces should be the primary inter-module communication mechanism.
+
+#### Constraints and Limitations
+
+- Over-modularization can introduce boilerplate; small applications may not need full module separation.
+- Circular imports between modules can occur if boundaries are not enforced.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Module with Controller, Service, and Repository Layers
+
+```javascript
+// features/users/users.repository.js
+const db = require('../../common/db');
+exports.findById = (id) => db.query('SELECT * FROM users WHERE id = ?', [id]);
+
+// features/users/users.service.js
+const repo = require('./users.repository');
+exports.getUser = async (id) => {
+  const user = await repo.findById(id);
+  if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
+  return user;
+};
+
+// features/users/users.controller.js
+const service = require('./users.service');
+exports.getById = async (req, res) => {
+  const user = await service.getUser(Number(req.params.id));
+  res.json(user);
+};
+
+// features/users/users.routes.js
 const express = require('express');
 const router = express.Router();
-const authController = require('../controllers/authController');
+const controller = require('./users.controller');
 
-router.post('/register', authController.register);        // Create account
-router.post('/login', authController.login);              // Issue tokens
-router.post('/refresh', authController.refresh);          // Refresh access token
-router.post('/forgot-password', authController.forgotPassword);
-router.post('/reset-password/:token', authController.resetPassword);
-router.post('/logout', authController.logout);            // Invalidate tokens
+router.get('/:id', controller.getById);
 
 module.exports = router;
 ```
 
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/register` | POST | Create a new user account. |
-| `/login` | POST | Authenticate and issue access + refresh tokens. |
-| `/refresh` | POST | Exchange a valid refresh token for a new access token. |
-| `/forgot-password` | POST | Send password reset email with token. |
-| `/reset-password/:token` | POST | Reset password using the token. |
-| `/logout` | POST | Invalidate refresh token and end session. |
+**Expected Output**
 
-**Rules:**
-- Auth routes must be mounted **before** any router-level authentication middleware on the main app, or excluded from global auth.
-- Passwords must be hashed (bcrypt, argon2) before storage; never store plaintext.
-- Access tokens should be short-lived (15 minutes); refresh tokens longer-lived (7–30 days).
-- Refresh tokens should be rotated on each use and stored securely (HTTP-only cookies or database).
+```
+GET /users/1   → 200 { "id": 1, "name": "Alice" }
+GET /users/99  → 404 { "error": "User not found" }
+```
 
-### Annotated Code Example
+**Why This Output Occurs**
 
-```js
-// routes/auth.js
-const express = require('express');
-const router = express.Router();
-const jwt = require('jsonwebtoken');
+- The route delegates to the controller, which calls the service, which calls the repository. Each layer has a single responsibility.
 
-const ACCESS_SECRET = 'access-secret';
-const REFRESH_SECRET = 'refresh-secret';
+---
 
-// POST /auth/register
-router.post('/register', (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password required' });
-  }
-  // In production: hash password with bcrypt
-  res.status(201).json({ message: 'User registered', email });
-});
+### Real-World Cases
 
-// POST /auth/login
-router.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  // In production: verify against hashed password in DB
-  if (password !== 'correct-password') {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-  const accessToken = jwt.sign({ userId: 1, email }, ACCESS_SECRET, {
-    expiresIn: '15m'
-  });
-  const refreshToken = jwt.sign({ userId: 1 }, REFRESH_SECRET, {
-    expiresIn: '7d'
-  });
-  res.json({ accessToken, refreshToken });
-});
+- **Modular monoliths** — A single deployable application organized into feature modules.
+- **Domain-driven design** — Bounded contexts aligned with module boundaries.
+- **Microservice readiness** — Modules can be extracted into standalone services with minimal refactoring.
 
-// POST /auth/refresh
-router.post('/refresh', (req, res) => {
-  const { refreshToken } = req.body;
-  if (!refreshToken) {
-    return res.status(400).json({ error: 'Refresh token required' });
-  }
+---
+
+## Core Concept 3: Route Controllers
+
+### Definitions
+
+**Core Definition**
+Route controllers are the functions that handle the request–response cycle for a route, validating input, invoking business logic, and serializing the response, while remaining free of routing concerns.
+
+**Technical Definition**
+In Express.js, a controller is a function (or a method on a controller class) that receives `(req, res, next)`. Controllers sit between the router and the service layer: the router delegates to the controller, the controller validates input (often via a schema), calls one or more service methods, and sends a response. Controllers should **not** contain business logic or database queries; those belong in services and repositories. Controllers may use a `BaseController` pattern to centralize error handling, response formatting, and logging.
+
+**Beginner-Friendly Explanation**
+A controller is the function that actually handles a request. It reads the request, checks that the data is valid, asks the service layer to do the real work, and sends back the response. It doesn't contain the business logic itself—it orchestrates.
+
+---
+
+### Purposes
+
+- To separate request–response handling from routing and business logic.
+- To centralize input validation, response formatting, and error forwarding.
+- To enable controllers to be unit-tested independently of routes.
+- To provide a consistent structure for all endpoint handlers across the application.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: A Controller Function
+
+```javascript
+exports.getById = async (req, res, next) => {
   try {
-    const payload = jwt.verify(refreshToken, REFRESH_SECRET);
-    const newAccessToken = jwt.sign(
-      { userId: payload.userId }, ACCESS_SECRET, { expiresIn: '15m' }
-    );
-    res.json({ accessToken: newAccessToken });
-  } catch {
-    res.status(401).json({ error: 'Invalid or expired refresh token' });
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+    const user = await userService.getUser(id);
+    res.json(user);
+  } catch (err) {
+    next(err);
   }
-});
-
-// POST /auth/logout
-router.post('/logout', (req, res) => {
-  // In production: invalidate refresh token in DB
-  res.json({ message: 'Logged out successfully' });
-});
-
-module.exports = router;
+};
 ```
 
-**Expected Output (for `POST /auth/login` with `{ "email": "alice@example.com", "password": "correct-password" }`):**
-```
-{"accessToken":"eyJhbGciOiJIUzI1NiIs...","refreshToken":"eyJhbGciOiJIUzI1NiIs..."}
-```
+**Component Breakdown**
 
-**Expected Output (for `POST /auth/refresh` with valid refresh token):**
-```
-{"accessToken":"eyJhbGciOiJIUzI1NiIs..."}
-```
+| Component | Role |
+|-----------|------|
+| `req.params.id` | Raw input from the route. |
+| Validation | Rejects invalid input before calling the service. |
+| `userService.getUser()` | Business logic delegation. |
+| `next(err)` | Forwards unexpected errors to error middleware. |
 
-**Why this output:** The login handler verifies credentials (simulated), then signs two JWTs: a short-lived access token and a longer-lived refresh token. The refresh handler verifies the refresh token and issues a new access token without requiring the user to re-enter credentials.
+#### Syntax Rules
 
-### Real-World Cases
+- Controllers **must not** contain business logic, database queries, or complex error scenarios.
+- Validation should occur in the controller (or in dedicated validation middleware invoked by the router).
+- Errors should be forwarded to `next(err)` or handled by a base controller method.
 
-- **JWT-based APIs:** Access + refresh token rotation (used by most modern SPAs).
-- **OAuth 2.0 flows:** `/auth/google`, `/auth/github` for social login.
-- **Enterprise SSO:** `/auth/saml`, `/auth/oidc` for corporate identity providers.
-- **Multi-factor authentication:** `/auth/verify-otp`, `/auth/verify-mfa`.
+#### Constraints and Limitations
+
+- Controllers that grow too large become “god objects”; split responsibilities into services.
+- Async controllers in Express 4 require explicit error forwarding; Express 5 forwards rejections automatically.
 
 ---
 
-## Core Concept 3: Product Routes
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
 
-### Definitions
+#### Example 1: Controller with Validation and Service Delegation
 
-**Core Definition:** Product routes handle catalog browsing, inventory tracking, product metadata lookups, and pricing APIs for an e-commerce or inventory management system.
+```javascript
+// features/products/products.controller.js
+const productService = require('./products.service');
 
-**Technical Definition:** Product routes are mounted at `/products` (or `/api/products`) and typically expose a combination of public endpoints (catalog browsing, product details) and protected endpoints (inventory updates, pricing changes) that require admin or manager privileges.
-
-**Beginner-Friendly Explanation:** Product routes are like the "storefront" of an e-commerce application. They let customers browse what's available (catalog), look at details (metadata), check prices, and let administrators manage stock levels and product information.
-
-### Purposes
-
-- To provide catalog browsing with filtering, sorting, and pagination.
-- To expose product metadata (description, images, categories, specifications).
-- To enable inventory tracking (stock levels, reservations, restock alerts).
-- To serve pricing APIs (base price, discounts, tiered pricing).
-
-### Syntax Rules and Structure
-
-```js
-// routes/products.js
-const express = require('express');
-const router = express.Router();
-const productController = require('../controllers/productController');
-const { requireAuth, requireRole } = require('../middleware/auth');
-
-// Public catalog browsing
-router.get('/', productController.listProducts);          // List with filters
-router.get('/search', productController.searchProducts);   // Full-text search
-router.get('/:id', productController.getProduct);          // Product details
-
-// Inventory tracking (admin/manager)
-router.get('/:id/inventory', requireAuth, requireRole('admin', 'manager'), productController.getInventory);
-router.patch('/:id/inventory', requireAuth, requireRole('admin', 'manager'), productController.updateInventory);
-
-// Pricing (admin only)
-router.put('/:id/pricing', requireAuth, requireRole('admin'), productController.updatePricing);
-
-// Metadata management (admin/manager)
-router.patch('/:id/metadata', requireAuth, requireRole('admin', 'manager'), productController.updateMetadata);
-
-module.exports = router;
-```
-
-| Route | Method | Access | Purpose |
-|-------|--------|--------|---------|
-| `/` | GET | Public | List products with filters, sort, pagination. |
-| `/search` | GET | Public | Full-text search across product fields. |
-| `/:id` | GET | Public | Retrieve a single product's details. |
-| `/:id/inventory` | GET | Admin/Manager | Get stock levels and reservations. |
-| `/:id/inventory` | PATCH | Admin/Manager | Update stock quantity. |
-| `/:id/pricing` | PUT | Admin | Update base price, discounts, tiers. |
-| `/:id/metadata` | PATCH | Admin/Manager | Update description, images, categories. |
-
-### Annotated Code Example
-
-```js
-// routes/products.js
-const express = require('express');
-const router = express.Router();
-
-const products = [
-  { id: 1, name: 'Laptop', price: 1200, stock: 10, category: 'electronics' },
-  { id: 2, name: 'Phone', price: 800, stock: 25, category: 'electronics' },
-  { id: 3, name: 'Desk', price: 350, stock: 5, category: 'furniture' }
-];
-
-// GET /products — list with filtering, sorting, pagination
-router.get('/', (req, res) => {
-  let result = [...products];
-  const { category, minPrice, maxPrice, sortBy, order } = req.query;
-
-  if (category) result = result.filter(p => p.category === category);
-  if (minPrice) result = result.filter(p => p.price >= Number(minPrice));
-  if (maxPrice) result = result.filter(p => p.price <= Number(maxPrice));
-
-  if (sortBy) {
-    const dir = order === 'desc' ? -1 : 1;
-    result.sort((a, b) => (a[sortBy] > b[sortBy] ? dir : -dir));
+exports.create = async (req, res, next) => {
+  try {
+    const { name, price } = req.body;
+    if (!name || typeof price !== 'number') {
+      return res.status(400).json({ error: 'Invalid product data' });
+    }
+    const product = await productService.create({ name, price });
+    res.status(201).json({ data: product });
+  } catch (err) {
+    next(err);
   }
-
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const offset = (page - 1) * limit;
-
-  res.json({
-    data: result.slice(offset, offset + limit),
-    meta: { total: result.length, page, limit }
-  });
-});
-
-// GET /products/:id — single product details
-router.get('/:id', (req, res) => {
-  const product = products.find(p => p.id === parseInt(req.params.id));
-  if (!product) return res.status(404).json({ error: 'Product not found' });
-  res.json(product);
-});
-
-module.exports = router;
+};
 ```
 
-**Expected Output (for `GET /products?category=electronics&sortBy=price&order=asc`):**
+**Expected Output**
+
 ```
-{"data":[{"id":2,"name":"Phone","price":800,"stock":25,"category":"electronics"},{"id":1,"name":"Laptop","price":1200,"stock":10,"category":"electronics"}],"meta":{"total":2,"page":1,"limit":10}}
+POST /products  { "name": "Book", "price": 19.99 }
+→ 201 { "data": { "id": 1, "name": "Book", "price": 19.99 } }
+
+POST /products  { "name": "", "price": "free" }
+→ 400 { "error": "Invalid product data" }
 ```
 
-**Why this output:** The handler filters by `category=electronics`, sorts by `price` ascending, and returns the two matching products. The `meta` object provides pagination information.
+**Why This Output Occurs**
 
-### Real-World Cases
-
-- **E-commerce catalogues:** `/products?category=electronics&sortBy=price`.
-- **Inventory management:** `PATCH /products/:id/inventory` to update stock after a sale.
-- **Pricing APIs:** `PUT /products/:id/pricing` to apply discounts or tiered pricing.
-- **Marketplace platforms:** `/products/search?q=wireless+headphones`.
+- The controller validates the request body before delegating to the service.
 
 ---
 
-## Core Concept 4: Order Routes
-
-### Definitions
-
-**Core Definition:** Order routes manage the checkout lifecycle, payment processing hooks, order status updates, and order history logs for an e-commerce or transactional system.
-
-**Technical Definition:** Order routes are mounted at `/orders` and typically require authentication. They handle the creation of orders from a cart, initiate payment processing (often integrating with payment gateways like Stripe or PayPal), update order status through a state machine (pending → paid → shipped → delivered), and provide order history retrieval.
-
-**Beginner-Friendly Explanation:** Order routes are like the "checkout counter" and "order tracking" system of an online store. They turn a shopping cart into an order, process the payment, track where the order is in its journey, and let customers view their past orders.
-
-### Purposes
-
-- To create orders from a user's cart or direct purchase.
-- To process payments and integrate with payment gateways.
-- To update order status through a defined lifecycle.
-- To provide order history and tracking for users and admins.
-- To handle refunds, cancellations, and returns.
-
-### Syntax Rules and Structure
-
-```js
-// routes/orders.js
-const express = require('express');
-const router = express.Router();
-const orderController = require('../controllers/orderController');
-const { requireAuth } = require('../middleware/auth');
-
-router.post('/', requireAuth, orderController.createOrder);             // Create order
-router.get('/', requireAuth, orderController.getMyOrders);              // Order history
-router.get('/:id', requireAuth, orderController.getOrder);              // Order details
-router.patch('/:id/status', requireAuth, orderController.updateStatus); // Update status
-router.post('/:id/pay', requireAuth, orderController.processPayment);   // Payment hook
-router.post('/:id/refund', requireAuth, orderController.refundOrder);   // Refund
-router.get('/:id/payments', requireAuth, orderController.getPaymentHistory);
-
-module.exports = router;
-```
-
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/` | POST | Create a new order from cart. |
-| `/` | GET | Retrieve the authenticated user's order history. |
-| `/:id` | GET | Get a specific order's details. |
-| `/:id/status` | PATCH | Update order status (pending → paid → shipped → delivered). |
-| `/:id/pay` | POST | Process payment for an order. |
-| `/:id/refund` | POST | Initiate a refund. |
-| `/:id/payments` | GET | Retrieve payment history for an order. |
-
-**Rules:**
-- Orders should be created in a `pending` state; only move to `paid` after payment confirmation.
-- Payment hooks should be **idempotent** (the same event processed twice should not double-charge).
-- Use webhooks from payment gateways to update order status asynchronously.
-- Order history should be paginated and sortable.
-
-### Annotated Code Example
-
-```js
-// routes/orders.js
-const express = require('express');
-const router = express.Router();
-
-const orders = [
-  { id: 1, userId: 1, items: ['Laptop'], total: 1200, status: 'paid', createdAt: '2026-01-15' }
-];
-
-// POST /orders — create a new order
-router.post('/', (req, res) => {
-  const { items, total } = req.body;
-  if (!items || !items.length) {
-    return res.status(400).json({ error: 'Items are required' });
-  }
-  const newOrder = {
-    id: orders.length + 1,
-    userId: req.userId,
-    items,
-    total,
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  };
-  orders.push(newOrder);
-  res.status(201).json(newOrder);
-});
-
-// GET /orders — user's order history
-router.get('/', (req, res) => {
-  const userOrders = orders.filter(o => o.userId === req.userId);
-  res.json(userOrders);
-});
-
-// PATCH /orders/:id/status — update order status
-router.patch('/:id/status', (req, res) => {
-  const order = orders.find(o => o.id === parseInt(req.params.id));
-  if (!order) return res.status(404).json({ error: 'Order not found' });
-
-  const validTransitions = {
-    pending: ['paid', 'cancelled'],
-    paid: ['shipped', 'refunded'],
-    shipped: ['delivered'],
-    delivered: ['refunded']
-  };
-
-  const allowed = validTransitions[order.status] || [];
-  if (!allowed.includes(req.body.status)) {
-    return res.status(400).json({
-      error: `Cannot transition from ${order.status} to ${req.body.status}`
-    });
-  }
-
-  order.status = req.body.status;
-  res.json(order);
-});
-
-// POST /orders/:id/pay — payment processing hook
-router.post('/:id/pay', (req, res) => {
-  const order = orders.find(o => o.id === parseInt(req.params.id));
-  if (!order) return res.status(404).json({ error: 'Order not found' });
-  if (order.status !== 'pending') {
-    return res.status(400).json({ error: 'Order is not pending payment' });
-  }
-  // In production: call Stripe/PayPal API, handle webhook confirmation
-  order.status = 'paid';
-  res.json({ message: 'Payment processed', orderId: order.id });
-});
-
-module.exports = router;
-```
-
-**Expected Output (for `POST /orders` with `{ "items": ["Phone"], "total": 800 }`):**
-```
-{"id":2,"userId":1,"items":["Phone"],"total":800,"status":"pending","createdAt":"2026-01-15T12:00:00.000Z"}
-```
-
-**Expected Output (for `PATCH /orders/2/status` with `{ "status": "paid" }`):**
-```
-{"id":2,"userId":1,"items":["Phone"],"total":800,"status":"paid","createdAt":"..."}
-```
-
-**Expected Output (for `PATCH /orders/1/status` with `{ "status": "pending" }`):**
-```
-{"error":"Cannot transition from paid to pending"}
-```
-
-**Why this output:** The status transition handler enforces a state machine: `pending` can only move to `paid` or `cancelled`, `paid` to `shipped` or `refunded`, etc. Invalid transitions are rejected. The payment hook updates the order to `paid` and would integrate with a payment gateway in production.
-
 ### Real-World Cases
 
-- **E-commerce checkout:** `POST /orders` → `POST /orders/:id/pay` → webhook confirms payment.
-- **Food delivery:** Order status lifecycle (placed → preparing → out-for-delivery → delivered).
-- **Subscription billing:** `POST /orders/:id/refund` for cancelled subscriptions.
-- **Marketplace:** `/orders/:id/payments` to track split payments to sellers.
+- **REST APIs** — Controllers for each resource endpoint (`list`, `getById`, `create`, `update`, `delete`).
+- **GraphQL resolvers** — Controllers that resolve fields and mutations.
+- **Webhook handlers** — Controllers that validate signatures and enqueue events.
 
 ---
 
-## Core Concept 5: Admin Routes
+## Core Concept 4: Route Versioning
 
 ### Definitions
 
-**Core Definition:** Admin routes expose high-privilege management consoles, system metrics, and analytical endpoints that are restricted to users with administrative roles.
+**Core Definition**
+Route versioning is the practice of exposing multiple generations of an API simultaneously, allowing clients to migrate at their own pace while the server evolves.
 
-**Technical Definition:** Admin routes are mounted at `/admin` (or `/api/admin`) and are protected by both authentication and role-based authorisation middleware. They provide endpoints for user management, system health monitoring, analytics dashboards, and configuration changes.
+**Technical Definition**
+Express route versioning is most commonly implemented through **URL path versioning**, where the version is embedded in the mount path (e.g., `/api/v1/users`, `/api/v2/users`). Alternative strategies include **header-based versioning** (using an `Accept-Version` or `api-version` header), **query parameter versioning** (e.g., `?version=1`), and **content negotiation**. Each version is typically isolated in its own folder and mounted on a separate router. Shared logic can be factored into common services, while version-specific controllers handle breaking changes.
 
-**Beginner-Friendly Explanation:** Admin routes are like the "control room" of your application — a restricted area where authorised staff can manage users, view system health, check analytics, and configure settings. Regular users cannot access these routes.
-
-### Purposes
-
-- To provide management consoles for user administration (create, edit, suspend users).
-- To expose system metrics (CPU, memory, uptime, request rates).
-- To serve analytical endpoints (revenue reports, user growth, product performance).
-- To enable configuration changes (feature flags, maintenance mode).
-- To provide audit logs and security monitoring.
-
-### Syntax Rules and Structure
-
-```js
-// routes/admin.js
-const express = require('express');
-const router = express.Router();
-const adminController = require('../controllers/adminController');
-const { requireAuth, requireRole } = require('../middleware/auth');
-
-// All admin routes require authentication + admin role
-router.use(requireAuth);
-router.use(requireRole('admin'));
-
-// User management
-router.get('/users', adminController.listUsers);
-router.patch('/users/:id/role', adminController.updateUserRole);
-router.delete('/users/:id', adminController.deleteUser);
-
-// System metrics
-router.get('/metrics', adminController.getSystemMetrics);
-router.get('/health', adminController.getHealthCheck);
-
-// Analytics
-router.get('/analytics/revenue', adminController.getRevenueAnalytics);
-router.get('/analytics/users', adminController.getUserGrowth);
-router.get('/analytics/products', adminController.getProductPerformance);
-
-// Configuration
-router.get('/config', adminController.getConfig);
-router.put('/config', adminController.updateConfig);
-
-// Audit logs
-router.get('/audit-logs', adminController.getAuditLogs);
-
-module.exports = router;
-```
-
-| Route | Method | Purpose |
-|-------|--------|---------|
-| `/users` | GET | List all users with filters and pagination. |
-| `/users/:id/role` | PATCH | Update a user's role. |
-| `/metrics` | GET | System metrics (CPU, memory, uptime). |
-| `/analytics/revenue` | GET | Revenue reports by period. |
-| `/analytics/users` | GET | User growth and retention metrics. |
-| `/config` | PUT | Update application configuration. |
-| `/audit-logs` | GET | Retrieve audit trail of admin actions. |
-
-**Rules:**
-- **All** admin routes must be protected by authentication **and** role-based authorisation.
-- Apply `requireRole('admin')` as router-level middleware so it applies to every route in the file.
-- Log all admin actions for audit purposes.
-- Rate-limit admin endpoints more aggressively than public endpoints.
-
-### Annotated Code Example
-
-```js
-// routes/admin.js
-const express = require('express');
-const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
-
-// Router-level middleware: all admin routes require auth + admin role
-router.use(requireAuth);
-router.use(requireRole('admin'));
-
-// GET /admin/dashboard — system statistics
-router.get('/dashboard', (req, res) => {
-  res.json({
-    totalUsers: 1250,
-    activeUsers: 890,
-    totalOrders: 3400,
-    revenue: 245000,
-    systemHealth: 'healthy'
-  });
-});
-
-// GET /admin/metrics — system metrics
-router.get('/metrics', (req, res) => {
-  res.json({
-    cpu: '45%',
-    memory: '62%',
-    uptime: process.uptime(),
-    requestsPerMinute: 120
-  });
-});
-
-// GET /admin/analytics/revenue — revenue analytics
-router.get('/analytics/revenue', (req, res) => {
-  const { period = '30d' } = req.query;
-  res.json({
-    period,
-    total: 245000,
-    byDay: [
-      { date: '2026-01-01', revenue: 8000 },
-      { date: '2026-01-02', revenue: 9500 }
-    ]
-  });
-});
-
-module.exports = router;
-```
-
-**Expected Output (for `GET /admin/dashboard` with admin token):**
-```
-{"totalUsers":1250,"activeUsers":890,"totalOrders":3400,"revenue":245000,"systemHealth":"healthy"}
-```
-
-**Expected Output (for `GET /admin/dashboard` without token):**
-```
-{"error":"Unauthorized"}
-```
-
-**Why this output:** The `router.use(requireAuth)` and `router.use(requireRole('admin'))` middleware run before every route handler. A request without a valid admin token is rejected before reaching the dashboard handler.
-
-### Real-World Cases
-
-- **SaaS platforms:** `/admin/users` to manage customer accounts and subscriptions.
-- **E-commerce:** `/admin/analytics/revenue` for sales dashboards.
-- **DevOps:** `/admin/health` and `/admin/metrics` for monitoring integrations.
-- **Content platforms:** `/admin/audit-logs` for moderation and compliance.
+**Beginner-Friendly Explanation**
+Route versioning lets your API change without breaking old clients. You publish `/api/v1/users` for the current version and, when you make a breaking change, you publish `/api/v2/users` alongside it. Old clients keep using v1 until they are ready to upgrade.
 
 ---
-
-## Core Concept 6: API Versioning
-
-### Definitions
-
-**Core Definition:** API versioning is the practice of exposing multiple versions of an API simultaneously, allowing clients to migrate at their own pace while the server evolves without breaking existing integrations.
-
-**Technical Definition:** In Express, API versioning is implemented by creating separate router instances for each version and mounting them at distinct URL prefixes (`/api/v1`, `/api/v2`), or by resolving the requested version from request headers (e.g., `Accept` or `X-API-Version`) and routing accordingly. URL path versioning is the most common and explicit approach; header versioning keeps URLs clean but is less visible.
-
-**Beginner-Friendly Explanation:** API versioning is like having two editions of a book — the old edition (v1) and the new edition (v2). Readers who have the old edition can keep using it, while new readers get the updated version. In Express, you create separate routers for each version and mount them at `/api/v1` and `/api/v2`.
 
 ### Purposes
 
 - To introduce breaking changes without disrupting existing clients.
-- To support multiple client generations simultaneously during migration.
-- To provide a clear deprecation timeline for old versions.
-- To enable independent evolution of different API versions.
+- To support gradual client migration and deprecation timelines.
+- To isolate version-specific logic while sharing common services.
+- To provide a clear, cache-friendly URL structure (with URL path versioning).
 
 ---
 
-### Sub-Feature 6.1: `/api/v1` — First-Generation Stable API
+### Syntax Rules and Structure
 
-#### Syntax Rules and Structure
+#### Complete General Syntax: URL Path Versioning
 
-```js
-// routes/v1/users.js
-const v1Router = express.Router();
+```javascript
+// routes/v1/index.js
+const router = require('express').Router();
+router.use('/users', require('./users.routes'));
+module.exports = router;
 
-v1Router.get('/users', (req, res) => {
-  res.json([{ id: 1, name: 'Alice' }]);  // Flat array (v1 format)
-});
+// routes/v2/index.js
+const router = require('express').Router();
+router.use('/users', require('./users.routes')); // v2 routes
+module.exports = router;
 
-module.exports = v1Router;
-```
-
-```js
 // app.js
-app.use('/api/v1', require('./routes/v1/users'));
+app.use('/api/v1', require('./routes/v1'));
+app.use('/api/v2', require('./routes/v2'));
 ```
 
-| Component | Breakdown |
-|-----------|-----------|
-| `/api/v1` | URL prefix for version 1. |
-| `v1Router` | Separate router instance for v1. |
-| Response format | Original schema (e.g., flat array). |
+**Component Breakdown**
 
-**Rules:**
-- v1 should remain **unchanged** once clients depend on it.
-- Bug fixes are allowed; breaking changes are not.
-- Set deprecation headers (`Deprecation: true`, `Sunset: <date>`) when v1 is scheduled for removal.
+| Component | Role |
+|-----------|------|
+| `routes/v1/` | Version-specific route folder. |
+| `routes/v2/` | Next version folder. |
+| `app.use('/api/v1', ...)` | Mounts version 1 under its prefix. |
+| `app.use('/api/v2', ...)` | Mounts version 2 under its prefix. |
+
+#### Syntax Rules
+
+- Version folders should follow a consistent naming pattern (e.g., `v1`, `v2`）.
+- Shared services should be imported by both versions; version-specific controllers handle divergent behavior.
+- Deprecation headers should be added to older versions to signal migration timelines.
+
+#### Constraints and Limitations
+
+- **URL pollution** — URL path versioning makes URLs longer and is harder to deprecate cleanly.
+- **Header versioning** is less visible to clients and can complicate caching and debugging.
+- **Query parameter versioning** is discouraged for public APIs because it conflates resource addressing with version negotiation.
 
 ---
 
-### Sub-Feature 6.2: `/api/v2` — Non-Breaking Optimisations or Breaking Overhauls
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
 
-#### Syntax Rules and Structure
+#### Example 1: URL Path Versioning with Shared Service
 
-```js
-// routes/v2/users.js
-const v2Router = express.Router();
+```javascript
+// services/user.service.js
+exports.getAll = async () => [{ id: 1, name: 'Alice' }];
 
-v2Router.get('/users', (req, res) => {
-  res.json({
-    data: [{ id: 1, name: 'Alice', email: 'alice@example.com' }],  // Envelope
-    meta: { total: 1, page: 1 }
-  });
+// routes/v1/users.routes.js
+const router = require('express').Router();
+const service = require('../../services/user.service');
+router.get('/', async (req, res) => {
+  const users = await service.getAll();
+  res.json({ version: 1, data: users });
 });
+module.exports = router;
 
-module.exports = v2Router;
-```
+// routes/v2/users.routes.js
+const router = require('express').Router();
+const service = require('../../services/user.service');
+router.get('/', async (req, res) => {
+  const users = await service.getAll();
+  res.json({ version: 2, data: users.map(u => ({ ...u, displayName: u.name })) });
+});
+module.exports = router;
 
-```js
 // app.js
-app.use('/api/v1', require('./routes/v1/users'));
-app.use('/api/v2', require('./routes/v2/users'));
+app.use('/api/v1/users', require('./routes/v1/users.routes'));
+app.use('/api/v2/users', require('./routes/v2/users.routes'));
 ```
 
-| Change type | v1 | v2 |
-|-------------|----|----|
-| Response structure | Flat array | Envelope with `data` + `meta` |
-| New fields | Not present | `email` added |
-| Pagination | Not supported | `page`, `limit`, `total` |
+**Expected Output**
 
-**Rules:**
-- v2 can introduce breaking changes (new response format, renamed fields).
-- Non-breaking additions (new optional fields) do not require a version bump.
-- Document migration guides for clients moving from v1 to v2.
+```
+GET /api/v1/users → 200 { "version": 1, "data": [{ "id": 1, "name": "Alice" }] }
+GET /api/v2/users → 200 { "version": 2, "data": [{ "id": 1, "name": "Alice", "displayName": "Alice" }] }
+```
+
+**Why This Output Occurs**
+
+- Both versions share the same service but serialize responses differently according to their version's contract.
 
 ---
-
-### Sub-Feature 6.3: Alternative Versioning Strategies
-
-#### URL Path Versioning vs. Header Versioning
-
-| Strategy | Example | Pros | Cons |
-|----------|---------|------|------|
-| **URL Path** | `GET /api/v1/users` | Explicit, cache-friendly, easy to route | URL proliferation, clients must update URLs |
-| **Header (Accept)** | `Accept: application/vnd.myapp.v2+json` | Clean URLs, RESTful content negotiation | Harder to test in browser, less visible |
-| **Header (Custom)** | `X-API-Version: 2` | Explicit, easy to read | Non-standard header |
-| **Query Parameter** | `GET /api/users?version=2` | Easy to test | Not RESTful, caching complexity |
-
-#### Header Versioning Implementation
-
-```js
-// middleware/extractVersion.js
-function extractVersion(defaultVersion = '1') {
-  return (req, res, next) => {
-    let version = req.headers['x-api-version'];
-    if (!version) {
-      const accept = req.get('accept') || '';
-      const m = accept.match(/application\/vnd\.myapp\.v(\d+)\+json/);
-      version = m ? m[1] : defaultVersion;
-    }
-    req.apiVersion = version;
-    res.setHeader('Vary', 'API-Version');  // Required for caching
-    next();
-  };
-}
-
-// Usage
-app.use(extractVersion('1'));
-
-app.get('/api/users', (req, res) => {
-  if (req.apiVersion === '2') {
-    return res.json({ data: getUsersV2(), meta: { total: 100 } });
-  }
-  res.json(getUsersV1());  // Flat array
-});
-```
-
-**Expected Output (for `GET /api/users` with `X-API-Version: 2`):**
-```
-{"data":[...],"meta":{"total":100}}
-```
-
-**Expected Output (for `GET /api/users` without header):**
-```
-[{"id":1,"name":"Alice"}]
-```
-
-**Why this output:** The `extractVersion` middleware reads the `X-API-Version` header. If present and valid, `req.apiVersion` is set; otherwise, it defaults to `'1'`. The route handler branches based on `req.apiVersion`, returning the appropriate response format.
 
 ### Real-World Cases
 
-- **Stripe:** URL-based versioning (`/v1/charges`, `/v1/customers`) with date-based API versions.
-- **GitHub:** Header-based versioning (`Accept: application/vnd.github.v3+json`).
-- **Twitter/X:** URL-based versioning (`/1.1/statuses`, `/2/tweets`).
-- **Internal microservices:** Header versioning for cleaner internal URLs.
+- **Public API platforms** — Stripe-style date-based versioning or URL path versioning.
+- **Mobile backends** — Old app versions continue to use `/v1` while the latest app uses `/v2`.
+- **Enterprise integrations** — Header-based versioning for partners with strict URL requirements.
+
+---
+
+## Core Concept 5: Route Prefixes
+
+### Definitions
+
+**Core Definition**
+A route prefix is the leading path segment at which a router or middleware is mounted, causing all of its internal routes to be served under that namespace.
+
+**Technical Definition**
+In Express.js, a route prefix is established by the mount path argument of `app.use(path, router)` or `parentRouter.use(path, childRouter)`. The prefix is stripped from the request URL before the mounted router processes the remaining path. Prefixes enable namespacing (e.g., `/api/v1`), resource grouping (e.g., `/users`), and the isolation of middleware to a subset of routes. Common prefixes include `/api`, `/admin`, `/auth`, and version identifiers such as `/v1`.
+
+**Beginner-Friendly Explanation**
+A route prefix is the beginning part of a URL that applies to a whole group of routes. If you mount a router at `/api/users`, then all routes inside that router automatically start with `/api/users`. It's like putting a folder inside a folder.
+
+---
+
+### Purposes
+
+- To namespace route groups under a common URL segment.
+- To enable middleware to run only for a specific subset of routes.
+- To support versioning and resource hierarchy through path structure.
+- To make the application's URL surface predictable and discoverable.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Mounting with a Prefix
+
+```javascript
+app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/products', productsRouter);
+```
+
+**Component Breakdown**
+
+| Component | Role |
+|-----------|------|
+| `'/api/v1/users'` | The prefix; all router routes are appended to this. |
+| `usersRouter` | The router instance being mounted. |
+
+#### Syntax Rules
+
+- The prefix must not end with a trailing slash (unless strict routing is enabled).
+- Mounting order determines which prefix captures a request first.
+- `app.use()` prefixes are matched as **path prefixes**, not exact paths.
+
+#### Constraints and Limitations
+
+- Multiple routers mounted at overlapping prefixes can shadow each other if not ordered carefully.
+- Changing a prefix requires updating all clients; prefixes are part of the public API contract.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Namespaced API Prefixes
+
+```javascript
+const express = require('express');
+const app = express();
+
+const usersRouter = express.Router();
+usersRouter.get('/', (req, res) => res.send('Users'));
+
+const productsRouter = express.Router();
+productsRouter.get('/', (req, res) => res.send('Products'));
+
+app.use('/api/users', usersRouter);
+app.use('/api/products', productsRouter);
+
+app.listen(3000);
+```
+
+**Expected Output**
+
+```
+GET /api/users    → 200 "Users"
+GET /api/products → 200 "Products"
+```
+
+**Why This Output Occurs**
+
+- Each router is mounted at a distinct prefix; requests are routed to the correct router based on the prefix.
+
+---
+
+### Real-World Cases
+
+- **API namespacing** — `/api/v1` separates the API from web pages.
+- **Admin isolation** — `/admin` mounts an admin router with its own authentication.
+- **Static asset prefixes** — `/static` serves files from a virtual path.
+
+---
+
+## Core Concept 6: Route Grouping
+
+### Definitions
+
+**Core Definition**
+Route grouping is the practice of organizing related routes—often under a shared prefix or router—so that they share middleware, configuration, and a common organizational boundary.
+
+**Technical Definition**
+Express route grouping can be achieved through **router-level grouping** (mounting a router at a prefix), **middleware grouping** (applying shared middleware to a router), **nested router grouping** (mounting child routers under parent routers), or **external grouping libraries** that provide declarative group syntax. Grouping is the structural mechanism that realizes route modules and prefixes in practice. Effective grouping ensures that cross-cutting concerns—authentication, rate limiting, validation—are applied once to a group rather than repeated per route.
+
+**Beginner-Friendly Explanation**
+Route grouping means putting related routes together and applying shared rules to all of them. For example, you can group all “admin” routes and put a “must be logged in” check at the top of the group, so every admin route is protected automatically.
+
+---
+
+### Purposes
+
+- To apply shared middleware (authentication, logging, rate limiting) to a cohesive set of routes.
+- To mirror the application's domain structure in its route organization.
+- To reduce duplication by registering middleware once per group.
+- To enable nested resource routing through grouped child routers.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Router-Level Grouping with Shared Middleware
+
+```javascript
+const adminRouter = express.Router();
+
+// Group-level middleware
+adminRouter.use(authenticate);
+adminRouter.use(authorize('admin'));
+
+// Grouped routes
+adminRouter.get('/dashboard', dashboardController);
+adminRouter.get('/users', adminUsersController);
+
+app.use('/admin', adminRouter);
+```
+
+**Component Breakdown**
+
+| Component | Role |
+|-----------|------|
+| `adminRouter.use(authenticate)` | Applies middleware to every route in the group. |
+| `app.use('/admin', adminRouter)` | Groups all admin routes under the `/admin` prefix. |
+
+#### Syntax Rules
+
+- Group-level middleware must be registered **before** the routes it should protect.
+- `router.use()` middleware applies to all HTTP methods and all paths within the router.
+- Nested grouping requires `mergeParams: true` if parent parameters are needed.
+
+#### Constraints and Limitations
+
+- Middleware applied at the group level affects **all** routes in the group; ensure it is appropriate for every route.
+- Over-grouping can create unnecessary layers and obscure the middleware chain.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Grouped Admin Routes with Shared Authentication
+
+```javascript
+const express = require('express');
+const app = express();
+
+const adminRouter = express.Router();
+
+// Group middleware
+const fakeAuth = (req, res, next) => {
+  if (req.headers['x-admin'] === 'true') return next();
+  res.status(403).send('Forbidden');
+};
+
+adminRouter.use(fakeAuth);
+
+adminRouter.get('/dashboard', (req, res) => res.send('Admin Dashboard'));
+adminRouter.get('/settings', (req, res) => res.send('Admin Settings'));
+
+app.use('/admin', adminRouter);
+
+app.listen(3000);
+```
+
+**Expected Output**
+
+```
+GET /admin/dashboard  (header X-Admin: true)  → 200 "Admin Dashboard"
+GET /admin/dashboard  (no header)             → 403 "Forbidden"
+```
+
+**Why This Output Occurs**
+
+- The group middleware runs before any admin route handler; without the required header, access is denied.
+
+---
+
+### Real-World Cases
+
+- **Admin sections** — Grouping `/admin/*` routes with authentication and authorization middleware.
+- **Authenticated user areas** — Grouping `/account/*` routes behind a login gate.
+- **Public vs. private APIs** — Grouping routes by access level to apply rate limiting selectively.
+
+---
+
+## Core Concept 7: Route Organization Best Practices
+
+### Definitions
+
+**Core Definition**
+Route organization best practices are the architectural and coding patterns that keep Express route definitions maintainable, scalable, secure, and consistent as the application and team grow.
+
+**Technical Definition**
+Best practices encompass: organizing by **feature/domain** rather than technical layer; keeping route files thin and delegating to controllers and services; applying the **application factory pattern** (separating `app.js` from `server.js`); using `express.Router()` for every logical route group; mounting routers with clear, versioned prefixes; isolating API versions in dedicated folders; registering error-handling middleware last; and using consistent naming conventions (`*.routes.js`, `*.controller.js`, `*.service.js`).
+
+**Beginner-Friendly Explanation**
+Best practices are the habits that keep your route organization clean. They include putting things in feature folders, keeping route files short, separating routing from logic, using clear URL prefixes, and making sure errors are handled in one place.
+
+---
+
+### Purposes
+
+- To maintain a clean separation of concerns between routing, request handling, business logic, and data access.
+- To enable the application to scale in both codebase size and team size without structural decay.
+- To make routes easy to locate, test, and modify.
+- To support versioning, deprecation, and eventual extraction into microservices.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Best-Practice Application Structure
+
+```text
+src/
+├── app.js                  # Application factory (no listen)
+├── server.js               # Entry point (calls app.listen)
+├── features/
+│   ├── users/
+│   │   ├── users.routes.js
+│   │   ├── users.controller.js
+│   │   ├── users.service.js
+│   │   └── users.validation.js
+│   └── products/
+│       └── ...
+├── common/
+│   ├── middleware/
+│   │   └── error-handler.js
+│   └── utils/
+└── config/
+```
+
+**Component Breakdown**
+
+| Practice | Implementation |
+|----------|----------------|
+| Feature-first organization | `features/users/`, `features/products/` |
+| Thin route files | Only paths, middleware, and controller delegation |
+| Application factory | `createApp()` exported from `app.js`; `server.js` calls `listen()` |
+| Error handler last | `app.use(errorHandler)` after all routes |
+| Versioned prefixes | `app.use('/api/v1', v1Router)` |
+
+#### Syntax Rules
+
+- Organize by feature/domain, not by technical type (`controllers/`, `models/`).
+- Keep route handlers thin: validate input → call service → serialize response.
+- Separate `app.js` from `server.js` to enable testing with Supertest without opening a port.
+- Register error-handling middleware **after** all routes and router mounts.
+- Use consistent file naming across all feature modules.
+
+#### Constraints and Limitations
+
+- Feature-based organization can feel heavier for very small applications; a layered structure may suffice initially.
+- Over-engineering the structure before the application grows can slow early development.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Application Factory with Feature Routers
+
+```javascript
+// src/app.js
+const express = require('express');
+const usersRouter = require('./features/users/users.routes');
+const errorHandler = require('./common/middleware/error-handler');
+
+function createApp() {
+  const app = express();
+  app.use(express.json());
+  app.use('/api/v1/users', usersRouter);
+  app.use(errorHandler); // MUST be last
+  return app;
+}
+
+module.exports = createApp;
+
+// src/server.js
+const createApp = require('./app');
+const app = createApp();
+app.listen(3000, () => console.log('Server on :3000'));
+```
+
+**Expected Output**
+
+```
+GET /api/v1/users → 200 (user list)
+Any unhandled error → error handler response
+```
+
+**Why This Output Occurs**
+
+- The application factory separates configuration from listening, enabling testing.
+- The error handler is registered last, ensuring it catches errors from all routes.
+
+---
+
+### Real-World Cases
+
+- **Production Express APIs** — Feature-based modules, application factories, and versioned prefixes.
+- **Team-based development** — Clear module ownership and consistent file naming.
+- **Microservice-ready monoliths** — Modular features that can be extracted with minimal changes.
 
 ---
 
 ## References
 
-- Express.js Routing Guide — https://expressjs.com/en/guide/routing.html
-- Express.js 5.x Router API — https://expressjs.com/en/5x/api/router/
-- Express.js Using Middleware Guide — https://expressjs.com/en/guide/using-middleware/
-- Express.js 5.x Application Object — `app.use()` — https://expressjs.com/en/5x/api/application/#appuse
-- Split a Monolithic Express Router into Domain Routes — https://docs.devinenterprise.com/use-cases/gallery/refactor-module
-- Compile-N-Run — Express Route Organization — https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/framework/express/1-express-routing/10-express-route-organization.mdx
-- API Versioning Strategies — https://raw.githubusercontent.com/glennguilloux/llm-knowledge-base/refs/heads/main/api-design/versioning.md
-- API Versioning Strategies (Comprehensive Guide) — https://raw.githubusercontent.com/vasilyu1983/AI-Agents-public/45953e53d00de7c0035c263c9d11c59a55001108/frameworks/shared-skills/skills/dev-api-design/references/versioning-strategies.md
-- Implementing API Header Versioning in Node.js — https://dev.to/silentwatcher_95/implementing-api-header-versioning-in-nodejs-4e29
-- Requestly — Mastering Express Routers — https://requestly.com/blog/express-routes/
-- Express.js Migration Guide (v4 to v5) — https://expressjs.com/en/guide/migrating-5.html
-- E-Commerce API — Product Catalog — https://mintlify.wiki
-- How to Implement API Versioning in Express — https://oneuptime.com
-- MDN — HTTP Accept Header — https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept
+- Express.js Development Guidelines (Feature-Based Organization, Application Factory, Thin Handlers) — https://github.com/snowdreamtech/template/blob/main/.agent/rules/express.md
+- What is the best folder structure for a scalable Node.js project? (Modular + Layered Architecture) — https://github.com/orgs/community/discussions/190484
+- Routing and Controllers — Best Practices (The Golden Rule: Routes Only) — https://github.com/aiskillstore/marketplace/blob/main/skills/dojocodinglabs/backend-dev-guidelines/resources/routing-and-controllers.md
+- Express Modular Architecture (Controllers, Services, Repositories) — https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/framework/express/15-express-advanced-patterns/2-express-modular-architecture.mdx
+- Express API Versioning (Folder Structure for Versions) — https://www.npmjs.com/package/api-express-versioning
+- Express Route Versioning (URL Path, Header, Query Strategies) — https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/framework/express/1-express-routing/12-express-route-versioning.mdx
+- Express Route Groups (Router-Level Grouping) — https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/framework/express/1-express-routing/8-express-route-groups.mdx
+- Express `app.use()` Mount Path Behavior (Prefix Stripping) — https://expressjs.com/en/4x/api.html#app.use
+- Express.js FAQ: How should I structure my application? — https://expressjs.com/en/starter/faq.html

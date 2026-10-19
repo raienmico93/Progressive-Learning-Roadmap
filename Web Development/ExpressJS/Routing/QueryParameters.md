@@ -1,4 +1,4 @@
-# Express.js Query Parameters — Comprehensive Programming Cheat Sheet
+# Query Parameters in Express.js — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,45 +6,43 @@
 
 ### Definitions
 
-**Core Definition:** Query parameters are non-hierarchical key-value pairs appended to the end of a URL after a `?` character, used to filter, sort, paginate, or search data without altering the URL path. Express parses these into the `req.query` object, making them accessible to route handlers.
+**Core Definition**
+Query parameters are the key–value pairs appended to a URL after a question mark (`?`), used to pass optional, non-hierarchical data such as search terms, filters, pagination settings, and sorting preferences to the server.
 
-**Technical Definition:** Express uses an underlying query parser (configurable via `app.set('query parser', ...)`) to parse the URL query string into a JavaScript object. In Express 4, the default parser was the `qs` library ("extended" mode), which supports nested objects and arrays. In Express 5, the default was changed to Node's built-in `querystring` module ("simple" mode), which produces flat key-value pairs. The parsed result is exposed as `req.query`, an object whose shape is based on user-controlled input and must therefore be treated as untrusted.
+**Technical Definition**
+In Express.js, query parameters are parsed from the request URL's query string and exposed on the `req.query` object. The shape of `req.query` depends on the configured **query parser**: Express 4 defaults to the `qs` library ("extended" parsing, supporting nested objects and arrays), while Express 5 defaults to Node's built-in `querystring` module ("simple" parsing, which does not parse nested structures). All values in `req.query` are **untrusted user-controlled input** and must be validated before use. Query strings are **not** part of the route path and do not affect route matching.
 
-**Beginner-Friendly Explanation:** Query parameters are like the options you tick on a search form. The main URL (`/products`) is where you're going, and the query string (`?category=electronics&sort=price&page=2`) is the set of filters, sort orders, and page numbers you're applying. Express automatically collects these options and puts them in an easy-to-read object called `req.query`.
+**Beginner-Friendly Explanation**
+Query parameters are the extra information at the end of a URL, starting with `?`. For example, in `/search?q=node&page=2`, `q=node` and `page=2` are query parameters. They are used for things like search terms, filters, and pagination. In Express, you read them from `req.query.q` and `req.query.page`. They are always strings (or arrays/objects if repeated or nested), so you often need to convert them to numbers or booleans.
+
+---
 
 ### Key Characteristics
 
-- **Automatic parsing:** Express parses the query string by default; no middleware is required.
-- **String values:** All query parameter values are strings (or arrays of strings for repeated keys) unless explicitly cast.
-- **Flat vs. nested:** The "simple" parser produces flat keys (`price[eq]` becomes the literal key `'price[eq]'`); the "extended" parser produces nested objects (`{ price: { eq: '5' } }`).
-- **Untrusted input:** Query parameters come from the user and must be validated and sanitized before use.
-- **Not part of route matching:** Query strings are ignored when Express matches route paths.
-- **Immutable in Express 5:** `req.query` is a getter, not a writable property, in Express 5.
+- **Optional and unordered** — Query parameters are not required for a route to match; their order does not matter.
+- **String-valued by default** — Every leaf value is a string (or an array of strings, or a nested object depending on the parser).
+- **Parser-dependent shape** — `req.query` can be a flat object, a nested object, or an array of values depending on the Express version and `query parser` setting.
+- **Excluded from route matching** — Query strings do not affect which route handler runs.
+- **Untrusted by nature** — Express explicitly warns that `req.query` is based on user-controlled input and must be validated.
+
+---
 
 ### Prerequisites
 
-- **Node.js runtime** (v18 or higher for Express 5.x; v0.10+ for Express 4.x).
-- **Express.js installed:** `npm install express`.
-- **Basic JavaScript knowledge:** Objects, arrays, type coercion, and asynchronous code.
-- **Understanding of HTTP:** URLs, query strings, and request/response cycle.
-- **Familiarity with database querying** (for filtering, sorting, and pagination sections).
+- Node.js and npm installed; Express 5 requires Node.js 18 or higher.
+- An Express application initialized with `const app = express()`.
+- Basic understanding of routing and middleware.
+- Familiarity with JavaScript type conversion and validation concepts.
+
+---
 
 ### Related Programming Areas
 
-- **RESTful API design:** Query parameters are the standard way to filter, sort, and paginate collections.
-- **Database integration:** Query parameters are translated into SQL `WHERE`, `ORDER BY`, `LIMIT`, and `OFFSET` clauses.
-- **Validation libraries:** `express-validator`, `joi`, `zod`, or `celebrate` for schema-based validation.
-- **Security middleware:** `express-xss-sanitizer`, `hppx` (HTTP Parameter Pollution protection), and `express-mongo-sanitize` for sanitization.
-- **Search engines:** Full-text search (Elasticsearch, MongoDB `$text`, MySQL `FULLTEXT`) driven by the `q` query parameter.
-
-### Core Concepts
-
-1. **`req.query`** — the parsed query object generated by Express's query parser.
-2. **Filtering** — passing conditions (e.g., `?status=active`) to alter database queries safely.
-3. **Sorting** — managing ordering flags and directions (e.g., `?sortBy=createdAt&order=desc`).
-4. **Pagination** — implementing cursor-based or offset-based limit controls (e.g., `?page=2&limit=20`).
-5. **Search Parameters** — passing free-text search terms (e.g., `?q=express+routing`).
-6. **Validation and Sanitization** — casting strings to safe types and escaping malicious characters.
+- **Routing** — Query parameters supplement route paths and route parameters.
+- **Input validation** — All query values must be validated and sanitized.
+- **API design** — Query parameters define filtering, sorting, and pagination interfaces.
+- **Security** — Query strings are visible in logs, browser history, and referrer headers; sensitive data must never be placed in them.
+- **Search and filtering** — Query parameters are the primary mechanism for client-driven result refinement.
 
 ---
 
@@ -52,856 +50,815 @@
 
 ### Definitions
 
-**Core Definition:** `req.query` is an object containing a property for each query string parameter in the request URL, automatically parsed by Express.
+**Core Definition**
+`req.query` is an object containing a property for each query string parameter in the request URL, with keys corresponding to parameter names and values corresponding to the parsed parameter values.
 
-**Technical Definition:** This property is an object containing a property for each query string parameter in the route. If there is no query string, it is the empty object `{}`. As `req.query`'s shape is based on user-controlled input, all properties and values in this object are untrusted and should be validated before trusting. In Express 5, `req.query` is defined as a getter and is no longer writable.
+**Technical Definition**
+Express populates `req.query` by parsing the request URL's query string using the configured query parser. When `query parser` is set to `disabled`, `req.query` is an empty object `{}`. Otherwise, it is the result of the configured parser. In Express 4, the default parser is `qs` ("extended"), which supports nested objects and arrays. In Express 5, the default parser is Node's `querystring` module ("simple"), which does not parse nested structures. The shape of `req.query` is entirely determined by user-controlled input and must be treated as untrusted.
 
-**Beginner-Friendly Explanation:** `req.query` is like a neatly labelled box that Express fills with all the options from the URL's query string. If someone visits `/search?q=books&page=2`, Express puts `{ q: 'books', page: '2' }` into `req.query`. You can then read `req.query.q` or `req.query.page` to access each value.
+**Beginner-Friendly Explanation**
+`req.query` is the box where Express puts all the query parameters from the URL. If someone visits `/search?q=node&page=2`, then `req.query.q` is `"node"` and `req.query.page` is `"2"`. If the same key appears multiple times, it may become an array. The exact shape depends on your Express version and settings.
+
+---
 
 ### Purposes
 
-- To inspect the parsed query object generated by Express's underlying query parser.
-- To access user-provided filter, sort, pagination, and search values.
-- To decouple route paths from the data-selection logic.
-- To provide a consistent interface for reading query string data across all routes.
+- To provide a convenient, object-based interface for accessing query string values.
+- To enable handlers to read optional client-supplied parameters such as search terms, filters, and pagination controls.
+- To support flexible request customization without altering route paths.
+- To serve as the input to validation and sanitization middleware.
+
+---
 
 ### Syntax Rules and Structure
 
-```js
+#### Complete General Syntax: Accessing `req.query`
+
+```javascript
 app.get('/search', (req, res) => {
-  const { q, page, limit } = req.query;
-  res.json({ query: q, page, limit });
+  const { q, page = 1, limit = 10 } = req.query;
+  res.json({ query: q, page: Number(page), limit: Number(limit) });
 });
 ```
 
-| Component | Breakdown |
-|-----------|-----------|
-| `req.query` | Object containing parsed query parameters. |
-| `q` | Example parameter name; value is always a string (or array). |
-| `page`, `limit` | Additional parameters; values are strings until cast. |
+**Component Breakdown**
 
-**Rules:**
-- Express parses the query string automatically; no middleware is required.
-- If a query parameter appears multiple times (`?tag=js&tag=node`), the value becomes an array.
-- If a parameter is absent, the corresponding property is `undefined` (or absent from the object).
-- Query parameter values are **always strings**; no automatic type conversion occurs.
+| Component | Role |
+|-----------|------|
+| `req.query` | Object containing parsed query-string key–value pairs. |
+| Destructuring | Extracts values with optional defaults. |
+| `Number()` | Converts string values to numbers explicitly. |
 
-**Constraints and Limitations:**
-- **Express 5 immutability:** `req.query` is a getter in Express 5 and cannot be directly reassigned. Use `Object.defineProperty` to make it writable if necessary.
-- **Express 5 parser change:** The default parser changed from `"extended"` (qs) to `"simple"` (Node's `querystring`). This means nested objects like `?price[eq]=5` are parsed as a flat key `'price[eq]'` rather than `{ price: { eq: '5' } }`.
-- **Prototype pollution:** In Express 5, the query parser returns a plain object with no prototype, mitigating prototype-pollution attacks.
+#### Syntax Rules
 
-### Annotated Code Examples
+- Query strings begin with `?` and use `&` to separate pairs (`?key1=value1&key2=value2`).
+- `req.query` values are strings, arrays of strings, or nested objects depending on the parser.
+- Query parameters are **not** part of the route path and do not affect route matching.
 
-#### Example 1: Accessing Basic Query Parameters
+#### Constraints and Limitations
 
-```js
-// req-query-basic.js
+- **Express 5 change** — The default parser switched from `qs` ("extended") to `querystring` ("simple"); nested objects require `app.set('query parser', 'extended')` to restore the Express 4 behavior.
+- **Untrusted input** — Express explicitly warns that `req.query` properties and values are untrusted and must be validated before trusting.
+- `req.param(name)` (the old helper that searched params, body, and query) has been **removed in Express 5**; use `req.params`, `req.body`, or `req.query` directly.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Basic Query Parameter Access
+
+```javascript
 const express = require('express');
 const app = express();
 
 app.get('/search', (req, res) => {
-  // req.query is automatically populated by Express
-  console.log('Full query object:', req.query);
-  console.log('Search term:', req.query.q);
-  console.log('Page:', req.query.page);
-
+  // Values are strings by default
   res.json({
-    q: req.query.q || '',
-    page: parseInt(req.query.page, 10) || 1
+    query: req.query.q,
+    page: req.query.page,
+    type: typeof req.query.page
   });
 });
 
-app.listen(3000, () => console.log('Server on port 3000'));
+app.listen(3000);
 ```
 
-**Expected Output (for `GET /search?q=express&page=2`):**
+**Step-by-Step Explanation**
+
+1. **Request** — The client sends `GET /search?q=node&page=2`.
+2. **Parsing** — Express parses the query string into `req.query = { q: 'node', page: '2' }`.
+3. **Response** — The handler reads the values; `page` is the string `"2"`, not the number `2`.
+
+**Expected Output**
+
 ```
-Full query object: { q: 'express', page: '2' }
-Search term: express
-Page: 2
-{"q":"express","page":2}
+GET /search?q=node&page=2
+→ 200 {
+  "query": "node",
+  "page": "2",
+  "type": "string"
+}
 ```
 
-**Why this output:** Express parses the query string `?q=express&page=2` and creates the object `{ q: 'express', page: '2' }`. Both values are strings. The handler uses `parseInt` to convert `page` to a number for the JSON response.
+**Why This Output Occurs**
 
-#### Example 2: Array Parameters and Nested Objects
+- `req.query` values are always strings (unless repeated or parsed into nested structures); explicit conversion is required for numbers.
 
-```js
-// req-query-array.js
+---
+
+### Real-World Cases
+
+- **Search endpoints** — `/search?q=express` reads the search term from `req.query.q`.
+- **Filtered listings** — `/products?category=books&minPrice=10` reads filter values.
+- **Pagination** — `/posts?page=3&limit=20` reads pagination controls.
+
+---
+
+## Core Concept 2: Query String Parsing
+
+### Definitions
+
+**Core Definition**
+Query string parsing is the process of converting the raw URL query string (the portion after `?`) into a structured JavaScript object that the application can use.
+
+**Technical Definition**
+Express delegates query string parsing to a configurable parser. The `query parser` application setting controls the behavior:
+- `"simple"` (default in Express 5) — Uses Node's built-in `querystring` module; repeated keys produce arrays, but bracket notation (`a[b]=c`) remains a literal key.
+- `"extended"` (default in Express 4) — Uses the `qs` library; supports nested objects, arrays with indices, and deep structures.
+- `"disabled"` — `req.query` is always `{}`.
+- **Custom function** — A user-supplied function `(str) => object` can implement arbitrary parsing.
+
+**Beginner-Friendly Explanation**
+Parsing is how Express turns the messy string `?q=node&page=2` into a neat object `{ q: 'node', page: '2' }`. Different parsers produce different shapes. The "simple" parser only handles flat keys, while the "extended" parser can build nested objects and arrays. Express 5 switched the default to the simple parser, so nested structures require an explicit setting.
+
+---
+
+### Purposes
+
+- To transform the raw query string into a usable JavaScript object.
+- To control how repeated keys, bracket notation, and nested structures are interpreted.
+- To balance feature richness against security and performance (complex parsing can be abused).
+- To maintain compatibility across Express versions through explicit parser configuration.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Configuring the Query Parser
+
+```javascript
+// Express 5: use extended parsing (qs library) for nested objects
+app.set('query parser', 'extended');
+
+// Or provide a custom parser function
+app.set('query parser', (str) => {
+  return require('qs').parse(str, { depth: 5 });
+});
+```
+
+**Component Breakdown**
+
+| Setting | Behavior |
+|---------|----------|
+| `'simple'` | Node `querystring`; flat keys, repeated keys → arrays. |
+| `'extended'` | `qs` library; nested objects and arrays supported. |
+| `'disabled'` | `req.query` is always `{}`. |
+| Custom function | Arbitrary parsing logic; receives the raw query string. |
+
+#### Syntax Rules
+
+- `app.set('query parser', ...)` must be called before routes are defined.
+- The `'extended'` parser uses `qs` with default options; deep nesting can cause CPU/memory spikes.
+- Express 4 defaults to `'extended'`; Express 5 defaults to `'simple'`.
+
+#### Constraints and Limitations
+
+- **Prototype pollution risk** — The `qs` library with `allowPrototypes: true` (Express's historical setting) can be exploited; Express 5's simple parser mitigates this by default.
+- **Array limit** — The `qs` parser historically capped indexed array notation at 20 elements; Express 4.22+ and Express 5 restore array parsing with `arrayLimit: 1000` for repeated keys.
+- **Parser change is breaking** — Code relying on nested objects (`req.query.user.email`) breaks under the simple parser.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Simple vs Extended Parsing
+
+```javascript
+const express = require('express');
+
+// Express 5 default: simple parser
+const appSimple = express();
+appSimple.get('/demo', (req, res) => res.json(req.query));
+
+// Extended parser
+const appExtended = express();
+appExtended.set('query parser', 'extended');
+appExtended.get('/demo', (req, res) => res.json(req.query));
+```
+
+**Expected Output**
+
+```
+# Simple parser (Express 5 default)
+GET /demo?user[name]=john&user[age]=30
+→ 200 { "user[name]": "john", "user[age]": "30" }
+
+# Extended parser
+GET /demo?user[name]=john&user[age]=30
+→ 200 { "user": { "name": "john", "age": "30" } }
+```
+
+**Why This Output Occurs**
+
+- The simple parser treats bracket notation as part of the literal key; the extended parser interprets it as nesting.
+
+---
+
+### Real-World Cases
+
+- **Express 4 to 5 migration** — Teams must decide whether to keep `'extended'` parsing or refactor to flat query keys.
+- **Security hardening** — Applications that do not need nested queries should use `'simple'` to reduce attack surface.
+- **Custom depth limits** — High-security applications use a custom parser with `depth: 3` to prevent deep-nesting abuse.
+
+---
+
+## Core Concept 3: Multiple Values
+
+### Definitions
+
+**Core Definition**
+Multiple values occur when the same query parameter key appears more than once in the query string, producing either an array of values or a parser-specific structure.
+
+**Technical Definition**
+When a query string contains repeated keys (e.g., `?tag=node&tag=express`), Express exposes the value as an array on `req.query.tag`. In both simple and extended parsers, repeated keys produce arrays. Bracket notation with empty brackets (`tag[]=node&tag[]=express`) also produces arrays under the extended parser; under the simple parser, it remains a literal key. Array parsing is subject to an `arrayLimit` (historically 20 for indexed notation; 1000 for repeated-key notation in patched versions).
+
+**Beginner-Friendly Explanation**
+If a URL has the same parameter twice, like `?color=red&color=blue`, Express gives you an array: `req.query.color = ['red', 'blue']`. This is useful for multi-select filters or tags.
+
+---
+
+### Purposes
+
+- To allow clients to send multiple values for the same logical parameter (e.g., multiple tags or filters).
+- To support multi-select UI components without requiring a custom encoding scheme.
+- To provide a natural representation of repeated keys as arrays.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Repeated Keys
+
+```javascript
+app.get('/filter', (req, res) => {
+  const tags = req.query.tag; // string or array
+  const normalized = Array.isArray(tags) ? tags : tags ? [tags] : [];
+  res.json({ tags: normalized });
+});
+```
+
+**Component Breakdown**
+
+| Component | Role |
+|-----------|------|
+| `req.query.tag` | String if one value; array if repeated. |
+| `Array.isArray()` | Normalizes single values to arrays. |
+
+#### Syntax Rules
+
+- Repeated keys (`?a=1&a=2`) produce an array under both simple and extended parsers.
+- Single occurrence produces a string, not a one-element array; normalization is required.
+- Bracket notation (`?a[]=1&a[]=2`) produces arrays only under the extended parser.
+
+#### Constraints and Limitations
+
+- The `qs` parser caps indexed array notation at `arrayLimit` (historically 20; patched to 1000 for repeated keys in Express 4.22.2+).
+- The simple parser does not interpret `a[]` as an array; it becomes the literal key `"a[]"`.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Repeated Keys as Arrays
+
+```javascript
 const express = require('express');
 const app = express();
-
-app.get('/tags', (req, res) => {
-  // Repeated keys become arrays
-  const tags = req.query.tag;
-  console.log('Tags:', tags);                  // Array or string
-  console.log('Is array:', Array.isArray(tags));
-
-  res.json({
-    tags: Array.isArray(tags) ? tags : [tags].filter(Boolean)
-  });
-});
-
-// Nested object example (requires extended parser)
-app.set('query parser', 'extended'); // Enable qs parsing
 
 app.get('/filter', (req, res) => {
-  console.log('Nested query:', req.query);
-  // ?price[eq]=5 becomes { price: { eq: '5' } }
-  res.json(req.query);
-});
-
-app.listen(3000, () => console.log('Array query on 3000'));
-```
-
-**Expected Output (for `GET /tags?tag=js&tag=node`):**
-```
-Tags: [ 'js', 'node' ]
-Is array: true
-{"tags":["js","node"]}
-```
-
-**Expected Output (for `GET /filter?price[eq]=5` with extended parser):**
-```
-Nested query: { price: { eq: '5' } }
-{"price":{"eq":"5"}}
-```
-
-**Why this output:** Repeated keys (`tag=js&tag=node`) produce an array. With the `"extended"` parser (the `qs` library), square-bracket notation (`price[eq]=5`) produces a nested object. Without the extended parser (Express 5 default), the key would be the literal string `'price[eq]'`.
-
-### Real-World Cases
-
-- **Search endpoints:** `/search?q=node.js&page=2` to retrieve and paginate search results.
-- **E-commerce filtering:** `/products?category=electronics&minPrice=100&maxPrice=500` to filter products.
-- **API versioning:** `/api/users?page=2&limit=20&sort=createdAt` to paginate and sort users.
-- **Analytics:** `/events?startDate=2026-01-01&endDate=2026-01-31` to filter date ranges.
-
----
-
-## Core Concept 2: Filtering
-
-### Definitions
-
-**Core Definition:** Filtering uses query parameters to pass specific conditions that narrow down the set of records returned by a database query.
-
-**Technical Definition:** Filter parameters are read from `req.query`, validated, and translated into database query conditions (e.g., SQL `WHERE` clauses or ORM filter objects). The values must never be concatenated directly into query strings; instead, parameterised queries or ORM bindings must be used to prevent SQL injection.
-
-**Beginner-Friendly Explanation:** Filtering is like telling a librarian exactly what kind of books you want: "Only show me books that are in stock, cost less than $20, and are in the science category." In an API, you pass those conditions as query parameters (`?status=active&maxPrice=20&category=science`), and the server builds a database query that returns only matching records.
-
-### Purposes
-
-- To pass specific conditions (e.g., `?status=active`) to alter database queries safely.
-- To reduce the volume of data transferred by returning only relevant records.
-- To enable dynamic, user-driven data exploration without changing the API endpoint.
-- To support faceted search and advanced filtering in e-commerce and analytics applications.
-
-### Syntax Rules and Structure
-
-```js
-app.get('/api/users', async (req, res) => {
-  const { status, role, search } = req.query;
-  const where = {};
-  if (status) where.status = status;
-  if (role) where.role = role;
-  if (search) where.name = { [Op.like]: `%${search}%` };
-  const users = await User.findAll({ where });
-  res.json(users);
-});
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `req.query.status` | Filter value for the `status` column. |
-| `where` object | Dynamically built to include only provided filters. |
-| ORM operators | `Op.like`, `Op.eq`, etc., for safe query building. |
-
-**Rules:**
-- Only include filters that the user provided; omit absent parameters.
-- Always use parameterised queries or ORM bindings; never concatenate user input into SQL strings.
-- Validate filter values against an allow-list of permitted fields and values.
-- Consider using `express-validator` or `joi` to validate filter parameters.
-
-**Constraints and Limitations:**
-- Complex nested filters (e.g., `?price[gte]=10&price[lte]=50`) require the `"extended"` query parser.
-- HTTP Parameter Pollution (HPP) can cause issues if the same filter parameter appears multiple times; use `hpp` or `hppx` middleware.
-- Filtering on non-indexed columns can cause performance degradation.
-
-### Annotated Code Example
-
-```js
-// filter-query.js
-const express = require('express');
-const app = express();
-
-// Simulated database
-const users = [
-  { id: 1, name: 'Alice', status: 'active', role: 'admin' },
-  { id: 2, name: 'Bob', status: 'inactive', role: 'user' },
-  { id: 3, name: 'Charlie', status: 'active', role: 'user' }
-];
-
-app.get('/api/users', (req, res) => {
-  const { status, role, search } = req.query;
-  let result = users;
-
-  // Filter by status (exact match)
-  if (status) {
-    result = result.filter(u => u.status === status);
-  }
-
-  // Filter by role (exact match)
-  if (role) {
-    result = result.filter(u => u.role === role);
-  }
-
-  // Filter by search term (partial match)
-  if (search) {
-    result = result.filter(u =>
-      u.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }
-
-  res.json(result);
-});
-
-app.listen(3000, () => console.log('Filter server on 3000'));
-```
-
-**Expected Output (for `GET /api/users?status=active`):**
-```
-[{"id":1,"name":"Alice","status":"active","role":"admin"},{"id":3,"name":"Charlie","status":"active","role":"user"}]
-```
-
-**Expected Output (for `GET /api/users?status=active&role=admin`):**
-```
-[{"id":1,"name":"Alice","status":"active","role":"admin"}]
-```
-
-**Expected Output (for `GET /api/users?search=ali`):**
-```
-[{"id":1,"name":"Alice","status":"active","role":"admin"}]
-```
-
-**Why this output:** Each filter is applied conditionally. Only users matching all provided criteria are returned. The `search` parameter uses a case-insensitive partial match. In production, these filters would be translated into database queries (e.g., SQL `WHERE` clauses) using parameterised statements.
-
-### Real-World Cases
-
-- **E-commerce:** `/products?category=electronics&brand=apple&inStock=true` to filter products.
-- **CRM:** `/contacts?status=lead&source=website&createdAfter=2026-01-01` to filter contacts.
-- **Log analysis:** `/logs?level=error&service=api&from=2026-01-01` to filter log entries.
-- **HR systems:** `/employees?department=engineering&role=senior` to filter employees.
-
----
-
-## Core Concept 3: Sorting
-
-### Definitions
-
-**Core Definition:** Sorting uses query parameters to control the order in which records are returned (e.g., ascending or descending by a specific field).
-
-**Technical Definition:** Sorting parameters (`sortBy`, `order`, or `sort`) are read from `req.query`, validated against an allow-list of permitted columns, and translated into database `ORDER BY` clauses or ORM sort options. The direction (`asc`/`desc`) must be validated to prevent injection of arbitrary SQL.
-
-**Beginner-Friendly Explanation:** Sorting is like telling a librarian to arrange the books by publication date, newest first. In an API, you pass `?sortBy=createdAt&order=desc` to say "sort by the `createdAt` field in descending order." The server then applies that ordering to the database query.
-
-### Purposes
-
-- To manage ordering flags and directions (e.g., `?sortBy=createdAt&order=desc`).
-- To allow users to control the presentation order of results.
-- To support multi-column sorting for complex data sets.
-- To enable consistent pagination by ensuring a deterministic order.
-
-### Syntax Rules and Structure
-
-```js
-app.get('/api/users', async (req, res) => {
-  const sortBy = req.query.sortBy || 'createdAt';
-  const order = (req.query.order || 'asc').toUpperCase();
-
-  // Validate against allow-list
-  const allowedSortFields = ['name', 'createdAt', 'email'];
-  const allowedOrders = ['ASC', 'DESC'];
-
-  if (!allowedSortFields.includes(sortBy) || !allowedOrders.includes(order)) {
-    return res.status(400).json({ error: 'Invalid sort parameters' });
-  }
-
-  const users = await User.findAll({ order: [[sortBy, order]] });
-  res.json(users);
-});
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `sortBy` | Field name to sort by (must be validated). |
-| `order` | Direction: `asc` or `desc` (must be validated). |
-| Allow-list | Array of permitted column names; prevents injection. |
-
-**Rules:**
-- Always validate `sortBy` against an allow-list of column names.
-- Always validate `order` to be either `asc` or `desc` (case-insensitive).
-- Use parameterised queries or ORM bindings; never concatenate sort values into SQL.
-- Provide sensible defaults (e.g., `createdAt` and `asc`).
-
-**Constraints and Limitations:**
-- Multi-column sorting (`?sort=name,createdAt`) requires parsing and validation of comma-separated values.
-- Sorting by unindexed columns can be slow on large datasets.
-- Some ORMs require the sort field to be a valid column name; aliases may not work.
-
-### Annotated Code Example
-
-```js
-// sort-query.js
-const express = require('express');
-const app = express();
-
-const products = [
-  { id: 1, name: 'Laptop', price: 1200, createdAt: '2026-01-10' },
-  { id: 2, name: 'Phone', price: 800, createdAt: '2026-01-15' },
-  { id: 3, name: 'Tablet', price: 600, createdAt: '2026-01-05' }
-];
-
-app.get('/api/products', (req, res) => {
-  const sortBy = req.query.sortBy || 'createdAt';
-  const order = req.query.order || 'asc';
-
-  // Allow-list of sortable fields
-  const allowedFields = ['name', 'price', 'createdAt'];
-  if (!allowedFields.includes(sortBy)) {
-    return res.status(400).json({ error: 'Invalid sortBy field' });
-  }
-
-  const sorted = [...products].sort((a, b) => {
-    const aVal = a[sortBy];
-    const bVal = b[sortBy];
-    if (aVal < bVal) return order === 'asc' ? -1 : 1;
-    if (aVal > bVal) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
-
-  res.json(sorted);
-});
-
-app.listen(3000, () => console.log('Sort server on 3000'));
-```
-
-**Expected Output (for `GET /api/products?sortBy=price&order=desc`):**
-```
-[{"id":1,"name":"Laptop","price":1200,"createdAt":"2026-01-10"},{"id":2,"name":"Phone","price":800,"createdAt":"2026-01-15"},{"id":3,"name":"Tablet","price":600,"createdAt":"2026-01-05"}]
-```
-
-**Expected Output (for `GET /api/products?sortBy=createdAt&order=asc`):**
-```
-[{"id":3,"name":"Tablet","price":600,"createdAt":"2026-01-05"},{"id":1,"name":"Laptop","price":1200,"createdAt":"2026-01-10"},{"id":2,"name":"Phone","price":800,"createdAt":"2026-01-15"}]
-```
-
-**Why this output:** The handler reads `sortBy` and `order` from `req.query`, validates `sortBy` against an allow-list, and sorts the array accordingly. Descending order reverses the comparison logic. In a database-backed application, the sort would be applied via an `ORDER BY` clause.
-
-### Real-World Cases
-
-- **Blog listings:** `/posts?sortBy=publishedAt&order=desc` to show newest posts first.
-- **E-commerce:** `/products?sortBy=price&order=asc` to show cheapest products first.
-- **User directories:** `/users?sortBy=lastName&order=asc` for alphabetical ordering.
-- **Analytics dashboards:** `/metrics?sortBy=value&order=desc` to show highest metrics first.
-
----
-
-## Core Concept 4: Pagination
-
-### Definitions
-
-**Core Definition:** Pagination uses query parameters to divide a large dataset into smaller, manageable pages, returning only a subset of records per request.
-
-**Technical Definition:** Pagination parameters (typically `page` and `limit`, or `limit` and `offset`) are read from `req.query`, validated and cast to integers, and translated into database `LIMIT` and `OFFSET` clauses (offset-based) or cursor-based queries. The response typically includes metadata such as total count, total pages, and whether there is a next or previous page.
-
-**Beginner-Friendly Explanation:** Pagination is like reading a book one chapter at a time instead of trying to hold the entire book in your hands. You tell the server "give me page 2, with 20 items per page" (`?page=2&limit=20`), and the server returns just those 20 items along with information about how many pages exist in total.
-
-### Purposes
-
-- To implement cursor-based or offset-based limit controls (e.g., `?page=2&limit=20`).
-- To reduce response payload size and improve API performance.
-- To enable infinite scrolling or "load more" functionality in frontends.
-- To provide a predictable, consistent interface for retrieving large collections.
-
-### Sub-Feature 4.1: Offset-Based Pagination
-
-#### Syntax Rules and Structure
-
-```js
-const page = parseInt(req.query.page) || 1;
-const limit = parseInt(req.query.limit) || 10;
-const offset = (page - 1) * limit;
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `page` | Page number (1-indexed). |
-| `limit` | Items per page. |
-| `offset` | Computed as `(page - 1) * limit`. |
-
-**Constraints:**
-- `page` and `limit` must be positive integers.
-- Large offsets (deep pagination) can be slow on large datasets.
-- Records may be skipped or duplicated if data changes between requests.
-
----
-
-### Sub-Feature 4.2: Cursor-Based Pagination
-
-#### Syntax Rules and Structure
-
-```js
-const limit = parseInt(req.query.limit) || 20;
-const cursor = req.query.cursor;
-// Query: WHERE id < cursor ORDER BY id DESC LIMIT limit + 1
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `cursor` | Opaque pointer to the last item of the previous page. |
-| `limit` | Items per page. |
-
-**Constraints:**
-- Cursor-based pagination is more efficient for large, real-time datasets.
-- The cursor must be validated and decoded safely.
-- Requires a stable, unique sort key (e.g., `id` or `createdAt`).
-
-### Annotated Code Example
-
-```js
-// pagination-query.js
-const express = require('express');
-const app = express();
-
-// Simulated dataset
-const items = Array.from({ length: 100 }, (_, i) => ({
-  id: i + 1,
-  name: `Item ${i + 1}`
-}));
-
-// Offset-based pagination
-app.get('/api/items', (req, res) => {
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = parseInt(req.query.limit, 10) || 10;
-
-  // Validate
-  if (page < 1 || limit < 1 || limit > 100) {
-    return res.status(400).json({ error: 'Invalid pagination parameters' });
-  }
-
-  const offset = (page - 1) * limit;
-  const paginatedItems = items.slice(offset, offset + limit);
-  const total = items.length;
-
+  const colors = req.query.color;
   res.json({
-    data: paginatedItems,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-      hasNext: page < Math.ceil(total / limit),
-      hasPrev: page > 1
+    raw: colors,
+    isArray: Array.isArray(colors),
+    normalized: Array.isArray(colors) ? colors : colors ? [colors] : []
+  });
+});
+
+app.listen(3000);
+```
+
+**Expected Output**
+
+```
+GET /filter?color=red
+→ 200 { "raw": "red", "isArray": false, "normalized": ["red"] }
+
+GET /filter?color=red&color=blue
+→ 200 { "raw": ["red", "blue"], "isArray": true, "normalized": ["red", "blue"] }
+```
+
+**Why This Output Occurs**
+
+- A single value is a string; repeated keys produce an array. Normalization ensures consistent downstream handling.
+
+---
+
+### Real-World Cases
+
+- **Tag filtering** — `/posts?tag=javascript&tag=node` retrieves posts with either tag.
+- **Multi-select facets** — `/products?brand=apple&brand=samsung` filters by multiple brands.
+- **Permission lists** — `/resources?scope=read&scope=write` requests multiple scopes.
+
+---
+
+## Core Concept 4: Arrays
+
+### Definitions
+
+**Core Definition**
+Arrays in query parameters are ordered collections of values produced when a parameter is repeated or expressed with array notation, and they are exposed as JavaScript arrays on `req.query`.
+
+**Technical Definition**
+Express produces arrays from query strings through two mechanisms: **repeated keys** (`?a=1&a=2`), which work under both simple and extended parsers, and **bracket notation** (`?a[]=1&a[]=2` or `?a[0]=1&a[1]=2`), which requires the extended (`qs`) parser. The `qs` parser also supports **array limits** to prevent memory exhaustion; indexed notation is capped at `arrayLimit` (default 20, raised to 1000 for repeated keys in patched Express versions). The simple parser does not interpret bracket notation as arrays.
+
+**Beginner-Friendly Explanation**
+Arrays let you send multiple values for one parameter. The easiest way is to repeat the key: `?tag=a&tag=b`. Under the extended parser, you can also use brackets: `?tag[]=a&tag[]=b`. Not all parsers support the bracket style, so repeated keys are the most portable approach.
+
+---
+
+### Purposes
+
+- To represent multi-value parameters in a way that is natural in JavaScript.
+- To support bulk operations such as filtering by multiple IDs or tags.
+- To allow clients to submit lists without custom serialization.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Array Query Parameters
+
+```javascript
+// Repeated keys (portable)
+app.get('/items', (req, res) => {
+  const ids = req.query.id; // string or array
+  const idArray = Array.isArray(ids) ? ids : ids ? [ids] : [];
+  res.json({ ids: idArray });
+});
+```
+
+**Component Breakdown**
+
+| Notation | Parser Requirement | Result |
+|----------|-------------------|--------|
+| `?id=1&id=2` | Any | `['1', '2']` |
+| `?id[]=1&id[]=2` | Extended (`qs`) | `['1', '2']` |
+| `?id[0]=1&id[1]=2` | Extended (`qs`) | `['1', '2']` (limited by `arrayLimit`) |
+
+#### Syntax Rules
+
+- Repeated keys always produce arrays under both parsers.
+- Bracket notation requires the extended parser; under the simple parser, brackets become part of the key.
+- Always normalize single values to arrays if the handler expects an array.
+
+#### Constraints and Limitations
+
+- **Array limit** — The `qs` parser caps indexed array notation at `arrayLimit` (20 by default; patched to 1000 for repeated keys in Express 4.22.2+).
+- **Simple parser** — Does not support bracket-notation arrays.
+- **Type conversion** — Array elements are strings; explicit conversion is required for numbers.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Normalizing Array Parameters
+
+```javascript
+const express = require('express');
+const app = express();
+
+app.get('/items', (req, res) => {
+  const ids = req.query.id;
+
+  // Normalize: always an array
+  const idArray = Array.isArray(ids) ? ids : ids ? [ids] : [];
+
+  // Convert to numbers and validate
+  const numericIds = idArray.map(Number).filter(n => Number.isInteger(n) && n > 0);
+
+  res.json({ ids: numericIds });
+});
+
+app.listen(3000);
+```
+
+**Expected Output**
+
+```
+GET /items?id=1&id=2&id=3
+→ 200 { "ids": [1, 2, 3] }
+
+GET /items?id=1
+→ 200 { "ids": [1] }
+
+GET /items
+→ 200 { "ids": [] }
+
+GET /items?id=abc
+→ 200 { "ids": [] }   (invalid value filtered out)
+```
+
+**Why This Output Occurs**
+
+- Normalization ensures the handler always receives an array, even for a single value.
+- Conversion and filtering reject non-numeric values.
+
+---
+
+### Real-World Cases
+
+- **Bulk retrieval** — `/users?id=1&id=2&id=3` fetches multiple users in one request.
+- **Multi-tag filtering** — `/posts?tag=node&tag=express`.
+- **Permission scopes** — `/auth?scope=read&scope=write`.
+
+---
+
+## Core Concept 5: Nested Objects
+
+### Definitions
+
+**Core Definition**
+Nested objects in query parameters are hierarchical structures created when bracket notation (`a[b][c]=value`) is parsed by a query parser that supports nesting, producing objects within `req.query`.
+
+**Technical Definition**
+Nested object parsing is a feature of the **extended** query parser (the `qs` library), which was the default in Express 4. The `qs` library interprets bracket notation as object paths: `?user[name]=john&user[age]=30` becomes `{ user: { name: 'john', age: '30' } }`. In Express 5, the default parser changed to `querystring` ("simple"), which does **not** parse nested structures; bracket notation remains a literal key (`{ 'user[name]': 'john' }`). To restore nested-object parsing in Express 5, set `app.set('query parser', 'extended')`.
+
+**Beginner-Friendly Explanation**
+Nested objects let you send structured data through the URL, like `?user[name]=john&user[age]=30`, which becomes `req.query.user.name` and `req.query.user.age`. However, this only works if your app uses the "extended" parser. Express 5 switched to a simpler parser by default, so you must explicitly enable extended parsing to use nested query objects.
+
+---
+
+### Purposes
+
+- To represent hierarchical data (user profiles, address components, filter groups) in the query string.
+- To provide a structured alternative to flat key naming conventions (`userName`, `userAge`).
+- To support complex client-side form or filter serialization.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Nested Query Objects
+
+```javascript
+// Enable extended parsing (required in Express 5)
+app.set('query parser', 'extended');
+
+app.get('/filter', (req, res) => {
+  const { user } = req.query;
+  res.json({ name: user?.name, age: user?.age });
+});
+```
+
+**Component Breakdown**
+
+| Query String | Extended Parser Result | Simple Parser Result |
+|-------------|------------------------|----------------------|
+| `?user[name]=john` | `{ user: { name: 'john' } }` | `{ 'user[name]': 'john' }` |
+| `?a[b][c]=d` | `{ a: { b: { c: 'd' } } }` | `{ 'a[b][c]': 'd' }` |
+
+#### Syntax Rules
+
+- Nested objects require the **extended** parser (`app.set('query parser', 'extended')`).
+- Bracket notation can nest arbitrarily deep, but depth limits should be configured to prevent abuse.
+- The `qs` parser supports `depth` and `parameterLimit` options for security.
+
+#### Constraints and Limitations
+
+- **Express 5 default** — The simple parser does not parse nested objects; migration requires explicit configuration.
+- **Prototype pollution risk** — The `qs` parser with `allowPrototypes: true` (Express's historical setting) can be exploited; consider a custom parser with `allowPrototypes: false`.
+- **Performance** — Deep nesting can cause CPU and memory spikes; limit depth.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Nested Object Access with Extended Parser
+
+```javascript
+const express = require('express');
+const app = express();
+
+// Required in Express 5; default in Express 4
+app.set('query parser', 'extended');
+
+app.get('/profile', (req, res) => {
+  const { user } = req.query;
+  res.json({
+    name: user?.name ?? null,
+    age: user?.age ? Number(user.age) : null
+  });
+});
+
+app.listen(3000);
+```
+
+**Expected Output**
+
+```
+GET /profile?user[name]=john&user[age]=30
+→ 200 { "name": "john", "age": 30 }
+
+GET /profile
+→ 200 { "name": null, "age": null }
+```
+
+**Why This Output Occurs**
+
+- The extended parser converts bracket notation into a nested object; optional chaining and defaults handle missing values.
+
+---
+
+### Real-World Cases
+
+- **Advanced filtering** — `/products?price[min]=10&price[max]=100`.
+- **Address forms** — `/checkout?address[street]=Main&address[city]=Springfield`.
+- **User preferences** — `/settings?notifications[email]=true&notifications[sms]=false`.
+
+---
+
+## Core Concept 6: Query Parameter Validation
+
+### Definitions
+
+**Core Definition**
+Query parameter validation is the process of checking that client-supplied query values conform to expected formats, types, ranges, and allowed values before they are used in business logic, database queries, or responses.
+
+**Technical Definition**
+Because `req.query` values are untrusted strings (or arrays/objects), validation is mandatory. Validation can be performed manually with type checks (`Number()`, `Array.isArray()`, `typeof`), through schema libraries such as `express-validator` (which provides `query()` chains and `checkSchema()` with `in: ['query']`), or through custom middleware. Express-validator allows sanitization before validation (e.g., trimming, converting to lowercase) and supports dot-notation or array paths for nested query values. Validation failures should return `400 Bad Request` with descriptive error messages.
+
+**Beginner-Friendly Explanation**
+Validation is checking that the query values make sense. If your endpoint expects `page` to be a positive number, validation rejects `?page=abc` with a `400` error. You can write checks yourself or use a library like `express-validator`, which lets you declare rules cleanly.
+
+---
+
+### Purposes
+
+- To reject malformed or malicious query values before they cause errors or security vulnerabilities.
+- To enforce type constraints (integers, booleans, dates) and allowed-value constraints.
+- To prevent injection attacks (SQL, NoSQL, command) by ensuring values are safe.
+- To provide clear, consistent error responses for invalid input.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Manual Validation
+
+```javascript
+app.get('/items', (req, res) => {
+  const page = Number(req.query.page);
+  const limit = Number(req.query.limit);
+
+  if (!Number.isInteger(page) || page < 1) {
+    return res.status(400).json({ error: 'page must be a positive integer' });
+  }
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    return res.status(400).json({ error: 'limit must be between 1 and 100' });
+  }
+
+  res.json({ page, limit });
+});
+```
+
+#### Complete General Syntax: `express-validator` Validation
+
+```javascript
+const { query, validationResult } = require('express-validator');
+
+app.get(
+  '/items',
+  query('page').optional().isInt({ min: 1 }).withMessage('page must be a positive integer'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('limit must be 1–100'),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-  });
-});
-
-// Cursor-based pagination
-app.get('/api/items/cursor', (req, res) => {
-  const limit = parseInt(req.query.limit, 10) || 10;
-  const cursor = parseInt(req.query.cursor, 10) || 0;
-
-  const filtered = items.filter(item => item.id > cursor);
-  const paginated = filtered.slice(0, limit);
-  const nextCursor = paginated.length === limit
-    ? paginated[paginated.length - 1].id
-    : null;
-
-  res.json({
-    data: paginated,
-    pagination: { nextCursor, limit, hasNext: nextCursor !== null }
-  });
-});
-
-app.listen(3000, () => console.log('Pagination server on 3000'));
-```
-
-**Expected Output (for `GET /api/items?page=2&limit=5`):**
-```
-{
-  "data": [
-    {"id":6,"name":"Item 6"},
-    {"id":7,"name":"Item 7"},
-    {"id":8,"name":"Item 8"},
-    {"id":9,"name":"Item 9"},
-    {"id":10,"name":"Item 10"}
-  ],
-  "pagination": {
-    "page": 2,
-    "limit": 5,
-    "total": 100,
-    "totalPages": 20,
-    "hasNext": true,
-    "hasPrev": true
+    res.json({ page: Number(req.query.page) || 1 });
   }
-}
+);
 ```
 
-**Expected Output (for `GET /api/items/cursor?limit=3&cursor=5`):**
-```
-{
-  "data": [
-    {"id":6,"name":"Item 6"},
-    {"id":7,"name":"Item 7"},
-    {"id":8,"name":"Item 8"}
-  ],
-  "pagination": {
-    "nextCursor": 8,
-    "limit": 3,
-    "hasNext": true
-  }
-}
-```
+**Component Breakdown**
 
-**Why this output:** Offset-based pagination uses `slice(offset, offset + limit)` to return the correct page. Cursor-based pagination filters items with `id > cursor` and returns the next `limit` items, using the last ID as the next cursor. In a database, these would translate to `LIMIT`/`OFFSET` and `WHERE id > ? LIMIT ?` respectively.
+| Component | Role |
+|-----------|------|
+| `query('field')` | Targets `req.query.field`. |
+| `.optional()` | Allows the parameter to be absent. |
+| `.isInt({ min, max })` | Validates integer range. |
+| `validationResult(req)` | Collects validation errors. |
 
-### Real-World Cases
+#### Syntax Rules
 
-- **Social media feeds:** `/posts?page=2&limit=20` for offset-based pagination.
-- **Real-time streams:** `/messages?limit=50&cursor=lastMessageId` for cursor-based pagination.
-- **E-commerce listings:** `/products?page=3&limit=24` to paginate product grids.
-- **API search results:** `/search?q=node&page=2&limit=10` to paginate search results.
+- Validate **before** using query values in business logic or database queries.
+- Convert types explicitly; `Number('')` is `0`, and `Number('abc')` is `NaN`.
+- Use `Array.isArray()` to normalize repeated keys before validating elements.
+- For nested query values, use dot-notation (`query('user.name')`) or array paths.
+
+#### Constraints and Limitations
+
+- Manual validation is repetitive; centralize rules in middleware or schemas.
+- `express-validator` adds a dependency but provides sanitization and schema support.
+- Validation must account for arrays and nested objects, not just strings.
 
 ---
 
-## Core Concept 5: Search Parameters
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
 
-### Definitions
+#### Example 1: Validating Pagination Parameters
 
-**Core Definition:** Search parameters pass free-text search terms from the client to the server, which uses them to perform full-text or pattern-based searches across one or more fields.
-
-**Technical Definition:** The search term is typically passed as the `q` query parameter (e.g., `?q=express+routing`). The server decodes the term (Express automatically decodes `+` to spaces), validates its length and content, and passes it to a search engine (Elasticsearch, MongoDB `$text`, MySQL `FULLTEXT`) or a database query using parameterised `LIKE`/`ILIKE` clauses.
-
-**Beginner-Friendly Explanation:** Search parameters are like the search box on a website. You type "express routing" into the box, and the website sends `?q=express+routing` to the server. The server then looks through its data for anything matching those words and returns the results.
-
-### Purposes
-
-- To pass free-text search terms (e.g., `?q=express+routing`) for full-text search engines.
-- To enable users to find relevant records without knowing exact filter values.
-- To support fuzzy matching, phrase search, and relevance ranking.
-- To power search-as-you-type and autocomplete features.
-
-### Syntax Rules and Structure
-
-```js
-app.get('/search', async (req, res) => {
-  const q = req.query.q;
-  if (!q || q.trim().length === 0) {
-    return res.status(400).json({ error: 'Search term "q" is required' });
-  }
-  const results = await Product.find({
-    $text: { $search: q }
-  });
-  res.json(results);
-});
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `req.query.q` | The search term (string). |
-| `q.trim()` | Removes leading/trailing whitespace. |
-| `$text` / `$search` | MongoDB full-text search operators. |
-
-**Rules:**
-- Validate that the search term is present and non-empty.
-- Limit the length of the search term (e.g., max 200 characters) to prevent abuse.
-- Use parameterised queries or full-text search indexes; never concatenate the search term into SQL.
-- Consider escaping special characters if using a `LIKE` query.
-
-**Constraints and Limitations:**
-- Full-text search requires appropriate indexes (MongoDB text index, MySQL `FULLTEXT` index, Elasticsearch index).
-- `LIKE '%term%'` queries are slow on large datasets without full-text indexes.
-- Search terms may contain operators (e.g., `-term`, `"phrase"`) that require special handling.
-- HTML/script tags in search terms must be sanitised to prevent XSS.
-
-### Annotated Code Example
-
-```js
-// search-query.js
+```javascript
 const express = require('express');
 const app = express();
 
-const articles = [
-  { id: 1, title: 'Express Routing Guide', content: 'Learn how to define routes...' },
-  { id: 2, title: 'Node.js File System', content: 'Working with fs module...' },
-  { id: 3, title: 'Express Middleware', content: 'Understanding middleware...' }
-];
+app.get('/items', (req, res) => {
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
 
-app.get('/api/search', (req, res) => {
-  const q = req.query.q;
-
-  // Validate: search term is required
-  if (!q || q.trim().length === 0) {
-    return res.status(400).json({ error: 'Query parameter "q" is required' });
+  if (!Number.isInteger(page) || page < 1) {
+    return res.status(400).json({ error: 'page must be a positive integer' });
+  }
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    return res.status(400).json({ error: 'limit must be between 1 and 100' });
   }
 
-  // Limit length to prevent abuse
+  res.json({ page, limit });
+});
+
+app.listen(3000);
+```
+
+**Expected Output**
+
+```
+GET /items?page=2&limit=20
+→ 200 { "page": 2, "limit": 20 }
+
+GET /items?page=abc
+→ 400 { "error": "page must be a positive integer" }
+
+GET /items?limit=500
+→ 400 { "error": "limit must be between 1 and 100" }
+```
+
+**Why This Output Occurs**
+
+- `Number()` converts valid strings to numbers; `Number.isInteger()` rejects `NaN` and non-integers.
+- Range checks enforce business constraints.
+
+---
+
+### Real-World Cases
+
+- **Pagination endpoints** — Validating `page` and `limit` to prevent unbounded queries.
+- **Search endpoints** — Ensuring the search term is non-empty and within length limits.
+- **Filter endpoints** — Restricting filter values to an allowed set (`isIn(['price', 'rating', 'date'])`).
+
+---
+
+## Core Concept 7: Query Parameter Best Practices
+
+### Definitions
+
+**Core Definition**
+Query parameter best practices are the design, validation, security, and performance patterns that keep query-driven endpoints safe, predictable, and maintainable.
+
+**Technical Definition**
+Best practices for Express query parameters include: treating all `req.query` values as untrusted; validating and sanitizing every parameter before use; choosing the appropriate query parser (`'simple'` for flat keys, `'extended'` for nested structures with depth limits); normalizing repeated keys to arrays; never placing sensitive data in query strings; using parameterized queries or ORM protections to prevent injection; limiting `parameterLimit` and `depth` to mitigate DoS; and documenting query contracts clearly.
+
+**Beginner-Friendly Explanation**
+Best practices are the habits that keep your query handling safe and clean. They include checking every value, choosing the right parser, avoiding secrets in URLs, and making sure your app cannot be overwhelmed by huge or deeply nested query strings.
+
+---
+
+### Purposes
+
+- To prevent injection attacks, prototype pollution, and denial-of-service through query strings.
+- To ensure consistent, predictable handling of single, repeated, and nested values.
+- To protect sensitive data from appearing in logs, browser history, and referrer headers.
+- To maintain compatibility and security across Express versions.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Hardened Query Handling
+
+```javascript
+// 1. Choose a safe parser
+app.set('query parser', 'simple'); // or 'extended' with depth limits
+
+// 2. Validate and normalize
+app.get('/items', (req, res) => {
+  const raw = req.query.id;
+  const ids = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const numericIds = ids.map(Number).filter(Number.isInteger);
+
+  if (numericIds.length === 0 && raw !== undefined) {
+    return res.status(400).json({ error: 'Invalid IDs' });
+  }
+
+  res.json({ ids: numericIds });
+});
+```
+
+**Component Breakdown**
+
+| Practice | Implementation |
+|----------|----------------|
+| Parser choice | `'simple'` for flat keys; `'extended'` with `depth` limit for nesting. |
+| Normalization | Convert single values to arrays. |
+| Validation | Convert and filter invalid values. |
+| Error handling | Return `400` for invalid input. |
+
+#### Syntax Rules
+
+- **Never** read sensitive parameters (`password`, `token`, `secret`, `apiKey`) from `req.query`; use the request body or `Authorization` header instead.
+- Use parameterized queries or ORM protections; never concatenate `req.query` values into SQL or NoSQL queries.
+- Configure `parameterLimit` and `depth` when using the `qs` parser to prevent resource exhaustion.
+- Sanitize values that will be reflected in responses to prevent XSS.
+
+#### Constraints and Limitations
+
+- **Express 5 parser change** — Default `'simple'` parser breaks nested-object code; migration requires `'extended'` or code refactoring.
+- **qs prototype pollution** — The `allowPrototypes: true` option used historically by Express can be exploited; prefer `'simple'` or a custom parser with `allowPrototypes: false`.
+- **URL length limits** — Proxies and browsers impose URL length limits; extremely large query strings may be truncated.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Safe Query Handling with Validation and Normalization
+
+```javascript
+const express = require('express');
+const app = express();
+
+// Use simple parser to avoid nested-object attack surface
+app.set('query parser', 'simple');
+
+app.get('/search', (req, res) => {
+  // Normalize repeated values
+  const rawTags = req.query.tag;
+  const tags = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
+
+  // Validate search term
+  const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
   if (q.length > 100) {
     return res.status(400).json({ error: 'Search term too long' });
   }
 
-  // Perform case-insensitive search across title and content
-  const term = q.toLowerCase();
-  const results = articles.filter(article =>
-    article.title.toLowerCase().includes(term) ||
-    article.content.toLowerCase().includes(term)
-  );
+  // Validate pagination
+  const page = Number(req.query.page) || 1;
+  const limit = Math.min(Number(req.query.limit) || 10, 50);
 
-  res.json({ query: q, count: results.length, results });
+  res.json({ q, tags, page, limit });
 });
 
-app.listen(3000, () => console.log('Search server on 3000'));
+app.listen(3000);
 ```
 
-**Expected Output (for `GET /api/search?q=express`):**
+**Expected Output**
+
 ```
-{
-  "query": "express",
-  "count": 2,
-  "results": [
-    {"id":1,"title":"Express Routing Guide","content":"Learn how to define routes..."},
-    {"id":3,"title":"Express Middleware","content":"Understanding middleware..."}
-  ]
-}
+GET /search?q=node&tag=a&tag=b&page=2&limit=20
+→ 200 { "q": "node", "tags": ["a", "b"], "page": 2, "limit": 20 }
+
+GET /search?q=
+→ 200 { "q": "", "tags": [], "page": 1, "limit": 10 }
+
+GET /search?q=<very long string>
+→ 400 { "error": "Search term too long" }
 ```
 
-**Expected Output (for `GET /api/search?q=routing`):**
-```
-{
-  "query": "routing",
-  "count": 1,
-  "results": [
-    {"id":1,"title":"Express Routing Guide","content":"Learn how to define routes..."}
-  ]
-}
-```
+**Why This Output Occurs**
 
-**Expected Output (for `GET /api/search`):**
-```
-{"error":"Query parameter \"q\" is required"}
-```
+- Normalization ensures `tags` is always an array.
+- Trimming and length checks reject abusive input.
+- Pagination defaults and limits prevent unbounded results.
 
-**Why this output:** The handler validates that `q` is present and not too long. It then performs a case-insensitive partial match across the `title` and `content` fields. In a production system, this would be replaced by a full-text search query against a database or search engine.
+---
 
 ### Real-World Cases
 
-- **Documentation search:** `/search?q=express+routing` to find relevant docs pages.
-- **E-commerce search:** `/products?q=wireless+headphones` to search product titles.
-- **Knowledge base:** `/articles?q=file+system` to search help articles.
-- **Log search:** `/logs?q=timeout` to find log entries containing "timeout".
-
----
-
-## Core Concept 6: Validation and Sanitization
-
-### Definitions
-
-**Core Definition:** Validation ensures that query parameter values conform to expected types and formats; sanitization removes or escapes characters that could be used for injection attacks (XSS, SQL injection, NoSQL injection).
-
-**Technical Definition:** Validation libraries such as `express-validator` (which wraps `validator.js`) provide middleware that checks query parameters against rules (`.isInt()`, `.isBoolean()`, `.isArray()`, etc.) and sanitizers (`.trim()`, `.escape()`, `.toInt()`, `.toBoolean()`). Sanitization middleware such as `express-xss-sanitizer` strips or escapes HTML tags from `req.query`, `req.body`, `req.params`, and `req.headers`. HTTP Parameter Pollution (HPP) protection (e.g., `hppx`) prevents multiple parameters with the same name from causing unexpected behaviour.
-
-**Beginner-Friendly Explanation:** Validation is like a bouncer checking IDs: it makes sure the query parameters are the right type and format before they're used. Sanitization is like washing your hands before cooking: it removes harmful characters (like `<script>` tags) that could contaminate your application. Together, they ensure that user input is safe to use.
-
-### Purposes
-
-- To explicitly cast string-based query inputs into safe integers, booleans, or arrays.
-- To escape malicious characters to eliminate cross-site scripting (XSS) surface area.
-- To prevent SQL injection, NoSQL injection, and HTTP Parameter Pollution (HPP).
-- To provide clear error messages when invalid parameters are supplied.
-
-### Sub-Feature 6.1: Type Casting
-
-#### Syntax Rules and Structure
-
-```js
-const page = parseInt(req.query.page, 10) || 1;
-const limit = parseInt(req.query.limit, 10) || 10;
-const active = req.query.active === 'true';
-const tags = Array.isArray(req.query.tag)
-  ? req.query.tag
-  : [req.query.tag].filter(Boolean);
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `parseInt(value, 10)` | Converts a string to a base-10 integer. |
-| `=== 'true'` | Converts the string `'true'` to boolean `true`. |
-| `Array.isArray()` | Checks if a repeated parameter is already an array. |
-
-**Rules:**
-- Always provide a radix (`10`) to `parseInt` to avoid octal/hex surprises.
-- Use `Number.isInteger()` to validate the converted number.
-- Use `=== 'true'` / `=== 'false'` for boolean casting; avoid `Boolean('false')`, which returns `true`.
-- Handle both single values and arrays for repeated parameters.
-
----
-
-### Sub-Feature 6.2: Validation with `express-validator`
-
-#### Syntax Rules and Structure
-
-```js
-const { query, validationResult } = require('express-validator');
-
-app.get('/api/users',
-  query('page').optional().isInt({ min: 1 }).toInt(),
-  query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
-  query('status').optional().isIn(['active', 'inactive']),
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    // Use validated and sanitized values
-    const { page = 1, limit = 10, status } = req.query;
-    res.json({ page, limit, status });
-  }
-);
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `query('page')` | Selects the `page` query parameter. |
-| `.optional()` | Makes validation optional (no error if absent). |
-| `.isInt({ min: 1 })` | Validates that the value is an integer ≥ 1. |
-| `.toInt()` | Sanitizes by converting the string to an integer. |
-
-**Constraints:**
-- `express-validator` requires the `validator.js` library (bundled as a dependency).
-- Validation chains must be passed as middleware before the route handler.
-- In Express 5, `req.query` is immutable; use `matchedData()` to retrieve sanitized values instead of mutating `req.query`.
-
----
-
-### Sub-Feature 6.3: Sanitization Against XSS
-
-#### Syntax Rules and Structure
-
-```js
-const { xss } = require('express-xss-sanitizer');
-app.use(xss()); // Sanitizes req.body, req.query, req.params, req.headers
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `xss()` | Middleware that strips or escapes HTML tags. |
-| Global use | Apply before all route handlers. |
-
-**Constraints:**
-- **CVE-2026-33979:** `express-xss-sanitizer` versions prior to 2.0.2 had a configuration bypass where empty `allowedTags` fell back to `sanitize-html` defaults instead of enforcing a deny-all policy. Upgrade to `>=2.0.2`.
-- Sanitization should complement — not replace — validation and output encoding.
-
-### Annotated Code Example
-
-```js
-// validation-sanitization.js
-const express = require('express');
-const { query, validationResult } = require('express-validator');
-const { xss } = require('express-xss-sanitizer');
-
-const app = express();
-
-// Global XSS sanitization for all request sources
-app.use(xss());
-
-app.get('/api/users',
-  // Validation and sanitization chains
-  query('page').optional().isInt({ min: 1 }).toInt(),
-  query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
-  query('status').optional().isIn(['active', 'inactive']),
-  query('search').optional().trim().escape(),
-  (req, res) => {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    // Use validated and sanitized values
-    const page = req.query.page || 1;      // Already an integer
-    const limit = req.query.limit || 10;   // Already an integer
-    const status = req.query.status;       // Validated against allow-list
-    const search = req.query.search;       // Trimmed and escaped
-
-    res.json({
-      filters: { status, search },
-      pagination: { page, limit }
-    });
-  }
-);
-
-app.listen(3000, () => console.log('Validation server on 3000'));
-```
-
-**Expected Output (for `GET /api/users?page=2&limit=20&status=active&search=alice`):**
-```
-{
-  "filters": { "status": "active", "search": "alice" },
-  "pagination": { "page": 2, "limit": 20 }
-}
-```
-
-**Expected Output (for `GET /api/users?page=abc`):**
-```
-{
-  "errors": [
-    {
-      "type": "field",
-      "value": "abc",
-      "msg": "Invalid value",
-      "path": "page",
-      "location": "query"
-    }
-  ]
-}
-```
-
-**Expected Output (for `GET /api/users?search=<script>alert(1)</script>`):**
-```
-{
-  "filters": { "status": null, "search": "&lt;script&gt;alert(1)&lt;/script&gt;" },
-  "pagination": { "page": 1, "limit": 10 }
-}
-```
-
-**Why this output:** The `query('page').isInt().toInt()` chain validates that `page` is an integer and converts it. Invalid values produce validation errors. The `escape()` sanitizer converts HTML special characters (`<`, `>`, `&`, `"`, `'`) to HTML entities, neutralising XSS payloads. The global `xss()` middleware provides an additional layer of protection across all request sources.
-
-### Real-World Cases
-
-- **Public APIs:** Validating pagination and filter parameters to prevent abuse and injection attacks.
-- **User-generated content:** Sanitizing search terms before rendering them in HTML responses.
-- **E-commerce:** Validating product filter parameters to prevent SQL injection.
-- **Authentication systems:** Validating query parameters used in password-reset or email-verification flows.
+- **Public APIs** — Simple parser, strict validation, and parameter limits protect against abuse.
+- **Search engines** — Normalized tag arrays and trimmed search terms produce consistent results.
+- **Security-sensitive applications** — No secrets in query strings; parser configured to avoid prototype pollution.
 
 ---
 
 ## References
 
-- Express.js 5.x API Reference — `req.query` — https://expressjs.com/en/5x/api.html#req.query
-- Express.js 4.x API Reference — `req.query` — https://expressjs.com/en/4x/api.html#req.query
-- Express.js Migration Guide (v4 to v5) — https://expressjs.com/en/guide/migrating-5.html
-- Express.js Routing Guide — https://expressjs.com/en/guide/routing.html
-- express-validator Documentation — https://express-validator.github.io/docs/
-- express-validator — `query()` API — https://express-validator.github.io/docs/api/check/#query
-- express-validator — `matchedData()` — https://express-validator.github.io/docs/api/matched-data/
-- express-xss-sanitizer on Snyk — https://security.snyk.io/package/npm/express-xss-sanitizer
-- express-xss-sanitizer on npm — https://www.npmjs.com/package/express-xss-sanitizer
-- hppx (HTTP Parameter Pollution protection) — https://www.npmjs.com/package/hppx
-- qs Library Documentation — https://github.com/ljharb/qs
-- Node.js `querystring` Module — https://nodejs.org/api/querystring.html
-- CoreUI — Filtering in Node.js APIs — https://coreui.io/answers/how-to-handle-filtering-in-nodejs-apis/
-- CoreUI — Pagination in Node.js — https://coreui.io/answers/how-to-implement-pagination-in-nodejs/
-- CoreUI — Sorting in Node.js APIs — https://coreui.io/answers/how-to-handle-sorting-in-nodejs-apis/
-- CVE-2026-33979 — Express XSS Sanitizer bypass — https://mallory.ai/vulnerabilities/CVE-2026-33979
-- MDN — Query String — https://developer.mozilla.org/en-US/docs/Web/API/URL/search
-- MDN — URLSearchParams — https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams
+- Express.js `req.query` API Reference (Express 4.x) — https://expressjs.com/en/4x/api/request/#reqquery
+- Express.js `req.query` API Reference (Express 5.x) — https://expressjs.com/en/5x/api/request/#reqquery
+- Express.js Application Settings (`query parser`) — https://expressjs.com/en/4x/api/application/#application-settings
+- Migrating to Express 5 — https://expressjs.com/en/guide/migrating-5.html
+- `qs` Library Documentation — https://www.npmjs.com/package/qs
+- express-validator: `query()` API — https://express-validator.github.io/docs/api/check/
+- express-validator: `checkSchema()` — https://express-validator.github.io/docs/api/check-schema/
+- OWASP Input Validation Cheat Sheet — https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
+- OWASP Injection Prevention Cheat Sheet — https://cheatsheetseries.owasp.org/cheatsheets/Injection_Prevention_Cheat_Sheet.html
+- CWE-598: Use of GET Request Method With Sensitive Query Strings — https://cwe.mitre.org/data/definitions/598.html
+- Express 4.22.2 Array Parsing Fix — https://github.com/expressjs/express/commit/8d09bfe6
+- express-query-parser2 (nested/array parsing utility) — https://www.npmjs.com/package/express-query-parser2

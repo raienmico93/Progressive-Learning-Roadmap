@@ -1,4 +1,4 @@
-# React CSS and Native Styling in React: A Comprehensive Programming Cheat Sheet
+# React CSS Stylesheets — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1308 +6,975 @@
 
 ### Definitions
 
-**Core Definition:** React CSS and native styling is the discipline of applying, scoping, and managing styles within a React component architecture, using native browser CSS features (cascade layers, `@scope`, custom properties, container queries) and build-tool-based scoping mechanisms (CSS Modules) to avoid the global-scope pitfalls of traditional CSS.
+**Core Definition:** CSS stylesheets in React are external `.css` files that define global styling rules, applied to components via the `className` prop.
 
-**Technical Definition:** React CSS and native styling encompasses the architectural decisions and browser-native mechanisms for styling component-based applications. It addresses the fundamental conflict between CSS's global, document-oriented design and React's component-scoped, modular architecture. Key mechanisms include **CSS Cascade Layers** (`@layer`), which decouple style priority from selector specificity by establishing explicit layer ordering; **CSS Modules**, which compile class names to locally-scoped unique identifiers; **CSS Custom Properties** (CSS Variables), which enable dynamic theming at runtime through the cascade; **Container Queries** (`@container`), which allow components to respond to their own container's size rather than the viewport; and the **`@scope` at-rule**, which restricts selectors to a DOM subtree without tooling. Together, these features enable component-level styling that is portable, maintainable, and free from global leakage.
+**Technical Definition:** In React, CSS stylesheets are imported into component modules (e.g., `import './Button.css'`) and bundled by the build tool. The styles are **global by default** — a class defined in one stylesheet applies to any element with that class name anywhere in the application. React uses `className` instead of `class` because `class` is a reserved JavaScript keyword. Stylesheets cascade according to the CSS cascade algorithm, which resolves conflicts through origin, layer, specificity, and order of appearance. For component-scoped styling, CSS Modules (`.module.css`) are the recommended alternative to global stylesheets.
 
-**Beginner-Friendly Explanation:** CSS was designed for single HTML pages, where every style rule applies globally. React builds applications out of small, reusable components—but a global stylesheet means one component's styles can accidentally break another's. React CSS and native styling is about using modern CSS features to keep each component's styles contained to that component, like giving every component its own private style notebook instead of writing on a shared whiteboard. Cascade layers, CSS Modules, custom properties, container queries, and `@scope` are the tools that make this possible.
+**Beginner-Friendly Explanation:** CSS stylesheets are regular CSS files that you import into your React components. Once imported, the styles become global — any component can use the class names you defined. This is the traditional way of styling websites, and React supports it fully. You use `className` instead of `class` because React is JavaScript-based, and `class` is a special word in JavaScript. The main thing to remember is that these styles are not scoped to a single component unless you use a special tool like CSS Modules.
 
 ### Key Characteristics
 
-- **Global Scope is the Default:** Standard CSS imports in React are global; a class name defined in one component's stylesheet can affect any other component in the application.
-- **Specificity Wars:** Global CSS combined with third-party libraries and legacy styles forces developers to add `!important` flags, creating brittle stylesheets.
-- **Cascade Layers Decouple Priority from Specificity:** `@layer` establishes explicit priority ordering; a simple class in a higher layer beats a heavy selector in a lower layer.
-- **CSS Modules Provide Local Scoping by Default:** All class names and animation names are scoped locally; the import returns a mapping object from local names to global names.
-- **Custom Properties Enable Runtime Theming:** CSS variables scoped to `:root` or `[data-theme]` allow theme switching without re-rendering components.
-- **Container Queries Make Components Portable:** A component responds to its own container's size, not the viewport, so the same component works in a sidebar and a main column without modifier classes.
-- **`@scope` Restricts Selectors to Subtrees:** The `@scope` at-rule limits selectors to a DOM subtree without build tools, though browser support is still maturing.
+- **Global scope by default:** Any imported CSS affects the entire application unless scoped with CSS Modules.
+- **`className` instead of `class`:** React uses `className` because `class` is a reserved JavaScript keyword.
+- **Cascade-driven:** Styles are applied according to CSS's cascade algorithm, considering origin, specificity, and order.
+- **Import-based:** CSS files are imported into component modules and bundled by the build tool.
+- **Zero runtime cost:** Unlike runtime CSS-in-JS, stylesheets are static and do not add per-render JavaScript overhead.
+- **Compatible with Server Components:** Global CSS and CSS Modules work in React Server Components (RSC), unlike runtime CSS-in-JS.
 
 ### Prerequisites
 
-- Solid understanding of CSS selectors, specificity, the cascade, and inheritance.
-- Familiarity with React function components, JSX, and the `className` prop.
-- Working knowledge of a build tool (Vite, Webpack, Next.js) and how it handles CSS imports.
-- Basic understanding of React Context and the `useState`/`useEffect` Hooks (for theming).
-- Awareness of browser developer tools for debugging styles.
+- Basic CSS syntax (selectors, properties, values).
+- React function components and JSX.
+- Understanding of the `className` prop.
+- Familiarity with ES modules (`import`).
 
 ### Related Programming Areas
 
-- **CSS Architecture:** BEM, SMACSS, and other naming methodologies.
-- **Design Systems:** Design tokens, CSS custom properties, and component libraries.
-- **Theming:** Light/dark mode, brand themes, and runtime theme switching.
-- **Responsive Design:** Media queries, container queries, and fluid typography.
-- **Build Tooling:** CSS Modules, PostCSS, and preprocessor integration.
-
-### Core Concepts / Features
-
-1. Global CSS Injection, Reset Layers, and Stylesheet Ordering Bugs
-2. Component-Level Styles and the Limits of Scope Insulation
-3. CSS Modules Architecture (Local Scoping, Class Composition, Dynamic Class Joining)
-4. CSS Naming Strategies (BEM, SMACSS) vs. CSS-Scoping Mechanisms
-5. Modern Native CSS Integration: CSS Variables for Dynamic Theme Switching
-6. Responsive Styling Foundations: Media Queries vs. Container Queries
+- **CSS Modules** — component-scoped alternatives to global stylesheets.
+- **CSS cascade and specificity** — the rules that determine which style wins.
+- **CSS naming conventions** — BEM, SMACSS, OOCSS for maintainable styles.
+- **Utility-first CSS** — Tailwind and similar frameworks.
+- **CSS-in-JS** — runtime and compile-time styling solutions.
 
 ---
 
-## Core Concept 1: Global CSS Injection, Reset Layers, and Stylesheet Ordering Bugs
+## 1. CSS Stylesheets
 
 ### Definitions
 
-**Core Definition:** Global CSS injection is the default behaviour of imported stylesheets in React, where all styles become globally scoped; reset layers are CSS resets (e.g., `normalize.css`) that override component styles; and stylesheet ordering bugs occur when the order of CSS imports in the bundle does not match the intended cascade priority.
+**Core Definition:** A CSS stylesheet is an external `.css` file containing styling rules that are applied to React elements via the `className` prop.
 
-**Technical Definition:** When a CSS file is imported in a React component, the bundler (Vite, Webpack) injects it into the document, making all its rules globally available. This breaks component encapsulation: "CSS imports are global, which breaks decoupling, because a component will have access to styles that are not within its own scope". A CSS reset (e.g., `body { margin: 0; }`) declared outside a `@layer` takes precedence over layered styles, because "unlayered styles always beat any layered style regardless of specificity". Stylesheet ordering bugs arise when the import order in the bundle does not match the intended cascade order—for example, when a third-party library's styles are injected after your own, overriding your components.
+**Technical Definition:** A CSS stylesheet is a text file with a `.css` extension containing CSS rules. In React, it is imported into a JavaScript module using a side-effect import: `import './styles.css'`. The build tool (Vite, webpack, Next.js) processes the CSS and includes it in the application bundle. The rules are global — they apply to any matching element in the document, regardless of which component imported the file. CSS stylesheets support the full CSS feature set: selectors, pseudo-classes, media queries, keyframe animations, and cascade layers.
 
-**Beginner-Friendly Explanation:** Imagine you and your roommates share a whiteboard. Everyone writes on the same board—your notes, their notes, and the landlord's rules. That's global CSS. A CSS reset is like the landlord writing "no writing on the walls" on the whiteboard, which covers up your notes. Stylesheet ordering bugs happen when someone writes over your section because they wrote after you. CSS Cascade Layers fix this by giving everyone their own whiteboard, stacked in a fixed order: the landlord's rules are at the bottom, yours are in the middle, and urgent notes are on top.
-
-### Purposes
-
-- **Global CSS injection:** To apply base styles (resets, typography) across the entire application.
-- **Reset layers:** To normalise browser defaults without overriding component styles.
-- **Cascade layers:** To establish explicit priority ordering so components are not overridden by third-party or legacy styles.
-- **Stylesheet ordering:** To ensure that the intended cascade order is preserved regardless of import order in the bundle.
-
-### Syntax Rules and Structure
-
-**Cascade Layer Declaration (Top of Global Stylesheet):**
-```css
-/* app/globals.css — declare layer order at the very top */
-@layer reset, vendor, design-system, utilities;
-```
-
-**Component Breakdown:**
-- `@layer reset, vendor, design-system, utilities`: Declares four layers in order from lowest to highest priority.
-- Later layers win over earlier layers, regardless of selector specificity.
-- Unlayered styles always beat layered styles.
-
-**Assigning Styles to Layers:**
-```css
-@layer reset {
-  *, *::before, *::after { box-sizing: border-box; }
-  body { margin: 0; }
-}
-
-@layer vendor {
-  .external-legacy-widget table td > div {
-    background-color: #888888;
-    padding: 24px;
-  }
-}
-
-@layer design-system {
-  .custom-dashboard-card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  }
-}
-
-@layer utilities {
-  .force-brand-purple { background-color: #6366f1 !important; }
-}
-```
-
-**Component Breakdown:**
-- `@layer reset { ... }`: Base normalisation; lowest priority.
-- `@layer vendor { ... }`: Third-party styles; low priority, cannot override the design system.
-- `@layer design-system { ... }`: Your component styles; higher priority than vendor.
-- `@layer utilities { ... }`: Utility classes that must always win; highest priority.
-
-**Fix for Mantine Styles Being Overridden:**
-```js
-// ❌ Wrong order – Mantine styles override your styles
-import './styles.css';
-import '@mantine/core/styles.css';
-```
-```js
-// ✅ Correct order – your styles override Mantine styles
-import '@mantine/core/styles.css';
-import './styles.css';
-```
-
-**Using Mantine's Layer Version:**
-```javascript
-import '@mantine/core/styles.layer.css';
-```
-
-**Syntax Rules:**
-- Declare `@layer` order at the very top of your global stylesheet, before any other rules.
-- Put resets in a `@layer reset` (or `@layer base`) so they do not override component styles.
-- Put third-party library styles in a `@layer vendor` so your design system can override them.
-- Put your component styles in a higher layer (e.g., `@layer design-system`).
-- Put utility classes in the highest layer (`@layer utilities`).
-- If a library provides a `.layer.css` version, use it instead of the unlayered version.
-- If you cannot use `@layer`, ensure your styles are imported after the library's styles.
-
-**Constraints and Limitations:**
-- `@layer` has broad browser support (Baseline 2022+) but may not work in very old browsers.
-- Unlayered styles always beat layered styles, so a stray unlayered reset will override everything.
-- `!important` reverses layer order: an `!important` declaration in a lower layer beats a normal declaration in a higher layer.
-- Not all build tools handle `@layer` correctly; some may reorder imports.
-- Safari had bugs with `all: revert-layer`; React Spectrum removed it in v0.7.0.
-
-### Annotated Code Example: Layer Order Fix
-
-```css
-/* app/globals.css */
-
-/* 1. Declare layer order — reset first, utilities last */
-@layer reset, vendor, design-system, utilities;
-
-/* 2. Reset layer — normalises browser defaults */
-@layer reset {
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0;
-    font-family: system-ui, sans-serif;
-  }
-}
-
-/* 3. Vendor layer — third-party widget styles */
-@layer vendor {
-  /* A heavy legacy selector that would normally win */
-  .legacy-calendar table td > div {
-    background-color: #888;
-    padding: 24px;
-  }
-}
-
-/* 4. Design system layer — your component styles */
-@layer design-system {
-  .card {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-  }
-}
-
-/* 5. Utilities layer — highest priority */
-@layer utilities {
-  .text-brand {
-    color: #6366f1 !important;
-  }
-}
-```
-
-```jsx
-// DashboardCard.tsx
-export function DashboardCard() {
-  return (
-    <div className="card">
-      <h2 className="text-brand">Revenue</h2>
-      {/* The legacy widget is quarantined in the vendor layer */}
-      <div className="legacy-calendar">
-        <LegacyCalendarEngine />
-      </div>
-    </div>
-  );
-}
-```
-
-**Expected Output:** The `.card` styles from `@layer design-system` override the `.legacy-calendar` styles from `@layer vendor`, even though the legacy selector is more specific. The `.text-brand` utility always wins.
-
-**Why This Output Occurs:** The layer order `reset, vendor, design-system, utilities` establishes priority: `utilities` > `design-system` > `vendor` > `reset`. A simple class in `design-system` beats a heavy selector in `vendor` because layer priority is evaluated before specificity.
-
-### Real-World Cases
-
-- **Design systems + Tailwind:** MUI + Tailwind coexistence via cascade layers: `@layer theme, base, mui, components, utilities` so Tailwind utilities beat MUI.
-- **Legacy + modern styles:** A new design system layered above a legacy vendor stylesheet.
-- **Multi-tenant white-label:** Theme layers that can be reordered per tenant.
-- **React Spectrum:** Uses `@layer` internally to avoid specificity issues.
-
-### References
-
-- MDN Web Docs – CSS Cascade Layers: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Cascade_layers
-- Mantine – Styles Order: https://help.mantine.dev/q/styles-order
-- SmartTechDevs – Mastering CSS Cascade Layers in React: https://smarttechdevs.in/blog/nextjs-css-cascade-layers-style-isolation
-- React Spectrum – v0.7.0 Release Notes: https://react-spectrum.adobe.com/releases/v0-7-0.md
-
----
-
-## Core Concept 2: Component-Level Styles and the Limits of Scope Insulation
-
-### Definitions
-
-**Core Definition:** Component-level styles are styles intended to apply only to a specific component; scope insulation is the degree to which those styles are prevented from leaking out or being affected by external styles—and it has inherent limits.
-
-**Technical Definition:** Component-level styles aim to achieve encapsulation: "Properly encapsulated components will not have any implicit dependencies on each other". However, CSS inheritance and the global cascade mean that true style isolation is never absolute. Properties like `font-family`, `color`, and `line-height` inherit from ancestors, so a component's inherited styles can be affected by its parent. Global styles (resets, third-party CSS) always affect components unless explicitly reset. Even CSS Modules, which scope class names, do not isolate inherited properties or prevent global styles from affecting the component's elements. The `@scope` at-rule limits selectors to a subtree, but inherited properties still cross the scope boundary. The limits of insulation mean that component-level styles must be designed defensively: use explicit reset rules for inherited properties, avoid relying on the absence of global styles, and use cascade layers to manage priority.
-
-**Beginner-Friendly Explanation:** Imagine you live in an apartment with shared walls. You can paint your own walls (component styles), but noise from neighbours (global styles) still comes through, and the building's heating system (inherited properties) affects your apartment regardless of what you do. Component-level styles are like your interior design—they make your apartment look how you want, but they cannot fully block out the shared infrastructure. The best you can do is soundproof (reset inherited properties) and coordinate with the building management (cascade layers).
+**Beginner-Friendly Explanation:** A CSS stylesheet is a regular CSS file. You write your styles in it, import it into your React component, and then use the class names with `className`. The styles apply everywhere in your app.
 
 ### Purposes
 
-- To apply styles to a single component without affecting others.
-- To understand the boundaries of scope insulation so components can be designed defensively.
-- To use `@scope` for selector isolation without build tooling.
-- To recognise that inherited properties cross all scope boundaries and must be reset explicitly.
-- To combine multiple insulation mechanisms (CSS Modules + cascade layers + `@scope`) for maximum isolation.
+- To define global styles (resets, typography, base element styles).
+- To apply static styling that does not change based on component state or props.
+- To leverage the full power of CSS, including pseudo-classes and media queries.
+- To separate styling concerns from component logic in a familiar, standards-based way.
 
 ### Syntax Rules and Structure
 
-**`@scope` for Selector Isolation:**
-```css
-/* Styles inside @scope only apply within .card */
-@scope (.card) {
-  :scope {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
-  p {
-    color: #333;
-    line-height: 1.5;
-  }
-  img {
-    max-width: 100%;
-  }
-}
-```
-
-**Component Breakdown:**
-- `@scope (.card) { ... }`: Limits all selectors inside to descendants of `.card`.
-- `:scope`: Selects the scoping root itself (`.card`).
-- `p`, `img`: Only match elements inside `.card`, not elsewhere in the document.
-
-**Proximity in `@scope`:**
-```css
-@scope (.card) to (.card-footer) {
-  p { color: #333; }
-}
-```
-
-**Component Breakdown:**
-- `to (.card-footer)`: Stops the scope at `.card-footer`; `p` elements inside `.card-footer` are not styled by this rule.
-- This allows fine-grained control over which subtree a rule applies to.
-
-**CSS Modules Scoping:**
-```css
-/* Button.module.css */
-.button {
-  background: blue;
-  color: white;
-}
-```
+**General Syntax:**
 
 ```jsx
-import styles from './Button.module.css';
+import './Component.css';
 
-function Button() {
-  return <button className={styles.button}>Click</button>;
+function Component() {
+  return <div className="my-class">Content</div>;
 }
-// Renders: <button class="Button_button__a1b2c">Click</button>
 ```
 
 **Component Breakdown:**
-- `styles.button`: The compiled, locally-scoped class name.
-- The original `.button` selector is transformed to a unique global name (e.g., `Button_button__a1b2c`).
+
+| Component | Description |
+|-----------|-------------|
+| `import './Component.css'` | Side-effect import that includes the stylesheet in the bundle. |
+| `className="my-class"` | Applies the CSS class to the element. |
 
 **Syntax Rules:**
-- Use `@scope` for selector isolation without build tools; it is supported in Baseline 2023+ browsers (Chrome, Edge, Safari; Firefox support is in progress).
-- Use `:scope` inside `@scope` to target the scoping root.
-- Use `to (selector)` to limit the scope's reach.
-- Use CSS Modules for class-name scoping; it transforms local names to unique global names.
-- Always reset inherited properties (`color`, `font-family`, `line-height`) at the component root if strict isolation is required.
-- Recognise that `@scope` isolates *selectors*, not *inherited properties*; inherited values still cross the boundary.
-- Combine `@scope` with `@layer` for both selector and priority isolation.
+
+1. Import the CSS file at the top of the component module.
+2. Use `className` (not `class`) to apply classes.
+3. Class names are global; use a naming convention to avoid collisions.
+4. Multiple classes are separated by spaces: `className="btn btn-primary"`.
 
 **Constraints and Limitations:**
-- CSS inheritance crosses all scope boundaries; `@scope` does not prevent inherited properties from affecting children beyond the scope limit.
-- Firefox does not yet fully support `@scope` (as of early 2026).
-- CSS Modules do not isolate inherited properties or prevent global styles from affecting the component.
-- Styled-components and other CSS-in-JS libraries have runtime performance overhead and SSR complexity.
-- Even with insulation, global resets and third-party CSS can still affect components unless layered or scoped.
 
-### Annotated Code Example: `@scope` + CSS Modules
+- Global scope can cause naming collisions in large applications.
+- Styles cannot be dynamically computed without adding or removing classes.
+- Unused CSS is not automatically tree-shaken unless the build tool supports it.
+- `@import` from external URLs is render-blocking and can cause flash of unstyled content (FOUC).
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Basic Global Stylesheet
+
+**`Button.css`:**
 
 ```css
-/* Card.module.css */
-.card {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 16px;
-}
-```
-
-```jsx
-// Card.tsx
-import styles from './Card.module.css';
-
-export function Card({ children }) {
-  return (
-    <div className={styles.card}>
-      <style>{`
-        @scope (.${styles.card}) {
-          p { color: #333; line-height: 1.5; }
-          img { max-width: 100%; border-radius: 4px; }
-        }
-      `}</style>
-      {children}
-    </div>
-  );
-}
-```
-
-**Expected Output:** The `p` and `img` styles only apply inside this card, even though the selectors are generic. The card's border and padding come from the CSS Module class. Inherited properties (e.g., `font-family`) still come from the document, and must be reset explicitly if needed.
-
-**Why This Output Occurs:** The CSS Module scopes `.card` to a unique class name. The `@scope` rule uses that unique class name as its scoping root, limiting `p` and `img` selectors to descendants of the card. However, `font-family` and other inherited properties still cross the boundary because CSS inheritance is not blocked by `@scope`.
-
-### Real-World Cases
-
-- **Embedding third-party HTML:** `@scope` is ideal for styling email previews or CMS content without leaking styles.
-- **Design system components:** CSS Modules + `@scope` for maximum isolation.
-- **Legacy integration:** `@scope` to contain old CSS selectors to a specific subtree.
-- **Defensive component design:** Explicitly resetting inherited properties at the component root.
-
-### References
-
-- Smashing Magazine – CSS @scope: https://www.smashingmagazine.com/2026/02/css-scope-alternative-naming-conventions/
-- Frontend Masters – @scope and HTML Style Blocks: https://frontendmasters.com/blog/reminder-that-scope-and-html-style-blocks-are-a-potent-combo/
-- MDN Web Docs – @scope: https://developer.mozilla.org/en-US/docs/Web/CSS/@scope
-- W3C CSSWG – CSS Cascade 6: https://drafts.csswg.org/css-cascade-6/#scoped-styles
-- Stack Overflow – How to limit style to component level in React: https://stackoverflow.com/posts/77510767/revisions
-
----
-
-## Core Concept 3: CSS Modules Architecture (Local Scoping, Class Composition, and Dynamic Class Joining)
-
-### Definitions
-
-**Core Definition:** CSS Modules is a build-time tool that scopes all class names and animation names locally by default, exporting a mapping object from local names to globally unique names; class composition allows one class to inherit the styles of another; dynamic class joining combines multiple class names conditionally at runtime.
-
-**Technical Definition:** A CSS Module is "a CSS file in which all class names and animation names are scoped locally by default". When imported from JavaScript, it exports an object with all mappings from local names to global names: `import styles from "./style.css"` gives `styles.className` as the compiled unique name. The `composes` property allows a class to inherit the rules of another class: `.otherClassName { composes: className; color: yellow; }`. `composes` must appear before other rules in the class body. Classes can compose from other CSS Modules: `composes: className from "./style.css"`. Dynamic class joining in React is achieved by conditionally constructing a `className` string from the `styles` object, often with a utility library like `clsx` or `classnames`.
-
-**Beginner-Friendly Explanation:** CSS Modules are like giving each component its own private vocabulary. When you write `.button` in a CSS Module, the build tool renames it to something unique like `Button_button__a1b2c`, so it cannot clash with any other `.button` in the application. `composes` is like saying "this class should also include everything from that class"—like mixing paint colours. Dynamic class joining is what you do when a component's appearance depends on its state (e.g., `active`, `disabled`): you build the `className` string conditionally in JavaScript.
-
-### Purposes
-
-- To eliminate class name collisions by scoping all class names locally.
-- To make component styles modular and reusable without global namespace pollution.
-- To compose styles from multiple classes, promoting DRY (Don't Repeat Yourself) principles.
-- To compose classes across files for shared design primitives.
-- To dynamically join class names based on component state (active, disabled, variant).
-- To achieve explicit dependencies between styles and components.
-
-### Syntax Rules and Structure
-
-**Basic CSS Module:**
-```css
-/* Button.module.css */
-.button {
-  background: blue;
-  color: white;
+.btn {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
-}
-
-.button--large {
-  font-size: 20px;
-  padding: 12px 24px;
-}
-```
-
-```jsx
-import styles from './Button.module.css';
-
-function Button({ size = 'md', children }) {
-  const className = size === 'lg'
-    ? `${styles.button} ${styles['button--large']}`
-    : styles.button;
-
-  return <button className={className}>{children}</button>;
-}
-```
-
-**Class Composition (`composes`):**
-```css
-/* styles.module.css */
-.base {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-}
-
-.primary {
-  composes: base;
-  background: blue;
-  color: white;
-}
-
-.secondary {
-  composes: base;
-  background: gray;
-  color: white;
-}
-```
-
-**Component Breakdown:**
-- `.primary` composes `.base`, inheriting its padding, border, and border-radius.
-- The compiled `.primary` element receives both class names: `styles.primary` and `styles.base`.
-- `composes` must appear before other rules in the class body.
-
-**Composing from Another CSS Module:**
-```css
-.otherClassName {
-  composes: className from "./style.css";
-}
-```
-
-**Component Breakdown:**
-- `composes: className from "./style.css"`: Pulls in a class from another module.
-- The composition order across files is undefined; do not define conflicting properties in composed classes from different files.
-
-**Dynamic Class Joining with `clsx`:**
-```jsx
-import clsx from 'clsx';
-import styles from './Button.module.css';
-
-function Button({ variant = 'primary', size = 'md', disabled, children }) {
-  return (
-    <button
-      className={clsx(
-        styles.button,
-        styles[`button--${variant}`],
-        size === 'lg' && styles['button--large'],
-        disabled && styles['button--disabled']
-      )}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  );
-}
-```
-
-**Component Breakdown:**
-- `clsx(...)`: Joins class names, ignoring falsy values.
-- `styles[\`button--${variant}\`]`: Dynamically accesses the compiled class name.
-- `disabled && styles['button--disabled']`: Conditionally includes a class.
-
-**Syntax Rules:**
-- Name CSS Module files with the `.module.css` extension so the bundler treats them as modules.
-- Import the module as `styles` (or any name) and reference `styles.className`.
-- Use camelCase for local class names (recommended).
-- Use `composes` to inherit styles from other classes; it must be the first declaration in the class body.
-- Use `:global(...)` to escape to global scope for a specific selector.
-- Use `clsx` or `classnames` for dynamic class joining.
-- Do not use multiple CSS Modules to describe a single element; compose classes within one module instead.
-
-**Constraints and Limitations:**
-- `composes` only works for single class selectors, not complex selectors or elements.
-- Composition order across files is undefined; avoid conflicting properties in composed classes from different files.
-- CSS Modules do not isolate inherited properties; a global `body { font-family: ... }` still affects all components.
-- Dynamic class names (computed at runtime) cannot be used with `composes` in CSS; only static class names can be composed.
-- CSS Modules add a build step; they are not usable in plain HTML without a bundler.
-
-### Annotated Code Example: Button with Composition and Dynamic Joining
-
-```css
-/* Button.module.css */
-.base {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
   cursor: pointer;
 }
 
-.primary {
-  composes: base;
-  background: #007bff;
+.btn-primary {
+  background: blue;
   color: white;
-}
-
-.primary:hover {
-  background: #0069d9;
-}
-
-.secondary {
-  composes: base;
-  background: #6c757d;
-  color: white;
-}
-
-.large {
-  composes: base;
-  padding: 12px 24px;
-  font-size: 20px;
-}
-
-.disabled {
-  composes: base;
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 ```
 
+**`Button.jsx`:**
+
 ```jsx
-import clsx from 'clsx';
+import './Button.css';
+
+function Button({ variant = 'primary', children }) {
+  return (
+    <button className={`btn btn-${variant}`}>
+      {children}
+    </button>
+  );
+}
+```
+
+**Expected Output:** A blue primary button with padding and rounded corners.
+
+**Why this output:** The imported CSS file defines `.btn` and `.btn-primary`. The template literal combines them into `"btn btn-primary"`, applying both rules.
+
+#### Example 2: Global Reset Stylesheet
+
+**`global.css`:**
+
+```css
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  color: #333;
+}
+```
+
+**`layout.tsx` (Next.js):**
+
+```tsx
+import './global.css';
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+**Expected Output:** All elements use border-box sizing, zero margins, and the system font.
+
+**Why this output:** The global stylesheet is imported at the root layout, applying the reset and base typography to every route in the application.
+
+### Real-World Cases
+
+- **Application resets:** Normalising browser default styles.
+- **Base typography:** Setting font families, sizes, and line heights globally.
+- **Design tokens:** Defining CSS custom properties for colors and spacing.
+- **Third-party CSS:** Importing Bootstrap or other CSS libraries from packages.
+
+### References
+
+- Next.js — CSS Styling — https://nextjs.org/learn/dashboard-app/css-styling
+- Vercel — NO_EXTERNAL_CSS_AT_IMPORTS — https://vercel.com/docs/conformance/rules/NO_EXTERNAL_CSS_AT_IMPORTS
+- TanStack — CSS Styling — https://tanstack.com/router/latest/docs/start/framework/react/guide/css-styling
+
+---
+
+## 2. Importing CSS
+
+### Definitions
+
+**Core Definition:** Importing CSS is the act of including a `.css` file in a JavaScript module so its rules become part of the application bundle.
+
+**Technical Definition:** CSS is imported using a side-effect import: `import './styles.css'`. The build tool processes the import, resolves the file path, and includes the CSS in the final bundle. In frameworks like Next.js, global CSS can be imported in the root layout (`app/layout.tsx`) to apply to all routes. For component-scoped styles, CSS Modules use a default import: `import styles from './Component.module.css'`. Relative imports are processed by the framework and avoid the render-blocking issues of external `@import` URLs.
+
+**Beginner-Friendly Explanation:** Importing CSS means telling your component to use a CSS file. You write `import './styles.css'` at the top of your file, and the styles become available.
+
+### Purposes
+
+- To include stylesheet rules in the application bundle.
+- To apply global or component-scoped styles.
+- To load third-party CSS from packages or local files.
+
+### Syntax Rules and Structure
+
+**Global CSS Import:**
+
+```jsx
+import './global.css';
+```
+
+**CSS Module Import:**
+
+```jsx
+import styles from './Component.module.css';
+```
+
+**Third-Party CSS Import:**
+
+```jsx
+import 'bootstrap/dist/css/bootstrap.css';
+```
+
+**Syntax Rules:**
+
+1. Global CSS uses a side-effect import (no variable assigned).
+2. CSS Modules use a default import to access the class name mapping.
+3. Third-party CSS can be imported from `node_modules` packages.
+4. Relative imports are processed by the build tool and are safe from render-blocking issues.
+
+**Constraints and Limitations:**
+
+- External `@import` URLs are render-blocking and can cause FOUC.
+- Global CSS imported in a component applies to the entire application, not just that component.
+- In React Server Components, page-specific global CSS should be avoided in broad `'use client'` entry points.
+
+### Annotated Code Examples
+
+```jsx
+// Global CSS — applies everywhere
+import './globals.css';
+
+// Third-party CSS from node_modules
+import 'bootstrap/dist/css/bootstrap.css';
+
+// CSS Module — scoped to this component
 import styles from './Button.module.css';
 
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  children,
-}) {
-  return (
-    <button
-      className={clsx(
-        styles[variant],           // .primary or .secondary (composes .base)
-        size === 'lg' && styles.large,
-        disabled && styles.disabled
-      )}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  );
+function Button() {
+  return <button className={styles.primary}>Click</button>;
 }
 ```
 
-**Expected Output:** A `<button>` with the combined styles of `.base` and `.primary` (or `.secondary`), plus `.large` and `.disabled` if applicable. The compiled class names are unique (e.g., `Button_base__a1b2c Button_primary__d3e4f`).
+**Expected Output:** Global styles apply app-wide; the CSS Module class is scoped and unique.
 
-**Why This Output Occurs:** `.primary` composes `.base`, so the element receives both the `.primary` and `.base` compiled class names. `clsx` joins the selected classes. The `disabled` attribute is set separately for accessibility, while the `.disabled` class provides the visual state.
+**Why this output:** The side-effect imports include the CSS in the bundle. The CSS Module import returns an object mapping class names to generated unique names, ensuring scoping.
 
 ### Real-World Cases
 
-- **Design systems:** Buttons, inputs, and cards composed from shared base classes.
-- **Variant-driven components:** Buttons with `primary`, `secondary`, `danger`, `ghost` variants.
-- **Size-driven components:** Inputs with `sm`, `md`, `lg` sizes.
-- **State-driven components:** Disabled, loading, error, and success states.
+- **Root layout:** Importing `global.css` in `app/layout.tsx` for Next.js applications.
+- **Third-party libraries:** Importing Bootstrap or Tailwind base styles from packages.
+- **Component styles:** Importing CSS Modules for scoped component styling.
 
 ### References
 
-- CSS Modules – README: https://raw.githubusercontent.com/css-modules/css-modules/8d33532b29327386173b28051d289e9d25545e1f/README.md
-- CSS Modules – Composition: https://github.com/Terro216/css-modules/blob/master/docs/composition.md
-- Lightning CSS – CSS Modules: https://lightningcss.dev
-- MakeUseOf – How to Style React Components Using CSS Modules: https://www.makeuseof.com
+- Next.js — Global styles — https://nextjs.org/learn/dashboard-app/css-styling
+- Vercel — Importing CSS from packages — https://vercel.com/docs/conformance/rules/NO_EXTERNAL_CSS_AT_IMPORTS
+- TanStack — Global route CSS — https://tanstack.com/router/latest/docs/start/framework/react/guide/css-styling
 
 ---
 
-## Core Concept 4: CSS Naming Strategies (BEM, SMACSS) vs. CSS-Scoping Mechanisms
+## 3. Global CSS
 
 ### Definitions
 
-**Core Definition:** BEM (Block, Element, Modifier) and SMACSS (Scalable and Modular Architecture for CSS) are naming conventions that manage global CSS by enforcing structured class names; CSS-scoping mechanisms (CSS Modules, `@scope`, cascade layers) use browser or build-tool features to isolate styles without naming conventions.
+**Core Definition:** Global CSS refers to stylesheet rules that apply to the entire application, regardless of which component imported them.
 
-**Technical Definition:** BEM is a naming convention where a **Block** is a standalone component (`button`), an **Element** is a part of a block (`button__icon`), and a **Modifier** is a variant (`button--primary`). SMACSS categorises CSS rules into five types: **Base** (defaults), **Layout** (page structure), **Module** (reusable components), **State** (JavaScript-dependent states), and **Theme** (visual themes). Both are naming-based solutions to the global scope problem: "Rigid class name conventions, such as BEM, are one theoretical solution to this issue". However, "in the real world, it doesn't always work out like that"—BEM class names can become long and unwieldy (e.g., `app-user-overview__status--is-authenticating`), and small HTML changes require many CSS revisions. CSS-scoping mechanisms, by contrast, use technology (local scoping, `@scope`) rather than convention, eliminating the need for lengthy prefixes.
+**Technical Definition:** In React, all CSS imported through a standard `import './styles.css'` statement becomes global. A class defined in one file applies to any element with that class name anywhere in the document. Global CSS is best limited to foundational styles: resets, base typography, brand colors, and CSS custom properties. Next.js recommends importing global CSS in the root layout to apply styles to every route. For component-specific styling, CSS Modules or utility-first CSS should be used instead to avoid collisions.
 
-**Beginner-Friendly Explanation:** BEM and SMACSS are like agreeing on a naming system for everyone in a shared office: "All documents about Project X start with 'X-', and drafts end with '-draft'." It works if everyone follows the rules, but it is easy to break. CSS Modules and `@scope` are like giving everyone their own office with a locked door: no naming rules are needed because no one can accidentally touch your documents. Naming conventions are a social solution; scoping mechanisms are a technical solution.
+**Beginner-Friendly Explanation:** Global CSS means the styles apply to the whole app. If you define a `.button` class, any element with `className="button"` will get those styles, no matter where it is. This is useful for resets and base styles, but can cause conflicts if you are not careful.
 
 ### Purposes
 
-- **BEM:** To provide a systematic, predictable naming convention that reduces class name collisions.
-- **BEM:** To make the relationship between blocks, elements, and modifiers explicit in the class name.
-- **SMACSS:** To categorise CSS rules by purpose (base, layout, module, state, theme) for better organisation.
-- **SMACSS:** To separate concerns between layout, components, and states.
-- **CSS-scoping mechanisms:** To provide technical isolation without relying on developer discipline.
-- **Hybrid approach:** To combine naming conventions with scoping mechanisms for both clarity and isolation.
+- To apply foundational styles (resets, typography, base element rules) across the application.
+- To define design tokens (CSS custom properties) that are available everywhere.
+- To load third-party CSS frameworks that require global scope.
+- To ensure consistent baseline styling across all routes.
 
 ### Syntax Rules and Structure
 
-**BEM Naming:**
-```css
-/* Block */
-.button { ... }
-
-/* Element (part of a block) */
-.button__icon { ... }
-
-/* Modifier (variant) */
-.button--primary { ... }
-.button--large { ... }
-
-/* Element with modifier */
-.button__icon--spin { ... }
-```
+**General Syntax:**
 
 ```jsx
-function Button({ variant = 'default', size, children }) {
-  const className = [
-    'button',
-    variant !== 'default' && `button--${variant}`,
-    size && `button--${size}`,
-  ].filter(Boolean).join(' ');
+// app/layout.tsx (Next.js root layout)
+import './global.css';
 
+export default function RootLayout({ children }) {
+  return <html><body>{children}</body></html>;
+}
+```
+
+**Syntax Rules:**
+
+1. Import global CSS at the application root (root layout or top-level component).
+2. Global CSS should contain only truly global rules: resets, base typography, brand colors.
+3. Avoid attaching styles to raw HTML elements unless part of the design system.
+4. Use CSS Modules or utility classes for component-specific styles.
+
+**Constraints and Limitations:**
+
+- Global styles cannot be scoped to a single component.
+- Importing global CSS in many components can cause style leakage and unexpected overrides.
+- In React Server Components, page-specific global CSS in broad `'use client'` entry points can make unrelated pages wait on that CSS.
+
+### Annotated Code Examples
+
+**`global.css`:**
+
+```css
+:root {
+  --color-primary: #2563eb;
+  --spacing-unit: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #fafafa;
+}
+```
+
+**`app/layout.tsx`:**
+
+```tsx
+import './global.css';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <button className={className}>
-      <span className="button__icon">{/* icon */}</span>
-      {children}
-    </button>
+    <html lang="en">
+      <body>{children}</body>
+    </html>
   );
 }
 ```
 
-**Component Breakdown:**
-- `.button`: The Block (standalone component).
-- `.button__icon`: The Element (part of the block).
-- `.button--primary`: The Modifier (variant).
-- Class names are constructed as strings in the component.
+**Expected Output:** Every route inherits the reset, base typography, and CSS custom properties.
+
+**Why this output:** The global stylesheet is imported once at the root layout. Its rules apply to the entire document, and the CSS custom properties are available to all components.
+
+### Real-World Cases
+
+- **Application reset:** Normalising browser defaults across all pages.
+- **Design tokens:** Defining `--color-primary`, `--spacing-unit` globally.
+- **Tailwind base styles:** Importing `@tailwind base;` globally.
+
+### References
+
+- Next.js — Global styles — https://nextjs.org/learn/dashboard-app/css-styling
+- React on Rails — Global CSS and RSC — https://reactonrails.com
+- RT Camp — Minimal Global Styles — https://rtcamp.com/handbook/react-best-practices/styling/
+
+---
+
+## 4. CSS Specificity
+
+### Definitions
+
+**Core Definition:** CSS specificity is the weight browsers use to determine which CSS declaration is most relevant to an element when multiple rules conflict.
+
+**Technical Definition:** Specificity is the weight that browsers use in the cascade algorithm to determine the CSS declaration that is the most relevant to an element, which in turn determines the property value to apply. The specificity value is a three-column count: **ID – CLASS – TYPE**. ID selectors add 1-0-0, class selectors (including attribute selectors and pseudo-classes) add 0-1-0, and type selectors (elements and pseudo-elements) add 0-0-1. The declaration with the highest specificity wins. If specificities are equal, the later rule in the source order wins. Specificity is compared only between selectors from the same cascade origin and layer.
+
+**Beginner-Friendly Explanation:** Specificity is CSS's way of deciding which style wins when two rules target the same element. An ID is stronger than a class, and a class is stronger than a tag name. If two rules have the same strength, the one written later wins.
+
+### Purposes
+
+- To understand which style rule is applied when multiple rules conflict.
+- To write selectors that are predictable and maintainable.
+- To avoid specificity wars and unnecessary `!important` flags.
+
+### Syntax Rules and Structure
+
+**Specificity Weight Categories:**
+
+| Category | Selectors | Weight |
+|----------|-----------|--------|
+| ID | `#header` | 1-0-0 |
+| Class | `.btn`, `[type="radio"]`, `:hover` | 0-1-0 |
+| Type | `div`, `::before` | 0-0-1 |
+
+**Syntax Rules:**
+
+1. Inline styles have the highest specificity (1-0-0-0) and override all selectors.
+2. `!important` overrides normal declarations but should be avoided.
+3. The universal selector `*` has zero specificity (0-0-0).
+4. Nesting adds specificity equal to the parent selector.
+
+**Constraints and Limitations:**
+
+- High-specificity selectors are hard to override without `!important`.
+- ID selectors create very high specificity and are discouraged in component styling.
+- Specificity is compared only within the same cascade layer and origin.
+
+### Annotated Code Examples
+
+```css
+/* Specificity: 0-0-1 */
+p {
+  color: blue;
+}
+
+/* Specificity: 0-1-0 */
+.text {
+  color: red;
+}
+
+/* Specificity: 1-0-0 */
+#intro {
+  color: green;
+}
+```
+
+```jsx
+<p id="intro" className="text">Hello</p>
+```
+
+**Expected Output:** The text is green because `#intro` has the highest specificity (1-0-0).
+
+**Why this output:** The ID selector outranks both the class and type selectors. Even though `.text` appears later in the stylesheet, specificity takes precedence over source order.
+
+### Real-World Cases
+
+- **Debugging style conflicts:** Understanding why a style is not applying.
+- **Writing low-specificity CSS:** Using classes and avoiding IDs for easier overrides.
+- **Cascade layers:** Using `@layer` to control specificity across groups of rules.
+
+### References
+
+- MDN — Specificity — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Specificity
+- MDN — Handling conflicts — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Introduction
+
+---
+
+## 5. CSS Cascade
+
+### Definitions
+
+**Core Definition:** The CSS cascade is the algorithm that determines which CSS rule is applied when multiple rules target the same element.
+
+**Technical Definition:** The cascade is an algorithm that defines how user agents combine property values originating from different sources. It defines the origin and layer that takes precedence when declarations in more than one origin, cascade layer, or `@scope` block set a value for a property. The cascade considers, in order: **origin and importance** (user-agent, user, author), **cascade layers**, **specificity**, and **order of appearance**. The cascade lies at the core of CSS, as emphasized by the name: Cascading Style Sheets.
+
+**Beginner-Friendly Explanation:** The cascade is CSS's decision-making process. When several rules could apply to the same element, the cascade figures out which one actually wins. It looks at where the rule came from, what layer it is in, how specific the selector is, and which rule was written last.
+
+### Purposes
+
+- To resolve conflicts between multiple CSS declarations.
+- To determine the final value of a property when multiple rules apply.
+- To enable predictable and maintainable styling through origin, layers, and specificity.
+
+### Syntax Rules and Structure
+
+**Cascade Order (Highest to Lowest Precedence):**
+
+| Step | Factor |
+|------|--------|
+| 1 | Origin and importance (user-agent → user → author) |
+| 2 | Cascade layers (`@layer`) |
+| 3 | Specificity (ID > class > type) |
+| 4 | Order of appearance (later wins) |
+
+**Syntax Rules:**
+
+1. Author styles override user-agent styles unless the user-agent uses `!important`.
+2. Cascade layers (`@layer`) control precedence between groups of rules.
+3. Specificity is compared after origin and layer.
+4. If all else is equal, the later rule wins.
+
+### Annotated Code Examples
+
+```css
+@layer reset, base, components;
+
+@layer base {
+  p { color: blue; }
+}
+
+@layer components {
+  .text { color: red; }
+}
+
+/* Unlayered */
+p { color: green; }
+```
+
+```jsx
+<p className="text">Hello</p>
+```
+
+**Expected Output:** The text is green because unlayered styles override layered styles.
+
+**Why this output:** The unlayered `p` rule has the highest cascade priority, even though `.text` has higher specificity. Origin and layer precedence come before specificity in the cascade.
+
+### Real-World Cases
+
+- **Cascade layers:** Organising styles into reset, base, components, and utilities layers.
+- **Third-party CSS:** Placing third-party styles in a lower-priority layer.
+- **Debugging:** Understanding why a style is not applying despite high specificity.
+
+### References
+
+- MDN — Introduction to the CSS cascade — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Introduction
+- MDN — Cascade layers — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Introduction
+
+---
+
+## 6. CSS Inheritance
+
+### Definitions
+
+**Core Definition:** CSS inheritance is the mechanism by which certain properties are passed from a parent element to its children when no value is specified for the child.
+
+**Technical Definition:** Inheritance controls what happens when no value is specified for a property on an element. Some properties are **inherited** by default (e.g., `color`, `font-family`, `line-height`), meaning the child receives the computed value from its parent. Other properties are **non-inherited** (e.g., `margin`, `padding`, `border`), meaning the child uses the property's initial value if no declaration applies. The `inherit` keyword explicitly forces inheritance, and `initial`, `unset`, and `revert` control the fallback behaviour. Inheritance is always from the parent element in the document tree, even when the parent is not the containing block.
+
+**Beginner-Friendly Explanation:** Inheritance means some styles automatically pass down from parent elements to their children. For example, if you set `color` on a `<div>`, all text inside it inherits that color unless something else overrides it. Other properties, like `margin`, do not inherit — each element starts with its own default.
+
+### Purposes
+
+- To propagate typography and color settings through the component tree.
+- To reduce redundant declarations by relying on inherited values.
+- To control which properties inherit and which do not.
+
+### Syntax Rules and Structure
+
+**Inherited Properties (Examples):**
+
+| Property | Inherited? |
+|----------|-----------|
+| `color` | Yes |
+| `font-family` | Yes |
+| `font-size` | Yes |
+| `line-height` | Yes |
+| `visibility` | Yes |
+| `margin` | No |
+| `padding` | No |
+| `border` | No |
+| `background` | No |
+
+**Syntax Rules:**
+
+1. Inherited properties automatically receive the parent's computed value when no declaration applies.
+2. Non-inherited properties use their initial value when no declaration applies.
+3. The `inherit` keyword explicitly forces inheritance on any property.
+4. `initial` resets to the property's initial value; `unset` behaves as `inherit` for inherited properties and `initial` for non-inherited ones.
+
+### Annotated Code Examples
+
+```css
+.parent {
+  color: blue;
+  margin: 16px;
+}
+
+.child {
+  /* color is inherited (blue) */
+  /* margin is not inherited (uses initial 0) */
+}
+```
+
+```jsx
+<div className="parent">
+  Parent
+  <div className="child">Child</div>
+</div>
+```
+
+**Expected Output:** Both "Parent" and "Child" text are blue. The child has no inherited margin.
+
+**Why this output:** `color` is an inherited property, so the child receives `blue` from the parent. `margin` is non-inherited, so the child uses its initial value (0) unless explicitly declared.
+
+### Real-World Cases
+
+- **Typography:** Setting `font-family` and `color` once on `body` and letting all elements inherit.
+- **Component theming:** Using `color` inheritance to propagate theme colors.
+- **Resetting styles:** Using `all: unset` or `all: initial` to clear inheritance.
+
+### References
+
+- MDN — CSS cascade and inheritance — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade
+- MDN — Inheritance — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Inheritance
+
+---
+
+## 7. CSS Naming Conventions
+
+### Definitions
+
+**Core Definition:** CSS naming conventions are agreed-upon rules for naming CSS classes to improve readability, maintainability, and collaboration.
+
+**Technical Definition:** CSS naming conventions are guidelines that assist developers in writing consistent and understandable CSS code. They advocate using specific naming patterns for CSS classes, IDs, and selectors to increase code readability, maintainability, and collaboration. Popular conventions include **BEM** (Block Element Modifier), **OOCSS** (Object-Oriented CSS), **SMACSS** (Scalable and Modular Architecture for CSS), and SUIT CSS. Choosing the appropriate convention depends on the project's scope and collaboration practices.
+
+**Beginner-Friendly Explanation:** Naming conventions are rules for naming your CSS classes. Good names make it obvious what a class does and where it belongs. This helps teams avoid conflicts and keeps the codebase organised.
+
+### Purposes
+
+- To make class names self-documenting and predictable.
+- To avoid naming collisions in large codebases.
+- To improve collaboration between developers.
+- To make it easier to find where styles are defined.
+
+### Syntax Rules and Structure
+
+**Comparison of Naming Conventions:**
+
+| Convention | Focus | Example |
+|------------|-------|---------|
+| BEM | Block, Element, Modifier naming | `card__title--large` |
+| OOCSS | Separation of structure and skin | `.button` + `.button--primary` |
+| SMACSS | Categorisation into five rule types | `l-header`, `is-active`, `module-card` |
+
+**Syntax Rules:**
+
+1. Choose one convention and apply it consistently across the project.
+2. Use descriptive, functional names rather than abstract labels.
+3. Avoid descendant selectors and location-dependent styling.
+
+### Annotated Code Examples
+
+```css
+/* BEM naming */
+.card { }
+.card__title { }
+.card__title--large { }
+
+/* SMACSS naming */
+.l-header { }      /* Layout */
+.is-active { }     /* State */
+.module-card { }   /* Module */
+```
+
+**Expected Output:** Class names clearly communicate their role and scope.
+
+**Why this output:** BEM separates blocks, elements, and modifiers with `__` and `--`. SMACSS prefixes layout (`l-`), state (`is-`), and module classes for immediate recognition.
+
+### Real-World Cases
+
+- **Large teams:** Consistent naming reduces merge conflicts and confusion.
+- **Design systems:** Component classes follow a predictable pattern.
+- **Legacy codebases:** Naming conventions make refactoring safer.
+
+### References
+
+- Frontend Mentor — Understanding CSS naming conventions — https://www.frontendmentor.io/articles/understanding-css-naming-conventions-bem-oocss-smacss-and-suit-css-V6ZZUYs1xz
+- SMACSS — Categorizing CSS Rules — http://smacss.com/book/categorizing
+
+---
+
+## 8. BEM (Block Element Modifier)
+
+### Definitions
+
+**Core Definition:** BEM is a naming convention that divides UI into independent blocks, each with elements and modifiers, using `__` and `--` separators.
+
+**Technical Definition:** BEM (Block Element Modifier) is a popular naming convention for CSS classes that helps developers create maintainable, reusable, and self-documenting code. It is based on the concept of dividing user interfaces into independent blocks, each of which can have elements and modifiers. **Blocks** are standalone components (e.g., `.nav`). **Elements** are parts of a block (e.g., `.nav__list`). **Modifiers** are variations or states (e.g., `.nav__item--active`). The naming pattern is `block__element--modifier`.
+
+**Beginner-Friendly Explanation:** BEM gives you a formula for naming classes. You name the main component (the block), then its parts (elements), then variations (modifiers). The double underscores and double hyphens make the structure obvious.
+
+### Purposes
+
+- To create self-documenting class names that reveal the component structure.
+- To avoid naming collisions through unique prefixes.
+- To make styles reusable across different contexts.
+- To reduce specificity issues by using flat class selectors.
+
+### Syntax Rules and Structure
+
+**BEM Syntax:**
+
+```css
+.block { }
+.block__element { }
+.block__element--modifier { }
+```
+
+**Syntax Rules:**
+
+1. Block names are lowercase with hyphens: `.nav`.
+2. Elements are separated by double underscores: `.nav__list`.
+3. Modifiers are separated by double hyphens: `.nav__item--active`.
+4. Class names should not depend on other blocks (no `.nav .button`).
+
+### Annotated Code Examples
+
+```css
+.nav {
+  display: flex;
+}
+
+.nav__list {
+  list-style: none;
+}
+
+.nav__item--active {
+  font-weight: bold;
+}
+```
+
+```jsx
+<nav className="nav">
+  <ul className="nav__list">
+    <li className="nav__item nav__item--active">Home</li>
+  </ul>
+</nav>
+```
+
+**Expected Output:** A horizontal navigation with a bold active item.
+
+**Why this output:** `.nav` defines the block. `.nav__list` styles the element. `.nav__item--active` applies the modifier for the active state.
+
+### Real-World Cases
+
+- **Component libraries:** BEM is widely used in design systems.
+- **Large applications:** Unique class names prevent collisions.
+- **Team collaboration:** The naming pattern is easy to learn and apply.
+
+### References
+
+- Frontend Mentor — BEM — https://www.frontendmentor.io/articles/understanding-css-naming-conventions-bem-oocss-smacss-and-suit-css-V6ZZUYs1xz
+- Get BEM — Official site — https://getbem.com/
+
+---
+
+## 9. SMACSS (Scalable and Modular Architecture for CSS)
+
+### Definitions
+
+**Core Definition:** SMACSS is a CSS architecture that categorises rules into five types — Base, Layout, Module, State, and Theme — to improve scalability and maintainability.
+
+**Technical Definition:** SMACSS (pronounced "smacks") is more of a style guide than a rigid framework. At its core is **categorisation**: by categorizing CSS rules, developers begin to see patterns and can define better practices around each pattern. The five categories are: **Base** (defaults, single-element selectors), **Layout** (page sections), **Module** (reusable components), **State** (how modules/layouts look in a particular state), and **Theme** (visual variations). Naming prefixes like `l-` for layout and `is-` for state help identify each category.
+
+**Beginner-Friendly Explanation:** SMACSS organises your CSS into five buckets: base styles, layout, modules, states, and themes. Each bucket has its own naming prefix so you can tell at a glance what kind of rule you are looking at.
+
+### Purposes
+
+- To categorise CSS rules for better organisation.
+- To reduce code duplication and simplify maintenance.
+- To make it easy to find where a style belongs.
+- To scale CSS across large projects.
+
+### Syntax Rules and Structure
 
 **SMACSS Categories:**
+
+| Category | Purpose | Example Prefix |
+|----------|---------|----------------|
+| Base | Default element styles | (none) |
+| Layout | Page sections | `l-` |
+| Module | Reusable components | (module name) |
+| State | Active/inactive states | `is-` |
+| Theme | Visual variations | (theme name) |
+
+**Syntax Rules:**
+
+1. Base rules use single element selectors: `html`, `body`, `a`.
+2. Layout rules use the `l-` prefix: `.l-header`, `.l-sidebar`.
+3. State rules use the `is-` prefix: `.is-hidden`, `.is-collapsed`.
+4. Modules are the bulk of the styles and use descriptive names.
+
+### Annotated Code Examples
+
 ```css
-/* Base — defaults, resets */
-body { margin: 0; font-family: system-ui; }
+/* Base */
+body { margin: 0; font-family: sans-serif; }
 
-/* Layout — page structure */
-.l-header { ... }
-.l-sidebar { ... }
-.l-main { ... }
+/* Layout */
+.l-header { height: 60px; }
+.l-sidebar { width: 250px; }
 
-/* Module — reusable components */
-.card { ... }
-.card__title { ... }
+/* Module */
+.card { padding: 16px; border: 1px solid #ddd; }
 
-/* State — JavaScript-dependent states */
-.is-active { ... }
-.is-disabled { ... }
-
-/* Theme — visual themes */
-.theme-dark { ... }
-.theme-light { ... }
+/* State */
+.is-hidden { display: none; }
+.is-active { font-weight: bold; }
 ```
 
-**Component Breakdown:**
-- `.l-` prefix: Layout modules (page-level structure).
-- `.is-` prefix: State classes applied dynamically via JavaScript.
-- `.theme-` prefix: Theme classes applied at the root.
-- Module class names are the component's base class.
+**Expected Output:** Styles are clearly organised into SMACSS categories.
 
-**CSS-Scoping Mechanisms (Comparison):**
+**Why this output:** The prefixes (`l-`, `is-`) and the categorisation make it immediately clear which layer each rule belongs to.
+
+### Real-World Cases
+
+- **Large-scale applications:** SMACSS keeps CSS organised as the project grows.
+- **Team projects:** The five categories provide a shared vocabulary.
+- **Combining methodologies:** SMACSS can be combined with BEM for naming.
+
+### References
+
+- SMACSS — Categorizing CSS Rules — http://smacss.com/book/categorizing
+- Frontend Mentor — SMACSS overview — https://www.frontendmentor.io/articles/understanding-css-naming-conventions-bem-oocss-smacss-and-suit-css-V6ZZUYs1xz
+
+---
+
+## 10. OOCSS (Object-Oriented CSS)
+
+### Definitions
+
+**Core Definition:** OOCSS is a CSS methodology that encourages reusable, modular styles by separating structure from skin and container from content.
+
+**Technical Definition:** OOCSS (Object-Oriented CSS) draws upon object-oriented programming concepts. It has two major underlying principles: **separation of structure and skin** (layout vs. visual appearance) and **separation of container and content** (styles should not depend on where an element is located). The goal is to create reusable "objects" — CSS classes that can be applied anywhere and behave consistently, regardless of context. OOCSS also promotes the open/closed principle: classes should be open for extension but closed for modification.
+
+**Beginner-Friendly Explanation:** OOCSS says you should separate how an element is laid out from how it looks, and you should not tie styles to a specific location. This makes your CSS more reusable.
+
+### Purposes
+
+- To encourage reuse of CSS snippets independent of location.
+- To separate structure (layout) from skin (visual appearance).
+- To avoid location-dependent styling.
+- To create simple, reusable base objects.
+
+### Syntax Rules and Structure
+
+**OOCSS Principles:**
+
+| Principle | Description | Example |
+|-----------|-------------|---------|
+| Separate structure and skin | Layout classes vs. visual classes | `.media` (structure) + `.media--rounded` (skin) |
+| Separate container and content | Styles should not depend on parent | `.btn` works anywhere, not just inside `.header` |
+
+**Syntax Rules:**
+
+1. Create separate classes for layout and visual styling.
+2. Avoid descendant selectors that tie styles to a container.
+3. Keep base objects simple and extend them with modifiers.
+
+### Annotated Code Examples
+
 ```css
-/* CSS Modules — technical isolation */
-.button {
+/* Structure (separate from skin) */
+.media {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Skin (separate from structure) */
+.media--bordered {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Reusable button object */
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+}
+
+.btn--primary {
   background: blue;
-}
-/* Compiles to: .Button_button__a1b2c */
-
-/* @scope — selector isolation */
-@scope (.card) {
-  p { color: #333; }
-}
-
-/* Cascade layers — priority isolation */
-@layer reset, vendor, design-system, utilities;
-```
-
-**Component Breakdown:**
-- CSS Modules: No naming convention needed; the build tool generates unique names.
-- `@scope`: No naming convention needed; selectors are limited to a subtree.
-- Cascade layers: No naming convention needed; priority is controlled by layer order.
-
-**Syntax Rules:**
-- **BEM:** Use `block__element--modifier` syntax; avoid nesting more than one level of elements.
-- **SMACSS:** Categorise rules into Base, Layout, Module, State, Theme; use prefixes (`l-` for layout, `is-` for state).
-- **CSS Modules:** Use `.module.css` files and import the styles object.
-- **`@scope`:** Use `@scope (root) to (limit) { ... }` for selector isolation.
-- **Cascade Layers:** Declare `@layer` order at the top of the global stylesheet.
-- **Hybrid:** Use BEM for component class names and `@layer` for priority control.
-
-**Constraints and Limitations:**
-- BEM class names become long and unwieldy for deeply nested components (e.g., `app-user-overview__status--is-authenticating`).
-- BEM requires discipline; "not fully adhering to the naming rules breaks the system's structure".
-- SMACSS provides categories but "does not present any specific syntax"; it is a philosophy, not a strict convention.
-- CSS-scoping mechanisms require build tooling (CSS Modules) or browser support (`@scope`, `@layer`).
-- Naming conventions do not provide technical isolation; a developer can still accidentally use the wrong class name.
-
-### Annotated Code Example: BEM + Cascade Layers
-
-```css
-/* app/globals.css */
-@layer reset, vendor, components, utilities;
-
-/* BEM naming inside a layer */
-@layer components {
-  .button {
-    display: inline-flex;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .button--primary {
-    background: #007bff;
-    color: white;
-  }
-
-  .button--secondary {
-    background: #6c757d;
-    color: white;
-  }
-
-  .button__icon {
-    margin-right: 8px;
-  }
-
-  .button--disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  color: white;
 }
 ```
 
 ```jsx
-function Button({ variant = 'primary', disabled, children }) {
-  return (
-    <button
-      className={`button button--${variant} ${disabled ? 'button--disabled' : ''}`}
-      disabled={disabled}
-    >
-      <span className="button__icon">{/* icon */}</span>
-      {children}
-    </button>
-  );
-}
+<div className="media media--bordered">
+  <img src="avatar.jpg" alt="Avatar" />
+  <div>Content</div>
+</div>
+
+<button className="btn btn--primary">Click</button>
 ```
 
-**Expected Output:** A `<button>` with BEM class names (`.button`, `.button--primary`, `.button__icon`) inside the `components` layer, so it overrides vendor styles but is overridden by utilities.
+**Expected Output:** The media object and button can be reused in any context.
 
-**Why This Output Occurs:** BEM provides predictable class names. The `@layer components` ensures these styles have higher priority than `vendor` but lower than `utilities`. The combination gives both naming clarity and priority control.
+**Why this output:** Structure (`.media`, `.btn`) is separated from skin (`.media--bordered`, `.btn--primary`). Neither depends on a specific container, making them reusable anywhere.
 
 ### Real-World Cases
 
-- **Large teams:** BEM provides a shared vocabulary across teams.
-- **Design systems:** SMACSS categories map to design system layers (base tokens, layout, components, states).
-- **Legacy modernisation:** Introducing `@layer` to control BEM styles relative to legacy vendor CSS.
-- **Component libraries:** CSS Modules + BEM-like naming for components shipped to multiple apps.
+- **Design systems:** OOCSS principles underpin many component libraries.
+- **Reusable utilities:** Layout objects that work in any context.
+- **Scalable CSS:** Reducing duplication through reusable classes.
 
 ### References
 
-- Encapsulation (UNSW) – BEM and CSS Modules: https://cgi.cse.unsw.edu.au/~cs6080/raw/lectures/react-css-custom.pdf
-- SMACSS – Categorizing CSS Rules: https://smacss.com/book/categorizing
-- Smashing Magazine – CSS @scope: https://www.smashingmagazine.com/2026/02/css-scope-alternative-naming-conventions/
-- SmartTechDevs – Mastering CSS Cascade Layers in React: https://smarttechdevs.in/blog/nextjs-css-cascade-layers-style-isolation
+- KeyCDN — OOCSS: The Future of Writing CSS — https://www.keycdn.com/blog/oocss
+- CSS-Tricks — Methods to Organize CSS — https://css-tricks.com/methods-organize-css/
 
 ---
 
-## Core Concept 5: Modern Native CSS Integration — CSS Variables for Dynamic Theme Switching
+## 11. CSS Best Practices
 
 ### Definitions
 
-**Core Definition:** CSS Custom Properties (CSS Variables) are runtime-dynamic values defined with the `--` prefix that can be read and written by JavaScript, enabling theme switching by changing variable values on the document root.
+**Core Definition:** CSS best practices are guidelines for writing maintainable, performant, and scalable stylesheets in React applications.
 
-**Technical Definition:** CSS custom properties are "reusable values in CSS files… preceded by `--` followed by an identifier and can store values such as colors, lengths, or fonts". They are inherited by descendants and can be scoped to any selector, including `:root`, `[data-theme="dark"]`, or a component class. Dynamic theme switching is implemented by defining theme-specific values under selectors like `.dark` and `.light` (or `[data-theme="dark"]` and `[data-theme="light"]`), and toggling the class or attribute on the `<html>` element. React manages the theme state (usually via Context API) and persists the preference in `localStorage`; a `useEffect` hook updates the `data-theme` attribute on the document root. CSS rules reference `var(--color-primary)` instead of hardcoded values, so switching the attribute re-points all variables in the same frame.
+**Technical Definition:** CSS best practices in React encompass: limiting global styles to foundational rules (resets, typography, design tokens), using CSS Modules or utility-first CSS for component-scoped styles, avoiding inline styles for anything other than dynamic values, following a consistent naming convention, avoiding multiple competing styling solutions, and leveraging modern CSS features (cascade layers, nesting, container queries). The goal is a predictable, scalable, and easy-to-reason-about styling system.
 
-**Beginner-Friendly Explanation:** Imagine your app's colours are written on sticky notes. When you switch from light to dark mode, you don't repaint the walls—you just swap the sticky notes for a different set. CSS variables are the sticky notes: `--bg-color`, `--text-color`, `--primary-color`. React flips the switch (changes the `data-theme` attribute), and every component that references `var(--bg-color)` instantly shows the new colour. No component needs to re-render—the browser handles the change.
+**Beginner-Friendly Explanation:** Best practices are the habits that keep your CSS clean and maintainable. They include keeping global styles minimal, using the right tool for each job, and being consistent.
 
-### Purposes
+### Best Practices Table
 
-- To define reusable, semantic colour tokens (e.g., `--color-bg-primary`) instead of hardcoded values.
-- To enable runtime theme switching (light/dark, brand themes) without re-rendering components.
-- To scope theme values to different subtrees (e.g., a dark sidebar inside a light page).
-- To persist theme preference across sessions via `localStorage`.
-- To integrate with design systems that generate CSS variables from design tokens.
+| Practice | Description |
+|----------|-------------|
+| **Minimal global styles** | Limit global CSS to resets, base typography, and design tokens. |
+| **Use CSS Modules for component styles** | Scope styles to avoid collisions. |
+| **Avoid inline styles** | Use them only for dynamic values, not static styling. |
+| **Stick to one styling approach** | Avoid mixing CSS Modules, SASS, and CSS-in-JS. |
+| **Use design tokens** | Reference semantic classes like `text-primary` instead of hardcoded values. |
+| **Use descriptive class names** | Prefer `btn-primary` over `box1` or `redText`. |
+| **Avoid location-dependent styling** | Do not nest selectors unnecessarily. |
+| **Use cascade layers for organisation** | Group styles into reset, base, components, utilities. |
 
-### Syntax Rules and Structure
+### Annotated Code Examples
 
-**Defining Theme Variables:**
+**✅ Good Practices:**
+
 ```css
-/* app/globals.css */
+/* global.css — minimal global styles */
 :root {
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f5f5f5;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #6c757d;
-  --color-border: #dee2e6;
-  --color-brand: #007bff;
+  --color-primary: #2563eb;
+  --spacing-4: 16px;
 }
 
-[data-theme="dark"] {
-  --color-bg-primary: #1a1a1a;
-  --color-bg-secondary: #2d2d2d;
-  --color-text-primary: #f5f5f5;
-  --color-text-secondary: #adb5bd;
-  --color-border: #495057;
-  --color-brand: #4dabf7;
-}
-```
-
-**Component Breakdown:**
-- `:root { ... }`: Default (light) theme variables.
-- `[data-theme="dark"] { ... }`: Dark theme overrides.
-- All components reference `var(--color-...)`.
-
-**Using Variables in Components:**
-```css
-/* Card.module.css */
-.card {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.title {
-  color: var(--color-brand);
-}
-```
-
-**React Theme Provider:**
-```jsx
-import { createContext, useContext, useEffect, useState } from 'react';
-
-const ThemeContext = createContext();
-
-export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    return saved === 'dark';
-  });
-
-  useEffect(() => {
-    document.documentElement.setAttribute(
-      'data-theme',
-      isDark ? 'dark' : 'light'
-    );
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
-
-  const toggleTheme = () => setIsDark(!isDark);
-
-  return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) throw new Error('useTheme must be used within ThemeProvider');
-  return context;
-}
-```
-
-**Component Breakdown:**
-- `isDark`: Boolean theme state, initialised from `localStorage`.
-- `useEffect`: Sets `data-theme` on `<html>` and persists to `localStorage`.
-- `toggleTheme`: Flips the theme state.
-- `useTheme`: Custom hook for consuming the theme.
-
-**Theme Toggle Component:**
-```jsx
-function ThemeToggle() {
-  const { isDark, toggleTheme } = useTheme();
-  return (
-    <button onClick={toggleTheme}>
-      {isDark ? '☀️ Light Mode' : '🌙 Dark Mode'}
-    </button>
-  );
-}
-```
-
-**Component Breakdown:**
-- `isDark`: Reads the current theme.
-- `toggleTheme`: Changes the theme.
-- The button label reflects the current theme.
-
-**Syntax Rules:**
-- Define theme variables under `:root` (default) and `[data-theme="dark"]` (dark).
-- Use semantic variable names (`--color-bg-primary`) rather than literal names (`--blue-500`).
-- Reference variables with `var(--variable-name)` in all component styles.
-- Use React Context to manage the theme state globally.
-- Persist the theme preference in `localStorage` and initialise from it.
-- Set `data-theme` on `document.documentElement` (the `<html>` element).
-- Avoid inline `style` for theming; use variables in CSS files for maintainability.
-- For SSR, inject the theme attribute server-side to avoid a flash of incorrect theme.
-
-**Constraints and Limitations:**
-- CSS variables are inherited; a variable set on `:root` is available everywhere, but a variable set on a component is only available to its descendants.
-- CSS variables do not work in IE11 or other very old browsers.
-- Changing a variable triggers a style recalculation but does not re-render React components; this is a performance advantage but means React state and CSS state can diverge if not carefully managed.
-- For SSR, the server must render the correct theme attribute; otherwise, the client will flash the default theme.
-- CSS variables cannot be used in media query conditions (e.g., `@media (min-width: var(--breakpoint))` is invalid).
-
-### Annotated Code Example: Complete Theme System
-
-```css
-/* app/globals.css */
-:root {
-  --color-bg: #ffffff;
-  --color-surface: #f8f9fa;
-  --color-text: #212529;
-  --color-text-muted: #6c757d;
-  --color-primary: #007bff;
-  --color-border: #dee2e6;
-  --radius: 8px;
-  --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="dark"] {
-  --color-bg: #121212;
-  --color-surface: #1e1e1e;
-  --color-text: #e9ecef;
-  --color-text-muted: #adb5bd;
-  --color-primary: #4dabf7;
-  --color-border: #343a40;
-  --shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-```
-
-```css
-/* Card.module.css */
-.card {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 16px;
-}
-
-.title {
-  color: var(--color-primary);
-  margin: 0 0 8px;
-}
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; }
 ```
 
 ```jsx
-// App.tsx
-import { ThemeProvider, useTheme } from './ThemeProvider';
-import styles from './Card.module.css';
+// Button.module.css — scoped component styles
+import styles from './Button.module.css';
 
-function Card() {
-  return (
-    <div className={styles.card}>
-      <h2 className={styles.title}>Revenue</h2>
-      <p>Monthly recurring revenue is up 12%.</p>
-    </div>
-  );
-}
-
-function ThemeToggle() {
-  const { isDark, toggleTheme } = useTheme();
-  return (
-    <button onClick={toggleTheme}>
-      {isDark ? 'Switch to Light' : 'Switch to Dark'}
-    </button>
-  );
-}
-
-export default function App() {
-  return (
-    <ThemeProvider>
-      <ThemeToggle />
-      <Card />
-    </ThemeProvider>
-  );
+function Button({ variant = 'primary' }) {
+  return <button className={styles[variant]}>Click</button>;
 }
 ```
 
-**Expected Output:** A card with a title and text. Clicking the toggle switches between light and dark themes. The card's background, text, border, and shadow all change instantly without a page reload or component re-render.
+**❌ Bad Practices:**
 
-**Why This Output Occurs:** The `ThemeProvider` sets `data-theme="dark"` or `data-theme="light"` on `<html>`. The CSS variables in `[data-theme="dark"]` override those in `:root`. The card's styles reference `var(--color-surface)`, `var(--color-text)`, etc., so they automatically update when the theme attribute changes. React only re-renders the `ThemeToggle` button (because its state changed); the `Card` component does not re-render, yet its appearance changes.
+```jsx
+// ❌ Inline static styles
+<div style={{ padding: 16, backgroundColor: 'blue' }} />
+
+// ❌ Mixing multiple styling solutions
+import styles from './Button.module.css';
+import styled from 'styled-components';
+
+// ❌ Global styles for component-specific rules
+.button { padding: 16px; } // Applied everywhere!
+```
+
+**Expected Output:** The good practices produce predictable, scoped, and maintainable styling.
+
+**Why this output:** Global styles are minimal and foundational. Component styles are scoped with CSS Modules. Inline styles are avoided for static styling. A single styling approach is used consistently.
 
 ### Real-World Cases
 
-- **Light/dark mode:** The most common use case; persists across sessions with `localStorage`.
-- **Multi-brand theming:** Different brands (e.g., "Blue Business", "Green Eco", "Purple Creative") defined as separate variable sets.
-- **White-label apps:** Tenants can customise colours, fonts, and radii without code changes.
-- **Design system tokens:** CSS variables generated from design tokens (Figma, Style Dictionary).
-- **Scoped theming:** A dark sidebar inside a light page by scoping variables to the sidebar's container.
+- **All React applications:** Best practices apply universally.
+- **Design systems:** Consistency and scalability are critical.
+- **Large teams:** A single styling approach prevents conflicts.
 
 ### References
 
-- CoreUI – How to Implement Dark Mode in React: https://coreui.io/answers/how-to-implement-dark-mode-in-react/
-- Basedash – How We Built Light Mode Without Tailwind's dark: Class: https://old.basedash.com
-- Syncfusion – Themes using CSS Variables in React: https://ej2.syncfusion.com
-- Tencent Cloud – Dynamic Theme Switching in Next.js: https://cloud.tencent.cn/developer/article/2609520
-
----
-
-## Core Concept 6: Responsive Styling Foundations — Media Queries vs. Container Queries
-
-### Definitions
-
-**Core Definition:** Media queries respond to the viewport size (or user preferences like `prefers-color-scheme`), while container queries respond to the size of a specific ancestor container, enabling truly portable, context-aware components.
-
-**Technical Definition:** Media queries (`@media`) evaluate the browser viewport's dimensions and user preferences. Container queries (`@container`) evaluate the size of a specific ancestor element that has been declared as a query container via `container-type: inline-size` (or `size`). Container queries make components "self-contained and truly reusable" because the component adapts to its own container, not the viewport. Container query units (`cqi`, `cqb`, `cqw`, `cqh`) allow fluid typography and spacing relative to the container. Style queries (`@container style(--density: compact)`) query custom property values. Browser support for size queries is Baseline 2023+, while style queries are newer.
-
-**Beginner-Friendly Explanation:** Media queries ask: "How wide is the browser window?" Container queries ask: "How wide is the box I'm in?" This distinction matters for reusable components. A card in a sidebar should look different from a card in the main content area, even if the browser window is the same width. Media queries cannot tell the difference; container queries can. Use media queries for page-level layout (navigation, grid columns) and container queries for reusable components (cards, widgets, forms).
-
-### Purposes
-
-- **Media queries:** To make page-level layout decisions (hide navigation, change grid columns, adjust root font size).
-- **Media queries:** To respond to user preferences (`prefers-color-scheme`, `prefers-reduced-motion`, `hover`, `orientation`).
-- **Container queries:** To make reusable components adapt to their available space.
-- **Container queries:** To eliminate modifier class explosion (`.card--compact`, `.card--sidebar`) by letting the component own its breakpoints.
-- **Container query units:** To create fluid typography and spacing that scales with the component, not the window.
-- **Style queries:** To query custom property values (e.g., `--density: compact`) for component variants.
-
-### Syntax Rules and Structure
-
-**Media Query (Page-Level):**
-```css
-/* Page layout changes at viewport breakpoints */
-@media (min-width: 768px) {
-  .sidebar {
-    display: block;
-    width: 250px;
-  }
-  .main {
-    display: flex;
-    flex: 1;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #121212;
-  }
-}
-```
-
-**Component Breakdown:**
-- `@media (min-width: 768px)`: Viewport is at least 768px wide.
-- `@media (prefers-color-scheme: dark)`: User prefers a dark colour scheme.
-- Media queries are global; every component responds to the same viewport.
-
-**Container Query (Component-Level):**
-```css
-.card-wrapper {
-  container-type: inline-size;
-  container-name: card;
-}
-
-@container card (min-width: 400px) {
-  .card {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-  }
-  .card__image {
-    width: 150px;
-  }
-}
-
-@container card (max-width: 399px) {
-  .card {
-    display: flex;
-    flex-direction: column;
-  }
-  .card__image {
-    width: 100%;
-  }
-}
-```
-
-**Component Breakdown:**
-- `container-type: inline-size`: Declares the element as a query container for inline-size queries.
-- `container-name: card`: Optional name to disambiguate in nested containers.
-- `@container card (min-width: 400px)`: Applies when the container is at least 400px wide.
-- The component adapts to its own container, not the viewport.
-
-**Container Query Units:**
-```css
-.card__title {
-  font-size: clamp(1rem, 4cqi, 1.5rem);
-}
-```
-
-**Component Breakdown:**
-- `cqi`: 1% of the container's inline size.
-- `clamp(1rem, 4cqi, 1.5rem)`: Fluid font size that scales with the container, bounded by min and max.
-- The title's font size adapts to the card's width, not the viewport.
-
-**Style Queries:**
-```css
-.card-slot {
-  container-name: card;
-  --density: comfortable;
-}
-
-@container card style(--density: compact) {
-  .card {
-    padding: 0.5rem;
-  }
-}
-```
-
-**Component Breakdown:**
-- `style(--density: compact)`: Queries the container's custom property value.
-- Useful for density variants without modifier classes.
-
-**React Component with Container Queries (Tailwind):**
-```jsx
-function Card() {
-  return (
-    <div className="@container">
-      <div className="flex flex-col @md:flex-row gap-4">
-        <img className="w-full @md:w-40" src={img} alt="" />
-        <div>
-          <h3 className="text-lg @md:text-xl">{title}</h3>
-          <p>{description}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-**Component Breakdown:**
-- `@container`: Tailwind's container query root.
-- `@md:flex-row`: Applies `flex-row` when the container is at least `md` width.
-- The same component works in a sidebar and a main column without modifier classes.
-
-**Syntax Rules:**
-- Use **media queries** for page chrome, global typography, `prefers-*` features, print, and orientation.
-- Use **container queries** for reusable components (cards, widgets, forms) that can appear in multiple widths.
-- Declare `container-type: inline-size` on the wrapper element; forgetting it means queries never match.
-- Use `container-name` for nested containers to avoid ambiguity.
-- Use `cqi`/`cqw` for fluid typography and spacing relative to the container.
-- Use `clamp()` with `cqi` to create fluid scales with min/max bounds.
-- Use `@supports (container-type: inline-size)` for progressive enhancement.
-- Style queries are newer than size queries; treat them as progressive enhancement.
-
-**Constraints and Limitations:**
-- Container queries require a defined container (`container-type`); forgetting it means the query never matches.
-- Size containment (`container-type: size`) can affect how percentages and overflowing content behave; `inline-size` is usually safer.
-- Container queries are not a full replacement for media queries; dark mode, reduced motion, and print still belong in `@media`.
-- Nested containers need clear `container-name`s or queries may attach to the wrong ancestor.
-- Browser support for `@container` is Baseline 2023+; Firefox supports it, but older browsers do not.
-- Media queries remain better for page-level decisions and user preference features.
-
-### Annotated Code Example: Responsive Card with Container Queries
-
-```css
-/* Card.module.css */
-.wrapper {
-  container-type: inline-size;
-  container-name: card;
-}
-
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-/* Narrow container: vertical layout */
-@container card (max-width: 399px) {
-  .card {
-    display: flex;
-    flex-direction: column;
-  }
-  .image {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-  .title {
-    font-size: clamp(1rem, 4cqi, 1.25rem);
-  }
-}
-
-/* Wide container: horizontal layout */
-@container card (min-width: 400px) {
-  .card {
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-  }
-  .image {
-    width: 160px;
-    height: 160px;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-  .title {
-    font-size: clamp(1.25rem, 3cqi, 1.5rem);
-  }
-}
-```
-
-```jsx
-import styles from './Card.module.css';
-
-export function Card({ image, title, description }) {
-  return (
-    <div className={styles.wrapper}>
-      <div className={styles.card}>
-        <img className={styles.image} src={image} alt="" />
-        <div className={styles.content}>
-          <h3 className={styles.title}>{title}</h3>
-          <p>{description}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-**Expected Output:** The card renders vertically in a narrow container (sidebar) and horizontally in a wide container (main column). The title font size scales fluidly with the container width via `cqi`.
-
-**Why This Output Occurs:** The `.wrapper` declares `container-type: inline-size`, making it a query container. The `@container card (max-width: 399px)` and `@container card (min-width: 400px)` rules apply based on the container's width, not the viewport. The `cqi` unit in `clamp()` makes the title's font size relative to the container's inline size. The same component works in both contexts without modifier classes.
-
-### Real-World Cases
-
-- **Design system cards:** Cards that adapt to sidebars, modals, and main columns without variant classes.
-- **Dashboard widgets:** Widgets that reflow based on their grid cell width.
-- **E-commerce product cards:** Product cards that switch between horizontal and vertical layouts.
-- **CMS components:** Modular components that can be placed in different container widths.
-- **Netflix UI:** Uses container queries for dynamic layouts across devices.
-
-### References
-
-- Smashing Magazine – Container Queries: https://www.smashingmagazine.com/2026/09/
-- web.dev – Unlocking the Power of CSS Container Queries: https://web.dev
-- GitHub – CSS Container Queries Guide (LucaNerlich): https://github.com/LucaNerlich/lucanerlich.com/pull/53
-- SitePoint – CSS Container Queries + Subgrid: https://www.sitepoint.com
-- OrchestKit – Responsive Patterns: https://raw.githubusercontent.com/yonatangross/orchestkit/main/src/skills/responsive-patterns/SKILL.md
-
----
-
-## Comparison and Decision Guidance
-
-| Concern | Recommended Approach | When to Use | Key Risk |
-|---|---|---|---|
-| **Global CSS priority** | Cascade Layers (`@layer`) | Any app with third-party CSS or resets | Unlayered styles beat layered styles |
-| **Component style isolation** | CSS Modules | Component libraries, design systems | Does not isolate inherited properties |
-| **Selector isolation without tooling** | `@scope` | Embedding third-party HTML, email previews | Firefox support still maturing |
-| **Naming conventions** | BEM / SMACSS | Large teams, legacy codebases | Verbose; discipline required |
-| **Dynamic theming** | CSS Custom Properties + Context | Light/dark mode, multi-brand | SSR flash without server-side attribute |
-| **Component responsiveness** | Container Queries | Cards, widgets, reusable components | Requires `container-type` on wrapper |
-| **Page-level responsiveness** | Media Queries | Layout, navigation, `prefers-*` | Cannot respond to component context |
-| **Fluid typography** | `clamp()` + `cqi` | Component-scoped type scales | Over-reliance can harm readability |
-
-**Decision Guidance:**
-- **Start with cascade layers** to establish explicit priority order between resets, vendor styles, your design system, and utilities.
-- **Use CSS Modules** for component-level style scoping; they eliminate class name collisions without naming conventions.
-- **Use `@scope`** for selector isolation when you cannot use a build tool, or for embedding third-party HTML.
-- **Use BEM or SMACSS** alongside scoping mechanisms for naming clarity, but do not rely on them alone for isolation.
-- **Use CSS Custom Properties** for all theming; define semantic tokens under `:root` and `[data-theme="dark"]`.
-- **Use container queries** for reusable components that must adapt to their container; use media queries for page-level layout and user preferences.
-- **Combine `clamp()` with `cqi`** for fluid typography that scales with the component.
-- **Always declare `container-type: inline-size`** on wrappers where container queries are used.
-- **Test with `@supports`** for progressive enhancement of newer features.
+- RT Camp — Styling Best Practice for React-based projects — https://rtcamp.com/handbook/react-best-practices/styling/
+- Impertio Studio — React Implementation Styling — https://github.com/Impertio-Studio/React-Claude-Skill-Package
+- MDN — Organizing your CSS — https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Organizing
 
 ---
 
 ## References
 
-- MDN Web Docs – CSS Cascade Layers: https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Cascade_layers
-- MDN Web Docs – @scope: https://developer.mozilla.org/en-US/docs/Web/CSS/@scope
-- MDN Web Docs – CSS Custom Properties: https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties
-- MDN Web Docs – Container Queries: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment/Container_queries
-- CSS Modules – README: https://raw.githubusercontent.com/css-modules/css-modules/8d33532b29327386173b28051d289e9d25545e1f/README.md
-- CSS Modules – Composition: https://github.com/Terro216/css-modules/blob/master/docs/composition.md
-- SMACSS – Categorizing CSS Rules: https://smacss.com/book/categorizing
-- Smashing Magazine – CSS @scope: https://www.smashingmagazine.com/2026/02/css-scope-alternative-naming-conventions/
-- SmartTechDevs – Mastering CSS Cascade Layers in React: https://smarttechdevs.in/blog/nextjs-css-cascade-layers-style-isolation
-- Mantine – Styles Order: https://help.mantine.dev/q/styles-order
-- React Spectrum – v0.7.0 Release Notes: https://react-spectrum.adobe.com/releases/v0-7-0.md
-- CoreUI – How to Implement Dark Mode in React: https://coreui.io/answers/how-to-implement-dark-mode-in-react/
-- Frontend Masters – @scope and HTML Style Blocks: https://frontendmasters.com/blog/reminder-that-scope-and-html-style-blocks-are-a-potent-combo/
-- W3C CSSWG – CSS Cascade 6: https://drafts.csswg.org/css-cascade-6/#scoped-styles
-- GitHub – CSS Container Queries Guide (LucaNerlich): https://github.com/LucaNerlich/lucanerlich.com/pull/53
-- web.dev – Unlocking the Power of CSS Container Queries: https://web.dev
-- SitePoint – CSS Container Queries + Subgrid: https://www.sitepoint.com
-- OrchestKit – Responsive Patterns: https://raw.githubusercontent.com/yonatangross/orchestkit/main/src/skills/responsive-patterns/SKILL.md
-- Caisy – Styled Components vs CSS Modules: https://caisy.io
-- Syncfusion – Themes using CSS Variables in React: https://ej2.syncfusion.com
+- Next.js — CSS Styling — https://nextjs.org/learn/dashboard-app/css-styling
+- Vercel — NO_EXTERNAL_CSS_AT_IMPORTS — https://vercel.com/docs/conformance/rules/NO_EXTERNAL_CSS_AT_IMPORTS
+- TanStack — CSS Styling — https://tanstack.com/router/latest/docs/start/framework/react/guide/css-styling
+- MDN — Specificity — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Specificity
+- MDN — Introduction to the CSS cascade — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Introduction
+- MDN — CSS cascade and inheritance — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade
+- MDN — Inheritance — https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Inheritance
+- MDN — Organizing your CSS — https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Organizing
+- SMACSS — Categorizing CSS Rules — http://smacss.com/book/categorizing
+- Frontend Mentor — Understanding CSS naming conventions — https://www.frontendmentor.io/articles/understanding-css-naming-conventions-bem-oocss-smacss-and-suit-css-V6ZZUYs1xz
+- KeyCDN — OOCSS: The Future of Writing CSS — https://www.keycdn.com/blog/oocss
+- CSS-Tricks — Methods to Organize CSS — https://css-tricks.com/methods-organize-css/
+- RT Camp — Styling Best Practice for React-based projects — https://rtcamp.com/handbook/react-best-practices/styling/
+- Impertio Studio — React Implementation Styling — https://github.com/Impertio-Studio/React-Claude-Skill-Package
+- React on Rails — CSS and Styling with React Server Components — https://reactonrails.com
+- Get BEM — Official site — https://getbem.com/

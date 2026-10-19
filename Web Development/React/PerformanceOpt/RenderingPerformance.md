@@ -1,4 +1,4 @@
-# React Rendering Performance: A Comprehensive Programming Cheat Sheet
+# React Rendering Performance — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1009 +6,1472 @@
 
 ### Definitions
 
-**Core Definition:** React rendering performance is the study and optimisation of how React converts state, props, and context changes into DOM updates—minimising unnecessary re-renders, controlling re-render propagation, and leveraging the Fiber architecture and the React Compiler to keep the UI responsive.
+**Core Definition:** React rendering performance is the efficiency with which React executes component functions, reconciles the resulting element tree, and commits changes to the DOM — and the practice of reducing unnecessary work in that pipeline.
 
-**Technical Definition:** React's rendering performance is governed by the interplay between the **render phase** (where React calls components to produce a new virtual DOM tree) and the **commit phase** (where React applies the minimal set of DOM mutations). A re-render is triggered whenever a component's state, its parent's render, a consumed context value, or (for `React.memo`-wrapped components) its props change. The **Fiber architecture** (introduced in React 16) allows the render phase to be interruptible and prioritised, enabling concurrent features. **Reconciliation** (the diffing algorithm) determines which DOM nodes need updating, using element type and `key` to match old and new trees. **Batching** groups multiple state updates into a single render pass (automatic in React 18+). The **React Compiler** (formerly React Forget) automates memoisation by analysing component code at build time and inserting `useMemo`/`useCallback` equivalents, reducing the manual burden of referential equality management.
+**Technical Definition:** React's rendering model is built on comparing values to decide when components need to re-render. When a component renders, React executes the component function again, generates a new JSX output, compares it with the previous output (reconciliation), and updates only the changed DOM nodes. The critical distinction is that **re-render ≠ DOM update**: a re-render means the component function is re-executed, and every calculation inside it runs again. Rendering performance therefore concerns the cost of component execution, reconciliation, and commit — not just DOM mutations. React's default behaviour is to re-render a component and all its children whenever state changes, unless manual memoization or architectural patterns prevent it.
 
-**Beginner-Friendly Explanation:** Every time something changes in your app—a button click, a data fetch, a parent re-render—React has to figure out what part of the screen needs to update. If it re-renders too much, the app feels slow. Rendering performance is about making React do the smallest amount of work possible: only re-render what actually changed, avoid creating new objects and functions that trick React into thinking things changed, and let the React Compiler handle the tedious optimisation for you.
+**Beginner-Friendly Explanation:** React re-renders a component by running its function again. Even if the screen does not change, all the code inside that function runs — sorting, filtering, building JSX, and so on. If a component re-renders unnecessarily, that work is wasted. Rendering performance is about stopping that waste: only re-running the components whose output actually needs to change, and only doing the expensive calculations when their inputs really change.
 
 ### Key Characteristics
 
-- **Re-renders are Recursive by Default:** When a component re-renders, React re-renders all its descendants unless a memoisation boundary (`React.memo`) or a structural optimisation stops the propagation.
-- **Render ≠ Commit:** React may call a component's function (render phase) without touching the DOM (commit phase) if the output is identical.
-- **Referential Equality Drives Memoisation:** `React.memo`, `useMemo`, and `useCallback` all rely on `Object.is` comparison; new object/function references defeat them.
-- **Fiber Enables Interruptibility:** The Fiber architecture breaks rendering into units of work that can be paused, prioritised, and resumed.
-- **Keys Drive List Reconciliation:** Stable keys let React match elements across renders; unstable keys (indices, random values) cause remounting and lost state.
-- **Automatic Batching:** React 18 batches all state updates (including in promises, timeouts, and native event handlers) into a single render.
-- **React Compiler Automates Memoisation:** The compiler inserts memoisation automatically, making manual `useMemo`/`useCallback` increasingly unnecessary.
+- **Re-render is function execution:** Every re-render re-runs the component body, including all calculations and JSX construction.
+- **Blast radius:** A state change at a high level re-renders the component and all its children, even those that do not use the changed state.
+- **Reference equality matters:** React compares props and dependencies with `Object.is`; new object, array, or function references on every render defeat memoization.
+- **State placement is the primary lever:** Moving state closer to its consumers prevents render storms more effectively than sprinkling memoization everywhere.
+- **Memoization is surgical:** `React.memo`, `useMemo`, and `useCallback` are targeted tools, not blanket solutions.
 
 ### Prerequisites
 
-- Solid understanding of React function components, JSX, and the primary Hooks.
-- Working knowledge of the render/commit lifecycle and the component tree.
-- Familiarity with `useState`, `useEffect`, `useMemo`, and `useCallback`.
-- Basic understanding of `React.memo` and referential equality.
-- Awareness of React DevTools Profiler and the React Compiler.
+- React function components, state, props, and JSX.
+- Understanding of the render → reconcile → commit pipeline.
+- Familiarity with reference equality and `Object.is`.
+- Basic knowledge of list rendering and keys.
 
 ### Related Programming Areas
 
-- **Memoisation:** `React.memo`, `useMemo`, `useCallback`, and the React Compiler.
-- **State Architecture:** Where state lives and how updates propagate.
-- **Reconciliation:** Diffing, keys, and the Fiber tree.
-- **Concurrent Rendering:** Transitions, Suspense, and interruptible rendering.
-- **Profiling:** React DevTools Profiler, browser performance tools, and flame graphs.
-
-### Core Concepts / Features
-
-1. Re-render Triggers
-2. Component Boundaries
-3. Referential Equality
-4. Reconciliation and the Fiber Architecture
-5. Modern Compiler Optimisation (React Compiler)
+- **Reconciliation** — the algorithm that compares element trees.
+- **Memoization** — `React.memo`, `useMemo`, `useCallback`.
+- **Virtualization** — rendering only visible list items.
+- **State management** — colocation, lifting, and context.
 
 ---
 
-## Core Concept 1: Re-render Triggers
+## 1. Unnecessary Re-renders
 
 ### Definitions
 
-**Core Definition:** Re-render triggers are the events that cause React to call a component's function again and reconcile its output—state changes, parent re-renders, context changes, and (for memoised components) prop changes.
+**Core Definition:** An unnecessary re-render is a component execution that produces the same output as the previous render, wasting CPU time without any visible change.
 
-**Technical Definition:** React schedules a re-render of a component when one of four conditions occurs: (1) **State change** — a `setState` call (from `useState` or `useReducer`) updates the component's state; (2) **Parent re-render** — the parent component's function is called, which by default calls all its children recursively; (3) **Context change** — a context provider's `value` changes, causing all consumers to re-render; (4) **Props change** — for a component wrapped in `React.memo`, a shallow comparison of props (`Object.is` per prop) detects a difference. Notably, a component's own state change re-renders that component and all its descendants, but **does not** re-render its parent or siblings. A parent re-render **does** re-render all descendants unless `React.memo` or a structural boundary stops it.
+**Technical Definition:** An unnecessary re-render occurs when React re-executes a component function even though the component's output would be identical — because its props and state have not meaningfully changed. The most common causes are state lifted too high (causing the entire subtree to re-render), unstable prop references (new objects or functions on every render), and context value changes that re-render all consumers. These re-renders drive up CPU usage, increase garbage collection overhead, and degrade the user experience.
 
-**Beginner-Friendly Explanation:** A re-render is React calling your component function again to see if the output changed. It happens when state changes, when a parent re-renders, when context changes, or when memoised props change. The important thing is that re-renders flow *down* the tree—a parent re-rendering re-renders all its children, but a child re-rendering does not re-render its parent. This is why where you put your state matters so much.
+**Beginner-Friendly Explanation:** An unnecessary re-render is React doing work for nothing. The component runs again, but the screen looks exactly the same. A few of these are harmless; thousands of them make the app feel slow.
 
 ### Purposes
 
-- To understand the precise conditions that cause a component to re-render.
-- To diagnose unnecessary re-renders by tracing the trigger.
-- To choose where state lives so that updates propagate minimally.
-- To decide when `React.memo` is needed to block parent-driven re-renders.
-- To avoid the misconception that "React re-renders everything."
+- (Unnecessary re-renders are a problem to eliminate, not a feature.)
+- To understand where wasted rendering work comes from.
+- To prioritise architectural fixes over premature memoization.
 
 ### Syntax Rules and Structure
 
-**The Four Re-render Triggers:**
+**Common Sources of Unnecessary Re-renders:**
 
-| Trigger | Affects | Propagates Down? |
-|---|---|---|
-| **State change** (`setState`) | The component itself + descendants | Yes |
-| **Parent re-render** | All children (unless memoised) | Yes |
-| **Context change** | All consumers of that context | Yes |
-| **Props change** (memoised) | The memoised component | Yes |
+| Source | Mechanism |
+|--------|-----------|
+| State lifted too high | Every state change re-renders the entire subtree |
+| Unstable object props | New object reference on every render defeats `React.memo` |
+| Inline functions | New function reference on every render |
+| Context value churn | New context value object re-renders all consumers |
+| Redundant state | Storing derived values triggers extra renders |
+| Controlled inputs | Every keystroke re-renders the component and its children |
 
-**General Syntax (Parent-Triggered Re-render):**
+**Syntax Rules:**
+
+1. Re-rendering is not inherently bad; unnecessary re-rendering is the target.
+2. Measure with the React DevTools Profiler before optimising.
+3. Prefer architectural fixes (state colocation, component splitting) before memoization.
+
+### Annotated Code Examples
+
+```jsx
+// ❌ State lifted too high: HeavyComponent re-renders on every count change
+function Page() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <>
+      <button onClick={() => setCount(c => c + 1)}>{count}</button>
+      <HeavyComponent /> {/* Does not use count, but re-renders anyway */}
+    </>
+  );
+}
+```
+
+**Expected Output:** `HeavyComponent` re-executes on every button click, even though its output does not change.
+
+**Why this output:** React's default behaviour is to re-render all children when a parent re-renders. `HeavyComponent` is caught in the blast radius.
+
+### Real-World Cases
+
+- **Dashboards:** A counter in the header re-rendering the entire chart grid.
+- **Forms:** Every keystroke re-rendering a sibling data table.
+- **Lists:** The parent re-rendering all list items when only one item changes.
+
+### References
+
+- React Performance and Preventing Unnecessary Re-renders — https://aspnetzero.com/blog/react-performance-and-preventing-unnecessary-renders
+- Remediating Superfluous Re-Rendering in React Applications (ICSE 2026) — https://dl.acm.org/doi/10.1145/3744916.3773235
+- RT Camp — Performance Optimization for React-based projects — https://rtcamp.com/handbook/react-best-practices/performance-optimization/
+
+---
+
+## 2. Re-render Causes
+
+### Definitions
+
+**Core Definition:** Re-render causes are the specific events that trigger React to execute a component function again.
+
+**Technical Definition:** A component re-renders when: (1) its own state changes via a state setter; (2) the props passed to it change; (3) its parent component re-renders (by default, all children re-render); or (4) a context value it consumes changes. React does not perform deep analysis to determine whether a child's output would actually differ; it relies on a deterministic model where parent renders propagate to children.
+
+**Beginner-Friendly Explanation:** A component re-renders when its own data changes, when its parent re-renders, or when it receives new props. The parent re-render trigger is the one that most often causes unnecessary work.
+
+### Purposes
+
+- To understand the triggers so they can be controlled.
+- To identify which trigger is causing a performance problem.
+- To choose the right optimisation for the specific trigger.
+
+### Syntax Rules and Structure
+
+**Re-render Triggers:**
+
+| Trigger | Description |
+|---------|-------------|
+| State change | A setter from `useState` or `useReducer` is called. |
+| Prop change | The parent passes different prop values. |
+| Parent render | The parent re-renders, causing children to re-render by default. |
+| Context change | A consumed context value changes. |
+
+**Syntax Rules:**
+
+1. State changes are local to the component that owns the state.
+2. Parent renders propagate to all children unless blocked by `React.memo` or architectural patterns.
+3. Context changes propagate to all consumers of that context.
+
+### Annotated Code Examples
+
 ```jsx
 function Parent() {
   const [count, setCount] = useState(0);
-  return (
-    <div>
-      <button onClick={() => setCount(c => c + 1)}>Increment</button>
-      <Child />          {/* Re-renders when Parent re-renders */}
-      <MemoChild />      {/* Skipped if props are referentially equal */}
-    </div>
-  );
-}
-
-const Child = () => <p>Child</p>;
-
-const MemoChild = React.memo(() => <p>Memo Child</p>);
-```
-
-**Component Breakdown:**
-- `Parent` owns `count`; clicking the button triggers a state change.
-- `Child` re-renders because the parent re-rendered (no memoisation).
-- `MemoChild` is wrapped in `React.memo`; since it has no props, it never re-renders after the first render.
-
-**General Syntax (State Change Does Not Re-render Parent):**
-```jsx
-function Parent() {
-  const [parentCount, setParentCount] = useState(0);
-  console.log('Parent render');
 
   return (
     <div>
-      <button onClick={() => setParentCount(c => c + 1)}>Parent: {parentCount}</button>
-      <Child />
+      <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>
+      <Child /> {/* Re-renders because Parent re-renders */}
     </div>
   );
 }
 
 function Child() {
-  const [childCount, setChildCount] = useState(0);
-  console.log('Child render');
-
-  return (
-    <button onClick={() => setChildCount(c => c + 1)}>Child: {childCount}</button>
-  );
+  console.log('Child rendered');
+  return <p>Child</p>;
 }
 ```
 
-**Component Breakdown:**
-- Clicking "Child" logs "Child render" only; the parent does not re-render.
-- Clicking "Parent" logs "Parent render" and "Child render"; the child re-renders because the parent did.
+**Expected Output:** `"Child rendered"` logs on every `Parent` re-render.
+
+**Why this output:** The parent's state change triggers a parent re-render, which by default re-renders all children.
+
+### Real-World Cases
+
+- **Debugging:** Identifying which trigger causes a re-render storm.
+- **Architecture:** Placing state to avoid parent-render propagation.
+- **Context design:** Splitting context to avoid consumer-wide re-renders.
+
+### References
+
+- Reducing Re-renders in React Applications (Webkul) — https://webkul.com/blog/reducing-re-renders-in-react-applications/
+- React Performance and Preventing Unnecessary Re-renders — https://aspnetzero.com/blog/react-performance-and-preventing-unnecessary-renders
+- Open Storefront Framework Developer's Guide — https://docs.oracle.com/en/industries/retail/retail-digital-commerce/latest/dosfa/avoid-unnecessary-rerendering.htm
+
+---
+
+## 3. Re-render Optimization
+
+### Definitions
+
+**Core Definition:** Re-render optimization is the set of techniques used to prevent or reduce unnecessary component executions.
+
+**Technical Definition:** Re-render optimization combines **architectural techniques** (state colocation, component splitting, children as props) and **memoization techniques** (`React.memo`, `useMemo`, `useCallback`) to reduce the number of component functions executed during an update. The architectural techniques address the root cause (state placed too high, components too large); memoization techniques address the symptoms (unstable references, expensive recomputation). The React Compiler (React 19+) automates memoization at build time, reducing the need for manual `useMemo` and `useCallback`.
+
+**Beginner-Friendly Explanation:** Re-render optimization means stopping React from running components that do not need to run. You do this first by putting state in the right place and splitting components, and second by telling React when a component can safely skip re-rendering.
+
+### Purposes
+
+- To reduce wasted CPU work and improve responsiveness.
+- To prevent render storms from high-level state changes.
+- To stabilise prop references so memoization can work.
+- To keep large component trees fast as they grow.
+
+### Syntax Rules and Structure
+
+**Optimization Toolbox:**
+
+| Technique | Type | When to use |
+|-----------|------|-------------|
+| State colocation | Architectural | State is used by a small subtree |
+| Component splitting | Architectural | A large component re-renders often |
+| Children as props | Architectural | A parent's state changes frequently but children are static |
+| `React.memo` | Memoization | A component re-renders with the same props |
+| `useMemo` | Memoization | An expensive calculation repeats |
+| `useCallback` | Memoization | A function prop breaks a memoized child |
 
 **Syntax Rules:**
-- A component's own state change re-renders that component and its descendants—never its parent or siblings.
-- A parent re-render re-renders all descendants unless `React.memo` or a structural boundary stops it.
-- A context value change re-renders all consumers of that context, regardless of where they are in the tree.
-- `React.memo` performs a shallow prop comparison; if any prop is referentially different, the component re-renders.
-- Moving state down to a leaf component reduces the number of components that re-render when that state changes.
-- Lifting state up increases the number of components affected by a state change.
 
-**Constraints and Limitations:**
-- React does not skip a parent render just because the output is identical; the parent function is still called.
-- State updates are asynchronous; reading state immediately after `setState` returns the old value.
-- Context consumers re-render even if the specific part of the value they use has not changed (unless selectors are used).
-- `React.memo` does not prevent the component from rendering the first time.
+1. Measure first; optimise only proven bottlenecks.
+2. Prefer architectural fixes over memoization.
+3. Use memoization only when there is a concrete re-render problem.
 
 ### Annotated Code Examples
 
-**Example 1: Tracing Re-render Triggers**
-
 ```jsx
-import { useState, memo } from 'react';
-
-const ChildA = memo(function ChildA({ label }) {
-  console.log('ChildA render');
-  return <p>{label}</p>;
-});
-
-function ChildB({ label }) {
-  console.log('ChildB render');
-  return <p>{label}</p>;
+// ✅ State colocated: HeavyComponent is outside the state-owning component
+function App() {
+  return (
+    <>
+      <Counter /> {/* State lives here */}
+      <HeavyComponent /> {/* Never re-renders from counter changes */}
+    </>
+  );
 }
 
-export default function Parent() {
+function Counter() {
   const [count, setCount] = useState(0);
-  console.log('Parent render');
+  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
+}
+```
+
+**Expected Output:** Clicking the counter does not re-render `HeavyComponent`.
+
+**Why this output:** State is colocated with its consumer (`Counter`). `HeavyComponent` is a sibling, not a child, so it is outside the re-render blast radius.
+
+### Real-World Cases
+
+- **Large dashboards:** Colocating filter state to avoid re-rendering charts.
+- **Forms:** Splitting form sections so keystrokes only re-render the active field.
+- **Lists:** Memoizing list items so only the changed item re-renders.
+
+### References
+
+- RT Camp — Performance Optimization for React-based projects — https://rtcamp.com/handbook/react-best-practices/performance-optimization/
+- React Performance and Preventing Unnecessary Re-renders — https://aspnetzero.com/blog/react-performance-and-preventing-unnecessary-renders
+- React Compiler Introduction — https://zh-hans.react.dev/learn/react-compiler/introduction
+
+---
+
+## 4. `React.memo`
+
+### Definitions
+
+**Core Definition:** `React.memo` is a higher-order component that prevents a function component from re-rendering when its props have not changed.
+
+**Technical Definition:** `React.memo(Component)` returns a memoized version of the component. React renders the component only if its props have changed, performing a shallow comparison of props by default. If the props are shallowly equal to the previous render, React skips rendering and reuses the previous output. `React.memo` is effective only when the component renders the same output for the same props and when prop references are stable.
+
+**Beginner-Friendly Explanation:** `React.memo` tells React: “Only re-render this component if its props actually changed.” If the parent re-renders but the props are the same, React skips the child.
+
+### Purposes
+
+- To skip re-renders of pure components when props are unchanged.
+- To isolate expensive components from parent re-render waves.
+- To optimize frequently re-rendered list items and charts.
+
+### Syntax Rules and Structure
+
+**General Syntax:**
+
+```jsx
+const MemoizedComponent = memo(function Component(props) {
+  return <JSX />;
+});
+```
+
+**Syntax Rules:**
+
+1. `React.memo` performs a shallow comparison of props.
+2. It is effective only when prop references are stable.
+3. Do not wrap every component; unnecessary use adds overhead.
+4. `React.memo` does not prevent re-renders caused by context changes.
+
+**Constraints and Limitations:**
+
+- New object or function props on every render defeat the memoization.
+- The comparison is shallow; nested object changes are not detected.
+- Memoization is a performance hint, not a guarantee.
+
+### Annotated Code Examples
+
+```jsx
+import { memo, useState } from 'react';
+
+const ExpensiveList = memo(function ExpensiveList({ items }) {
+  console.log('ExpensiveList rendered');
+  return <ul>{items.map(i => <li key={i}>{i}</li>)}</ul>;
+});
+
+function App() {
+  const [count, setCount] = useState(0);
+  const items = ['apple', 'banana', 'cherry']; // Stable reference
 
   return (
     <div>
       <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>
-      <ChildA label="A" />
-      <ChildB label="B" />
+      <ExpensiveList items={items} />
     </div>
   );
 }
 ```
 
-**Expected Output (console):**
-```
-Parent render
-ChildA render
-ChildB render
---- click ---
-Parent render
-ChildB render
-```
+**Expected Output:** `"ExpensiveList rendered"` logs once; clicking the button does not re-render it.
 
-**Why This Output Occurs:** On the first render, all three components render. Clicking the button changes `count`, causing `Parent` to re-render. `ChildA` is wrapped in `React.memo` and receives the same string prop `"A"`, so its props are referentially equal (`"A" === "A"`) and it is skipped. `ChildB` is not memoised, so it re-renders with the parent.
-
-**Example 2: State Change Does Not Re-render Parent**
-
-```jsx
-function Counter() {
-  const [count, setCount] = useState(0);
-  console.log('Counter render');
-  return <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>;
-}
-
-export default function App() {
-  console.log('App render');
-  return <Counter />;
-}
-```
-
-**Expected Output (console):**
-```
-App render
-Counter render
---- click ---
-Counter render
-```
-
-**Why This Output Occurs:** Clicking the button changes `Counter`'s state, causing `Counter` to re-render. `App` does not re-render because its state and props did not change—only the child's state changed, and state updates do not propagate upward.
+**Why this output:** `items` is a stable reference (defined outside the render cycle in this example). `React.memo` compares the prop reference and skips the re-render.
 
 ### Real-World Cases
 
-- **Form inputs:** A controlled input's state change should not re-render the entire page.
-- **Modals:** Opening/closing a modal should not re-render the page behind it.
-- **Search boxes:** Typing in a search box re-renders the input and results, but ideally not the header or sidebar.
-- **Tabs:** Switching tabs re-renders the active tab's content and the tab list, not the entire layout.
-- **Data tables:** Sorting or filtering re-renders the table, not the surrounding dashboard.
+- **Large lists:** Memoizing list item components.
+- **Charts and visualisations:** Preventing re-renders when only unrelated state changes.
+- **Layout components:** Isolating static layout sections from dynamic parents.
 
 ### References
 
-- React Official Documentation – Render and Commit: https://react.dev/learn/render-and-commit
-- React Official Documentation – `memo`: https://react.dev/reference/react/memo
-- React Official Documentation – State as a Snapshot: https://react.dev/learn/state-as-a-snapshot
-- React Official Documentation – Queueing a Series of State Updates: https://react.dev/learn/queueing-a-series-of-state-updates
-- React Official Documentation – Passing Data Deeply with Context: https://react.dev/learn/passing-data-deeply-with-context
+- CoreUI — How to prevent unnecessary re-renders in React — https://coreui.io/answers/how-to-prevent-unnecessary-re-renders-in-react/
+- Open Storefront Framework Developer's Guide — https://docs.oracle.com/en/industries/retail/retail-digital-commerce/latest/dosfa/avoid-unnecessary-rerendering.htm
+- Webkul — Reducing Re-renders in React Applications — https://webkul.com/blog/reducing-re-renders-in-react-applications/
 
 ---
 
-## Core Concept 2: Component Boundaries
+## 5. `useMemo`
 
 ### Definitions
 
-**Core Definition:** Component boundaries are deliberate structural and memoisation points that isolate volatile state changes to small components, protecting heavy ancestor or sibling components from unnecessary re-renders.
+**Core Definition:** `useMemo` is a React Hook that caches the result of an expensive calculation between renders.
 
-**Technical Definition:** A component boundary is a point in the component tree where re-render propagation is intentionally stopped or isolated. This is achieved through: (1) **State colocation** — moving state down to the smallest component that needs it, so updates do not bubble up; (2) **`React.memo`** — wrapping components that should not re-render when their parent re-renders with the same props; (3) **`children` as props** — passing children from a parent that does not re-render, so the children's identity is preserved and the heavy component does not re-render; (4) **Component splitting** — extracting the volatile part of a component into a separate, small component so that only it re-renders. The key insight is that a parent re-rendering with the same `children` prop does not re-render those children if the parent's render output preserves the same element identity (which is not automatic in React, but is achieved by hoisting the element or using `children` as a prop).
+**Technical Definition:** `useMemo(calculateValue, dependencies)` returns a memoized value. React calls `calculateValue` on the initial render and re-runs it only when a dependency changes (compared with `Object.is`). `useMemo` is used for expensive computations — filtering, sorting, and building derived data structures. It should not be used for simple object literals or arrays, where the overhead outweighs the benefit.
 
-**Beginner-Friendly Explanation:** Imagine a large, expensive component at the top of your page—a chart, a map, a heavy table. If a small piece of state near it changes (like a toggle for a sidebar), you do not want the whole chart to re-render. Component boundaries are the walls you build to keep the volatile state isolated. You can either move the state down into a tiny component, wrap the heavy component in `React.memo`, or pass the heavy component as `children` so its element identity does not change.
+**Beginner-Friendly Explanation:** `useMemo` remembers the result of a slow calculation. If the inputs have not changed, React reuses the remembered result instead of recalculating.
 
 ### Purposes
 
-- To isolate volatile state changes to the smallest possible components.
-- To protect heavy components (charts, maps, tables) from re-rendering due to unrelated state changes.
-- To reduce the total number of component renders per state update.
-- To improve perceived performance by keeping the UI responsive.
-- To make the re-render graph explicit and predictable.
+- To avoid repeating expensive calculations on every render.
+- To stabilise object and array references passed to memoized children.
+- To keep derived data computations efficient.
 
 ### Syntax Rules and Structure
 
-**Pattern 1: State Colocation**
 ```jsx
-// ❌ Bad: state in the parent re-renders the heavy child
-function Page() {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div>
-      <button onClick={() => setIsOpen(o => !o)}>Toggle</button>
-      {isOpen && <p>Panel</p>}
-      <HeavyChart />  {/* Re-renders on every toggle */}
-    </div>
-  );
-}
+const cachedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+```
 
-// ✅ Good: state colocated in a small component
-function Page() {
-  return (
-    <div>
-      <TogglePanel />   {/* Only this re-renders on toggle */}
-      <HeavyChart />    {/* Never re-renders */}
-    </div>
-  );
-}
+**Syntax Rules:**
 
-function TogglePanel() {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div>
-      <button onClick={() => setIsOpen(o => !o)}>Toggle</button>
-      {isOpen && <p>Panel</p>}
-    </div>
+1. Use only for genuinely expensive computations.
+2. Include all reactive dependencies.
+3. Do not use for simple primitives or trivial object literals.
+4. `useMemo` caches a value, not a function (use `useCallback` for functions).
+
+**Constraints and Limitations:**
+
+- Every `useMemo` call has comparison overhead.
+- Overuse adds complexity without benefit.
+- React may discard the cache in certain situations.
+
+### Annotated Code Examples
+
+```jsx
+function ProductList({ products, filterText }) {
+  const filtered = useMemo(
+    () => products.filter(p =>
+      p.name.toLowerCase().includes(filterText.toLowerCase())
+    ),
+    [products, filterText]
   );
+
+  return <ul>{filtered.map(p => <li key={p.id}>{p.name}</li>)}</ul>;
 }
 ```
 
-**Component Breakdown:**
-- Bad version: `isOpen` lives in `Page`; toggling re-renders `Page` and all its children, including `HeavyChart`.
-- Good version: `isOpen` lives in `TogglePanel`; toggling re-renders only `TogglePanel`. `HeavyChart` is in a different branch and is never re-rendered.
+**Expected Output:** The filter runs only when `products` or `filterText` changes.
 
-**Pattern 2: `children` as Props**
+**Why this output:** `useMemo` caches the filtered array and recomputes it only when a dependency changes.
+
+### Real-World Cases
+
+- **Data grids:** Sorting and filtering large datasets.
+- **Search:** Filtering results by query.
+- **Derived data:** Computing aggregates or transformed structures.
+
+### References
+
+- CoreUI — How to prevent unnecessary re-renders in React — https://coreui.io/answers/how-to-prevent-unnecessary-re-renders-in-react/
+- RT Camp — Performance Optimization — https://rtcamp.com/handbook/react-best-practices/performance-optimization/
+- Steve Kinney — Identity Stability Props — https://stevekinney.com/courses/react-performance/identity-stability-props
+
+---
+
+## 6. `useCallback`
+
+### Definitions
+
+**Core Definition:** `useCallback` is a React Hook that caches a function reference between renders.
+
+**Technical Definition:** `useCallback(fn, dependencies)` returns the same function reference between renders as long as its dependencies have not changed. It is used when passing functions to memoized children, because a new function reference on every render would break `React.memo`'s shallow comparison. `useCallback` should only be used when a function is passed to a memoized child or used as a dependency in another Hook.
+
+**Beginner-Friendly Explanation:** `useCallback` keeps the same function around between renders. This matters when a memoized child receives the function as a prop — if the function reference changes, the child re-renders anyway.
+
+### Purposes
+
+- To stabilise function references passed to memoized children.
+- To prevent memoized components from re-rendering unnecessarily.
+- To stabilise dependencies in `useEffect` and other Hooks.
+
+### Syntax Rules and Structure
+
 ```jsx
-// ❌ Bad: ScrollTracker re-renders HeavyChart on every scroll
-function ScrollTracker() {
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+const handleClick = useCallback(() => {
+  doSomething(id);
+}, [id]);
+```
+
+**Syntax Rules:**
+
+1. Use only when passing functions to memoized children.
+2. Include all reactive dependencies.
+3. Avoid “defensive wrapping” of every function.
+4. Use functional state updates to keep dependencies minimal.
+
+**Constraints and Limitations:**
+
+- Inline arrow functions in JSX still create new references and break memoization.
+- Overuse adds overhead without benefit.
+
+### Annotated Code Examples
+
+```jsx
+function Parent() {
+  const [count, setCount] = useState(0);
+
+  // ✅ Stable function reference
+  const handleClick = useCallback(() => {
+    console.log('clicked');
   }, []);
 
   return (
-    <div>
-      <p>Scroll: {scrollY}</p>
-      <HeavyChart />
-    </div>
+    <>
+      <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>
+      <MemoizedChild onClick={handleClick} />
+    </>
   );
 }
 
-// ✅ Good: children preserve element identity
-function ScrollTracker({ children }) {
-  const [scrollY, setScrollY] = useState(0);
-  useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+const MemoizedChild = memo(function MemoizedChild({ onClick }) {
+  return <button onClick={onClick}>Click me</button>;
+});
+```
 
+**Expected Output:** Clicking the count button does not re-render `MemoizedChild`.
+
+**Why this output:** `useCallback` keeps `handleClick` stable, so `React.memo` sees an unchanged `onClick` prop and skips the child re-render.
+
+### Real-World Cases
+
+- **Design system components:** Passing stable callbacks to memoized primitives.
+- **Lists:** Stable handlers for each list item.
+- **Effects:** Stable callbacks used as effect dependencies.
+
+### References
+
+- CoreUI — How to prevent unnecessary re-renders — https://coreui.io/answers/how-to-prevent-unnecessary-re-renders-in-react/
+- RT Camp — Performance Optimization — https://rtcamp.com/handbook/react-best-practices/performance-optimization/
+- React Compiler Introduction — https://zh-hans.react.dev/learn/react-compiler/introduction
+
+---
+
+## 7. Component Composition
+
+### Definitions
+
+**Core Definition:** Component composition is the practice of building complex components by nesting smaller components, and it is a primary architectural tool for controlling re-render scope.
+
+**Technical Definition:** Composition allows you to place state in a component that is a **sibling** or **parent** of the expensive components, rather than an ancestor, so that state changes do not propagate through the expensive subtree. It also enables the **children as props** pattern, where expensive JSX is created outside the state-owning component and passed in as `children`, preserving its identity across renders.
+
+**Beginner-Friendly Explanation:** Composition means arranging components so that state lives in a small component, and the expensive components are outside its re-render blast radius. You build the UI by putting small pieces together, not by making one giant component.
+
+### Purposes
+
+- To isolate state changes to the smallest possible subtree.
+- To prevent re-render waves from reaching expensive components.
+- To make components easier to test and reason about.
+
+### Syntax Rules and Structure
+
+**Composition Patterns for Performance:**
+
+| Pattern | Mechanism |
+|---------|-----------|
+| Sibling state | State component and expensive component are siblings under a common parent |
+| Children as props | Expensive JSX is created outside the state-owning component and passed as `children` |
+| Extracted children | Complex child components are extracted into separate components |
+
+**Syntax Rules:**
+
+1. Place state in the component that consumes it, not at the top of the tree.
+2. Pass expensive JSX as `children` so it is not re-created when the parent's state changes.
+3. Extract child components to create new reconciliation boundaries.
+
+### Annotated Code Examples
+
+```jsx
+// ✅ Children as props: expensive children keep their identity
+function Counter({ children }) {
+  const [count, setCount] = useState(0);
   return (
     <div>
-      <p>Scroll: {scrollY}</p>
+      <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>
       {children}
     </div>
   );
 }
 
-function Page() {
+function App() {
   return (
-    <ScrollTracker>
-      <HeavyChart />   {/* Element identity preserved; no re-render */}
-    </ScrollTracker>
+    <Counter>
+      <ExpensiveComponent /> {/* Created by App, not Counter */}
+    </Counter>
   );
 }
 ```
 
-**Component Breakdown:**
-- Bad version: `HeavyChart` is rendered inside `ScrollTracker`, so it re-renders on every scroll.
-- Good version: `HeavyChart` is passed as `children` from `Page`. `Page` does not re-render on scroll, so the `children` element is the same reference, and React skips re-rendering it.
+**Expected Output:** `ExpensiveComponent` does not re-render when the counter increments.
 
-**Pattern 3: `React.memo` Boundary**
-```jsx
-const HeavyChart = React.memo(function HeavyChart({ data }) {
-  return <div>{/* expensive chart */}</div>;
-});
+**Why this output:** The `children` prop is created in `App`'s render. When `Counter` re-renders due to its own state change, the `children` reference remains the same, so React skips reconciling that subtree.
 
-function Dashboard() {
-  const [isOpen, setIsOpen] = useState(false);
-  const data = useMemo(() => computeData(), []);
+### Real-World Cases
 
-  return (
-    <div>
-      <button onClick={() => setIsOpen(o => !o)}>Toggle</button>
-      <HeavyChart data={data} />   {/* Skipped when isOpen changes */}
-    </div>
-  );
-}
-```
+- **Layout components:** Passing static sidebars and headers as children to a dynamic layout.
+- **Modals:** Passing modal content as children to a modal controller.
+- **Forms:** Passing expensive preview components as children to a form state provider.
 
-**Component Breakdown:**
-- `HeavyChart` is memoised; it re-renders only when `data` changes.
-- `data` is memoised with `useMemo`, so its reference is stable across toggles.
-- Toggling `isOpen` re-renders `Dashboard`, but `HeavyChart` is skipped because `data` is referentially equal.
+### References
+
+- Children Pattern to Prevent Parent Re-Renders — https://github.com/pproenca/dot-skills
+- State Colocation with Consumers — https://github.com/pproenca/dot-skills
+- Steve Kinney — Colocation of State — https://stevekinney.com/courses/react-performance/colocation-of-state
+
+---
+
+## 8. Component Splitting
+
+### Definitions
+
+**Core Definition:** Component splitting is the practice of breaking a large component into smaller components to create distinct reconciliation boundaries.
+
+**Technical Definition:** When a component is large, any state change within it re-renders the entire component, including all JSX and child components. Splitting the component into smaller components isolates state to the component that owns it, so a state change in one part does not re-render the others. This is described as “physically blocking the spread of the re-render wave by breaking components down into logical” units.
+
+**Beginner-Friendly Explanation:** If one big component holds all the state and renders everything, changing anything re-renders everything. Splitting it into smaller components means only the relevant part re-renders.
+
+### Purposes
+
+- To limit the re-render blast radius of a state change.
+- To isolate expensive subtrees from frequently changing state.
+- To improve maintainability and testability.
+
+### Syntax Rules and Structure
+
+**Splitting Strategy:**
+
+| Before | After |
+|--------|-------|
+| One component with state and expensive children | State-owning component + memoized/expensive sibling components |
+| All state at the root | State colocated in the component that uses it |
+| Large JSX block with inline handlers | Extracted child components with stable props |
 
 **Syntax Rules:**
-- Move state down to the smallest component that needs it (state colocation).
-- Pass heavy components as `children` when a parent must re-render but the heavy component should not.
-- Wrap heavy components in `React.memo` and stabilise their props.
-- Memoise props (objects, arrays, functions) with `useMemo`/`useCallback` before passing them to memoised children.
-- Split components so that volatile state lives in small, focused components.
-- Avoid passing inline object/array/function literals to memoised children.
 
-**Constraints and Limitations:**
-- `React.memo` only skips re-renders if all props are shallowly equal; unstable props defeat it.
-- Passing `children` as a prop preserves element identity only if the parent that renders `children` does not re-render.
-- Over-splitting components can make the tree harder to understand and increase the number of components.
-- `React.memo` adds a comparison cost per render; for trivial components, it can be a net loss.
-- Context providers that change often can still re-render all consumers, regardless of boundaries.
+1. Identify which parts of the UI are expensive and which state changes frequently.
+2. Move state down to the component that actually uses it.
+3. Extract the expensive parts into separate components so they are outside the state-owning component.
 
-### Annotated Code Example: Protecting a Heavy Component
+### Annotated Code Examples
 
 ```jsx
-import { useState, memo, useMemo } from 'react';
-
-const HeavyTable = memo(function HeavyTable({ rows }) {
-  console.log('HeavyTable render');
-  return (
-    <table>
-      <tbody>
-        {rows.map(r => <tr key={r.id}><td>{r.name}</td></tr>)}
-      </tbody>
-    </table>
-  );
-});
-
-export default function Dashboard() {
+// ❌ One large component: everything re-renders on every state change
+function Dashboard() {
   const [filter, setFilter] = useState('');
-  const rows = useMemo(
-    () => Array.from({ length: 1000 }, (_, i) => ({ id: i, name: `Row ${i}` })),
-    []
-  );
-
-  console.log('Dashboard render');
-
   return (
     <div>
       <input value={filter} onChange={e => setFilter(e.target.value)} />
-      <HeavyTable rows={rows} />
+      <ExpensiveChart />
+      <ExpensiveTable />
     </div>
   );
 }
-```
 
-**Expected Output (console):**
-```
-Dashboard render
-HeavyTable render
---- typing ---
-Dashboard render
-Dashboard render
-Dashboard render
-```
-
-**Why This Output Occurs:** `rows` is memoised with `useMemo` and has a stable reference. `HeavyTable` is wrapped in `React.memo`, so its shallow prop comparison finds `rows` unchanged and skips its render. Only `Dashboard` re-renders on each keystroke.
-
-### Real-World Cases
-
-- **Dashboards:** A filter input re-renders the filter component, not the heavy data grid.
-- **Maps:** A sidebar toggle re-renders the sidebar, not the map.
-- **Editors:** Typing in a rich text editor re-renders the editor, not the preview pane (or vice versa).
-- **Layouts:** A theme toggle re-renders a theme-aware button, not the entire page.
-- **Modals:** Opening a modal re-renders the modal, not the background page.
-
-### References
-
-- React Official Documentation – `memo`: https://react.dev/reference/react/memo
-- React Official Documentation – Passing JSX as Children: https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children
-- React Official Documentation – Preserving and Resetting State: https://react.dev/learn/preserving-and-resetting-state
-- React Official Documentation – Choosing the State Structure: https://react.dev/learn/choosing-the-state-structure
-- Kent C. Dodds – One React Mistake That's Keeping Your App Slow: https://kentcdodds.com/blog/optimize-react-re-renders
-
----
-
-## Core Concept 3: Referential Equality
-
-### Definitions
-
-**Core Definition:** Referential equality is the comparison of two values by their memory reference (`Object.is`), which determines whether React considers a prop, state value, or dependency to have changed; new object/array/function references across renders defeat memoisation.
-
-**Technical Definition:** JavaScript objects, arrays, and functions are compared by reference, not by content. `{ a: 1 } === { a: 1 }` is `false` because they are different objects in memory. React uses `Object.is` to compare previous and next values in `React.memo`, `useMemo`, `useCallback`, and dependency arrays. This means that creating a new object, array, or function during render—even if its content is identical—causes React to treat it as a change, triggering re-renders or recomputations. Referential equality is the root cause of most "unnecessary re-render" bugs: a parent passes `style={{ color: 'red' }}` to a memoised child, and the child re-renders every time because the style object is new every render.
-
-**Beginner-Friendly Explanation:** Imagine you have two identical-looking boxes. Even though the contents are the same, they are different boxes. React compares boxes by identity, not by what is inside. If you create a new box every time, React thinks something changed—even if it did not. The fix is to either reuse the same box (`useMemo`, `useCallback`) or compare by content (custom `React.memo` comparator, though this is discouraged).
-
-### Purposes
-
-- To understand why memoised components still re-render.
-- To identify which props, state values, or dependencies are defeating memoisation.
-- To apply `useMemo` and `useCallback` to stabilise references.
-- To avoid creating new objects, arrays, and functions during render when they are passed to memoised children or used as dependencies.
-- To reason about `React.memo`'s shallow comparison.
-
-### Syntax Rules and Structure
-
-**Referential Equality Examples:**
-```javascript
-// Primitives: value equality
-"a" === "a";                    // true
-1 === 1;                        // true
-true === true;                  // true
-
-// Objects: referential equality
-{ a: 1 } === { a: 1 };          // false
-const obj = { a: 1 };
-obj === obj;                    // true
-
-// Arrays: referential equality
-[1, 2] === [1, 2];              // false
-
-// Functions: referential equality
-(() => {}) === (() => {});      // false
-```
-
-**Common Referential Equality Bugs:**
-```jsx
-// ❌ New style object every render
-<MemoChild style={{ color: 'red' }} />
-
-// ✅ Stable style object
-const style = useMemo(() => ({ color: 'red' }), []);
-<MemoChild style={style} />
-
-// ❌ New callback every render
-<MemoChild onClick={() => doSomething(id)} />
-
-// ✅ Stable callback
-const handleClick = useCallback(() => doSomething(id), [id]);
-<MemoChild onClick={handleClick} />
-
-// ❌ New array every render
-<MemoList items={items.filter(i => i.active)} />
-
-// ✅ Memoised array
-const activeItems = useMemo(() => items.filter(i => i.active), [items]);
-<MemoList items={activeItems} />
-```
-
-**Component Breakdown:**
-- Each "bad" example creates a new reference on every render, defeating `React.memo`.
-- Each "good" example uses `useMemo`/`useCallback` to stabilise the reference.
-- The dependency array controls when the memoised value is recreated.
-
-**Custom `React.memo` Comparator (Discouraged):**
-```jsx
-const MemoChild = React.memo(
-  function Child({ config }) { /* ... */ },
-  (prevProps, nextProps) => {
-    // Return true if props are equal (skip re-render)
-    return prevProps.config.theme === nextProps.config.theme;
-  }
-);
-```
-
-**Component Breakdown:**
-- The second argument is a custom comparator.
-- Returning `true` skips the re-render.
-- This is discouraged because it is easy to get wrong and can hide bugs.
-
-**Syntax Rules:**
-- Memoise objects, arrays, and functions passed to memoised children with `useMemo`/`useCallback`.
-- Memoise values used as dependencies of `useEffect`, `useMemo`, and `useCallback`.
-- Use `useCallback` for event handlers passed to memoised children.
-- Use `useMemo` for computed values (filtered lists, config objects, style objects) passed to memoised children.
-- Move constant objects and functions outside the component when they do not depend on props/state.
-- Avoid custom `React.memo` comparators; prefer stabilising references instead.
-
-**Constraints and Limitations:**
-- `useMemo` and `useCallback` are performance optimisations, not semantic guarantees; React may discard memoised values.
-- Memoising values that are not passed to memoised children or used as dependencies is wasted work.
-- `useMemo` with an unstable dependency is useless; the dependency must also be stable.
-- Deeply nested objects require deep memoisation or a state management library.
-- The React Compiler automates much of this, reducing the need for manual memoisation.
-
-### Annotated Code Example: Fixing a Referential Equality Bug
-
-```jsx
-import { useState, memo, useMemo, useCallback } from 'react';
-
-const MemoList = memo(function MemoList({ items, onSelect }) {
-  console.log('MemoList render');
-  return (
-    <ul>
-      {items.map(item => (
-        <li key={item.id}>
-          <button onClick={() => onSelect(item)}>{item.name}</button>
-        </li>
-      ))}
-    </ul>
-  );
-});
-
-export default function App() {
-  const [query, setQuery] = useState('');
-  const [items] = useState([
-    { id: 1, name: 'Apple' },
-    { id: 2, name: 'Banana' },
-    { id: 3, name: 'Cherry' },
-  ]);
-
-  // ✅ Memoised filtered list
-  const filtered = useMemo(
-    () => items.filter(i => i.name.toLowerCase().includes(query.toLowerCase())),
-    [items, query]
-  );
-
-  // ✅ Stable callback
-  const handleSelect = useCallback((item) => {
-    console.log('Selected', item.name);
-  }, []);
-
-  console.log('App render');
-
+// ✅ Split: filter state only re-renders the input
+function Dashboard() {
   return (
     <div>
-      <input value={query} onChange={e => setQuery(e.target.value)} />
-      <MemoList items={filtered} onSelect={handleSelect} />
+      <FilterInput /> {/* State lives here */}
+      <ExpensiveChart />
+      <ExpensiveTable />
     </div>
   );
 }
 ```
 
-**Expected Output (console):**
-```
-App render
-MemoList render
---- typing "ap" ---
-App render
-MemoList render   (because `filtered` changed)
---- typing "app" ---
-App render
-App render
-App render
---- deleting "p" ---
-App render
-MemoList render   (because `filtered` changed)
-```
+**Expected Output:** In the split version, typing in the filter does not re-render the chart or table.
 
-**Why This Output Occurs:** `filtered` changes only when the filtered result actually changes (e.g., when "ap" becomes "app", the filter still matches Apple, so `filtered` is a new array—wait, `useMemo` recreates it when `query` changes, so `filtered` is new). The key insight: `useMemo` recreates `filtered` whenever `query` changes, so `MemoList` re-renders whenever the query changes. To truly skip renders, you would need to memoise based on the *content* of the filtered list, which is not what `useMemo` does. However, `handleSelect` is stable, so it does not contribute to re-renders. The main benefit is that `MemoList` re-renders only when `filtered` changes, not on every unrelated state change.
+**Why this output:** The filter state is isolated in `FilterInput`. `ExpensiveChart` and `ExpensiveTable` are siblings, not children, so they are outside the re-render blast radius.
 
 ### Real-World Cases
 
-- **Lists with row actions:** Stable delete/edit callbacks for memoised rows.
-- **Config objects:** Memoised chart/map configuration to prevent re-renders.
-- **Filtered data:** Memoised filtered/sorted arrays passed to memoised tables.
-- **Event handlers:** Stable handlers passed to deeply nested components.
-- **Style objects:** Memoised inline styles for memoised components.
+- **Dashboard widgets:** Each widget manages its own state.
+- **Forms:** Each section manages its own fields.
+- **Data tables:** Filters and pagination split from the table body.
 
 ### References
 
-- React Official Documentation – `useMemo`: https://react.dev/reference/react/useMemo
-- React Official Documentation – `useCallback`: https://react.dev/reference/react/useCallback
-- React Official Documentation – `memo`: https://react.dev/reference/react/memo
-- MDN Web Docs – `Object.is()`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
-- Kent C. Dodds – When to useMemo and useCallback: https://kentcdodds.com/blog/usememo-and-usecallback
+- React Performance and Preventing Unnecessary Re-renders — https://aspnetzero.com/blog/react-performance-and-preventing-unnecessary-renders
+- RT Camp — Performance Optimization — https://rtcamp.com/handbook/react-best-practices/performance-optimization/
 
 ---
 
-## Core Concept 4: Reconciliation and the Fiber Architecture
+## 9. State Colocation
 
 ### Definitions
 
-**Core Definition:** Reconciliation is React's algorithm for comparing the previous virtual DOM tree with the new one and determining the minimal set of DOM mutations; the Fiber architecture is React's internal representation of the component tree that makes this process interruptible, prioritised, and resumable.
+**Core Definition:** State colocation is the practice of keeping each piece of state as close as possible to the components that actually use it.
 
-**Technical Definition:** The **Fiber** architecture (React 16+) represents each component instance as a "fiber node" containing its type, props, state, and pointers to its parent, child, and sibling. The fiber tree is a linked list that React traverses during the render phase, producing a new "work-in-progress" tree. **Reconciliation** (also called "diffing") compares the old and new trees: if the element type is different, React unmounts the old subtree and mounts a new one; if the type is the same, React updates the existing DOM node and recurses into children. **Keys** are used to match children in lists: a stable key lets React move, reuse, or remove elements without remounting. **Batching** groups multiple state updates into a single render pass (automatic in React 18+). The Fiber architecture's key advantage is **interruptibility**: the render phase can be paused, prioritised (transitions, Suspense), and resumed, enabling concurrent rendering.
+**Technical Definition:** State lifted too high forces intermediate components to forward props they do not use, and every parent in the chain re-renders when the state changes, even though only the leaf component reads it. Moving state to the component that consumes it eliminates the forwarding chain and confines re-renders. The rule is: keep state as low as it can live, and lift it only when another component genuinely needs to read or change it.
 
-**Beginner-Friendly Explanation:** Imagine React as a librarian reorganising a bookshelf. Reconciliation is the librarian comparing the old shelf to the new one and only moving the books that changed. Keys are the labels on the books—without them, the librarian has to guess which book is which and might rebuild the whole shelf. The Fiber architecture is the librarian's ability to pause, answer a phone call, and resume exactly where they left off. This is what makes React's concurrent features possible.
+**Beginner-Friendly Explanation:** Put state where it is used. If only a small part of the UI needs a piece of state, that state should live in that small part, not at the top of the app.
 
 ### Purposes
 
-- To understand how React decides which DOM nodes to update.
-- To use keys correctly so React can match elements across renders.
-- To understand why unstable keys cause remounting and lost state.
-- To understand how Fiber enables interruptible, prioritised rendering.
-- To reason about batching and the number of render passes.
+- To eliminate prop drilling.
+- To confine re-renders to the components that actually depend on the state.
+- To simplify data flow and improve maintainability.
 
 ### Syntax Rules and Structure
 
-**Diffing Algorithm (Simplified):**
-```
-1. If the element type is different (e.g., <div> → <span>):
-   - Unmount the old subtree.
-   - Mount a new subtree.
-2. If the element type is the same:
-   - Update the existing DOM node (props, attributes).
-   - Recurse into children.
-3. For lists of children:
-   - Use `key` to match old and new elements.
-   - Without keys, match by index (fragile).
-```
+**Colocation Decision:**
 
-**Keys: Stable vs. Unstable:**
+| State usage | Placement |
+|-------------|-----------|
+| Only one component uses it | Inside that component |
+| A small subtree uses it | In the subtree's root |
+| Multiple distant components use it | Lift to their nearest common ancestor or use Context |
+
+**Syntax Rules:**
+
+1. Start with state in the component that uses it.
+2. Lift state only when a sibling or cousin also needs it.
+3. Use Context only when prop drilling becomes unwieldy, not as a default.
+
+### Annotated Code Examples
+
 ```jsx
-// ❌ Bad: index as key — remounts on reorder/insert/delete
-{items.map((item, index) => <Row key={index} item={item} />)}
-
-// ❌ Bad: random key — remounts every render
-{items.map(item => <Row key={Math.random()} item={item} />)}
-
-// ✅ Good: stable, unique key from data
-{items.map(item => <Row key={item.id} item={item} />)}
-```
-
-**Component Breakdown:**
-- Index keys: when items are reordered, React matches by position, not identity, causing state loss and unnecessary remounts.
-- Random keys: every render produces new keys, so React remounts every item.
-- Stable IDs: React matches the same item across renders, preserving state and DOM nodes.
-
-**Demonstrating Key Problems:**
-```jsx
-function List({ items }) {
+// ❌ State too high: every keystroke re-renders the whole page
+function ProductPage() {
+  const [searchQuery, setSearchQuery] = useState('');
   return (
-    <ul>
-      {items.map((item, index) => (
-        <li key={index}>
-          <input placeholder={item.name} />
-        </li>
-      ))}
-    </ul>
+    <div>
+      <Header />
+      <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
+      <SearchResults query={searchQuery} />
+      <Footer />
+    </div>
+  );
+}
+
+// ✅ State colocated: only the search subtree re-renders
+function ProductPage() {
+  return (
+    <div>
+      <Header />
+      <ProductSearch /> {/* State lives here */}
+      <Footer />
+    </div>
+  );
+}
+
+function ProductSearch() {
+  const [searchQuery, setSearchQuery] = useState('');
+  return (
+    <>
+      <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
+      <SearchResults query={searchQuery} />
+    </>
   );
 }
 ```
 
-**Component Breakdown:**
-- If the user types into an input and then the list is reordered, index keys cause the typed value to stay with the *position*, not the *item*—a classic bug.
-- Using `item.id` as the key preserves the input's state with the item.
+**Expected Output:** In the colocated version, typing in the search bar does not re-render `Header` or `Footer`.
 
-**Automatic Batching (React 18+):**
+**Why this output:** The `searchQuery` state is confined to `ProductSearch`. `Header` and `Footer` are outside its subtree, so they are not re-rendered.
+
+### Real-World Cases
+
+- **Search bars:** Keeping query state inside the search component.
+- **Modals:** Keeping open/closed state inside the modal trigger.
+- **Tabs:** Keeping active tab state inside the tab group.
+
+### References
+
+- Steve Kinney — Colocation of State — https://stevekinney.com/courses/react-performance/colocation-of-state
+- State Colocation with Consumers — https://github.com/pproenca/dot-skills
+- React Performance and Preventing Unnecessary Re-renders — https://aspnetzero.com/blog/react-performance-and-preventing-unnecessary-renders
+
+---
+
+## 10. Children as Props
+
+### Definitions
+
+**Core Definition:** The children-as-props pattern passes expensive JSX as the `children` prop so it is created outside the state-owning component and preserves its identity across renders.
+
+**Technical Definition:** When a parent component owns state that changes frequently, all JSX declared inside that parent re-renders on every state change. Moving expensive children above the state-owning component and passing them as `children` props preserves their identity across renders, skipping reconciliation entirely. The `children` prop is created by the outer component and passed down as a prop; React sees the same element reference and skips re-rendering that subtree.
+
+**Beginner-Friendly Explanation:** If a component has state that changes often, do not put expensive children inside it. Put the expensive children in the parent and pass them down as `children`. That way, when the component's state changes, the children are not re-created.
+
+### Purposes
+
+- To prevent expensive children from re-rendering when the parent's state changes.
+- To preserve the identity of static or expensive subtrees.
+- To combine state management with isolated rendering.
+
+### Syntax Rules and Structure
+
 ```jsx
+function Stateful({ children }) {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <button onClick={() => setCount(c => c + 1)}>{count}</button>
+      {children}
+    </div>
+  );
+}
+
+<Stateful>
+  <ExpensiveComponent /> {/* Created outside Stateful */}
+</Stateful>
+```
+
+**Syntax Rules:**
+
+1. Create the expensive JSX in the outer component, not inside the state-owning component.
+2. Pass it as `children` to the state-owning component.
+3. The state-owning component renders `{children}` in its output.
+
+### Annotated Code Examples
+
+```jsx
+function ExpensiveTree() {
+  console.log('ExpensiveTree rendered');
+  return <div>{/* heavy content */}</div>;
+}
+
+function Counter({ children }) {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>
+      {children}
+    </div>
+  );
+}
+
 function App() {
-  const [a, setA] = useState(0);
-  const [b, setB] = useState(0);
-
-  function handleClick() {
-    setA(a + 1);
-    setB(b + 1);
-    // React batches both updates into a single render
-  }
-
-  return <button onClick={handleClick}>{a} {b}</button>;
-}
-```
-
-**Component Breakdown:**
-- Both `setA` and `setB` are batched into one render, even though they are called sequentially.
-- In React 18, batching also applies to updates inside promises, `setTimeout`, and native event handlers.
-
-**Syntax Rules:**
-- Always use stable, unique keys from data; never use indices or random values.
-- Keys must be unique among siblings, not globally.
-- Keys should be stable across renders (do not regenerate them).
-- Do not use keys to force remounting unless you intend to reset state (e.g., `<Component key={userId} />`).
-- Understand that React batches state updates automatically in React 18+.
-- Use `flushSync` only when you need to force a synchronous render (rare).
-
-**Constraints and Limitations:**
-- React cannot know which item is which without keys; it guesses by position.
-- Keys are not passed to components as props; they are internal to React.
-- The diffing algorithm is heuristic, not optimal; it runs in O(n) but may produce suboptimal results in edge cases.
-- Fiber's interruptibility is a React 18+ feature; React 17 and earlier render synchronously.
-- Batching can be surprising if you rely on reading state immediately after `setState`.
-
-### Annotated Code Example: Key-Induced State Loss
-
-```jsx
-import { useState } from 'react';
-
-export default function ReorderableList() {
-  const [items, setItems] = useState([
-    { id: 1, name: 'Apple' },
-    { id: 2, name: 'Banana' },
-    { id: 3, name: 'Cherry' },
-  ]);
-
-  function reverse() {
-    setItems(prev => [...prev].reverse());
-  }
-
   return (
-    <div>
-      <button onClick={reverse}>Reverse</button>
-      <ul>
-        {items.map((item, index) => (
-          <li key={index}>
-            <input placeholder={item.name} />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Counter>
+      <ExpensiveTree />
+    </Counter>
   );
 }
 ```
 
-**Expected Output:** Typing into the input for "Apple", then clicking "Reverse", causes the typed value to appear on "Cherry" (the new first item). The input state does not follow the item—it stays with the position.
+**Expected Output:** `"ExpensiveTree rendered"` logs once. Clicking the counter does not re-render it.
 
-**Why This Output Occurs:** React uses the key (index) to match elements. After reversing, position 0 has a new item ("Cherry"), but React sees key `0` and reuses the same input, preserving its state. The typed value stays with position 0, not with "Apple". Using `key={item.id}` would preserve the input state with the item.
-
-**Fixed Version:**
-```jsx
-{items.map(item => (
-  <li key={item.id}>
-    <input placeholder={item.name} />
-  </li>
-))}
-```
-
-**Why the Fix Works:** React matches by `item.id`, so when the list reverses, the input for "Apple" moves with "Apple" and preserves its state.
+**Why this output:** `ExpensiveTree` is created in `App`'s render and passed as `children`. When `Counter` re-renders, the `children` prop reference is unchanged, so React skips reconciling that subtree.
 
 ### Real-World Cases
 
-- **Todo lists:** Stable keys preserve checkbox state across reorders.
-- **Sortable tables:** Stable keys preserve row state and DOM nodes when sorting.
-- **Chat messages:** Stable message IDs preserve scroll position and input state.
-- **Drag-and-drop lists:** Stable keys are essential for correct reordering.
-- **Infinite scroll:** Stable keys prevent remounting when new pages are appended.
+- **Modal controllers:** Passing modal body content as children to a stateful modal controller.
+- **Layout components:** Passing static sidebars and headers as children to a dynamic layout.
+- **Providers:** Passing the application tree as children to context providers.
 
 ### References
 
-- React Official Documentation – Reconciliation: https://legacy.reactjs.org/docs/reconciliation.html
-- React Official Documentation – Rendering Lists: https://react.dev/learn/rendering-lists
-- React Official Documentation – Preserving and Resetting State: https://react.dev/learn/preserving-and-resetting-state
-- React Official Documentation – React Fiber Architecture: https://github.com/acdlite/react-fiber-architecture
-- React Official Documentation – Automatic Batching: https://react.dev/blog/2022/03/29/react-v18#automatically-batch-updates
-- Andrew Clark – React Fiber Architecture: https://github.com/acdlite/react-fiber-architecture
+- Children Pattern to Prevent Parent Re-Renders — https://github.com/pproenca/dot-skills
+- State Colocation with Consumers — https://github.com/pproenca/dot-skills
 
 ---
 
-## Core Concept 5: Modern Compiler Optimisation (React Compiler)
+## 11. Render Optimization
 
 ### Definitions
 
-**Core Definition:** The React Compiler (formerly React Forget) is a build-time tool that automatically memoises components and hooks by analysing their code, inserting `useMemo`/`useCallback`-equivalent optimisations without requiring manual intervention.
+**Core Definition:** Render optimization is the practice of minimizing the work React performs during the render phase — component execution, reconciliation, and commit.
 
-**Technical Definition:** The React Compiler is a Babel plugin (and increasingly a Rust-based compiler) that runs at build time and analyses React components and hooks. It applies memoisation automatically: each component's output is cached based on its props and state, and each value or function inside the component is cached based on the values it reads. The compiler relies on the **Rules of React** (components must be pure, props and state are immutable, hooks follow the Rules of Hooks) and the **Rules of Hooks**. When code violates these rules, the compiler skips optimisation for that component. The compiler is designed to be incremental: it can be adopted in one file at a time, and it coexists with existing `useMemo`/`useCallback` (which are preserved and often made redundant). In React 19, the compiler is stable and can be enabled via `babel-plugin-react-compiler`.
+**Technical Definition:** Render optimization combines architectural techniques (colocation, splitting, children as props) with reference stability (stable objects, arrays, and functions) and memoization (`React.memo`, `useMemo`, `useCallback`). The goal is to reduce the number of component functions executed and the amount of reconciliation work performed, not to manipulate the DOM directly.
 
-**Beginner-Friendly Explanation:** The React Compiler is like a smart assistant that looks at your components and automatically adds the memoisation you would have written by hand. If you have a component that filters a list, the compiler caches the filtered list. If you pass a callback to a child, the compiler caches the callback. You stop worrying about `useMemo` and `useCallback`—the compiler handles it. The catch: your code must follow the Rules of React (pure components, no mutation) or the compiler skips it.
+**Beginner-Friendly Explanation:** Render optimization means making React's rendering work smaller and more predictable. It is about doing less unnecessary work, not about hacking the DOM.
 
 ### Purposes
 
-- To automate memoisation and eliminate manual `useMemo`/`useCallback`.
-- To reduce the cognitive burden of referential equality management.
-- To improve rendering performance by default, without code changes.
-- To make performance optimisation the default rather than an afterthought.
-- To prepare codebases for React 19 and beyond.
+- To reduce the total time spent in the render phase.
+- To keep updates fast and predictable.
+- To maintain responsiveness as the component tree grows.
 
 ### Syntax Rules and Structure
 
-**Installation (Vite):**
-```bash
-npm install -D babel-plugin-react-compiler@latest
-```
+**Render Optimization Checklist:**
 
-```javascript
-// vite.config.ts
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+| Check | Action |
+|-------|--------|
+| Is state in the right place? | Colocate it with its consumers |
+| Is the component too large? | Split it into smaller components |
+| Are expensive children re-rendering? | Pass them as `children` |
+| Are prop references stable? | Move static values outside; use `useMemo`/`useCallback` |
+| Is a pure component re-rendering often? | Wrap in `React.memo` |
+| Are list keys stable? | Use unique IDs, not indices |
 
-export default defineConfig({
-  plugins: [
-    react({
-      babel: {
-        plugins: [['babel-plugin-react-compiler', {}]],
-      },
-    }),
-  ],
-});
-```
+**Syntax Rules:**
 
-**Installation (Next.js):**
-```javascript
-// next.config.js
-module.exports = {
-  experimental: {
-    reactCompiler: true,
-  },
-};
-```
+1. Architecture first; memoization second.
+2. Measure with the Profiler before and after changes.
+3. Avoid premature optimization; it adds complexity without benefit.
 
-**Before the Compiler (Manual Memoisation):**
+### Annotated Code Examples
+
 ```jsx
-function ProductList({ products, query }) {
-  const filtered = useMemo(
-    () => products.filter(p => p.name.includes(query)),
-    [products, query]
-  );
+// ✅ Stable props + memoized child + colocated state
+const MemoizedRow = memo(function Row({ row, onToggle }) {
+  return <tr><td>{row.name}</td><td><input type="checkbox" onChange={() => onToggle(row.id)} /></td></tr>;
+});
 
-  const handleSelect = useCallback((product) => {
-    console.log(product);
+function Table({ rows }) {
+  const [selected, setSelected] = useState(new Set());
+
+  const handleToggle = useCallback((id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   }, []);
 
   return (
-    <ul>
-      {filtered.map(p => (
-        <ProductRow key={p.id} product={p} onSelect={handleSelect} />
-      ))}
-    </ul>
+    <table>
+      <tbody>
+        {rows.map(row => (
+          <MemoizedRow key={row.id} row={row} onToggle={handleToggle} />
+        ))}
+      </tbody>
+    </table>
   );
 }
 ```
 
-**After the Compiler (Automatic Memoisation):**
-```jsx
-function ProductList({ products, query }) {
-  const filtered = products.filter(p => p.name.includes(query));
+**Expected Output:** Toggling one row does not re-render the other rows.
 
-  const handleSelect = (product) => {
-    console.log(product);
-  };
-
-  return (
-    <ul>
-      {filtered.map(p => (
-        <ProductRow key={p.id} product={p} onSelect={handleSelect} />
-      ))}
-    </ul>
-  );
-}
-```
-
-**Component Breakdown:**
-- The second version has no `useMemo` or `useCallback`.
-- The compiler inserts memoisation automatically: `filtered` is cached based on `products` and `query`; `handleSelect` is cached.
-- The code is simpler and equally performant.
-
-**What the Compiler Optimises:**
-- **Component output:** The component re-renders only when its props or state change.
-- **Expensive computations:** Values like `filtered` are memoised.
-- **Function identities:** Callbacks passed to children are memoised.
-- **JSX elements:** Elements created inside the component are memoised.
-
-**Syntax Rules:**
-- Enable the compiler via the Babel plugin or framework integration.
-- Follow the Rules of React: components must be pure, props and state must be immutable, and Hooks must follow the Rules of Hooks.
-- Do not mutate props, state, or values derived from them; the compiler assumes immutability.
-- You can keep existing `useMemo`/`useCallback`; the compiler coexists with them.
-- Adopt incrementally: the compiler optimises compliant components and skips non-compliant ones.
-- Use the `eslint-plugin-react-compiler` to catch violations early.
-
-**Constraints and Limitations:**
-- The compiler requires code that follows the Rules of React; violating code is skipped (not broken).
-- The compiler does not optimise components that read mutable external state (e.g., global variables).
-- The compiler may not eliminate all re-renders; `React.memo`-like behaviour is applied to component output, but some patterns still re-render.
-- The compiler is a build-time tool; it does not help if the bottleneck is network or DOM, not rendering.
-- Existing `useMemo`/`useCallback` may become redundant, but removing them is optional.
-
-### Annotated Code Example: Compiler-Optimised Component
-
-```jsx
-// Before compiler (manual optimisation)
-function SearchPage({ items }) {
-  const [query, setQuery] = useState('');
-  const filtered = useMemo(
-    () => items.filter(i => i.name.includes(query)),
-    [items, query]
-  );
-  const handleSelect = useCallback((item) => console.log(item), []);
-
-  return (
-    <div>
-      <input value={query} onChange={e => setQuery(e.target.value)} />
-      <List items={filtered} onSelect={handleSelect} />
-    </div>
-  );
-}
-
-// After compiler (same code, no manual memoisation)
-function SearchPage({ items }) {
-  const [query, setQuery] = useState('');
-  const filtered = items.filter(i => i.name.includes(query));
-  const handleSelect = (item) => console.log(item);
-
-  return (
-    <div>
-      <input value={query} onChange={e => setQuery(e.target.value)} />
-      <List items={filtered} onSelect={handleSelect} />
-    </div>
-  );
-}
-```
-
-**Expected Output:** Both versions behave identically. The compiler inserts memoisation for `filtered` and `handleSelect`, so `List` re-renders only when `filtered` or `handleSelect` changes. The second version is simpler and equally performant.
-
-**Why This Output Occurs:** The compiler analyses the component, identifies that `filtered` depends on `items` and `query`, and caches it. It identifies that `handleSelect` has no dependencies and caches it. The memoisation is inserted automatically, so the developer does not need to write `useMemo`/`useCallback`.
+**Why this output:** `handleToggle` is stable via `useCallback`, and `MemoizedRow` skips re-rendering when its `row` prop is unchanged and `onToggle` reference is stable.
 
 ### Real-World Cases
 
-- **Large codebases:** Adopting the compiler incrementally to reduce memoisation boilerplate.
-- **New projects:** Writing simpler code without manual `useMemo`/`useCallback`.
-- **Design systems:** Components benefit from automatic memoisation without manual tuning.
-- **Performance-critical apps:** The compiler reduces the risk of missed memoisation.
-- **React 19 migration:** The compiler is the recommended path for new performance work.
+- **Data tables:** Row-level memoization and stable callbacks.
+- **Forms:** Stable field handlers and isolated field components.
+- **Charts:** Memoized chart components with stable data references.
 
 ### References
 
-- React Official Documentation – React Compiler: https://react.dev/learn/react-compiler
-- React Official Documentation – React Compiler Introduction: https://react.dev/learn/react-compiler/introduction
-- React Official Documentation – React Compiler Installation: https://react.dev/learn/react-compiler/installation
-- React Official Documentation – Rules of React: https://react.dev/reference/rules
-- React Official Documentation – eslint-plugin-react-compiler: https://www.npmjs.com/package/eslint-plugin-react-compiler
-- babel-plugin-react-compiler: https://www.npmjs.com/package/babel-plugin-react-compiler
+- RT Camp — Performance Optimization — https://rtcamp.com/handbook/react-best-practices/performance-optimization/
+- Steve Kinney — Identity Stability Props — https://stevekinney.com/courses/react-performance/identity-stability-props
+- CoreUI — How to prevent unnecessary re-renders — https://coreui.io/answers/how-to-prevent-unnecessary-re-renders-in-react/
 
 ---
 
-## Comparison and Decision Guidance
+## 12. Reconciliation Optimization
 
-| Technique | When to Use | Cost | Benefit |
-|---|---|---|---|
-| **State colocation** | Volatile state affects a small subtree | Low (code organisation) | High (fewer re-renders) |
-| **`children` as props** | Parent must re-render, but a heavy child should not | Low | High |
-| **`React.memo`** | Component re-renders with the same props | Low (comparison per render) | High for expensive components |
-| **`useMemo`** | Expensive computation or stable prop | Low (memory + comparison) | High when passed to memoised children |
-| **`useCallback`** | Callback passed to memoised child or used as dependency | Low | High for memoised children |
-| **Stable keys** | Lists that reorder, insert, or delete | None | Prevents remounting and state loss |
-| **React Compiler** | Any codebase following Rules of React | Build-time only | Automatic memoisation |
+### Definitions
 
-**Decision Guidance:**
-- **Start with state colocation** — move volatile state down to the smallest component.
-- **Use `children` as props** when a parent must re-render but a heavy child should not.
-- **Use `React.memo`** for expensive components that re-render with the same props.
-- **Stabilise props** with `useMemo`/`useCallback` before passing them to memoised children.
-- **Always use stable keys** from data; never use indices or random values.
-- **Adopt the React Compiler** for automatic memoisation; keep manual memoisation only where the compiler cannot help.
-- **Profile before and after** any optimisation; measure the impact.
+**Core Definition:** Reconciliation optimization is the practice of structuring element trees and keys so React's diffing algorithm performs minimal DOM work.
+
+**Technical Definition:** React's reconciler compares the new element tree with the previous one. When element types differ, React tears down the old tree and builds a new one. When types are the same, React updates only changed attributes and recurses on children. For lists, React uses `key` props to match children across renders. Stable, unique keys let React match elements and perform minimal DOM moves; index keys cause full DOM teardown and rebuild when items are reordered.
+
+**Beginner-Friendly Explanation:** Reconciliation optimization is about helping React compare the old and new UI efficiently. The most important thing is using stable keys in lists so React knows which items are the same.
+
+### Purposes
+
+- To minimize DOM mutations during updates.
+- To preserve component state across renders.
+- To avoid unnecessary teardown and rebuild of list items.
+
+### Syntax Rules and Structure
+
+**Reconciliation Rules:**
+
+| Situation | Behaviour |
+|-----------|-----------|
+| Different element types | Full teardown and rebuild |
+| Same element type | Update changed attributes, recurse on children |
+| Same component type | Update props, re-render |
+| Stable key | Match by key, minimal DOM moves |
+| Index key | Match by position, full rebuild on reorder |
+
+**Syntax Rules:**
+
+1. Use stable, unique IDs from data as keys.
+2. Never use array indices for dynamic lists.
+3. Never use `Math.random()` as keys.
+4. Keep element types consistent across renders where possible.
+
+### Annotated Code Examples
+
+```jsx
+// ❌ Index keys: reorder causes full rebuild
+<ul>
+  {sorted.map((item, index) => (
+    <li key={index}>{item.name}</li>
+  ))}
+</ul>
+
+// ✅ Stable ID keys: reorder causes minimal DOM moves
+<ul>
+  {sorted.map((item) => (
+    <li key={item.id}>{item.name}</li>
+  ))}
+</ul>
+```
+
+**Expected Output:** The stable-key version preserves component state and performs minimal DOM updates when the list is reordered.
+
+**Why this output:** Index keys change when items are reordered, causing React to treat every item as changed. Stable IDs let React match items across renders.
+
+### Real-World Cases
+
+- **Sortable tables:** Stable keys prevent full rebuilds when sorting.
+- **Chat feeds:** Stable keys preserve message state when new messages arrive.
+- **Notifications:** Stable keys prevent animation glitches on reorder.
+
+### References
+
+- Use Stable Keys for List Rendering Performance — https://github.com/pproenca/dot-skills
+- CoreUI — How to use the key prop in React lists — https://coreui.io/answers/how-to-use-the-key-prop-in-react-lists/
+- Reconciliation (React legacy docs) — https://ru.react.js.org/docs/reconciliation.html
 
 ---
 
-## References
+## 13. Key Optimization
 
-- React Official Documentation – Render and Commit: https://react.dev/learn/render-and-commit
-- React Official Documentation – `memo`: https://react.dev/reference/react/memo
-- React Official Documentation – `useMemo`: https://react.dev/reference/react/useMemo
-- React Official Documentation – `useCallback`: https://react.dev/reference/react/useCallback
-- React Official Documentation – Rendering Lists: https://react.dev/learn/rendering-lists
-- React Official Documentation – Preserving and Resetting State: https://react.dev/learn/preserving-and-resetting-state
-- React Official Documentation – Reconciliation (Legacy): https://legacy.reactjs.org/docs/reconciliation.html
-- React Official Documentation – React Compiler: https://react.dev/learn/react-compiler
-- React Official Documentation – React Compiler Introduction: https://react.dev/learn/react-compiler/introduction
-- React Official Documentation – React Compiler Installation: https://react.dev/learn/react-compiler/installation
-- React Official Documentation – Rules of React: https://react.dev/reference/rules
-- React Official Documentation – Automatic Batching (React 18): https://react.dev/blog/2022/03/29/react-v18#automatically-batch-updates
-- React Official Documentation – Passing JSX as Children: https://react.dev/learn/passing-props-to-a-component#passing-jsx-as-children
-- React Official Documentation – Choosing the State Structure: https://react.dev/learn/choosing-the-state-structure
-- Andrew Clark – React Fiber Architecture: https://github.com/acdlite/react-fiber-architecture
-- MDN Web Docs – `Object.is()`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
-- Kent C. Dodds – When to useMemo and useCallback: https://kentcdodds.com/blog/usememo-and-usecallback
-- Kent C. Dodds – One React Mistake That's Keeping Your App Slow: https://kentcdodds.com/blog/optimize-react-re-renders
-- babel-plugin-react-compiler: https://www.npmjs.com/package/babel-plugin-react-compiler
-- eslint-plugin-react-compiler: https://www.npmjs.com/package/eslint-plugin-react-compiler
+### Definitions
+
+**Core Definition:** Key optimization is the practice of choosing the right `key` prop for list items so React's reconciler can efficiently match elements across renders.
+
+**Technical Definition:** The `key` prop tells React which child elements are the same across renders. React uses keys to match children in the original tree with children in the subsequent tree. Stable, unique, and predictable keys enable minimal DOM moves and preserve component state; unstable keys (indices, random values) cause full teardown and rebuild.
+
+**Beginner-Friendly Explanation:** Keys are how React identifies list items. If the key is stable and unique, React knows exactly which item is which and only moves the DOM nodes that changed.
+
+### Purposes
+
+- To minimize DOM manipulations during list updates.
+- To preserve component state across reorders.
+- To avoid rendering bugs caused by mismatched keys.
+
+### Syntax Rules and Structure
+
+**Key Selection Guide:**
+
+| Scenario | Recommended key |
+|----------|-----------------|
+| Data has a unique ID | `item.id` |
+| Data has a composite unique value | `` `${item.category}-${item.name}` `` |
+| Data has no unique value | Generate a stable ID when the data is created |
+| Never | Array index, `Math.random()` |
+
+**Syntax Rules:**
+
+1. Keys must be stable across renders.
+2. Keys must be unique among siblings.
+3. Keys must be predictable (not random).
+4. Use IDs from the data, not derived values that change.
+
+### Annotated Code Examples
+
+```jsx
+// ✅ Stable composite key
+<ul>
+  {items.map(item => (
+    <li key={`${item.category}-${item.name}`}>{item.name}</li>
+  ))}
+</ul>
+```
+
+**Expected Output:** List items are matched correctly across renders, preserving state and minimizing DOM updates.
+
+**Why this output:** The composite key is stable and unique, so React can match items even if the list is filtered or reordered.
+
+### Real-World Cases
+
+- **Filtered lists:** Stable keys preserve item state when the filter changes.
+- **Dynamic forms:** Stable keys prevent input state from being assigned to the wrong row.
+- **Animations:** Stable keys prevent animation glitches.
+
+### References
+
+- CoreUI — How to use the key prop in React lists — https://coreui.io/answers/how-to-use-the-key-prop-in-react-lists/
+- Use Stable Keys for List Rendering Performance — https://github.com/pproenca/dot-skills
+- Reconciliation (React legacy docs) — https://ru.react.js.org/docs/reconciliation.html
+
+---
+
+## 14. List Virtualization
+
+### Definitions
+
+**Core Definition:** List virtualization is the technique of rendering only the list items currently visible in the viewport (plus a small buffer), rather than rendering the entire list.
+
+**Technical Definition:** Virtualization (also called windowing) calculates which items fit in the visible area based on scroll position and renders only those items, keeping the DOM node count constant regardless of dataset size. This enables 60fps scrolling and low memory usage even with 100K+ items. The trade-off is that virtualized content is not in the DOM until scrolled, which can affect SEO and browser find-in-page.
+
+**Beginner-Friendly Explanation:** Virtualization means only rendering the list items you can actually see. Instead of creating 10,000 DOM nodes, you create the 10 that fit on screen. As you scroll, React swaps out the visible items. The list feels smooth because the browser only manages a handful of nodes.
+
+### Purposes
+
+- To render massive lists at 60fps.
+- To keep memory usage low regardless of dataset size.
+- To avoid the performance cost of creating thousands of DOM nodes.
+- To enable smooth infinite scrolling and large data tables.
+
+### Syntax Rules and Structure
+
+**Virtualization Concepts:**
+
+| Concept | Description |
+|---------|-------------|
+| Window | The set of items currently rendered |
+| Overscan | Extra items rendered above and below the viewport |
+| Item size | Fixed or variable height of each item |
+| Scroll container | The element that scrolls the virtualized list |
+
+**Syntax Rules:**
+
+1. Use virtualization only for large lists (100+ items).
+2. Provide accurate item sizes or a measurement function for variable heights.
+3. Tune overscan based on scroll speed and device performance.
+4. Use stable keys for virtualized items.
+
+### Annotated Code Examples
+
+```jsx
+import { FixedSizeList as List } from 'react-window';
+
+const Row = ({ index, style }) => (
+  <div style={style}>Row {index}</div>
+);
+
+function VirtualizedList() {
+  return (
+    <List
+      height={500}       // Viewport height
+      itemCount={10000}  // Total items
+      itemSize={35}      // Row height
+      width={300}
+    >
+      {Row}
+    </List>
+  );
+}
+```
+
+**Expected Output:** A scrollable list of 10,000 rows that renders only the visible rows, staying smooth at 60fps.
+
+**Why this output:** `react-window` calculates which rows fit in the 500px viewport and renders only those (plus a small buffer), keeping the DOM node count constant.
+
+### Real-World Cases
+
+- **Chat history:** Rendering only visible messages.
+- **Data tables:** Rendering only visible rows.
+- **Infinite feeds:** Loading and rendering items as the user scrolls.
+
+### References
+
+- Handling Large Lists (Virtualization) — https://github.com/MarcoNasi/AI-Skills
+- Virtualization Specialist Skill — https://github.com/curiositech/windags-skills
+
+---
+
+## 15. Windowing
+
+### Definitions
+
+**Core Definition:** Windowing is the mechanism behind virtualization: maintaining a moving "window" of rendered items that corresponds to the visible viewport.
+
+**Technical Definition:** Windowing calculates the start and end indices of the items that should be rendered based on the scroll position, viewport height, and item sizes. Items outside the window are unmounted. As the user scrolls, the window moves and React mounts/unmounts items accordingly.
+
+**Beginner-Friendly Explanation:** Windowing is the "sliding window" of items that are currently rendered. As you scroll, the window slides, and React swaps out the items that left the window for the ones that entered it.
+
+### Purposes
+
+- To keep the rendered item count proportional to the viewport, not the dataset.
+- To enable smooth scrolling with massive datasets.
+- To reduce memory usage from DOM nodes.
+
+### Syntax Rules and Structure
+
+**Windowing Parameters:**
+
+| Parameter | Effect |
+|-----------|--------|
+| Viewport size | How many items fit on screen |
+| Item size | How much space each item takes |
+| Overscan | Extra buffer items for smooth scrolling |
+| Scroll offset | Which items are currently visible |
+
+**Syntax Rules:**
+
+1. The window must be recalculated on scroll.
+2. Overscan should be tuned based on device and scroll speed.
+3. Item sizes must be accurate for correct window calculation.
+
+### Annotated Code Examples
+
+```jsx
+// Conceptual windowing calculation
+function getVisibleRange(scrollTop, viewportHeight, itemSize, totalItems) {
+  const start = Math.floor(scrollTop / itemSize);
+  const visibleCount = Math.ceil(viewportHeight / itemSize);
+  const end = Math.min(start + visibleCount, totalItems);
+  return { start, end };
+}
+```
+
+**Expected Output:** The function returns the range of items that should be rendered for the current scroll position.
+
+**Why this output:** The start index is determined by dividing the scroll offset by the item size. The end index is the start plus the number of items that fit in the viewport.
+
+### Real-World Cases
+
+- **Virtualized tables:** Calculating visible rows from scroll position.
+- **Chat logs:** Rendering only the messages in view.
+- **Image galleries:** Rendering only visible thumbnails.
+
+### References
+
+- Handling Large Lists (Virtualization) — https://github.com/MarcoNasi/AI-Skills
+- Virtualization Specialist Skill — https://github.com/curiositech/windags-skills
+
+---
+
+## 16. React Window
+
+### Definitions
+
+**Core Definition:** `react-window` is a lightweight React library for virtualizing large lists and grids.
+
+**Technical Definition:** `react-window` provides components like `FixedSizeList`, `VariableSizeList`, and `FixedSizeGrid` that render only the visible items in a scrollable container. It is designed to be small and fast, making it suitable for most virtualization needs.
+
+**Beginner-Friendly Explanation:** `react-window` is a small, focused library that makes virtualized lists easy. You give it the total item count, the item height, and a row component, and it handles the windowing.
+
+### Purposes
+
+- To virtualize large lists with minimal configuration.
+- To keep bundle size small.
+- To support fixed-size and variable-size items.
+
+### Syntax Rules and Structure
+
+```jsx
+import { FixedSizeList as List } from 'react-window';
+
+<List
+  height={500}
+  itemCount={10000}
+  itemSize={35}
+  width={300}
+>
+  {Row}
+</List>
+```
+
+**Syntax Rules:**
+
+1. Provide `height`, `itemCount`, `itemSize`, and `width`.
+2. The child is a component that receives `{ index, style }`.
+3. Apply the provided `style` to the row element for correct positioning.
+
+### Annotated Code Examples
+
+```jsx
+import { FixedSizeList as List } from 'react-window';
+
+const Row = ({ index, style }) => (
+  <div style={style} className="row">
+    Row {index}
+  </div>
+);
+
+function App() {
+  return (
+    <List height={400} itemCount={5000} itemSize={40} width={300}>
+      {Row}
+    </List>
+  );
+}
+```
+
+**Expected Output:** A smooth, scrollable list of 5,000 rows that only renders the visible rows.
+
+**Why this output:** `react-window` calculates the visible range and passes the correct `style` (including `top` positioning) to each rendered row.
+
+### Real-World Cases
+
+- **Chat applications:** Virtualized message lists.
+- **Admin panels:** Large data tables.
+- **Dropdowns:** Long option lists.
+
+### References
+
+- Handling Large Lists (Virtualization) — https://github.com/MarcoNasi/AI-Skills
+- Virtualization Specialist Skill — https://github.com/curiositech/windags-skills
+
+---
+
+## 17. React Virtualized
+
+### Definitions
+
+**Core Definition:** `react-virtualized` is a feature-rich React library for virtualizing lists, tables, and grids, offering advanced capabilities beyond basic windowing.
+
+**Technical Definition:** `react-virtualized` provides a comprehensive set of virtualization components, including `List`, `Table`, `Grid`, `Masonry`, and `Collection`. It supports variable sizes, infinite loading, and complex layouts. It is larger and more feature-rich than `react-window`.
+
+**Beginner-Friendly Explanation:** `react-virtualized` is the older, more feature-packed sibling of `react-window`. It can handle more complex layouts, but it is heavier.
+
+### Purposes
+
+- To virtualize complex layouts (tables, grids, masonry).
+- To support advanced features like infinite loading and dynamic sizes.
+- To provide a comprehensive virtualization toolkit.
+
+### Syntax Rules and Structure
+
+```jsx
+import { List } from 'react-virtualized';
+
+<List
+  width={300}
+  height={500}
+  rowCount={1000}
+  rowHeight={35}
+  rowRenderer={({ index, key, style }) => (
+    <div key={key} style={style}>Row {index}</div>
+  )}
+/>
+```
+
+**Syntax Rules:**
+
+1. Provide `width`, `height`, `rowCount`, `rowHeight`, and `rowRenderer`.
+2. `rowRenderer` receives `{ index, key, style }` and must apply the `style` and `key`.
+
+### Annotated Code Examples
+
+```jsx
+import { List } from 'react-virtualized';
+
+function VirtualizedTable({ rows }) {
+  return (
+    <List
+      width={600}
+      height={400}
+      rowCount={rows.length}
+      rowHeight={30}
+      rowRenderer={({ index, key, style }) => (
+        <div key={key} style={style}>{rows[index].name}</div>
+      )}
+    />
+  );
+}
+```
+
+**Expected Output:** A virtualized table that renders only visible rows.
+
+**Why this output:** `react-virtualized` calculates the visible range and calls `rowRenderer` only for those rows.
+
+### Real-World Cases
+
+- **Complex data tables:** Multi-column tables with fixed headers.
+- **Masonry layouts:** Virtualized Pinterest-style grids.
+- **Infinite loading:** Virtualized lists with server-side pagination.
+
+### References
+
+- Handling Large Lists (Virtualization) — https://github.com/MarcoNasi/AI-Skills
+- Virtualization Specialist Skill — https://github.com/curiositech/windags-skills
+
+---
+
+## 18. TanStack Virtual
+
+### Definitions
+
+**Core Definition:** TanStack Virtual is a headless, framework-agnostic virtualization library that provides the core windowing logic without prescribing markup or styling.
+
+**Technical Definition:** TanStack Virtual is a headless UI utility for virtualizing long lists of elements. It provides hooks like `useVirtualizer` that calculate the virtual items, total size, and measurement functions. The consumer renders the markup and applies the positioning. It supports fixed, variable, and dynamic item sizes, as well as 2D virtualization for grids.
+
+**Beginner-Friendly Explanation:** TanStack Virtual gives you the virtualization logic but lets you build the UI however you want. It is framework-agnostic and highly flexible.
+
+### Purposes
+
+- To virtualize lists with complete control over markup and styling.
+- To support complex scenarios (variable heights, dynamic measurement, 2D grids).
+- To work across frameworks (React, Vue, Solid, etc.).
+
+### Syntax Rules and Structure
+
+```jsx
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+const virtualizer = useVirtualizer({
+  count: items.length,
+  getScrollElement: () => parentRef.current,
+  estimateSize: () => 35,
+});
+```
+
+**Syntax Rules:**
+
+1. Provide `count`, `getScrollElement`, and `estimateSize`.
+2. The virtualizer returns `getVirtualItems()` and `getTotalSize()`.
+3. Render only the virtual items and apply the calculated `transform` or `top`.
+
+### Annotated Code Examples
+
+```jsx
+import { useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+function VirtualList({ items }) {
+  const parentRef = useRef(null);
+
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 35,
+  });
+
+  return (
+    <div ref={parentRef} style={{ height: 400, overflow: 'auto' }}>
+      <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+        {virtualizer.getVirtualItems().map(virtualItem => (
+          <div
+            key={virtualItem.key}
+            style={{
+              position: 'absolute',
+              top: 0,
+              transform: `translateY(${virtualItem.start}px)`,
+              height: virtualItem.size,
+            }}
+          >
+            {items[virtualItem.index]}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+**Expected Output:** A headless virtualized list that renders only visible items with absolute positioning.
+
+**Why this output:** `useVirtualizer` calculates which items are visible and provides their positions. The consumer renders only those items.
+
+### Real-World Cases
+
+- **Custom design systems:** Virtualization that matches a specific visual style.
+- **2D grids:** Virtualizing both rows and columns.
+- **Chat with variable heights:** Dynamic measurement of message heights.
+
+### References
+
+- Handling Large Lists (Virtualization) — https://github.com/MarcoNasi/AI-Skills
+- Virtualization Specialist Skill — https://github.com/curiositech/windags-skills
+- TanStack Virtual documentation — https://tanstack.com/virtual
+
+---
+
+## 19. Rendering Best Practices
+
+### Definitions
+
+**Core Definition:** Rendering best practices are guidelines for structuring React components and state to minimize unnecessary rendering work while maintaining correctness and maintainability.
+
+**Technical Definition:** Rendering best practices combine architectural principles (state colocation, component splitting, children as props), reference stability (stable objects, arrays, and functions), targeted memoization (`React.memo`, `useMemo`, `useCallback`), stable keys, and virtualization for large lists. The overarching principle is to measure first, fix architecture before adding memoization, and avoid premature optimization.
+
+**Beginner-Friendly Explanation:** These are the habits that keep your app fast. Put state where it is used. Split big components. Use stable references. Memoize only when needed. Use stable keys in lists. Virtualize long lists. And always measure before you optimize.
+
+### Best Practices Table
+
+| Practice | Description |
+|----------|-------------|
+| **Colocate state** | Keep state as close as possible to its consumers |
+| **Split components** | Break large components into smaller reconciliation boundaries |
+| **Use children as props** | Pass expensive JSX from outside the state-owning component |
+| **Stabilise references** | Move static values outside; use `useMemo`/`useCallback` only when needed |
+| **Memoize selectively** | `React.memo` for pure, frequently re-rendered components |
+| **Use stable keys** | Never use array indices for dynamic lists |
+| **Virtualize large lists** | Render only visible items for 100+ item lists |
+| **Measure first** | Use React DevTools Profiler before optimizing |
+| **Avoid premature optimization** | Do not memoize everything; it adds complexity without benefit |
+
+### Annotated Code Examples
+
+```jsx
+// ✅ Best-practice component: colocated state, memoized child, stable callback, stable key
+const Row = memo(function Row({ item, onSelect }) {
+  return (
+    <tr>
+      <td>{item.name}</td>
+      <td><input type="checkbox" onChange={() => onSelect(item.id)} /></td>
+    </tr>
+  );
+});
+
+function Table({ items }) {
+  const [selected, setSelected] = useState(new Set());
+
+  const handleSelect = useCallback((id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
+
+  return (
+    <table>
+      <tbody>
+        {items.map(item => (
+          <Row key={item.id} item={item} onSelect={handleSelect} />
+        ))}
+      </tbody>
+    </table>
+  );
+}
+```
+
+**Expected Output:** Selecting one row does not re-render the other rows, and the selection state is preserved.
+
+**Why this output:** The state is colocated in `Table`. `handleSelect` is stable via `useCallback`. `Row` is memoized, so unchanged rows skip re-rendering. Keys are stable IDs.
+
+### Real-World Cases
+
+- **All React applications:** These practices apply universally.
+- **Large-scale dashboards:** Colocation and virtualization are essential.
+- **Design systems:** Stable references and memoization keep primitives fast.
+
+### References
+
+- RT Camp — Performance Optimization — https://rtcamp.com/handbook/react-best-practices/performance-optimization/
+- React Performance and Preventing Unnecessary Re-renders — https://aspnetzero.com/blog/react-performance-and-preventing-unnecessary-renders
+- Steve Kinney — Identity Stability Props — https://stevekinney.com/courses/react-performance/identity-stability-props
+- Steve Kinney — Colocation of State — https://stevekinney.com/courses/react-performance/colocation-of-state
+- CoreUI — How to prevent unnecessary re-renders — https://coreui.io/answers/how-to-prevent-unnecessary-re-renders-in-react/
+- CoreUI — How to use the key prop — https://coreui.io/answers/how-to-use-the-key-prop-in-react-lists/
+- Handling Large Lists (Virtualization) — https://github.com/MarcoNasi/AI-Skills
+- Virtualization Specialist Skill — https://github.com/curiositech/windags-skills
+- Use Stable Keys for List Rendering Performance — https://github.com/pproenca/dot-skills
+- Children Pattern to Prevent Parent Re-Renders — https://github.com/pproenca/dot-skills
+- State Colocation with Consumers — https://github.com/pproenca/dot-skills
+- React Compiler Introduction — https://zh-hans.react.dev/learn/react-compiler/introduction
+- Open Storefront Framework Developer's Guide — https://docs.oracle.com/en/industries/retail/retail-digital-commerce/latest/dosfa/avoid-unnecessary-rerendering.htm
+- Webkul — Reducing Re-renders in React Applications — https://webkul.com/blog/reducing-re-renders-in-react-applications/
+- Reconciliation (React legacy docs) — https://ru.react.js.org/docs/reconciliation.html
