@@ -1,4 +1,4 @@
-# Express.js Template Engine Fundamentals — Comprehensive Programming Cheat Sheet
+# Express.js Templating Fundamentals — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1350 +6,790 @@
 
 ### Definitions
 
-**Core Definition:** A template engine is a library that enables an Express application to use static template files containing placeholders; at runtime, the engine replaces variables with actual values and transforms the template into an HTML file sent to the client.
+**Core Definition**
+Templating in Express.js is the mechanism by which static template files are transformed into dynamic HTML at runtime, with variables and logic replaced by actual values before the result is sent to the client.
 
-**Technical Definition:** Express-compliant template engines export a function named `__express(filePath, options, callback)`, which `res.render()` calls to render the template code. The engine compiles the template source into a JavaScript function, executes it with the merged data context (locals), and produces an HTML string. Express manages template file resolution, caching, and engine loading internally once configured via `app.set('view engine', ...)` and `app.set('views', ...)`.
+**Technical Definition**
+Express uses a pluggable **view engine** architecture. A template engine enables the use of static template files in an application; at runtime, the engine replaces variables in the template with actual values and transforms the template into an HTML file sent to the client. Express supports any Express-compliant template engine that exports a function named `__express(filePath, options, callback)`, which `res.render()` calls to render the template code. The two application settings that control this system are `views` (the directory containing template files) and `view engine` (the default engine to use).
 
-**Beginner-Friendly Explanation:** A template engine lets you write HTML with special placeholders — like `{{name}}` or `<%= name %>` — that get replaced with real data when the page is rendered. Instead of building HTML strings in JavaScript, you write a template that looks like HTML and let the engine fill in the blanks.
+**Beginner-Friendly Explanation**
+Templating lets you write HTML pages with placeholders—like “Hello, {{name}}”—and then fill in those placeholders with real data when a user requests the page. Instead of building HTML strings by hand in your JavaScript code, you write a template file, and Express uses a template engine to combine the template with your data and send the finished HTML to the browser.
+
+---
 
 ### Key Characteristics
 
-- **Separation of concerns:** Presentation (templates) is separated from business logic (routes and controllers).
-- **Server-side rendering:** HTML is generated on the server and sent fully rendered to the client.
-- **Engine-agnostic:** Express supports any template engine that follows the `__express` convention, including Pug, EJS, and Handlebars.
-- **Layout and partial support:** Most engines provide mechanisms for reusable fragments and structural inheritance.
-- **Data binding:** Variables passed via `res.render()`, `res.locals`, or `app.locals` are interpolated into the template.
-- **Caching:** The engine caches compiled template functions (not rendered output), so templates are re-rendered on every request.
+- **Pluggable engines** — Express does not force a specific template engine; Pug, EJS, Handlebars, Nunjucks, LiquidJS, and over a dozen others are supported via `@ladjs/consolidate` or native `__express` compliance.
+- **Two-setting configuration** — The `views` directory and the `view engine` default are the only two settings required to enable templating.
+- **Layered locals** — Template variables are merged from three sources with a defined precedence: `res.render()` options override `res.locals`, which override `app.locals`.
+- **Environment-aware caching** — View caching is enabled by default in production (`NODE_ENV=production`) and disabled in development; only the compiled template is cached, not the rendered output.
+- **Security-sensitive** — `res.render()` performs filesystem operations and evaluates modules; the `view` argument and the `locals` object must not contain unsanitized user input.
+
+---
 
 ### Prerequisites
 
-- **Node.js runtime** (v18 or higher recommended).
-- **Express.js installed** (`npm install express`).
-- **A template engine package** (e.g., `npm install pug`, `npm install ejs`, `npm install express-handlebars`).
-- **Basic JavaScript knowledge:** Functions, objects, and callbacks.
-- **Understanding of Express routing:** How `app.get()` and `res.render()` work.
+- Node.js 18 or higher and an Express application initialized with `const app = express()`.
+- A template engine package installed via npm (e.g., `ejs`, `pug`, `hbs`).
+- Basic familiarity with HTML and JavaScript expressions.
+- Understanding of Express routing and the `res` object.
+
+---
 
 ### Related Programming Areas
 
-- **Server-Side Rendering (SSR):** Generating HTML on the server for faster initial page loads and SEO.
-- **Middleware pipeline:** Locals set in middleware are available in templates.
-- **Static file serving:** CSS, JavaScript, and images are served separately from templates.
-- **API development:** Template engines can also render JSON, XML, or plain text.
-- **Frontend frameworks:** Template engines are alternatives to React, Vue, and Angular for server-rendered pages.
-
-### Core Concepts
-
-1. **Template Engine Architecture** — how Express compiles templates into HTML, and `app.set('view engine')` vs `app.set('views')`.
-2. **Core Layout Patterns** — base layouts, partials, fragments, block overrides, and structural inheritance.
-3. **Data Binding & Context Interpolation** — local variables, `app.locals`, and `res.locals`.
-4. **Control Structures** — conditionals, loops, and list iterations within markup.
-5. **Custom Helper Functions** — registering globally accessible utility functions for formatting.
+- **Routing** — Routes invoke `res.render()` to respond with rendered HTML.
+- **Middleware** — Middleware populates `res.locals` with request-scoped data for templates.
+- **Security** — Auto-escaping and XSS prevention are templating concerns.
+- **Static file serving** — CSS, JavaScript, and images referenced by templates are served via `express.static()`.
+- **Error handling** — Error-handling middleware can render dedicated error templates.
 
 ---
 
-## Core Concept 1: Template Engine Architecture
+## Core Concept 1: Template Engines
 
 ### Definitions
 
-**Core Definition:** Template engine architecture describes how Express discovers template files, loads the engine module, compiles templates into functions, and renders them with data to produce HTML.
+**Core Definition**
+A template engine is a library that combines template files containing placeholders and logic with data to produce finished HTML output.
 
-**Technical Definition:** When `res.render(view, locals)` is called, Express resolves the view file path using the `views` setting and the `view engine` setting, loads the engine module (cached after first load), calls the engine's `__express` function with the file path, merged options (locals + `app.locals` + `res.locals`), and a callback, and receives the rendered HTML string.
+**Technical Definition**
+An Express-compliant template engine exports a function named `__express(filePath, options, callback)` that `res.render()` invokes to render the template. Some engines do not follow this convention natively; the `@ladjs/consolidate` library maps all popular Node.js template engines to the Express convention and works seamlessly within Express. Engines can be registered explicitly with `app.engine(ext, callback)`, where the callback has the signature `(path, options, callback)`.
 
-**Beginner-Friendly Explanation:** Express is like a post office. When you call `res.render('index')`, Express looks in the `views` directory for a file called `index` with the extension of your chosen engine. It hands the file and your data to the engine, which fills in the blanks and returns the finished HTML.
+**Beginner-Friendly Explanation**
+A template engine is the tool that takes your template file and your data and produces the final HTML. EJS, Pug, and Handlebars are different template engines with different syntaxes, but they all do the same basic job.
+
+---
 
 ### Purposes
 
-- To configure the template engine and view directory for the application.
-- To enable automatic engine loading and file extension resolution.
-- To control caching behaviour for development and production.
-- To allow multiple engines within a single application via `app.engine()`.
+- To separate presentation (HTML structure) from application logic (route handlers and business logic).
+- To enable dynamic content generation without manual string concatenation.
+- To provide automatic HTML escaping and reduce XSS risk.
+- To support reusable partials, layouts, and components across pages.
 
-### Sub-Feature 1.1: `app.set('view engine')` vs `app.set('views')`
+---
 
-#### Definitions
+### Syntax Rules and Structure
 
-**Core Definition:** `app.set('views')` specifies the directory where template files are stored, and `app.set('view engine')` specifies which template engine to use.
+#### Complete General Syntax: Popular Engine Comparison
 
-**Technical Definition:** The `views` setting defaults to the `views` directory in the application root. The `view engine` setting tells Express which module to load for rendering. Once set, the file extension can be omitted in `res.render()`; Express appends the engine's extension automatically. If no view engine is set, the extension must be specified.
+| Engine | Syntax Style | Learning Curve | Key Traits |
+|--------|--------------|----------------|------------|
+| **EJS** | HTML with `<% %>` tags | Low | Simple, similar to PHP/ASP |
+| **Pug** | Indentation-based, minimal | Medium | Concise, powerful, no closing tags |
+| **Handlebars** | HTML with `{{}}` expressions | Low | Logic-less templates |
 
-**Beginner-Friendly Explanation:** `app.set('views', './templates')` tells Express "my HTML templates live in the `templates` folder." `app.set('view engine', 'pug')` tells Express "these templates are written in Pug." Once both are set, you can write `res.render('index')` instead of `res.render('index.pug')`.
+**Component Breakdown**
 
-#### Purposes
+| Engine | Escaped Output | Unescaped Output |
+|--------|----------------|-------------------|
+| EJS | `<%= value %>` | `<%- value %>`（trusted only） |
+| Pug | `#{value}` or `p= value` | `!{value}` or `p!= value` |
+| Handlebars | `{{value}}` | `{{{value}}}` |
 
-- To configure the location and type of template files for the application.
-- To enable extension-free rendering via `res.render()`.
-- To allow custom view directory paths for different project structures.
-- To support multiple engines within one application.
+#### Syntax Rules
 
-#### Syntax Rules and Structure
+- The engine must either natively export `__express` or be wrapped by `@ladjs/consolidate`.
+- The default engine is set via `app.set('view engine', 'ejs')`; Express loads the module internally once the setting is configured.
+- When the view engine is set, file extensions can be omitted in `res.render()` calls; otherwise, the extension is required.
 
-```js
-app.set('views', './views');        // Template directory
-app.set('view engine', 'pug');      // Engine name
-```
+#### Constraints and Limitations
 
-| Setting | Breakdown |
-|---------|-----------|
-| `'views'` | Directory where template files are located. Defaults to `views` in the app root. |
-| `'view engine'` | Engine name (e.g., `'pug'`, `'ejs'`, `'hbs'`). Express loads the module internally. |
+- Pug is indentation-sensitive and can produce confusing errors if whitespace is inconsistent.
+- Handlebars is “logic-less”; complex logic must be implemented in helpers or pre-processed data.
+- EJS allows arbitrary JavaScript, which increases flexibility but also risk if misused.
 
-**Constraints and Limitations:**
-- The engine module must be installed separately (`npm install pug`).
-- Some engines do not follow the `__express` convention; use `@ladjs/consolidate` for those.
-- The `views` path can be an array of directories, searched in order.
+---
 
-#### Annotated Code Example
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
 
-```js
-// app.js — Configuring the view engine
+#### Example 1: EJS Template Rendering
+
+```javascript
+// app.js
 const express = require('express');
-const path = require('node:path');
+const path = require('path');
 const app = express();
 
-// ✅ Set the views directory (absolute path recommended)
 app.set('views', path.join(__dirname, 'views'));
-
-// ✅ Set the view engine
-app.set('view engine', 'pug');
-
-// ✅ Create a route that renders a template
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Home', message: 'Welcome!' });
-});
-
-app.listen(3000, () => console.log('Server on 3000'));
-```
-
-```pug
-//- views/index.pug
-doctype html
-html
-  head
-    title= title
-  body
-    h1= message
-```
-
-**Expected Output (for `GET /`):**
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Home</title>
-  </head>
-  <body>
-    <h1>Welcome!</h1>
-  </body>
-</html>
-```
-
-**Why this output:** Express resolves `index` to `views/index.pug`, loads the Pug engine, and calls its `__express` function with the file path and the locals object `{ title: 'Home', message: 'Welcome!' }`. Pug compiles the template, interpolates the variables, and returns the HTML string.
-
-#### Real-World Cases
-
-- **Multi-page websites:** Different routes render different templates from the same `views` directory.
-- **Custom directory structures:** `app.set('views', path.join(__dirname, 'templates', 'pages'))` for non-standard layouts.
-- **Multiple engines:** `app.engine('html', require('ejs').renderFile)` to use EJS with `.html` extensions.
-
----
-
-### Sub-Feature 1.2: The `__express` Convention and `app.engine()`
-
-#### Definitions
-
-**Core Definition:** The `__express` convention is the interface that Express-compliant template engines implement, allowing Express to call the engine's rendering function directly.
-
-**Technical Definition:** An Express-compliant engine exports a function named `__express(filePath, options, callback)`. `res.render()` invokes this function. For engines that do not follow this convention, `app.engine(extension, callback)` registers a custom rendering function for a specific file extension.
-
-**Beginner-Friendly Explanation:** Think of `__express` as a standard plug shape. Any template engine that has this plug can connect to Express. If an engine has a different plug shape, `app.engine()` lets you adapt it.
-
-#### Purposes
-
-- To enable Express to render templates without loading the engine module directly.
-- To support engines that do not follow the `__express` convention.
-- To register custom rendering functions for specific file extensions.
-
-#### Syntax Rules and Structure
-
-```js
-// Standard: Express loads the engine automatically
-app.set('view engine', 'pug');
-
-// Custom: Register a rendering function for an extension
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html');
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `app.engine(ext, fn)` | Registers a rendering function for the given extension. |
-| `fn(filePath, options, callback)` | The rendering function signature. |
-| `app.set('view engine', ext)` | Sets the registered engine as the default. |
-
-**Constraints and Limitations:**
-- `app.engine()` must be called before `app.set('view engine')`.
-- The rendering function must accept `(filePath, options, callback)` and call the callback with `(err, html)`.
-
-#### Annotated Code Example
-
-```js
-// app.js — Custom engine registration
-const express = require('express');
-const ejs = require('ejs');
-const app = express();
-
-// ✅ Register EJS for .html files
-app.engine('html', ejs.renderFile);
-
-// ✅ Set .html as the default view engine
-app.set('view engine', 'html');
-app.set('views', './views');
+app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
-  res.render('index', { name: 'World' });
+  res.render('index', {
+    title: 'Home',
+    user: { name: 'Alice' },
+    isAdmin: true
+  });
 });
 
-app.listen(3000, () => console.log('Server on 3000'));
-```
-
-```html
-<!-- views/index.html -->
-<h1>Hello, <%= name %>!</h1>
-```
-
-**Expected Output (for `GET /`):**
-```html
-<h1>Hello, World!</h1>
-```
-
-**Why this output:** `app.engine('html', ejs.renderFile)` tells Express to use EJS's `renderFile` function whenever it encounters an `.html` file. `app.set('view engine', 'html')` makes `.html` the default extension, so `res.render('index')` resolves to `views/index.html`.
-
-#### Real-World Cases
-
-- **Using EJS with `.html` extensions:** Many teams prefer `.html` over `.ejs` for editor syntax highlighting.
-- **Custom template formats:** Registering a custom engine for `.md` files that render Markdown to HTML.
-- **Legacy migrations:** Registering an adapter for an old template engine while migrating to a new one.
-
----
-
-## Core Concept 2: Core Layout Patterns
-
-### Definitions
-
-**Core Definition:** Layout patterns are reusable template structures — base layouts, partials, fragments, and blocks — that promote DRY (Don't Repeat Yourself) principles across multiple pages.
-
-**Technical Definition:** A **layout** is a master template defining the common HTML skeleton (header, footer, navigation) with placeholders for page-specific content. **Partials** are reusable template fragments (header, footer, sidebar) included in multiple pages. **Blocks** are named regions in a layout that child templates can override, append to, or prepend to. **Structural inheritance** allows templates to extend other templates, overriding specific blocks while inheriting the rest.
-
-**Beginner-Friendly Explanation:** A layout is like a picture frame. The frame (header, footer, sidebar) stays the same, but the picture (page content) changes. Partials are like reusable stickers that you can place on any picture. Blocks are like windows in the frame where you can insert different content.
-
-### Purposes
-
-- To eliminate duplication of common HTML structure across pages.
-- To provide consistent navigation, headers, and footers.
-- To enable page-specific content insertion through block overrides.
-- To support multi-level inheritance for complex site hierarchies.
-- To keep templates modular and maintainable.
-
-### Sub-Feature 2.1: Pug Template Inheritance (Block/Extends)
-
-#### Definitions
-
-**Core Definition:** Pug's template inheritance uses the `block` and `extends` keywords to define replaceable regions in a layout and override them in child templates.
-
-**Technical Definition:** A layout template defines named blocks using the `block` keyword. A child template uses `extends layout` to inherit from the layout and then overrides specific blocks. Blocks can have default content that is used if the child does not override them. Pug also supports `block append` and `block prepend` to add content without replacing the default.
-
-**Beginner-Friendly Explanation:** Think of a layout as a form with blank fields. The child template fills in those fields. If the child doesn't fill in a field, the default value is used.
-
-#### Purposes
-
-- To provide a single layout for all pages of a website.
-- To override only the parts of the layout that change per page.
-- To add scripts or styles for specific pages via `append`.
-- To support multi-level inheritance (sub-layouts).
-
-#### Syntax Rules and Structure
-
-```pug
-//- layout.pug
-doctype html
-html
-  head
-    title= title
-    block head
-  body
-    block content
-    block footer
-      p Default footer
-```
-
-```pug
-//- page.pug
-extends layout.pug
-
-block content
-  h1= title
-  p Welcome to #{title}
-```
-
-| Keyword | Purpose |
-|---------|---------|
-| `block name` | Defines a replaceable region. |
-| `extends layout` | Inherits from the specified layout. |
-| `block append name` | Adds content after the block's default content. |
-| `block prepend name` | Adds content before the block's default content. |
-
-**Constraints and Limitations:**
-- Only named blocks and mixin definitions can appear at the top level of a child template.
-- A child template cannot add content outside of a block.
-- Variables defined in the layout are inherited by child templates.
-
-#### Annotated Code Example
-
-```pug
-//- views/layout.pug
-doctype html
-html
-  head
-    title My Site - #{title}
-    block scripts
-      script(src='/vendor/jquery.js')
-  body
-    block content
-    block foot
-      #footer
-        p Copyright 2026
-```
-
-```pug
-//- views/page-a.pug
-extends layout.pug
-
-block scripts
-  script(src='/pets.js')
-
-block content
-  h1= title
-  - var pets = ['cat', 'dog']
-  each petName in pets
-    include pet.pug
-```
-
-```pug
-//- views/pet.pug
-p= petName
-```
-
-**Expected Output (for rendering `page-a` with `{ title: 'Pets' }`):**
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>My Site - Pets</title>
-    <script src="/pets.js"></script>
-  </head>
-  <body>
-    <h1>Pets</h1>
-    <p>cat</p>
-    <p>dog</p>
-    <div id="footer"><p>Copyright 2026</p></div>
-  </body>
-</html>
-```
-
-**Why this output:** `page-a.pug` extends `layout.pug` and overrides the `scripts` block with a different script. The `content` block is replaced with the pets list. The `foot` block is not overridden, so the default footer is used.
-
-#### Real-World Cases
-
-- **Multi-page websites:** A single `layout.pug` provides the common structure; each page extends it.
-- **Admin dashboards:** A `dashboard-layout.pug` with sidebar and navbar blocks; pages override the content block.
-- **Blogs:** A `post-layout.pug` with metadata blocks; individual posts override title, date, and body.
-
----
-
-### Sub-Feature 2.2: EJS Partials and Includes
-
-#### Definitions
-
-**Core Definition:** EJS partials are reusable template fragments included in other templates using the `<%- include() %>` syntax.
-
-**Technical Definition:** EJS provides an `include()` function that reads another template file, renders it with the current context (or a passed object), and inserts the result at the inclusion point. Partials are typically stored in a `partials` subdirectory within `views`.
-
-**Beginner-Friendly Explanation:** A partial is like a LEGO block that you can snap into any page. The header, footer, and navigation are common partials that you include on every page.
-
-#### Purposes
-
-- To reuse common HTML fragments (header, footer, nav) across pages.
-- To pass different data to the same partial from different pages.
-- To keep templates DRY and maintainable.
-
-#### Syntax Rules and Structure
-
-```ejs
-<%- include('partials/header', { title: 'My Page' }) %>
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `<%-` | Outputs unescaped HTML (partials should not be escaped). |
-| `include('path')` | Includes the template at the given path. |
-| `{ title: 'My Page' }` | Optional object passed to the partial. |
-
-**Constraints and Limitations:**
-- `<%-` is unescaped; use `<%=` for escaped output only.
-- The include path is relative to the current template unless configured otherwise.
-- EJS does not have built-in layout inheritance; use `ejs-mate` or `express-ejs-layouts` for layouts.
-
-#### Annotated Code Example
-
-```html
-<!-- views/partials/header.ejs -->
-<header>
-  <h1><%= title %></h1>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/about">About</a>
-  </nav>
-</header>
+app.listen(3000);
 ```
 
 ```html
 <!-- views/index.ejs -->
 <!DOCTYPE html>
 <html>
-  <head><title><%= title %></title></head>
-  <body>
-    <%- include('partials/header', { title: 'Home' }) %>
-    <main>
-      <p>Welcome to the home page.</p>
-    </main>
-    <%- include('partials/footer') %>
-  </body>
+<head><title><%= title %></title></head>
+<body>
+  <h1>Welcome, <%= user.name %>!</h1>
+  <% if (isAdmin) { %>
+    <div class="admin-panel">Admin controls</div>
+  <% } %>
+</body>
 </html>
 ```
 
-**Expected Output (for rendering `index` with `{ title: 'Home' }`):**
+**Step-by-Step Explanation**
+
+1. **Engine selection** — `app.set('view engine', 'ejs')` tells Express to use EJS and load the `ejs` module internally.
+2. **Directory configuration** — `app.set('views', ...)` points to the folder containing `index.ejs`.
+3. **Rendering** — `res.render('index', { ... })` passes locals to the template, and EJS substitutes them into the HTML.
+
+**Expected Output**
+
 ```html
 <!DOCTYPE html>
 <html>
-  <head><title>Home</title></head>
-  <body>
-    <header>
-      <h1>Home</h1>
-      <nav>
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-      </nav>
-    </header>
-    <main>
-      <p>Welcome to the home page.</p>
-    </main>
-    <footer><p>© 2026</p></footer>
-  </body>
+<head><title>Home</title></head>
+<body>
+  <h1>Welcome, Alice!</h1>
+  <div class="admin-panel">Admin controls</div>
+</body>
 </html>
 ```
 
-**Why this output:** The `include()` function reads `partials/header.ejs`, renders it with the passed `{ title: 'Home' }` object, and inserts the result. The `title` variable is available in the partial because it is passed explicitly.
+**Why This Output Occurs**
 
-#### Real-World Cases
-
-- **Blogs:** A `header.ejs` partial with navigation and a `footer.ejs` partial with copyright.
-- **E-commerce:** A `product-card.ejs` partial rendered in a loop on the products page.
-- **Admin panels:** A `sidebar.ejs` partial with navigation links, included on every admin page.
+- EJS evaluates the `<%= %>` expressions and the `<% if %>` block, producing the final HTML.
 
 ---
 
-### Sub-Feature 2.3: Handlebars Layouts and Blocks
+### Real-World Cases
 
-#### Definitions
-
-**Core Definition:** `express-handlebars` provides layout support via the `{{{body}}}` placeholder and block helpers for named content regions.
-
-**Technical Definition:** The `express-handlebars` package adds back the concept of layouts that was removed in Express 3.x. A layout template contains the `{{{body}}}` placeholder where the rendered page content is inserted. Named blocks are defined with `{{{block "name"}}}` in layouts and filled with `{{#contentFor "name"}}...{{/contentFor}}` in pages. Partials are included with `{{> partialName}}` and are loaded from a `partials` directory.
-
-**Beginner-Friendly Explanation:** A layout is a picture frame with a hole in the middle (`{{{body}}}`). The page content fills that hole. Blocks are additional smaller holes (for page-specific scripts or styles) that you can fill from the page.
-
-#### Purposes
-
-- To provide layout inheritance for Handlebars templates.
-- To allow pages to inject scripts or styles into the layout's `<head>`.
-- To reuse partials across pages.
-- To support multi-level layouts.
-
-#### Syntax Rules and Structure
-
-```js
-// app.js
-const exphbs = require('express-handlebars');
-app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs' }));
-app.set('view engine', 'hbs');
-```
-
-```handlebars
-{{! views/layouts/main.hbs }}
-<!DOCTYPE html>
-<html>
-<head>
-  <title>{{title}}</title>
-  {{{block "pageStyles"}}}
-</head>
-<body>
-  {{{body}}}
-  {{{block "pageScripts"}}}
-</body>
-</html>
-```
-
-```handlebars
-{{! views/home.hbs }}
-{{#contentFor "pageScripts"}}
-  <script src="/home.js"></script>
-{{/contentFor}}
-<h1>{{title}}</h1>
-<p>Welcome!</p>
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `{{{body}}}` | Placeholder for the rendered page content. |
-| `{{{block "name"}}}` | Named block for page-specific content. |
-| `{{#contentFor "name"}}` | Fills the named block from the page. |
-| `{{> partialName}}` | Includes a partial. |
-
-**Constraints and Limitations:**
-- `defaultLayout` must be configured or passed to `res.render()`.
-- Layouts are resolved from the `layouts` directory (default: `views/layouts`).
-- Handlebars escapes HTML by default; use triple braces `{{{ }}}` for unescaped content.
-
-#### Annotated Code Example
-
-```js
-// app.js
-const express = require('express');
-const exphbs = require('express-handlebars');
-const app = express();
-
-app.engine('hbs', exphbs({
-  defaultLayout: 'main',
-  extname: '.hbs',
-  layoutsDir: 'views/layouts',
-  partialsDir: 'views/partials'
-}));
-app.set('view engine', 'hbs');
-
-app.get('/', (req, res) => {
-  res.render('home', { title: 'Home', message: 'Hello, Handlebars!' });
-});
-
-app.listen(3000, () => console.log('Server on 3000'));
-```
-
-```handlebars
-{{! views/layouts/main.hbs }}
-<!DOCTYPE html>
-<html>
-<head>
-  <title>{{title}}</title>
-  {{{block "pageStyles"}}}
-</head>
-<body>
-  {{> header}}
-  {{{body}}}
-  {{{block "pageScripts"}}}
-</body>
-</html>
-```
-
-```handlebars
-{{! views/partials/header.hbs }}
-<header><h1>{{title}}</h1></header>
-```
-
-```handlebars
-{{! views/home.hbs }}
-{{#contentFor "pageScripts"}}
-  <script src="/home.js"></script>
-{{/contentFor}}
-<p>{{message}}</p>
-```
-
-**Expected Output (for `GET /`):**
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Home</title>
-</head>
-<body>
-  <header><h1>Home</h1></header>
-  <p>Hello, Handlebars!</p>
-  <script src="/home.js"></script>
-</body>
-</html>
-```
-
-**Why this output:** The layout `main.hbs` provides the HTML skeleton with `{{{body}}}` and block placeholders. The `home.hbs` template fills the `pageScripts` block with a script tag and provides the body content. The `header` partial is included in the layout.
-
-#### Real-World Cases
-
-- **Multi-page websites:** A single `main.hbs` layout with partials for header and footer.
-- **Admin dashboards:** A `dashboard.hbs` layout with sidebar and content blocks.
-- **Marketing pages:** A `landing.hbs` layout with different block overrides for each page.
+- **Server-rendered web applications** — Traditional multi-page apps render full HTML on each request.
+- **Email templates** — The same engines render HTML emails using `app.render()` for programmatic string generation.
+- **Error pages** — Dedicated error templates render status-specific pages for `404` and `500` responses.
 
 ---
 
-## Core Concept 3: Data Binding & Context Interpolation
+## Core Concept 2: View Engine
 
 ### Definitions
 
-**Core Definition:** Data binding is the process of passing data from the Express application to the template engine, where variables are interpolated into the rendered HTML.
+**Core Definition**
+The view engine is the default template engine that Express uses to render views when a file extension is not explicitly provided in the `res.render()` call.
 
-**Technical Definition:** Express provides three levels of data binding: `res.render(view, locals)` passes data for a single render call; `res.locals` holds data for the lifetime of a single request-response cycle; `app.locals` holds data for the lifetime of the application. The template engine merges these objects (with `res.render` locals taking precedence over `res.locals`, which take precedence over `app.locals`) and makes them available as variables in the template.
+**Technical Definition**
+The `view engine` application setting specifies the default template engine. Once set, Express loads the corresponding module internally, and `res.render()` can omit the file extension. Express can also be configured with multiple engines registered via `app.engine(ext, callback)`, allowing different file extensions to be handled by different engines. If the `view engine` property is not set, the extension must be specified in every `res.render()` call.
 
-**Beginner-Friendly Explanation:** Think of templates as forms. `app.locals` is like a company-wide directory available to every form. `res.locals` is like a folder for the current customer, available only while they're being served. `res.render` locals are like sticky notes for that specific form.
-
-### Purposes
-
-- To pass dynamic data from route handlers to templates.
-- To provide application-wide data (site name, version) to all templates.
-- To expose request-specific data (current user, settings) to templates.
-- To provide helper functions to all templates.
-
-### Sub-Feature 3.1: `res.render()` Locals
-
-#### Definitions
-
-**Core Definition:** `res.render(view, locals)` passes a locals object to the template for a single rendering operation.
-
-**Technical Definition:** The locals object is merged with `res.locals` and `app.locals` and passed to the template engine. Keys in the `res.render` locals object take precedence over the same keys in `res.locals` and `app.locals`.
-
-**Beginner-Friendly Explanation:** When you call `res.render('index', { title: 'Home' })`, the template receives a `title` variable with the value `'Home'`. This is the most direct way to pass data to a template.
-
-#### Purposes
-
-- To pass route-specific data to a template.
-- To override application-level or request-level locals for a specific render.
-- To provide data that changes with every request.
-
-#### Syntax Rules and Structure
-
-```js
-res.render('index', { title: 'Home', user: req.user });
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `'index'` | Template name (extension optional if view engine is set). |
-| `{ title: 'Home', user: req.user }` | Locals object passed to the template. |
-
-**Constraints and Limitations:**
-- The locals object is merged with `res.locals` and `app.locals`; conflicting keys are resolved in favour of `res.render` locals.
-- Locals should not contain user-controlled keys that could affect the view engine's operation.
-
-#### Annotated Code Example
-
-```js
-// app.js
-app.get('/user/:id', (req, res) => {
-  const user = { id: req.params.id, name: 'Alice', role: 'admin' };
-  res.render('profile', { title: 'User Profile', user });
-});
-```
-
-```pug
-//- views/profile.pug
-h1= title
-p Name: #{user.name}
-p Role: #{user.role}
-```
-
-**Expected Output (for `GET /user/42`):**
-```html
-<h1>User Profile</h1>
-<p>Name: Alice</p>
-<p>Role: admin</p>
-```
-
-**Why this output:** The `res.render` call passes `title` and `user` to the `profile` template. Pug interpolates `title` as `'User Profile'` and accesses `user.name` and `user.role` from the nested object.
-
-#### Real-World Cases
-
-- **User profiles:** Passing the user object to a profile template.
-- **Product pages:** Passing product details to a product template.
-- **Search results:** Passing the query and results array to a search template.
+**Beginner-Friendly Explanation**
+The view engine is the “default engine” Express uses when you say `res.render('home')` without telling it which type of template it is. Setting it once saves you from repeating the engine name on every render call.
 
 ---
 
-### Sub-Feature 3.2: `res.locals` — Request-Scoped Variables
+### Purposes
 
-#### Definitions
+- To establish a default rendering engine so file extensions can be omitted.
+- To enable Express to load the engine module automatically without explicit `require()` in every route.
+- To support multiple engines for different file types in the same application.
 
-**Core Definition:** `res.locals` is an object whose properties are available to templates rendered during a single request-response cycle.
+---
 
-**Technical Definition:** `res.locals` is populated in middleware and route handlers. It is merged with `app.locals` and `res.render` locals when a template is rendered. Variables set on `res.locals` are available only for the current request and are not shared between requests.
+### Syntax Rules and Structure
 
-**Beginner-Friendly Explanation:** `res.locals` is like a folder that belongs to the current customer. Everything you put in the folder is available while you're serving that customer, but when the next customer arrives, you get a fresh folder.
+#### Complete General Syntax
 
-#### Purposes
+```javascript
+app.set('view engine', 'ejs');
+```
 
-- To expose request-level information (authenticated user, request path) to templates.
-- To set variables in middleware that are consumed in templates.
-- To provide a clean separation between application-wide and request-specific data.
+**Component Breakdown**
 
-#### Syntax Rules and Structure
+| Component | Role |
+|-----------|------|
+| `'view engine'` | Application setting name |
+| `'ejs'` | Name of the installed engine package |
 
-```js
-// Middleware: set res.locals
-app.use((req, res, next) => {
-  res.locals.currentUser = req.user;
-  res.locals.path = req.path;
-  next();
+#### Syntax Rules
+
+- The engine package must be installed via npm and Express-compatible.
+- Once set, `res.render('home')` resolves to `home.ejs` without the extension.
+- Multiple engines can be registered with `app.engine('ext', engineFunction)` and used by specifying the extension.
+
+#### Constraints and Limitations
+
+- The engine must follow the `__express` convention or be wrapped by `@ladjs/consolidate`.
+- Changing the view engine at runtime affects subsequent render calls.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Multiple Engines
+
+```javascript
+const express = require('express');
+const exphbs = require('express-handlebars');
+const app = express();
+
+// Register Handlebars for .handlebars files
+app.engine('handlebars', exphbs());
+// Set EJS as the default engine
+app.set('view engine', 'ejs');
+
+app.get('/ejs', (req, res) => res.render('example.ejs', { title: 'EJS' }));
+app.get('/hbs', (req, res) => res.render('example.handlebars', { title: 'HBS' }));
+```
+
+**Expected Output**
+
+```
+GET /ejs  → rendered example.ejs
+GET /hbs  → rendered example.handlebars
+```
+
+**Why This Output Occurs**
+
+- The default engine handles extension-less renders, while explicit extensions route to their registered engines.
+
+---
+
+### Real-World Cases
+
+- **Gradual migrations** — Using Handlebars for new pages while keeping legacy EJS pages working.
+- **Email versus web** — Using a lightweight engine for web pages and a feature-rich engine for emails.
+
+---
+
+## Core Concept 3: `app.set('view engine', ...)`
+
+### Definitions
+
+**Core Definition**
+`app.set('view engine', name)` configures the default template engine that Express uses to render views and to determine file extensions for extension-less render calls.
+
+**Technical Definition**
+This application setting tells Express which template engine module to load internally. Once set, Express does not require the engine to be explicitly required in application code; it loads the module when rendering. The setting works in conjunction with `app.set('views', ...)` to fully configure the view system.
+
+**Beginner-Friendly Explanation**
+This line tells Express, “Use this template engine as your default.” After setting it, you can render templates without typing the file extension every time.
+
+---
+
+### Purposes
+
+- To set the default engine for all extension-less `res.render()` calls.
+- To let Express load the engine module automatically, reducing boilerplate.
+- To pair with the `views` setting to complete view configuration.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax
+
+```javascript
+app.set('view engine', 'pug');
+```
+
+**Component Breakdown**
+
+| Argument | Role |
+|----------|------|
+| `'view engine'` | The setting key |
+| `'pug'` | The engine name (matching the npm package) |
+
+#### Syntax Rules
+
+- The engine package must be installed.
+- The setting must be configured before any `res.render()` call.
+- It works alongside `app.set('views', ...)`.
+
+#### Constraints and Limitations
+
+- If the engine does not follow the `__express` convention, wrap it with `@ladjs/consolidate`.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Setting the Engine Before Routes
+
+```javascript
+const express = require('express');
+const path = require('path');
+const app = express();
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
+app.get('/', (req, res) => {
+  res.render('index', { title: 'Pug Example' });
 });
 ```
 
-| Component | Breakdown |
-|-----------|-----------|
-| `res.locals.currentUser` | Variable available in all templates for this request. |
-| `res.locals.path` | The request path, available in templates. |
+**Expected Output**
 
-**Constraints and Limitations:**
-- `res.locals` is reset for each request.
-- Keys should not be user-controlled to avoid view engine manipulation.
+```
+GET / → rendered index.pug
+```
 
-#### Annotated Code Example
+**Why This Output Occurs**
 
-```js
-// app.js — Middleware sets res.locals
+- The engine setting allows `res.render('index')` to resolve to `index.pug`.
+
+---
+
+### Real-World Cases
+
+- **Express generator projects** — The default generator sets Pug as the view engine.
+- **API-plus-web hybrids** — The engine is set once, and JSON routes remain unaffected.
+
+---
+
+## Core Concept 4: `app.set('views', ...)`
+
+### Definitions
+
+**Core Definition**
+`app.set('views', path)` specifies the directory (or directories) where Express looks for template files.
+
+**Technical Definition**
+The `views` setting defaults to the `views` directory in the application root. It can be set to an absolute path or a relative path, and it can be an array of directories, in which case Express searches them in order until the template is found. This setting is essential for view resolution when templates are organized outside the default location.
+
+**Beginner-Friendly Explanation**
+This setting tells Express where your template files live. If your templates are in a folder called `views`, you usually don't need to change it—but if you organize them differently, this is how you point Express to the right place.
+
+---
+
+### Purposes
+
+- To tell Express where template files are located.
+- To support custom directory structures (e.g., `templates/` instead of `views/`).
+- To allow multiple view directories searched in priority order.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax
+
+```javascript
+app.set('views', path.join(__dirname, 'views'));
+// Or multiple directories
+app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'admin-views')]);
+```
+
+**Component Breakdown**
+
+| Component | Role |
+|-----------|------|
+| `path.join(__dirname, 'views')` | Absolute path to the template directory |
+| Array | Multiple directories searched in order |
+
+#### Syntax Rules
+
+- Use absolute paths (`path.join(__dirname, ...)`) for reliability across environments.
+- The default is the `views` directory in the application root.
+- Multiple directories are supported and searched in order.
+
+#### Constraints and Limitations
+
+- Relative paths are resolved from the current working directory, which can vary in deployments.
+- If a template exists in multiple directories, the first match wins.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Multiple View Directories
+
+```javascript
 const express = require('express');
+const path = require('path');
 const app = express();
+
+app.set('views', [
+  path.join(__dirname, 'views'),
+  path.join(__dirname, 'admin-views'),
+  path.join(__dirname, 'email-templates')
+]);
+app.set('view engine', 'ejs');
+
+app.get('/admin', (req, res) => {
+  // Express searches all three directories for dashboard.ejs
+  res.render('dashboard', { title: 'Admin' });
+});
+```
+
+**Expected Output**
+
+```
+GET /admin → rendered dashboard.ejs (found in whichever directory contains it)
+```
+
+**Why This Output Occurs**
+
+- Express searches the directories in order and uses the first matching template.
+
+---
+
+### Real-World Cases
+
+- **Modular applications** — Feature-specific view directories searched alongside shared views.
+- **Email templates** — A separate directory for email templates kept apart from web views.
+
+---
+
+## Core Concept 5: `res.render()`
+
+### Definitions
+
+**Core Definition**
+`res.render(view [, locals] [, callback])` renders a view template with the provided local variables and sends the rendered HTML string to the client.
+
+**Technical Definition**
+The `view` argument is a string path to the template file, either absolute or relative to the `views` setting. If the path lacks an extension, the `view engine` setting determines it; if an extension is present, Express loads the corresponding engine module and uses its `__express` function. The optional `locals` object defines variables for the view, and the optional `callback` receives both the possible error and the rendered string without performing an automated response; when an error occurs, `next(err)` is invoked internally if no callback is provided.
+
+**Beginner-Friendly Explanation**
+`res.render()` is the command that says “take this template, fill it with this data, and send the result to the browser.” You give it the template name and an object containing the data, and Express handles the rest.
+
+---
+
+### Purposes
+
+- To render a template with data and send the resulting HTML as the response.
+- To support callback-based rendering for custom processing or testing.
+- To integrate with error-handling middleware through internal `next(err)` invocation.
+- To enable programmatic rendering via `app.render()` when the response should not be sent automatically.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax
+
+```javascript
+res.render(view [, locals] [, callback]);
+```
+
+**Component Breakdown**
+
+| Parameter | Role |
+|-----------|------|
+| `view` | Template file path (relative to `views` or absolute) |
+| `locals` | Object of variables for the template |
+| `callback` | Optional `(err, html)` callback; suppresses automatic response |
+
+#### Syntax Rules
+
+- If `view` has no extension, the `view engine` setting determines it.
+- If `view` has an extension, Express loads the module for that engine.
+- Without a callback, `res.render()` sends the HTML automatically.
+- With a callback, the rendered string is passed to the callback instead of being sent.
+
+#### Constraints and Limitations
+
+- The `view` argument performs filesystem operations and evaluates modules; it must not contain user input.
+- The `locals` object keys may be sensitive and should not contain user-controlled input that could affect the engine or enable XSS.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Basic Rendering with Locals
+
+```javascript
+app.get('/user', (req, res) => {
+  res.render('user', { name: 'Tobi' });
+});
+```
+
+**Expected Output**
+
+```
+GET /user → rendered user template with name = "Tobi"
+```
+
+**Why This Output Occurs**
+
+- The `locals` object passes `name` to the template, and `res.render()` sends the rendered HTML.
+
+---
+
+#### Example 2: Callback-Based Rendering
+
+```javascript
+app.get('/user', (req, res) => {
+  res.render('user', { name: 'Tobi' }, (err, html) => {
+    if (err) return res.status(500).send('Render error');
+    res.send(html); // must send explicitly when callback is provided
+  });
+});
+```
+
+**Expected Output**
+
+```
+GET /user → rendered HTML sent explicitly via res.send()
+```
+
+**Why This Output Occurs**
+
+- The callback suppresses the automatic response, so the developer must send the HTML explicitly.
+
+---
+
+### Real-World Cases
+
+- **Web pages** — Standard HTML responses for browser requests.
+- **Email generation** — `app.render()` renders templates to strings for email bodies without sending an HTTP response.
+- **Error pages** — `res.status(404).render('errors/404', { ... })` sends a status code with a rendered error template.
+
+---
+
+## Core Concept 6: View Locals
+
+### Definitions
+
+**Core Definition**
+View locals are the variables made available to a template during rendering, merged from three sources with a defined precedence.
+
+**Technical Definition**
+Express merges local variables from three sources when rendering templates, with the following precedence from highest to lowest: (1) variables passed directly to `res.render()` or `app.render()`, (2) `res.locals` (request-scoped variables), and (3) `app.locals` (application-wide variables). `app.locals` is initialized during application setup and includes a reference to `app.settings`; `res.locals` is initialized as an empty object per request. This layered system allows global defaults, request-specific data, and per-render overrides to coexist cleanly.
+
+**Beginner-Friendly Explanation**
+View locals are the pieces of data you give to a template. There are three “levels”: `app.locals` for things that are always the same (like the site name), `res.locals` for things that depend on the request (like the logged-in user), and the object you pass directly to `res.render()` for things that only apply to that one page. The most specific level wins.
+
+---
+
+### Purposes
+
+- To provide application-wide constants (site name, version) to all templates via `app.locals`.
+- To attach request-scoped data (current user, flash messages) to templates via `res.locals`.
+- To pass page-specific data directly to `res.render()`.
+- To avoid repeating common variables in every render call.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Layered Locals
+
+```javascript
+// Application-wide
+app.locals.siteName = 'My App';
+
+// Request-scoped middleware
+app.use((req, res, next) => {
+  res.locals.user = req.user;
+  res.locals.isAuthenticated = !!req.user;
+  next();
+});
+
+// Page-specific
+res.render('home', { title: 'Home' });
+```
+
+**Component Breakdown**
+
+| Source | Scope | Precedence |
+|--------|-------|------------|
+| `res.render()` locals | Single render call | Highest |
+| `res.locals` | Current request | Middle |
+| `app.locals` | Entire application | Lowest |
+
+#### Syntax Rules
+
+- `app.locals` persists for the application lifetime; use it for constants.
+- `res.locals` is per-request; set it in middleware before rendering.
+- Direct `res.render()` locals override both other sources.
+
+#### Constraints and Limitations
+
+- `res.locals` is not shared across requests; do not use it for global state.
+- Mutating `app.locals` at runtime affects all subsequent renders.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Layered Locals in Action
+
+```javascript
+app.locals.siteName = 'My App';
+
+app.use((req, res, next) => {
+  res.locals.user = { name: 'Alice' };
+  next();
+});
+
+app.get('/page', (req, res) => {
+  res.render('page', { title: 'Page Title', user: { name: 'Override' } });
+});
+```
+
+```html
+<!-- page.ejs -->
+<h1><%= siteName %></h1>     <!-- from app.locals -->
+<p>User: <%= user.name %></p> <!-- from res.render locals (overrides res.locals) -->
+<p>Title: <%= title %></p>    <!-- from res.render locals -->
+```
+
+**Expected Output**
+
+```html
+<h1>My App</h1>
+<p>User: Override</p>
+<p>Title: Page Title</p>
+```
+
+**Why This Output Occurs**
+
+- `siteName` comes from `app.locals`; `user.name` is overridden by the `res.render()` locals because render locals have the highest precedence.
+
+---
+
+### Real-World Cases
+
+- **Authentication-aware navigation** — `res.locals.isAuthenticated` and `res.locals.user` drive conditional navigation rendering.
+- **Site-wide constants** — `app.locals.siteTitle` used in every layout.
+- **Flash messages** — `res.locals.flash` set by middleware and displayed once per request.
+
+---
+
+## Core Concept 7: Templating Best Practices
+
+### Definitions
+
+**Core Definition**
+Templating best practices are the organizational, security, and performance patterns that keep template-based Express applications maintainable, safe, and efficient.
+
+**Technical Definition**
+Best practices encompass: selecting an engine appropriate to team and project needs; organizing templates into `layouts/`, `partials/`, and `pages/` directories; enabling automatic HTML escaping and never disabling it for user input; pre-processing data in route handlers rather than performing database queries or complex logic in templates; caching compiled templates in production; and rendering error-specific templates with correct status codes.
+
+**Beginner-Friendly Explanation**
+Best practices are the habits that keep your templates clean and safe. They include organizing your template files, always letting the engine escape user data, doing heavy calculations in your JavaScript code instead of inside the template, and turning on caching in production for speed.
+
+---
+
+### Purposes
+
+- To prevent XSS by relying on automatic escaping and avoiding unescaped output tags for user data.
+- To keep templates readable and maintainable through consistent directory structure and partials.
+- To improve performance by caching compiled templates and minimizing work inside templates.
+- To provide consistent, user-friendly error pages.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Recommended Structure
+
+```text
+project-root/
+├── views/
+│   ├── layouts/
+│   │   └── main.ejs
+│   ├── partials/
+│   │   ├── header.ejs
+│   │   └── footer.ejs
+│   └── pages/
+│       ├── home.ejs
+│       └── about.ejs
+├── public/
+└── app.js
+```
+
+**Component Breakdown**
+
+| Practice | Implementation |
+|----------|----------------|
+| Directory structure | `layouts/`, `partials/`, `pages/` |
+| Auto-escaping | Use `<%= %>` (EJS), `#{}` (Pug), `{{}}` (Handlebars) for user data |
+| View caching | `app.set('view cache', true)` in production |
+| Error templates | `res.status(statusCode).render('errors/error', { ... })` |
+
+#### Syntax Rules
+
+- **Never** use unescaped output tags (`<%- %>`, `!{}`, `{{{}}}`) with user-controlled data.
+- **Never** disable auto-escaping globally.
+- Pre-process data in route handlers; do not run database queries inside templates.
+- Enable `view cache` in production (default when `NODE_ENV=production`).
+- Do not pass user input to the `view` argument or as top-level `locals` keys.
+
+#### Constraints and Limitations
+
+- View caching caches only the compiled template, not the rendered output; dynamic data is still evaluated on every request.
+- Template engines that are logic-less (Handlebars) require helpers for any non-trivial logic.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Safe Rendering with Layouts and Partials
+
+```javascript
+// app.js
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+app.set('view cache', process.env.NODE_ENV === 'production');
 
 app.use((req, res, next) => {
   res.locals.siteName = 'My App';
-  res.locals.currentPath = req.path;
+  res.locals.user = req.user;
   next();
 });
 
 app.get('/', (req, res) => {
-  res.render('index', { title: 'Home' });
-});
-```
-
-```pug
-//- views/layout.pug
-doctype html
-html
-  head
-    title= siteName + ' - ' + title
-  body
-    nav
-      a(href='/', class=currentPath === '/' ? 'active' : '') Home
-    block content
-```
-
-**Expected Output (for `GET /`):**
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>My App - Home</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="active">Home</a>
-    </nav>
-  </body>
-</html>
-```
-
-**Why this output:** The middleware sets `res.locals.siteName` and `res.locals.currentPath` before the route handler renders the template. The layout uses these variables alongside the `title` from `res.render` locals.
-
-#### Real-World Cases
-
-- **Authentication:** Setting `res.locals.user` in authentication middleware, available in all templates.
-- **Navigation highlighting:** Setting `res.locals.currentPath` to highlight the active link.
-- **Flash messages:** Setting `res.locals.flash` from session data, consumed in the layout.
-
----
-
-### Sub-Feature 3.3: `app.locals` — Application-Wide Variables and Helpers
-
-#### Definitions
-
-**Core Definition:** `app.locals` is an object whose properties persist throughout the life of the application and are available in all templates.
-
-**Technical Definition:** `app.locals` is a JavaScript object (technically a Function object in older Express versions) whose properties are merged into the locals for every `res.render` call. It is useful for providing helper functions and application-level data such as site name, version, and configuration values.
-
-**Beginner-Friendly Explanation:** `app.locals` is like a company directory that every employee (template) can access. The site name, the current year, and helper functions for formatting dates are stored here.
-
-#### Purposes
-
-- To provide application-wide data (site name, version, environment) to all templates.
-- To register helper functions accessible from any template.
-- To avoid passing the same data to every `res.render` call.
-
-#### Syntax Rules and Structure
-
-```js
-app.locals.siteName = 'My App';
-app.locals.version = '1.0.0';
-app.locals.formatDate = (date) => new Date(date).toLocaleDateString();
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `app.locals.siteName` | String available in all templates. |
-| `app.locals.formatDate` | Function callable from templates. |
-
-**Constraints and Limitations:**
-- Values persist for the life of the application; changing them affects all subsequent requests.
-- Do not use native function property names (`name`, `call`, `apply`, `bind`, `length`, `constructor`) as keys.
-- `app.locals` is a Function object in Express 3.x; this is not an issue in Express 4.x and 5.x.
-
-#### Annotated Code Example
-
-```js
-// app.js — Application-wide locals and helpers
-const express = require('express');
-const app = express();
-
-app.locals.siteName = 'My App';
-app.locals.currentYear = new Date().getFullYear();
-app.locals.formatCurrency = (amount) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Home' });
-});
-```
-
-```pug
-//- views/index.pug
-h1= siteName
-p © #{currentYear}
-p Price: #{formatCurrency(29.99)}
-```
-
-**Expected Output (for `GET /`):**
-```html
-<h1>My App</h1>
-<p>© 2026</p>
-<p>Price: $29.99</p>
-```
-
-**Why this output:** `app.locals.siteName`, `app.locals.currentYear`, and `app.locals.formatCurrency` are merged into the locals for every render. The template accesses them directly by name.
-
-#### Real-World Cases
-
-- **Site-wide metadata:** `app.locals.siteName` and `app.locals.description` used in the layout's `<title>` and meta tags.
-- **Helper functions:** `app.locals.formatDate` used in blog post templates.
-- **Configuration:** `app.locals.environment` used to conditionally load analytics scripts.
-
----
-
-## Core Concept 4: Control Structures
-
-### Definitions
-
-**Core Definition:** Control structures are template syntax constructs that allow conditional logic and iteration within templates.
-
-**Technical Definition:** Template engines provide syntax for `if/else` conditionals, `for`/`forEach` loops, and other control flow constructs. EJS uses standard JavaScript inside `<% %>` tags; Pug uses indentation-based `if`, `else`, `each`, and `while` keywords; Handlebars uses `{{#if}}`, `{{#each}}`, and `{{#unless}}` block helpers.
-
-**Beginner-Friendly Explanation:** Control structures let your templates make decisions ("show this if the user is logged in") and repeat content ("show this card for each product"). They bring programming logic into your HTML.
-
-### Purposes
-
-- To conditionally render HTML based on data values.
-- To iterate over arrays and objects to generate repetitive markup.
-- To provide fallback content when data is missing.
-- To keep templates dynamic and data-driven.
-
-### Sub-Feature 4.1: EJS Conditionals and Loops
-
-#### Definitions
-
-**Core Definition:** EJS embeds JavaScript logic inside `<% %>` tags for control flow, with `<%= %>` for escaped output and `<%- %>` for unescaped output.
-
-**Technical Definition:** `<% if (condition) { %>` opens a conditional block; `<% } %>` closes it. `<% array.forEach(function(item) { %>` iterates over an array. `<%= variable %>` outputs an escaped value; `<%- variable %>` outputs unescaped HTML.
-
-**Beginner-Friendly Explanation:** EJS lets you write regular JavaScript inside your HTML. The `<% %>` tags contain logic that doesn't output anything; the `<%= %>` tags output values.
-
-#### Purposes
-
-- To conditionally display content (e.g., admin panel only for admins).
-- To loop over arrays and generate lists.
-- To handle empty states with `else` blocks.
-
-#### Syntax Rules and Structure
-
-```ejs
-<% if (user.isAdmin) { %>
-  <p>Admin Panel</p>
-<% } else { %>
-  <p>User Dashboard</p>
-<% } %>
-
-<ul>
-  <% items.forEach(function(item) { %>
-    <li><%= item.name %></li>
-  <% }); %>
-</ul>
-```
-
-| Tag | Purpose |
-|-----|---------|
-| `<% %>` | Executes JavaScript without output. |
-| `<%= %>` | Outputs escaped value. |
-| `<%- %>` | Outputs unescaped HTML. |
-
-**Constraints and Limitations:**
-- The opening and closing tags must be balanced.
-- `<%=` escapes HTML; use `<%-` only for trusted content.
-
-#### Annotated Code Example
-
-```html
-<!-- views/users.ejs -->
-<h1>Users</h1>
-<% if (users.length === 0) { %>
-  <p>No users found.</p>
-<% } else { %>
-  <ul>
-    <% users.forEach(function(user) { %>
-      <li>
-        <strong><%= user.name %></strong>
-        <% if (user.role === 'admin') { %>
-          <span class="badge">Admin</span>
-        <% } %>
-      </li>
-    <% }); %>
-  </ul>
-<% } %>
-```
-
-**Expected Output (for `users = [{ name: 'Alice', role: 'admin' }, { name: 'Bob', role: 'user' }]`):**
-```html
-<h1>Users</h1>
-<ul>
-  <li>
-    <strong>Alice</strong>
-    <span class="badge">Admin</span>
-  </li>
-  <li>
-    <strong>Bob</strong>
-  </li>
-</ul>
-```
-
-**Why this output:** The outer `if` checks if the array is empty. The `forEach` loop iterates over each user. The inner `if` conditionally renders the admin badge only for users with the `admin` role.
-
-#### Real-World Cases
-
-- **Product listings:** Looping over a products array to generate cards.
-- **User tables:** Displaying user data with conditional action buttons.
-- **Empty states:** Showing "No results found" when a search returns nothing.
-
----
-
-### Sub-Feature 4.2: Pug Conditionals and Iteration
-
-#### Definitions
-
-**Core Definition:** Pug uses indentation-based syntax for conditionals (`if`, `else if`, `else`) and iteration (`each`, `while`).
-
-**Technical Definition:** Pug's `if`/`else if`/`else` keywords create conditional blocks. `each item in items` iterates over arrays and objects. `while` creates a loop with a condition. Code lines beginning with `-` are unbuffered (no output), and `=` outputs an expression.
-
-**Beginner-Friendly Explanation:** Pug uses indentation instead of angle brackets. You write `if user.isAdmin` on one line, and indent the content that should be shown.
-
-#### Purposes
-
-- To conditionally render content with clean, indentation-based syntax.
-- To iterate over arrays with `each`.
-- To write loops with `while` when the iteration count is known.
-
-#### Syntax Rules and Structure
-
-```pug
-if user.isAdmin
-  p Admin Panel
-else
-  p User Dashboard
-
-ul
-  each item in items
-    li= item.name
-```
-
-| Keyword | Purpose |
-|---------|---------|
-| `if` / `else if` / `else` | Conditional rendering. |
-| `each item in items` | Iterate over arrays and objects. |
-| `while condition` | Loop while condition is true. |
-
-**Constraints and Limitations:**
-- Indentation must be consistent (2 spaces or 1 tab).
-- `each` also supports `each val, index in items` for index access.
-
-#### Annotated Code Example
-
-```pug
-//- views/users.pug
-h1 Users
-if users.length === 0
-  p No users found.
-else
-  ul
-    each user in users
-      li
-        strong= user.name
-        if user.role === 'admin'
-          span.badge Admin
-```
-
-**Expected Output (for the same users array):**
-```html
-<h1>Users</h1>
-<ul>
-  <li><strong>Alice</strong><span class="badge">Admin</span></li>
-  <li><strong>Bob</strong></li>
-</ul>
-```
-
-**Why this output:** The `if` checks if the array is empty. The `each` loop iterates over each user. The inner `if` conditionally renders the admin badge.
-
-#### Real-World Cases
-
-- **Navigation menus:** `each link in links` to generate the navigation.
-- **Blog archives:** `each post in posts` to generate post previews.
-- **Tables:** `each row in data` to generate table rows.
-
----
-
-### Sub-Feature 4.3: Handlebars Conditionals and Each
-
-#### Definitions
-
-**Core Definition:** Handlebars uses block helpers (`{{#if}}`, `{{#each}}`, `{{#unless}}`) for control flow.
-
-**Technical Definition:** `{{#if condition}}...{{else}}...{{/if}}` renders content conditionally. `{{#each items}}...{{/each}}` iterates over arrays and objects. `{{#unless condition}}` is the inverse of `if`. Inside `each`, `{{this}}` refers to the current item and `{{@index}}` to the current index.
-
-**Beginner-Friendly Explanation:** Handlebars uses `{{#if}}` and `{{#each}}` blocks. You write `{{#if user.isAdmin}}` and close with `{{/if}}`.
-
-#### Purposes
-
-- To provide declarative conditionals without embedding JavaScript.
-- To iterate over arrays with built-in index and first/last helpers.
-- To handle empty states with `{{else}}`.
-
-#### Syntax Rules and Structure
-
-```handlebars
-{{#if user.isAdmin}}
-  <p>Admin Panel</p>
-{{else}}
-  <p>User Dashboard</p>
-{{/if}}
-
-<ul>
-  {{#each items}}
-    <li>{{this.name}}</li>
-  {{/each}}
-</ul>
-```
-
-| Helper | Purpose |
-|--------|---------|
-| `{{#if}}` | Conditional rendering. |
-| `{{#each}}` | Iterate over arrays. |
-| `{{#unless}}` | Inverse conditional. |
-| `{{this}}` | Current item in `each`. |
-| `{{@index}}` | Current index in `each`. |
-
-**Constraints and Limitations:**
-- Handlebars is logic-less; complex logic should be handled in the route or with helpers.
-- `{{#each}}` does not support `else` for empty arrays by default; use `{{#if items.length}}` or a custom helper.
-
-#### Annotated Code Example
-
-```handlebars
-{{! views/users.hbs }}
-<h1>Users</h1>
-{{#if users.length}}
-  <ul>
-    {{#each users}}
-      <li>
-        <strong>{{this.name}}</strong>
-        {{#if this.isAdmin}}
-          <span class="badge">Admin</span>
-        {{/if}}
-      </li>
-    {{/each}}
-  </ul>
-{{else}}
-  <p>No users found.</p>
-{{/if}}
-```
-
-**Expected Output (for the same users array):**
-```html
-<h1>Users</h1>
-<ul>
-  <li>
-    <strong>Alice</strong>
-    <span class="badge">Admin</span>
-  </li>
-  <li>
-    <strong>Bob</strong>
-  </li>
-</ul>
-```
-
-**Why this output:** The outer `{{#if users.length}}` checks if the array has items. The `{{#each}}` block iterates over each user. The inner `{{#if this.isAdmin}}` conditionally renders the badge.
-
-#### Real-World Cases
-
-- **E-commerce:** `{{#each products}}` to generate product cards.
-- **Blogs:** `{{#each posts}}` to generate post previews.
-- **Admin panels:** `{{#if user.isAdmin}}` to show admin-only controls.
-
----
-
-## Core Concept 5: Custom Helper Functions
-
-### Definitions
-
-**Core Definition:** Custom helper functions are JavaScript functions registered on `app.locals` (or the engine's helper system) that can be called from templates to perform formatting, calculation, or other utility tasks.
-
-**Technical Definition:** In Express, `app.locals` accepts both data values and functions. Functions registered on `app.locals` are available as callable helpers in templates. In Handlebars, helpers are registered via `Handlebars.registerHelper()`. In EJS, any function in the locals object is callable. In Pug, functions are callable as mixins or directly.
-
-**Beginner-Friendly Explanation:** A helper is like a calculator that lives inside your template. You give it a value (like a date or a price), and it returns a formatted result (like "January 15, 2026" or "$29.99").
-
-### Purposes
-
-- To format dates, currency, and strings consistently across templates.
-- To compute derived values (e.g., full name from first and last).
-- To conditionally render content based on complex logic.
-- To avoid duplicating formatting logic in multiple templates.
-
-### Sub-Feature 5.1: Registering Helpers on `app.locals`
-
-#### Definitions
-
-**Core Definition:** Helpers registered on `app.locals` are available in all templates rendered by the application.
-
-**Technical Definition:** Any function assigned to a property of `app.locals` is merged into the locals object for every `res.render` call. The function can accept arguments and return a value that is interpolated into the template.
-
-**Beginner-Friendly Explanation:** You attach a helper function to `app.locals`, and from then on, every template can call it by name.
-
-#### Purposes
-
-- To provide consistent formatting across all templates.
-- To centralise utility logic in one place.
-- To make templates cleaner by moving complex expressions into helpers.
-
-#### Syntax Rules and Structure
-
-```js
-app.locals.formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
-};
-
-app.locals.formatCurrency = (amount) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `app.locals.formatDate` | Helper name available in templates. |
-| `(date) => { ... }` | Function accepting a value and returning a formatted string. |
-
-**Constraints and Limitations:**
-- Helpers must be synchronous; asynchronous helpers require engine-specific support.
-- Do not use native function property names (`name`, `call`, `apply`, `bind`, `length`, `constructor`) as helper names.
-- Helpers are registered once at application startup.
-
-#### Annotated Code Example
-
-```js
-// app.js — Registering helpers on app.locals
-const express = require('express');
-const app = express();
-
-// ✅ Date formatting helper
-app.locals.formatDate = (date) => {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
-};
-
-// ✅ Currency formatting helper
-app.locals.formatCurrency = (amount) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
-
-// ✅ Truncation helper
-app.locals.truncate = (str, len = 50) =>
-  str.length > len ? str.slice(0, len) + '...' : str;
-
-app.get('/', (req, res) => {
-  res.render('index', {
-    title: 'Helpers Demo',
-    created: new Date(),
-    price: 29.99,
-    description: 'A very long description that needs to be truncated for display purposes.'
+  res.render('pages/home', {
+    title: 'Home',
+    bio: '<script>alert("xss")</script>Safe bio text'
   });
 });
-
-app.listen(3000, () => console.log('Server on 3000'));
 ```
 
-```pug
-//- views/index.pug
-h1= title
-p Created: #{formatDate(created)}
-p Price: #{formatCurrency(price)}
-p Description: #{truncate(description, 30)}
-```
-
-**Expected Output (for `GET /`):**
 ```html
-<h1>Helpers Demo</h1>
-<p>Created: January 15, 2026</p>
-<p>Price: $29.99</p>
-<p>Description: A very long description that...</p>
+<!-- views/pages/home.ejs -->
+<%- include('../partials/header', { title: title }) %>
+<h1>Welcome to <%= siteName %></h1>
+<p>Bio: <%= bio %></p>  <!-- Escaped: script tags rendered as text -->
+<%- include('../partials/footer') %>
 ```
 
-**Why this output:** The `formatDate` helper converts the `Date` object to a readable string. The `formatCurrency` helper formats the number as USD. The `truncate` helper shortens the description to 30 characters. All helpers are called with arguments and return values that are interpolated into the template.
+**Expected Output**
 
-#### Real-World Cases
+```html
+<!-- Header with title "Home" -->
+<h1>Welcome to My App</h1>
+<p>Bio: &lt;script&gt;alert("xss")&lt;/script&gt;Safe bio text</p>
+<!-- Footer -->
+```
 
-- **Blogs:** `formatDate` for post publication dates.
-- **E-commerce:** `formatCurrency` for product prices.
-- **User profiles:** `truncate` for bio snippets.
-- **Admin panels:** `formatDate` for audit log timestamps.
+**Why This Output Occurs**
+
+- `<%= bio %>` escapes the HTML, neutralizing the script tags; the layout and partials provide structure while `siteName` comes from `res.locals`.
 
 ---
 
-### Sub-Feature 5.2: Handlebars Helpers
+### Real-World Cases
 
-#### Definitions
-
-**Core Definition:** Handlebars helpers are functions registered with `Handlebars.registerHelper()` that can be called from within templates using `{{helperName arg}}`.
-
-**Technical Definition:** Handlebars helpers receive arguments and an options object (for block helpers). They return a string that is inserted into the template. Helpers can be inline (`{{helper arg}}`) or block (`{{#helper}}...{{/helper}}`).
-
-**Beginner-Friendly Explanation:** Handlebars helpers are like custom tools you add to your template toolkit. Once registered, you can use them anywhere in your Handlebars templates.
-
-#### Purposes
-
-- To add custom formatting logic to Handlebars templates.
-- To create reusable block helpers for conditional rendering.
-- To extend Handlebars' built-in helpers with application-specific logic.
-
-#### Syntax Rules and Structure
-
-```js
-Handlebars.registerHelper('formatCurrency', (amount) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
-);
-```
-
-```handlebars
-{{formatCurrency price}}
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `Handlebars.registerHelper(name, fn)` | Registers a helper. |
-| `fn(arg1, arg2, options)` | Helper function signature. |
-| `{{helperName arg}}` | Calls the helper in a template. |
-
-**Constraints and Limitations:**
-- Helpers must be registered before the template is compiled.
-- Block helpers receive an `options.fn()` function to render the block content.
-
-#### Annotated Code Example
-
-```js
-// app.js — Handlebars helpers
-const express = require('express');
-const exphbs = require('express-handlebars');
-const Handlebars = require('handlebars');
-const app = express();
-
-app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs' }));
-app.set('view engine', 'hbs');
-
-// ✅ Register helpers
-Handlebars.registerHelper('formatDate', (date) => {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
-});
-
-Handlebars.registerHelper('formatCurrency', (amount) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
-);
-
-Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
-  switch (operator) {
-    case '===': return v1 === v2 ? options.fn(this) : options.inverse(this);
-    case '>': return v1 > v2 ? options.fn(this) : options.inverse(this);
-    default: return options.inverse(this);
-  }
-});
-
-app.get('/', (req, res) => {
-  res.render('index', {
-    title: 'Helpers Demo',
-    created: new Date(),
-    price: 29.99,
-    stock: 5
-  });
-});
-
-app.listen(3000, () => console.log('Server on 3000'));
-```
-
-```handlebars
-{{! views/index.hbs }}
-<h1>{{title}}</h1>
-<p>Created: {{formatDate created}}</p>
-<p>Price: {{formatCurrency price}}</p>
-{{#ifCond stock '>' 0}}
-  <p>In stock</p>
-{{else}}
-  <p>Out of stock</p>
-{{/ifCond}}
-```
-
-**Expected Output (for `GET /`):**
-```html
-<h1>Helpers Demo</h1>
-<p>Created: January 15, 2026</p>
-<p>Price: $29.99</p>
-<p>In stock</p>
-```
-
-**Why this output:** The `formatDate` and `formatCurrency` helpers are called with the `created` and `price` values. The `ifCond` block helper compares `stock` with `0` using the `>` operator and renders the appropriate block.
-
-#### Real-World Cases
-
-- **E-commerce:** `formatCurrency` for prices, `ifCond` for stock status.
-- **Blogs:** `formatDate` for post dates, `truncate` for excerpts.
-- **Dashboards:** `formatDate` for timestamps, `ifCond` for status badges.
+- **Production web applications** — View caching, organized templates, and escaped output.
+- **Error handling** — Dedicated `errors/` templates rendered with the correct status codes.
+- **Internationalized sites** — Locale data passed as locals and rendered with an i18n helper.
 
 ---
 
 ## References
 
-- Using template engines with Express — https://expressjs.com/en/guide/using-template-engines.html
-- Express Application Object (`app.locals`) — https://expressjs.com/en/5x/api/application.html#app.locals
-- Express Response Object (`res.locals`) — https://expressjs.com/en/5x/api/response.html#res.locals
-- Pug Template Inheritance — https://pugjs.org/language/inheritance.html
-- EJS Documentation — https://ejs.co/
-- express-handlebars Documentation — https://www.npmjs.com/package/express-handlebars
-- express-hbs Documentation — https://www.npmjs.com/package/express-hbs
-- @ladjs/consolidate — https://www.npmjs.com/package/@ladjs/consolidate
-- GeeksforGeeks: How to create helper functions with EJS in Express — https://origin.geeksforgeeks.org/how-to-create-helper-functions-with-ejs-in-express/
+- Using template engines with Express · Express.js — https://expressjs.com/en/guide/using-template-engines/
+- `res.render()` API Reference (Express 4.x) — https://github.com/Jankyboy/expressjs.com/blob/fcaca7fcc6f182a8821352a94a88f9fc10320cbb/_includes/api/en/4x/res-render.md
+- Template Rendering (Express internals, DeepWiki) — https://deepwiki.com/expressjs/express/6.2-template-rendering
+- Express View Configuration (Compile-N-Run) — https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/framework/express/5-express-templating/11-express-view-configuration.mdx
+- Express Template Best Practices (Compile-N-Run) — https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/framework/express/5-express-templating/13-express-template-best-practices.mdx
+- Express Template Caching (Compile-N-Run) — https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/framework/express/5-express-templating/9-express-template-caching.mdx
+- Prevent XSS in ExpressJS (Semgrep) — https://docs.semgrep.dev/cheat-sheets/express-xss
+- Express.js Insecure Template Engine Usage (Sourcery) — https://www.sourcery.ai
+- `app.locals` vs `res.locals` (Express documentation and community) — https://expressjs.com/en/5x/api/application/#applocals
+- `@ladjs/consolidate` (Express-compatible engine mapping) — https://www.npmjs.com/package/@ladjs/consolidate

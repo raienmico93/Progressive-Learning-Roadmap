@@ -1,4 +1,4 @@
-# Error Handling Architecture — Comprehensive Programming Cheat Sheet
+# Express.js Error Handling Fundamentals — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,801 +6,600 @@
 
 ### Definitions
 
-**Core Definition:** Error handling architecture is the systematic design of how an application detects, propagates, processes, and responds to errors that occur during request processing — ensuring that failures are caught consistently, logged appropriately, and communicated to clients without crashing the application.
+**Core Definition**
+Error handling in Express.js refers to how the framework catches, propagates, and processes errors that occur during the execution of route handlers and middleware—both synchronously and asynchronously.
 
-**Technical Definition:** Error handling refers to how Express catches and processes errors that occur both synchronously and asynchronously. Express provides a default error handler so you don't need to write your own to get started. A robust error handling architecture distinguishes between **operational errors** (expected runtime failures such as invalid input, network timeouts, or resource not found) and **programmer errors** (bugs in the code such as reading a property of undefined). It centralises error processing in a single middleware function with the signature `(err, req, res, next)`, ensuring consistent responses across the entire application.
+**Technical Definition**
+Express provides a default error handler at the end of the middleware stack, so applications can function without custom error handling initially. Errors are caught automatically from synchronous code throws, but asynchronous errors must be explicitly forwarded to Express via `next(err)`—except in Express 5, where rejected Promises from route handlers and middleware automatically call `next(value)`. If any value (except the string `'route'`) is passed to `next()`, Express treats the request as being in an error state and skips all remaining non-error-handling routing and middleware functions.
 
-**Beginner-Friendly Explanation:** Error handling architecture is like the safety systems in a building. Smoke detectors (error detection) catch problems early. Sprinklers (error handling middleware) respond automatically. Emergency exits (error propagation) guide people out safely. And the fire department (logging and monitoring) investigates what happened. Without a proper architecture, a small fire (error) can burn down the whole building (crash the server). With it, the building stays standing and the problem is contained.
+**Beginner-Friendly Explanation**
+Error handling is how your Express app deals with things going wrong. If a route throws an error or a database query fails, Express needs to catch that problem and send a helpful response instead of crashing. Express has a built-in safety net, but for production apps you write your own error handlers to control what users see and to log problems for debugging.
+
+---
 
 ### Key Characteristics
 
-- **Dual nature:** Express handles synchronous errors automatically but requires explicit handling for asynchronous errors in Express 4.
-- **Centralised processing:** A single error-handling middleware processes all errors, ensuring consistent responses.
-- **Error classification:** Errors are categorised as operational (expected) or programmer (bugs) to determine the appropriate response.
-- **Custom error classes:** Extending the native `Error` object with properties like `statusCode` and `isOperational` enables structured error handling.
-- **Middleware signature:** Error handlers are identified by their four-argument signature `(err, req, res, next)`.
-- **Order-dependent:** The error handler must be registered **after** all routes and other middleware.
+- **Default handler included** — Express ships with a built-in error handler that writes the error (including stack trace in development) to the client.
+- **Arity-based recognition** — Error-handling middleware is identified solely by its four-argument signature `(err, req, res, next)`; three-argument functions are treated as regular middleware.
+- **Synchronous errors are automatic** — Errors thrown in synchronous code inside handlers or middleware require no extra work; Express catches and processes them.
+- **Asynchronous errors require forwarding** — Callback-based async errors must be passed to `next(err)`; Express 5 automatically forwards rejected Promises.
+- **Environment-aware behavior** — The default handler includes stack traces in development but omits them when `NODE_ENV=production`.
+
+---
 
 ### Prerequisites
 
-- **Node.js runtime** (v18 or higher for Express 5.x; v10+ for Express 4.x).
-- **Express.js installed:** `npm install express`.
-- **Basic JavaScript knowledge:** Functions, classes, callbacks, and asynchronous programming.
-- **Understanding of Express middleware:** `req`, `res`, `next`, and the middleware chain.
+- Node.js 18 or higher and an Express application initialized with `const app = express()`.
+- Understanding of middleware signatures `(req, res, next)` and the `next()` function.
+- Familiarity with JavaScript `try/catch`, Promises, and `async/await`.
+- Basic knowledge of HTTP status codes (`400`, `404`, `500`).
+
+---
 
 ### Related Programming Areas
 
-- **Middleware Order:** Error-handling middleware must be registered last.
-- **Custom Error Classes:** Extending `Error` for domain-specific errors.
-- **Logging and Observability:** Structured logging of errors for debugging and monitoring.
-- **Validation:** Validation errors are a common source of operational errors.
-- **Process Management:** Handling `uncaughtException` and `unhandledRejection` for graceful shutdown.
-
-### Core Concepts
-
-1. **Synchronous Errors** — catching instant runtime faults natively within Express.
-2. **Asynchronous Errors** — managing broken Promises, unhandled async operations, Express 5 vs Express 4.
-3. **Custom Error Classes** — extending `Error` to build specific domain types (AppError, HttpError).
-4. **Centralised Error Middleware** — a single point of truth `(err, req, res, next)` for all pipeline failures.
-5. **Error Propagation** — understanding how exceptions bubble up; `next(err)` vs `throw`.
-6. **Operational vs. Programmer Errors** — distinguishing expected failures from unpredictable bugs.
+- **Middleware** — Error handlers are a specialized middleware type with distinct arity and invocation rules.
+- **Routing** — Errors thrown or forwarded from route handlers propagate to error middleware.
+- **Async patterns** — Promise rejections and async throws must be routed to error handlers.
+- **Logging and monitoring** — Centralized error handlers are the natural place to log errors and emit metrics.
+- **Security** — Error handlers prevent stack traces and internal details from leaking to clients.
 
 ---
 
-## Core Concept 1: Synchronous Errors
+## Core Concept 1: Errors
 
 ### Definitions
 
-**Core Definition:** Synchronous errors are errors that occur immediately during the execution of a function, throwing an exception that interrupts the normal flow of the program.
+**Core Definition**
+An error in Express.js is a JavaScript `Error` object (or any value) that signals a failure during request processing and is passed to `next()` to enter the error-handling flow.
 
-**Technical Definition:** Errors that occur in synchronous code inside route handlers and middleware require no extra work. If synchronous code throws an error, Express will catch and process it automatically. This is because Express wraps synchronous handler invocations in a try-catch block internally. The thrown error is automatically passed to the error-handling middleware without requiring an explicit `next(err)` call.
+**Technical Definition**
+Express treats any value passed to `next()`—except the string `'route'`—as an error. The error object is typically an instance of `Error` with a `message` and `stack`. In production applications, custom error classes (e.g., `AppError`) extend `Error` and add properties such as `statusCode` and `isOperational` to distinguish between expected operational failures (invalid input, missing resources) and programming bugs (null reference errors, type errors).
 
-**Beginner-Friendly Explanation:** Synchronous errors are like dropping a glass on the floor — it breaks immediately, and everyone hears it. Express automatically notices the break (the error) and sends it to the clean-up crew (the error handler). You don't need to do anything special.
+**Beginner-Friendly Explanation**
+An error is a signal that something went wrong. In Express, you create an error with `new Error('message')` and pass it to `next()` to tell Express “stop normal processing and send this to the error handler.”
+
+---
 
 ### Purposes
 
-- To catch instant script compilation and execution runtime faults natively within Express.
-- To allow developers to use `throw new Error()` naturally in synchronous code.
-- To provide automatic error propagation without boilerplate.
-- To ensure that synchronous failures do not crash the process silently.
+- To represent failures during request processing in a structured way.
+- To distinguish operational errors (expected failures) from programming errors (bugs) for appropriate handling and response strategies.
+- To carry metadata such as HTTP status codes and error codes for client responses and logging.
+- To enable centralized error handling through a consistent error object contract.
+
+---
 
 ### Syntax Rules and Structure
 
-```js
-app.get('/', (req, res) => {
-  throw new Error('BROKEN'); // Express will catch this on its own
-});
-```
+#### Complete General Syntax: Basic and Custom Errors
 
-| Component | Breakdown |
-|-----------|-----------|
-| `throw new Error()` | Throws a synchronous exception. |
-| Express behaviour | Automatically catches and forwards to error handler. |
-| No `next(err)` needed | Synchronous throws are handled natively. |
+```javascript
+// Basic error
+next(new Error('Something broke'));
 
-**Rules:**
-- Any synchronous `throw` inside a route handler or middleware is caught by Express.
-- The error is automatically passed to the error-handling middleware.
-- No `try/catch` or `next(err)` is required for synchronous code.
-
-**Constraints:**
-- Synchronous throws only work for code executing in the same tick as the handler invocation.
-- Asynchronous code (Promises, callbacks) requires explicit error handling.
-
-### Annotated Code Example
-
-```js
-// synchronous-errors.js
-const express = require('express');
-const app = express();
-
-// Synchronous throw — Express catches it automatically
-app.get('/crash', (req, res) => {
-  throw new Error('Something went wrong');
-});
-
-// Synchronous error in middleware
-app.use((req, res, next) => {
-  if (!req.headers.authorization) {
-    throw new Error('No authorization header');
-  }
-  next();
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('Error caught:', err.message);
-  res.status(500).json({ error: err.message });
-});
-
-app.listen(3000, () => console.log('Server on 3000'));
-```
-
-**Expected Output (for `GET /crash`):**
-```
-Error caught: Something went wrong
-HTTP/1.1 500 Internal Server Error
-{"error":"Something went wrong"}
-```
-
-**Why this output:** The route handler throws a synchronous error. Express automatically catches it and forwards it to the error-handling middleware. The error handler logs the message and sends a JSON response.
-
-### Real-World Cases
-
-- **Validation failures:** Throwing a synchronous error when input validation fails.
-- **Programming bugs:** Null reference errors or undefined property access.
-- **Configuration errors:** Missing environment variables detected at request time.
-
----
-
-## Core Concept 2: Asynchronous Errors
-
-### Definitions
-
-**Core Definition:** Asynchronous errors are errors that occur in code that does not execute immediately — such as Promises, `async/await` functions, or callback-based operations — and require explicit handling to be forwarded to Express's error pipeline.
-
-**Technical Definition:** For errors returned from asynchronous functions invoked by route handlers and middleware, you must pass them to the `next()` function, where Express will catch and process them. Starting with Express 5, route handlers and middleware that return a Promise will call `next(value)` automatically when they reject or throw an error. In Express 4, unhandled rejections in async middleware crash the process or leave the request hanging.
-
-**Beginner-Friendly Explanation:** Asynchronous errors are like a delayed reaction. If you drop a glass but catch it mid-air, the break happens later — and Express might not notice if you don't tell it. In Express 5, Express has a net that catches everything. In Express 4, you have to shout "I dropped it!" (call `next(err)`) for Express to know.
-
-### Purposes
-
-- To manage broken Promises and unhandled async operations.
-- To use Express 5's native async forwarding for automatic error propagation.
-- To provide manual wrappers (like `express-async-errors`) for Express 4 compatibility.
-- To prevent silent failures where async errors disappear without a response.
-
-### Sub-Feature 2.1: Express 5 — Native Async Error Catching
-
-#### Syntax Rules and Structure
-
-```js
-// Express 5 — This just works
-app.get('/users', async (req, res) => {
-  const users = await db.getUsers(); // If this rejects, error handler catches it
-  res.json(users);
-});
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `async` handler | Returns a Promise. |
-| Rejection | Automatically forwarded to `next(err)`. |
-| No wrapper needed | Express 5 handles it natively. |
-
-**Rules:**
-- If the Promise rejects, `next(value)` is called with the rejected value.
-- If no rejected value is provided, `next` is called with a default Error object.
-- No `try/catch` or wrapper function is required.
-
----
-
-### Sub-Feature 2.2: Express 4 — Manual Wrappers Required
-
-#### Syntax Rules and Structure
-
-```js
-// Express 4 — DANGEROUS
-app.get('/users', async (req, res) => {
-  const users = await db.getUsers(); // Rejection = unhandled crash!
-  res.json(users);
-});
-```
-
-```js
-// Express 4 — SAFE with wrapper
-const asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-app.get('/users', asyncHandler(async (req, res) => {
-  const users = await db.getUsers();
-  res.json(users);
-}));
-```
-
-| Approach | Error Handling |
-|----------|---------------|
-| No wrapper | Unhandled rejection → crash or hang. |
-| `try/catch` + `next(err)` | Explicit handling in every handler. |
-| `asyncHandler` wrapper | Automatic `.catch(next)` for all async handlers. |
-| `express-async-errors` | Monkey-patches Express to catch async errors globally. |
-
-**Rules:**
-- Express 4 does **not** catch rejected Promises automatically.
-- Every async handler needs a `try/catch` block or a wrapper function.
-- The wrapper catches rejections and forwards them to `next(err)`.
-
-### Annotated Code Example
-
-```js
-// async-errors.js
-const express = require('express');
-const app = express();
-
-// Simulated async database
-const db = {
-  getUsers: async () => {
-    throw new Error('Database connection failed');
-  }
-};
-
-// Express 5 — native async error catching
-app.get('/users', async (req, res) => {
-  const users = await db.getUsers(); // Rejection auto-forwarded
-  res.json(users);
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('Async error caught:', err.message);
-  res.status(500).json({ error: err.message });
-});
-
-app.listen(3000, () => console.log('Server on 3000'));
-```
-
-**Expected Output (for `GET /users`):**
-```
-Async error caught: Database connection failed
-HTTP/1.1 500 Internal Server Error
-{"error":"Database connection failed"}
-```
-
-**Why this output:** The async handler awaits `db.getUsers()`, which rejects. In Express 5, the rejection is automatically forwarded to `next(err)`, which triggers the error-handling middleware. The error handler logs the message and sends a JSON response.
-
-### Real-World Cases
-
-- **Database queries:** `await db.query()` in an async route handler.
-- **External API calls:** `await fetch('https://api.example.com')` in middleware.
-- **File I/O:** `await fs.promises.readFile()` in a route handler.
-
----
-
-## Core Concept 3: Custom Error Classes
-
-### Definitions
-
-**Core Definition:** Custom error classes are user-defined classes that extend the native JavaScript `Error` object, adding properties such as `statusCode` and `isOperational` to carry structured metadata about the error.
-
-**Technical Definition:** Custom error classes extend `Error` (e.g., `AppError`) with properties for `statusCode` and `isOperational`. The `isOperational` flag distinguishes expected operational errors (which can be handled gracefully) from programmer errors (which indicate bugs). The `Error.captureStackTrace` method is used to exclude the constructor from the stack trace.
-
-**Beginner-Friendly Explanation:** Custom error classes are like labelled containers for different types of problems. Instead of throwing a generic "Error," you throw a "NotFoundError" or "ValidationError" — each with its own label (status code) and instructions for how to handle it.
-
-### Purposes
-
-- To extend the native JavaScript `Error` object to build specific domain types (e.g., `AppError`, `HttpError`).
-- To carry HTTP status codes and error codes alongside error messages.
-- To distinguish operational errors from programmer errors via the `isOperational` flag.
-- To enable the error-handling middleware to respond appropriately based on error type.
-
-### Syntax Rules and Structure
-
-```js
+// Custom operational error
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
-    this.statusCode = statusCode || 500;
-    this.isOperational = true; // Indicates this is a known operational error
-    Error.captureStackTrace(this, this.constructor);
+    this.statusCode = statusCode;
+    this.isOperational = true;
   }
 }
-
-class NotFoundError extends AppError {
-  constructor(resource) {
-    super(`${resource} not found`, 404);
-  }
-}
-
-class ValidationError extends AppError {
-  constructor(message, details) {
-    super(message, 422);
-    this.details = details;
-  }
-}
+next(new AppError('User not found', 404));
 ```
 
-| Component | Breakdown |
-|-----------|-----------|
-| `extends Error` | Inherits from the native Error object. |
-| `super(message)` | Calls the parent constructor with the message. |
-| `this.statusCode` | HTTP status code for the response. |
-| `this.isOperational` | Flag distinguishing expected errors from bugs. |
-| `Error.captureStackTrace` | Excludes the constructor from the stack trace. |
+**Component Breakdown**
 
-**Rules:**
-- Custom error classes should extend `Error` and call `super(message)`.
-- The `statusCode` should be a valid HTTP status code.
-- The `isOperational` flag should be `true` for expected errors and `false` (or absent) for bugs.
-- Use `Error.captureStackTrace(this, this.constructor)` to keep stack traces clean.
+| Component | Role |
+|-----------|------|
+| `new Error(message)` | Creates a standard error with a message and stack trace |
+| `statusCode` | HTTP status code for the response (e.g., `404`, `400`) |
+| `isOperational` | Distinguishes expected failures from programming bugs |
 
-**Constraints:**
-- Custom error classes must be instantiated with `new`.
-- The `instanceof` check should be used to identify error types in the error handler.
+#### Syntax Rules
 
-### Annotated Code Example
+- Any value passed to `next()` (except `'route'`) is treated as an error.
+- Custom error classes should extend `Error` and set `name` and `statusCode` explicitly.
+- Operational errors are safe to expose to clients; programming errors should return a generic message.
 
-```js
-// errors/AppError.js
+#### Constraints and Limitations
+
+- Not all errors are `Error` instances; Express accepts any value, but non-`Error` values lack stack traces.
+- Over-classifying bugs as operational errors can mask programming mistakes.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Custom Operational Error
+
+```javascript
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
+    this.name = this.constructor.name;
     this.statusCode = statusCode;
     this.isOperational = true;
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
-class NotFoundError extends AppError {
-  constructor(resource) {
-    super(`${resource} not found`, 404);
-  }
-}
-
-class UnauthorizedError extends AppError {
-  constructor(message = 'Unauthorized') {
-    super(message, 401);
-  }
-}
-
-module.exports = { AppError, NotFoundError, UnauthorizedError };
-```
-
-```js
-// services/user.service.js
-const { NotFoundError } = require('../errors/AppError');
-
-class UserService {
-  async findById(id) {
-    const user = await db.findById(id);
-    if (!user) throw new NotFoundError('User');
-    return user;
-  }
-}
-```
-
-```js
-// middleware/errorHandler.js
-const { AppError } = require('../errors/AppError');
-
-function errorHandler(err, req, res, next) {
-  if (err.isOperational) {
-    return res.status(err.statusCode).json({
-      success: false,
-      error: err.message
-    });
-  }
-  console.error('PROGRAMMER ERROR:', err);
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error'
-  });
-}
-```
-
-**Expected Output (for a missing user):**
-```json
-{
-  "success": false,
-  "error": "User not found"
-}
-```
-
-**Why this output:** The `NotFoundError` extends `AppError` with a 404 status code and `isOperational: true`. The error handler checks the `isOperational` flag and responds with the appropriate status code and message.
-
-### Real-World Cases
-
-- **REST APIs:** `NotFoundError` for 404 responses, `ValidationError` for 422 responses.
-- **Authentication:** `UnauthorizedError` for 401 responses, `ForbiddenError` for 403 responses.
-- **E-commerce:** `OutOfStockError` for 409 responses, `PaymentFailedError` for 402 responses.
-
----
-
-## Core Concept 4: Centralised Error Middleware
-
-### Definitions
-
-**Core Definition:** Centralised error middleware is a single Express middleware function with the signature `(err, req, res, next)` that processes all errors from the entire application pipeline uniformly.
-
-**Technical Definition:** Error-handling middleware functions are defined in the same way as other middleware functions, except error-handling functions have four arguments instead of three: `(err, req, res, next)`. This middleware must be registered **after** all other `app.use()` and route definitions. It differentiates between operational errors (400/404) and programmer errors (500), sending structured JSON responses.
-
-**Beginner-Friendly Explanation:** Centralised error middleware is like a hospital's emergency room. No matter what kind of injury (error) comes in — a broken bone (validation error), a heart attack (database failure), or a paper cut (404) — the ER (error handler) assesses it and provides the appropriate treatment. Instead of each department handling its own emergencies, there's one place for all of them.
-
-### Purposes
-
-- To build a single point of truth endpoint `(err, req, res, next)` to process all pipeline failures uniformly.
-- To ensure consistent error responses across all endpoints.
-- To differentiate between operational errors and programmer errors.
-- To log errors centrally for debugging and monitoring.
-- To prevent unhandled errors from crashing the application.
-
-### Syntax Rules and Structure
-
-```js
-function errorHandler(err, req, res, next) {
-  // Log the error
-  console.error(err.stack);
-
-  // Operational errors (expected)
-  if (err.isOperational) {
-    return res.status(err.statusCode).json({
-      success: false,
-      error: err.message
-    });
-  }
-
-  // Programmer errors (bugs)
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error'
-  });
-}
-
-// Register LAST
-app.use(errorHandler);
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `(err, req, res, next)` | Four arguments — Express detects error middleware by arity. |
-| `err.isOperational` | Flag distinguishing expected errors from bugs. |
-| `err.statusCode` | HTTP status code attached to the error. |
-| `app.use(errorHandler)` | Must be registered after all routes. |
-
-**Rules:**
-- Error-handling middleware **must** have exactly four arguments.
-- It must be registered **after** all other `app.use()` and route definitions.
-- If registered too early, route errors will not be caught.
-- The handler should not expose stack traces in production responses.
-
-**Constraints:**
-- Error handlers should distinguish between operational and programmer errors.
-- Multiple error handlers can be defined for different error types.
-- If an error handler calls `next(err)`, it passes to the next error handler.
-
-### Annotated Code Example
-
-```js
-// app.js
-const express = require('express');
-const app = express();
-const { AppError } = require('./errors/AppError');
-
-// Routes
 app.get('/users/:id', async (req, res, next) => {
-  try {
-    const user = await userService.findById(req.params.id);
-    if (!user) throw new AppError('User not found', 404);
-    res.json({ data: user });
-  } catch (error) {
-    next(error); // Delegate to global handler
-  }
-});
-
-app.get('/crash', (req, res) => {
-  throw new Error('Unexpected bug'); // Programmer error
-});
-
-// Centralised error handler — MUST be last
-app.use((err, req, res, next) => {
-  console.error({
-    message: err.message,
-    stack: err.stack,
-    url: req.url,
-    method: req.method,
-    timestamp: new Date().toISOString()
-  });
-
-  if (err.isOperational) {
-    return res.status(err.statusCode).json({
-      success: false,
-      error: err.message
-    });
-  }
-
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error'
-  });
-});
-
-app.listen(3000, () => console.log('Server on 3000'));
-```
-
-**Expected Output (for `GET /users/999`):**
-```json
-{
-  "success": false,
-  "error": "User not found"
-}
-```
-
-**Expected Output (for `GET /crash`):**
-```
-console.error output:
-{ message: 'Unexpected bug', stack: '...', url: '/crash', method: 'GET', timestamp: '...' }
-
-HTTP Response:
-{"success": false, "error": "Internal server error"}
-```
-
-**Why this output:** The error handler checks `err.isOperational`. For the operational `AppError` (user not found), it returns the specific message. For the programmer error (unexpected bug), it logs the full stack and returns a generic 500 response to avoid leaking internal details.
-
-### Real-World Cases
-
-- **REST APIs:** Consistent error responses across all endpoints.
-- **Multi-service architectures:** Centralised error formatting for microservices.
-- **Production applications:** Logging errors for debugging while hiding details from clients.
-
----
-
-## Core Concept 5: Error Propagation
-
-### Definitions
-
-**Core Definition:** Error propagation is the mechanism by which errors travel through the middleware chain — either by throwing (for synchronous code) or by passing to `next(err)` (for asynchronous code) — until they reach the error-handling middleware.
-
-**Technical Definition:** In general, Express follows the way of passing errors rather than throwing it, for any errors in the program you can pass the error object to `next`. Per the docs, `throw` and `next(err)` basically do the same thing in synchronous code. However, `return next(err)` instead of `throw err` allows asynchronous code to raise an exception and still have it caught by the error handling pipeline.
-
-**Beginner-Friendly Explanation:** Error propagation is like a relay race where the baton is the error. In synchronous code, you can simply throw the baton and Express will catch it. In asynchronous code, you have to hand the baton to the next runner (call `next(err)`) — if you just throw it into the air, Express might not see it.
-
-### Purposes
-
-- To understand how exceptions bubble up through middleware chains.
-- To know when to use `next(err)` vs. throwing directly.
-- To ensure that errors are always caught by the error-handling middleware.
-- To avoid silent failures where errors disappear without a response.
-
-### Syntax Rules and Structure
-
-```js
-// Synchronous: throw works
-app.get('/sync', (req, res) => {
-  throw new Error('Sync error'); // Express catches it
-});
-
-// Asynchronous: next(err) required
-app.get('/async', async (req, res, next) => {
-  try {
-    await someAsyncOperation();
-    res.json({ ok: true });
-  } catch (err) {
-    next(err); // Pass to error handler
-  }
-});
-
-// Or with Express 5: throw works
-app.get('/async5', async (req, res) => {
-  throw new Error('Async error'); // Express 5 catches it
-});
-```
-
-| Context | Mechanism | Express Catches? |
-|---------|-----------|------------------|
-| Synchronous handler | `throw new Error()` | ✅ Yes |
-| Synchronous middleware | `throw new Error()` | ✅ Yes |
-| Async (Express 4) | `throw new Error()` | ❌ No |
-| Async (Express 4) | `next(err)` | ✅ Yes |
-| Async (Express 5) | `throw new Error()` | ✅ Yes |
-
-**Rules:**
-- Synchronous code: `throw` works and is equivalent to `next(err)`.
-- Asynchronous code (Express 4): `next(err)` is required — `throw` will not be caught.
-- Asynchronous code (Express 5): `throw` works natively.
-- `next('route')` skips to the next route handler, not the error handler.
-
-**Constraints:**
-- Throwing inside a callback (e.g., `fs.readFile`) will not be caught by Express.
-- Always use `return next(err)` to prevent further execution after passing the error.
-
-### Annotated Code Example
-
-```js
-// propagation.js
-const express = require('express');
-const app = express();
-
-// Synchronous throw
-app.get('/sync-error', (req, res) => {
-  throw new Error('Synchronous failure');
-});
-
-// Async with next(err)
-app.get('/async-error', async (req, res, next) => {
-  try {
-    await Promise.reject(new Error('Async failure'));
-  } catch (err) {
-    next(err);
-  }
-});
-
-// Callback-based error
-app.get('/callback-error', (req, res, next) => {
-  setTimeout(() => {
-    try {
-      throw new Error('Callback failure');
-    } catch (err) {
-      next(err);
-    }
-  }, 100);
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  res.status(500).json({ error: err.message });
-});
-
-app.listen(3000, () => console.log('Server on 3000'));
-```
-
-**Expected Output (for `GET /sync-error`):**
-```json
-{"error":"Synchronous failure"}
-```
-
-**Expected Output (for `GET /async-error`):**
-```json
-{"error":"Async failure"}
-```
-
-**Expected Output (for `GET /callback-error`):**
-```json
-{"error":"Callback failure"}
-```
-
-**Why this output:** The synchronous route throws, and Express catches it. The async route catches the rejection and passes it to `next(err)`. The callback route wraps the throw in a try/catch and passes the error to `next(err)`. All three errors reach the error handler.
-
-### Real-World Cases
-
-- **Database operations:** `try/catch` around `await db.query()` with `next(err)`.
-- **External API calls:** Catching fetch errors and passing to `next(err)`.
-- **File I/O:** Wrapping `fs.readFile` callbacks in try/catch with `next(err)`.
-
----
-
-## Core Concept 6: Operational vs. Programmer Errors
-
-### Definitions
-
-**Core Definition:** Operational errors are expected runtime failures that correctly-written programs should handle; programmer errors are bugs in the code that indicate the program itself is broken.
-
-**Technical Definition:** Operational errors represent runtime problems whose results are expected and should be dealt with in a proper way. Operational errors don't mean the application itself has bugs, but developers need to handle them thoughtfully. Programmer errors represent unexpected bugs in poorly written code. They mean the code itself has some issues to solve and was coded wrong. A good example of a programmer error is trying to read a property of `undefined`.
-
-**Beginner-Friendly Explanation:** Operational errors are like a customer ordering a dish that's sold out — it's an expected problem, and the restaurant handles it politely. Programmer errors are like the chef forgetting to turn on the stove — it's a mistake in the kitchen that needs to be fixed. The restaurant can handle a sold-out dish gracefully, but a broken stove requires turning everything off and fixing the problem.
-
-### Purposes
-
-- To distinguish between expected operational failures (e.g., resource not found, invalid validation) and unpredictable programmer bugs (e.g., undefined reference crashes).
-- To determine the appropriate response: operational errors get specific status codes; programmer errors get a generic 500.
-- To guide recovery strategy: operational errors can be retried or handled; programmer errors require a restart.
-- To improve debugging by logging programmer errors with full stack traces.
-
-### Syntax Rules and Structure
-
-| Category | Examples | Response | Recovery |
-|----------|----------|----------|----------|
-| Operational | Invalid input, 404, timeout, DB connection failure | Specific status code (400, 404, etc.) | Retry, graceful degradation |
-| Programmer | `undefined` property access, type errors, logic bugs | Generic 500 | Crash and restart |
-
-```js
-// Error handler distinguishing types
-app.use((err, req, res, next) => {
-  if (err.isOperational) {
-    // Operational: send specific message
-    return res.status(err.statusCode).json({ error: err.message });
-  }
-
-  // Programmer: log full stack, send generic message
-  console.error('PROGRAMMER ERROR:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-```
-
-**Rules:**
-- Operational errors should be instantiated with `AppError` and `isOperational: true`.
-- Programmer errors should be allowed to bubble up to the error handler.
-- The error handler should differentiate based on the `isOperational` flag.
-- Best practice for programmer errors is to crash immediately and let a restarter restart the application.
-
-**Constraints:**
-- Not all errors fall neatly into one category; some are ambiguous.
-- Unhandled operational errors can become programmer errors if not handled properly.
-
-### Annotated Code Example
-
-```js
-// operational-vs-programmer.js
-const express = require('express');
-const app = express();
-
-class AppError extends Error {
-  constructor(message, statusCode) {
-    super(message);
-    this.statusCode = statusCode;
-    this.isOperational = true;
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
-
-// Operational error
-app.get('/user/:id', async (req, res, next) => {
-  const user = await db.findById(req.params.id);
+  const user = await findUser(req.params.id);
   if (!user) {
     return next(new AppError('User not found', 404));
   }
   res.json(user);
 });
-
-// Programmer error
-app.get('/bug', (req, res) => {
-  const obj = undefined;
-  console.log(obj.property); // TypeError: Cannot read property of undefined
-});
-
-// Error handler
-app.use((err, req, res, next) => {
-  if (err.isOperational) {
-    return res.status(err.statusCode).json({
-      error: err.message,
-      type: 'operational'
-    });
-  }
-
-  console.error('PROGRAMMER ERROR:', err.stack);
-  res.status(500).json({
-    error: 'Internal server error',
-    type: 'programmer'
-  });
-});
-
-app.listen(3000, () => console.log('Server on 3000'));
 ```
 
-**Expected Output (for `GET /user/999` — operational):**
-```json
-{"error":"User not found","type":"operational"}
+**Expected Output**
+
+```
+GET /users/1   → 200 (user data)
+GET /users/99  → 404 { "error": "User not found" }
 ```
 
-**Expected Output (for `GET /bug` — programmer):**
-```
-PROGRAMMER ERROR: TypeError: Cannot read property 'property' of undefined
-    at ... (stack trace)
+**Why This Output Occurs**
 
-HTTP Response:
-{"error":"Internal server error","type":"programmer"}
-```
+- The `AppError` carries a `404` status and operational flag, allowing the centralized handler to send the correct message.
 
-**Why this output:** The operational error (user not found) has `isOperational: true` and a 404 status code, so the error handler responds with the specific message. The programmer error (TypeError) has no `isOperational` flag, so the handler logs the full stack trace and returns a generic 500 response to avoid leaking internal details.
+---
 
 ### Real-World Cases
 
-- **E-commerce:** `OutOfStockError` (operational) vs. a bug in the pricing calculation (programmer).
-- **Authentication:** `InvalidCredentialsError` (operational) vs. a missing `req.user` assignment (programmer).
-- **File uploads:** `FileTooLargeError` (operational) vs. a bug in the upload middleware (programmer).
+- **Validation failures** — `400 Bad Request` with field-level error details.
+- **Missing resources** — `404 Not Found` when a database lookup returns `null`.
+- **Authentication failures** — `401 Unauthorized` when credentials are invalid.
+
+---
+
+## Core Concept 2: Error Propagation
+
+### Definitions
+
+**Core Definition**
+Error propagation is the mechanism by which an error travels through the middleware stack—skipping normal processing—until it reaches an error-handling middleware function.
+
+**Technical Definition**
+When `next(err)` is called with any value except `'route'`, Express marks the request as being in an error state and skips all remaining non-error-handling routing and middleware functions. The request then enters the first error-handling middleware (a four-argument function) registered after the point of failure. If no custom error handler exists, the built-in default error handler processes the error and writes it to the client, including the stack trace in non-production environments.
+
+**Beginner-Friendly Explanation**
+Propagation is how an error “jumps” over the normal steps straight to the error handler. When you call `next(error)`, Express ignores all the remaining routes and middleware and goes directly to the function with four parameters that is designed to handle errors.
+
+---
+
+### Purposes
+
+- To route errors from any point in the pipeline to centralized error-handling logic.
+- To skip irrelevant middleware and avoid executing business logic after a failure.
+- To ensure errors from synchronous, callback-based, and promise-based code reach the same handling path.
+- To enable graceful degradation and appropriate client responses.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Propagation Mechanisms
+
+```javascript
+// Explicit forwarding
+next(err);
+
+// Automatic for synchronous throws
+throw new Error('Sync failure');
+
+// Automatic for Promise rejections (Express 5)
+const data = await riskyOperation(); // rejection auto-forwarded
+```
+
+**Component Breakdown**
+
+| Mechanism | Propagation |
+|-----------|-------------|
+| `next(err)` | Explicitly places request in error state |
+| Synchronous `throw` | Express catches and forwards automatically |
+| Promise rejection (Express 5) | Automatically calls `next(value)` |
+
+#### Syntax Rules
+
+- Pass only non-`'route'` values to `next()` to signal an error.
+- In Express 4, async handlers must use `try/catch` with `next(err)` or a wrapper.
+- In Express 5, return or throw inside `async` handlers; rejections auto-forward.
+
+#### Constraints and Limitations
+
+- Errors thrown in asynchronous callbacks not passed to `next(err)` can crash the process or go unhandled.
+- Calling `next(err)` multiple times can trigger the default error handler erroneously.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Propagation from Synchronous and Asynchronous Code
+
+```javascript
+app.get('/sync', (req, res) => {
+  throw new Error('Sync failure'); // auto-caught
+});
+
+app.get('/callback', (req, res, next) => {
+  fs.readFile('/missing', (err, data) => {
+    if (err) return next(err); // explicit forwarding
+    res.send(data);
+  });
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: err.message });
+});
+```
+
+**Expected Output**
+
+```
+GET /sync     → 500 { "error": "Sync failure" }
+GET /callback → 500 { "error": "ENOENT: no such file or directory" }
+```
+
+**Why This Output Occurs**
+
+- Synchronous throws are caught automatically; callback errors are explicitly forwarded via `next(err)`.
+
+---
+
+### Real-World Cases
+
+- **Database failures** — Forwarding query errors to a centralized handler.
+- **File system operations** — Handling `ENOENT` and permission errors.
+- **Third-party API failures** — Propagating HTTP client errors with context.
+
+---
+
+## Core Concept 3: Synchronous Errors
+
+### Definitions
+
+**Core Definition**
+Synchronous errors are errors thrown during the execution of synchronous code inside route handlers or middleware; Express catches them automatically without any extra error-forwarding code.
+
+**Technical Definition**
+If synchronous code inside a route handler or middleware throws an error, Express catches it and processes it through the error-handling pipeline. No `try/catch` block or `next(err)` call is required. Express detects the thrown error and skips to the nearest error-handling middleware, or to the default error handler if none is registered.
+
+**Beginner-Friendly Explanation**
+If your code throws an error while running synchronously—like calling a method on `undefined`—Express notices and sends it to the error handler automatically. You do not need to do anything special.
+
+---
+
+### Purposes
+
+- To simplify error handling for synchronous logic by relying on Express's built-in catch mechanism.
+- To ensure programming errors in synchronous code reach the centralized error handler.
+- To reduce boilerplate by avoiding unnecessary `try/catch` blocks around synchronous operations.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax
+
+```javascript
+app.get('/', (req, res) => {
+  throw new Error('BROKEN'); // Express catches this automatically
+});
+```
+
+**Component Breakdown**
+
+| Component | Role |
+|-----------|------|
+| `throw` | Throws synchronously; Express catches and forwards it |
+
+#### Syntax Rules
+
+- Synchronous throws require no `next(err)` call.
+- Express catches only synchronous errors within the handler's immediate execution; errors in async callbacks are not caught automatically.
+- Thrown values that are not `Error` instances are still treated as errors, but lack stack traces.
+
+#### Constraints and Limitations
+
+- Synchronous error catching does not extend to asynchronous callbacks or timers.
+- Throwing inside a `try/catch` that does not re-throw will prevent Express from catching the error.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Synchronous Throw
+
+```javascript
+app.get('/fail', (req, res) => {
+  throw new Error('Sync failure');
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: err.message });
+});
+```
+
+**Expected Output**
+
+```
+GET /fail → 500 { "error": "Sync failure" }
+```
+
+**Why This Output Occurs**
+
+- The synchronous `throw` is caught by Express and routed to the error handler without any explicit forwarding.
+
+---
+
+### Real-World Cases
+
+- **Programming bugs** — Null reference errors and type errors in synchronous logic.
+- **Validation failures** — Throwing a custom `AppError` for invalid synchronous input.
+- **Configuration errors** — Missing required settings detected during request handling.
+
+---
+
+## Core Concept 4: Asynchronous Errors
+
+### Definitions
+
+**Core Definition**
+Asynchronous errors are errors that occur during asynchronous operations—such as callback-based I/O or Promise-based operations—and require explicit forwarding to Express in Express 4, but are automatically forwarded in Express 5 when returned as rejected Promises.
+
+**Technical Definition**
+In Express 4, errors returned from asynchronous functions invoked by route handlers and middleware must be passed to `next()` explicitly; otherwise Express cannot catch them because they occur outside the synchronous execution context. In Express 5, route handlers and middleware that return a Promise automatically call `next(value)` when the Promise rejects or throws, eliminating the need for `try/catch` or wrapper functions for Promise-based async code.
+
+**Beginner-Friendly Explanation**
+Asynchronous errors happen later—after your function has already finished running. In older Express versions, you have to catch them yourself and pass them to `next(error)`. In Express 5, if you use `async`/`await`, Express catches them for you automatically.
+
+---
+
+### Purposes
+
+- To ensure errors from database queries, file I/O, and network requests reach the error handler.
+- To avoid unhandled Promise rejections that can crash the process.
+- To simplify async code in Express 5 by removing the need for repetitive `try/catch` blocks.
+- To maintain consistent error handling across synchronous and asynchronous execution paths.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Callback and Promise Patterns
+
+```javascript
+// Callback-style (Express 4 and 5)
+fs.readFile(path, (err, data) => {
+  if (err) return next(err);
+  res.send(data);
+});
+
+// Promise-style (Express 5 automatic)
+app.get('/async', async (req, res) => {
+  const data = await riskyOperation(); // rejection auto-forwarded
+  res.json(data);
+});
+
+// Express 4 wrapper
+const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
+```
+
+**Component Breakdown**
+
+| Pattern | Error Forwarding |
+|---------|-----------------|
+| Callback `next(err)` | Manual forwarding required in all versions |
+| `async`/`await` (Express 5) | Automatic on rejection |
+| `asyncHandler` wrapper (Express 4) | Catches rejection and calls `next(err)` |
+
+#### Syntax Rules
+
+- In Express 4, every `async` handler must use `try/catch` with `next(err)` or a wrapper.
+- In Express 5, return or throw inside `async` handlers; Express forwards rejections automatically.
+- Callback-based APIs require explicit `if (err) return next(err)`.
+
+#### Constraints and Limitations
+
+- Express 4 does not automatically forward rejected Promises; unhandled rejections can crash the process.
+- Express 5 automatic forwarding applies to returned Promises; fire-and-forget async calls without awaiting may not be caught.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Express 5 Automatic Async Forwarding
+
+```javascript
+app.get('/data', async (req, res) => {
+  const result = await Promise.resolve({ value: 42 });
+  res.json(result);
+});
+
+app.get('/fail', async (req, res) => {
+  throw new Error('Async failure'); // automatically forwarded in Express 5
+});
+
+app.use((err, req, res, next) => {
+  res.status(500).json({ error: err.message });
+});
+```
+
+**Expected Output**
+
+```
+GET /data  → 200 { "value": 42 }
+GET /fail  → 500 { "error": "Async failure" }
+```
+
+**Why This Output Occurs**
+
+- Express 5 automatically calls `next(err)` when the async handler rejects.
+
+---
+
+#### Example 2: Express 4 `asyncHandler` Wrapper
+
+```javascript
+const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
+
+app.get('/fail', asyncHandler(async (req, res) => {
+  throw new Error('Async failure');
+}));
+```
+
+**Expected Output**
+
+```
+GET /fail → 500 { "error": "Async failure" }
+```
+
+**Why This Output Occurs**
+
+- The wrapper catches the rejection and explicitly forwards it to `next(err)`.
+
+---
+
+### Real-World Cases
+
+- **Database queries** — ORM or driver errors in `async` route handlers.
+- **HTTP client calls** — Failures from third-party APIs.
+- **File system operations** — `fs.promises` rejections on missing files or permissions.
+
+---
+
+## Core Concept 5: Error Handling Best Practices
+
+### Definitions
+
+**Core Definition**
+Error handling best practices are the design and implementation patterns that keep error responses secure, consistent, observable, and maintainable across an Express application.
+
+**Technical Definition**
+Best practices include: registering error-handling middleware last with a four-argument signature; distinguishing operational errors from programming errors; logging full error details server-side while sending safe, generic messages to clients; setting `NODE_ENV=production` to suppress stack traces; and ensuring all asynchronous errors are forwarded to the centralized handler. Custom error classes (`AppError`) with `statusCode` and `isOperational` flags enable precise response formatting and appropriate status codes.
+
+**Beginner-Friendly Explanation**
+Best practices are the habits that keep error handling safe and useful. Log the full error for yourself, but send only a safe message to the user. Use the right status code. Make sure async errors actually reach the handler. And never let a stack trace leak in production.
+
+---
+
+### Purposes
+
+- To prevent sensitive information (stack traces, internal paths) from leaking to clients.
+- To ensure all errors—synchronous, asynchronous, and from third-party APIs—are caught and handled consistently.
+- To provide clients with actionable, correctly typed error responses.
+- To make errors observable through structured logging and monitoring.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax: Centralized Error Handler with `AppError`
+
+```javascript
+app.use((err, req, res, next) => {
+  const status = err.isOperational ? err.statusCode : 500;
+  const message = err.isOperational ? err.message : 'Internal Server Error';
+
+  console.error({ status, message: err.message, stack: err.stack, path: req.path });
+
+  res.status(status).json({ error: message });
+});
+```
+
+**Component Breakdown**
+
+| Practice | Implementation |
+|----------|----------------|
+| Hide internal details | Generic `500` for non-operational errors |
+| Log server-side | Full stack and request context logged, not sent |
+| Correct status codes | `404`, `401`, `400` for operational errors |
+| Production mode | `NODE_ENV=production` suppresses default stack traces |
+
+#### Syntax Rules
+
+- Register error handlers **last**; they must not be placed before routes.
+- Use the four-argument signature; three-argument functions are treated as regular middleware.
+- Log full details server-side; send safe messages to clients.
+- Express 5 automatically forwards async rejections; Express 4 requires `try/catch` or wrappers.
+
+#### Constraints and Limitations
+
+- Error handlers cannot recover the request into normal flow; they can only respond or delegate.
+- The default Express error handler exposes stack traces unless `NODE_ENV=production`.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples and Expected Outputs
+
+#### Example 1: Production-Ready Centralized Error Handler
+
+```javascript
+const express = require('express');
+const app = express();
+
+class AppError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.statusCode = statusCode;
+    this.isOperational = true;
+  }
+}
+
+app.get('/user/:id', async (req, res, next) => {
+  const user = await findUser(req.params.id);
+  if (!user) throw new AppError('User not found', 404);
+  res.json(user);
+});
+
+app.get('/bug', (req, res, next) => {
+  throw new Error('Unexpected bug');
+});
+
+app.use((err, req, res, next) => {
+  const status = err.isOperational ? err.statusCode : 500;
+  const message = err.isOperational ? err.message : 'Internal Server Error';
+
+  console.error({ status, message: err.message, stack: err.stack, path: req.path });
+
+  res.status(status).json({ error: message });
+});
+
+app.listen(3000);
+```
+
+**Expected Output**
+
+```
+GET /user/1   → 200 (user data)
+GET /user/99  → 404 { "error": "User not found" }
+GET /bug      → 500 { "error": "Internal Server Error" }
+```
+
+**Why This Output Occurs**
+
+- Operational errors keep their status and message; programming errors are masked with a generic `500` message while full details are logged server-side.
+
+---
+
+### Real-World Cases
+
+- **Production APIs** — Safe error responses, full server-side logging, and monitoring integration.
+- **Security audits** — No stack traces or internal paths exposed to clients.
+- **Multi-environment deployments** — Detailed errors in development, safe errors in production.
 
 ---
 
 ## References
 
-- Express.js — Error Handling Guide — https://expressjs.com/en/guide/error-handling.html
-- Express.js 4.x — Error Handling — https://expressjs.com/en/4x/guide/error-handling.html
-- Express 5 Migration Guide — https://expressjs.com/en/guide/migrating-5.html
-- MDN — Express/Node Introduction — https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/Introduction
-- Node.js — Errors — https://nodejs.org/api/errors.html
-- Joyent — Node.js Error Handling Best Practices — https://www.joyent.com/node-js/production/design/errors
-- Stack Overflow — throw Error vs next(error) — https://stackoverflow.com/questions/27794750/
-- Stack Overflow — Error handling in ExpressJS middlewares — https://stackoverflow.com/questions/74908911/
-- OneUptime — How to Handle Error Handling Properly in Express — https://oneuptime.com/blog/post/2026-02-02-error-handling-express/view
-- OneUptime — How to Implement Error Handling in Express — https://oneuptime.com/blog/post/2026-01-26-error-handling-express/view
-- CoreUI — How to handle errors globally in Node.js — https://coreui.io/answers/how-to-handle-errors-globally-in-nodejs/
-- DEV Community — Express Middleware Patterns: Composition, Error Handling, and Auth — https://dev.to
-- TRAE-Skills — Error Handling (Express) — https://github.com/HighMark-31/TRAE-Skills
-- GitHub — WalletWise Issue #184: Centralized Error Handling — https://github.com/SoumyaMishra-7/WalletWise/issues/184
-- GitHub — Typed-Error Middleware with Express — https://github.com
-- @point-hub/express-error-handler — npm — https://www.npmjs.com/package/@point-hub/express-error-handler
-- express-error-toolkit — npm — https://www.npmjs.com/package/express-error-toolkit
-- error-cure — npm — https://www.npmjs.com/package/error-cure
-- oops-error — npm — https://www.npmjs.com/package/oops-error
-- @minikit/terror — npm — https://www.npmjs.com/package/@minikit/terror
-- Node.js Best Practices — Distinguish Operational vs Programmer Errors — https://github.com/goldbergyoni/nodebestpractices
-- Stackify — Node.js Error Handling Best Practices — https://stackify.com/node-js-error-handling/
+- Error Handling · Express.js — https://expressjs.com/en/guide/error-handling.html
+- Error Handling · Express.js 5.x — https://expressjs.com/en/5x/guide/error-handling/
+- How to handle errors in Express · CoreUI — https://coreui.io/answers/how-to-handle-errors-in-express/
+- Express for Node Error Handling and Tracking Done Right · AppSignal Blog — https://blog.appsignal.com/2025/07/16/express-for-node-error-handling-and-tracking-done-right.html
+- Compile-N-Run: Express Error Basics — https://github.com/Compile-N-Run/Compile-N-Run/blob/main/docs/framework/express/9-express-error-handling/0-express-error-basics.mdx
+- Typed-Error Middleware with Express · Steve Kinney — https://stevekinney.com/courses/full-stack-typescript/typed-error-middleware

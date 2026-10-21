@@ -685,7 +685,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
 
 # V. Functions
 
-- **36. Function Fundamentals**
+- [**36. Function Fundamentals**](/Web%20Development/PHP/Functions/Function.md)
   - Functions
   - `function`
   - Function declaration
@@ -697,7 +697,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Function naming
   - Function best practices
 
-- **37. Parameters**
+- [**37. Parameters**](/Web%20Development/PHP/Functions/Params.md)
   - Positional parameters
   - Default parameters
   - Optional parameters
@@ -712,7 +712,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
     - `&$param`
   - Parameter best practices
 
-- **38. Return Values**
+- [**38. Return Values**](/Web%20Development/PHP/Functions/ReturnValues.md)
   - Return values
   - Return types
   - `void`
@@ -723,7 +723,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - `parent`
   - Return best practices
 
-- **39. Variable Scope**
+- [**39. Variable Scope**](/Web%20Development/PHP/Functions/VariableScope.md)
   - Global scope
   - Local scope
   - Function scope
@@ -732,7 +732,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Superglobals
   - Scope best practices
 
-- **40. Anonymous Functions**
+- [**40. Anonymous Functions**](/Web%20Development/PHP/Functions/AnonymousFunc.md)
   - Anonymous functions
   - Closures
   - `function() {}`
@@ -744,13 +744,13 @@ PHP is best learned as more than "a scripting language for websites." The progre
     - `bind()`
   - Closure best practices
 
-- **41. Arrow Functions**
+- [**41. Arrow Functions**](/Web%20Development/PHP/Functions/ArrowFunc.md)
   - Arrow functions
   - `fn() =>`
   - Auto-capture
   - Arrow function best practices
 
-- **42. Callable**
+- [**42. Callable**](/Web%20Development/PHP/Functions/Callable.md)
   - Callable
   - `callable` type
   - `is_callable()`
@@ -759,7 +759,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - `Closure::fromCallable()`
   - Callable best practices
 
-- **43. Recursion**
+- [**43. Recursion**](/Web%20Development/PHP/Functions/Recursion.md)
   - Recursion
   - Base case
   - Recursive case
@@ -768,7 +768,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Recursion vs iteration
   - Recursion best practices
 
-- **44. Function Best Practices**
+- [**44. Function Best Practices**](/Web%20Development/PHP/Functions/BestPractices.md)
   - Function naming
   - Function length
   - Function cohesion

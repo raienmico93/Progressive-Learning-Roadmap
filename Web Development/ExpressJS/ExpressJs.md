@@ -286,7 +286,7 @@
   * Handlebars / Mustache 
   * Alternative engines 
 
-* [**21. Security in Template Rendering**](/Web%20Development/ExpressJS/Templating%20Engines/Security.md)
+* **21. Security in Template Rendering**
 
   * Auto-escaping & XSS prevention 
   * Contextual sanitization
@@ -448,7 +448,7 @@
 
 # X. Validation and Error Handling
 
-* [**39. Input Validation**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/InputValidation.md)
+* [**39. Input Validation**](/Web%20Development/ExpressJS/Validation/InputValidation.md)
 
   * Request-body validation
   * Query validation
@@ -458,7 +458,7 @@
   * Length constraints
   * Range constraints
 
-* [**40. Validation Libraries**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/Libraries.md)
+* [**40. Validation Libraries**](/Web%20Development/ExpressJS/Validation/Libraries.md)
 
   * Zod
   * Joi
@@ -483,7 +483,7 @@
   * Authorization errors
   * Database errors
 
-* [**43. Production Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ProductionError.md)
+* **43. Production Error Handling**
 
   * Avoiding stack-trace leakage
   * Structured logging

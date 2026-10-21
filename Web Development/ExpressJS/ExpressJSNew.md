@@ -240,7 +240,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # III. Middleware
 
-- **14. Middleware Fundamentals**
+- [**14. Middleware Fundamentals**](/Web%20Development/ExpressJS/Middleware/Middleware.md)
   - Middleware
   - Middleware functions
   - Middleware signature
@@ -253,7 +253,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - `next('router')`
   - Middleware best practices
 
-- **15. Application-Level Middleware**
+- [**15. Application-Level Middleware**](/Web%20Development/ExpressJS/Middleware/AppLevel.md)
   - `app.use()`
   - Global middleware
   - Path-specific middleware
@@ -261,14 +261,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Middleware arrays
   - Application middleware best practices
 
-- **16. Router-Level Middleware**
+- [**16. Router-Level Middleware**](/Web%20Development/ExpressJS/Middleware/RouteLevel.md)
   - `router.use()`
   - Router middleware
   - Router-specific middleware
   - Middleware scoping
   - Router middleware best practices
 
-- **17. Error-Handling Middleware**
+- [**17. Error-Handling Middleware**](/Web%20Development/ExpressJS/Middleware/ErrorHandling.md)
   - Error-handling middleware
   - Four-argument signature
   - Error propagation
@@ -276,7 +276,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Centralized error handling
   - Error handling best practices
 
-- **18. Built-in Middleware**
+- [**18. Built-in Middleware**](/Web%20Development/ExpressJS/Middleware/Built-in.md)
   - `express.json()`
   - `express.urlencoded()`
   - `express.static()`
@@ -284,7 +284,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - `express.text()`
   - Built-in middleware best practices
 
-- **19. Third-Party Middleware**
+- [**19. Third-Party Middleware**](/Web%20Development/ExpressJS/Middleware/ThirdParty.md)
   - `cors`
   - `helmet`
   - `morgan`
@@ -304,7 +304,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - `express-status-monitor`
   - Third-party middleware best practices
 
-- **20. Custom Middleware**
+- [**20. Custom Middleware**](/Web%20Development/ExpressJS/Middleware/Custom.md)
   - Custom middleware
   - Middleware factories
   - Middleware options
@@ -312,7 +312,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Middleware testing
   - Custom middleware best practices
 
-- **21. Middleware Patterns**
+- [**21. Middleware Patterns**](/Web%20Development/ExpressJS/Middleware/Patterns.md)
   - Authentication middleware
   - Authorization middleware
   - Logging middleware
@@ -328,9 +328,9 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # IV. Request and Response
 
-- **22. Request Object**
+- [**22. Request Object**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/Request.md)
   - `req`
-  - Request properties
+  - [Request properties](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/RequestProps.md)
     - `req.params`
     - `req.query`
     - `req.body`
@@ -355,7 +355,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
     - `req.app`
     - `req.res`
     - `req.next`
-  - Request methods
+  - [Request methods](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/RequestMethods.md)
     - `req.get()`
     - `req.header()`
     - `req.accepts()`
@@ -401,7 +401,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
     - `res.locals`
   - Response best practices
 
-- **24. Status Codes**
+- [**24. Status Codes**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/HTTPResponses.md)
   - Status code categories
     - 1xx informational
     - 2xx success
@@ -428,7 +428,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
     - 503 Service Unavailable
   - Status code best practices
 
-- **25. Headers**
+- [**25. Headers**](/Web%20Development/ExpressJS/Request%20and%20Response%20Handling/Headers.md)
   - Request headers
   - Response headers
   - Custom headers
@@ -517,8 +517,8 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # V. Templating
 
-- **31. Templating Fundamentals**
-  - Template engines
+- [**31. Templating Fundamentals**](/Web%20Development/ExpressJS/Templating%20Engines/TemplateEngine.md)
+  - [Template engines](/Web%20Development/ExpressJS/Templating%20Engines/ExpressEngines.md)
   - View engine
   - `app.set('view engine', ...)`
   - `app.set('views', ...)`
@@ -526,7 +526,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - View locals
   - Templating best practices
 
-- **32. EJS**
+- [**32. EJS**](/Web%20Development/ExpressJS/Templating%20Engines/EJS.md)
   - EJS
   - EJS syntax
   - `<%= %>`
@@ -537,7 +537,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Partials
   - EJS best practices
 
-- **33. Pug**
+- [**33. Pug**](/Web%20Development/ExpressJS/Templating%20Engines/Pug.md)
   - Pug
   - Pug syntax
   - Indentation
@@ -549,7 +549,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Mixins
   - Pug best practices
 
-- **34. Handlebars**
+- [**34. Handlebars**](/Web%20Development/ExpressJS/Templating%20Engines/Handlebars.md)
   - Handlebars
   - Handlebars syntax
   - `{{ }}`
@@ -559,7 +559,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Layouts
   - Handlebars best practices
 
-- **35. Other Template Engines**
+- [**35. Other Template Engines**](/Web%20Development/ExpressJS/Templating%20Engines/OtherEngines.md)
   - Nunjucks
   - Mustache
   - Liquid
@@ -567,7 +567,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Marko
   - Template engine comparison
 
-- **36. Static Files**
+- [**36. Static Files**](/Web%20Development/ExpressJS/Templating%20Engines/StaticFiles.md)
   - `express.static()`
   - Static directories
   - Static options
@@ -584,24 +584,35 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Multiple static directories
   - Static file best practices
 
+- [**Performance & Production Optimization**](/Web%20Development/ExpressJS/Templating%20Engines/PerformanceAndProduction.md)
+  - View caching
+  - Stream-based rendering 
+  - File system structuring
+  - Minification & Asset pipelines
+
+- [**Modern Context & SSR Transitions**](/Web%20Development/ExpressJS/Templating%20Engines/ModernContext.md)
+  - Server-Side Rendering (SSR) limits
+  - Hybrid rendering 
+  - Isomorphic validation handling
+
 ---
 
 # VI. Error Handling
 
-- **37. Error Handling Fundamentals**
+- [**37. Error Handling Fundamentals**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorHandling.md)
   - Errors
   - Error propagation
   - Synchronous errors
   - Asynchronous errors
   - Error handling best practices
 
-- **38. Synchronous Error Handling**
+- [**38. Synchronous Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/SyncError.md)
   - `try/catch`
   - Throwing errors
   - Error propagation
   - Synchronous error best practices
 
-- **39. Asynchronous Error Handling**
+- [**39. Asynchronous Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/AsyncError.md)
   - Async errors
   - `next(err)`
   - Promise rejection
@@ -609,7 +620,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Async error best practices
   - Express 5 async error handling
 
-- **40. Error-Handling Middleware**
+- [**40. Error-Handling Middleware**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/Middleware.md)
   - Error-handling middleware
   - Four-argument signature
   - Error handling order
@@ -617,7 +628,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Centralized error handling
   - Error handling best practices
 
-- **41. Custom Error Classes**
+- [**41. Custom Error Classes**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/CustomErrorClasses.md)
   - Custom errors
   - Error inheritance
   - Error properties
@@ -625,33 +636,49 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Error messages
   - Custom error best practices
 
-- **42. Error Responses**
+- [**42. Error Responses**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorResponses.md)
   - Error response format
   - Status codes
   - Error messages
   - Error details
   - Error logging
   - Error response best practices
+  
+  [**43. Error Design**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ErrorDesign.md)
+  - Error codes
+  - Human-readable messages
+  - Machine-readable details
+  - Validation errors
+  - Authentication errors
+  - Authorization errors
+  - Database errors
 
-- **43. Operational vs Programming Errors**
+- [**44. Operational vs Programming Errors**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/OperationalVsProg.md)
   - Operational errors
   - Programming errors
   - Error classification
   - Error handling strategies
   - Error classification best practices
 
+  [**Production Error Handling**](/Web%20Development/ExpressJS/Validation%20and%20Error%20Handling/ProductionError.md)
+  * Avoiding stack-trace leakage
+  * Structured logging
+  * Correlation/request IDs
+  * Error monitoring
+  * Graceful failure
+
 ---
 
 # VII. Validation
 
-- **44. Validation Fundamentals**
+- [**45. Validation Fundamentals**](/Web%20Development/ExpressJS/Validation/InputValidation.md)
   - Validation
   - Input validation
   - Request validation
   - Response validation
   - Validation best practices
 
-- **45. Validation Libraries**
+- [**46. Validation Libraries**](/Web%20Development/ExpressJS/Validation/Libraries.md)
   - `express-validator`
   - Joi
   - Zod
@@ -661,7 +688,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Validation library comparison
   - Validation library selection
 
-- **46. express-validator**
+- [**47. express-validator**](/Web%20Development/ExpressJS/Validation/express-validator.md)
   - `express-validator`
   - `body()`
   - `query()`
@@ -673,7 +700,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Error handling
   - express-validator best practices
 
-- **47. Joi**
+- [**48. Joi**](/Web%20Development/ExpressJS/Validation/Joi.md)
   - Joi
   - Schemas
   - Schema validation
@@ -682,7 +709,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Error messages
   - Joi best practices
 
-- **48. Zod**
+- [**49. Zod**](/Web%20Development/ExpressJS/Validation/Zod.md)
   - Zod
   - Schemas
   - Type inference
@@ -691,13 +718,13 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Error messages
   - Zod best practices
 
-- **49. Custom Validation**
+- [**50. Custom Validation**](/Web%20Development/ExpressJS/Validation/CustomValidation.md)
   - Custom validators
   - Validation middleware
   - Validation errors
   - Validation best practices
 
-- **50. Validation Patterns**
+- [**51. Validation Patterns**](/Web%20Development/ExpressJS/Validation/Patterns.md)
   - Request body validation
   - Query validation
   - Parameter validation
@@ -707,9 +734,9 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 ---
 
-# VIII. Authentication and Authorization
+# VIII. Authentication
 
-- [**51. Authentication Fundamentals**](/Web%20Development/ExpressJS/Authentication/Authentication.md)
+- [**52. Authentication Fundamentals**](/Web%20Development/ExpressJS/Authentication/Authentication.md)
   - Authentication
   - Identity
   - Credentials
@@ -717,7 +744,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Tokens
   - Authentication best practices
 
-- [**52. Session Authentication**](/Web%20Development/ExpressJS/Authentication/SessionBased.md)
+- [**53. Session Authentication**](/Web%20Development/ExpressJS/Authentication/SessionBased.md)
   - Session-based authentication
   - `express-session`
   - Login
@@ -726,7 +753,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Session security
   - Session authentication best practices
 
-- **53. Token Authentication**
+- [**54. Token Authentication**](/Web%20Development/ExpressJS/Authentication/Token.md)
   - Token-based authentication
   - JWT
   - `jsonwebtoken`
@@ -736,12 +763,12 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Token security
   - Token authentication best practices
 
-- **54. Passport.js**
+- [**55. Passport.js**](/Web%20Development/ExpressJS/Authentication/PassportJS.md)
   - Passport.js
   - Strategies
     - Local
-    - JWT
-    - OAuth
+    - [JWT](/Web%20Development/ExpressJS/Authentication/JWT.md)
+    - [OAuth](/Web%20Development/ExpressJS/Authentication/OAuth.md)
     - Google
     - Facebook
     - GitHub
@@ -751,7 +778,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Deserialization
   - Passport best practices
 
-- **55. Password Security**
+- [**56. Password Security**](/Web%20Development/ExpressJS/Authentication/Password.md)
   - Password hashing
     - bcrypt
     - argon2
@@ -760,15 +787,6 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Password policies
   - Password reset
   - Password security best practices
-
-- **56. Authorization**
-  - Authorization
-  - Roles
-  - Permissions
-  - RBAC
-  - Resource-based authorization
-  - Authorization middleware
-  - Authorization best practices
 
 - **57. OAuth and OpenID Connect**
   - [OAuth](/Web%20Development/ExpressJS/Authentication/OAuth.md)
@@ -780,16 +798,50 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 ---
 
+# IX. Authorization
+
+- [**58. Authorization Fundamentals**](/Web%20Development/ExpressJS/Authorization/Authorization.md)
+
+  - Authorization
+  - Roles
+  - Permissions
+  - RBAC
+  - Resource-based authorization
+  - Authorization middleware
+  - Authorization best practices
+
+- [**59. Role-Based Access Control**](/Web%20Development/ExpressJS/Authorization/RoleBasedAccessControl.md)
+
+  - Roles
+  - Permissions
+  - Role middleware
+  - Admin privileges
+
+- [**60. Attribute-Based Access Control**](/Web%20Development/ExpressJS/Authorization/AttributeBased.md)
+
+  - User attributes
+  - Resource attributes
+  - Contextual authorization
+
+- [**61. Multi-Tenant Authorization**](/Web%20Development/ExpressJS/Authorization/MultiTenant.md)
+
+  - Tenant identification
+  - Tenant-scoped queries
+  - Data isolation
+  - Tenant-level roles
+
+---
+
 # IX. Databases
 
-- **58. Database Fundamentals**
+- [**62. Database Fundamentals**](/Web%20Development/ExpressJS/Databases/Database.md)
   - Databases
   - Relational databases
   - NoSQL databases
   - Database selection
   - Database best practices
 
-- **59. SQL Databases**
+- [**63. SQL Databases**](/Web%20Development/ExpressJS/Databases/SQL.md)
   - PostgreSQL
   - MySQL
   - MariaDB
@@ -797,19 +849,19 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - SQLite
   - SQL database best practices
 
-- **60. Database Drivers**
+- [**64. Database Drivers**](/Web%20Development/ExpressJS/Databases/Drivers.md)
   - `pg`
   - `mysql2`
   - `better-sqlite3`
   - `mssql`
   - Database driver best practices
 
-- **61. Query Builders**
+- [**65. Query Builders**](/Web%20Development/ExpressJS/Databases/QueryBuilders.md)
   - Knex
   - Kysely
   - Query builder best practices
 
-- **62. ORMs**
+- [**66. ORMs**](/Web%20Development/ExpressJS/Databases/ORMs.md)
   - Prisma
   - Sequelize
   - TypeORM
@@ -817,14 +869,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - MikroORM
   - ORM best practices
 
-- **63. NoSQL Databases**
+- [**67. NoSQL Databases**](/Web%20Development/ExpressJS/Databases/NoSQL.md)
   - MongoDB
   - Redis
   - Cassandra
   - Couchbase
   - NoSQL best practices
 
-- **64. Database Patterns**
+- [**68. Database Patterns**](/Web%20Development/ExpressJS/Databases/Patterns.md)
   - Repository pattern
   - Service layer
   - Transaction management
@@ -835,7 +887,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # X. REST API Development
 
-- **65. REST Fundamentals**
+- **69. REST Fundamentals**
   - REST
   - Resources
   - Endpoints
@@ -844,7 +896,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Representations
   - REST best practices
 
-- **66. API Design**
+- **70. API Design**
   - Resource naming
   - URL structures
   - Request formats
@@ -853,7 +905,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Error responses
   - API design best practices
 
-- **67. CRUD APIs**
+- **71. CRUD APIs**
   - Create
   - Read
   - Update
@@ -864,14 +916,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Searching
   - CRUD best practices
 
-- **68. API Versioning**
+- **72. API Versioning**
   - URI versioning
   - Header versioning
   - Backward compatibility
   - Deprecation strategies
   - Versioning best practices
 
-- **69. API Documentation**
+- **73. API Documentation**
   - OpenAPI
   - Swagger
   - Swagger UI
@@ -879,14 +931,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - `swagger-ui-express`
   - API documentation best practices
 
-- **70. API Rate Limiting**
+- **74. API Rate Limiting**
   - Rate limiting
   - `express-rate-limit`
   - Rate limit strategies
   - Rate limit headers
   - Rate limiting best practices
 
-- **71. API Caching**
+- **75. API Caching**
   - Caching
   - `apicache`
   - Redis caching
@@ -894,21 +946,21 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Cache invalidation
   - Caching best practices
 
-- **72. API Pagination**
+- **76. API Pagination**
   - Offset pagination
   - Cursor pagination
   - Keyset pagination
   - Pagination metadata
   - Pagination best practices
 
-- **73. API Filtering and Sorting**
+- **77. API Filtering and Sorting**
   - Filtering
   - Sorting
   - Field selection
   - Embedding
   - Filtering best practices
 
-- **74. GraphQL**
+- **78. GraphQL**
   - GraphQL
   - `express-graphql`
   - Apollo Server
@@ -922,7 +974,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # XI. Security
 
-- **75. Security Fundamentals**
+- **79. Security Fundamentals**
   - Security
   - Threat modeling
   - Attack surface
@@ -931,7 +983,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Secure defaults
   - Security best practices
 
-- **76. Helmet**
+- **80. Helmet**
   - Helmet
   - Security headers
   - CSP
@@ -942,7 +994,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Permissions-Policy
   - Helmet best practices
 
-- **77. CORS**
+- **81. CORS**
   - CORS
   - `cors`
   - Origin
@@ -952,7 +1004,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Preflight
   - CORS best practices
 
-- **78. CSRF Protection**
+- **82. CSRF Protection**
   - CSRF
   - `csurf` (deprecated)
   - `csurf` alternatives
@@ -960,40 +1012,40 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - SameSite cookies
   - CSRF best practices
 
-- **79. Input Validation**
+- **83. Input Validation**
   - Input validation
   - Sanitization
   - Validation libraries
   - Validation best practices
 
-- **80. SQL Injection Prevention**
+- **84. SQL Injection Prevention**
   - SQL injection
   - Parameterized queries
   - Prepared statements
   - ORM protection
   - SQL injection prevention best practices
 
-- **81. XSS Prevention**
+- **85. XSS Prevention**
   - XSS
   - Output encoding
   - Content Security Policy
   - Sanitization
   - XSS prevention best practices
 
-- **82. Rate Limiting**
+- **86. Rate Limiting**
   - Rate limiting
   - `express-rate-limit`
   - Rate limit strategies
   - Rate limiting best practices
 
-- **83. Secure Cookies**
+- **87. Secure Cookies**
   - Secure cookies
   - `httpOnly`
   - `secure`
   - `sameSite`
   - Cookie security best practices
 
-- **84. Secret Management**
+- **88. Secret Management**
   - Environment variables
   - `dotenv`
   - Secret managers
@@ -1001,14 +1053,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - AWS Secrets Manager
   - Secret management best practices
 
-- **85. Dependency Security**
+- **89. Dependency Security**
   - Dependency auditing
   - `npm audit`
   - Snyk
   - Dependabot
   - Dependency security best practices
 
-- **86. Security Auditing**
+- **90. Security Auditing**
   - Security auditing
   - Penetration testing
   - Vulnerability scanning
@@ -1018,7 +1070,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # XII. Testing Express Applications
 
-- **87. Testing Fundamentals**
+- **91. Testing Fundamentals**
   - Testing
   - Test types
     - Unit tests
@@ -1027,7 +1079,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Test pyramid
   - Testing best practices
 
-- **88. Unit Testing**
+- **92. Unit Testing**
   - Unit testing
   - Jest
   - Vitest
@@ -1037,7 +1089,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Testing controllers
   - Unit testing best practices
 
-- **89. Integration Testing**
+- **93. Integration Testing**
   - Integration testing
   - Supertest
   - Testing HTTP endpoints
@@ -1045,14 +1097,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Testing database integration
   - Integration testing best practices
 
-- **90. End-to-End Testing**
+- **94. End-to-End Testing**
   - E2E testing
   - Full request lifecycle
   - Real or test databases
   - Business workflows
   - E2E testing best practices
 
-- **91. Mocking**
+- **95. Mocking**
   - Mocking
   - `jest.mock()`
   - `sinon`
@@ -1061,7 +1113,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Mocking external services
   - Mocking best practices
 
-- **92. Test Automation**
+- **96. Test Automation**
   - CI integration
   - Test pipelines
   - Parallel testing
@@ -1073,7 +1125,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # XIII. Performance Optimization
 
-- **93. Performance Fundamentals**
+- **97. Performance Fundamentals**
   - Performance
   - Latency
   - Throughput
@@ -1081,14 +1133,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Performance metrics
   - Performance best practices
 
-- **94. Compression**
+- **98. Compression**
   - Compression
   - `compression`
   - gzip
   - Brotli
   - Compression best practices
 
-- **95. Caching**
+- **99. Caching**
   - In-memory caching
   - Redis caching
   - HTTP caching
@@ -1096,38 +1148,38 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Cache invalidation
   - Caching best practices
 
-- **96. Connection Pooling**
+- **100. Connection Pooling**
   - Database connection pooling
   - HTTP connection pooling
   - Connection pool configuration
   - Connection pooling best practices
 
-- **97. Clustering**
+- **101. Clustering**
   - Node.js cluster
   - PM2
   - Load balancing
   - Clustering best practices
 
-- **98. Worker Threads**
+- **102. Worker Threads**
   - Worker threads
   - CPU-intensive workloads
   - Worker thread best practices
 
-- **99. Profiling**
+- **103. Profiling**
   - Profiling
   - Node.js profiler
   - Clinic.js
   - `0x`
   - Profiling best practices
 
-- **100. Benchmarking**
+- **104. Benchmarking**
   - Benchmarking
   - autocannon
   - wrk
   - k6
   - Benchmarking best practices
 
-- **101. Load Testing**
+- **105. Load Testing**
   - Load testing
   - Stress testing
   - Spike testing
@@ -1137,7 +1189,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # XIV. Express Architecture
 
-- **102. Project Structure**
+- **106. Project Structure**
   - Project structure
   - Controllers
   - Services
@@ -1150,21 +1202,21 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Tests
   - Project structure best practices
 
-- **103. Layered Architecture**
+- **107. Layered Architecture**
   - Controller layer
   - Service layer
   - Repository layer
   - Database layer
   - Layered architecture best practices
 
-- **104. MVC**
+- **108. MVC**
   - MVC
   - Models
   - Views
   - Controllers
   - MVC best practices
 
-- **105. Clean Architecture**
+- **109. Clean Architecture**
   - Clean architecture
   - Entities
   - Use cases
@@ -1172,19 +1224,19 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Frameworks and drivers
   - Clean architecture best practices
 
-- **106. Hexagonal Architecture**
+- **110. Hexagonal Architecture**
   - Hexagonal architecture
   - Ports
   - Adapters
   - Hexagonal architecture best practices
 
-- **107. Modular Architecture**
+- **111. Modular Architecture**
   - Modular architecture
   - Feature modules
   - Module boundaries
   - Modular architecture best practices
 
-- **108. Dependency Injection**
+- **112. Dependency Injection**
   - Dependency injection
   - Manual DI
   - DI containers
@@ -1192,19 +1244,19 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - `tsyringe`
   - DI best practices
 
-- **109. Service Layer**
+- **113. Service Layer**
   - Service layer
   - Business logic
   - Service methods
   - Service layer best practices
 
-- **110. Repository Pattern**
+- **114. Repository Pattern**
   - Repository pattern
   - Repository interfaces
   - Repository implementations
   - Repository best practices
 
-- **111. Domain-Driven Design**
+- **115. Domain-Driven Design**
   - DDD
   - Entities
   - Value objects
@@ -1217,7 +1269,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # XV. Express Ecosystem
 
-- **112. Popular Middleware**
+- **116. Popular Middleware**
   - `cors`
   - `helmet`
   - `morgan`
@@ -1235,7 +1287,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - `response-time`
   - Middleware best practices
 
-- **113. Popular Tools**
+- **117. Popular Tools**
   - nodemon
   - PM2
   - concurrently
@@ -1245,7 +1297,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - npm-run-all
   - Tool best practices
 
-- **114. Testing Tools**
+- **118. Testing Tools**
   - Jest
   - Vitest
   - Mocha
@@ -1254,14 +1306,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Sinon
   - Testing tool best practices
 
-- **115. API Documentation Tools**
+- **119. API Documentation Tools**
   - Swagger
   - OpenAPI
   - Postman
   - Insomnia
   - Documentation tool best practices
 
-- **116. Database Tools**
+- **120. Database Tools**
   - Prisma
   - Sequelize
   - TypeORM
@@ -1269,7 +1321,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Kysely
   - Database tool best practices
 
-- **117. Security Tools**
+- **121. Security Tools**
   - Helmet
   - `express-rate-limit`
   - `express-validator`
@@ -1277,7 +1329,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - `jsonwebtoken`
   - Security tool best practices
 
-- **118. Monitoring Tools**
+- **122. Monitoring Tools**
   - `express-status-monitor`
   - New Relic
   - Datadog
