@@ -1,1248 +1,897 @@
-# TypeScript Generic Fundamentals: A Comprehensive Cheat Sheet
+## Generics Fundamentals
+
+**Topic Overview.** **Generics** are TypeScript's primary mechanism for creating **reusable, type-safe components** that operate over a variety of types rather than a single one. A generic component declares one or more **type parameters** — placeholders for types supplied later — and uses them throughout its signature and body. When the component is used, **type arguments** either are provided explicitly or are inferred by the compiler from the values passed in. Unlike using `any`, generics **preserve type information**: the type relationship between inputs and outputs remains intact, so callers receive precise types rather than `any`. Generics are the foundation for TypeScript's most powerful type-level abstractions, including utility types (`Array<T>`, `Promise<T>`, `Record<K, V>`), constraint-driven APIs, and variance-aware designs.
 
 ---
 
-## Topic Overview
+## 1. Generics
 
 ### Definitions
 
-**Core Definition**
-Generics in TypeScript are a language feature that allows you to write reusable, type-safe code by parameterizing types. A generic type is a "template" that works with a variety of types while preserving the specific type information of the values it operates on. Instead of writing separate functions or classes for each type, you write one generic component that adapts to the type it's used with.
+**Core Definition.** **Generics** are a language feature that allows functions, interfaces, classes, and type aliases to be **parameterized over types**, so that a single declaration can work over many types while preserving type safety.
 
-**Technical Definition**
-Generics in TypeScript are implemented through type parameters—special kinds of variables that work on types rather than values. A generic declaration introduces one or more type parameters in angle brackets (e.g., `<T>`), which serve as placeholders for actual types provided at the use site. TypeScript employs a constraint-based type inference system: when a generic function is called, the compiler infers type arguments from the values passed in, unless explicitly provided. Generic types are "templates" from which multiple concrete types can be instantiated. The type parameters of a generic declaration are in scope throughout that declaration and can be constrained using the `extends` keyword. Generic parameter defaults are supported, and type parameters are erased at runtime.
+**Technical Definition.** Generics introduce **type parameters** — type-level variables declared in angle brackets (`<T>`). A generic declaration is a **type constructor**: it takes type arguments and produces a concrete type. In TypeScript, generics are checked at compile time and **erased** at runtime, like all type-level constructs. The type system uses **type argument inference** to determine type arguments from usage when they are not explicitly provided.
 
-**Beginner-Friendly Explanation**
-Generics are TypeScript's way of writing code that works with many types while keeping full type safety. Think of them like function parameters, but for types. If you write a function `identity<T>(value: T): T`, the `T` is a placeholder for whatever type you pass in. When you call `identity(42)`, TypeScript knows `T` is `number`, and you get a `number` back. When you call `identity("hello")`, `T` becomes `string`. Without generics, you'd either write separate functions for each type or use `any` and lose all type information. Generics let you write once and use with any type, while TypeScript still tracks the specific type at each call site.
-
-### Key Characteristics
-
-- **Type parameterization**: Types are passed as parameters, making components reusable across many types.
-- **Type preservation**: Unlike `any`, generics preserve the specific type information at each use site.
-- **Inference**: TypeScript infers type arguments from values when not explicitly provided.
-- **Constraints**: Type parameters can be constrained with `extends` to require certain shapes.
-- **Defaults**: Generic parameters can have default types.
-- **Scope**: Type parameters are scoped to the declaration they appear in.
-- **Runtime erasure**: Type parameters are erased at runtime; they exist only at compile time.
-- **Works across constructs**: Generics apply to functions, interfaces, classes, and type aliases.
-
-### Prerequisites
-
-- Basic knowledge of TypeScript types (primitives, objects, unions)
-- Familiarity with functions, interfaces, classes, and type aliases
-- Understanding of type annotations and type inference
-- Familiarity with `tsconfig.json` compiler options
-
-### Related Programming Areas
-
-- **Type Theory**: Parametric polymorphism, bounded quantification
-- **Type-Level Programming**: Generic constraints, conditional types, mapped types
-- **Reusable Components**: Library design, utility types, container types
-- **Functional Programming**: Generic higher-order functions
-- **Object-Oriented Programming**: Generic classes and interfaces
-
-### Core Concepts / Features
-
-1. Generic Type Parameters (Type Variables as Placeholders)
-2. Generic Functions and Method Signatures
-3. Generic Interfaces for Flexible Object Shapes
-4. Generic Classes (Instance Properties, Methods, and Static Limitations)
-5. Generic Type Aliases and Generic Parameter Scope
-6. Generic Arrow Function Syntax Constraints and the `<T,>` / `T extends unknown` JSX Parsing Workaround
-
-
-## 1. Generic Type Parameters (Type Variables as Placeholders)
-
-### Definitions
-
-**Core Definition**
-Generic type parameters (also called type variables) are identifiers declared in angle brackets (`<T>`) that serve as placeholders for actual types. They allow a single declaration to work with multiple types while preserving type relationships between inputs and outputs.
-
-**Technical Definition**
-A type parameter is a special kind of variable that operates on types rather than values. When a generic declaration is used, the type parameter is replaced with a concrete type argument (either explicitly provided or inferred). Type parameters can be constrained with `extends` to require a minimum shape, and can have default types. The scope of a type parameter is the entire declaration in which it appears. TypeScript uses type parameter inference to determine the type argument from the values passed to a generic function or the type arguments provided to a generic type. Type parameters are erased at runtime and exist only during compilation.
-
-**Beginner-Friendly Explanation**
-A type parameter is like a placeholder that says "some type goes here." When you write `function identity<T>(value: T): T`, the `T` is a placeholder. You can use `T` anywhere in the function—in parameter types, return types, and local variable types. When you call `identity(42)`, TypeScript replaces `T` with `number`. The type parameter acts like a function parameter, but for types instead of values. This is what makes generics so powerful: you write code once, and it works with any type.
+**Beginner-Friendly Explanation.** Generics let you write **one piece of code that works with many types** without losing track of which type is which. Instead of writing separate functions for numbers, strings, and objects, you write a function with a placeholder type (`<T>`) that TypeScript fills in when you call it. The placeholder ensures that whatever type goes in is the same type that comes out.
 
 ### Purposes
 
-- To create reusable components that work with multiple types.
-- To preserve type relationships between inputs and outputs.
-- To avoid code duplication across similar type-specific implementations.
-- To provide type safety without resorting to `any`.
-- To enable type-level abstraction and parameterization.
+- **To enable code reuse across types** without sacrificing type safety or resorting to `any`.
+- **To preserve type relationships** between inputs and outputs, so the compiler knows that an `identity<number>(42)` returns a `number`, not `any`.
+- **To express type-level abstractions** that are checked at compile time and erased at runtime.
+- **To provide the foundation for generic libraries and utility types** such as `Array<T>`, `Promise<T>`, and `Record<K, V>`.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Single Type Parameter**
+**General syntax (generic function):**
 
 ```typescript
-function functionName<T>(param: T): T {
+function functionName<TypeParam>(param: TypeParam): TypeParam {
   return param;
 }
 ```
 
-**Component Breakdown**
-- `<T>`: The type parameter declaration.
-- `T`: The type parameter identifier (conventionally `T`, `U`, `V`, or descriptive names).
-- `param: T`: A parameter using the type parameter.
-- `): T`: The return type using the type parameter.
+**Component breakdown:**
 
-**General Syntax: Multiple Type Parameters**
+- `functionName` — the function identifier.
+- `<TypeParam>` — the **type parameter list**; declares one or more type variables.
+- `param: TypeParam` — a parameter whose type is the type parameter.
+- `): TypeParam` — the return type, preserving the type relationship.
 
-```typescript
-function pair<T, U>(first: T, second: U): [T, U] {
-  return [first, second];
-}
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- `<T, U>`: Multiple type parameters separated by commas.
-- Each parameter can be used independently.
+- Type parameters are declared in angle brackets immediately after the function, class, or interface name.
+- Type arguments may be supplied explicitly (`identity<number>(42)`) or inferred from arguments (`identity(42)`).
+- Generics are **erased**; no runtime type information survives compilation.
+- Generic enums and namespaces are **not supported**; generics apply to functions, interfaces, classes, and type aliases.
 
-**General Syntax: Constrained Type Parameter**
+**Constraints and limitations.**
 
-```typescript
-function logLength<T extends { length: number }>(value: T): T {
-  console.log(value.length);
-  return value;
-}
-```
+- A generic type parameter that is never used in the declaration is a code smell and is discouraged.
+- Generics cannot be used with `enum` or `namespace` declarations.
+- Without constraints, a type parameter is treated as if it could be any type, which restricts operations on values of that type.
 
-**Component Breakdown**
-- `<T extends { length: number }>`: The constraint requires `T` to have a `length` property.
-- The constraint ensures `value.length` is valid.
+### Annotated Complete Step by Step Code Examples
 
-**General Syntax: Default Type Parameter**
+#### Example 1: The identity function — generics vs `any`
 
 ```typescript
-function createArray<T = string>(length: number, value: T): T[] {
-  return Array(length).fill(value);
-}
-```
-
-**Component Breakdown**
-- `<T = string>`: The default type is `string` when `T` cannot be inferred.
-
-**Syntax Rules**
-
-- Type parameters are declared in angle brackets after the function, class, or interface name.
-- Type parameter names are conventionally single uppercase letters (`T`, `U`, `V`) or descriptive (`TValue`, `TKey`).
-- Multiple type parameters are separated by commas.
-- Type parameters can be constrained with `extends`.
-- Type parameters can have default types with `=`.
-- Type parameters are in scope throughout the declaration.
-- Type parameters are erased at runtime.
-
-**Constraints and Limitations**
-
-- Type parameters cannot be used as values (e.g., `new T()` is not allowed).
-- Type parameters cannot appear in static members of generic classes.
-- Type parameters are erased at runtime; no runtime type information is available.
-- Unconstrained type parameters default to `unknown` in strict mode.
-- Very complex generic signatures can be difficult to read.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Generic Function
-
-```typescript
-// Step 1: Define a generic identity function.
-function identity<T>(value: T): T {
-  return value;
+// example_generics_identity.ts
+// Step 1: Generic identity function.
+function identity<T>(arg: T): T {
+  return arg;
 }
 
-// Step 2: Call with explicit type argument.
-const num1 = identity<number>(42);
-console.log(num1);  // 42
+// Step 2: Explicit type argument.
+let output1 = identity<string>("myString");  // output1: string
 
-// Step 3: Call with type inference.
-const str1 = identity("hello");
-console.log(str1);  // "hello"
+// Step 3: Inferred type argument.
+let output2 = identity(42);                  // output2: number
 
-// Step 4: TypeScript preserves the type.
-const num2: number = identity(100);      // ✅
-const str2: string = identity("world");  // ✅
-// const wrong: string = identity(42);   // ❌ Error: number not assignable to string.
-
-// Step 5: Without generics, we'd lose type information.
-function identityAny(value: any): any {
-  return value;
+// Step 4: Contrast with any (loses type information).
+function identityAny(arg: any): any {
+  return arg;
 }
-const result = identityAny("hello");  // result: any — no type safety!
+let output3 = identityAny("myString");       // output3: any
+
+console.log(output1.toUpperCase());   // Expected: MYSTRING
+console.log(output2.toFixed(0));      // Expected: 42
+// console.log(output3.toUpperCase()); // would compile with any but loses safety
 ```
 
 **Expected Output:**
 ```
+MYSTRING
 42
-hello
 ```
 
-**Why This Output Occurs:** The generic `identity<T>` function captures the type of its argument and returns the same type. When called with `42`, `T` is inferred as `number`. When called with `"hello"`, `T` is inferred as `string`. The `any` version loses all type information.
+**Why this output occurs.** `identity<T>` preserves the argument’s type in its return type. `identity<string>("myString")` returns `string`, so `.toUpperCase()` is valid. `identity(42)` infers `T = number`, so `.toFixed(0)` is valid. `identityAny` returns `any`, erasing the type relationship and disabling checking on the result.
 
-#### Example 2: Constrained and Default Type Parameters
+#### Example 2: Generic array wrapper
 
 ```typescript
-// Step 1: Constrained type parameter.
-interface HasLength {
-  length: number;
+// example_generics_array.ts
+// Step 1: Generic function operating on arrays.
+function firstElement<T>(arr: T[]): T | undefined {
+  return arr[0];
 }
 
-function logLength<T extends HasLength>(value: T): T {
-  console.log(`Length: ${value.length}`);
-  return value;
-}
-
-logLength("hello");        // "Length: 5"
-logLength([1, 2, 3]);      // "Length: 3"
-logLength({ length: 10 }); // "Length: 10"
-// logLength(42);          // ❌ Error: number does not have 'length'.
-
-// Step 2: Default type parameter.
-function createArray<T = string>(length: number, value: T): T[] {
-  return Array(length).fill(value);
-}
-
-const strings = createArray(3, "hello");  // string[]
-const numbers = createArray(3, 42);       // number[]
-const defaults = createArray(3, "hi");    // string[] (uses default)
-
-console.log(strings);   // ["hello", "hello", "hello"]
-console.log(numbers);   // [42, 42, 42]
-```
-
-**Expected Output:**
-```
-Length: 5
-Length: 3
-Length: 10
-[ 'hello', 'hello', 'hello' ]
-[ 42, 42, 42 ]
-```
-
-**Why This Output Occurs:** The `extends HasLength` constraint requires the argument to have a `length` property. The default type parameter `T = string` means that if `T` cannot be inferred, it defaults to `string`. The generic function preserves the specific type of the value.
-
-### Real-World Cases
-
-**Case 1: Utility Functions**
-Functions like `identity`, `clone`, and `first` use generics to work with any type while preserving type information.
-
-**Case 2: Container Types**
-Arrays, Maps, Sets, and custom containers use generics to specify their element types.
-
-**Case 3: API Response Wrappers**
-Generic response types like `ApiResponse<T>` wrap data of any type while preserving the payload type.
-
-**Case 4: Type-Safe Event Emitters**
-Event emitters use generics to type event names and payloads, ensuring that handlers receive the correct event data.
-
-
-## 2. Generic Functions and Method Signatures
-
-### Definitions
-
-**Core Definition**
-A generic function is a function that declares one or more type parameters on its call signature. The type parameters are specified (or inferred) when the function is called, allowing the function to work with different types while maintaining type relationships between parameters and return values.
-
-**Technical Definition**
-A generic function declares its type parameters on the call signature, not on the function itself. The type parameters are in scope throughout the function body and can be used in parameter types, return types, and local variable types. TypeScript infers type arguments from the values passed at the call site unless explicitly provided. Generic methods are functions declared within classes, interfaces, or object literals that have their own type parameters, independent of any type parameters on the containing type.
-
-**Beginner-Friendly Explanation**
-A generic function is a function that can work with any type. You declare the type parameters in angle brackets after the function name: `function identity<T>(value: T): T`. When you call the function, TypeScript figures out what `T` should be based on the arguments you pass. Generic methods work the same way but are defined inside a class or object. The key benefit is that the function remembers the specific type you used, so you get type safety without writing separate functions for each type.
-
-### Purposes
-
-- To write reusable functions that work with multiple types.
-- To preserve type relationships between parameters and return values.
-- To enable type-safe higher-order functions.
-- To avoid code duplication and `any` usage.
-- To provide type-safe utility functions and algorithms.
-
-### Syntax Rules and Structure
-
-**General Syntax: Generic Function Declaration**
-
-```typescript
-function functionName<T>(param: T): T {
-  return param;
-}
-```
-
-**Component Breakdown**
-- `<T>`: Type parameter declared on the function.
-- `param: T`: Parameter using the type parameter.
-- `): T`: Return type using the type parameter.
-
-**General Syntax: Generic Function Expression**
-
-```typescript
-const functionName = function <T>(param: T): T {
-  return param;
-};
-```
-
-**Component Breakdown**
-- Type parameters are declared after the `function` keyword.
-
-**General Syntax: Generic Method in Interface**
-
-```typescript
-interface Container {
-  get<T>(index: number): T;
-  set<T>(index: number, value: T): void;
-}
-```
-
-**Component Breakdown**
-- Methods can have their own type parameters independent of the interface.
-
-**General Syntax: Generic Method in Class**
-
-```typescript
-class Collection {
-  private items: any[] = [];
-
-  add<T>(item: T): void {
-    this.items.push(item);
-  }
-
-  get<T>(index: number): T {
-    return this.items[index];
-  }
-}
-```
-
-**Component Breakdown**
-- Generic methods have their own type parameters.
-
-**Syntax Rules**
-
-- Type parameters are declared in angle brackets after the function name.
-- Type parameters are in scope throughout the function body.
-- Type arguments are inferred from the call site unless explicitly provided.
-- Multiple type parameters are separated by commas.
-- Generic methods can be declared in classes, interfaces, and object literals.
-- Methods can have their own type parameters independent of the containing type.
-- Type parameters can be constrained with `extends`.
-
-**Constraints and Limitations**
-
-- Generic methods cannot access static members of generic classes.
-- Type parameters are erased at runtime.
-- Overloaded generic functions require careful declaration.
-- Type inference may not always produce the expected type; explicit annotations can help.
-- Generic methods in classes cannot reference the class's type parameters if they are static.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Generic Function
-
-```typescript
-// Step 1: Define a generic function.
-function firstElement<T>(array: T[]): T | undefined {
-  return array[0];
-}
-
-// Step 2: Call with different types.
+// Step 2: Call with different array types.
 const firstNum = firstElement([1, 2, 3]);        // number | undefined
 const firstStr = firstElement(["a", "b"]);       // string | undefined
-const firstObj = firstElement([{ name: "Alice" }]); // { name: string } | undefined
 
-console.log(firstNum);  // 1
-console.log(firstStr);  // "a"
-
-// Step 3: Explicit type argument.
-const explicit = firstElement<number>([10, 20, 30]);
-console.log(explicit);  // 10
-
-// Step 4: Type safety is preserved.
-// const wrong: string = firstElement([1, 2, 3]);
-// ❌ Error: number is not assignable to string.
+console.log(firstNum);   // Expected: 1
+console.log(firstStr);   // Expected: a
 ```
 
 **Expected Output:**
 ```
 1
 a
-10
 ```
 
-**Why This Output Occurs:** The generic `firstElement<T>` function infers `T` from the array argument. When called with `[1, 2, 3]`, `T` is `number`. When called with `["a", "b"]`, `T` is `string`. The return type is `T | undefined` because the array may be empty.
-
-#### Example 2: Generic Method in a Class
-
-```typescript
-// Step 1: Define a class with generic methods.
-class Stack {
-  private items: unknown[] = [];
-
-  push<T>(item: T): void {
-    this.items.push(item);
-  }
-
-  pop<T>(): T | undefined {
-    return this.items.pop() as T | undefined;
-  }
-
-  // Generic method with constraint.
-  find<T extends { id: number }>(id: number): T | undefined {
-    return this.items.find(
-      (item): item is T => (item as T).id === id
-    ) as T | undefined;
-  }
-}
-
-// Step 2: Use the generic methods.
-const stack = new Stack();
-stack.push("hello");
-stack.push(42);
-stack.push({ id: 1, name: "Alice" });
-
-const str = stack.pop<string>();
-console.log(str);  // { id: 1, name: "Alice" } — actually the last pushed
-
-// Step 3: Constrained generic method.
-stack.push({ id: 2, name: "Bob" });
-const found = stack.find<{ id: number; name: string }>(2);
-console.log(found);  // { id: 2, name: 'Bob' }
-```
-
-**Expected Output:**
-```
-{ id: 1, name: 'Alice' }
-{ id: 2, name: 'Bob' }
-```
-
-**Why This Output Occurs:** The `Stack` class has generic methods `push<T>`, `pop<T>`, and `find<T extends { id: number }>`. Each method has its own type parameter, independent of the class. The `find` method uses a constraint to require an `id` property. TypeScript infers the return types based on the type arguments.
+**Why this output occurs.** The type parameter `T` is inferred from the array argument. For `[1, 2, 3]`, `T = number`; for `["a", "b"]`, `T = string`. The return type `T | undefined` accurately reflects that the array may be empty. No explicit type argument is needed.
 
 ### Real-World Cases
 
-**Case 1: Array Utility Functions**
-Functions like `map`, `filter`, `reduce`, and `find` are generic, enabling type-safe array operations.
+- **Utility types**: `Array<T>`, `Promise<T>`, `Record<K, V>`, and `Partial<T>` are all built on generics.
+- **API clients**: `fetchJson<T>(url: string): Promise<T>` returns a typed response without losing type information.
+- **Data structures**: Stacks, queues, and linked lists are implemented generically to work with any element type.
 
-**Case 2: Promise Handling**
-`Promise<T>` and `async` functions are generic, preserving the resolved value type.
+---
 
-**Case 3: Event Handlers**
-Event handler functions use generics to type event payloads while preserving event-specific data.
-
-**Case 4: API Client Methods**
-API client methods use generics to type request and response payloads, ensuring type safety across network calls.
-
-
-## 3. Generic Interfaces for Flexible Object Shapes
+## 2. Generic Functions
 
 ### Definitions
 
-**Core Definition**
-A generic interface is an interface declaration that declares one or more type parameters. The type parameters act as placeholders for types that are supplied when the interface is used, allowing the interface to describe object shapes that work with different types.
+**Core Definition.** A **generic function** is a function that declares one or more **type parameters** and uses them in its parameter types, return type, or body.
 
-**Technical Definition**
-A generic interface declares type parameters in angle brackets after the interface name. The type parameters are in scope throughout the interface body and can be used in property types, method signatures, and index signatures. Generic interfaces are "templates" from which multiple concrete interfaces can be instantiated by providing type arguments. Type arguments can be inferred in some contexts (e.g., when a generic interface is used as a function parameter type) but are often explicitly provided. Generic interfaces are commonly used for container types, repository patterns, and API response wrappers.
+**Technical Definition.** A generic function’s type is a **generic function type** — a function type parameterized over one or more type variables. The type parameters are listed in angle brackets before the parameter list. Type argument inference uses the types of the arguments at the call site to determine the type arguments, unless they are explicitly provided.
 
-**Beginner-Friendly Explanation**
-A generic interface is an interface that takes type parameters. For example, `interface Box<T> { value: T }` describes a box that holds a value of any type. When you write `Box<number>`, you get an interface with `value: number`. When you write `Box<string>`, you get `value: string`. Generic interfaces let you define reusable object shapes that work with different types. They're especially useful for containers, wrappers, and patterns where the shape is the same but the data type varies.
+**Beginner-Friendly Explanation.** A generic function is **a function with a type placeholder**. You write `<T>` after the function name, and then use `T` wherever you want to say “whatever type the caller uses.” The function works for any type, but TypeScript still checks that the types line up.
 
 ### Purposes
 
-- To define reusable object shapes that work with multiple types.
-- To create type-safe container and wrapper interfaces.
-- To enable repository and data-access patterns with type-safe entities.
-- To provide flexible API response and request types.
-- To support generic data structures and collections.
+- **To write reusable functions** that work over many types while preserving type relationships.
+- **To enable type argument inference**, reducing the need for explicit type annotations at call sites.
+- **To support higher-order functions** and callbacks with precise type flow.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Generic Interface**
-
 ```typescript
-interface InterfaceName<T> {
-  property: T;
-  method(param: T): T;
+function functionName<T, U>(param1: T, param2: U): ReturnType {
+  // body
 }
 ```
 
-**Component Breakdown**
-- `<T>`: Type parameter declared after the interface name.
-- `property: T`: Property using the type parameter.
-- `method(param: T): T`: Method using the type parameter.
+**Component breakdown:**
 
-**General Syntax: Multiple Type Parameters**
+- `<T, U>` — the type parameter list; multiple parameters are separated by commas.
+- `param1: T` — a parameter typed by the first type parameter.
+- `param2: U` — a parameter typed by the second type parameter.
+- `): ReturnType` — the return type, which may reference `T`, `U`, or both.
+
+**Syntax rules.**
+
+- Type parameters are declared before the parameter list.
+- Type arguments may be explicit (`fn<number, string>(1, "a")`) or inferred from arguments.
+- Constraints may be applied with `extends` (e.g., `<T extends object>`).
+- Defaults may be provided (e.g., `<T = string>`).
+
+**Constraints and limitations.**
+
+- Unconstrained type parameters permit only operations that are valid for all types; accessing `.length` or other members requires a constraint.
+- Inference may fail in complex positions; explicit type arguments resolve ambiguity.
+- Generic function declarations with bodies that always throw infer `void` unless annotated `never`.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Generic function with multiple type parameters
 
 ```typescript
-interface Pair<T, U> {
-  first: T;
-  second: U;
+// example_generic_function_pair.ts
+function pair<T, U>(first: T, second: U): [T, U] {
+  return [first, second];
+}
+
+const result = pair("age", 30);
+// result: [string, number]
+
+console.log(result[0]);   // Expected: age
+console.log(result[1]);   // Expected: 30
+```
+
+**Expected Output:**
+```
+age
+30
+```
+
+**Why this output occurs.** The compiler infers `T = string` from `"age"` and `U = number` from `30`. The return type is the tuple `[string, number]`, preserving both types precisely.
+
+#### Example 2: Generic function with a constraint
+
+```typescript
+// example_generic_function_constraint.ts
+interface HasLength {
+  length: number;
+}
+
+function logLength<T extends HasLength>(value: T): T {
+  console.log(value.length);
+  return value;
+}
+
+logLength("hello");          // Expected: 5
+logLength([1, 2, 3]);        // Expected: 3
+// logLength(42);            // Error: number does not satisfy HasLength
+```
+
+**Expected Output:**
+```
+5
+3
+```
+
+**Why this output occurs.** The constraint `T extends HasLength` guarantees that every `T` has a `length` property, so `value.length` is legal. Strings and arrays satisfy `HasLength`; numbers do not, so the call with `42` is a compile-time error.
+
+### Real-World Cases
+
+- **Array utilities**: `map<T, U>(arr: T[], fn: (item: T) => U): U[]` transforms arrays with full type preservation.
+- **Event emitters**: `emit<T>(event: string, payload: T)` types the payload per event.
+- **API wrappers**: `request<T>(url: string): Promise<T>` types the response.
+
+---
+
+## 3. Generic Interfaces
+
+### Definitions
+
+**Core Definition.** A **generic interface** is an interface that declares one or more **type parameters**, allowing its members to reference those parameters.
+
+**Technical Definition.** A generic interface describes a family of object types parameterized by one or more type variables. Type parameters may be placed on the **call signature** (making individual methods generic) or on the **interface itself** (making the whole type generic). The placement determines whether the type argument is fixed for the entire object or per-method invocation.
+
+**Beginner-Friendly Explanation.** A generic interface is **a blueprint for objects that can hold or produce different types**. For example, a `Box<T>` interface describes an object with a `value: T` property — one blueprint, many concrete types (`Box<number>`, `Box<string>`).
+
+### Purposes
+
+- **To describe generic object shapes** without duplicating interface declarations for each type.
+- **To support generic call signatures** and reusable function-object contracts.
+- **To model containers, wrappers, and repositories** that work over arbitrary payload types.
+
+### Syntax Rules and Structure
+
+```typescript
+interface InterfaceName<TypeParam> {
+  property: TypeParam;
+  method(param: TypeParam): TypeParam;
 }
 ```
 
-**Component Breakdown**
-- `<T, U>`: Multiple type parameters.
+**Component breakdown:**
 
-**General Syntax: Constrained Generic Interface**
+- `InterfaceName<TypeParam>` — the generic interface name and its type parameter list.
+- `property: TypeParam` — a property whose type is the type parameter.
+- `method(param: TypeParam): TypeParam` — a method using the type parameter.
 
-```typescript
-interface Repository<T extends { id: number }> {
-  findById(id: number): T | undefined;
-  save(entity: T): void;
-}
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- `<T extends { id: number }>`: Constraint requiring an `id` property.
+- Type parameters are declared after the interface name.
+- When using the interface, type arguments must be supplied (`Box<number>`) or inferred from context.
+- Type parameters may have constraints (`<T extends object>`) and defaults (`<T = string>`).
 
-**General Syntax: Default Type Parameter**
+**Constraints and limitations.**
 
-```typescript
-interface ApiResponse<T = unknown> {
-  data: T;
-  status: number;
-}
-```
+- A generic interface that never uses its type parameter is discouraged.
+- Interfaces may merge with other interfaces; merged declarations may introduce defaults for existing type parameters but must follow the default rules.
+- Generic interfaces cannot be instantiated directly; they describe shapes only.
 
-**Component Breakdown**
-- `<T = unknown>`: Default type is `unknown`.
+### Annotated Complete Step by Step Code Examples
 
-**Syntax Rules**
-
-- Type parameters are declared in angle brackets after the interface name.
-- Type parameters are in scope throughout the interface body.
-- Generic interfaces are used with type arguments: `InterfaceName<Type>`.
-- Type arguments can be explicit or inferred in some contexts.
-- Type parameters can be constrained with `extends`.
-- Type parameters can have default types with `=`.
-- Generic interfaces can extend other generic interfaces.
-
-**Constraints and Limitations**
-
-- Type parameters are erased at runtime.
-- Generic interfaces cannot be instantiated directly (they describe shapes).
-- Type inference for generic interfaces is limited compared to generic functions.
-- Complex generic interfaces can be difficult to read and maintain.
-- Generic interfaces cannot have static members.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Generic Container Interface
+#### Example 1: Generic container interface
 
 ```typescript
-// Step 1: Define a generic container interface.
-interface Container<T> {
+// example_generic_interface.ts
+interface Box<T> {
   value: T;
-  getValue(): T;
-  map<U>(fn: (value: T) => U): Container<U>;
 }
 
-// Step 2: Implement the interface.
-function createContainer<T>(value: T): Container<T> {
-  return {
-    value,
-    getValue() { return value; },
-    map<U>(fn: (value: T) => U): Container<U> {
-      return createContainer(fn(value));
-    },
-  };
-}
+const numberBox: Box<number> = { value: 42 };
+const stringBox: Box<string> = { value: "hello" };
 
-// Step 3: Use the container with different types.
-const numberContainer = createContainer(42);
-console.log(numberContainer.getValue());  // 42
-
-const stringContainer = numberContainer.map((n) => n.toString());
-console.log(stringContainer.getValue());  // "42"
-
-const arrayContainer = numberContainer.map((n) => [n, n * 2]);
-console.log(arrayContainer.getValue());   // [42, 84]
-
-// Step 4: Type safety is preserved.
-const num: number = numberContainer.getValue();      // ✅
-const str: string = stringContainer.getValue();      // ✅
-// const wrong: string = numberContainer.getValue(); // ❌ Error.
+console.log(numberBox.value);   // Expected: 42
+console.log(stringBox.value);   // Expected: hello
 ```
 
 **Expected Output:**
 ```
 42
-42
-[ 42, 84 ]
+hello
 ```
 
-**Why This Output Occurs:** The `Container<T>` interface is generic over its value type. The `map<U>` method transforms the container's value from `T` to `U`, preserving type safety. Each container instance knows its value type.
+**Why this output occurs.** `Box<T>` is a generic interface. `Box<number>` requires `value: number`; `Box<string>` requires `value: string`. The interface describes the shape once, and the type argument specializes it.
 
-#### Example 2: Generic Repository Interface
+#### Example 2: Type parameter on the call signature vs the interface
 
 ```typescript
-// Step 1: Define a base entity interface.
-interface Entity {
-  id: number;
+// example_generic_interface_call_signature.ts
+// Type parameter on the call signature: each call may use a different type.
+interface GenericIdentityFn {
+  <T>(arg: T): T;
 }
 
-// Step 2: Define a generic repository interface with constraint.
-interface Repository<T extends Entity> {
-  findById(id: number): T | undefined;
-  findAll(): T[];
-  save(entity: T): void;
-  delete(id: number): void;
+// Type parameter on the interface: the type is fixed for the object.
+interface GenericIdentityFnFixed<T> {
+  (arg: T): T;
 }
 
-// Step 3: Implement for a specific entity.
-interface User extends Entity {
-  name: string;
-  email: string;
-}
+const identity: GenericIdentityFn = (arg) => arg;
+const identityNumber: GenericIdentityFnFixed<number> = (arg) => arg;
 
-class UserRepository implements Repository<User> {
-  private users: Map<number, User> = new Map();
-
-  findById(id: number): User | undefined {
-    return this.users.get(id);
-  }
-
-  findAll(): User[] {
-    return Array.from(this.users.values());
-  }
-
-  save(user: User): void {
-    this.users.set(user.id, user);
-  }
-
-  delete(id: number): void {
-    this.users.delete(id);
-  }
-}
-
-// Step 4: Use the repository.
-const repo: Repository<User> = new UserRepository();
-repo.save({ id: 1, name: "Alice", email: "alice@example.com" });
-repo.save({ id: 2, name: "Bob", email: "bob@example.com" });
-
-console.log(repo.findById(1));  // { id: 1, name: 'Alice', email: 'alice@example.com' }
-console.log(repo.findAll().length);  // 2
+console.log(identity("a"));         // Expected: a
+console.log(identity(1));           // Expected: 1
+console.log(identityNumber(2));     // Expected: 2
 ```
 
 **Expected Output:**
 ```
-{ id: 1, name: 'Alice', email: 'alice@example.com' }
+a
+1
 2
 ```
 
-**Why This Output Occurs:** The `Repository<T extends Entity>` interface is generic over the entity type, constrained to have an `id` property. `UserRepository` implements `Repository<User>`, providing type-safe CRUD operations for `User` entities.
+**Why this output occurs.** `GenericIdentityFn` places `<T>` on the call signature, so each invocation infers its own `T`. `GenericIdentityFnFixed<number>` fixes `T = number`, so the function must accept and return `number`. This distinction is central to designing generic interfaces.
 
 ### Real-World Cases
 
-**Case 1: API Response Wrappers**
-`ApiResponse<T>` interfaces wrap API responses with metadata while preserving the payload type.
+- **Repositories**: `Repository<T>` with `get(id: string): Promise<T>` and `save(entity: T): Promise<void>`.
+- **React props**: `Props<T>` interfaces for components that render generic data.
+- **API responses**: `ApiResponse<T>` with `data: T` and `error?: string`.
 
-**Case 2: Repository Pattern**
-Generic repositories (`Repository<T>`) provide CRUD operations for any entity type, reducing boilerplate.
+---
 
-**Case 3: State Management**
-State containers (`Store<T>`) hold application state of any type while preserving type safety.
-
-**Case 4: Form Libraries**
-Form libraries use generic interfaces to type form values and validation results.
-
-
-## 4. Generic Classes (Instance Properties, Methods, and Static Limitations)
+## 4. Generic Classes
 
 ### Definitions
 
-**Core Definition**
-A generic class is a class declaration that declares one or more type parameters. The type parameters are in scope throughout the class body and can be used in instance properties, method signatures, and constructor parameters. Static members, however, cannot reference the class's type parameters.
+**Core Definition.** A **generic class** is a class that declares one or more **type parameters**, which may be used in property types, method signatures, and the constructor.
 
-**Technical Definition**
-A generic class declares type parameters in angle brackets after the class name. Each instance of the generic class is parameterized by the type arguments provided at instantiation. Instance properties, instance methods, and constructors can use the class's type parameters. Static members, however, cannot reference the class's type parameters because static members belong to the class itself, not to instances, and there is only one runtime representation of the class regardless of type arguments. Generic classes can have methods with their own additional type parameters, and can implement generic interfaces.
+**Technical Definition.** A generic class has a type parameter list after the class name. Instantiating the class with type arguments produces a concrete class type whose members are specialized to those arguments. Generic classes support the same constraints and defaults as generic functions and interfaces.
 
-**Beginner-Friendly Explanation**
-A generic class is a class that takes type parameters. For example, `class Box<T> { value: T; }` describes a box that holds a value of any type. When you write `new Box<number>(42)`, you get a box with `value: number`. The type parameter `T` can be used in instance properties, methods, and constructors. But there's a key limitation: static members cannot use the class's type parameters. This is because static members are shared across all instances, and there's only one version of a static member at runtime, regardless of what type arguments you use.
+**Beginner-Friendly Explanation.** A generic class is **a class that can work with different types**. A `Stack<T>` class can be a stack of numbers, strings, or anything else, but TypeScript tracks which type each instance holds.
 
 ### Purposes
 
-- To create reusable class-based data structures that work with multiple types.
-- To provide type-safe containers, collections, and wrappers.
-- To implement generic algorithms and patterns as classes.
-- To enable type-safe instance methods and properties.
-- To support generic class hierarchies and interfaces.
+- **To build reusable data structures** (stacks, queues, trees, caches) that work over arbitrary element types.
+- **To enforce type consistency** between a class’s internal state and its public API.
+- **To support generic factories and dependency injection** with typed constructors.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Generic Class**
-
 ```typescript
-class ClassName<T> {
-  property: T;
-  constructor(value: T) {
-    this.property = value;
+class ClassName<TypeParam> {
+  property: TypeParam;
+  constructor(property: TypeParam) {
+    this.property = property;
   }
-  method(param: T): T {
-    return param;
+  method(): TypeParam {
+    return this.property;
   }
 }
 ```
 
-**Component Breakdown**
-- `<T>`: Type parameter declared after the class name.
-- `property: T`: Instance property using the type parameter.
-- `constructor(value: T)`: Constructor using the type parameter.
-- `method(param: T): T`: Method using the type parameter.
+**Component breakdown:**
 
-**General Syntax: Generic Class with Multiple Parameters**
+- `ClassName<TypeParam>` — the class name and its type parameter list.
+- `property: TypeParam` — an instance property typed by the parameter.
+- `constructor(property: TypeParam)` — the constructor parameter.
+- `method(): TypeParam` — a method returning the type parameter.
 
-```typescript
-class Pair<T, U> {
-  constructor(public first: T, public second: U) {}
-}
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- `<T, U>`: Multiple type parameters.
+- Type parameters follow the class name.
+- Type arguments are supplied when instantiating: `new ClassName<number>(42)`.
+- Constraints (`<T extends object>`) and defaults (`<T = string>`) are supported.
+- Generic classes may implement generic interfaces.
 
-**General Syntax: Generic Class Implementing Generic Interface**
+**Constraints and limitations.**
 
-```typescript
-class Repository<T extends Entity> implements IRepository<T> {
-  findById(id: number): T | undefined { /* ... */ }
-}
-```
-
-**Component Breakdown**
-- The class implements a generic interface with the same type parameter.
-
-**Syntax Rules**
-
-- Type parameters are declared in angle brackets after the class name.
-- Type parameters are in scope throughout the class body (instance members only).
-- Static members cannot reference the class's type parameters.
-- Generic classes can have methods with their own type parameters.
-- Generic classes can implement generic interfaces.
-- Generic classes can extend other generic classes.
-- Type parameters can be constrained with `extends`.
-- Type parameters can have default types.
-
-**Constraints and Limitations**
-
+- A generic class that does not use its type parameter is pointless and discouraged.
 - Static members cannot reference class type parameters.
-- Type parameters are erased at runtime; no runtime type information is available.
-- Generic classes cannot be used with `new T()` (type parameters are not constructors).
-- Complex generic class hierarchies can be difficult to maintain.
-- Type inference for generic classes is limited compared to generic functions.
+- Generic classes cannot have generic `static` members.
 
-### Multiple Annotated Complete Step-by-Step Code Examples
+### Annotated Complete Step by Step Code Examples
 
-#### Example 1: Basic Generic Class
+#### Example 1: Generic stack
 
 ```typescript
-// Step 1: Define a generic class.
-class Box<T> {
-  private _value: T;
+// example_generic_class_stack.ts
+class Stack<T> {
+  private items: T[] = [];
 
-  constructor(value: T) {
-    this._value = value;
+  push(item: T): void {
+    this.items.push(item);
   }
 
-  get value(): T {
-    return this._value;
-  }
-
-  map<U>(fn: (value: T) => U): Box<U> {
-    return new Box(fn(this._value));
+  pop(): T | undefined {
+    return this.items.pop();
   }
 }
 
-// Step 2: Create instances with different types.
-const numberBox = new Box<number>(42);
-const stringBox = new Box<string>("hello");
-const objectBox = new Box({ name: "Alice", age: 30 });
+const numberStack = new Stack<number>();
+numberStack.push(1);
+numberStack.push(2);
+console.log(numberStack.pop());   // Expected: 2
 
-// Step 3: Access properties and methods.
-console.log(numberBox.value);   // 42
-console.log(stringBox.value);   // "hello"
-console.log(objectBox.value);   // { name: 'Alice', age: 30 }
+const stringStack = new Stack<string>();
+stringStack.push("hello");
+console.log(stringStack.pop());   // Expected: hello
+```
 
-// Step 4: Transform with generic method.
-const doubled = numberBox.map((n) => n * 2);
-console.log(doubled.value);  // 84
+**Expected Output:**
+```
+2
+hello
+```
 
-const upper = stringBox.map((s) => s.toUpperCase());
-console.log(upper.value);    // "HELLO"
+**Why this output occurs.** `Stack<number>` ensures that only numbers can be pushed, and `pop()` returns `number | undefined`. `Stack<string>` enforces string consistency. The type parameter is fixed for each instance, preventing mixing of types within a stack.
 
-// Step 5: Type safety is preserved.
-const n: number = numberBox.value;      // ✅
-const s: string = stringBox.value;      // ✅
-// const wrong: string = numberBox.value; // ❌ Error.
+#### Example 2: Generic class with a constraint
+
+```typescript
+// example_generic_class_constraint.ts
+interface Identifiable {
+  id: string;
+}
+
+class Repository<T extends Identifiable> {
+  private items: T[] = [];
+
+  add(item: T): void {
+    this.items.push(item);
+  }
+
+  findById(id: string): T | undefined {
+    return this.items.find((item) => item.id === id);
+  }
+}
+
+const userRepo = new Repository<{ id: string; name: string }>();
+userRepo.add({ id: "u1", name: "Ada" });
+console.log(userRepo.findById("u1")?.name);   // Expected: Ada
+```
+
+**Expected Output:**
+```
+Ada
+```
+
+**Why this output occurs.** The constraint `T extends Identifiable` guarantees that every `T` has an `id: string` property, making `findById`’s comparison legal. The type argument `{ id: string; name: string }` satisfies the constraint.
+
+### Real-World Cases
+
+- **Data structures**: `Queue<T>`, `LinkedList<T>`, `BinaryTree<T>`.
+- **Repositories**: `Repository<T extends Entity>` for database access.
+- **Caches**: `Cache<K, V>` with generic key and value types.
+- **Event buses**: `EventEmitter<EventMap>` where `EventMap` maps event names to payload types.
+
+---
+
+## 5. Generic Type Aliases
+
+### Definitions
+
+**Core Definition.** A **generic type alias** is a type alias that declares one or more **type parameters**, allowing the alias to produce different types depending on the arguments supplied.
+
+**Technical Definition.** A generic type alias introduces a **type constructor** — a named type-level function from type arguments to a type. It is especially useful for unions, intersections, tuples, and conditional types that cannot be expressed as interfaces. Type parameters follow the alias name and support constraints and defaults.
+
+**Beginner-Friendly Explanation.** A generic type alias is **a nickname for a type that depends on other types**. For example, `type Pair<T> = [T, T]` defines a tuple of two values of the same type. `Pair<number>` is `[number, number]`, and `Pair<string>` is `[string, string]`.
+
+### Purposes
+
+- **To name reusable type-level patterns** such as unions, intersections, and tuples.
+- **To build discriminated unions** that are parameterized over payload types.
+- **To support generic utility types** and type-level computations.
+- **To avoid duplicating type declarations** across similar shapes.
+
+### Syntax Rules and Structure
+
+```typescript
+type AliasName<TypeParam> = TypeExpression;
+```
+
+**Component breakdown:**
+
+- `AliasName<TypeParam>` — the alias name and its type parameter list.
+- `TypeExpression` — any type expression that may reference the type parameter.
+
+**Syntax rules.**
+
+- Type parameters follow the alias name.
+- Constraints use `extends`; defaults use `=`.
+- Generic aliases can be recursive (e.g., JSON types) and can reference other generic aliases.
+- Generic aliases cannot be declaration-merged, unlike interfaces.
+
+**Constraints and limitations.**
+
+- Recursive generic aliases must terminate; infinite recursion is a compile-time error.
+- Type aliases are erased and cannot be extended or implemented.
+- Generic aliases with unused type parameters are discouraged.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Generic tuple alias
+
+```typescript
+// example_generic_alias_tuple.ts
+type Pair<T> = [T, T];
+
+const coordinates: Pair<number> = [10, 20];
+const names: Pair<string> = ["Ada", "Grace"];
+
+console.log(coordinates[0] + coordinates[1]);   // Expected: 30
+console.log(names.join(" & "));                  // Expected: Ada & Grace
+```
+
+**Expected Output:**
+```
+30
+Ada & Grace
+```
+
+**Why this output occurs.** `Pair<T>` is a tuple type parameterized by `T`. `Pair<number>` enforces that both elements are numbers, enabling numeric addition. `Pair<string>` enforces string elements, enabling `join`.
+
+#### Example 2: Generic discriminated union
+
+```typescript
+// example_generic_alias_union.ts
+type Result<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
+
+function unwrap<T>(result: Result<T>): T {
+  if (result.success) {
+    return result.data;   // narrowed to success branch
+  }
+  throw new Error(result.error);
+}
+
+console.log(unwrap({ success: true, data: 42 }));   // Expected: 42
+```
+
+**Expected Output:**
+```
+42
+```
+
+**Why this output occurs.** `Result<T>` is a generic discriminated union. The `success` discriminant narrows the union inside `unwrap`, allowing safe access to `data` in the success branch and `error` in the failure branch. The type argument `T` flows through the entire union.
+
+### Real-World Cases
+
+- **API responses**: `type ApiResult<T> = { ok: true; data: T } | { ok: false; error: string }`.
+- **Form state**: `type FieldState<T> = { value: T; touched: boolean }`.
+- **JSON types**: Recursive generic aliases model JSON values.
+- **Function types**: `type Mapper<T, U> = (input: T) => U`.
+
+---
+
+## 6. Type Parameters
+
+### Definitions
+
+**Core Definition.** A **type parameter** is a **type-level variable** declared in a generic declaration, standing in for a type that will be supplied as a type argument when the generic is used.
+
+**Technical Definition.** Type parameters are declared in angle brackets (`<T>`). They may be **constrained** with `extends` (restricting the set of permissible type arguments), **defaulted** with `=` (providing a fallback when no type argument is supplied), and **annotated for variance** with `in` and `out` (TypeScript 4.7+) to document intended variance. A type parameter is **in scope** throughout the declaration’s body and signature.
+
+**Beginner-Friendly Explanation.** A type parameter is **a placeholder for a type**. When you write `function identity<T>(arg: T)`, `T` is the placeholder. When you call `identity(42)`, TypeScript replaces `T` with `number`. Constraints let you say “T must have a `length` property,” and defaults let you say “use `string` if no type is given.”
+
+### Purposes
+
+- **To declare a type variable** that can be used throughout a generic declaration.
+- **To constrain the set of acceptable type arguments** with `extends`.
+- **To provide a sensible fallback** with defaults, improving usability for common cases.
+- **To document variance** with `in`/`out` annotations for correctness and performance.
+
+### Syntax Rules and Structure
+
+```typescript
+<T>                          // unconstrained type parameter
+<T extends Constraint>       // constrained type parameter
+<T = DefaultType>            // defaulted type parameter
+<T extends Constraint = Default>  // constrained and defaulted
+<in T>                       // contravariant annotation
+<out T>                      // covariant annotation
+```
+
+**Component breakdown:**
+
+- `T` — the type parameter name (conventionally single uppercase letters or descriptive names like `TKey`, `TValue`).
+- `extends Constraint` — restricts `T` to types assignable to `Constraint`.
+- `= Default` — supplies a fallback type when no type argument is provided.
+- `in` / `out` — variance annotations (optional, advanced).
+
+**Syntax rules.**
+
+- Required type parameters must not follow optional (defaulted) type parameters.
+- Default types must satisfy the parameter’s constraint, if any.
+- Constraints may reference other type parameters (e.g., `<T, K extends keyof T>`).
+- Variance annotations are only consulted in instantiation-based comparisons; they do not change structural behavior.
+
+**Constraints and limitations.**
+
+- Unconstrained type parameters permit only operations valid for all types.
+- Defaults should only be used when the type is meaningfully usable without specialization; otherwise they create a false sense of optionality.
+- Variance annotations should not be used to “force” variance contrary to structural behavior; TypeScript infers variance automatically in most cases.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Constrained type parameter with `keyof`
+
+```typescript
+// example_type_parameter_keyof.ts
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}
+
+const person = { name: "Ada", age: 36 };
+const name = getProperty(person, "name");   // string
+const age = getProperty(person, "age");     // number
+
+console.log(name);   // Expected: Ada
+console.log(age);    // Expected: 36
+```
+
+**Expected Output:**
+```
+Ada
+36
+```
+
+**Why this output occurs.** The constraint `K extends keyof T` ensures that `key` is a valid property name of `obj`. The return type `T[K]` is the **indexed access type** — the type of the property `K` on `T`. For `"name"`, `T[K]` is `string`; for `"age"`, it is `number`.
+
+#### Example 2: Default type parameter
+
+```typescript
+// example_type_parameter_default.ts
+interface Container<T = string> {
+  value: T;
+}
+
+const defaultContainer: Container = { value: "hello" };
+// T defaults to string
+const numberContainer: Container<number> = { value: 42 };
+
+console.log(defaultContainer.value);   // Expected: hello
+console.log(numberContainer.value);    // Expected: 42
+```
+
+**Expected Output:**
+```
+hello
+42
+```
+
+**Why this output occurs.** `Container` declares `T = string` as a default. When no type argument is supplied, `T` resolves to `string`. When `Container<number>` is used, `T` is `number`, overriding the default.
+
+### Real-World Cases
+
+- **Utility functions**: `getProperty<T, K extends keyof T>` is a pattern for type-safe property access.
+- **Configuration types**: `Options<T = {}>` allows callers to omit type arguments for simple cases.
+- **Variance-sensitive types**: `Producer<out T>` and `Consumer<in T>` document covariance and contravariance in libraries.
+
+---
+
+## 7. Type Arguments
+
+### Definitions
+
+**Core Definition.** A **type argument** is the **concrete type** supplied to a generic declaration in place of a type parameter, either explicitly in angle brackets or implicitly through type argument inference.
+
+**Technical Definition.** Type arguments instantiate a generic type constructor, producing a concrete type. They are checked against the type parameter’s constraints. When omitted, TypeScript infers them from the types of arguments, contextual types, and return positions. Explicit type arguments override inference and are required when inference cannot determine a unique type.
+
+**Beginner-Friendly Explanation.** A type argument is **the actual type you give to a generic**. In `identity<number>(42)`, `number` is the type argument. In `identity(42)`, TypeScript infers `number` automatically. Type arguments fill in the placeholders.
+
+### Purposes
+
+- **To specialize a generic declaration** to a concrete type.
+- **To override inference** when the inferred type is not what you intend.
+- **To satisfy constraints** and enable type checking of the instantiation.
+- **To provide explicit type information** in complex cases where inference is ambiguous.
+
+### Syntax Rules and Structure
+
+```typescript
+genericFunction<TypeArgument>(arguments);
+new GenericClass<TypeArgument>(constructorArgs);
+const value: GenericInterface<TypeArgument> = ...;
+```
+
+**Component breakdown:**
+
+- `genericFunction<TypeArgument>` — explicit type argument on a function call.
+- `new GenericClass<TypeArgument>` — explicit type argument on a class instantiation.
+- `GenericInterface<TypeArgument>` — type argument in a type annotation.
+
+**Syntax rules.**
+
+- Type arguments are supplied in angle brackets after the generic name.
+- When explicit type arguments are provided, inference is bypassed for those parameters.
+- Partial type argument lists are allowed when remaining parameters have defaults.
+- Type arguments must satisfy the corresponding type parameter’s constraints.
+
+**Constraints and limitations.**
+
+- Providing the wrong number of type arguments is a compile-time error.
+- Explicit type arguments can conflict with argument types, causing errors.
+- Type arguments are erased at runtime; they have no runtime representation.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Explicit vs inferred type arguments
+
+```typescript
+// example_type_arguments.ts
+function createArray<T>(length: number, value: T): T[] {
+  return Array(length).fill(value);
+}
+
+// Explicit type argument.
+const strings = createArray<string>(3, "x");   // string[]
+
+// Inferred type argument.
+const numbers = createArray(3, 0);             // number[]
+
+console.log(strings);   // Expected: ["x", "x", "x"]
+console.log(numbers);   // Expected: [0, 0, 0]
+```
+
+**Expected Output:**
+```
+["x", "x", "x"]
+[0, 0, 0]
+```
+
+**Why this output occurs.** `createArray<string>` explicitly sets `T = string`. `createArray(3, 0)` infers `T = number` from `0`. Both produce arrays of the correct element type.
+
+#### Example 2: Explicit type argument resolving ambiguity
+
+```typescript
+// example_type_arguments_ambiguity.ts
+function combine<T>(a: T, b: T): T[] {
+  return [a, b];
+}
+
+// Inference may produce a union when types differ.
+const mixed = combine(1, "two");   // (string | number)[]
+
+// Explicit type argument forces a common type.
+const asStrings = combine<string>("1", "two");   // string[]
+
+console.log(mixed);       // Expected: [1, "two"]
+console.log(asStrings);   // Expected: ["1", "two"]
+```
+
+**Expected Output:**
+```
+[1, "two"]
+["1", "two"]
+```
+
+**Why this output occurs.** With `combine(1, "two")`, inference produces `T = string | number`. Explicit `combine<string>` forces `T = string`, and the number `1` must be assignable to `string` — which it is not, so this would actually be a type error unless a string is passed. The example illustrates how explicit type arguments control inference.
+
+### Real-World Cases
+
+- **React hooks**: `useState<number>(0)` explicitly types state when inference from the initial value is insufficient.
+- **API clients**: `fetchJson<User>(url)` explicitly types the response payload.
+- **Generic containers**: `new Map<string, number>()` supplies both key and value type arguments.
+
+---
+
+## 8. Generic Best Practices
+
+### Definitions
+
+**Core Definition.** **Generic best practices** are guidelines for designing and using generics in ways that maximize **reusability, type safety, clarity, and performance** while avoiding common pitfalls such as unused type parameters, unnecessary defaults, and unconstrained generics.
+
+**Technical Definition.** Best practices include: using **as few type parameters as possible**; ensuring each type parameter **appears at least twice** in the signature; **constraining generics** when specific members are accessed; avoiding **return-type-only generics**; providing **defaults only when meaningful**; and using **variance annotations** sparingly and only when they match structural behavior.
+
+**Beginner-Friendly Explanation.** Best practices help you write generics that are **actually useful and not confusing**. Use generics when you need to preserve a type relationship; don’t use them just to look advanced. If a type parameter appears only once, you probably don’t need it. Constrain your generics when you need to use specific properties. Avoid defaults unless they make sense.
+
+### Purposes
+
+- **To maximize type safety** by ensuring generics preserve meaningful type relationships.
+- **To minimize complexity** by avoiding unnecessary type parameters and defaults.
+- **To improve API usability** by constraining generics appropriately and providing defaults only when useful.
+- **To avoid common generics pitfalls** such as unused type parameters and return-type-only generics.
+
+### Syntax Rules and Structure
+
+**Key best-practice rules:**
+
+1. **Use fewer type parameters**: prefer `function log<T>(value: T)` over unnecessary multi-parameter forms.
+2. **Ensure each type parameter appears at least twice**: a type parameter used only once is likely unnecessary.
+3. **Constrain generics when accessing members**: use `<T extends HasLength>` before calling `.length`.
+4. **Avoid return-type-only generics**: do not create APIs where the type parameter appears only in the return type; callers cannot infer it, and explicit specification is required.
+5. **Use defaults only when the type is meaningful without specialization**: otherwise, defaults create a false sense of optionality.
+6. **Use variance annotations sparingly**: TypeScript infers variance automatically; annotations are only for correctness documentation and rare performance optimization.
+7. **Use descriptive type parameter names** when the meaning is not obvious (`TKey`, `TValue` rather than `T`, `U`).
+
+**Constraints and limitations.**
+
+- Over-constraining generics reduces reusability; find the minimal constraint needed.
+- Defaults that are not meaningful create confusing APIs.
+- Variance annotations that do not match structural behavior cause unpredictable behavior.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Fewer type parameters and ensuring each appears twice
+
+```typescript
+// example_best_fewer_params.ts
+// Recommended: one type parameter, used twice.
+function wrap<T>(value: T): { value: T } {
+  return { value };
+}
+
+// Discouraged: unnecessary second type parameter.
+// function wrapBad<T, U>(value: T): { value: U } { ... }
+// U appears only once and cannot be inferred.
+
+console.log(wrap(42).value);      // Expected: 42
+console.log(wrap("hello").value); // Expected: hello
 ```
 
 **Expected Output:**
 ```
 42
 hello
-{ name: 'Alice', age: 30 }
-84
+```
+
+**Why this output occurs.** `T` appears in both the parameter and the return type, preserving the type relationship. A second type parameter `U` appearing only in the return type cannot be inferred and would require explicit specification at every call site.
+
+#### Example 2: Constraint before member access
+
+```typescript
+// example_best_constraint.ts
+function longest<T extends { length: number }>(a: T, b: T): T {
+  return a.length >= b.length ? a : b;
+}
+
+console.log(longest("hello", "hi"));          // Expected: hello
+console.log(longest([1, 2, 3], [4, 5]));      // Expected: [1, 2, 3]
+// longest(1, 2);                             // Error: number has no length
+```
+
+**Expected Output:**
+```
+hello
+[1, 2, 3]
+```
+
+**Why this output occurs.** The constraint `T extends { length: number }` guarantees that `.length` is available on both arguments. Strings and arrays satisfy the constraint; numbers do not. This is safer than leaving `T` unconstrained and casting to `any`.
+
+#### Example 3: Defaults only when meaningful
+
+```typescript
+// example_best_defaults.ts
+// Recommended: default is meaningful (string is a sensible no-specialization type).
+interface Formatter<T = string> {
+  format(value: T): string;
+}
+
+// Discouraged: default creates a false sense of optionality.
+// interface Repository<T = never> { ... }
+// T is required for the repository to be useful.
+
+const stringFormatter: Formatter = {
+  format: (v) => v.toUpperCase(),
+};
+
+console.log(stringFormatter.format("hello"));   // Expected: HELLO
+```
+
+**Expected Output:**
+```
 HELLO
 ```
 
-**Why This Output Occurs:** The `Box<T>` class is generic over its value type. Each instance has a specific type (`Box<number>`, `Box<string>`, etc.). The `map<U>` method transforms the box's value type from `T` to `U`, preserving type safety.
-
-#### Example 2: Generic Class with Constraint and Static Limitation
-
-```typescript
-// Step 1: Define a generic class with a constraint.
-interface Entity {
-  id: number;
-}
-
-class Repository<T extends Entity> {
-  private items: Map<number, T> = new Map();
-
-  save(entity: T): void {
-    this.items.set(entity.id, entity);
-  }
-
-  findById(id: number): T | undefined {
-    return this.items.get(id);
-  }
-
-  // Static member — cannot reference T.
-  // static defaultEntity: T;  // ❌ Error: Static members cannot reference class type parameters.
-
-  // Workaround: use a separate type parameter for static methods.
-  static create<U extends Entity>(entity: U): U {
-    return entity;
-  }
-}
-
-// Step 2: Use the generic class.
-interface User extends Entity {
-  name: string;
-  email: string;
-}
-
-const userRepo = new Repository<User>();
-userRepo.save({ id: 1, name: "Alice", email: "alice@example.com" });
-console.log(userRepo.findById(1));  // { id: 1, name: 'Alice', email: 'alice@example.com' }
-
-// Step 3: Static method with its own type parameter.
-const user = Repository.create<User>({ id: 2, name: "Bob", email: "bob@example.com" });
-console.log(user);  // { id: 2, name: 'Bob', email: 'bob@example.com' }
-```
-
-**Expected Output:**
-```
-{ id: 1, name: 'Alice', email: 'alice@example.com' }
-{ id: 2, name: 'Bob', email: 'bob@example.com' }
-```
-
-**Why This Output Occurs:** The `Repository<T extends Entity>` class constrains `T` to types with an `id` property. Static members cannot reference `T`, so `static defaultEntity: T` is a compile error. The workaround is to use a separate type parameter for static methods (`static create<U extends Entity>`), which works because static methods have their own scope.
+**Why this output occurs.** `T = string` is a meaningful default because a string formatter is a valid, useful configuration without specialization. A default like `never` would not be meaningful and would mislead callers into thinking the type is optional when it is not.
 
 ### Real-World Cases
 
-**Case 1: Collection Classes**
-Custom collections (`List<T>`, `Stack<T>`, `Queue<T>`) use generics to provide type-safe storage and retrieval.
-
-**Case 2: Result Types**
-`Result<T, E>` classes model success/failure outcomes with type-safe value and error access.
-
-**Case 3: Builder Patterns**
-Generic builders (`QueryBuilder<T>`, `FormBuilder<T>`) build typed objects step by step.
-
-**Case 4: Caching Layers**
-Generic cache classes (`Cache<K, V>`) store key-value pairs with type safety.
-
-**Case 5: Dependency Injection Containers**
-Generic DI containers (`Container<T>`) resolve dependencies with type safety.
-
-
-## 5. Generic Type Aliases and Generic Parameter Scope
-
-### Definitions
-
-**Core Definition**
-A generic type alias is a type alias declaration that declares one or more type parameters. The type parameters are in scope throughout the aliased type expression. Type aliases can represent any type—including unions, intersections, primitives, and tuples—making generic type aliases more flexible than generic interfaces.
-
-**Technical Definition**
-A generic type alias declares type parameters in angle brackets after the alias name. The type parameters are in scope throughout the aliased type expression and can be used anywhere within it. Unlike interfaces, type aliases can represent non-object types (unions, primitives, tuples, conditional types), and generic type aliases can be recursive. The scope of a type parameter is the entire type alias declaration. Type parameters of a generic type alias are referenced in type references, and writing a reference to a generic type alias instantiates the aliased type with the given type arguments.
-
-**Beginner-Friendly Explanation**
-A generic type alias is a type alias that takes type parameters. For example, `type Pair<T> = [T, T]` defines a tuple of two values of the same type. `Pair<number>` gives `[number, number]`. Type aliases are more flexible than interfaces because they can represent unions, primitives, and tuples—not just object shapes. The type parameter scope is the entire alias declaration, so `T` can be used anywhere in the type expression. This makes generic type aliases essential for type-level programming.
-
-### Purposes
-
-- To create reusable type expressions that work with multiple types.
-- To define generic tuples, unions, and function types.
-- To enable type-level programming with conditional and mapped types.
-- To provide concise names for complex generic types.
-- To support recursive type definitions with type parameters.
-
-### Syntax Rules and Structure
-
-**General Syntax: Generic Type Alias**
-
-```typescript
-type AliasName<T> = TypeExpression;
-```
-
-**Component Breakdown**
-- `<T>`: Type parameter declared after the alias name.
-- `TypeExpression`: Any type expression using `T`.
-
-**General Syntax: Generic Tuple Alias**
-
-```typescript
-type Pair<T> = [first: T, second: T];
-```
-
-**Component Breakdown**
-- The alias defines a tuple with two elements of type `T`.
-
-**General Syntax: Generic Union Alias**
-
-```typescript
-type Result<T, E = Error> =
-  | { success: true; data: T }
-  | { success: false; error: E };
-```
-
-**Component Breakdown**
-- The alias defines a union with type parameters for data and error.
-
-**General Syntax: Recursive Generic Type Alias**
-
-```typescript
-type Tree<T> = {
-  value: T;
-  children: Tree<T>[];
-};
-```
-
-**Component Breakdown**
-- The alias references itself recursively with the type parameter.
-
-**Syntax Rules**
-
-- Type parameters are declared in angle brackets after the alias name.
-- Type parameters are in scope throughout the aliased type expression.
-- Type aliases can represent any type: unions, intersections, primitives, tuples, objects.
-- Type aliases can be recursive.
-- Type parameters can be constrained with `extends`.
-- Type parameters can have default types with `=`.
-- Generic type aliases can be used in any type position.
-
-**Constraints and Limitations**
-
-- Type parameters are erased at runtime.
-- Recursive type aliases must be "guarded" by an object type, array type, or tuple type.
-- Type aliases cannot participate in declaration merging.
-- Type aliases cannot be extended with `extends` (only intersected).
-- Very complex generic type aliases can be difficult to read.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Generic Tuple Alias
-
-```typescript
-// Step 1: Define a generic tuple alias.
-type Pair<T> = [first: T, second: T];
-type Triple<T> = [first: T, second: T, third: T];
-
-// Step 2: Use the aliases.
-const numberPair: Pair<number> = [1, 2];
-const stringPair: Pair<string> = ["a", "b"];
-const mixedTriple: Triple<string | number> = [1, "a", 2];
-
-console.log(numberPair);   // [1, 2]
-console.log(stringPair);   // ["a", "b"]
-console.log(mixedTriple);  // [1, "a", 2]
-
-// Step 3: Type safety is preserved.
-const firstNum: number = numberPair[0];  // ✅
-const firstStr: string = stringPair[0];  // ✅
-
-// Step 4: Generic tuple alias in functions.
-function swap<T, U>(pair: [T, U]): [U, T] {
-  return [pair[1], pair[0]];
-}
-
-const swapped = swap(["hello", 42]);
-console.log(swapped);  // [42, "hello"]
-```
-
-**Expected Output:**
-```
-[ 1, 2 ]
-[ 'a', 'b' ]
-[ 1, 'a', 2 ]
-[ 42, 'hello' ]
-```
-
-**Why This Output Occurs:** The `Pair<T>` alias defines a tuple of two `T` values. The `swap<T, U>` function uses its own type parameters to swap the tuple elements, preserving the types.
-
-#### Example 2: Recursive Generic Type Alias
-
-```typescript
-// Step 1: Define a recursive generic type alias for a tree.
-type Tree<T> = {
-  value: T;
-  children: Tree<T>[];
-};
-
-// Step 2: Create a tree of numbers.
-const numberTree: Tree<number> = {
-  value: 1,
-  children: [
-    { value: 2, children: [] },
-    { value: 3, children: [{ value: 4, children: [] }] },
-  ],
-};
-
-// Step 3: Create a tree of strings.
-const stringTree: Tree<string> = {
-  value: "root",
-  children: [
-    { value: "child1", children: [] },
-    { value: "child2", children: [] },
-  ],
-};
-
-// Step 4: Recursive processing.
-function sumTree(tree: Tree<number>): number {
-  return tree.value + tree.children.reduce((sum, child) => sum + sumTree(child), 0);
-}
-
-console.log(sumTree(numberTree));  // 10
-
-// Step 5: Generic type alias with constraint.
-type Identifiable = { id: number };
-type EntityTree<T extends Identifiable> = {
-  entity: T;
-  children: EntityTree<T>[];
-};
-
-const entityTree: EntityTree<{ id: number; name: string }> = {
-  entity: { id: 1, name: "Root" },
-  children: [
-    { entity: { id: 2, name: "Child" }, children: [] },
-  ],
-};
-
-console.log(entityTree.entity.name);  // "Root"
-```
-
-**Expected Output:**
-```
-10
-Root
-```
-
-**Why This Output Occurs:** The `Tree<T>` alias recursively defines a tree structure where each node has a value of type `T` and an array of child trees. The `EntityTree<T extends Identifiable>` alias adds a constraint requiring an `id` property. The recursive type works because the self-reference is guarded by the object type.
-
-### Real-World Cases
-
-**Case 1: Utility Types**
-`Partial<T>`, `Required<T>`, `Readonly<T>`, and `Record<K, V>` are generic type aliases.
-
-**Case 2: Result and Either Types**
-`Result<T, E>` and `Either<L, R>` are generic type aliases for error handling.
-
-**Case 3: Recursive Data Structures**
-Trees, linked lists, and JSON types use recursive generic type aliases.
-
-**Case 4: Function Type Aliases**
-`type Mapper<T, U> = (item: T) => U` is a generic function type alias.
-
-**Case 5: Conditional Type Aliases**
-`type IsArray<T> = T extends any[] ? true : false` is a generic conditional type alias.
-
-
-## 6. Generic Arrow Function Syntax Constraints and the `<T,>` / `T extends unknown` JSX Parsing Workaround
-
-### Definitions
-
-**Core Definition**
-Generic arrow functions in TypeScript have a syntactic ambiguity in `.tsx` files: the `<T>` syntax for type parameters conflicts with JSX opening tags. Two workarounds exist: adding a trailing comma (`<T,>`) or constraining the type parameter (`<T extends unknown>`). These disambiguate the generic arrow function from JSX.
-
-**Technical Definition**
-In `.tsx` files, the parser cannot distinguish between `<T>(value: T) => value` (a generic arrow function) and `<T>(value: T) => value</T>` (JSX). The trailing comma workaround `<T,>` provides a parse hint that the angle brackets denote type parameters, not JSX. The constraint workaround `<T extends unknown>` provides an explicit type constraint that disambiguates. Both workarounds are semantically equivalent to `<T>` in `.ts` files. The trailing comma is the most concise; the constraint is more explicit and works in all contexts. A third option is to use a named function declaration instead of an arrow function.
-
-**Beginner-Friendly Explanation**
-In `.tsx` files (TypeScript + JSX), writing a generic arrow function like `<T>(value: T) => value` confuses the parser—it thinks you're starting a JSX element. To fix this, you can either add a comma: `<T,>(value: T) => value`, or add a constraint: `<T extends unknown>(value: T) => value`. Both tell TypeScript "this is a generic function, not JSX." The trailing comma is shorter; the constraint is more explicit. You only need this workaround in `.tsx` files—in `.ts` files, `<T>` works fine. If you don't want to deal with it, use a named function instead of an arrow function.
-
-### Purposes
-
-- To write generic arrow functions in `.tsx` files.
-- To disambiguate generic syntax from JSX syntax.
-- To enable generic React components and hooks with arrow function syntax.
-- To understand the parsing constraints of `.tsx` files.
-- To choose the appropriate workaround for the context.
-
-### Syntax Rules and Structure
-
-**General Syntax: Trailing Comma Workaround**
-
-```typescript
-const identity = <T,>(value: T): T => value;
-```
-
-**Component Breakdown**
-- `<T,>`: The trailing comma disambiguates from JSX.
-
-**General Syntax: Constraint Workaround**
-
-```typescript
-const identity = <T extends unknown>(value: T): T => value;
-```
-
-**Component Breakdown**
-- `<T extends unknown>`: The constraint disambiguates from JSX.
-
-**General Syntax: Named Function (Alternative)**
-
-```typescript
-function identity<T>(value: T): T {
-  return value;
-}
-```
-
-**Component Breakdown**
-- Named functions do not have the JSX ambiguity.
-
-**General Syntax: Function Expression (Alternative)**
-
-```typescript
-const identity = function <T>(value: T): T {
-  return value;
-};
-```
-
-**Component Breakdown**
-- Function expressions with `function` keyword also work.
-
-**Syntax Rules**
-
-- In `.tsx` files, `<T>` alone is ambiguous with JSX.
-- The trailing comma `<T,>` disambiguates.
-- The constraint `<T extends unknown>` disambiguates.
-- Named functions and function expressions do not have the ambiguity.
-- The workarounds are only needed in `.tsx` files.
-- In `.ts` files, `<T>` works without modification.
-- Multiple type parameters also need the workaround: `<T, U>` works, but `<T,>` is safer.
-
-**Constraints and Limitations**
-
-- The trailing comma is a syntax hack; it has no semantic meaning.
-- The constraint `<T extends unknown>` is semantically equivalent to `<T>`.
-- Some tools and linters may flag the trailing comma as unnecessary.
-- The workaround is specific to `.tsx` files; in `.ts` files, no workaround is needed.
-- The workaround does not apply to generic function declarations (only arrow functions).
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Trailing Comma Workaround
-
-```typescript
-// Step 1: Define a generic arrow function in a .tsx file.
-// The trailing comma disambiguates from JSX.
-const identity = <T,>(value: T): T => value;
-
-// Step 2: Use the function.
-const num = identity(42);
-const str = identity("hello");
-
-console.log(num);  // 42
-console.log(str);  // "hello"
-
-// Step 3: Type safety is preserved.
-const n: number = identity(100);      // ✅
-const s: string = identity("world");  // ✅
-
-// Step 4: Multiple type parameters.
-const pair = <T, U>(first: T, second: U): [T, U] => [first, second];
-const result = pair("hello", 42);
-console.log(result);  // ["hello", 42]
-
-// Step 5: Without the comma, this would be a JSX error in .tsx.
-// const wrong = <T>(value: T): T => value;
-// ❌ Error: JSX element 'T' has no corresponding closing tag.
-```
-
-**Expected Output:**
-```
-42
-hello
-[ 'hello', 42 ]
-```
-
-**Why This Output Occurs:** The trailing comma in `<T,>` tells the TypeScript parser that the angle brackets denote type parameters, not JSX. The generic arrow function works normally, preserving type safety. Without the comma, the parser would interpret `<T>` as a JSX opening tag.
-
-#### Example 2: Constraint Workaround
-
-```typescript
-// Step 1: Define a generic arrow function with a constraint.
-const identity = <T extends unknown>(value: T): T => value;
-
-// Step 2: Use the function.
-const num = identity(42);
-const str = identity("hello");
-
-console.log(num);  // 42
-console.log(str);  // "hello"
-
-// Step 3: Constrained generic arrow function.
-const logLength = <T extends { length: number }>(value: T): T => {
-  console.log(`Length: ${value.length}`);
-  return value;
-};
-
-logLength("hello");     // "Length: 5"
-logLength([1, 2, 3]);   // "Length: 3"
-
-// Step 4: Named function alternative (no workaround needed).
-function identityNamed<T>(value: T): T {
-  return value;
-}
-
-const result = identityNamed("hello");
-console.log(result);  // "hello"
-```
-
-**Expected Output:**
-```
-42
-hello
-Length: 5
-Length: 3
-hello
-```
-
-**Why This Output Occurs:** The constraint `<T extends unknown>` is semantically identical to `<T>` but disambiguates from JSX. The `logLength` function uses a more specific constraint (`{ length: number }`) to enable `.length` access. The named function has no ambiguity and needs no workaround.
-
-### Real-World Cases
-
-**Case 1: Generic React Components**
-React components with generic props use the workaround to write generic arrow function components in `.tsx` files.
-
-**Case 2: Generic Hooks**
-Custom React hooks with generic state types use the workaround for arrow function declarations.
-
-**Case 3: Utility Libraries**
-Libraries distributed as `.tsx` files use the workaround to provide generic utility functions.
-
-**Case 4: Test Utilities**
-Test helpers with generic assertions use the workaround for arrow function syntax.
+- **Library design**: Constrained generics with meaningful defaults provide safe, ergonomic APIs.
+- **Utility types**: `Pick<T, K extends keyof T>` and `Record<K extends keyof any, T>` use constraints to ensure correctness.
+- **Return-type-only generics**: Explicit type arguments are required when the return type cannot be inferred, such as `useState<number>(0)`.
 
 ---
 
 ## References
 
-- TypeScript Handbook: Generics — https://www.typescriptlang.org/docs/handbook/2/generics.html
-- TypeScript Handbook: Generic Parameter Defaults — https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-parameter-defaults
-- TypeScript Language Specification: Type Aliases — https://chromium.googlesource.com/external/github.com/kythe/kythe/+/7c2c91248ad9bc8d22dfaa00764c6381af512113/third_party/typescript/doc/spec.md
-- TypeScript Language Specification: Generic Types — https://github.com/microsoft/TypeScript/blob/main/doc/spec.md
-- TypeScript Deep Dive: Generics — https://basarat.gitbook.io/typescript/type-system/generics
-- TypeScript Deep Dive: Arrow Generics — https://basarat.gitbook.io/typescript/type-system/generics#arrow-generics
-- React + TypeScript Cheatsheets: Generic Components — https://react-typescript-cheatsheet.netlify.app/docs/advanced/patterns_by_usecase/#generic-components
-- Total TypeScript: Generic Constraints — https://www.totaltypescript.com/workshops/typescript-pro-essentials/the-utils-folder/type-parameter-constraints-with-generic-functions/solution
-- Steve Kinney: TypeScript Generics Deep Dive — https://stevekinney.com/courses/react-typescript/typescript-generics-deep-dive
-- Stack Overflow: Generic Arrow Functions in TSX — https://stackoverflow.com/questions/41112313/generic-arrow-functions-in-tsx
-- Stack Overflow: Static Attribute of Generic Type — https://stackoverflow.com/questions/41089854/typescript-access-static-attribute-of-generic-type
-- MDN: JavaScript Classes — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
-- MDN: Arrow Function Expressions — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions
+- TypeScript Handbook — Generics - https://www.typescriptlang.org/docs/handbook/2/generics.html
+- TypeScript Handbook — Creating Types from Types - https://www.typescriptlang.org/docs/handbook/2/types-from-types.html
+- TypeScript Handbook — Do’s and Don’ts (Generics) - https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html
+- TypeScript Release Notes 2.6 — Strict Function Types and Variance - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-6.html
+- TypeScript 4.7 Release Notes — Optional Variance Annotations - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html
+- Google TypeScript Style Guide — Return type only generics - https://google.github.io/styleguide/tsguide.html
+- Learning TypeScript — Generics - https://www.learningtypescript.com/generics
+- TypeScript Generics Reference — Constraints, Defaults, NoInfer - https://cdn.jsdelivr.net/npm/typescript-generics-reference

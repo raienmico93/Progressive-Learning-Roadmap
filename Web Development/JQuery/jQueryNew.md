@@ -256,7 +256,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # III. DOM Manipulation
 
-- **9. DOM Manipulation Fundamentals**
+- [**9. DOM Manipulation Fundamentals**](/Web%20Development/JQuery/DOM%20Manipulation/DOMManipulation.md)
   - DOM manipulation
   - jQuery DOM methods
   - Getting content
@@ -279,33 +279,40 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - jQuery object reuse
   - jQuery DOM manipulation best practices
 
-- **10. Content Manipulation**
-  - `.html()`
-  - `.text()`
-  - `.val()`
-  - `.append()`
-  - `.appendTo()`
-  - `.prepend()`
-  - `.prependTo()`
-  - `.after()`
-  - `.insertAfter()`
-  - `.before()`
-  - `.insertBefore()`
-  - `.wrap()`
-  - `.wrapAll()`
-  - `.wrapInner()`
-  - `.unwrap()`
-  - `.replaceWith()`
-  - `.replaceAll()`
-  - `.remove()`
-  - `.detach()`
-  - `.empty()`
-  - `.clone()`
-  - `.html()` vs `.text()` vs `.val()`
-  - XSS considerations
-  - Content manipulation best practices
+- [**10. Content Manipulation**](/Web%20Development/JQuery/DOM%20Manipulation/Content.md)
+  - [Content Retrieval and Modification](/Web%20Development/JQuery/DOM%20Manipulation/ReadingModifyingContent.md)
+    - .html()
+    - .text()
+    - .val()
+  - [Insertion Inside Elements](/Web%20Development/JQuery/DOM%20Manipulation/CreatingElements.md)
+    - .append()
+    - .appendTo()
+    - .prepend() 
+    - .prependTo() 
+  - [Insertion Outside Elements](/Web%20Development/JQuery/DOM%20Manipulation/CreatingElements.md)
+    - .after()
+    - .insertAfter()
+    - .before()
+    - .insertBefore()
+  - [Element Wrapping](/Web%20Development/JQuery/DOM%20Manipulation/WrappingElements.md)
+    - .wrap()
+    - .wrapAll() 
+    - .wrapInner()
+    - .unwrap()
+  - Replacement
+    -  .replaceWith()
+    -  .replaceAll()
+  - [Removal and Copying](/Web%20Development/JQuery/DOM%20Manipulation/RemovingReplacingElements.md)
+    - .remove()
+    - .detach() 
+    - .empty()
+    - .clone()
+  - Comparisons, Security, and Guidelines
+    - .html() vs .text() vs .val()
+    - XSS considerations
+    - Content manipulation best practices
 
-- **11. Attribute Manipulation**
+- [**11. Attribute Manipulation**](/Web%20Development/JQuery/DOM%20Manipulation/Attributes.md)
   - `.attr()`
   - `.prop()`
   - `.removeAttr()`
@@ -324,7 +331,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - `data-*` attributes
   - Attribute manipulation best practices
 
-- **12. CSS Manipulation**
+- [**12. CSS Manipulation**](/Web%20Development/JQuery/DOM%20Manipulation/CSSManipulation.md)
   - `.css()`
   - Getting CSS
   - Setting CSS
@@ -339,7 +346,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - CSS performance
   - CSS manipulation best practices
 
-- **13. Dimension Manipulation**
+- [**13. Dimension Manipulation**](/Web%20Development/JQuery/Miscellaneous/Dimensions.md)
   - `.width()`
   - `.height()`
   - `.innerWidth()`
@@ -357,7 +364,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - `window`
   - Dimension manipulation best practices
 
-- **14. Position Manipulation**
+- [**14. Position Manipulation**](/Web%20Development/JQuery/Miscellaneous/Positioning.md)
   - `.offset()`
   - `.position()`
   - `.offsetParent()`

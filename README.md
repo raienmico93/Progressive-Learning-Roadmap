@@ -160,6 +160,9 @@
   - [**PyTest**](Python%20Technologies/PyTest/PyTest.md)
   - [**Unittest**](Python%20Technologies/Unittest/Unittest.md)
 
+- **GUI**
+  - [**Tkinter**](Python%20Technologies/Tkinter/Tkinter.md)
+
 ---
 
 ## [Java Technologies](Java%20Technologies/JavaTechnologies.md)

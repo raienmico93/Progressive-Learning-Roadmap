@@ -1,4 +1,4 @@
-# TypeScript Inheritance and Realization: A Comprehensive Cheat Sheet
+# Inheritance in TypeScript — Comprehensive Cheat Sheet
 
 ---
 
@@ -6,1405 +6,1209 @@
 
 ### Definitions
 
-**Core Definition**
-Inheritance and realization are two fundamental mechanisms for building type hierarchies in TypeScript. Inheritance (`extends`) allows a class to derive from another class, inheriting its members and behavior. Realization (`implements`) allows a class to commit to an interface contract, promising to provide all specified members. Together, they enable code reuse, polymorphism, and contract-based design.
+**Core Definition (Academic).** **Inheritance** is an object-oriented mechanism in which a **derived class** acquires the properties and methods of a **base class**, establishing an **“is-a” subtype relationship** between the two. In TypeScript, inheritance is expressed with the `extends` keyword and is statically checked: the compiler enforces that a derived class remains a **subtype** of its base class, respecting the base class’s contract.
 
-**Technical Definition**
-In TypeScript, class inheritance uses the `extends` clause to create a subtype relationship between a derived (child) class and a base (parent) class. The child inherits all non-private members (fields, methods, accessors) from the parent and may override methods (with the `override` keyword under `noImplicitOverride`). The `super` keyword provides access to the parent class's constructor (`super()`) and methods (`super.method()`). Abstract classes (declared with `abstract`) cannot be instantiated and may contain abstract members that subclasses must implement. Interface realization uses the `implements` clause to assert that a class satisfies one or more interfaces. Unlike `extends`, `implements` creates no inheritance relationship—it is a contract check only. TypeScript allows a class to extend one class and implement multiple interfaces simultaneously.
+**Technical Definition.** Inheritance in TypeScript is a **compile-time and runtime** mechanism. At the type level, the derived class type is a subtype of the base class type, meaning a derived instance is assignable wherever a base instance is expected. At the value level, the derived class’s prototype chain includes the base class’s prototype, so inherited members are available through prototype lookup. TypeScript adds **method overriding checks**, the **`super` keyword** for base-class access, and **abstract classes** that cannot be instantiated and may declare abstract members that derived classes must implement. All TypeScript-specific inheritance annotations are erased during compilation, but the underlying JavaScript prototype chain remains.
 
-**Beginner-Friendly Explanation**
-Inheritance lets one class build on another. If you have a `Vehicle` class, you can create a `Car` class that extends it—`Car` gets all of `Vehicle`'s features and can add its own. Realization lets a class promise to follow an interface's contract. If you have a `Serializable` interface, a class can `implement Serializable` to promise it has all the required methods. Abstract classes are like blueprints that can't be used directly—they define common behavior and leave some methods for subclasses to fill in. Together, these features let you organize related classes and enforce contracts.
+**Beginner-Friendly Explanation.** Inheritance is a way to **build a new class from an existing one**. The existing class is the **base class** (or parent); the new class is the **derived class** (or child). The child automatically gets everything the parent has, and can add its own features or **override** the parent’s behavior. TypeScript checks that the child respects the parent’s rules — for example, it cannot make a method stricter than the parent’s method — so you can safely use a child wherever a parent is expected.
+
+---
 
 ### Key Characteristics
 
-- **Single class inheritance**: A class can extend only one parent class.
-- **Multiple interface realization**: A class can implement multiple interfaces.
-- **Method overriding**: Subclasses can replace parent method implementations.
-- **`override` keyword**: Enforces that a method actually overrides a parent method.
-- **`super` access**: Child classes can call parent constructors and methods.
-- **Abstract classes**: Cannot be instantiated; may declare abstract members.
-- **Abstract members**: Must be implemented by concrete subclasses.
-- **Polymorphism**: Instances of subclasses are assignable to parent types.
+| Characteristic | Description |
+|---|---|
+| **“Is-a” relationship** | Inheritance models an “is-a” relationship: a `Dog` is an `Animal`. |
+| **Single inheritance** | A class may extend only **one** base class (unlike interfaces, which support multiple implementation). |
+| **Subtype requirement** | TypeScript enforces that a derived class is always a **subtype** of its base class. |
+| **Prototype-based runtime** | At runtime, inheritance is implemented via the JavaScript prototype chain. |
+| **`super` access** | Derived classes access base-class constructors and methods via `super`. |
+| **Overriding with checks** | Method overrides must remain compatible with the base signature; `override` and `noImplicitOverride` improve safety. |
+| **Abstract base classes** | Abstract classes cannot be instantiated and may declare abstract members that derived classes must implement. |
+| **Erasure of TS-only features** | `abstract`, `override`, and access modifiers are compile-time only; the emitted JavaScript uses standard `extends` and `super`. |
+
+---
 
 ### Prerequisites
 
-- Basic knowledge of TypeScript classes
-- Familiarity with interfaces and class members
-- Understanding of access modifiers (`public`, `private`, `protected`)
-- Familiarity with the `this` type and method binding
+- **JavaScript classes**: `class`, `constructor`, `new`, `this`, `extends`, `super`.
+- **TypeScript classes**: fields, methods, constructors, access modifiers.
+- **Object-oriented concepts**: encapsulation, polymorphism, subtype relationships.
+- **TypeScript’s structural typing**: classes are compared structurally unless `private` or `protected` members introduce nominal behavior.
+
+---
 
 ### Related Programming Areas
 
-- **Object-Oriented Programming**: Inheritance and polymorphism are core OOP concepts
-- **Design Patterns**: Template method, strategy, and factory patterns use inheritance
-- **SOLID Principles**: Liskov substitution, open/closed, and interface segregation principles
-- **Interface-Based Design**: Realization enables contract-based programming
-- **Nominal Typing**: `private` and `protected` members introduce nominal behavior
+- **Object-oriented design**: polymorphism, the Liskov Substitution Principle.
+- **Design patterns**: Template Method, Strategy, Factory, Decorator.
+- **Composition over inheritance**: an alternative to deep hierarchies.
+- **Mixins**: a pattern for composing behavior without multiple inheritance.
+- **Interface implementation**: `implements` as a contract-checking alternative to `extends`.
+
+---
 
 ### Core Concepts / Features
 
-1. Class Extension (`extends`)
-2. Parent and Child Class Mechanics
-3. Method Overriding and the `override` Keyword
-4. `Super` Calls (`super()` and `super.method()`)
-5. Interface Realization via the `implements` Clause
-6. Abstract Classes and Abstract Members (Properties and Methods)
+The following sections cover the requested concepts. Each follows the uniform structure.
 
+---
 
-## 1. Class Extension (`extends`)
+## 1. Inheritance
 
 ### Definitions
 
-**Core Definition**
-Class extension is the mechanism by which a class (the child or derived class) inherits members from another class (the parent or base class) using the `extends` keyword. The child class gains all accessible members of the parent and can add new members or override inherited ones.
+**Core Definition.** **Inheritance** is the mechanism by which a class (the **derived class**) acquires the members of another class (the **base class**), forming a hierarchical “is-a” relationship and enabling code reuse and polymorphism.
 
-**Technical Definition**
-The `extends` clause in a class declaration creates a subtype relationship between the child class and the parent class. The child class's instances are assignable to the parent class's type. The child inherits all `public` and `protected` members (fields, methods, accessors) from the parent but not `private` members (which remain inaccessible). The child's constructor must call `super()` before accessing `this`. TypeScript enforces that method overrides are compatible with the parent's signatures. A class can extend only one class (single inheritance), but the inheritance chain can be arbitrarily deep.
+**Technical Definition.** In TypeScript, inheritance is established with the `extends` clause. The derived class inherits the base class’s instance members (fields, methods, accessors) and static members. The derived class type is a **subtype** of the base class type, so instances of the derived class are assignable to variables, parameters, and return types declared as the base class. TypeScript checks that overriding members remain compatible with the base contract. The runtime implements inheritance through the prototype chain: `Derived.prototype` inherits from `Base.prototype`.
 
-**Beginner-Friendly Explanation**
-Class extension lets one class build on another. If you have a `Vehicle` class with a `move()` method, you can create a `Car` class that `extends Vehicle`. The `Car` class automatically has the `move()` method and can add its own methods like `honk()`. The `Car` is a `Vehicle`—you can use a `Car` wherever a `Vehicle` is expected. This is the foundation of inheritance and polymorphism in object-oriented programming.
+**Beginner-Friendly Explanation.** Inheritance is **creating a new class based on an existing one**. The new class gets everything the old class has, and you can add or change things. It is like saying “a `Dog` is a kind of `Animal`,” so a `Dog` can do everything an `Animal` can do, plus dog-specific things.
 
 ### Purposes
 
-- To reuse common properties and methods across related classes.
-- To create type hierarchies that model "is-a" relationships.
-- To enable polymorphism through subtype assignment.
-- To share implementation while allowing specialization.
-- To organize code into logical, extensible structures.
+- **To reuse implementation** across related classes without duplication.
+- **To model “is-a” relationships** in the type system, enabling polymorphic substitution.
+- **To establish a subtype hierarchy** where derived instances can be used wherever base instances are expected.
+- **To share common behavior** through a base class while allowing specialized behavior in derived classes.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Class Extension**
+**General syntax (inheritance declaration):**
 
-```typescript
-class ParentClass {
-  parentProperty: Type;
-  parentMethod(): ReturnType { }
-}
-
-class ChildClass extends ParentClass {
-  childProperty: Type;
-  childMethod(): ReturnType { }
+```
+class Derived extends Base {
+  // additional or overridden members
 }
 ```
 
-**Component Breakdown**
-- `extends ParentClass`: The clause indicating the parent class.
-- The child inherits all accessible parent members.
-- The child can add new members and override inherited methods.
+**Component breakdown:**
 
-**General Syntax: Multi-Level Inheritance**
+- `class` — declaration keyword.
+- `Derived` — the derived class name.
+- `extends` — the inheritance keyword.
+- `Base` — the base class (a value expression that evaluates to a constructor).
+- `{ ... }` — the derived class body.
 
-```typescript
-class GrandParent { }
-class Parent extends GrandParent { }
-class Child extends Parent { }
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- Inheritance chains can be arbitrarily deep.
+- A class may `extends` **exactly one** base class (single inheritance).
+- The base class must be a **constructor value**; it cannot be an interface (use `implements` for interfaces).
+- Derived classes inherit instance members and static members.
+- A derived class may add new members and override inherited members.
+- If the derived class has a constructor, it **must call `super()`** before accessing `this`.
 
-**Syntax Rules**
+**Constraints and limitations.**
 
-- A class can extend only one parent class.
-- The child inherits all `public` and `protected` members.
-- `private` members are not inherited (they remain inaccessible to the child).
-- The child must call `super()` in its constructor if the parent has a constructor with required parameters.
-- The child's type is assignable to the parent's type (polymorphism).
-- The parent's type is not assignable to the child's type.
-- The child can override parent methods with compatible signatures.
-- The child can add new members not present in the parent.
+- TypeScript does **not** support multiple inheritance of classes; use `implements` for multiple interfaces or **mixins** for behavior composition.
+- Inheritance creates **tight coupling**: changes to the base class can affect all derived classes.
+- Deep inheritance hierarchies are discouraged; prefer composition when flexibility is needed.
+- TypeScript-specific inheritance features (`abstract`, `override`) are erased and have no runtime representation.
 
-**Constraints and Limitations**
+### Annotated Complete Step by Step Code Examples
 
-- Single inheritance: a class cannot extend multiple classes.
-- `private` members are not accessible in child classes.
-- Overriding methods must have compatible signatures (return type covariance, parameter contravariance under `strictFunctionTypes` for function properties).
-- The parent class must be defined before the child class is referenced (or imported).
-- Deep inheritance chains can become difficult to maintain (favor composition in such cases).
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Class Extension
+#### Example 1: Basic inheritance with method reuse
 
 ```typescript
-// Step 1: Define a parent class.
-class Vehicle {
-  brand: string;
-  speed: number = 0;
-
-  constructor(brand: string) {
-    this.brand = brand;
-    console.log(`Vehicle ${brand} created`);
-  }
-
-  move(): void {
-    console.log(`${this.brand} is moving at ${this.speed} km/h`);
-  }
-
-  accelerate(amount: number): void {
-    this.speed += amount;
-    console.log(`Speed increased to ${this.speed} km/h`);
-  }
-}
-
-// Step 2: Define a child class that extends Vehicle.
-class Car extends Vehicle {
-  doors: number;
-
-  constructor(brand: string, doors: number) {
-    super(brand);  // Call parent constructor
-    this.doors = doors;
-    console.log(`Car with ${doors} doors created`);
-  }
-
-  honk(): void {
-    console.log(`${this.brand} honks: Beep beep!`);
-  }
-}
-
-// Step 3: Create a Car instance.
-const car = new Car("Toyota", 4);
-// Output:
-// "Vehicle Toyota created"
-// "Car with 4 doors created"
-
-// Step 4: Use inherited and own methods.
-car.accelerate(50);  // "Speed increased to 50 km/h"
-car.move();          // "Toyota is moving at 50 km/h"
-car.honk();          // "Toyota honks: Beep beep!"
-
-// Step 5: Polymorphism — Car is a Vehicle.
-const vehicle: Vehicle = car;  // ✅ Allowed
-vehicle.move();  // "Toyota is moving at 50 km/h"
-
-// Step 6: Extra properties on child are not accessible via parent type.
-// vehicle.doors;  // ❌ Error: Property 'doors' does not exist on type 'Vehicle'.
-```
-
-**Expected Output:**
-```
-Vehicle Toyota created
-Car with 4 doors created
-Speed increased to 50 km/h
-Toyota is moving at 50 km/h
-Toyota honks: Beep beep!
-Toyota is moving at 50 km/h
-```
-
-**Why This Output Occurs:** The `Car` class extends `Vehicle`, inheriting `brand`, `speed`, `move()`, and `accelerate()`. The `Car` constructor calls `super(brand)` to initialize the parent's `brand` property. The `Car` adds a `doors` property and `honk()` method. A `Car` instance is assignable to `Vehicle` because it has all of `Vehicle`'s members.
-
-#### Example 2: Multi-Level Inheritance
-
-```typescript
-// Step 1: Define a grandparent class.
+// example_inheritance.ts
+// Step 1: Define a base class.
 class Animal {
-  name: string;
-
-  constructor(name: string) {
-    this.name = name;
-  }
-
-  eat(): void {
-    console.log(`${this.name} is eating.`);
+  move(distanceInMeters: number = 0) {
+    console.log(`Animal moved ${distanceInMeters}m.`);
   }
 }
 
-// Step 2: Define a parent class that extends Animal.
-class Mammal extends Animal {
-  warmBlooded: boolean = true;
-
-  breathe(): void {
-    console.log(`${this.name} is breathing.`);
+// Step 2: Define a derived class using extends.
+class Dog extends Animal {
+  bark() {
+    console.log("Woof! Woof!");
   }
 }
 
-// Step 3: Define a child class that extends Mammal.
-class Dog extends Mammal {
-  breed: string;
-
-  constructor(name: string, breed: string) {
-    super(name);  // Calls Mammal's constructor, which calls Animal's
-    this.breed = breed;
-  }
-
-  bark(): void {
-    console.log(`${this.name} (${this.breed}) barks!`);
-  }
-}
-
-// Step 4: Create a Dog instance.
-const rex = new Dog("Rex", "German Shepherd");
-
-// Step 5: Access members from all levels.
-rex.eat();      // From Animal: "Rex is eating."
-rex.breathe();  // From Mammal: "Rex is breathing."
-rex.bark();     // From Dog: "Rex (German Shepherd) barks!"
-
-// Step 6: Polymorphism works through the chain.
-const animal: Animal = rex;  // ✅ Dog → Mammal → Animal
-animal.eat();  // "Rex is eating."
-
-const mammal: Mammal = rex;  // ✅ Dog → Mammal
-mammal.breathe();  // "Rex is breathing."
+// Step 3: Create a Dog and use inherited and own methods.
+const dog = new Dog();
+dog.bark();       // Dog's own method
+dog.move(10);     // Inherited from Animal
+dog.bark();
 ```
 
 **Expected Output:**
 ```
-Rex is eating.
-Rex is breathing.
-Rex (German Shepherd) barks!
-Rex is eating.
-Rex is breathing.
+Woof! Woof!
+Animal moved 10m.
+Woof! Woof!
 ```
 
-**Why This Output Occurs:** The inheritance chain `Animal` → `Mammal` → `Dog` means `Dog` inherits from both `Mammal` and `Animal`. The `super(name)` call in `Dog`'s constructor invokes `Mammal`'s constructor, which invokes `Animal`'s constructor. Polymorphism works at every level: a `Dog` is a `Mammal` and an `Animal`.
-
-### Real-World Cases
-
-**Case 1: UI Component Hierarchies**
-UI frameworks use class inheritance for component hierarchies: `Component` → `Button` → `PrimaryButton`, with shared rendering logic in the base class.
-
-**Case 2: Domain Entity Hierarchies**
-Domain models use inheritance for entity hierarchies: `Payment` → `CardPayment` → `CreditCardPayment`, sharing common payment logic.
-
-**Case 3: Error Hierarchies**
-Custom error classes extend `Error` to add application-specific error information while preserving standard error behavior.
+**Why this output occurs.** `Dog` extends `Animal`, so it inherits the `move` method. `dog.bark()` calls the dog-specific method. `dog.move(10)` calls the inherited method, which logs the distance. This demonstrates the most basic inheritance feature: classes inherit properties and methods from base classes.
 
 ---
 
-## 2. Parent and Child Class Mechanics
-
-### Definitions
-
-**Core Definition**
-Parent and child class mechanics describe the runtime and compile-time interactions between a base class and its derived classes. This includes member inheritance, constructor chaining, property shadowing, and the behavior of `this` throughout the inheritance hierarchy.
-
-**Technical Definition**
-When a child class extends a parent, the child's prototype chain is linked to the parent's prototype. The child inherits all `public` and `protected` members via the prototype chain. Fields declared in the child shadow same-named fields in the parent. Constructor execution order is: parent field initializers, parent constructor body, child field initializers, child constructor body (after `super()`). The `this` value in a parent method, when called on a child instance, refers to the child instance—enabling polymorphic dispatch. Static members are also inherited via the constructor function's prototype chain.
-
-**Beginner-Friendly Explanation**
-When a child class extends a parent, the child gets everything the parent has. But there are some subtle mechanics: when you create a child instance, the parent's constructor runs first (via `super()`), then the child's. Fields declared in the child can shadow same-named fields in the parent. When a parent method runs on a child instance, `this` refers to the child—so the method sees the child's data. Understanding these mechanics helps you avoid subtle bugs in inheritance hierarchies.
-
-### Purposes
-
-- To understand the execution order of constructors and field initializers.
-- To predict how `this` behaves in inherited methods.
-- To avoid field shadowing bugs between parent and child classes.
-- To understand prototype chain behavior for method resolution.
-- To correctly design class hierarchies with shared state and behavior.
-
-### Syntax Rules and Structure
-
-**General Syntax: Field Shadowing**
+#### Example 2: Inheritance with constructor and `super()`
 
 ```typescript
-class Parent {
-  value: number = 10;
+// example_inheritance_constructor.ts
+class Animal {
+  constructor(public name: string) {}
 }
 
-class Child extends Parent {
-  value: number = 20;  // Shadows parent's value
-}
-```
+class Dog extends Animal {
+  constructor(name: string, public breed: string) {
+    super(name); // Must call super before using this.
+  }
 
-**Component Breakdown**
-- The child's `value` shadows the parent's `value`.
-- Accessing `childInstance.value` returns the child's value.
-
-**General Syntax: Constructor Execution Order**
-
-```typescript
-class Parent {
-  parentField = console.log("Parent field");
-  constructor() {
-    console.log("Parent constructor");
+  describe(): string {
+    return `${this.name} (${this.breed})`;
   }
 }
 
-class Child extends Parent {
-  childField = console.log("Child field");
-  constructor() {
-    super();
-    console.log("Child constructor");
-  }
-}
-// Output order:
-// "Parent field"
-// "Parent constructor"
-// "Child field"
-// "Child constructor"
-```
-
-**Component Breakdown**
-- Parent field initializers run first, then parent constructor body.
-- Then child field initializers, then child constructor body (after `super()`).
-
-**Syntax Rules**
-
-- Parent field initializers run before the parent constructor body.
-- Child field initializers run after `super()` returns.
-- Field shadowing: child fields with the same name as parent fields shadow the parent's.
-- `this` in parent methods refers to the actual instance type (child instance).
-- Static members are inherited via the constructor function's prototype chain.
-- Method resolution follows the prototype chain (child methods shadow parent methods).
-
-**Constraints and Limitations**
-
-- Field shadowing can cause subtle bugs; use distinct names or `declare` to avoid issues.
-- With `useDefineForClassFields: true`, parent fields are redefined on the child instance, which can shadow accessors.
-- Parent constructors calling overridden methods can access uninitialized child fields.
-- `this` in parent constructors refers to the child instance but child fields are not yet initialized.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Constructor Execution Order
-
-```typescript
-// Step 1: Define a parent class with field initializers and constructor logic.
-class Parent {
-  parentField = "parent-initialized";
-  parentField2: string;
-
-  constructor() {
-    console.log(`Parent constructor: parentField = ${this.parentField}`);
-    this.parentField2 = "parent-constructor-set";
-    console.log(`Parent constructor: parentField2 = ${this.parentField2}`);
-  }
-}
-
-// Step 2: Define a child class.
-class Child extends Parent {
-  childField = "child-initialized";
-
-  constructor() {
-    super();  // Parent field initializers and constructor run first
-    console.log(`Child constructor: childField = ${this.childField}`);
-    console.log(`Child constructor: parentField = ${this.parentField}`);
-  }
-}
-
-// Step 3: Create a Child instance and observe the order.
-const child = new Child();
-// Output:
-// "Parent constructor: parentField = parent-initialized"
-// "Parent constructor: parentField2 = parent-constructor-set"
-// "Child constructor: childField = child-initialized"
-// "Child constructor: parentField = parent-initialized"
+const dog = new Dog("Rex", "Labrador");
+console.log(dog.describe()); // Expected: Rex (Labrador)
 ```
 
 **Expected Output:**
 ```
-Parent constructor: parentField = parent-initialized
-Parent constructor: parentField2 = parent-constructor-set
-Child constructor: childField = child-initialized
-Child constructor: parentField = parent-initialized
+Rex (Labrador)
 ```
 
-**Why This Output Occurs:** The parent's field initializers run first (`parentField = "parent-initialized"`), then the parent constructor body (setting `parentField2`). Then the child's field initializers run (`childField`), then the child constructor body. This order is guaranteed by the language specification.
-
-#### Example 2: Field Shadowing and `this` Behavior
-
-```typescript
-// Step 1: Define a parent class with a method using `this`.
-class Parent {
-  value: number = 10;
-
-  getValue(): number {
-    return this.value;  // `this` is the actual instance
-  }
-
-  describe(): string {
-    return `Parent with value ${this.value}`;
-  }
-}
-
-// Step 2: Define a child that shadows the field.
-class Child extends Parent {
-  value: number = 20;  // Shadows parent's value
-
-  describe(): string {
-    return `Child with value ${this.value}`;
-  }
-}
-
-// Step 3: Create instances and observe behavior.
-const parent = new Parent();
-const child = new Child();
-
-console.log(parent.getValue());     // 10 — parent's value
-console.log(child.getValue());      // 20 — child's value (via `this`)
-console.log(parent.describe());     // "Parent with value 10"
-console.log(child.describe());      // "Child with value 20"
-
-// Step 4: `this` in inherited method refers to the child instance.
-// The parent's getValue() method, when called on child, sees child.value.
-const parentRef: Parent = child;    // Polymorphic assignment
-console.log(parentRef.getValue());  // 20 — still the child's value
-console.log(parentRef.describe());  // "Child with value 20" — virtual dispatch
-```
-
-**Expected Output:**
-```
-10
-20
-Parent with value 10
-Child with value 20
-20
-Child with value 20
-```
-
-**Why This Output Occurs:** The child's `value` field shadows the parent's. When `getValue()` is called on the child instance, `this.value` resolves to the child's `value` (20). When `describe()` is called on `parentRef` (which holds a `Child` instance), the child's `describe()` method is invoked due to virtual dispatch—even though the reference type is `Parent`.
-
-### Real-World Cases
-
-**Case 1: Framework Base Classes**
-Framework base classes (e.g., `React.Component`) use field initialization order carefully to ensure child classes can rely on parent state.
-
-**Case 2: Template Method Pattern**
-The template method pattern relies on parent methods calling overridable child methods, requiring careful `this` and initialization order understanding.
-
-**Case 3: Plugin Architectures**
-Plugin base classes define extension points via overridable methods, and child plugins override them to customize behavior.
+**Why this output occurs.** `Dog` extends `Animal` and its constructor calls `super(name)` to initialize the inherited `name` property. The `breed` parameter property is initialized after `super()`. The `describe` method accesses both inherited and own properties.
 
 ---
 
-## 3. Method Overriding and the `override` Keyword
+### Real-World Cases
+
+- **Framework base classes**: `class BaseController extends FrameworkController { ... }`.
+- **Domain hierarchies**: `class SavingsAccount extends BankAccount { ... }`.
+- **UI component hierarchies**: `class PrimaryButton extends Button { ... }`.
+
+---
+
+## 2. `extends`
 
 ### Definitions
 
-**Core Definition**
-Method overriding is the process by which a child class provides its own implementation of a method that exists in its parent class. The `override` keyword (introduced in TypeScript 4.3) explicitly marks a method as overriding a parent method, enabling compile-time verification that the parent method exists.
+**Core Definition.** The **`extends` keyword** is the syntactic operator that establishes an inheritance relationship between a derived class and a base class. It specifies that the derived class inherits the members of the base class.
 
-**Technical Definition**
-Method overriding occurs when a child class declares a method with the same name as a parent method. The child's method must have a compatible signature: the return type must be covariant (child return type assignable to parent return type), and parameters must be compatible (bivariant for method syntax, contravariant for function property syntax under `strictFunctionTypes`). The `override` keyword, when required by `noImplicitOverride`, ensures that the method actually overrides a parent member, catching typos and refactoring errors. The `override` keyword can also be used with the `super` keyword to call the parent implementation.
+**Technical Definition.** In TypeScript’s grammar, `class Derived extends Base { ... }` creates a class whose prototype chain includes `Base.prototype`. The `extends` clause accepts a value expression that evaluates to a constructor (or `null`). TypeScript checks that the derived class is a **subtype** of the base class and that any overridden members are compatible with the base contract. The `extends` keyword is also used in **generic constraints** (`T extends U`), but that is a distinct type-level use.
 
-**Beginner-Friendly Explanation**
-Method overriding means a child class can replace a parent's method with its own version. For example, if `Animal` has a `makeSound()` method, `Dog` can override it to return `"Woof"`. The `override` keyword is a safety feature: it tells TypeScript "I intend to override a parent method," and TypeScript checks that the parent method actually exists. If you typo the method name, TypeScript catches it. Without `override`, a typo would silently create a new method instead of overriding. Using `override` is a best practice for maintaining inheritance hierarchies.
+**Beginner-Friendly Explanation.** `extends` is the word that **connects a child class to its parent**. Writing `class Dog extends Animal` means “Dog is a kind of Animal and inherits everything Animal has.” It is the TypeScript/JavaScript equivalent of saying “this class extends that one.”
 
 ### Purposes
 
-- To customize inherited behavior for specific subclasses.
-- To enforce that a method actually overrides a parent member (via `override`).
-- To catch typos and refactoring errors in inheritance hierarchies.
-- To enable polymorphic dispatch where the child's implementation is used.
-- To combine parent behavior with child-specific logic via `super`.
+- **To declare an inheritance relationship** between two classes.
+- **To inherit members** from a base class without re-declaring them.
+- **To establish subtyping** so derived instances can be used as base instances.
+- **To enable polymorphism** through base-class references to derived instances.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Method Override**
+**General syntax:**
 
-```typescript
-class Parent {
-  method(): ReturnType { }
-}
-
-class Child extends Parent {
-  override method(): ReturnType { }
+```
+class Derived extends Base {
+  // body
 }
 ```
 
-**Component Breakdown**
-- `override`: The keyword marking the method as an override.
-- The child's method replaces the parent's for child instances.
+**Component breakdown:**
 
-**General Syntax: Override with `super`**
+- `extends` — inheritance keyword.
+- `Base` — the base class constructor (a value expression).
+
+**Syntax rules.**
+
+- A class may extend **only one** class.
+- The base class must be a **constructor value**, not an interface or type alias.
+- The derived class inherits both instance and static members.
+- If the derived class does not declare a constructor, the base constructor is used implicitly.
+- If the derived class declares a constructor, it must call `super()` before accessing `this`.
+
+**Constraints and limitations.**
+
+- `extends` cannot be used with interfaces; use `implements` for interfaces.
+- A class cannot extend a **sealed** or **final** class (TypeScript has no `final` keyword, but conventions may discourage extension).
+- The base class must be **statically resolvable**; dynamic expressions that produce constructors are allowed but reduce type safety.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: `extends` with implicit constructor
 
 ```typescript
-class Child extends Parent {
-  override method(): ReturnType {
-    const parentResult = super.method();
-    return transform(parentResult);
+// example_extends_implicit.ts
+class Base {
+  greet() {
+    return "Hello";
   }
 }
-```
 
-**Component Breakdown**
-- `super.method()`: Calls the parent's implementation.
-- The child can extend or modify the parent's behavior.
-
-**General Syntax: `noImplicitOverride` Configuration**
-
-```json
-{
-  "compilerOptions": {
-    "noImplicitOverride": true
-  }
+class Derived extends Base {
+  // No constructor — base constructor is used implicitly.
 }
+
+const d = new Derived();
+console.log(d.greet()); // Expected: Hello
 ```
 
-**Component Breakdown**
-- When enabled, all overriding methods must use the `override` keyword.
+**Expected Output:**
+```
+Hello
+```
 
-**Syntax Rules**
+**Why this output occurs.** `Derived` does not declare a constructor, so it implicitly uses `Base`’s constructor. The `greet` method is inherited via the prototype chain.
 
-- Overriding methods must have the same name as a parent method.
-- The child's method signature must be compatible with the parent's (return type covariant).
-- The `override` keyword is optional unless `noImplicitOverride` is enabled.
-- `override` can be combined with access modifiers: `public override`, `protected override`.
-- `super.method()` calls the parent's implementation.
-- The `override` keyword applies to methods, accessors, and properties (TypeScript 4.3+).
-- Overriding a method that doesn't exist in the parent is an error when using `override`.
+---
 
-**Constraints and Limitations**
-
-- The `override` keyword requires TypeScript 4.3+.
-- Without `noImplicitOverride`, forgetting the `override` keyword is not an error.
-- Overriding private methods is not allowed (private members are not inherited).
-- Return type covariance is allowed, but parameter types must be compatible.
-- Overriding with an incompatible signature is a compile error.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Method Overriding
+#### Example 2: `extends` with method addition
 
 ```typescript
-// Step 1: Define a parent class with a method.
+// example_extends_add.ts
 class Shape {
   area(): number {
     return 0;
   }
-
-  describe(): string {
-    return `Shape with area ${this.area()}`;
-  }
 }
 
-// Step 2: Define a child class that overrides area().
 class Circle extends Shape {
-  radius: number;
-
-  constructor(radius: number) {
+  constructor(private radius: number) {
     super();
-    this.radius = radius;
   }
 
-  override area(): number {
+  area(): number {
     return Math.PI * this.radius ** 2;
   }
 }
 
-// Step 3: Define another child that overrides area().
-class Square extends Shape {
-  side: number;
-
-  constructor(side: number) {
-    super();
-    this.side = side;
-  }
-
-  override area(): number {
-    return this.side ** 2;
-  }
-}
-
-// Step 4: Polymorphic dispatch uses the correct override.
-const shapes: Shape[] = [new Shape(), new Circle(5), new Square(4)];
-shapes.forEach((shape) => console.log(shape.describe()));
-// "Shape with area 0"
-// "Shape with area 78.53981633974483"
-// "Shape with area 16"
+const c = new Circle(2);
+console.log(c.area().toFixed(2)); // Expected: 12.57
 ```
 
 **Expected Output:**
 ```
-Shape with area 0
-Shape with area 78.53981633974483
-Shape with area 16
+12.57
 ```
 
-**Why This Output Occurs:** The `describe()` method in `Shape` calls `this.area()`. When `describe()` is invoked on a `Circle` or `Square` instance, virtual dispatch calls the overridden `area()` method. The `override` keyword ensures that `area()` actually overrides a parent method.
+**Why this output occurs.** `Circle` extends `Shape` and overrides `area` with its own implementation. The `super()` call is required because `Circle` declares a constructor. The overridden `area` returns the circle’s area, demonstrating both inheritance and overriding.
 
-#### Example 2: Override with `super` and Typo Detection
+---
+
+### Real-World Cases
+
+- **Error hierarchies**: `class ValidationError extends Error { ... }`.
+- **Model hierarchies**: `class Admin extends User { ... }`.
+- **Framework extension points**: `class MyComponent extends React.Component { ... }`.
+
+---
+
+## 3. Base Class
+
+### Definitions
+
+**Core Definition.** A **base class** (also called **superclass** or **parent class**) is the class from which other classes inherit. It defines the common members that derived classes share.
+
+**Technical Definition.** The base class is the class named in the `extends` clause. Its prototype becomes the prototype of the derived class. The base class’s instance type is a **supertype** of the derived class’s instance type. Base-class members are accessible to derived classes according to their access modifiers (`private` members are not accessible; `protected` members are accessible within the hierarchy).
+
+**Beginner-Friendly Explanation.** The base class is **the parent**. It contains the shared features that all children inherit. For example, `Animal` might be the base class for `Dog`, `Cat`, and `Bird`.
+
+### Purposes
+
+- **To centralize shared state and behavior** across a family of related classes.
+- **To define a common contract** that derived classes extend or specialize.
+- **To enable polymorphic substitution** through the base type.
+- **To provide a stable extension point** for framework and library design.
+
+### Syntax Rules and Structure
+
+**General syntax (base class declaration):**
+
+```
+class Base {
+  // common members
+}
+```
+
+**Component breakdown:**
+
+- `class` — declaration keyword.
+- `Base` — the base class name.
+- `{ ... }` — common members inherited by derived classes.
+
+**Syntax rules.**
+
+- A base class may itself extend another class, forming a hierarchy.
+- Base-class members may be `public`, `protected`, or `private`; `private` members are not inherited in an accessible form.
+- Base-class constructors are called via `super()` in derived classes.
+- Base classes may be `abstract` (see Section 7).
+
+**Constraints and limitations.**
+
+- Base classes should be **stable**; frequent changes can break derived classes.
+- Overly broad base classes can become “god objects.”
+- Base classes with `private` members introduce **nominal-like** compatibility, affecting structural typing.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Base class with shared and protected members
 
 ```typescript
-// Step 1: Define a parent class.
+// example_base_class.ts
+class Vehicle {
+  protected speed = 0;
+
+  accelerate(amount: number): void {
+    this.speed += amount;
+  }
+
+  describe(): string {
+    return `Speed: ${this.speed}`;
+  }
+}
+
+class Car extends Vehicle {
+  honk(): void {
+    console.log("Beep!");
+  }
+}
+
+const car = new Car();
+car.accelerate(50);
+console.log(car.describe()); // Expected: Speed: 50
+car.honk();                  // Expected: Beep!
+```
+
+**Expected Output:**
+```
+Speed: 50
+Beep!
+```
+
+**Why this output occurs.** `Vehicle` is the base class with a protected `speed` field and a public `accelerate` method. `Car` extends `Vehicle` and adds `honk`. `Car` can access `speed` because it is `protected` and `Car` is a subclass. `accelerate(50)` updates the inherited field.
+
+---
+
+### Real-World Cases
+
+- **`Error` as a base class**: `class AppError extends Error { ... }`.
+- **`EventEmitter` as a base class**: custom emitters extend a base emitter.
+- **Abstract repository bases**: `class BaseRepository<T> { ... }`.
+
+---
+
+## 4. Derived Class
+
+### Definitions
+
+**Core Definition.** A **derived class** (also called **subclass** or **child class**) is a class that inherits from a base class via `extends`. It acquires the base class’s members and may add or override members.
+
+**Technical Definition.** The derived class’s prototype chain includes the base class’s prototype. Its instance type is a **subtype** of the base type. TypeScript checks that the derived class **does not violate the base contract**: overridden members must be compatible with the base signatures, and the derived class cannot remove members required by the base class. Derived classes may declare constructors that call `super()`.
+
+**Beginner-Friendly Explanation.** The derived class is **the child**. It gets everything from the parent and can add its own stuff or change what the parent does. For example, `Dog` is a derived class of `Animal`; it inherits `move` and adds `bark`.
+
+### Purposes
+
+- **To specialize base-class behavior** for a particular subtype.
+- **To add subtype-specific members** while retaining inherited members.
+- **To override methods** with compatible implementations.
+- **To participate in polymorphism** through the base-class type.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+class Derived extends Base {
+  // additional members
+  // overridden members
+}
+```
+
+**Component breakdown:**
+
+- `Derived` — the derived class name.
+- `extends Base` — the inheritance relationship.
+- `{ ... }` — the derived class body.
+
+**Syntax rules.**
+
+- A derived class may add **new** fields, methods, and accessors.
+- A derived class may **override** inherited methods and fields.
+- If the derived class declares a constructor, it must call `super()` before `this`.
+- Derived classes inherit static members as well as instance members.
+- TypeScript enforces that the derived class is a **subtype** of the base class.
+
+**Constraints and limitations.**
+
+- A derived class cannot **remove** a base-class member.
+- Overridden methods must remain **compatible** with the base signature (same or wider parameter types; same or narrower return type under `strictFunctionTypes`).
+- Deeply nested derived classes are discouraged.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Derived class adding members
+
+```typescript
+// example_derived_add.ts
+class Animal {
+  move() {
+    console.log("Moving");
+  }
+}
+
+class Bird extends Animal {
+  fly() {
+    console.log("Flying");
+  }
+}
+
+const bird = new Bird();
+bird.move(); // Inherited
+bird.fly();  // Own
+```
+
+**Expected Output:**
+```
+Moving
+Flying
+```
+
+**Why this output occurs.** `Bird` extends `Animal` and adds `fly`. It inherits `move` from `Animal`. Both methods are available on `bird`.
+
+---
+
+#### Example 2: Derived class overriding a method
+
+```typescript
+// example_derived_override.ts
+class Base {
+  greet() {
+    console.log("Hello, world!");
+  }
+}
+
+class Derived extends Base {
+  greet(name?: string) {
+    if (name === undefined) {
+      super.greet(); // Call base implementation.
+    } else {
+      console.log(`Hello, ${name.toUpperCase()}`);
+    }
+  }
+}
+
+const d = new Derived();
+d.greet();        // Expected: Hello, world!
+d.greet("reader"); // Expected: Hello, READER
+```
+
+**Expected Output:**
+```
+Hello, world!
+Hello, READER
+```
+
+**Why this output occurs.** `Derived` overrides `greet`. When called without an argument, it delegates to `super.greet()`; with an argument, it uses its own implementation. The override is compatible with the base signature because the parameter is optional.
+
+---
+
+### Real-World Cases
+
+- **Specialized services**: `class PremiumUserService extends UserService { ... }`.
+- **Custom errors**: `class NotFoundError extends HttpError { ... }`.
+- **UI variants**: `class IconButton extends Button { ... }`.
+
+---
+
+## 5. Method Overriding
+
+### Definitions
+
+**Core Definition.** **Method overriding** is the act of a derived class providing its own implementation of a method that is already defined in its base class, replacing the inherited behavior for instances of the derived class.
+
+**Technical Definition.** In TypeScript, an overriding method must have a signature **compatible** with the base method: it may accept the same or **wider** parameter types (contravariance for function parameters under `strictFunctionTypes`) and must return the same or a **narrower** return type (covariance). The `override` keyword (introduced in TypeScript 4.3) explicitly marks a method as an override, and `noImplicitOverride` can require it to catch accidental “out-of-sync” overrides when base methods are renamed. The `super` keyword allows the overriding method to call the base implementation.
+
+**Beginner-Friendly Explanation.** Method overriding is **replacing a parent’s method with a child’s version**. The child says “I want to do this differently.” But TypeScript makes sure the child’s version still fits the parent’s rules — you cannot make the method require more arguments or return a completely different type. You can optionally call the parent’s version with `super.method()`.
+
+### Purposes
+
+- **To customize inherited behavior** for a specific subtype.
+- **To implement abstract methods** declared in an abstract base class.
+- **To extend base behavior** by calling `super` and adding logic.
+- **To participate in polymorphism** with subtype-specific implementations.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+class Derived extends Base {
+  [override] methodName(params): ReturnType {
+    // implementation
+    // super.methodName(...) optional
+  }
+}
+```
+
+**Component breakdown:**
+
+- `override` — optional keyword (required under `noImplicitOverride`) indicating the method overrides a base method.
+- `methodName` — the name of the overridden method.
+- `params` — parameter list; must be compatible with the base signature.
+- `ReturnType` — return type; must be compatible with the base return type.
+- `super.methodName(...)` — optional call to the base implementation.
+
+**Syntax rules.**
+
+- The overriding method must be **compatible** with the base method.
+- The `override` keyword is optional by default but **required** under `noImplicitOverride`.
+- `super` can be used to call the base method implementation.
+- Overriding a field with a method or vice versa is generally discouraged; TypeScript may allow it but it can be confusing.
+
+**Constraints and limitations.**
+
+- Overriding methods must not make parameters **more restrictive** (e.g., a required parameter cannot replace an optional one).
+- Overriding methods must not return a **wider** type than the base method.
+- Without `noImplicitOverride`, renaming a base method can silently break overrides because the derived method becomes a **new method** rather than an override.
+- `super` cannot be used in static methods to access instance methods.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Compatible override with `super`
+
+```typescript
+// example_override_super.ts
+class Base {
+  greet() {
+    console.log("Hello, world!");
+  }
+}
+
+class Derived extends Base {
+  override greet(name?: string) {
+    if (name === undefined) {
+      super.greet(); // Call base implementation.
+    } else {
+      console.log(`Hello, ${name.toUpperCase()}`);
+    }
+  }
+}
+
+const d = new Derived();
+d.greet();        // Expected: Hello, world!
+d.greet("reader"); // Expected: Hello, READER
+```
+
+**Expected Output:**
+```
+Hello, world!
+Hello, READER
+```
+
+**Why this output occurs.** The `override` keyword marks `greet` as an override. The optional parameter `name` makes the signature compatible with the base `greet()` (a method with fewer parameters is assignable to one with more). `super.greet()` calls the base implementation when no name is provided.
+
+---
+
+#### Example 2: Incompatible override rejected
+
+```typescript
+// example_override_incompatible.ts
+class Base {
+  greet() {
+    console.log("Hello");
+  }
+}
+
+class Derived extends Base {
+  // ❌ This override is incompatible: it requires a parameter.
+  // greet(name: string) {
+  //   console.log(`Hello, ${name}`);
+  // }
+  // Error: Property 'greet' in type 'Derived' is not assignable to the same property in base type 'Base'.
+}
+
+console.log("Incompatible override would be rejected");
+```
+
+**Expected Output:**
+```
+Incompatible override would be rejected
+```
+
+**Why this output occurs.** The base `greet()` accepts zero arguments, but the attempted override requires one argument. TypeScript rejects this because a `Derived` instance could be used as a `Base`, and calling `greet()` on it would fail at runtime.
+
+---
+
+#### Example 3: `noImplicitOverride` catching a renamed base method
+
+```typescript
+// example_no_implicit_override.ts
+// With noImplicitOverride enabled:
+class Album {
+  download() {
+    console.log("Downloading album");
+  }
+}
+
+class SharedAlbum extends Album {
+  // ❌ Without override, this is a new method, not an override.
+  // download() { ... }
+  // Error: This member must have an 'override' modifier because it overrides a member in the base class 'Album'.
+
+  override download() {
+    console.log("Downloading shared album");
+  }
+}
+
+new SharedAlbum().download(); // Expected: Downloading shared album
+```
+
+**Expected Output:**
+```
+Downloading shared album
+```
+
+**Why this output occurs.** Under `noImplicitOverride`, any method that overrides a base method must include the `override` keyword. This prevents the “out-of-sync” problem where a base method is renamed and the derived method silently becomes a new method rather than an override.
+
+---
+
+### Real-World Cases
+
+- **Custom error messages**: `class ValidationError extends Error { override message = "..."; }`.
+- **Framework lifecycle hooks**: overriding `componentDidMount` in React class components.
+- **Strategy implementations**: overriding a base `execute` method with a specific algorithm.
+
+---
+
+## 6. `super`
+
+### Definitions
+
+**Core Definition.** The **`super` keyword** provides access to the **base class** from within a derived class. It is used to call the base-class constructor (`super(...)`) and to invoke base-class methods (`super.method(...)`).
+
+**Technical Definition.** In a derived-class constructor, `super(...)` invokes the base-class constructor and initializes the `this` binding. In a derived-class method, `super.method(...)` performs a **dynamic lookup** on the base class’s prototype, allowing the derived method to call the inherited implementation. TypeScript enforces that `super()` is called **before any reference to `this`** in a derived constructor (with limited leniency introduced in TypeScript 4.6). `super` is not a value; it is a keyword with special semantics.
+
+**Beginner-Friendly Explanation.** `super` means **“the parent.”** In a child’s constructor, `super(args)` calls the parent’s constructor to set things up. In a child’s method, `super.method()` calls the parent’s version of that method. It lets the child reuse the parent’s behavior instead of replacing it completely.
+
+### Purposes
+
+- **To initialize inherited state** by calling the base-class constructor.
+- **To invoke base-class methods** from an overriding method, extending rather than replacing behavior.
+- **To satisfy TypeScript’s requirement** that `super()` precedes `this` access in derived constructors.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+super(arguments);          // Call base constructor
+super.methodName(arguments); // Call base method
+```
+
+**Component breakdown:**
+
+- `super` — keyword referring to the base class.
+- `(...)` — constructor call; must occur before `this` access.
+- `.methodName(...)` — base method call.
+
+**Syntax rules.**
+
+- `super()` must be called in a derived constructor **before** any reference to `this`.
+- `super.method()` can be used in derived methods to call the base implementation.
+- `super` cannot be used in **static methods** to access instance methods; it can access static methods via `super.staticMethod()`.
+- `super` cannot be used outside a class body.
+
+**Constraints and limitations.**
+
+- Calling `super()` more than once is an error.
+- `super()` cannot be called after `this` has been accessed.
+- `super` property access (`super.field`) is allowed for `protected` fields but not for `private` fields.
+- TypeScript 4.6+ permits some code before `super()` but still requires `super()` to occur at the top level before any `this` reference.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: `super()` in a derived constructor
+
+```typescript
+// example_super_constructor.ts
+class Base {
+  constructor(public name: string) {}
+}
+
+class Derived extends Base {
+  constructor(name: string, public age: number) {
+    super(name); // Initialize base state first.
+    // this.age is initialized by the parameter property after super().
+  }
+}
+
+const d = new Derived("Ada", 36);
+console.log(d.name); // Expected: Ada
+console.log(d.age);  // Expected: 36
+```
+
+**Expected Output:**
+```
+Ada
+36
+```
+
+**Why this output occurs.** `Derived` calls `super(name)` to invoke `Base`’s constructor, which initializes the inherited `name` field. The `age` parameter property is initialized after `super()`. Accessing `this.age` before `super()` would be a compile-time error.
+
+---
+
+#### Example 2: `super.method()` in an overriding method
+
+```typescript
+// example_super_method.ts
 class Logger {
   log(message: string): void {
     console.log(`[LOG] ${message}`);
   }
-
-  logError(message: string): void {
-    console.log(`[ERROR] ${message}`);
-  }
 }
 
-// Step 2: Define a child that extends the parent's behavior.
-class TimestampLogger extends Logger {
+class TimestampedLogger extends Logger {
   override log(message: string): void {
-    const timestamp = new Date().toISOString();
-    super.log(`${timestamp} ${message}`);  // Call parent implementation
-  }
-
-  // Step 3: Typo detection with override.
-  // override logErrorr(message: string): void { }
-  // ❌ Error: This member cannot have an 'override' modifier because
-  // it is not declared in the base class 'Logger'.
-
-  // Step 4: Without override, a typo silently creates a new method.
-  logErrorTypo(message: string): void {
-    console.log(`Typo method: ${message}`);
+    super.log(`${new Date().toISOString()}: ${message}`);
   }
 }
 
-// Step 5: Use the child logger.
-const logger = new TimestampLogger();
-logger.log("Application started");
-// Output: "[LOG] 2024-...T...Z Application started"
-
-logger.logError("Something failed");
-// Output: "[ERROR] Something failed" (inherited from parent)
+const logger = new TimestampedLogger();
+logger.log("System started");
+// Expected: [LOG] 2025-...: System started
 ```
 
-**Expected Output:**
+**Expected Output (approximate):**
 ```
-[LOG] 2024-...T...Z Application started
-[ERROR] Something failed
+[LOG] 2025-01-15T10:30:00.000Z: System started
 ```
 
-**Why This Output Occurs:** The `TimestampLogger` overrides `log` to prepend a timestamp, calling `super.log()` to use the parent's formatting. The `override` keyword ensures `log` actually overrides a parent method. If we tried to override `logErrorr` (a typo), TypeScript would produce an error because the parent has no such method.
-
-### Real-World Cases
-
-**Case 1: UI Component Overrides**
-React class components override lifecycle methods (`componentDidMount`, `render`) to customize behavior.
-
-**Case 2: Framework Hooks**
-Testing frameworks override `setUp` and `tearDown` methods to provide test-specific initialization.
-
-**Case 3: Domain-Specific Behavior**
-Domain entities override `toString()`, `equals()`, and `hashCode()` (or their TypeScript equivalents) to provide domain-specific semantics.
+**Why this output occurs.** `TimestampedLogger` overrides `log` and calls `super.log(...)` to reuse the base logging behavior, prepending a timestamp. This demonstrates **extending** rather than replacing base behavior.
 
 ---
 
-## 4. `Super` Calls (`super()` and `super.method()`)
-
-### Definitions
-
-**Core Definition**
-The `super` keyword provides access to the parent class from within a child class. `super()` calls the parent constructor, and `super.method()` calls a parent method. `super` is essential for constructor chaining and for extending (rather than replacing) parent behavior.
-
-**Technical Definition**
-In a derived class constructor, `super()` must be called before accessing `this`. The `super()` call invokes the parent constructor with the provided arguments, initializing the parent portion of the instance. In instance methods, `super.method(args)` invokes the parent's implementation of `method`, bypassing the child's override. `super` is not a value—it cannot be assigned to a variable or passed as an argument. In static methods, `super.method()` calls the parent class's static method. The `super` keyword is only valid inside classes with an `extends` clause.
-
-**Beginner-Friendly Explanation**
-The `super` keyword lets a child class use its parent's code. `super()` calls the parent constructor—you must do this before using `this` in a child constructor. `super.method()` calls the parent's version of a method, which is useful when you want to extend the parent's behavior rather than completely replace it. For example, a child `log()` method might call `super.log()` to use the parent's formatting, then add its own timestamp. `super` is how child classes build on parent behavior.
-
-### Purposes
-
-- To initialize the parent portion of an instance via `super()`.
-- To call a parent method from an overriding child method.
-- To extend parent behavior rather than replacing it entirely.
-- To access parent static methods from child static methods.
-- To enforce constructor initialization order in derived classes.
-
-### Syntax Rules and Structure
-
-**General Syntax: `super()` in Constructor**
-
-```typescript
-class Child extends Parent {
-  constructor(args: ArgTypes) {
-    super(parentArgs);  // Must be called before `this` access
-    // child initialization
-  }
-}
-```
-
-**Component Breakdown**
-- `super(parentArgs)`: Invokes the parent constructor.
-- Must be the first statement (or before any `this` access) in the child constructor.
-
-**General Syntax: `super.method()` in Methods**
-
-```typescript
-class Child extends Parent {
-  method(args: ArgTypes): ReturnType {
-    const parentResult = super.method(args);
-    return transform(parentResult);
-  }
-}
-```
-
-**Component Breakdown**
-- `super.method(args)`: Calls the parent's implementation of `method`.
-
-**General Syntax: `super.method()` in Static Methods**
-
-```typescript
-class Child extends Parent {
-  static staticMethod(args: ArgTypes): ReturnType {
-    return super.staticMethod(args);
-  }
-}
-```
-
-**Component Breakdown**
-- `super.staticMethod(args)`: Calls the parent's static method.
-
-**Syntax Rules**
-
-- `super()` must be called before `this` access in derived class constructors.
-- `super()` can only be called in a constructor of a derived class.
-- `super.method()` can be called in any instance method of a derived class.
-- `super.staticMethod()` can be called in any static method of a derived class.
-- `super` cannot be used as a value (no `const s = super`).
-- `super` is only valid inside classes with an `extends` clause.
-- If the child constructor does not explicitly call `super()`, TypeScript inserts an implicit `super()` call (if the parent has a no-arg constructor).
-
-**Constraints and Limitations**
-
-- `super()` must be called before any `this` access in the child constructor.
-- `super` cannot access parent `private` members.
-- `super.method()` bypasses the child's own override (calls parent version).
-- `super` in static methods refers to the parent class, not an instance.
-- Arrow functions inside methods capture `super` lexically.
-- Calling `super()` twice in the same constructor is an error.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: `super()` and `super.method()`
-
-```typescript
-// Step 1: Define a parent class.
-class Employee {
-  name: string;
-  salary: number;
-
-  constructor(name: string, salary: number) {
-    this.name = name;
-    this.salary = salary;
-    console.log(`Employee ${name} created with salary ${salary}`);
-  }
-
-  getDetails(): string {
-    return `${this.name} earns $${this.salary}`;
-  }
-}
-
-// Step 2: Define a child class that uses super.
-class Manager extends Employee {
-  reports: string[];
-
-  constructor(name: string, salary: number, reports: string[] = []) {
-    super(name, salary);  // Call parent constructor
-    this.reports = reports;
-    console.log(`Manager ${name} manages ${reports.length} reports`);
-  }
-
-  override getDetails(): string {
-    const baseDetails = super.getDetails();  // Call parent method
-    return `${baseDetails} and manages ${this.reports.length} people`;
-  }
-}
-
-// Step 3: Create a Manager instance.
-const manager = new Manager("Alice", 100000, ["Bob", "Charlie"]);
-// Output:
-// "Employee Alice created with salary 100000"
-// "Manager Alice manages 2 reports"
-
-// Step 4: Use the overridden method.
-console.log(manager.getDetails());
-// "Alice earns $100000 and manages 2 people"
-
-// Step 5: The parent method is still available via super internally.
-const employee: Employee = manager;
-console.log(employee.getDetails());  // Uses Manager's override (virtual dispatch)
-// "Alice earns $100000 and manages 2 people"
-```
-
-**Expected Output:**
-```
-Employee Alice created with salary 100000
-Manager Alice manages 2 reports
-Alice earns $100000 and manages 2 people
-Alice earns $100000 and manages 2 people
-```
-
-**Why This Output Occurs:** The `Manager` constructor calls `super(name, salary)`, which invokes the `Employee` constructor. The `getDetails` override calls `super.getDetails()` to get the parent's formatted string, then appends the reports count. Virtual dispatch ensures the child's version is called even through a `Employee` reference.
-
-#### Example 2: `super` in Static Methods
-
-```typescript
-// Step 1: Define a parent class with static members.
-class BaseModel {
-  static tableName: string = "base";
-
-  static find(id: number): string {
-    return `SELECT * FROM ${this.tableName} WHERE id = ${id}`;
-  }
-
-  static createTable(): string {
-    return `CREATE TABLE ${this.tableName}`;
-  }
-}
-
-// Step 2: Define a child class that overrides static behavior.
-class UserModel extends BaseModel {
-  static tableName: string = "users";  // Shadows parent's static
-
-  static find(id: number): string {
-    const query = super.find(id);  // Calls parent's static find
-    console.log(`Executing: ${query}`);
-    return query;
-  }
-
-  static createTable(): string {
-    return super.createTable() + " (with user-specific columns)";
-  }
-}
-
-// Step 3: Use static methods.
-console.log(BaseModel.find(1));
-// "SELECT * FROM base WHERE id = 1"
-
-console.log(UserModel.find(2));
-// "Executing: SELECT * FROM users WHERE id = 2"
-// "SELECT * FROM users WHERE id = 2"
-
-console.log(UserModel.createTable());
-// "CREATE TABLE users (with user-specific columns)"
-
-// Step 4: `this` in static methods refers to the class.
-console.log(BaseModel.find(3));  // Uses BaseModel.tableName ("base")
-```
-
-**Expected Output:**
-```
-SELECT * FROM base WHERE id = 1
-Executing: SELECT * FROM users WHERE id = 2
-SELECT * FROM users WHERE id = 2
-CREATE TABLE users (with user-specific columns)
-SELECT * FROM base WHERE id = 3
-```
-
-**Why This Output Occurs:** The `UserModel` overrides the static `tableName` property and the `find` method. `super.find(id)` calls the parent's static method, which uses `this.tableName`—and `this` refers to `UserModel` when called on `UserModel`. Static `super` calls access the parent class's static members.
-
 ### Real-World Cases
 
-**Case 1: UI Component Lifecycle**
-React class components use `super(props)` in constructors and `super.componentDidMount()` to extend lifecycle behavior.
-
-**Case 2: Domain Entity Initialization**
-Domain entity subclasses call `super()` to initialize base entity fields (ID, timestamps) before adding subclass-specific state.
-
-**Case 3: Framework Base Classes**
-Framework base classes define template methods that call `super` implementations, allowing subclasses to extend rather than replace behavior.
+- **Custom error classes**: `super(message)` to initialize `Error.message`.
+- **Lifecycle hooks**: `super.componentDidMount()` in React class components.
+- **Template methods**: calling `super.execute()` before adding subclass-specific logic.
 
 ---
 
-## 5. Interface Realization via the `implements` Clause
+## 7. Abstract Classes
 
 ### Definitions
 
-**Core Definition**
-Interface realization is the mechanism by which a class commits to satisfying one or more interfaces using the `implements` clause. The class must provide implementations for all interface members. Unlike `extends`, `implements` creates no inheritance relationship—it is a contract check performed by the compiler.
+**Core Definition.** An **abstract class** is a class that **cannot be instantiated directly** and may contain **abstract members** — members declared without an implementation that derived classes must implement. Abstract classes serve as base classes that define a partial implementation and a contract for subclasses.
 
-**Technical Definition**
-The `implements` clause in a class declaration asserts that the class satisfies the specified interfaces. TypeScript checks that the class has all required members with compatible types. A class can implement multiple interfaces simultaneously. The class's instances are assignable to the interface types. Unlike `extends`, `implements` does not inherit any implementation—the class must provide its own. Interfaces can be implemented by classes without affecting the class's inheritance chain. A class can extend a parent class and implement interfaces simultaneously.
+**Technical Definition.** The `abstract` modifier on a class prevents `new AbstractClass()` from compiling. Abstract classes may contain concrete members (with implementations) and abstract members (without implementations). Abstract methods must be implemented in every concrete derived class. Abstract properties must be initialized in derived classes. Under `strictPropertyInitialization`, abstract properties are excluded from the initialization check because they are expected to be initialized by subclasses.
 
-**Beginner-Friendly Explanation**
-Realization (`implements`) is a promise: a class says "I will provide all the members this interface requires." TypeScript checks that the class keeps this promise. Unlike inheritance, where the child gets the parent's code, `implements` gives you no code—you must write everything yourself. But `implements` lets a class satisfy multiple interfaces at once (unlike `extends`, which allows only one parent class). It's the foundation of interface-based design: define contracts as interfaces, and let classes implement them however they want.
+**Beginner-Friendly Explanation.** An abstract class is **a blueprint that is not complete enough to use on its own**. It says “every subclass must provide these methods, but I will provide some shared code too.” You cannot create an object directly from an abstract class; you must create a concrete subclass that fills in the missing pieces.
 
 ### Purposes
 
-- To enforce that a class satisfies one or more interface contracts.
-- To enable interface-based design where classes are programmed against interfaces, not implementations.
-- To allow a class to fulfill multiple contracts simultaneously.
-- To decouple class consumers from specific class implementations.
-- To enable polymorphism through interface types.
+- **To define a contract** that multiple derived classes must fulfill.
+- **To share common implementation** while forcing subclasses to implement specific members.
+- **To prevent direct instantiation** of incomplete base classes.
+- **To model template-method patterns** where the base class defines the algorithm skeleton and subclasses fill in steps.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Single Interface Implementation**
+**General syntax:**
 
-```typescript
-interface InterfaceName {
-  property: Type;
-  method(): ReturnType;
-}
-
-class ClassName implements InterfaceName {
-  property: Type = value;
-  method(): ReturnType { }
-}
 ```
-
-**Component Breakdown**
-- `implements InterfaceName`: The clause asserting the class satisfies the interface.
-- The class must provide all interface members.
-
-**General Syntax: Multiple Interface Implementation**
-
-```typescript
-class ClassName implements Interface1, Interface2, Interface3 {
-  // Must satisfy all three interfaces
-}
-```
-
-**Component Breakdown**
-- Multiple interfaces are separated by commas.
-
-**General Syntax: Extends and Implements Together**
-
-```typescript
-class Child extends ParentClass implements Interface1, Interface2 {
-  // Inherits from ParentClass and satisfies Interface1 and Interface2
-}
-```
-
-**Component Breakdown**
-- `extends` comes first, then `implements`.
-
-**Syntax Rules**
-
-- A class can implement multiple interfaces.
-- The class must provide implementations for all interface members.
-- The class's members must be compatible with the interface's member types.
-- Interfaces can be implemented by classes that also extend a parent class.
-- `implements` does not inherit any implementation—the class provides its own.
-- The class's instances are assignable to the interface types.
-- Optional interface members do not need to be implemented.
-- Readonly interface members can be implemented as readonly or mutable (TypeScript does not enforce readonly on implementation).
-
-**Constraints and Limitations**
-
-- The class must implement all required interface members (compile error otherwise).
-- TypeScript does not enforce `readonly` on interface members when implemented by a class.
-- Implementing an interface does not inherit any code—full implementation is required.
-- A class cannot implement an interface that requires a constructor signature (interfaces describe instances, not constructors).
-- Interface members with `private` or `protected` (not allowed in interfaces) cannot be implemented.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Single Interface Implementation
-
-```typescript
-// Step 1: Define an interface.
-interface Serializable {
-  serialize(): string;
-  deserialize(data: string): void;
-}
-
-// Step 2: Implement the interface in a class.
-class User implements Serializable {
-  name: string;
-  age: number;
-
-  constructor(name: string, age: number) {
-    this.name = name;
-    this.age = age;
-  }
-
-  serialize(): string {
-    return JSON.stringify({ name: this.name, age: this.age });
-  }
-
-  deserialize(data: string): void {
-    const parsed = JSON.parse(data);
-    this.name = parsed.name;
-    this.age = parsed.age;
-  }
-}
-
-// Step 3: Use the class through the interface type.
-const user: Serializable = new User("Alice", 30);
-console.log(user.serialize());  // '{"name":"Alice","age":30}'
-
-// Step 4: Missing methods cause errors.
-// class Invalid implements Serializable {
-//   serialize(): string { return ""; }
-//   // ❌ Error: Class 'Invalid' incorrectly implements interface 'Serializable'.
-//   // Property 'deserialize' is missing.
-// }
-```
-
-**Expected Output:**
-```
-{"name":"Alice","age":30}
-```
-
-**Why This Output Occurs:** The `User` class implements `Serializable`, providing both `serialize` and `deserialize` methods. The `user` variable is typed as `Serializable`, so only interface members are accessible.
-
-#### Example 2: Multiple Interfaces and Extends Together
-
-```typescript
-// Step 1: Define multiple interfaces.
-interface Identifiable {
-  id: number;
-}
-
-interface Timestamped {
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface Comparable<T> {
-  compareTo(other: T): number;
-}
-
-// Step 2: Define a base class.
-class Entity {
-  protected version: number = 1;
-}
-
-// Step 3: Implement multiple interfaces and extend a class.
-class User extends Entity implements Identifiable, Timestamped, Comparable<User> {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-
-  constructor(id: number, name: string) {
-    super();
-    this.id = id;
-    this.name = name;
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  compareTo(other: User): number {
-    return this.name.localeCompare(other.name);
-  }
-
-  touch(): void {
-    this.updatedAt = new Date();
-    this.version += 1;
-  }
-}
-
-// Step 4: Use the class through different interface types.
-const alice = new User(1, "Alice");
-const bob = new User(2, "Bob");
-
-const identifiable: Identifiable = alice;
-console.log(`ID: ${identifiable.id}`);  // 1
-
-const timestamped: Timestamped = alice;
-console.log(`Created: ${timestamped.createdAt.toISOString()}`);
-
-const comparable: Comparable<User> = alice;
-console.log(`Compare: ${comparable.compareTo(bob)}`);  // Negative (Alice < Bob)
-
-// Step 5: All members are accessible on the class instance.
-console.log(`Name: ${alice.name}`);  // "Alice"
-alice.touch();  // Uses protected `version` from Entity
-```
-
-**Expected Output:**
-```
-ID: 1
-Created: 2024-...T...Z
-Compare: -1
-Name: Alice
-```
-
-**Why This Output Occurs:** The `User` class extends `Entity` (gaining `version`) and implements three interfaces (`Identifiable`, `Timestamped`, `Comparable<User>`), providing all required members. The class is assignable to each interface type, enabling interface-based polymorphism.
-
-### Real-World Cases
-
-**Case 1: Repository Pattern**
-Repository interfaces (`UserRepository`, `OrderRepository`) define contracts that concrete implementations (`PostgresUserRepository`, `MongoUserRepository`) implement.
-
-**Case 2: Plugin Systems**
-Plugin interfaces define contracts that plugin classes implement, enabling dynamic loading and polymorphism.
-
-**Case 3: Domain-Driven Design**
-Domain interfaces (`AggregateRoot`, `ValueObject`, `Entity`) are implemented by domain classes, enforcing architectural constraints.
-
----
-
-## 6. Abstract Classes and Abstract Members
-
-### Definitions
-
-**Core Definition**
-An abstract class is a class that cannot be instantiated directly and may contain abstract members (methods and properties without implementation) that subclasses must implement. Abstract classes provide a way to define partial implementations and enforce that subclasses complete them.
-
-**Technical Definition**
-Abstract classes are declared with the `abstract` keyword. They cannot be instantiated with `new`. Abstract members (declared with `abstract`) have no implementation in the abstract class and must be implemented by concrete subclasses. Abstract classes can also have concrete (implemented) members that subclasses inherit. A subclass of an abstract class must implement all abstract members unless it is also declared abstract. Abstract classes can be extended but not implemented (interfaces cannot extend abstract classes, but classes can extend abstract classes and implement interfaces). Abstract methods cannot be `private` (they must be accessible to subclasses).
-
-**Beginner-Friendly Explanation**
-An abstract class is a class that's meant to be a blueprint, not something you create directly. You can't do `new AbstractClass()`—you must create a subclass. Abstract classes can have two kinds of members: regular members with implementation (which subclasses inherit) and abstract members without implementation (which subclasses must provide). This is useful when you have common behavior that all subclasses share, plus some behavior that each subclass must define for itself. For example, an abstract `Shape` class might have a concrete `describe()` method but an abstract `area()` method that each shape must implement.
-
-### Purposes
-
-- To define partial implementations that subclasses complete.
-- To enforce that subclasses implement specific members.
-- To share common behavior across related classes while requiring specialization.
-- To model abstract concepts that have no direct instances.
-- To enable template method patterns where the abstract class defines the algorithm skeleton.
-
-### Syntax Rules and Structure
-
-**General Syntax: Abstract Class**
-
-```typescript
-abstract class AbstractClassName {
-  concreteProperty: Type = value;
-
+abstract class AbstractBase {
+  abstract abstractMethod(): ReturnType;
   abstract abstractProperty: Type;
 
-  concreteMethod(): ReturnType {
-    // implementation
-  }
-
-  abstract abstractMethod(params: ParamTypes): ReturnType;
-}
-```
-
-**Component Breakdown**
-- `abstract class`: The keyword combination for abstract classes.
-- `abstract abstractProperty`: An abstract property (no initializer).
-- `abstract abstractMethod(...)`: An abstract method (no body).
-
-**General Syntax: Concrete Subclass**
-
-```typescript
-class ConcreteClass extends AbstractClassName {
-  abstractProperty: Type = value;
-
-  abstractMethod(params: ParamTypes): ReturnType {
-    // implementation
+  concreteMethod() {
+    // shared implementation
   }
 }
 ```
 
-**Component Breakdown**
-- The concrete subclass must implement all abstract members.
+**Component breakdown:**
 
-**General Syntax: Abstract Subclass**
+- `abstract class` — declares an abstract class.
+- `abstract methodName(params): ReturnType;` — an abstract method declaration (no body).
+- `abstract propertyName: Type;` — an abstract property declaration (no initializer).
+- `concreteMethod()` — a regular method with implementation, inherited by subclasses.
 
-```typescript
-abstract class AbstractSubclass extends AbstractClassName {
-  // May leave some abstract members unimplemented
-}
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- Abstract subclasses can defer implementation to further subclasses.
+- An abstract class **cannot be instantiated** directly.
+- Abstract methods have **no body** and must be implemented in concrete derived classes.
+- Abstract properties must be initialized in derived classes.
+- Abstract classes may have constructors, which are called via `super()` in derived constructors.
+- Abstract members may have `protected` or `public` visibility; `private abstract` is not allowed.
 
-**Syntax Rules**
+**Constraints and limitations.**
 
-- Abstract classes are declared with `abstract class`.
-- Abstract classes cannot be instantiated with `new`.
-- Abstract members are declared with `abstract` and have no implementation.
-- Abstract properties cannot have initializers.
-- Abstract methods cannot have bodies.
-- Concrete subclasses must implement all abstract members.
-- Abstract subclasses can defer implementation.
-- Abstract members cannot be `private` (must be accessible to subclasses).
-- Abstract classes can have constructors (called by subclasses via `super()`).
-- Abstract classes can implement interfaces.
-- Abstract classes can have static members.
+- Abstract classes cannot be `final` (TypeScript has no `final` keyword).
+- A derived class that does not implement all abstract members must itself be declared `abstract`.
+- Abstract members are **erased** at runtime; they exist only for type checking.
+- Abstract classes contribute to the **nominal-like** behavior of `private` and `protected` members.
 
-**Constraints and Limitations**
+### Annotated Complete Step by Step Code Examples
 
-- Abstract classes cannot be instantiated.
-- Abstract methods cannot be `private`.
-- Abstract properties cannot have initializers.
-- Abstract members must be implemented by concrete subclasses.
-- TypeScript's `abstract` keyword has no runtime representation (it's a compile-time constraint).
-- Abstract classes are erased to regular classes at runtime.
-- A class cannot extend multiple abstract classes (single inheritance).
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Abstract Class
+#### Example 1: Abstract class with abstract method
 
 ```typescript
-// Step 1: Define an abstract class.
+// example_abstract.ts
 abstract class Shape {
-  name: string;
+  abstract area(): number; // Must be implemented by subclasses.
 
-  constructor(name: string) {
-    this.name = name;
-  }
-
-  // Concrete method — shared by all shapes
   describe(): string {
-    return `${this.name} with area ${this.area().toFixed(2)}`;
+    return `Area: ${this.area()}`;
   }
-
-  // Abstract method — must be implemented by subclasses
-  abstract area(): number;
-
-  // Abstract property — must be implemented by subclasses
-  abstract readonly color: string;
 }
 
-// Step 2: Attempt to instantiate the abstract class (error).
-// const shape = new Shape("Generic");
-// ❌ Error: Cannot create an instance of an abstract class.
-
-// Step 3: Define a concrete subclass.
 class Circle extends Shape {
-  readonly color: string;
-
-  constructor(radius: number, color: string) {
-    super("Circle");
-    this.radius = radius;
-    this.color = color;
+  constructor(private radius: number) {
+    super();
   }
-
-  radius: number;
 
   area(): number {
     return Math.PI * this.radius ** 2;
   }
 }
 
-// Step 4: Define another concrete subclass.
-class Square extends Shape {
-  readonly color: string;
+const circle = new Circle(2);
+console.log(circle.describe()); // Expected: Area: 12.566370614359172
 
-  constructor(side: number, color: string) {
-    super("Square");
-    this.side = side;
-    this.color = color;
+// const shape = new Shape(); // Error: Cannot create an instance of an abstract class.
+```
+
+**Expected Output:**
+```
+Area: 12.566370614359172
+```
+
+**Why this output occurs.** `Shape` is abstract and declares `area` as abstract. `Circle` implements `area`. `describe` is a concrete method inherited by `Circle`; it calls `this.area()`, which resolves to `Circle`’s implementation. Direct instantiation of `Shape` is rejected at compile time.
+
+---
+
+#### Example 2: Abstract class with abstract property
+
+```typescript
+// example_abstract_property.ts
+abstract class Vehicle {
+  abstract wheels: number;
+
+  describe(): string {
+    return `This vehicle has ${this.wheels} wheels.`;
   }
+}
 
-  side: number;
+class Car extends Vehicle {
+  wheels = 4;
+}
+
+class Bike extends Vehicle {
+  wheels = 2;
+}
+
+console.log(new Car().describe());  // Expected: This vehicle has 4 wheels.
+console.log(new Bike().describe()); // Expected: This vehicle has 2 wheels.
+```
+
+**Expected Output:**
+```
+This vehicle has 4 wheels.
+This vehicle has 2 wheels.
+```
+
+**Why this output occurs.** `Vehicle` declares `wheels` as an abstract property. `Car` and `Bike` initialize it with concrete values. The inherited `describe` method accesses `this.wheels`, which is provided by the subclass. Abstract properties are excluded from `strictPropertyInitialization` checks because they are expected to be initialized in subclasses.
+
+---
+
+### Real-World Cases
+
+- **Template method pattern**: `abstract class DataProcessor { abstract parse(); process() { ... } }`.
+- **Framework base classes**: `abstract class BaseController { abstract handleRequest(); }`.
+- **Domain contracts**: `abstract class PaymentMethod { abstract charge(amount: number): void; }`.
+
+---
+
+## 8. `abstract`
+
+### Definitions
+
+**Core Definition.** The **`abstract` keyword** is a modifier applied to a **class** or a **member** (method or property) to indicate that it is incomplete and must be completed by a derived class. An abstract class cannot be instantiated; an abstract member has no implementation.
+
+**Technical Definition.** `abstract` is a TypeScript-only modifier that affects **static checking** and is **erased** during compilation. On a class, it prevents direct instantiation. On a method, it declares a signature without a body; derived concrete classes must provide an implementation. On a property, it declares the property type without an initializer; derived classes must initialize it. Abstract members may have access modifiers (`public`, `protected`) but not `private`.
+
+**Beginner-Friendly Explanation.** `abstract` means **“not finished yet.”** An abstract class is a class with missing pieces; you cannot use it directly. An abstract method is a method with no body; the child class must fill in the body. It is TypeScript’s way of saying “subclasses must implement this.”
+
+### Purposes
+
+- **To mark a class as non-instantiable** while still allowing inheritance.
+- **To declare members that subclasses must implement**, enforcing a contract.
+- **To combine shared implementation with required subclass customization**.
+- **To support the template-method pattern** with abstract steps.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+abstract class AbstractClass {
+  abstract abstractMethod(params): ReturnType;
+  abstract abstractProperty: Type;
+}
+```
+
+**Component breakdown:**
+
+- `abstract class` — non-instantiable class.
+- `abstract method` — method declaration without a body.
+- `abstract property` — property declaration without an initializer.
+
+**Syntax rules.**
+
+- `abstract` classes cannot be instantiated.
+- `abstract` methods have no body and must be implemented by concrete subclasses.
+- `abstract` properties must be initialized by concrete subclasses.
+- `abstract` cannot be used on **static** members.
+- `abstract` members may have `public` or `protected` visibility; `private abstract` is not allowed.
+
+**Constraints and limitations.**
+
+- `abstract` is erased at runtime; it has no runtime effect.
+- A subclass that does not implement all abstract members must also be `abstract`.
+- `abstract` cannot be combined with `final` (TypeScript has no `final`).
+- Abstract properties are excluded from `strictPropertyInitialization` checks.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Abstract class with abstract and concrete members
+
+```typescript
+// example_abstract_members.ts
+abstract class Repository<T> {
+  abstract findById(id: string): T | undefined;
+
+  findMany(ids: string[]): (T | undefined)[] {
+    return ids.map((id) => this.findById(id));
+  }
+}
+
+class UserRepository extends Repository<{ id: string; name: string }> {
+  private users: { id: string; name: string }[] = [
+    { id: "u1", name: "Ada" },
+    { id: "u2", name: "Grace" },
+  ];
+
+  findById(id: string) {
+    return this.users.find((u) => u.id === id);
+  }
+}
+
+const repo = new UserRepository();
+console.log(repo.findMany(["u1", "u3"]).map((u) => u?.name));
+// Expected: [ 'Ada', undefined ]
+```
+
+**Expected Output:**
+```
+[ 'Ada', undefined ]
+```
+
+**Why this output occurs.** `Repository` declares `findById` as abstract and provides a concrete `findMany` that calls it. `UserRepository` implements `findById`. The inherited `findMany` uses the concrete implementation. This demonstrates the **template-method pattern** with an abstract step.
+
+---
+
+#### Example 2: Abstract class cannot be instantiated
+
+```typescript
+// example_abstract_instantiation.ts
+abstract class Shape {
+  abstract area(): number;
+}
+
+// const s = new Shape();
+// Error: Cannot create an instance of an abstract class.
+
+class Square extends Shape {
+  constructor(private side: number) {
+    super();
+  }
 
   area(): number {
     return this.side ** 2;
   }
 }
 
-// Step 5: Create instances of concrete subclasses.
-const circle = new Circle(5, "red");
-const square = new Square(4, "blue");
-
-console.log(circle.describe());  // "Circle with area 78.54"
-console.log(square.describe());  // "Square with area 16.00"
-
-// Step 6: Polymorphism through the abstract class type.
-const shapes: Shape[] = [circle, square];
-shapes.forEach((s) => console.log(`${s.color}: ${s.describe()}`));
-// "red: Circle with area 78.54"
-// "blue: Square with area 16.00"
+console.log(new Square(3).area()); // Expected: 9
 ```
 
 **Expected Output:**
 ```
-Circle with area 78.54
-Square with area 16.00
-red: Circle with area 78.54
-blue: Square with area 16.00
+9
 ```
 
-**Why This Output Occurs:** The abstract `Shape` class defines a concrete `describe()` method that uses the abstract `area()` method. Subclasses `Circle` and `Square` implement `area()` and the abstract `color` property. Instances of subclasses are assignable to `Shape`, enabling polymorphic dispatch.
+**Why this output occurs.** Direct instantiation of `Shape` is a compile-time error because it is abstract. `Square` implements `area` and can be instantiated. The abstract class serves purely as a contract and partial implementation.
 
-#### Example 2: Template Method Pattern with Abstract Class
-
-```typescript
-// Step 1: Define an abstract class implementing a template method.
-abstract class DataProcessor {
-  // Template method — defines the algorithm skeleton
-  process(data: string[]): string[] {
-    const filtered = this.filter(data);
-    const transformed = this.transform(filtered);
-    const sorted = this.sort(transformed);
-    return sorted;
-  }
-
-  // Concrete helper method
-  protected log(message: string): void {
-    console.log(`[${this.constructor.name}] ${message}`);
-  }
-
-  // Abstract methods — subclasses provide specific behavior
-  protected abstract filter(data: string[]): string[];
-  protected abstract transform(data: string[]): string[];
-  protected abstract sort(data: string[]): string[];
-}
-
-// Step 2: Concrete implementation for numeric data.
-class NumberProcessor extends DataProcessor {
-  protected filter(data: string[]): string[] {
-    this.log("Filtering numbers");
-    return data.filter((s) => !isNaN(Number(s)));
-  }
-
-  protected transform(data: string[]): string[] {
-    this.log("Doubling numbers");
-    return data.map((s) => String(Number(s) * 2));
-  }
-
-  protected sort(data: string[]): string[] {
-    this.log("Sorting numerically");
-    return data.sort((a, b) => Number(a) - Number(b));
-  }
-}
-
-// Step 3: Concrete implementation for text data.
-class TextProcessor extends DataProcessor {
-  protected filter(data: string[]): string[] {
-    this.log("Filtering non-empty strings");
-    return data.filter((s) => s.trim().length > 0);
-  }
-
-  protected transform(data: string[]): string[] {
-    this.log("Uppercasing text");
-    return data.map((s) => s.toUpperCase());
-  }
-
-  protected sort(data: string[]): string[] {
-    this.log("Sorting alphabetically");
-    return data.sort();
-  }
-}
-
-// Step 4: Use the processors.
-const numberProcessor = new NumberProcessor();
-console.log(numberProcessor.process(["5", "abc", "2", "10", "1"]));
-// Output: [LOG lines] then ["2", "4", "10", "20"]
-
-const textProcessor = new TextProcessor();
-console.log(textProcessor.process(["banana", "", "apple", "cherry"]));
-// Output: [LOG lines] then ["APPLE", "BANANA", "CHERRY"]
-```
-
-**Expected Output:**
-```
-[NumberProcessor] Filtering numbers
-[NumberProcessor] Doubling numbers
-[NumberProcessor] Sorting numerically
-[ '2', '4', '10', '20' ]
-[TextProcessor] Filtering non-empty strings
-[TextProcessor] Uppercasing text
-[TextProcessor] Sorting alphabetically
-[ 'APPLE', 'BANANA', 'CHERRY' ]
-```
-
-**Why This Output Occurs:** The abstract `DataProcessor` defines the `process` template method, which calls the abstract `filter`, `transform`, and `sort` methods. Subclasses implement these methods with domain-specific logic. The `log` method uses `this.constructor.name` to identify the concrete class, demonstrating polymorphic behavior.
+---
 
 ### Real-World Cases
 
-**Case 1: Framework Base Classes**
-Frameworks like Angular and NestJS use abstract classes for base components, services, and controllers, defining lifecycle hooks that subclasses implement.
+- **Plugin architectures**: `abstract class Plugin { abstract activate(): void; }`.
+- **Data access layers**: `abstract class BaseRepository<T> { abstract find(id: string): T; }`.
+- **Game entities**: `abstract class Entity { abstract update(dt: number): void; }`.
 
-**Case 2: Template Method Pattern**
-Data processing pipelines, report generators, and ETL workflows use abstract classes to define algorithm skeletons with customizable steps.
+---
 
-**Case 3: Domain Modeling**
-Domain models use abstract classes for base entities and value objects, enforcing that subclasses provide domain-specific behavior.
+## 9. Inheritance Best Practices
+
+### Definitions
+
+**Core Definition.** **Inheritance best practices** are guidelines for using class inheritance in TypeScript in ways that maximize **maintainability, type safety, and flexibility**, while avoiding the pitfalls of tight coupling, deep hierarchies, and fragile base classes.
+
+**Technical Definition.** Best practices encompass **favoring composition over inheritance** when the relationship is not a genuine “is-a,” **keeping base classes stable and narrowly focused**, **avoiding deep inheritance chains**, **using `abstract` to define contracts**, **using `override` and `noImplicitOverride` to keep overrides synchronized**, **preferring `implements` for interface contracts**, and **respecting the Liskov Substitution Principle** so that derived instances can always substitute for base instances without breaking behavior.
+
+**Beginner-Friendly Explanation.** Best practices are **the habits experienced TypeScript developers use** to keep inheritance from becoming a mess. The biggest rule is: **favor composition over inheritance**. Only use inheritance when there is a true “is-a” relationship. Keep parent classes small and stable. Do not build deep chains of classes. Use `override` so you know when you are replacing a parent method. And remember that inheritance creates a tight bond — changing the parent can break all the children.
+
+### Purposes
+
+- **To prevent tight coupling** between base classes and derived classes.
+- **To keep hierarchies shallow and understandable**, reducing debugging and maintenance costs.
+- **To ensure derived classes remain valid substitutes** for base classes (Liskov Substitution Principle).
+- **To catch override mistakes early** with `override` and `noImplicitOverride`.
+- **To choose the right tool** — inheritance for “is-a,” composition for “has-a” and flexibility.
+
+### Syntax Rules and Structure
+
+Best practices are conventions that interact with inheritance syntax. The core rules are:
+
+1. **Favor composition over inheritance.** Use inheritance only for genuine “is-a” relationships where the derived class is a true subtype.
+2. **Keep base classes stable and narrow.** A base class should have a focused, well-defined contract.
+3. **Avoid deep inheritance hierarchies.** Deep chains are hard to understand and maintain.
+4. **Use `abstract` for contracts.** Declare abstract classes and members to force subclasses to implement required behavior.
+5. **Use `override` and enable `noImplicitOverride`.** Explicitly mark overrides to catch renamed base methods.
+6. **Respect the Liskov Substitution Principle.** A derived class must be usable anywhere its base class is expected without breaking behavior.
+7. **Prefer `implements` for interface contracts.** Use `implements` when you only need to guarantee a shape, not inherit implementation.
+8. **Consider mixins for behavior composition.** When multiple inheritance-like behavior is needed, use TypeScript mixins instead of deep hierarchies.
+
+**Component breakdown (inheritance decision tree):**
+
+```
+Is there a genuine “is-a” relationship?
+  ├── No → Use composition (has-a) or implements (contract).
+  └── Yes → Is the base class stable and narrow?
+            ├── No → Refactor the base class or use composition.
+            └── Yes → Will the hierarchy remain shallow (2–3 levels)?
+                      ├── No → Consider composition or mixins.
+                      └── Yes → Inheritance is appropriate.
+```
+
+**Constraints and limitations.**
+
+- Composition is not a universal replacement; inheritance is still appropriate for genuine subtype relationships.
+- Deep hierarchies are sometimes unavoidable, but should be documented and kept as shallow as possible.
+- `noImplicitOverride` may require updating existing codebases with explicit `override` keywords.
+- Abstract classes and `implements` serve different purposes: abstract classes share implementation; interfaces define pure contracts.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Composition over inheritance for flexible behavior
+
+```typescript
+// example_best_composition.ts
+// ❌ Inheritance would tightly couple these behaviors.
+// class Logger { log() { ... } }
+// class DatabaseLogger extends Logger { ... } // Tight coupling.
+
+// ✅ Composition: inject the behavior.
+class ConsoleLogger {
+  log(message: string): void {
+    console.log(`[LOG] ${message}`);
+  }
+}
+
+class UserService {
+  constructor(private readonly logger: ConsoleLogger) {}
+
+  createUser(name: string): void {
+    this.logger.log(`Creating user: ${name}`);
+  }
+}
+
+const service = new UserService(new ConsoleLogger());
+service.createUser("Ada"); // Expected: [LOG] Creating user: Ada
+```
+
+**Expected Output:**
+```
+[LOG] Creating user: Ada
+```
+
+**Why this output occurs.** `UserService` **has-a** `ConsoleLogger` rather than **is-a** `ConsoleLogger`. Composition allows the logger to be swapped at runtime (e.g., for a file logger or a mock in tests) without changing the class hierarchy. This is more flexible than inheritance.
+
+---
+
+#### Example 2: Shallow hierarchy with abstract contract and `override`
+
+```typescript
+// example_best_hierarchy.ts
+abstract class PaymentMethod {
+  abstract charge(amount: number): void;
+
+  process(amount: number): void {
+    console.log(`Processing payment of $${amount}`);
+    this.charge(amount);
+  }
+}
+
+class CreditCard extends PaymentMethod {
+  override charge(amount: number): void {
+    console.log(`Charged $${amount} to credit card`);
+  }
+}
+
+class PayPal extends PaymentMethod {
+  override charge(amount: number): void {
+    console.log(`Charged $${amount} via PayPal`);
+  }
+}
+
+const payments: PaymentMethod[] = [new CreditCard(), new PayPal()];
+payments.forEach((p) => p.process(100));
+// Expected:
+// Processing payment of $100
+// Charged $100 to credit card
+// Processing payment of $100
+// Charged $100 via PayPal
+```
+
+**Expected Output:**
+```
+Processing payment of $100
+Charged $100 to credit card
+Processing payment of $100
+Charged $100 via PayPal
+```
+
+**Why this output occurs.** The hierarchy is **shallow** (one abstract base, two concrete leaves). The abstract class defines the contract and shared `process` logic. Both concrete classes use `override` to explicitly implement `charge`. This satisfies the Liskov Substitution Principle: both `CreditCard` and `PayPal` can be used as `PaymentMethod` without breaking behavior.
+
+---
+
+### Real-World Cases
+
+- **API clients**: composition of `HttpClient` rather than extending a base client.
+- **UI components**: composition of behavior (hooks, render props) over deep component inheritance chains.
+- **Domain models**: shallow hierarchies with abstract contracts for payment methods, shipping strategies, or notification channels.
+- **Code review checklists**: enforcing “is-a” justifications for new `extends` relationships and preferring `implements` for pure contracts.
 
 ---
 
 ## References
 
-- TypeScript Handbook: Classes (Inheritance) — https://www.typescriptlang.org/docs/handbook/2/classes.html#extends-clause
-- TypeScript Handbook: Classes (Implements Clauses) — https://www.typescriptlang.org/docs/handbook/2/classes.html#implements-clauses
-- TypeScript Handbook: Classes (Abstract Classes and Members) — https://www.typescriptlang.org/docs/handbook/2/classes.html#abstract-classes-and-members
-- TypeScript 4.3 Release Notes (override Keyword) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-3.html
-- TypeScript `noImplicitOverride` Documentation — https://www.typescriptlang.org/tsconfig#noImplicitOverride
-- TypeScript `strictFunctionTypes` Documentation — https://www.typescriptlang.org/tsconfig#strictFunctionTypes
-- MDN: extends — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/extends
-- MDN: super — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/super
-- TypeScript Playground: Classes — https://www.typescriptlang.org/play/typescript/classes.ts.html
-- Effective TypeScript: Item 28 — Prefer Classes to Namespaces
-- Total TypeScript: Classes — https://www.totaltypescript.com/tutorials/beginners-typescript/12-classes
-- TypeScript ESLint: explicit-member-accessibility — https://typescript-eslint.io/rules/explicit-member-accessibility/
-- TypeScript ESLint: no-extraneous-class — https://typescript-eslint.io/rules/no-extraneous-class/
+- TypeScript Handbook — Classes (Inheritance, `extends`, `super`, Overriding) - https://www.typescriptlang.org/docs/handbook/2/classes.html
+- TypeScript Handbook — Classes (Legacy, Abstract Classes) - https://www.typescriptlang.org/docs/handbook/classes.html
+- TSConfig — `noImplicitOverride` - https://www.typescriptlang.org/tsconfig/noImplicitOverride.html
+- TypeScript 4.6 Release Notes — Allowing Code in Constructors Before `super()` - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-6.html
+- TypeScript for Java/C# Programmers — Inheritance and Subtyping - https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes-oop.html
+- TypeScript for JavaScript Programmers — Classes and Inheritance - https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html
+- Convex — TypeScript Inheritance Guide (Abstract Classes and Composition) - https://www.convex.dev/typescript/core-concepts/object-oriented-programming/typescript-inheritance
+- EpicWeb — Composition vs Inheritance (Object-Oriented TypeScript) - https://github.com/epicweb-dev/object-oriented-typescript/blob/main/exercises/04.composition-vs-inheritance/FINISHED.mdx
+- CodeSignal — Implementing Inheritance Wisely with TypeScript (Best Practices) - https://codesignal.com/learn/courses/implementing-inheritance-wisely-with-typescript
+- Google TypeScript Style Guide — Classes and Inheritance - https://google.github.io/styleguide/tsguide.html
+- MDN — Classes (`extends`, `super`) - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
+- Microsoft/TypeScript Wiki — TypeScript Design Goals (Soundness and Erasure) - https://github.com/microsoft/TypeScript/wiki/TypeScript-Design-Goals
+- TypeScript Handbook — Mixins (Alternative to Multiple Inheritance) - https://www.typescriptlang.org/docs/handbook/mixins.html

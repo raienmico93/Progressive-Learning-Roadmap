@@ -781,7 +781,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
 
 # VI. Object-Oriented Programming
 
-- **45. Classes and Objects**
+- [**45. Classes and Objects**](/Web%20Development/PHP/OOP/ClassesAndObjects.md)
   - Classes
   - Objects
   - Instances
@@ -800,7 +800,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - `static`
   - Class best practices
 
-- **46. Properties**
+- [**46. Properties**](/Web%20Development/PHP/OOP/Properties.md)
   - Properties
   - Property declaration
   - Property visibility
@@ -813,7 +813,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Static properties
   - Property best practices
 
-- **47. Methods**
+- [**47. Methods**](/Web%20Development/PHP/OOP/Methods.md)
   - Methods
   - Method declaration
   - Method visibility
@@ -824,13 +824,13 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Final methods
   - Method best practices
 
-- **48. Constructors and Destructors**
+- [**48. Constructors and Destructors**](/Web%20Development/PHP/OOP/ConstructorsAndDestructors.md)
   - `__construct()`
   - `__destruct()`
   - Constructor promotion
   - Destructor best practices
 
-- **49. Inheritance**
+- [**49. Inheritance**](/Web%20Development/PHP/OOP/Inheritance.md)
   - Inheritance
   - `extends`
   - Parent class
@@ -842,7 +842,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Inheritance best practices
   - Composition over inheritance
 
-- **50. Interfaces**
+- [**50. Interfaces**](/Web%20Development/PHP/OOP/Interfaces.md)
   - Interfaces
   - `interface`
   - `implements`
@@ -851,7 +851,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Interface constants
   - Interface best practices
 
-- **51. Abstract Classes**
+- [**51. Abstract Classes**](/Web%20Development/PHP/OOP/AbstractClasses.md)
   - Abstract classes
   - `abstract`
   - Abstract methods
@@ -859,7 +859,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Abstract class vs interface
   - Abstract class best practices
 
-- **52. Traits**
+- [**52. Traits**](/Web%20Development/PHP/OOP/Traits.md)
   - Traits
   - `trait`
   - `use`
@@ -868,7 +868,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Trait conflict resolution
   - Trait best practices
 
-- **53. Magic Methods**
+- [**53. Magic Methods**](/Web%20Development/PHP/OOP/MagicMethods.md)
   - `__construct()`
   - `__destruct()`
   - `__call()`
@@ -888,14 +888,14 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - `__debugInfo()`
   - Magic method best practices
 
-- **54. Static Members**
+- [**54. Static Members**](/Web%20Development/PHP/OOP/StaticMembers.md)
   - Static properties
   - Static methods
   - `static::`
   - Late static binding
   - Static best practices
 
-- **55. Namespaces**
+- [**55. Namespaces**](/Web%20Development/PHP/OOP/Namespace.md)
   - Namespaces
   - `namespace`
   - `use`
@@ -904,7 +904,7 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Global namespace
   - Namespace best practices
 
-- **56. Enums**
+- [**56. Enums**](/Web%20Development/PHP/OOP/Enums.md)
   - Enums
   - `enum`
   - Pure enums
@@ -913,20 +913,20 @@ PHP is best learned as more than "a scripting language for websites." The progre
   - Enum interfaces
   - Enum best practices
 
-- **57. Readonly**
+- [**57. Readonly**](/Web%20Development/PHP/OOP/Readonly.md)
   - `readonly`
   - Readonly properties
   - Readonly classes
   - Readonly best practices
 
-- **58. Object Cloning**
+- [**58. Object Cloning**](/Web%20Development/PHP/OOP/ObjectCloning.md)
   - `clone`
   - `__clone()`
   - Deep cloning
   - Shallow cloning
   - Clone best practices
 
-- **59. Object Comparison**
+- [**59. Object Comparison**](/Web%20Development/PHP/OOP/ObjectComparison.md)
   - `==`
   - `===`
   - Object comparison

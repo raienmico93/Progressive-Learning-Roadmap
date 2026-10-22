@@ -234,7 +234,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 ---
 
-# IV. Controllers and Middleware
+# IV. Controllers
 
 - [**12. Controllers**](/Web%20Development/Laravel/Controller/BasicController.md)
   - Controllers
@@ -248,6 +248,25 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Controller traits
   - Controller testing
   - Controller best practices
+
+- [**Controller Types**](/Web%20Development/Laravel/Controller/ControllerTypes.md)
+  - Standard controllers
+  - Resource controllers
+  - API controllers
+  - Invokable controllers
+  - Single-action controllers
+
+- [**Controller Design**](/Web%20Development/Laravel/Controller/ControllerDesign.md)
+  - Separation of concerns
+  - Thin controllers
+  - Delegating business logic
+  - Service classes
+  - Request validation
+  - Response transformation
+
+---
+
+# Middleware
 
 - [**13. Middleware**](/Web%20Development/Laravel/Middleware/Middleware.md)
   - Middleware
@@ -276,6 +295,32 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
     - Trim strings
     - Convert empty strings to null
 
+- [**Middleware Types**](/Web%20Development/Laravel/Middleware/MiddlewareTypes.md)
+  - Authentication
+  - Authorization
+  - CSRF protection
+  - Rate limiting
+  - CORS-related handling
+  - Logging
+  - Custom application middleware
+
+- [**Middleware Architecture**](/Web%20Development/Laravel/Middleware/MiddlewareArchitecture.md)
+  - Global middleware
+  - Route middleware
+  - Middleware groups
+  - Middleware parameters
+  - Middleware ordering
+
+- [**Custom Middleware**](/Web%20Development/Laravel/Middleware/CustomMiddleware.md)
+  - Creating middleware
+  - Dependency injection
+  - Request checks
+  - Response modification
+  - Short-circuiting requests
+
+---
+
+# Requests and Responses
 - **14. Form Requests**
   - Form requests
   - Form request creation
@@ -286,6 +331,33 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Form request error messages
   - Form request attributes
   - Form request best practices
+
+- [**HTTP Requests**](/Web%20Development/Laravel/Requests%20and%20Responses/HTTPRequests.md)
+  - Request objects
+  - Input retrieval
+  - Query parameters
+  - Form data
+  - JSON input
+  - Headers
+  - Cookies
+  - Uploaded files
+
+- [**HTTP Responses**](/Web%20Development/Laravel/Requests%20and%20Responses/HTTPResponses.md)
+  - Strings
+  - Views
+  - Redirects
+  - JSON responses
+  - Downloads
+  - File responses
+  - Custom status codes
+  - Custom headers
+
+- [**Response Design**](/Web%20Development/Laravel/Requests%20and%20Responses/ResponseDesign.md)
+  - API response structures
+  - Error responses
+  - Pagination responses
+  - Resource responses
+  - Consistent response conventions
 
 ---
 
@@ -795,7 +867,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Factory sequences
   - Factory best practices
 
-- **30. Query Optimization**
+- [**30. Query Optimization**](/Web%20Development/Laravel/EloquentORM/QueryOpt.md)
   - Query optimization
   - N+1 problem
   - Eager loading

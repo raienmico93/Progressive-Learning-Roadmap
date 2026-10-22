@@ -1603,7 +1603,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # XIII. JVM and Memory Management
 
-- **87. JVM Architecture**
+- [**87. JVM Architecture**](/Programming%20Languages/Java/JVM/JVM.md)
   - JVM
   - Class loader
   - Bytecode verifier
@@ -1621,7 +1621,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Class unloading
   - JVM best practices
 
-- **88. Memory Model**
+- [**88. Memory Model**](/Programming%20Languages/Java/JVM/JVMMemory.md)
   - Java Memory Model
   - JMM
   - Heap
@@ -1637,7 +1637,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Memory barriers
   - Memory best practices
 
-- **89. Garbage Collection**
+- [**89. Garbage Collection**](/Programming%20Languages/Java/JVM/GarbageCollection.md)
   - Garbage collection
   - GC roots
   - Reachability

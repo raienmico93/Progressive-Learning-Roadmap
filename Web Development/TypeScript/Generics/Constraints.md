@@ -1,1047 +1,597 @@
-# TypeScript Generic Constraints: A Comprehensive Cheat Sheet
+## Generic Constraints
+
+**Topic Overview.** **Generic constraints** are TypeScript’s mechanism for restricting the set of types that can be supplied as **type arguments** to a generic declaration. Without a constraint, a type parameter `T` is implicitly constrained by `unknown` — the top type to which all types are assignable — which means the generic body can only use operations valid for every conceivable type. A constraint, written with the `extends` keyword in the type parameter list (`<T extends Constraint>`), tells the compiler that `T` must be assignable to `Constraint`, which in turn permits the generic body to safely access the members of that constraint. Constraints are the bridge between **reusability** and **type safety**: they let a single generic component work over a family of types while guaranteeing that the members it relies on are present. The `keyof` operator is the canonical companion to constraints, enabling type-safe property access by restricting keys to the actual property names of an object type. Constraints are erased at compile time like all type-level constructs; they exist solely to guide the checker.
 
 ---
 
-## Topic Overview
+## 1. Generic Constraints (General)
 
 ### Definitions
 
-**Core Definition**
-Generic constraints in TypeScript are a mechanism for restricting the set of types that can be used as type arguments for a generic type parameter. By using the `extends` keyword, you declare that a type parameter must satisfy a minimum structural requirement—such as having certain properties, being assignable to a union, or matching a specific shape.
+**Core Definition.** A **generic constraint** is a restriction placed on a type parameter that limits the set of types that may be supplied as type arguments, specified with the `extends` keyword in the type parameter list.
 
-**Technical Definition**
-A generic constraint is expressed using the `extends` keyword after a type parameter declaration: `<T extends Constraint>`. The constraint limits the possible types that `T` can be instantiated with to those assignable to `Constraint`. Inside the generic body, `T` is treated as having all the members of `Constraint`, enabling safe access to those members. Constraints are checked structurally, so any type with the required members satisfies the constraint regardless of its declaration site. Constraints can themselves be generic (e.g., `K extends keyof T`), can be union types, primitive types, or complex object types, and can be combined with conditional types for advanced type-level logic.
+**Technical Definition.** In a type parameter declaration `<T extends Constraint>`, the type parameter `T` is constrained such that every type argument supplied for `T` must be assignable to `Constraint`. Within the generic declaration’s body, `T` is treated as a subtype of `Constraint`, so members of `Constraint` are accessible on values of type `T`. If no constraint is provided, `T` is implicitly constrained by `unknown`. Constraints participate in type argument inference: if an inferred argument does not satisfy the constraint, the compiler reports an error.
 
-**Beginner-Friendly Explanation**
-A generic constraint is a way to say "this type parameter must be at least this much." If you write `function logLength<T extends { length: number }>(value: T)`, you're telling TypeScript that `T` must have a `length` property that's a number. Now you can safely access `value.length` inside the function. Without the constraint, TypeScript wouldn't know that `T` has a `length` property, so it would give you an error. Constraints let you use generic code while still accessing specific properties—you get the flexibility of generics with the safety of knowing what's available.
+**Beginner-Friendly Explanation.** A generic constraint is **a rule about what types a generic will accept**. Without a constraint, `T` could be anything — a number, a string, a boolean — so the function cannot assume `T` has any particular property. With a constraint like `<T extends { length: number }>`, you are saying “`T` must be something that has a `length` property.” Now the function can safely use `.length`. Constraints turn a generic from “any type” into **“any type that fits”**.
 
 ### Key Characteristics
 
-- **Structural compliance**: Constraints are checked structurally; any type with the required members satisfies the constraint.
-- **Safe member access**: Inside the generic body, the type parameter is treated as having all constraint members.
-- **Composability**: Constraints can be union types, intersections, primitives, or other generic types.
-- **Key-based constraints**: `K extends keyof T` restricts keys to valid property names.
-- **Conditional constraints**: Constraints can be combined with conditional types for type-level logic.
-- **Runtime erasure**: Constraints are erased at compile time; they exist only in the type system.
+| Characteristic | Description |
+|---|---|
+| **Restrictive** | Limits the set of permissible type arguments to those assignable to the constraint. |
+| **Enabling** | Grants access to the members of the constraint inside the generic body. |
+| **Structural** | Compatibility is determined by members, not by nominal identity. |
+| **Inference-participating** | Constraints guide type argument inference and produce errors when inferred arguments do not satisfy them. |
+| **Composable** | Multiple constraints may be combined with intersection types (`&`). |
+| **Erased** | Constraints have no runtime representation. |
 
 ### Prerequisites
 
-- Basic knowledge of TypeScript generics
-- Familiarity with the `extends` keyword in inheritance
-- Understanding of structural typing
-- Familiarity with the `keyof` operator and indexed access types (`T[K]`)
+- **Basic generics**: type parameters and type arguments.
+- **Structural typing**: awareness that TypeScript compares object shapes by members.
+- **Union and intersection types**: for combining constraints.
+- **The `keyof` operator**: for property-key constraints.
 
 ### Related Programming Areas
 
-- **Type Theory**: Bounded quantification, parametric polymorphism
-- **Type-Level Programming**: Conditional types, mapped types, `infer`
-- **Structural Typing**: Duck typing, structural subtyping
-- **Library Design**: Reusable APIs with type-safe constraints
-- **Utility Types**: `Pick<T, K>`, `Omit<T, K>`, `Record<K, V>`
+- **Generic functions, interfaces, and classes**: constraints apply uniformly across all generic constructs.
+- **Utility types**: `Pick<T, K extends keyof T>` and `Record<K extends keyof any, T>` rely on constraints.
+- **Type-level programming**: conditional types and mapped types frequently constrain their inputs.
+- **API design**: constraints document and enforce the minimal capabilities a generic component requires.
 
-### Core Concepts / Features
+---
 
-1. The `extends` Keyword for Minimum Structural Compliance
-2. Constraining Type Parameters Against Primitives, Objects, and Unions
-3. Key-Based Constraints Using `extends keyof` Patterns
-4. Structural Constraints and Duck-Typing Enforcement
-5. Conditional Constraints Within Generic Bodies
-
-
-## 1. The `extends` Keyword for Minimum Structural Compliance
+## 2. `extends` (The Constraint Keyword)
 
 ### Definitions
 
-**Core Definition**
-The `extends` keyword in a generic constraint declares that a type parameter must be assignable to (i.e., structurally compatible with) a specified constraint type. It establishes the minimum set of members that the type argument must provide.
+**Core Definition.** The **`extends` keyword**, when used in a type parameter list, introduces a **constraint** that restricts the type parameter to types assignable to the specified constraint type.
 
-**Technical Definition**
-In a generic declaration `<T extends Constraint>`, the `extends` keyword constrains `T` to types that are assignable to `Constraint`. This is a structural check: any type whose members satisfy `Constraint`'s members is accepted. Inside the generic body, `T` is treated as a subtype of `Constraint`, so all of `Constraint`'s members are accessible on values of type `T`. The constraint can be any type expression—a primitive, an object type, a union, an intersection, or another generic type parameter. When a type argument is provided that does not satisfy the constraint, TypeScript produces a compile error with a descriptive message.
+**Technical Definition.** In `<T extends Constraint>`, `extends` is not class inheritance; it expresses a **subtype (assignability) relationship**. A type argument `A` satisfies `T extends Constraint` if `A` is assignable to `Constraint` under TypeScript’s structural rules. Inside the generic body, `T` is narrowed to `Constraint`, so the members of `Constraint` are available. `extends` also appears in conditional types (`A extends B ? C : D`), where it tests assignability rather than declaring a constraint; the two uses are related but distinct.
 
-**Beginner-Friendly Explanation**
-The `extends` keyword in generics is like a minimum requirement. When you write `<T extends { id: number }>`, you're saying "T must be an object with an `id` number property." Any type that has that `id` property works, even if it has lots of other properties. Inside the function, TypeScript knows that `T` has an `id`, so you can access `value.id`. If you try to pass a string (which doesn't have `id`), TypeScript gives you an error. The constraint guarantees that certain members are always available.
+**Beginner-Friendly Explanation.** `extends` in a generic constraint means **“must be compatible with”** or **“must be a subset of”**. When you write `<T extends HasLength>`, you are saying “`T` must be a type that fits the `HasLength` shape.” It does not mean `T` inherits from `HasLength` in the class sense; it means `T` has at least the members that `HasLength` requires.
 
 ### Purposes
 
-- To guarantee that certain members are available on the type parameter.
-- To enable safe access to constraint members within the generic body.
-- To provide meaningful compile errors when the constraint is not satisfied.
-- To document the minimum requirements for a generic component.
-- To enable type-safe generic algorithms and data structures.
+- **To restrict the permissible type arguments** to those that satisfy a required structure.
+- **To grant safe access to members** of the constraint inside the generic body.
+- **To document the minimal capabilities** a generic component requires.
+- **To improve error messages** by reporting constraint violations at the call site.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Basic Constraint**
+**General syntax:**
 
 ```typescript
-function functionName<T extends Constraint>(param: T): ReturnType {
-  // T is treated as a subtype of Constraint
-}
+function fn<T extends Constraint>(value: T): void { ... }
+interface Iface<T extends Constraint> { ... }
+class Cls<T extends Constraint> { ... }
+type Alias<T extends Constraint> = ...;
 ```
 
-**Component Breakdown**
-- `<T extends Constraint>`: The type parameter with a constraint.
-- Inside the body: `param` has all members of `Constraint`.
+**Component breakdown:**
 
-**General Syntax: Multiple Constraints via Intersection**
+- `<T extends Constraint>` — the constrained type parameter declaration.
+- `T` — the type parameter.
+- `extends` — the constraint keyword (assignability, not inheritance).
+- `Constraint` — any type expression: an interface, a primitive, a union, an object type literal, `keyof X`, etc.
 
-```typescript
-function functionName<T extends A & B>(param: T): void {
-  // T must satisfy both A and B
-}
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- `T extends A & B`: The type must satisfy both constraints.
+- The constraint follows `extends` in the type parameter list.
+- The constraint may reference other type parameters (e.g., `<T, K extends keyof T>`).
+- A constraint may be an intersection (`A & B`) or a union (`A | B`).
+- If an explicit type argument does not satisfy the constraint, it is a compile-time error.
 
-**General Syntax: Constraint with Default**
+**Constraints and limitations.**
 
-```typescript
-function functionName<T extends Constraint = DefaultType>(param: T): void {
-  // T defaults to DefaultType if not inferred
-}
-```
+- `extends` in a constraint does not permit access to members not declared in the constraint; over-constraining couples the generic to a specific implementation.
+- The constraint is checked at compile time only; no runtime enforcement occurs.
+- A constraint of `{}` accepts all non-nullish types but provides no member access beyond `Object` members.
 
-**Component Breakdown**
-- `<T extends Constraint = DefaultType>`: The default must satisfy the constraint.
+### Annotated Complete Step by Step Code Examples
 
-**Syntax Rules**
-
-- The `extends` keyword is used after the type parameter name.
-- The constraint can be any type expression.
-- Multiple constraints are combined with intersection (`&`).
-- The constraint is checked structurally, not nominally.
-- Inside the generic body, the type parameter is treated as a subtype of the constraint.
-- A type parameter's default (if provided) must satisfy the constraint.
-- Constraint violations produce compile errors at the call site or declaration.
-
-**Constraints and Limitations**
-
-- The constraint does not change the runtime representation of the type.
-- Constraints can be recursive (`T extends U, U extends T` is an error).
-- Very complex constraints can slow down the compiler.
-- Constraints do not create nominal typing (structural compatibility is sufficient).
-- The constraint must be a type, not a value.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Structural Constraint
+#### Example 1: Constraint enabling member access
 
 ```typescript
-// Step 1: Define a constraint interface.
-interface HasId {
-  id: number;
+// example_extends_access.ts
+// Step 1: Define the minimal structure needed.
+interface HasLength {
+  length: number;
 }
 
-// Step 2: Constrain a generic function.
-function printId<T extends HasId>(value: T): void {
-  // Inside the function, T is known to have an `id` property.
-  console.log(`ID: ${value.id}`);
+// Step 2: Constrain T to HasLength.
+function logLength<T extends HasLength>(value: T): number {
+  return value.length;   // legal: T is known to have length
 }
 
-// Step 3: Call with a type that satisfies the constraint.
-printId({ id: 1, name: "Alice" });  // "ID: 1"
-printId({ id: 2 });                 // "ID: 2"
-
-// Step 4: A class that structurally satisfies the constraint.
-class User {
-  constructor(public id: number, public name: string) {}
-}
-
-printId(new User(3, "Bob"));  // "ID: 3"
-
-// Step 5: A type that does NOT satisfy the constraint.
-// printId({ name: "Charlie" });  // ❌ Error: Property 'id' is missing.
-// printId("hello");              // ❌ Error: string does not have 'id'.
+// Step 3: Call with compatible types.
+console.log(logLength("hello"));    // Expected: 5
+console.log(logLength([1, 2, 3]));  // Expected: 3
+// console.log(logLength(42));       // Error: number does not satisfy HasLength
 ```
 
 **Expected Output:**
 ```
-ID: 1
-ID: 2
-ID: 3
+5
+3
 ```
 
-**Why This Output Occurs:** The constraint `T extends HasId` requires the type argument to have an `id: number` property. Objects with `id` (and optionally other properties) satisfy the constraint. Objects without `id` produce compile errors.
+**Why this output occurs.** The constraint `T extends HasLength` guarantees that every `T` has a `length: number` property, making `value.length` legal inside the function. Strings and arrays satisfy `HasLength`; numbers do not, so the call with `42` is rejected at compile time.
 
-#### Example 2: Intersection Constraint
+#### Example 2: Constraint without member access is still a restriction
 
 ```typescript
-// Step 1: Define two constraint interfaces.
+// example_extends_restriction.ts
+function printObject<T extends object>(value: T): void {
+  console.log(value);
+}
+
+printObject({ a: 1 });       // OK
+printObject([1, 2, 3]);      // OK (arrays are objects)
+// printObject("hello");     // Error: string is not assignable to object
+```
+
+**Expected Output:**
+```
+{ a: 1 }
+[ 1, 2, 3 ]
+```
+
+**Why this output occurs.** `T extends object` restricts arguments to non-primitive values. Strings, numbers, and booleans are rejected; plain objects, arrays, and functions are accepted. The constraint does not grant access to specific properties, but it does restrict the domain of `T`.
+
+### Real-World Cases
+
+- **Type-safe property access**: `getProperty<T, K extends keyof T>` constrains the key to valid property names.
+- **Component props**: `List<T extends HasId>` ensures every item has an `id` for use as a React key.
+- **Repository APIs**: `Repository<T extends Entity>` ensures entities have the members the repository requires.
+
+---
+
+## 3. Constraint Types
+
+### Definitions
+
+**Core Definition.** **Constraint types** are the type expressions that appear on the right-hand side of `extends` in a type parameter declaration, specifying the structure, union, or condition that type arguments must satisfy.
+
+**Technical Definition.** A constraint type may be any type expression: an interface or class type, a primitive (`string`, `number`), a union (`A | B`), an intersection (`A & B`), an object type literal (`{ id: string }`), `keyof X`, a conditional type, or a type parameter. The constraint determines both the set of permissible type arguments and the members accessible on the constrained type parameter inside the generic body.
+
+**Beginner-Friendly Explanation.** A constraint type is **the shape or condition you require**. It can be a simple object shape (`{ length: number }`), a primitive (`string`), a union of allowed types, or `keyof T` to restrict keys. Whatever you put after `extends` is the requirement.
+
+### Purposes
+
+- **To specify structural requirements** such as required properties or methods.
+- **To restrict type arguments to primitives, objects, or unions**.
+- **To bind keys to valid property names** using `keyof`.
+- **To compose multiple requirements** through intersection or union types.
+
+### Syntax Rules and Structure
+
+**Common constraint types:**
+
+```typescript
+<T extends HasLength>                 // interface / object shape
+<T extends object>                    // non-primitive
+<T extends string | number>           // union of primitives
+<T extends A & B>                     // intersection (multiple requirements)
+<T extends keyof U>                   // key constraint
+<T extends Record<string, unknown>>   // record-like object
+```
+
+**Component breakdown:**
+
+- `HasLength` — an interface or type alias specifying required members.
+- `object` — the non-primitive type.
+- `string | number` — a union restricting to primitives.
+- `A & B` — an intersection requiring both `A` and `B`.
+- `keyof U` — the union of property names of `U`.
+
+**Syntax rules.**
+
+- The constraint type may reference other type parameters in scope.
+- Intersections are the standard way to require multiple structures.
+- Unions allow any of the listed types.
+- `{}` accepts all non-nullish types but provides almost no member access.
+
+**Constraints and limitations.**
+
+- `object` excludes primitives but does not guarantee any specific property.
+- `{}` is often too permissive; prefer a specific structural constraint.
+- Deeply nested intersections reduce readability; use a named type alias.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Structural constraint
+
+```typescript
+// example_constraint_structural.ts
+interface Identifiable {
+  id: string;
+}
+
+function findById<T extends Identifiable>(items: T[], id: string): T | undefined {
+  return items.find((item) => item.id === id);
+}
+
+const users = [{ id: "1", name: "Ada" }, { id: "2", name: "Grace" }];
+console.log(findById(users, "2")?.name);   // Expected: Grace
+```
+
+**Expected Output:**
+```
+Grace
+```
+
+**Why this output occurs.** The constraint `T extends Identifiable` guarantees an `id: string` property, making `item.id` legal. The inferred type argument is `{ id: string; name: string }`, which satisfies the constraint.
+
+#### Example 2: Union constraint
+
+```typescript
+// example_constraint_union.ts
+function formatId<T extends string | number>(id: T): string {
+  return typeof id === "string" ? id.toUpperCase() : id.toFixed(0);
+}
+
+console.log(formatId("abc"));   // Expected: ABC
+console.log(formatId(42));      // Expected: 42
+// console.log(formatId(true)); // Error: boolean is not assignable to string | number
+```
+
+**Expected Output:**
+```
+ABC
+42
+```
+
+**Why this output occurs.** The union constraint restricts `T` to `string` or `number`. Inside the function, narrowing via `typeof` handles both possibilities. Booleans and other types are rejected.
+
+### Real-World Cases
+
+- **Entity constraints**: `T extends { id: string }` for repositories and lists.
+- **Primitive restrictions**: `T extends string | number` for formatting functions.
+- **Record constraints**: `T extends Record<string, unknown>` for table-like components.
+
+---
+
+## 4. Multiple Constraints
+
+### Definitions
+
+**Core Definition.** **Multiple constraints** combine two or more constraint types on a single type parameter, requiring the type argument to satisfy **all** of them simultaneously.
+
+**Technical Definition.** TypeScript does not support the syntax `<T extends A, B>` for a single type parameter. Multiple constraints are expressed with the **intersection operator** `&`: `<T extends A & B>`. A type argument satisfies the constraint if it is assignable to both `A` and `B`. Alternatively, multiple type parameters may each have their own constraint (`<T extends A, U extends B>`), which is distinct from a single parameter with multiple constraints.
+
+**Beginner-Friendly Explanation.** Multiple constraints mean **“the type must satisfy all of these requirements at once.”** You write `<T extends A & B>` to say “`T` must have everything `A` requires **and** everything `B` requires.” You cannot write `<T extends A, B>`; the `&` intersection is the correct syntax.
+
+### Purposes
+
+- **To require a type argument to satisfy several structural requirements** simultaneously.
+- **To compose constraints from reusable pieces** rather than creating a monolithic constraint interface.
+- **To combine a structural requirement with a primitive or union restriction**.
+
+### Syntax Rules and Structure
+
+```typescript
+<T extends A & B>                     // intersection of two constraints
+<T extends HasId & { active: boolean }> // structural + inline shape
+<T extends A, U extends B>            // two parameters, each constrained
+```
+
+**Component breakdown:**
+
+- `A & B` — an intersection type; `T` must be assignable to both `A` and `B`.
+- `HasId & { active: boolean }` — an intersection of a named interface and an inline object type.
+- `<T extends A, U extends B>` — two independent type parameters with separate constraints.
+
+**Syntax rules.**
+
+- Multiple constraints on one parameter use `&`, not `,`.
+- Intersections may combine interfaces, object type literals, and type aliases.
+- Multiple type parameters are separated by commas, each with its own optional constraint.
+- Deeply nested intersections (`A & B & C & D`) should be extracted into a named type alias for readability.
+
+**Constraints and limitations.**
+
+- Intersections are not the same as union constraints: `A & B` requires both; `A | B` requires one.
+- Contradictory intersections (e.g., `string & number`) produce `never` and make the generic unusable.
+- Multiple constraints can make inference harder; prefer the minimal necessary set.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Intersection constraint
+
+```typescript
+// example_multiple_constraints.ts
 interface HasId {
-  id: number;
+  id: string;
 }
 
 interface HasName {
   name: string;
 }
 
-// Step 2: Combine constraints with intersection.
-function describeEntity<T extends HasId & HasName>(entity: T): string {
-  // T has both `id` and `name`.
-  return `Entity ${entity.id}: ${entity.name}`;
+function describe<T extends HasId & HasName>(item: T): string {
+  return `${item.name} (${item.id})`;
 }
 
-// Step 3: Call with a type that satisfies both constraints.
-console.log(describeEntity({ id: 1, name: "Alice" }));
-// "Entity 1: Alice"
-
-console.log(describeEntity({ id: 2, name: "Bob", email: "bob@example.com" }));
-// "Entity 2: Bob"
-
-// Step 4: Missing either constraint produces an error.
-// describeEntity({ id: 3 });           // ❌ Error: 'name' is missing.
-// describeEntity({ name: "Charlie" }); // ❌ Error: 'id' is missing.
+console.log(describe({ id: "1", name: "Ada" }));   // Expected: Ada (1)
+// console.log(describe({ id: "1" }));             // Error: missing name
 ```
 
 **Expected Output:**
 ```
-Entity 1: Alice
-Entity 2: Bob
+Ada (1)
 ```
 
-**Why This Output Occurs:** The constraint `T extends HasId & HasName` requires the type argument to satisfy both interfaces. Objects with both `id` and `name` are accepted, including those with extra properties.
+**Why this output occurs.** The constraint `T extends HasId & HasName` requires both `id: string` and `name: string`. The argument satisfies both; an argument missing `name` is rejected.
+
+#### Example 2: Multiple type parameters, each constrained
+
+```typescript
+// example_multiple_params_constraints.ts
+function merge<T extends object, U extends object>(base: T, updates: U): T & U {
+  return { ...base, ...updates };
+}
+
+const merged = merge({ name: "Ada" }, { age: 36 });
+console.log(merged);   // Expected: { name: 'Ada', age: 36 }
+```
+
+**Expected Output:**
+```
+{ name: 'Ada', age: 36 }
+```
+
+**Why this output occurs.** `T` and `U` each have an independent `object` constraint. The return type `T & U` preserves both shapes. This is distinct from a single parameter with an intersection constraint.
 
 ### Real-World Cases
 
-**Case 1: Entity Repositories**
-Generic repositories use `T extends { id: number }` to ensure all entities have an ID, enabling methods like `findById`.
+- **Entity + status constraints**: `T extends Entity & { status: Status }`.
+- **Sortable lists**: `T extends HasId & { createdAt: Date }`.
+- **Composed API contracts**: `T extends Serializable & Identifiable`.
 
-**Case 2: Logging Utilities**
-Logging functions use `T extends { errorCode: number; errorDescription: string }` to ensure logged errors have the expected shape.
+---
 
-**Case 3: React Components**
-Generic React components use constraints like `T extends { id: string }` to ensure list items have keys.
-
-**Case 4: Database Clients**
-Database clients use `T extends Record<string, unknown>` to ensure query parameters are objects.
-
-
-## 2. Constraining Type Parameters Against Primitives, Objects, and Unions
+## 5. `keyof` (Key Constraints)
 
 ### Definitions
 
-**Core Definition**
-Generic constraints can be applied against primitive types (e.g., `string`, `number`), object types (interfaces, classes), and union types. This allows developers to restrict type parameters to specific categories of types while leveraging TypeScript's structural typing.
+**Core Definition.** The **`keyof` operator** takes an object type and produces a **union of its property names** (string or numeric literal types). Used as a constraint (`K extends keyof T`), it restricts a key type parameter to the actual keys of an object type.
 
-**Technical Definition**
-A constraint can be any type expression: a primitive (`T extends string`), an object type (`T extends { id: number }`), a union (`T extends string | number`), or an intersection (`T extends A & B`). When the constraint is a primitive, the type argument must be assignable to that primitive. When the constraint is a union, the type argument must be assignable to at least one member of the union. When the constraint is an object type, the type argument must have all the required members. Constraints can also be combined with conditional types for advanced type-level logic.
+**Technical Definition.** For a type `T`, `keyof T` is the union of all known, public property names of `T`. If `T` has a string or number index signature, `keyof T` returns those types instead. The constraint `<K extends keyof T>` ensures that `K` is a valid property name of `T`, enabling **type-safe indexed access**: the expression `obj[key]` has type `T[K]`, the precise type of the property named by `K`.
 
-**Beginner-Friendly Explanation**
-You can constrain a generic to primitives, objects, or unions. If you write `<T extends string>`, only strings are allowed. If you write `<T extends string | number>`, strings and numbers are allowed. If you write `<T extends { id: number }>`, any object with an `id` is allowed. This lets you control exactly what types can be passed to your generic code. Primitives are useful for limiting to simple types; objects for requiring certain properties; unions for allowing a specific set of types.
+**Beginner-Friendly Explanation.** `keyof` means **“the names of the properties.”** `keyof User` is `"id" | "name" | "email"`. When you constrain `K extends keyof T`, you are saying “`K` must be one of the property names of `T`.” This lets a function look up a property safely: pass `"name"`, get a `string`; pass `"age"`, get a `number` — and a typo like `"nmae"` is caught at compile time.
 
 ### Purposes
 
-- To restrict type parameters to primitive types when only primitives are supported.
-- To allow a specific set of types via union constraints.
-- To require certain properties via object constraints.
-- To combine multiple constraints via intersection.
-- To document the acceptable type categories for a generic component.
+- **To restrict keys to valid property names** of an object type.
+- **To preserve the precise return type** of a property access (`T[K]`).
+- **To catch typos in property names at compile time** rather than at runtime.
+- **To enable generic utilities** like `Pick`, `Omit`, and property plucking.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Primitive Constraint**
-
 ```typescript
-function functionName<T extends string>(value: T): T {
-  return value;
-}
-```
-
-**Component Breakdown**
-- `<T extends string>`: Only strings are allowed.
-
-**General Syntax: Union Constraint**
-
-```typescript
-function functionName<T extends string | number>(value: T): T {
-  return value;
-}
-```
-
-**Component Breakdown**
-- `<T extends string | number>`: Strings and numbers are allowed.
-
-**General Syntax: Object Constraint**
-
-```typescript
-function functionName<T extends { id: number; name: string }>(value: T): T {
-  return value;
-}
-```
-
-**Component Breakdown**
-- `<T extends { id: number; name: string }>`: Objects with `id` and `name` are allowed.
-
-**General Syntax: Union of Object Types**
-
-```typescript
-type Shape = { kind: "circle"; radius: number } | { kind: "square"; side: number };
-
-function functionName<T extends Shape>(shape: T): number {
-  return 0;
-}
-```
-
-**Component Breakdown**
-- `<T extends Shape>`: Only circle or square shapes are allowed.
-
-**Syntax Rules**
-
-- The constraint can be a primitive, object, union, or intersection.
-- For primitive constraints, the type argument must be assignable to the primitive.
-- For union constraints, the type argument must be assignable to at least one member.
-- For object constraints, the type argument must have all required members.
-- Literal types are subtypes of their primitives and satisfy primitive constraints.
-- The constraint does not prevent extra properties on object types.
-
-**Constraints and Limitations**
-
-- Primitive constraints do not narrow the type parameter to literal types (unless the argument is a literal).
-- Union constraints allow any member of the union, not a subset.
-- Object constraints require all specified members, even if they are optional in the type argument.
-- Constraints are structural, so any type with the required members satisfies the constraint.
-- Very specific object constraints reduce the reusability of generic components.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Primitive and Union Constraints
-
-```typescript
-// Step 1: Constrain to primitives.
-function double<T extends number>(value: T): number {
-  return value * 2;
-}
-
-console.log(double(21));       // 42
-// double("hello");            // ❌ Error: string is not assignable to number.
-
-// Step 2: Constrain to a union of primitives.
-function stringify<T extends string | number | boolean>(value: T): string {
-  return String(value);
-}
-
-console.log(stringify("hello"));  // "hello"
-console.log(stringify(42));       // "42"
-console.log(stringify(true));     // "true"
-// stringify({});                 // ❌ Error: object is not assignable to the union.
-
-// Step 3: Constrain to a union of literal types.
-type Direction = "north" | "south" | "east" | "west";
-
-function move<T extends Direction>(direction: T): string {
-  return `Moving ${direction}`;
-}
-
-console.log(move("north"));  // "Moving north"
-// move("up");               // ❌ Error: "up" is not assignable to Direction.
-
-// Step 4: Constrain to an object type.
-interface Point {
-  x: number;
-  y: number;
-}
-
-function translate<T extends Point>(point: T, dx: number, dy: number): T {
-  return { ...point, x: point.x + dx, y: point.y + dy } as T;
-}
-
-const p = translate({ x: 0, y: 0, z: 0 }, 5, 10);
-console.log(p);  // { x: 5, y: 10, z: 0 }
-```
-
-**Expected Output:**
-```
-42
-hello
-42
-true
-Moving north
-{ x: 5, y: 10, z: 0 }
-```
-
-**Why This Output Occurs:** The `double` function only accepts numbers. The `stringify` function accepts strings, numbers, and booleans. The `move` function only accepts the four literal directions. The `translate` function accepts any object with `x` and `y` numbers, preserving extra properties via the generic type.
-
-#### Example 2: Union of Object Types Constraint
-
-```typescript
-// Step 1: Define a union of object types.
-type Shape =
-  | { kind: "circle"; radius: number }
-  | { kind: "square"; side: number }
-  | { kind: "rectangle"; width: number; height: number };
-
-// Step 2: Constrain to the union.
-function calculateArea<T extends Shape>(shape: T): number {
-  switch (shape.kind) {
-    case "circle":
-      return Math.PI * shape.radius ** 2;
-    case "square":
-      return shape.side ** 2;
-    case "rectangle":
-      return shape.width * shape.height;
-  }
-}
-
-// Step 3: Call with valid shapes.
-console.log(calculateArea({ kind: "circle", radius: 5 }).toFixed(2));
-// "78.54"
-console.log(calculateArea({ kind: "square", side: 4 }));
-// 16
-console.log(calculateArea({ kind: "rectangle", width: 3, height: 6 }));
-// 18
-
-// Step 4: Invalid shapes are rejected.
-// calculateArea({ kind: "triangle", base: 3, height: 4 });
-// ❌ Error: 'triangle' is not assignable to 'circle' | 'square' | 'rectangle'.
-```
-
-**Expected Output:**
-```
-78.54
-16
-18
-```
-
-**Why This Output Occurs:** The constraint `T extends Shape` restricts the type argument to the three shape variants. The switch statement narrows the union based on the discriminant, enabling safe access to variant-specific properties.
-
-### Real-World Cases
-
-**Case 1: Numeric Utilities**
-Mathematical utilities use `T extends number` to accept only numbers, rejecting strings and objects.
-
-**Case 2: String Manipulation**
-String utilities use `T extends string` to accept only strings, leveraging string methods safely.
-
-**Case 3: Event Systems**
-Event systems use union constraints to restrict event types to a known set, enabling exhaustive handling.
-
-**Case 4: Configuration Validators**
-Config validators use object constraints to ensure configuration objects have required fields.
-
-
-## 3. Key-Based Constraints Using `extends keyof` Patterns
-
-### Definitions
-
-**Core Definition**
-Key-based constraints use the `keyof` operator combined with `extends` to restrict a type parameter to the keys (property names) of another type. The pattern `K extends keyof T` ensures that `K` is a valid property name of `T`, enabling type-safe property access.
-
-**Technical Definition**
-For a type `T`, `keyof T` is the union of all known public property names of `T`. When a type parameter is constrained as `K extends keyof T`, `K` can only be instantiated with one of `T`'s property names. This enables type-safe property access: `T[K]` is the indexed access type corresponding to the property `K`. The pattern is fundamental to utility types like `Pick<T, K>` and `Omit<T, K>`, and is used in generic functions that operate on object properties. The `extends` in `K extends keyof T` is a constraint (not inheritance), meaning `K` must be assignable to the union of keys.
-
-**Beginner-Friendly Explanation**
-The `keyof` operator gives you a union of all property names of a type. If you have `interface User { name: string; age: number }`, then `keyof User` is `"name" | "age"`. When you write `<K extends keyof T>`, you're saying "K must be one of the property names of T." This lets you write functions that work with any property of an object, while TypeScript ensures you only use valid property names. For example, a `getProperty` function can take an object and a key, and TypeScript will check that the key actually exists on the object.
-
-### Purposes
-
-- To restrict a type parameter to valid property names of another type.
-- To enable type-safe property access via indexed access types (`T[K]`).
-- To build generic utilities like `Pick`, `Omit`, and `getProperty`.
-- To prevent typos in property names at compile time.
-- To enable type-safe object manipulation in generic code.
-
-### Syntax Rules and Structure
-
-**General Syntax: Key-Based Constraint**
-
-```typescript
-function functionName<T, K extends keyof T>(obj: T, key: K): T[K] {
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
   return obj[key];
 }
 ```
 
-**Component Breakdown**
-- `<T, K extends keyof T>`: `K` must be a property name of `T`.
-- `): T[K]`: The return type is the type of the property at `key`.
+**Component breakdown:**
 
-**General Syntax: Key-Based Constraint with Default**
+- `T` — the object type parameter.
+- `K extends keyof T` — the key type parameter, constrained to `T`’s property names.
+- `obj: T` — the object argument.
+- `key: K` — the key argument, restricted to valid names.
+- `): T[K]` — the **indexed access type**; the return type is the type of the property `K` on `T`.
 
-```typescript
-function functionName<T, K extends keyof T = keyof T>(obj: T, key: K): T[K] {
-  return obj[key];
-}
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- `K extends keyof T = keyof T`: Defaults to all keys.
+- `keyof T` produces a union of literal types (e.g., `"id" | "name"`).
+- `K extends keyof T` constrains `K` to that union.
+- `T[K]` is the indexed access type, preserving the property’s precise type.
+- `keyof` works with interfaces, type aliases, and object type literals.
 
-**General Syntax: Multiple Keys**
+**Constraints and limitations.**
 
-```typescript
-function functionName<T, K extends keyof T>(obj: T, keys: K[]): T[K][] {
-  return keys.map((key) => obj[key]);
-}
-```
+- `keyof` returns only **public** property names; private and protected members are excluded.
+- If `T` has an index signature, `keyof T` may be `string | number`, reducing key precision.
+- Without the `K extends keyof T` constraint, the return type would be the union of all property types (`T[keyof T]`), losing precision.
 
-**Component Breakdown**
-- `keys: K[]`: An array of valid keys.
-- `): T[K][]`: An array of the corresponding property values.
+### Annotated Complete Step by Step Code Examples
 
-**Syntax Rules**
-
-- `keyof T` returns a union of property names.
-- `K extends keyof T` restricts `K` to those names.
-- `T[K]` is the indexed access type for property `K`.
-- The constraint works with interfaces, type aliases, classes, and index signatures.
-- `keyof T` includes optional properties.
-- `keyof T` excludes private and protected members.
-- For types with index signatures, `keyof T` includes `string | number`.
-
-**Constraints and Limitations**
-
-- `keyof` on a type without properties returns `never`.
-- `keyof` on `any` returns `string | number | symbol`.
-- `keyof` on a union distributes, producing the union of all keys (not the intersection).
-- Index signatures affect `keyof` results (`string | number` for `[key: string]`).
-- `K extends keyof T` does not narrow `T` itself.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic `keyof` Constraint
+#### Example 1: Type-safe property access with `keyof`
 
 ```typescript
-// Step 1: Define an interface.
-interface Person {
-  name: string;
-  age: number;
-  email: string;
-}
-
-// Step 2: Define a generic function with a key constraint.
+// example_keyof_access.ts
 function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
   return obj[key];
 }
 
-// Step 3: Use the function with valid keys.
-const person: Person = { name: "Alice", age: 30, email: "alice@example.com" };
+const user = { id: 1, name: "Ada", active: true };
 
-const name = getProperty(person, "name");   // string
-const age = getProperty(person, "age");     // number
-const email = getProperty(person, "email"); // string
+const name = getProperty(user, "name");   // string
+const id = getProperty(user, "id");       // number
+const active = getProperty(user, "active"); // boolean
 
-console.log(name);   // "Alice"
-console.log(age);    // 30
-console.log(email);  // "alice@example.com"
-
-// Step 4: Invalid keys produce compile errors.
-// getProperty(person, "gender");  // ❌ Error: "gender" is not assignable to "name" | "age" | "email".
-// getProperty(person, "address"); // ❌ Error: "address" is not a key of Person.
-
-// Step 5: Type safety is preserved.
-const nameLength: number = getProperty(person, "name").length;  // ✅
-const ageFixed: string = getProperty(person, "age").toFixed(2); // ✅
+console.log(name, id, active);   // Expected: Ada 1 true
+// getProperty(user, "age");     // Error: "age" is not keyof typeof user
 ```
 
 **Expected Output:**
 ```
-Alice
-30
-alice@example.com
+Ada 1 true
 ```
 
-**Why This Output Occurs:** The constraint `K extends keyof T` restricts `key` to `"name" | "age" | "email"`. The return type `T[K]` is the specific type of the property, so `getProperty(person, "age")` returns `number`. Invalid keys are caught at compile time.
+**Why this output occurs.** `K extends keyof T` restricts the key to `"id" | "name" | "active"`. `T[K]` resolves to the precise property type for each key: `string` for `"name"`, `number` for `"id"`, `boolean` for `"active"`. The invalid key `"age"` is rejected at compile time.
 
-#### Example 2: `keyof` Constraint with Multiple Keys and Defaults
+#### Example 2: `keyof` with an index signature
 
 ```typescript
-// Step 1: Define an interface.
-interface Config {
-  apiUrl: string;
-  timeout: number;
-  retries: number;
+// example_keyof_index.ts
+type Dictionary = { [key: string]: number };
+
+function getValue<T extends Dictionary, K extends keyof T>(dict: T, key: K): T[K] {
+  return dict[key];
 }
 
-// Step 2: Get multiple properties.
-function getProperties<T, K extends keyof T>(obj: T, keys: K[]): T[K][] {
-  return keys.map((key) => obj[key]);
+const scores: Dictionary = { alice: 10, bob: 20 };
+console.log(getValue(scores, "alice"));   // Expected: 10
+```
+
+**Expected Output:**
+```
+10
+```
+
+**Why this output occurs.** `keyof Dictionary` is `string` (from the index signature). `K extends string` is satisfied by `"alice"`. The return type `T[K]` is `number` because every property value in `Dictionary` is a `number`.
+
+### Real-World Cases
+
+- **Property plucking**: `pluck<T, K extends keyof T>(items: T[], key: K): T[K][]`.
+- **Table components**: `columns: { key: keyof T; header: string }[]` catches typos in column keys.
+- **Configuration updates**: `update<T, K extends keyof T>(obj: T, key: K, value: T[K])`.
+
+---
+
+## 6. Generic Constraint Best Practices
+
+### Definitions
+
+**Core Definition.** **Generic constraint best practices** are guidelines for choosing, composing, and documenting constraints in ways that maximize **reusability, type safety, inference success, and readability**, while avoiding over-constraining, under-constraining, and misleading constraint types.
+
+**Technical Definition.** Best practices include: constraining to the **minimal structure** the generic body actually uses; preferring **`keyof` constraints** for property access; using **intersections** for multiple requirements and extracting deeply nested intersections into named type aliases; avoiding `{}` and `object` when a more specific constraint is possible; and documenting constraints so callers understand the required capabilities. The guiding principle is: **constrain only what you access, and access only what you constrain**.
+
+**Beginner-Friendly Explanation.** Best practices help you write constraints that are **useful but not restrictive**. Constrain only the members you actually use. Use `keyof` when you need valid property names. Combine constraints with `&` for multiple requirements, but don’t overdo it. Avoid constraints so broad they don’t help (`{}`) or so narrow they exclude reasonable types.
+
+### Purposes
+
+- **To maximize reusability** by requiring only the members the generic actually needs.
+- **To maximize type safety** by requiring enough structure to access members safely.
+- **To improve inference** by keeping constraints aligned with parameter types.
+- **To keep signatures readable** by using named constraints and avoiding deep intersections.
+- **To document intent** so callers know what capabilities are required.
+
+### Syntax Rules and Structure
+
+**Key best-practice rules:**
+
+1. **Constrain to the minimal structure used.** If the generic only accesses `.length`, constrain to `{ length: number }`, not a full `Array` or `String` type.
+2. **Prefer `keyof` for property access.** Use `<K extends keyof T>` rather than `<K extends string>` when the key must be a valid property name.
+3. **Use `&` for multiple constraints, not commas.** `<T extends A & B>` is the correct syntax; `<T extends A, B>` is invalid.
+4. **Extract deep intersections into named aliases.** `type EntityWithStatus = Entity & { status: Status }` improves readability.
+5. **Avoid `{}` when a specific constraint is possible.** `{}` accepts almost everything but provides almost no member access.
+6. **Prefer `object` over `{}` when excluding primitives** is the goal.
+7. **Document constraints** when their purpose is not self-evident, using TSDoc.
+
+**Constraints and limitations.**
+
+- Over-constraining reduces reusability; a constraint that requires members the body never uses is a red flag.
+- Under-constraining forces casts to `any` inside the body, defeating type safety.
+- Contradictory intersections (`string & number`) produce `never` and make the generic unusable.
+- Deeply nested intersections harm readability and error messages.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Minimal constraint
+
+```typescript
+// example_best_minimal.ts
+// GOOD: constraint includes only what the body uses.
+function printLength<T extends { length: number }>(value: T): void {
+  console.log(value.length);
 }
 
-const config: Config = {
-  apiUrl: "https://api.example.com",
-  timeout: 5000,
-  retries: 3,
-};
+// Over-constrained: requires unrelated members.
+// function bad<T extends { length: number; name: string }>(value: T) { ... }
 
-const values = getProperties(config, ["apiUrl", "timeout"]);
-console.log(values);  // ["https://api.example.com", 5000]
+printLength("hello");      // Expected: 5
+printLength([1, 2, 3]);    // Expected: 3
+```
 
-// Step 3: Key constraint with default.
-function getPropertyWithDefault<T, K extends keyof T = keyof T>(
-  obj: T,
-  key?: K
-): T[K] | undefined {
-  if (key === undefined) return undefined;
+**Expected Output:**
+```
+5
+3
+```
+
+**Why this output occurs.** The constraint requires only `length`, so strings and arrays both qualify. Requiring `name` would exclude both, reducing reusability without benefit.
+
+#### Example 2: `keyof` instead of broad string
+
+```typescript
+// example_best_keyof.ts
+// GOOD: K is restricted to actual property names.
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
   return obj[key];
 }
 
-console.log(getPropertyWithDefault(config, "retries"));  // 3
-console.log(getPropertyWithDefault(config));             // undefined
-
-// Step 4: Constraint with index signatures.
-interface StringMap {
-  [key: string]: string;
+// BAD: key: string loses type safety and requires a cast.
+function getPropertyBad<T>(obj: T, key: string): unknown {
+  return (obj as any)[key];
 }
 
-function getMapValue<T extends StringMap, K extends keyof T>(map: T, key: K): string {
-  return map[key];
-}
-
-const map: StringMap = { a: "hello", b: "world" };
-console.log(getMapValue(map, "a"));  // "hello"
+const user = { id: 1, name: "Ada" };
+console.log(getProperty(user, "name"));   // Expected: Ada
 ```
 
 **Expected Output:**
 ```
-[ 'https://api.example.com', 5000 ]
-3
-undefined
-hello
+Ada
 ```
 
-**Why This Output Occurs:** The `getProperties` function accepts an array of valid keys and returns their values. The `getPropertyWithDefault` function defaults to all keys. The `getMapValue` function works with index signatures, where `keyof T` is `string | number`.
+**Why this output occurs.** `K extends keyof T` restricts the key to `"id" | "name"` and returns the precise property type `string` for `"name"`. The unconstrained version accepts any string and returns `unknown`, forcing a cast and losing safety.
+
+#### Example 3: Named alias for multiple constraints
+
+```typescript
+// example_best_alias.ts
+interface Entity {
+  id: string;
+}
+
+interface Timestamped {
+  createdAt: Date;
+}
+
+// Extract the intersection into a named alias.
+type EntityWithTimestamp = Entity & Timestamped;
+
+function sortByCreation<T extends EntityWithTimestamp>(items: T[]): T[] {
+  return [...items].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+}
+
+const rows = [
+  { id: "1", createdAt: new Date("2024-01-02") },
+  { id: "2", createdAt: new Date("2024-01-01") },
+];
+
+console.log(sortByCreation(rows).map((r) => r.id));   // Expected: [ '2', '1' ]
+```
+
+**Expected Output:**
+```
+[ '2', '1' ]
+```
+
+**Why this output occurs.** The named alias `EntityWithTimestamp` makes the constraint readable. The function accesses `createdAt` and `id`, both guaranteed by the constraint. The intersection is documented in one place.
 
 ### Real-World Cases
 
-**Case 1: Form Libraries**
-Form libraries use `K extends keyof FormValues` to type field names and ensure type-safe access to form values.
-
-**Case 2: State Management**
-State management utilities use `keyof` constraints to type action creators and reducers that operate on state properties.
-
-**Case 3: Configuration Access**
-Configuration helpers use `keyof Config` to provide type-safe access to configuration values.
-
-**Case 4: Data Transformation**
-Data transformation utilities use `keyof` constraints to type functions that pick, omit, or transform object properties.
-
-**Case 5: Database Query Builders**
-Query builders use `keyof Entity` to type column names, preventing SQL injection and typos.
-
-
-## 4. Structural Constraints and Duck-Typing Enforcement
-
-### Definitions
-
-**Core Definition**
-Structural constraints enforce duck typing: a type satisfies a constraint if it has the required members, regardless of its name or declaration site. This is a fundamental characteristic of TypeScript's type system, where compatibility is determined by structure rather than nominal identity.
-
-**Technical Definition**
-TypeScript's type system is structurally typed: two types are compatible if their members are compatible. When a generic constraint is applied (`T extends Constraint`), any type whose members satisfy `Constraint`'s members is accepted. This means classes, interfaces, and object literals can all satisfy the same constraint without sharing a common ancestor. The exception is classes with `private` or `protected` members, which introduce nominal behavior—only types that inherit from the same declaration satisfy the constraint. Structural constraints enable duck typing: "if it walks like a duck and quacks like a duck, it's a duck."
-
-**Beginner-Friendly Explanation**
-Structural constraints mean TypeScript only cares about what a type *has*, not what it's *called*. If your constraint requires an `id` property and a `name` property, any object with those properties works—whether it's a class instance, an interface, or a plain object literal. You don't need to explicitly implement an interface. This is called "duck typing": if it looks like the constraint, it satisfies the constraint. The only exception is classes with `private` members, which require actual inheritance. This flexibility is one of TypeScript's most powerful features.
-
-### Purposes
-
-- To enable duck typing: any type with the required members satisfies the constraint.
-- To allow unrelated classes and interfaces to satisfy the same constraint.
-- To decouple generic components from specific type names and hierarchies.
-- To work with plain objects, class instances, and interfaces interchangeably.
-- To enforce minimum structural compliance without requiring explicit implementation.
-
-### Syntax Rules and Structure
-
-**General Syntax: Structural Constraint**
-
-```typescript
-interface HasId {
-  id: number;
-}
-
-function functionName<T extends HasId>(value: T): T {
-  return value;
-}
-
-// Any type with `id: number` satisfies the constraint.
-functionName({ id: 1 });
-functionName(new User(2));
-functionName({ id: 3, name: "Alice" });
-```
-
-**Component Breakdown**
-- `<T extends HasId>`: The structural constraint.
-- Any type with an `id` number property is accepted.
-
-**General Syntax: Nominal Exception with Private Members**
-
-```typescript
-class Base {
-  private secret: string = "hidden";
-}
-
-class Derived extends Base {}
-
-function functionName<T extends Base>(value: T): T {
-  return value;
-}
-
-functionName(new Derived());  // ✅
-// functionName({ secret: "hidden" });  // ❌ Error: private member mismatch.
-```
-
-**Component Breakdown**
-- Private members make the constraint nominal.
-
-**Syntax Rules**
-
-- Structural constraints are checked by member compatibility, not name.
-- Any type with the required members satisfies the constraint.
-- Classes, interfaces, and object literals can all satisfy the same constraint.
-- Private and protected members introduce nominal behavior.
-- Extra properties on the type argument are allowed.
-- The constraint does not require explicit `implements` or `extends`.
-
-**Constraints and Limitations**
-
-- Structural typing can allow unintended compatibility between similar shapes.
-- Private and protected members break structural compatibility (nominal).
-- Excess property checking applies to direct object literals but not variables.
-- Structural constraints can make type errors less obvious.
-- Duck typing does not provide nominal guarantees.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Structural Constraint with Different Types
-
-```typescript
-// Step 1: Define a structural constraint.
-interface Serializable {
-  serialize(): string;
-}
-
-// Step 2: Constrain a generic function.
-function save<T extends Serializable>(entity: T): string {
-  return entity.serialize();
-}
-
-// Step 3: An interface that structurally satisfies the constraint.
-interface User {
-  name: string;
-  serialize(): string;
-}
-
-const user: User = {
-  name: "Alice",
-  serialize() { return JSON.stringify(this); },
-};
-
-console.log(save(user));  // '{"name":"Alice","serialize":...}'
-
-// Step 4: A class that structurally satisfies the constraint.
-class Product {
-  constructor(public name: string, public price: number) {}
-  serialize(): string { return JSON.stringify(this); }
-}
-
-console.log(save(new Product("Laptop", 999)));
-// '{"name":"Laptop","price":999}'
-
-// Step 5: A plain object that structurally satisfies the constraint.
-console.log(save({ serialize: () => "custom" }));  // "custom"
-
-// Step 6: A type without `serialize` is rejected.
-// save({ name: "Charlie" });  // ❌ Error: 'serialize' is missing.
-```
-
-**Expected Output:**
-```
-{"name":"Alice","serialize":...}
-{"name":"Laptop","price":999}
-custom
-```
-
-**Why This Output Occurs:** The constraint `T extends Serializable` requires a `serialize` method. Any type with that method—interface, class, or plain object—satisfies the constraint. No explicit `implements` is needed because TypeScript is structurally typed.
-
-#### Example 2: Nominal Behavior with Private Members
-
-```typescript
-// Step 1: Define a class with a private member.
-class BaseEntity {
-  private id: number;
-  constructor(id: number) {
-    this.id = id;
-  }
-  getId(): number {
-    return this.id;
-  }
-}
-
-// Step 2: Constrain a generic function.
-function processEntity<T extends BaseEntity>(entity: T): number {
-  return entity.getId();
-}
-
-// Step 3: A derived class satisfies the constraint.
-class User extends BaseEntity {
-  constructor(id: number, public name: string) {
-    super(id);
-  }
-}
-
-console.log(processEntity(new User(1, "Alice")));  // 1
-
-// Step 4: A structurally similar class does NOT satisfy the constraint.
-class FakeEntity {
-  private id: number;
-  constructor(id: number) {
-    this.id = id;
-  }
-  getId(): number {
-    return this.id;
-  }
-}
-
-// processEntity(new FakeEntity(2));
-// ❌ Error: Types have separate declarations of a private property 'id'.
-
-// Step 5: A plain object does NOT satisfy the constraint.
-// processEntity({ id: 3, getId: () => 3 });
-// ❌ Error: Property 'getId' is private in type 'BaseEntity' but not in the object.
-```
-
-**Expected Output:**
-```
-1
-```
-
-**Why This Output Occurs:** The `private id` member in `BaseEntity` makes the constraint nominal. Only classes that inherit from `BaseEntity` (or share its private member declaration) satisfy the constraint. Structurally similar classes and plain objects are rejected because they have separate declarations of the private member.
-
-### Real-World Cases
-
-**Case 1: Plugin Systems**
-Plugin systems use structural constraints to accept any plugin that implements the required methods, without requiring a common base class.
-
-**Case 2: Dependency Injection**
-DI containers use structural constraints to resolve dependencies based on the shape of the dependency, not its type name.
-
-**Case 3: Testing Mocks**
-Tests use structural constraints to accept mock objects that have the same shape as production dependencies, without instantiating real classes.
-
-**Case 4: API Clients**
-API clients use structural constraints to accept any object with the required HTTP methods, enabling different HTTP libraries.
-
-**Case 5: Serialization**
-Serialization utilities use structural constraints to accept any object with a `toJSON` method, matching JavaScript's JSON serialization protocol.
-
-
-## 5. Conditional Constraints Within Generic Bodies
-
-### Definitions
-
-**Core Definition**
-Conditional constraints combine generic constraints with conditional types to create type-level logic that varies based on whether a type parameter satisfies a condition. Inside a generic body, conditional types can inspect the type parameter and produce different types depending on the outcome.
-
-**Technical Definition**
-A conditional type has the form `T extends U ? X : Y`. When used within a generic body (as a type alias or return type), it evaluates based on the type argument provided. The `extends` in a conditional type is a type-level check: it asks "is `T` assignable to `U`?" (not "does `T` inherit from `U`"). Conditional types become distributive when the checked type is a naked type parameter: `T extends U ? X : Y` distributes over unions in `T`, applying the conditional to each member. The `infer` keyword enables type extraction within conditional types. Conditional constraints are commonly used for utility types, type-level validation, and function overload resolution.
-
-**Beginner-Friendly Explanation**
-A conditional type is like an "if" statement at the type level. You write `T extends U ? X : Y`, which means "if T is assignable to U, use type X; otherwise, use type Y." When combined with generics, this lets you create types that change based on what type parameter you pass in. For example, a `Result<T>` type might return `{ data: T }` if `T` is not an error, or `{ error: T }` if it is. Conditional types are powerful but complex—they're used in advanced type-level programming and utility types.
-
-### Purposes
-
-- To create type-level logic that varies based on the type argument.
-- To implement utility types like `Exclude<T, U>`, `Extract<T, U>`, and `NonNullable<T>`.
-- To enable type-safe function overloads and return type inference.
-- To filter and transform unions in type-level operations.
-- To build advanced generic APIs with conditional behavior.
-
-### Syntax Rules and Structure
-
-**General Syntax: Conditional Type**
-
-```typescript
-type ConditionalType<T> = T extends U ? X : Y;
-```
-
-**Component Breakdown**
-- `T extends U ? X : Y`: If `T` is assignable to `U`, the type is `X`; otherwise, `Y`.
-
-**General Syntax: Conditional Type with `infer`**
-
-```typescript
-type UnwrapArray<T> = T extends (infer U)[] ? U : T;
-```
-
-**Component Breakdown**
-- `infer U`: Captures the element type of the array.
-
-**General Syntax: Distributive Conditional Type**
-
-```typescript
-type ToArray<T> = T extends any ? T[] : never;
-// ToArray<string | number> = string[] | number[]
-```
-
-**Component Breakdown**
-- The conditional distributes over union members.
-
-**General Syntax: Conditional Constraint in Generic Body**
-
-```typescript
-function functionName<T>(value: T): T extends string ? string : T {
-  if (typeof value === "string") {
-    return value.toUpperCase() as any;
-  }
-  return value as any;
-}
-```
-
-**Component Breakdown**
-- The return type uses a conditional type based on `T`.
-
-**Syntax Rules**
-
-- Conditional types use the form `T extends U ? X : Y`.
-- The `extends` in conditional types is a type-level assignability check.
-- Conditional types distribute over naked type parameters when the checked type is a union.
-- `infer` declares a type variable within the true branch.
-- Conditional types can be nested.
-- Conditional types are commonly used in type aliases, not function bodies (due to runtime/type separation).
-
-**Constraints and Limitations**
-
-- Conditional types with generic parameters are often deferred until instantiation.
-- Distributive conditional types can produce unexpected results with unions.
-- `infer` can only be used within the true branch of a conditional type.
-- Conditional types cannot be used to perform runtime logic.
-- Very complex conditional types can slow down the compiler and produce unreadable errors.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Conditional Type
-
-```typescript
-// Step 1: Define a conditional type.
-type IsString<T> = T extends string ? true : false;
-
-// Step 2: Use it with different types.
-type A = IsString<string>;   // true
-type B = IsString<number>;   // false
-type C = IsString<"hello">;  // true (literal extends string)
-
-// Step 3: Conditional type with generic function.
-function describeType<T>(value: T): IsString<T> extends true ? string : T {
-  if (typeof value === "string") {
-    return `String: ${value.toUpperCase()}` as any;
-  }
-  return value as any;
-}
-
-console.log(describeType("hello"));  // "String: HELLO"
-console.log(describeType(42));       // 42
-
-// Step 4: Distributive conditional type.
-type ToArray<T> = T extends any ? T[] : never;
-
-type StringOrNumberArray = ToArray<string | number>;
-// string[] | number[] (distributed)
-
-// Step 5: Utility type using conditional.
-type NonNullable<T> = T extends null | undefined ? never : T;
-
-type Defined = NonNullable<string | null | undefined>;  // string
-const value: Defined = "hello";
-console.log(value);  // "hello"
-```
-
-**Expected Output:**
-```
-String: HELLO
-42
-hello
-```
-
-**Why This Output Occurs:** The `IsString<T>` conditional type evaluates to `true` for strings and `false` otherwise. The `describeType` function uses this to vary its return type. The `ToArray` type distributes over unions. The `NonNullable` utility filters out `null` and `undefined`.
-
-#### Example 2: Conditional Constraint for Type-Safe Property Access
-
-```typescript
-// Step 1: Define a conditional type for property access.
-type PropType<T, K extends keyof T> = T[K] extends infer U ? U : never;
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
-// Step 2: Extract property types conditionally.
-type UserId = PropType<User, "id">;     // number
-type UserName = PropType<User, "name">; // string
-
-// Step 3: Conditional type for function return.
-type ReturnTypeOf<T> = T extends (...args: any[]) => infer R ? R : never;
-
-function greet(name: string): string {
-  return `Hello, ${name}`;
-}
-
-type GreetReturn = ReturnTypeOf<typeof greet>;  // string
-const greeting: GreetReturn = "Hello";
-console.log(greeting);  // "Hello"
-
-// Step 4: Conditional constraint with union.
-type ExtractStrings<T> = T extends string ? T : never;
-
-type Mixed = "a" | 1 | "b" | 2;
-type OnlyStrings = ExtractStrings<Mixed>;  // "a" | "b"
-
-const s: OnlyStrings = "a";
-console.log(s);  // "a"
-
-// Step 5: Nested conditional types.
-type DeepReadonly<T> = T extends object
-  ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
-  : T;
-
-interface Config {
-  api: { url: string; timeout: number };
-}
-
-type ReadonlyConfig = DeepReadonly<Config>;
-// All properties recursively readonly.
-```
-
-**Expected Output:**
-```
-Hello
-a
-```
-
-**Why This Output Occurs:** The `PropType` conditional type extracts the type of a property. The `ReturnTypeOf` conditional type infers the return type of a function. The `ExtractStrings` conditional type filters a union to only string members. The `DeepReadonly` conditional type recursively makes all properties readonly.
-
-### Real-World Cases
-
-**Case 1: Utility Type Libraries**
-Libraries like `type-fest` and `ts-essentials` use conditional types extensively for utility types.
-
-**Case 2: API Response Typing**
-API clients use conditional types to infer response types based on request parameters.
-
-**Case 3: Form Validation**
-Form libraries use conditional types to derive validation result types from form schemas.
-
-**Case 4: State Management**
-State management libraries use conditional types to type reducers and selectors based on state shape.
-
-**Case 5: Type-Safe Event Emitters**
-Event emitters use conditional types to map event names to payload types.
+- **Repository design**: Minimal `T extends { id: string }` constraints keep repositories reusable.
+- **UI tables**: `keyof T` constraints for column keys catch typos at compile time.
+- **Composed domain constraints**: Named aliases for `Entity & Timestamped & SoftDeletable` improve clarity.
 
 ---
 
 ## References
 
-- TypeScript Handbook: Generic Constraints — https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints
-- TypeScript Handbook: Conditional Types — https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
-- TypeScript Handbook: Keyof Type Operator — https://www.typescriptlang.org/docs/handbook/2/keyof-types.html
-- TypeScript Handbook: Indexed Access Types — https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html
-- TypeScript Handbook: Utility Types — https://www.typescriptlang.org/docs/handbook/utility-types.html
-- TypeScript Handbook: Type Compatibility — https://www.typescriptlang.org/docs/handbook/type-compatibility.html
-- TypeScript 2.8 Release Notes (Conditional Types) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html
-- TypeScript 2.1 Release Notes (keyof and Lookup Types) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html
-- Stack Overflow: `extends keyof` and `in keyof` Meaning — https://browse.library.kiwix.org/content/stackoverflow.com_en_all_2023-11/questions/57337598/in-typescript-what-do-extends-keyof-and-in-keyof-mean
-- Stack Overflow: Constraining a Generic Parameter to a Union Type — https://stackoverflow.com/questions/69035651/constraining-a-generic-parameter-to-be-a-union-type-in-typescript
-- Total TypeScript: Generic Constraints — https://www.totaltypescript.com/workshops/typescript-pro-essentials/the-utils-folder/type-parameter-constraints-with-generic-functions/solution
-- TypeScript ESLint: no-unnecessary-type-constraint — https://typescript-eslint.io/rules/no-unnecessary-type-constraint/
-- Effective TypeScript: Item 14 — Use Type Operations and Generics to Avoid Repeating Yourself
+- TypeScript Handbook — Generics (Generic Constraints) - https://www.typescriptlang.org/docs/handbook/2/generics.html
+- TypeScript Handbook — Keyof Type Operator - https://www.typescriptlang.org/docs/handbook/2/keyof-types.html
+- TypeScript Handbook — Creating Types from Types - https://www.typescriptlang.org/docs/handbook/2/types-from-types.html
+- TypeScript Documentation — Indexed Access Types - https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html
+- TypeScript Documentation — Conditional Types - https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
+- TypeScript Generic Constraints — React Patterns (keyof and extends) - https://github.com/voku/agent-skills/blob/a51823f68844c282d1a32f60fd575840c8b3465f/skills/typescript-react-patterns/AGENTS.md
+- TypeScript 泛型约束完整指南 (extends、keyof、T[K]) - https://www.w3cschool.cn/article/36032363.html
+- Can You Specify Multiple Type Constraints For TypeScript Generics — Stack Overflow - https://stackoverflow.com/questions/17125764/can-you-specify-multiple-type-constraints-for-typescript-generics
+- TypeScript 两种泛型函数定义方式对比 (K extends keyof T) - https://www.volcengine.com/article/179177

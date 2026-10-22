@@ -1,4 +1,4 @@
-# TypeScript Classes & Instantiation: A Comprehensive Cheat Sheet
+# Classes in TypeScript — Comprehensive Cheat Sheet
 
 ---
 
@@ -6,1813 +6,1659 @@
 
 ### Definitions
 
-**Core Definition**
-A class in TypeScript is a blueprint for creating objects that share common properties and methods. TypeScript extends JavaScript's class syntax with static type checking, access modifiers, parameter properties, and additional features that improve encapsulation and type safety.
+**Core Definition (Academic).** A **class** in TypeScript is a **runtime construct** that serves a dual role: it is both a **value** (a JavaScript constructor function) and a **type** (the type of instances created by that constructor). TypeScript extends JavaScript's ES2015 `class` syntax with **type annotations**, **access modifiers**, **readonly properties**, **parameter properties**, and **compile-time member checking**, while preserving the runtime semantics of the underlying JavaScript class.
 
-**Technical Definition**
-A TypeScript class is a value-space and type-space construct that defines a constructor, instance members (fields, methods, accessors), and static members. Classes create both a constructor function (value) and an instance type (type). TypeScript augments JavaScript classes with type annotations, access modifiers (`public`, `private`, `protected`), the `readonly` modifier, parameter properties (constructor parameter shorthand), abstract classes, and interface implementation checking. TypeScript's class system is structurally typed for compatibility, except when private or protected members introduce nominal behavior. The `this` type, `this` parameter, and polymorphic `this` return types enable fluent interfaces and inheritance-safe APIs.
+**Technical Definition.** A class declaration introduces a **named type** and a **constructor value** into the lexical scope. The type describes the **instance shape** — the properties and methods available on objects created via `new`. The value is the constructor function itself, which may have **static members**. TypeScript adds a **type annotation layer** over JavaScript classes: fields, methods, and accessors can be annotated; visibility modifiers (`public`, `private`, `protected`) restrict access at compile time; `readonly` restricts assignment after initialization; and **parameter properties** merge constructor parameters with field declarations. All TypeScript-specific class features are **erased** during compilation, except for runtime constructs such as `enum` and decorator metadata.
 
-**Beginner-Friendly Explanation**
-A class is a template for making objects. If you want to create many user objects with the same properties and behaviors, you write a `User` class once and then create instances with `new User(...)`. TypeScript adds extra safety features to classes: you can mark properties as `private` (only accessible inside the class) or `readonly` (can't be changed after creation), and TypeScript checks that your class implements any interfaces it claims to. Classes are the foundation of object-oriented programming in TypeScript, though modern TypeScript developers often combine classes with functional patterns.
+**Beginner-Friendly Explanation.** A class is **a blueprint for creating objects**. It describes what data an object holds (its **properties**) and what it can do (its **methods**). In TypeScript, a class is also a **type**, so the compiler knows exactly what properties and methods every instance will have. TypeScript adds **labels** to the blueprint — `private` means “only this class can touch it,” `readonly` means “set it once and never change it” — but those labels disappear when the code runs. They exist to help you and your editor catch mistakes before the program executes.
+
+---
 
 ### Key Characteristics
 
-- **Blueprint for objects**: Classes define the structure and behavior of instances.
-- **Dual nature**: A class creates both a constructor function (value) and an instance type (type).
-- **Access modifiers**: `public`, `private`, and `protected` control visibility.
-- **Parameter properties**: Constructor parameters can declare and initialize class fields simultaneously.
-- **Hard private fields**: JavaScript's `#private` syntax provides true runtime privacy.
-- **Accessors**: `get`/`set` accessors enable computed properties.
-- **Static members**: Properties, methods, and initialization blocks belong to the class itself.
-- **Structural typing**: Class compatibility is structural except with private/protected members.
-- **`this` polymorphism**: The `this` type enables inheritance-safe fluent APIs.
+| Characteristic | Description |
+|---|---|
+| **Dual value/type role** | A class is both a constructor function (value) and a type describing its instances. |
+| **Type annotations on members** | Fields, methods, accessors, and parameters can carry type annotations. |
+| **Compile-time visibility** | `public`, `private`, and `protected` are enforced **only at compile time**; they have no runtime effect unless ECMAScript `#` private fields are used. |
+| **Readonly enforcement** | `readonly` fields can be assigned only at declaration or in the constructor. |
+| **Parameter properties** | Constructor parameters prefixed with a visibility modifier or `readonly` automatically become class fields. |
+| **Structural compatibility** | Classes are compared structurally unless `private` or `protected` members introduce nominal-like behavior. |
+| **Erasure of TS-only features** | Annotations, modifiers, and parameter properties are erased; only standard JavaScript class syntax remains. |
+
+---
 
 ### Prerequisites
 
-- Basic knowledge of JavaScript classes (constructor, methods, `new`)
-- Familiarity with TypeScript interfaces and object types
-- Understanding of TypeScript access modifiers and readonly properties
-- Familiarity with inheritance and the `extends` keyword
+- **JavaScript ES2015 classes**: `class`, `constructor`, `new`, `this`, `extends`, `super`.
+- **TypeScript basics**: type annotations, interfaces, and type aliases.
+- **Object-oriented concepts**: properties, methods, inheritance, encapsulation.
+- **A TypeScript environment** (`tsc` or an editor with TypeScript support).
+
+---
 
 ### Related Programming Areas
 
-- **Object-Oriented Programming**: Classes are the foundation of OOP
-- **Design Patterns**: Factory, singleton, observer, and strategy patterns use classes
-- **Dependency Injection**: Classes are often injected as dependencies
-- **Interface Implementation**: Classes implement interfaces to fulfill contracts
-- **JavaScript Prototypes**: TypeScript classes compile to JavaScript's prototype-based system
+- **Object-oriented programming (OOP)** : encapsulation, inheritance, polymorphism.
+- **Design patterns**: Factory, Builder, Singleton, Strategy — often implemented with classes.
+- **Dependency injection** and **composition over inheritance**.
+- **Structural vs. nominal typing** in TypeScript.
+- **Runtime privacy** via ECMAScript `#` private fields.
+
+---
 
 ### Core Concepts / Features
 
-1. Class Field Declaration and Structural Inference
-2. Constructors and Initialization
-3. Instance Methods and `this` Binding Behaviors
-4. Parameter Properties (`constructor(private name: string)`)
-5. TypeScript Access Modifiers (`public`, `private`, `protected`)
-6. JavaScript Hard Private Fields (`#private`)
-7. Getters and Setters (`get` / `set` accessors)
-8. `readonly` Properties in Classes
-9. Static Members (Properties, Blocks, and Methods)
-
-
-## 1. Class Field Declaration and Structural Inference
-
-### Definitions
-
-**Core Definition**
-Class field declarations define the properties that each instance of a class will have. Fields can be declared with type annotations or inferred from initializers. TypeScript infers field types from their initial values, and field declarations participate in the class's structural type.
-
-**Technical Definition**
-Class fields in TypeScript are declared either with explicit type annotations (`field: Type;`) or with initializers (`field = value;`). The field's type is the annotation if provided, otherwise the widened type of the initializer. Without `useDefineForClassFields` (a `tsconfig` option tied to the target), fields declared without initializers are type-only and emit nothing. With `useDefineForClassFields: true` (default for ES2022+), fields are emitted as `Object.defineProperty` calls, and declared-but-uninitialized fields are set to `undefined`. Field declarations contribute to the class's instance type and are structurally checked when instances are assigned to interface types.
-
-**Beginner-Friendly Explanation**
-Class fields are the properties each object will have. When you write `class User { name: string = "Alice"; age: number; }`, you're saying every `User` instance has a `name` (defaulting to `"Alice"`) and an `age`. TypeScript can infer field types from initializers: `name = "Alice"` makes `name` a `string`. Fields are part of the class's type, so TypeScript knows what properties exist on instances. The `useDefineForClassFields` option changes some subtle behavior about how fields are initialized, especially for fields without initializers.
-
-### Purposes
-
-- To declare the properties that each instance of a class will have.
-- To provide default values for fields at instance creation.
-- To enable type inference for field types from initializers.
-- To participate in structural typing so instances match interface types.
-- To control field initialization behavior with `useDefineForClassFields`.
-
-### Syntax Rules and Structure
-
-**General Syntax: Field Declaration with Type Annotation**
-
-```typescript
-class ClassName {
-  fieldName: FieldType;
-  initializedField: FieldType = initialValue;
-}
-```
-
-**Component Breakdown**
-- `fieldName: FieldType`: A field with an explicit type annotation (no initializer).
-- `initializedField: FieldType = initialValue`: A field with an initializer.
-
-**General Syntax: Field Declaration with Inferred Type**
-
-```typescript
-class ClassName {
-  fieldName = initialValue;  // Type inferred from initialValue
-}
-```
-
-**Component Breakdown**
-- The field's type is the widened type of `initialValue`.
-
-**General Syntax: Readonly and Access-Modified Fields**
-
-```typescript
-class ClassName {
-  readonly readonlyField: Type = value;
-  private privateField: Type = value;
-  protected protectedField: Type = value;
-  static staticField: Type = value;
-}
-```
-
-**Component Breakdown**
-- Modifiers can be combined on field declarations.
-
-**Syntax Rules**
-
-- Fields can have explicit type annotations or rely on inference from initializers.
-- Fields without initializers and without type annotations infer as `any` (with `noImplicitAny` errors).
-- The `useDefineForClassFields` option (default for ES2022+) changes field initialization semantics.
-- Fields with `declare` modifier emit no code (used with `useDefineForClassFields` to avoid shadowing).
-- Fields can be `readonly`, `public`, `private`, `protected`, or `static`.
-- Field initializers run in declaration order during construction.
-- Fields are part of the instance type for structural typing.
-
-**Constraints and Limitations**
-
-- Uninitialized fields without type annotations infer as `any` under `noImplicitAny`.
-- With `useDefineForClassFields: true`, declared-but-uninitialized fields are set to `undefined`, potentially shadowing prototype properties.
-- The `declare` modifier is needed to declare fields that exist on the prototype without emitting code.
-- Field initializers cannot reference `this` before `super()` in derived classes.
-- Field initialization order matters when initializers depend on each other.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Field Declarations with Inference
-
-```typescript
-// Step 1: Declare a class with various field declarations.
-class Product {
-  id: number;                    // Explicit type, no initializer
-  name = "Unnamed Product";      // Inferred type: string
-  price = 0;                     // Inferred type: number
-  tags: string[] = [];           // Explicit type with initializer
-  inStock = true;                // Inferred type: boolean
-
-  constructor(id: number) {
-    this.id = id;                // Initialize the uninitialized field
-  }
-}
-
-// Step 2: Create instances.
-const product = new Product(1);
-console.log(product);
-// Product { id: 1, name: "Unnamed Product", price: 0, tags: [], inStock: true }
-
-// Step 3: Field types are enforced.
-product.name = "Laptop";        // ✅ Allowed
-// product.price = "expensive"; // ❌ Error: Type 'string' is not assignable to type 'number'.
-
-// Step 4: Fields participate in structural typing.
-interface ProductLike {
-  id: number;
-  name: string;
-}
-
-const productLike: ProductLike = product;  // ✅ Allowed — Product has id and name
-console.log(productLike.name);  // "Laptop"
-```
-
-**Expected Output:**
-```
-Product { id: 1, name: 'Unnamed Product', price: 0, tags: [], inStock: true }
-Laptop
-```
-
-**Why This Output Occurs:** TypeScript infers field types from initializers (`name: string`, `price: number`) and uses the explicit annotation for `id`. The `Product` instance satisfies the `ProductLike` interface because it has compatible `id` and `name` properties (structural typing).
-
-#### Example 2: `useDefineForClassFields` Behavior
-
-```typescript
-// Step 1: Class with a declared field (no initializer).
-class Example {
-  declaredField: string;  // No initializer
-  initializedField = "hello";
-}
-
-// Step 2: With useDefineForClassFields: false (legacy behavior),
-// declaredField is type-only and emits nothing.
-// The instance has no own property "declaredField" until assigned.
-
-// Step 3: With useDefineForClassFields: true (ES2022 default),
-// declaredField is emitted as Object.defineProperty(this, "declaredField", undefined).
-// The instance has an own property "declaredField" set to undefined.
-
-// Step 4: With the "declare" modifier, no code is emitted regardless.
-class ExampleWithDeclare {
-  declare declaredField: string;  // No runtime effect
-  initializedField = "hello";
-}
-
-const ex = new ExampleWithDeclare();
-console.log(ex.initializedField);  // "hello"
-console.log("declaredField" in ex);  // false (declare emits nothing)
-```
-
-**Expected Output:**
-```
-hello
-false
-```
-
-**Why This Output Occurs:** The `declare` modifier tells TypeScript that the field exists on the type but should not emit any code. With `useDefineForClassFields: true`, `declaredField` would otherwise be defined as `undefined` on the instance. Using `declare` avoids this, which is important when extending classes that have prototype properties.
-
-### Real-World Cases
-
-**Case 1: Domain Entities**
-Domain entities (User, Product, Order) declare fields with types and defaults, providing a clear structure for instance data.
-
-**Case 2: API Client Classes**
-API client classes declare fields for configuration (baseUrl, timeout, retries) with sensible defaults, enabling flexible instantiation.
-
-**Case 3: React Class Components**
-Legacy React class components declare fields for state and props, with types ensuring type-safe access.
+The following sections cover the requested core concepts. Each follows the uniform structure.
 
 ---
 
-## 2. Constructors and Initialization
+## 1. Classes
 
 ### Definitions
 
-**Core Definition**
-A constructor is a special method in a class that runs when an instance is created with `new`. The constructor initializes instance fields, performs setup logic, and can accept parameters that configure the instance. In derived classes, the constructor must call `super()` before accessing `this`.
+**Core Definition.** A **class** is a reusable code template that defines the **state** (properties) and **behavior** (methods) of objects created from it. In TypeScript, a class is simultaneously a **constructor value** and a **type** describing its instances.
 
-**Technical Definition**
-The constructor method (`constructor(...)`) is invoked during instance creation. TypeScript types constructor parameters and checks that `new ClassName(args)` matches the constructor signature. In derived classes, `super(...)` must be called before any `this` access; TypeScript enforces this. Constructor overloads can be declared with multiple signature declarations followed by a single implementation. Constructor return type is always the class instance type (or a subtype). Parameter properties (covered separately) allow declaring and initializing fields directly in the constructor parameter list.
+**Technical Definition.** A class declaration `class C { ... }` introduces a **type** `C` (the instance type) and a **value** `C` (the constructor function). The instance type includes all non-static members declared in the class body and inherited members. The constructor value includes the constructor signature and all static members. TypeScript checks that instances satisfy the declared shape and that member accesses respect visibility and readonly constraints.
 
-**Beginner-Friendly Explanation**
-A constructor is a special function that runs when you create a new object from a class. It's where you set up the object's initial state—assigning values to fields, validating inputs, and performing any setup. When you write `new User("Alice", 30)`, the constructor receives `"Alice"` and `30` and uses them to initialize the `User` instance. In classes that extend other classes, the constructor must call `super()` first to initialize the parent class before using `this`.
+**Beginner-Friendly Explanation.** A class is **a cookie cutter**. The class itself is not a cookie; it is the tool that makes cookies. Each cookie (instance) has the same shape but its own data. TypeScript adds a **label** to the cutter saying what kind of cookie it produces, so the compiler knows what to expect.
 
 ### Purposes
 
-- To initialize instance fields when an object is created.
-- To validate or transform constructor arguments before assignment.
-- To perform setup logic (e.g., opening connections, registering listeners).
-- To enforce invariants at object creation time.
-- To support overloaded constructor signatures for flexible instantiation.
+- **To bundle related data and behavior** into a single, cohesive unit.
+- **To define a reusable type** that can be used in annotations, parameters, and return types.
+- **To enforce initialization** of instance state through constructors.
+- **To support inheritance and polymorphism** with compile-time checking.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Constructor Declaration**
+**General syntax (basic class declaration):**
 
-```typescript
+```
 class ClassName {
-  field: Type;
-
-  constructor(param1: ParamType1, param2: ParamType2) {
-    this.field = param1;
-    // initialization logic
-  }
+  // fields, constructor, methods
 }
 ```
 
-**Component Breakdown**
-- `constructor(...)`: The constructor method (no return type annotation).
-- Parameters are typed like function parameters.
-- `this.field = param1`: Field initialization.
+**Component breakdown:**
 
-**General Syntax: Derived Class Constructor**
+- `class` — the declaration keyword.
+- `ClassName` — the identifier; by convention PascalCase.
+- `{ ... }` — the **class body**, containing members.
+
+**Syntax rules.**
+
+- A class body may contain fields, constructors, methods, accessors (`get`/`set`), and static members.
+- Class declarations are **not hoisted** in the same way as function declarations; they must be declared before use.
+- A class may `extends` at most one base class and may `implements` multiple interfaces.
+- TypeScript classes support generic type parameters: `class Box<T> { ... }`.
+
+**Constraints and limitations.**
+
+- TypeScript-specific class features (`private`, `readonly`, parameter properties) are **compile-time only** and are erased.
+- Classes are compared **structurally** unless `private` or `protected` members are present.
+- `this` binding must be handled with arrow functions or the `this` parameter when methods are detached.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Basic class with fields, constructor, and method
 
 ```typescript
-class ChildClass extends ParentClass {
-  field: Type;
+// example_class_basic.ts
+// Step 1: Declare a class.
+class Point {
+  // Step 2: Declare typed fields.
+  x: number;
+  y: number;
 
-  constructor(param: ParamType) {
-    super(parentArg);  // Must call super() first
-    this.field = param;
+  // Step 3: Define a constructor that initializes fields.
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  // Step 4: Define a method.
+  distanceTo(other: Point): number {
+    return Math.hypot(this.x - other.x, this.y - other.y);
   }
 }
+
+// Step 5: Create instances.
+const p1 = new Point(0, 0);
+const p2 = new Point(3, 4);
+
+console.log(p1.distanceTo(p2)); // Expected: 5
 ```
 
-**Component Breakdown**
-- `super(parentArg)`: Calls the parent constructor.
-- `this` is only accessible after `super()`.
+**Setup.** Compile with `npx tsc example_class_basic.ts --strict` and run `node example_class_basic.js`.
 
-**General Syntax: Constructor Overloads**
-
-```typescript
-class ClassName {
-  constructor(value: string);
-  constructor(value: number);
-  constructor(value: string | number) {
-    // implementation
-  }
-}
+**Expected Output:**
+```
+5
 ```
 
-**Component Breakdown**
-- Multiple signature declarations followed by one implementation signature.
+**Why this output occurs.** `Point` declares two `number` fields and a constructor that assigns them. The `distanceTo` method computes the Euclidean distance using `Math.hypot(3, 4)`, which is `5`. The compiler verifies that `p1` and `p2` are `Point` instances and that `distanceTo` receives a `Point`.
 
-**Syntax Rules**
+---
 
-- The constructor method is named `constructor`.
-- Constructor parameters are typed like function parameters.
-- In derived classes, `super()` must be called before `this` access.
-- TypeScript enforces `super()` call order.
-- Constructor overloads require one implementation signature.
-- Constructors can be `private` or `protected` to prevent direct instantiation.
-- A class without a constructor has an implicit no-arg constructor.
-- The constructor's return type is always the class instance type.
-
-**Constraints and Limitations**
-
-- Constructors cannot have return type annotations.
-- In derived classes, `super()` must be called before any `this` access.
-- Constructor overloads must be ordered from most specific to least specific.
-- Private constructors prevent `new ClassName()` outside the class (factory pattern).
-- Constructors run field initializers before the constructor body (in declaration order).
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Constructor
+#### Example 2: Class used as a type in annotations
 
 ```typescript
-// Step 1: Declare a class with a constructor.
+// example_class_type.ts
+// Step 1: Define a class.
 class User {
-  id: number;
-  name: string;
-  email: string;
-
-  constructor(id: number, name: string, email: string) {
-    this.id = id;
-    this.name = name;
-    this.email = email;
-    console.log(`User ${name} created with ID ${id}`);
-  }
+  constructor(public id: string, public name: string) {}
 }
 
-// Step 2: Create instances.
-const alice = new User(1, "Alice", "alice@example.com");
-// Output: "User Alice created with ID 1"
+// Step 2: Use the class as a type annotation.
+function greet(user: User): string {
+  return `Hello, ${user.name}`;
+}
 
-const bob = new User(2, "Bob", "bob@example.com");
-// Output: "User Bob created with ID 2"
+// Step 3: Call with an instance.
+const ada = new User("u1", "Ada");
+console.log(greet(ada)); // Expected: Hello, Ada
 
-// Step 3: Constructor arguments are type-checked.
-// const charlie = new User("3", "Charlie", "charlie@example.com");
-// ❌ Error: Argument of type 'string' is not assignable to parameter of type 'number'.
-
-// Step 4: Access initialized fields.
-console.log(alice.name);   // "Alice"
-console.log(bob.email);    // "bob@example.com"
+// Step 4: Structurally compatible object literal is accepted.
+console.log(greet({ id: "u2", name: "Grace" })); // Expected: Hello, Grace
 ```
 
 **Expected Output:**
 ```
-User Alice created with ID 1
-User Bob created with ID 2
-Alice
-bob@example.com
+Hello, Ada
+Hello, Grace
 ```
 
-**Why This Output Occurs:** The constructor receives arguments matching its typed parameters, assigns them to fields, and logs a creation message. TypeScript checks that `new User(...)` arguments match the constructor signature.
-
-#### Example 2: Derived Class with `super()`
-
-```typescript
-// Step 1: Define a base class.
-class Animal {
-  name: string;
-
-  constructor(name: string) {
-    this.name = name;
-    console.log(`Animal ${name} created`);
-  }
-
-  move(): void {
-    console.log(`${this.name} moves.`);
-  }
-}
-
-// Step 2: Define a derived class.
-class Dog extends Animal {
-  breed: string;
-
-  constructor(name: string, breed: string) {
-    super(name);  // Must call super() before accessing this
-    this.breed = breed;
-    console.log(`Dog ${name} (${breed}) created`);
-  }
-
-  bark(): void {
-    console.log(`${this.name} barks!`);
-  }
-}
-
-// Step 3: Create a Dog instance.
-const rex = new Dog("Rex", "German Shepherd");
-// Output:
-// "Animal Rex created"
-// "Dog Rex (German Shepherd) created"
-
-// Step 4: Call inherited and own methods.
-rex.move();  // "Rex moves."
-rex.bark();  // "Rex barks!"
-```
-
-**Expected Output:**
-```
-Animal Rex created
-Dog Rex (German Shepherd) created
-Rex moves.
-Rex barks!
-```
-
-**Why This Output Occurs:** The `Dog` constructor calls `super(name)` first, which invokes the `Animal` constructor and logs "Animal Rex created". Then the `Dog` constructor assigns `breed` and logs its own message. `rex.move()` uses the inherited method, and `rex.bark()` uses the Dog-specific method.
-
-### Real-World Cases
-
-**Case 1: API Client Initialization**
-API client classes use constructors to accept configuration (base URL, API key, timeout) and initialize internal state like HTTP headers and connection pools.
-
-**Case 2: Domain Entity Creation**
-Domain entities use constructors to enforce invariants (e.g., a `Money` class validating that amounts are non-negative) and initialize derived fields.
-
-**Case 3: Factory Pattern**
-Classes with private constructors use static factory methods to control instantiation, returning cached or configured instances.
+**Why this output occurs.** `User` serves as both a constructor and a type. The `greet` function accepts `User`, and `ada` is a `User` instance. The object literal `{ id: "u2", name: "Grace" }` is also accepted because TypeScript’s structural compatibility checks only the **public shape** — and `User` has only public parameter properties. This demonstrates the dual value/type role of classes.
 
 ---
 
-## 3. Instance Methods and `this` Binding Behaviors
+### Real-World Cases
+
+- **Domain models**: `class Order { ... }` encapsulates order data and behavior (totals, validation).
+- **Service layers**: `class UserService { ... }` groups related operations with dependency-injected clients.
+- **Custom errors**: `class ValidationError extends Error { ... }` creates typed, catchable error classes.
+
+---
+
+## 2. `class` Keyword
 
 ### Definitions
 
-**Core Definition**
-Instance methods are functions defined on a class that operate on individual instances. TypeScript types `this` within methods as the instance type, enabling type-safe access to instance fields and methods. The `this` binding can be explicitly typed using `this` parameters to control method context.
+**Core Definition.** The **`class` keyword** is the syntactic token that introduces a class declaration or class expression in TypeScript and JavaScript (ES2015+). It may be followed by an optional class name, an optional type-parameter list, an optional `extends` clause, an optional `implements` clause, and a class body.
 
-**Technical Definition**
-Instance methods are declared using method syntax (`methodName(params): ReturnType { }`). TypeScript infers the type of `this` within methods as the instance type (`this: ClassName`), giving type-safe access to fields and methods. The `this` parameter (a fake first parameter) allows explicit typing of `this`, which is useful for callbacks and event handlers. The polymorphic `this` type (`this: this`) enables fluent APIs and inheritance-safe method chaining. Arrow function class properties capture the lexical `this`, avoiding binding issues.
+**Technical Definition.** In TypeScript’s grammar, a class declaration is `class BindingIdentifier TypeParameters? ClassHeritage? { ClassBody }`. The `class` token is a **declaration keyword** that creates a lexical binding for the class name and establishes the class’s type and value meanings. Class expressions (`const C = class { ... }`) use the same keyword without a required binding name.
 
-**Beginner-Friendly Explanation**
-Instance methods are functions that belong to each object created from a class. When you call `alice.greet()`, the method runs with `this` referring to `alice`, so `this.name` accesses Alice's name. TypeScript knows that inside a method, `this` is the instance type, so it can catch mistakes like `this.nmae`. The `this` parameter lets you explicitly type `this` for callbacks. Arrow function properties capture `this` from the enclosing scope, which is useful when passing methods as callbacks (e.g., to event listeners).
+**Beginner-Friendly Explanation.** `class` is **the word you type to start a class**. Everything after it — the name, the body, the `extends` clause — describes the class. It is the TypeScript/JavaScript equivalent of saying “I am defining a blueprint now.”
 
 ### Purposes
 
-- To define behavior that operates on instance data.
-- To enable type-safe access to instance fields and methods via `this`.
-- To support method chaining and fluent APIs with the polymorphic `this` type.
-- To control `this` binding for callbacks using arrow function properties.
-- To explicitly type `this` in functions extracted from classes.
+- **To declare a named class** that introduces both a type and a constructor value.
+- **To create class expressions** for anonymous or locally scoped classes.
+- **To establish the syntactic foundation** for inheritance (`extends`) and interface implementation (`implements`).
+- **To support generic classes** with type parameters.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Instance Method**
+**General syntax (declaration with heritage and type parameters):**
+
+```
+class ClassName<T> extends BaseClass implements Interface1, Interface2 {
+  // body
+}
+```
+
+**Component breakdown:**
+
+- `class` — declaration keyword.
+- `ClassName` — binding identifier (PascalCase convention).
+- `<T>` — optional type-parameter list.
+- `extends BaseClass` — optional single base class.
+- `implements Interface1, Interface2` — optional interface implementation list.
+- `{ ... }` — class body.
+
+**Syntax rules.**
+
+- A class declaration is **not hoisted**; it must appear before use in the same scope.
+- Class expressions may omit the name: `const C = class { ... }`.
+- `extends` accepts a value expression that evaluates to a constructor (or `null`).
+- `implements` accepts a type expression (interface, class type, or object type).
+- Type parameters on classes are erased and cannot be used at runtime.
+
+**Constraints and limitations.**
+
+- A class may extend **only one** base class (single inheritance).
+- A class may implement **multiple** interfaces.
+- TypeScript’s `implements` clause is a **compile-time check** only; it is erased.
+- `class` declarations are subject to the **temporal dead zone** in block scopes.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Class declaration vs. class expression
 
 ```typescript
-class ClassName {
-  field: Type;
-
-  methodName(param: ParamType): ReturnType {
-    return this.field;  // `this` is the instance
+// example_class_keyword.ts
+// Step 1: Class declaration with a name.
+class Greeter {
+  greet(name: string): string {
+    return `Hello, ${name}`;
   }
 }
+
+// Step 2: Class expression assigned to a const.
+const Fareweller = class {
+  farewell(name: string): string {
+    return `Goodbye, ${name}`;
+  }
+};
+
+// Step 3: Use both.
+console.log(new Greeter().greet("Ada"));       // Expected: Hello, Ada
+console.log(new Fareweller().farewell("Ada")); // Expected: Goodbye, Ada
 ```
 
-**Component Breakdown**
-- `methodName(params): ReturnType`: The method declaration.
-- `this`: Refers to the instance within the method.
+**Expected Output:**
+```
+Hello, Ada
+Goodbye, Ada
+```
 
-**General Syntax: `this` Parameter**
+**Why this output occurs.** The `class` keyword introduces both declarations. The declaration form creates a named binding `Greeter`; the expression form creates an anonymous class assigned to `Fareweller`. Both produce constructor values and instance types.
+
+---
+
+#### Example 2: Generic class with `extends` and `implements`
 
 ```typescript
-class ClassName {
-  methodName(this: ClassName, param: ParamType): ReturnType {
-    // `this` is explicitly typed
+// example_class_generic_heritage.ts
+// Step 1: Define an interface.
+interface Identifiable {
+  id: string;
+}
+
+// Step 2: Define a base class.
+class Entity {
+  constructor(public id: string) {}
+}
+
+// Step 3: Define a generic subclass implementing the interface.
+class Repository<T extends Entity & Identifiable> extends Entity
+  implements Identifiable {
+  private items: T[] = [];
+
+  add(item: T): void {
+    this.items.push(item);
+  }
+
+  count(): number {
+    return this.items.length;
   }
 }
+
+// Step 4: Use the class.
+const repo = new Repository("users");
+repo.add(new Entity("u1") as Entity & Identifiable);
+console.log(repo.count()); // Expected: 1
 ```
 
-**Component Breakdown**
-- `this: ClassName`: The fake first parameter explicitly types `this`.
+**Expected Output:**
+```
+1
+```
 
-**General Syntax: Polymorphic `this`**
+**Why this output occurs.** The `class` keyword introduces `Repository` with a type parameter `T` constrained to `Entity & Identifiable`. The `extends Entity` clause makes `Repository` inherit the `id` property, and `implements Identifiable` is statically checked. The generic type parameter is erased at runtime, but the constraint is enforced during compilation.
+
+---
+
+### Real-World Cases
+
+- **Framework base classes**: `class BaseController extends FrameworkController { ... }`.
+- **Generic containers**: `class Stack<T> { ... }`, `class Cache<K, V> { ... }`.
+- **Anonymous class expressions** in factory functions: `return class { ... }`.
+
+---
+
+## 3. Class Declaration
+
+### Definitions
+
+**Core Definition.** A **class declaration** is the statement form of a class definition that introduces a **named binding** for the class in the enclosing scope. It is the most common way to define classes in TypeScript.
+
+**Technical Definition.** A class declaration `class C { ... }` creates a **lexical binding** `C` in the current scope. The binding has both a **type meaning** (the instance type) and a **value meaning** (the constructor function). Class declarations are **block-scoped** and are subject to the temporal dead zone: they cannot be referenced before the declaration is evaluated.
+
+**Beginner-Friendly Explanation.** A class declaration is **the normal way you write a class** — you give it a name, and that name can be used as both a constructor and a type. It is a statement, like `let` or `function`, and it is scoped to the block it appears in.
+
+### Purposes
+
+- **To introduce a named class type and constructor** into a scope.
+- **To support inheritance and interface implementation** with a clear declaration structure.
+- **To serve as the canonical form** for defining reusable object blueprints.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+class ClassName {
+  // members
+}
+```
+
+**Component breakdown:**
+
+- `class` — keyword.
+- `ClassName` — identifier bound in the current scope.
+- `{ ... }` — body with fields, constructor, methods, accessors, static members.
+
+**Syntax rules.**
+
+- Class declarations are **block-scoped** and **not hoisted** like function declarations.
+- The class name is available inside the class body (useful for static methods and recursion).
+- A class declaration may be `export`ed: `export class C { ... }`.
+- A class declaration may be `default`-exported: `export default class C { ... }`.
+
+**Constraints and limitations.**
+
+- Referencing the class before its declaration in the same scope causes a `ReferenceError` (temporal dead zone).
+- Class declarations cannot be conditionally redeclared in the same scope.
+- TypeScript-specific members are erased; the emitted JavaScript is a standard class.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Named class declaration with export
 
 ```typescript
-class ClassName {
-  setValue(value: number): this {
-    // ...
-    return this;
+// example_declaration.ts
+// Step 1: Declare and export a class.
+export class Temperature {
+  constructor(private celsius: number) {}
+
+  toFahrenheit(): number {
+    return (this.celsius * 9) / 5 + 32;
   }
 }
+
+// Step 2: Use the class in the same module.
+const temp = new Temperature(100);
+console.log(temp.toFahrenheit()); // Expected: 212
 ```
 
-**Component Breakdown**
-- `: this`: The return type is the polymorphic `this` type.
-- Enables method chaining in subclasses.
+**Expected Output:**
+```
+212
+```
 
-**General Syntax: Arrow Function Property**
+**Why this output occurs.** The class declaration binds `Temperature` as both a type and a constructor. `new Temperature(100)` creates an instance with `celsius = 100`, and `toFahrenheit` computes `212`. The `export` keyword makes the class available to other modules.
+
+---
+
+#### Example 2: Temporal dead zone behavior
 
 ```typescript
-class ClassName {
-  methodName = (param: ParamType): ReturnType => {
-    return this.field;  // Lexically captured `this`
-  };
+// example_tdz.ts
+// Step 1: This is valid — class is declared before use.
+class A {
+  value = 1;
+}
+console.log(new A().value); // Expected: 1
+
+// Step 2: The following would throw a ReferenceError.
+// console.log(new B());
+// class B { value = 2; }
+// Error: Cannot access 'B' before initialization
+```
+
+**Expected Output:**
+```
+1
+```
+
+**Why this output occurs.** `A` is declared before `new A()` is evaluated, so it works. `B` is referenced before its declaration is evaluated, which triggers the temporal dead zone and throws a `ReferenceError` at runtime. This distinguishes class declarations from hoisted function declarations.
+
+---
+
+### Real-World Cases
+
+- **Exported domain classes**: `export class Invoice { ... }` in a module.
+- **Default-exported framework classes**: `export default class App extends Component { ... }`.
+- **Namespace-scoped classes** in declaration files.
+
+---
+
+## 4. Class Members
+
+### Definitions
+
+**Core Definition.** **Class members** are the constituents of a class body: **fields** (properties), **methods**, **constructors**, **accessors** (`get`/`set`), and **static members**. They define the structure and behavior of instances (and, for static members, of the constructor itself).
+
+**Technical Definition.** A class body contains **member declarations**. Instance members are installed on the prototype (methods, accessors) or on each instance (fields). Static members are installed on the constructor function. TypeScript annotates each member with a type and optionally a visibility modifier, `readonly`, or `static`. Member names may be identifiers, string literals, numeric literals, or computed property names.
+
+**Beginner-Friendly Explanation.** Class members are **the pieces inside a class**. Fields are the data; methods are the actions; the constructor is the setup routine; accessors are controlled getters and setters; static members belong to the class itself rather than to instances.
+
+### Purposes
+
+- **To define the data and behavior** of instances and the class itself.
+- **To control access** to data through visibility modifiers.
+- **To provide controlled read/write access** through accessors.
+- **To attach class-level utilities** through static members.
+
+### Syntax Rules and Structure
+
+**General syntax (member categories):**
+
+```
+class C {
+  field: Type = value;                  // instance field
+  static staticField: Type = value;     // static field
+  constructor(params) { ... }           // constructor
+  method(params): ReturnType { ... }    // instance method
+  static staticMethod(): ReturnType { ... } // static method
+  get accessor(): Type { ... }          // getter
+  set accessor(value: Type) { ... }     // setter
 }
 ```
 
-**Component Breakdown**
-- `= (...) => { }`: An arrow function class property captures the lexical `this`.
+**Component breakdown:**
 
-**Syntax Rules**
+- `field: Type = value` — instance field with annotation and optional initializer.
+- `static` — marks a member as belonging to the constructor, not instances.
+- `constructor(params)` — initialization routine; no return type annotation.
+- `method(params): ReturnType` — instance method; `ReturnType` may be omitted and inferred.
+- `get` / `set` — accessor declarations; getters must not have parameters, setters must have exactly one.
 
-- Instance methods use method syntax (`methodName(params): ReturnType { }`).
-- `this` inside a method is typed as the instance type.
-- The `this` parameter (fake first parameter) explicitly types `this`.
-- The polymorphic `this` return type enables inheritance-safe chaining.
-- Arrow function properties capture the lexical `this` from the enclosing scope.
-- Methods are on the prototype; arrow function properties are on the instance.
-- TypeScript's `noImplicitThis` option catches untyped `this` usage.
+**Syntax rules.**
 
-**Constraints and Limitations**
+- Fields may be annotated, initialized, or both; unannotated uninitialized fields are implicitly `any` without `strictPropertyInitialization`.
+- `static` members are accessed via the class name: `C.staticMember`.
+- Accessors cannot have the same name as a field in the same class.
+- Computed member names are allowed: `[Symbol.iterator]() { ... }`.
 
-- Methods extracted from instances lose their `this` binding unless bound or arrow-wrapped.
-- Arrow function properties consume more memory (one per instance vs. one on the prototype).
-- The `this` parameter cannot be used with arrow functions.
-- Polymorphic `this` cannot be used with static methods.
-- `this` in static methods refers to the class itself, not an instance.
+**Constraints and limitations.**
 
-### Multiple Annotated Complete Step-by-Step Code Examples
+- Instance fields are **not** on the prototype; they are per-instance properties.
+- `static` members are inherited by subclasses but are not available on instances.
+- TypeScript accessors are compiled to `Object.defineProperty` on the prototype.
+- Member names cannot be `constructor`.
 
-#### Example 1: Basic Instance Methods and `this`
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: All member categories in one class
 
 ```typescript
-// Step 1: Define a class with instance methods.
+// example_members.ts
 class Counter {
+  // Instance field with initializer.
   count: number = 0;
 
+  // Static field.
+  static instances: number = 0;
+
+  // Constructor.
+  constructor(public label: string) {
+    Counter.instances++;
+  }
+
+  // Instance method.
   increment(): void {
-    this.count += 1;  // `this` is the Counter instance
+    this.count++;
   }
 
-  decrement(): void {
-    this.count -= 1;
+  // Static method.
+  static resetInstances(): void {
+    Counter.instances = 0;
   }
 
-  getCount(): number {
-    return this.count;
+  // Getter.
+  get description(): string {
+    return `${this.label}: ${this.count}`;
+  }
+
+  // Setter.
+  set description(value: string) {
+    const [label, count] = value.split(": ");
+    this.label = label;
+    this.count = Number(count);
   }
 }
 
-// Step 2: Create an instance and call methods.
-const counter = new Counter();
-counter.increment();
-counter.increment();
-counter.decrement();
-console.log(counter.getCount());  // 1
+const c = new Counter("clicks");
+c.increment();
+c.increment();
+console.log(c.description);        // Expected: clicks: 2
+console.log(Counter.instances);    // Expected: 1
 
-// Step 3: `this` is type-checked.
-class BadCounter {
-  value: number = 0;
-  increment(): void {
-    // this.nonExistent += 1;  // ❌ Error: Property 'nonExistent' does not exist.
-  }
-}
+c.description = "taps: 10";
+console.log(c.count);              // Expected: 10
 ```
 
 **Expected Output:**
 ```
+clicks: 2
 1
+10
 ```
 
-**Why This Output Occurs:** Each method call operates on the `counter` instance via `this`. TypeScript knows `this.count` is a number, so `this.count += 1` is type-safe.
-
-#### Example 2: Polymorphic `this` and Arrow Function Properties
-
-```typescript
-// Step 1: Define a class with polymorphic `this` return type.
-class QueryBuilder {
-  protected conditions: string[] = [];
-
-  where(condition: string): this {
-    this.conditions.push(condition);
-    return this;  // Returns the current instance
-  }
-
-  build(): string {
-    return this.conditions.length > 0
-      ? `WHERE ${this.conditions.join(" AND ")}`
-      : "";
-  }
-}
-
-// Step 2: Method chaining works because of polymorphic `this`.
-const query = new QueryBuilder()
-  .where("age > 18")
-  .where("country = 'US'")
-  .build();
-console.log(query);  // "WHERE age > 18 AND country = 'US'"
-
-// Step 3: Polymorphic `this` preserves subclass types.
-class AdvancedQueryBuilder extends QueryBuilder {
-  orderBy(field: string): this {
-    console.log(`Order by ${field}`);
-    return this;
-  }
-}
-
-const advanced = new AdvancedQueryBuilder()
-  .where("active = true")
-  .orderBy("name")  // ✅ Available because `this` is AdvancedQueryBuilder
-  .build();
-console.log(advanced);  // "WHERE active = true"
-
-// Step 4: Arrow function property captures lexical `this`.
-class Timer {
-  seconds = 0;
-
-  start = (): void => {
-    // `this` is lexically captured — works as a callback
-    setInterval(() => {
-      this.seconds += 1;
-    }, 1000);
-  };
-}
-```
-
-**Expected Output:**
-```
-WHERE age > 18 AND country = 'US'
-Order by name
-WHERE active = true
-```
-
-**Why This Output Occurs:** The polymorphic `this` return type ensures that chaining returns the correct subclass type. In `AdvancedQueryBuilder`, `orderBy` is available after `where` because `this` is the subclass type. The arrow function property in `Timer` captures `this` lexically, so it works correctly when passed as a callback.
-
-### Real-World Cases
-
-**Case 1: Fluent APIs and Builders**
-Query builders, HTTP clients, and configuration builders use polymorphic `this` to enable method chaining with correct subclass types.
-
-**Case 2: Event Handlers**
-Arrow function properties are used for event handlers in React class components and DOM event listeners to preserve `this` binding.
-
-**Case 3: Callback Passing**
-When passing methods as callbacks (e.g., to `Array.map` or `setTimeout`), arrow function properties avoid `this` binding issues.
+**Why this output occurs.** `count` is an instance field initialized to `0`; two `increment` calls make it `2`. `instances` is a static field incremented in the constructor. The getter returns a formatted string; the setter parses the string and updates both `label` and `count`. All member categories are exercised.
 
 ---
 
-## 4. Parameter Properties (`constructor(private name: string)`)
-
-### Definitions
-
-**Core Definition**
-Parameter properties are a TypeScript shorthand that allows constructor parameters to be declared as class fields simultaneously. By adding an access modifier (`public`, `private`, `protected`) or `readonly` to a constructor parameter, TypeScript generates a field with the same name and initializes it with the parameter value.
-
-**Technical Definition**
-Parameter properties combine field declaration and constructor parameter declaration in a single syntax. When a constructor parameter has an access modifier (`public`, `private`, `protected`), `readonly`, or both, TypeScript emits a field declaration and assigns the parameter value to `this.paramName` at the start of the constructor body. Parameter properties must appear before regular parameters in the constructor. They reduce boilerplate for the common pattern of accepting constructor arguments and assigning them to fields.
-
-**Beginner-Friendly Explanation**
-Parameter properties are a shortcut for a common pattern. Instead of writing a field declaration and a constructor that assigns to it, you write the modifier directly on the constructor parameter. For example, `constructor(private name: string) {}` automatically creates a `private name` field and assigns the constructor argument to it. It's a compact way to write classes with dependency injection or configuration parameters. You can use `public`, `private`, `protected`, `readonly`, or combinations.
-
-### Purposes
-
-- To reduce boilerplate by combining field declaration and constructor parameter declaration.
-- To implement dependency injection patterns concisely.
-- To create classes with configuration parameters that become instance fields.
-- To make class definitions shorter and more readable.
-- To enforce access control on constructor-injected fields.
-
-### Syntax Rules and Structure
-
-**General Syntax: Parameter Property**
+#### Example 2: Static vs. instance member access
 
 ```typescript
-class ClassName {
-  constructor(
-    public publicField: Type1,
-    private privateField: Type2,
-    protected protectedField: Type3,
-    readonly readonlyField: Type4
-  ) {}
-}
-```
+// example_static_vs_instance.ts
+class MathUtils {
+  static readonly PI = 3.14159;
 
-**Component Breakdown**
-- `public`, `private`, `protected`, `readonly`: Modifiers on constructor parameters.
-- Each parameter becomes a field with the same name and the modifier applied.
-- The parameter value is assigned to `this.paramName`.
-
-**General Syntax: Combined Modifiers**
-
-```typescript
-class ClassName {
-  constructor(
-    private readonly name: string,
-    public readonly id: number
-  ) {}
-}
-```
-
-**Component Breakdown**
-- `private readonly`: The field is private and readonly.
-- `public readonly`: The field is public and readonly.
-
-**Syntax Rules**
-
-- Parameter properties use access modifiers or `readonly` on constructor parameters.
-- Parameter properties must appear before regular parameters.
-- The generated field has the same name as the parameter.
-- The parameter value is assigned to the field at the start of the constructor.
-- Parameter properties can be combined with regular parameters.
-- The constructor body can access parameter properties via `this`.
-- Parameter properties are public by default if no modifier is specified (they are not parameter properties unless a modifier is present).
-
-**Constraints and Limitations**
-
-- Parameter properties must come before regular parameters.
-- Modifiers cannot be applied to rest parameters.
-- Parameter properties cannot be used with destructuring parameters.
-- The generated code adds `this.paramName = paramName` at the top of the constructor body.
-- Parameter properties cannot be conditionally initialized (the assignment always happens).
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Parameter Properties
-
-```typescript
-// Step 1: Define a class using parameter properties.
-class User {
-  constructor(
-    public id: number,
-    public name: string,
-    private email: string,
-    readonly createdAt: Date = new Date()
-  ) {}
-
-  getEmail(): string {
-    return this.email;  // Accessible within the class
+  static circleArea(radius: number): number {
+    return MathUtils.PI * radius ** 2;
   }
 
-  describe(): string {
-    return `${this.name} (${this.getEmail()})`;
-  }
+  description = "utility";
 }
 
-// Step 2: Create instances.
-const alice = new User(1, "Alice", "alice@example.com");
-console.log(alice.id);           // 1 (public)
-console.log(alice.name);         // "Alice" (public)
-// console.log(alice.email);     // ❌ Error: 'email' is private.
-console.log(alice.getEmail());   // "alice@example.com"
-console.log(alice.describe());   // "Alice (alice@example.com)"
+console.log(MathUtils.circleArea(2)); // Expected: 12.56636
+console.log(new MathUtils().description); // Expected: utility
 
-// Step 3: Readonly parameter property cannot be reassigned.
-// alice.createdAt = new Date();  // ❌ Error: Cannot assign to 'createdAt'.
-console.log(alice.createdAt instanceof Date);  // true
-
-// Step 4: Equivalent verbose version (for comparison).
-class UserVerbose {
-  public id: number;
-  public name: string;
-  private email: string;
-  readonly createdAt: Date;
-
-  constructor(id: number, name: string, email: string, createdAt: Date = new Date()) {
-    this.id = id;
-    this.name = name;
-    this.email = email;
-    this.createdAt = createdAt;
-  }
-
-  getEmail(): string { return this.email; }
-}
+// MathUtils.description; // Error: Property 'description' does not exist on type 'typeof MathUtils'.
+// new MathUtils().circleArea(2); // Error: Property 'circleArea' does not exist on type 'MathUtils'.
 ```
 
 **Expected Output:**
 ```
-1
-Alice
-alice@example.com
-Alice (alice@example.com)
+12.56636
+utility
+```
+
+**Why this output occurs.** `PI` and `circleArea` are static members, accessible only on the class (constructor) itself. `description` is an instance field, accessible only on instances. The compiler enforces this separation, preventing accidental cross-access.
+
+---
+
+### Real-World Cases
+
+- **Entity classes**: fields for data, methods for behavior, static factory methods for creation.
+- **Utility classes**: static methods and constants only.
+- **Reactive models**: accessors that notify subscribers on `set`.
+
+---
+
+## 5. Properties (Fields)
+
+### Definitions
+
+**Core Definition.** A **property** (also called a **field**) is a class member that holds **data** on an instance or on the class itself. In TypeScript, properties can be annotated with types, initialized with values, and modified with visibility modifiers, `readonly`, or `static`.
+
+**Technical Definition.** An instance field declaration `name: Type` creates a property on each instance created by the constructor. An initializer `name: Type = value` is evaluated during construction (after `super()` in derived classes). TypeScript checks assignments to the field against its annotated type. Under `strictPropertyInitialization`, every field must be initialized either at declaration or in the constructor.
+
+**Beginner-Friendly Explanation.** A property is **a piece of data attached to an object**. `name: string` means every instance has a `name` that must be a string. You can give it a starting value (`= "unknown"`), and TypeScript will make sure you never accidentally assign a number to it.
+
+### Purposes
+
+- **To store per-instance or per-class state**.
+- **To enforce type safety on data** through annotations.
+- **To ensure initialization** of instance state before use.
+- **To control mutability** through `readonly` and visibility modifiers.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+[modifiers] fieldName: Type [= initializer];
+```
+
+**Component breakdown:**
+
+- `modifiers` — optional `public` / `private` / `protected` / `readonly` / `static` combination.
+- `fieldName` — identifier, string literal, numeric literal, or computed property.
+- `: Type` — optional annotation; if omitted with an initializer, the type is inferred.
+- `= initializer` — optional value; evaluated during construction.
+
+**Syntax rules.**
+
+- `strictPropertyInitialization` requires initialization at declaration or in the constructor.
+- Definite assignment assertion `!` can suppress the check: `name!: string;`.
+- `readonly` fields may be assigned only at declaration or in the constructor.
+- `static` fields belong to the constructor, not instances.
+- Computed property names are allowed: `[Symbol.toStringTag]: string`.
+
+**Constraints and limitations.**
+
+- Uninitialized fields without `strictPropertyInitialization` are implicitly `any` and may be `undefined` at runtime.
+- Fields are **per-instance**; changing a field on one instance does not affect others (unless the field is `static`).
+- TypeScript field declarations may emit runtime initialization code, affecting class semantics compared to JavaScript prototype-based fields.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Typed fields with initialization
+
+```typescript
+// example_fields.ts
+class User {
+  // Annotated and initialized.
+  name: string = "Anonymous";
+
+  // Annotated, initialized in constructor.
+  email: string;
+
+  // Inferred from initializer.
+  active = true;
+
+  // Readonly field.
+  readonly createdAt: Date = new Date();
+
+  constructor(email: string) {
+    this.email = email;
+  }
+}
+
+const user = new User("ada@example.com");
+console.log(user.name);       // Expected: Anonymous
+console.log(user.email);      // Expected: ada@example.com
+console.log(user.active);     // Expected: true
+
+// user.createdAt = new Date(); // Error: Cannot assign to 'createdAt' because it is a read-only property.
+```
+
+**Expected Output:**
+```
+Anonymous
+ada@example.com
 true
 ```
 
-**Why This Output Occurs:** The parameter properties `public id`, `public name`, `private email`, and `readonly createdAt` generate fields with the same names and assign the constructor arguments. The `private email` field is only accessible within the class (via `getEmail`). The `readonly createdAt` field cannot be reassigned.
+**Why this output occurs.** `name` has a default initializer, so every instance starts with `"Anonymous"`. `email` is assigned in the constructor. `active` is inferred as `boolean` from `true`. `createdAt` is `readonly`, so reassignment is a compile-time error. `strictPropertyInitialization` is satisfied because all fields are initialized.
 
-#### Example 2: Dependency Injection with Parameter Properties
+---
+
+#### Example 2: Definite assignment assertion and optional fields
 
 ```typescript
-// Step 1: Define service interfaces.
-interface Logger {
-  log(message: string): void;
-}
+// example_fields_assertion.ts
+class Config {
+  // Definite assignment assertion — tells the compiler it will be set.
+  host!: string;
 
-interface Database {
-  query(sql: string): unknown[];
-}
+  // Optional field — may be undefined.
+  port?: number;
 
-// Step 2: Define a class with parameter properties for dependency injection.
-class UserService {
-  constructor(
-    private readonly logger: Logger,
-    private readonly db: Database,
-    private readonly tableName: string = "users"
-  ) {}
-
-  getUser(id: number): unknown {
-    this.logger.log(`Fetching user ${id} from ${this.tableName}`);
-    const results = this.db.query(`SELECT * FROM ${this.tableName} WHERE id = ${id}`);
-    return results[0];
+  initialize() {
+    this.host = "localhost";
   }
 }
 
-// Step 3: Create mock implementations.
-const consoleLogger: Logger = {
-  log: (msg) => console.log(`[LOG] ${msg}`),
-};
-
-const mockDb: Database = {
-  query: (sql) => {
-    console.log(`[DB] ${sql}`);
-    return [{ id: 1, name: "Alice" }];
-  },
-};
-
-// Step 4: Inject dependencies.
-const service = new UserService(consoleLogger, mockDb);
-const user = service.getUser(1);
-console.log(user);  // { id: 1, name: "Alice" }
+const config = new Config();
+config.initialize();
+console.log(config.host); // Expected: localhost
+console.log(config.port); // Expected: undefined
 ```
 
 **Expected Output:**
 ```
-[LOG] Fetching user 1 from users
-[DB] SELECT * FROM users WHERE id = 1
-{ id: 1, name: 'Alice' }
+localhost
+undefined
 ```
 
-**Why This Output Occurs:** The parameter properties `private readonly logger`, `private readonly db`, and `private readonly tableName` automatically create and initialize fields. The `UserService` class receives its dependencies through the constructor, enabling dependency injection without explicit field declarations.
-
-### Real-World Cases
-
-**Case 1: Dependency Injection**
-Services, repositories, and controllers use parameter properties to receive dependencies concisely, especially in frameworks like NestJS and Angular.
-
-**Case 2: Value Objects**
-Value objects (Money, DateRange, Coordinates) use parameter properties to encapsulate their components with appropriate access modifiers.
-
-**Case 3: Configuration Wrappers**
-Classes that wrap configuration objects use parameter properties to expose configuration values as readonly fields.
+**Why this output occurs.** `host!` suppresses `strictPropertyInitialization`; the field is declared but not initialized at declaration or in the constructor, and the `!` asserts that it will be assigned before use. `port?` makes the field optional, so its type is `number | undefined`. At runtime, `port` has not been assigned, so it is `undefined`.
 
 ---
 
-## 5. TypeScript Access Modifiers (`public`, `private`, `protected`)
+### Real-World Cases
+
+- **Configuration objects**: `host!: string` with a separate `initialize` method.
+- **Entity IDs**: `readonly id: string` assigned once in the constructor.
+- **Optional metadata**: `tags?: string[]` for optional fields.
+
+---
+
+## 6. Methods
 
 ### Definitions
 
-**Core Definition**
-Access modifiers in TypeScript control the visibility of class members. `public` (default) allows access from anywhere. `private` restricts access to the declaring class. `protected` restricts access to the declaring class and its subclasses. These modifiers are compile-time-only constraints.
+**Core Definition.** A **method** is a class member that defines **behavior** — a function associated with instances (or with the class itself, if `static`). Methods can accept parameters, return values, and access instance state via `this`.
 
-**Technical Definition**
-TypeScript access modifiers are type-level annotations that control member visibility during type checking. `public` members are accessible from any code. `private` members are accessible only within the declaring class (not subclasses). `protected` members are accessible within the declaring class and its subclasses. These modifiers are enforced at compile time and erased at runtime—`private` and `protected` members are still accessible at runtime via bracket notation or type assertions. Classes with `private` or `protected` members are compared nominally (structural compatibility requires the same declaration), while classes with only `public` members are compared structurally.
+**Technical Definition.** An instance method declaration installs a function on the class’s prototype. A static method installs a function on the constructor. TypeScript annotates parameter types and return types, and checks calls against the method signature. The `this` type can be explicitly annotated as the first parameter to control the method’s binding context.
 
-**Beginner-Friendly Explanation**
-Access modifiers control who can see and use class members. `public` means everyone can access it. `private` means only the class itself can access it—not even subclasses. `protected` means the class and its subclasses can access it. These are compile-time checks: TypeScript enforces them when you write code, but at runtime, the members are still there. This is different from JavaScript's `#private` fields, which are truly private at runtime. Access modifiers are primarily for documentation and compile-time safety.
+**Beginner-Friendly Explanation.** A method is **an action an object can perform**. `deposit(amount: number)` on a `BankAccount` class means every account can deposit money. TypeScript checks that you pass a number and that the method’s return value (if any) is used correctly.
 
 ### Purposes
 
-- To encapsulate internal state and prevent external access.
-- To document the intended visibility of class members.
-- To enforce encapsulation at compile time.
-- To enable nominal-like typing for classes with private members.
-- To support inheritance hierarchies with protected members.
+- **To encapsulate behavior** alongside the data it operates on.
+- **To provide a typed interface** for object operations.
+- **To support static utility functions** that do not require an instance.
+- **To control `this` binding** through the `this` parameter.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Access Modifiers**
+**General syntax:**
 
-```typescript
-class ClassName {
-  public publicField: Type;
-  private privateField: Type;
-  protected protectedField: Type;
-
-  public publicMethod(): void { }
-  private privateMethod(): void { }
-  protected protectedMethod(): void { }
+```
+[modifiers] methodName(params): ReturnType {
+  // body
 }
 ```
 
-**Component Breakdown**
-- `public`: Accessible from anywhere (default).
-- `private`: Accessible only within the declaring class.
-- `protected`: Accessible within the declaring class and subclasses.
+**Component breakdown:**
 
-**General Syntax: Modifier on Constructor Parameters**
+- `modifiers` — optional `public` / `private` / `protected` / `static`.
+- `methodName` — identifier, string/numeric literal, or computed name.
+- `params` — parameter list with optional annotations, defaults, and rest parameters.
+- `ReturnType` — optional annotation; inferred from the body if omitted.
+
+**Syntax rules.**
+
+- Methods are installed on the prototype; they are shared across instances.
+- `this` inside a method refers to the instance (unless the method is detached).
+- The `this` parameter can be declared as the first parameter: `method(this: C, ...) { ... }`.
+- Arrow function fields (`method = () => { ... }`) bind `this` lexically and are per-instance.
+
+**Constraints and limitations.**
+
+- Detached methods lose their `this` binding unless bound or defined as arrow function fields.
+- Overloading is supported via multiple method signatures followed by an implementation signature.
+- `static` methods cannot access instance members via `this`.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Instance and static methods
 
 ```typescript
-class ClassName {
-  constructor(
-    public publicParam: Type1,
-    private privateParam: Type2,
-    protected protectedParam: Type3
-  ) {}
+// example_methods.ts
+class Calculator {
+  // Instance method.
+  add(a: number, b: number): number {
+    return a + b;
+  }
+
+  // Static method.
+  static multiply(a: number, b: number): number {
+    return a * b;
+  }
+
+  // Arrow function field — lexically bound this.
+  log = (message: string): void => {
+    console.log(message);
+  };
+}
+
+const calc = new Calculator();
+console.log(calc.add(2, 3));           // Expected: 5
+console.log(Calculator.multiply(2, 3)); // Expected: 6
+calc.log("done");                      // Expected: done
+
+const detachedAdd = calc.add;
+// console.log(detachedAdd(2, 3)); // Error at runtime: this is undefined.
+```
+
+**Expected Output:**
+```
+5
+6
+done
+```
+
+**Why this output occurs.** `add` is a prototype method; `multiply` is a static method on the constructor. `log` is an arrow function field, so `this` is permanently bound to the instance. Detaching `add` loses its `this` binding, which is why the commented call would fail at runtime.
+
+---
+
+#### Example 2: Method with `this` parameter
+
+```typescript
+// example_this_param.ts
+class Counter {
+  count = 0;
+
+  increment(this: Counter, by: number = 1): void {
+    this.count += by;
+  }
+}
+
+const counter = new Counter();
+const increment = counter.increment;
+
+// The this parameter ensures the method is called on a Counter.
+increment.call(counter, 5);
+console.log(counter.count); // Expected: 5
+
+// increment(5); // Error: The 'this' context of type 'void' is not assignable to method's 'this' of type 'Counter'.
+```
+
+**Expected Output:**
+```
+5
+```
+
+**Why this output occurs.** The `this: Counter` parameter tells the compiler that `increment` must be called with a `Counter` as `this`. Using `.call(counter, 5)` satisfies this requirement and increments the count. Calling `increment(5)` without a proper `this` is rejected at compile time.
+
+---
+
+### Real-World Cases
+
+- **Service methods**: `class UserService { async findById(id: string): Promise<User> { ... } }`.
+- **Static helpers**: `class StringUtils { static capitalize(s: string): string { ... } }`.
+- **Event handlers**: arrow function fields for stable `this` in callbacks.
+
+---
+
+## 7. Constructors
+
+### Definitions
+
+**Core Definition.** A **constructor** is a special class member that is automatically invoked when an instance is created with `new`. It initializes instance state, validates input, and may call the parent constructor via `super()`.
+
+**Technical Definition.** The `constructor` member defines the **construction signature** of the class. It has no return type annotation because it always returns the instance. In a derived class, the constructor must call `super(...)` before accessing `this`. TypeScript checks constructor arguments against the declared parameter types and enforces `strictPropertyInitialization` where applicable. Constructors may be overloaded with multiple signatures.
+
+**Beginner-Friendly Explanation.** A constructor is **the setup routine for a new object**. When you write `new User("Ada")`, the constructor runs with `"Ada"` as its argument. It puts the object into a valid starting state. TypeScript checks that you provide the right arguments and that all required fields are initialized.
+
+### Purposes
+
+- **To initialize instance fields** to valid starting values.
+- **To validate constructor arguments** before the object is used.
+- **To enforce required initialization** under `strictPropertyInitialization`.
+- **To support inheritance** by calling `super()` and passing required arguments.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+constructor(params) {
+  // initialization
 }
 ```
 
-**Component Breakdown**
-- Modifiers on constructor parameters create parameter properties.
+**Component breakdown:**
 
-**Syntax Rules**
+- `constructor` — the keyword; cannot be renamed.
+- `params` — parameter list with types, defaults, rest parameters, and optional parameter properties.
+- `{ ... }` — body; must call `super(...)` first in derived classes.
 
-- `public` is the default and can be omitted.
-- `private` members are accessible only within the declaring class.
-- `protected` members are accessible within the declaring class and subclasses.
-- Modifiers apply to fields, methods, accessors, and constructor parameters.
-- Classes with `private` or `protected` members are compared nominally.
-- Access modifiers are erased at runtime.
-- The `private` modifier does not prevent runtime access (use `#private` for that).
+**Syntax rules.**
 
-**Constraints and Limitations**
+- Constructors have **no return type annotation**.
+- In a derived class, `super(...)` must be called before `this` is accessed.
+- Parameter properties (`public`, `private`, `protected`, `readonly`) create and initialize fields automatically.
+- Constructor overloads are declared as multiple signatures followed by one implementation.
+- `private` constructors prevent direct instantiation from outside the class (useful for singletons).
 
-- `private` and `protected` are compile-time only; they provide no runtime protection.
-- `private` members cannot be accessed in subclasses (unlike `protected`).
-- Nominal comparison for classes with private members can cause unexpected incompatibility.
-- Access modifiers cannot be used on static members in some older TypeScript versions (they can in modern versions).
-- Bracket notation can bypass `private` at runtime in JavaScript.
+**Constraints and limitations.**
 
-### Multiple Annotated Complete Step-by-Step Code Examples
+- `strictPropertyInitialization` requires all fields to be initialized at declaration or in the constructor.
+- Forgetting `super()` in a derived class is a compile-time error.
+- Constructor logic cannot be asynchronous.
 
-#### Example 1: Access Modifiers in Action
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Basic constructor with validation
 
 ```typescript
-// Step 1: Define a class with all access modifiers.
+// example_constructor.ts
 class BankAccount {
-  public accountNumber: string;       // Accessible everywhere
-  private balance: number;            // Accessible only in BankAccount
-  protected owner: string;            // Accessible in BankAccount and subclasses
+  balance: number;
 
-  constructor(accountNumber: string, owner: string, initialBalance: number) {
-    this.accountNumber = accountNumber;
-    this.owner = owner;
+  constructor(public owner: string, initialBalance: number) {
+    if (initialBalance < 0) {
+      throw new Error("Initial balance cannot be negative");
+    }
     this.balance = initialBalance;
   }
-
-  public deposit(amount: number): void {
-    this.balance += amount;  // ✅ Private access within the class
-    console.log(`Deposited ${amount}. New balance: ${this.balance}`);
-  }
-
-  public getBalance(): number {
-    return this.balance;  // ✅ Private access within the class
-  }
-
-  private validateAmount(amount: number): boolean {
-    return amount > 0;
-  }
 }
 
-// Step 2: Create an instance.
-const account = new BankAccount("ACC-001", "Alice", 1000);
+const account = new BankAccount("Ada", 1000);
+console.log(account.owner);   // Expected: Ada
+console.log(account.balance); // Expected: 1000
 
-// Step 3: Public members are accessible.
-console.log(account.accountNumber);  // "ACC-001"
-account.deposit(500);                // "Deposited 500. New balance: 1500"
-console.log(account.getBalance());   // 1500
-
-// Step 4: Private members are NOT accessible.
-// console.log(account.balance);     // ❌ Error: Property 'balance' is private.
-// account.validateAmount(100);      // ❌ Error: Property 'validateAmount' is private.
-
-// Step 5: Protected members are accessible in subclasses.
-class SavingsAccount extends BankAccount {
-  private interestRate: number;
-
-  constructor(accountNumber: string, owner: string, initialBalance: number, interestRate: number) {
-    super(accountNumber, owner, initialBalance);
-    this.interestRate = interestRate;
-  }
-
-  public addInterest(): void {
-    // this.balance is NOT accessible (private)
-    // this.owner IS accessible (protected)
-    console.log(`Adding interest for ${this.owner}`);
-    const interest = this.getBalance() * this.interestRate;
-    this.deposit(interest);
-  }
-}
-
-const savings = new SavingsAccount("SAV-001", "Bob", 5000, 0.05);
-savings.addInterest();  // "Adding interest for Bob" then "Deposited 250..."
-```
-
-**Expected Output:**
-```
-ACC-001
-Deposited 500. New balance: 1500
-1500
-Adding interest for Bob
-Deposited 250. New balance: 5250
-```
-
-**Why This Output Occurs:** `accountNumber` (public) is accessible everywhere. `balance` (private) is only accessible within `BankAccount` (used in `deposit` and `getBalance`). `owner` (protected) is accessible in both `BankAccount` and `SavingsAccount`. The subclass accesses `this.owner` (protected) but not `this.balance` (private), using `getBalance()` instead.
-
-### Real-World Cases
-
-**Case 1: Encapsulation in Domain Models**
-Domain entities use `private` for internal state (balance, status) and `public` for methods that expose safe operations.
-
-**Case 2: Framework Base Classes**
-Framework base classes use `protected` for members that subclasses should access but external code should not.
-
-**Case 3: Nominal Typing**
-Classes with `private` members are compared nominally, which is useful for creating distinct types that happen to have the same shape.
-
----
-
-## 6. JavaScript Hard Private Fields (`#private`)
-
-### Definitions
-
-**Core Definition**
-JavaScript hard private fields use the `#` prefix to create truly private class fields that are enforced at runtime, not just at compile time. Unlike TypeScript's `private` modifier, `#private` fields cannot be accessed outside the class under any circumstances—not even via bracket notation or type assertions.
-
-**Technical Definition**
-Hard private fields, introduced in ES2022 and supported by TypeScript 3.8+, use the syntax `#fieldName` for declarations and access. These fields are stored in a private slot that is not accessible via property access, bracket notation, `Object.keys`, or reflection APIs. The `#` prefix is part of the field name, and the fields must be declared in the class body. TypeScript enforces `#private` access at compile time and emits the `#` syntax to JavaScript, which enforces it at runtime. Subclasses cannot access parent class `#private` fields.
-
-**Beginner-Friendly Explanation**
-JavaScript's `#private` fields are truly private—no one outside the class can access them, not even with tricks. TypeScript's `private` keyword is only a compile-time check: at runtime, the field is still accessible. If you need real privacy (e.g., for security or to prevent accidental access), use `#private`. The `#` symbol before the field name marks it as hard private. Subclasses can't access parent `#private` fields either, making them completely encapsulated.
-
-### Purposes
-
-- To create truly private fields that are inaccessible at runtime.
-- To prevent accidental access or modification of internal state.
-- To provide runtime-enforced encapsulation (unlike TypeScript's `private`).
-- To avoid naming collisions in inheritance hierarchies.
-- To satisfy security requirements where runtime privacy is essential.
-
-### Syntax Rules and Structure
-
-**General Syntax: Hard Private Field**
-
-```typescript
-class ClassName {
-  #privateField: Type;
-
-  constructor(value: Type) {
-    this.#privateField = value;
-  }
-
-  #privateMethod(): ReturnType {
-    return this.#privateField;
-  }
-}
-```
-
-**Component Breakdown**
-- `#privateField`: The `#` prefix marks the field as hard private.
-- Access uses `this.#privateField` within the class.
-- External access is a compile-time and runtime error.
-
-**Syntax Rules**
-
-- Hard private fields use the `#` prefix in both declaration and access.
-- `#private` fields must be declared in the class body (not in the constructor).
-- Access is only allowed within the declaring class.
-- Subclasses cannot access parent `#private` fields.
-- `#private` fields are not enumerable and do not appear in `Object.keys` or `for...in`.
-- `#private` methods are supported (TypeScript 4.3+).
-- `#private` fields cannot be combined with TypeScript access modifiers.
-
-**Constraints and Limitations**
-
-- `#private` fields cannot be accessed by subclasses (unlike `protected`).
-- `#private` fields cannot be used with `readonly` modifier (though they are effectively read-only from outside).
-- `#private` fields require ES2022+ target or downlevel support.
-- Reflection APIs cannot access `#private` fields.
-- `#private` fields cannot be used with parameter properties.
-- Mixing `#private` and TypeScript `private` in the same class is allowed but can be confusing.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Hard Private Fields vs TypeScript `private`
-
-```typescript
-// Step 1: Define a class with both TypeScript private and hard private fields.
-class SecureAccount {
-  private tsPrivate: string = "typescript-private";
-  #hardPrivate: string = "hard-private";
-
-  getTsPrivate(): string {
-    return this.tsPrivate;
-  }
-
-  getHardPrivate(): string {
-    return this.#hardPrivate;  // ✅ Accessible within the class
-  }
-}
-
-// Step 2: Create an instance.
-const account = new SecureAccount();
-
-// Step 3: TypeScript private is accessible via bracket notation at runtime.
-console.log(account.getTsPrivate());  // "typescript-private"
-console.log((account as any).tsPrivate);  // "typescript-private" — bypassed!
-
-// Step 4: Hard private is NOT accessible even with bracket notation.
-console.log(account.getHardPrivate());  // "hard-private"
-// console.log((account as any)["#hardPrivate"]);  // undefined
-// console.log((account as any).hardPrivate);      // undefined
-
-// Step 5: Hard private fields don't appear in enumeration.
-console.log(Object.keys(account));  // ["tsPrivate"] — only the TS private field
-```
-
-**Expected Output:**
-```
-typescript-private
-typescript-private
-hard-private
-[ 'tsPrivate' ]
-```
-
-**Why This Output Occurs:** TypeScript's `private` modifier is compile-time only, so `(account as any).tsPrivate` bypasses it at runtime. The `#hardPrivate` field is truly private: it doesn't appear in `Object.keys`, and bracket notation cannot access it. The `#` prefix is part of the field name and is enforced by JavaScript's runtime.
-
-#### Example 2: Hard Private Methods
-
-```typescript
-// Step 1: Define a class with hard private methods.
-class Counter {
-  #count = 0;
-
-  #validateIncrement(amount: number): void {
-    if (amount < 0) {
-      throw new Error("Increment must be non-negative");
-    }
-  }
-
-  increment(amount: number = 1): void {
-    this.#validateIncrement(amount);  // ✅ Accessible within the class
-    this.#count += amount;
-  }
-
-  get count(): number {
-    return this.#count;
-  }
-}
-
-// Step 2: Use the class.
-const counter = new Counter();
-counter.increment();
-counter.increment(5);
-console.log(counter.count);  // 6
-
-// Step 3: Hard private methods are not accessible.
-// counter.#validateIncrement(1);  // ❌ Error: Property '#validateIncrement' is not accessible.
-
-// Step 4: Hard private fields cannot be accessed.
-// console.log(counter.#count);  // ❌ Error: Property '#count' is not accessible.
-```
-
-**Expected Output:**
-```
-6
-```
-
-**Why This Output Occurs:** The `#validateIncrement` method and `#count` field are hard private, accessible only within the `Counter` class. The public `increment` method uses them internally, and the public `count` getter exposes the count safely.
-
-### Real-World Cases
-
-**Case 1: Security-Sensitive State**
-Classes that handle sensitive data (authentication tokens, encryption keys) use `#private` to prevent runtime access.
-
-**Case 2: Library Internal State**
-Libraries that need true encapsulation of internal state use `#private` to prevent consumers from relying on implementation details.
-
-**Case 3: Avoiding Inheritance Collisions**
-When a class hierarchy might use the same field names, `#private` ensures that parent and child fields are truly separate.
-
----
-
-## 7. Getters and Setters (`get` / `set` Accessors)
-
-### Definitions
-
-**Core Definition**
-Getters and setters are special methods that provide controlled access to a property. A getter (`get`) is called when the property is read; a setter (`set`) is called when the property is assigned. Together, they allow computed properties, validation, and side effects during property access.
-
-**Technical Definition**
-TypeScript supports ES5+ getter and setter syntax in classes. A getter is declared with `get propertyName(): ReturnType { }` and is invoked on property read. A setter is declared with `set propertyName(value: ParamType) { }` and is invoked on property write. Getters and setters must have the same property name, and if both are present, the setter's parameter type must be assignable to the getter's return type (TypeScript 4.3+). Accessors can have access modifiers (`public`, `private`, `protected`) and `static`. Since TypeScript 4.3, getters and setters can have different access modifiers (e.g., public getter, private setter).
-
-**Beginner-Friendly Explanation**
-Getters and setters let you run code when someone reads or writes a property. Instead of a plain field, you can have a `get` method that computes a value on the fly, or a `set` method that validates input before storing it. For example, a `fullName` getter might combine `firstName` and `lastName`, and a `set` method might reject invalid emails. They look like properties from the outside—`user.fullName` calls the getter, and `user.email = "..."` calls the setter. This encapsulation lets you change internal representation without changing the public API.
-
-### Purposes
-
-- To provide computed properties derived from other fields.
-- To validate or transform values before storing them.
-- To trigger side effects when a property is accessed or modified.
-- To encapsulate internal representation while exposing a property-like API.
-- To implement lazy initialization of expensive values.
-
-### Syntax Rules and Structure
-
-**General Syntax: Getter and Setter**
-
-```typescript
-class ClassName {
-  private _field: Type;
-
-  get propertyName(): Type {
-    return this._field;
-  }
-
-  set propertyName(value: Type) {
-    this._field = value;
-  }
-}
-```
-
-**Component Breakdown**
-- `get propertyName(): Type`: The getter, invoked on read.
-- `set propertyName(value: Type)`: The setter, invoked on write.
-- The backing field (`_field`) stores the actual value.
-
-**General Syntax: Getter Only (Read-Only Property)**
-
-```typescript
-class ClassName {
-  get computed(): ReturnType {
-    return /* computed value */;
-  }
-}
-```
-
-**Component Breakdown**
-- A getter without a setter creates a read-only property.
-
-**General Syntax: Different Access Modifiers (TypeScript 4.3+)**
-
-```typescript
-class ClassName {
-  get value(): Type { return this._value; }
-  private set value(v: Type) { this._value = v; }
-}
-```
-
-**Component Breakdown**
-- Public getter, private setter.
-
-**Syntax Rules**
-
-- Getters use `get name(): Type { }`.
-- Setters use `set name(value: Type) { }`.
-- A getter without a setter creates a read-only property.
-- A setter without a getter creates a write-only property (rare).
-- The getter's return type and the setter's parameter type must be compatible (TypeScript 4.3+).
-- Accessors can be `static`, `public`, `private`, or `protected`.
-- Getters and setters can have different access modifiers (TypeScript 4.3+).
-- Accessors cannot have the same name as a field in the same class.
-
-**Constraints and Limitations**
-
-- Before TypeScript 4.3, getters and setters had to have the same access modifier.
-- Accessors add runtime overhead compared to plain fields.
-- Accessors cannot be used with parameter properties.
-- A getter without a setter means the property is read-only (assignment is a compile error).
-- Accessors and fields cannot share the same name in the same class.
-- `super` accessors work but require care with inheritance.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Getter and Setter
-
-```typescript
-// Step 1: Define a class with a getter and setter.
-class Temperature {
-  private _celsius: number = 0;
-
-  get celsius(): number {
-    return this._celsius;
-  }
-
-  set celsius(value: number) {
-    if (value < -273.15) {
-      throw new Error("Temperature below absolute zero is not possible");
-    }
-    this._celsius = value;
-  }
-
-  get fahrenheit(): number {
-    return (this._celsius * 9) / 5 + 32;
-  }
-
-  set fahrenheit(value: number) {
-    this.celsius = ((value - 32) * 5) / 9;  // Uses the celsius setter
-  }
-}
-
-// Step 2: Use the accessors.
-const temp = new Temperature();
-temp.celsius = 25;
-console.log(`Celsius: ${temp.celsius}`);       // 25
-console.log(`Fahrenheit: ${temp.fahrenheit}`); // 77
-
-temp.fahrenheit = 100;
-console.log(`Celsius: ${temp.celsius}`);       // 37.777...
-console.log(`Fahrenheit: ${temp.fahrenheit}`); // 100
-
-// Step 3: Setter validation.
 try {
-  temp.celsius = -300;
+  new BankAccount("Grace", -1);
 } catch (e) {
-  console.log(`Error: ${(e as Error).message}`);
+  console.log((e as Error).message); // Expected: Initial balance cannot be negative
 }
 ```
 
 **Expected Output:**
 ```
-Celsius: 25
-Fahrenheit: 77
-Celsius: 37.77777777777778
-Fahrenheit: 100
-Error: Temperature below absolute zero is not possible
+Ada
+1000
+Initial balance cannot be negative
 ```
 
-**Why This Output Occurs:** The `celsius` getter returns the backing field, and the setter validates before storing. The `fahrenheit` getter computes from `celsius`, and the setter converts and delegates to the `celsius` setter. Validation in the setter prevents invalid temperatures.
-
-#### Example 2: Different Access Modifiers for Getter and Setter
-
-```typescript
-// Step 1: Define a class with a public getter and private setter.
-class User {
-  private _email: string = "";
-
-  get email(): string {
-    return this._email;
-  }
-
-  private set email(value: string) {
-    if (!value.includes("@")) {
-      throw new Error("Invalid email address");
-    }
-    this._email = value;
-  }
-
-  constructor(email: string) {
-    this.email = email;  // ✅ Allowed inside the class
-  }
-
-  updateEmail(newEmail: string): void {
-    this.email = newEmail;  // ✅ Allowed inside the class
-  }
-}
-
-// Step 2: Use the class.
-const user = new User("alice@example.com");
-console.log(user.email);  // "alice@example.com"
-
-user.updateEmail("alice.smith@example.com");
-console.log(user.email);  // "alice.smith@example.com"
-
-// Step 3: The setter is private — external assignment fails.
-// user.email = "bob@example.com";  // ❌ Error: Property 'email' has no setter.
-```
-
-**Expected Output:**
-```
-alice@example.com
-alice.smith@example.com
-```
-
-**Why This Output Occurs:** The getter is public, so `user.email` is readable externally. The setter is private, so external code cannot assign `user.email = ...`. The constructor and `updateEmail` method can use the setter internally.
-
-### Real-World Cases
-
-**Case 1: Validated Properties**
-Classes that store user input (email, phone, age) use setters for validation, ensuring only valid values are stored.
-
-**Case 2: Computed Properties**
-Classes with derived properties (fullName from firstName + lastName, area from width + height) use getters to compute values on demand.
-
-**Case 3: Lazy Initialization**
-Expensive resources (database connections, large computations) are lazily initialized in getters, avoiding the cost until first access.
+**Why this output occurs.** The constructor validates `initialBalance` and throws if it is negative. `owner` is a parameter property, so it is automatically declared and initialized. `balance` is assigned explicitly after validation. The `strictPropertyInitialization` check is satisfied.
 
 ---
 
-## 8. `readonly` Properties in Classes
+#### Example 2: Inheritance and `super()`
+
+```typescript
+// example_constructor_inheritance.ts
+class Animal {
+  constructor(public name: string) {}
+}
+
+class Dog extends Animal {
+  constructor(name: string, public breed: string) {
+    super(name); // Must call super before accessing this.
+  }
+
+  describe(): string {
+    return `${this.name} (${this.breed})`;
+  }
+}
+
+const dog = new Dog("Rex", "Labrador");
+console.log(dog.describe()); // Expected: Rex (Labrador)
+```
+
+**Expected Output:**
+```
+Rex (Labrador)
+```
+
+**Why this output occurs.** `Dog` extends `Animal`. Its constructor calls `super(name)` to initialize the inherited `name` property before initializing `breed`. The parameter property `public breed: string` creates and assigns `breed` automatically. The `describe` method accesses both inherited and own properties.
+
+---
+
+### Real-World Cases
+
+- **Entity construction**: validating IDs and required fields in domain entities.
+- **Singleton pattern**: `private constructor()` with a static `getInstance()`.
+- **Dependency injection**: constructors accept service interfaces, enabling test doubles.
+
+---
+
+## 8. Access Modifiers — `public`
 
 ### Definitions
 
-**Core Definition**
-The `readonly` modifier in TypeScript classes makes a property immutable after initialization. Readonly properties can only be assigned during declaration or in the constructor (and in the constructor of the declaring class only—not subclasses). This is a compile-time-only constraint.
+**Core Definition.** **`public`** is the default access modifier in TypeScript. A `public` member is accessible from **anywhere**: inside the class, from subclasses, and from external code.
 
-**Technical Definition**
-Class properties marked `readonly` can only be assigned at the point of declaration or within the constructor of the declaring class. Assignments in subclass constructors or instance methods are compile errors. The `readonly` modifier can be combined with access modifiers (`public readonly`, `private readonly`, `protected readonly`) and parameter properties (`constructor(readonly name: string)`). Readonly is shallow: if the property holds an object, the object's properties can still be mutated. `readonly` is erased at runtime and does not prevent property modification via type assertions or bracket notation.
+**Technical Definition.** The `public` modifier imposes **no access restriction** during type checking. Because it is the default, explicitly writing `public` is redundant except in **parameter properties**, where it is required to create the field. Google’s TypeScript style guide recommends **not** writing `public` except for non-readonly parameter properties.
 
-**Beginner-Friendly Explanation**
-A readonly property is one that can't be changed after the object is created. You can set it when you declare it or in the constructor, but after that, it's locked. This is useful for properties that should never change—like IDs, creation timestamps, or configuration values. For example, `readonly id: number` means once the object is created with an ID, no one can change it. But be careful: readonly only applies to the property itself. If the property holds an object or array, you can still change the contents of that object or array.
+**Beginner-Friendly Explanation.** `public` means **“anyone can use this.”** It is the default, so you rarely need to write it. If a member has no modifier, it is public.
 
 ### Purposes
 
-- To prevent accidental modification of properties that should remain constant.
-- To document the intended immutability of class properties.
-- To enable compile-time enforcement of immutability for IDs, timestamps, and configuration.
-- To support immutable value objects and data classes.
-- To combine with parameter properties for concise immutable classes.
+- **To explicitly document** that a member is part of the public API.
+- **To create public parameter properties** in constructors.
+- **To serve as the default visibility** for class members.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Readonly Property**
+**General syntax:**
 
-```typescript
-class ClassName {
-  readonly propertyName: Type = initialValue;
-
-  constructor(value: Type) {
-    this.readonlyProperty = value;  // ✅ Allowed in the declaring class constructor
-  }
-}
+```
+public memberName: Type;
 ```
 
-**Component Breakdown**
-- `readonly`: The modifier preventing reassignment.
-- Assignment allowed at declaration and in the declaring class's constructor.
+**Component breakdown:**
 
-**General Syntax: Readonly Parameter Property**
+- `public` — visibility modifier.
+- `memberName` — identifier.
+- `: Type` — annotation.
 
-```typescript
-class ClassName {
-  constructor(readonly propertyName: Type) {}
-}
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- `readonly` on a constructor parameter creates a readonly field.
+- `public` is the default; omitting it has the same effect.
+- `public` can be combined with `readonly` and `static`.
+- In parameter properties, `public` creates a field and assigns the parameter.
 
-**General Syntax: Readonly with Access Modifier**
+**Constraints and limitations.**
 
-```typescript
-class ClassName {
-  public readonly publicReadonly: Type;
-  private readonly privateReadonly: Type;
-  protected readonly protectedReadonly: Type;
-}
-```
+- Explicit `public` is often considered redundant style; follow project conventions.
+- Public members are part of the structural type and affect compatibility.
 
-**Component Breakdown**
-- Modifiers can be combined: `public readonly`, `private readonly`, `protected readonly`.
+### Annotated Complete Step by Step Code Examples
 
-**Syntax Rules**
-
-- `readonly` properties can only be assigned at declaration or in the declaring class's constructor.
-- Subclass constructors cannot assign parent readonly properties.
-- `readonly` can be combined with access modifiers.
-- `readonly` parameter properties create readonly fields.
-- `readonly` is shallow: nested object properties remain mutable.
-- `readonly` is erased at runtime and provides no runtime protection.
-- `as const` cannot be used on class properties (only object literals and arrays).
-
-**Constraints and Limitations**
-
-- `readonly` is shallow: nested objects and arrays remain mutable.
-- `readonly` is erased at runtime and can be bypassed with type assertions.
-- Subclasses cannot assign parent readonly properties.
-- `readonly` cannot be used with `#private` fields (though `#private` fields are effectively read-only from outside).
-- Readonly properties cannot be conditionally assigned in the constructor (only once).
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Readonly Properties in Classes
+#### Example 1: Public vs. default visibility
 
 ```typescript
-// Step 1: Define a class with readonly properties.
+// example_public.ts
 class User {
-  readonly id: number;
-  readonly createdAt: Date;
-  name: string;  // Mutable
+  public name: string;      // Explicit public (redundant but legal).
+  email: string;            // Implicit public (default).
 
-  constructor(id: number, name: string) {
-    this.id = id;                        // ✅ Allowed in constructor
-    this.createdAt = new Date();         // ✅ Allowed in constructor
+  constructor(name: string, email: string) {
     this.name = name;
-  }
-
-  updateName(newName: string): void {
-    this.name = newName;  // ✅ Mutable field
-    // this.id = 999;     // ❌ Error: Cannot assign to 'id' because it is a read-only property.
+    this.email = email;
   }
 }
 
-// Step 2: Create an instance.
-const alice = new User(1, "Alice");
-console.log(`ID: ${alice.id}, Name: ${alice.name}`);
-
-// Step 3: Readonly properties cannot be reassigned.
-// alice.id = 2;  // ❌ Error: Cannot assign to 'id'.
-
-// Step 4: Mutable properties can be reassigned.
-alice.name = "Alice Smith";  // ✅ Allowed
-console.log(`Updated name: ${alice.name}`);
-
-// Step 5: Shallow readonly — the Date object is still mutable.
-alice.createdAt.setFullYear(2025);  // ✅ Allowed — mutating the Date object
-console.log(`Modified createdAt: ${alice.createdAt.getFullYear()}`);
+const user = new User("Ada", "ada@example.com");
+console.log(user.name);  // Expected: Ada
+console.log(user.email); // Expected: ada@example.com
 ```
 
 **Expected Output:**
 ```
-ID: 1, Name: Alice
-Updated name: Alice Smith
-Modified createdAt: 2025
+Ada
+ada@example.com
 ```
 
-**Why This Output Occurs:** The `id` and `createdAt` properties are readonly, so they can only be assigned in the constructor. The `name` property is mutable and can be reassigned. The `createdAt` Date object is mutable even though the property is readonly (shallow readonly).
-
-#### Example 2: Readonly Parameter Properties and Inheritance
-
-```typescript
-// Step 1: Define a base class with readonly parameter properties.
-class Entity {
-  constructor(
-    public readonly id: number,
-    public readonly createdAt: Date = new Date()
-  ) {}
-}
-
-// Step 2: Define a subclass.
-class User extends Entity {
-  constructor(
-    id: number,
-    public name: string,
-    public email: string
-  ) {
-    super(id);  // ✅ Passes id to Entity constructor
-    // this.id = id;  // ❌ Error: Cannot assign to 'id' — it's readonly and belongs to Entity.
-  }
-}
-
-// Step 3: Create instances.
-const user = new User(1, "Alice", "alice@example.com");
-console.log(`User ${user.id}: ${user.name} (${user.email})`);
-console.log(`Created: ${user.createdAt.toISOString()}`);
-
-// Step 4: Readonly properties cannot be modified.
-// user.id = 2;  // ❌ Error: Cannot assign to 'id'.
-
-// Step 5: Mutable properties can be modified.
-user.name = "Alice Smith";  // ✅ Allowed
-console.log(`Updated: ${user.name}`);
-```
-
-**Expected Output:**
-```
-User 1: Alice (alice@example.com)
-Created: 2024-...
-Updated: Alice Smith
-```
-
-**Why This Output Occurs:** The `Entity` class declares `id` and `createdAt` as readonly parameter properties. The `User` subclass passes `id` to the parent constructor via `super(id)`. The subclass cannot assign `this.id` because readonly properties can only be assigned in the declaring class's constructor.
-
-### Real-World Cases
-
-**Case 1: Entity IDs and Timestamps**
-Domain entities use readonly for `id` and `createdAt` fields, ensuring these values never change after creation.
-
-**Case 2: Configuration Objects**
-Configuration classes use readonly for values that should not change at runtime, documenting and enforcing immutability.
-
-**Case 3: Value Objects**
-Value objects (Money, Coordinates, DateRange) use readonly for all fields, making them truly immutable value types.
+**Why this output occurs.** Both `name` and `email` are public (one explicit, one implicit) and are accessible from outside the class. The explicit `public` documents intent but does not change behavior.
 
 ---
 
-## 9. Static Members (Properties, Blocks, and Methods)
+### Real-World Cases
+
+- **Public API surfaces**: explicitly marking stable public members in libraries.
+- **Parameter properties**: `constructor(public readonly id: string) {}`.
+
+---
+
+## 9. Access Modifiers — `private`
 
 ### Definitions
 
-**Core Definition**
-Static members belong to the class itself, not to instances. Static properties, methods, and initialization blocks are accessed via the class name (`ClassName.staticMember`) rather than through instances. Static members are shared across all instances and are commonly used for utility functions, constants, and class-level state.
+**Core Definition.** **`private`** restricts member access to **within the declaring class only**. Subclasses and external code cannot access `private` members.
 
-**Technical Definition**
-Static members are declared with the `static` keyword. Static properties are stored on the constructor function. Static methods are called on the class itself and have `this` typed as the class constructor (not an instance). Static initialization blocks (`static { }`), introduced in TypeScript 4.4 / ES2022, run once when the class is defined, enabling complex static initialization with access to private static fields. Static members can have access modifiers (`public`, `private`, `protected`) and can be `readonly`. Static members are inherited by subclasses but accessed via the subclass name. Static members cannot access instance members directly and vice versa.
+**Technical Definition.** The `private` modifier is enforced **at compile time** by TypeScript. It does not emit runtime access checks; the emitted JavaScript still allows access to the property. For **true runtime privacy**, ECMAScript `#` private fields must be used. Two classes with `private` members are **not structurally compatible** unless the private member originates from the same declaration, introducing nominal-like behavior.
 
-**Beginner-Friendly Explanation**
-Static members belong to the class, not to individual objects. If you have a `MathUtils` class with a static `add` method, you call it as `MathUtils.add(1, 2)`—you don't need to create an instance. Static properties are shared across all instances, like a counter that tracks how many objects have been created. Static blocks are a way to run initialization code for static properties. Static members are useful for utility functions, constants, factory methods, and class-level state.
+**Beginner-Friendly Explanation.** `private` means **“only this class can touch it.”** Other code — even subclasses — cannot read or write it. TypeScript will give you an error if you try. But remember: this is a **compile-time** rule, not a runtime lock.
 
 ### Purposes
 
-- To define utility functions and constants that don't depend on instance state.
-- To track class-level state (e.g., instance counts, registries).
-- To implement factory methods that create instances in controlled ways.
-- To perform complex static initialization with static blocks.
-- To share data across all instances of a class.
+- **To encapsulate internal state** and prevent external mutation.
+- **To hide implementation details** from the public API.
+- **To introduce nominal identity** between classes with private members.
+- **To enforce invariants** by controlling access to sensitive fields.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Static Property**
+**General syntax:**
 
-```typescript
-class ClassName {
-  static staticProperty: Type = initialValue;
-}
+```
+private memberName: Type;
 ```
 
-**Component Breakdown**
-- `static`: The keyword placing the property on the class itself.
-- Access: `ClassName.staticProperty`.
+**Component breakdown:**
 
-**General Syntax: Static Method**
+- `private` — visibility modifier.
+- `memberName` — identifier.
 
-```typescript
-class ClassName {
-  static staticMethod(param: ParamType): ReturnType {
-    return /* ... */;
-  }
-}
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- `static`: The keyword placing the method on the class itself.
-- Access: `ClassName.staticMethod(args)`.
+- `private` members are accessible only within the class body.
+- `private` can be combined with `readonly` and `static`.
+- Private parameter properties create private fields.
+- Private members affect structural compatibility: classes with private members are compatible only if the private member comes from the same declaration.
 
-**General Syntax: Static Block**
+**Constraints and limitations.**
 
-```typescript
-class ClassName {
-  static staticProperty: Type;
+- `private` is **compile-time only**; it can be bypassed at runtime via bracket notation or `as any`.
+- `private` does not prevent subclassing, but subclasses cannot access the private member.
+- For true runtime privacy, use `#privateField` syntax.
 
-  static {
-    // Initialization logic
-    ClassName.staticProperty = computeValue();
-  }
-}
-```
+### Annotated Complete Step by Step Code Examples
 
-**Component Breakdown**
-- `static { }`: A static initialization block that runs once.
-- Multiple static blocks run in declaration order.
-
-**General Syntax: Static with Access Modifiers**
+#### Example 1: Private field and method
 
 ```typescript
-class ClassName {
-  private static privateStatic: Type;
-  protected static protectedStatic: Type;
-  public static publicStatic: Type;
-  static readonly readonlyStatic: Type = value;
-}
-```
+// example_private.ts
+class BankAccount {
+  private balance: number = 0;
 
-**Component Breakdown**
-- Static members can have access modifiers and `readonly`.
-
-**Syntax Rules**
-
-- Static members are declared with the `static` keyword.
-- Static members are accessed via the class name, not instances.
-- Static methods have `this` typed as the class constructor (not an instance).
-- Static blocks (`static { }`) run once when the class is defined.
-- Static members can have `public`, `private`, `protected`, and `readonly` modifiers.
-- Static members are inherited by subclasses (accessible via subclass name).
-- Static members cannot directly access instance members.
-- Instance members cannot directly access static members without using the class name.
-
-**Constraints and Limitations**
-
-- Static members cannot access instance members directly (no `this` instance context).
-- Instance members must use `ClassName.staticMember` to access static members.
-- Static methods cannot be polymorphic with the `this` type (static `this` is the constructor).
-- Static blocks cannot access instance fields.
-- Static members are not available on instances (e.g., `instance.staticMethod` is undefined).
-- Private static members are accessible within the class body only.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Static Properties and Methods
-
-```typescript
-// Step 1: Define a class with static members.
-class Counter {
-  static count: number = 0;              // Static property
-  static readonly MAX: number = 100;     // Static readonly
-  private static instances: number = 0;  // Private static
-
-  id: number;
-
-  constructor() {
-    Counter.instances += 1;
-    this.id = Counter.instances;
-    Counter.count += 1;
+  deposit(amount: number): void {
+    if (amount <= 0) throw new Error("Invalid amount");
+    this.balance += amount;
   }
 
-  static getInstanceCount(): number {
-    return Counter.instances;
-  }
-
-  static reset(): void {
-    Counter.count = 0;
-    // Counter.MAX = 200;  // ❌ Error: Cannot assign to 'MAX' because it is read-only.
-  }
-
-  static create(): Counter {
-    return new Counter();  // Factory method
+  getBalance(): number {
+    return this.balance;
   }
 }
 
-// Step 2: Use static members.
-const c1 = new Counter();
-const c2 = new Counter();
-const c3 = Counter.create();  // Factory method
+const account = new BankAccount();
+account.deposit(100);
+console.log(account.getBalance()); // Expected: 100
 
-console.log(`Instances: ${Counter.getInstanceCount()}`);  // 3
-console.log(`Count: ${Counter.count}`);                   // 3
-console.log(`MAX: ${Counter.MAX}`);                       // 100
-
-// Step 3: Static members are NOT on instances.
-// console.log(c1.count);  // ❌ Error: Property 'count' does not exist on type 'Counter'.
-
-// Step 4: Reset static state.
-Counter.reset();
-console.log(`After reset — Count: ${Counter.count}`);  // 0
+// account.balance; // Error: Property 'balance' is private.
+// account.deposit(-5); // Throws at runtime.
 ```
 
 **Expected Output:**
 ```
-Instances: 3
-Count: 3
-MAX: 100
-After reset — Count: 0
+100
 ```
 
-**Why This Output Occurs:** The static `instances` and `count` properties are shared across all instances. Each constructor increments both. The `getInstanceCount` and `reset` methods are static, accessed via `Counter`. The `MAX` static readonly cannot be reassigned.
+**Why this output occurs.** `balance` is private, so external code cannot read or write it directly. `deposit` controls mutation and validates the amount. `getBalance` provides controlled read access. The compiler enforces the private boundary.
 
-#### Example 2: Static Initialization Blocks
+---
+
+#### Example 2: Private members and nominal compatibility
 
 ```typescript
-// Step 1: Define a class with static initialization blocks.
-class Config {
-  static readonly apiUrl: string;
-  static readonly timeout: number;
-  static readonly features: string[];
-
-  static {
-    // Complex initialization logic
-    const env = process.env.NODE_ENV ?? "development";
-    Config.apiUrl = env === "production"
-      ? "https://api.example.com"
-      : "http://localhost:3000";
-    Config.timeout = env === "production" ? 10000 : 5000;
-    Config.features = env === "production"
-      ? ["auth", "logging", "metrics"]
-      : ["auth", "logging"];
-    console.log(`Config initialized for ${env}`);
-  }
-
-  // Multiple static blocks run in order.
-  static {
-    console.log(`Features: ${Config.features.join(", ")}`);
-  }
+// example_private_nominal.ts
+class A {
+  private secret = 1;
+  value = 2;
 }
 
-// Step 2: Static blocks run when the class is defined.
-// Output (in development):
-// "Config initialized for development"
-// "Features: auth, logging"
+class B {
+  private secret = 1;
+  value = 2;
+}
 
-// Step 3: Access static properties.
-console.log(Config.apiUrl);   // "http://localhost:3000"
-console.log(Config.timeout);  // 5000
+const a = new A();
+// const b: B = a;
+// Error: Property 'secret' is private in type 'A' but not in type 'B'.
 ```
 
 **Expected Output:**
 ```
-Config initialized for development
-Features: auth, logging
-http://localhost:3000
-5000
+(no output; compile-time error if uncommented)
 ```
 
-**Why This Output Occurs:** The static blocks run once when the `Config` class is defined. The first block reads `process.env.NODE_ENV` and initializes `apiUrl`, `timeout`, and `features`. The second block logs the features. Both blocks run before any instance is created.
+**Why this output occurs.** Although `A` and `B` have identical public shapes, their `private` members originate from different declarations. TypeScript therefore considers them incompatible, exhibiting **nominal-like** behavior. Without the private members, they would be structurally compatible.
+
+---
 
 ### Real-World Cases
 
-**Case 1: Utility Classes**
-Utility classes (MathUtils, StringUtils) use static methods for pure functions that don't depend on instance state.
+- **Encapsulated domain state**: `private balance` with controlled mutation.
+- **Internal helper methods**: `private validate()` hidden from the public API.
+- **Nominal branding**: private members to distinguish semantically different types.
 
-**Case 2: Singleton Pattern**
-Singleton classes use a private static instance property and a static `getInstance` method to ensure only one instance exists.
+---
 
-**Case 3: Factory Methods**
-Classes use static factory methods (`fromJSON`, `create`, `of`) to provide named constructors and controlled instantiation.
+## 10. Access Modifiers — `protected`
 
-**Case 4: Class-Level Registries**
-Classes maintain static registries (e.g., of all instances, of subclasses) for plugin systems and dependency injection.
+### Definitions
+
+**Core Definition.** **`protected`** allows access **within the declaring class and all subclasses**, but not from external code.
+
+**Technical Definition.** The `protected` modifier is checked at compile time. It permits access from derived classes via `this` and `super`, but not from unrelated code. Like `private`, `protected` members introduce **nominal-like** compatibility: two classes with `protected` members are compatible only if the member comes from the same declaration.
+
+**Beginner-Friendly Explanation.** `protected` means **“this class and its children can use it, but outsiders cannot.”** It is useful when you want subclasses to customize behavior without exposing the internals to the world.
+
+### Purposes
+
+- **To share implementation details with subclasses** while hiding them from external code.
+- **To enable template-method patterns** where subclasses override protected hooks.
+- **To maintain encapsulation** across an inheritance hierarchy.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+protected memberName: Type;
+```
+
+**Component breakdown:**
+
+- `protected` — visibility modifier.
+- `memberName` — identifier.
+
+**Syntax rules.**
+
+- `protected` members are accessible within the class and subclasses.
+- A subclass can access a protected member via `this` or `super`.
+- Protected members affect structural compatibility nominally.
+- `protected` can be combined with `readonly` and `static`.
+
+**Constraints and limitations.**
+
+- Protected members are **compile-time only**.
+- External code cannot access protected members, even via subclass instances.
+- Protected constructors prevent direct instantiation but allow subclassing.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Protected member in an inheritance hierarchy
+
+```typescript
+// example_protected.ts
+class Animal {
+  protected energy = 100;
+
+  protected consume(amount: number): void {
+    this.energy -= amount;
+  }
+}
+
+class Dog extends Animal {
+  bark(): void {
+    this.consume(10); // Allowed: protected access from subclass.
+  }
+
+  status(): string {
+    return `Energy: ${this.energy}`;
+  }
+}
+
+const dog = new Dog();
+dog.bark();
+console.log(dog.status()); // Expected: Energy: 90
+
+// dog.energy;   // Error: Property 'energy' is protected.
+// dog.consume(5); // Error: Property 'consume' is protected.
+```
+
+**Expected Output:**
+```
+Energy: 90
+```
+
+**Why this output occurs.** `energy` and `consume` are protected, so `Dog` (a subclass) can access them inside its methods. External code cannot access them directly. `bark` calls `consume(10)`, reducing energy to `90`.
+
+---
+
+### Real-World Cases
+
+- **Template method pattern**: protected hooks for subclasses to override.
+- **Base service classes**: protected helper methods shared by subclasses.
+- **Framework base controllers**: protected lifecycle methods.
+
+---
+
+## 11. Access Modifiers — `readonly`
+
+### Definitions
+
+**Core Definition.** **`readonly`** is a modifier that prevents reassignment of a property after its initial assignment. It can be applied to fields and parameter properties.
+
+**Technical Definition.** A `readonly` property may be assigned only in its declaration or in the constructor of the declaring class. TypeScript checks assignments at compile time and rejects reassignment. `readonly` does not perform a deep freeze; it prevents reassignment of the property binding, not mutation of the referenced object. `readonly` can be combined with `public`, `private`, `protected`, and `static`.
+
+**Beginner-Friendly Explanation.** `readonly` means **“set it once, then leave it alone.”** You can assign it when you declare it or in the constructor, but after that, TypeScript will not let you change it. It does not make the object inside immutable; it only prevents you from pointing the property at a different value.
+
+### Purposes
+
+- **To enforce immutability of identity** (IDs, creation timestamps).
+- **To prevent accidental reassignment** of configuration values.
+- **To document intent** that a property should not change after construction.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+readonly memberName: Type = value;
+```
+
+**Component breakdown:**
+
+- `readonly` — modifier.
+- `memberName` — identifier.
+- `: Type` — annotation.
+- `= value` — optional initializer; assignment here is allowed.
+
+**Syntax rules.**
+
+- `readonly` fields can be assigned at declaration or in the constructor.
+- `readonly` parameter properties create readonly fields.
+- `readonly` can be combined with visibility modifiers and `static`.
+- `readonly` does not prevent mutation of object contents (`readonly arr: number[]` still allows `arr.push(1)`).
+
+**Constraints and limitations.**
+
+- `readonly` is **compile-time only**; it does not enforce runtime immutability.
+- `readonly` on arrays and objects is shallow; use `ReadonlyArray<T>` or `Readonly<T>` for deeper immutability.
+- `readonly` cannot be applied to methods.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Readonly field assignment rules
+
+```typescript
+// example_readonly.ts
+class Config {
+  readonly host: string = "localhost";
+  readonly port: number;
+
+  constructor(port: number) {
+    this.port = port; // Allowed: assignment in constructor.
+  }
+
+  // changeHost() {
+  //   this.host = "example.com"; // Error: Cannot assign to 'host' because it is a read-only property.
+  // }
+}
+
+const config = new Config(3000);
+console.log(config.host); // Expected: localhost
+console.log(config.port); // Expected: 3000
+```
+
+**Expected Output:**
+```
+localhost
+3000
+```
+
+**Why this output occurs.** `host` is initialized at declaration and cannot be reassigned afterward. `port` is readonly but uninitialized at declaration; the constructor assigns it once. The compiler rejects any assignment outside the constructor.
+
+---
+
+#### Example 2: Readonly parameter properties
+
+```typescript
+// example_readonly_param.ts
+class Point {
+  constructor(public readonly x: number, public readonly y: number) {}
+}
+
+const p = new Point(1, 2);
+console.log(p.x); // Expected: 1
+
+// p.x = 10; // Error: Cannot assign to 'x' because it is a read-only property.
+```
+
+**Expected Output:**
+```
+1
+```
+
+**Why this output occurs.** The parameter properties `public readonly x` and `public readonly y` create public readonly fields and assign the constructor arguments. After construction, the fields cannot be reassigned.
+
+---
+
+### Real-World Cases
+
+- **Entity IDs**: `readonly id: string` assigned once.
+- **Configuration values**: `readonly apiUrl: string`.
+- **Immutable value objects**: `readonly x`, `readonly y` in `Point`.
+
+---
+
+## 12. Parameter Properties
+
+### Definitions
+
+**Core Definition.** **Parameter properties** are a TypeScript-specific shorthand that allows constructor parameters prefixed with a visibility modifier (`public`, `private`, `protected`) or `readonly` to be **automatically declared and initialized as class fields** with the same name.
+
+**Technical Definition.** The syntax `constructor(private name: string)` declares a private field `name` and assigns the constructor argument to it. The modifier before the parameter serves a dual role: it is both a **parameter declaration** and a **field declaration**. Parameter properties support all access modifiers and `readonly`. They reduce boilerplate by merging declaration, parameter, and assignment into one statement. The emitted JavaScript contains the field assignment, but the modifier itself is erased.
+
+**Beginner-Friendly Explanation.** Parameter properties are **a shortcut**. Instead of writing a field, a constructor parameter, and an assignment, you write `constructor(private name: string)` — and TypeScript creates the private field and assigns the value automatically. It saves typing and keeps the constructor clean.
+
+### Purposes
+
+- **To eliminate boilerplate** of declaring fields, parameters, and assignments separately.
+- **To keep constructors concise** and focused on initialization logic.
+- **To make field visibility explicit** directly in the constructor signature.
+- **To support readonly fields** with minimal syntax.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+constructor([modifier] parameterName: Type, ...) { ... }
+```
+
+**Component breakdown:**
+
+- `modifier` — `public`, `private`, `protected`, `readonly`, or a combination (e.g., `private readonly`).
+- `parameterName` — the name of both the parameter and the created field.
+- `: Type` — the type annotation.
+
+**Syntax rules.**
+
+- Parameter properties must be declared in the **constructor parameter list**.
+- Supported modifiers: `public`, `private`, `protected`, `readonly`.
+- A parameter property may combine `readonly` with a visibility modifier.
+- The created field is assigned the parameter value at the start of the constructor body.
+- Parameter properties cannot be used in **ambient declarations** or **overload signatures**.
+
+**Constraints and limitations.**
+
+- Some style guides and ESLint configurations (`no-parameter-properties`) discourage parameter properties, requiring explicit field declarations instead.
+- Parameter properties are erased as syntax, but the field assignment remains in the emitted JavaScript.
+- Debugging can be harder because the field does not appear in the class body.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Parameter properties vs. explicit declarations
+
+```typescript
+// example_param_props.ts
+// ❌ Verbose: explicit field + parameter + assignment.
+class VerboseUser {
+  private name: string;
+  private age: number;
+
+  constructor(name: string, age: number) {
+    this.name = name;
+    this.age = age;
+  }
+}
+
+// ✅ Concise: parameter properties.
+class ConciseUser {
+  constructor(private name: string, private age: number) {}
+}
+
+const user = new ConciseUser("Ada", 36);
+console.log(user); // Expected: ConciseUser { name: 'Ada', age: 36 }
+```
+
+**Expected Output:**
+```
+ConciseUser { name: 'Ada', age: 36 }
+```
+
+**Why this output occurs.** The `ConciseUser` constructor declares two private parameter properties, which the compiler expands to field declarations and assignments. At runtime, the instance has `name` and `age` properties set to the constructor arguments. The output is the same as the verbose version, but the source is significantly shorter.
+
+---
+
+#### Example 2: Readonly parameter properties with inheritance
+
+```typescript
+// example_param_props_inheritance.ts
+class Entity {
+  constructor(public readonly id: string) {}
+}
+
+class User extends Entity {
+  constructor(id: string, public readonly email: string) {
+    super(id); // Must call super before using this.
+  }
+}
+
+const user = new User("u1", "ada@example.com");
+console.log(user.id);    // Expected: u1
+console.log(user.email); // Expected: ada@example.com
+```
+
+**Expected Output:**
+```
+u1
+ada@example.com
+```
+
+**Why this output occurs.** `Entity` declares a public readonly `id` parameter property. `User` extends `Entity` and declares a public readonly `email` parameter property. The `super(id)` call initializes the inherited `id` field. Both fields are readonly and public, so they are accessible on the instance.
+
+---
+
+### Real-World Cases
+
+- **DTOs and entities**: `constructor(public readonly id: string, public name: string) {}`.
+- **Service classes**: `constructor(private readonly http: HttpClient) {}` for dependency injection.
+- **Value objects**: `constructor(public readonly x: number, public readonly y: number) {}`.
+
+---
+
+## 13. Class Best Practices
+
+### Definitions
+
+**Core Definition.** **Class best practices** are guidelines for designing and using TypeScript classes that maximize **type safety, encapsulation, maintainability, and testability**, while avoiding common pitfalls such as unsafe `any` leakage, fragile inheritance hierarchies, and redundant boilerplate.
+
+**Technical Definition.** Best practices encompass **explicit visibility modifiers**, **preference for composition over inheritance**, **dependency injection via constructor parameters**, **readonly for immutable identity**, **avoidance of `public` where redundant**, **precise type annotations on public APIs**, and **runtime privacy with `#` when true encapsulation is required**. Google’s style guide, for example, recommends never using `public` except for non-readonly parameter properties, and preferring `readonly` for properties that should not be reassigned.
+
+**Beginner-Friendly Explanation.** Best practices are **the habits experienced TypeScript developers use** to keep classes clean and safe. They include: always write `private` or `protected` for internal members; prefer building classes from smaller pieces (composition) rather than deep inheritance; inject dependencies through the constructor so classes are easy to test; use `readonly` for things that should never change; and avoid writing `public` because it is already the default.
+
+### Purposes
+
+- **To maximize encapsulation** by defaulting to the narrowest visibility.
+- **To improve testability** through constructor injection and composition.
+- **To prevent accidental mutation** with `readonly`.
+- **To keep public APIs precise and documented** with explicit return types.
+- **To avoid the pitfalls of deep inheritance** by favoring composition.
+
+### Syntax Rules and Structure
+
+Best practices are conventions that interact with class syntax. The core rules are:
+
+1. **Explicit visibility.** Write `private` or `protected` for non-public members; omit `public` where it is redundant.
+2. **Prefer composition over inheritance.** Build behavior by combining small objects rather than extending deep hierarchies.
+3. **Constructor injection.** Accept dependencies as constructor parameters (often `private readonly`) rather than instantiating them internally.
+4. **Use `readonly` for immutable identity.** Mark fields that should not change after construction as `readonly`.
+5. **Type public APIs explicitly.** Annotate return types of public methods for clarity and stability.
+6. **Use `#` for runtime privacy** when true encapsulation is required, rather than relying solely on TypeScript’s compile-time `private`.
+7. **Avoid `any`.** Use `unknown` and narrow, or precise types.
+8. **Prefer named exports over default exports** for better refactoring and auto-imports.
+
+**Component breakdown (visibility decision tree):**
+
+```
+Should this member be accessible outside the class?
+  ├── No → Should subclasses access it?
+  │        ├── Yes → protected
+  │        └── No  → private (or #private for runtime privacy)
+  └── Yes → Is it part of the stable public API?
+           ├── Yes → public (omit modifier if non-parameter property)
+           └── No  → Consider making the class internal or the member private
+```
+
+**Constraints and limitations.**
+
+- Overusing inheritance can lead to fragile base classes; composition is often safer.
+- `private` is compile-time only; do not rely on it for security.
+- Constructor injection increases constructor parameter counts; consider a parameter object for many dependencies.
+- Explicit `public` is sometimes required by team style guides despite being redundant.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Composition over inheritance and constructor injection
+
+```typescript
+// example_best_composition.ts
+// ✅ Composition: small, focused classes combined.
+class Logger {
+  log(message: string): void {
+    console.log(message);
+  }
+}
+
+class Database {
+  query(sql: string): string[] {
+    return [`result for: ${sql}`];
+  }
+}
+
+class UserRepository {
+  // Constructor injection with private readonly.
+  constructor(
+    private readonly db: Database,
+    private readonly logger: Logger
+  ) {}
+
+  findAll(): string[] {
+    this.logger.log("Fetching users");
+    return this.db.query("SELECT * FROM users");
+  }
+}
+
+// ✅ Easy to test with mocks.
+const repo = new UserRepository(new Database(), new Logger());
+console.log(repo.findAll()); // Expected: [ 'result for: SELECT * FROM users' ]
+```
+
+**Expected Output:**
+```
+Fetching users
+[ 'result for: SELECT * FROM users' ]
+```
+
+**Why this output occurs.** `UserRepository` composes `Database` and `Logger` through constructor injection rather than inheriting from them. The dependencies are `private readonly`, so they cannot be reassigned. This design is testable: `Database` and `Logger` can be replaced with mocks. It avoids the fragility of a deep inheritance hierarchy.
+
+---
+
+#### Example 2: Runtime privacy with `#` vs. compile-time `private`
+
+```typescript
+// example_best_runtime_privacy.ts
+class SecureAccount {
+  #pin: number;          // True runtime privacy.
+  private balance: number; // Compile-time privacy only.
+
+  constructor(pin: number, balance: number) {
+    this.#pin = pin;
+    this.balance = balance;
+  }
+
+  validate(input: number): boolean {
+    return this.#pin === input;
+  }
+}
+
+const acc = new SecureAccount(1234, 500);
+console.log(acc.validate(1234)); // Expected: true
+
+// acc.#pin;      // SyntaxError at runtime — truly private.
+// (acc as any).balance; // Allowed at runtime — TypeScript private is compile-time only.
+```
+
+**Expected Output:**
+```
+true
+```
+
+**Why this output occurs.** `#pin` is an ECMAScript private field, enforced at runtime. `balance` is a TypeScript `private` field, erased to a normal property at runtime. If true encapsulation is required, `#` is the correct choice; TypeScript `private` is for compile-time checking only.
+
+---
+
+#### Example 3: Explicit return types and readonly identity
+
+```typescript
+// example_best_return_readonly.ts
+class Invoice {
+  constructor(
+    public readonly id: string,
+    private readonly items: readonly string[]
+  ) {}
+
+  // Explicit return type on public API.
+  totalItems(): number {
+    return this.items.length;
+  }
+}
+
+const inv = new Invoice("i1", ["a", "b"]);
+console.log(inv.totalItems()); // Expected: 2
+
+// inv.id = "i2"; // Error: Cannot assign to 'id' because it is a read-only property.
+// inv.items.push("c"); // Error: Property 'push' does not exist on type 'readonly string[]'.
+```
+
+**Expected Output:**
+```
+2
+```
+
+**Why this output occurs.** `id` is a public readonly parameter property, so it cannot be reassigned. `items` is a private readonly `readonly string[]`, preventing both reassignment and mutation. `totalItems` has an explicit `number` return type, documenting the public API. These practices enforce immutability and clarity.
+
+---
+
+### Real-World Cases
+
+- **Dependency injection in services**: `constructor(private readonly http: HttpClient, private readonly config: Config) {}`.
+- **Domain entities with immutable identity**: `readonly id` and `readonly createdAt`.
+- **Testable architecture**: composition and constructor injection enable mock-based testing.
+- **Security-sensitive classes**: `#private` fields for PINs, passwords, and secrets.
 
 ---
 
 ## References
 
-- TypeScript Handbook: Classes — https://www.typescriptlang.org/docs/handbook/2/classes.html
-- TypeScript Handbook: Class Members (Access Modifiers, Readonly, Static) — https://www.typescriptlang.org/docs/handbook/2/classes.html#class-members
-- TypeScript 4.3 Release Notes (Separate Write Types on Properties) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-3.html
-- TypeScript 4.4 Release Notes (Static Blocks) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-4.html
-- TypeScript 3.8 Release Notes (ECMAScript Private Fields) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-8.html
-- TypeScript `useDefineForClassFields` Documentation — https://www.typescriptlang.org/tsconfig#useDefineForClassFields
-- MDN: Classes — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
-- MDN: Private Class Fields — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields
-- MDN: Static Initialization Blocks — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Static_initialization_blocks
-- MDN: getter — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get
-- MDN: setter — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/set
-- TypeScript Playground: Classes — https://www.typescriptlang.org/play/typescript/classes.ts.html
-- Effective TypeScript: Item 28 — Prefer Classes to Namespaces
-- Total TypeScript: Classes — https://www.totaltypescript.com/tutorials/beginners-typescript/12-classes
-- TypeScript ESLint: explicit-member-accessibility — https://typescript-eslint.io/rules/explicit-member-accessibility/
+- TypeScript Handbook — Classes - https://www.typescriptlang.org/docs/handbook/2/classes.html
+- TypeScript Handbook — Classes (Legacy, Deprecated) - https://www.typescriptlang.org/docs/handbook/classes.html
+- TypeScript Documentation — TypeScript for Java/C# Programmers (Classes) - https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes-oop.html
+- TypeScript Documentation — TypeScript for JavaScript Programmers - https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html
+- Microsoft Learn — Declare Classes and Create Instances in TypeScript - https://learn.microsoft.com/en-us/training/modules/typescript-declare-instantiate-classes/
+- W3Schools — TypeScript Classes - https://www.w3schools.com/typescript/typescript_classes.php
+- Refine — Essentials of TypeScript Classes - https://refine.dev/blog/typescript-classes/
+- Convex — TypeScript Constructors - https://www.convex.dev/typescript/core-concepts/object-oriented-programming/typescript-constructor
+- Google TypeScript Style Guide — Class Members and Visibility - https://google.github.io/styleguide/tsguide.html
+- TypeScript ESLint — `no-parameter-properties` Rule - https://typescript-eslint.io/rules/parameter-properties/
+- MDN — Classes (JavaScript) - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
+- MDN — Private Class Features - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields
+- Microsoft/TypeScript Wiki — TypeScript Design Goals - https://github.com/microsoft/TypeScript/wiki/TypeScript-Design-Goals

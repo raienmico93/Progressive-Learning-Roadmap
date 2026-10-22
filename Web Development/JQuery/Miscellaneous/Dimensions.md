@@ -1,4 +1,4 @@
-# jQuery Dimensions — Comprehensive Programming Cheat Sheet
+# jQuery Dimension Manipulation — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1001 +6,991 @@
 
 ### Definitions
 
-**Core Definition:** jQuery Dimensions is a category of jQuery API methods that retrieve and modify the width and height of DOM elements, browser windows, and documents. These methods provide a normalized, cross-browser interface for reading and writing element measurements, abstracting away inconsistencies in native JavaScript properties such as `offsetWidth`, `clientWidth`, and `getComputedStyle()`.
+**Core Definition:**
+jQuery Dimension Manipulation is the set of methods for reading and setting the width and height of DOM elements, with precise control over which layers of the CSS box model (content, padding, border, margin) are included in the measurement.
 
-**Technical Definition:** The jQuery Dimensions API comprises six paired getter/setter methods — `.width()`, `.height()`, `.innerWidth()`, `.innerHeight()`, `.outerWidth()`, and `.outerHeight()` — that compute dimensions according to the CSS box model. Each method corresponds to a specific subset of the box model: content only (`.width()`/`.height()`), content plus padding (`.innerWidth()`/`.innerHeight()`), or content plus padding plus border, with an optional margin flag (`.outerWidth()`/`.outerHeight()`). As of jQuery 1.8, these methods are aware of the CSS `box-sizing` property and adjust their calculations accordingly when `box-sizing: border-box` is active.
+**Technical Definition:**
+jQuery provides six dimension methods that operate on the CSS box model: `.width()` and `.height()` return the content-box dimensions (excluding padding, border, and margin); `.innerWidth()` and `.innerHeight()` include padding but exclude border; `.outerWidth()` and `.outerHeight()` include padding and border; `.outerWidth(true)` and `.outerHeight(true)` also include margin. These methods return numbers (pixels) for getters and return the jQuery object for setters, enabling chaining. The methods also support `$(window)` and `$(document)` for viewport and document dimensions respectively.
 
-**Beginner-Friendly Explanation:** Imagine you have a gift box. The jQuery Dimensions methods let you measure different parts of that box. `.width()` tells you how much space is inside for the gift (just the content). `.innerWidth()` adds the bubble wrap (padding). `.outerWidth()` adds the cardboard walls (border). And `.outerWidth(true)` adds the space you leave around the box on the shelf (margin). jQuery gives you a simple way to ask: "How wide is this part?" or "Set this part to be exactly this wide."
+**Beginner-Friendly Explanation:**
+Every element on a web page is a box, and that box has layers: the content in the middle, then padding, then a border, then margin space around it. jQuery's dimension methods let you ask "how wide is this element?" and specify which layers you want to count. `.width()` counts only the content. `.innerWidth()` adds padding. `.outerWidth()` adds padding and border. `.outerWidth(true)` adds padding, border, and margin.
 
 ### Key Characteristics
 
-- **Getter/Setter duality:** Every method in this category functions both as a getter (when called without arguments) and a setter (when called with a value, function, or string).
-- **Pixel-normalized returns:** Getters always return numeric values in pixels (unit-less integers or floats), making them suitable for mathematical calculations.
-- **First-element getter behavior:** When used as a getter, dimension methods return the value for only the first element in the matched set.
-- **All-element setter behavior:** When used as a setter, dimension methods apply the value to every element in the matched set.
-- **Box-sizing awareness (jQuery 1.8+):** The methods account for `box-sizing: content-box` and `box-sizing: border-box`, ensuring consistent results regardless of the CSS box model in use.
-- **Fractional values:** Returned dimensions may be fractional; code should not assume integer results.
-- **Window and document support:** `.width()` and `.height()` can measure the browser viewport and the HTML document, but `.innerWidth()`/`.innerHeight()` cannot.
+- **Box-Model Precision:** Each method corresponds to a specific layer of the CSS box model, allowing developers to measure exactly what they need.
+- **Getter/Setter Duality:** Without arguments, methods return the computed dimension of the first element; with a value, they set the content-box dimension of every element and return the jQuery object.
+- **Window and Document Support:** The same methods work on `$(window)` (viewport) and `$(document)` (HTML document), returning unitless pixel values suitable for mathematical calculations.
+- **Box-Sizing Interaction:** As of jQuery 1.8, `.width()` and `.height()` always return the **content-box** size regardless of the CSS `box-sizing` property. For `box-sizing: border-box` elements, this requires jQuery to retrieve the CSS width, read the `box-sizing` property, and subtract padding and border, incurring a performance penalty.
+- **Hidden Element Zero:** Dimension getters return `0` for elements or descendants of elements with `display: none`; retrieving dimensions from hidden elements is 8–15× slower than visible elements.
+- **Browser Zoom Inconsistency:** Dimensions may be incorrect when the page is zoomed by the user; browsers do not expose an API to detect this condition, and WebKit zoom has known issues with `box-sizing: border-box` and padding at non-round zoom levels.
 
 ### Prerequisites
 
-- Basic understanding of HTML and CSS, particularly the CSS box model (content, padding, border, margin).
-- Familiarity with JavaScript fundamentals (functions, variables, DOM manipulation).
-- jQuery library included in the project (typically via CDN or local file).
-- Working knowledge of jQuery selectors and the jQuery object (`$(selector)`).
+- Basic knowledge of HTML and CSS, especially the box model (`content`, `padding`, `border`, `margin`)
+- Familiarity with jQuery selectors and chainability
+- Understanding of the `box-sizing` CSS property (`content-box` vs. `border-box`)
+- Awareness of browser rendering and layout concepts
 
 ### Related Programming Areas
 
-- **DOM Manipulation:** Adjusting element sizes dynamically in response to user interactions.
-- **Responsive Web Design:** Measuring viewport dimensions and element sizes for layout calculations.
-- **Animation and Transitions:** Reading current dimensions before animating to a new size.
-- **Layout Engines:** Understanding how browsers compute box dimensions under different `box-sizing` models.
-- **Cross-Browser Compatibility:** Abstracting native measurement inconsistencies across browsers.
+- **CSS Box Model:** The foundation for understanding which dimension method to use.
+- **CSS Styling:** Dimension methods frequently accompany `.css()` and class manipulation.
+- **Layout and Positioning:** Dimensions are essential for centering, equal-height columns, and responsive design.
+- **Performance Optimization:** Dimension calls can trigger reflows; caching and batching are critical.
+- **Responsive Design:** Window and document dimensions drive responsive breakpoints.
 
 ### Core Concepts / Features
 
-The jQuery Dimensions API is organized around three pairs of methods, each corresponding to a distinct level of the CSS box model. Additionally, two cross-cutting concerns — `box-sizing` impact and getter/setter mechanics — affect all methods.
+1. `.width()`
+2. `.height()`
+3. `.innerWidth()`
+4. `.innerHeight()`
+5. `.outerWidth()`
+6. `.outerHeight()`
+7. `.outerWidth(true)`
+8. `.outerHeight(true)`
+9. Box Model (Content Box, Padding Box, Border Box, Margin Box)
+10. `document` and `window` Dimensions
+11. Dimension Manipulation Best Practices
 
 ---
 
-## Core Concept 1: `.width()` and `.height()`
+## 1. `.width()`
 
 ### Definitions
 
-**Core Definition:** `.width()` and `.height()` are jQuery methods that get or set the content-box width and height of an element, excluding padding, border, and margin.
+**Core Definition:**
+`.width()` gets the current computed **content-box** width of the first matched element or sets the content-box width of every matched element.
 
-**Technical Definition:** As getters, `.width()` and `.height()` return the computed content-box dimension of the first element in the matched set as a unit-less pixel number. As setters, they assign a CSS width/height value to every matched element, accepting numbers (interpreted as pixels), strings with units, or a function returning the new value. As of jQuery 1.8, these methods always return the content-box dimension regardless of the element's `box-sizing` property, though they must internally inspect `box-sizing` and subtract padding/border when `border-box` is active.
+**Technical Definition:**
+`.width()` without arguments returns the content width (excluding padding, border, and margin) of the first element in the set as a unitless pixel number. `.width(value)` sets the content width of every matched element; the value can be a number (interpreted as pixels) or a string with CSS units (e.g., `"50%"`, `"10em"`). As of jQuery 1.8, the getter always returns the content-box width regardless of the `box-sizing` property, which may require extra computation for `border-box` elements.
 
-**Beginner-Friendly Explanation:** `.width()` and `.height()` measure or set the “usable space” inside an element — like measuring the inside of a picture frame without counting the frame itself or the matting. If you have a `<div>` with padding and a border, `.width()` tells you how much room is available for the actual content, not the total size of the element.
-
-### Purposes
-
-- To retrieve the exact content-area width or height of an element for mathematical calculations or layout logic.
-- To set the content-area width or height of one or more elements programmatically.
-- To measure the browser viewport (`$(window)`) or the HTML document (`$(document)`) in pixels.
-- To obtain a numeric value (without units) that can be used directly in arithmetic operations.
-
-### Syntax Rules and Structure
-
-**Complete General Syntaxes with Breakdowns:**
-
-**Getter:**
-```javascript
-$(selector).width()
-$(selector).height()
-```
-
-| Component | Description |
-|-----------|-------------|
-| `$(selector)` | A jQuery object containing the element(s) to measure. |
-| `.width()` / `.height()` | Called with no arguments, returns the content-box dimension of the first matched element as a number (pixels). |
-
-**Setter (value):**
-```javascript
-$(selector).width(value)
-$(selector).height(value)
-```
-
-| Component | Description |
-|-----------|-------------|
-| `value` | A number (interpreted as pixels), or a string with a CSS unit (e.g., `"50px"`, `"20em"`, `"70%"`). |
-
-**Setter (function):**
-```javascript
-$(selector).width(function(index, oldWidth) { ... })
-$(selector).height(function(index, oldHeight) { ... })
-```
-
-| Component | Description |
-|-----------|-------------|
-| `function(index, oldWidth)` | A function returning the new dimension. Receives the element's index in the set and its old dimension value. `this` refers to the current element. |
-
-**Syntax Rules:**
-
-- If a **number** is passed, jQuery appends `"px"` automatically.
-- If a **string without a unit** is passed (e.g., `"12.5"`), jQuery does not append `"px"` and the setter fails silently. Always include a unit or pass a number.
-- Strings may use any valid CSS length unit: `px`, `em`, `rem`, `%`, `pt`, `vh`, `vw`, etc.
-- When used as a getter, only the first element in the set is measured.
-
-**Constraints and Limitations:**
-
-- The value reported is **not guaranteed to be accurate** when the element or its parent is hidden. jQuery attempts to temporarily show and re-hide the element, but this is unreliable and may be removed in future versions.
-- Dimensions may be **incorrect when the page is zoomed**; browsers do not expose an API to detect zoom level.
-- Returned values may be **fractional**; do not assume integers.
-- Calling `.width()` or `.height()` on `<style>` or `<script>` tags, even when absolutely positioned, is strongly discouraged and results may be unreliable.
-- `.width()` and `.height()` are not applicable to `window` and `document` for `.innerWidth()`/`.innerHeight()` — use `.width()`/`.height()` instead.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Getting Content-Box Dimensions**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>jQuery width/height getter demo</title>
-  <style>
-    #box {
-      width: 200px;          /* content width */
-      height: 100px;         /* content height */
-      padding: 20px;         /* padding all around */
-      border: 5px solid #333; /* border all around */
-      margin: 10px;          /* margin all around */
-      background-color: #f0f0f0;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div id="box">Hello</div>
-  <p id="output"></p>
-
-  <script>
-    // Step 1: Select the #box element
-    var $box = $("#box");
-
-    // Step 2: Get the content-box width (excludes padding, border, margin)
-    var w = $box.width();   // Returns 200
-
-    // Step 3: Get the content-box height (excludes padding, border, margin)
-    var h = $box.height();  // Returns 100
-
-    // Step 4: Display the results
-    $("#output").text("Content width: " + w + "px, Content height: " + h + "px");
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-Content width: 200px, Content height: 100px
-```
-
-**Why this output:** The CSS `width: 200px` and `height: 100px` define the content box. Padding (20px), border (5px), and margin (10px) are all excluded from `.width()` and `.height()` calculations. The methods return the raw content dimensions as unit-less numbers.
-
----
-
-**Example 2: Setting Dimensions with Numbers, Strings, and Functions**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>jQuery width/height setter demo</title>
-  <style>
-    .box {
-      height: 50px;
-      background-color: #cce5ff;
-      border: 2px solid #004085;
-      margin: 5px;
-      display: inline-block;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div class="box">A</div>
-  <div class="box">B</div>
-  <div class="box">C</div>
-  <p id="log"></p>
-
-  <script>
-    // Step 1: Set all .box elements to 150px wide using a number (px assumed)
-    $(".box").width(150);        // All become 150px wide
-
-    // Step 2: Set height using a string with an explicit unit
-    $(".box").height("3em");     // Height becomes 3em (relative to font-size)
-
-    // Step 3: Set width using a function that grows each box by 20px
-    $(".box").width(function(index, oldWidth) {
-      // index: 0, 1, 2
-      // oldWidth: current width of each element
-      return oldWidth + 20;
-    });
-
-    // Step 4: Log the final widths
-    var widths = [];
-    $(".box").each(function() {
-      widths.push($(this).width());
-    });
-    $("#log").text("Final widths: " + widths.join(", ") + "px");
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-Final widths: 170, 170, 170px
-```
-
-**Why this output:** Step 1 sets all boxes to 150px. Step 2 does not affect width. Step 3 uses a function that receives each element's current width (150) and returns 150 + 20 = 170. All three boxes end up 170px wide.
-
----
-
-**Example 3: Measuring Window and Document**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Window and Document dimensions</title>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <p id="result"></p>
-
-  <script>
-    // Step 1: Get viewport dimensions (browser window inner area)
-    var winW = $(window).width();
-    var winH = $(window).height();
-
-    // Step 2: Get document dimensions (entire HTML document)
-    var docW = $(document).width();
-    var docH = $(document).height();
-
-    // Step 3: Display results
-    $("#result").text(
-      "Window: " + winW + "×" + winH +
-      " | Document: " + docW + "×" + docH
-    );
-  </script>
-</body>
-</html>
-```
-
-**Expected Output (varies by viewport):**
-```
-Window: 1280×720 | Document: 1280×850
-```
-
-**Why this output:** `$(window).width()` returns the viewport width; `$(window).height()` returns the viewport height. `$(document).width()` and `$(document).height()` return the full document dimensions, which may exceed the viewport if the page scrolls.
-
-### Real-World Cases
-
-- **Dynamic content sizing:** A chat widget measures its container's `.width()` before appending a new message to determine whether text will wrap.
-- **Equal-height columns:** A script loops through a row of cards, finds the maximum `.height()`, and applies that height to all cards for a uniform grid.
-- **Viewport detection:** A responsive navigation script uses `$(window).width()` to decide whether to render a mobile or desktop menu.
-- **Canvas setup:** A drawing application reads the `.width()` and `.height()` of a container `<div>` to initialize an HTML5 `<canvas>` with matching pixel dimensions.
-
----
-
-## Core Concept 2: `.innerWidth()` and `.innerHeight()`
-
-### Definitions
-
-**Core Definition:** `.innerWidth()` and `.innerHeight()` are jQuery methods that get or set the inner dimension of an element — the content-box dimension plus padding, but excluding border and margin.
-
-**Technical Definition:** As getters, `.innerWidth()` and `.innerHeight()` return the computed width or height of the first matched element, including top and bottom (or left and right) padding, in pixels. As setters (added in jQuery 1.8), they set the inner width or height of every matched element, accepting numbers, strings with units, or a function. These methods are not applicable to `window` and `document` objects; use `.width()` and `.height()` for those.
-
-**Beginner-Friendly Explanation:** `.innerWidth()` and `.innerHeight()` measure the space from the inside edge of the border to the opposite inside edge — that is, the content area plus any padding. Think of a framed photograph: `.width()` measures just the photo, while `.innerWidth()` measures the photo plus the matting inside the frame.
+**Beginner-Friendly Explanation:**
+`.width()` tells you how wide the **content** of an element is — just the text or image inside, not the padding or border around it. If you set `.width(200)`, you make the content area 200 pixels wide.
 
 ### Purposes
 
-- To calculate the total horizontal or vertical space consumed by an element's content and padding, excluding the border.
-- To set an element's content-plus-padding dimension directly without affecting its border or margin.
-- To determine how much space is available inside an element before the border begins — useful for positioning inner elements.
-- To compute padding values indirectly by subtracting `.width()` from `.innerWidth()`.
+- To read the content width of an element for layout calculations.
+- To set the content width of elements programmatically.
+- To compute proportional sizes based on container width.
+- To retrieve a unitless pixel value suitable for arithmetic.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntaxes with Breakdowns:**
+**Complete General Syntax:**
 
-**Getter:**
 ```javascript
-$(selector).innerWidth()
-$(selector).innerHeight()
-```
-
-| Component | Description |
-|-----------|-------------|
-| `$(selector)` | jQuery object containing the element(s) to measure. |
-| `.innerWidth()` / `.innerHeight()` | No arguments; returns the content + padding dimension of the first matched element as a number (pixels). |
-
-**Setter (value):**
-```javascript
-$(selector).innerWidth(value)
-$(selector).innerHeight(value)
-```
-
-| Component | Description |
-|-----------|-------------|
-| `value` | A number (pixels), or a string with a CSS unit (e.g., `"300px"`, `"15em"`). |
-
-**Setter (function):**
-```javascript
-$(selector).innerWidth(function(index, oldInnerWidth) { ... })
-$(selector).innerHeight(function(index, oldInnerHeight) { ... })
-```
-
-| Component | Description |
-|-----------|-------------|
-| `function(index, oldInnerWidth)` | Returns the new inner dimension. Receives index and old value. `this` is the current element. |
-
-**Syntax Rules:**
-
-- As getters, these methods return the content + padding dimension in pixels.
-- As setters, the value is applied to the content box, and the browser recalculates the total occupied space based on the element's `box-sizing` property.
-- Passing a string without a unit (e.g., `"200"`) does not work; include a unit or pass a number.
-- These methods cannot be used on `window` or `document`.
-
-**Constraints and Limitations:**
-
-- Not applicable to `window` or `document`; returns `undefined` for an empty set (or `null` before jQuery 3.0).
-- Same zoom, hidden-element, and fractional-value caveats apply as with `.width()` and `.height()`.
-- The setter form was added in jQuery 1.8; older versions (pre-1.8) do not support setting via `.innerWidth()`/`.innerHeight()`.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Getting Inner Dimensions**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>innerWidth / innerHeight demo</title>
-  <style>
-    #sample {
-      width: 300px;
-      height: 150px;
-      padding: 25px;          /* 25px all around */
-      border: 10px solid #666;
-      margin: 15px;
-      background-color: #e0e0e0;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div id="sample">Content</div>
-  <p id="result"></p>
-
-  <script>
-    // Step 1: Select the element
-    var $el = $("#sample");
-
-    // Step 2: Get content-box width (300)
-    var contentW = $el.width();
-
-    // Step 3: Get inner width (content + left padding + right padding)
-    // 300 + 25 + 25 = 350
-    var innerW = $el.innerWidth();
-
-    // Step 4: Get inner height (content + top padding + bottom padding)
-    // 150 + 25 + 25 = 200
-    var innerH = $el.innerHeight();
-
-    // Step 5: Display results
-    $("#result").html(
-      "Content width: " + contentW + "px<br>" +
-      "Inner width: " + innerW + "px<br>" +
-      "Inner height: " + innerH + "px"
-    );
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-Content width: 300px
-Inner width: 350px
-Inner height: 200px
-```
-
-**Why this output:** The CSS `width: 300px` and `height: 150px` define the content box. Padding is 25px on all sides. `.innerWidth()` adds left and right padding: 300 + 25 + 25 = 350. `.innerHeight()` adds top and bottom padding: 150 + 25 + 25 = 200. Border and margin are excluded.
-
----
-
-**Example 2: Setting Inner Dimensions**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>innerWidth setter demo</title>
-  <style>
-    .panel {
-      padding: 20px;
-      border: 3px solid #000;
-      background-color: #f9f9f9;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div class="panel">Panel A</div>
-  <div class="panel">Panel B</div>
-  <p id="log"></p>
-
-  <script>
-    // Step 1: Set innerWidth to 400px on all panels
-    // jQuery sets the content width so that content + padding = 400px
-    // Content width = 400 - 20 - 20 = 360px
-    $(".panel").innerWidth(400);
-
-    // Step 2: Set innerHeight to 200px using a string with unit
-    $(".panel").innerHeight("200px");
-
-    // Step 3: Verify by reading back
-    $(".panel").each(function(idx) {
-      var innerW = $(this).innerWidth();   // 400
-      var innerH = $(this).innerHeight();  // 200
-      $("#log").append("Panel " + idx + ": inner " + innerW + "×" + innerH + "<br>");
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-Panel 0: inner 400×200
-Panel 1: inner 400×200
-```
-
-**Why this output:** `.innerWidth(400)` instructs jQuery to set the content width such that content + padding equals 400px. Since padding is 20px left + 20px right = 40px total, the content width becomes 360px. Reading back `.innerWidth()` confirms 400. Similarly for height.
-
-### Real-World Cases
-
-- **Padding calculation:** A developer computes horizontal padding as `$el.innerWidth() - $el.width()`, which equals the sum of left and right padding.
-- **Inner layout containers:** A modal dialog sets `.innerWidth()` to match a target inner dimension while retaining its padding for visual spacing.
-- **Scrollable content areas:** Before initializing a custom scrollbar, a script reads `.innerWidth()` to determine the available content width inside a padded container.
-
----
-
-## Core Concept 3: `.outerWidth()` and `.outerHeight()`
-
-### Definitions
-
-**Core Definition:** `.outerWidth()` and `.outerHeight()` are jQuery methods that get or set the outer dimension of an element — the content-box dimension plus padding and border, with an optional boolean flag to include margin.
-
-**Technical Definition:** As getters, `.outerWidth(includeMargin)` and `.outerHeight(includeMargin)` return the computed width or height of the first matched element, including padding and border by default, and additionally including margin when `includeMargin` is `true`. As setters (enhanced in jQuery 1.8), they set the outer width or height of every matched element, accepting numbers, strings, or functions; a second argument `true` may be passed to account for margins in the setter calculation.
-
-**Beginner-Friendly Explanation:** `.outerWidth()` and `.outerHeight()` measure the entire visible box of an element — the picture, the matting, and the frame. If you also pass `true`, they include the space around the frame (margin), giving you the total space the element occupies on the page.
-
-### Purposes
-
-- To retrieve the full visual footprint of an element, including its border, for layout and collision detection.
-- To measure the total space occupied by an element including its margin (`outerWidth(true)` / `outerHeight(true)`).
-- To set an element's outer dimension directly, so that the total width including padding and border matches a target value.
-- To compute margin values indirectly by subtracting `outerWidth()` from `outerWidth(true)`.
-
-### Syntax Rules and Structure
-
-**Complete General Syntaxes with Breakdowns:**
-
-**Getter (without margin):**
-```javascript
-$(selector).outerWidth()
-$(selector).outerHeight()
-```
-
-| Component | Description |
-|-----------|-------------|
-| `$(selector)` | jQuery object. |
-| `.outerWidth()` / `.outerHeight()` | No arguments; returns content + padding + border of the first matched element as a number (pixels). |
-
-**Getter (with margin):**
-```javascript
-$(selector).outerWidth(true)
-$(selector).outerHeight(true)
-```
-
-| Component | Description |
-|-----------|-------------|
-| `true` | Boolean flag indicating that margin should be included in the calculation. |
-
-**Setter (value):**
-```javascript
-$(selector).outerWidth(value)
-$(selector).outerHeight(value)
-```
-
-| Component | Description |
-|-----------|-------------|
-| `value` | A number (pixels) or string with unit. Sets the outer dimension (content + padding + border). |
-
-**Setter (value, includeMargin):**
-```javascript
-$(selector).outerWidth(value, true)
-$(selector).outerHeight(value, true)
-```
-
-| Component | Description |
-|-----------|-------------|
-| `value` | New outer dimension. |
-| `true` | When `true`, the setter accounts for margins in the calculation (undocumented but functional in jQuery 3.x). |
-
-**Setter (function):**
-```javascript
-$(selector).outerWidth(function(index, oldOuterWidth) { ... })
-$(selector).outerHeight(function(index, oldOuterHeight) { ... })
-```
-
-**Syntax Rules:**
-
-- `includeMargin` is optional and defaults to `false`. When omitted or `false`, padding and border are included; when `true`, margin is also included.
-- As a setter, passing `0` returns the jQuery object (not a number), which can cause confusion if the return value is used numerically.
-- The setter form was added in jQuery 1.8; before that, `.outerWidth()`/`.outerHeight()` were getter-only.
-- The `includeMargin` flag for setters is not officially documented in the main API but is functional in jQuery 3.2.1 and later.
-
-**Constraints and Limitations:**
-
-- `.outerWidth(true)` on a hidden element may return only the margin value without the element's width, producing incorrect results.
-- Same zoom, hidden-element, and fractional-value caveats apply.
-- Not applicable to `window` and `document` in the same way as `.innerWidth()`/`.innerHeight()`.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Getting Outer Dimensions With and Without Margin**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>outerWidth / outerHeight demo</title>
-  <style>
-    #demo {
-      width: 200px;
-      height: 100px;
-      padding: 15px;
-      border: 8px solid #333;
-      margin: 12px;
-      background-color: #d4edda;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div id="demo">Box</div>
-  <p id="output"></p>
-
-  <script>
-    var $el = $("#demo");
-
-    // Step 1: Get outer width without margin
-    // content (200) + left padding (15) + right padding (15)
-    // + left border (8) + right border (8) = 246
-    var outerW = $el.outerWidth();
-
-    // Step 2: Get outer width WITH margin
-    // 246 + left margin (12) + right margin (12) = 270
-    var outerWMargin = $el.outerWidth(true);
-
-    // Step 3: Get outer height without margin
-    // 100 + 15 + 15 + 8 + 8 = 146
-    var outerH = $el.outerHeight();
-
-    // Step 4: Get outer height WITH margin
-    // 146 + 12 + 12 = 170
-    var outerHMargin = $el.outerHeight(true);
-
-    // Step 5: Display
-    $("#output").html(
-      "Outer width (no margin): " + outerW + "px<br>" +
-      "Outer width (+margin): " + outerWMargin + "px<br>" +
-      "Outer height (no margin): " + outerH + "px<br>" +
-      "Outer height (+margin): " + outerHMargin + "px"
-    );
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-Outer width (no margin): 246px
-Outer width (+margin): 270px
-Outer height (no margin): 146px
-Outer height (+margin): 170px
-```
-
-**Why this output:** The content box is 200×100. Padding adds 15px per side, border adds 8px per side. Without margin: 200 + 30 + 16 = 246 for width; 100 + 30 + 16 = 146 for height. With margin (12px per side): 246 + 24 = 270 for width; 146 + 24 = 170 for height.
-
----
-
-**Example 2: Setting Outer Width**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>outerWidth setter demo</title>
-  <style>
-    .card {
-      padding: 10px;
-      border: 5px solid #007bff;
-      background-color: #e7f1ff;
-      margin-bottom: 10px;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div class="card">Card 1</div>
-  <div class="card">Card 2</div>
-  <p id="result"></p>
-
-  <script>
-    // Step 1: Set outer width to 300px on all cards
-    // jQuery sets the content width so that
-    // content + padding + border = 300px
-    // Content width = 300 - 10 - 10 - 5 - 5 = 270px
-    $(".card").outerWidth(300);
-
-    // Step 2: Verify by reading back
-    $(".card").each(function(i) {
-      var ow = $(this).outerWidth();  // 300
-      $("#result").append("Card " + i + " outer width: " + ow + "px<br>");
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-Card 0 outer width: 300px
-Card 1 outer width: 300px
-```
-
-**Why this output:** `.outerWidth(300)` sets the total outer width (content + padding + border) to 300px. Since padding is 10px per side and border is 5px per side, the content width becomes 300 − 10 − 10 − 5 − 5 = 270px. Reading back `.outerWidth()` confirms the total is 300px.
-
-### Real-World Cases
-
-- **Collision detection:** A drag-and-drop library uses `.outerWidth(true)` and `.outerHeight(true)` to determine the full bounding box of a draggable element, including its margin, for accurate overlap checks.
-- **Grid alignment:** A layout script measures `.outerWidth(true)` of each grid item to calculate the exact number of items that fit in a row, accounting for margins.
-- **Total space calculation:** A dashboard widget computes the total vertical space consumed by a stack of panels using `.outerHeight(true)` on each, ensuring the container scrolls correctly.
-- **Margin extraction:** A developer derives an element's horizontal margin as `(outerWidth(true) - outerWidth()) / 2`.
-
----
-
-## Enhanced Topic: The `box-sizing` Impact on Dimension Calculations
-
-### Definitions
-
-**Core Definition:** The CSS `box-sizing` property determines whether an element's `width` and `height` properties include padding and border. jQuery Dimensions methods are aware of this property and adjust their calculations accordingly.
-
-**Technical Definition:** `box-sizing: content-box` (the default) means the CSS `width` and `height` properties specify the content box only; padding and border are added outside these values. `box-sizing: border-box` means the CSS `width` and `height` properties specify the border box; padding and border are subtracted from the specified value to determine the content box. As of jQuery 1.8, `.width()` and `.height()` always return the **content-box** dimension regardless of `box-sizing`, but they must internally read the `box-sizing` property and subtract padding and border when `border-box` is active.
-
-**Beginner-Friendly Explanation:** `box-sizing` decides whether the size you set in CSS includes the “extras” (padding and border) or not. With `content-box`, setting `width: 200px` means the content is 200px and the total box is larger. With `border-box`, setting `width: 200px` means the total box is 200px and the content is smaller. jQuery’s dimension methods always tell you the content size, but they do the math behind the scenes to figure it out correctly in both modes.
-
-### Purposes
-
-- To ensure that dimension measurements are consistent across elements using different `box-sizing` models.
-- To allow developers to retrieve the true content-box dimension even when `border-box` is in use.
-- To document and manage the performance implication of `box-sizing` inspection in jQuery 1.8+.
-- To provide a strategy for avoiding the performance penalty by using `.css("width")` instead of `.width()`.
-
-### Syntax Rules and Structure
-
-There is no separate syntax for `box-sizing` impact; it affects the behavior of all six dimension methods.
-
-**Syntax Rules:**
-
-- `.width()` and `.height()` **always return the content-box dimension**, regardless of `box-sizing`.
-- `.css("width")` returns the value **as specified by CSS**: for `content-box`, it returns content width; for `border-box`, it returns content + padding + border width.
-- `.outerWidth()` and `.outerHeight()` always include padding and border; with `true`, they also include margin.
-- When `box-sizing: border-box` is active, `.width()` must read `box-sizing` and subtract padding and border, which can be **up to 100 times more expensive** on some browsers.
-
-**Constraints and Limitations:**
-
-- The performance penalty of `box-sizing` inspection can be significant when measuring dozens of elements repeatedly.
-- Using `.css("height")` instead of `.height()` avoids the penalty but returns a string with units (e.g., `"200px"`), requiring `parseFloat()` for numeric use.
-- jQuery versions before 1.8 were not fully aware of `box-sizing: border-box` and could return incorrect values.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Comparing `content-box` vs. `border-box`**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>box-sizing impact demo</title>
-  <style>
-    .content-box {
-      box-sizing: content-box;
-      width: 200px;
-      height: 100px;
-      padding: 20px;
-      border: 5px solid #dc3545;
-    }
-    .border-box {
-      box-sizing: border-box;
-      width: 200px;
-      height: 100px;
-      padding: 20px;
-      border: 5px solid #28a745;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div class="content-box" id="cb">Content-box</div>
-  <div class="border-box" id="bb">Border-box</div>
-  <p id="out"></p>
-
-  <script>
-    // Step 1: Read .width() for content-box element
-    // CSS width = 200, box-sizing = content-box
-    // .width() returns content width = 200
-    var cbWidth = $("#cb").width();
-
-    // Step 2: Read .width() for border-box element
-    // CSS width = 200, box-sizing = border-box
-    // Content width = 200 - 20 - 20 - 5 - 5 = 150
-    // .width() returns 150 (jQuery subtracts padding and border)
-    var bbWidth = $("#bb").width();
-
-    // Step 3: Read .css("width") for both
-    // .css("width") returns the CSS-specified value
-    var cbCssWidth = $("#cb").css("width");  // "200px"
-    var bbCssWidth = $("#bb").css("width");  // "200px"
-
-    // Step 4: Read .outerWidth() for both
-    // outerWidth includes content + padding + border
-    var cbOuter = $("#cb").outerWidth();  // 200 + 40 + 10 = 250
-    var bbOuter = $("#bb").outerWidth();  // 200 (since border-box total is 200)
-
-    $("#out").html(
-      "Content-box .width(): " + cbWidth + "<br>" +
-      "Border-box .width(): " + bbWidth + "<br>" +
-      "Content-box .css('width'): " + cbCssWidth + "<br>" +
-      "Border-box .css('width'): " + bbCssWidth + "<br>" +
-      "Content-box .outerWidth(): " + cbOuter + "<br>" +
-      "Border-box .outerWidth(): " + bbOuter
-    );
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-Content-box .width(): 200
-Border-box .width(): 150
-Content-box .css('width'): 200px
-Border-box .css('width'): 200px
-Content-box .outerWidth(): 250
-Border-box .outerWidth(): 200
-```
-
-**Why this output:** For the content-box element, `.width()` returns 200 (the CSS-specified content width), `.css("width")` returns `"200px"`, and `.outerWidth()` adds padding (40) and border (10) to get 250. For the border-box element, `.width()` returns 150 because jQuery subtracts padding (40) and border (10) from the CSS width (200) to get the content width. `.css("width")` returns the specified `"200px"`, and `.outerWidth()` returns 200 because the border-box total is already 200.
-
-### Real-World Cases
-
-- **Framework integration:** Bootstrap and other frameworks use `box-sizing: border-box` globally. jQuery dimension methods handle this transparently, but developers should be aware that `.width()` returns content width, not the CSS width.
-- **Performance-sensitive measuring loops:** A script that measures hundreds of elements should use `.css("width")` with `parseFloat()` to avoid the `box-sizing` inspection overhead.
-- **Debugging layout issues:** When an element appears smaller than expected with `border-box`, developers can use `.width()` to confirm the actual content width.
-
----
-
-## Enhanced Topic: Getter vs. Setter Behaviors
-
-### Definitions
-
-**Core Definition:** jQuery dimension methods operate in two modes: as getters (called without arguments) they return a numeric pixel value; as setters (called with a value, string, or function) they modify the dimensions of all matched elements and return the jQuery object for chaining.
-
-**Technical Definition:** Getter behavior: `.width()`, `.height()`, `.innerWidth()`, `.innerHeight()`, `.outerWidth()`, `.outerHeight()` — when called with no arguments, return a `Number` (possibly fractional) representing the first matched element's dimension in pixels. Setter behavior: When called with a `value` (Number or String), a `function(index, oldValue)`, or for outer methods a `value` plus `includeMargin` boolean, the method sets the corresponding dimension on every matched element and returns the jQuery object for method chaining. The string setter accepts any valid CSS length unit; numbers are interpreted as pixels.
-
-**Beginner-Friendly Explanation:** If you ask jQuery “how wide is this?” without giving it a number, it tells you the width (getter). If you give it a number, it changes the width (setter). You can also give it a function that calculates the new width based on the old one. Setters always work on all matched elements; getters always report only the first one.
-
-### Purposes
-
-- To read dimension values without modifying the DOM (getter mode).
-- To assign new dimension values to one or more elements simultaneously (setter mode).
-- To compute new dimensions dynamically based on each element's index and previous value using a function.
-- To specify dimensions in various CSS units (px, em, %, etc.) via string arguments.
-- To chain dimension setting with other jQuery methods because setters return the jQuery object.
-
-### Syntax Rules and Structure
-
-**Getter Syntax:**
-```javascript
-$(selector).width()
-$(selector).height()
-$(selector).innerWidth()
-$(selector).innerHeight()
-$(selector).outerWidth([includeMargin])
-$(selector).outerHeight([includeMargin])
-```
-
-**Setter Syntax (value):**
-```javascript
-$(selector).width(value)
-$(selector).height(value)
-$(selector).innerWidth(value)
-$(selector).innerHeight(value)
-$(selector).outerWidth(value)
-$(selector).outerHeight(value)
-```
-
-**Setter Syntax (function):**
-```javascript
-$(selector).width(function(index, oldValue) { return newValue; })
-$(selector).height(function(index, oldValue) { return newValue; })
-$(selector).innerWidth(function(index, oldValue) { return newValue; })
-$(selector).innerHeight(function(index, oldValue) { return newValue; })
-$(selector).outerWidth(function(index, oldValue) { return newValue; })
-$(selector).outerHeight(function(index, oldValue) { return newValue; })
+// Getter — content width of first element
+var w = $(selector).width();
+
+// Setter — content width of all elements
+$(selector).width(200);
+$(selector).width("50%");
+
+// Setter with callback
+$(selector).width(function(index, oldWidth) {
+    return oldWidth * 2;
+});
 ```
 
 **Component Breakdown:**
 
-| Component | Description |
-|-----------|-------------|
-| `$(selector)` | jQuery object. |
-| `value` | Number (pixels) or String (with CSS unit). |
-| `function(index, oldValue)` | Returns the new dimension. `index` is the element's position in the set; `oldValue` is the current dimension. `this` refers to the current element. |
-| `includeMargin` | Boolean; `true` includes margin in outer dimension calculations. |
+| Form | Returns | Scope |
+|------|---------|-------|
+| `.width()` | Number (pixels) | First element only. |
+| `.width(value)` | jQuery object | All elements (setter). |
+| `.width(fn)` | jQuery object | All elements (computed setter). |
 
 **Syntax Rules:**
 
-- **Numbers** are interpreted as pixels; jQuery appends `"px"` automatically.
-- **Strings without units** (e.g., `"12.5"`) do not work — jQuery fails silently. Always include a unit or pass a number.
-- **Strings with units** (e.g., `"50px"`, `"20em"`, `"70%"`) set the dimension using that CSS unit.
-- **Functions** receive `index` and `oldValue`; the return value becomes the new dimension.
-- Setters return the jQuery object, enabling chaining: `$(".box").width(200).height(100);`.
-- Getters return a `Number` (or `undefined` for an empty set in jQuery 3.0+; `null` before 3.0).
+1. The getter returns the **content-box** width, excluding padding, border, and margin.
+2. The getter returns a unitless number (no `"px"` suffix).
+3. Setting `.width()` modifies the content box, even for `box-sizing: border-box` elements.
+4. Returns `0` for hidden elements (`display: none`) or elements with no content.
 
 **Constraints and Limitations:**
 
-- String-based numeric values without units fail silently — a known behavior documented in jQuery bug #6610.
-- Fractional return values are possible; do not assume integers.
-- When a setter is called with `0` on `.outerWidth()`/`.outerHeight()`, the method returns the jQuery object instead of a number, which can cause bugs if the return value is used numerically.
-- Hidden elements may produce inaccurate getter results; jQuery attempts a show-and-rehide workaround that is unreliable and may be removed.
+- For `box-sizing: border-box` elements, the getter must compute the content width by subtracting padding and border, which is slower than `.css("width")`.
+- Dimensions may be incorrect when the browser is zoomed; no reliable API exists to detect zoom.
+- Setting width on hidden elements has no visible effect until they are shown.
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
+### Multiple Annotated Complete Step by Step Code Examples
 
-**Example 1: Getter vs. Setter with Number, String, and Function**
+**Example 1: Reading and Setting Content Width**
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>Getter/Setter mechanics demo</title>
-  <style>
-    .item {
-      height: 40px;
-      padding: 5px;
-      border: 2px solid #333;
-      margin: 3px;
-      background-color: #fff3cd;
-      display: block;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
+    <title>.width() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box {
+            width: 100px;
+            padding: 10px;
+            border: 5px solid #333;
+            margin: 15px;
+        }
+    </style>
 </head>
 <body>
-  <div class="item">Item 1</div>
-  <div class="item">Item 2</div>
-  <div class="item">Item 3</div>
-  <p id="log"></p>
+    <div class="box" id="target">Box</div>
 
-  <script>
-    // ===== GETTER MODE =====
-    // Step 1: Get the width of the first .item (no arguments)
-    var firstWidth = $(".item").width();  // Getter: returns Number
-    // At this point, width is 0 (no explicit width set)
+    <script>
+        // Step 1: Read content width (excludes padding, border, margin)
+        console.log("Content width: " + $("#target").width()); // 100
 
-    // ===== SETTER MODE: NUMBER =====
-    // Step 2: Set width to 200 (number → px assumed)
-    $(".item").width(200);  // All items become 200px wide
+        // Step 2: Compare with computed CSS width
+        console.log("CSS width: " + $("#target").css("width")); // 100px
 
-    // ===== SETTER MODE: STRING WITH UNIT =====
-    // Step 3: Set height to "4em" (string with explicit unit)
-    $(".item").height("4em");  // Height depends on font-size
+        // Step 3: Set content width programmatically
+        $("#target").width(200);
+        console.log("After set: " + $("#target").width()); // 200
 
-    // ===== SETTER MODE: FUNCTION =====
-    // Step 4: Increase each item's width by 50px using a function
-    $(".item").width(function(index, oldWidth) {
-      // index: 0, 1, 2
-      // oldWidth: 200 (from Step 2)
-      return oldWidth + 50;
-    });
-
-    // ===== VERIFICATION =====
-    // Step 5: Read back widths
-    var widths = [];
-    $(".item").each(function() {
-      widths.push($(this).width());  // Should all be 250
-    });
-
-    $("#log").text("Widths after function setter: " + widths.join(", ") + "px");
-  </script>
+        // Step 4: Set width with a CSS unit
+        $("#target").width("50%");
+        console.log("50% width: " + $("#target").width()); // resolved pixel value
+    </script>
 </body>
 </html>
 ```
 
 **Expected Output:**
 ```
-Widths after function setter: 250, 250, 250px
+Content width: 100
+CSS width: 100px
+After set: 200
+50% width: [resolved pixel value]
 ```
 
-**Why this output:** The getter in Step 1 returns 0 because no width was set. Step 2 sets all items to 200px. Step 3 sets height using `em` units. Step 4 uses a function that receives each item's current width (200) and returns 250. Step 5 confirms all widths are 250px.
-
----
-
-**Example 2: String Unit Setter with `em`, `%`, and `px`**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>String unit setter demo</title>
-  <style>
-    #container { width: 600px; }
-    .box { border: 1px solid #999; margin: 5px; }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div id="container">
-    <div class="box" id="b1">Box 1</div>
-    <div class="box" id="b2">Box 2</div>
-  </div>
-  <p id="out"></p>
-
-  <script>
-    // Step 1: Set width using px string
-    $("#b1").width("300px");   // Explicit px
-
-    // Step 2: Set width using percentage string
-    $("#b2").width("50%");     // 50% of parent container (600px) = 300px
-
-    // Step 3: Set height using em string
-    $("#b1").height("2em");    // Relative to font-size
-
-    // Step 4: Read back the computed pixel values
-    var b1W = $("#b1").width();  // Getter returns pixels
-    var b2W = $("#b2").width();
-
-    $("#out").text("Box 1 width: " + b1W + "px | Box 2 width: " + b2W + "px");
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-Box 1 width: 300px | Box 2 width: 300px
-```
-
-**Why this output:** `"300px"` sets box 1 to exactly 300px. `"50%"` sets box 2 to 50% of its parent's width (600px × 0.5 = 300px). The getter `.width()` returns the computed pixel value regardless of the unit used in the setter.
+**Why This Code Produces That Result:**
+The CSS rule sets `width: 100px`, so the content box is 100 pixels. Padding (10px each side) and border (5px each side) are **not** included in `.width()`. Setting `.width(200)` changes the content box to 200 pixels. Setting `.width("50%")` makes the content box 50% of the parent's content width, and the getter returns the resolved pixel value.
 
 ### Real-World Cases
 
-- **Progressive resizing:** A script uses a function setter to increase each element's width proportionally based on its current size: `$(".card").width(function(i, w) { return w * 1.1; })`.
-- **Unit-flexible theming:** A theme editor allows users to specify dimensions in `em` or `%`, and the setter applies the string directly.
-- **Chained dimension updates:** A resize handler chains setters: `$(".panel").width("100%").height("auto").outerHeight(200);`.
-- **Index-based layout:** A grid script uses the function setter's `index` parameter to assign progressively larger widths to each column.
+- **Responsive Images:** Setting image width based on container content width.
+- **Progress Bars:** Calculating fill width as a percentage of the track's content width.
+- **Text Truncation:** Measuring content width to determine if text overflows.
+- **Canvas Sizing:** Setting canvas width to match a container's content width.
+
+---
+
+## 2. `.height()`
+
+### Definitions
+
+**Core Definition:**
+`.height()` gets the current computed **content-box** height of the first matched element or sets the content-box height of every matched element.
+
+**Technical Definition:**
+`.height()` without arguments returns the content height (excluding padding, border, and margin) of the first element as a unitless pixel number. `.height(value)` sets the content height of every matched element. Like `.width()`, the getter always returns the content-box height regardless of `box-sizing`, and the same performance and hidden-element caveats apply.
+
+**Beginner-Friendly Explanation:**
+`.height()` tells you how tall the **content** of an element is — just the text or image, not the padding or border. Setting `.height(100)` makes the content area 100 pixels tall.
+
+### Purposes
+
+- To read the content height of an element for layout calculations.
+- To set the content height of elements programmatically.
+- To compute equal-height columns based on the tallest content.
+- To retrieve a unitless pixel value for arithmetic.
+
+### Syntax Rules and Structure
+
+```javascript
+var h = $(selector).height();        // getter
+$(selector).height(150);             // setter
+$(selector).height("10em");          // setter with unit
+```
+
+**Component Breakdown:**
+
+| Form | Returns | Scope |
+|------|---------|-------|
+| `.height()` | Number (pixels) | First element only. |
+| `.height(value)` | jQuery object | All elements (setter). |
+
+**Syntax Rules:**
+
+1. The getter returns the **content-box** height.
+2. Returns `0` for hidden elements or elements with no content.
+3. Setting height on hidden elements has no visible effect until shown.
+
+**Constraints and Limitations:**
+
+- Same `box-sizing` and zoom caveats as `.width()`.
+- Height calculations can be affected by line-height, font-size, and content overflow.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Reading and Setting Content Height**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>.height() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box {
+            height: 50px;
+            padding: 10px;
+            border: 5px solid #333;
+            margin: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box" id="target">Content</div>
+
+    <script>
+        // Step 1: Read content height
+        console.log("Content height: " + $("#target").height()); // 50
+
+        // Step 2: Set content height
+        $("#target").height(120);
+        console.log("After set: " + $("#target").height()); // 120
+
+        // Step 3: Verify padding and border are excluded
+        console.log("Padding: " + $("#target").css("padding-top")); // 10px
+        console.log("Border: " + $("#target").css("border-top-width")); // 5px
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+```
+Content height: 50
+After set: 120
+Padding: 10px
+Border: 5px
+```
+
+**Why This Code Produces That Result:**
+The content height is 50 pixels, while padding and border exist around it. `.height()` returns only the content height. Setting `.height(120)` changes the content box to 120 pixels; the padding and border remain unchanged.
+
+### Real-World Cases
+
+- **Equal-Height Columns:** Reading the tallest column's content height and applying it to siblings.
+- **Accordion Panels:** Setting content height for smooth expand/collapse.
+- **Scrollable Areas:** Setting a fixed content height before enabling overflow scrolling.
+- **Image Galleries:** Matching caption height to thumbnail height.
+
+---
+
+## 3. `.innerWidth()`
+
+### Definitions
+
+**Core Definition:**
+`.innerWidth()` gets the current computed **padding-box** width of the first matched element (content plus padding) or sets the inner width of every matched element.
+
+**Technical Definition:**
+`.innerWidth()` returns the width including padding but **excluding** border and margin. It corresponds to the **padding box** of the CSS box model. The method does not accept a `margin` argument (unlike `.outerWidth(true)`). Setters set the content-box width, but the getter reports the padding-box width.
+
+**Beginner-Friendly Explanation:**
+`.innerWidth()` tells you how wide the element is **including its padding** but not its border. If an element has 100px content and 10px padding on each side, `.innerWidth()` returns 120.
+
+### Purposes
+
+- To measure the width including padding for layout calculations where padding matters.
+- To determine the usable inner space of a container with padding.
+- To calculate content width from a known inner width and padding values.
+
+### Syntax Rules and Structure
+
+```javascript
+var iw = $(selector).innerWidth();   // getter
+$(selector).innerWidth(250);          // setter
+```
+
+**Component Breakdown:**
+
+| Form | Returns | Scope |
+|------|---------|-------|
+| `.innerWidth()` | Number (pixels) | First element only (content + padding). |
+| `.innerWidth(value)` | jQuery object | All elements (setter). |
+
+**Syntax Rules:**
+
+1. The getter includes padding on both left and right.
+2. Border and margin are excluded.
+3. The setter modifies the content box, not the padding box.
+
+**Constraints and Limitations:**
+
+- The setter does not set the "inner width" directly; it sets the content width, and the getter then reports content + padding.
+- Hidden elements return `0`.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Comparing `.width()` and `.innerWidth()`**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>.innerWidth() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box { width: 100px; padding: 10px; border: 5px solid #333; }
+    </style>
+</head>
+<body>
+    <div class="box" id="target">Box</div>
+
+    <script>
+        // Step 1: Content width
+        console.log("width(): " + $("#target").width()); // 100
+
+        // Step 2: Inner width (content + padding)
+        console.log("innerWidth(): " + $("#target").innerWidth()); // 120
+
+        // Step 3: Outer width (content + padding + border)
+        console.log("outerWidth(): " + $("#target").outerWidth()); // 130
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+```
+width(): 100
+innerWidth(): 120
+outerWidth(): 130
+```
+
+**Why This Code Produces That Result:**
+`.width()` returns `100` (content only). `.innerWidth()` adds the left and right padding (`10 + 10`) to get `120`. `.outerWidth()` adds the left and right border (`5 + 5`) to get `130`. This demonstrates the box-model layers.
+
+### Real-World Cases
+
+- **Padding-Aware Layouts:** Measuring available inner space in a padded container.
+- **Text Overflow Detection:** Comparing text width to `.innerWidth()`.
+- **Grid Calculations:** Computing column widths that include padding.
+
+---
+
+## 4. `.innerHeight()`
+
+### Definitions
+
+**Core Definition:**
+`.innerHeight()` gets the current computed **padding-box** height of the first matched element (content plus padding) or sets the inner height of every matched element.
+
+**Technical Definition:**
+`.innerHeight()` returns the height including padding but excluding border and margin. It corresponds to the **padding box** height. The getter includes top and bottom padding; the setter modifies the content-box height.
+
+**Beginner-Friendly Explanation:**
+`.innerHeight()` tells you how tall the element is **including padding** but not the border. If content is 50px and padding is 10px top and bottom, `.innerHeight()` returns 70.
+
+### Purposes
+
+- To measure the height including padding for vertical layout calculations.
+- To determine usable vertical space inside a padded container.
+- To compute content height from inner height and padding.
+
+### Syntax Rules and Structure
+
+```javascript
+var ih = $(selector).innerHeight();
+$(selector).innerHeight(200);
+```
+
+**Component Breakdown:**
+
+| Form | Returns | Scope |
+|------|---------|-------|
+| `.innerHeight()` | Number (pixels) | First element only (content + padding). |
+| `.innerHeight(value)` | jQuery object | All elements (setter). |
+
+**Syntax Rules:**
+
+1. Includes top and bottom padding.
+2. Excludes border and margin.
+3. Hidden elements return `0`.
+
+**Constraints and Limitations:**
+
+- Same setter/getter asymmetry as `.innerWidth()`.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Padding-Box Height**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>.innerHeight() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box { height: 50px; padding: 10px; border: 5px solid #333; }
+    </style>
+</head>
+<body>
+    <div class="box" id="target">Content</div>
+
+    <script>
+        // Step 1: Content height
+        console.log("height(): " + $("#target").height()); // 50
+
+        // Step 2: Inner height (content + padding)
+        console.log("innerHeight(): " + $("#target").innerHeight()); // 70
+
+        // Step 3: Outer height (content + padding + border)
+        console.log("outerHeight(): " + $("#target").outerHeight()); // 80
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+```
+height(): 50
+innerHeight(): 70
+outerHeight(): 80
+```
+
+**Why This Code Produces That Result:**
+`.innerHeight()` adds the top and bottom padding (`10 + 10`) to the content height (`50`) to produce `70`. `.outerHeight()` further adds the top and bottom border (`5 + 5`) to produce `80`.
+
+### Real-World Cases
+
+- **Vertical Centering:** Calculating available vertical space including padding.
+- **Accordion Content Areas:** Measuring the padded height of panel content.
+- **Scroll Containers:** Determining when content overflows the padding box.
+
+---
+
+## 5. `.outerWidth()`
+
+### Definitions
+
+**Core Definition:**
+`.outerWidth()` gets the current computed **border-box** width of the first matched element (content + padding + border) or sets the outer width of every matched element. By default, margin is **excluded**.
+
+**Technical Definition:**
+`.outerWidth()` returns the width including padding and border, corresponding to the **border box** of the CSS box model. `.outerWidth(true)` additionally includes margin, corresponding to the **margin box**. The method accepts an optional boolean argument: when `true`, margin is included.
+
+**Beginner-Friendly Explanation:**
+`.outerWidth()` tells you how wide the element is **including padding and border**, but not margin. If you pass `true`, it also counts the margin — that is the space the element takes up in the layout.
+
+### Purposes
+
+- To measure the full visible width of an element (content + padding + border).
+- To determine the layout footprint including margin (with `true`).
+- To calculate centering offsets and available space in flex/grid layouts.
+
+### Syntax Rules and Structure
+
+```javascript
+var ow = $(selector).outerWidth();       // border box
+var owm = $(selector).outerWidth(true);  // margin box
+$(selector).outerWidth(300);              // setter
+```
+
+**Component Breakdown:**
+
+| Form | Includes | Returns |
+|------|----------|---------|
+| `.outerWidth()` | Content + padding + border | Number (pixels). |
+| `.outerWidth(true)` | Content + padding + border + margin | Number (pixels). |
+
+**Syntax Rules:**
+
+1. Without `true`, margin is excluded.
+2. With `true`, margin is included.
+3. The setter sets the content-box width, not the outer width.
+
+**Constraints and Limitations:**
+
+- The setter/getter asymmetry means `.outerWidth(300)` does not make `.outerWidth()` return `300`.
+- Margin values may be `auto`, which computes to `0` in getters.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Border Box vs. Margin Box**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>.outerWidth() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box {
+            width: 100px; padding: 10px; border: 5px solid #333; margin: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box" id="target">Box</div>
+
+    <script>
+        // Step 1: Content, inner, outer, and outer+margin
+        console.log("width(): " + $("#target").width());             // 100
+        console.log("innerWidth(): " + $("#target").innerWidth());   // 120
+        console.log("outerWidth(): " + $("#target").outerWidth());   // 130
+        console.log("outerWidth(true): " + $("#target").outerWidth(true)); // 160
+
+        // Step 2: Demonstrate setter behavior
+        $("#target").outerWidth(200);
+        console.log("After set, outerWidth(): " + $("#target").outerWidth()); // 230 (200 + 20 padding + 10 border)
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+```
+width(): 100
+innerWidth(): 120
+outerWidth(): 130
+outerWidth(true): 160
+After set, outerWidth(): 230
+```
+
+**Why This Code Produces That Result:**
+`.outerWidth()` adds padding and border to the content width (`100 + 20 + 10 = 130`). `.outerWidth(true)` adds margin (`15 + 15 = 30`) to produce `160`. Setting `.outerWidth(200)` sets the **content** width to `200`, so the getter then returns `200 + 20 + 10 = 230`. This demonstrates the critical setter/getter asymmetry: the setter does not set the outer width directly.
+
+### Real-World Cases
+
+- **Centering Elements:** Using `.outerWidth(true)` to calculate total space including margin.
+- **Equal-Width Grids:** Measuring the full footprint of items with borders.
+- **Modal Sizing:** Ensuring modals fit within the viewport including borders.
+
+---
+
+## 6. `.outerHeight()`
+
+### Definitions
+
+**Core Definition:**
+`.outerHeight()` gets the current computed **border-box** height (content + padding + border) or, with `true`, the **margin-box** height (including margin) of the first matched element, and sets the outer height of every matched element.
+
+**Technical Definition:**
+`.outerHeight()` returns the height including padding and border. `.outerHeight(true)` includes margin. The setter sets the content-box height. The method is the vertical counterpart to `.outerWidth()`.
+
+**Beginner-Friendly Explanation:**
+`.outerHeight()` tells you how tall the element is including padding and border. With `true`, it also includes the margin space around it.
+
+### Purposes
+
+- To measure the full vertical footprint of an element.
+- To calculate available vertical space in layouts.
+- To determine scroll heights and container fit.
+
+### Syntax Rules and Structure
+
+```javascript
+var oh = $(selector).outerHeight();
+var ohm = $(selector).outerHeight(true);
+$(selector).outerHeight(150);
+```
+
+**Component Breakdown:**
+
+| Form | Includes | Returns |
+|------|----------|---------|
+| `.outerHeight()` | Content + padding + border | Number (pixels). |
+| `.outerHeight(true)` | Content + padding + border + margin | Number (pixels). |
+
+**Syntax Rules:**
+
+1. Without `true`, margin is excluded.
+2. With `true`, margin is included.
+3. The setter sets the content-box height.
+
+**Constraints and Limitations:**
+
+- Same setter/getter asymmetry as `.outerWidth()`.
+- Hidden elements return `0`.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Outer Height with and without Margin**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>.outerHeight() Example</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box {
+            height: 50px; padding: 10px; border: 5px solid #333; margin: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box" id="target">Box</div>
+
+    <script>
+        console.log("height(): " + $("#target").height());               // 50
+        console.log("innerHeight(): " + $("#target").innerHeight());     // 70
+        console.log("outerHeight(): " + $("#target").outerHeight());     // 80
+        console.log("outerHeight(true): " + $("#target").outerHeight(true)); // 110
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+```
+height(): 50
+innerHeight(): 70
+outerHeight(): 80
+outerHeight(true): 110
+```
+
+**Why This Code Produces That Result:**
+The content height is `50`. Adding top and bottom padding (`20`) gives `70`. Adding top and bottom border (`10`) gives `80`. Adding top and bottom margin (`30`) gives `110`. Each method reveals one more layer of the box model.
+
+### Real-World Cases
+
+- **Scroll Calculations:** Using `.outerHeight(true)` to determine total document height.
+- **Sticky Headers:** Measuring header height including margin for offset calculations.
+- **Grid Row Heights:** Computing the tallest item's margin-box height.
+
+---
+
+## 7. Box Model
+
+### Definitions
+
+**Core Definition:**
+The CSS box model describes how every element is rendered as a rectangular box composed of four concentric areas: content, padding, border, and margin.
+
+**Technical Definition:**
+The W3C CSS Box Model specification defines four edges: the **content edge** (inner edge), which surrounds the content rectangle; the **padding edge**, which surrounds the padding; the **border edge**, which surrounds the border; and the **margin edge** (outer edge), which surrounds the margin. The four content edges define the **content box**; the four padding edges define the **padding box**; the four border edges define the **border box**; and the four margin edges define the **margin box**.
+
+**Beginner-Friendly Explanation:**
+Think of an element as a framed picture: the picture is the content, the matting is the padding, the frame is the border, and the wall space around the frame is the margin. jQuery's dimension methods let you measure the picture alone, the picture with matting, the picture with matting and frame, or everything including the wall space.
+
+### Purposes
+
+- To choose the correct dimension method for a given measurement need.
+- To understand why `.width()`, `.innerWidth()`, and `.outerWidth()` produce different values.
+- To reason about layout and spacing decisions.
+- To debug dimension discrepancies in complex layouts.
+
+### Syntax Rules and Structure
+
+**Box-Model Layers and Corresponding jQuery Methods:**
+
+| Layer | Includes | jQuery Method |
+|-------|----------|---------------|
+| **Content box** | Content only | `.width()`, `.height()` |
+| **Padding box** | Content + padding | `.innerWidth()`, `.innerHeight()` |
+| **Border box** | Content + padding + border | `.outerWidth()`, `.outerHeight()` |
+| **Margin box** | Content + padding + border + margin | `.outerWidth(true)`, `.outerHeight(true)` |
+
+**Syntax Rules:**
+
+1. The box model applies to all elements with `display: block` or `display: inline-block`; inline elements have different behavior.
+2. The `box-sizing` property changes how the CSS `width` and `height` properties are interpreted, but jQuery dimension getters always normalize to the content box.
+3. Margin can be negative; dimension getters will reflect negative margins in `.outerWidth(true)`.
+
+**Constraints and Limitations:**
+
+- `box-sizing: border-box` makes `.width()` slower because jQuery must subtract padding and border.
+- Browser zoom can distort dimension calculations.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Measuring All Four Box-Model Layers**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Box Model Layers</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        #demo {
+            width: 100px;
+            height: 50px;
+            padding: 10px;
+            border: 5px solid #333;
+            margin: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="demo">Box</div>
+
+    <script>
+        var $el = $("#demo");
+
+        // Step 1: Content box
+        console.log("Content: " + $el.width() + " x " + $el.height()); // 100 x 50
+
+        // Step 2: Padding box
+        console.log("Padding: " + $el.innerWidth() + " x " + $el.innerHeight()); // 120 x 70
+
+        // Step 3: Border box
+        console.log("Border: " + $el.outerWidth() + " x " + $el.outerHeight()); // 130 x 80
+
+        // Step 4: Margin box
+        console.log("Margin: " + $el.outerWidth(true) + " x " + $el.outerHeight(true)); // 160 x 110
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+```
+Content: 100 x 50
+Padding: 120 x 70
+Border: 130 x 80
+Margin: 160 x 110
+```
+
+**Why This Code Produces That Result:**
+Each method measures a progressively larger layer of the box model. The content box is the base (`100 × 50`). Padding adds `20` to both dimensions. Border adds `10`. Margin adds `30`. This is the definitive demonstration of the box-model hierarchy.
+
+### Real-World Cases
+
+- **Layout Debugging:** Identifying which layer is causing overflow.
+- **Spacing Systems:** Designing margin and padding scales based on box-model understanding.
+- **Responsive Calculations:** Computing available space at each layer.
+
+---
+
+## 8. `document` and `window` Dimensions
+
+### Definitions
+
+**Core Definition:**
+jQuery dimension methods can be called on `$(document)` to get the HTML document's dimensions and on `$(window)` to get the browser viewport's dimensions.
+
+**Technical Definition:**
+`$(window).width()` and `$(window).height()` return the width and height of the browser **viewport** (the visible area, excluding browser chrome). `$(document).width()` and `$(document).height()` return the width and height of the **HTML document** (the full content area, which may exceed the viewport and require scrolling). Both return unitless pixel numbers.
+
+**Beginner-Friendly Explanation:**
+`$(window).width()` tells you how wide the visible browser area is. `$(document).width()` tells you how wide the entire page content is. When the page is taller than the screen, `$(document).height()` is larger than `$(window).height()`.
+
+### Purposes
+
+- To detect viewport size for responsive breakpoints.
+- To determine whether the document is taller than the viewport (scrollbars).
+- To center modals relative to the viewport.
+- To calculate scroll ranges and lazy-load thresholds.
+
+### Syntax Rules and Structure
+
+```javascript
+// Viewport dimensions
+var vw = $(window).width();
+var vh = $(window).height();
+
+// Document dimensions
+var dw = $(document).width();
+var dh = $(document).height();
+```
+
+**Component Breakdown:**
+
+| Target | Method | Returns |
+|--------|--------|---------|
+| `$(window)` | `.width()` / `.height()` | Viewport dimensions. |
+| `$(document)` | `.width()` / `.height()` | Document dimensions. |
+
+**Syntax Rules:**
+
+1. `$(window).width()` and `$(window).height()` are the recommended methods for viewport size.
+2. `$(document).height()` may be larger than `$(window).height()` when scrolling is possible.
+3. These methods do not work on `window` or `document` DOM objects directly; they must be wrapped in jQuery.
+
+**Constraints and Limitations:**
+
+- Viewport dimensions include scrollbar width in some browsers, which can cause layout shifts.
+- Document dimensions may be affected by margins, padding, and absolutely positioned elements.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Comparing Viewport and Document Dimensions**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Window vs Document</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body { height: 2000px; margin: 0; }
+    </style>
+</head>
+<body>
+    <script>
+        // Step 1: Viewport dimensions
+        console.log("Viewport width: " + $(window).width());
+        console.log("Viewport height: " + $(window).height());
+
+        // Step 2: Document dimensions
+        console.log("Document width: " + $(document).width());
+        console.log("Document height: " + $(document).height());
+
+        // Step 3: Check for scrolling
+        var hasScroll = $(document).height() > $(window).height();
+        console.log("Scrollable: " + hasScroll); // true
+    </script>
+</body>
+</html>
+```
+
+**Expected Output (approximate, depends on browser):**
+```
+Viewport width: [e.g., 1200]
+Viewport height: [e.g., 800]
+Document width: [e.g., 1200]
+Document height: 2000
+Scrollable: true
+```
+
+**Why This Code Produces That Result:**
+The `<body>` has `height: 2000px`, making the document taller than the viewport. `$(window).height()` returns the visible area, while `$(document).height()` returns `2000`. The comparison detects scrollability. If the document were shorter than the viewport, the two heights would be equal (or the document height would be smaller).
+
+### Real-World Cases
+
+- **Responsive Navigation:** Switching to a mobile menu based on `$(window).width()`.
+- **Modal Centering:** Positioning modals at `($(window).height() - modalHeight) / 2`.
+- **Infinite Scroll:** Triggering a load when the scroll position approaches `$(document).height()`.
+- **Sticky Footers:** Checking if the document is shorter than the viewport.
+
+---
+
+## 9. Dimension Manipulation Best Practices
+
+### Definitions
+
+**Core Definition:**
+Dimension manipulation best practices are guidelines for reading and setting element dimensions in a performant, accurate, and maintainable manner, accounting for box-model layers, `box-sizing`, hidden elements, and browser inconsistencies.
+
+**Technical Definition:**
+Best practices encompass choosing the correct method for the desired box-model layer, caching dimension reads and avoiding interleaved read/write operations that cause layout thrashing, handling `box-sizing: border-box` performance implications, accounting for hidden elements returning `0`, acknowledging browser zoom limitations, and using `.css("width")` when the CSS property value is needed rather than the content-box dimension.
+
+**Beginner-Friendly Explanation:**
+These are the rules that keep your dimension code accurate and fast. They help you avoid common mistakes like measuring the wrong layer, slowing down the page with too many measurements, or getting zero when an element is hidden.
+
+### Purposes
+
+- To select the correct dimension method for the measurement need.
+- To minimize layout thrashing and reflow costs.
+- To handle edge cases (hidden elements, `box-sizing`, zoom) correctly.
+- To write dimension code that is easy to understand and maintain.
+
+### Syntax Rules and Structure
+
+**Key Best Practices:**
+
+| # | Practice | Bad Example | Good Example |
+|---|----------|-------------|--------------|
+| 1 | Choose the correct layer | Using `.width()` when margin matters | `.outerWidth(true)` when margin matters |
+| 2 | Cache dimension reads | Reading `.width()` repeatedly | `var w = $el.width();` |
+| 3 | Batch reads and writes | Read → write → read → write | All reads, then all writes |
+| 4 | Use `.css("width")` for CSS value | `.width()` on `border-box` for authored width | `.css("width")` when CSS value is needed |
+| 5 | Handle hidden elements | Assume dimensions are valid | Temporarily show, measure, hide |
+| 6 | Account for zoom | Trust dimension values at non-100% zoom | Test at multiple zoom levels |
+
+**Syntax Rules:**
+
+1. Use `.width()`/`.height()` only when the content-box size is needed.
+2. Use `.innerWidth()`/`.innerHeight()` when padding is part of the usable space.
+3. Use `.outerWidth(true)`/`.outerHeight(true)` when the full layout footprint (including margin) matters.
+4. For `box-sizing: border-box` elements, prefer `.css("width")` when the CSS property value is needed to avoid the subtraction penalty.
+5. Batch all dimension **reads** before performing **writes** to avoid forced synchronous layouts.
+
+**Constraints and Limitations:**
+
+- No best practice eliminates the browser zoom limitation entirely.
+- Hidden elements will always return `0`; a temporary show-measure-hide pattern is required, but it triggers reflows.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+**Example 1: Applying Dimension Best Practices**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dimension Best Practices</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        .box { width: 100px; padding: 10px; border: 5px solid #333; margin: 15px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="box" id="a">A</div>
+    <div class="box hidden" id="b">B</div>
+
+    <script>
+        var $a = $("#a");
+        var $b = $("#b");
+
+        // ✅ Choose the correct layer
+        console.log("A border-box width: " + $a.outerWidth()); // 130
+        console.log("A margin-box width: " + $a.outerWidth(true)); // 160
+
+        // ✅ Cache reads (batch reads before writes)
+        var aWidth = $a.width();
+        var aHeight = $a.height();
+
+        // ✅ Handle hidden elements: temporarily show, measure, hide
+        $b.css("display", "block");
+        var bWidth = $b.width();
+        var bHeight = $b.height();
+        $b.css("display", "none");
+        console.log("B content: " + bWidth + " x " + bHeight); // 100 x auto
+
+        // ✅ Use .css("width") for the CSS value
+        console.log("A CSS width: " + $a.css("width")); // 100px
+
+        // Writes happen after all reads
+        $a.width(200).height(100);
+        console.log("A after set: " + $a.width() + " x " + $a.height()); // 200 x 100
+    </script>
+</body>
+</html>
+```
+
+**Expected Output:**
+```
+A border-box width: 130
+A margin-box width: 160
+B content: 100 x [auto height]
+A CSS width: 100px
+A after set: 200 x 100
+```
+
+**Why This Code Produces That Result:**
+The correct method is chosen for each measurement need. Reads are cached and batched before writes to avoid layout thrashing. The hidden element is temporarily made visible to obtain its dimensions. `.css("width")` returns the authored CSS value (`"100px"`), while `.width()` returns a number. Finally, setters are applied after all reads.
+
+### Real-World Cases
+
+- **Performance-Critical Dashboards:** Batching dimension reads in resize handlers.
+- **Responsive Components:** Choosing `.outerWidth(true)` for grid calculations that include gutters (margins).
+- **Hidden Tabs/Accordions:** Temporarily showing panels to measure content height before animating.
+- **Cross-Browser Testing:** Verifying dimension behavior at 100% and non-100% zoom levels.
 
 ---
 
 ## References
 
-- jQuery API Documentation — Dimensions — https://api.jquery.com/category/dimensions/dimensions/
-- jQuery API Documentation — .height() — https://api.jquery.com/height/
-- jQuery API Documentation — .innerHeight() — https://api.jquery.com/innerheight/
-- jQuery API Documentation — .outerWidth() — https://api.jquery.com/outerWidth/
-- jQuery API Documentation — .width() — https://api.jquery.com/width/
-- jQuery Blog — “jQuery 1.8 box-sizing: width(), css(“width”), and outerWidth()” — https://blog.jquery.com/2012/08/16/jquery-1-8-box-sizing-width-csswidth-and-outerwidth/
-- MDN Web Docs — box-sizing CSS property — https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/box-sizing
-- jQuery Bug Tracker — Ticket #6610: Inconsistent behavior setting dimensions — http://bugs.jquery.com/ticket/6610/
-- W3Schools — jQuery Dimensions — https://www.w3schools.com/jquery/jquery_dimensions.asp
-- jQuery Bug Tracker — Ticket #10877: outerWidth/outerHeight as setters — https://bugs.jquery.com/ticket/10877/
-- W3C CSS Box Sizing Module Level 3 — https://www.w3.org/TR/css-sizing-3/
-- jQuery Learning Center — CSS, Styling, & Dimensions — https://learn.jquery.com/using-jquery-core/css-styling-dimensions/
+- jQuery API Documentation — Dimensions Category - https://api.jquery.com/category/dimensions/
+- jQuery API Documentation — `.width()` - https://api.jquery.com/width/
+- jQuery API Documentation — `.height()` - https://api.jquery.com/height/
+- jQuery API Documentation — `.innerWidth()` - https://api.jquery.com/innerWidth/
+- jQuery API Documentation — `.innerHeight()` - https://api.jquery.com/innerHeight/
+- jQuery API Documentation — `.outerWidth()` - https://api.jquery.com/outerWidth/
+- jQuery API Documentation — `.outerHeight()` - https://api.jquery.com/outerHeight/
+- W3C — CSS Box Model (CSS 2.2) - https://www.w3.org/TR/2016/WD-CSS22-20160412/box.html
+- MDN Web Docs — CSS Box Model - https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Box_Model/Introduction_to_the_CSS_box_model
+- jQuery Bug Tracker — Issue with `outerWidth()` setter, padding, and `box-sizing` at zoom levels - https://bugs.jquery.com/ticket/13543/
+- jQuery GitHub Issue — Performance of dimension methods on hidden elements - https://github.com/jquery/jquery/issues/2108
+- Stack Overflow — jQuery `width()` and `height()` performance under IE7 - https://bugs.jquery.com/ticket/2108
+- Amaze UI — Differences between jQuery and Zepto.js (box-sizing and dimension penalties) - https://amazeui.github.io/docs/en/javascript/
+- jQuery API Documentation — CSS Styling and Dimensions - https://learn.jquery.com/using-jquery-core/css-styling-dimensions/

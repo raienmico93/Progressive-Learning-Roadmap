@@ -163,7 +163,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Readonly tuples
   * Tuples versus arrays
 
-* [**12. Enums**](/Web%20Development/TypeScript/Core%20Type%20System/Enums.md)
+* **12. Enums**
 
   * Numeric enums
   * String enums
@@ -226,7 +226,7 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # V. Object-Oriented TypeScript
 
-* [**18. Objects**](/Web%20Development/TypeScript/Object%20Oriented/Objects.md)
+* **18. Objects**
 
   * Object type inference
   * Object type annotations
@@ -235,7 +235,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Readonly properties
   * Index signatures
 
-* [**19. Type Aliases**](/Web%20Development/TypeScript/Object%20Oriented/TypeAliases.md)
+* **19. Type Aliases**
 
   * Primitive aliases
   * Object aliases
@@ -263,7 +263,6 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Methods
   * Parameter properties
   * Access modifiers
-
     * `public`
     * `private`
     * `protected`
@@ -316,7 +315,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Conflicting properties
   * Practical use cases
 
-* [**27. Literal Types**](/Web%20Development/TypeScript/Type%20Composition/Literal.md)
+* **27. Literal Types**
 
   * String literals
   * Numeric literals

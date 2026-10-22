@@ -423,7 +423,7 @@ PHP is best learned progressively: first the language itself, then web programmi
   * Failure handling
   * Graceful degradation
 
----
+--- 
 
 # IX. Files, Directories, and Input/Output
 
@@ -617,7 +617,7 @@ PHP is best learned progressively: first the language itself, then web programmi
 
 # XIII. Namespaces and Code Organization
 
-* [**54. Namespaces**](/Web%20Development/PHP/Advanced/Namespace.md)
+* **54. Namespaces**
 
   * Namespace declaration
   * Namespace imports

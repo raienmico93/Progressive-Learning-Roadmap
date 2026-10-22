@@ -1,4 +1,4 @@
-# TypeScript Intersection Types: A Comprehensive Cheat Sheet
+# Intersection Types in TypeScript — Comprehensive Cheat Sheet
 
 ---
 
@@ -6,1016 +6,737 @@
 
 ### Definitions
 
-**Core Definition**
-An intersection type in TypeScript is a type that combines two or more types into one, requiring a value to satisfy *all* constituent types simultaneously. Intersection types are written using the ampersand operator (`&`) between types. A value of an intersection type has all the members of every constituent type.
+**Core Definition (Academic).** An **intersection type** is a type formed by combining two or more types with the ampersand operator (`&`), representing a value that must satisfy **all constituent types simultaneously**. It is the type-level equivalent of a logical **AND**: a value of type `A & B` must be assignable to both `A` and `B`, possessing every member required by each constituent.
 
-**Technical Definition**
-An intersection type is a TypeScript type construct that denotes the set-theoretic intersection of its constituent types. Given types `A` and `B`, the intersection `A & B` contains all values that are members of both `A` and `B`. For object types, this means the resulting type has all properties from both `A` and `B`. When property types conflict between constituents, the intersection of those property types is computed (e.g., `string & number` results in `never` because no value is both a string and a number). For callable types (functions), intersection produces overloaded signatures. Intersection types are the primary mechanism for composing behaviors and mixing properties in TypeScript, and they serve as the type-level counterpart to the mixin pattern.
+**Technical Definition.** In TypeScript's type grammar, an intersection type `T₁ & T₂ & … & Tₙ` denotes the **set-theoretic intersection** of its constituent types. A value is assignable to the intersection only if it is assignable to **every** member. For object types, properties are **recursively merged**; if the same property appears in multiple constituents with **incompatible types**, the resulting property type becomes `never`, because no value can satisfy both. Unlike interface `extends`, intersections do **not** detect property conflicts at declaration—conflicts surface only when the type is used. Since TypeScript 4.8, intersections with `{}` are simplified to the other object type. Intersection types are **erased** during compilation and have no runtime representation.
 
-**Beginner-Friendly Explanation**
-An intersection type says "this value must be *all* of these types at once." If you have `Person & Employee`, a value of that type must have all of `Person`'s properties *and* all of `Employee`'s properties. It's like combining two checklists into one—you have to check off everything from both. Intersection types are written with `&` (ampersand). They're used to combine object shapes, add properties to existing types, and compose interfaces. Unlike union types (which say "one of these"), intersection types say "all of these."
+**Beginner-Friendly Explanation.** An intersection type says: **"This value must be everything from A AND everything from B."** If a union is an OR, an intersection is an AND. `A & B` requires the value to have all of A's members and all of B's members. It is TypeScript's primary mechanism for **type composition**—building a new type from existing pieces without duplication.
+
+---
 
 ### Key Characteristics
 
-- **Set-theoretic intersection**: A value must satisfy *all* constituent types.
-- **Property merging**: Object intersections merge all properties from all members.
-- **Conflict resolution**: Conflicting primitive property types result in `never`.
-- **Method overloading**: Conflicting method signatures produce overloads.
-- **Composition tool**: Intersections are the primary way to compose object types.
-- **Mixins**: Intersections model the type-level result of mixin patterns.
-- **Structural**: Intersection compatibility is structural.
-- **Compile-time only**: Erased at runtime.
+| Characteristic | Description |
+|---|---|
+| **AND semantics** | A value of `A & B` must be assignable to both `A` and `B`. |
+| **Recursive merging** | Object properties are merged recursively on every use, not flattened once. |
+| **Silent conflict to `never`** | Incompatible property types reduce to `never` without a declaration-time error. |
+| **Composition tool** | Intersections are the primary way to compose types, especially when interfaces cannot be extended (unions, primitives, functions). |
+| **Performance cost** | Intersections are **recomputed on every use**, causing measurable slowdowns in large codebases. |
+| **Interface caching contrast** | Interfaces are cached by name; intersections are not. |
+| **Mixin foundation** | Intersections model the ECMAScript mixin pattern by combining constructor types. |
+| **Erasure** | Intersection types exist only at compile time and emit no JavaScript. |
+
+---
 
 ### Prerequisites
 
-- Basic knowledge of TypeScript object types and interfaces
-- Familiarity with union types (`|`)
-- Understanding of type aliases and interfaces
-- Familiarity with generics and utility types
+- **TypeScript basics**: type annotations, type aliases, and interfaces.
+- **Union types** (`|`) — the dual of intersections.
+- **Object types** and structural compatibility.
+- **Generics fundamentals**: type parameters and constraints.
+- **A TypeScript environment** (`tsc` or an editor with TypeScript support).
+
+---
 
 ### Related Programming Areas
 
-- **Type Theory**: Intersection types are product types (in the type-theoretic sense) for object members
-- **Design Patterns**: Mixin, decorator, and adapter patterns
-- **Interface Composition**: Intersections compose interfaces without inheritance
-- **Utility Types**: Many built-in utility types (`Readonly<T>`, `Partial<T>`) use intersections internally
-- **Module Augmentation**: Intersections extend third-party types
-
-### Core Concepts / Features
-
-1. Intersection Syntax (`&`) and Conceptual Meaning
-2. Combining Object Types and Mixing Properties
-3. Composition of Interfaces with Intersection Types
-4. Conflicting Properties (Primitive Mismatches Resulting in `never` vs. Method Overloading)
-5. Practical Use Cases (Mixins, Extending Third-Party Library Options)
-
-
-## 1. Intersection Syntax (`&`) and Conceptual Meaning
-
-### Definitions
-
-**Core Definition**
-Intersection syntax uses the ampersand operator (`&`) to combine two or more types into a single type that requires values to satisfy all constituent types. The conceptual meaning is "all of these types" or "this AND that."
-
-**Technical Definition**
-The intersection type operator (`&`) is a binary type operator that constructs the intersection of its operands. `A & B` is the type whose values are exactly the values that are members of *both* `A` and `B`. For object types, the resulting type has the union of all properties from both operands (with property type intersections applied for conflicting names). For primitive types, `A & B` is `never` unless one is a subtype of the other (in which case, the subtype wins). For callable types, the intersection produces overloaded signatures. TypeScript normalizes intersections: duplicate members are merged, `never` absorbs the entire intersection (`T & never` is `never`), `unknown` is the identity (`T & unknown` is `T`), and `any` absorbs everything (`T & any` is `any`).
-
-**Beginner-Friendly Explanation**
-The ampersand (`&`) is TypeScript's way of saying "and." When you write `Person & Employee`, you're saying "this value must have everything a Person has AND everything an Employee has." It's like combining two requirements into one. Intersection types are useful when you want to compose behaviors: `Timestamped & Serializable` gives you a type that's both timestamped and serializable. Unlike union types (which are "or"), intersections are "and."
-
-### Purposes
-
-- To combine multiple object types into a single type with all members.
-- To compose interfaces without using inheritance.
-- To add properties to an existing type without modifying it.
-- To model mixin patterns at the type level.
-- To constrain generic type parameters to multiple contracts simultaneously.
-
-### Syntax Rules and Structure
-
-**General Syntax: Intersection Type**
-
-```typescript
-type AliasName = Type1 & Type2 & Type3;
-```
-
-**Component Breakdown**
-- `Type1 & Type2 & Type3`: The intersection of the constituent types.
-- A value of `AliasName` must satisfy all three types.
-
-**General Syntax: Inline Intersection Annotation**
-
-```typescript
-let variable: Type1 & Type2 = value;
-```
-
-**Component Breakdown**
-- The intersection can be used directly in variable, parameter, or return type positions.
-
-**General Syntax: Intersection in Generic Constraints**
-
-```typescript
-function functionName<T extends Type1 & Type2>(value: T): void { }
-```
-
-**Component Breakdown**
-- `T extends Type1 & Type2`: The generic parameter must satisfy both types.
-
-**Syntax Rules**
-
-- The `&` operator joins two or more types into an intersection.
-- Intersection members can be any valid type: primitives, objects, literals, functions, tuples.
-- Duplicate members are merged.
-- `never` absorbs the intersection (`T & never` is `never`).
-- `unknown` is the identity (`T & unknown` is `T`).
-- `any` absorbs the intersection (`T & any` is `any`).
-- Object intersections merge all properties.
-- Conflicting primitive properties become `never`.
-- Conflicting method signatures become overloads.
-
-**Constraints and Limitations**
-
-- Intersections of incompatible primitives (`string & number`) produce `never`, which is rarely useful.
-- Intersection types are erased at runtime; they exist only in the type system.
-- Complex intersections can be hard to read; consider extracting to named interfaces.
-- Intersection type members cannot be overridden—they accumulate.
-- Intersections do not create nominal identity; two structurally identical intersections are compatible.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Intersection Types
-
-```typescript
-// Step 1: Define two interfaces.
-interface Person {
-  name: string;
-  age: number;
-}
-
-interface Employee {
-  employeeId: number;
-  department: string;
-}
-
-// Step 2: Create an intersection type.
-type EmployeePerson = Person & Employee;
-
-// Step 3: Create a value satisfying both.
-const alice: EmployeePerson = {
-  name: "Alice",
-  age: 30,
-  employeeId: 1001,
-  department: "Engineering",
-};
-
-// Step 4: All properties are accessible.
-console.log(`${alice.name} (ID: ${alice.employeeId})`);
-console.log(`Department: ${alice.department}, Age: ${alice.age}`);
-
-// Step 5: Missing properties from either interface cause errors.
-// const bob: EmployeePerson = {
-//   name: "Bob",
-//   age: 25,
-//   employeeId: 1002,
-//   // department is missing
-// };
-// ❌ Error: Property 'department' is missing.
-
-// Step 6: Both interfaces are satisfied.
-function describe(person: Person): string {
-  return `${person.name}, ${person.age}`;
-}
-
-function describeEmployee(employee: Employee): string {
-  return `${employee.employeeId} in ${employee.department}`;
-}
-
-console.log(describe(alice));          // "Alice, 30"
-console.log(describeEmployee(alice));  // "1001 in Engineering"
-```
-
-**Expected Output:**
-```
-Alice (ID: 1001)
-Department: Engineering, Age: 30
-Alice, 30
-1001 in Engineering
-```
-
-**Why This Output Occurs:** The `EmployeePerson` intersection requires all properties from both `Person` and `Employee`. The `alice` object satisfies both, so it can be used wherever either `Person` or `Employee` is expected.
-
-#### Example 2: Intersection Normalization
-
-```typescript
-// Step 1: TypeScript normalizes intersections.
-type A = { name: string } & { name: string };         // Merges duplicate
-type B = { name: string } & unknown;                  // unknown is identity
-type C = { name: string } & any;                      // any absorbs everything
-type D = { name: string } & never;                    // never absorbs everything
-
-// Step 2: Verify normalization.
-const a: A = { name: "Alice" };  // ✅
-const b: B = { name: "Bob" };    // ✅
-const c: C = { name: "Charlie" }; // ✅ (but c is `any`)
-
-// Step 3: never intersection makes the type uninhabitable.
-// const d: D = { name: "Dave" };
-// ❌ Error: Type '{ name: string; }' is not assignable to type 'never'.
-
-// Step 4: Intersection with any loses type safety.
-function useAny(value: C): void {
-  console.log(value.nonExistent.deeply.nested);  // ✅ No error (value is any)
-}
-
-useAny({ name: "Test" });  // Runtime error if nonExistent accessed
-```
-
-**Expected Output:** No output (the `useAny` call would produce a runtime error if the property chain were actually accessed; the code is shown to compile).
-
-**Why This Output Occurs:** TypeScript normalizes intersections by merging duplicates and applying identity/absorbing rules. `unknown` is the identity element (`T & unknown = T`). `any` absorbs everything (`T & any = any`). `never` absorbs everything (`T & never = never`), making the type uninhabitable.
-
-### Real-World Cases
-
-**Case 1: Mixin Composition**
-Mixins in TypeScript are often modeled with intersection types: `Timestamped & Serializable & Loggable`.
-
-**Case 2: Utility Types**
-TypeScript's built-in utility types use intersections. For example, `Required<T>` is implemented as a mapped type that intersects with the original.
-
-**Case 3: Third-Party Augmentation**
-Intersections are used to add properties to third-party types without modifying the source.
+- **Type composition** and **mixin patterns** in TypeScript.
+- **Interface inheritance** (`extends`) — the preferred alternative for object hierarchies.
+- **Union types** (`|`) — the OR counterpart to intersection's AND.
+- **Utility types** — `Omit<T, K>`, `Pick<T, K>`, and intersection composition.
+- **Compiler performance** — interface caching vs. intersection recomputation.
 
 ---
 
-## 2. Combining Object Types and Mixing Properties
-
-### Definitions
-
-**Core Definition**
-Combining object types with intersections merges the properties of all constituent object types into a single type. The resulting type has every property from every constituent, with property types computed via intersection when names conflict.
-
-**Technical Definition**
-For object types `A` and `B`, the intersection `A & B` produces a type with the union of all property names from `A` and `B`. For each property name, the resulting type is `A[P] & B[P]` if the property exists in both, or the sole type if it exists in only one. Property modifiers are merged: a property is optional in the intersection only if it is optional in all constituents; a property is readonly if it is readonly in any constituent. This merging enables powerful composition patterns: combining base types, adding capabilities, and layering concerns.
-
-**Beginner-Friendly Explanation**
-When you intersect two object types, you get a type with all properties from both. For example, `{ name: string } & { age: number }` produces `{ name: string; age: number }`. It's like combining two Lego pieces into one. If both types have the same property with the same type, it stays the same. If they have the same property with different types, TypeScript intersects the types (which usually results in `never`). Intersections are the cleanest way to compose object shapes without inheritance.
-
-### Purposes
-
-- To merge properties from multiple object types into one.
-- To add capabilities to a base type without modifying it.
-- To compose domain models from smaller, focused interfaces.
-- To implement mixin-style type composition.
-- To constrain generic types to multiple object contracts.
-
-### Syntax Rules and Structure
-
-**General Syntax: Object Intersection**
-
-```typescript
-type Combined = { prop1: Type1 } & { prop2: Type2 };
-// Result: { prop1: Type1; prop2: Type2 }
-```
-
-**Component Breakdown**
-- The intersection merges the properties of both object literals.
-
-**General Syntax: Interface Intersection**
-
-```typescript
-interface A { a: string; }
-interface B { b: number; }
-type C = A & B;
-// Result: { a: string; b: number }
-```
-
-**Component Breakdown**
-- Intersections work with named interfaces as well as inline object types.
-
-**General Syntax: Optional and Readonly Merging**
-
-```typescript
-type A = { prop?: string };
-type B = { prop: string };
-type C = A & B;  // prop is required in C (required wins)
-```
-
-**Component Breakdown**
-- A property is optional only if optional in all constituents.
-- A property is readonly if readonly in any constituent.
-
-**Syntax Rules**
-
-- Object intersections merge all properties from all constituents.
-- Property types are intersected for conflicting names.
-- Optionality: a property is optional only if optional in all constituents.
-- Readonly: a property is readonly if readonly in any constituent.
-- Extra properties on object literals are subject to excess property checking.
-- Intersections of object types are commutative and associative (order doesn't matter).
-- Intersections can be combined with unions (with careful precedence).
-
-**Constraints and Limitations**
-
-- Conflicting primitive property types result in `never` (rarely useful).
-- Intersection types cannot override property types (only intersect them).
-- Deeply nested intersections can be complex to read.
-- Excess property checking with intersections can be surprising.
-- Intersections of object types with methods can produce overloads if signatures conflict.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Merging Object Properties
-
-```typescript
-// Step 1: Define base object types.
-type HasName = { name: string };
-type HasAge = { age: number };
-type HasEmail = { email: string };
-
-// Step 2: Combine with intersections.
-type Person = HasName & HasAge;
-type Contact = HasName & HasEmail;
-type FullProfile = HasName & HasAge & HasEmail;
-
-// Step 3: Create values.
-const person: Person = { name: "Alice", age: 30 };
-const contact: Contact = { name: "Bob", email: "bob@example.com" };
-const profile: FullProfile = { name: "Charlie", age: 25, email: "charlie@example.com" };
-
-console.log(person);   // { name: 'Alice', age: 30 }
-console.log(contact);  // { name: 'Bob', email: 'bob@example.com' }
-console.log(profile);  // { name: 'Charlie', age: 25, email: 'charlie@example.com' }
-
-// Step 4: Each intersection is assignable to its constituents.
-function greet(p: HasName): string {
-  return `Hello, ${p.name}`;
-}
-
-console.log(greet(person));   // "Hello, Alice"
-console.log(greet(contact));  // "Hello, Bob"
-console.log(greet(profile));  // "Hello, Charlie"
-
-// Step 5: Missing properties cause errors.
-// const invalid: FullProfile = { name: "Dave", age: 40 };
-// ❌ Error: Property 'email' is missing.
-```
-
-**Expected Output:**
-```
-{ name: 'Alice', age: 30 }
-{ name: 'Bob', email: 'bob@example.com' }
-{ name: 'Charlie', age: 25, email: 'charlie@example.com' }
-Hello, Alice
-Hello, Bob
-Hello, Charlie
-```
-
-**Why This Output Occurs:** Intersections merge all properties. `FullProfile` has `name`, `age`, and `email`. Values of `FullProfile` are assignable to `HasName`, `HasAge`, and `HasEmail` because they have all required properties.
-
-#### Example 2: Optional and Readonly Merging
-
-```typescript
-// Step 1: Define types with modifiers.
-type WithOptional = { nickname?: string; bio?: string };
-type WithRequired = { nickname: string; email: string };
-type WithReadonly = { readonly id: number; name: string };
-
-// Step 2: Intersect types with different modifiers.
-type MergedOptionalRequired = WithOptional & WithRequired;
-// nickname: string (required — because WithRequired requires it)
-// bio?: string (optional — only in WithOptional)
-// email: string (required — from WithRequired)
-
-const merged: MergedOptionalRequired = {
-  nickname: "Al",
-  email: "al@example.com",
-  // bio is optional, so it can be omitted
-};
-console.log(merged);  // { nickname: 'Al', email: 'al@example.com' }
-
-// Step 3: Readonly merging.
-type MergedReadonly = WithReadonly & { name: string };
-// id: readonly number (readonly wins)
-// name: string (mutable)
-
-const item: MergedReadonly = { id: 1, name: "Widget" };
-// item.id = 2;  // ❌ Error: Cannot assign to 'id' because it is a read-only property.
-item.name = "Gadget";  // ✅ Allowed
-console.log(item);  // { id: 1, name: 'Gadget' }
-```
-
-**Expected Output:**
-```
-{ nickname: 'Al', email: 'al@example.com' }
-{ id: 1, name: 'Gadget' }
-```
-
-**Why This Output Occurs:** When merging optional with required, required wins (the property must be present). When merging readonly with mutable, readonly wins (the property cannot be reassigned). These rules ensure that the intersection is the *most restrictive* combination.
-
-### Real-World Cases
-
-**Case 1: Domain Modeling**
-Domain models combine base traits: `type User = HasId & HasTimestamps & HasName & HasEmail`.
-
-**Case 2: API DTOs**
-API DTOs combine request-specific fields with common metadata: `type CreateUserRequest = UserFields & AuditFields`.
-
-**Case 3: UI Props**
-UI component props combine base props with component-specific props: `type ButtonProps = BaseProps & { variant: "primary" | "secondary" }`.
+## Core Concepts / Features
 
 ---
 
-## 3. Composition of Interfaces with Intersection Types
+## 1. Intersection Types
 
 ### Definitions
 
-**Core Definition**
-Intersection types compose interfaces by combining their members into a single type. This provides an alternative to interface inheritance (`extends`) for composing contracts, with the key difference that intersections do not create a subtype relationship—they create a new type with all members.
+**Core Definition.** An **intersection type** combines two or more types into a new type that has **every member of every constituent**. A value of the intersection must satisfy all constituents simultaneously.
 
-**Technical Definition**
-Interface composition with intersections merges the members of multiple interfaces. Unlike `interface C extends A, B`, which creates a subtype relationship where `C` is assignable to `A` and `B`, the intersection `type C = A & B` creates a type that is assignable to both `A` and `B` and has all their members. The key difference is that interfaces can be extended (declaration merging, additional `extends`), while type aliases with intersections are fixed. However, intersections can combine interfaces that cannot be extended (e.g., interfaces with conflicting members, or interfaces combined with type aliases representing unions).
+**Technical Definition.** An intersection `A & B` is the **greatest lower bound** of `A` and `B`: it includes every member from both. For object types, members are merged recursively. Conflicting properties produce `never`. Intersections may combine interfaces, type aliases, object literals, primitives, function types, and tuples. They are the **only way** to extend type aliases that are not object types.
 
-**Beginner-Friendly Explanation**
-Intersections let you combine interfaces without inheritance. If you have `Readable` and `Writable` interfaces, you can create `ReadWritable = Readable & Writable`. The result has all members of both. This is similar to `interface ReadWritable extends Readable, Writable`, but with an important difference: intersections create a new type alias, not an interface. This means you can't extend the result further, but you *can* combine interfaces with type aliases (which `extends` doesn't allow). Intersections are a flexible composition tool.
+**Beginner-Friendly Explanation.** An intersection is **the "AND" of types**. `A & B` means "has all of A's stuff AND all of B's stuff." It is how you glue types together to make a richer type.
 
 ### Purposes
 
-- To compose interfaces without creating inheritance relationships.
-- To combine interfaces with type aliases (which `extends` cannot do).
-- To create "flattened" types from multiple interface contracts.
-- To add capabilities to interfaces without modifying them.
-- To build complex types from small, focused interfaces.
+- **To compose multiple types** into one that satisfies all of them.
+- **To extend type aliases** that cannot use `extends`.
+- **To combine function types or primitives** that interfaces cannot extend.
+- **To model values that participate in multiple contracts simultaneously**.
+- **To implement mixins** by intersecting constructor and instance types.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Interface Composition via Intersection**
+**General syntax:**
 
-```typescript
-interface Readable { read(): string; }
-interface Writable { write(data: string): void; }
-type ReadWritable = Readable & Writable;
+```
+type Combined = TypeA & TypeB & TypeC;
 ```
 
-**Component Breakdown**
-- `Readable & Writable`: The composed type with all members.
+**Component breakdown:**
 
-**General Syntax: Composition with Type Aliases**
+- `type` — alias keyword (or inline in a type position).
+- `Combined` — the resulting type name.
+- `&` — intersection operator.
+- `TypeA, TypeB, TypeC` — constituent types.
 
-```typescript
-type HasId = { id: number };
-type HasTimestamps = { createdAt: Date; updatedAt: Date };
-type Entity = HasId & HasTimestamps;
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- Type aliases (including unions) can be intersected.
+- `&` has **higher precedence** than `|`: `A & B | C` is `(A & B) | C`.
+- Intersections may combine any types: object types, interfaces, primitives, function types, tuples.
+- Duplicate members are merged; conflicting members become `never`.
+- Intersections may be used inline in parameters and return types.
 
-**General Syntax: Composition with Generics**
+**Constraints and limitations.**
 
-```typescript
-type WithMeta<T> = T & { meta: { createdAt: Date; updatedAt: Date } };
-```
+- **Conflicts are silent**: incompatible properties produce `never` without a declaration-time error, unlike interface `extends`.
+- **Performance cost**: intersections are **recomputed on every use**, unlike cached interfaces.
+- Intersections cannot express unions or conditional types directly; use type aliases.
 
-**Component Breakdown**
-- Generic intersections add capabilities to any type.
+### Annotated Complete Step by Step Code Examples
 
-**Syntax Rules**
-
-- Interfaces and type aliases can be combined via intersections.
-- The result is a type alias, not an interface (cannot be extended with `extends`).
-- The result has all members from all constituents.
-- The result is assignable to each constituent.
-- Intersections can be generic.
-- Intersections with unions require careful precedence (use parentheses).
-
-**Constraints and Limitations**
-
-- Intersections of interfaces cannot be extended (they are type aliases).
-- Intersections do not create nominal identity.
-- Intersection type aliases cannot participate in declaration merging.
-- Very large intersections can impact compiler performance.
-- Intersections with unions require careful parenthesization.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Composing Interfaces
+#### Example 1: Composing two interfaces
 
 ```typescript
-// Step 1: Define focused interfaces.
-interface Readable {
-  read(): string;
+// example_intersection_basic.ts
+interface ErrorHandling {
+  success: boolean;
+  error?: { message: string };
 }
 
-interface Writable {
-  write(data: string): void;
+interface ArtworksData {
+  artworks: { title: string }[];
 }
 
-interface Closeable {
-  close(): void;
-}
+// Compose via intersection.
+type ArtworksResponse = ArtworksData & ErrorHandling;
 
-// Step 2: Compose them with intersections.
-type ReadWritable = Readable & Writable;
-type Stream = Readable & Writable & Closeable;
-
-// Step 3: Implement the composed type.
-const stream: Stream = {
-  read() { return "data"; },
-  write(data: string) { console.log(`Writing: ${data}`); },
-  close() { console.log("Closed"); },
+const response: ArtworksResponse = {
+  success: true,
+  artworks: [{ title: "Mona Lisa" }],
 };
 
-console.log(stream.read());  // "data"
-stream.write("hello");       // "Writing: hello"
-stream.close();              // "Closed"
-
-// Step 4: The composed type is assignable to each interface.
-const readable: Readable = stream;
-const writable: Writable = stream;
-const closeable: Closeable = stream;
-
-console.log(readable.read());  // "data"
-
-// Step 5: Compose with type aliases.
-type HasId = { id: number };
-type HasMeta = { createdAt: Date };
-type Entity = ReadWritable & HasId & HasMeta;
-
-const entity: Entity = {
-  id: 1,
-  createdAt: new Date(),
-  read: () => "entity data",
-  write: (data) => console.log(`Entity write: ${data}`),
-};
-
-console.log(entity.id);  // 1
+console.log(response.artworks[0].title); // Expected: Mona Lisa
+console.log(response.success);           // Expected: true
 ```
+
+**Setup.** Compile with `npx tsc example_intersection_basic.ts --strict`.
 
 **Expected Output:**
 ```
-data
-Writing: hello
-Closed
-data
-1
-```
-
-**Why This Output Occurs:** The `Stream` type is the intersection of `Readable`, `Writable`, and `Closeable`, so it has all their methods. The composed type is assignable to each constituent, enabling polymorphic use. Adding `HasId` and `HasMeta` further composes the type.
-
-#### Example 2: Generic Composition and Union Interactions
-
-```typescript
-// Step 1: Define a generic composition utility.
-type WithTimestamp<T> = T & { createdAt: Date; updatedAt: Date };
-type WithSoftDelete<T> = T & { deletedAt: Date | null };
-
-// Step 2: Compose multiple utilities.
-type User = { id: number; name: string };
-type AuditedUser = WithTimestamp<WithSoftDelete<User>>;
-
-const user: AuditedUser = {
-  id: 1,
-  name: "Alice",
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  deletedAt: null,
-};
-
-console.log(user.name);       // "Alice"
-console.log(user.deletedAt);  // null
-
-// Step 3: Intersection with unions requires parentheses.
-type Status = "active" | "inactive";
-type TaggedStatus = { status: Status } & { updatedAt: Date };
-
-const tagged: TaggedStatus = {
-  status: "active",
-  updatedAt: new Date(),
-};
-
-console.log(tagged.status);  // "active"
-
-// Step 4: Incorrect precedence without parentheses.
-// type Wrong = { status: Status } & { updatedAt: Date } | { extra: string };
-// This parses as: ({ status: Status } & { updatedAt: Date }) | { extra: string }
-// which is probably not what was intended.
-
-// Step 5: Correct parenthesization for unions.
-type Correct = ({ status: "active" } | { status: "inactive" }) & { updatedAt: Date };
-```
-
-**Expected Output:**
-```
-Alice
-null
-active
-```
-
-**Why This Output Occurs:** Generic intersections add capabilities to any type. The `WithTimestamp<WithSoftDelete<User>>` composition adds both timestamp and soft-delete fields to `User`. Parenthesization is required when intersecting with unions because `&` binds tighter than `|`.
-
-### Real-World Cases
-
-**Case 1: Domain Entity Composition**
-Domain entities compose from traits: `type User = HasId & HasTimestamps & HasSoftDelete & UserFields`.
-
-**Case 2: GraphQL Type Composition**
-GraphQL schemas compose from fragments: `type UserWithPosts = UserFragment & PostsFragment`.
-
-**Case 3: Configuration Schemas**
-Configuration schemas compose base options with environment-specific ones: `type ProdConfig = BaseConfig & ProdOverrides`.
-
----
-
-## 4. Conflicting Properties (Primitive Mismatches Resulting in `never` vs. Method Overloading)
-
-### Definitions
-
-**Core Definition**
-When intersecting types have properties with the same name but different types, TypeScript intersects the property types. For primitive types, this usually results in `never` (since no value can be both a string and a number). For function types, the intersection produces an overloaded function that must satisfy both signatures.
-
-**Technical Definition**
-For a property `P` present in both `A` and `B` with types `PA` and `PB`, the intersection `A & B` gives `P` the type `PA & PB`. For primitive types, `string & number` is `never`, `string & "hello"` is `"hello"` (literal absorbed), and `boolean & true` is `true`. For object types, `PA & PB` recursively merges their members. For function types, `(x: A) => B & (x: C) => D` produces an overloaded signature that can be called with either `A` or `C` (but must satisfy both). This behavior makes intersections powerful for method overloading but problematic for primitive conflicts.
-
-**Beginner-Friendly Explanation**
-When two types have a property with the same name but different types, TypeScript tries to intersect those types. For primitives, this usually fails: a property can't be both a string and a number, so TypeScript makes it `never` (which means "no value is possible"). For functions, TypeScript creates an overloaded function that can handle both signatures. This means intersections are great for overloading methods but bad for conflicting primitive properties. If you're seeing `never` in your intersection, it's probably because two types have a property with incompatible primitive types.
-
-### Purposes
-
-- To understand why conflicting primitive properties produce `never`.
-- To use method overloading via intersections.
-- To diagnose and fix `never`-producing intersections.
-- To compose function types with multiple signatures.
-- To avoid unintended conflicts when combining object types.
-
-### Syntax Rules and Structure
-
-**General Syntax: Primitive Conflict**
-
-```typescript
-type A = { value: string };
-type B = { value: number };
-type C = A & B;
-// value: string & number = never
-```
-
-**Component Breakdown**
-- `string & number` is `never`, making `C` uninhabitable.
-
-**General Syntax: Literal Absorption**
-
-```typescript
-type A = { value: string };
-type B = { value: "hello" };
-type C = A & B;
-// value: string & "hello" = "hello"
-```
-
-**Component Breakdown**
-- Literal types are absorbed by their supertypes.
-
-**General Syntax: Method Overloading via Intersection**
-
-```typescript
-type A = { fn: (x: string) => string };
-type B = { fn: (x: number) => number };
-type C = A & B;
-// fn: { (x: string): string; (x: number): number; }
-```
-
-**Component Breakdown**
-- The intersection produces an overloaded function with both signatures.
-
-**Syntax Rules**
-
-- Primitive property conflicts produce `never` (unless one is a subtype of the other).
-- Literal types are absorbed by their supertypes.
-- Object property conflicts produce recursive intersections.
-- Function property conflicts produce overloaded signatures.
-- Optional properties remain optional only if optional in all constituents.
-- Readonly properties remain readonly if readonly in any constituent.
-
-**Constraints and Limitations**
-
-- `never`-producing intersections are uninhabitable and rarely useful.
-- Overloaded functions from intersections must satisfy both signatures.
-- Conflicting method signatures can produce complex overload sets.
-- The compiler may not always produce helpful error messages for `never` intersections.
-- Intersection conflicts are resolved at compile time; no runtime error occurs.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Primitive Conflicts Resulting in `never`
-
-```typescript
-// Step 1: Define types with conflicting primitive properties.
-type HasStringId = { id: string; name: string };
-type HasNumberId = { id: number; email: string };
-
-// Step 2: Intersect them — id becomes never.
-type Conflicting = HasStringId & HasNumberId;
-// id: string & number = never
-// name: string
-// email: string
-
-// Step 3: Attempt to create a value — id is impossible.
-// const invalid: Conflicting = {
-//   id: "abc",  // ❌ Error: Type 'string' is not assignable to type 'never'.
-//   name: "Alice",
-//   email: "alice@example.com",
-// };
-
-// Step 4: The type is effectively uninhabitable due to `never`.
-function process(value: Conflicting): void {
-  // value.id is never — can't be assigned or used meaningfully
-  console.log(value.name);   // ✅ Accessible
-  console.log(value.email);  // ✅ Accessible
-}
-
-// Step 5: Literal absorption prevents some conflicts.
-type HasBroadId = { id: string };
-type HasLiteralId = { id: "user-123" };
-type Absorbed = HasBroadId & HasLiteralId;
-// id: string & "user-123" = "user-123"
-
-const absorbed: Absorbed = { id: "user-123" };  // ✅ Allowed
-console.log(absorbed.id);  // "user-123"
-```
-
-**Expected Output:**
-```
-user-123
-```
-
-**Why This Output Occurs:** The conflict between `string` and `number` produces `never`, making `Conflicting` uninhabitable. The conflict between `string` and the literal `"user-123"` is resolved by absorbing the literal into `string` (the literal is a subtype, so the intersection is the literal).
-
-#### Example 2: Method Overloading via Intersection
-
-```typescript
-// Step 1: Define types with function properties.
-type StringProcessor = {
-  process: (input: string) => string;
-};
-
-type NumberProcessor = {
-  process: (input: number) => number;
-};
-
-// Step 2: Intersect them — process becomes overloaded.
-type MultiProcessor = StringProcessor & NumberProcessor;
-
-// Step 3: Implement the overloaded function.
-const processor: MultiProcessor = {
-  process(input: string | number): string | number {
-    if (typeof input === "string") {
-      return input.toUpperCase();
-    }
-    return input * 2;
-  },
-};
-
-// Step 4: Call with both types.
-console.log(processor.process("hello"));  // "HELLO"
-console.log(processor.process(21));       // 42
-
-// Step 5: TypeScript enforces the overloads.
-// processor.process(true);  // ❌ Error: No overload matches this call.
-
-// Step 6: Multiple overloads compose.
-type Logger = {
-  log: (message: string) => void;
-  log: (message: string, level: string) => void;  // Not valid — use intersection instead
-};
-
-type BaseLogger = { log: (message: string) => void };
-type LeveledLogger = { log: (message: string, level: string) => void };
-type FullLogger = BaseLogger & LeveledLogger;
-
-const logger: FullLogger = {
-  log(message: string, level?: string): void {
-    console.log(level ? `[${level}] ${message}` : message);
-  },
-};
-
-logger.log("Hello");              // "Hello"
-logger.log("Warning", "WARN");    // "[WARN] Warning"
-```
-
-**Expected Output:**
-```
-HELLO
-42
-Hello
-[WARN] Warning
-```
-
-**Why This Output Occurs:** The intersection of `StringProcessor` and `NumberProcessor` produces an overloaded `process` function with two signatures. The implementation accepts the union of parameter types and handles both. The `FullLogger` intersection produces an overloaded `log` function with one- and two-argument signatures.
-
-### Real-World Cases
-
-**Case 1: Event Handler Overloading**
-Event systems use intersection types to type handlers that can accept different event shapes, producing overloaded call signatures.
-
-**Case 2: Utility Function Overloading**
-Libraries use intersections to type utility functions with multiple overloads (e.g., `lodash`'s `get` function).
-
-**Case 3: API Client Methods**
-API clients use intersections to type methods that accept different parameter combinations, enabling overloaded method signatures.
-
----
-
-## 5. Practical Use Cases (Mixins, Extending Third-Party Library Options)
-
-### Definitions
-
-**Core Definition**
-Intersection types are widely used in practice for mixin patterns, extending third-party library options, and composing complex types from simpler ones. The mixin pattern combines behaviors from multiple sources; intersection types model the resulting type. Third-party option extension adds application-specific options to library configurations without modifying the library.
-
-**Technical Definition**
-Mixin patterns in TypeScript use functions that take a base class and return a new class with additional behavior. The type-level representation of a mixed class is the intersection of the base class type and the mixin's contribution. Third-party option extension uses intersections to combine a library's option interface with application-specific options: `type MyOptions = LibraryOptions & { customField: string }`. This pattern is common with libraries like `passport`, `express`, and `webpack`, where developers augment configuration types without forking.
-
-**Beginner-Friendly Explanation**
-Intersections are used in two major real-world patterns. First, mixins: when you combine behaviors from multiple classes, the resulting type is an intersection. Second, extending library options: if a library defines `LibraryOptions`, you can create `MyOptions = LibraryOptions & { myCustomField: string }` to add your own options without modifying the library. These patterns make intersections one of the most practical TypeScript features—they let you compose and extend types cleanly.
-
-### Purposes
-
-- To model the type-level result of mixin composition.
-- To add application-specific options to third-party library configurations.
-- To compose complex types from small, reusable pieces.
-- To extend existing types without modifying their definitions.
-- To create domain-specific types on top of library types.
-
-### Syntax Rules and Structure
-
-**General Syntax: Mixin Type Composition**
-
-```typescript
-type MixedClass = BaseClass & Mixin1 & Mixin2;
-```
-
-**Component Breakdown**
-- The intersection combines base class members with mixin members.
-
-**General Syntax: Extending Third-Party Options**
-
-```typescript
-import { LibraryOptions } from "some-library";
-
-type MyOptions = LibraryOptions & {
-  customField: string;
-  anotherOption?: number;
-};
-```
-
-**Component Breakdown**
-- The intersection adds custom fields to the library's options.
-
-**General Syntax: Generic Mixin Utility**
-
-```typescript
-type WithLogging<T> = T & {
-  log(message: string): void;
-};
-
-type LoggedUser = WithLogging<User>;
-```
-
-**Component Breakdown**
-- Generic intersections add capabilities to any type.
-
-**Syntax Rules**
-
-- Mixin types are intersections of base and mixin contributions.
-- Third-party options are extended via intersections with custom fields.
-- Generic intersections can add capabilities to any type.
-- Intersections preserve all members from all constituents.
-- The composed type is assignable to each constituent.
-
-**Constraints and Limitations**
-
-- Mixins add runtime code; intersections only model types.
-- Third-party option extensions must be compatible with the library's expectations.
-- Excess property checking applies to intersections.
-- Generic intersections can produce complex type errors.
-- Intersections do not enforce that custom fields are actually used by the library.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Mixin Type Composition
-
-```typescript
-// Step 1: Define a base class.
-class User {
-  constructor(public name: string, public email: string) {}
-}
-
-// Step 2: Define mixin behaviors as functions.
-function Timestamped<T extends new (...args: any[]) => {}>(Base: T) {
-  return class extends Base {
-    createdAt = new Date();
-    updatedAt = new Date();
-  };
-}
-
-function Loggable<T extends new (...args: any[]) => {}>(Base: T) {
-  return class extends Base {
-    log(message: string): void {
-      console.log(`[LOG] ${message}`);
-    }
-  };
-}
-
-// Step 3: Apply mixins.
-const TimestampedLoggableUser = Loggable(Timestamped(User));
-const user = new TimestampedLoggableUser("Alice", "alice@example.com");
-
-// Step 4: The instance has all members.
-console.log(user.name);        // "Alice"
-console.log(user.createdAt);   // Date
-user.log("User created");      // "[LOG] User created"
-
-// Step 5: The type-level composition is an intersection.
-type UserWithMixins = User & { createdAt: Date; updatedAt: Date } & { log: (msg: string) => void };
-
-const typedUser: UserWithMixins = user;  // ✅ Structurally compatible
-console.log(typedUser.createdAt instanceof Date);  // true
-```
-
-**Expected Output:**
-```
-Alice
-2024-...
-[LOG] User created
+Mona Lisa
 true
 ```
 
-**Why This Output Occurs:** The mixin functions add `createdAt`, `updatedAt`, and `log` to the `User` class. The resulting type is the intersection of `User` with the mixin contributions. The `UserWithMixins` type alias models this intersection, and the runtime instance is structurally compatible.
+**Why this output occurs.** `ArtworksResponse` requires all members of both `ArtworksData` and `ErrorHandling`. The object literal satisfies both contracts. This is the canonical composition pattern from the TypeScript Playground.
 
-#### Example 2: Extending Third-Party Library Options
+---
+
+#### Example 2: Intersection with a union (precise composition)
 
 ```typescript
-// Step 1: Imagine a third-party library defines options.
-interface LibraryOptions {
-  apiKey: string;
-  timeout?: number;
-  retries?: number;
+// example_intersection_union.ts
+interface CreateArtistBioBase {
+  artistID: string;
+  thirdParty?: boolean;
 }
 
-// Step 2: Extend with application-specific options.
-type MyLibraryOptions = LibraryOptions & {
-  customLogger: (message: string) => void;
-  environment: "development" | "production";
+// Intersection with a union: must have base AND (html OR markdown).
+type CreateArtistBioRequest = CreateArtistBioBase & ({ html: string } | { markdown: string });
+
+const request: CreateArtistBioRequest = {
+  artistID: "banksy",
+  markdown: "Banksy is an anonymous graffiti artist...",
 };
 
-// Step 3: Create the extended options.
-const options: MyLibraryOptions = {
-  apiKey: "key-123",
-  timeout: 5000,
-  customLogger: (msg) => console.log(`[MY-APP] ${msg}`),
-  environment: "production",
-};
-
-// Step 4: Use the extended options.
-options.customLogger(`Environment: ${options.environment}`);
-console.log(`API Key: ${options.apiKey}`);
-console.log(`Timeout: ${options.timeout}`);
-
-// Step 5: The extended type is assignable to the library options.
-function libraryInit(libOptions: LibraryOptions): void {
-  console.log(`Initializing library with key ${libOptions.apiKey}`);
-}
-
-libraryInit(options);  // ✅ Works — MyLibraryOptions has all LibraryOptions members
-
-// Step 6: Generic extension utility.
-type WithLogging<T> = T & { log: (msg: string) => void };
-type LoggedLibraryOptions = WithLogging<LibraryOptions>;
-
-const loggedOptions: LoggedLibraryOptions = {
-  apiKey: "key-456",
-  log: (msg) => console.log(msg),
-};
-
-loggedOptions.log("Logged message");
+console.log(request.artistID); // Expected: banksy
 ```
 
 **Expected Output:**
 ```
-[MY-APP] Environment: production
-API Key: key-123
-Timeout: 5000
-Initializing library with key key-123
-Logged message
+banksy
 ```
 
-**Why This Output Occurs:** The `MyLibraryOptions` intersection adds `customLogger` and `environment` to `LibraryOptions`. The extended type is assignable to `LibraryOptions` because it has all required members. The library's `libraryInit` function accepts `LibraryOptions`, and `MyLibraryOptions` is structurally compatible. The generic `WithLogging<T>` utility demonstrates a reusable extension pattern.
+**Why this output occurs.** The intersection requires the base fields **and** exactly one of `html` or `markdown`. The object provides `artistID` and `markdown`, satisfying both the intersection and the union inside it.
+
+---
 
 ### Real-World Cases
 
-**Case 1: Passport.js Strategy Options**
-Passport strategies use intersections to combine base strategy options with strategy-specific options.
+- **API response composition**: `type ArtworksResponse = ArtworksData & ErrorHandling`.
+- **Request payloads**: combining base fields with one-of variants.
+- **Function type composition**: combining call signatures with properties.
 
-**Case 2: Express Request Augmentation**
-Express middleware augments `Request` with custom properties via intersections: `type AuthenticatedRequest = Request & { user: User }`.
+---
 
-**Case 3: Redux Store State Composition**
-Redux store state composes from slice reducers: `type RootState = UserState & OrderState & ProductState`.
+## 2. `&` Operator
 
-**Case 4: Form Library Option Extension**
-Form libraries (Formik, React Hook Form) use intersections to extend base form options with validation and submission options.
+### Definitions
+
+**Core Definition.** The **`&` operator** is the syntactic token that combines two or more types into an intersection type. It is TypeScript's type-level analog of the logical AND.
+
+**Technical Definition.** In TypeScript's grammar, `&` appears between type expressions in an intersection. It has **higher precedence** than `|` and is left-associative. Duplicate members are merged; incompatible members become `never`. The operator may combine any type expressions, including primitives, object types, function types, and tuples.
+
+**Beginner-Friendly Explanation.** The `&` symbol is **the "AND" of the type world**. You put it between types to say "this value must be the first type AND the second type AND the third type."
+
+### Purposes
+
+- **To combine types into an intersection** concisely.
+- **To compose object types** without creating a new interface.
+- **To combine function signatures** and primitives that interfaces cannot extend.
+- **To build mixin types** by intersecting constructor and instance types.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+type Combined = A & B & C;
+```
+
+**Component breakdown:**
+
+- `A`, `B`, `C` — constituent types.
+- `&` — the intersection operator.
+
+**Syntax rules.**
+
+- `&` has higher precedence than `|`.
+- `&` is left-associative: `A & B & C` is `(A & B) & C`.
+- Duplicate members are merged.
+- Conflicting members produce `never`.
+- `&` may combine primitives, objects, functions, and tuples.
+
+**Constraints and limitations.**
+
+- `&` cannot be used to combine **values**; it is type-level only.
+- `&` cannot extend interfaces; use `extends` for interface hierarchies.
+- Conflicts are silent and may produce `never` without warning.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Precedence of `&` vs. `|`
+
+```typescript
+// example_amp_precedence.ts
+type A = { a: string };
+type B = { b: number };
+type C = { c: boolean };
+
+// & binds tighter than |: (A & B) | C
+type Combined = A & B | C;
+
+const x: Combined = { a: "hello", b: 42 }; // ✅ Matches A & B
+const y: Combined = { c: true };            // ✅ Matches C
+
+console.log(x.a, x.b); // Expected: hello 42
+console.log(y.c);      // Expected: true
+```
+
+**Expected Output:**
+```
+hello 42
+true
+```
+
+**Why this output occurs.** `&` has higher precedence than `|`, so `A & B | C` is parsed as `(A & B) | C`. The union accepts either the intersection or `C`.
+
+---
+
+#### Example 2: Intersection with primitives (interfaces cannot do this)
+
+```typescript
+// example_amp_primitives.ts
+// Interfaces cannot extend primitives; intersections can.
+type BrandedString = string & { __brand: "UserId" };
+
+function createUserId(id: string): BrandedString {
+  return id as BrandedString;
+}
+
+const userId = createUserId("u1");
+console.log(typeof userId); // Expected: string
+```
+
+**Expected Output:**
+```
+string
+```
+
+**Why this output occurs.** The intersection combines `string` with a phantom brand property. At runtime, the value is a plain string; the brand exists only in the type system. This is a key use case where intersections are **mandatory**—interfaces cannot extend primitives.
+
+---
+
+### Real-World Cases
+
+- **Branded types**: `type UserId = string & { __brand: "UserId" }`.
+- **Function type composition**: `type Handler = ((e: Event) => void) & { priority: number }`.
+- **One-off type combinations**: `type Config = BaseConfig & { override: string }`.
+
+---
+
+## 3. Intersection Type Declaration
+
+### Definitions
+
+**Core Definition.** An **intersection type declaration** is a type alias or inline annotation that defines an intersection by listing its constituent types separated by `&`.
+
+**Technical Definition.** Intersection types may be declared as **named type aliases** (`type Combined = A & B`) or used **inline** in annotations, parameters, return types, and generic arguments. Interfaces **cannot** declare intersections directly. Intersections may be **generic** (`type Tagged<T> = T & { __tag: string }`) and may reference other intersections (which are not flattened but recursively merged).
+
+**Beginner-Friendly Explanation.** An intersection type declaration is **the statement that defines an intersection**. It gives the intersection a name or uses it directly, listing the types to be combined with `&`.
+
+### Purposes
+
+- **To name a composed type** for reuse.
+- **To define precise contracts** that require multiple constituent types.
+- **To parameterize intersections** with generics.
+- **To document the composition** of independent type pieces.
+
+### Syntax Rules and Structure
+
+**General syntax (named intersection):**
+
+```
+type Combined = TypeA & TypeB;
+```
+
+**General syntax (generic intersection):**
+
+```
+type Tagged<T> = T & { __tag: string };
+```
+
+**General syntax (inline intersection):**
+
+```
+function f(param: TypeA & TypeB): ReturnType { ... }
+```
+
+**Component breakdown:**
+
+- `type Combined` — the named intersection alias.
+- `= TypeA & TypeB` — the constituent types.
+
+**Syntax rules.**
+
+- Intersection aliases may be **generic** with constraints.
+- Intersections may include **primitives**, **object types**, **interfaces**, and **other aliases**.
+- Intersections may be **recursive** through type aliases.
+- Intersections may combine with unions: `(A | B) & C`.
+
+**Constraints and limitations.**
+
+- **Interfaces cannot extend intersections**; use type aliases.
+- Intersection aliases are **closed** (cannot be declaration-merged).
+- **Recursive intersections** force the compiler to recompute the merged type on every reference.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Generic intersection alias
+
+```typescript
+// example_intersection_generic.ts
+type Timestamped<T> = T & { createdAt: Date; updatedAt: Date };
+
+interface User {
+  id: string;
+  name: string;
+}
+
+type TimestampedUser = Timestamped<User>;
+
+const user: TimestampedUser = {
+  id: "u1",
+  name: "Ada",
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+console.log(user.name); // Expected: Ada
+```
+
+**Expected Output:**
+```
+Ada
+```
+
+**Why this output occurs.** `Timestamped<T>` intersects any type `T` with timestamp fields. When instantiated with `User`, the result requires `id`, `name`, `createdAt`, and `updatedAt`. This is a reusable generic composition pattern.
+
+---
+
+#### Example 2: Intersection of interfaces
+
+```typescript
+// example_intersection_interfaces.ts
+interface User {
+  id: string;
+  name: string;
+}
+
+interface Permissions {
+  canRead: boolean;
+  canWrite: boolean;
+}
+
+type UserWithPermissions = User & Permissions;
+
+const admin: UserWithPermissions = {
+  id: "u1",
+  name: "Ada",
+  canRead: true,
+  canWrite: true,
+};
+
+console.log(admin.canWrite); // Expected: true
+```
+
+**Expected Output:**
+```
+true
+```
+
+**Why this output occurs.** The intersection requires all members from both `User` and `Permissions`. The object literal satisfies the combined contract.
+
+---
+
+### Real-World Cases
+
+- **Generic utility types**: `type Tagged<T> = T & { __tag: string }`.
+- **API response composition**: combining domain data with error handling and pagination metadata.
+- **React prop composition**: `type ButtonProps = BaseProps & { variant: "primary" | "secondary" }`.
+
+---
+
+## 4. Intersection Type Usage
+
+### Definitions
+
+**Core Definition.** **Intersection type usage** refers to applying intersection types in type annotations, generic constraints, parameters, return types, and other type positions to require values that satisfy multiple constituents simultaneously.
+
+**Technical Definition.** Intersections are used wherever a value must meet multiple contracts. Common usage patterns include **composition of interfaces**, **generic constraints** (`<T extends A & B>`), **parameter typing** (`function f(x: A & B)`), **mixins** (intersecting constructor types), and **branded types** (intersecting a base type with a phantom marker). Usage sites inherit the **conflict-to-`never`** and **recomputation** behavior of intersections.
+
+**Beginner-Friendly Explanation.** Intersection type usage is simply **using `&` wherever you need a value to satisfy more than one type**. You write `A & B` in a parameter, a return type, or a type alias. It tells TypeScript: "whatever goes here must have everything from A and everything from B."
+
+### Purposes
+
+- **To require multiple contracts** in function parameters and return types.
+- **To constrain generics** to types that satisfy several conditions.
+- **To compose reusable type pieces** without creating new interfaces.
+- **To implement mixins** by intersecting constructor types with base types.
+
+### Syntax Rules and Structure
+
+**Usage positions:**
+
+- **Parameters**: `function f(x: A & B): void`
+- **Return types**: `function f(): A & B`
+- **Generic constraints**: `<T extends A & B>`
+- **Type aliases**: `type C = A & B`
+- **Variable annotations**: `const x: A & B = ...`
+
+**Syntax rules.**
+
+- The constituents must be types, not values.
+- The resulting type requires **all** members from **all** constituents.
+- Conflicting members become `never`.
+- Intersections may be combined with unions: `(A | B) & C`.
+
+**Constraints and limitations.**
+
+- **Recomputation cost**: every use of an intersection forces recursive merging, slowing compilation in large codebases.
+- **Silent `never`**: conflicts are not caught at declaration.
+- **Error message complexity**: intersections can produce hard-to-read error messages.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Intersection in a function parameter
+
+```typescript
+// example_intersection_param.ts
+interface Serializable {
+  serialize(): string;
+}
+
+interface Loggable {
+  log(): void;
+}
+
+function process(entity: Serializable & Loggable) {
+  entity.log();
+  console.log(entity.serialize());
+}
+
+class User implements Serializable, Loggable {
+  serialize() { return "User data"; }
+  log() { console.log("Logging user"); }
+}
+
+process(new User());
+// Expected:
+// Logging user
+// User data
+```
+
+**Expected Output:**
+```
+Logging user
+User data
+```
+
+**Why this output occurs.** The parameter requires both `serialize` and `log`. The `User` class provides both. The function can safely call either method because the intersection guarantees their presence.
+
+---
+
+#### Example 2: Intersection in a generic constraint
+
+```typescript
+// example_intersection_constraint.ts
+interface Identifiable {
+  id: string;
+}
+
+interface Timestamped {
+  createdAt: Date;
+}
+
+function sortById<T extends Identifiable & Timestamped>(items: T[]): T[] {
+  return items.sort((a, b) => a.id.localeCompare(b.id));
+}
+
+const items = [
+  { id: "b", createdAt: new Date() },
+  { id: "a", createdAt: new Date() },
+];
+
+console.log(sortById(items).map((i) => i.id));
+// Expected: [ 'a', 'b' ]
+```
+
+**Expected Output:**
+```
+[ 'a', 'b' ]
+```
+
+**Why this output occurs.** The generic constraint `T extends Identifiable & Timestamped` ensures that every item has both `id` and `createdAt`. The function can safely access `.id` and `.createdAt` on any `T`.
+
+---
+
+#### Example 3: Mixin pattern with constructor intersections
+
+```typescript
+// example_intersection_mixin.ts
+type Constructor = new (...args: any[]) => {};
+
+// Mixin returns a class expression; the type is an intersection.
+function Activatable<TBase extends Constructor>(Base: TBase) {
+  return class extends Base {
+    isActive = false;
+    activate() { this.isActive = true; }
+    deactivate() { this.isActive = false; }
+  };
+}
+
+class User {
+  constructor(public name: string) {}
+}
+
+const ActiveUser = Activatable(User);
+const user = new ActiveUser("Ada");
+
+user.activate();
+console.log(user.isActive); // Expected: true
+console.log(user.name);     // Expected: Ada
+```
+
+**Expected Output:**
+```
+true
+Ada
+```
+
+**Why this output occurs.** The mixin pattern in TypeScript 2.2+ represents a mixin class as an intersection between the mixin constructor type and the base class constructor type. The resulting `ActiveUser` type combines `User`'s members with the mixin's members.
+
+---
+
+### Real-World Cases
+
+- **Dependency injection**: requiring services that satisfy multiple interfaces.
+- **Mixin classes**: intersecting constructor types with base classes.
+- **Generic constraints**: `<T extends A & B>` for functions that need multiple capabilities.
+- **Branded types**: `string & { __brand: "UserId" }` for nominal-like safety.
+
+---
+
+## 5. Intersection Type Best Practices
+
+### Definitions
+
+**Core Definition.** **Intersection type best practices** are guidelines for using intersections in ways that maximize **type safety, compiler performance, and maintainability**, while avoiding the pitfalls of silent `never` conflicts, excessive intersection hierarchies, and performance degradation from recursive merging.
+
+**Technical Definition.** Best practices center on the principle emphasized by the TypeScript Performance Wiki and community experts: **prefer `interface extends` over intersections for object inheritance**. Interfaces create a **single flat type**, detect property conflicts **at declaration**, and are **cached by the compiler**. Intersections **recursively merge on every use**, force the compiler to recompute the combined type repeatedly, and may silently produce `never` on conflicts. Intersections should be reserved for cases where interfaces cannot be used: **combining function types or primitives**, **creating mapped or conditional types**, and **one-off type combinations not reused elsewhere**.
+
+**Beginner-Friendly Explanation.** Best practices are **the habits experienced TypeScript developers use** to keep intersections safe and fast. The big rule is: **if you are building an object hierarchy, use `interface extends`, not `&`**. Intersections are for one-off combinations, primitives, and functions. They are slower and hide conflicts, so use them sparingly.
+
+### Purposes
+
+- **To maximize compiler performance** by preferring cached interfaces over recomputed intersections.
+- **To catch property conflicts early** at declaration time.
+- **To avoid silent `never` types** that mask bugs.
+- **To choose the right tool** between `extends` and `&`.
+- **To keep type definitions clear and maintainable**.
+
+### Syntax Rules and Structure
+
+Best practices are conventions that interact with intersection syntax. The core rules are:
+
+1. **Prefer `interface extends` for object inheritance.** Interfaces create a single flat type, detect conflicts at declaration, and are cached by the compiler—resulting in **2–5× faster type resolution**.
+2. **Use intersections only when interfaces cannot work.** Appropriate cases: combining **function types**, combining **primitives**, creating **mapped or conditional types**, and **one-off combinations not reused elsewhere**.
+3. **Avoid building deep intersection hierarchies.** Each intersection layer adds another level of computation on every reference.
+4. **Watch for silent `never`.** Intersections with incompatible properties produce `never` without a declaration-time error; use `extends` when conflict detection matters.
+5. **Prefer `interface extends` in large codebases.** The performance difference is measurable and grows with codebase size.
+6. **Use intersections for branded types and mixins.** These are legitimate use cases where intersections are the only or best tool.
+7. **Consider merging object-only intersections into a single type literal.** ESLint plugins can enforce this: `type A = { x: 1 } & { y: 2 }` becomes `type A = { x: 1; y: 2 }`.
+
+**Component breakdown (intersection vs. interface decision tree):**
+
+```
+Are you building an object type hierarchy used repeatedly?
+  ├── Yes → Use interface extends.
+  │        ├── Does it need to combine function types or primitives? → Use &.
+  │        └── Is it a one-off combination? → & is acceptable.
+  └── No → Are you combining function types, primitives, or mapped types?
+           ├── Yes → Use intersection (&).
+           └── No → Re-evaluate; interface extends is likely better for objects.
+```
+
+**Constraints and limitations.**
+
+- Interface `extends` cannot combine unions, primitives, or function types; intersections are required for those.
+- Intersections silently produce `never` on conflicts, which can hide bugs.
+- Intersections are recomputed on every use, causing performance degradation in large codebases.
+- ESLint plugins exist to enforce the `interface extends` preference.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Prefer interface `extends` over intersection for object hierarchies
+
+```typescript
+// example_best_extends.ts
+// ❌ Intersection hierarchy: recomputed on every use, no conflict detection.
+// type UserWithPermissions = User & Permissions & AuditInfo;
+
+// ✅ Interface extends: cached, conflict-detecting, 2–5× faster.
+interface User {
+  id: string;
+  name: string;
+}
+
+interface Permissions {
+  canRead: boolean;
+  canWrite: boolean;
+}
+
+interface AuditInfo {
+  createdAt: Date;
+}
+
+interface UserWithPermissions extends User, Permissions, AuditInfo {}
+
+const admin: UserWithPermissions = {
+  id: "u1",
+  name: "Ada",
+  canRead: true,
+  canWrite: true,
+  createdAt: new Date(),
+};
+
+console.log(admin.canWrite); // Expected: true
+```
+
+**Expected Output:**
+```
+true
+```
+
+**Why this output occurs.** The interface hierarchy uses `extends`, which creates a single flat type, detects conflicts at declaration, and is cached by the compiler. The intersection version would recursively merge on every use, causing slower type checking.
+
+---
+
+#### Example 2: Intersection for one-off function type composition
+
+```typescript
+// example_best_function.ts
+// ✅ Intersection is appropriate for combining function types.
+type Handler = ((event: Event) => void) & { priority: number };
+
+const handler: Handler = Object.assign(
+  (event: Event) => console.log(event.type),
+  { priority: 1 }
+);
+
+console.log(handler.priority); // Expected: 1
+```
+
+**Expected Output:**
+```
+1
+```
+
+**Why this output occurs.** Interfaces cannot extend function types. The intersection combines a callable signature with a property. This is a legitimate intersection use case where `extends` is not an option.
+
+---
+
+#### Example 3: Avoiding silent `never` with `extends`
+
+```typescript
+// example_best_never.ts
+// ❌ Intersection silently produces never.
+// type Broken = { x: string } & { x: number };
+// const b: Broken = { x: "hello" }; // No error at declaration.
+
+// ✅ Interface extends detects the conflict at declaration.
+// interface A { x: string }
+// interface B { x: number }
+// interface C extends A, B {}
+// Error: Interface 'C' cannot simultaneously extend types 'A' and 'B'.
+
+console.log("Interface extends detects conflicts early");
+```
+
+**Expected Output:**
+```
+Interface extends detects conflicts early
+```
+
+**Why this output occurs.** The intersection `{ x: string } & { x: number }` compiles without error, but `x` becomes `never` and cannot be assigned. Interface `extends` reports the conflict at declaration, preventing the bug from propagating.
+
+---
+
+### Real-World Cases
+
+- **Large codebases**: preferring `interface extends` for object hierarchies to benefit from caching and conflict detection.
+- **Utility types**: using intersections for one-off combinations like `Omit<T, K> & { extra: string }`.
+- **Function types**: combining callable signatures with properties via intersection.
+- **Branded primitives**: `string & { __brand: "UserId" }` where interfaces cannot extend primitives.
 
 ---
 
 ## References
 
-- TypeScript Handbook: Intersection Types — https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types
-- TypeScript Handbook: Unions and Intersection Types — https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types
-- TypeScript Handbook: Mixins — https://www.typescriptlang.org/docs/handbook/mixins.html
-- TypeScript Handbook: Utility Types — https://www.typescriptlang.org/docs/handbook/utility-types.html
-- TypeScript 2.2 Release Notes (Object Type) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html
-- TypeScript Deep Dive: Intersection Types — https://basarat.gitbook.io/typescript/type-system/intersection
-- Effective TypeScript: Item 13 — Know the Differences Between type and interface
-- Effective TypeScript: Item 14 — Use Type Operations and Generics to Avoid Repeating Yourself
-- MDN: Spread Syntax — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
-- TypeScript Playground: Intersection Types — https://www.typescriptlang.org/play/typescript/primitives/intersection-types.ts.html
-- Total TypeScript: Intersection Types — https://www.totaltypescript.com/intersection-types
-- TypeScript ESLint: consistent-type-definitions — https://typescript-eslint.io/rules/consistent-type-definitions/
+- TypeScript Playground — Union and Intersection Types (Official) - https://www.typescriptlang.org/play/typescript/primitives/union-and-intersection-types.ts.html
+- TypeScript Handbook — Unions and Intersection Types (Deprecated) - https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html
+- TypeScript 4.8 Release Notes — Improved Intersection Reduction, Union Compatibility, and Narrowing - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-8.html
+- TypeScript Performance Wiki — Preferring Interfaces Over Intersections - https://github.com/microsoft/TypeScript/wiki/Performance#preferring-interfaces-over-intersections
+- Total TypeScript — Comparing Intersection and Interface Extends - https://www.totaltypescript.com/workshops/typescript-pro-essentials/objects/comparing-intersection-and-interface-extends-in-typescript
+- Prefer Interfaces Over Type Intersections — pproenca/dot-skills - https://github.com/pproenca/dot-skills/blob/HEAD/skills/.curated/typescript/references/type-interfaces-over-intersections.md
+- TypeScript 2.2 Release Notes — Mixin Class Pattern (Intersection Types) - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html
+- TypeScript ESLint — `prefer-interface-extends-over-type-intersection` (eslint-plugin-ts-type-preferences) - https://www.npmjs.com/package/eslint-plugin-ts-type-preferences
+- ESLint Plugin — `prefer-merged-type-literal-over-intersection` - https://www.npmjs.com/package/eslint-plugin-ts-type-preferences
+- Stack Overflow — Intersection Types vs Interfaces in TypeScript - https://stackoverflow.com/questions/52681316/intersection-types-vs-interfaces-in-typescript
+- Stack Overflow — Type safety difference between type and interface when extending - https://stackoverflow.com/questions/71221037/type-safety-difference-between-type-and-interface-when-extending

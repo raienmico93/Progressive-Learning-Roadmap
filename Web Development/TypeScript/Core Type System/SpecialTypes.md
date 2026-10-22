@@ -1051,7 +1051,295 @@ React components with optional props use `undefined` to represent "not provided.
 
 ---
 
-## 8. Appropriate and Inappropriate Use Cases
+## 8. `{}` (Empty Object Type)
+
+### Definitions
+
+**Core Definition.** The **`{}` type** (empty object type) is **not** an “empty object” as its name suggests. It represents **any value that is not `null` or `undefined`**—including primitives like strings, numbers, and booleans.
+
+**Technical Definition.** `{}` is a **non-nullish supertype**: every value except `null` and `undefined` is assignable to `{}`. This includes `string`, `number`, `boolean`, arrays, functions, and objects. Despite its name, `{}` does **not** mean “an object with no properties”; it means “any value that is defined.” ESLint’s `no-empty-object-type` rule recommends against using `{}` because it is a common source of confusion [5†L9-L13].
+
+**Beginner-Friendly Explanation.** `{}` is **misleadingly named**. It does not mean “empty object”—it means **“anything except `null` and `undefined`.”** Strings, numbers, and booleans all satisfy `{}`. Use it only when you want to accept any defined value, and prefer `object` or `Record<string, never>` when you mean something more specific.
+
+### Purposes
+
+- **To accept any non-nullish value** in a very broad constraint (rarely the intended meaning).
+- **To serve as the default type parameter** when a type is not specified (though `unknown` is usually safer).
+- **To represent “any defined value”** in constraints where `null` and `undefined` must be excluded.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```
+function f(value: {}): void { ... }
+```
+
+**Component breakdown:**
+
+- `{}` — the non-nullish type annotation.
+
+**Syntax rules.**
+
+- **Everything except `null` and `undefined`** is assignable to `{}`.
+- `{}` does **not** mean “an empty object”; it means “any defined value.”
+- To represent a truly empty object, use `Record<string, never>`.
+- To represent any non-primitive, use `object`.
+
+**Constraints and limitations.**
+
+- `{}` accepts primitives, which is usually not intended.
+- **ESLint `no-empty-object-type`** flags `{}` as a type because of this confusion [5†L9-L13].
+- `{}` provides no useful property access without further narrowing.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: `{}` accepts primitives
+
+```typescript
+// example_empty_object.ts
+function acceptDefined(value: {}): void {
+  console.log(value);
+}
+
+acceptDefined("hello");   // ✅ string is non-nullish
+acceptDefined(42);        // ✅ number is non-nullish
+acceptDefined(true);      // ✅ boolean is non-nullish
+acceptDefined({ a: 1 });  // ✅ object is non-nullish
+
+// acceptDefined(null);      // ❌ Error: null is not assignable to {}
+// acceptDefined(undefined); // ❌ Error: undefined is not assignable to {}
+```
+
+**Expected Output:**
+```
+hello
+42
+true
+{ a: 1 }
+```
+
+**Why this output occurs.** `{}` accepts every value except `null` and `undefined`. Primitives satisfy `{}` because they are non-nullish.
+
+---
+
+#### Example 2: Representing a truly empty object with `Record<string, never>`
+
+```typescript
+// example_empty_record.ts
+// ✅ Truly empty object type.
+type EmptyObject = Record<string, never>;
+
+const empty: EmptyObject = {};
+console.log(empty); // Expected: {}
+
+// const bad: EmptyObject = { foo: 1 };
+// Error: number is not assignable to never.
+```
+
+**Expected Output:**
+```
+{}
+```
+
+**Why this output occurs.** `Record<string, never>` requires all properties (if any) to be of type `never`, which no value can satisfy. Only an object with no properties is assignable. This correctly represents a truly empty object.
+
+---
+
+### Real-World Cases
+
+- **Excluding `null` and `undefined`**: a broad constraint when only nullish values must be rejected (rare).
+- **Default type parameters**: `T = {}` (though `unknown` is usually safer).
+- **Legacy code**: encountering `{}` in older type definitions and understanding its actual meaning.
+
+---
+
+## 9. Special Type Best Practices
+
+### Definitions
+
+**Core Definition.** **Special type best practices** are guidelines for using `any`, `unknown`, `never`, `void`, `object`, and `{}` in ways that maximize **type safety, clarity, and maintainability**, while avoiding the pitfalls of type-safety erosion, misleading constraints, and unnecessary escape hatches.
+
+**Technical Definition.** Best practices center on **avoiding `any`** and replacing it with `unknown` where possible, **using `never` for exhaustiveness** and impossible paths, **using `void` for ignored return values**, **preferring `object` over `{}` and `Object`** for non-primitive constraints, and **using `Record<string, never>`** for truly empty objects. The Google TypeScript Style Guide explicitly states that `any` is dangerous and can mask severe errors [3†L22-L25]. TypeScript’s “Do’s and Don’ts” recommend `void` for ignored callback return values instead of `any` [13†L11-L16].
+
+**Beginner-Friendly Explanation.** Best practices are **the habits experienced TypeScript developers use** to keep special types from weakening the type system. The big rules are: **avoid `any`**—use `unknown` and narrow; use `never` to catch forgotten cases; use `void` for callbacks that return nothing useful; use `object` when you mean “non-primitive”; and never use `{}` expecting an empty object—use `Record<string, never>` instead.
+
+### Purposes
+
+- **To preserve type safety** by avoiding `any` and using `unknown` with narrowing.
+- **To enforce exhaustiveness** with `never` so no cases are missed.
+- **To express ignored return values** clearly with `void`.
+- **To constrain to non-primitive values** correctly with `object`.
+- **To avoid the misleading `{}` type** in favor of precise alternatives.
+- **To align with official style guides** and lint rules.
+
+### Syntax Rules and Structure
+
+Best practices are conventions that interact with special type syntax. The core rules are:
+
+1. **Avoid `any` at all costs.** Use `unknown` for truly unknown values and narrow with type guards. Accept `any` only at third-party integration boundaries with a documented comment.
+2. **Use `unknown` for untyped input.** Return `unknown` from parsing functions and require callers to narrow. This preserves type safety at API boundaries.
+3. **Use `never` for exhaustiveness checking.** Add `assertNever(value: never)` to the `default` branch of every exhaustive `switch` on a discriminated union.
+4. **Use `void` for callbacks whose return value is ignored.** Do not use `any` for ignored return types; `void` prevents accidental use of the return value.
+5. **Prefer `object` over `{}` and `Object`.** `object` correctly excludes primitives; `{}` and `Object` both accept primitives and are usually not what you mean.
+6. **Use `Record<string, never>` for truly empty objects.** `{}` is not an empty object; `Record<string, never>` is.
+7. **Never use the boxed types `String`, `Number`, `Boolean`, `Symbol`, or `Object`.** Use their lowercase primitive equivalents (`string`, `number`, `boolean`, `symbol`) or `object` instead.
+
+**Component breakdown (special type decision tree):**
+
+```
+Do you need to represent a value of unknown type?
+  ├── Yes → Use unknown (not any). Narrow before use.
+  └── No → Does the function never return (throws or loops)?
+           ├── Yes → Use never.
+           └── No → Does the function return nothing useful?
+                    ├── Yes → Use void.
+                    └── No → Do you need a non-primitive constraint?
+                             ├── Yes → Use object.
+                             └── No → Do you need a non-nullish constraint?
+                                      ├── Yes → Reconsider; {} is rarely correct. Use a specific type or unknown.
+                                      └── No → Use a specific type.
+```
+
+**Constraints and limitations.**
+
+- `unknown` adds narrowing verbosity; use it deliberately.
+- `never`-based exhaustiveness requires a `default` branch and a helper function.
+- `object` does not guarantee any properties; further narrowing is needed for access.
+- `{}` is almost never the intended type; prefer `object` or `Record<string, never>`.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Replace `any` with `unknown`
+
+```typescript
+// example_best_unknown.ts
+// ❌ `any`: no safety.
+function parseAny(input: string): any {
+  return JSON.parse(input);
+}
+
+// ✅ `unknown`: forces narrowing.
+function parseUnknown(input: string): unknown {
+  return JSON.parse(input);
+}
+
+const data = parseUnknown('{"name":"Ada"}');
+if (typeof data === "object" && data !== null && "name" in data) {
+  console.log((data as { name: string }).name); // Expected: Ada
+}
+```
+
+**Expected Output:**
+```
+Ada
+```
+
+**Why this output occurs.** `unknown` requires a runtime check before accessing `name`. The `typeof` and `in` guards narrow the type safely, avoiding the unchecked access that `any` would permit.
+
+---
+
+#### Example 2: `never` for exhaustiveness
+
+```typescript
+// example_best_never.ts
+type Shape =
+  | { kind: "circle"; radius: number }
+  | { kind: "square"; side: number };
+
+function assertNever(value: never): never {
+  throw new Error(`Unhandled: ${JSON.stringify(value)}`);
+}
+
+function area(shape: Shape): number {
+  switch (shape.kind) {
+    case "circle": return Math.PI * shape.radius ** 2;
+    case "square": return shape.side ** 2;
+    default: return assertNever(shape);
+  }
+}
+
+console.log(area({ kind: "circle", radius: 1 }).toFixed(2)); // Expected: 3.14
+```
+
+**Expected Output:**
+```
+3.14
+```
+
+**Why this output occurs.** The `assertNever` helper ensures that all union members are handled. Adding a new variant without handling it causes a compile-time error because `shape` in `default` would no longer be `never`.
+
+---
+
+#### Example 3: `void` for ignored callbacks, `object` for non-primitives
+
+```typescript
+// example_best_void_object.ts
+// ✅ void for callbacks.
+function forEach<T>(items: T[], fn: (item: T) => void): void {
+  for (const item of items) fn(item);
+}
+
+forEach([1, 2, 3], (n) => console.log(n * 2));
+// Expected: 2, 4, 6
+
+// ✅ object for non-primitive constraints.
+function keys(obj: object): string[] {
+  return Object.keys(obj);
+}
+
+console.log(keys({ a: 1, b: 2 })); // Expected: [ 'a', 'b' ]
+```
+
+**Expected Output:**
+```
+2
+4
+6
+[ 'a', 'b' ]
+```
+
+**Why this output occurs.** `void` prevents the callback’s return value from being used. `object` accepts the plain object `{ a: 1, b: 2 }` while rejecting primitives at compile time.
+
+---
+
+#### Example 4: `Record<string, never>` for empty objects
+
+```typescript
+// example_best_empty_record.ts
+// ❌ {} is not an empty object.
+// type BadEmpty = {};
+
+// ✅ Record<string, never> is truly empty.
+type EmptyObject = Record<string, never>;
+
+const empty: EmptyObject = {};
+console.log(empty); // Expected: {}
+
+// const bad: EmptyObject = { foo: 1 };
+// Error: number is not assignable to never.
+```
+
+**Expected Output:**
+```
+{}
+```
+
+**Why this output occurs.** `Record<string, never>` permits only objects with no properties. `{}` would accept primitives and non-empty objects, which is rarely the intended meaning.
+
+---
+
+### Real-World Cases
+
+- **API boundaries**: `unknown` for `JSON.parse`, external data, and catch clause errors.
+- **Redux reducers**: `assertNever` for exhaustive action handling.
+- **Event handlers**: `void` for ignored callback return values.
+- **Utility functions**: `object` for `Object.keys`, `Object.entries`, and `Object.assign` wrappers.
+- **Empty object constraints**: `Record<string, never>` for “no properties allowed” contexts.
+
+---
+
+## 10. Appropriate and Inappropriate Use Cases
 
 ### `any` — Appropriate and Inappropriate
 

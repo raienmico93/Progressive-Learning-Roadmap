@@ -183,7 +183,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # II. Type System
 
-- **7. Type System Fundamentals**
+- [**7. Type System Fundamentals**](/Web%20Development/TypeScript/Core%20Type%20System/TypeSystem.md)
   - Type system
   - Static typing
   - Dynamic typing
@@ -196,7 +196,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Type erasure
   - Type system best practices
 
-- **8. Primitive Types**
+- [**8. Primitive Types**](/Web%20Development/TypeScript/Core%20Type%20System/PrimitiveTypes.md)
   - `string`
   - `number`
   - `boolean`
@@ -211,7 +211,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - `object`
   - Primitive type best practices
 
-- **9. Type Annotations**
+- [**9. Type Annotations**](/Web%20Development/TypeScript/Core%20Type%20System/TypeAnnotations.md)
   - Type annotations
   - Variable annotations
   - Function annotations
@@ -220,7 +220,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Property annotations
   - Type annotation best practices
 
-- **10. Type Inference**
+- [**10. Type Inference**](/Web%20Development/TypeScript/Core%20Type%20System/TypeInference.md)
   - Type inference
   - Inferred types
   - Best common type
@@ -229,20 +229,22 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Type narrowing
   - Type inference best practices
 
-- **11. Literal Types**
+- [**11. Literal Types**](/Web%20Development/TypeScript/Core%20Type%20System/Literal.md)
   - String literal types
   - Number literal types
   - Boolean literal types
   - BigInt literal types
   - Template literal types
+  - Literal unions
+  - Configuration modeling
   - Literal type best practices
 
 - **12. Arrays and Tuples**
-  - Array types
+  - [Array types](/Web%20Development/TypeScript/Core%20Type%20System/Arrays.md)
     - `T[]`
     - `Array<T>`
     - `ReadonlyArray<T>`
-  - Tuple types
+  - [Tuple types](/Web%20Development/TypeScript/Core%20Type%20System/Tuples.md)
     - `[T, U]`
     - Optional elements
     - Rest elements
@@ -250,14 +252,18 @@ TypeScript is best learned as more than "JavaScript with types." The progression
     - Readonly tuples
   - Array and tuple best practices
 
-- **13. Objects**
+- [**13. Objects**](/Web%20Development/TypeScript/Core%20Type%20System/Objects.md)
   - Object types
   - Object literals
   - Object type annotations
   - Object type inference
+  - Nested objects
+  - Optional properties
+  - Readonly properties
+  - Index signatures
   - Object type best practices
 
-- **14. Functions**
+- [**14. Functions**](/Web%20Development/TypeScript/Core%20Type%20System/Functions.md)
   - Function types
   - Function declarations
   - Function expressions
@@ -270,14 +276,17 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Function overloads
   - Function type best practices
 
-- **15. Special Types**
+- [**15. Special Types**](/Web%20Development/TypeScript/Core%20Type%20System/SpecialTypes.md)
   - `any`
   - `unknown`
   - `never`
   - `void`
   - `object`
+  - `null` and `undefined`
+  - Differences among special types
   - `{}` (empty object type)
   - Special type best practices
+  - Appropriate and inappropriate use cases
 
 - **16. Type Assertions**
   - Type assertions
@@ -323,7 +332,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # III. Interfaces and Type Aliases
 
-- **20. Interfaces**
+- [**20. Interfaces**](/Web%20Development/TypeScript/Int%20and%20TA/Interfaces.md)
   - Interfaces
   - `interface`
   - Interface declaration
@@ -339,7 +348,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Multiple inheritance
   - Interface best practices
 
-- **21. Type Aliases**
+- [**21. Type Aliases**](/Web%20Development/TypeScript/Int%20and%20TA/TypeAliases.md)
   - Type aliases
   - `type`
   - Type alias declaration
@@ -347,45 +356,45 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Type alias vs interface
   - Type alias best practices
 
-- **22. Interface vs Type Alias**
+- [**22. Interface vs Type Alias**](/Web%20Development/TypeScript/Int%20and%20TA/InterfaceVSTypeAlias.md)
   - Interface vs type alias
   - When to use interfaces
   - When to use type aliases
   - Comparison
   - Best practices
 
-- **23. Extending Types**
+- [**23. Extending Types**](/Web%20Development/TypeScript/Int%20and%20TA/ExtendingTypes.md)
   - Extending interfaces
   - Extending type aliases
   - Intersection types
   - Merging declarations
   - Extending best practices
 
-- **24. Index Signatures**
+- [**24. Index Signatures**](/Web%20Development/TypeScript/Int%20and%20TA/IndexSignatures.md)
   - Index signatures
   - `[key: string]: T`
   - `[key: number]: T`
   - Index signature best practices
 
-- **25. Property Modifiers**
+- [**25. Property Modifiers**](/Web%20Development/TypeScript/Int%20and%20TA/PropertyModifiers.md)
   - Optional properties
   - `?`
   - Readonly properties
   - `readonly`
   - Property modifier best practices
 
-- **26. Method Signatures**
+- [**26. Method Signatures**](/Web%20Development/TypeScript/Int%20and%20TA/MethodSignatures.md)
   - Method signatures
   - Method overloading
   - `this` parameter
   - Method signature best practices
 
-- **27. Call Signatures**
+- [**27. Call Signatures**](/Web%20Development/TypeScript/Int%20and%20TA/CallSignatures.md)
   - Call signatures
   - Callable interfaces
   - Call signature best practices
 
-- **28. Construct Signatures**
+- [**28. Construct Signatures**](/Web%20Development/TypeScript/Int%20and%20TA/ConstructSignatures.md)
   - Construct signatures
   - `new () => T`
   - Construct signature best practices
@@ -394,28 +403,28 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # IV. Unions and Intersections
 
-- **29. Union Types**
+- [**29. Union Types**](/Web%20Development/TypeScript/Type%20Composition/Union.md)
   - Union types
   - `|`
   - Union type declaration
   - Union type narrowing
   - Union type best practices
 
-- **30. Intersection Types**
+- [**30. Intersection Types**](/Web%20Development/TypeScript/Type%20Composition/Intersection.md)
   - Intersection types
   - `&`
   - Intersection type declaration
   - Intersection type usage
   - Intersection type best practices
 
-- **31. Discriminated Unions**
+- [**31. Discriminated Unions**](/Web%20Development/TypeScript/Type%20Composition/DiscriminatedUnions.md)
   - Discriminated unions
   - Discriminant property
   - Tagged unions
   - Discriminated union patterns
   - Discriminated union best practices
 
-- **32. Union and Intersection Patterns**
+- [**32. Union and Intersection Patterns**](/Web%20Development/TypeScript/Type%20Composition/Patterns.md)
   - Union patterns
   - Intersection patterns
   - Combined patterns
@@ -425,7 +434,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # V. Generics
 
-- **33. Generics Fundamentals**
+- [**33. Generics Fundamentals**](/Web%20Development/TypeScript/Generics/Generics.md)
   - Generics
   - Generic functions
   - Generic interfaces
@@ -435,7 +444,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Type arguments
   - Generic best practices
 
-- **34. Generic Functions**
+- [**34. Generic Functions**](/Web%20Development/TypeScript/Generics/Functions.md)
   - Generic function declaration
   - Type parameter
   - `<T>`
@@ -444,19 +453,19 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Type inference
   - Generic function best practices
 
-- **35. Generic Interfaces**
+- [**35. Generic Interfaces**](/Web%20Development/TypeScript/Generics/Interfaces.md)
   - Generic interfaces
   - Generic interface declaration
   - Generic interface usage
   - Generic interface best practices
 
-- **36. Generic Classes**
+- [**36. Generic Classes**](/Web%20Development/TypeScript/Generics/Classes.md)
   - Generic classes
   - Generic class declaration
   - Generic class usage
   - Generic class best practices
 
-- **37. Generic Constraints**
+- [**37. Generic Constraints**](/Web%20Development/TypeScript/Generics/Constraints.md)
   - Generic constraints
   - `extends`
   - Constraint types
@@ -464,12 +473,24 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - `keyof`
   - Generic constraint best practices
 
-- **38. Default Type Parameters**
+- [**38. Default Type Parameters**](/Web%20Development/TypeScript/Generics/Defaults.md)
   - Default type parameters
   - `<T = DefaultType>`
   - Default type parameter best practices
 
-- **39. Generic Patterns**
+- [**39. Generic Relationships**](/Web%20Development/TypeScript/Generics/Relationships.md)
+  - Multiple type parameters
+  - Type relationships
+  - Generic callbacks
+  - Generic factories
+
+- [**40. Advanced Generic Design**](/Web%20Development/TypeScript/Generics/AdvancedDesign.md)
+  - Generic inference
+  - Higher-order generic functions
+  - Generic composition
+  - Reusable type-safe abstractions
+
+- [**41. Generic Patterns**](/Web%20Development/TypeScript/Generics/Patterns.md)
   - Generic patterns
   - Factory pattern
   - Repository pattern
@@ -478,9 +499,9 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 ---
 
-# VI. Classes
+# VI. Object Oriented
 
-- **40. Classes**
+- [**40. Classes**](/Web%20Development/TypeScript/Object%20Oriented/Classes.md)
   - Classes
   - `class`
   - Class declaration
@@ -496,7 +517,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Parameter properties
   - Class best practices
 
-- **41. Inheritance**
+- [**41. Inheritance**](/Web%20Development/TypeScript/Object%20Oriented/Inheritance.md)
   - Inheritance
   - `extends`
   - Base class
@@ -507,45 +528,60 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - `abstract`
   - Inheritance best practices
 
-- **42. Interfaces and Classes**
+- [**42. Interfaces**](/Web%20Development/TypeScript/Object%20Oriented/Interfaces.md)
   - Implementing interfaces
   - `implements`
   - Multiple interfaces
   - Interface implementation best practices
 
-- **43. Access Modifiers**
+- [**43. Access Modifiers**](/Web%20Development/TypeScript/Object%20Oriented/AccessModifiers.md)
   - `public`
   - `private`
   - `protected`
   - `readonly`
   - Access modifier best practices
 
-- **44. Static Members**
+- [**44. Static Members**](/Web%20Development/TypeScript/Object%20Oriented/StaticClasses.md)
   - Static properties
   - Static methods
   - Static blocks
   - Static member best practices
 
-- **45. Abstract Classes**
+- [**Encapsulation and Abstraction**](/Web%20Development/TypeScript/Object%20Oriented/Encapsulation.md)
+  - Encapsulation
+  - Access control
+  - Abstract classes
+  - Abstract methods
+  - Interface-based abstraction
+  - Composition versus inheritance
+
+- [**Polymorphism**](/Web%20Development/TypeScript/Object%20Oriented/Polymorphism.md)
+  - Structural polymorphism
+  - Method overriding
+  - Interface polymorphism
+  - Base-type references
+  - Generic polymorphism
+
+- [**45. Abstract Classes**](/Web%20Development/TypeScript/Object%20Oriented/AbstractClasses.md)
   - Abstract classes
   - `abstract`
   - Abstract methods
   - Abstract properties
   - Abstract class best practices
 
-- **46. Getters and Setters**
+- [**46. Getters and Setters**](/Web%20Development/TypeScript/Object%20Oriented/GettersAndSetters.md)
   - Getters
   - Setters
   - `get`
   - `set`
   - Getter and setter best practices
 
-- **47. Index Signatures in Classes**
+- [**47. Index Signatures in Classes**](/Web%20Development/TypeScript/Object%20Oriented/IndexSignatures.md)
   - Index signatures
   - Class index signatures
   - Index signature best practices
 
-- **48. Class Expressions**
+- [**48. Class Expressions**](/Web%20Development/TypeScript/Object%20Oriented/ClassExp.md)
   - Class expressions
   - Anonymous classes
   - Class expression best practices
