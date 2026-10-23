@@ -379,7 +379,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Blade layouts
   - Blade inheritance
 
-- **16. Blade Directives**
+- [**16. Blade Directives**](/Web%20Development/Laravel/BladeTemplating/BladeDirectives.md)
   - Conditional Statements
     - `@if` and `@endif`
     - `@elseif`
@@ -735,117 +735,120 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Deadlock handling
   - Database best practices
 
-- [**27. Migrations**](/Web%20Development/Laravel/Migrations/Migrations.md)
+- [**Migrations**](/Web%20Development/Laravel/Migrations/Migrations.md)
   - Migrations
-  - Migration creation
-  - `artisan make:migration`
+  - Migration creation (artisan make:migration)
   - Migration structure
-  - Migration methods
-    - `up`
-    - `down`
+  - Migration methods: up, down
+  - Migration squashing
+  - Migration best practices
+
+- [**Schema Builder & Operations**](/Web%20Development/Laravel/Migrations/SchemaBuilderAndOperations.md)
   - Schema builder
   - Table creation
-  - Column types
-    - Numeric & Integer Types
-      - `bigIncrements`
-      - `bigInteger`
-      - `decimal`
-      - `double`
-      - `float`
-      - `increments`
-      - `integer`
-      - `mediumIncrements`
-      - `mediumInteger`
-      - `smallIncrements`
-      - `smallInteger`
-      - `tinyIncrements`
-      - `tinyInteger`
-      - `unsignedBigInteger`
-      - `unsignedDecimal`
-      - `unsignedInteger`
-      - `unsignedMediumInteger`
-      - `unsignedSmallInteger`
-      - `unsignedTinyInteger`
-    - String & Text Types
-      - `char`
-      - `longText`
-      - `mediumText`
-      - `string`
-      - `text`
-      - `tinyText`
-    - Date & Time Types
-      - `dateTimeTz`
-      - `dateTime`
-      - `date`
-      - `nullableTimestamps`
-      - `softDeletesTz`
-      - `softDeletes`
-      - `timeTz`
-      - `time`
-      - `timestampTz`
-      - `timestamp`
-      - `timestampsTz`
-      - `timestamps`
-      - `year`
-    - Keys, IDs & Identifiers
-      - `id`
-      - `foreignId`
-      - `foreignUlid`
-      - `foreignUuid`
-      - `ulid`
-      - `uuid`
-    - Polymorphic Relations
-      - `morphs`
-      - `nullableMorphs`
-      - `nullableUlidMorphs`
-      - `nullableUuidMorphs`
-      - `ulidMorphs`
-      - `uuidMorphs`
-    - Spatial / Geometry Types
-      - `geometryCollection`
-      - `geometry`
-      - `lineString`
-    - Specialized and Miscellaneous Types
-      - `binary`
-      - `boolean`
-      - `enum`
-      - `ipAddress`
-      - `json`
-      - `jsonb`
-      - `macAddress`
-      - `rememberToken`
-      - `set`
-  - Column modifiers
-    - `after`
-    - `autoIncrement`
-    - `charset`
-    - `collation`
-    - `comment`
-    - `default`
-    - `first`
-    - `generatedAs`
-    - `invisible`
-    - `nullable`
-    - `storedAs`
-    - `unsigned`
-    - `useCurrent`
-    - `useCurrentOnUpdate`
-    - `virtualAs`
-    - `always`
-  - Indexes
-    - `primary`
-    - `unique`
-    - `index`
-    - `fullText`
-    - `spatialIndex`
-    - `foreign`
-  - Foreign keys
   - Drop columns
   - Rename columns
   - Drop tables
   - Rename tables
-  - Migration squashing
-  - Migration best practices
+
+- [**Column Types**](/Web%20Development/Laravel/Migrations/ColumnTypes.md)
+  - Numeric & Integer Types
+    - bigIncrements
+    - bigInteger
+    - decimal
+    - double
+    - float
+    - increments
+    - integer
+    - mediumIncrements
+    - mediumInteger
+    - smallIncrements
+    - smallInteger
+    - tinyIncrements
+    - tinyInteger
+    - unsignedBigInteger
+    - unsignedDecimal
+    - unsignedInteger
+    - unsignedMediumInteger
+    - unsignedSmallInteger
+    - unsignedTinyInteger
+  - String & Text Types
+    - char
+    - longText
+    - mediumText
+    - string
+    - text
+    - tinyText
+  - Date & Time Types
+    - date
+    - dateTime
+    - dateTimeTz
+    - nullableTimestamps
+    - softDeletes
+    - softDeletesTz
+    - time
+    - timeTz
+    - timestamp
+    - timestampTz
+    - timestamps
+    - timestampsTz
+    - year
+  - Keys, IDs & Identifiers
+    - id
+    - foreignId
+    - foreignUlid
+    - foreignUuid
+    - ulid
+    - uuid
+  - Polymorphic Relations
+    - morphs
+    - nullableMorphs
+    - nullableUlidMorphs
+    - nullableUuidMorphs
+    - ulidMorphs
+    - uuidMorphs
+  - Spatial / Geometry Types
+    - geometry
+    - geometryCollection
+    - lineString
+  - Specialized and Miscellaneous Types
+    - binary
+    - boolean
+    - enum
+    - ipAddress
+    - json
+    - jsonb
+    - macAddress
+    - rememberToken
+    - set
+
+- [**Column Modifiers**](/Web%20Development/Laravel/Migrations/ColumnModifiers.md)
+  - after
+  - always
+  - autoIncrement
+  - charset
+  - collation
+  - comment
+  - default
+  - first
+  - generatedAs
+  - invisible
+  - nullable
+  - storedAs
+  - unsigned
+  - useCurrent
+  - useCurrentOnUpdate
+  - virtualAs
+
+- [**Indexes & Foreign Keys**](/Web%20Development/Laravel/Migrations/IndexesAndForeignKeys.md)
+  - Indexes: 
+    - primary
+    - unique
+    - index
+    - fullText
+    - spatialIndex
+    - foreign
+  - Foreign keys
 
 - [**28. Seeders**](/Web%20Development/Laravel/EloquentORM/Seeders.md)
   - Seeders
@@ -897,87 +900,99 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Validation error display
   - Validation best practices
 
-- **32. Validation Rules**
-  - `accepted`
-  - `active_url`
-  - `after`
-  - `after_or_equal`
-  - `alpha`
-  - `alpha_dash`
-  - `alpha_num`
-  - `array`
-  - `bail`
-  - `before`
-  - `before_or_equal`
-  - `between`
-  - `boolean`
-  - `confirmed`
-  - `current_password`
-  - `date`
-  - `date_equals`
-  - `date_format`
-  - `declined`
-  - `different`
-  - `digits`
-  - `digits_between`
-  - `dimensions`
-  - `distinct`
-  - `email`
-  - `ends_with`
-  - `enum`
-  - `exists`
-  - `file`
-  - `filled`
-  - `gt`
-  - `gte`
-  - `image`
-  - `in`
-  - `in_array`
-  - `integer`
-  - `ip`
-  - `ipv4`
-  - `ipv6`
-  - `json`
-  - `lt`
-  - `lte`
-  - `max`
-  - `mimes`
-  - `mimetypes`
-  - `min`
-  - `missing`
-  - `multiple_of`
-  - `not_in`
-  - `not_regex`
-  - `nullable`
-  - `numeric`
-  - `password`
-  - `present`
-  - `prohibited`
-  - `prohibits`
-  - `regex`
-  - `required`
-  - `required_array_keys`
-  - `required_if`
-  - `required_if_accepted`
-  - `required_unless`
-  - `required_with`
-  - `required_with_all`
-  - `required_without`
-  - `required_without_all`
-  - `same`
-  - `size`
-  - `starts_with`
-  - `string`
-  - `timezone`
-  - `unique`
-  - `url`
-  - `ulid`
-  - `uuid`
-  - Custom rules
-  - Rule objects
-  - Rule groups
-  - Conditional rules
-  - Validation best practices
+- [**32. Validation Rules**](/Web%20Development/Laravel/Validation/ValidationRules.md)
+  - Presence & Requirement
+    - accepted
+    - declined
+    - filled
+    - missing
+    - nullable
+    - present
+    - required
+    - required_array_keys
+  - Conditional Requirements
+    - required_if
+    - required_if_accepted
+    - required_unless
+    - required_with
+    - required_with_all
+    - required_without
+    - required_without_all
+    - prohibited
+    - prohibits
+  - Data Types & Formats
+    - alpha
+    - alpha_dash
+    - alpha_num
+    - array
+    - boolean
+    - date
+    - enum
+    - integer
+    - json
+    - numeric
+    - string
+    - timezone
+  - Numbers, Sizes & Ranges
+    - between
+    - digits
+    - digits_between
+    - gt (Greater Than)
+    - gte (Greater Than or Equal)
+    - lt (Less Than)
+    - lte (Less Than or Equal)
+    - max
+    - min
+    - multiple_of
+    - size
+  - Strings & Text Patterns
+    - ends_with
+    - not_regex
+    - regex
+    - starts_with
+    - ulid
+    - uuid
+  - Networks & Identifiers
+    - active_url
+    - email
+    - ip
+    - ipv4
+    - ipv6
+    - url
+  - Dates & Times
+    - after
+    - after_or_equal
+    - before
+    - before_or_equal
+    - date_equals
+    - date_format
+  - Comparisons & Relationships
+    - confirmed
+    - different
+    - distinct
+    - in
+    - in_array
+    - not_in
+    - same
+  - Database & Authentication
+    - current_password
+    - exists
+    - password
+    - unique
+  - Files & Images
+    - dimensions
+    - file
+    - image
+    - mimes
+    - mimetypes
+  - Execution Controls
+    - bail
+  - Custom & Advanced Architecture
+    - Conditional rules
+    - Custom rules
+    - Rule groups
+    - Rule objects
+    - Validation best practices
 
 - [**33. Form Request Validation**](/Web%20Development/Laravel/Validation/FormRequestValidation.md)
   - Form requests
@@ -997,11 +1012,17 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Error status codes
   - API validation best practices
 
-  [**Advanced Validation**](/Web%20Development/Laravel/Validation/AdvancedValidation.md)
+- [**Advanced Validation**](/Web%20Development/Laravel/Validation/AdvancedValidation.md)
+  - Conditional rules
+  - Nested input
+  - Array validation
+  - Unique constraints
+  - Database-aware validation
+  - Custom validation rules
 
 ---
 
-# IX. Authentication and Authorization
+# IX. Authentication
 
 - [**35. Authentication Fundamentals**](/Web%20Development/Laravel/Authentication/Authentication.md)
   - Authentication
@@ -1045,6 +1066,29 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Passport OAuth2 flows
   - Token best practices
 
+- [**56. Authentication Workflows**](/Web%20Development/Laravel/Authentication/AuthenticationWorkflows.md)
+  - Registration
+  - Login
+  - Logout
+  - Password resets
+  - Email verification
+  - Remember-me functionality
+
+- [**57. Authentication Architecture**](/Web%20Development/Laravel/Authentication/AuthenticationArchitecture.md)
+  - Guards
+  - Providers
+  - Multiple authentication mechanisms
+  - Session-based authentication
+  - Token-based authentication
+
+- [**58. Modern Authentication Integration**](/Web%20Development/Laravel/Authentication/AuthenticationIntegration.md)
+  - Laravel starter kits
+  - API authentication
+  - SPA authentication
+  - Social login concepts
+
+# Authorization
+
 - [**38. Authorization**](/Web%20Development/Laravel/Authorization/Autorization.md)
   - Authorization
   - [Gates](/Web%20Development/Laravel/Authorization/Gates.md)
@@ -1069,6 +1113,17 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - `@cannot`
   - `@canany`
   - Authorization best practices
+
+- [**Gates**](/Web%20Development/Laravel/Authorization/Gates.md)
+  - Gate definitions
+  - Gate checks
+  - Before/after authorization hooks
+
+- [**Policies**](/Web%20Development/Laravel/Authorization/Policies.md)
+  - Policy classes
+  - Policy methods
+  - Model authorization
+  - Resource authorization
 
 - [**39. Role-Based Access Control**](/Web%20Development/Laravel/Authorization/RoleAndPermission.md)
   - Roles
@@ -1105,6 +1160,19 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - API documentation
   - API best practices
 
+- [**API Routing**](/Web%20Development/Laravel/API%20Development/APIRouting.md)
+  - API routes
+  - Route prefixes
+  - Versioning
+  - Authentication middleware
+  - Rate limiting
+
+- [**API Controllers**](/Web%20Development/Laravel/API%20Development/APIControllers.md)
+  - CRUD endpoints
+  - Request validation
+  - Resource responses
+  - Error handling
+
 - [**42. API Resources**](/Web%20Development/Laravel/API%20Development/APIResources.md)
   - API resources
   - Resource creation
@@ -1127,6 +1195,16 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Token refresh
   - API authentication best practices
 
+- [**API Design**](/Web%20Development/Laravel/API%20Development/APIDesign.md)
+  - Pagination
+  - Filtering
+  - Sorting
+  - Searching
+  - Versioning
+  - Idempotency
+  - Error conventions
+  - Rate limiting
+
 - [**44. API Rate Limiting**](/Web%20Development/Laravel/API%20Development/APIRateLimiting.md)
   - Rate limiting
   - Rate limiter configuration
@@ -1134,7 +1212,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Rate limit headers
   - Rate limit best practices
 
-- **45. API Documentation**
+- [**45. API Documentation**](/Web%20Development/Laravel/API%20Development/APIDoc.md)
   - API documentation
   - OpenAPI
   - Swagger
@@ -1142,7 +1220,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Laravel API Documentation
   - API documentation best practices
 
-- **46. GraphQL**
+- [**46. GraphQL**](/Web%20Development/Laravel/API%20Development/GraphQL.md)
   - GraphQL
   - Lighthouse
   - GraphQL schema

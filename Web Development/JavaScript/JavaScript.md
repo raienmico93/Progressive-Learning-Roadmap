@@ -75,7 +75,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
 
 # II. Variables and Data Types
 
-- **4. Variables**
+- [**4. Variables**](/Web%20Development/JavaScript/Variables%20and%20Data%20Types/Variables.md)
   - `var`
   - `let`
   - `const`
@@ -91,7 +91,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Naming conventions
   - Naming best practices
 
-- **5. Primitive Data Types**
+- [**5. Primitive Data Types**](/Web%20Development/JavaScript/Variables%20and%20Data%20Types/PrimitiveDataTypes.md)
   - String
   - Number
   - BigInt
@@ -103,7 +103,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Primitive wrappers
   - `typeof` operator
 
-- **6. Reference Data Types**
+- [**6. Reference Data Types**](/Web%20Development/JavaScript/Variables%20and%20Data%20Types/ReferencesDataTypes.md)
   - Object
   - Array
   - Function
@@ -118,7 +118,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Reference vs value
   - Memory model
 
-- **7. Type Coercion**
+- [**7. Type Coercion**](/Web%20Development/JavaScript/Variables%20and%20Data%20Types/TypeCoercion.md)
   - Implicit coercion
   - Explicit coercion
   - `String()`
@@ -143,7 +143,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Coercion pitfalls
   - Coercion best practices
 
-- **8. Numbers**
+- [**8. Numbers**](/Web%20Development/JavaScript/Variables%20and%20Data%20Types/Numbers.md)
   - Number literals
   - Integer literals
   - Floating-point literals
@@ -775,7 +775,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Inheritance performance
   - Inheritance pitfalls
 
-- **54. Classes**
+- [**54. Classes**](/Web%20Development/JavaScript/Prototype/Classes.md)
   - Class syntax
   - Class declarations
   - Class expressions
@@ -794,7 +794,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Class hoisting
   - Class vs constructor functions
 
-- **55. Mixins**
+- [**55. Mixins**](/Web%20Development/JavaScript/Prototype/Mixins.md)
   - Mixins
   - Mixin patterns
   - Object mixins
@@ -802,7 +802,7 @@ JavaScript is best learned as more than "a scripting language for the web." The 
   - Composition over inheritance
   - Multiple inheritance alternatives
 
-- **56. Inheritance Patterns**
+- [**56. Inheritance Patterns**](/Web%20Development/JavaScript/Prototype/InheritancePatterns.md)
   - Classical inheritance
   - Prototypal inheritance
   - Functional inheritance
