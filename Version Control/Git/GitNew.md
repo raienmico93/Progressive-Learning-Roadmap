@@ -7,7 +7,7 @@ Git is best learned as more than "a tool for saving code." The progression shoul
 ---
 
 # I. Version Control Foundations
-
+ 
 - **1. What Version Control Is**
   - Version control
   - Version control systems

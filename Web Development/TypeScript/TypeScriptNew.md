@@ -288,14 +288,14 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Special type best practices
   - Appropriate and inappropriate use cases
 
-- **16. Type Assertions**
+- [**16. Type Assertions**](/Web%20Development/TypeScript/Core%20Type%20System/TypeAssertions.md)
   - Type assertions
   - `as` syntax
   - Angle bracket syntax
   - `as const`
   - Type assertion best practices
 
-- **17. Type Guards**
+- [**17. Type Guards**](/Web%20Development/TypeScript/Core%20Type%20System/TypeGuards.md)
   - Type guards
   - `typeof`
   - `instanceof`
@@ -303,9 +303,10 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Custom type guards
   - Type predicate
   - `is` keyword
+  - Reusable narrowing logic
   - Type guard best practices
 
-- **18. Type Narrowing**
+- [**18. Type Narrowing**](/Web%20Development/TypeScript/Core%20Type%20System/Narrowing.md)
   - Type narrowing
   - Control flow analysis
   - Discriminated unions
@@ -316,7 +317,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Narrowing with equality
   - Narrowing best practices
 
-- **19. Null Safety**
+- [**19. Null Safety**](/Web%20Development/TypeScript/Core%20Type%20System/NullSafety.md)
   - `null`
   - `undefined`
   - `strictNullChecks`
@@ -590,35 +591,38 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # VII. Enums
 
-- **49. Enums**
+- [**49. Enums**](/Web%20Development/TypeScript/Enums/Enums.md)
   - Enums
   - `enum`
   - Numeric enums
   - String enums
   - Heterogeneous enums
   - Const enums
+  - Reverse mappings
+  - Enum alternatives
+  - Trade-offs of enums
   - Enum best practices
 
-- **50. Numeric Enums**
+- [**50. Numeric Enums**](/Web%20Development/TypeScript/Enums/NumericEnums.md)
   - Numeric enums
   - Auto-incrementing
   - Custom values
   - Reverse mapping
   - Numeric enum best practices
 
-- **51. String Enums**
+- [**51. String Enums**](/Web%20Development/TypeScript/Enums/StringEnums.md)
   - String enums
   - String enum declaration
   - String enum usage
   - String enum best practices
 
-- **52. Const Enums**
+- [**52. Const Enums**](/Web%20Development/TypeScript/Enums/ConstEnums.md)
   - Const enums
   - `const enum`
   - Const enum usage
   - Const enum best practices
 
-- **53. Enum Alternatives**
+- [**53. Enum Alternatives**](/Web%20Development/TypeScript/Enums/EnumAlt.md)
   - Union types
   - Object literals
   - `as const`
@@ -628,7 +632,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # VIII. Modules
 
-- **54. Modules**
+- [**54. Modules**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ESModule.md)
   - Modules
   - ES modules
   - `import`
@@ -638,8 +642,18 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Re-exports
   - Module best practices
 
-- **55. Module Resolution**
+- [**Module Organization**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ModuleOrg.md)
+  - File-based modules
+  - Feature-based structure
+  - Shared utilities
+  - Public API boundaries
+  - Barrel exports
+
+- [**55. Module Resolution**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ModuleResolution.md)
   - Module resolution
+  - Relative imports
+  - Package imports
+  - Path aliases
   - `moduleResolution`
   - `node`
   - `node16`
@@ -651,22 +665,25 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - `paths`
   - Module resolution best practices
 
-- **56. Namespaces**
+- [**56. Namespaces**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/Namespaces.md)
   - Namespaces
   - `namespace`
   - Namespace declaration
   - Namespace usage
   - Namespace best practices
 
-- **57. Declaration Files**
+- [**57. Declaration Files**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/DeclarationFiles.md)
   - Declaration files
   - `.d.ts`
   - `declare`
+  - Declaring external libraries
   - Declaration merging
   - Ambient declarations
+  - Global declarations
+  - Module declarations
   - Declaration file best practices
 
-- **58. Type Declarations**
+- [**58. Type Declarations**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/TypeDeclarations.md)
   - Type declarations
   - `declare module`
   - `declare global`
@@ -677,19 +694,25 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - `declare var`
   - Type declaration best practices
 
-- **59. DefinitelyTyped**
+- [**59. DefinitelyTyped**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/DefinitelyTyped.md)
   - DefinitelyTyped
   - `@types`
   - Type packages
   - Type package installation
   - DefinitelyTyped best practices
 
-- **60. Module Augmentation**
+- [**Third-Party Type Definitions**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ThirdPartyTypeDef.md)
+  - Built-in library types
+  - Community-maintained typings
+  - `@types` packages
+  - Typing untyped JavaScript libraries
+
+- [**60. Module Augmentation**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/ModuleAugmentation.md)
   - Module augmentation
   - `declare module`
   - Augmentation best practices
 
-- **61. Global Augmentation**
+- [**61. Global Augmentation**](/Web%20Development/TypeScript/Modules%20and%20Code%20Organization/GlobalAugmentation.md)
   - Global augmentation
   - `declare global`
   - Global augmentation best practices
@@ -698,15 +721,15 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # IX. Advanced Types
 
-- **62. Advanced Type Fundamentals**
+- [**62. Advanced Type Fundamentals**](/Web%20Development/TypeScript/Advanced%20Type%20System/AdvancedType.md)
   - Advanced types
   - Type manipulation
   - Type transformation
   - Advanced type best practices
 
-- **63. Type Operators**
-  - `keyof`
-  - `typeof`
+- [**63. Type Operators**](/Web%20Development/TypeScript/Advanced%20Type%20System/TypeOperators.md)
+  - [`keyof`](/Web%20Development/TypeScript/Advanced%20Type%20System/keyof.md)
+  - [`typeof`](/Web%20Development/TypeScript/Advanced%20Type%20System/typeof.md)
   - `in`
   - `extends`
   - `infer`
@@ -715,23 +738,31 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - `satisfies`
   - Type operator best practices
 
-- **64. Indexed Access Types**
+- [**64. Indexed Access Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/IndexedAccessTypes.md)
   - Indexed access types
   - `T[K]`
+  - Property lookup types
+  - Array element types
+  - Nested indexed access
   - Indexed access best practices
 
-- **65. Conditional Types**
+- [**65. Conditional Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/ConditionalTypes.md)
   - Conditional types
   - `T extends U ? X : Y`
+  - Type relationships
+  - Branching at the type level
+  - `infer`
   - Conditional type declaration
   - Conditional type usage
   - Distributive conditional types
   - Conditional type best practices
 
-- **66. Mapped Types**
+- [**66. Mapped Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/MappedTypes.md)
   - Mapped types
   - `[K in keyof T]`
   - Mapped type declaration
+  - Iterating over keys
+  - Property transformation
   - Mapped type modifiers
     - `+`
     - `-`
@@ -741,52 +772,60 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - `as`
   - Mapped type best practices
 
-- **67. Template Literal Types**
+- [**67. Template Literal Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/TemplateLiteralTypes.md)
   - Template literal types
   - `` `Hello ${T}` ``
   - Template literal type declaration
   - Template literal type usage
   - Template literal type best practices
+  - String composition
+  - Pattern modeling
+  - Event-name types
+  - Route and API-path types
 
-- **68. Infer Keyword**
+- [**68. Infer Keyword**](/Web%20Development/TypeScript/Advanced%20Type%20System/InferKeyword.md)
   - `infer`
   - Infer declaration
   - Infer usage
   - Infer best practices
 
-- **69. Recursive Types**
+- [**69. Recursive Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/RecursiveTypes.md)
   - Recursive types
   - Recursive type declaration
   - Recursive type usage
   - Recursive type best practices
+  * Recursive aliases
+  * Tree structures
+  * Nested configurations
+  * Recursive utility types
 
-- **70. Type Predicates**
+- [**70. Type Predicates**](/Web%20Development/TypeScript/Advanced%20Type%20System/TypePredicates.md)
   - Type predicates
   - `is`
   - Type predicate declaration
   - Type predicate usage
   - Type predicate best practices
 
-- **71. Assertion Functions**
+- [**71. Assertion Functions**](/Web%20Development/TypeScript/Advanced%20Type%20System/AssertionFunc.md)
   - Assertion functions
   - `asserts`
   - Assertion function declaration
   - Assertion function usage
   - Assertion function best practices
 
-- **72. Satisfies Operator**
+- [**72. Satisfies Operator**](/Web%20Development/TypeScript/Advanced%20Type%20System/SatisfiesOperator.md)
   - `satisfies`
   - Satisfies operator
   - Satisfies usage
   - Satisfies best practices
 
-- **73. Type Branding**
+- [**73. Type Branding**](/Web%20Development/TypeScript/Advanced%20Type%20System/TypeBranding.md)
   - Type branding
   - Branded types
   - Opaque types
   - Type branding best practices
 
-- **74. Type-Level Programming**
+- [**74. Type-Level Programming**](/Web%20Development/TypeScript/Advanced%20Type%20System/TypeLevelProgramming.md)
   - Type-level programming
   - Type-level computation
   - Type-level algorithms
@@ -796,13 +835,13 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # X. Utility Types
 
-- **75. Utility Types Fundamentals**
+- [**75. Utility Types Fundamentals**](/Web%20Development/TypeScript/Utility%20Types/UtilityTypes.md)
   - Utility types
   - Built-in utility types
   - Custom utility types
   - Utility type best practices
 
-- **76. Built-in Utility Types**
+- [**76. Built-in Utility Types**](/Web%20Development/TypeScript/Utility%20Types/BuiltIn.md)
   - `Partial<T>`
   - `Required<T>`
   - `Readonly<T>`
@@ -826,7 +865,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - `Awaited<T>`
   - Built-in utility type best practices
 
-- **77. Custom Utility Types**
+- [**77. Custom Utility Types**](/Web%20Development/TypeScript/Utility%20Types/CustomUtilityTypes.md)
   - Custom utility types
   - Utility type declaration
   - Utility type usage

@@ -1,4 +1,4 @@
-# TypeScript ES Modules: A Comprehensive Cheat Sheet
+# Modules in TypeScript — Comprehensive Cheat Sheet
 
 ---
 
@@ -6,640 +6,660 @@
 
 ### Definitions
 
-**Core Definition**
-ES Modules (ECMAScript Modules) are the official, standardized module system built into the JavaScript language. They provide a way to split code into separate files, each with its own scope, and to explicitly share code between files using `import` and `export` statements. TypeScript fully supports ES Modules and adds type-aware features on top of the standard syntax.
+**Core Definition (Academic).** A **module** is a source file with its **own lexical scope** that explicitly **exports** declarations for use by other files and **imports** declarations from other files. TypeScript adopts the ECMAScript module (ESM) system as its primary module model, while also supporting CommonJS interoperability. Modules are the fundamental unit of code organization, encapsulation, and dependency management in modern TypeScript applications.
 
-**Technical Definition**
-ES Modules (ESM) are defined by the ECMAScript specification and use dedicated `import` and `export` syntax. In TypeScript, any file containing a top-level `import` or `export` is considered a module and executes within its own scope, not the global scope. ESM was added to the JavaScript spec in 2015 and gained broad support in browsers and Node.js by 2020. TypeScript supports ESM output via the `module` compiler option (e.g., `"esnext"`, `"node16"`, `"nodenext"`), and the `moduleResolution` option (e.g., `"bundler"`, `"nodenext"`) controls how import specifiers are resolved to files on disk. TypeScript also provides type-only import/export syntax (`import type`, `export type`) to ensure that type-only dependencies are erased during compilation.
+**Technical Definition.** In TypeScript, any file containing a **top-level `import` or `export`** is treated as a module; a file without either is treated as a **script** whose declarations live in the global scope. Modules execute in their own scope, and their declarations are invisible outside unless explicitly exported. TypeScript supports **ES Modules** (the standard `import`/`export` syntax added to JavaScript in 2015) as well as **CommonJS** (`require`/`module.exports`) for Node.js interoperability. TypeScript adds **type-only imports and exports**, **module resolution configuration**, and compiler options such as `verbatimModuleSyntax` and `isolatedModules` to align module syntax with runtime and bundler behavior.
 
-**Beginner-Friendly Explanation**
-ES Modules are the modern way to organize JavaScript and TypeScript code into separate files. Instead of everything sharing one global scope (which causes naming conflicts), each file is its own module with its own private scope. To share code, you use `export` to make things available and `import` to bring them in. For example, a `math.ts` file can `export function add()`, and a `app.ts` file can `import { add } from "./math.js"`. TypeScript adds type safety to this system, and it also has special syntax for importing types that disappear when compiled. If you're building a modern web app or Node.js project, you're almost certainly using ES Modules.
+**Beginner-Friendly Explanation.** A module is **a file that keeps its contents private by default**. If you want another file to use something from a module, you must **export** it; if you want to use something from another module, you must **import** it. This is how large programs are split into small, manageable pieces without polluting a global namespace. TypeScript uses the standard JavaScript `import`/`export` syntax and adds type safety on top of it.
+
+---
 
 ### Key Characteristics
 
-- **File-scoped by default**: Each module has its own scope; nothing is shared unless explicitly exported.
-- **Standardized syntax**: Uses `import` and `export` statements defined by ECMAScript.
-- **Static structure**: Imports and exports are resolved at compile time, enabling tree-shaking.
-- **Type-aware**: TypeScript extends ESM with type annotations and type-only import/export syntax.
-- **Extension-aware**: In native ESM environments (Node.js ESM, browsers without bundlers), relative imports require explicit file extensions (`.js`).
-- **Multiple export forms**: Named exports, default exports, and namespace exports.
-- **Tree-shakeable**: Named exports enable bundlers to eliminate unused code from the final bundle.
-- **Module resolution modes**: TypeScript offers `"node16"`, `"nodenext"`, `"bundler"`, and legacy modes, each with different rules.
+| Characteristic | Description |
+|---|---|
+| **File-level scope** | Each module has its own scope; declarations do not leak globally unless exported. |
+| **Explicit dependencies** | Modules declare what they import and export, making dependencies visible and analyzable. |
+| **ES Modules first** | TypeScript’s primary module syntax is standard ECMAScript `import`/`export`. |
+| **Type-only imports/exports** | TypeScript can erase imports/exports used only for types, avoiding runtime dependencies. |
+| **Interoperability** | TypeScript supports both ESM and CommonJS, with compiler options controlling interop. |
+| **Static analysis** | Imports and exports are statically analyzable, enabling bundling, tree-shaking, and refactoring. |
+| **Module resolution** | The compiler resolves module specifiers to files using configurable strategies (`bundler`, `nodenext`, etc.). |
+| **Erasable by design** | Type-only syntax is removed; value imports/exports remain in the emitted JavaScript. |
+
+---
 
 ### Prerequisites
 
-- Basic knowledge of JavaScript functions, variables, and objects
-- Familiarity with TypeScript type annotations and interfaces
-- Understanding of file systems and relative paths
-- Basic familiarity with `tsconfig.json` compiler options
+- **TypeScript basics**: type annotations, interfaces, and type aliases.
+- **JavaScript modules**: familiarity with `import` and `export` syntax.
+- **File system and paths**: relative and bare module specifiers.
+- **Node.js or a bundler**: to run or bundle the emitted JavaScript.
+- **`tsconfig.json`**: understanding of `module`, `moduleResolution`, `target`, and `strict`.
+
+---
 
 ### Related Programming Areas
 
-- **Module Systems**: CommonJS (CJS), AMD, UMD, SystemJS, and ES Modules
-- **Bundlers**: Webpack, Rollup, Vite, esbuild, and their module handling
-- **Node.js Runtime**: ESM support in Node.js (v12+), `package.json` `"type"` field
-- **Tree-Shaking**: Dead code elimination based on ESM's static structure
-- **TypeScript Compiler**: `module` and `moduleResolution` options
+- **ES Modules (ESM)** and **CommonJS (CJS)** — the two dominant module systems.
+- **Bundlers** (Vite, webpack, esbuild, Rollup) — consume module graphs and tree-shake.
+- **Type-only imports** and **`verbatimModuleSyntax`** — modern TypeScript module hygiene.
+- **Module resolution** — how specifiers map to files on disk.
+- **Barrel files and re-exports** — aggregating public APIs.
+- **Namespaces** — TypeScript’s legacy internal module construct, now discouraged.
+
+---
 
 ### Core Concepts / Features
 
-1. `export` and `import` Syntax
-2. Named Exports, Default Exports, and Namespace Imports (`import * as`)
-3. Re-exporting Configurations and Tree-Shaking Patterns
-4. Type-Only Imports and Exports (`import type` / `export type`)
-5. The Impact of Explicit `.js` Extensions in ESM Import Paths
+The following sections cover modules, ES modules, `import`, `export`, named exports, default exports, re-exports, and module best practices. Each follows a uniform structure.
 
+---
 
-## 1. `export` and `import` Syntax
+## 1. Modules
 
 ### Definitions
 
-**Core Definition**
-The `export` keyword makes declarations (variables, functions, classes, types, interfaces) available to other modules. The `import` keyword brings those exported declarations into the current module's scope. Together, they form the foundation of ES Modules.
+**Core Definition.** A **module** is a file with its own scope that explicitly exports and imports declarations, forming a dependency graph of reusable code units.
 
-**Technical Definition**
-ES Module syntax uses dedicated `export` and `import` declarations at the top level of a module. `export` can be applied directly to declarations (`export function f() {}`) or used in an export list (`export { f, g }`). `import` declarations bring exported bindings into scope using named imports (`import { f } from "./module.js"`), default imports (`import f from "./module.js"`), or namespace imports (`import * as mod from "./module.js"`). In TypeScript, `export` and `import` can also be applied to TypeScript-specific declarations like type aliases and interfaces. The compiler uses the `module` option to determine how these statements are emitted in JavaScript.
+**Technical Definition.** A TypeScript file is a module if it contains a **top-level `import` or `export`** (or top-level `await`). Modules have their own scope; declarations are not global unless exported. A file with no imports or exports is a **script** and shares the global scope with other scripts. Adding `export {}` to a file forces it to be treated as a module exporting nothing. Modules are the foundation for dependency management, encapsulation, and tooling.
 
-**Beginner-Friendly Explanation**
-The `export` keyword says "this thing can be used by other files." The `import` keyword says "I want to use this thing from another file." For example, if `math.ts` has `export function add(a, b) { return a + b; }`, then `app.ts` can do `import { add } from "./math.js"` and call `add(1, 2)`. The path in the import must point to the file, and in modern ESM environments, you need to include the `.js` extension even if the source file is `.ts`. TypeScript checks that the imported names actually exist and that their types match what you expect.
+**Beginner-Friendly Explanation.** A module is **a file that minds its own business**. Nothing inside it is visible to other files unless it is explicitly exported. If a file has no imports or exports, TypeScript treats it as an old-fashioned script that shares global variables—usually not what you want. Adding `export {}` is a quick way to mark a file as a module.
 
 ### Purposes
 
-- To split code into separate, independently scoped files.
-- To explicitly control what is shared between files (encapsulation).
-- To enable static analysis for tree-shaking and refactoring.
-- To provide type-safe imports with compiler-checked names and types.
-- To support modern JavaScript runtimes (browsers, Node.js) natively.
+- **To encapsulate code** in file-level scopes and prevent global namespace pollution.
+- **To make dependencies explicit** through imports and exports.
+- **To enable code reuse** across files, packages, and applications.
+- **To support tooling** such as bundlers, tree-shaking, refactoring, and type checking.
+- **To provide a unit of compilation and distribution** for libraries and applications.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Named Export**
+**Module detection:**
 
 ```typescript
-// math.ts
-export function add(a: number, b: number): number {
-  return a + b;
-}
-
-export const PI = 3.14159;
-
-export interface Point {
-  x: number;
-  y: number;
-}
+// A file with a top-level import or export is a module.
+import { something } from "./somewhere.js";
+export const value = 42;
 ```
 
-**Component Breakdown**
-- `export function`: Exports a function declaration.
-- `export const`: Exports a variable declaration.
-- `export interface`: Exports a TypeScript interface.
-
-**General Syntax: Named Import**
+**Forcing a file to be a module:**
 
 ```typescript
-// app.ts
-import { add, PI, Point } from "./math.js";
-
-console.log(add(1, 2));  // 3
-console.log(PI);          // 3.14159
+export {}; // Marks the file as a module that exports nothing.
 ```
 
-**Component Breakdown**
-- `import { add, PI, Point }`: Imports the named exports.
-- `from "./math.js"`: The module specifier (path).
+**Component breakdown:**
 
-**General Syntax: Renaming Imports and Exports**
+- `import` / `export` — top-level module syntax that marks the file as a module.
+- `export {}` — an empty export list; makes a file a module without adding runtime exports.
 
-```typescript
-// Renaming on import
-import { add as addNumbers, PI as pi } from "./math.js";
-
-// Renaming on export
-export { add as addNumbers, PI as pi };
-```
-
-**Component Breakdown**
-- `as`: Renames the binding locally or externally.
-
-**General Syntax: Export List**
-
-```typescript
-// utils.ts
-function internalHelper() { }
-export function publicApi() { }
-
-export { publicApi, internalHelper as helper };
-```
-
-**Component Breakdown**
-- `export { ... }`: An export list at the end of the module.
-- `internalHelper as helper`: Renames on export.
-
-**Syntax Rules**
+**Syntax rules.**
 
 - Any file with a top-level `import` or `export` is a module.
-- Files without imports/exports are scripts with global scope (use `export {}` to force module mode).
-- Named exports are declared with `export` before the declaration or via an export list.
-- Imports use `import { name } from "specifier"` for named exports.
-- The `as` keyword renames imports and exports.
-- TypeScript-specific declarations (types, interfaces) can be exported and imported like values.
-- The module specifier must be a string literal (not a variable).
+- A file without module syntax is a **script** and shares the global scope.
+- Module declarations are not global; they must be imported to be used elsewhere.
+- `export {}` is a no-op export that marks a file as a module.
 
-**Constraints and Limitations**
+**Constraints and limitations.**
 
-- Import specifiers are string literals; dynamic imports require `import()`.
-- Top-level `import`/`export` cannot appear inside conditional blocks or functions.
-- Circular imports can cause runtime issues (values may be `undefined` during initialization).
-- In native ESM (Node.js without bundler), relative imports require `.js` extensions.
-- The `export =` syntax is CommonJS-only and incompatible with ESM.
+- Scripts can accidentally pollute the global scope; prefer modules everywhere.
+- Module detection can be affected by `moduleDetection` compiler settings.
+- Ambient declarations and global augmentation require care in module files.
 
-### Multiple Annotated Complete Step-by-Step Code Examples
+### Annotated Complete Step by Step Code Examples
 
-#### Example 1: Basic Named Exports and Imports
+#### Example 1: Script vs. module
 
 ```typescript
-// Step 1: Define a module with named exports.
+// file: script.ts (no import/export — a script)
+const greeting = "Hello from script";
+
+// file: module.ts (has export — a module)
+export const greeting = "Hello from module";
+```
+
+```typescript
+// file: main.ts
+import { greeting } from "./module.js";
+console.log(greeting); // Expected: Hello from module
+```
+
+**Setup.** Compile with `npx tsc --module nodenext --target es2022 module.ts main.ts` and run `node main.js`.
+
+**Expected Output:**
+```
+Hello from module
+```
+
+**Why this output occurs.** `module.ts` has a top-level `export`, so it is a module with its own scope. `main.ts` imports the exported `greeting`. The `script.ts` file has no exports and is treated as a script; its `greeting` would be global and is not imported here.
+
+---
+
+#### Example 2: Forcing a file to be a module with `export {}`
+
+```typescript
+// file: standalone.ts
+const privateValue = 42;
+export {}; // Now this file is a module.
+```
+
+**Expected Output:**
+```
+(no runtime output; module classification is compile-time behavior)
+```
+
+**Why this output occurs.** `export {}` contains a top-level `export`, so TypeScript treats the file as a module even though nothing is exported. `privateValue` remains module-scoped.
+
+---
+
+### Real-World Cases
+
+- **Application structure**: every `.ts` file is a module with explicit exports.
+- **Library packaging**: modules define the public API surface.
+- **Monorepos**: modules and packages form a dependency graph.
+- **Testing**: modules can be imported and mocked in isolation.
+
+---
+
+## 2. ES Modules
+
+### Definitions
+
+**Core Definition.** **ES Modules (ESM)** is the standard JavaScript module system built into the language, using static `import` and `export` declarations. It is supported in modern browsers and Node.js.
+
+**Technical Definition.** ESM uses dedicated `import` and `export` syntax and is supported in modern browsers and Node.js since v12. ESM is **static**: imports and exports are analyzed at parse time, enabling tree-shaking and early error detection. TypeScript emits ESM when configured with `"module": "esnext"`, `"nodenext"`, or similar options. ESM files may be executed directly by runtimes or bundled by tools.
+
+**Beginner-Friendly Explanation.** ES Modules are **the modern, standard way to split JavaScript into files**. You use `import` to bring things in and `export` to send things out. Browsers and Node.js understand this natively, and bundlers can optimize it.
+
+### Purposes
+
+- **To use the standard JavaScript module system** supported by browsers, Node.js, and bundlers.
+- **To enable static analysis** and tree-shaking through static `import`/`export` syntax.
+- **To interoperate with modern tooling** such as Vite, Rollup, and esbuild.
+- **To replace legacy CommonJS** in new code.
+- **To support top-level `await`** in module files.
+
+### Syntax Rules and Structure
+
+**ESM import/export:**
+
+```typescript
 // math.ts
+export function add(a: number, b: number): number { return a + b; }
+
+// main.ts
+import { add } from "./math.js";
+console.log(add(2, 3));
+```
+
+**Component breakdown:**
+
+- `export function add(...)` — exports a named declaration.
+- `import { add } from "./math.js"` — imports the named export.
+- `.js` extension — required in Node ESM for relative specifiers.
+
+**Syntax rules.**
+
+- ESM uses `import`/`export`, not `require`/`module.exports`.
+- Imports are **static** and hoisted; they cannot be conditionally placed inside blocks.
+- Under Node ESM, relative imports require **file extensions** (e.g., `./math.js`).
+- TypeScript’s `module` option controls the emitted module format.
+- `verbatimModuleSyntax` helps preserve or erase imports consistently.
+
+**Constraints and limitations.**
+
+- ESM and CommonJS interoperability requires configuration (`esModuleInterop`, `module: nodenext`).
+- Top-level `await` is available only in modules, not scripts.
+- Default export interop between ESM and CJS can be confusing.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: ESM file pair
+
+```typescript
+// file: math.ts
 export function add(a: number, b: number): number {
   return a + b;
 }
 
-export function multiply(a: number, b: number): number {
-  return a * b;
-}
-
 export const PI = 3.14159;
+```
 
-export interface Point {
-  x: number;
-  y: number;
+```typescript
+// file: main.ts
+import { add, PI } from "./math.js";
+
+console.log(add(2, 3)); // Expected: 5
+console.log(PI);        // Expected: 3.14159
+```
+
+**Setup.** Compile with `npx tsc --module nodenext --target es2022 math.ts main.ts` and run `node main.js`.
+
+**Expected Output:**
+```
+5
+3.14159
+```
+
+**Why this output occurs.** `math.ts` exports two named bindings. `main.ts` imports them using ESM syntax. The `.js` extension is required under Node ESM module resolution.
+
+---
+
+#### Example 2: Dynamic `import()`
+
+```typescript
+// file: dynamic.ts
+async function loadMath() {
+  const math = await import("./math.js");
+  console.log(math.add(10, 20)); // Expected: 30
 }
 
-export function distance(p1: Point, p2: Point): number {
-  return Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+loadMath();
+```
+
+**Expected Output:**
+```
+30
+```
+
+**Why this output occurs.** Dynamic `import()` returns a promise for the module namespace object. It is evaluated at runtime, unlike static imports.
+
+---
+
+### Real-World Cases
+
+- **Modern frontend apps**: Vite and Rollup consume ESM.
+- **Node.js packages**: `"type": "module"` enables ESM.
+- **Library distribution**: ESM builds for bundlers and browsers.
+- **Code splitting**: dynamic `import()` loads modules on demand.
+
+---
+
+## 3. `import`
+
+### Definitions
+
+**Core Definition.** The **`import` declaration** brings exported bindings from another module into the current module’s scope.
+
+**Technical Definition.** TypeScript recognizes standard ECMAScript `import` forms: **named imports** (`import { x }`), **default imports** (`import x`), **namespace imports** (`import * as ns`), and **side-effect imports** (`import "mod"`). It adds **type-only imports** (`import type`) and inline `type` specifiers (`import { type T, value }`) that are guaranteed to be erased from the output. Imports are **static** and hoisted. TypeScript also supports the legacy CommonJS-interop syntax `import x = require("x")`, which should be avoided in new ESM code.
+
+**Beginner-Friendly Explanation.** `import` is **how you bring code from another file into yours**. You can import specific named things with braces, a default thing without braces, or everything at once as a namespace. You can also import a module just for its side effects. TypeScript lets you mark type-only imports so they disappear from the final JavaScript.
+
+### Purposes
+
+- **To access exported values and types** from other modules.
+- **To declare dependencies explicitly** at the top of a file.
+- **To enable static analysis, bundling, and tree-shaking**.
+- **To separate type-only imports** from runtime imports for cleaner output.
+- **To support namespace imports** for convenient access to many exports.
+
+### Syntax Rules and Structure
+
+**Named import:**
+
+```typescript
+import { add, PI as pi } from "./math.js";
+```
+
+**Default import:**
+
+```typescript
+import greet from "./greeter.js";
+```
+
+**Namespace import:**
+
+```typescript
+import * as math from "./math.js";
+```
+
+**Side-effect import:**
+
+```typescript
+import "./polyfills.js";
+```
+
+**Type-only import:**
+
+```typescript
+import type { User } from "./types.js";
+import { type Config, loadConfig } from "./config.js";
+```
+
+**Component breakdown:**
+
+- `import` — declaration keyword.
+- `{ add, PI as pi }` — named specifiers, optionally renamed with `as`.
+- `greet` — default binding.
+- `* as math` — namespace binding.
+- `type` — type-only modifier.
+
+**Syntax rules.**
+
+- Named imports use braces; default imports do not.
+- `as` renames a binding locally.
+- Namespace imports bind the entire module namespace object.
+- Side-effect imports execute the module without binding anything.
+- `import type` is guaranteed to be erased from JavaScript.
+- Type-only imports cannot combine a default import and named bindings without splitting or using `default as`.
+
+**Constraints and limitations.**
+
+- `import type` bindings cannot be used as values.
+- `import x = require("x")` is TypeScript-specific and CommonJS-only; avoid it in ESM.
+- Static imports must be top-level; dynamic `import()` is available for runtime loading.
+- Node ESM requires explicit file extensions for relative imports.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Named, namespace, and side-effect imports
+
+```typescript
+// file: utils.ts
+export const version = "1.0.0";
+export function log(message: string) { console.log(message); }
+console.log("utils loaded");
+```
+
+```typescript
+// file: main.ts
+import { version, log } from "./utils.js";
+import * as utils from "./utils.js";
+import "./side-effect.js";
+
+log(`Version: ${version}`); // Expected: Version: 1.0.0
+console.log(utils.version); // Expected: 1.0.0
+```
+
+**Expected Output (assuming `side-effect.js` logs “side effect”):**
+```
+utils loaded
+side effect
+Version: 1.0.0
+1.0.0
+```
+
+**Why this output occurs.** Named imports bind `version` and `log`. The namespace import binds the entire module object. The side-effect import executes `side-effect.js` without binding anything. The module is evaluated only once.
+
+---
+
+#### Example 2: Type-only import
+
+```typescript
+// file: types.ts
+export interface User { id: string; name: string }
+export const defaultUser: User = { id: "u1", name: "Ada" };
+```
+
+```typescript
+// file: main.ts
+import { defaultUser, type User } from "./types.js";
+
+const user: User = defaultUser;
+console.log(user.name); // Expected: Ada
+```
+
+**Expected Output:**
+```
+Ada
+```
+
+**Why this output occurs.** `type User` is erased from the emitted JavaScript. Only `defaultUser` remains as a runtime import. This avoids a runtime dependency on a type-only binding.
+
+---
+
+### Real-World Cases
+
+- **Importing services and utilities** in application code.
+- **Namespace imports** for large utility modules (`import * as _ from "lodash"`).
+- **Side-effect imports** for CSS, polyfills, and global setup.
+- **Type-only imports** for interfaces and type aliases that do not exist at runtime.
+
+---
+
+## 4. `export`
+
+### Definitions
+
+**Core Definition.** The **`export` declaration** makes a module’s declarations available to other modules.
+
+**Technical Definition.** TypeScript supports **export declarations** (`export function f() {}`), **export lists** (`export { x, y as z }`), **default exports** (`export default expr`), **type exports** (`export type { T }`), and **re-exports** (`export { x } from "./mod.js"`, `export * from "./mod.js"`). Exports are static and can be analyzed by tooling. TypeScript-specific declarations such as interfaces and type aliases can be exported like JavaScript declarations.
+
+**Beginner-Friendly Explanation.** `export` is **how you make something available to other files**. You can export a function, class, variable, or type directly, or list several exports at once. You can also re-export things from other modules.
+
+### Purposes
+
+- **To define a module’s public API**.
+- **To make declarations available to importers**.
+- **To control what is exposed** and keep everything else private.
+- **To support type-only exports** that are erased from JavaScript.
+- **To aggregate and re-export modules** through barrel files.
+
+### Syntax Rules and Structure
+
+**Export declaration:**
+
+```typescript
+export function add(a: number, b: number): number { return a + b; }
+export const PI = 3.14159;
+export interface User { id: string; name: string }
+```
+
+**Export list:**
+
+```typescript
+function internal() {}
+export { internal as publicName };
+```
+
+**Default export:**
+
+```typescript
+export default function greet(name: string): string {
+  return `Hello, ${name}`;
+}
+```
+
+**Type-only export:**
+
+```typescript
+export type { User };
+export type Config = { debug: boolean };
+```
+
+**Re-export:**
+
+```typescript
+export { add } from "./math.js";
+export * from "./models.js";
+export * as utils from "./utils.js";
+```
+
+**Component breakdown:**
+
+- `export` — declaration keyword.
+- `default` — marks the single default export.
+- `type` — type-only modifier.
+- `from "./mod.js"` — re-export source.
+
+**Syntax rules.**
+
+- A module may have **one** default export.
+- Named exports may be multiple.
+- `export type` is erased from JavaScript.
+- `export *` re-exports all named exports, but **not** the default export.
+- `export * as ns` re-exports the entire module as a namespace object.
+
+**Constraints and limitations.**
+
+- `export =` is TypeScript-specific CommonJS syntax and should be avoided in ESM.
+- Default exports have no canonical name at the import site, weakening refactoring.
+- Re-exporting a default requires `export { default } from` or `export { default as X } from`.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Export declaration and list
+
+```typescript
+// file: math.ts
+export function add(a: number, b: number): number {
+  return a + b;
 }
 
-// Step 2: Import and use the named exports.
-// app.ts
-import { add, multiply, PI, distance } from "./math.js";
-import type { Point } from "./math.js";
+function subtract(a: number, b: number): number {
+  return a - b;
+}
 
-const result = add(5, 3);
-console.log(result);  // 8
+export { subtract as minus };
+```
 
-const product = multiply(4, 7);
-console.log(product);  // 28
-
-console.log(PI);  // 3.14159
-
-const p1: Point = { x: 0, y: 0 };
-const p2: Point = { x: 3, y: 4 };
-console.log(distance(p1, p2));  // 5
-
-// Step 3: Missing imports are compile errors.
-// import { subtract } from "./math.js";
-// ❌ Error: Module '"./math.js"' has no exported member 'subtract'.
+```typescript
+// file: main.ts
+import { add, minus } from "./math.js";
+console.log(add(5, 3));  // Expected: 8
+console.log(minus(5, 3)); // Expected: 2
 ```
 
 **Expected Output:**
 ```
 8
-28
-3.14159
-5
+2
 ```
 
-**Why This Output Occurs:** The `math.ts` module exports `add`, `multiply`, `PI`, `Point`, and `distance`. The `app.ts` module imports the functions and the type separately (using `import type` for the type-only import). TypeScript checks that each imported name exists and has the correct type.
+**Why this output occurs.** `add` is exported directly; `subtract` is exported under the alias `minus` via an export list. Both are available to importers.
 
-#### Example 2: Export Lists and Renaming
+---
+
+#### Example 2: Type-only export
 
 ```typescript
-// Step 1: Define a module with internal and public functions.
-// utils.ts
-function internalTrim(s: string): string {
-  return s.trim();
-}
+// file: models.ts
+export interface User { id: string; name: string }
+export const users: User[] = [];
+```
 
-function internalUpper(s: string): string {
-  return s.toUpperCase();
-}
-
-function formatName(first: string, last: string): string {
-  return `${internalTrim(first)} ${internalTrim(last)}`;
-}
-
-// Step 2: Export using an export list with renaming.
-export {
-  formatName,
-  internalTrim as trim,
-  internalUpper as upper,
-};
-
-// Step 3: Import the renamed exports.
-// app.ts
-import { formatName, trim, upper } from "./utils.js";
-
-console.log(formatName("  Alice  ", "  Smith  "));  // "Alice Smith"
-console.log(trim("  hello  "));                     // "hello"
-console.log(upper("world"));                        // "WORLD"
-
-// Step 4: Import with renaming.
-import { trim as trimString } from "./utils.js";
-console.log(trimString("  test  "));  // "test"
+```typescript
+// file: main.ts
+import { users, type User } from "./models.js";
+const user: User = { id: "u1", name: "Ada" };
+users.push(user);
+console.log(users.length); // Expected: 1
 ```
 
 **Expected Output:**
 ```
-Alice Smith
-hello
-WORLD
-test
+1
 ```
 
-**Why This Output Occurs:** The `export { ... }` list exposes `formatName`, and renames `internalTrim` to `trim` and `internalUpper` to `upper`. The importing module can further rename with `import { trim as trimString }`. All imports are type-checked.
+**Why this output occurs.** `User` is exported as a type only and is erased; `users` remains a runtime value.
+
+---
 
 ### Real-World Cases
 
-**Case 1: Utility Libraries**
-Utility libraries (e.g., lodash-es) export individual functions as named exports, enabling consumers to import only what they need and enabling tree-shaking.
+- **Library entry points**: exporting the public API.
+- **Barrel files**: aggregating multiple modules.
+- **Type-only exports**: exposing interfaces without runtime code.
+- **Namespace re-exports**: grouping utilities under a namespace.
 
-**Case 2: Component Libraries**
-React component libraries export components as named exports, allowing consumers to import specific components without pulling in the entire library.
+---
 
-**Case 3: API Clients**
-API clients export typed functions and types, ensuring that consumers get both the runtime functions and the TypeScript types they need.
-
-**Case 4: Domain Models**
-Domain models export interfaces and types as named exports, providing a shared vocabulary across modules.
-
-### References
-
-- TypeScript Handbook: Modules — https://www.typescriptlang.org/docs/handbook/2/modules.html
-- MDN: JavaScript Modules — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
-
-
-## 2. Named Exports, Default Exports, and Namespace Imports (`import * as`)
+## 5. Named Exports
 
 ### Definitions
 
-**Core Definition**
-ES Modules support three primary export/import styles: named exports (multiple values per module), default exports (one primary value per module), and namespace imports (importing all exports as a single object). Each has distinct use cases and trade-offs.
+**Core Definition.** **Named exports** are exports that are identified by a **stable name** in the exporting module and imported using braces (`import { name }`). A module may have **any number** of named exports.
 
-**Technical Definition**
-A named export exports a binding by name (`export function f()`), and importers must use the same name (`import { f }`). A default export exports a single value as the module's "main" export (`export default f`), and importers can choose any name (`import anything from "./module.js"`). A namespace import imports the entire module as an object (`import * as mod from "./module.js"`), with each named export accessible as a property (`mod.f`). TypeScript type-checks all three forms, and the `esModuleInterop` compiler option affects how default imports from CommonJS modules are handled.
+**Technical Definition.** Named exports are static bindings with a canonical name in the exporting module. They support **renaming on import** (`import { x as y }`) and **renaming on export** (`export { x as y }`). Named exports enable precise static analysis: importing a non-existent name is a compile-time error. They are the recommended export style by the Google TypeScript Style Guide and many other authorities.
 
-**Beginner-Friendly Explanation**
-Named exports are like a toolbox where each tool has a name—you pick the ones you need. Default exports are like a module that has one main thing to offer—you can call it whatever you want when you import it. Namespace imports bring in the whole toolbox as a single object, so you can access tools with dot notation. Most modern TypeScript codebases prefer named exports because they're better for tree-shaking, refactoring, and autocomplete. Default exports are useful for frameworks that expect them (like React lazy loading), and namespace imports are useful when you want to access many exports from a module with a clear prefix.
+**Beginner-Friendly Explanation.** Named exports are **exports with names**. You export `add` and `subtract`, and other files import exactly `add` and `subtract` using braces. If someone tries to import something that does not exist, TypeScript catches it.
 
 ### Purposes
 
-- To provide flexible import styles for different use cases.
-- To enable tree-shaking through named exports.
-- To support frameworks and tools that require default exports.
-- To provide a single, clear "main" export for modules with one primary purpose.
-- To allow namespace imports for modules with many related exports.
+- **To provide multiple, clearly named exports** from a module.
+- **To enable compile-time errors** for misspelled or missing imports.
+- **To support reliable refactoring and auto-import** because names are stable.
+- **To avoid naming inconsistencies** at import sites.
+- **To allow aliasing** when a local name conflicts.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Default Export**
-
 ```typescript
-// logger.ts
-export default function log(message: string): void {
-  console.log(`[LOG] ${message}`);
-}
-```
-
-**Component Breakdown**
-- `export default`: Marks a single value as the module's default export.
-- The value can be a function, class, object, or expression.
-
-**General Syntax: Default Import**
-
-```typescript
-// app.ts
-import log from "./logger.js";  // Any name works
-log("Hello");  // "[LOG] Hello"
-```
-
-**Component Breakdown**
-- `import log`: The local name can be anything.
-- No braces for default imports.
-
-**General Syntax: Namespace Import**
-
-```typescript
-// app.ts
-import * as math from "./math.js";
-
-console.log(math.add(1, 2));  // 3
-console.log(math.PI);          // 3.14159
-```
-
-**Component Breakdown**
-- `import * as math`: Imports all named exports as properties of `math`.
-- `math.add`, `math.PI`: Access via dot notation.
-
-**General Syntax: Combining Default and Named Imports**
-
-```typescript
-// app.ts
-import log, { formatMessage, LogLevel } from "./logger.js";
-```
-
-**Component Breakdown**
-- `log`: The default export.
-- `{ formatMessage, LogLevel }`: Named exports.
-
-**Syntax Rules**
-
-- A module can have at most one default export.
-- Named exports are imported with braces: `import { name } from "module"`.
-- Default exports are imported without braces: `import name from "module"`.
-- Namespace imports use `* as` and access exports as properties.
-- Default and named imports can be combined in one statement.
-- Default exports can be anonymous (functions, classes) or named expressions.
-- The `esModuleInterop` option enables default imports from CommonJS modules.
-
-**Constraints and Limitations**
-
-- Default exports are harder to refactor (the import name is local, not checked against the export).
-- Default exports can hurt tree-shaking because the entire module must be loaded to access the default.
-- Namespace imports can prevent tree-shaking because bundlers may keep the entire namespace.
-- Namespace imports are not enumerable in the same way as object literals.
-- Combining default and named imports in one statement is not allowed with `import type`.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Default Export and Import
-
-```typescript
-// Step 1: Define a module with a default export.
-// calculator.ts
-export default class Calculator {
-  private value: number = 0;
-
-  add(n: number): this {
-    this.value += n;
-    return this;
-  }
-
-  subtract(n: number): this {
-    this.value -= n;
-    return this;
-  }
-
-  getValue(): number {
-    return this.value;
-  }
-}
-
-// Step 2: Import the default export with any name.
-// app.ts
-import Calculator from "./calculator.js";
-
-const calc = new Calculator();
-calc.add(10).subtract(3);
-console.log(calc.getValue());  // 7
-
-// Step 3: Default import name can be anything.
-import MyCalc from "./calculator.js";
-const calc2 = new MyCalc();
-calc2.add(5);
-console.log(calc2.getValue());  // 5
-```
-
-**Expected Output:**
-```
-7
-5
-```
-
-**Why This Output Occurs:** The `calculator.ts` module has a default export (the `Calculator` class). The `app.ts` module imports it with the name `Calculator` in one case and `MyCalc` in another. Both work because the default export doesn't have a fixed name.
-
-#### Example 2: Namespace Import
-
-```typescript
-// Step 1: Define a module with multiple named exports.
-// stringUtils.ts
-export function trim(s: string): string {
-  return s.trim();
-}
-
-export function upper(s: string): string {
-  return s.toUpperCase();
-}
-
-export function lower(s: string): string {
-  return s.toLowerCase();
-}
-
-export const VERSION = "1.0.0";
-
-// Step 2: Import all exports as a namespace.
-// app.ts
-import * as StringUtils from "./stringUtils.js";
-
-console.log(StringUtils.trim("  hello  "));  // "hello"
-console.log(StringUtils.upper("world"));     // "WORLD"
-console.log(StringUtils.lower("HELLO"));     // "hello"
-console.log(StringUtils.VERSION);            // "1.0.0"
-
-// Step 3: Combine with default imports.
-import defaultExport, { trim, upper } from "./stringUtils.js";
-// Note: stringUtils.ts has no default export, so this would error.
-// Use namespace or named imports instead.
-```
-
-**Expected Output:**
-```
-hello
-WORLD
-hello
-1.0.0
-```
-
-**Why This Output Occurs:** The `stringUtils.ts` module exports `trim`, `upper`, `lower`, and `VERSION` as named exports. The `app.ts` module imports them all as a namespace object (`StringUtils`) and accesses each export as a property.
-
-### Real-World Cases
-
-**Case 1: React Components**
-React component libraries typically use named exports for components, but default exports are still common in some codebases and are required for `React.lazy` dynamic imports.
-
-**Case 2: Configuration Modules**
-Configuration modules often use default exports for the main configuration object and named exports for related constants.
-
-**Case 3: Utility Libraries**
-Utility libraries prefer named exports because they enable better tree-shaking and are more refactor-friendly.
-
-**Case 4: Namespace Imports for Math/Constants**
-Namespace imports are useful for modules that export many related constants or utility functions, providing a clear prefix.
-
-### References
-
-- TypeScript Handbook: Modules — https://www.typescriptlang.org/docs/handbook/2/modules.html
-- TypeScript `esModuleInterop` — https://www.typescriptlang.org/tsconfig#esModuleInterop
-- MDN: `import` — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
-- MDN: `export` — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export
-
-
-## 3. Re-exporting Configurations and Tree-Shaking Patterns
-
-### Definitions
-
-**Core Definition**
-Re-exporting is the practice of importing a value from one module and immediately exporting it from another, creating a "barrel" or "facade" module that consolidates exports. Tree-shaking is a build-time optimization where bundlers remove unused exports from the final bundle. Re-exporting patterns have a significant impact on tree-shaking effectiveness.
-
-**Technical Definition**
-Re-exporting uses `export { name } from "./module.js"` or `export * from "./module.js"` to forward exports without creating local bindings. TypeScript supports these forms with full type checking. Tree-shaking relies on ESM's static structure: bundlers analyze the import/export graph and eliminate code that is never imported. Named exports enable tree-shaking because the bundler can see exactly which names are used. `export *` can hurt tree-shaking because the bundler cannot statically determine which names are actually used, especially when re-exporting from another library. Barrel files (index files that re-export many modules) are common but can negate tree-shaking if they use `export *`.
-
-**Beginner-Friendly Explanation**
-Re-exporting is when a module says "everything from this other module is also mine." You create a "barrel file" (often called `index.ts`) that re-exports from many files, so consumers can import from one place instead of many. Tree-shaking is when the bundler removes code you don't use. The problem is that `export *` makes it hard for the bundler to know what's used, so it often keeps everything. Named re-exports (`export { foo } from "./foo.js"`) are better because the bundler can see exactly what's exported and what's used. The rule of thumb: prefer named re-exports over `export *` if tree-shaking matters.
-
-### Purposes
-
-- To create a single entry point for a library or module (barrel file).
-- To simplify imports for consumers (fewer paths to remember).
-- To enable tree-shaking by using named re-exports.
-- To expose a curated public API while hiding internal modules.
-- To aggregate exports from many modules into a cohesive namespace.
-
-### Syntax Rules and Structure
-
-**General Syntax: Named Re-export**
-
-```typescript
-// index.ts
-export { add, multiply } from "./math.js";
-export { trim, upper } from "./stringUtils.js";
-```
-
-**Component Breakdown**
-- `export { name } from "module"`: Re-exports specific names.
-- The names are not available locally unless also imported.
-
-**General Syntax: Re-export Everything (`export *`)**
-
-```typescript
-// index.ts
-export * from "./math.js";
-export * from "./stringUtils.js";
-```
-
-**Component Breakdown**
-- `export *`: Re-exports all named exports.
-- Does not re-export default exports.
-
-**General Syntax: Re-export with Renaming**
-
-```typescript
-// index.ts
-export { add as addNumbers, subtract as subtractNumbers } from "./math.js";
-```
-
-**Component Breakdown**
-- `as`: Renames on re-export.
-
-**General Syntax: Re-export Default as Named**
-
-```typescript
-// index.ts
-export { default as Calculator } from "./calculator.js";
-```
-
-**Component Breakdown**
-- `default as Calculator`: Re-exports the default export under a named export.
-
-**Syntax Rules**
-
-- `export { name } from "module"` re-exports specific names.
-- `export * from "module"` re-exports all named exports (not default).
-- Re-exports do not create local bindings.
-- Named re-exports are tree-shakeable; `export *` may not be.
-- Re-exporting from a module that re-exports from another can cause tree-shaking issues.
-- Default exports must be explicitly named when re-exported.
-
-**Constraints and Limitations**
-
-- `export *` does not re-export default exports.
-- `export *` with conflicting names across modules causes the conflicting names to be omitted.
-- Barrel files with `export *` can hurt tree-shaking because bundlers cannot determine used names.
-- Re-exporting from CommonJS modules in ESM can cause interop issues.
-- Circular re-exports can cause runtime errors.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Barrel File with Named Re-exports
-
-```typescript
-// Step 1: Define individual modules.
 // math.ts
+export function add(a: number, b: number): number { return a + b; }
+export const PI = 3.14159;
+```
+
+```typescript
+// main.ts
+import { add, PI } from "./math.js";
+```
+
+**Component breakdown:**
+
+- `export function add` — named export declaration.
+- `export const PI` — named export declaration.
+- `import { add, PI }` — named import.
+
+**Syntax rules.**
+
+- Named exports use braces in imports.
+- A module may have any number of named exports.
+- `as` renames on import or export.
+- Missing named exports produce compile-time errors.
+- Type-only named exports use `export type` or inline `type`.
+
+**Constraints and limitations.**
+
+- Named exports require importers to know the exact names.
+- Barrel files that re-export many names can create large public surfaces.
+- Names must be unique within a module’s export list.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Multiple named exports
+
+```typescript
+// file: math.ts
 export function add(a: number, b: number): number { return a + b; }
 export function multiply(a: number, b: number): number { return a * b; }
 export const PI = 3.14159;
+```
 
-// stringUtils.ts
-export function trim(s: string): string { return s.trim(); }
-export function upper(s: string): string { return s.toUpperCase(); }
+```typescript
+// file: main.ts
+import { add, multiply, PI } from "./math.js";
 
-// Step 2: Create a barrel file with named re-exports.
-// index.ts
-export { add, multiply, PI } from "./math.js";
-export { trim, upper } from "./stringUtils.js";
-
-// Step 3: Import from the barrel.
-// app.ts
-import { add, trim, PI } from "./index.js";
-
-console.log(add(1, 2));    // 3
-console.log(trim("  hello  "));  // "hello"
-console.log(PI);           // 3.14159
-
-// Step 4: Tree-shaking works: `multiply` and `upper` are not imported,
-// so bundlers can eliminate them from the final bundle.
-// (This is a build-time optimization, not visible at runtime.)
+console.log(add(2, 3));      // Expected: 5
+console.log(multiply(2, 3)); // Expected: 6
+console.log(PI);             // Expected: 3.14159
 ```
 
 **Expected Output:**
 ```
-3
-hello
+5
+6
 3.14159
 ```
 
-**Why This Output Occurs:** The `index.ts` barrel file re-exports specific names from `math.ts` and `stringUtils.ts`. The `app.ts` imports from the barrel. Because the re-exports are named, the bundler can see exactly which exports are used and tree-shake the rest.
+**Why this output occurs.** All three bindings are named exports with stable identities. Importing them by name is checked at compile time.
 
-#### Example 2: `export *` and Tree-Shaking Pitfalls
+---
+
+#### Example 2: Named export with alias
 
 ```typescript
-// Step 1: Define modules with many exports.
-// math.ts
-export function add(a: number, b: number): number { return a + b; }
-export function multiply(a: number, b: number): number { return a * b; }
-export function divide(a: number, b: number): number { return a / b; }
-export function subtract(a: number, b: number): number { return a - b; }
-export const PI = 3.14159;
-export const E = 2.71828;
+// file: math.ts
+function subtract(a: number, b: number): number { return a - b; }
+export { subtract as minus };
+```
 
-// Step 2: Barrel file with `export *`.
-// index.ts
-export * from "./math.js";
-
-// Step 3: Import only `add` — but bundler may keep everything.
-// app.ts
-import { add } from "./index.js";
-console.log(add(1, 2));  // 3
-
-// Step 4: With `export *`, the bundler may not be able to tree-shake
-// `multiply`, `divide`, `subtract`, `PI`, and `E` because it cannot
-// statically determine which names are used through the barrel.
-
-// Step 5: Named re-exports fix this.
-// index.ts (fixed)
-export { add, multiply, divide, subtract, PI, E } from "./math.js";
-
-// Now the bundler knows exactly which names are exported and can
-// tree-shake unused ones.
+```typescript
+// file: main.ts
+import { minus } from "./math.js";
+console.log(minus(5, 2)); // Expected: 3
 ```
 
 **Expected Output:**
@@ -647,456 +667,448 @@ export { add, multiply, divide, subtract, PI, E } from "./math.js";
 3
 ```
 
-**Why This Output Occurs:** `export *` makes it difficult for bundlers to determine which exports are used, potentially preventing tree-shaking. Named re-exports provide the static information needed for effective tree-shaking.
+**Why this output occurs.** The export list renames `subtract` to `minus` for importers.
+
+---
 
 ### Real-World Cases
 
-**Case 1: Component Library Barrel Files**
-React component libraries use barrel files to export all components from a single entry point. Named re-exports ensure tree-shaking works, so consumers only bundle the components they import.
+- **Utility libraries**: exporting many named functions.
+- **Component libraries**: exporting `Button`, `Input`, and `Modal`.
+- **Type packages**: exporting named interfaces and type aliases.
+- **Barrel files**: re-exporting named APIs from submodules.
 
-**Case 2: Utility Library Aggregation**
-Utility libraries aggregate functions from many modules into a single entry point. Named re-exports enable consumers to import only the functions they need.
+---
 
-**Case 3: Monorepo Package Exports**
-Monorepos use barrel files to expose packages from a single entry point, with named re-exports to support tree-shaking.
-
-**Case 4: Icon Libraries**
-Icon libraries use named re-exports to expose hundreds of icons from a barrel file, enabling tree-shaking so consumers only bundle the icons they use.
-
-### References
-
-- TypeScript Handbook: Modules Reference (Export Syntax) — https://www.typescriptlang.org/docs/handbook/modules/reference.html
-- MDN: `export` — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export
-- Webpack: Tree Shaking — https://webpack.js.org/guides/tree-shaking/
-- Rollup: Tree Shaking — https://rollupjs.org/faqs/#tree-shaking
-
-
-## 4. Type-Only Imports and Exports (`import type` / `export type`)
+## 6. Default Exports
 
 ### Definitions
 
-**Core Definition**
-Type-only imports and exports (`import type` and `export type`) are TypeScript-specific syntax that explicitly marks imports and exports as type-only. These are guaranteed to be erased during compilation, so they produce no JavaScript code and create no runtime dependencies. They were introduced in TypeScript 3.8.
+**Core Definition.** A **default export** is a single export per module that is imported **without braces** and whose local name is chosen by the importer. It is intended for modules with one primary export.
 
-**Technical Definition**
-The `import type` and `export type` syntax tells TypeScript that the imported/exported declarations are only used in type positions and should be completely erased from the emitted JavaScript. This is important for `isolatedModules` mode, `transpileModule` API, Babel, and other tools that transpile TypeScript file-by-file without type information. By default, TypeScript automatically elides imports that are only used in type positions, but `import type` makes this explicit and mandatory. Import specifiers can also be prefixed with the `type` keyword (`import { f, type SomeInterface } from "./module.js"`). The `verbatimModuleSyntax` compiler option (TypeScript 5.0+) further enforces explicit type-only annotations.
+**Technical Definition.** A module may have **at most one** default export, declared with `export default`. Importers may bind it to any local name (`import Foo from "./mod.js"`), so the name is not canonical across the codebase. Default exports are **not included** in `export *` re-exports; re-exporting a default requires `export { default } from` or `export { default as X } from`. The Google TypeScript Style Guide explicitly discourages default exports because they weaken refactoring and naming consistency.
 
-**Beginner-Friendly Explanation**
-Type-only imports and exports are a way to say "this import is only for types, not for runtime code." When TypeScript compiles your code to JavaScript, these imports disappear completely—no `require()` call, no `import` statement, nothing. This is important because Babel and other tools that compile TypeScript file-by-file can't always tell which imports are type-only. With `import type`, you make it explicit. For example, `import type { User } from "./models.js"` tells TypeScript and Babel that `User` is only a type, so it should be removed from the output. This keeps your bundle smaller and avoids unnecessary runtime dependencies.
+**Beginner-Friendly Explanation.** A default export is **the “main thing” a module exports**. You import it without braces and can call it whatever you like. Only one default is allowed per module. Many style guides recommend against it because different files can import it under different names.
 
 ### Purposes
 
-- To make type-only imports explicit and ensure they are erased during compilation.
-- To improve compatibility with `isolatedModules`, Babel, and other file-by-file transpilers.
-- To reduce bundle size by eliminating unnecessary runtime imports.
-- To enable `verbatimModuleSyntax` for stricter module output.
-- To prevent accidental runtime dependencies on types.
+- **To designate a single primary export** for a module.
+- **To simplify imports** for modules that conceptually export one thing.
+- **To interoperate with ecosystems** that conventionally use default exports (e.g., some frameworks).
+- **To support default-import interoperability** with CommonJS modules when configured.
 
 ### Syntax Rules and Structure
 
-**General Syntax: `import type` Declaration**
-
 ```typescript
-import type { SomeType } from "./module.js";
-```
-
-**Component Breakdown**
-- `import type`: Imports only for type positions.
-- The import is completely erased at runtime.
-
-**General Syntax: Inline Type Import**
-
-```typescript
-import { f, type SomeInterface } from "./module.js";
-```
-
-**Component Breakdown**
-- `type SomeInterface`: Only this specifier is type-only.
-- `f`: A regular (value) import.
-
-**General Syntax: `export type` Declaration**
-
-```typescript
-export type { SomeType };
-```
-
-**Component Breakdown**
-- `export type`: Exports a type-only binding.
-- Erased at runtime.
-
-**General Syntax: `import type` with Default and Named**
-
-```typescript
-import type { default as fs, BigIntOptions } from "fs";
-```
-
-**Component Breakdown**
-- A type-only import can specify a default import or named bindings, but not both in one declaration.
-
-**General Syntax: Inline `export type`**
-
-```typescript
-export { f, type SomeType };
-```
-
-**Component Breakdown**
-- `type SomeType`: Only this export is type-only.
-
-**Syntax Rules**
-
-- `import type` and `export type` are guaranteed to be elided from the output.
-- Type-only imports can only be used in type positions, not as values.
-- A type-only import cannot declare both a default import and named bindings in one declaration.
-- Import specifiers can be individually marked with `type`.
-- `verbatimModuleSyntax` (TypeScript 5.0+) enforces explicit `type` annotations.
-- Classes are both types and values; `import type` imports only the type side.
-
-**Constraints and Limitations**
-
-- `import type` imports cannot be used as values (e.g., `new`, function calls).
-- Extending a class imported with `import type` is an error.
-- `import type` cannot be combined with `import()` type syntax.
-- Type-only imports are erased, so they cannot carry side effects.
-- The `verbatimModuleSyntax` option may require code changes in existing projects.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: `import type` and `export type`
-
-```typescript
-// Step 1: Define types in a module.
-// models.ts
-export interface User {
-  id: number;
-  name: string;
-  email: string;
+// greeter.ts
+export default function greet(name: string): string {
+  return `Hello, ${name}`;
 }
+```
 
-export type UserRole = "admin" | "user" | "guest";
+```typescript
+// main.ts
+import greet from "./greeter.js";
+console.log(greet("Ada"));
+```
 
-export function createUser(name: string): User {
-  return { id: 1, name, email: `${name}@example.com` };
+**Component breakdown:**
+
+- `export default` — declares the default export.
+- `import greet from` — imports the default without braces.
+- The local name `greet` is chosen by the importer.
+
+**Syntax rules.**
+
+- At most one default export per module.
+- Imported without braces.
+- The importer chooses the local name.
+- `export *` does not re-export the default.
+- Re-export with `export { default } from "./mod.js"` or `export { default as X } from "./mod.js"`.
+
+**Constraints and limitations.**
+
+- No canonical name at the import site; refactoring and auto-import are weaker.
+- Different files may import the same default under different names.
+- Default exports encourage bundling many unrelated things into one object.
+- Google TypeScript Style Guide recommends **not** using default exports.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Default export and import
+
+```typescript
+// file: greeter.ts
+export default function greet(name: string): string {
+  return `Hello, ${name}`;
 }
+```
 
-// Step 2: Import types with `import type` and values normally.
-// app.ts
-import { createUser } from "./models.js";
-import type { User, UserRole } from "./models.js";
+```typescript
+// file: main.ts
+import greet from "./greeter.js";
+console.log(greet("Ada")); // Expected: Hello, Ada
 
-const user: User = createUser("Alice");
-const role: UserRole = "admin";
-
-console.log(user.name);  // "Alice"
-console.log(role);       // "admin"
-
-// Step 3: The compiled JavaScript contains only the value import.
-// Compiled app.js:
-// import { createUser } from "./models.js";
-// const user = createUser("Alice");
-// const role = "admin";
-// console.log(user.name);
-// console.log(role);
-
-// Step 4: `export type` for re-exporting types.
-// index.ts
-export { createUser } from "./models.js";
-export type { User, UserRole } from "./models.js";
-
-// Step 5: Inline type imports.
-import { createUser, type User } from "./models.js";
-const user2: User = createUser("Bob");
+// A different file may import it under a different name:
+// import sayHello from "./greeter.js";
 ```
 
 **Expected Output:**
 ```
-Alice
-admin
+Hello, Ada
 ```
 
-**Why This Output Occurs:** The `import type` declaration imports `User` and `UserRole` as type-only bindings. These are erased during compilation, so the emitted JavaScript only contains the `createUser` import. The `export type` re-exports types without creating runtime exports.
+**Why this output occurs.** The default export is bound to the local name `greet` in `main.ts`. The module has no canonical export name, so another file could call it `sayHello` without a compile-time error.
 
-#### Example 2: `verbatimModuleSyntax` and Type-Only Enforcement
+---
+
+#### Example 2: Re-exporting a default
 
 ```typescript
-// Step 1: Enable verbatimModuleSyntax in tsconfig.json.
-// { "compilerOptions": { "verbatimModuleSyntax": true } }
+// file: index.ts
+export { default as greet } from "./greeter.js";
+```
 
-// Step 2: Without explicit `type`, TypeScript cannot elide imports.
-// app.ts
-import { User } from "./models.js";  // ⚠️ Warning: User is only used as a type.
-// With verbatimModuleSyntax, this must be:
-import type { User } from "./models.js";
-
-// Step 3: Correct usage with verbatimModuleSyntax.
-import { createUser } from "./models.js";
-import type { User } from "./models.js";
-
-const user: User = createUser("Alice");
-console.log(user.name);
-
-// Step 4: Inline type specifiers also work.
-import { createUser, type User } from "./models.js";
-
-// Step 5: The compiled output preserves the exact import syntax.
-// app.js:
-// import { createUser } from "./models.js";
-// const user = createUser("Alice");
-// console.log(user.name);
-// (The `import type` line is completely absent.)
+```typescript
+// file: main.ts
+import { greet } from "./index.js";
+console.log(greet("Grace")); // Expected: Hello, Grace
 ```
 
 **Expected Output:**
 ```
-Alice
+Hello, Grace
 ```
 
-**Why This Output Occurs:** With `verbatimModuleSyntax`, TypeScript requires explicit `type` annotations on type-only imports. The `import type` line is completely erased from the output, while the value import is preserved exactly as written.
+**Why this output occurs.** The default export is re-exported under the named export `greet`, restoring a canonical name for importers.
+
+---
 
 ### Real-World Cases
 
-**Case 1: Babel and SWC Transpilation**
-Projects using Babel or SWC to transpile TypeScript rely on `import type` to ensure type-only imports are correctly erased, since these tools do not have full type information.
+- **Framework conventions**: some frameworks expect default exports for pages or components.
+- **Single-class modules**: a module exporting one class.
+- **Interop wrappers**: re-exporting CommonJS defaults.
+- **Legacy codebases**: existing default-export patterns.
 
-**Case 2: `isolatedModules` Mode**
-When `isolatedModules` is enabled, `import type` ensures that type-only imports are correctly identified and erased, preventing runtime errors.
+---
 
-**Case 3: Library Authoring**
-Library authors use `export type` to re-export types without including them in the runtime bundle, keeping the package smaller.
-
-**Case 4: `verbatimModuleSyntax` Projects**
-Modern TypeScript projects enable `verbatimModuleSyntax` to enforce explicit type-only annotations, ensuring predictable module output.
-
-### References
-
-- TypeScript 3.8 Release Notes: Type-Only Imports and Exports — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-8.html#type-only-imports-and-export
-- TypeScript Modules Reference: Type-Only Imports and Exports — https://www.typescriptlang.org/docs/handbook/modules/reference.html#type-only-imports-and-exports
-- TypeScript `verbatimModuleSyntax` — https://www.typescriptlang.org/tsconfig#verbatimModuleSyntax
-- TypeScript `isolatedModules` — https://www.typescriptlang.org/tsconfig#isolatedModules
-
-
-## 5. The Impact of Explicit `.js` Extensions in ESM Import Paths
+## 7. Re-exports
 
 ### Definitions
 
-**Core Definition**
-In native ES Modules (Node.js ESM, browsers without bundlers), relative import paths must include the full file extension (`.js`). This means that even when writing TypeScript, you must import from `"./foo.js"` rather than `"./foo"`. TypeScript 4.7 introduced `"node16"` and `"nodenext"` module options that enforce this requirement.
+**Core Definition.** A **re-export** is an export declaration that exports bindings **from another module** without first importing them into local scope. Re-exports are used to aggregate and forward APIs, commonly in **barrel files**.
 
-**Technical Definition**
-Node.js ESM requires explicit file extensions for relative import specifiers. Since TypeScript is designed to never transform valid JavaScript constructs, it enforces this requirement when the `module` option is set to `"node16"` or `"nodenext"`. When TypeScript compiles a `.ts` file to a `.js` file, the import path in the source must reference the output `.js` extension, not the source `.ts` extension. The `allowImportingTsExtensions` compiler option allows `.ts` extensions in imports, but it requires `noEmit` or `emitDeclarationOnly` (it's designed for bundler scenarios, not direct Node.js execution). Tools like `tsc-esm-fix` and `rollup-plugin-esnext-to-nodenext` can automatically add `.js` extensions to existing imports during build.
+**Technical Definition.** TypeScript supports `export { x } from "./mod.js"`, `export { x as y } from "./mod.js"`, `export * from "./mod.js"`, and `export * as ns from "./mod.js"`. `export *` re-exports all **named** exports but **not** the default export. Type-only re-exports use `export type { T } from "./mod.js"`. Re-exports do not introduce local names, so they cannot be used within the re-exporting module itself.
 
-**Beginner-Friendly Explanation**
-In the old CommonJS system, you could write `import { foo } from "./foo"` without an extension—Node.js would figure out the file. But in native ES Modules, Node.js requires the full extension: `import { foo } from "./foo.js"`. This means when you're writing TypeScript for Node.js ESM, you have to write `.js` even though the file on disk is `.ts`. It feels weird at first, but it's because Node.js loads the compiled `.js` file, not the `.ts` source. TypeScript tooling like auto-imports will usually add the extension for you. If you're using a bundler (like Vite or webpack), you can use `"moduleResolution": "bundler"` and skip the extensions—the bundler handles resolution.
+**Beginner-Friendly Explanation.** A re-export is **forwarding something from another file**. It is how a barrel file (`index.ts`) collects exports from many files and presents a single public API. You do not have to import the thing first; you just re-export it directly.
 
 ### Purposes
 
-- To comply with Node.js ESM's requirement for explicit file extensions.
-- To ensure that compiled JavaScript can be loaded correctly by Node.js ESM.
-- To enable direct execution of ESM output without a bundler.
-- To provide compatibility with modern Node.js versions (v12+) that support ESM.
-- To support tools like `tsx` and `ts-node` that run TypeScript directly.
+- **To aggregate exports** from multiple modules into a single entry point.
+- **To create stable public APIs** for libraries and packages.
+- **To avoid importing and re-exporting in two steps**.
+- **To rename exports** during re-export for compatibility.
+- **To group related modules** under a namespace with `export * as ns`.
 
 ### Syntax Rules and Structure
 
-**General Syntax: ESM Import with `.js` Extension**
+**Named re-export:**
 
 ```typescript
-// bar.ts (source)
-import { helper } from "./foo.js";  // References the compiled output
-helper();
+export { add } from "./math.js";
 ```
 
-**Component Breakdown**
-- `"./foo.js"`: The path to the compiled JavaScript file.
-- The source file is `foo.ts`, but the import references `foo.js`.
+**Renamed re-export:**
 
-**General Syntax: `allowImportingTsExtensions`**
+```typescript
+export { subtract as minus } from "./math.js";
+```
+
+**Wildcard re-export:**
+
+```typescript
+export * from "./models.js";
+```
+
+**Namespace re-export:**
+
+```typescript
+export * as utils from "./utils.js";
+```
+
+**Default re-export:**
+
+```typescript
+export { default } from "./greeter.js";
+export { default as greet } from "./greeter.js";
+```
+
+**Type re-export:**
+
+```typescript
+export type { User } from "./types.js";
+export type { User as UserShape } from "./types.js";
+```
+
+**Component breakdown:**
+
+- `export { ... } from "..."` — re-exports specific bindings.
+- `export * from "..."` — re-exports all named bindings.
+- `export * as ns from "..."` — re-exports the module namespace as `ns`.
+- `type` — marks the re-export as type-only.
+
+**Syntax rules.**
+
+- Re-exported bindings are not introduced into the local scope.
+- `export *` does not re-export the default export.
+- Defaults must be re-exported explicitly with `export { default } from` or aliased.
+- `export type` guarantees erasure of type-only re-exports.
+- `export * as ns` creates a namespace object named `ns`.
+
+**Constraints and limitations.**
+
+- Wildcard re-exports can create name collisions if multiple modules export the same name.
+- Barrel files can create circular dependencies if not managed carefully.
+- Re-exported types must use `export type` under strict module settings.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Barrel file with named and wildcard re-exports
+
+```typescript
+// file: models/user.ts
+export interface User { id: string; name: string }
+export const defaultUser: User = { id: "u1", name: "Ada" };
+```
+
+```typescript
+// file: models/post.ts
+export interface Post { id: string; title: string }
+export const defaultPost: Post = { id: "p1", title: "Hello" };
+```
+
+```typescript
+// file: models/index.ts
+export { defaultUser, type User } from "./user.js";
+export * from "./post.js";
+```
+
+```typescript
+// file: main.ts
+import { defaultUser, defaultPost } from "./models/index.js";
+console.log(defaultUser.name); // Expected: Ada
+console.log(defaultPost.title); // Expected: Hello
+```
+
+**Expected Output:**
+```
+Ada
+Hello
+```
+
+**Why this output occurs.** `models/index.ts` aggregates the two modules. `defaultUser` is explicitly re-exported with its type, and `export *` forwards all named exports from `post.ts`. Importers use a single entry point.
+
+---
+
+#### Example 2: Namespace re-export
+
+```typescript
+// file: utils/string.ts
+export function capitalize(s: string): string { return s.toUpperCase(); }
+```
+
+```typescript
+// file: utils/index.ts
+export * as stringUtils from "./string.js";
+```
+
+```typescript
+// file: main.ts
+import { stringUtils } from "./utils/index.js";
+console.log(stringUtils.capitalize("hello")); // Expected: HELLO
+```
+
+**Expected Output:**
+```
+HELLO
+```
+
+**Why this output occurs.** `export * as stringUtils` re-exports the entire `string.ts` module as a namespace object. Importers access its exports through `stringUtils`.
+
+---
+
+### Real-World Cases
+
+- **Package entry points**: `index.ts` re-exports the public API.
+- **Feature modules**: aggregating components, hooks, and types.
+- **Type-only barrels**: re-exporting interfaces with `export type`.
+- **Namespace grouping**: `export * as utils` for organized utilities.
+
+---
+
+## 8. Module Best Practices
+
+### Definitions
+
+**Core Definition.** **Module best practices** are guidelines for writing modules that are **predictable, refactorable, tooling-friendly, and compatible with modern runtimes and bundlers**.
+
+**Technical Definition.** Best practices center on **preferring named exports over default exports**, **using ES modules rather than legacy TypeScript/CommonJS syntax**, **marking type-only imports and exports explicitly**, **enabling `verbatimModuleSyntax` (or `isolatedModules`)**, **minimizing the exported API surface**, and **avoiding TypeScript-specific module syntax such as `export =` and `import = require`**. They also include correct module resolution configuration (`module`, `moduleResolution`) and explicit file extensions under Node ESM.
+
+**Beginner-Friendly Explanation.** Module best practices are **the habits experienced TypeScript developers use** to keep imports and exports clean. The big rules are: use named exports instead of default exports; use `import`/`export`, not `require`; mark type-only imports with `import type`; enable `verbatimModuleSyntax`; and keep your public API small.
+
+### Purposes
+
+- **To make imports predictable and refactorable** with stable names.
+- **To ensure compatibility with bundlers and single-file transpilers**.
+- **To avoid runtime dependencies on type-only bindings**.
+- **To keep the public API surface minimal and intentional**.
+- **To align emitted JavaScript with the actual module system**.
+- **To prevent accidental global-scope pollution**.
+
+### Syntax Rules and Structure
+
+Best practices are conventions that interact with module syntax. The core rules are:
+
+1. **Prefer named exports over default exports.** Named exports provide canonical names, catch import typos at compile time, and refactor reliably. The Google TypeScript Style Guide says: “Use named exports in all code” and “Do not use default exports”.
+2. **Use ES modules, not `namespace` or `require`.** Use `import`/`export` consistently and avoid legacy TypeScript `namespace` and CommonJS `require`/`module.exports` in new code.
+3. **Use `import type` and `export type` for type-only bindings.** This makes erasure explicit and avoids runtime dependencies.
+4. **Enable `verbatimModuleSyntax`.** It preserves non-type imports and drops type-only ones, simplifying module output. It also enables `isolatedModules` behavior.
+5. **Use `isolatedModules` when `verbatimModuleSyntax` is not available.** It ensures each file can be transpiled independently by tools like esbuild, SWC, and Babel.
+6. **Avoid `export =` and `import = require`.** They are TypeScript-specific CommonJS syntax and should not be used in new ESM code.
+7. **Minimize the exported API surface.** Only export what consumers need; keep internals private.
+8. **Use explicit `.js` extensions for relative imports under Node ESM.** `module: nodenext` requires them.
+9. **Configure module resolution correctly.** Use `"module": "esnext"` and `"moduleResolution": "bundler"` for bundlers; `"module": "nodenext"` for Node.js.
+10. **Be careful with barrel files.** They improve ergonomics but can create circular dependencies and increase bundle size; keep them intentional.
+
+**Component breakdown (recommended `tsconfig.json` excerpt for a bundler project):**
 
 ```json
 {
   "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true
   }
 }
 ```
 
-**Component Breakdown**
-- `allowImportingTsExtensions`: Allows `.ts` extensions in imports.
-- Requires `noEmit` or `emitDeclarationOnly`.
+- `module` — emitted module format.
+- `moduleResolution` — how specifiers resolve to files.
+- `esModuleInterop` — improves ESM/CJS default import interop.
+- `verbatimModuleSyntax` — preserves non-type imports and erases type-only ones.
+- `noEmit` — bundler handles output.
 
-**General Syntax: `tsc-esm-fix` Post-Build**
+**Constraints and limitations.**
 
-```bash
-tsc-esm-fix --tsconfig tsconfig.json
-```
+- `verbatimModuleSyntax` requires explicit `type` modifiers for type-only imports/exports.
+- `isolatedModules` rejects cross-file type re-exports without `export type`.
+- Default exports remain necessary in some framework conventions (e.g., Next.js pages), where best practices may be relaxed.
+- Barrel files can introduce circular dependencies if not managed.
 
-**Component Breakdown**
-- Automatically adds `.js` extensions to imports in the compiled output.
+### Annotated Complete Step by Step Code Examples
 
-**Syntax Rules**
+#### Example 1: Named exports over default exports
 
-- Node.js ESM requires explicit file extensions for relative imports.
-- TypeScript enforces this when `module` is `"node16"` or `"nodenext"`.
-- The import path references the output `.js` file, not the source `.ts` file.
-- `allowImportingTsExtensions` allows `.ts` extensions but requires `noEmit`.
-- Bundler scenarios use `"moduleResolution": "bundler"` and can omit extensions.
-- Auto-imports and path completion in IDEs typically add `.js` extensions automatically.
-- `.d.ts` files are also affected—they must import from `.js` paths.
-
-**Constraints and Limitations**
-
-- The `.js` extension requirement does not apply to bare specifiers (e.g., `"lodash"`).
-- It only applies to relative specifiers (`"./foo.js"`, `"../bar.js"`).
-- Changing all imports to `.js` can be tedious in existing codebases.
-- Tools like `tsc-esm-fix` automate the process but add a build step.
-- The requirement can be confusing because the source file is `.ts` but the import is `.js`.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: ESM Import with `.js` Extension
-\
-`foo.ts`
 ```typescript
-// Step 1: Define a module in foo.ts.
-export function helper(): string {
-  return "Hello from foo";
+// ❌ Default export: importer chooses the name.
+// file: user.ts
+export default class User {
+  constructor(public name: string) {}
 }
+
+// file: main.ts
+import AnyName from "./user.js"; // Name is arbitrary.
 ```
-\
-`bar.ts`
+
 ```typescript
-// Step 2: Import using the .js extension.
-import { helper } from "./foo.js";  // References the compiled foo.js
+// ✅ Named export: canonical name, typo-safe.
+// file: user.ts
+export class User {
+  constructor(public name: string) {}
+}
 
-console.log(helper());  // "Hello from foo"
-
-// Step 3: Compiled output (bar.js) preserves the .js import.
-// import { helper } from "./foo.js";
-// console.log(helper());
-
-// Step 4: Node.js runs the compiled .js files.
-// node bar.js
-// Output: "Hello from foo"
-
-// Step 5: Without the extension, Node.js ESM fails.
-// import { helper } from "./foo";
-// ❌ Error: Cannot find module './foo' imported from bar.js
+// file: main.ts
+import { User } from "./user.js";
+console.log(new User("Ada").name); // Expected: Ada
 ```
 
 **Expected Output:**
 ```
-Hello from foo
+Ada
 ```
 
-**Why This Output Occurs:** The `.ts` source imports from `"./foo.js"` (the compiled output path). The compiled JavaScript preserves this import. Node.js ESM loads `foo.js` successfully. Without the extension, Node.js ESM cannot resolve the module.
+**Why this output occurs.** The named export has a canonical name. Importing `User` is checked at compile time. A typo such as `import { Usr }` would fail immediately, unlike a default import that can be renamed arbitrarily.
 
-#### Example 2: Bundler vs. Node.js ESM Resolution
+---
+
+#### Example 2: Type-only imports and exports
 
 ```typescript
-// Step 1: Bundler scenario — extensions not required.
-// vite.config.ts
-// { "compilerOptions": { "moduleResolution": "bundler" } }
+// file: types.ts
+export interface User { id: string; name: string }
+export const defaultUser: User = { id: "u1", name: "Ada" };
+```
 
-// app.ts (with bundler)
-import { helper } from "./foo";  // ✅ Allowed with bundler resolution
-console.log(helper());
+```typescript
+// file: main.ts
+import { defaultUser, type User } from "./types.js";
 
-// Step 2: Node.js ESM scenario — extensions required.
-// tsconfig.json
-// {
-//   "compilerOptions": {
-//     "module": "nodenext",
-//     "moduleResolution": "nodenext"
-//   }
-// }
-
-// app.ts (with NodeNext)
-import { helper } from "./foo.js";   // ✅ Required with nodenext
-// import { helper } from "./foo";   // ❌ Error with nodenext
-console.log(helper());
-
-// Step 3: The difference is in how the runtime resolves modules.
-// - Bundlers (Vite, webpack, esbuild) implement their own resolution.
-// - Node.js ESM requires full extensions by specification.
-
-// Step 4: Use the appropriate resolution mode for your target.
-// - Bundled apps: "bundler"
-// - Node.js ESM apps: "nodenext"
-// - Libraries: "nodenext" (for maximum compatibility)
-
-console.log("Resolution modes demonstrated.");
+const user: User = defaultUser;
+console.log(user.name); // Expected: Ada
 ```
 
 **Expected Output:**
 ```
-Hello from foo
-Resolution modes demonstrated.
+Ada
 ```
 
-**Why This Output Occurs:** Bundler resolution allows extensionless imports because the bundler handles resolution. Node.js ESM requires explicit `.js` extensions because Node.js implements the ESM specification strictly.
+**Why this output occurs.** `type User` is erased from JavaScript; only `defaultUser` is emitted. This avoids a runtime import for an interface that does not exist at runtime.
+
+---
+
+#### Example 3: `verbatimModuleSyntax` in practice
+
+```typescript
+// file: main.ts
+import type { User } from "./types.js";       // Erased entirely.
+import { defaultUser, type Config } from "./types.js"; // Becomes import { defaultUser }.
+```
+
+**Expected Output:**
+```
+(no runtime output; this is a compile-time transformation)
+```
+
+**Why this output occurs.** Under `verbatimModuleSyntax`, imports without `type` are preserved, and imports with `type` are dropped. This makes the emitted JavaScript predictable across compilers.
+
+---
 
 ### Real-World Cases
 
-**Case 1: Node.js ESM Applications**
-Node.js applications using `"type": "module"` in `package.json` must use `.js` extensions in relative imports for ESM output.
+- **Library APIs**: named exports for stable public interfaces.
+- **Bundler-based apps**: `moduleResolution: "bundler"` with `verbatimModuleSyntax`.
+- **Node.js ESM packages**: `"module": "nodenext"`, `.js` extensions, `"type": "module"`.
+- **Code review**: rejecting default exports and `export =` in new code.
 
-**Case 2: Library Publishing**
-Library authors targeting both Node.js ESM and bundlers use `"nodenext"` resolution and include `.js` extensions in imports, ensuring maximum compatibility.
-
-**Case 3: `tsx` and `ts-node`**
-Tools like `tsx` (which uses esbuild) and `ts-node` (with ESM support) respect the `.js` extension requirement when running TypeScript directly.
-
-**Case 4: Migration from CommonJS**
-Projects migrating from CommonJS to ESM use tools like `tsc-esm-fix` to automatically add `.js` extensions to existing imports.
-
-**Case 5: Monorepo ESM Packages**
-Monorepos with multiple ESM packages use `.js` extensions in cross-package imports to ensure Node.js compatibility.
-
-### References
-
-- TypeScript 4.7 Release Notes: ECMAScript Module Support in Node.js — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html
-- TypeScript Modules Guide: Choosing Compiler Options — https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options.html
-- Node.js ESM Documentation: Import Specifiers — https://nodejs.org/api/esm.html#import-specifiers
-- `tsc-esm-fix` — https://www.npmjs.com/package/tsc-esm-fix
-- `rollup-plugin-esnext-to-nodenext` — https://www.npmjs.com/package/rollup-plugin-esnext-to-nodenext
-
-
-## Summary: ES Module Feature Comparison
-
-| Feature | Syntax | Purpose | Key Detail |
-|---------|--------|---------|------------|
-| Named export | `export function f()` | Export multiple values | Tree-shakeable, refactor-safe |
-| Default export | `export default f` | Export one primary value | Import name is local, harder to refactor |
-| Namespace import | `import * as mod` | Import all exports as object | May hurt tree-shaking |
-| Named import | `import { f }` | Import specific values | Type-checked names |
-| Re-export (named) | `export { f } from "./mod.js"` | Forward specific exports | Tree-shakeable |
-| Re-export (all) | `export * from "./mod.js"` | Forward all exports | May hurt tree-shaking |
-| `import type` | `import type { T }` | Type-only import | Erased at runtime |
-| `export type` | `export type { T }` | Type-only export | Erased at runtime |
-| Inline `type` | `import { f, type T }` | Mixed value/type import | Explicit elision |
-| `.js` extension | `import { f } from "./foo.js"` | Node.js ESM resolution | Required for relative imports |
-| `moduleResolution: "bundler"` | Extensionless imports | Bundler resolution | Extensions optional |
-| `verbatimModuleSyntax` | Enforces explicit `type` | Predictable output | TypeScript 5.0+ |
-
+---
 
 ## References
 
-- TypeScript Handbook: Modules — https://www.typescriptlang.org/docs/handbook/2/modules.html
-- TypeScript Handbook: Modules Theory — https://www.typescriptlang.org/docs/handbook/modules/theory.html
-- TypeScript Handbook: Modules Reference — https://www.typescriptlang.org/docs/handbook/modules/reference.html
-- TypeScript Handbook: Choosing Compiler Options — https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options.html
-- TypeScript 3.8 Release Notes: Type-Only Imports and Exports — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-8.html
-- TypeScript 4.7 Release Notes: ECMAScript Module Support in Node.js — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-7.html
-- TypeScript 5.0 Release Notes — https://devblogs.microsoft.com/typescript/announcing-typescript-5-0/
-- MDN: JavaScript Modules — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules
-- MDN: `import` — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
-- MDN: `export` — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export
-- Node.js ESM Documentation: Import Specifiers — https://nodejs.org/api/esm.html#import-specifiers
-- TypeScript `verbatimModuleSyntax` — https://www.typescriptlang.org/tsconfig#verbatimModuleSyntax
-- TypeScript `isolatedModules` — https://www.typescriptlang.org/tsconfig#isolatedModules
-- TypeScript `esModuleInterop` — https://www.typescriptlang.org/tsconfig#esModuleInterop
-- Webpack: Tree Shaking — https://webpack.js.org/guides/tree-shaking/
-- Rollup: Tree Shaking — https://rollupjs.org/faqs/#tree-shaking
-- `tsc-esm-fix` — https://www.npmjs.com/package/tsc-esm-fix
-- `rollup-plugin-esnext-to-nodenext` — https://www.npmjs.com/package/rollup-plugin-esnext-to-nodenext
-- `node-ts-resolver` — https://www.npmjs.com/package/node-ts-resolver
+- TypeScript Handbook — Modules - https://www.typescriptlang.org/docs/handbook/2/modules.html
+- TypeScript Handbook — Modules: Theory - https://www.typescriptlang.org/docs/handbook/modules/theory.html
+- TypeScript Handbook — Modules: Reference - https://www.typescriptlang.org/docs/handbook/modules/reference.html
+- TypeScript Handbook — Modules: Choosing Compiler Options - https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options.html
+- TSConfig Reference — `verbatimModuleSyntax` - https://www.typescriptlang.org/tsconfig/verbatimModuleSyntax
+- TSConfig Reference — `isolatedModules` - https://www.typescriptlang.org/tsconfig/isolatedModules
+- TSConfig Reference — `module` - https://www.typescriptlang.org/tsconfig/module
+- TSConfig Reference — `moduleResolution` - https://www.typescriptlang.org/tsconfig/moduleResolution
+- TypeScript 1.5 Release Notes — ES6 Modules, Re-exports, Default Exports - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-1-5.html
+- TypeScript 3.8 Release Notes — Type-Only Imports and Exports - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-8.html
+- TypeScript 5.0 Release Notes — `verbatimModuleSyntax` - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-0.html
+- Google TypeScript Style Guide — Modules and Exports - https://google.github.io/styleguide/tsguide.html
+- Microsoft Cloudpack — Module Settings and `isolatedModules` - https://microsoft.github.io/cloudpack/repo-guidance/tsconfig-isolated-modules
+- MDN — JavaScript Modules - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules

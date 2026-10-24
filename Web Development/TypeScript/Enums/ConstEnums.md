@@ -1,0 +1,519 @@
+# Const Enums in TypeScript — Comprehensive Cheat Sheet
+
+---
+
+## Topic Overview
+
+### Definitions
+
+**Core Definition (Academic).** A **`const` enum** is a TypeScript enumeration declared with the `const` modifier. Unlike a regular enum, a `const` enum is **completely erased during compilation**: its members are **inlined as literal values at every use site**, and no runtime enum object is emitted. This eliminates the runtime cost and bundle-size overhead associated with regular enums, but introduces significant **tooling and interoperability constraints** that make `const` enums unsuitable for many modern projects.
+
+**Technical Definition.** A `const` enum declaration uses the syntax `const enum E { ... }`. The compiler **inlines** every reference to `E.Member` with the member's constant value. `const` enums may only use **constant enum expressions** — a subset of TypeScript expressions that can be fully evaluated at compile time — and therefore cannot have computed members. When `preserveConstEnums` is enabled, the compiler emits the same JavaScript object as a regular enum, restoring runtime lookup at the cost of bundle size. When `isolatedModules` is enabled, referencing an **ambient** `const` enum member (i.e., from a `.d.ts` file) is a compile-time error, because single-file transpilers cannot inline values across module boundaries.
+
+**Beginner-Friendly Explanation.** A `const` enum is **an enum that disappears completely when your code is compiled**. Instead of creating a JavaScript object at runtime, TypeScript **copies the values directly into the places where you use them**. For example, `Direction.Up` becomes just `0` in the output. This makes your bundle smaller and removes runtime lookup overhead — but it also means `const` enums **cannot be used with modern build tools** that compile files one at a time (like Babel, esbuild, or SWC), because those tools cannot see the enum's values across files.
+
+---
+
+### Key Characteristics
+
+| Characteristic | Description |
+|---|---|
+| **Compile-time erasure** | `const` enums are completely removed from the emitted JavaScript. |
+| **Value inlining** | Every reference is replaced with the member's literal value at the use site. |
+| **No runtime object** | No enum object exists at runtime unless `preserveConstEnums` is enabled. |
+| **Constant expressions only** | Members must use constant enum expressions; computed members are not allowed. |
+| **`isolatedModules` conflict** | Ambient `const` enum members cannot be referenced under `isolatedModules`. |
+| **`preserveConstEnums` escape hatch** | Emits regular enum objects, restoring runtime lookup at the cost of bundle size. |
+| **Best avoided in libraries** | Exporting `const` enums breaks consumers using single-file transpilers. |
+
+---
+
+### Prerequisites
+
+- **Enums fundamentals**: numeric and string enums, members, and initializers.
+- **Constant expressions**: understanding what can be evaluated at compile time.
+- **Module systems**: CommonJS, ES modules, and the difference between `.ts` and `.d.ts` files.
+- **Compiler flags**: `isolatedModules`, `preserveConstEnums`.
+- **Single-file transpilers**: Babel, esbuild, SWC, and `ts.transpileModule`.
+
+---
+
+### Related Programming Areas
+
+- **Regular enums** — the runtime-object counterpart to `const` enums.
+- **Union types and `as const` objects** — modern alternatives that avoid enum trade-offs.
+- **Bundle size optimization** — `const` enums eliminate runtime enum objects.
+- **`isolatedModules` and single-file transpilation** — the primary compatibility constraint.
+- **`preserveConstEnums`** — the flag that restores regular-enum behavior.
+
+---
+
+## Core Concepts / Features
+
+---
+
+## 1. Const Enums
+
+### Definitions
+
+**Core Definition.** A **`const` enum** is an enum declared with the `const` modifier that is **fully inlined at compile time** and **emits no runtime object** (unless `preserveConstEnums` is enabled). It is designed to eliminate the runtime and bundle-size costs of regular enums.
+
+**Technical Definition.** A `const enum` declaration introduces only a **type-level** construct; the value-level enum object is removed. Each member reference is replaced by the member's constant value in the emitted JavaScript. Only **constant enum expressions** are permitted, meaning members must be initialized with numeric literals, string literals, other constant enum members, or parenthesized constant expressions. Computed members (e.g., function calls) are rejected. Under `isolatedModules`, ambient `const` enum members cannot be referenced because single-file transpilers cannot determine their values.
+
+**Beginner-Friendly Explanation.** A `const` enum is **an enum that is copied into your code instead of being created as an object**. It saves space and is faster at runtime, but it only works if your build tool can see the enum's values — which many modern tools cannot do across files.
+
+### Purposes
+
+- **To eliminate the runtime object** generated by regular enums, reducing bundle size.
+- **To remove the runtime lookup overhead** when accessing enum values.
+- **To enable constant folding** by the compiler, potentially simplifying surrounding code.
+- **To avoid the reverse-mapping overhead** of numeric enums.
+- **To provide zero-runtime-overhead named constants** in performance-sensitive code.
+
+### Syntax Rules and Structure
+
+**General syntax:**
+
+```typescript
+const enum ConstEnumName {
+  Member1 = constantValue1,
+  Member2 = constantValue2,
+}
+```
+
+**Component breakdown:**
+
+- `const` — the modifier that enables inlining and erasure.
+- `enum` — the enum keyword.
+- `ConstEnumName` — the enum identifier.
+- `Member1 = constantValue1` — a member with a **constant enum expression**.
+
+**Syntax rules.**
+
+- Members must use **constant enum expressions** (numeric literals, string literals, other constant enum members, parenthesized constants, or arithmetic on constants).
+- Computed members are **not allowed**.
+- `const` enums are **completely removed** during compilation unless `preserveConstEnums` is enabled.
+- `const` enums may be `declare`d to describe ambient enums in `.d.ts` files.
+- `const` enums may be exported, but doing so from a library is discouraged.
+
+**Constraints and limitations.**
+
+- **`isolatedModules` conflict**: ambient `const` enum members cannot be referenced; error TS2748.
+- **Single-file transpilers** (Babel, esbuild, SWC) cannot inline values across module boundaries.
+- **No runtime object**: reverse mapping, iteration, and runtime validation are impossible unless `preserveConstEnums` is enabled.
+- **Library incompatibility**: exporting `const` enums breaks consumers using `isolatedModules`.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Basic `const` enum with inlining
+
+```typescript
+// example_const_enum_basic.ts
+// Step 1: Declare a const enum.
+const enum Direction {
+  Up = 0,
+  Down = 1,
+  Left = 2,
+  Right = 3,
+}
+
+// Step 2: Use a member.
+const dir = Direction.Up;
+
+// Step 3: Log the value.
+console.log(dir); // Expected: 0
+
+// Emitted JavaScript (types and enum object removed):
+// const dir = 0 /* Direction.Up */;
+// console.log(dir);
+```
+
+**Setup.** Compile with `npx tsc example_const_enum_basic.ts --strict`.
+
+**Expected Output:**
+```
+0
+```
+
+**Why this output occurs.** The `const` enum is completely erased. Every reference to `Direction.Up` is replaced with the literal `0` (with a comment for readability). No enum object exists at runtime.
+
+---
+
+#### Example 2: `preserveConstEnums` restores runtime behavior
+
+```typescript
+// example_const_preserve.ts
+// Compiled with: tsc --preserveConstEnums
+const enum Status {
+  Active = 0,
+  Inactive = 1,
+}
+
+console.log(Status.Active); // Expected: 0
+console.log(Status[0]);     // Expected: Active (reverse mapping restored)
+```
+
+**Expected Output:**
+```
+0
+Active
+```
+
+**Why this output occurs.** With `preserveConstEnums`, the compiler emits the same JavaScript object as a regular enum. The enum object exists at runtime, so reverse mapping works and the values are not inlined.
+
+---
+
+### Real-World Cases
+
+- **Performance-sensitive code**: eliminating enum object lookups in hot paths.
+- **Bundle-size optimization**: removing unused enum values from production bundles.
+- **Compile-time constants**: numeric flags that never need runtime iteration or reverse mapping.
+
+---
+
+## 2. `const enum` Syntax
+
+### Definitions
+
+**Core Definition.** The **`const enum` syntax** is the declaration form `const enum E { ... }` that enables compile-time inlining and erasure. It is syntactically identical to a regular enum declaration except for the `const` modifier.
+
+**Technical Definition.** The `const` modifier must immediately precede the `enum` keyword. The enum body follows the same member syntax as regular enums, but only constant enum expressions are permitted. The declaration may be `export`ed, `declare`d, or merged, but each form has specific constraints. The `const` modifier is **erased** along with the enum itself.
+
+**Beginner-Friendly Explanation.** `const enum` is **the exact syntax you write to create an inlined enum**. You put `const` before `enum`, list your members with constant values, and TypeScript inlines them everywhere.
+
+### Purposes
+
+- **To declare an inlined enum** with compile-time-only semantics.
+- **To enable value substitution** at every use site.
+- **To signal to the compiler that runtime enum behavior is not needed**.
+
+### Syntax Rules and Structure
+
+```typescript
+const enum EnumName {
+  Member = constantExpression,
+}
+```
+
+**Component breakdown:**
+
+- `const` — the inlining modifier.
+- `enum` — the enum keyword.
+- `EnumName` — the identifier.
+- `Member = constantExpression` — a constant enum expression.
+
+**Syntax rules.**
+
+- `const` must directly precede `enum`.
+- Members must be constant enum expressions.
+- `declare const enum` describes an ambient enum in `.d.ts` files.
+- `export const enum` exports the enum, but is discouraged in libraries.
+- `const` enums cannot have computed members.
+
+**Constraints and limitations.**
+
+- **Ambient `const` enums** (in `.d.ts`) conflict with `isolatedModules`.
+- **Computed members** are rejected.
+- **`const` enums cannot be used at runtime** unless `preserveConstEnums` is enabled.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: `const enum` with string values
+
+```typescript
+// example_const_enum_string.ts
+const enum LogLevel {
+  Debug = "DEBUG",
+  Info = "INFO",
+  Error = "ERROR",
+}
+
+function log(level: LogLevel, message: string) {
+  console.log(`[${level}] ${message}`);
+}
+
+log(LogLevel.Info, "Server started");
+// Expected: [INFO] Server started
+
+// Emitted JavaScript:
+// log("INFO" /* LogLevel.Info */, "Server started");
+```
+
+**Expected Output:**
+```
+[INFO] Server started
+```
+
+**Why this output occurs.** The string values are inlined at the call site. The enum object is removed entirely. The emitted JavaScript contains the literal `"INFO"` instead of `LogLevel.Info`.
+
+---
+
+### Real-World Cases
+
+- **String-based constants**: log levels, status codes, event names.
+- **Internal flags**: numeric bit masks used across a single module.
+- **Performance-critical libraries**: avoiding runtime object lookups.
+
+---
+
+## 3. Const Enum Usage
+
+### Definitions
+
+**Core Definition.** **`const` enum usage** refers to applying `const` enums in type annotations, function parameters, return types, and runtime expressions, while understanding that the enum's **values are inlined** and the **runtime object does not exist** (by default).
+
+**Technical Definition.** `const` enum members may be used in type positions (`level: LogLevel`) and value positions (`LogLevel.Info`). In value positions, the compiler substitutes the literal value. Runtime operations that require the enum object — reverse mapping, iteration with `Object.keys`, `Object.values` — are **unavailable** unless `preserveConstEnums` is enabled. Under `isolatedModules`, referencing an **ambient** `const` enum member is an error, and `export const enum` from a library breaks consumers.
+
+**Beginner-Friendly Explanation.** You use a `const` enum **just like a regular enum** in your code. But behind the scenes, the values are copied in, and you cannot use the enum object at runtime — no reverse lookups, no iteration. And if you are using a modern build tool, you may not be able to use `const` enums from other files at all.
+
+### Purposes
+
+- **To use inlined constants** in type-safe annotations and expressions.
+- **To avoid runtime enum objects** while retaining named constants.
+- **To enable constant folding** and dead-code elimination.
+- **To optimize bundle size** by removing unused enum values.
+
+### Syntax Rules and Structure
+
+**Usage in type positions:**
+
+```typescript
+function log(level: LogLevel, message: string) { ... }
+```
+
+**Usage in value positions:**
+
+```typescript
+const level = LogLevel.Info; // inlined to "INFO"
+```
+
+**Runtime limitations:**
+
+```typescript
+// ❌ Not available unless preserveConstEnums is enabled:
+// LogLevel["INFO"]        // reverse mapping
+// Object.keys(LogLevel)   // iteration
+```
+
+**Syntax rules.**
+
+- `const` enums may be used in type and value positions.
+- Value positions are replaced by literals at compile time.
+- Runtime object operations are unavailable unless `preserveConstEnums` is enabled.
+- Ambient `const` enum members cannot be referenced under `isolatedModules`.
+
+**Constraints and limitations.**
+
+- **No reverse mapping** by default.
+- **No iteration** by default.
+- **`isolatedModules` incompatibility** for ambient enums.
+- **Library exports break consumers** using single-file transpilers.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Type and value usage
+
+```typescript
+// example_const_usage.ts
+const enum Status {
+  Active = "ACTIVE",
+  Inactive = "INACTIVE",
+}
+
+// Type position.
+function setStatus(status: Status) {
+  console.log(status);
+}
+
+// Value position (inlined).
+setStatus(Status.Active); // Expected: ACTIVE
+```
+
+**Expected Output:**
+```
+ACTIVE
+```
+
+**Why this output occurs.** The type annotation `status: Status` is checked nominally. The value `Status.Active` is replaced with `"ACTIVE"` at compile time. The enum object does not exist at runtime.
+
+---
+
+#### Example 2: `isolatedModules` error with ambient `const` enums
+
+```typescript
+// example_const_isolated.ts
+// Compiled with: tsc --isolatedModules
+
+// Assume a .d.ts declares:
+// declare const enum Numbers { Zero = 0, One = 1 }
+
+// ❌ Referencing an ambient const enum member is an error.
+// console.log(Numbers.Zero + Numbers.One);
+// Error TS2748: Cannot access ambient const enums when 'isolatedModules' is enabled.
+
+console.log("Ambient const enums cannot be used with isolatedModules");
+```
+
+**Expected Output:**
+```
+Ambient const enums cannot be used with isolatedModules
+```
+
+**Why this output occurs.** Single-file transpilers cannot inline values from `.d.ts` files because they do not parse type information. `isolatedModules` makes this an error to prevent runtime failures.
+
+---
+
+### Real-World Cases
+
+- **Internal modules**: using `const` enums within a single compilation unit.
+- **Performance-sensitive flags**: numeric constants that never need runtime lookup.
+- **Legacy codebases**: using `const` enums where `preserveConstEnums` is enabled.
+
+---
+
+## 4. Const Enum Best Practices
+
+### Definitions
+
+**Core Definition.** **`const` enum best practices** are guidelines for deciding when — and whether — to use `const` enums, given their **compile-time inlining**, **tooling incompatibilities**, and the availability of **safer alternatives** like union types and `as const` objects.
+
+**Technical Definition.** Best practices center on the **modern consensus** that `const` enums should be **avoided in most codebases**, especially in libraries. The TypeScript Handbook documents that `const` enums have **major pitfalls** related to `isolatedModules` and **ambient `const` enums**, and recommends either **not using them at all** or **not publishing ambient `const` enums** by deconstifying them with `preserveConstEnums`. Microsoft's own guidance (Cloudpack) states: "Avoid const enums." Total TypeScript and other community experts recommend **union types** or **`as const` objects** instead.
+
+**Beginner-Friendly Explanation.** Best practices are **the habits experienced TypeScript developers use** to avoid the problems with `const` enums. The big rules are: **do not use `const` enums in libraries**; **avoid them entirely if you use modern build tools**; and **prefer union types or `as const` objects** for new code. If you must use them, keep them **internal to a single module** and never export them.
+
+### Purposes
+
+- **To avoid breaking consumers** who use `isolatedModules` or single-file transpilers.
+- **To eliminate tooling incompatibilities** with Babel, esbuild, SWC, and Vite.
+- **To choose safer alternatives** that provide the same benefits without the pitfalls.
+- **To migrate existing `const` enums** to union types or `as const` objects.
+- **To use `preserveConstEnums`** when runtime behavior is needed.
+
+### Syntax Rules and Structure
+
+Best practices are conventions that interact with `const` enum syntax. The core rules are:
+
+1. **Do not use `const` enums at all.** The TypeScript Handbook explicitly lists this as an option to avoid the pitfalls entirely. Lint rules can ban them.
+2. **Never export `const` enums from libraries.** Exporting them breaks consumers using `isolatedModules` because single-file transpilers cannot inline the values.
+3. **Use `preserveConstEnums` when runtime behavior is needed.** This emits regular enum objects, restoring reverse mapping and iteration at the cost of bundle size.
+4. **Prefer union types or `as const` objects for new code.** They are structural, erasable, and compatible with all build tools.
+5. **Keep `const` enums internal to a single compilation unit** if you must use them, to avoid cross-file inlining issues.
+6. **Use `declare const enum` only in `.d.ts` files** and only when you control the compilation environment.
+
+**Component breakdown (const enum decision tree):**
+
+```
+Are you writing a library or a shared package?
+  ├── Yes → Do NOT use const enums. Use union types or `as const` objects.
+  └── No → Does your build use isolatedModules or single-file transpilers?
+           ├── Yes → Do NOT use const enums. Use union types or `as const`.
+           └── No → Do you need runtime enum behavior?
+                    ├── Yes → Use `preserveConstEnums` or a regular enum.
+                    └── No → `const` enum is acceptable (internal only).
+```
+
+**Constraints and limitations.**
+
+- `const` enums remain appropriate for **autogenerated code** in controlled environments.
+- `preserveConstEnums` restores runtime behavior but increases bundle size.
+- Lint rules can enforce a ban on `const` enums.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: `const` enum breaking a consumer with `isolatedModules`
+
+```typescript
+// example_best_break.ts
+// Assume a library exports:
+// export const enum Color { Red = "RED", Blue = "BLUE" }
+
+// Consumer code:
+// import { Color } from "some-lib";
+// let color = Color.Red;
+// With isolatedModules, this fails because the transpiler cannot inline Color.Red.
+
+console.log("Exported const enums break isolatedModules consumers");
+```
+
+**Expected Output:**
+```
+Exported const enums break isolatedModules consumers
+```
+
+**Why this output occurs.** The consumer's single-file transpiler leaves the import in place because it does not know whether `Color` is a type or a value. At runtime, the import fails because the `const` enum object does not exist.
+
+---
+
+#### Example 2: Union type as a safe alternative
+
+```typescript
+// example_best_union.ts
+// ❌ const enum: inlined, incompatible with isolatedModules.
+// const enum Status { Active = "ACTIVE", Inactive = "INACTIVE" }
+
+// ✅ Union type: structural, erasable, compatible with all tooling.
+type Status = "ACTIVE" | "INACTIVE";
+
+function setStatus(status: Status) {
+  console.log(status);
+}
+
+setStatus("ACTIVE"); // Expected: ACTIVE
+```
+
+**Expected Output:**
+```
+ACTIVE
+```
+
+**Why this output occurs.** The union type is erased and works with every build tool. It provides the same type safety as a `const` enum without the inlining and `isolatedModules` constraints.
+
+---
+
+#### Example 3: `preserveConstEnums` for runtime behavior
+
+```typescript
+// example_best_preserve.ts
+// Compiled with: tsc --preserveConstEnums
+const enum Status {
+  Active = 0,
+  Inactive = 1,
+}
+
+console.log(Status.Active); // Expected: 0
+console.log(Status[0]);     // Expected: Active (reverse mapping works)
+```
+
+**Expected Output:**
+```
+0
+Active
+```
+
+**Why this output occurs.** With `preserveConstEnums`, the compiler emits a regular enum object, so runtime operations work. This is the escape hatch when `const` enum syntax is required but runtime behavior is needed.
+
+---
+
+### Real-World Cases
+
+- **Library authoring**: banning `const` enums to preserve consumer compatibility.
+- **Modern build pipelines**: preferring union types to avoid `isolatedModules` errors.
+- **Legacy migrations**: using `preserveConstEnums` to restore runtime behavior during migration.
+- **Code review**: flagging exported `const` enums as a breaking change.
+
+---
+
+## References
+
+- TypeScript Handbook — Enums: `const` Enums - https://www.typescriptlang.org/docs/handbook/enums.html#const-enums
+- TypeScript Handbook — Enums: `const` Enums Pitfalls - https://www.typescriptlang.org/docs/handbook/enums.html#const-enum-pitfalls
+- TypeScript 2.0 Release Notes — `const` enums - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-0.html
+- TSConfig Reference — `isolatedModules` - https://www.typescriptlang.org/tsconfig/isolatedModules.html
+- TSConfig Reference — `preserveConstEnums` - https://www.typescriptlang.org/tsconfig/preserveConstEnums.html
+- Microsoft Cloudpack — Repo Guidance: Avoid `const` Enums - https://microsoft.github.io/cloudpack/repo-guidance/no-const-enums
+- Total TypeScript — Why I Don’t Like Enums - https://www.totaltypescript.com/why-i-dont-like-typescript-enums
+- Educative — TypeScript Enum Guide: Get Started in 5 Minutes (`const` Enums for Performance) - https://www.educative.io/blog/typescript-enum-guide
+- TypeScript ESLint — How to Ban a Specific Language Feature (`const` enum) - https://typescript-eslint.io/linting/troubleshooting#how-can-i-ban-specific-language-feature
+- Dometrain — Enums and Alternatives (`const` Enums vs. `as const` Objects) - https://github.com/Dometrain/getting-started-typescript/blob/main/3-typing-fundamentals/3.5-enums-and-alternatives
+- TypeScript Playground — Enums Example (`const` Enum Inlining) - https://www.typescriptlang.org/play#example/enums
+- Stack Overflow — `const` Enum vs. Regular Enum in TypeScript - https://stackoverflow.com/questions/28818817/const-enum-vs-enum-in-typescript

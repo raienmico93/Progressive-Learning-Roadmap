@@ -335,7 +335,7 @@ This roadmap follows the same progressive structure: **language foundations → 
 
 # VII. Type Narrowing and Control Flow
 
-* [**29. Narrowing Fundamentals**](/Web%20Development/TypeScript/Type%20Narrowing%20and%20Control%20Flow/Narrowing.md)
+* **29. Narrowing Fundamentals**
 
   * Control-flow analysis
   * Type guards
@@ -349,7 +349,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Equality checks
   * Truthiness checks
 
-* [**31. User-Defined Type Guards**](/Web%20Development/TypeScript/Type%20Narrowing%20and%20Control%20Flow/TypeGuards.md)
+* **31. User-Defined Type Guards**
 
   * Type predicates
   * Custom validation functions
@@ -442,7 +442,6 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Iterating over keys
   * Property transformation
   * Modifiers
-
     * `readonly`
     * Optionality
   * Key remapping
@@ -455,7 +454,7 @@ This roadmap follows the same progressive structure: **language foundations → 
   * Event-name types
   * Route and API-path types
 
-* [**45. Utility Types**](/Web%20Development/TypeScript/Advanced%20Type%20System/UtilityTypes.md)
+* **45. Utility Types**
 
   * `Partial`
   * `Required`

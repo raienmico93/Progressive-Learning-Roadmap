@@ -1,4 +1,4 @@
-# TypeScript Mapped Types: A Comprehensive Cheat Sheet
+# Mapped Types in TypeScript — Comprehensive Cheat Sheet
 
 ---
 
@@ -6,1265 +6,983 @@
 
 ### Definitions
 
-**Core Definition**
-Mapped types are a TypeScript type-level feature that creates new object types by iterating over the keys of an existing type and transforming each property according to a defined rule. They are TypeScript's equivalent of JavaScript's `Array.map()`, but applied to type properties instead of array values.
+**Core Definition (Academic).** A **mapped type** is a generic type that **iterates over a union of property keys** (typically produced by `keyof`) and **computes a new object type** by applying a transformation to each key. Mapped types are TypeScript’s primary mechanism for **deriving new types from existing ones**, enabling DRY, maintainable type definitions that automatically adapt when the base type changes.
 
-**Technical Definition**
-A mapped type is a generic type that uses a union of property keys (frequently created via `keyof`) to iterate through keys and create a new type. The syntax uses an index signature-like structure with the `in` keyword: `{ [P in keyof T]: T[P] }`. Mapped types support property modifiers (`readonly`, `?`) with `+` and `-` prefixes for adding or removing modifiers, and since TypeScript 4.1, key remapping via the `as` clause for filtering and transforming property names. The `exactOptionalPropertyTypes` compiler option (TypeScript 4.4+) further refines mapped type behavior by distinguishing between missing optional properties and explicitly `undefined` optional properties.
+**Technical Definition.** A mapped type has the form `{ [K in Keys]: ValueType }`, where `Keys` is a union of string, number, or symbol literal types, and `ValueType` may reference `K` and the original type via indexed access (`T[K]`). When `Keys` is `keyof T`, the mapped type is **homomorphic**—it preserves property modifiers (`readonly`, `?`) and, since TypeScript 3.1, maps over tuples and arrays to produce new tuples/arrays. Mapped types support **modifier addition and removal** (`+readonly`, `-readonly`, `+?`, `-?`) and **key remapping** via `as` (TypeScript 4.1+). All mapped types are **erased** at compile time and emit no JavaScript.
 
-**Beginner-Friendly Explanation**
-Mapped types are a way to create new types by transforming the properties of an existing type. If you have a `User` type with `name` and `age`, you can use a mapped type to create a `PartialUser` type where all properties are optional, or a `ReadonlyUser` type where all properties are readonly. The syntax `{ [P in keyof T]: T[P] }` says: "for each property `P` in type `T`, create a property with the same name and type `T[P]`." You can then add modifiers or transform the property types. Mapped types are the foundation for TypeScript's built-in utility types like `Partial<T>`, `Readonly<T>`, `Pick<T, K>`, and `Record<K, V>`.
+**Beginner-Friendly Explanation.** A mapped type is **a type-level “for each loop” over an object’s properties**. Instead of manually writing every variation of a type—`PartialUser`, `ReadonlyUser`, `StringifiedUser`—you write **one rule** that transforms every property, and TypeScript applies it to all keys. It is how `Partial<T>`, `Readonly<T>`, and `Pick<T, K>` are implemented. Once you understand mapped types, you can generate types that stay synchronized with your data models automatically.
+
+---
 
 ### Key Characteristics
 
-- **Key iteration**: Uses `in keyof T` to iterate over all keys of a type.
-- **Property transformation**: Each property's type can be transformed via `T[P]` and conditional types.
-- **Modifier control**: `readonly` and `?` modifiers can be added or removed with `+` and `-` prefixes.
-- **Key remapping**: Since TypeScript 4.1, the `as` clause enables filtering, renaming, and prefixing/suffixing keys.
-- **Homomorphic preservation**: Mapped types of the form `{ [P in keyof T]: ... }` are homomorphic—they preserve the structure and modifiers of the source type.
-- **Exact optional properties**: With `exactOptionalPropertyTypes`, mapped types distinguish between missing keys and explicit `undefined` values.
-- **Compile-time only**: Mapped types are erased at runtime; they exist only during type checking.
+| Characteristic | Description |
+|---|---|
+| **Key iteration** | `[K in keyof T]` iterates over every property key of `T`. |
+| **Property transformation** | Value types can be computed from `T[K]`, making properties optional, readonly, stringified, or wrapped. |
+| **Modifier control** | `+` adds, `-` removes; `readonly` and `?` are the two controllable modifiers. |
+| **Homomorphic behavior** | `{ [K in keyof T]: ... }` preserves existing modifiers and maps tuples/arrays to tuples/arrays. |
+| **Key remapping** | `as` clauses rename, prefix, suffix, or filter keys (TypeScript 4.1+). |
+| **Arbitrary key unions** | Mapped types can iterate over any union of types, not just `string \| number \| symbol`. |
+| **Erasure** | Mapped types are compile-time only and emit no JavaScript. |
+| **Performance-sensitive** | Complex mapped types with multiple conditional branches slow compilation; break them into smaller composable types. |
+
+---
 
 ### Prerequisites
 
-- Solid understanding of TypeScript generics (type parameters, constraints)
-- Familiarity with `keyof` and indexed access types (`T[K]`)
-- Understanding of union types and conditional types
-- Familiarity with utility types (`Partial`, `Readonly`, `Pick`, `Record`)
+- **TypeScript basics**: type aliases, interfaces, and object types.
+- **The `keyof` operator**: extracting property key unions.
+- **Indexed access types** (`T[K]`): retrieving property types.
+- **Generics fundamentals**: type parameters and constraints.
+- **Union types** and **literal types**.
+- **A TypeScript environment** (`tsc` or an editor with TypeScript support).
+
+---
 
 ### Related Programming Areas
 
-- **Utility Types**: `Partial`, `Required`, `Readonly`, `Pick`, `Omit`, `Record` are all mapped types.
-- **Type-Level Programming**: Mapped types are a core tool for type transformations.
-- **Key Remapping**: The `as` clause enables dynamic key transformations and filtering.
-- **Conditional Types**: Mapped types often combine with conditional types for property-level transformations.
-- **Homomorphic Mappings**: Mapped types that preserve the structure of their source type.
+- **Utility types** — `Partial`, `Required`, `Readonly`, `Pick`, `Omit`, and `Record` are mapped types.
+- **Conditional types** — combined with mapped types to conditionally transform or filter properties.
+- **Template literal types** — used in `as` clauses for key remapping.
+- **Homomorphic mapped types** — the `{ [K in keyof T]: ... }` form that preserves structure.
+- **Type-level programming** — recursive mapped types like `DeepPartial` and `DeepReadonly`.
 
-### Core Concepts / Features
+---
 
-1. Iterating Over Keys Using the `in keyof` Syntax
-2. Property Transformation and Structural Generation
-3. Modifiers for Altering Property States: Adding/Removing `readonly` and Optionality (`+` / `-` Prefixes)
-4. Exact Optional Properties Mapping Behavior (Handling Explicit `undefined` vs Missing Keys)
-5. Key Remapping Using the `as` Clause to Filter or Transform Property Keys Dynamically
+## Core Concepts / Features
 
+---
 
-## 1. Iterating Over Keys Using the `in keyof` Syntax
+## 1. Mapped Types
 
 ### Definitions
 
-**Core Definition**
-The `in keyof` syntax is the foundation of mapped types. It iterates over the union of property names produced by `keyof T`, creating a new type with the same keys but potentially different property types. The syntax `{ [P in keyof T]: NewType }` creates a type where each property `P` of `T` is mapped to `NewType`.
+**Core Definition.** A **mapped type** is a generic type that iterates over a union of keys and produces a new object type by applying a transformation to each key’s value.
 
-**Technical Definition**
-The mapped type syntax `{ [P in K]: X }` iterates over a union of property keys `K` and creates a new object type with those keys. When `K` is `keyof T`, the mapped type is **homomorphic**—it preserves the structure, modifiers, and optionality of the source type `T`. The type parameter `P` represents each key in the union, and `T[P]` (indexed access) refers to the type of that property. The mapped type `{ [P in keyof T]: T[P] }` creates an identical copy of `T`. The `in` keyword is what distinguishes mapped types from index signatures: index signatures use `[key: string]` (a fixed key type), while mapped types use `[P in K]` (an iterated union of keys). Since TypeScript 2.9, the `keyof` operator and mapped types support `number` and `symbol` named properties, not just strings.
+**Technical Definition.** The syntax `{ [K in Keys]: ValueType }` creates a new type with one property per member of `Keys`. `Keys` is typically `keyof T`, making the mapped type **homomorphic**—it preserves modifiers and tuple/array structure. `ValueType` may use `T[K]` to reference the original property type. Mapped types are **compile-time only** and are the foundation of TypeScript’s built-in utility types.
 
-**Beginner-Friendly Explanation**
-The `in keyof` syntax is the heart of mapped types. Think of it as a "for each" loop, but for types. `{ [P in keyof T]: ... }` says: "for each property `P` in type `T`, create a property with the same name." The `P` is a type variable that takes on each key of `T` one at a time. Inside the mapped type, you can use `T[P]` to refer to the type of the current property. If you write `{ [P in keyof T]: T[P] }`, you get an exact copy of `T`. If you write `{ [P in keyof T]: boolean }`, you get a type where every property is a boolean. This is how TypeScript's utility types like `Partial<T>` and `Readonly<T>` work under the hood.
+**Beginner-Friendly Explanation.** A mapped type is **a rule that transforms every property of an object type**. You say “for each key `K` in `T`, produce a property with this type,” and TypeScript builds the new type for you.
 
 ### Purposes
 
-- To iterate over all keys of a type and create a new type with transformed properties.
-- To serve as the foundation for TypeScript's built-in utility types (`Partial`, `Readonly`, `Pick`, `Record`).
-- To enable DRY (Don't Repeat Yourself) type definitions that automatically adapt when the source type changes.
-- To provide homomorphic type transformations that preserve the structure of the source type.
-- To support type-level mapping over `string`, `number`, and `symbol` keys.
+- **To eliminate duplicated type definitions** by deriving variations from a single base type.
+- **To apply uniform transformations** across all properties (make all optional, all readonly, all boolean).
+- **To implement utility types** like `Partial<T>` and `Readonly<T>`.
+- **To keep derived types synchronized** with the source type when it changes.
+- **To enable type-level programming** with conditional and template literal types.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Basic Mapped Type**
+**General syntax:**
 
 ```typescript
 type MappedType<T> = {
-  [P in keyof T]: T[P];
+  [K in keyof T]: T[K];
 };
 ```
 
-**Component Breakdown**
-- `[P in keyof T]`: The key iteration clause. `P` takes on each key of `T`.
-- `: T[P]`: The property type. `T[P]` is the indexed access type for the current key.
-- `MappedType<T>`: A generic type that transforms `T`.
+**Component breakdown:**
 
-**General Syntax: Modifying Property Types**
+- `[K in keyof T]` — iterates over each key `K` in the union `keyof T`.
+- `: T[K]` — the value type for each key, referencing the original property type.
 
-```typescript
-type Nullable<T> = {
-  [P in keyof T]: T[P] | null;
-};
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- Each property type becomes `T[P] | null`.
+- `K in Keys` is the iteration clause; `Keys` must be a union of literal types.
+- `T[K]` accesses the original property type.
+- The mapped type may add or remove `readonly` and `?` modifiers.
+- Key remapping with `as` may follow the iteration clause (TypeScript 4.1+).
 
-**General Syntax: Using a Union of Keys**
+**Constraints and limitations.**
 
-```typescript
-type PartialByKeys<T, K extends keyof T> = {
-  [P in K]?: T[P];
-};
-```
+- Mapped types cannot add properties that do not correspond to existing keys unless iterating over an explicit key union.
+- Homomorphic mapped types over primitives return the primitive unchanged.
+- Deeply recursive mapped types can hit compiler recursion limits.
 
-**Component Breakdown**
-- `[P in K]`: Iterates over a subset of keys `K` (not all of `T`).
-- This creates a non-homomorphic mapped type.
+### Annotated Complete Step by Step Code Examples
 
-**General Syntax: Mapped Type Over a Union**
+#### Example 1: Basic mapped type — boolean flags
 
 ```typescript
-type Flags = {
-  [K in "a" | "b" | "c"]: boolean;
-};
-// { a: boolean; b: boolean; c: boolean }
-```
-
-**Component Breakdown**
-- The union of keys can be any union of string, number, or symbol literal types.
-
-**Syntax Rules**
-
-- The `in` keyword introduces the key iteration.
-- `keyof T` produces the union of `T`'s property names.
-- `P` is a type parameter that represents each key.
-- `T[P]` (indexed access) refers to the type of the current property.
-- Homomorphic mapped types (those using `keyof T`) preserve modifiers and optionality.
-- The key union can include `string`, `number`, and `symbol` keys (TypeScript 2.9+).
-- Mapped types can be nested and combined with conditional types.
-
-**Constraints and Limitations**
-
-- The key union must be a union of literal types (not a general `string`).
-- Mapped types cannot be used at runtime; they are compile-time only.
-- Non-homomorphic mapped types (those using an arbitrary key union) do not preserve modifiers.
-- `keyof` on a type with no properties produces `never`, resulting in an empty mapped type.
-- Index signatures in the source type affect the `keyof` result (e.g., `string | number` for string index signatures).
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Mapped Type
-
-```typescript
+// example_mapped_basic.ts
 // Step 1: Define a source type.
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
-
-// Step 2: Create a mapped type that makes all properties boolean.
-type Booleanify<T> = {
-  [P in keyof T]: boolean;
+type Features = {
+  darkMode: () => void;
+  newUserProfile: () => void;
 };
 
-type BooleanUser = Booleanify<User>;
-// { id: boolean; name: boolean; email: boolean }
-
-// Step 3: Use the mapped type.
-const flags: BooleanUser = {
-  id: true,
-  name: false,
-  email: true,
+// Step 2: Map every property to boolean.
+type OptionsFlags<Type> = {
+  [Property in keyof Type]: boolean;
 };
 
-console.log(flags);  // { id: true, name: false, email: true }
+// Step 3: Apply the mapped type.
+type FeatureOptions = OptionsFlags<Features>;
+// { darkMode: boolean; newUserProfile: boolean }
 
-// Step 4: Create a mapped type that makes all properties nullable.
-type Nullable<T> = {
-  [P in keyof T]: T[P] | null;
+const options: FeatureOptions = {
+  darkMode: true,
+  newUserProfile: false,
 };
 
-type NullableUser = Nullable<User>;
-// { id: number | null; name: string | null; email: string | null }
-
-const nullableUser: NullableUser = {
-  id: 1,
-  name: null,
-  email: "alice@example.com",
-};
-
-console.log(nullableUser);  // { id: 1, name: null, email: 'alice@example.com' }
-
-// Step 5: Homomorphic mapped type (preserves modifiers).
-interface PartialUser {
-  id: number;
-  name?: string;
-  readonly email: string;
-}
-
-type Copy<T> = { [P in keyof T]: T[P] };
-type CopiedUser = Copy<PartialUser>;
-// Same as PartialUser — preserves ? and readonly modifiers.
-
-console.log("Mapped types complete.");
+console.log(options.darkMode); // Expected: true
 ```
+
+**Setup.** Compile with `npx tsc example_mapped_basic.ts --strict`.
 
 **Expected Output:**
 ```
-{ id: true, name: false, email: true }
-{ id: 1, name: null, email: 'alice@example.com' }
-Mapped types complete.
+true
 ```
 
-**Why This Output Occurs:** The `Booleanify<T>` mapped type iterates over each key of `T` and changes the property type to `boolean`. The `Nullable<T>` mapped type adds `| null` to each property type. The `Copy<T>` homomorphic mapped type preserves the original modifiers (`?` and `readonly`).
+**Why this output occurs.** `OptionsFlags<Features>` iterates over `"darkMode" | "newUserProfile"` and sets each property’s type to `boolean`, discarding the original function types.
 
-#### Example 2: Mapped Types Over Unions and Number Keys
+---
+
+#### Example 2: Identity mapped type
 
 ```typescript
-// Step 1: Mapped type over a union of literal keys.
-type Flags = {
-  [K in "read" | "write" | "execute"]: boolean;
+// example_mapped_identity.ts
+type Identity<T> = {
+  [K in keyof T]: T[K];
 };
 
-const permissions: Flags = {
-  read: true,
-  write: false,
-  execute: true,
-};
+interface User {
+  id: string;
+  name: string;
+}
 
-console.log(permissions);  // { read: true, write: false, execute: true }
-
-// Step 2: Mapped type with number keys (TypeScript 2.9+).
-type NumberKeys = {
-  [K in 0 | 1 | 2]: string;
-};
-
-const tupleLike: NumberKeys = {
-  0: "zero",
-  1: "one",
-  2: "two",
-};
-
-console.log(tupleLike);  // { '0': 'zero', '1': 'one', '2': 'two' }
-
-// Step 3: Mapped type over an array (produces tuple/array).
-type ReadonlyArray<T> = {
-  readonly [P in keyof T]: T[P];
-};
-
-const arr: ReadonlyArray<number[]> = [1, 2, 3];
-// arr.push(4);  // ❌ Error: Property 'push' does not exist on type 'readonly number[]'.
-
-console.log(arr);  // [1, 2, 3]
-
-console.log("Mapped types over unions complete.");
+const user: Identity<User> = { id: "u1", name: "Ada" };
+console.log(user.name); // Expected: Ada
 ```
 
 **Expected Output:**
 ```
-{ read: true, write: false, execute: true }
-{ '0': 'zero', '1': 'one', '2': 'two' }
-[ 1, 2, 3 ]
-Mapped types over unions complete.
+Ada
 ```
 
-**Why This Output Occurs:** The `Flags` mapped type iterates over the union `"read" | "write" | "execute"`. The `NumberKeys` type iterates over numeric literals `0 | 1 | 2`. The `ReadonlyArray<T>` mapped type transforms an array type into a readonly array type, preserving the element type.
+**Why this output occurs.** The identity mapped type preserves every property and its type. It is homomorphic, so modifiers on the original type are preserved.
+
+---
 
 ### Real-World Cases
 
-**Case 1: Form Libraries**
-Form libraries use mapped types to create form value types where all properties are optional or nullable, enabling partial form updates.
+- **Feature flag maps**: `OptionsFlags<Features>` converting functions to booleans.
+- **API response adapters**: mapping a domain model to a DTO shape.
+- **Form state**: mapping every field to a validation state.
 
-**Case 2: API Response Typing**
-API clients use mapped types to transform response types, making all properties readonly or adding error types to each field.
+---
 
-**Case 3: State Management**
-State management libraries use mapped types to create action types from state shapes, ensuring type safety across reducers.
-
-**Case 4: Configuration Validation**
-Configuration validators use mapped types to create validation rule types for each configuration key.
-
-**Case 5: Database Schema Types**
-ORMs use mapped types to transform entity types into query result types, adding metadata or transforming field types.
-
-**Case 6: Testing Utilities**
-Test utilities use mapped types to create mock types where all properties are jest mock functions.
-
-### References
-
-- TypeScript Handbook: Mapped Types — https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
-- TypeScript 2.9 Release Notes: Support number and symbol named properties with keyof and mapped types — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-9.html
-- TypeScript Playground: Mapped Types — https://www.typescriptlang.org/play/typescript/meta-types/mapped-types.ts.html
-- TypeScript 2.1 Release Notes: Mapped Types — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html
-
-
-## 2. Property Transformation and Structural Generation
+## 2. `[K in keyof T]` — Iterating Over Keys
 
 ### Definitions
 
-**Core Definition**
-Property transformation is the process of changing the type of each property in a mapped type. The indexed access type `T[P]` provides the original property type, which can be transformed using union types, conditional types, or other type operators. Structural generation refers to the creation of entirely new type structures from an existing type's keys and values.
+**Core Definition.** The `[K in keyof T]` clause is the **iteration mechanism** of a mapped type. It binds a type variable `K` to each member of the union `keyof T`, producing one property per key.
 
-**Technical Definition**
-Inside a mapped type, the property type expression `T[P]` can be transformed in several ways: (1) wrapping in another type (`T[P] | null`, `Promise<T[P]>`), (2) applying a conditional type (`T[P] extends Function ? never : T[P]`), (3) using the property type in a more complex expression (`{ value: T[P] }`), or (4) replacing it entirely with a fixed type (`boolean`, `string`). The indexed access `T[P]` is the bridge between the source and target types. Structural generation uses the keys of the source type to create a new structure—for example, generating getter/setter methods or transforming a data type into an API client type. The transformation can depend on the key (`P`), the property type (`T[P]`), or both.
+**Technical Definition.** `keyof T` produces a union of the property keys of `T` (string, number, or symbol literal types). `K in keyof T` iterates over that union, and the mapped type body computes the value type for each `K`. When `T` is a tuple or array, `keyof T` includes array method names; homomorphic mapped types over tuples/arrays produce new tuples/arrays rather than objects with `push`, `pop`, etc.
 
-**Beginner-Friendly Explanation**
-Property transformation is what happens inside a mapped type. You take the original property type (`T[P]`) and change it. You can add `| null` to make it nullable, wrap it in a `Promise` or `Array`, or use a conditional type to change it based on what it is. For example, you might transform all function properties into `never` (removing them) or all properties into getter methods. Structural generation goes further: you can create entirely new types from an existing type's keys. For example, from a type with `name` and `age`, you can generate a type with `getName` and `getAge` methods. This is how libraries like React Hook Form generate form field types from form value types.
+**Beginner-Friendly Explanation.** `[K in keyof T]` means **“for each property name `K` in `T`.”** It is the loop header of a mapped type.
 
 ### Purposes
 
-- To transform property types (e.g., making them nullable, readonly, or wrapped in another type).
-- To generate new type structures (e.g., getters, setters, API clients) from existing type keys.
-- To apply conditional logic to individual properties based on their types.
-- To create domain-specific type transformations (e.g., form field types, query result types).
-- To reduce type duplication by deriving types from a single source of truth.
+- **To iterate over all properties of a type** without hardcoding property names.
+- **To preserve the relationship between each key and its value type**.
+- **To enable homomorphic transformations** that retain modifiers and array/tuple structure.
+- **To map over arbitrary key unions**, not just `keyof T`.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Type Wrapping**
-
 ```typescript
-type Wrapped<T> = {
-  [P in keyof T]: { value: T[P] };
+type Mapped<T> = {
+  [K in keyof T]: T[K];
 };
 ```
 
-**Component Breakdown**
-- Each property becomes an object with a `value` property.
-
-**General Syntax: Conditional Property Transformation**
+**Arbitrary union:**
 
 ```typescript
-type FunctionKeysToNever<T> = {
-  [P in keyof T]: T[P] extends Function ? never : T[P];
+type Flags<Keys extends string> = {
+  [K in Keys]: boolean;
 };
 ```
 
-**Component Breakdown**
-- Function properties become `never` (effectively removing them).
+**Component breakdown:**
 
-**General Syntax: Property Type Replacement**
+- `K` — the iteration type variable.
+- `keyof T` — the union of keys to iterate.
+- `T[K]` — the value type for the current key.
 
-```typescript
-type AllStrings<T> = {
-  [P in keyof T]: string;
-};
-```
+**Syntax rules.**
 
-**Component Breakdown**
-- All property types become `string`.
+- `K` is scoped to the mapped type body.
+- `keyof T` may include `string | number` for index signatures, losing specific keys.
+- Mapped types over tuples/arrays produce tuples/arrays when homomorphic.
 
-**General Syntax: Structural Generation (Getters)**
+**Constraints and limitations.**
 
-```typescript
-type Getters<T> = {
-  [P in keyof T as `get${Capitalize<string & P>}`]: () => T[P];
-};
-```
+- `keyof` on a type with a broad index signature yields `string | number`, not specific keys.
+- Non-homomorphic mapped types over tuples produce objects with array method names.
 
-**Component Breakdown**
-- Generates getter methods for each property using key remapping.
+### Annotated Complete Step by Step Code Examples
 
-**Syntax Rules**
-
-- `T[P]` accesses the original property type.
-- The property type can be transformed with unions, intersections, conditional types, or utility types.
-- The transformation can depend on `P` (the key) or `T[P]` (the property type).
-- Conditional types can filter or transform properties based on their types.
-- Key remapping (`as`) can be combined with property transformation.
-- The transformed type can be a completely different structure.
-
-**Constraints and Limitations**
-
-- The transformation must be expressible at the type level (no runtime logic).
-- Complex conditional types can produce unreadable error messages.
-- The transformation cannot depend on runtime values.
-- Recursive mapped types can cause compiler performance issues.
-- Deeply nested transformations can hit TypeScript's recursion limits.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Property Type Transformations
+#### Example 1: `keyof` iteration
 
 ```typescript
-// Step 1: Define a source type.
+// example_keyof_iteration.ts
 interface Product {
-  id: number;
-  name: string;
+  id: string;
   price: number;
   inStock: boolean;
-  getDetails: () => string;
 }
 
-// Step 2: Transform all properties to nullable.
+type Keys = keyof Product; // "id" | "price" | "inStock"
+
+type ProductFlags = {
+  [K in Keys]: boolean;
+};
+// { id: boolean; price: boolean; inStock: boolean }
+
+const flags: ProductFlags = { id: true, price: false, inStock: true };
+console.log(flags.price); // Expected: false
+```
+
+**Expected Output:**
+```
+false
+```
+
+**Why this output occurs.** `keyof Product` yields the three key literals. The mapped type iterates over them and sets each value to `boolean`.
+
+---
+
+#### Example 2: Mapped type over a tuple
+
+```typescript
+// example_tuple_mapped.ts
+type ToMutable<T> = {
+  -readonly [K in keyof T]: T[K];
+};
+
+type ReadonlyTuple = readonly [string, number];
+type MutableTuple = ToMutable<ReadonlyTuple>; // [string, number]
+
+const tuple: MutableTuple = ["hello", 42];
+console.log(tuple[1]); // Expected: 42
+```
+
+**Expected Output:**
+```
+42
+```
+
+**Why this output occurs.** Homomorphic mapped types over tuples preserve the tuple structure. Removing `readonly` produces a mutable tuple.
+
+---
+
+### Real-World Cases
+
+- **Generic property maps**: `type Flags<T> = { [K in keyof T]: boolean }`.
+- **Tuple transformations**: mapping readonly tuples to mutable tuples.
+- **Arbitrary key sets**: `type Handlers<Events extends string> = { [E in Events]: () => void }`.
+
+---
+
+## 3. Mapped Type Declaration
+
+### Definitions
+
+**Core Definition.** A **mapped type declaration** is a type alias that defines a mapped type, typically with a generic parameter representing the source type.
+
+**Technical Definition.** A mapped type declaration uses `type Name<T> = { [K in keyof T]: ... }`. It may be exported, reused, and composed with other types. The declaration is **erased** and produces no runtime code.
+
+**Beginner-Friendly Explanation.** A mapped type declaration is **the statement that defines a mapped type**. You give it a name and a generic parameter so you can reuse the transformation.
+
+### Purposes
+
+- **To name and reuse mapped type transformations** across a codebase.
+- **To document the intended transformation** with a descriptive name.
+- **To compose complex types** from smaller mapped type utilities.
+- **To export reusable type utilities** for other modules.
+
+### Syntax Rules and Structure
+
+```typescript
+type MappedName<T> = {
+  [K in keyof T]: Transformation<T[K]>;
+};
+```
+
+**Syntax rules.**
+
+- The declaration uses `type` and may include generic constraints.
+- The transformation may reference `T[K]`, conditional types, or template literal types.
+- Mapped type declarations are erased and produce no JavaScript.
+
+**Constraints and limitations.**
+
+- Complex declarations with multiple conditional branches can slow compilation.
+- Recursive mapped types require base cases and depth limits.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Declaring a reusable `Nullable` mapped type
+
+```typescript
+// example_mapped_declaration.ts
 type Nullable<T> = {
-  [P in keyof T]: T[P] | null;
+  [K in keyof T]: T[K] | null;
 };
 
-type NullableProduct = Nullable<Product>;
-// All properties are now `T | null`.
+interface User {
+  name: string;
+  age: number;
+}
 
-// Step 3: Transform all properties to promises.
-type Promisify<T> = {
-  [P in keyof T]: Promise<T[P]>;
-};
+type NullableUser = Nullable<User>;
+// { name: string | null; age: number | null }
 
-type AsyncProduct = Promisify<Product>;
-// All properties are now Promise<T>.
-
-// Step 4: Conditional transformation (remove functions).
-type RemoveFunctions<T> = {
-  [P in keyof T]: T[P] extends Function ? never : T[P];
-};
-
-type ProductData = RemoveFunctions<Product>;
-// { id: number; name: string; price: number; inStock: boolean; getDetails: never }
-
-// Step 5: Structural generation (getters).
-type Getters<T> = {
-  [P in keyof T as `get${Capitalize<string & P>}`]: () => T[P];
-};
-
-type ProductGetters = Getters<Product>;
-// { getId: () => number; getName: () => string; getPrice: () => number; ... }
-
-// Step 6: Use the transformed types.
-const nullableProduct: NullableProduct = {
-  id: 1,
-  name: null,
-  price: 999,
-  inStock: null,
-  getDetails: null,
-};
-console.log(nullableProduct.name);  // null
-
-const productData: ProductData = {
-  id: 1,
-  name: "Laptop",
-  price: 999,
-  inStock: true,
-  getDetails: undefined as never,
-};
-console.log(productData.name);  // "Laptop"
-
-console.log("Property transformations complete.");
+const user: NullableUser = { name: null, age: 36 };
+console.log(user.name); // Expected: null
 ```
 
 **Expected Output:**
 ```
 null
-Laptop
-Property transformations complete.
 ```
 
-**Why This Output Occurs:** The `Nullable<T>` mapped type wraps each property type in `T[P] | null`. The `Promisify<T>` wraps each in `Promise<T[P]>`. The `RemoveFunctions<T>` conditional transformation replaces function types with `never`. The `Getters<T>` mapped type generates getter methods using key remapping.
+**Why this output occurs.** `Nullable` maps every property to `T[K] | null`, allowing each field to be null.
 
-#### Example 2: Domain-Specific Transformations
+---
+
+### Real-World Cases
+
+- **`Partial<T>` and `Readonly<T>`** are declared as mapped types in TypeScript’s standard library.
+- **API adapters**: `type ApiModel<T> = { [K in keyof T]: ApiType<T[K]> }`.
+
+---
+
+## 4. Property Transformation
+
+### Definitions
+
+**Core Definition.** **Property transformation** is the act of computing a **new value type** for each property during mapped type iteration, using `T[K]` and any type-level operators.
+
+**Technical Definition.** The value type in a mapped type may be `T[K]` (preserving the original type), `T[K] | null` (adding null), `string` (replacing), or a conditional type such as `T[K] extends Function ? never : T[K]`. Transformation is applied uniformly to every key.
+
+**Beginner-Friendly Explanation.** Property transformation is **changing what each property’s type becomes**. You can make every property optional, readonly, nullable, stringified, or wrapped in a promise.
+
+### Purposes
+
+- **To uniformly modify property types** across an object.
+- **To wrap or unwrap types** (e.g., `Promise<T[K]>`).
+- **To filter properties** by transforming unwanted keys to `never`.
+- **To derive DTOs** from domain models by transforming field types.
+
+### Syntax Rules and Structure
 
 ```typescript
-// Step 1: Define a source type.
-interface ApiEndpoints {
-  getUser: (id: number) => Promise<User>;
-  createUser: (data: UserData) => Promise<User>;
-  deleteUser: (id: number) => Promise<void>;
-}
+type Transform<T> = {
+  [K in keyof T]: NewType<T[K]>;
+};
+```
+
+**Examples:**
+
+```typescript
+type Stringify<T> = { [K in keyof T]: string };
+type Nullable<T> = { [K in keyof T]: T[K] | null };
+type Promisify<T> = { [K in keyof T]: Promise<T[K]> };
+```
+
+**Syntax rules.**
+
+- The transformation expression may reference `T[K]` and `K`.
+- Conditional types may be used to transform based on the property type.
+- Returning `never` for a key removes it (though `Omit` is usually clearer).
+
+**Constraints and limitations.**
+
+- Transformations apply uniformly; per-key logic requires conditional types.
+- Deep transformations require recursive mapped types.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Stringifying all properties
+
+```typescript
+// example_transform_stringify.ts
+type Stringify<T> = {
+  [K in keyof T]: string;
+};
 
 interface User {
   id: number;
   name: string;
+  active: boolean;
 }
 
-interface UserData {
-  name: string;
-}
+type StringifiedUser = Stringify<User>;
+// { id: string; name: string; active: string }
 
-// Step 2: Transform to extract return types.
-type ReturnTypes<T> = {
-  [P in keyof T]: T[P] extends (...args: any[]) => infer R ? R : never;
-};
-
-type EndpointResults = ReturnTypes<ApiEndpoints>;
-// { getUser: Promise<User>; createUser: Promise<User>; deleteUser: Promise<void> }
-
-// Step 3: Transform to extract parameter types.
-type ParameterTypes<T> = {
-  [P in keyof T]: T[P] extends (...args: infer P) => any ? P : never;
-};
-
-type EndpointParams = ParameterTypes<ApiEndpoints>;
-// { getUser: [id: number]; createUser: [data: UserData]; deleteUser: [id: number] }
-
-// Step 4: Transform to create mock functions.
-type MockApi<T> = {
-  [P in keyof T]: T[P] extends (...args: any[]) => any
-    ? (...args: Parameters<T[P]>) => ReturnType<T[P]>
-    : never;
-};
-
-// Step 5: Use the transformed types.
-const results: EndpointResults = {
-  getUser: Promise.resolve({ id: 1, name: "Alice" }),
-  createUser: Promise.resolve({ id: 2, name: "Bob" }),
-  deleteUser: Promise.resolve(),
-};
-
-console.log(await results.getUser);  // { id: 1, name: 'Alice' }
-
-console.log("Domain-specific transformations complete.");
+const user: StringifiedUser = { id: "1", name: "Ada", active: "true" };
+console.log(user.active); // Expected: true
 ```
 
 **Expected Output:**
 ```
-{ id: 1, name: 'Alice' }
-Domain-specific transformations complete.
+true
 ```
 
-**Why This Output Occurs:** The `ReturnTypes<T>` mapped type uses conditional types with `infer` to extract the return type of each function property. The `ParameterTypes<T>` extracts parameter tuples. These transformations derive new types from the API endpoint structure, reducing duplication.
+**Why this output occurs.** Every property type is replaced with `string`, regardless of the original type.
+
+---
+
+#### Example 2: Wrapping properties in promises
+
+```typescript
+// example_transform_promise.ts
+type Promisify<T> = {
+  [K in keyof T]: Promise<T[K]>;
+};
+
+interface Data {
+  id: number;
+  name: string;
+}
+
+type AsyncData = Promisify<Data>;
+// { id: Promise<number>; name: Promise<string> }
+
+const asyncData: AsyncData = {
+  id: Promise.resolve(1),
+  name: Promise.resolve("Ada"),
+};
+
+asyncData.name.then(console.log); // Expected: Ada
+```
+
+**Expected Output:**
+```
+Ada
+```
+
+**Why this output occurs.** Each property is wrapped in `Promise<T[K]>`, producing an async version of the original type.
+
+---
 
 ### Real-World Cases
 
-**Case 1: API Client Generation**
-API clients use mapped types to transform endpoint definitions into typed client methods, extracting parameter and return types.
+- **DTO generation**: converting domain models to API payload types.
+- **Async models**: `Promisify<T>` for repository results.
+- **Read-only projections**: combining transformation with `readonly`.
 
-**Case 2: Form Libraries**
-Form libraries use mapped types to transform value types into field types, adding validation metadata or transforming types for form inputs.
+---
 
-**Case 3: State Management**
-State management libraries use mapped types to generate action creators, selectors, and reducers from a state shape.
-
-**Case 4: ORM Query Builders**
-ORMs use mapped types to transform entity types into query result types, adding database-specific metadata.
-
-**Case 5: Testing Utilities**
-Test utilities use mapped types to create mock types where all methods are jest mock functions with the correct signatures.
-
-**Case 6: GraphQL Code Generation**
-GraphQL code generators use mapped types to transform query result types into TypeScript types, extracting nested data structures.
-
-### References
-
-- TypeScript Handbook: Mapped Types — https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
-- TypeScript Handbook: Conditional Types — https://www.typescriptlang.org/docs/handbook/2/conditional-types.html
-- TypeScript Handbook: Utility Types — https://www.typescriptlang.org/docs/handbook/utility-types.html
-- Total TypeScript: Mapped Types — https://www.totaltypescript.com/workshops/type-transformations/mapped-types
-
-
-## 3. Modifiers for Altering Property States: Adding/Removing `readonly` and Optionality (`+` / `-` Prefixes)
+## 5. Mapped Type Modifiers (`+`, `-`, `readonly`, `?`)
 
 ### Definitions
 
-**Core Definition**
-Mapped types support two property modifiers: `readonly` (for immutability) and `?` (for optionality). These modifiers can be prefixed with `+` to add them or `-` to remove them. When no prefix is used, `+` is assumed. This enables precise control over property states in transformed types.
+**Core Definition.** **Mapped type modifiers** control whether properties in the mapped type are `readonly` and/or optional. The `+` prefix **adds** a modifier, and the `-` prefix **removes** it. Without a prefix, `+` is assumed.
 
-**Technical Definition**
-In a mapped type, `readonly` and `?` modifiers can be applied to each property. The `+` prefix (or no prefix) adds the modifier, while the `-` prefix removes it. For homomorphic mapped types (`{ [P in keyof T]: ... }`), the modifiers of the source type are preserved by default. The `-?` modifier removes optionality and, under `strictNullChecks`, also removes `undefined` from the property type. The `-readonly` modifier removes readonly, making properties mutable. TypeScript 2.8 introduced the `+` and `-` prefixes for modifiers, and `Required<T>` and `Mutable<T>` are built-in utility types that use these modifiers.
+**Technical Definition.** The two modifiers are `readonly` (immutability) and `?` (optionality). `readonly` adds `readonly`; `-readonly` removes it. `?` adds optionality; `-?` removes it. The `+` prefix is optional and implicit for addition. Modifiers may be combined: `-readonly [K in keyof T]-?`. Homomorphic mapped types (`{ [K in keyof T]: ... }`) preserve existing modifiers unless overridden.
 
-**Beginner-Friendly Explanation**
-Mapped types can add or remove `readonly` and `?` modifiers from properties. If you write `{ readonly [P in keyof T]: T[P] }`, you make all properties readonly. If you write `{ -readonly [P in keyof T]: T[P] }`, you remove readonly from all properties. Similarly, `{ [P in keyof T]?: T[P] }` makes all properties optional, and `{ [P in keyof T]-?: T[P] }` makes all properties required. The `+` prefix is optional—if you don't write anything, `+` is assumed. The `-?` modifier is especially important: it not only removes optionality but also removes `undefined` from the property type under `strictNullChecks`, which is how `Required<T>` works.
+**Beginner-Friendly Explanation.** Modifiers let you **toggle immutability and optionality**. `readonly` makes properties read-only; `-readonly` makes them writable. `?` makes properties optional; `-?` makes them required. You can use `+` to be explicit about adding.
 
 ### Purposes
 
-- To make all properties readonly (immutable) or remove readonly (mutable).
-- To make all properties optional or required.
-- To create utility types like `Required<T>`, `Readonly<T>`, and `Mutable<T>`.
-- To strip modifiers from a type for specific transformations.
-- To combine modifier changes with property transformations for complex type manipulations.
+- **To add or remove `readonly`** from all properties (`Readonly<T>`, `Mutable<T>`).
+- **To add or remove optionality** from all properties (`Partial<T>`, `Required<T>`).
+- **To preserve or override existing modifiers** in homomorphic mapped types.
+- **To combine both modifiers** in a single mapped type.
 
 ### Syntax Rules and Structure
 
-**General Syntax: Adding Modifiers**
+**Adding modifiers:**
 
 ```typescript
-type ReadonlyPartial<T> = {
-  readonly [P in keyof T]?: T[P];
-};
+type ReadonlyProps<T> = { readonly [K in keyof T]: T[K] };
+type OptionalProps<T> = { [K in keyof T]?: T[K] };
+type ReadonlyOptional<T> = { readonly [K in keyof T]?: T[K] };
 ```
 
-**Component Breakdown**
-- `readonly`: Adds readonly to all properties.
-- `?`: Adds optionality to all properties.
-
-**General Syntax: Removing Modifiers**
+**Removing modifiers:**
 
 ```typescript
-type MutableRequired<T> = {
-  -readonly [P in keyof T]-?: T[P];
-};
+type Mutable<T> = { -readonly [K in keyof T]: T[K] };
+type RequiredProps<T> = { [K in keyof T]-?: T[K] };
 ```
 
-**Component Breakdown**
-- `-readonly`: Removes readonly.
-- `-?`: Removes optionality (and `undefined` under `strictNullChecks`).
-
-**General Syntax: Explicit `+` Prefix**
+**Explicit `+`:**
 
 ```typescript
-type ExplicitReadonly<T> = {
-  +readonly [P in keyof T]: T[P];
-};
+type ExplicitReadonly<T> = { +readonly [K in keyof T]: T[K] };
 ```
 
-**Component Breakdown**
-- `+readonly`: Explicitly adds readonly (same as `readonly` without prefix).
+**Component breakdown:**
 
-**General Syntax: Combining with Key Remapping**
+- `+readonly` / `readonly` — adds `readonly`.
+- `-readonly` — removes `readonly`.
+- `+?` / `?` — adds optionality.
+- `-?` — removes optionality.
+
+**Syntax rules.**
+
+- `+` is optional for adding; `-` is required for removing.
+- `-?` removes optionality, making all properties required.
+- Modifiers apply uniformly to all properties.
+- Homomorphic mapped types preserve existing modifiers unless a modifier clause overrides them.
+
+**Constraints and limitations.**
+
+- Modifiers cannot be applied per-property without conditional types.
+- `-?` on a property whose type includes `undefined` does not remove `undefined` from the type (it only removes the optional marker).
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Adding `readonly` and `?`
 
 ```typescript
-type ReadonlyGetters<T> = {
-  +readonly [P in keyof T as `get${Capitalize<string & P>}`]: () => T[P];
-};
-```
-
-**Component Breakdown**
-- Modifiers can be combined with key remapping.
-
-**Syntax Rules**
-
-- `readonly` and `?` are the two modifiers.
-- `+` (or no prefix) adds the modifier.
-- `-` removes the modifier.
-- `-?` removes optionality and `undefined` under `strictNullChecks`.
-- `-readonly` removes readonly.
-- Homomorphic mapped types preserve source modifiers by default.
-- Modifiers can be combined with key remapping (`as`).
-- Modifiers apply to every property in the mapped type.
-
-**Constraints and Limitations**
-
-- Modifiers cannot be applied to non-property types (e.g., primitives).
-- `-?` and `-readonly` are not available in TypeScript versions before 2.8.
-- Removing `?` from a property also removes `undefined` from its type under `strictNullChecks`.
-- Modifiers interact with `exactOptionalPropertyTypes` for optional property handling.
-- Overusing modifier changes can make types harder to understand.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Adding and Removing Modifiers
-
-```typescript
-// Step 1: Define a source type.
-interface User {
-  readonly id: number;
-  name: string;
-  email?: string;
-}
-
-// Step 2: Add modifiers — make all properties readonly and optional.
-type ReadonlyPartial<T> = {
-  +readonly [P in keyof T]+?: T[P];
-};
-
-type ReadonlyPartialUser = ReadonlyPartial<User>;
-// { readonly id?: number; readonly name?: string; readonly email?: string }
-
-// Step 3: Remove modifiers — make all properties mutable and required.
-type MutableRequired<T> = {
-  -readonly [P in keyof T]-?: T[P];
-};
-
-type MutableRequiredUser = MutableRequired<User>;
-// { id: number; name: string; email: string }
-
-// Step 4: Use the transformed types.
-const readonlyUser: ReadonlyPartialUser = { id: 1, name: "Alice" };
-// readonlyUser.name = "Bob";  // ❌ Error: Cannot assign to 'name' because it is a read-only property.
-
-const requiredUser: MutableRequiredUser = {
-  id: 1,
-  name: "Alice",
-  email: "alice@example.com",
-};
-requiredUser.name = "Bob";  // ✅ Allowed (mutable)
-
-console.log(requiredUser);  // { id: 1, name: 'Bob', email: 'alice@example.com' }
-
-// Step 5: Built-in utility types use these modifiers.
-type RequiredUser = Required<User>;
-// { id: number; name: string; email: string }
-
-type ReadonlyUser = Readonly<User>;
-// { readonly id: number; readonly name: string; readonly email?: string }
-
-console.log("Modifier transformations complete.");
-```
-
-**Expected Output:**
-```
-{ id: 1, name: 'Bob', email: 'alice@example.com' }
-Modifier transformations complete.
-```
-
-**Why This Output Occurs:** The `ReadonlyPartial<T>` mapped type adds `+readonly` and `+?` to all properties. The `MutableRequired<T>` removes `-readonly` and `-?`. The `Required<User>` utility removes optionality, and `Readonly<User>` adds readonly. The `-?` modifier also removes `undefined` from the property type under `strictNullChecks`.
-
-#### Example 2: Modifier Interaction with Property Types
-
-```typescript
-// Step 1: Define a source type with optional and readonly properties.
-interface Config {
-  readonly apiUrl: string;
-  timeout?: number;
-  retries?: number;
-}
-
-// Step 2: Make everything required and mutable.
-type MutableRequired<T> = {
-  -readonly [P in keyof T]-?: T[P];
-};
-
-type ResolvedConfig = MutableRequired<Config>;
-// { apiUrl: string; timeout: number; retries: number }
-
-// Step 3: Make everything optional and readonly.
-type OptionalReadonly<T> = {
-  +readonly [P in keyof T]+?: T[P];
-};
-
-type PartialReadonlyConfig = OptionalReadonly<Config>;
-// { readonly apiUrl?: string; readonly timeout?: number; readonly retries?: number }
-
-// Step 4: Remove only optionality (keep readonly).
-type RequiredConfig = {
-  [P in keyof Config]-?: Config[P];
-};
-
-type RequiredOnlyConfig = RequiredConfig;
-// { readonly apiUrl: string; timeout: number; retries: number }
-
-// Step 5: Remove only readonly (keep optionality).
-type MutableConfig = {
-  -readonly [P in keyof Config]: Config[P];
-};
-
-type MutableOnlyConfig = MutableConfig;
-// { apiUrl: string; timeout?: number; retries?: number }
-
-// Step 6: Use the types.
-const resolved: ResolvedConfig = {
-  apiUrl: "https://api.example.com",
-  timeout: 5000,
-  retries: 3,
-};
-
-console.log(resolved);  // { apiUrl: 'https://api.example.com', timeout: 5000, retries: 3 }
-
-console.log("Modifier interaction complete.");
-```
-
-**Expected Output:**
-```
-{ apiUrl: 'https://api.example.com', timeout: 5000, retries: 3 }
-Modifier interaction complete.
-```
-
-**Why This Output Occurs:** The `MutableRequired<T>` removes both `readonly` and `?`, making all properties mutable and required. The `OptionalReadonly<T>` adds both modifiers. The `RequiredConfig` removes only `?` (keeping `readonly`), and `MutableConfig` removes only `readonly` (keeping `?`). This demonstrates the granular control over modifiers.
-
-### Real-World Cases
-
-**Case 1: Configuration Resolution**
-Configuration libraries use `Required<T>` to ensure all configuration values are resolved before use, removing optionality after merging defaults.
-
-**Case 2: Immutable State**
-Redux and other state management libraries use `Readonly<T>` to enforce immutability of state objects.
-
-**Case 3: Form Submission**
-Form libraries use `Required<T>` to ensure all form fields are present before submission, removing optionality from validated forms.
-
-**Case 4: API Request Bodies**
-API clients use `MutableRequired<T>` to ensure request bodies have all required fields and are mutable for serialization.
-
-**Case 5: Partial Updates**
-Update functions use `Partial<T>` to accept partial objects, allowing callers to specify only the fields they want to update.
-
-**Case 6: Draft Types**
-Immer and similar libraries use `Draft<T>` (which uses modifier removal) to allow mutable operations on immutable state during draft phases.
-
-### References
-
-- TypeScript 2.8 Release Notes: Improved control over mapped type modifiers — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html
-- TypeScript Handbook: Mapped Types (Mapping Modifiers) — https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#mapping-modifiers
-- TypeScript Handbook: Utility Types — https://www.typescriptlang.org/docs/handbook/utility-types.html
-- GitHub: TypeScript PR #21935 — https://github.com/microsoft/TypeScript/pull/21935
-
-
-## 4. Exact Optional Properties Mapping Behavior (Handling Explicit `undefined` vs Missing Keys)
-
-### Definitions
-
-**Core Definition**
-With the `exactOptionalPropertyTypes` compiler option (TypeScript 4.4+) enabled, optional properties in mapped types distinguish between "missing" and "explicitly `undefined`." Without this option, `{ name?: string }` is equivalent to `{ name: string | undefined }`, meaning both missing keys and explicit `undefined` are allowed. With `exactOptionalPropertyTypes`, optional properties cannot be assigned `undefined` explicitly—they must either be present with a value or absent entirely.
-
-**Technical Definition**
-When `exactOptionalPropertyTypes` is `false` (default), the type `{ name?: string }` is treated as `{ name: string | undefined }`, and both `{}` and `{ name: undefined }` are valid. When `exactOptionalPropertyTypes` is `true`, the type `{ name?: string }` means the property may be missing, but if present, it must be a `string` (not `undefined`). This affects homomorphic mapped types: `{ [P in keyof T]: T[P] }` may preserve the optionality of `T[P]` without adding `| undefined` when `exactOptionalPropertyTypes` is on. However, indexing an optional property within a mapped type may produce `T[P] | undefined` in some cases depending on whether the mapped type is homomorphic. The `-?` modifier removes optionality and, under `strictNullChecks`, also removes `undefined` from the property type. TypeScript issues #60233 and #60138 document assignability issues with homomorphic mapped types and `exactOptionalPropertyTypes`.
-
-**Beginner-Friendly Explanation**
-Normally in TypeScript, an optional property like `email?: string` means "the property might be missing, or it might be a string, or it might be `undefined`." With `exactOptionalPropertyTypes` enabled, it means "the property might be missing, but if it's there, it must be a string—not `undefined`." This is a stricter mode that prevents the subtle bug where you pass `{ email: undefined }` instead of just leaving out the property. In mapped types, this distinction can affect how property types are preserved. When you use a homomorphic mapped type like `{ [P in keyof T]: T[P] }`, the optionality is preserved, but the exact treatment of `undefined` depends on whether you're reading the property type directly or wrapping it in another type.
-
-### Purposes
-
-- To distinguish between missing optional properties and explicitly `undefined` properties.
-- To enforce stricter type safety around optional properties in mapped types.
-- To prevent accidental assignment of `undefined` to optional properties.
-- To understand how homomorphic mapped types interact with `exactOptionalPropertyTypes`.
-- To handle assignability issues that arise when mapping types with `exactOptionalPropertyTypes`.
-
-### Syntax Rules and Structure
-
-**General Syntax: Optional Property Without `exactOptionalPropertyTypes`**
-
-```typescript
-// exactOptionalPropertyTypes: false (default)
-interface User {
-  name: string;
-  email?: string;  // Equivalent to email?: string | undefined
-}
-
-const user1: User = { name: "Alice" };                     // ✅
-const user2: User = { name: "Bob", email: undefined };    // ✅ (allowed!)
-```
-
-**Component Breakdown**
-- Optional properties include `undefined` in their type.
-- Both missing and explicit `undefined` are allowed.
-
-**General Syntax: Optional Property With `exactOptionalPropertyTypes`**
-
-```typescript
-// exactOptionalPropertyTypes: true
-interface User {
-  name: string;
-  email?: string;  // Cannot be explicitly undefined
-}
-
-const user1: User = { name: "Alice" };                     // ✅
-// const user2: User = { name: "Bob", email: undefined };  // ❌ Error!
-// const user3: User = { name: "Bob", email: "bob@example.com" };  // ✅
-```
-
-**Component Breakdown**
-- Optional properties cannot be explicitly `undefined`.
-- Only missing or a defined value is allowed.
-
-**General Syntax: Mapped Type Behavior**
-
-```typescript
-// With exactOptionalPropertyTypes: true
-type Foo<Type> = { [P in keyof Type]: Type[P] };
-type T = Foo<{ a?: 1 }>;
-// T = { a?: 1 }  (preserves optionality without adding undefined)
-```
-
-**Component Breakdown**
-- Homomorphic mapped types preserve the exact optional property behavior.
-
-**General Syntax: Wrapping to Get `undefined`**
-
-```typescript
-// With exactOptionalPropertyTypes: true
-type Foo<Type> = { [P in keyof Type]: [Type[P]] };
-type T = Foo<{ a?: 1 }>;
-// T = { a?: [1 | undefined] }  (wrapping adds undefined)
-```
-
-**Component Breakdown**
-- Wrapping the property type in a tuple forces `undefined` to be included.
-
-**Syntax Rules**
-
-- `exactOptionalPropertyTypes` is a `tsconfig` compiler option (TypeScript 4.4+).
-- When `true`, optional properties cannot be explicitly `undefined`.
-- Homomorphic mapped types (`{ [P in keyof T]: T[P] }`) preserve optionality.
-- Indexing an optional property within a mapped type may or may not include `undefined` depending on context.
-- Wrapping the property type in a tuple (`[T[P]]`) forces `undefined` to be included.
-- The `-?` modifier removes optionality and `undefined` under `strictNullChecks`.
-
-**Constraints and Limitations**
-
-- `exactOptionalPropertyTypes` requires TypeScript 4.4+.
-- Homomorphic mapped types can break assignability with `exactOptionalPropertyTypes` (GitHub issues #60233, #60138).
-- Not all libraries and frameworks are compatible with `exactOptionalPropertyTypes`.
-- The behavior of optional properties in mapped types can be non-deterministic in some cases (GitHub issue #60717).
-- The option can be enabled independently of `strict` mode.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Comparing With and Without `exactOptionalPropertyTypes`
-
-```typescript
-// Step 1: Without exactOptionalPropertyTypes.
-// tsconfig.json: { "compilerOptions": { "strict": true } }
-interface User1 {
-  name: string;
-  email?: string;
-}
-
-const user1a: User1 = { name: "Alice" };
-const user1b: User1 = { name: "Bob", email: undefined };  // ✅ Allowed
-console.log(user1b.email);  // undefined
-
-// Step 2: With exactOptionalPropertyTypes.
-// tsconfig.json: { "compilerOptions": { "strict": true, "exactOptionalPropertyTypes": true } }
-interface User2 {
-  name: string;
-  email?: string;
-}
-
-const user2a: User2 = { name: "Alice" };
-// const user2b: User2 = { name: "Bob", email: undefined };
-// ❌ Error: Type '{ name: string; email: undefined; }' is not assignable to type 'User2'.
-//   Property 'email' is optional and cannot be assigned 'undefined'.
-
-// Step 3: Mapped type behavior with exactOptionalPropertyTypes.
-type Copy<T> = { [P in keyof T]: T[P] };
-type CopiedUser = Copy<User2>;
-// CopiedUser = { name: string; email?: string }
-
-const copied: CopiedUser = { name: "Charlie" };
-console.log(copied.name);  // "Charlie"
-
-// Step 4: Wrapping the property type to include undefined.
-type Wrapped<T> = { [P in keyof T]: [T[P]] };
-type WrappedUser = Wrapped<User2>;
-// WrappedUser = { name: [string]; email?: [string | undefined] }
-
-const wrapped: WrappedUser = { name: ["Dave"] };
-console.log(wrapped.name);  // ["Dave"]
-
-console.log("Exact optional property types demonstrated.");
-```
-
-**Expected Output:**
-```
-undefined
-Charlie
-[ 'Dave' ]
-Exact optional property types demonstrated.
-```
-
-**Why This Output Occurs:** Without `exactOptionalPropertyTypes`, `{ email: undefined }` is allowed. With it, `undefined` is rejected for optional properties. The homomorphic `Copy<T>` preserves the optional property behavior. Wrapping `T[P]` in a tuple forces `undefined` to be included in the wrapped type.
-
-#### Example 2: Assignability Issues with Homomorphic Mapped Types
-
-```typescript
-// Step 1: Define a type with optional properties.
-interface Settings {
-  theme: string;
-  fontSize?: number;
-}
-
-// Step 2: Create a homomorphic mapped type.
-type PartialSettings<T> = { [P in keyof T]?: T[P] };
-
-type PartialConfig = PartialSettings<Settings>;
-// With exactOptionalPropertyTypes: { theme?: string; fontSize?: number }
-
-// Step 3: Create an instance.
-const config: PartialConfig = { theme: "dark" };
-
-// Step 4: Assignability can break with exactOptionalPropertyTypes.
-// The following may error with exactOptionalPropertyTypes enabled:
-// const settings: Settings = config;
-// ❌ Error: Property 'theme' is optional in type 'PartialConfig' but required in type 'Settings'.
-
-// Step 5: Workaround — use Required or explicit undefined.
-type ExactPartial<T> = { [P in keyof T]?: T[P] | undefined };
-const exactConfig: ExactPartial<Settings> = { theme: "dark" };
-const settings: Settings = { theme: "dark", ...exactConfig };
-
-console.log(settings);  // { theme: 'dark' }
-
-console.log("Assignability workaround complete.");
-```
-
-**Expected Output:**
-```
-{ theme: 'dark' }
-Assignability workaround complete.
-```
-
-**Why This Output Occurs:** With `exactOptionalPropertyTypes`, a mapped type that makes properties optional may not be assignable to the original required-property type. Adding `| undefined` explicitly or using `Required<T>` resolves the assignability issue.
-
-### Real-World Cases
-
-**Case 1: Configuration Merging**
-Configuration libraries that merge partial configs with defaults use `exactOptionalPropertyTypes` to distinguish between "not set" and "set to undefined."
-
-**Case 2: Form Data**
-Form libraries use `exactOptionalPropertyTypes` to distinguish between an empty field and a field that hasn't been touched.
-
-**Case 3: API Payloads**
-API clients use `exactOptionalPropertyTypes` to ensure optional fields are either present with values or absent entirely, not explicitly `undefined`.
-
-**Case 4: State Management**
-State management libraries use `exactOptionalPropertyTypes` to enforce strict optional state updates.
-
-**Case 5: Database Updates**
-Database update functions use `exactOptionalPropertyTypes` to distinguish between "don't update this field" and "set this field to null/undefined."
-
-### References
-
-- TypeScript 4.4 Release Notes: exactOptionalPropertyTypes — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-4.html#exact-optional-property-types---exactoptionalpropertytypes
-- TypeScript `exactOptionalPropertyTypes` Documentation — https://www.typescriptlang.org/tsconfig#exactOptionalPropertyTypes
-- GitHub Issue #60717: How does indexing an optional property within a mapped type behave? — https://github.com/microsoft/TypeScript/issues/60717
-- GitHub Issue #60233: Certain homomorphic mappings break assignability with exactOptionalPropertyTypes — https://github.com/microsoft/TypeScript/issues/60233
-- GitHub Issue #60138: `exactOptionalPropertyTypes` faults the use of `Omit` — https://github.com/microsoft/TypeScript/issues/60138
-- Exploring TypeScript: exactOptionalPropertyTypes — https://exploringjs.com/ts/book/ch_optional-props.html
-
-
-## 5. Key Remapping Using the `as` Clause to Filter or Transform Property Keys Dynamically
-
-### Definitions
-
-**Core Definition**
-Key remapping via the `as` clause is a TypeScript 4.1 feature that allows mapped types to transform, rename, or filter property keys during iteration. The syntax `{ [P in keyof T as NewKey]: ... }` uses the `as` clause to compute a new key for each property, enabling three operations in a single pass: filtering keys (by mapping to `never`), renaming keys (by mapping to a different literal), and prefixing/suffixing keys (via template literal types).
-
-**Technical Definition**
-The `as` clause appears after the key iteration clause: `[P in keyof T as NewKeyExpression]`. The `NewKeyExpression` can be any type expression that evaluates to a string, number, or symbol literal (or a union of these). If the expression evaluates to `never`, the property is omitted from the result. If it evaluates to a different literal, the property is renamed. Template literal types enable prefixing and suffixing: `` `get${Capitalize<string & P>}` ``. Key remapping combined with conditional types allows filtering based on the property type (`T[P] extends Function ? K : never`). The `as` clause is the most under-used advanced mapped-type feature in real codebases.
-
-**Beginner-Friendly Explanation**
-Key remapping lets you change the names of properties while mapping. Instead of just transforming values, you can also transform keys. For example, you can rename all properties to `get` + `Capitalize` of the original name, so `name` becomes `getName`. Or you can filter out properties by mapping them to `never`, which removes them entirely. You can even combine filtering and renaming: for example, keep only non-function properties and rename them to `set` + name. This is incredibly powerful for generating API clients, form field types, and utility types. The `as` clause is what makes mapped types truly dynamic—it lets you create entirely new type structures from existing ones.
-
-### Purposes
-
-- To filter out properties by mapping their keys to `never`.
-- To rename properties dynamically using template literal types.
-- To prefix or suffix property names (e.g., `get`/`set` prefixes).
-- To combine filtering and renaming in a single mapped type.
-- To generate event handler names, selector hooks, and API method names from existing types.
-
-### Syntax Rules and Structure
-
-**General Syntax: Basic Key Remapping**
-
-```typescript
-type Remapped<T> = {
-  [P in keyof T as NewKeyExpression]: T[P];
-};
-```
-
-**Component Breakdown**
-- `as NewKeyExpression`: Computes the new key for each property.
-- If the expression is `never`, the property is removed.
-
-**General Syntax: Filtering Keys**
-
-```typescript
-type Methods<T> = {
-  [K in keyof T as T[K] extends Function ? K : never]: T[K];
-};
-```
-
-**Component Breakdown**
-- Only function properties are kept; others are mapped to `never` (removed).
-
-**General Syntax: Renaming Keys with Template Literals**
-
-```typescript
-type Getters<T> = {
-  [K in keyof T & string as `get${Capitalize<K>}`]: () => T[K];
-};
-```
-
-**Component Breakdown**
-- `get${Capitalize<K>}`: Prefixes each key with `get` and capitalizes.
-
-**General Syntax: Combining Filter and Rename**
-
-```typescript
-type Setters<T> = {
-  [K in keyof T & string as T[K] extends Function ? never : `set${Capitalize<K>}`]: (value: T[K]) => void;
-};
-```
-
-**Component Breakdown**
-- Function properties are filtered out; others are renamed with `set` prefix.
-
-**Syntax Rules**
-
-- The `as` clause appears after the `in` clause: `[P in K as NewKey]`.
-- The new key expression must evaluate to a string, number, or symbol literal.
-- `never` removes the property from the result.
-- Template literal types enable prefixing/suffixing.
-- Conditional types enable filtering based on property types.
-- The `& string` intersection widens the key type for template literal operations.
-- Key remapping works with both homomorphic and non-homomorphic mapped types.
-
-**Constraints and Limitations**
-
-- Template literals only work on string keys; `number` and `symbol` keys are dropped.
-- The `as` clause cannot depend on runtime values.
-- Complex conditional expressions in the `as` clause can produce unreadable errors.
-- Key remapping is available in TypeScript 4.1 and later.
-- Filtering via `never` removes properties but does not prevent other transformations.
-
-### Multiple Annotated Complete Step-by-Step Code Examples
-
-#### Example 1: Basic Key Remapping
-
-```typescript
-// Step 1: Define a source type.
+// example_modifiers_add.ts
 interface User {
   id: string;
   name: string;
-  save(): Promise<void>;
-  delete(): Promise<void>;
+  email: string;
 }
 
-// Step 2: Filter to only methods.
-type Methods<T> = {
-  [K in keyof T as T[K] extends Function ? K : never]: T[K];
+type ReadonlyUser = {
+  readonly [K in keyof User]: User[K];
 };
 
-type UserMethods = Methods<User>;
-// { save: () => Promise<void>; delete: () => Promise<void> }
-
-// Step 3: Rename to getters.
-type Getters<T> = {
-  [K in keyof T & string as `get${Capitalize<K>}`]: () => T[K];
+type PartialUser = {
+  [K in keyof User]?: User[K];
 };
 
-type UserGetters = Getters<User>;
-// { getId: () => string; getName: () => string; getSave: () => ...; getDelete: () => ... }
-
-// Step 4: Combine filter and rename — only data properties as setters.
-type Setters<T> = {
-  [K in keyof T & string as T[K] extends Function ? never : `set${Capitalize<K>}`]: (value: T[K]) => void;
+type ReadonlyPartialUser = {
+  readonly [K in keyof User]?: User[K];
 };
 
-type UserSetters = Setters<User>;
-// { setId: (value: string) => void; setName: (value: string) => void }
+const user: ReadonlyPartialUser = { id: "u1" };
+console.log(user.id); // Expected: u1
 
-// Step 5: Use the remapped types.
-const getters: UserGetters = {
-  getId: () => "1",
-  getName: () => "Alice",
-  getSave: () => Promise.resolve(),
-  getDelete: () => Promise.resolve(),
+// user.id = "u2"; // ❌ Error: readonly.
+```
+
+**Expected Output:**
+```
+u1
+```
+
+**Why this output occurs.** `ReadonlyPartialUser` adds both `readonly` and `?` to every property. The object can omit properties but cannot reassign them.
+
+---
+
+#### Example 2: Removing `readonly` and `?` with `-`
+
+```typescript
+// example_modifiers_remove.ts
+interface LockedConfig {
+  readonly host?: string;
+  readonly port?: number;
+}
+
+type WritableRequired<T> = {
+  -readonly [K in keyof T]-?: T[K];
 };
 
-console.log(getters.getId());  // "1"
-console.log(getters.getName()); // "Alice"
+type Config = WritableRequired<LockedConfig>;
+// { host: string; port: number }
 
-console.log("Key remapping complete.");
+const config: Config = { host: "localhost", port: 3000 };
+config.host = "example.com"; // ✅ Writable now.
+console.log(config.host); // Expected: example.com
+```
+
+**Expected Output:**
+```
+example.com
+```
+
+**Why this output occurs.** `-readonly` removes immutability; `-?` removes optionality. The resulting type has required, writable properties.
+
+---
+
+#### Example 3: Explicit `+` prefix
+
+```typescript
+// example_modifiers_plus.ts
+type ExplicitReadonly<T> = {
+  +readonly [K in keyof T]: T[K];
+};
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+const point: ExplicitReadonly<Point> = { x: 1, y: 2 };
+// point.x = 10; // ❌ Error: readonly.
+console.log(point.x); // Expected: 1
 ```
 
 **Expected Output:**
 ```
 1
-Alice
-Key remapping complete.
 ```
 
-**Why This Output Occurs:** The `Methods<T>` mapped type filters out non-function properties by mapping their keys to `never`. The `Getters<T>` type renames all properties with a `get` prefix. The `Setters<T>` type filters out function properties and renames the rest with a `set` prefix.
+**Why this output occurs.** `+readonly` is equivalent to `readonly`; both add the modifier. The `+` makes the intent explicit.
 
-#### Example 2: Dynamic Event Handler Generation
+---
+
+### Real-World Cases
+
+- **`Partial<T>`** : `{ [K in keyof T]?: T[K] }`.
+- **`Required<T>`** : `{ [K in keyof T]-?: T[K] }`.
+- **`Readonly<T>`** : `{ readonly [K in keyof T]: T[K] }`.
+- **`Mutable<T>`** : `{ -readonly [K in keyof T]: T[K] }`.
+
+---
+
+## 6. Key Remapping via `as`
+
+### Definitions
+
+**Core Definition.** **Key remapping** is the ability to **transform property names** during mapped type iteration using an `as` clause: `[K in keyof T as NewKey]`. It allows renaming, prefixing, suffixing, and **filtering** (by producing `never`) of keys.
+
+**Technical Definition.** The `as` clause (TypeScript 4.1+) computes a new key for each iterated key `K`. The new key may be a literal, a template literal type, or a conditional type. If the new key is `never`, the property is **removed**. Key remapping is **non-homomorphic** when the new key differs from `K`; homomorphic modifier preservation is lost. Template literal types are commonly used to prefix or suffix keys, but they only operate on string keys—symbol and number keys are dropped unless widened.
+
+**Beginner-Friendly Explanation.** Key remapping is **renaming properties while building a mapped type**. You can turn `name` into `getName`, `age` into `getAge`, or remove `kind` entirely. It is how you generate getter types and filter out unwanted fields.
+
+### Purposes
+
+- **To rename properties** systematically (e.g., prefix with `get`, suffix with `Changed`).
+- **To filter properties** by producing `never` for keys that should not exist.
+- **To generate derived APIs** such as getter/setter types.
+- **To map event names to handler types** using template literal types.
+- **To create branded or namespaced property names**.
+
+### Syntax Rules and Structure
+
+**General syntax:**
 
 ```typescript
-// Step 1: Define an event map.
-interface EventMap {
-  loggedIn: { userId: string };
-  loggedOut: { userId: string; timestamp: Date };
-  error: { message: string; code: number };
+type Mapped<T> = {
+  [K in keyof T as NewKey]: T[K];
+};
+```
+
+**Renaming with template literals:**
+
+```typescript
+type Getters<T> = {
+  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K];
+};
+```
+
+**Filtering with `Exclude`:**
+
+```typescript
+type RemoveKind<T> = {
+  [K in keyof T as Exclude<K, "kind">]: T[K];
+};
+```
+
+**Component breakdown:**
+
+- `as NewKey` — computes the new property name.
+- `never` — filters out the key.
+- Template literal types — build new string keys.
+- `Exclude` — removes specific keys.
+
+**Syntax rules.**
+
+- `as` follows the iteration clause.
+- The new key must be assignable to `string | number | symbol`.
+- `never` removes the property.
+- Template literals require string keys; widen with `& string` and accept symbol/number keys being dropped.
+
+**Constraints and limitations.**
+
+- Key remapping breaks homomorphic modifier preservation when the key changes.
+- Symbol and number keys are dropped by template literal remapping unless handled separately.
+- Complex conditional remapping can slow compilation.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Generating getters
+
+```typescript
+// example_remap_getters.ts
+type Getters<Type> = {
+  [Property in keyof Type as `get${Capitalize<string & Property>}`]: () => Type[Property];
+};
+
+interface Person {
+  name: string;
+  age: number;
 }
 
-// Step 2: Generate event handler prop names.
-type EventHandlers<T> = {
-  [K in keyof T & string as `on${Capitalize<K>}`]: (payload: T[K]) => void;
+type LazyPerson = Getters<Person>;
+// { getName: () => string; getAge: () => number }
+
+const lazy: LazyPerson = {
+  getName: () => "Ada",
+  getAge: () => 36,
 };
 
-type AppEventHandlers = EventHandlers<EventMap>;
-// {
-//   onLoggedIn: (payload: { userId: string }) => void;
-//   onLoggedOut: (payload: { userId: string; timestamp: Date }) => void;
-//   onError: (payload: { message: string; code: number }) => void;
-// }
-
-// Step 3: Use the generated handlers.
-const handlers: AppEventHandlers = {
-  onLoggedIn: (payload) => console.log(`User ${payload.userId} logged in`),
-  onLoggedOut: (payload) => console.log(`User ${payload.userId} logged out`),
-  onError: (payload) => console.log(`Error ${payload.code}: ${payload.message}`),
-};
-
-handlers.onLoggedIn({ userId: "user-123" });  // "User user-123 logged in"
-handlers.onError({ message: "Not found", code: 404 });  // "Error 404: Not found"
-
-// Step 4: Generate selector hooks from a state shape.
-interface AppState {
-  user: { name: string; age: number };
-  theme: "light" | "dark";
-}
-
-type SelectorHooks<T> = {
-  [K in keyof T & string as `use${Capitalize<K>}`]: () => T[K];
-};
-
-type AppSelectors = SelectorHooks<AppState>;
-// { useUser: () => { name: string; age: number }; useTheme: () => "light" | "dark" }
-
-console.log("Event handler and selector generation complete.");
+console.log(lazy.getName()); // Expected: Ada
 ```
 
 **Expected Output:**
 ```
-User user-123 logged in
-Error 404: Not found
-Event handler and selector generation complete.
+Ada
 ```
 
-**Why This Output Occurs:** The `EventHandlers<T>` mapped type uses the `as` clause with template literals to generate `on` + `Capitalize` handler names from event names. The `SelectorHooks<T>` type generates `use` + `Capitalize` selector names from state keys. Both demonstrate how key remapping enables dynamic type generation.
+**Why this output occurs.** Each key `K` is remapped to `` `get${Capitalize<K>}` ``, producing `getName` and `getAge`. The value type is a function returning the original property type.
+
+---
+
+#### Example 2: Filtering keys with `Exclude`
+
+```typescript
+// example_remap_filter.ts
+type RemoveKindField<Type> = {
+  [Property in keyof Type as Exclude<Property, "kind">]: Type[Property];
+};
+
+interface Circle {
+  kind: "circle";
+  radius: number;
+}
+
+type KindlessCircle = RemoveKindField<Circle>;
+// { radius: number }
+
+const circle: KindlessCircle = { radius: 10 };
+console.log(circle.radius); // Expected: 10
+```
+
+**Expected Output:**
+```
+10
+```
+
+**Why this output occurs.** The `as Exclude<Property, "kind">` clause removes the `"kind"` key by mapping it to `never`. Only `radius` remains.
+
+---
+
+#### Example 3: Mapping over arbitrary unions
+
+```typescript
+// example_remap_union.ts
+type EventConfig<Events extends { kind: string }> = {
+  [E in Events as E["kind"]]: (event: E) => void;
+};
+
+type SquareEvent = { kind: "square"; x: number; y: number };
+type CircleEvent = { kind: "circle"; radius: number };
+
+type Config = EventConfig<SquareEvent | CircleEvent>;
+// { square: (event: SquareEvent) => void; circle: (event: CircleEvent) => void }
+
+const config: Config = {
+  square: (event) => console.log(event.x),
+  circle: (event) => console.log(event.radius),
+};
+
+config.square({ kind: "square", x: 1, y: 2 }); // Expected: 1
+```
+
+**Expected Output:**
+```
+1
+```
+
+**Why this output occurs.** The mapped type iterates over the union of event types. Each `E` is remapped to `E["kind"]`, producing a handler map keyed by event kind.
+
+---
 
 ### Real-World Cases
 
-**Case 1: React Event Handler Props**
-React component libraries use key remapping to generate `onClick`, `onChange`, etc. prop types from event maps.
+- **Getter/setter generation**: `Getters<T>` and `Setters<T>`.
+- **API filtering**: removing internal fields with `Exclude`.
+- **Event handler maps**: mapping event names to handler types.
+- **Route parameter maps**: remapping path segments to parameter types.
 
-**Case 2: State Management Selectors**
-State management libraries generate selector hooks (`useUserName`, `useUserAge`) from state shapes.
+---
 
-**Case 3: API Client Generation**
-API clients generate method names from endpoint definitions, filtering out non-function properties.
+## 7. Mapped Type Best Practices
 
-**Case 4: Form Field Generation**
-Form libraries generate field names with prefixes/suffixes (e.g., `field_` or `_value`) from data types.
+### Definitions
 
-**Case 5: ORM Query Builders**
-ORMs generate query method names from entity fields, filtering out non-scalar properties.
+**Core Definition.** **Mapped type best practices** are guidelines for using mapped types in ways that maximize **readability, safety, and compiler performance**, while avoiding excessive complexity, unnecessary recursion, and tooling slowdowns.
 
-**Case 6: Type-Safe Event Emitters**
-Event emitters generate `on`/`off`/`emit` method names from event maps, ensuring type safety across event handling.
+**Technical Definition.** Best practices center on **preferring built-in utility types** (`Partial`, `Required`, `Readonly`, `Pick`, `Omit`, `Record`), **breaking complex mapped types into smaller composable types**, **using homomorphic mapped types for structure preservation**, **being careful with key remapping** (especially symbol/number keys), and **avoiding deeply recursive or heavily conditional mapped types** that slow compilation. Performance guidance notes that **overly complex mapped types with multiple conditional branches slow compilation significantly**, and **each small utility type is cached separately**.
 
-**Case 7: GraphQL Code Generation**
-GraphQL generators create query/mutation method names from schema types, filtering based on operation types.
+**Beginner-Friendly Explanation.** Best practices are **the habits experienced TypeScript developers use** to keep mapped types fast and maintainable. The big rules are: use built-in utility types first; break complex transformations into small pieces; remember that key remapping drops symbol/number keys with template literals; and avoid deeply recursive mapped types.
 
-**Case 8: Testing Utilities**
-Test utilities generate mock method names from class interfaces, filtering out non-method properties.
+### Purposes
 
-### References
+- **To maximize compiler performance** by keeping mapped types small and composable.
+- **To keep types readable and debuggable** with focused utility types.
+- **To preserve property modifiers and array/tuple structure** with homomorphic forms.
+- **To avoid unexpected key loss** in remapping.
+- **To leverage built-in utilities** instead of reinventing them.
 
-- TypeScript 4.1 Release Notes: Key Remapping in Mapped Types — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-1.html#key-remapping-in-mapped-types
-- TypeScript Handbook: Mapped Types (Key Remapping via `as`) — https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
-- TypeScript PR #40336: Key Remapping in Mapped Types — https://github.com/microsoft/TypeScript/pull/40336
-- Remap Keys with `as` Clauses in Mapped Types — https://github.com/pproenca/dot-skills/blob/HEAD/skills/.experimental/typescript-advanced-patterns/references/tlp-key-remapping-as.md
-- Total TypeScript: Key Remapping — https://www.totaltypescript.com/workshops/type-transformations/mapped-types/key-remapping
+### Syntax Rules and Structure
 
+Best practices are conventions that interact with mapped type syntax. The core rules are:
 
-## Summary: Mapped Type Feature Comparison
+1. **Prefer built-in utility types.** Use `Partial<T>`, `Required<T>`, `Readonly<T>`, `Pick<T, K>`, and `Omit<T, K>` before writing custom mapped types.
+2. **Use homomorphic mapped types for structure preservation.** `{ [K in keyof T]: ... }` preserves modifiers and tuple/array structure.
+3. **Break complex mapped types into smaller composable types.** Overly complex mapped types with multiple conditional branches slow compilation; each small utility is cached separately.
+4. **Be careful with key remapping and symbol/number keys.** Template literal types only work on string keys; widen with `& string` and accept that symbol/number keys are dropped.
+5. **Avoid deeply recursive mapped types.** Recursive types like `DeepPartial` can hit recursion limits and slow compilation.
+6. **Keep template literal unions small.** Very large template literal unions degrade performance; keep them under ~20 members where possible.
+7. **Use `never` to filter keys** when key remapping is needed, but prefer `Omit<T, K>` for simple filtering.
+8. **Document complex mapped types.** Add comments explaining the intended transformation and any key remapping behavior.
 
-| Feature | Syntax | Purpose | TypeScript Version |
-|---------|--------|---------|-------------------|
-| Key iteration | `[P in keyof T]` | Iterate over all keys | 2.1 |
-| Property transformation | `T[P]` | Access/transform property types | 2.1 |
-| Add `readonly` | `+readonly` or `readonly` | Make properties immutable | 2.8 |
-| Remove `readonly` | `-readonly` | Make properties mutable | 2.8 |
-| Add optional | `+?` or `?` | Make properties optional | 2.8 |
-| Remove optional | `-?` | Make properties required (and remove `undefined`) | 2.8 |
-| Key remapping | `as NewKey` | Rename/filter keys | 4.1 |
-| Filter keys | `as ... ? K : never` | Remove properties | 4.1 |
-| Exact optional | `exactOptionalPropertyTypes` | Distinguish missing vs `undefined` | 4.4 |
-| `number`/`symbol` keys | `keyof` includes these | Support numeric/symbol keys | 2.9 |
+**Component breakdown (mapped type decision tree):**
 
+```
+Do you need to transform an object type?
+  ├── Yes → Can a built-in utility type do it?
+  │        ├── Yes → Use Partial / Required / Readonly / Pick / Omit / Record.
+  │        └── No → Write a mapped type.
+  │                 ├── Does it need to preserve modifiers and arrays? → Use homomorphic form.
+  │                 ├── Does it need to rename or filter keys? → Use `as` remapping.
+  │                 └── Keep it small and composable.
+  └── No → Use simpler types.
+```
+
+**Constraints and limitations.**
+
+- Key remapping can break homomorphic modifier preservation.
+- Symbol and number keys are dropped by template literal remapping.
+- Deep recursion and large unions can cause compiler performance issues.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Prefer built-in utilities
+
+```typescript
+// example_best_builtin.ts
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// ❌ Custom mapped type duplicates built-in behavior.
+// type MyPartial<T> = { [K in keyof T]?: T[K] };
+
+// ✅ Use the built-in.
+type PartialUser = Partial<User>;
+
+const update: PartialUser = { name: "Ada" };
+console.log(update.name); // Expected: Ada
+```
+
+**Expected Output:**
+```
+Ada
+```
+
+**Why this output occurs.** `Partial<User>` makes every property optional. The built-in is optimized and documented; reimplementing it adds maintenance burden without benefit.
+
+---
+
+#### Example 2: Break complex mapped types into composable utilities
+
+```typescript
+// example_best_composable.ts
+// ❌ Complex single mapped type with multiple branches.
+// type Complex<T> = {
+//   [K in keyof T]: T[K] extends string ? `str_${K}` : T[K] extends number ? `num_${K}` : K;
+// };
+
+// ✅ Smaller composable utilities.
+type StringKeys<T> = {
+  [K in keyof T as T[K] extends string ? K : never]: T[K];
+};
+
+type NumberKeys<T> = {
+  [K in keyof T as T[K] extends number ? K : never]: T[K];
+};
+
+interface Mixed {
+  name: string;
+  age: number;
+  active: boolean;
+}
+
+type StringFields = StringKeys<Mixed>; // { name: string }
+type NumberFields = NumberKeys<Mixed>; // { age: number }
+
+const str: StringFields = { name: "Ada" };
+console.log(str.name); // Expected: Ada
+```
+
+**Expected Output:**
+```
+Ada
+```
+
+**Why this output occurs.** Each small utility filters a single category of keys, keeping the conditional logic isolated and cacheable. Composing them is clearer and faster than one deeply nested mapped type.
+
+---
+
+#### Example 3: Handle symbol keys in remapping
+
+```typescript
+// example_best_symbol.ts
+// Template literal remapping drops symbol keys.
+type StringKeysOnly<T> = {
+  [K in keyof T as K extends string ? K : never]: T[K];
+};
+
+const symbolKey = Symbol("sym");
+
+interface Data {
+  name: string;
+  [symbolKey]: number;
+}
+
+type OnlyStringKeys = StringKeysOnly<Data>; // { name: string }
+
+const data: OnlyStringKeys = { name: "Ada" };
+console.log(data.name); // Expected: Ada
+```
+
+**Expected Output:**
+```
+Ada
+```
+
+**Why this output occurs.** The conditional `K extends string ? K : never` filters out symbol keys. This makes the dropped-key behavior explicit rather than relying on template literal widening.
+
+---
+
+### Real-World Cases
+
+- **Library utility types**: using `Partial`, `Required`, and `Readonly` instead of custom implementations.
+- **Large codebases**: splitting complex mapped types into small composable utilities to improve caching and compile time.
+- **Type-safe APIs**: using homomorphic mapped types to preserve array/tuple structure.
+- **Key remapping**: documenting symbol/number key handling in event maps and getter generators.
+
+---
 
 ## References
 
-- TypeScript Handbook: Mapped Types — https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
-- TypeScript 2.1 Release Notes: Mapped Types — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html
-- TypeScript 2.8 Release Notes: Improved control over mapped type modifiers — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-8.html
-- TypeScript 2.9 Release Notes: Support number and symbol named properties with keyof and mapped types — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-9.html
-- TypeScript 4.1 Release Notes: Key Remapping in Mapped Types — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-1.html#key-remapping-in-mapped-types
-- TypeScript 4.4 Release Notes: exactOptionalPropertyTypes — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-4.html#exact-optional-property-types---exactoptionalpropertytypes
-- TypeScript Handbook: Utility Types — https://www.typescriptlang.org/docs/handbook/utility-types.html
-- TypeScript Handbook: Keyof Type Operator — https://www.typescriptlang.org/docs/handbook/2/keyof-types.html
-- TypeScript Handbook: Indexed Access Types — https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html
-- TypeScript Playground: Mapped Types — https://www.typescriptlang.org/play/typescript/meta-types/mapped-types.ts.html
-- GitHub Issue #60717: How does indexing an optional property within a mapped type behave? — https://github.com/microsoft/TypeScript/issues/60717
-- GitHub Issue #60233: Certain homomorphic mappings break assignability with exactOptionalPropertyTypes — https://github.com/microsoft/TypeScript/issues/60233
-- GitHub Issue #60138: `exactOptionalPropertyTypes` faults the use of `Omit` — https://github.com/microsoft/TypeScript/issues/60138
-- Total TypeScript: Mapped Types — https://www.totaltypescript.com/workshops/type-transformations/mapped-types
+- Documentation - Mapped Types — https://www.typescriptlang.org/docs/handbook/2/mapped-types.html
+- Documentation - TypeScript 3.1 (Mapped types on tuples and arrays) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-1.html
+- Documentation - Creating Types from Types — https://www.typescriptlang.org/docs/handbook/2/types-from-types.html
+- Documentation - Keyof Type Operator — https://www.typescriptlang.org/docs/handbook/2/keyof-types.html
+- Documentation - Indexed Access Types — https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html
+- Documentation - Utility Types — https://www.typescriptlang.org/docs/handbook/utility-types.html
+- Documentation - TypeScript 4.1 (Key Remapping via `as`) — https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-1.html
+- How to Implement Mapped Types in TypeScript — https://github.com/OneUptime/blog/blob/master/posts/2026-01-30-how-to-implement-mapped-types-in-typescript/README.md
+- TypeScript Mapped Types and Template Literals — https://www.aiwisdom.dev
+- Type-Simplify Mapped Types (Performance Best Practices) — https://github.com/pproenca/dot-skills/blob/master/skills/.curated/typescript/references/type-simplify-mapped-types.md
+- Homomorphic Mapped Types — https://github.com/microsoft/TypeScript/issues/63132
+- Mapped Type Modifiers — https://www.booleanart.com
