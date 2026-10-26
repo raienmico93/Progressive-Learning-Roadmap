@@ -1,4 +1,4 @@
-# Express.js Security Fundamentals — Comprehensive Programming Cheat Sheet
+# Security Fundamentals — Comprehensive Cheat Sheet
 
 ---
 
@@ -6,1108 +6,931 @@
 
 ### Definitions
 
-**Core Definition:** Express.js security fundamentals encompass the configuration practices, coding patterns, and dependency management strategies required to protect an Express application from common web vulnerabilities, given that Express is intentionally minimal and ships with **no security features enabled by default**.
+**Core Definition (Academic).** **Security** in software systems is the **protection of information and processing resources** so that their **confidentiality, integrity, and availability (CIA)** are preserved under the control of the system owner. Security is not a feature that is added at the end; it is a **property of the system's design, implementation, and operation**, achieved through the systematic application of principles such as threat modeling, attack-surface minimization, defense in depth, least privilege, and secure defaults.
 
-**Technical Definition:** Express.js is a minimal, unopinionated Node.js web framework that provides routing, middleware, and a thin response API but includes no built-in security headers, no CSRF protection, no input validation, and no rate limiting. Security therefore must be layered explicitly through framework configuration settings (e.g., `app.disable()`, `app.set()`), middleware (e.g., Helmet, rate limiters), input validation libraries, secure session configuration, dependency auditing, and production-safe error handling.
+**Technical Definition.** Security engineering applies a **risk-based, lifecycle-oriented** process: identify assets and threats (threat modeling), enumerate exposed surfaces (attack surface), layer independent controls (defense in depth), constrain access to the minimum necessary (least privilege), ship configurations that are secure without operator intervention (secure defaults), and manage third-party code as a controlled supply chain (dependency management). The governing standard frameworks include **OWASP ASVS**, **NIST CSF**, **ISO/IEC 27034**, and **CIS Controls**.
 
-**Beginner-Friendly Explanation:** Express is like a house delivered without locks, windows, or a security system — it gives you the rooms (routes) and doors (middleware), but you must install the locks yourself. Express security fundamentals are the steps you take to lock the doors, hide the blueprints from strangers, check that your building materials (dependencies) are not counterfeit, and ensure that when something goes wrong, you don't accidentally hand a stranger the keys to the building.
+**Beginner-Friendly Explanation.** Security is **keeping the bad things from happening to your software and its data**. It means making sure only the right people can see data (confidentiality), that data is not secretly changed (integrity), and that the system keeps working when needed (availability). Good security is not a single lock on the front door; it is **a way of building and running the whole house** — knowing what you are protecting, who might attack it, and making the safe choice the easy choice.
+
+---
 
 ### Key Characteristics
 
-- **Minimal by default:** Express omits security features to remain flexible, making every protection an explicit addition.
-- **Dependency-heavy:** Express relies on a small set of companion packages (`qs`, `path-to-regexp`, `send`, `serve-static`, `body-parser`, `cookie`) whose vulnerabilities ripple into every application.
-- **Configuration-sensitive:** Settings such as `trust proxy`, `x-powered-by`, and `strict routing` have security implications when misconfigured.
-- **Error-handling dependent:** The default error handler leaks stack traces and internal paths unless replaced with a production-safe handler.
-- **Supply-chain exposed:** The npm ecosystem introduces risks from malicious packages, outdated dependencies, and dependency confusion attacks.
+| Characteristic | Description |
+|---|---|
+| **Risk-based** | Security decisions are prioritized by threat likelihood and impact, not by checklist completion. |
+| **Lifecycle-wide** | Security begins in requirements and design, continues through coding and testing, and extends into deployment and operations. |
+| **Defense-oriented** | No single control is trusted alone; layers provide redundancy and fault tolerance. |
+| **Least-privilege by default** | Every user, process, and service receives only the access it needs to function, and no more. |
+| **Secure-by-default** | The system ships in a secure state without requiring the operator to harden it manually. |
+| **Supply-chain aware** | Third-party and transitive dependencies are inventoried, scanned, and monitored as part of the attack surface. |
+| **Continuously verified** | Controls are tested, monitored, and audited rather than assumed to work. |
+
+---
 
 ### Prerequisites
 
-- **Node.js runtime** (v18 or higher recommended).
-- **Express.js installed** (`npm install express`).
-- **Basic understanding of HTTP:** headers, methods, status codes.
-- **Familiarity with middleware:** how `app.use()` and route handlers work.
-- **Environment variables:** understanding `NODE_ENV` and secrets management.
+- **Basic software development concepts**: code, configuration, deployment, and dependencies.
+- **HTTP and network fundamentals**: clients, servers, protocols, and data flows.
+- **Familiarity with the CIA triad** (confidentiality, integrity, availability).
+- **Access to a development environment** to experiment with code examples (Python, Terraform, CI pipelines).
+- **Awareness of common vulnerability classes** (injection, broken access control, supply-chain compromise).
+
+---
 
 ### Related Programming Areas
 
-- **Web application security:** OWASP Top 10 vulnerabilities (XSS, CSRF, injection).
-- **Middleware architecture:** Helmet, CORS, rate limiting, and session management.
-- **Dependency management:** npm audit, Snyk, Socket, lockfiles.
-- **Error handling and observability:** logging, monitoring, and incident response.
-- **DevOps and deployment:** TLS termination, reverse proxies, CI/CD security gates.
-
-### Core Concepts
-
-1. **Secure Defaults** — disabling `x-powered-by`, enforcing strict routing, and changing default session/cookie identifiers.
-2. **Attack Surfaces** — mapping entry points, securing parameters vs. query strings, and handling unexpected content types.
-3. **Dependency Management** — handling supply-chain attacks, monitoring vulnerabilities, and pinning versions securely.
-4. **Error Handling & Information Disclosure** — preventing stack traces, internal system paths, and database errors from leaking to clients in production.
+- **Secure SDLC**: integrating security activities into requirements, design, coding, testing, and operations.
+- **Application security (AppSec)**: OWASP Top 10, ASVS, and secure coding practices.
+- **Cloud security**: IAM, network segmentation, and shared-responsibility models.
+- **Software supply chain security**: SCA, SBOM, provenance, and dependency risk management.
+- **Incident response and monitoring**: detection, logging, and recovery complement preventive controls.
 
 ---
 
-## Core Concept 1: Secure Defaults
+### Core Concepts / Features
+
+The following eight sections cover the requested concepts. Each follows the uniform structure: definitions (core, technical, beginner-friendly), purposes beginning with “To”, syntax rules and structure with component breakdowns, annotated executable examples with expected outputs, real-world cases, and references.
+
+---
+
+## 1. Security
 
 ### Definitions
 
-**Core Definition:** Secure defaults are configuration changes applied immediately after creating an Express application to reduce its attack surface by removing unnecessary information, enforcing stricter routing behaviour, and replacing predictable identifiers with custom values.
+**Core Definition.** **Security** is the state in which a system preserves the **confidentiality, integrity, and availability** of its information and processing resources under the control of its owner.
 
-**Technical Definition:** Express exposes application-level settings through `app.disable()`, `app.enable()`, and `app.set()`. Key security-relevant defaults include the `X-Powered-By` header (enabled by default), non-strict routing (trailing slashes ignored), and default session cookie names (`connect.sid` for `express-session`, `session` for `cookie-session`). Each default creates a fingerprinting or attack vector that can be mitigated through explicit configuration.
+**Technical Definition.** Formally, security is achieved when the system enforces a **security policy** that specifies which subjects may perform which actions on which objects, and when the system's mechanisms (authentication, authorization, auditing, cryptography, isolation) correctly implement that policy. Security is **not a binary property**; it is a continuous risk-management outcome measured against an explicit **threat model**.
 
-**Beginner-Friendly Explanation:** Secure defaults are like changing the factory-set password on a new Wi-Fi router. The router works fine with the default password, but anyone who knows the brand can guess it. Similarly, Express works fine with its defaults, but attackers know those defaults and can use them to identify and target your application. Changing them is a simple but powerful first step.
+**Beginner-Friendly Explanation.** Security is **making sure your software behaves safely even when someone tries to make it misbehave**. It means protecting data from being read (confidentiality), altered (integrity), or destroyed or blocked (availability). It also means knowing **who** is allowed to do **what**, and being able to prove it later.
 
 ### Purposes
 
-- To reduce server fingerprinting by removing headers that reveal the technology stack.
-- To prevent route confusion attacks by enforcing strict trailing-slash and case-sensitivity rules.
-- To prevent session hijacking by replacing predictable session cookie names with custom identifiers.
-- To establish a hardened baseline before adding application-specific logic.
+- **To protect sensitive data** from unauthorized disclosure, modification, or destruction.
+- **To preserve system availability** so legitimate users can access services when needed.
+- **To establish accountability** through authentication, authorization, and audit trails.
+- **To reduce organizational risk** from breaches, regulatory penalties, and reputational damage.
+- **To enable trust** in software systems that handle financial, health, or personal information.
 
-### Sub-Feature 1.1: Disabling the `X-Powered-By` Header
+### Syntax Rules and Structure
 
-#### Definitions
+Security is a **discipline**, not a syntax; its “rules” are principles and standards. The canonical security principles include:
 
-**Core Definition:** The `X-Powered-By` header is an HTTP response header automatically set by Express that reveals the framework name (`Express`) to clients.
+| Principle | Rule |
+|---|---|
+| **Minimize attack surface** | Remove or disable unnecessary features, ports, and interfaces. |
+| **Employ secure defaults** | Ship configurations that are secure without operator action. |
+| **Use defense in depth** | Layer independent controls so no single failure compromises the system. |
+| **Apply least privilege** | Grant only the access necessary to perform the task. |
+| **Fail securely** | On failure, deny access rather than grant it. |
+| **Assume external systems are insecure** | Do not trust data from outside your trust boundary. |
+| **Never rely on obscurity** | Assume the attacker knows your design and code. |
 
-**Technical Definition:** Express sets the `X-Powered-By: Express` header by default. Disabling it prevents attackers from fingerprinting the server technology, which is a prerequisite for targeted exploitation of known Express vulnerabilities.
+**Constraints and limitations.**
 
-**Beginner-Friendly Explanation:** Imagine every letter you send is stamped with the name of the brand of stationery you used. An attacker who knows you use a particular brand can look up known weaknesses of that brand. Removing the stamp doesn't make the letter safer by itself, but it makes you a less obvious target.
+- **Security is context-dependent**: the right controls depend on the threat model, data sensitivity, and regulatory environment.
+- **No system is perfectly secure**: security is about managing risk to an acceptable level, not eliminating it.
+- **Security controls have costs** (performance, usability, operational overhead) that must be balanced against risk.
 
-#### Purposes
+### Annotated Complete Step by Step Code Examples
 
-- To prevent technology-stack fingerprinting by attackers.
-- To reduce the information available for targeted vulnerability exploitation.
-- To comply with security hardening checklists and penetration-test requirements.
+#### Example 1: Verifying the CIA triad in a simple data-access function
 
-#### Syntax Rules and Structure
+```python
+# security_cia.py
+import hashlib
 
-```js
-app.disable('x-powered-by');
+class SecureStore:
+    def __init__(self):
+        # Step 1: Confidentiality — data is encrypted at rest (simplified).
+        self._data = {}
+
+    def store(self, key: str, value: str):
+        # Integrity: store a hash alongside the value.
+        digest = hashlib.sha256(value.encode()).hexdigest()
+        self._data[key] = {"value": value, "digest": digest}
+
+    def retrieve(self, key: str) -> str:
+        entry = self._data[key]
+        # Integrity check: recompute the hash and compare.
+        if hashlib.sha256(entry["value"].encode()).hexdigest() != entry["digest"]:
+            raise IntegrityError("Data has been tampered with")
+        return entry["value"]
 ```
 
-| Component | Breakdown |
-|-----------|-----------|
-| `app` | The Express application instance. |
-| `disable` | Application method for turning off a setting. |
-| `'x-powered-by'` | The setting name corresponding to the header. |
-
-**Constraints and Limitations:**
-- Must be called **before** any route handlers are defined to take effect on all responses.
-- Helmet's `helmet()` middleware also removes the header, but explicit disabling is clearer and avoids middleware ordering dependencies.
-
-#### Annotated Code Example
-
-```js
-// secure-defaults.js
-const express = require('express');
-const app = express();
-
-// 1. Disable X-Powered-By header — must be done before routes
-app.disable('x-powered-by');
-
-// 2. Verify the setting is disabled
-console.log('x-powered-by enabled:', app.enabled('x-powered-by')); // false
-
-app.get('/', (req, res) => {
-  res.send('Hello, secure world!');
-});
-
-app.listen(3000, () => console.log('Server on port 3000'));
+**Expected Output (conceptual):**
+```
+store("user:1", "alice") → stored with digest
+retrieve("user:1") → "alice"
+Tampered data → IntegrityError raised
 ```
 
-**Expected Output (server console):**
-```
-x-powered-by enabled: false
-Server on port 3000
-```
-
-**Expected Response Headers (for `GET /`):**
-```
-HTTP/1.1 200 OK
-Content-Type: text/html; charset=utf-8
-(No X-Powered-By header present)
-```
-
-**Why this output:** `app.disable('x-powered-by')` turns off the setting that causes Express to add the header. The `app.enabled()` check confirms the setting is off. When a response is sent, the header is not included.
-
-#### Real-World Cases
-
-- **Security audits:** Penetration testers routinely check for the `X-Powered-By` header as an information-gathering step.
-- **Bug bounty programs:** Reports often flag the presence of `X-Powered-By` as a low-severity finding because it enables targeted attacks.
-- **Compliance:** Standards such as PCI DSS recommend minimising information disclosure in HTTP responses.
+**Why this output occurs.** The example demonstrates two legs of the CIA triad: **integrity** is enforced by comparing a stored hash against a recomputed hash on retrieval; **confidentiality** would be achieved by encrypting the value (simplified here). **Availability** is preserved by not corrupting the store on failed integrity checks. This is a foundational pattern: security properties must be **explicitly implemented and verified**, not assumed.
 
 ---
 
-### Sub-Feature 1.2: Enforcing Strict Routing
+### Real-World Cases
 
-#### Definitions
-
-**Core Definition:** Strict routing is an Express setting that treats URLs with and without trailing slashes as **distinct** routes, rather than equivalent.
-
-**Technical Definition:** By default, Express's router treats `/foo` and `/foo/` as the same route (non-strict routing). Enabling strict routing (`app.set('strict routing', true)` or `express.Router({ strict: true })`) makes trailing slashes significant, so `/foo` and `/foo/` match different routes.
-
-**Beginner-Friendly Explanation:** Without strict routing, `/about` and `/about/` are treated as the same address. With strict routing, they are different addresses — like distinguishing between "123 Main Street" and "123 Main Street/". This prevents attackers from exploiting inconsistent URL handling.
-
-#### Purposes
-
-- To prevent route confusion attacks where different URL forms bypass security checks.
-- To ensure deterministic routing behaviour across environments.
-- To align with cache and proxy behaviour where trailing slashes may be significant.
-
-#### Syntax Rules and Structure
-
-```js
-// Application-level
-app.set('strict routing', true);
-
-// Router-level
-const router = express.Router({ strict: true });
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `app.set()` | Application setting method. |
-| `'strict routing'` | The setting name. |
-| `true` | Enables strict routing. |
-| `express.Router({ strict: true })` | Router-level equivalent. |
-
-**Constraints and Limitations:**
-- Enabling strict routing may break existing routes that rely on non-strict behaviour.
-- The root path `/` is always treated as having a trailing slash by nature.
-
-#### Annotated Code Example
-
-```js
-// strict-routing.js
-const express = require('express');
-const app = express();
-
-app.set('strict routing', true);
-
-app.get('/about', (req, res) => res.send('About page'));
-app.get('/about/', (req, res) => res.send('About page (strict)'));
-
-app.listen(3000, () => console.log('Strict routing server on 3000'));
-```
-
-**Expected Output (for `GET /about`):**
-```
-About page
-```
-
-**Expected Output (for `GET /about/`):**
-```
-About page (strict)
-```
-
-**Why this output:** With strict routing enabled, Express distinguishes between `/about` and `/about/`, routing each to its respective handler. Without strict routing, both requests would match the first defined route.
-
-#### Real-World Cases
-
-- **API versioning:** Strict routing ensures `/api/v1/users` and `/api/v1/users/` are treated distinctly.
-- **Static file serving:** Prevents ambiguity in how paths are resolved.
-- **Security middleware:** Route-level authentication is less likely to be bypassed by URL manipulation.
+- **Financial services**: PCI DSS requires encryption of cardholder data at rest and in transit, plus access controls and audit logging.
+- **Healthcare**: HIPAA mandates confidentiality and integrity safeguards for protected health information.
+- **Cloud providers**: the shared-responsibility model divides security duties between the provider (infrastructure) and the customer (data, identity, configuration).
 
 ---
 
-### Sub-Feature 1.3: Changing Default Session/Cookie Identifiers
-
-#### Definitions
-
-**Core Definition:** Default session and cookie identifiers are predictable names used by Express middleware to store session references, which attackers can use to identify the session mechanism.
-
-**Technical Definition:** `express-session` defaults the session cookie name to `connect.sid`, and `cookie-session` defaults to `session`. These names are well-known and can be used by attackers to target session-related attacks. Changing them to custom values reduces the attack surface.
-
-**Beginner-Friendly Explanation:** If everyone in a neighbourhood uses the same brand of lock, a thief only needs to learn one technique to open all the doors. Changing your session cookie name is like using a custom lock — it doesn't make the door impenetrable, but it removes the advantage of familiarity.
-
-#### Purposes
-
-- To prevent session mechanism fingerprinting by attackers.
-- To reduce the risk of session hijacking through predictable identifiers.
-- To comply with security recommendations for session management.
-
-#### Syntax Rules and Structure
-
-```js
-app.use(session({
-  name: 'customSessionId',  // Custom cookie name
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true,
-    httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 3600000
-  }
-}));
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `name` | Custom session cookie name (replaces default `connect.sid`). |
-| `secret` | Secret key for signing the session ID cookie. |
-| `secure: true` | Cookie only sent over HTTPS. |
-| `httpOnly: true` | Cookie not accessible via JavaScript. |
-| `sameSite: 'lax'` | CSRF mitigation. |
-
-**Constraints and Limitations:**
-- The `secure: true` flag requires HTTPS; behind a reverse proxy, `app.set('trust proxy', 1)` may be needed.
-- `cookie-session` does not encrypt session contents, only signs them.
-
-#### Annotated Code Example
-
-```js
-// secure-session.js
-const express = require('express');
-const session = require('express-session');
-const app = express();
-
-app.set('trust proxy', 1); // Trust first proxy (e.g., load balancer)
-
-app.use(session({
-  name: 'app.sid',                              // Custom cookie name
-  secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: true,                               // HTTPS only
-    httpOnly: true,                             // No JavaScript access
-    sameSite: 'lax',                            // CSRF mitigation
-    maxAge: 3600000                             // 1 hour
-  }
-}));
-
-app.get('/', (req, res) => {
-  req.session.views = (req.session.views || 0) + 1;
-  res.send(`Views: ${req.session.views}`);
-});
-
-app.listen(3000, () => console.log('Session server on 3000'));
-```
-
-**Expected Response Headers (for `GET /` over HTTPS):**
-```
-Set-Cookie: app.sid=s%3A...; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600
-```
-
-**Why this output:** The session middleware sets a cookie with the custom name `app.sid` instead of `connect.sid`. The `HttpOnly` flag prevents JavaScript access, `Secure` restricts to HTTPS, and `SameSite=Lax` mitigates CSRF.
-
-#### Real-World Cases
-
-- **Banking applications:** Custom session identifiers reduce the risk of session-targeted attacks.
-- **Healthcare portals:** Compliance requirements (HIPAA) mandate secure session management.
-- **E-commerce:** Protecting customer sessions from hijacking during checkout.
-
----
-
-## Core Concept 2: Attack Surfaces
+## 2. Threat Modeling
 
 ### Definitions
 
-**Core Definition:** An attack surface is the sum of all entry points through which an attacker can interact with or influence an application.
+**Core Definition.** **Threat modeling** is a structured process for **identifying, categorizing, and prioritizing potential threats** to a system so that mitigations can be designed before vulnerabilities are exploited.
 
-**Technical Definition:** In Express, the attack surface includes URL path parameters (`req.params`), query string parameters (`req.query`), request bodies (`req.body`), HTTP headers, cookies, and the content types accepted by body-parsing middleware. Each entry point represents a potential vector for injection, prototype pollution, cross-site scripting, or denial-of-service attacks.
+**Technical Definition.** Threat modeling decomposes a system into **components, trust boundaries, and data flows**, then systematically enumerates threats against each element. The two most widely used methodologies are **STRIDE** (Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege) for **threat identification** and **DREAD** (Damage, Reproducibility, Exploitability, Affected users, Discoverability) for **risk scoring**. Modern practice treats threat models as **version-controlled artifacts** that evolve with the architecture.
 
-**Beginner-Friendly Explanation:** Think of your application as a building. The attack surface is every door, window, and vent through which someone could enter. Every URL parameter, every query string, every form field, and every API request is a potential entrance that needs to be checked and secured.
+**Beginner-Friendly Explanation.** Threat modeling is **thinking like an attacker before the attacker does**. You draw a picture of your system — what talks to what, where the trust boundaries are — and then ask “how could someone break this?” For each way, you decide how bad it would be and what you are going to do about it. It is a **structured brainstorming session with a paper trail**, not a one-time security review.
 
 ### Purposes
 
-- To identify and map all entry points where user input can enter the application.
-- To apply appropriate validation and sanitisation to each type of input.
-- To prevent prototype pollution through query string and body parsing.
-- To reject unexpected or malicious content types before they reach application logic.
+- **To find security bugs early** in design, when fixes are cheap.
+- **To communicate security design** to new team members and downstream teams.
+- **To guide test planning** by identifying the highest-risk attack paths.
+- **To prioritize remediation** using risk scoring rather than guesswork.
+- **To produce a version-controlled artifact** that evolves with the architecture.
 
-### Sub-Feature 2.1: Mapping Entry Points
+### Syntax Rules and Structure
 
-#### Definitions
+**General process (STRIDE + DREAD).**
 
-**Core Definition:** Mapping entry points is the systematic identification of every location in an Express application where external input is received and processed.
-
-**Technical Definition:** Express applications receive input through `req.params` (URL segments), `req.query` (query string), `req.body` (request body), `req.headers` (HTTP headers), and `req.cookies` (cookies). Each must be treated as untrusted and validated before use.
-
-**Beginner-Friendly Explanation:** Before you can secure a building, you need to know where all the doors are. Mapping entry points means writing down every place in your code where you accept something from the user — every URL parameter, every form field, every API body.
-
-#### Purposes
-
-- To create a comprehensive inventory of input sources for validation coverage.
-- To ensure no entry point is overlooked during security reviews.
-- To prioritise validation efforts based on risk exposure.
-
-#### Syntax Rules and Structure
-
-```js
-// Entry points in Express
-req.params      // URL path parameters: /users/:id
-req.query       // Query string: ?q=search&page=2
-req.body        // Request body (requires express.json() or express.urlencoded())
-req.headers     // HTTP headers: req.headers['authorization']
-req.cookies     // Cookies (requires cookie-parser middleware)
+```
+1. Draw the architecture (components, data flows, trust boundaries).
+2. For each element, ask STRIDE questions.
+3. Score each identified threat with DREAD (1–10 per factor).
+4. Prioritize by average DREAD score.
+5. Define mitigations and track them.
 ```
 
-| Entry Point | Source | Validation Required |
-|-------------|--------|---------------------|
-| `req.params` | URL path segments | Always |
-| `req.query` | URL query string | Always |
-| `req.body` | Request body | Always |
-| `req.headers` | HTTP headers | Always |
-| `req.cookies` | Cookie header | Always |
+**STRIDE categories.**
 
-**Constraints and Limitations:**
-- `req.body` is `undefined` unless body-parsing middleware is applied.
-- Query string parsing is handled by `qs`, which has historically been vulnerable to prototype pollution.
+| Letter | Threat | Question |
+|---|---|---|
+| **S** | Spoofing | Can an attacker pretend to be another user or system? |
+| **T** | Tampering | Can data be modified in transit or at rest? |
+| **R** | Repudiation | Can an actor deny performing an action? |
+| **I** | Information disclosure | Can data leak to unauthorized parties? |
+| **D** | Denial of service | Can availability be disrupted? |
+| **E** | Elevation of privilege | Can an unprivileged user gain more access? |
 
-#### Annotated Code Example
+**DREAD scoring.**
 
-```js
-// entry-points.js
-const express = require('express');
-const app = express();
-
-app.use(express.json());
-
-// Every entry point is untrusted and must be validated
-app.post('/api/users/:id', (req, res) => {
-  const userId = req.params.id;           // Entry point 1: URL param
-  const filter = req.query.filter;        // Entry point 2: Query string
-  const name = req.body.name;             // Entry point 3: Request body
-  const auth = req.headers.authorization; // Entry point 4: Header
-
-  // Log all inputs for demonstration
-  console.log({ userId, filter, name, auth });
-
-  res.json({ received: true });
-});
-
-app.listen(3000, () => console.log('Entry points server on 3000'));
+```
+Risk = AVERAGE(Damage, Reproducibility, Exploitability, Affected users, Discoverability)
 ```
 
-**Expected Output (server console for `POST /api/users/42?filter=active` with body `{"name":"Alice"}` and `Authorization: Bearer token`):**
+Each factor is scored from 1 (low) to 10 (high); the average determines the risk rank.
+
+**Constraints and limitations.**
+
+- **DREAD is subjective**; qualitative approaches (e.g., OWASP risk rating) are often preferred to avoid false precision.
+- **Threat models become stale**; they must be updated when the architecture or data flows change.
+- **Threat modeling is not a substitute for testing**; it identifies risks, not confirms absence of vulnerabilities.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Threat-model-as-code with STRIDE (Python)
+
+```python
+# threat_model.py
+from dataclasses import dataclass, field
+from typing import List
+
+@dataclass
+class Component:
+    name: str
+    threats: List[str] = field(default_factory=list)
+
+@dataclass
+class DataFlow:
+    source: str
+    destination: str
+    crosses_trust_boundary: bool
+
+class ThreatModel:
+    def __init__(self, name: str):
+        self.name = name
+        self.components = []
+        self.flows = []
+
+    def add_component(self, component: Component):
+        self.components.append(component)
+
+    def add_flow(self, flow: DataFlow):
+        self.flows.append(flow)
+
+    def analyze(self):
+        for flow in self.flows:
+            if flow.crosses_trust_boundary:
+                # Step 1: Apply STRIDE to each trust-boundary crossing.
+                for category in ["Spoofing", "Tampering", "Information disclosure"]:
+                    print(f"[{category}] Flow {flow.source} -> {flow.destination}")
 ```
-{ userId: '42', filter: 'active', name: 'Alice', auth: 'Bearer token' }
+
+**Expected Output:**
+```
+[Spoofing] Flow browser -> api
+[Tampering] Flow browser -> api
+[Information disclosure] Flow browser -> api
 ```
 
-**Why this output:** Each entry point is accessed explicitly from the request object. All values are logged as-is to demonstrate their presence; in production, each would be validated and sanitised before use.
-
-#### Real-World Cases
-
-- **Security code reviews:** Reviewers use entry-point mapping to verify that every input is validated.
-- **API documentation:** Listing entry points helps document expected input formats and constraints.
-- **Penetration testing:** Testers map entry points to plan injection and manipulation attacks.
+**Why this output occurs.** The model marks the browser-to-API flow as crossing a trust boundary, and the analyzer applies the relevant STRIDE categories. This makes threat enumeration **repeatable and version-controlled**, and the output can be fed into a risk-scoring tool or issue tracker.
 
 ---
 
-### Sub-Feature 2.2: Securing Parameters vs. Query Strings
+### Real-World Cases
 
-#### Definitions
-
-**Core Definition:** URL parameters (`req.params`) are hierarchical identifiers captured from the path, while query strings (`req.query`) are non-hierarchical key-value pairs appended after `?`. Each requires different validation strategies.
-
-**Technical Definition:** `req.params` values are always strings extracted from path segments defined by route patterns. `req.query` values are parsed by the `qs` library and can be strings, arrays, or nested objects. Query strings are particularly dangerous because they end up in access logs, proxy logs, browser history, and the `Referer` header of outbound links.
-
-**Beginner-Friendly Explanation:** URL parameters are like the apartment number in a building address (`/building/42`), while query strings are like preferences written on the envelope (`?floor=3&view=ocean`). Both can be manipulated by an attacker, but query strings are more exposed because they're visible in logs and shared links.
-
-#### Purposes
-
-- To apply stricter validation to query strings due to their exposure in logs and referrer headers.
-- To prevent prototype pollution through malicious query string structures.
-- To ensure sensitive data is never transmitted via query strings.
-- To convert and validate parameter types before use.
-
-#### Syntax Rules and Structure
-
-```js
-// URL parameter — hierarchical, always a string
-app.get('/users/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);     // Convert and validate
-  if (isNaN(id)) return res.status(400).send('Invalid ID');
-});
-
-// Query string — non-hierarchical, may be array or object
-app.get('/search', (req, res) => {
-  const q = typeof req.query.q === 'string' ? req.query.q : '';
-  // Validate and sanitise q before use
-});
-```
-
-| Aspect | `req.params` | `req.query` |
-|--------|-------------|-------------|
-| Source | URL path segments | After `?` in URL |
-| Type | Always string | String, array, or object |
-| Logged | Less commonly | Always logged |
-| Use for secrets | Never | Never |
-| Prototype pollution risk | Low | High (via `qs`) |
-
-**Constraints and Limitations:**
-- `qs` has historically been vulnerable to prototype pollution via `__proto__` keys.
-- Express 4.17.3+ and 5.x use patched versions of `qs`.
-- Sensitive data must never be placed in query strings.
-
-#### Annotated Code Example
-
-```js
-// params-vs-query.js
-const express = require('express');
-const app = express();
-
-// URL parameter: convert and validate
-app.get('/users/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (isNaN(id) || id < 1) {
-    return res.status(400).json({ error: 'Invalid user ID' });
-  }
-  res.json({ userId: id });
-});
-
-// Query string: validate type and sanitise
-app.get('/search', (req, res) => {
-  const q = req.query.q;
-  if (typeof q !== 'string' || q.length > 100) {
-    return res.status(400).json({ error: 'Invalid query' });
-  }
-  // Escape HTML to prevent XSS if rendered
-  const safe = q.replace(/[<>&"']/g, '');
-  res.json({ query: safe });
-});
-
-// Demonstrate prototype pollution risk
-app.get('/config', (req, res) => {
-  // DANGEROUS: never merge req.query directly
-  // const config = Object.assign({}, defaults, req.query); // VULNERABLE
-  const config = { theme: req.query.theme || 'default' }; // SAFE
-  res.json(config);
-});
-
-app.listen(3000, () => console.log('Params vs query on 3000'));
-```
-
-**Expected Output (for `GET /users/abc`):**
-```
-{"error":"Invalid user ID"}
-```
-
-**Expected Output (for `GET /search?q=<script>alert(1)</script>`):**
-```
-{"query":"scriptalert(1)/script"}
-```
-
-**Why this output:** The URL parameter `abc` cannot be parsed as an integer, triggering the 400 error. The query string contains HTML characters that are stripped by the replacement regex, preventing XSS if the value were later rendered.
-
-#### Real-World Cases
-
-- **Authentication tokens:** Never pass tokens in query strings; use headers or POST bodies.
-- **Search endpoints:** Sanitise query strings to prevent reflected XSS.
-- **API filters:** Validate query parameter types and ranges before applying to database queries.
+- **Microsoft SDL**: threat modeling is a required gate in the Security Development Lifecycle.
+- **OWASP Threat Dragon**: an open-source threat-modeling tool that generates STRIDE-based data-flow diagrams.
+- **Payment systems**: PCI DSS assessments frequently require evidence of threat modeling for cardholder-data environments.
 
 ---
 
-### Sub-Feature 2.3: Handling Unexpected Content Types
-
-#### Definitions
-
-**Core Definition:** Content-type handling is the process of validating that incoming requests carry a `Content-Type` header matching the expected format before the body is parsed or processed.
-
-**Technical Definition:** Express body-parsing middleware (`express.json()`, `express.urlencoded()`) only parses requests where the `Content-Type` header matches the configured type. Requests with unexpected content types either result in `req.body` being `undefined` or may trigger middleware-specific behaviour. Express 5.x provides `req.is()` for content-type checking.
-
-**Beginner-Friendly Explanation:** If someone sends you a letter written in a language you don't understand, you shouldn't try to read it. Similarly, if an API expects JSON but receives XML or plain text, the server should reject it rather than attempting to parse it and potentially causing errors.
-
-#### Purposes
-
-- To prevent parsing errors caused by mismatched content types.
-- To reject requests with malicious or unexpected payloads before processing.
-- To ensure `req.body` is populated only for legitimate requests.
-- To prevent GraphQL CSRF via non-JSON content types.
-
-#### Syntax Rules and Structure
-
-```js
-// Only parse JSON with a size limit
-app.use(express.json({ limit: '100kb', type: 'application/json' }));
-
-// Validate content type in a handler
-app.post('/api/data', (req, res) => {
-  if (!req.is('application/json')) {
-    return res.status(415).json({ error: 'Unsupported Media Type' });
-  }
-  // Process req.body
-});
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `express.json({ limit: '100kb' })` | Bounds body size to prevent DoS. |
-| `type: 'application/json'` | Only parses matching content type. |
-| `req.is('application/json')` | Returns `true` if request matches. |
-| `415` | HTTP status for unsupported media type. |
-
-**Constraints and Limitations:**
-- Middleware ordering matters: `express.json()` must be applied before routes that need `req.body`.
-- Without a `limit`, `express.json()` accepts unbounded payloads, enabling memory-exhaustion DoS.
-- `req.is()` returns `false` or `null` for unmatched types.
-
-#### Annotated Code Example
-
-```js
-// content-type.js
-const express = require('express');
-const app = express();
-
-// Bound body size and restrict content type
-app.use(express.json({ limit: '100kb' }));
-
-app.post('/api/data', (req, res) => {
-  // Explicit content-type check
-  if (!req.is('application/json')) {
-    return res.status(415).json({
-      error: 'Unsupported Media Type',
-      expected: 'application/json'
-    });
-  }
-
-  if (!req.body || Object.keys(req.body).length === 0) {
-    return res.status(400).json({ error: 'Empty body' });
-  }
-
-  res.json({ received: req.body });
-});
-
-app.listen(3000, () => console.log('Content-type server on 3000'));
-```
-
-**Expected Output (for `POST /api/data` with `Content-Type: text/plain` and body `hello`):**
-```
-{"error":"Unsupported Media Type","expected":"application/json"}
-```
-
-**Expected Output (for `POST /api/data` with `Content-Type: application/json` and body `{"name":"Alice"}`):**
-```
-{"received":{"name":"Alice"}}
-```
-
-**Why this output:** The first request is rejected because `req.is('application/json')` returns `false` for `text/plain`. The second request passes the content-type check, and `express.json()` has parsed the body, making `req.body` available.
-
-#### Real-World Cases
-
-- **File upload endpoints:** Validate `Content-Type` to distinguish JSON metadata from file uploads.
-- **GraphQL APIs:** Restrict queries to `application/json` via POST to prevent CSRF.
-- **Webhook receivers:** Reject requests with unexpected content types to prevent injection attacks.
-
----
-
-## Core Concept 3: Dependency Management
+## 3. Attack Surface
 
 ### Definitions
 
-**Core Definition:** Dependency management is the practice of controlling, monitoring, and securing the third-party packages that an Express application relies on.
+**Core Definition.** The **attack surface** is the **set of all points where an unauthorized user can interact with a system** — every interface, protocol, port, input channel, dependency, and privilege boundary that an attacker could attempt to exploit.
 
-**Technical Definition:** Express applications depend on a tree of npm packages — both direct dependencies (e.g., `express`, `helmet`) and transitive dependencies (dependencies of dependencies). Each package represents a potential attack vector for supply-chain attacks, known vulnerabilities, and dependency confusion. Tools such as `npm audit`, Snyk, and Socket provide automated vulnerability detection and behavioural analysis.
+**Technical Definition.** Attack surface comprises **network surface** (open ports, protocols, services), **software surface** (input parsers, APIs, file formats, authentication flows), **human surface** (social-engineering vectors), and **supply-chain surface** (third-party libraries and services). **Attack surface reduction** is the systematic removal or disabling of unnecessary exposure: closing unused ports, removing unused features, applying just-in-time access, retiring end-of-life technology, and enforcing application allow-lists.
 
-**Beginner-Friendly Explanation:** Your Express application is like a recipe that calls for ingredients from many different suppliers. If one supplier sends you contaminated flour, your whole cake is spoiled. Dependency management is the practice of checking every supplier, knowing which ingredients are risky, and having a system that alerts you when a supplier recalls a product.
+**Beginner-Friendly Explanation.** The attack surface is **every door and window an attacker could try to open**. A big house with many doors, windows, and vents has a bigger attack surface than a small house with one reinforced door. In software, every open port, every API endpoint, every dependency, and every enabled feature is another potential way in. **Reducing the attack surface** means **locking the doors you do not need** and **removing the windows you never use**.
 
 ### Purposes
 
-- To detect known vulnerabilities in the dependency tree.
-- To prevent supply-chain attacks through malicious package injection.
-- To ensure consistent installations across environments via lockfiles.
-- To minimise the attack surface by reducing unnecessary dependencies.
-- To automate vulnerability monitoring in CI/CD pipelines.
+- **To minimize the number of exploitable entry points** an attacker can target.
+- **To simplify security monitoring** by reducing the volume of surfaces that must be defended and observed.
+- **To limit lateral movement** by removing unnecessary connectivity and privileges.
+- **To comply with standards** (e.g., NCSC principles, CIS Controls) that mandate attack-surface reduction.
 
-### Sub-Feature 3.1: Handling Supply-Chain Attacks
+### Syntax Rules and Structure
 
-#### Definitions
+**General reduction checklist.**
 
-**Core Definition:** A supply-chain attack occurs when a malicious actor compromises a dependency or its distribution mechanism to inject malicious code into applications that use it.
+| Surface | Reduction Action |
+|---|---|
+| **Network** | Close unused ports; segment networks; enforce just-in-time access. |
+| **Software** | Disable unused features and modules; remove default accounts; apply application allow-listing. |
+| **Data** | Minimize stored data; enforce retention limits. |
+| **Identity** | Remove stale accounts; enforce least privilege; use temporary credentials. |
+| **Supply chain** | Inventory dependencies; remove unmaintained packages; pin versions. |
 
-**Technical Definition:** Supply-chain attacks in the npm ecosystem include typo-squatting (publishing packages with names similar to popular ones), dependency confusion (publishing internal package names to the public registry), and compromise of legitimate packages (e.g., the `ua-parser-js` and `plain-crypto-js` incidents). Effective mitigation requires monitoring package behaviour, pinning versions, and reducing dependency count.
+**Attack-surface analysis steps.**
 
-**Beginner-Friendly Explanation:** A supply-chain attack is like a saboteur secretly replacing a genuine ingredient at the factory with a contaminated one before it reaches your kitchen. You ordered the right product, but what arrived has been tampered with.
-
-#### Purposes
-
-- To identify and block malicious packages before they enter the dependency tree.
-- To reduce the number of trust relationships in the dependency graph.
-- To ensure that only verified, expected package versions are installed.
-
-#### Syntax Rules and Structure
-
-```bash
-# Count total dependencies
-npm ls --all | wc -l
-
-# Check for duplicate packages
-npm ls --all | sort | uniq -c | sort -rn | head -20
-
-# Use exact versions (no ^ or ~)
-npm install express --save-exact
+```
+1. Enumerate all externally reachable interfaces.
+2. Classify each by exposure (internet-facing, internal, local).
+3. Identify which are necessary for business function.
+4. Remove or disable unnecessary surfaces.
+5. Monitor the remaining surface continuously.
 ```
 
-| Practice | Command / Technique |
-|----------|---------------------|
-| Count dependencies | `npm ls --all` |
-| Pin exact versions | `--save-exact` or edit `package.json` |
-| Use lockfile | Commit `package-lock.json` |
-| Reduce dependencies | Use native Node.js APIs where possible |
+**Constraints and limitations.**
 
-**Constraints and Limitations:**
-- `npm audit` only detects known CVEs, not novel malware.
-- Behavioural analysis tools (Socket) can detect suspicious patterns that CVE-based scanners miss.
-- Transitive dependencies can number in the hundreds, multiplying the attack surface.
+- **Reduction must not break functionality**; surfaces must be removed only when their business value is zero or can be achieved another way.
+- **The attack surface changes continuously**; new deployments, dependencies, and features introduce new surfaces.
+- **External attack surface management (EASM)** tools can discover unknown exposures, but they require ongoing operation.
 
-#### Annotated Code Example
+### Annotated Complete Step by Step Code Examples
 
-```bash
-# Pin exact versions in package.json
-npm install express@4.21.2 --save-exact
-npm install helmet@8.1.0 --save-exact
-npm install express-rate-limit@7.5.0 --save-exact
+#### Example 1: Reducing attack surface in a Docker deployment
 
-# Audit and fix
-npm audit
-npm audit fix
+```dockerfile
+# Dockerfile — minimal attack surface
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
 
-# Scan with Socket (behavioural analysis)
-npx @socketsecurity/cli scan
-
-# Scan with Snyk (vulnerability management)
-npx snyk test
+FROM node:20-alpine
+# Step 1: Do not run as root.
+USER node
+WORKDIR /app
+# Step 2: Copy only the production artifacts — no dev tools, no shell utilities.
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+# Step 3: Expose only the one required port.
+EXPOSE 3000
+CMD ["node", "dist/server.js"]
 ```
 
-**Expected Output (npm audit):**
+**Expected Output (conceptual):**
 ```
-found 0 vulnerabilities
-```
-
-**Expected Output (Socket scan):**
-```
-✓ No suspicious behaviour detected
+The runtime image contains only the production Node.js application, runs as the non-root `node` user, and exposes only port 3000.
 ```
 
-**Why this output:** Pinning exact versions prevents automatic upgrades to vulnerable or compromised releases. Running multiple scanning tools provides layered coverage: `npm audit` catches known CVEs, Socket detects behavioural anomalies, and Snyk provides remediation guidance.
-
-#### Real-World Cases
-
-- **The `ua-parser-js` incident (2021):** A popular package was compromised to install cryptominers and password stealers.
-- **The `plain-crypto-js` attack:** A malicious package mimicked a legitimate crypto library, exfiltrating data via postinstall scripts.
-- **Dependency confusion:** Attackers publish packages with the same names as internal company packages to the public npm registry.
+**Why this output occurs.** The multi-stage build discards compilers, test tools, and shell utilities from the runtime image. Running as a non-root user limits the impact of compromise. Exposing only the application port removes unused network surfaces. This is **attack-surface reduction at the container layer**.
 
 ---
 
-### Sub-Feature 3.2: Monitoring Vulnerabilities via Automated Tools
+### Real-World Cases
 
-#### Definitions
+- **NCSC guidance**: recommends just-in-time access, network segmentation, and retiring end-of-support devices to reduce attack surface.
+- **Microsoft Defender ASR rules**: block common attack techniques (e.g., Office macros, script execution) at the endpoint layer.
+- **Cloud security posture management**: continuously discovers internet-exposed storage buckets and databases, which are classic unnecessary surfaces.
 
-**Core Definition:** Automated vulnerability monitoring uses tools to continuously scan the dependency tree for known security issues and alert developers.
+---
 
-**Technical Definition:** `npm audit` (built into npm) checks the dependency tree against the npm security advisory database. Snyk provides vulnerability management with risk scores and remediation advice. Socket performs behavioural analysis of package code to detect malicious patterns. Running all three in CI/CD provides layered coverage.
+## 4. Defense in Depth
 
-**Beginner-Friendly Explanation:** Think of these tools as different types of security guards. `npm audit` is a guard who checks a list of known criminals. Snyk is a guard who knows the criminal histories and can recommend how to avoid them. Socket is a guard who watches for suspicious behaviour, even from someone not on any list.
+### Definitions
 
-#### Purposes
+**Core Definition.** **Defense in depth (DiD)** is a security architecture principle that uses **multiple, independent layers of controls** so that if one layer fails, another still protects the system.
 
-- To detect known vulnerabilities in direct and transitive dependencies.
-- To detect malicious behaviour that is not yet catalogued in CVE databases.
-- To automate security gates in CI/CD pipelines.
-- To provide remediation guidance for identified issues.
+**Technical Definition.** DiD assumes that **any single control can be bypassed** and therefore requires **overlapping, diverse defenses** across physical, network, host, application, and data layers. The layers should be **independent** (no common mode of failure) and **mutually supporting** (one layer compensates for the weaknesses of another). Examples include network firewalls plus host-based firewalls plus application authentication plus data encryption plus audit logging.
 
-#### Syntax Rules and Structure
+**Beginner-Friendly Explanation.** Defense in depth is **not putting all your eggs in one basket**. If you rely only on a firewall, then a firewall bypass is a total breach. If you also have authentication, encryption, monitoring, and least privilege, an attacker who gets past the firewall still has several more walls to climb. Each layer **buys time and creates detection opportunities**.
 
-```bash
-# npm audit — built-in
-npm audit
-npm audit --audit-level=high
-npm audit fix
+### Purposes
 
-# Snyk — install and test
-npm install -g snyk
-snyk auth
-snyk test
+- **To prevent single points of failure** in security architecture.
+- **To increase attacker cost** by forcing them to defeat multiple independent controls.
+- **To provide detection opportunities** when one layer is breached.
+- **To satisfy regulatory and framework requirements** (e.g., NIST CSF, ISO 27001) that mandate layered controls.
 
-# Socket — behavioural analysis
-npx @socketsecurity/cli scan
+### Syntax Rules and Structure
+
+**Canonical layers.**
+
+| Layer | Example Controls |
+|---|---|
+| **Physical** | Facility access control, hardware locks. |
+| **Network** | Firewalls, segmentation, IDS/IPS, TLS. |
+| **Host** | OS hardening, endpoint protection, patching. |
+| **Application** | Authentication, authorization, input validation, secure defaults. |
+| **Data** | Encryption at rest and in transit, access controls, backups. |
+| **Monitoring** | Logging, SIEM, anomaly detection, audit trails. |
+
+**DiD design rules.**
+
+| Rule | Guidance |
+|---|---|
+| **Independence** | Layers should not share the same failure mode (e.g., same credential store). |
+| **Overlap** | Each critical asset should be protected by at least two independent controls. |
+| **Diversity** | Use different technologies and vendors where feasible. |
+| **Compartmentalization** | Limit the blast radius of a single layer's failure. |
+
+**Constraints and limitations.**
+
+- **Complexity cost**: more layers mean more operational overhead and potential misconfiguration.
+- **False sense of security**: layers must be tested and monitored, not merely deployed.
+- **Common-mode failures**: layers that share a dependency (e.g., the same identity provider) are not truly independent.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Layered controls for an API endpoint
+
+```python
+# layered_api.py — defense in depth for a single endpoint
+from flask import Flask, request, abort
+import jwt
+
+app = Flask(__name__)
+
+# Layer 1: Network — assume TLS termination at the load balancer (not shown).
+# Layer 2: Rate limiting — reject abusive traffic early.
+RATE_LIMIT = {}
+
+def rate_limit(key, limit=100, window=60):
+    # Simplified fixed-window counter.
+    pass  # omitted for brevity
+
+# Layer 3: Authentication — verify a signed token.
+def require_auth(f):
+    def wrapper(*args, **kwargs):
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        try:
+            payload = jwt.decode(token, "SECRET", algorithms=["HS256"])
+        except jwt.InvalidTokenError:
+            abort(401)
+        return f(payload, *args, **kwargs)
+    return wrapper
+
+# Layer 4: Authorization — check the claim.
+def require_role(role):
+    def decorator(f):
+        def wrapper(payload, *args, **kwargs):
+            if payload.get("role") != role:
+                abort(403)
+            return f(payload, *args, **kwargs)
+        return wrapper
+    return decorator
+
+# Layer 5: Input validation — reject malformed data.
+@app.route("/admin/users")
+@require_auth
+@require_role("admin")
+def list_users(payload):
+    if not request.args.get("limit", "20").isdigit():
+        abort(400)
+    return {"users": []}
 ```
 
-| Tool | Detection Method | Strength |
-|------|-----------------|----------|
-| `npm audit` | Known CVE database | Free, built-in, baseline |
-| Snyk | Known CVEs + risk context | Remediation guidance, CI integration |
-| Socket | Behavioural analysis | Detects zero-day malware |
+**Expected Output (conceptual):**
+```
+Valid admin token + valid limit → 200 OK with user list.
+Missing/invalid token → 401 Unauthorized.
+Valid token, non-admin role → 403 Forbidden.
+Invalid limit → 400 Bad Request.
+```
 
-**Constraints and Limitations:**
-- `npm audit` is noisy about dev dependencies and only knows disclosed CVEs.
-- Snyk requires authentication for full functionality.
-- No single tool provides complete coverage; layered use is recommended.
+**Why this output occurs.** Each decorator adds an independent layer: authentication (who are you), authorization (what may you do), and input validation (is the request well-formed). A failure at any layer is handled by that layer, and an attacker must defeat **all** layers to reach the handler. This is **defense in depth applied at the application layer**.
 
-#### Annotated Code Example
+---
+
+### Real-World Cases
+
+- **Banking systems**: combine network segmentation, HSM-backed key management, application-level transaction signing, and continuous fraud monitoring.
+- **Cloud architectures**: use security groups, WAF, IAM, encryption, and CloudTrail together rather than relying on any single service.
+- **Critical infrastructure**: the IAEA defines defense in depth as successive layers of nuclear security systems and measures.
+
+---
+
+## 5. Least Privilege
+
+### Definitions
+
+**Core Definition.** The **principle of least privilege (PoLP)** requires that every **user, application, or process** be granted only the **minimum access rights** necessary to perform its **pre-approved functions** — and no more.
+
+**Technical Definition.** Least privilege applies to **human identities** (role-based access, just-in-time elevation) and **non-human identities** (service accounts, IAM roles, database users). It requires **periodic access reviews**, **separation of duties**, and **time-bound credentials**. Over-provisioning — granting broad access “just in case” — is a direct violation because it **increases the blast radius** of any compromise.
+
+**Beginner-Friendly Explanation.** Least privilege means **giving everyone and everything the smallest key ring that still lets them do their job**. A database service account should be able to read and write its tables — not drop the database, not read the payroll schema, not create new users. If that service is compromised, the attacker inherits only those narrow permissions, not the keys to the kingdom. Least privilege **limits the damage** of a breach.
+
+### Purposes
+
+- **To limit the blast radius** of a compromised account or service.
+- **To reduce the attack surface** by removing unnecessary privileges.
+- **To mitigate human error** by preventing accidental destructive actions.
+- **To satisfy compliance requirements** (PCI DSS, NIST 800-53, ISO 27001) that mandate least privilege.
+- **To enable auditability** by making access decisions explicit and reviewable.
+
+### Syntax Rules and Structure
+
+**General implementation steps.**
+
+```
+1. Identify the tasks each identity must perform.
+2. Determine the minimum permissions for those tasks.
+3. Grant those permissions and no more.
+4. Set an expiry on temporary permissions.
+5. Review access regularly and revoke unused permissions.
+```
+
+**Least-privilege rules.**
+
+| Rule | Guidance |
+|---|---|
+| **Deny by default** | Start from zero permissions and add only what is proven necessary. |
+| **Separate accounts** | Use distinct accounts for standard and privileged activity. |
+| **Just-in-time (JIT) access** | Grant elevated access only when needed, for a bounded duration. |
+| **Avoid wildcards** | Do not use `*` in IAM policies or role definitions. |
+| **Review regularly** | Conduct access reviews and revoke stale permissions. |
+
+**Constraints and limitations.**
+
+- **Least privilege requires accurate task analysis**; incomplete understanding leads to over- or under-provisioning.
+- **It adds operational friction**; JIT and approval workflows can slow legitimate work.
+- **Legacy systems may not support fine-grained permissions**, forcing compensating controls.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Least-privilege IAM policy (AWS)
+
+```hcl
+# least_privilege.tf — scoped S3 access instead of a full-access policy
+resource "aws_iam_policy" "app_s3_policy" {
+  name = "AppS3AccessPolicy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "s3:GetObject",
+        "s3:PutObject"
+      ]
+      Resource = "arn:aws:s3:::my-app-bucket/uploads/*"
+    }]
+  })
+}
+```
+
+**Expected Output (conceptual):**
+```
+The application can read and write objects under my-app-bucket/uploads/ only.
+It cannot list the bucket, delete objects, or access any other S3 resource.
+```
+
+**Why this output occurs.** The policy grants only `GetObject` and `PutObject` on a **specific prefix** in a **specific bucket**. It omits `s3:*`, `DeleteObject`, `ListBucket`, and access to other buckets. If the application is compromised, the attacker cannot pivot to other data or destroy backups. This is the canonical least-privilege IAM pattern.
+
+---
+
+#### Example 2: Least-privilege database user (PostgreSQL)
+
+```sql
+-- Create a role with only the privileges the application needs.
+CREATE ROLE app_user LOGIN PASSWORD '...';
+
+-- Grant connection to the specific database.
+GRANT CONNECT ON DATABASE appdb TO app_user;
+
+-- Grant usage on the application schema.
+GRANT USAGE ON SCHEMA app TO app_user;
+
+-- Grant only SELECT, INSERT, UPDATE on the tables the app needs.
+GRANT SELECT, INSERT, UPDATE ON app.orders TO app_user;
+GRANT SELECT, INSERT, UPDATE ON app.order_items TO app_user;
+
+-- Explicitly deny DELETE and DDL.
+REVOKE DELETE ON app.orders FROM app_user;
+```
+
+**Expected Output (conceptual):**
+```
+app_user can connect to appdb, read and write orders and order_items, but cannot delete records, create tables, or access other schemas.
+```
+
+**Why this output occurs.** The role starts with no privileges and receives only the specific grants required by the application. `DELETE` and DDL privileges are explicitly revoked. If the application is compromised, the attacker cannot destroy data or modify the schema.
+
+---
+
+### Real-World Cases
+
+- **AWS IAM**: scoped policies with specific actions and resource ARNs replace `AdministratorAccess`.
+- **Microsoft Entra ID**: role-based access control with just-in-time elevation via PIM.
+- **Kubernetes RBAC**: roles and role bindings grant only the verbs and resources a service needs.
+
+---
+
+## 6. Secure Defaults
+
+### Definitions
+
+**Core Definition.** **Secure defaults** (also called **secure-by-default** or **fail-safe defaults**) are the principle that a system should **ship in a secure configuration** and remain secure **without requiring the operator to change settings** — the safe path must be the **default path**.
+
+**Technical Definition.** A secure default means that **security is enabled by default** (e.g., CSRF protection on, TLS verification on, authentication required, debug mode off, default credentials absent or forced to change). Choosing an insecure configuration must require a **conscious, explicit action** by the operator, and that action should be documented with its security implications. Secure defaults are a direct application of Saltzer and Schroeder's **fail-safe defaults** principle.
+
+**Beginner-Friendly Explanation.** Secure defaults mean **the software is safe out of the box**. You do not have to read a 50-page hardening guide to avoid leaving the front door unlocked. If the secure option is the default, most people will be secure without even thinking about it. If someone genuinely needs the insecure option, they have to **turn it on deliberately** and accept the risk. This is how security scales: it protects the majority who never change defaults.
+
+### Purposes
+
+- **To protect the majority of users** who never change default settings.
+- **To reduce the operational burden** of manual hardening.
+- **To prevent pervasive vulnerability exploits** caused by insecure defaults.
+- **To make the secure choice the easy choice**, improving usability and security simultaneously.
+- **To align with regulatory guidance** (CISA secure-by-design, NIST).
+
+### Syntax Rules and Structure
+
+**Secure-default design rules.**
+
+| Rule | Guidance |
+|---|---|
+| **Security enabled by default** | CSRF, TLS verification, authentication, and rate limiting are on unless explicitly disabled. |
+| **No default credentials** | Require credentials to be set during installation; never ship a shared default password. |
+| **Fail closed** | On error, deny access rather than granting it. |
+| **Least functionality** | Disable unused features, modules, and services by default. |
+| **Explicit insecure opt-in** | Insecure modes require a deliberate flag and documented risk acceptance. |
+| **Transparent migration** | When changing a default to secure, provide a gradual, reversible transition path. |
+
+**Constraints and limitations.**
+
+- **Backward compatibility**: changing a default to secure can break existing deployments; provide migration guidance and deprecation windows.
+- **Usability trade-offs**: security defaults must not make legitimate tasks unreasonably difficult, or operators will disable them.
+- **Documentation matters**: even secure defaults must be explained so operators understand what is protected and why.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Secure Flask configuration defaults
+
+```python
+# secure_defaults.py
+from flask import Flask
+
+app = Flask(__name__)
+
+# Step 1: Secure defaults — explicitly enable protections.
+app.config.update(
+    SESSION_COOKIE_SECURE=True,      # cookies only over HTTPS
+    SESSION_COOKIE_HTTPONLY=True,    # JavaScript cannot read the cookie
+    SESSION_COOKIE_SAMESITE="Lax",   # CSRF mitigation
+    WTF_CSRF_ENABLED=True,           # CSRF protection on by default
+    DEBUG=False,                     # debug mode OFF by default
+)
+
+# Step 2: No default credentials — require configuration from environment.
+import os
+app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]  # fails if unset
+```
+
+**Expected Output (conceptual):**
+```
+The application starts with secure cookies, CSRF protection, and debug mode off.
+If SECRET_KEY is not set, startup fails rather than falling back to a weak default.
+```
+
+**Why this output occurs.** Every security-relevant setting is configured to its **safe value by default**. The application does not rely on the developer to remember to enable CSRF or disable debug mode. The missing `SECRET_KEY` causes a **fail-closed** behavior instead of using a hardcoded fallback secret — a common insecure default.
+
+---
+
+#### Example 2: Secure defaults in a Kubernetes pod specification
+
+```yaml
+# secure_pod.yaml — secure by default
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app
+spec:
+  securityContext:
+    runAsNonRoot: true          # do not run as root by default
+    seccompProfile:
+      type: RuntimeDefault      # apply the default seccomp profile
+  containers:
+    - name: app
+      image: myapp:1.0
+      securityContext:
+        allowPrivilegeEscalation: false   # no privilege escalation
+        readOnlyRootFilesystem: true      # filesystem is read-only by default
+        capabilities:
+          drop: ["ALL"]                   # drop all Linux capabilities
+```
+
+**Expected Output (conceptual):**
+```
+The pod runs as a non-root user, with a read-only root filesystem, no privilege escalation, and all Linux capabilities dropped.
+```
+
+**Why this output occurs.** Each `securityContext` field sets the **secure default**: non-root, read-only, no escalation, no capabilities. An operator who needs a privileged container must **explicitly opt in** (e.g., `privileged: true`), which is visible in the manifest and auditable. This is secure-by-default at the orchestration layer.
+
+---
+
+### Real-World Cases
+
+- **CNCF Secure Defaults**: Docker ships with a built-in seccomp policy and runs on a local Unix socket by default, reducing attack surface.
+- **Kubernetes**: mutual TLS between control-plane components is enabled by default with built-in certificate management.
+- **CISA Secure-by-Design**: vendors are urged to ship products with secure configuration as the default baseline.
+
+---
+
+## 7. Dependency Management
+
+### Definitions
+
+**Core Definition.** **Dependency management** is the practice of **inventorying, tracking, updating, and securing** the third-party libraries and components that a software system relies on, including **transitive dependencies** that are not directly declared.
+
+**Technical Definition.** Modern applications depend on hundreds of transitive packages, creating **dependency explosion** — a supply-chain surface that cannot be tracked manually. Dependency management comprises **Software Composition Analysis (SCA)** to discover dependencies and match them against vulnerability databases, **Software Bill of Materials (SBOM)** generation to document the full dependency tree, **version pinning and lockfiles** to ensure reproducible builds, and **provenance verification** to confirm that artifacts are what they claim to be.
+
+**Beginner-Friendly Explanation.** Dependency management is **knowing exactly what third-party code is inside your software, and making sure none of it is known-bad**. Your application might directly use five libraries, but those five libraries use fifty more, and those fifty use hundreds more. You cannot secure what you cannot see. Dependency management gives you **a complete ingredient list (the SBOM)**, **a scanner that checks each ingredient against known vulnerabilities (SCA)**, and **a process for updating the dangerous ones**.
+
+### Purposes
+
+- **To detect vulnerable dependencies** before they reach production.
+- **To maintain a complete inventory** of all direct and transitive components (SBOM).
+- **To ensure reproducible builds** through lockfiles and version pinning.
+- **To validate license compliance** and avoid legal exposure.
+- **To detect supply-chain attacks** such as typosquatting, dependency confusion, and compromised packages.
+
+### Syntax Rules and Structure
+
+**General dependency-management pipeline.**
+
+```
+1. Generate an SBOM from the source tree or container image.
+2. Run SCA to match the SBOM against vulnerability databases (CVE, OSV, GHSA).
+3. Enforce policy gates in CI: block builds with critical/high vulnerabilities.
+4. Pin versions and commit lockfiles.
+5. Monitor continuously for newly disclosed vulnerabilities.
+```
+
+**Dependency-management rules.**
+
+| Rule | Guidance |
+|---|---|
+| **Inventory everything** | Generate an SBOM covering direct and transitive dependencies. |
+| **Scan continuously** | Run SCA on every pull request and on a schedule. |
+| **Pin versions** | Commit lockfiles; avoid floating version ranges in production. |
+| **Verify provenance** | Use signed attestations and trusted registries where available. |
+| **Enforce policy gates** | Fail the build on critical vulnerabilities; document exceptions. |
+| **Remove unmaintained packages** | Evaluate maintenance status and community health. |
+
+**Constraints and limitations.**
+
+- **False positives** are common in SCA; triage and suppression files are necessary.
+- **Not all vulnerabilities are exploitable** in every application; reachability analysis improves prioritization.
+- **SBOM formats vary** (SPDX, CycloneDX); choose one and integrate it into the pipeline.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Generating an SBOM with Syft
+
+```bash
+# Step 1: Generate an SBOM for a container image in CycloneDX JSON.
+syft myregistry/myapp:1.0 -o cyclonedx-json > sbom.cdx.json
+
+# Step 2: Generate an SBOM for a source directory.
+syft dir:. -o spdx-json > sbom.spdx.json
+```
+
+**Expected Output (conceptual):**
+```
+sbom.cdx.json and sbom.spdx.json contain the full component inventory: every package, version, license, and dependency relationship in the image or source tree.
+```
+
+**Why this output occurs.** Syft scans the image or directory and produces an industry-standard SBOM in **CycloneDX** or **SPDX** format. The SBOM becomes the input to SCA tooling and the artifact of record for compliance and incident response.
+
+---
+
+#### Example 2: SCA gate in GitHub Actions
+
+```yaml
+# .github/workflows/sca.yml
+name: Dependency Security
+on: [pull_request]
+
+jobs:
+  sca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate SBOM
+        run: syft dir:. -o cyclonedx-json > sbom.cdx.json
+      - name: Run SCA scan
+        uses: anchore/scan-action@v3
+        with:
+          sbom: sbom.cdx.json
+          fail-build: true
+          severity-cutoff: high
+```
+
+**Expected Output (conceptual):**
+```
+On every pull request: SBOM is generated, scanned for vulnerabilities, and the build fails if any high-severity vulnerability is found.
+```
+
+**Why this output occurs.** The workflow wires SBOM generation and SCA into the PR gate. `fail-build: true` and `severity-cutoff: high` enforce a **policy gate** that prevents vulnerable dependencies from being merged. This is the highest-leverage dependency-management control: it stops vulnerable code before it reaches production.
+
+---
+
+### Real-World Cases
+
+- **GitHub Dependabot**: automatic vulnerability alerts and pull requests for vulnerable dependencies.
+- **Dependency-Track**: a centralized SCA platform that ingests SBOMs and continuously monitors components against multiple vulnerability databases.
+- **Log4Shell response**: organizations with SBOMs could quickly determine whether they were affected by the Log4j vulnerability; those without SBOMs spent weeks manually searching.
+
+---
+
+## 8. Security Best Practices
+
+### Definitions
+
+**Core Definition.** **Security best practices** are **empirically established, risk-based guidelines** for building and operating software securely, distilled from frameworks such as **OWASP ASVS**, **NIST CSF**, **ISO/IEC 27034**, and **CIS Controls**.
+
+**Technical Definition.** Best practices span the full lifecycle: **design** (threat modeling, secure defaults, least privilege), **implementation** (input validation, parameterized queries, output encoding, cryptographic correctness), **verification** (SAST, DAST, SCA, penetration testing), **deployment** (hardening, secrets management, TLS), and **operations** (logging, monitoring, incident response). They are **layered** (defense in depth) and **prioritized by risk**, not applied as an undifferentiated checklist.
+
+**Beginner-Friendly Explanation.** Security best practices are **the habits that experienced security engineers follow** to avoid the mistakes that cause most breaches. They include things like “never trust user input,” “use parameterized queries,” “encrypt data in transit and at rest,” “don't hardcode secrets,” “keep dependencies updated,” and “log security events.” They are not magic; they are **the accumulated lessons of decades of incidents**, organized so you can apply them systematically.
+
+### Purposes
+
+- **To prevent the most common and impactful vulnerability classes** (injection, broken access control, cryptographic failures).
+- **To provide a measurable baseline** (OWASP ASVS levels) for assurance and compliance.
+- **To reduce the vulnerability escape rate** — the proportion of critical vulnerabilities that reach production.
+- **To align engineering practice with regulatory and contractual requirements**.
+- **To make security repeatable and auditable** rather than dependent on individual heroics.
+
+### Syntax Rules and Structure
+
+**OWASP Top 10 prevention checklist (abbreviated).**
+
+| Risk | Prevention |
+|---|---|
+| **A01: Broken Access Control** | Deny by default; enforce server-side checks; validate ownership. |
+| **A02: Cryptographic Failures** | Encrypt PII; use TLS 1.3; manage secrets properly. |
+| **A03: Injection** | Parameterize queries; avoid string concatenation; validate input. |
+| **A04: Insecure Design** | Threat model; apply secure design patterns. |
+| **A05: Security Misconfiguration** | Secure defaults; remove unused features; harden servers. |
+| **A06: Vulnerable Components** | SCA, SBOM, timely patching. |
+| **A07: Authentication Failures** | MFA; strong password policies; session management. |
+| **A08: Data Integrity Failures** | Verify signatures; use trusted sources. |
+| **A09: Logging Failures** | Log security events; protect logs; monitor. |
+| **A10: SSRF** | Allowlist destinations; validate URLs. |
+
+**Best-practice implementation rules.**
+
+| Rule | Guidance |
+|---|---|
+| **Validate all input** | Treat every external input as untrusted; use allow-lists. |
+| **Parameterize queries** | Never concatenate user input into SQL or commands. |
+| **Encode output** | Context-aware encoding prevents XSS. |
+| **Use strong cryptography** | TLS 1.3, AES-256, SHA-256; never invent crypto. |
+| **Manage secrets centrally** | Vaults and secret managers, never in source code. |
+| **Automate security testing** | SAST, DAST, SCA, and dependency scanning in CI. |
+| **Log and monitor** | Security events must be captured, protected, and reviewed. |
+
+**Constraints and limitations.**
+
+- **Best practices are context-sensitive**: a control appropriate for a bank may be overkill for an internal tool.
+- **Checklist compliance is not security**: completing ASVS items does not guarantee the absence of vulnerabilities.
+- **Security must be continuously verified**, not assumed from process adherence.
+
+### Annotated Complete Step by Step Code Examples
+
+#### Example 1: Parameterized query preventing SQL injection
+
+```python
+# safe_query.py — parameterized query (best practice)
+import sqlite3
+
+def get_user(conn: sqlite3.Connection, username: str):
+    # ✅ Parameterized: the value is bound, never concatenated.
+    cursor = conn.execute(
+        "SELECT id, username, email FROM users WHERE username = ?",
+        (username,)
+    )
+    return cursor.fetchone()
+
+# ❌ Vulnerable alternative (do not use):
+# cursor = conn.execute(f"SELECT * FROM users WHERE username = '{username}'")
+```
+
+**Expected Output (conceptual):**
+```
+get_user(conn, "alice") → returns alice's record.
+get_user(conn, "' OR 1=1 --") → returns no record; the input is treated as a literal string, not SQL.
+```
+
+**Why this output occurs.** Parameterization separates **code** from **data**. The database engine receives the query template and the parameter separately, so the malicious input cannot alter the query structure. This is the definitive defense against SQL injection and a core OWASP best practice.
+
+---
+
+#### Example 2: Security verification pipeline (SAST + SCA + secrets scan)
 
 ```yaml
 # .github/workflows/security.yml
-name: Security Scan
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: '0 0 * * 0'  # Weekly scan
+name: Security Verification
+on: [push, pull_request]
 
 jobs:
   security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Secret scan
+        uses: trufflesecurity/trufflehog@main
         with:
-          node-version: '20'
-      - run: npm ci
-      - name: Run npm audit
-        run: npm audit --audit-level=high
-      - name: Run Snyk
-        run: npx snyk test --severity-threshold=high
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+
+      - name: SAST (Semgrep)
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: p/owasp-top-ten
+
+      - name: SCA (Syft + Grype)
+        run: |
+          syft dir:. -o cyclonedx-json > sbom.cdx.json
+          grype sbom:sbom.cdx.json --fail-on high
 ```
 
-**Expected Output (when vulnerabilities found):**
+**Expected Output (conceptual):**
 ```
-npm ERR! audit found 2 high severity vulnerabilities
-Process completed with exit code 1
+Every push and pull request: secrets are scanned, static analysis runs the OWASP Top 10 ruleset, and dependencies are checked for high-severity vulnerabilities; the pipeline fails on any finding.
 ```
 
-**Why this output:** The CI pipeline fails when high-severity vulnerabilities are found, preventing vulnerable code from being merged or deployed. The `--audit-level=high` flag ensures only high-severity issues block the build.
-
-#### Real-World Cases
-
-- **CI/CD gates:** Blocking merges when high-severity vulnerabilities are detected.
-- **Weekly scans:** Scheduled scans catch vulnerabilities disclosed after initial deployment.
-- **Dependency updates:** Automated PRs from Snyk or Dependabot update vulnerable packages.
+**Why this output occurs.** The pipeline applies **three independent verification layers**: secret scanning catches hardcoded credentials, SAST catches insecure code patterns, and SCA catches vulnerable dependencies. Each layer addresses a different failure mode, and `--fail-on high` enforces a policy gate. This is **security best practices automated in CI**, making the secure path the default path.
 
 ---
 
-### Sub-Feature 3.3: Pinning Versions Securely
-
-#### Definitions
-
-**Core Definition:** Version pinning is the practice of specifying exact dependency versions in `package.json` to prevent automatic upgrades to potentially vulnerable or incompatible releases.
-
-**Technical Definition:** npm uses semantic versioning (semver) with symbols: `^` allows minor and patch updates, `~` allows patch updates, and no prefix pins the exact version. Lockfiles (`package-lock.json` or `yarn.lock`) record the exact resolved versions of the entire dependency tree. Committing lockfiles ensures reproducible installations.
-
-**Beginner-Friendly Explanation:** Version pinning is like ordering a specific edition of a book rather than "any recent edition." It ensures you get exactly what you tested and reviewed, rather than a new version that might have unexpected changes — or new security issues.
-
-#### Purposes
-
-- To ensure reproducible installations across development, testing, and production.
-- To prevent automatic upgrades to versions with known vulnerabilities.
-- To maintain control over the exact dependency tree that was security-reviewed.
-- To prevent dependency confusion attacks by locking transitive dependency versions.
-
-#### Syntax Rules and Structure
-
-```json
-{
-  "dependencies": {
-    "express": "4.21.2",
-    "helmet": "8.1.0",
-    "express-rate-limit": "7.5.0"
-  }
-}
-```
-
-| Symbol | Meaning | Security Implication |
-|--------|---------|---------------------|
-| `^4.21.2` | Allows `4.x.x` updates | May pull in vulnerable minor versions |
-| `~4.21.2` | Allows `4.21.x` updates | Lower risk, but still auto-updates |
-| `4.21.2` | Exact version only | Maximum control |
-| `package-lock.json` | Records full tree | Ensures reproducibility |
-
-**Constraints and Limitations:**
-- Pinning exact versions means security patches must be applied manually.
-- Lockfiles must be committed to version control to be effective.
-- `npm ci` (rather than `npm install`) should be used in CI to respect the lockfile exactly.
-
-#### Annotated Code Example
-
-```bash
-# Install with exact versions
-npm install express@4.21.2 --save-exact
-npm install helmet@8.1.0 --save-exact
-
-# Commit the lockfile
-git add package.json package-lock.json
-git commit -m "Pin dependencies to exact versions"
-
-# In CI, use npm ci to respect lockfile
-npm ci
-
-# Update a specific package when a patch is released
-npm install express@4.21.2 --save-exact
-```
-
-**Expected package.json (pinned):**
-```json
-{
-  "dependencies": {
-    "express": "4.21.2",
-    "helmet": "8.1.0"
-  }
-}
-```
-
-**Expected Output (npm ci):**
-```
-added 57 packages in 2s
-```
-
-**Why this output:** `npm ci` installs exactly the versions in `package-lock.json`, ignoring any newer versions that might be available. This ensures that the tested and reviewed dependency tree is reproduced exactly in production.
-
-#### Real-World Cases
-
-- **Production deployments:** Using `npm ci` with a committed lockfile ensures production matches testing.
-- **Security reviews:** Pinned versions allow security teams to audit the exact dependency tree.
-- **Regulated industries:** Compliance frameworks (SOC 2, PCI DSS) require reproducible builds.
-
----
-
-## Core Concept 4: Error Handling & Information Disclosure
-
-### Definitions
-
-**Core Definition:** Error handling and information disclosure prevention is the practice of catching errors gracefully and ensuring that sensitive internal details are never exposed to clients.
-
-**Technical Definition:** Express's default error handler responds with a 500 status and, in development mode, includes a full HTML stack trace. In production (`NODE_ENV=production`), the stack trace is omitted, but the response may still leak implementation details. Custom error-handling middleware — identified by the four-argument signature `(err, req, res, next)` — replaces the default handler and controls exactly what information is sent to clients.
-
-**Beginner-Friendly Explanation:** When something goes wrong in your application, the default behaviour is like a doctor reading out your entire medical history to a stranger in the waiting room. Custom error handling is like having a trained receptionist who says "The doctor will see you shortly" without revealing your private details.
-
-### Purposes
-
-- To prevent stack traces, internal file paths, and database errors from leaking to clients in production.
-- To provide consistent, safe error responses across all routes.
-- To log errors internally for debugging while sending generic messages externally.
-- To distinguish between operational errors (expected) and programming errors (bugs).
-
-### Sub-Feature 4.1: Preventing Stack Trace Leakage
-
-#### Definitions
-
-**Core Definition:** Stack trace leakage occurs when an application sends a detailed error stack trace — including file paths, line numbers, and function names — to a client in an HTTP response.
-
-**Technical Definition:** Express's default error handler includes the full error stack trace in development mode. In production, the trace is omitted, but the response may still include error messages that reveal implementation details. Custom error middleware must explicitly check `NODE_ENV` and send generic messages in production.
-
-**Beginner-Friendly Explanation:** A stack trace is like a map of your application's internal wiring. It tells an attacker exactly which file, which line, and which function failed. In production, this map should never leave the building.
-
-#### Purposes
-
-- To prevent attackers from learning internal file paths and code structure.
-- To comply with security standards that prohibit information disclosure.
-- To present a professional, consistent error experience to users.
-
-#### Syntax Rules and Structure
-
-```js
-app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'production'
-    ? 'Internal server error'
-    : err.message;
-  res.status(statusCode).json({ error: message });
-});
-```
-
-| Component | Breakdown |
-|-----------|-----------|
-| `(err, req, res, next)` | Four-argument signature identifies error middleware. |
-| `err.statusCode` | Custom status code if set. |
-| `NODE_ENV` check | Controls whether detailed messages are sent. |
-| Generic message | Safe for production. |
-
-**Constraints and Limitations:**
-- Must be registered **after** all other middleware and routes.
-- The four-argument signature is mandatory, even if `next` is not used.
-- In Express 5, async errors are automatically passed to error middleware; in Express 4, they must be wrapped or caught manually.
-
-#### Annotated Code Example
-
-```js
-// error-handler.js
-const express = require('express');
-const app = express();
-
-// Simulated route that throws an error
-app.get('/error', (req, res) => {
-  throw new Error('Database connection failed at /var/db/internal.js:42');
-});
-
-// Custom error-handling middleware
-app.use((err, req, res, next) => {
-  // Log the full error internally
-  console.error(`[ERROR] ${new Date().toISOString()}: ${err.stack}`);
-
-  const statusCode = err.statusCode || 500;
-  const isProduction = process.env.NODE_ENV === 'production';
-
-  res.status(statusCode).json({
-    error: isProduction ? 'Internal server error' : err.message,
-    ...(isProduction ? {} : { stack: err.stack })
-  });
-});
-
-app.listen(3000, () => console.log('Error handler server on 3000'));
-```
-
-**Expected Output (development, `NODE_ENV=development`):**
-```
-{
-  "error": "Database connection failed at /var/db/internal.js:42",
-  "stack": "Error: Database connection failed...\n    at /var/db/internal.js:42:11\n    ..."
-}
-```
-
-**Expected Output (production, `NODE_ENV=production`):**
-```
-{"error":"Internal server error"}
-```
-
-**Why this output:** In development mode, the full error message and stack are returned for debugging. In production, only a generic message is sent, while the full error is logged internally via `console.error`.
-
-#### Real-World Cases
-
-- **Production APIs:** Returning generic 500 errors while logging details to a monitoring service.
-- **Compliance:** Preventing internal path disclosure to meet security audit requirements.
-- **Incident response:** Internal logs contain the full stack for debugging, while clients see only a safe message.
-
----
-
-### Sub-Feature 4.2: Preventing Internal Path and Database Error Leakage
-
-#### Definitions
-
-**Core Definition:** Internal path and database error leakage occurs when error messages reveal file system paths, database table names, SQL queries, or connection strings to clients.
-
-**Technical Definition:** Database drivers and ORMs often include sensitive information in error messages (e.g., `ER_NO_SUCH_TABLE: Table 'users_v2' doesn't exist`). File system errors may include absolute paths (e.g., `ENOENT: no such file or directory, open '/app/config/secret.json'`). Custom error handling must sanitise these messages before sending them to clients.
-
-**Beginner-Friendly Explanation:** When a database query fails, the error message might say "Table 'internal_customers' doesn't exist." That tells an attacker the table name, which is valuable information. A safe error message would simply say "A database error occurred."
-
-#### Purposes
-
-- To prevent attackers from learning database schema and table names.
-- To prevent disclosure of internal file system paths.
-- To prevent connection strings or credentials from appearing in error responses.
-- To maintain a clean separation between internal diagnostics and client-facing messages.
-
-#### Syntax Rules and Structure
-
-```js
-app.use((err, req, res, next) => {
-  // Log full error internally
-  console.error(err);
-
-  // Determine safe status code
-  const statusCode = err.statusCode || 500;
-
-  // Generic message for all errors in production
-  const message = process.env.NODE_ENV === 'production'
-    ? 'An unexpected error occurred'
-    : err.message;
-
-  res.status(statusCode).json({ error: message });
-});
-```
-
-| Error Type | Sensitive Content | Safe Message |
-|------------|-------------------|--------------|
-| Database | Table names, SQL | "A database error occurred" |
-| File system | Absolute paths | "A file operation failed" |
-| Authentication | Credential hints | "Authentication failed" |
-| Validation | Internal rules | "Invalid input" |
-
-**Constraints and Limitations:**
-- Logging the full error internally is essential for debugging; never log to the client.
-- Use a structured logging library (e.g., Pino, Winston) to capture stack traces and metadata.
-
-#### Annotated Code Example
-
-```js
-// safe-errors.js
-const express = require('express');
-const app = express();
-
-// Simulate a database error with sensitive details
-app.get('/db-error', (req, res) => {
-  const err = new Error(
-    "ER_NO_SUCH_TABLE: Table 'internal_users' doesn't exist in database 'prod_db'"
-  );
-  err.statusCode = 500;
-  throw err;
-});
-
-// Simulate a file system error
-app.get('/file-error', (req, res) => {
-  const err = new Error(
-    "ENOENT: no such file or directory, open '/app/secrets/api-key.json'"
-  );
-  err.statusCode = 500;
-  throw err;
-});
-
-// Custom error handler that sanitises messages
-app.use((err, req, res, next) => {
-  console.error(`[ERROR] ${err.message}`); // Full details logged internally
-
-  const isProduction = process.env.NODE_ENV === 'production';
-
-  // Map error types to safe messages
-  let safeMessage = 'An unexpected error occurred';
-  if (err.message.includes('ENOENT')) {
-    safeMessage = 'A file operation failed';
-  } else if (err.message.includes('ER_') || err.message.includes('SQL')) {
-    safeMessage = 'A database error occurred';
-  }
-
-  res.status(err.statusCode || 500).json({
-    error: isProduction ? safeMessage : err.message
-  });
-});
-
-app.listen(3000, () => console.log('Safe errors server on 3000'));
-```
-
-**Expected Output (production, `NODE_ENV=production`, for `GET /db-error`):**
-```
-{"error":"A database error occurred"}
-```
-
-**Expected Output (production, for `GET /file-error`):**
-```
-{"error":"A file operation failed"}
-```
-
-**Why this output:** The error handler inspects the error message and maps it to a safe category. In production, the sanitised message is returned. In development, the full message is returned for debugging.
-
-#### Real-World Cases
-
-- **E-commerce platforms:** Preventing database schema disclosure during checkout errors.
-- **SaaS applications:** Protecting internal file paths that could reveal deployment architecture.
-- **Healthcare systems:** Ensuring compliance with HIPAA and other regulations that prohibit information disclosure.
+### Real-World Cases
+
+- **OWASP ASVS**: provides three verification levels; Level 1 is a baseline for all applications, Level 3 is for high-assurance systems.
+- **NIST CSF**: organizes security outcomes into Identify, Protect, Detect, Respond, and Recover functions.
+- **CIS Controls**: prioritizes 18 foundational controls, with the first six (inventory, patching, access management) addressing the most common attack vectors.
 
 ---
 
 ## References
 
-- Express.js Production Best Practices: Security — https://expressjs.com/en/advanced/best-practice-security/
-- Express.js Behind Proxies — https://expressjs.com/en/guide/behind-proxies/
-- Express.js Error Handling Guide — https://expressjs.com/en/guide/error-handling.html
-- Express.js Security Audit Milestone — https://expressjs.com/en/blog/2024-10-22-security-audit-milestone-achievement/
-- Express.js Security Updates — https://expressjs.com/en/advanced/security-updates/
-- Express.js Router API (strict routing) — https://expressjs.com/en/5x/api/router/
-- Express.js Session Middleware — https://expressjs.com/en/resources/middleware/session.html
-- Express.js Cookie Session Middleware — https://expressjs.com/en/resources/middleware/cookie-session.html
-- Helmet.js Documentation — https://helmetjs.github.io/
+- OWASP Application Security Verification Standard (ASVS) — https://owasp.org/www-project-application-security-verification-standard/
 - OWASP Top 10 — https://owasp.org/www-project-top-ten/
-- npm audit Documentation — https://docs.npmjs.com/cli/v10/commands/npm-audit
-- Snyk Documentation — https://docs.snyk.io/
-- Socket Documentation — https://docs.socket.dev/
-- CVE-2022-24999 (qs prototype pollution) — https://nvd.nist.gov/vuln/detail/CVE-2022-24999
-- CVE-2024-29041 (Express open redirect) — https://nvd.nist.gov/vuln/detail/CVE-2024-29041
-- CVE-2024-43796 (Express XSS in res.redirect) — https://nvd.nist.gov/vuln/detail/CVE-2024-43796
-- CVE-2024-45296 (path-to-regexp ReDoS) — https://nvd.nist.gov/vuln/detail/CVE-2024-45296
-- Express.js `res.redirect` Security — https://expressjs.com/en/5x/api.html#res.redirect
-- Express.js `req.is()` Content-Type Checking — https://expressjs.com/en/5x/api.html#req.is
-- Node.js Security Best Practices — https://nodejs.org/en/learn/getting-started/security-best-practices
+- NIST Cybersecurity Framework — https://www.nist.gov/cyberframework
+- ISO/IEC 27034 — Application Security — https://www.iso.org/standard/44378.html
+- CIS Critical Security Controls — https://www.cisecurity.org/controls
+- Microsoft Security Development Lifecycle (SDL) — https://www.microsoft.com/en-us/securityengineering/sdl
+- NCSC Least Privilege Standard — https://www.ncsc.govt.nz/protect-your-organisation/least-privilege/
+- CNCF Secure Defaults — https://contribute-cncf-io.netlify.app/community/tags/security-and-compliance/publications/secure-defaults-cloud-native-8/
+- CISA Secure by Design — https://www.cisa.gov/securebydesign
+- OWASP Threat Modeling — https://owasp.org/www-community/Threat_Modeling
+- OWASP Threat Dragon — https://owasp.org/www-project-threat-dragon/
+- Microsoft Learn — Software Composition Analysis (SCA) — https://learn.microsoft.com/en-us/training/modules/software-composition-analysis/
+- Syft — SBOM Generation — https://oss.anchore.com/docs/syft/
+- Anchore — SCA and SBOM Scanning — https://oss.anchore.com/docs/grype/
+- NIST SP 800-53 — Security and Privacy Controls — https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final
+- ISO/IEC 27001 — Information Security Management — https://www.iso.org/standard/27001

@@ -887,7 +887,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
 
 # X. REST API Development
 
-- **69. REST Fundamentals**
+- [**69. REST Fundamentals**](/Web%20Development/ExpressJS/API/REST.md)
   - REST
   - Resources
   - Endpoints
@@ -896,7 +896,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Representations
   - REST best practices
 
-- **70. API Design**
+- [**70. API Design**](/Web%20Development/ExpressJS/API/APIDesign.md)
   - Resource naming
   - URL structures
   - Request formats
@@ -905,7 +905,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Error responses
   - API design best practices
 
-- **71. CRUD APIs**
+- [**71. CRUD APIs**](/Web%20Development/ExpressJS/API/CRUD.md)
   - Create
   - Read
   - Update
@@ -916,14 +916,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Searching
   - CRUD best practices
 
-- **72. API Versioning**
+- [**72. API Versioning**](/Web%20Development/ExpressJS/API/APIVersioning.md)
   - URI versioning
   - Header versioning
   - Backward compatibility
   - Deprecation strategies
   - Versioning best practices
 
-- **73. API Documentation**
+- [**73. API Documentation**](/Web%20Development/ExpressJS/API/APIDocumentation.md)
   - OpenAPI
   - Swagger
   - Swagger UI
@@ -931,14 +931,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - `swagger-ui-express`
   - API documentation best practices
 
-- **74. API Rate Limiting**
+- [**74. API Rate Limiting**](/Web%20Development/ExpressJS/API/APIRateLimiting.md)
   - Rate limiting
   - `express-rate-limit`
   - Rate limit strategies
   - Rate limit headers
   - Rate limiting best practices
 
-- **75. API Caching**
+- [**75. API Caching**](/Web%20Development/ExpressJS/API/APICaching.md)
   - Caching
   - `apicache`
   - Redis caching
@@ -946,21 +946,21 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Cache invalidation
   - Caching best practices
 
-- **76. API Pagination**
+- [**76. API Pagination**](/Web%20Development/ExpressJS/API/APIPagination.md)
   - Offset pagination
   - Cursor pagination
   - Keyset pagination
   - Pagination metadata
   - Pagination best practices
 
-- **77. API Filtering and Sorting**
+- [**77. API Filtering and Sorting**](/Web%20Development/ExpressJS/API/APIFilteringAndSorting.md)
   - Filtering
   - Sorting
   - Field selection
   - Embedding
   - Filtering best practices
 
-- **78. GraphQL**
+- [**78. GraphQL**](/Web%20Development/ExpressJS/API/GraphQL.md)
   - GraphQL
   - `express-graphql`
   - Apollo Server
@@ -970,20 +970,68 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Resolvers
   - GraphQL best practices
 
+* [**OpenAPI (Swagger) Specification & Fundamentals**](/Web%20Development/ExpressJS/API/OpenAPI.md)
+   * OpenAPI 3.0/3.1 Standard vs. Swagger 2.0
+   * Paths, HTTP Methods, and Operations
+   * Parameters
+   * Request Bodies and Media Types
+   * Data Schemas
+   * HTTP Responses and Status Codes
+   * Security Schemes
+
+- [**Interactive Documentation & UI Tooling**](/Web%20Development/ExpressJS/API/InteractiveDoc.md)
+   * swagger-ui-express
+   * redoc-express
+   * API Exploration and Sandboxing
+   * Customizing UI Themes and Branding
+
+- [**Express-Specific Code-First Documentation Tools**](/Web%20Development/ExpressJS/API/ExpressSpec.md)
+   * swagger-jsdoc
+   * express-openapi-validator
+   * Auto-generating specs from Express routes
+
+- [**API Documentation Quality & SDKs**](/Web%20Development/ExpressJS/API/APIDoc.md)
+   * Request and Response Body Examples
+   * Comprehensive Error Documentation
+   * Authentication and Authorization Guides
+   * API Versioning Strategies
+   * Code Snippets for Consumers
+   * SDK Generation
+
+- [**Environments & Postman/Insomnia Integration**](/Web%20Development/ExpressJS/API/Env.md)
+   * Environment Management
+   * Exporting OpenAPI specs to Postman Collections and Insomnia
+   * Mocking Express APIs using documentation
+
 ---
 
 # XI. Security
 
-- **79. Security Fundamentals**
+- [**79. Security Fundamentals**](/Web%20Development/ExpressJS/Security/Security.md)
   - Security
   - Threat modeling
   - Attack surface
   - Defense in depth
   - Least privilege
   - Secure defaults
+  - Dependency management
   - Security best practices
 
-- **80. Helmet**
+- [**Common Web Attacks**](/Web%20Development/ExpressJS/Security/CommonWebAttacks.md)
+  - SQL injection
+  - Cross-site scripting
+  - Cross-site request forgery
+  - Brute force
+  - Credential attacks
+  - Session attacks
+
+- [**Security Middleware**](/Web%20Development/ExpressJS/Security/SecurityMiddleware.md)
+  - Helmet
+  - CORS
+  - Rate limiting
+  - Request-size limits
+
+- [**80. Helmet**](/Web%20Development/ExpressJS/Security/Helmet.md)
   - Helmet
   - Security headers
   - CSP
@@ -994,7 +1042,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Permissions-Policy
   - Helmet best practices
 
-- **81. CORS**
+- [**81. CORS**](/Web%20Development/ExpressJS/Security/CORS.md)
   - CORS
   - `cors`
   - Origin
@@ -1004,7 +1052,7 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Preflight
   - CORS best practices
 
-- **82. CSRF Protection**
+- [**82. CSRF Protection**](/Web%20Development/ExpressJS/Security/CSRFProtection.md)
   - CSRF
   - `csurf` (deprecated)
   - `csurf` alternatives
@@ -1012,45 +1060,56 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - SameSite cookies
   - CSRF best practices
 
-- **83. Input Validation**
+- [**83. Input Validation**](/Web%20Development/ExpressJS/Security/InputValidation.md)
   - Input validation
   - Sanitization
   - Validation libraries
   - Validation best practices
 
-- **84. SQL Injection Prevention**
+- [**84. SQL Injection Prevention**](/Web%20Development/ExpressJS/Security/SQLInjectionPrevention.md)
   - SQL injection
   - Parameterized queries
   - Prepared statements
   - ORM protection
   - SQL injection prevention best practices
 
-- **85. XSS Prevention**
+- [**85. XSS Prevention**](/Web%20Development/ExpressJS/Security/XSSPrevention.md)
   - XSS
   - Output encoding
   - Content Security Policy
   - Sanitization
   - XSS prevention best practices
+  
+- [**Secure HTTP Configuration**](/Web%20Development/ExpressJS/Security/SecureHTTPConfig.md)
+  - HTTPS
+  - Secure cookies
+  - HTTP-only cookies
+  - SameSite cookies
+  - Security headers
 
-- **86. Rate Limiting**
+- [**86. Rate Limiting**](/Web%20Development/ExpressJS/Security/RateLimiting.md)
   - Rate limiting
   - `express-rate-limit`
   - Rate limit strategies
   - Rate limiting best practices
 
-- **87. Secure Cookies**
+- [**87. Secure Cookies**](/Web%20Development/ExpressJS/Security/SecureCookies.md)
   - Secure cookies
   - `httpOnly`
   - `secure`
   - `sameSite`
   - Cookie security best practices
 
-- **88. Secret Management**
+- [**88. Secret Management**](/Web%20Development/ExpressJS/Security/SecretsManagement.md)
   - Environment variables
   - `dotenv`
   - Secret managers
   - Vault
   - AWS Secrets Manager
+  - API keys
+  - Database credentials
+  - Rotating secrets
+  - Never committing secrets
   - Secret management best practices
 
 - **89. Dependency Security**

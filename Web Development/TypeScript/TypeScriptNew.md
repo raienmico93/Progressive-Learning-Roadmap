@@ -875,7 +875,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # XI. Decorators
 
-- **78. Decorators Fundamentals**
+- [**78. Decorators Fundamentals**](/Web%20Development/TypeScript/Decorators/Decorators.md)
   - Decorators
   - Decorator syntax
   - `@`
@@ -883,37 +883,37 @@ TypeScript is best learned as more than "JavaScript with types." The progression
   - Stage 3 decorators
   - Decorator best practices
 
-- **79. Class Decorators**
+- [**79. Class Decorators**](/Web%20Development/TypeScript/Decorators/Class.md)
   - Class decorators
   - Class decorator declaration
   - Class decorator usage
   - Class decorator best practices
 
-- **80. Method Decorators**
+- [**80. Method Decorators**](/Web%20Development/TypeScript/Decorators/Method.md)
   - Method decorators
   - Method decorator declaration
   - Method decorator usage
   - Method decorator best practices
 
-- **81. Property Decorators**
+- [**81. Property Decorators**](/Web%20Development/TypeScript/Decorators/Property.md)
   - Property decorators
   - Property decorator declaration
   - Property decorator usage
   - Property decorator best practices
 
-- **82. Parameter Decorators**
+- [**82. Parameter Decorators**](/Web%20Development/TypeScript/Decorators/Parameter.md)
   - Parameter decorators
   - Parameter decorator declaration
   - Parameter decorator usage
   - Parameter decorator best practices
 
-- **83. Accessor Decorators**
+- [**83. Accessor Decorators**](/Web%20Development/TypeScript/Decorators/Accessor.md)
   - Accessor decorators
   - Accessor decorator declaration
   - Accessor decorator usage
   - Accessor decorator best practices
 
-- **84. Decorator Metadata**
+- [**84. Decorator Metadata**](/Web%20Development/TypeScript/Decorators/Metadata.md)
   - Decorator metadata
   - `reflect-metadata`
   - `emitDecoratorMetadata`
