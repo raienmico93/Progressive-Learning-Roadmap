@@ -464,19 +464,16 @@ class Alert extends Component
 
 **Example 1: Component with Constructor and Public Method**
 
-**Component Class**
+**Component Class (`app/View/Components/Alert.php`)**
 
 ```php
-// app/View/Components/Alert.php
 namespace App\View\Components;
 
 use Illuminate\View\Component;
 
 class Alert extends Component
 {
-    public function __construct(
-        public string $type = 'info'
-    ) {}
+    public function __construct(public string $type = 'info') {}
 
     public function render()
     {
@@ -490,10 +487,9 @@ class Alert extends Component
 }
 ```
 
-**Component View**
+**Component View (`resources/views/components/alert.blade.php`)**
 
 ```blade
-<!-- resources/views/components/alert.blade.php -->
 <div class="alert alert-{{ $type }}">
     @if ($isError())
         <strong>Error:</strong>
@@ -505,15 +501,16 @@ class Alert extends Component
 **Usage**
 
 ```blade
-<x-alert type="error">Something went wrong.</x-alert>
+<x-alert type="error">
+    Something went wrong.
+</x-alert>
 ```
 
 **Expected Output**
 
 ```html
 <div class="alert alert-error">
-    <strong>Error:</strong>
-    Something went wrong.
+    <strong>Error:</strong> Something went wrong.
 </div>
 ```
 
@@ -592,11 +589,13 @@ The component view is the HTML part of the component. It's where you write the m
 
 **Example 1: View with Attribute Merging**
 
-**Component View**
+**Component View (`resources/views/components/button.blade.php`)**
 
 ```blade
-<!-- resources/views/components/button.blade.php -->
-<button {{ $attributes->merge(['class' => 'btn btn-primary', 'type' => 'button']) }}>
+<button {{ $attributes->merge([
+    'class' => 'btn btn-primary', 
+    'type' => 'button'
+]) }}>
     {{ $slot }}
 </button>
 ```
@@ -604,7 +603,9 @@ The component view is the HTML part of the component. It's where you write the m
 **Usage**
 
 ```blade
-<x-button class="btn-lg" type="submit">Click Me</x-button>
+<x-button class="btn-lg" type="submit">
+    Click Me
+</x-button>
 ```
 
 **Expected Output**
@@ -658,17 +659,23 @@ Attributes are extra pieces of information you give to a component, like `class=
 
 **Complete General Syntax**
 
+Rendering all attributes
 ```blade
-{{-- Rendering all attributes --}}
 <div {{ $attributes }}>
+```
 
-{{-- Merging defaults --}}
+Merging defaults
+```blade
 <div {{ $attributes->merge(['class' => 'alert']) }}>
+```
 
-{{-- Conditional classes --}}
+Conditional classes
+```blade
 <div {{ $attributes->class(['active' => $isActive]) }}>
+```
 
-{{-- Filtering --}}
+Filtering
+```blade
 {{ $attributes->only(['class']) }}
 {{ $attributes->except(['class']) }}
 ```
@@ -699,10 +706,9 @@ Attributes are extra pieces of information you give to a component, like `class=
 
 **Example 1: Merging Classes**
 
-**Component View**
+**Component View (`resources/views/components/alert.blade.php`)**
 
 ```blade
-<!-- resources/views/components/alert.blade.php -->
 <div {{ $attributes->merge(['class' => 'alert alert-danger']) }}>
     {{ $slot }}
 </div>
@@ -711,7 +717,9 @@ Attributes are extra pieces of information you give to a component, like `class=
 **Usage**
 
 ```blade
-<x-alert class="mt-4">Error!</x-alert>
+<x-alert class="mt-4">
+    Error!
+</x-alert>
 ```
 
 **Expected Output**
@@ -796,13 +804,15 @@ A slot is like a blank space in a component where you can put your own content. 
 
 **Complete General Syntax**
 
+Default slot
 ```blade
-{{-- Default slot --}}
 <x-alert>
     This is the slot content.
 </x-alert>
+```
 
-{{-- Named slots --}}
+Named slots
+```blade
 <x-card>
     <x-slot:header>
         <h2>Title</h2>
@@ -838,10 +848,9 @@ A slot is like a blank space in a component where you can put your own content. 
 
 **Example 1: Default Slot**
 
-**Component View**
+**Component View (`resources/views/components/alert.blade.php`)**
 
 ```blade
-<!-- resources/views/components/alert.blade.php -->
 <div class="alert alert-info">
     {{ $slot }}
 </div>
@@ -871,10 +880,9 @@ The content between the component tags is assigned to `$slot` and echoed inside 
 
 **Example 2: Named Slots**
 
-**Component View**
+**Component View (`resources/views/components/card.blade.php`)**
 
 ```blade
-<!-- resources/views/components/card.blade.php -->
 <div class="card">
     <div class="card-header">
         {{ $header }}
@@ -994,10 +1002,9 @@ public function __construct(
 
 **Example 1: Anonymous Component with Props**
 
-**Component Definition**
+**Component Definition (`resources/views/components/alert.blade.php`)**
 
 ```blade
-<!-- resources/views/components/alert.blade.php -->
 @props(['type' => 'info', 'message'])
 
 <div class="alert alert-{{ $type }}">
@@ -1027,10 +1034,9 @@ The `@props` directive declares `$type` and `$message` as data variables. The `t
 
 **Example 2: Class-Based Component with Constructor Props**
 
-**Component Class**
+**Component Class (`app/View/Components/Alert.php`)**
 
 ```php
-// app/View/Components/Alert.php
 public function __construct(
     public string $type = 'info',
     public string $message = ''

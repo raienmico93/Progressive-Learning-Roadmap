@@ -156,7 +156,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
 
 # II. Elements
 
-- **7. Element Fundamentals**
+- [**7. Element Fundamentals**](/Web%20Development/HTML/Elements/Element.md)
   - Elements
   - Element types
     - Block-level elements
@@ -176,7 +176,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - Element content model
   - Element best practices
 
-- **8. Document Metadata Elements**
+- [**8. Document Metadata Elements**](/Web%20Development/HTML/Elements/DocumentMetadata.md)
   - `<html>`
   - `<head>`
   - `<title>`
@@ -188,7 +188,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `<noscript>`
   - Metadata element best practices
 
-- **9. Sectioning Elements**
+- [**9. Sectioning Elements**](/Web%20Development/HTML/Elements/Sectioning.md)
   - `<body>`
   - `<article>`
   - `<section>`
@@ -202,7 +202,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `<address>`
   - Sectioning element best practices
 
-- **10. Grouping Content Elements**
+- [**10. Grouping Content Elements**](/Web%20Development/HTML/Elements/GroupingContent.md)
   - `<div>`
   - `<p>`
   - `<hr>`

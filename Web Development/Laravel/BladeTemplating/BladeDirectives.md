@@ -97,23 +97,28 @@ These are the "if/then" directives. They let you show or hide parts of your page
 @else
     <p>Both conditions are false</p>
 @endif
-
+```
+```blade
 @unless ($condition)
     <p>Condition is false</p>
 @endunless
-
+```
+```blade
 @isset($records)
     <p>Records are defined</p>
 @endisset
-
+```
+```blade
 @empty($records)
     <p>No records found</p>
 @endempty
-
+```
+```blade
 @env('staging')
     <p>Staging environment</p>
 @endenv
-
+```
+```blade
 @production
     <p>Production environment</p>
 @endproduction

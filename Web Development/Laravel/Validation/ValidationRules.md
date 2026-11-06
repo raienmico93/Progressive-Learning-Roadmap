@@ -121,7 +121,7 @@ These rules answer questions like "Is this field here?" "Can it be blank?" and "
 ```php
 $request->validate([
     'name' => 'required|string|max:255',
-    'bio' => 'nullable|string|max:1000',
+    'bio'  => 'nullable|string|max:1000',
 ]);
 ```
 
@@ -142,7 +142,7 @@ $request->validate([
 
 ```php
 $request->validate([
-    'terms' => 'accepted',
+    'terms'      => 'accepted',
     'newsletter' => 'declined',
 ]);
 ```
@@ -261,15 +261,19 @@ These rules say "only require this field if that other field has a certain value
 
 ```php
 $request->validate([
-    'is_company' => 'boolean',
+    'is_company'   => 'boolean',
     'company_name' => 'required_if:is_company,true|nullable|string',
 ]);
 ```
 
 **Expected Output**
 
-- `is_company = true` and no `company_name` → fails.
-- `is_company = false` → passes without `company_name`.
+| `is_company` | `company_name` | Status | Outcome / Error Message |
+| :--- | :--- | :--- | :--- |
+| `true` | *(Missing / Null)* | ❌ **Fails** | The company name field is required when is company is true. |
+| `true` | `"Acme Corp"` |    **Passes** | Validation succeeds. |
+| `false` | *(Missing / Null)* |    **Passes** | Validation succeeds (field is bypassed). |
+| `false` | `"Acme Corp"` |    **Passes** | Validation succeeds (`nullable` allows the string through). |
 
 **Why This Output Occurs**
 
@@ -289,8 +293,11 @@ $request->validate([
 
 **Expected Output**
 
-- `payment_method = "credit_card"` with `coupon_code` → fails.
-- `payment_method = "paypal"` with `coupon_code` → passes.
+| `payment_method` | `coupon_code` | Status | Outcome / Error Message |
+| :--- | :--- | :--- | :--- |
+| `"credit_card"` | `"SAVE20"` | ❌ **Fails** | The coupon code field is prohibited when payment method is credit card. |
+| `"credit_card"` | *(Missing / Null)* |    **Passes** | Validation succeeds. |
+| `"paypal"` | `"SAVE20"` |    **Passes** | Validation succeeds. |
 
 **Why This Output Occurs**
 
@@ -310,8 +317,11 @@ $request->validate([
 
 **Expected Output**
 
-- `is_gift = true` and `gift_message` present → fails.
-- `is_gift = false` and `gift_message` present → passes.
+| `is_gift` | `gift_message` | Status | Outcome / Error Message |
+| :--- | :--- | :--- | :--- |
+| `true` / `false` | `"Happy Birthday!"` | ❌ **Fails** | The is gift field prohibits gift message from being present. |
+| `true` | *(Missing / Null)* |    **Passes** | Validation succeeds. |
+| *(Missing)* | `"Happy Birthday!"` |    **Passes** | Validation succeeds (because `is_gift` was never sent). |
 
 **Why This Output Occurs**
 
@@ -507,13 +517,13 @@ These rules control "how big" or "how many" something is—like a password being
 **Complete General Syntax**
 
 ```php
-'name' => 'string|between:2,50',
-'age' => 'integer|min:18|max:120',
+'name'     => 'string|between:2,50',
+'age'      => 'integer|min:18|max:120',
 'quantity' => 'integer|multiple_of:5',
-'pin' => 'digits:4',
-'code' => 'digits_between:4,6',
+'pin'      => 'digits:4',
+'code'     => 'digits_between:4,6',
 'end_date' => 'date|after:start_date',
-'price' => 'numeric|gt:0',
+'price'    => 'numeric|gt:0',
 ```
 
 **Component Breakdown**
@@ -573,7 +583,7 @@ $request->validate([
 
 ```php
 $request->validate([
-    'price' => 'numeric|gt:0',
+    'price'    => 'numeric|gt:0',
     'quantity' => 'integer|multiple_of:5',
 ]);
 ```
@@ -588,6 +598,85 @@ $request->validate([
 `gt:0` requires price to be greater than 0; `multiple_of:5` requires quantity to be divisible by 5.
 
 ---
+
+**Example 3: Minimum and Maximum Values**
+
+**Code**
+```php
+$request->validate([
+    'score'      => 'numeric|min:0|max:100',
+    'experience' => 'integer|min:1',
+]);
+```
+
+**Expected Output**
+
+-  score = 85.5 → passes; score = 105 → fails.
+-  experience = 5 → passes; experience = 0 → fails.
+
+**Why This Output Occurs**
+The min and max rules constrain the numeric boundaries. score must be between 0 and 100 (inclusive of decimals because of numeric), while experience must be a whole number of at least 1.
+
+---
+
+**Example 4: Digits Between and Decimal Places**
+
+**Code**
+```php
+$request->validate([
+    'security_code' => 'digits_between:3,4',
+    'latitude'      => 'decimal:2,6',
+]);
+```
+
+**Expected Output**
+
+- security_code = "987" → passes; security_code = "95" → fails.
+- latitude = 37.7749 → passes; latitude = 37 → fails.
+
+**Why This Output Occurs**
+digits_between ensures the input is numeric and contains between 3 and 4 digits total. The decimal rule requires the value to be numeric and have between 2 and 6 decimal places.
+
+---
+
+**Example 5: String Length as Size**
+
+**Code**
+```php
+$request->validate([
+    'username' => 'string|size:8',
+    'bio'      => 'string|between:10,160',
+]);
+```
+
+**Expected Output**
+
+- username = "laravel1" → passes; username = "dev" → fails.
+- bio = "Software dev." → passes; bio = "Hello" → fails.
+
+**Why This Output Occurs**
+When paired with the string rule, size changes its behavior from evaluating numeric value to evaluating character count. size:8 forces the string to be exactly 8 characters long, and between:10,160 forces the string length into that character range.
+
+---
+
+**Example 6: File Sizes**
+
+**Code**
+```php
+$request->validate([
+    'avatar'       => 'file|max:2048',
+    'pdf_document' => 'file|between:50,5120',
+]);
+```
+
+**Expected Output**
+- avatar = (1.5 MB file) → passes; avatar = (3 MB file) → fails.
+- pdf_document = (100 KB file) → passes; pdf_document = (20 KB file) → fails.
+
+**Why This Output Occurs**
+When validating a file, size-related rules (min, max, between, size) evaluate the file size in kilobytes (KB). Therefore, max:2048 limits the file to 2 Megabytes, and between:50,5120 restricts the file to between 50 KB and 5 MB.
+If you want to explore further, let me know if you would like examples focusing on Dates & Times, Arrays, or Conditional Validation Rules.
+
 
 #### Real-World Cases with Explanation
 
@@ -799,7 +888,7 @@ The `dns` parameter verifies that the domain has valid DNS records.
 
 ```php
 $request->validate([
-    'ip' => 'ip',
+    'ip'   => 'ip',
     'ipv4' => 'ipv4',
     'ipv6' => 'ipv6',
 ]);

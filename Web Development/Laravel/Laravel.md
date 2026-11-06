@@ -879,7 +879,7 @@ This roadmap organizes Laravel as a **progressive application-development curric
 
 # XXVI. Broadcasting and Real-Time Applications
 
-- [**90. Broadcasting Fundamentals**](/Web%20Development/Laravel/Miscellaneous/Broadcasting.md)
+- [**90. Broadcasting Fundamentals**](/Web%20Development/Laravel/Events%20and%20Listeners/Broadcasting.md)
   - Events
   - Broadcast channels
   - Public channels

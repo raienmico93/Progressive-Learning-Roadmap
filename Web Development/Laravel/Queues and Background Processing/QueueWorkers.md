@@ -1,4 +1,4 @@
-# Laravel Queue Workers & Runtime — Comprehensive Programming Cheat Sheet
+# Laravel Queue Workers & Horizon: A Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,619 +6,1331 @@
 
 ### Definitions
 
-**Core Definition:** Laravel Queue Workers & Runtime is the subsystem responsible for executing queued jobs in background processes, encompassing worker orchestration commands (`queue:work`, `queue:listen`), queue priority routing, resource and timeout guardrails, and graceful lifecycle management during deployments.
+**Core Definition**
 
-**Technical Definition:** Queue workers are long-lived PHP processes that poll a queue backend, retrieve serialized job payloads, resolve the job classes from the service container, and invoke their `handle()` methods. The `Illuminate\Queue\Worker` class manages the worker lifecycle, using `WorkerOptions` to configure memory limits, timeouts, sleep intervals, and job retry limits. The `queue:work` command (implemented by `Illuminate\Queue\Console\WorkCommand`) starts a daemon worker that processes jobs continuously, while `queue:listen` (implemented by `Illuminate\Queue\Console\ListenCommand`) spawns a new `queue:work --once` subprocess for each job, reloading the framework between jobs. Queue priorities are managed by passing a comma-separated list of queue names to `--queue`, with workers polling queues in priority order. Graceful maintenance is handled by `queue:restart`, which signals workers to exit after completing their current job, and process managers like Supervisor or Horizon which automatically restart them.
+Laravel queue workers are long-running background processes that continuously poll a queue connection for pending jobs and execute them, decoupling slow or resource-intensive work from the HTTP request lifecycle. **Laravel Horizon** is a first-party dashboard and code-driven process manager that supervises Redis-backed queue workers, providing autoscaling, real-time monitoring, and metrics.
 
-**Beginner-Friendly Explanation:** Queue workers are the "background employees" of your application. While your web server handles user requests, queue workers process slow tasks like sending emails, processing videos, or syncing data. You start them with `php artisan queue:work`, and they run continuously, picking up jobs as they arrive. During deployments, you need to restart them so they pick up your new code — that's where `queue:restart` and process managers come in. This cheat sheet covers how to run, prioritize, monitor, and gracefully maintain these workers in production.
+**Technical Definition**
+
+A queue worker is a CLI process started with `php artisan queue:work` that uses the queue driver’s API to reserve, execute, and acknowledge or release jobs. Workers are configured via CLI options (`--queue`, `--tries`, `--timeout`, `--sleep`, `--max-time`, `--max-jobs`, `--memory`) and require a process monitor in production to restart them on failure. **Horizon** replaces hand-written Supervisor configurations with a single `config/horizon.php` file, introduces supervisor groups with `minProcesses` / `maxProcesses` bounds and balancing strategies (`simple`, `auto`, `false`), and exposes a web dashboard at `/horizon` with throughput, runtime, wait time, and failure metrics.
+
+**Beginner-Friendly Explanation**
+
+Imagine a restaurant kitchen. The **queue worker** is the cook who keeps checking the order tickets and preparing each dish. A **process manager** (Supervisor) is the kitchen manager who makes sure the cook never leaves their station—if they faint, the manager revives them. **Horizon** is a smart kitchen manager for restaurants that use a specific type of order system (Redis): it watches how many orders are waiting, hires extra cooks automatically when it gets busy, and gives you a live dashboard showing every order’s progress.
+
+---
 
 ### Key Characteristics
 
-- **Long-lived daemon processes:** `queue:work` boots the framework once and keeps it in memory, making it highly efficient but requiring restarts after code changes.
-- **Zero-overhead reload alternative:** `queue:listen` spawns a fresh subprocess for each job, reloading the framework every time — slower but always picks up code changes.
-- **Priority-based polling:** Workers poll multiple queues in the order specified, draining higher-priority queues first on each poll cycle.
-- **Resource guardrails:** Memory limits, timeouts, and process recycling parameters prevent workers from degrading over time.
-- **Graceful shutdown:** `queue:restart` signals workers to finish their current job and exit, enabling zero-downtime deployments.
-- **Process manager integration:** Supervisor and Horizon ensure workers are automatically restarted if they crash or exit.
-- **Horizon orchestration:** For Redis-backed queues, Horizon provides code-driven worker configuration, auto-balancing, and real-time monitoring.
+- **Workers Are Long-Lived, Stateful Processes**: Unlike PHP-FPM requests, workers boot the framework once and reuse it across many jobs. Code changes require a restart (`queue:restart` or `horizon:terminate`).
+- **Process Monitoring Is Mandatory in Production**: Workers can crash due to memory limits, exceptions, or server restarts. Supervisor or Horizon must restart them automatically.
+- **Scaling Is Horizontal and Queue-Aware**: More workers (more processes) increase throughput. Multiple queues with priority (`--queue=high,default,low`) ensure critical jobs are not starved.
+- **Horizon Requires Redis**: Horizon supervises Redis queue connections only; it does not support the database, SQS, or Beanstalkd drivers.
+- **Timeout Chain Ordering Is Critical**: The job `timeout` must be less than the supervisor `timeout`, which must be less than `retry_after`. Wrong ordering causes duplicate job execution.
+- **Horizon Metrics Require Scheduling**: The metrics dashboard stays blank until `horizon:snapshot` is scheduled every five minutes.
+
+---
 
 ### Prerequisites
 
-- PHP 8.1 or higher (Laravel 10+; Laravel 11 requires PHP 8.2+).
-- A Laravel application with `config/queue.php` configured.
-- A queue backend (Redis, database, SQS, etc.) with a running worker or process manager.
-- For production: a process manager such as Supervisor (or Laravel Horizon for Redis queues).
-- The `pcntl` PHP extension (required for timeout support in workers).
-- A persistent cache driver (Redis, Memcached, database) for `queue:restart` to work correctly.
+- **PHP 8.1+** (Laravel 10+) or **PHP 8.2+** (Laravel 11+).
+- **A Laravel application** with `config/queue.php` and a configured queue connection.
+- **A queue backend**: Redis (required for Horizon), database, SQS, or Beanstalkd.
+- **`laravel/horizon`** installed via Composer for Horizon users.
+- **Supervisor** installed on the server (`apt-get install supervisor` on Ubuntu) for process monitoring.
+- **`predis/predis`** or the `phpredis` extension for Redis connections.
+- **The `pcntl` PHP extension** for signal-based worker termination and timeouts.
+
+---
 
 ### Related Programming Areas
 
-- **Artisan Console** — Queue workers are started and managed via Artisan commands.
-- **Queue System** — The foundation for job dispatching and processing.
-- **Process Management** — Supervisor and systemd keep workers running and restart them when they exit.
-- **Laravel Horizon** — Code-driven worker configuration, auto-balancing, and monitoring for Redis queues.
-- **Deployment** — `queue:restart` is a standard step in zero-downtime deployment scripts.
-- **Caching** — The restart signal is stored in the cache, requiring a persistent cache driver.
-
-### Core Concepts / Features
-
-1. Worker Orchestration (Managing differences between standard daemon processes `queue:work` and zero-overhead environments `queue:listen`)
-2. Queue Priorities (Directing worker focus across multi-tiered queues like `high`, `default`, `low`)
-3. Resource & Timeout Guardrails (Monitoring worker lifecycles, memory limits, and process recycling parameters)
-4. Graceful Maintenance (Pausing, draining, and restarting worker pools seamlessly during zero-downtime application deployments)
+- **Queues**: Workers consume jobs from queues; queue configuration determines worker behaviour.
+- **Jobs**: The unit of work executed by workers.
+- **Laravel Horizon**: A Redis-specific worker manager and monitoring dashboard.
+- **Process Supervision**: Supervisor, systemd, or container orchestrators keep workers alive.
+- **Task Scheduling**: `horizon:snapshot` must be scheduled; scheduled commands can dispatch jobs.
+- **Deployment**: Workers must be restarted (`queue:restart` / `horizon:terminate`) on every deploy.
 
 ---
 
-## 1. Worker Orchestration
+## Core Concepts
 
-### Definitions
+---
 
-**Core Definition:** Worker orchestration is the practice of starting, managing, and configuring queue worker processes, including choosing between the high-performance daemon mode (`queue:work`) and the code-reload-friendly listener mode (`queue:listen`).
+### 1. Queue Workers
 
-**Technical Definition:** The `queue:work` command starts a daemon worker that boots the Laravel application once and processes jobs continuously in a loop. It is highly efficient but does not pick up code changes until restarted. The `queue:listen` command is a wrapper that spawns a new `queue:work --once` subprocess for each job, reloading the framework every time. Internally, `queue:listen` creates a child process using Symfony's `Process` class and invokes `queue:work --once` in a `while` loop. The `Worker` class (`Illuminate\Queue\Worker`) manages the worker lifecycle, using `WorkerOptions` to configure memory, timeout, sleep, and retry parameters.
+#### Definitions
 
-**Beginner-Friendly Explanation:** `queue:work` is the production worker — it starts once, boots your application into memory, and processes jobs as fast as possible. The catch is that if you change your code, the worker doesn't see the changes until you restart it. `queue:listen` is the development worker — it starts a fresh process for every job, so it always uses the latest code, but it's much slower because it has to boot the entire framework each time.
+**Core Definition**
 
-### Purposes
+A queue worker is a long-running CLI process that polls a queue connection for pending jobs and executes them, using the framework’s queue driver to reserve, run, and acknowledge or release each job.
 
-- To provide a high-performance daemon worker for production environments (`queue:work`).
-- To provide a code-reload-friendly worker for development environments (`queue:listen`).
-- To start workers with specific connections, queues, and options.
-- To control worker behaviour through options like `--once`, `--stop-when-empty`, and `--max-jobs`.
-- To integrate with process managers for automatic restart and monitoring.
+**Technical Definition**
 
-### Syntax Rules and Structure
+`php artisan queue:work {connection} --queue={queues} --tries={n} --timeout={s} --sleep={s} --max-time={s} --max-jobs={n} --memory={mb}` starts a daemon worker. The worker boots the application once and enters a loop: reserve a job, fire `JobProcessing`, execute `handle()`, fire `JobProcessed` on success or release/retry on failure, then sleep if no job is available. `queue:work` is the production worker; `queue:listen` restarts the framework after each job and is intended for development.
 
-#### Complete General Syntax
+**Beginner-Friendly Explanation**
+
+A worker is the “cook” that keeps checking the order queue. It runs continuously, picks up jobs one by one, and does the work. You run one or more workers depending on how much work you have.
+
+#### Purposes
+
+- To process queued jobs asynchronously, keeping web requests fast.
+- To execute background work reliably in a long-lived process.
+- To scale throughput horizontally by running multiple workers.
+- To control job execution with timeouts, retries, and memory limits.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
 
 ```bash
-# Start a daemon worker (production)
-php artisan queue:work [connection] [options]
+# Basic worker
+php artisan queue:work
 
-# Start a listener worker (development)
-php artisan queue:listen [connection] [options]
+# Specific connection and queue priority
+php artisan queue:work redis --queue=high,default,low
+
+# Retry, timeout, and sleep configuration
+php artisan queue:work --tries=3 --timeout=60 --sleep=3 --backoff=30
+
+# Graceful shutdown after limits
+php artisan queue:work --max-jobs=1000 --max-time=3600 --memory=512
 ```
 
-**Common Options:**
+**Component Breakdown**
 
 | Option | Description |
 |--------|-------------|
-| `--queue=high,default,low` | Comma-separated list of queues to process in priority order |
-| `--once` | Process a single job and exit |
-| `--stop-when-empty` | Process all jobs and exit when the queue is empty |
-| `--max-jobs=1000` | Process N jobs and exit |
-| `--max-time=3600` | Process jobs for N seconds and exit |
-| `--tries=3` | Maximum number of attempts per job |
-| `--timeout=60` | Maximum seconds a job can run |
-| `--sleep=3` | Seconds to sleep when the queue is empty |
-| `--memory=128` | Maximum RAM the worker may consume (MB) |
-| `--backoff=0` | Seconds to wait before retrying a failed job |
-| `--force` | Run the worker even in maintenance mode |
+| `{connection}` | Queue connection (e.g., `redis`, `database`). |
+| `--queue` | Comma-separated priority list. |
+| `--tries` | Max attempts per job. |
+| `--timeout` | Seconds before the job is killed. |
+| `--sleep` | Seconds to sleep when no job is available. |
+| `--max-time` | Stop after N seconds. |
+| `--max-jobs` | Stop after N jobs. |
+| `--memory` | Memory limit in MB. |
+
+**Syntax Rules**
+
+- `queue:work` is the production worker; `queue:listen` is for development.
+- `--timeout` must be shorter than the connection’s `retry_after`.
+- Workers cache code at boot; run `php artisan queue:restart` after deploying changes.
+
+**Constraints and Limitations**
+
+- Workers are stateful; memory leaks in jobs accumulate over time. Use `--max-jobs` or `--max-time` for periodic restarts.
+- `queue:listen` is significantly slower and not recommended for production.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Starting a Worker with Priority Queues**
 
 ```bash
-# Production: daemon worker with priority queues
-php artisan queue:work redis --queue=high,default,low --tries=3 --timeout=90 --sleep=3
-
-# Development: listener worker (auto-reloads code)
-php artisan queue:listen redis --queue=default
-
-# Process a single job and exit
-php artisan queue:work --once
-
-# Process all jobs and exit (useful for Docker)
-php artisan queue:work --stop-when-empty
+php artisan queue:work redis --queue=high,default,low --tries=3 --timeout=60
 ```
 
-**Component Breakdown:**
+**Expected Output**
 
-- `queue:work` — Starts a daemon worker. Boots the framework once and keeps it in memory.
-- `queue:listen` — Starts a listener that spawns a new `queue:work --once` subprocess for each job.
-- `--once` — Processes one job and exits. Used internally by `queue:listen`.
-- `--stop-when-empty` — Processes all available jobs and exits gracefully.
-- `--max-jobs` / `--max-time` — Process recycling parameters (see Section 3).
-- `--memory` — Memory limit in megabytes (default: 128).
-- `--timeout` — Job timeout in seconds (default: 60).
+The worker processes all `high` jobs before moving to `default`, and all `default` before `low`, on every poll cycle. Each job is attempted up to 3 times with a 60-second timeout.
 
-**Syntax Rules:**
+**Why This Output Occurs**
 
-- `queue:work` runs indefinitely until stopped manually or by a process manager.
-- `queue:listen` is significantly less efficient than `queue:work` because it boots the framework for each job.
-- The `--once` option is used by `queue:listen` internally and can also be used standalone for testing.
-- The `--stop-when-empty` option is useful for Docker containers and batch processing.
-- The `pcntl` extension is required for the `--timeout` option to work correctly.
-
-**Constraints and Limitations:**
-
-- **Daemon workers do not pick up code changes.** You must restart them after deployment via `queue:restart`.
-- **`queue:listen` is much slower than `queue:work`.** It is suitable only for local development or debugging.
-- **Daemon workers do not "reboot" the framework between jobs.** Heavy resources (database connections, file handles) must be released manually.
-- **The `--timeout` option requires the `pcntl` extension.** Without it, timeouts are not enforced.
-- **Workers are long-lived processes.** Memory leaks in job code accumulate over time; use process recycling to mitigate.
-
-### Annotated Code Examples
-
-**Example 1: Starting a Production Daemon Worker**
-
-```bash
-# Step 1: Start a daemon worker with priority queues
-php artisan queue:work redis --queue=high,default,low --tries=3 --timeout=90 --sleep=3 --memory=256
-```
-
-**Expected Output:**
-
-```
-Processing jobs from the [high,default,low] queue.
-
-  2025-06-15 10:00:00 App\Jobs\SendEmail ....................... RUNNING
-  2025-06-15 10:00:01 App\Jobs\SendEmail ....................... DONE
-  2025-06-15 10:00:05 App\Jobs\ProcessOrder .................... RUNNING
-  2025-06-15 10:00:08 App\Jobs\ProcessOrder .................... DONE
-```
-
-**Why This Output Occurs:** The worker connects to the `redis` connection, boots the framework once, and begins polling the `high` queue first. When `high` is empty, it moves to `default`, then `low`. The `--tries=3` option limits each job to 3 attempts, `--timeout=90` kills jobs running longer than 90 seconds, and `--memory=256` restarts the worker if it exceeds 256 MB.
+The `--queue` option provides a priority list; the worker polls queues in order on each cycle. `--tries` and `--timeout` configure retry and execution limits.
 
 ---
 
-**Example 2: Using queue:listen for Development**
+**Example 2: Graceful Worker with Limits**
 
 ```bash
-# Start a listener worker that reloads code on every job
-php artisan queue:listen redis --queue=default --tries=3
+php artisan queue:work --max-jobs=1000 --max-time=3600
 ```
 
-**Expected Output:**
+**Expected Output**
 
-```
-Listening to the [default] queue on the [redis] connection.
+The worker exits gracefully after processing 1,000 jobs or after 3,600 seconds, whichever comes first. A process monitor (Supervisor or Horizon) then restarts it with a fresh process.
 
-  2025-06-15 10:00:00 App\Jobs\SendEmail ....................... RUNNING
-  2025-06-15 10:00:01 App\Jobs\SendEmail ....................... DONE
-```
+**Why This Output Occurs**
 
-**Why This Output Occurs:** The `queue:listen` command spawns a new `queue:work --once` subprocess for each job. Each subprocess boots the Laravel framework from scratch, picks up any code changes, processes one job, and exits. The parent listener then spawns a new subprocess for the next job.
-
-### Real-World Cases
-
-- **Production daemon workers:** Run `queue:work` under Supervisor with `--max-time=3600` to recycle workers hourly and release accumulated memory.
-- **Local development:** Use `queue:listen` to avoid restarting the worker after every code change.
-- **Docker containers:** Use `queue:work --stop-when-empty` to process all jobs and exit, allowing the container to shut down cleanly.
-- **Batch processing:** Use `queue:work --once` in a loop or `--max-jobs=100` to process a limited number of jobs and exit.
-- **Multi-connection setups:** Run separate workers for different connections (e.g., `queue:work redis` and `queue:work sqs`).
+`--max-jobs` and `--max-time` instruct the worker to stop after the specified limit, releasing accumulated memory.
 
 ---
 
-## 2. Queue Priorities
+#### Real-World Cases with Explanation
 
-### Definitions
+**Case 1: E-commerce Email Processing**
 
-**Core Definition:** Queue priorities are the mechanism by which workers process jobs from multiple queues in a defined order, ensuring that critical jobs are handled before less important ones.
+An e-commerce application sends order confirmations, shipping updates, and promotional emails. Separate workers process the `emails` queue with `--tries=5` and `--timeout=30`, ensuring transient SMTP failures are retried without blocking other work.
 
-**Technical Definition:** The `--queue` option accepts a comma-separated list of queue names. The worker polls the queues in the order specified: it checks the first queue for available jobs, then the second, and so on. If a job is found in a higher-priority queue, it is processed before any jobs in lower-priority queues. This polling happens on each cycle — the worker does not drain the first queue entirely before moving to the second. Jobs are routed to specific queues using the `onQueue()` method on the job instance or the `$queue` property on the job class.
+**Explanation**: Dedicated workers per workload isolate failure domains and allow independent scaling.
 
-**Beginner-Friendly Explanation:** Queue priorities let you say "process password reset emails before newsletter emails." You assign each job to a queue — `high`, `default`, or `low` — and then start a worker with `--queue=high,default,low`. The worker always checks `high` first, then `default`, then `low`. If a `high` job arrives while the worker is processing a `low` job, the `high` job waits until the current job finishes, but it will be picked up before the next `low` job.
+---
 
-### Purposes
+### 2. Worker Configuration
 
-- To ensure that critical jobs (password resets, payment processing, alerts) are processed before routine jobs.
-- To prevent low-priority jobs (newsletters, report generation) from blocking high-priority work.
-- To segment workloads across multiple queues for independent scaling and monitoring.
-- To allow different queues to have different retry, timeout, and memory configurations.
-- To enable dedicated workers for specific queues (e.g., a worker that only processes `urgent` jobs).
+#### Definitions
 
-### Syntax Rules and Structure
+**Core Definition**
 
-#### Complete General Syntax
+Worker configuration is the set of CLI options, connection settings, and job-level properties that control how a worker reserves, executes, retries, and times out jobs.
+
+**Technical Definition**
+
+Worker configuration spans three layers: **CLI options** (`--queue`, `--tries`, `--timeout`, `--sleep`, `--backoff`, `--max-jobs`, `--max-time`, `--memory`), **connection configuration** (`retry_after`, `block_for`, `queue`), and **job-level properties** (`$tries`, `$timeout`, `$backoff`, `$maxExceptions`, `$failOnTimeout`). The worker’s `--timeout` must be several seconds shorter than the connection’s `retry_after` to prevent duplicate execution. The timeout chain is: **job `timeout` < supervisor `timeout` < `retry_after`**.
+
+**Beginner-Friendly Explanation**
+
+Configuration is the control panel: how long a job can run, how many times to retry, how long to wait between retries, and when to restart the worker to avoid memory leaks.
+
+#### Purposes
+
+- To tune job execution to the workload’s reliability and latency requirements.
+- To prevent duplicate job execution caused by timeout and retry misalignment.
+- To control worker memory usage with periodic restarts.
+- To prioritize critical queues over lower-priority work.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+**CLI configuration**
 
 ```bash
-# Start a worker with priority queues
-php artisan queue:work --queue=high,default,low
+php artisan queue:work redis --queue=high,default --tries=3 --timeout=60 --sleep=3 --backoff=30 --max-time=3600 --memory=512
 ```
 
-```php
-// Assign a job to a specific queue
-dispatch((new ProcessOrder($order))->onQueue('high'));
-
-// Or set the queue on the job class
-class ProcessOrder implements ShouldQueue
-{
-    public $queue = 'high';
-}
-```
+**Connection configuration (`config/queue.php`)**
 
 ```php
-// Configuring default queue in config/queue.php
 'redis' => [
-    'driver'  => 'redis',
-    'queue'   => env('REDIS_QUEUE', 'default'),
-    // ...
+    'driver' => 'redis',
+    'queue' => 'default',
+    'retry_after' => 90,
+    'block_for' => null,
 ],
 ```
 
-**Component Breakdown:**
-
-- `--queue=high,default,low` — Comma-separated list of queues in priority order.
-- `->onQueue('high')` — Assigns the job to the `high` queue at dispatch time.
-- `public $queue = 'high'` — Sets the default queue for the job class.
-- `'queue' => 'default'` — The default queue name in the connection configuration.
-
-**Syntax Rules:**
-
-- The first queue in the `--queue` list has the highest priority.
-- The worker polls queues in order on each cycle; it does not drain one queue before moving to the next.
-- Jobs are routed to queues using `onQueue()` or the `$queue` property.
-- If no queue is specified, the job goes to the connection's default queue.
-- Multiple workers can be run with different `--queue` configurations for independent scaling.
-
-**Constraints and Limitations:**
-
-- **Queue priority is worker-level, not job-level.** You cannot assign a priority number to individual jobs; you assign them to named queues.
-- **A job in a lower-priority queue may still run before a job in a higher-priority queue** if the worker is already processing it when the higher-priority job arrives.
-- **Draining a queue does not mean it is empty.** The worker polls in order but may process jobs from lower-priority queues if the higher-priority queue is momentarily empty.
-- **Horizon's auto-balancing may override manual priority.** When using Horizon's `auto` strategy, workers are allocated dynamically based on workload.
-
-### Annotated Code Examples
-
-**Example 1: Configuring Priority Queues**
+**Job-level configuration**
 
 ```php
-// Step 1: Assign jobs to priority queues
-use App\Jobs\SendPasswordReset;
-use App\Jobs\ProcessOrder;
-use App\Jobs\SendNewsletter;
+public int $tries = 3;
+public int $timeout = 60;
+public int $backoff = 30;
+public bool $failOnTimeout = true;
+```
 
-// High priority: password resets
-SendPasswordReset::dispatch($user)->onQueue('high');
+**Component Breakdown**
 
-// Default priority: order processing
-ProcessOrder::dispatch($order)->onQueue('default');
+| Layer | Key Settings |
+|-------|--------------|
+| CLI | `--queue`, `--tries`, `--timeout`, `--sleep`, `--backoff`, `--max-jobs`, `--max-time`, `--memory` |
+| Connection | `retry_after`, `block_for`, `queue` |
+| Job | `$tries`, `$timeout`, `$backoff`, `$maxExceptions`, `$failOnTimeout` |
 
-// Low priority: newsletters
-SendNewsletter::dispatch($subscribers)->onQueue('low');
+**Syntax Rules**
+
+- `--timeout` must be less than `retry_after` with a safety margin of at least a few seconds.
+- `--tries` on the worker overrides the job’s `$tries` for that worker.
+- `--max-time` and `--max-jobs` trigger graceful worker exits for periodic restarts.
+
+**Constraints and Limitations**
+
+- If `retry_after` is shorter than the worker `--timeout`, a slow job is released and can run twice simultaneously.
+- Worker-level `--tries` does not override a job’s `retryUntil()` deadline.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Aligned Timeout and Retry**
+
+```php
+// config/queue.php
+'redis' => [
+    'retry_after' => 90,
+],
 ```
 
 ```bash
-# Step 2: Start a worker with priority queues
-php artisan queue:work redis --queue=high,default,low
+php artisan queue:work redis --timeout=60 --tries=3
 ```
 
-**Expected Output:** The worker processes `high` queue jobs first, then `default`, then `low`. If a `high` job arrives while the worker is processing a `low` job, it waits until the current job finishes but is picked up before the next `low` job.
+**Expected Output**
 
-**Why This Output Occurs:** The `--queue=high,default,low` option tells the worker to poll queues in that order. On each cycle, the worker checks `high` first, then `default`, then `low`. This ensures that high-priority jobs are processed as soon as the worker is free, even if lower-priority jobs are waiting.
+A job that exceeds 60 seconds is killed by the worker before the 90-second `retry_after` window expires, preventing a second worker from picking it up while it is still running.
+
+**Why This Output Occurs**
+
+The timeout (60s) is shorter than `retry_after` (90s), ensuring the worker terminates the job before the queue considers it lost and releases it again.
 
 ---
 
-**Example 2: Running Dedicated Workers for Different Queues**
+**Example 2: Job-Level Overrides**
 
-```bash
-# Terminal 1: High-priority worker (2 processes)
-php artisan queue:work redis --queue=high
-
-# Terminal 2: Default-priority worker (4 processes)
-php artisan queue:work redis --queue=default
-
-# Terminal 3: Low-priority worker (1 process)
-php artisan queue:work redis --queue=low
+```php
+class SendReport implements ShouldQueue
+{
+    public int $tries = 5;
+    public int $timeout = 120;
+    public array $backoff = [10, 30, 60];
+}
 ```
 
-**Expected Output:** Each worker processes only its assigned queue. High-priority jobs are processed immediately by dedicated workers, while low-priority jobs wait for available capacity.
+**Expected Output**
 
-**Why This Output Occurs:** Running dedicated workers for each queue allows independent scaling. High-priority queues get more worker processes (or more powerful servers), while low-priority queues use fewer resources. This is more flexible than a single worker with `--queue=high,default,low` because each queue can have its own retry, timeout, and memory configuration.
+This specific job is attempted up to 5 times, each attempt limited to 120 seconds, with escalating backoff delays of 10, 30, and 60 seconds.
 
-### Real-World Cases
+**Why This Output Occurs**
 
-- **E-commerce order pipeline:** Order confirmations and payment processing run on `high`; inventory updates and shipping labels run on `default`; marketing emails and reports run on `low`.
-- **SaaS incident management:** Critical alerts run on `urgent` with dedicated workers; user notifications run on `default`; analytics syncing runs on `low`.
-- **Healthcare systems:** Appointment reminders and prescription notifications run on `high`; billing and claims processing run on `default`; report generation runs on `low`.
-- **Financial services:** Transaction alerts run on `high`; statement generation runs on `default`; portfolio analysis runs on `low`.
-- **Social media platforms:** Real-time engagement notifications (likes, comments) run on `high`; content moderation runs on `default`; weekly digest emails run on `low`.
+Job-level properties override worker-level defaults for this job, allowing per-job tuning.
 
 ---
 
-## 3. Resource & Timeout Guardrails
+#### Real-World Cases with Explanation
 
-### Definitions
+**Case 1: Preventing Duplicate Invoice Generation**
 
-**Core Definition:** Resource and timeout guardrails are the configuration parameters that prevent queue workers from consuming excessive memory, running indefinitely, or accumulating state over time, ensuring stable long-term operation.
+An invoice job takes 45 seconds on average. The connection’s `retry_after` is set to 90 seconds, and the worker `--timeout` is set to 75 seconds. This prevents the job from being retried while still running, avoiding duplicate invoices.
 
-**Technical Definition:** The `WorkerOptions` class (`Illuminate\Queue\WorkerOptions`) defines the configurable parameters for queue workers: `$memory` (maximum RAM in MB, default 128), `$timeout` (maximum seconds a child worker may run, default 60), `$sleep` (seconds to wait between polling, default 3), `$maxTries` (maximum attempts per job, default 1), `$maxJobs` (maximum jobs before exiting, default 0 = unlimited), `$maxTime` (maximum seconds a worker may live, default 0 = unlimited), and `$rest` (seconds to rest between jobs). When a worker exceeds its memory limit, it exits gracefully, and a process manager (Supervisor, Horizon) restarts it. When a job exceeds its timeout, the child worker process is killed, and the job is released back to the queue.
-
-**Beginner-Friendly Explanation:** Queue workers are long-lived processes, which means they can accumulate memory leaks over time. If a worker runs out of memory, it crashes and stops processing jobs. Resource guardrails prevent this by setting a memory limit — when the worker reaches it, it exits gracefully and gets restarted by Supervisor. Similarly, the timeout prevents a single frozen job from blocking the worker forever. Process recycling (`--max-jobs`, `--max-time`) restarts workers periodically to release accumulated memory.
-
-### Purposes
-
-- To prevent workers from crashing due to memory exhaustion.
-- To ensure that frozen or hung jobs do not block the queue indefinitely.
-- To periodically recycle workers to release accumulated memory and database connections.
-- To control the trade-off between throughput (more jobs per worker) and stability (more frequent restarts).
-- To provide visibility into worker lifecycle events (memory exceeded, timeout, restart) for monitoring and alerting.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
-
-```bash
-# Worker with resource guardrails
-php artisan queue:work [connection] --memory=256 --timeout=90 --sleep=3 --max-jobs=1000 --max-time=3600
-```
-
-**Component Breakdown:**
-
-- `--memory=256` — Maximum RAM the worker may consume in megabytes. When exceeded, the worker exits gracefully.
-- `--timeout=90` — Maximum seconds a child worker may run before being killed.
-- `--sleep=3` — Seconds to sleep when no jobs are available.
-- `--max-jobs=1000` — Process 1000 jobs and exit (process recycling).
-- `--max-time=3600` — Process jobs for 1 hour and exit (process recycling).
-- `--tries=3` — Maximum attempts per job.
-- `--backoff=10` — Seconds to wait before retrying a failed job.
-
-```bash
-# Production worker with recycling
-php artisan queue:work redis --queue=high,default --memory=256 --timeout=90 --max-time=3600 --tries=3
-
-# Supervisor configuration (recommended for production)
-[program:laravel-worker]
-process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/app/artisan queue:work redis --queue=high,default --sleep=3 --tries=3 --max-time=3600 --memory=256
-autostart=true
-autorestart=true
-stopasgroup=true
-killasgroup=true
-numprocs=4
-redirect_stderr=true
-stdout_logfile=/var/www/app/storage/logs/worker.log
-stopwaitsecs=3600
-```
-
-**Syntax Rules:**
-
-- The `--memory` option causes the worker to exit gracefully when exceeded, allowing the process manager to restart it.
-- The `--timeout` option requires the `pcntl` extension to be installed.
-- The `--max-jobs` and `--max-time` options are mutually exclusive alternatives for process recycling.
-- The `stopwaitsecs` in Supervisor must be greater than the longest-running job's expected duration.
-- Worker lifecycle events (memory exceeded, timeout, restart) are now logged by Laravel for easier diagnosis.
-
-**Constraints and Limitations:**
-
-- **Memory limits are per-worker, not per-job.** A single job can exceed the limit if its `handle()` method allocates too much memory.
-- **The `--timeout` option kills the entire worker process, not just the job.** The job is released back to the queue for retry.
-- **Process recycling adds overhead.** Each restart re-boots the framework, taking a few seconds.
-- **The `--max-jobs` counter resets on worker restart.** If the worker crashes, the count is lost.
-- **Horizon has its own `maxJobs` and `maxTime` configuration** that overrides the command-line options for Redis queues.
-
-### Annotated Code Examples
-
-**Example 1: Configuring Worker Guardrails**
-
-```bash
-# Production worker with comprehensive guardrails
-php artisan queue:work redis \
-    --queue=high,default,low \
-    --tries=3 \
-    --timeout=90 \
-    --sleep=3 \
-    --memory=256 \
-    --max-jobs=1000 \
-    --max-time=3600
-```
-
-**Expected Output:**
-
-```
-Processing jobs from the [high,default,low] queue.
-Worker STARTED
-  [2025-06-15 10:00:00] Job processed: App\Jobs\SendEmail
-  [2025-06-15 10:00:01] Job processed: App\Jobs\ProcessOrder
-  ...
-Worker STOPPED Max time exceeded
-```
-
-**Why This Output Occurs:** The worker processes jobs until it reaches 1000 jobs or 3600 seconds (1 hour), whichever comes first. It also exits if memory usage exceeds 256 MB. When the worker exits, Supervisor automatically restarts it. The log message `Worker STOPPED Max time exceeded` indicates the reason for the restart.
+**Explanation**: Timeout and retry alignment is a critical correctness safeguard, not just a performance tuning parameter.
 
 ---
 
-**Example 2: Supervisor Configuration for Worker Recycling**
+### 3. Worker Scaling
+
+#### Definitions
+
+**Core Definition**
+
+Worker scaling is the process of increasing or decreasing the number of worker processes to match queue workload, either manually (more processes) or automatically (Horizon’s autoscaling).
+
+**Technical Definition**
+
+Scaling can be **vertical** (more workers on the same server) or **horizontal** (more servers/containers). With plain workers, scaling means increasing `numprocs` in Supervisor or starting more `queue:work` processes. With Horizon, scaling is controlled per supervisor via `minProcesses` and `maxProcesses`, and the `balance` strategy (`auto`, `simple`, `false`) determines how processes are distributed across queues while the application is running.
+
+**Beginner-Friendly Explanation**
+
+Scaling means hiring more cooks when the queue gets long, and letting some go home when it is quiet. Horizon can do this automatically; with Supervisor, you edit the number of processes and reload.
+
+#### Purposes
+
+- To increase job throughput when queues back up.
+- To reduce idle workers during quiet periods (with autoscaling).
+- To ensure critical queues get more processing capacity.
+- To handle traffic spikes without manual intervention.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+**Manual scaling (Supervisor)**
 
 ```ini
-; /etc/supervisor/conf.d/laravel-worker.conf
-
 [program:laravel-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/app/artisan queue:work redis --queue=high,default --sleep=3 --tries=3 --max-time=3600 --memory=256
+command=php /var/www/app/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+numprocs=8
+```
+
+**Horizon autoscaling (`config/horizon.php`)**
+
+```php
+'environments' => [
+    'production' => [
+        'supervisor-1' => [
+            'connection' => 'redis',
+            'queue' => ['default', 'notifications'],
+            'balance' => 'auto',
+            'minProcesses' => 1,
+            'maxProcesses' => 10,
+        ],
+    ],
+],
+```
+
+**Component Breakdown**
+
+| Strategy | Behaviour |
+|----------|-----------|
+| `simple` | Splits processes evenly across queues (default). |
+| `auto` | Scales each queue between `minProcesses` and `maxProcesses` based on workload. |
+| `false` | Fixed process count; processes queues strictly in priority order. |
+
+**Syntax Rules**
+
+- `minProcesses` must be ≥ 1; `maxProcesses` is the ceiling for the entire supervisor.
+- `balance` `auto` requires both `minProcesses` and `maxProcesses`.
+- With `balance` `false`, Horizon processes queues in strict priority order (exhausts `default` before `notifications`).
+
+**Constraints and Limitations**
+
+- Horizon autoscaling applies only to Redis connections.
+- Over-provisioning `maxProcesses` can exhaust server memory and CPU.
+- `balance` `false` with `maxProcesses` can cause all processes to be allocated to the first queue, starving later queues.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Horizon Auto-Balancing**
+
+```php
+'supervisor-1' => [
+    'connection' => 'redis',
+    'queue' => ['default', 'notifications'],
+    'balance' => 'auto',
+    'minProcesses' => 1,
+    'maxProcesses' => 10,
+],
+```
+
+**Expected Output**
+
+When both queues are busy, Horizon scales up to 10 total processes, allocating them proportionally to the queues’ workloads. Each queue always retains at least 1 process.
+
+**Why This Output Occurs**
+
+`balance` `auto` monitors queue sizes and adjusts process allocation between `minProcesses` and `maxProcesses` dynamically.
+
+---
+
+**Example 2: Priority-Only Processing**
+
+```php
+'supervisor-1' => [
+    'queue' => ['default', 'notifications'],
+    'balance' => false,
+],
+```
+
+**Expected Output**
+
+Horizon fully processes all `default` jobs before starting any `notifications` jobs.
+
+**Why This Output Occurs**
+
+`balance` `false` uses a fixed pool and strict priority ordering; it does not distribute processes across queues.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Black Friday Traffic Spike**
+
+An e-commerce platform runs Horizon with `balance => 'auto'`, `minProcesses => 2`, `maxProcesses => 20` on its `orders` queue. During Black Friday, queue depth spikes and Horizon scales to 20 processes automatically; after the spike, it scales back to 2.
+
+**Explanation**: Autoscaling matches capacity to demand without manual intervention.
+
+---
+
+### 4. Worker Supervision
+
+#### Definitions
+
+**Core Definition**
+
+Worker supervision is the practice of running queue workers under a process monitor that automatically restarts them if they crash, exit, or are killed, ensuring continuous job processing.
+
+**Technical Definition**
+
+Process monitors for Laravel workers include **Supervisor** (Linux process control system), **systemd** (service manager), **Laravel Horizon** (Redis-specific), and container orchestrators (Kubernetes, ECS). In production, a worker must never be run manually; it must be supervised so that crashes, memory exhaustion, and deployments do not silently halt processing. After deploying code, `php artisan queue:restart` signals workers to exit gracefully so the monitor restarts them with the new code.
+
+**Beginner-Friendly Explanation**
+
+Supervision is the manager that makes sure the cook never leaves the kitchen. If the cook faints (the worker crashes), the manager revives them (restarts the process) immediately.
+
+#### Purposes
+
+- To guarantee that queue processing continues after crashes or restarts.
+- To automatically restart workers after deployments.
+- To manage multiple worker processes (scaling).
+- To capture worker output and errors in logs.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+**Supervisor configuration**
+
+```ini
+[program:laravel-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/app/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
-numprocs=4
+user=www-data
+numprocs=8
 redirect_stderr=true
 stdout_logfile=/var/www/app/storage/logs/worker.log
 stopwaitsecs=3600
 ```
 
+**Supervisor commands**
+
 ```bash
-# Step 1: Reload Supervisor configuration
 sudo supervisorctl reread
 sudo supervisorctl update
-
-# Step 2: Start the workers
 sudo supervisorctl start laravel-worker:*
 ```
 
-**Expected Output:** Supervisor starts 4 worker processes. Each worker processes jobs for 1 hour, then exits and is automatically restarted by Supervisor. If a worker exceeds 256 MB of memory, it exits and is restarted.
+**Component Breakdown**
 
-**Why This Output Occurs:** Supervisor monitors the worker processes and restarts them when they exit (whether from `--max-time`, `--memory`, or a crash). The `stopwaitsecs` setting tells Supervisor to wait up to 3600 seconds for a worker to finish its current job before forcefully killing it, ensuring graceful shutdown.
+| Directive | Description |
+|-----------|-------------|
+| `autostart` | Start the program when Supervisor starts. |
+| `autorestart` | Restart the program if it exits. |
+| `numprocs` | Number of worker processes. |
+| `stopasgroup` / `killasgroup` | Ensure child processes are stopped/killed with the parent. |
+| `stopwaitsecs` | Seconds to wait for graceful shutdown. |
 
-### Real-World Cases
+**Syntax Rules**
 
-- **High-volume e-commerce:** Workers are configured with `--max-time=1800` (30 minutes) and `--memory=512` to process thousands of orders per day without memory degradation.
-- **Video processing platform:** Workers use `--timeout=600` (10 minutes) to accommodate long-running transcoding jobs, with `--max-jobs=100` to recycle frequently.
-- **SaaS with Redis queues:** Horizon's `maxJobs` and `maxTime` configuration provides per-supervisor recycling, automatically balancing workers based on queue load.
-- **Financial batch processing:** Workers run with `--memory=1024` (1 GB) for memory-intensive report generation, with `--max-time=7200` (2 hours) for long batch runs.
-- **Multi-tenant applications:** Workers use `--max-jobs=500` to ensure fair resource allocation across tenants, preventing one tenant's jobs from monopolizing a worker.
+- `autorestart=true` is mandatory for production reliability.
+- `stopasgroup=true` and `killasgroup=true` prevent orphaned worker processes.
+- `stopwaitsecs` should exceed the longest job timeout to allow graceful completion.
+
+**Constraints and Limitations**
+
+- Supervisor does not provide queue metrics or a dashboard; it only keeps processes alive.
+- Supervisor configuration is static; scaling requires editing `numprocs` and reloading.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Supervisor Configuration**
+
+```ini
+[program:laravel-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/html/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=8
+redirect_stderr=true
+stdout_logfile=/var/www/html/storage/logs/worker.log
+stopwaitsecs=3600
+```
+
+**Expected Output**
+
+Eight worker processes run continuously, restart automatically on failure, and restart hourly (`--max-time=3600`) to release accumulated memory.
+
+**Why This Output Occurs**
+
+Supervisor manages each process per the directives; `numprocs=8` starts eight parallel workers, and `autorestart=true` keeps them alive.
 
 ---
 
-## 4. Graceful Maintenance
-
-### Definitions
-
-**Core Definition:** Graceful maintenance is the practice of pausing, draining, and restarting queue workers during deployments without losing jobs or causing service interruptions, enabling zero-downtime application updates.
-
-**Technical Definition:** The `queue:restart` command writes a restart signal to the application's cache. Workers check for this signal before processing the next job; if the signal is present, they exit gracefully after completing their current job, ensuring no jobs are lost. Process managers (Supervisor, Horizon) automatically restart the workers, which then pick up the new code. The `queue:restart` command requires a persistent cache driver (Redis, Memcached, database); the `array` driver will fail silently because it stores data in memory that is lost between requests. For Horizon, the equivalent command is `horizon:terminate`, which gracefully restarts the Horizon master process.
-
-**Beginner-Friendly Explanation:** When you deploy new code, your queue workers are still running the old code. You can't just kill them because they might be in the middle of processing a job. The solution is `queue:restart` — it tells all workers to finish their current job and then exit. Supervisor immediately starts new workers with the new code. This is how you update your application without interrupting background processing.
-
-### Purposes
-
-- To ensure queue workers pick up new code after deployment.
-- To prevent job loss during worker restarts.
-- To enable zero-downtime deployments for applications with queue workers.
-- To coordinate worker restarts across multiple servers and processes.
-- To provide a clean, controlled shutdown of worker pools.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
+**Example 2: Reloading Supervisor After Configuration Change**
 
 ```bash
-# Gracefully restart all queue workers
-php artisan queue:restart
-
-# Gracefully restart Horizon (Redis queues)
-php artisan horizon:terminate
-
-# Forge zero-downtime deployment macro
-$RESTART_QUEUES()
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start laravel-worker:*
 ```
 
-```bash
-# Standard deployment script
-git pull origin main
-composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-php artisan optimize:clear
-php artisan optimize
-php artisan queue:restart  # Signal workers to restart
-```
+**Expected Output**
 
-**Component Breakdown:**
+Supervisor reads the new configuration, applies it, and starts the worker processes.
 
-- `queue:restart` — Writes a restart signal to the cache. Workers exit after their current job.
-- `horizon:terminate` — Gracefully restarts the Horizon master process (for Redis queues).
-- `$RESTART_QUEUES()` — Laravel Forge macro that handles queue restarts during zero-downtime deployments.
-- The cache driver must persist data between requests (Redis, Memcached, database).
+**Why This Output Occurs**
 
-**Syntax Rules:**
-
-- `queue:restart` requires a persistent cache driver. The `array` driver will fail silently.
-- Workers check for the restart signal before processing each job.
-- The signal is not instantaneous — workers may take a few seconds to notice it.
-- Process managers must be configured to automatically restart workers when they exit.
-- For Horizon, use `horizon:terminate` instead of `queue:restart`.
-
-**Constraints and Limitations:**
-
-- **`queue:restart` does not restart workers immediately.** It signals them to exit after their current job. Workers with long-running jobs may take minutes to restart.
-- **The `array` cache driver silently fails with `queue:restart`.** Always use a persistent cache driver in production.
-- **Workers on different servers may take different amounts of time to notice the signal.** The cache must be shared across all servers.
-- **`queue:restart` does not drain the queue.** Jobs that are already in the queue remain there and are processed by the new workers.
-- **Horizon's `horizon:terminate` is different from `queue:restart`.** It restarts the Horizon master process, which manages all supervisors and workers.
-
-### Annotated Code Examples
-
-**Example 1: Standard Deployment with queue:restart**
-
-```bash
-# Step 1: Put the application into maintenance mode (optional)
-php artisan down --secret="deploy-secret"
-
-# Step 2: Pull the latest code
-git pull origin main
-
-# Step 3: Install dependencies
-composer install --no-dev --optimize-autoloader
-
-# Step 4: Run migrations
-php artisan migrate --force
-
-# Step 5: Clear and rebuild caches
-php artisan optimize:clear
-php artisan optimize
-
-# Step 6: Gracefully restart queue workers
-php artisan queue:restart
-
-# Step 7: Bring the application back online
-php artisan up
-```
-
-**Expected Output:**
-
-```
-Application is now in maintenance mode.
-...
-Application is now live.
-Broadcasting queue restart signal.
-```
-
-**Why This Output Occurs:** The `queue:restart` command writes a restart signal to the cache. All running workers check for this signal before processing their next job. When they detect it, they finish their current job and exit gracefully. Supervisor (or Horizon) automatically restarts them with the new code.
+`reread` parses the configuration; `update` applies changes; `start` launches the programs.
 
 ---
 
-**Example 2: Horizon Deployment with horizon:terminate**
+#### Real-World Cases with Explanation
+
+**Case 1: Single VPS Deployment**
+
+A small SaaS application runs on a single VPS with Supervisor managing eight workers on the `emails` queue. When a worker crashes due to a memory leak, Supervisor restarts it within seconds, and the `--max-time=3600` option ensures fresh processes every hour.
+
+**Explanation**: Supervisor is the pragmatic choice for single-server deployments where Horizon’s Redis-only constraint or additional complexity is unnecessary.
+
+---
+
+### 5. Supervisor
+
+#### Definitions
+
+**Core Definition**
+
+Supervisor is a Linux process control system that monitors and controls configured processes, automatically restarting them when they exit unexpectedly.
+
+**Technical Definition**
+
+Supervisor reads INI-style configuration files from `/etc/supervisor/conf.d/`, starts the configured programs, and restarts them according to the `autostart` and `autorestart` directives. It provides `supervisorctl` for runtime management (`status`, `start`, `stop`, `restart`, `reread`, `update`). Laravel’s documentation recommends Supervisor for running `queue:work` in production.
+
+**Beginner-Friendly Explanation**
+
+Supervisor is the “manager” that watches your workers. If a worker stops, Supervisor starts it again. You configure it once, and it handles the rest.
+
+#### Purposes
+
+- To keep queue workers running continuously on Linux servers.
+- To restart workers after crashes or memory exhaustion.
+- To manage multiple worker processes from a single configuration.
+- To provide a simple, reliable supervision solution without additional dependencies.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```ini
+[program:laravel-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/artisan queue:work {connection} --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=8
+redirect_stderr=true
+stdout_logfile=/path/to/storage/logs/worker.log
+stopwaitsecs=3600
+```
+
+**Component Breakdown**
+
+| Section | Purpose |
+|---------|---------|
+| `[program:name]` | Defines a program. |
+| `command` | The Artisan command to run. |
+| `numprocs` | Number of worker processes. |
+| `autostart` / `autorestart` | Start on boot / restart on exit. |
+| `stopasgroup` / `killasgroup` | Kill child processes with the parent. |
+| `user` | The user to run the process as. |
+
+**Syntax Rules**
+
+- Configuration files belong in `/etc/supervisor/conf.d/`.
+- `autorestart=true` is required for reliability.
+- `stopasgroup=true` and `killasgroup=true` prevent orphaned processes.
+
+**Constraints and Limitations**
+
+- Supervisor is Linux-only.
+- It does not provide queue metrics, dashboards, or autoscaling.
+- Scaling requires editing `numprocs` and reloading.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Multiple Queues Under Supervisor**
+
+```ini
+[program:laravel-worker-default]
+command=php /var/www/app/artisan queue:work redis --queue=default --sleep=3 --tries=3 --max-time=3600
+numprocs=4
+autostart=true
+autorestart=true
+
+[program:laravel-worker-emails]
+command=php /var/www/app/artisan queue:work redis --queue=emails --sleep=3 --tries=5 --max-time=3600
+numprocs=2
+autostart=true
+autorestart=true
+```
+
+**Expected Output**
+
+Four workers process the `default` queue, and two workers process the `emails` queue independently, each with its own retry and timeout configuration.
+
+**Why This Output Occurs**
+
+Separate `[program:...]` blocks allow different worker configurations per queue.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Hybrid Queue Strategy**
+
+A team uses Supervisor for database and SQS queues (which Horizon does not support) and Horizon for Redis queues. Supervisor keeps the non-Redis workers alive, while Horizon handles Redis with autoscaling and metrics.
+
+**Explanation**: Supervisor and Horizon are complementary; Supervisor can manage any queue driver, while Horizon is Redis-only.
+
+---
+
+### 6. Horizon
+
+#### Definitions
+
+**Core Definition**
+
+Laravel Horizon is a first-party package that provides a code-driven configuration and dashboard for supervising Redis-backed queue workers, with autoscaling, real-time monitoring, and metrics.
+
+**Technical Definition**
+
+Horizon (`laravel/horizon`) replaces manual Supervisor configurations with `config/horizon.php`, which defines supervisors (groups of workers), queues, balancing strategies, and process bounds. It runs as a single `php artisan horizon` master process that spawns and manages worker processes. The `/horizon` dashboard displays throughput, runtime, wait time, failed jobs, and job tags. Horizon stores metrics in Redis and requires the `horizon:snapshot` command to be scheduled every five minutes to populate the metrics graphs.
+
+**Beginner-Friendly Explanation**
+
+Horizon is a smart kitchen manager for Redis queues. It watches the queue, hires and fires cooks automatically, and gives you a live dashboard showing every order’s status. You configure it in one PHP file instead of many Supervisor files.
+
+#### Purposes
+
+- To replace hand-written Supervisor configurations with a single, version-controlled PHP file.
+- To autoscale worker processes based on queue workload.
+- To provide real-time visibility into queue throughput, wait times, and failures.
+- To offer job tagging, filtering, and retry from the browser.
+
+#### Syntax Rules and Structure
+
+**Installation**
 
 ```bash
-# Step 1: Pull the latest code
-git pull origin main
+composer require laravel/horizon
+php artisan horizon:install
+php artisan migrate
+```
 
-# Step 2: Install dependencies
-composer install --no-dev --optimize-autoloader
+**Configuration (`config/horizon.php`)**
 
-# Step 3: Run migrations
-php artisan migrate --force
+```php
+'defaults' => [
+    'supervisor-1' => [
+        'connection' => 'redis',
+        'queue' => ['default'],
+        'balance' => 'auto',
+        'minProcesses' => 1,
+        'maxProcesses' => 10,
+        'tries' => 3,
+    ],
+],
 
-# Step 4: Clear and rebuild caches
-php artisan optimize:clear
-php artisan optimize
+'environments' => [
+    'production' => [
+        'supervisor-1' => [
+            'maxProcesses' => 20,
+        ],
+    ],
+    'local' => [
+        'supervisor-1' => [
+            'maxProcesses' => 2,
+        ],
+    ],
+],
+```
 
-# Step 5: Gracefully terminate Horizon
+**Running Horizon**
+
+```bash
+php artisan horizon
+php artisan horizon:status
 php artisan horizon:terminate
 ```
 
-**Expected Output:**
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `defaults` | Base supervisor configuration. |
+| `environments` | Per-environment overrides merged into defaults. |
+| `balance` | `simple`, `auto`, or `false`. |
+| `minProcesses` / `maxProcesses` | Autoscaling bounds. |
+| `horizon:snapshot` | Scheduled command for metrics. |
+
+**Syntax Rules**
+
+- Horizon requires the `redis` queue connection and does not support database or SQS drivers.
+- `environments` keys merge into `defaults`; they do not replace the entire supervisor block.
+- The `horizon:snapshot` command must be scheduled every five minutes for metrics to appear.
+
+**Constraints and Limitations**
+
+- Horizon is Redis-only; it does not supervise database, SQS, or Beanstalkd queues.
+- Redis Cluster is not supported; Horizon requires a standalone Redis connection.
+- The metrics dashboard remains blank until `horizon:snapshot` is scheduled.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Installing and Starting Horizon**
+
+```bash
+composer require laravel/horizon
+php artisan horizon:install
+php artisan migrate
+php artisan horizon
+```
+
+**Expected Output**
+
+Horizon starts and supervises the configured workers. Visiting `/horizon` shows the dashboard (once authorization is configured).
+
+**Why This Output Occurs**
+
+`horizon:install` publishes the configuration and service provider; `php artisan horizon` starts the master process that spawns workers.
+
+---
+
+**Example 2: Environment-Specific Scaling**
+
+```php
+'environments' => [
+    'production' => [
+        'supervisor-1' => ['maxProcesses' => 20],
+    ],
+    'local' => [
+        'supervisor-1' => ['maxProcesses' => 2],
+    ],
+],
+```
+
+**Expected Output**
+
+In production, the supervisor scales up to 20 processes; locally, it scales up to 2.
+
+**Why This Output Occurs**
+
+The `environments` array overrides specific keys of the `defaults` supervisor block per environment.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Migrating from Supervisor to Horizon**
+
+A team running plain `queue:work` under Supervisor migrates to Horizon on a Redis connection. They gain autoscaling, a dashboard, and job tagging, and remove their hand-written Supervisor INI files. They keep Supervisor only to monitor the `php artisan horizon` master process itself.
+
+**Explanation**: Horizon replaces Supervisor for worker management on Redis, but Supervisor is still used to keep the Horizon master process alive.
+
+---
+
+### 7. Horizon Installation
+
+#### Definitions
+
+**Core Definition**
+
+Horizon installation is the process of adding the `laravel/horizon` package, running `horizon:install`, migrating the database, and configuring dashboard authorization.
+
+**Technical Definition**
+
+Installation steps: (1) `composer require laravel/horizon`; (2) `php artisan horizon:install`, which publishes `config/horizon.php` and `app/Providers/HorizonServiceProvider.php`; (3) `php artisan migrate` (Horizon uses the existing Redis connection but may need migrations for certain features); (4) configure the `viewHorizon` gate in `HorizonServiceProvider` to restrict dashboard access; (5) start Horizon with `php artisan horizon`.
+
+**Beginner-Friendly Explanation**
+
+Installing Horizon is four commands: install the package, run the install command, migrate, and set up who can see the dashboard.
+
+#### Purposes
+
+- To publish Horizon’s configuration and authorization scaffolding.
+- To restrict dashboard access to authorized users.
+- To prepare the application for Horizon’s monitoring and autoscaling.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+composer require laravel/horizon
+php artisan horizon:install
+php artisan migrate
+```
+
+**Dashboard authorization (`app/Providers/HorizonServiceProvider.php`)**
+
+```php
+protected function gate(): void
+{
+    Gate::define('viewHorizon', function (User $user) {
+        return $user->is_admin;
+    });
+}
+```
+
+**Component Breakdown**
+
+| Step | Command / File | Purpose |
+|------|----------------|---------|
+| 1 | `composer require laravel/horizon` | Adds the package. |
+| 2 | `horizon:install` | Publishes config and provider. |
+| 3 | `migrate` | Runs any required migrations. |
+| 4 | `HorizonServiceProvider::gate()` | Restricts dashboard access. |
+
+**Syntax Rules**
+
+- The `viewHorizon` gate must be defined to secure the dashboard.
+- `horizon:install` publishes `config/horizon.php` and `HorizonServiceProvider`.
+- Horizon should be installed as a production dependency (not `--dev`).
+
+**Constraints and Limitations**
+
+- Without the gate, the dashboard may be publicly accessible (depending on environment).
+- Horizon requires a working Redis connection; installation does not validate Redis connectivity.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Securing the Horizon Dashboard**
+
+```php
+protected function gate(): void
+{
+    Gate::define('viewHorizon', function (User $user) {
+        return $user->is_admin;
+    });
+}
+```
+
+**Expected Output**
+
+Only users with `is_admin = true` can access `/horizon`; others receive a 403.
+
+**Why This Output Occurs**
+
+The `viewHorizon` gate is checked by Horizon’s middleware before rendering the dashboard.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Restricting Access in Production**
+
+A team deploys Horizon and configures the `viewHorizon` gate to allow only users with the `admin` role. They verify that a non-admin user receives a 403 when visiting `/horizon`, preventing sensitive queue data from being exposed.
+
+**Explanation**: Dashboard authorization is a mandatory security step, not an optional convenience.
+
+---
+
+### 8. Horizon Configuration
+
+#### Definitions
+
+**Core Definition**
+
+Horizon configuration is the definition of supervisors, queues, balancing strategies, and environment-specific overrides in `config/horizon.php`.
+
+**Technical Definition**
+
+`config/horizon.php` contains `defaults` (base supervisor definitions) and `environments` (per-environment overrides). Each supervisor block specifies `connection`, `queue`, `balance`, `minProcesses`, `maxProcesses`, `tries`, `timeout`, `nice`, and `balanceCooldown`. The `environments` array merges into `defaults`; it does not replace the entire supervisor block. The `waits` configuration defines the `LongWaitDetected` threshold per queue.
+
+**Beginner-Friendly Explanation**
+
+Configuration is the “recipe” for Horizon: which queues to process, how many workers to run, how aggressively to scale, and when to alert you about long wait times.
+
+#### Purposes
+
+- To define worker groups (supervisors) per environment.
+- To control autoscaling bounds and balancing strategy.
+- To set retry and timeout defaults for all jobs on a supervisor.
+- To configure wait-time alerts and metrics retention.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+'defaults' => [
+    'supervisor-1' => [
+        'connection' => 'redis',
+        'queue' => ['default'],
+        'balance' => 'auto',
+        'minProcesses' => 1,
+        'maxProcesses' => 10,
+        'tries' => 3,
+        'timeout' => 60,
+    ],
+],
+
+'environments' => [
+    'production' => [
+        'supervisor-1' => ['maxProcesses' => 20],
+    ],
+    'local' => [
+        'supervisor-1' => ['maxProcesses' => 2],
+    ],
+],
+
+'waits' => [
+    'redis:default' => 60,
+],
+```
+
+**Component Breakdown**
+
+| Key | Description |
+|-----|-------------|
+| `connection` | Queue connection (must be `redis`). |
+| `queue` | Array of queue names (priority order). |
+| `balance` | `simple`, `auto`, or `false`. |
+| `minProcesses` / `maxProcesses` | Autoscaling bounds. |
+| `tries` / `timeout` | Job retry and timeout defaults. |
+| `waits` | `LongWaitDetected` thresholds. |
+
+**Syntax Rules**
+
+- `connection` must be a Redis connection.
+- `environments` merges into `defaults`; specify only the keys you want to override.
+- `waits` keys use `{connection}:{queue}` format, with values in seconds.
+
+**Constraints and Limitations**
+
+- Multiple supervisors can be defined to isolate workloads (e.g., one for `default`, one for `emails`).
+- `balance` `auto` requires both `minProcesses` and `maxProcesses`.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Multi-Supervisor Configuration**
+
+```php
+'defaults' => [
+    'supervisor-default' => [
+        'connection' => 'redis',
+        'queue' => ['default'],
+        'balance' => 'auto',
+        'minProcesses' => 1,
+        'maxProcesses' => 10,
+    ],
+    'supervisor-emails' => [
+        'connection' => 'redis',
+        'queue' => ['emails'],
+        'balance' => 'simple',
+        'maxProcesses' => 4,
+    ],
+],
+```
+
+**Expected Output**
+
+Horizon runs two independent supervisors: one autoscaling the `default` queue between 1 and 10 processes, and one running a fixed 4 processes for `emails`.
+
+**Why This Output Occurs**
+
+Separate supervisor blocks allow independent configuration and scaling per workload.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Isolating Critical Workloads**
+
+A team defines two supervisors: one for `payments` with `minProcesses=2` and `maxProcesses=4`, and one for `analytics` with `minProcesses=1` and `maxProcesses=20`. Payment processing is never starved by analytics load.
+
+**Explanation**: Multiple supervisors isolate capacity between critical and non-critical workloads.
+
+---
+
+### 9. Horizon Monitoring
+
+#### Definitions
+
+**Core Definition**
+
+Horizon monitoring is the use of the `/horizon` dashboard and CLI commands to observe queue throughput, job runtime, wait times, failures, and worker status in real time.
+
+**Technical Definition**
+
+The Horizon dashboard displays **throughput** (jobs per minute), **runtime** (execution time), **wait time** (time in queue before processing), **failed jobs** (with stack traces and payloads), and **job tags** (for filtering). CLI commands include `horizon:status`, `horizon:supervisor-status`, `horizon:pause`, `horizon:continue`, and `horizon:terminate`. The `LongWaitDetected` event fires when a queue’s wait time exceeds the `waits` threshold.
+
+**Beginner-Friendly Explanation**
+
+Monitoring is the dashboard that shows you what your workers are doing: how many jobs are waiting, how long they are waiting, which ones failed, and whether your autoscaling is keeping up.
+
+#### Purposes
+
+- To detect queue backups and bottlenecks before they affect users.
+- To diagnose failed jobs with full payloads and stack traces.
+- To verify that autoscaling is responding to load.
+- To pause or terminate workers during deployments or incidents.
+
+#### Syntax Rules and Structure
+
+**Dashboard**
 
 ```
-Horizon terminated successfully.
+https://your-app.com/horizon
 ```
 
-**Why This Output Occurs:** The `horizon:terminate` command signals the Horizon master process to gracefully terminate. Horizon waits for all in-progress jobs to complete, then exits. The process manager (Supervisor or Forge's daemon) automatically restarts Horizon with the new code. This is the recommended deployment method for Horizon-managed queues.
+**CLI monitoring**
 
-### Real-World Cases
+```bash
+php artisan horizon:status
+php artisan horizon:supervisor-status supervisor-1
+php artisan horizon:pause
+php artisan horizon:continue
+php artisan horizon:terminate
+```
 
-- **Zero-downtime deployments:** Deploy new code while workers continue processing jobs; `queue:restart` ensures they pick up the new code without downtime.
-- **Multi-server deployments:** In a load-balanced environment, `queue:restart` writes the signal to a shared cache (Redis), and all workers across all servers pick it up.
-- **Horizon-managed queues:** Use `horizon:terminate` in deployment scripts for Redis-backed queues with Horizon.
-- **Rolling deployments:** Restart workers one server at a time, ensuring that capacity is maintained throughout the deployment.
-- **Scheduled maintenance windows:** Use `queue:restart` during planned maintenance to ensure workers are running the latest code after the window.
+**LongWaitDetected configuration (`config/horizon.php`)**
+
+```php
+'waits' => [
+    'redis:default' => 60,
+    'redis:emails' => 120,
+],
+```
+
+**Component Breakdown**
+
+| Feature | Description |
+|---------|-------------|
+| Throughput | Jobs processed per minute. |
+| Runtime | Average job execution time. |
+| Wait time | Time jobs spend in the queue. |
+| Failed jobs | Stack traces, payloads, retry buttons. |
+| Tags | Filter jobs by model or custom tag. |
+
+**Syntax Rules**
+
+- The dashboard is served at `/horizon` (configurable in `config/horizon.php`).
+- `waits` keys must match the connection and queue names.
+- `horizon:terminate` gracefully stops all workers after current jobs finish.
+
+**Constraints and Limitations**
+
+- The dashboard does not populate metrics until `horizon:snapshot` is scheduled.
+- Tagging requires jobs to implement `tags()` or use automatic model tagging.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Detecting Long Wait Times**
+
+```php
+'waits' => [
+    'redis:default' => 60,
+],
+```
+
+**Expected Output**
+
+If a job waits more than 60 seconds in the `default` queue, Horizon fires a `LongWaitDetected` event, which can be routed to Slack or email.
+
+**Why This Output Occurs**
+
+Horizon monitors wait time against the configured threshold and dispatches the event when exceeded.
+
+---
+
+**Example 2: Pausing Workers During Deployment**
+
+```bash
+php artisan horizon:pause
+# deploy code
+php artisan horizon:continue
+```
+
+**Expected Output**
+
+Horizon stops picking up new jobs while paused, allowing in-flight jobs to finish; after `continue`, it resumes processing.
+
+**Why This Output Occurs**
+
+`horizon:pause` instructs the master process to stop dispatching new jobs to workers until resumed.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Incident Response**
+
+During a production incident, the on-call engineer opens `/horizon`, sees that the `emails` queue has a 40-minute wait time, and uses the dashboard to identify a stuck job. They retry the failed job and pause the queue while investigating, preventing further backlog.
+
+**Explanation**: Horizon’s monitoring turns opaque queue behaviour into actionable operational intelligence.
+
+---
+
+### 10. Horizon Metrics
+
+#### Definitions
+
+**Core Definition**
+
+Horizon metrics are the recorded snapshots of queue throughput, wait time, and job counts that populate the dashboard’s graphs, generated by the scheduled `horizon:snapshot` command.
+
+**Technical Definition**
+
+The `horizon:snapshot` Artisan command captures the current queue metrics and stores them in Redis. The metrics graphs are built from these snapshots, which must be scheduled to run every five minutes via Laravel’s scheduler. Without scheduling, the dashboard’s metrics section remains blank even if Horizon is running. Metrics include jobs per minute, wait time per queue, and failed job counts.
+
+**Beginner-Friendly Explanation**
+
+Metrics are the “history graphs” on the Horizon dashboard. They show how your queues performed over time. But the graphs stay empty until you schedule the snapshot command to record data every five minutes.
+
+#### Purposes
+
+- To visualise queue performance trends over time.
+- To identify recurring bottlenecks and capacity issues.
+- To correlate deployments or traffic spikes with queue behaviour.
+- To provide data for capacity planning and autoscaling tuning.
+
+#### Syntax Rules and Structure
+
+**Scheduling the snapshot (`routes/console.php` or `app/Console/Kernel.php`)**
+
+```php
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('horizon:snapshot')->everyFiveMinutes();
+```
+
+**Or via Artisan**
+
+```bash
+php artisan horizon:snapshot
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `horizon:snapshot` | Captures current metrics. |
+| `everyFiveMinutes()` | Recommended schedule interval. |
+| Dashboard graphs | Built from snapshots. |
+
+**Syntax Rules**
+
+- The snapshot command must be scheduled; running Horizon alone does not generate metrics.
+- The recommended interval is every five minutes.
+- Metrics are stored in Redis and retained according to Horizon’s configuration.
+
+**Constraints and Limitations**
+
+- Metrics are not real-time; they are snapshots at five-minute intervals.
+- If the scheduler is not running, no metrics are recorded.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Scheduling the Snapshot**
+
+```php
+// routes/console.php (Laravel 11+)
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('horizon:snapshot')->everyFiveMinutes();
+```
+
+**Expected Output**
+
+Every five minutes, Laravel’s scheduler runs `horizon:snapshot`, capturing the current queue metrics and populating the dashboard graphs.
+
+**Why This Output Occurs**
+
+The snapshot command records the metrics that the dashboard reads; without scheduling, the graphs remain blank.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Capacity Planning**
+
+A team schedules `horizon:snapshot` and reviews the metrics graphs weekly. They notice that the `orders` queue consistently spikes every Monday at 9 AM, and they pre-emptively increase `maxProcesses` for that supervisor.
+
+**Explanation**: Historical metrics enable proactive capacity planning rather than reactive firefighting.
+
+---
+
+### 11. Horizon Best Practices
+
+#### Definitions
+
+**Core Definition**
+
+Horizon best practices are the guidelines for configuring, deploying, and monitoring Horizon to achieve reliable, scalable, and observable queue processing on Redis.
+
+#### Key Best Practices
+
+1. **Use Horizon Only with Redis**: Horizon does not support database, SQS, or Beanstalkd drivers. If you use those drivers, use Supervisor instead.
+
+2. **Enforce the Timeout Chain**: Job `timeout` < supervisor `timeout` < `retry_after`. Wrong ordering causes duplicate job execution.
+
+3. **Schedule `horizon:snapshot`**: The metrics dashboard stays blank until this command runs every five minutes.
+
+4. **Secure the Dashboard**: Define the `viewHorizon` gate to restrict access to authorized users only.
+
+5. **Use `balance => 'auto'` for Variable Loads**: Autoscaling between `minProcesses` and `maxProcesses` matches capacity to demand.
+
+6. **Isolate Workloads with Multiple Supervisors**: Run separate supervisors for critical queues (e.g., payments) and background queues (e.g., analytics) to prevent starvation.
+
+7. **Run Horizon Under Supervisor**: Use Supervisor to monitor the `php artisan horizon` master process itself, ensuring it restarts if it crashes.
+
+8. **Terminate Horizon on Deploy**: Run `php artisan horizon:terminate` during deployment so Supervisor restarts it with the new code.
+
+9. **Configure `LongWaitDetected` Alerts**: Set `waits` thresholds and route the event to Slack or email for early warning of backups.
+
+10. **Tag Jobs for Filtering**: Implement `tags()` on jobs or rely on automatic model tagging to make the dashboard searchable.
+
+11. **Monitor Memory and Scale Conservatively**: Over-provisioning `maxProcesses` can exhaust server memory; tune based on available RAM and CPU.
+
+12. **Keep Horizon and Workers on Separate Clusters**: For large applications, run Horizon workers on dedicated infrastructure separate from web servers.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Production-Ready Horizon Configuration**
+
+```php
+'defaults' => [
+    'supervisor-default' => [
+        'connection' => 'redis',
+        'queue' => ['default', 'notifications'],
+        'balance' => 'auto',
+        'minProcesses' => 1,
+        'maxProcesses' => 10,
+        'tries' => 3,
+        'timeout' => 60,
+    ],
+    'supervisor-payments' => [
+        'connection' => 'redis',
+        'queue' => ['payments'],
+        'balance' => 'simple',
+        'maxProcesses' => 4,
+        'tries' => 5,
+        'timeout' => 90,
+    ],
+],
+
+'environments' => [
+    'production' => [
+        'supervisor-default' => ['maxProcesses' => 20],
+        'supervisor-payments' => ['maxProcesses' => 8],
+    ],
+],
+
+'waits' => [
+    'redis:default' => 60,
+    'redis:payments' => 30,
+],
+```
+
+```php
+// routes/console.php
+Schedule::command('horizon:snapshot')->everyFiveMinutes();
+```
+
+**Expected Output**
+
+In production, Horizon autoscales the `default` queue up to 20 processes and runs 8 fixed processes for `payments`. Payments jobs alert after 30 seconds of waiting; default jobs alert after 60 seconds. Metrics graphs populate every five minutes.
+
+**Why This Output Occurs**
+
+The configuration combines multiple supervisors, environment overrides, autoscaling, wait-time alerts, and scheduled metrics—each aligned with the best practices above.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Mature Production Setup**
+
+A high-traffic SaaS application runs Horizon under Supervisor on a dedicated worker cluster. They schedule `horizon:snapshot` every five minutes, alert on `LongWaitDetected` at 60 seconds, use `balance => 'auto'` with `maxProcesses` tuned to their server’s memory, and terminate Horizon on every deploy. The queue system handles millions of jobs per day with sub-minute wait times.
+
+**Explanation**: Combining Horizon’s autoscaling and monitoring with Supervisor’s process-level resilience yields a production-grade queue infrastructure.
 
 ---
 
 ## References
 
-- Laravel Queues Documentation (Master) — https://laravel.com/docs/master/queues
-- Laravel Queues Documentation (Laravel 12.x) — https://laravel.com/docs/12.x/queues
-- Laravel Queues Documentation (Laravel 11.x) — https://laravel.com/docs/11.x/queues
-- Laravel Queues Documentation (Laravel 10.x) — https://laravel.com/docs/10.x/queues
-- Laravel Horizon Documentation — https://laravel.com/docs/12.x/horizon
-- Laravel `WorkerOptions` API — https://api.laravel.com/docs/8.x/Illuminate/Queue/WorkerOptions.html
-- Laravel `Worker` API — https://api.laravel.com/docs/12.x/Illuminate/Queue/Worker.html
-- Laravel `queue:restart` Command Documentation — https://laravel.com/docs/master/queues#queue-workers-and-deployment
-- Laravel `queue:listen` vs `queue:work` (Stack Overflow) — https://stackoverflow.com/questions/78516911/what-is-the-difference-queuework-and-queuelisten
-- Laravel Worker Lifecycle and Memory Limits (Laravel News) — https://laravel-news.com/laravel-queue-work-now-prints-why-the-worker-stopped
-- Laravel Forge Queues Documentation — https://laravel.com/forge/docs/sites/queues
-- Laravel Queue Priorities (Laravel Docs) — https://laravel.com/docs/12.x/queues#queue-priorities
-- Laravel Queue Worker Timeouts (Laravel Docs) — https://laravel.com/docs/12.x/queues#worker-timeouts
-- Laravel Queue Worker Memory Limits (Laravel Docs) — https://laravel.com/docs/12.x/queues#worker-memory-limit
-- Laravel Horizon Auto-Balancing — https://laravel.com/docs/12.x/horizon#balance-options
-- Laravel Queue Deployment with Supervisor — https://laravel.com/docs/12.x/queues#supervisor-configuration
-- Laravel `queue:restart` Cache Requirement (Laravel Forge) — https://laravel.com/forge/docs/sites/queues#restarting-queue-workers-after-deployment
-- Laravel Zero-Downtime Deployments (Laravel Forge) — https://forge.laravel.com/docs/sites/deployments#zero-downtime-deployments
+- Laravel Horizon — Laravel 13.x Documentation — https://laravel.com/framework/docs/13.x/horizon
+- Laravel Horizon — Laravel 10.x Documentation — https://laravel.com/docs/10.x/horizon
+- Queues — Laravel 11.x Documentation (Supervisor, Horizon) — https://laravel.com/docs/11.x/queues
+- Laravel Queue Workers (OneUptime Blog) — https://github.com/oneuptime/blog/tree/master/posts/2025-07-02-laravel-queue-workers
+- Laravel Horizon: Monitor and Scale Redis Queues in 2026 — https://laracopilot.com/blog/laravel-horizon-redis-queues/
+- Running Laravel Queue Workers in Production — Supervisor vs Horizon — https://medium.com/@chinthakahasan/running-laravel-queue-workers-in-production-supervisor-vs-horizon-229e04e7dd3f
+- Configuring Horizon (Coolify Skill) — https://github.com/coollabsio/coolify/blob/abc701ac6503afc602661fcfc52e0c455f289e73/.cursor/skills/configuring-horizon/SKILL.md
+- Horizon Balancing Strategies — https://laravel.com/docs/6.x/horizon
+- Metrics & Snapshots (Horizon) — https://github.com/laravel/horizon/blob/1.x/docs/metrics.md
+- Timeout vs. `retry_after` Best Practices — https://dev.to/…/laravel-job-timeout-vs-retry_after-the-ordering-rule-nothing-enforces
+- Supervisor Configuration for Laravel Workers — https://laravel.com/docs/10.x/queues#supervisor-configuration
+
+---
+
+**Version Note**: This cheat sheet is based on Laravel 10.x through 13.x documentation. Horizon requires Redis and does not support database, SQS, or Beanstalkd drivers. The `balance` strategies (`simple`, `auto`, `false`) and `minProcesses` / `maxProcesses` are available across these versions. `horizon:snapshot` scheduling is mandatory for metrics. The timeout chain (job `timeout` < supervisor `timeout` < `retry_after`) must be respected to prevent duplicate execution. Always consult the documentation for your specific Laravel version.

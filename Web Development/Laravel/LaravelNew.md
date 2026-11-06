@@ -1233,7 +1233,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # XI. Testing
 
-- **47. Testing Fundamentals**
+- [**47. Testing Fundamentals**](/Web%20Development/Laravel/Testing/Testing.md)
   - Testing
   - Test types
     - Unit tests
@@ -1249,7 +1249,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Test database
   - Test best practices
 
-- **48. Unit Testing**
+- [**48. Unit Testing**](/Web%20Development/Laravel/Testing/UnitTesting.md)
   - Unit testing
   - Testing classes
   - Testing methods
@@ -1261,7 +1261,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Assertions
   - Unit testing best practices
 
-- **49. Feature Testing**
+- [**49. Feature Testing**](/Web%20Development/Laravel/Testing/FeatureTesting.md)
   - Feature testing
   - HTTP testing
   - Route testing
@@ -1273,7 +1273,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Response testing
   - Feature testing best practices
 
-- **50. Database Testing**
+- [**50. Database Testing**](/Web%20Development/Laravel/Testing/DatabaseTesting.md)
   - Database testing
   - `RefreshDatabase`
   - `DatabaseTransactions`
@@ -1283,7 +1283,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Database assertions
   - Database testing best practices
 
-- **51. Browser Testing**
+- [**51. Browser Testing**](/Web%20Development/Laravel/Testing/BrowserTesting.md)
   - Browser testing
   - Laravel Dusk
   - Dusk installation
@@ -1292,7 +1292,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Dusk assertions
   - Dusk best practices
 
-- **52. Testing Tools**
+- [**52. Testing Tools**](/Web%20Development/Laravel/Testing/TestingTools.md)
   - Pest
   - PHPUnit
   - Laravel Dusk
@@ -1301,7 +1301,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Collision
   - Testing tools best practices
 
-- **53. Testing Patterns**
+- [**53. Testing Patterns**](/Web%20Development/Laravel/Testing/TestingPatterns.md)
   - Arrange-Act-Assert
   - Given-When-Then
   - Testing happy paths
@@ -1321,7 +1321,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
 
 # XII. Queues and Jobs
 
-- **54. Queue Fundamentals**
+- [**54. Queue Fundamentals**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/Queue.md)
   - Queues
   - Queue drivers
     - Sync
@@ -1331,13 +1331,13 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
     - Beanstalkd
   - Queue configuration
   - Queue connections
-  - Queue workers
+  - [Queue workers](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/QueueWorkers.md)
   - Queue processing
   - Queue retries
   - Queue failures
   - Queue best practices
 
-- **55. Jobs**
+- [**55. Jobs**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/Jobs.md)
   - Jobs
   - Job creation
   - `artisan make:job`
@@ -1353,7 +1353,7 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Job testing
   - Job best practices
 
-- **56. Queue Workers**
+- [**56. Queue Workers**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/QueueWorkers.md)
   - Queue workers
   - Worker configuration
   - Worker scaling
@@ -1366,13 +1366,21 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Horizon metrics
   - Horizon best practices
 
-- **57. Batching**
+- [**57. Batching**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/Batching.md)
   - Job batching
   - Batch dispatching
   - Batch callbacks
   - Batch progress
   - Batch failures
   - Batch best practices
+
+  [**Advanced Queue Engineering**](/Web%20Development/Laravel/Queues%20and%20Background%20Processing/AdvancedQueue.md)
+  - Retries
+  - Backoff
+  - Timeouts
+  - Rate limiting
+  - Idempotent jobs
+  - Failure recovery
 
 ---
 
@@ -1382,7 +1390,9 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Events
   - Event creation
   - `artisan make:event`
+  - Event classes
   - Event dispatching
+  - Event payloads
   - Event listeners
   - Event subscribers
   - Event discovery
@@ -1393,6 +1403,9 @@ Laravel is best learned as more than "a PHP framework for CRUD apps." The progre
   - Listeners
   - Listener creation
   - `artisan make:listener`
+  - Listener classes
+  - Synchronous listeners
+  - Queued listeners
   - Listener registration
   - Queued listeners
   - Listener middleware

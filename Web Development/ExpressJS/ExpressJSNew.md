@@ -1112,14 +1112,14 @@ Express.js is best learned as more than "a routing library for Node.js." The pro
   - Never committing secrets
   - Secret management best practices
 
-- **89. Dependency Security**
+- [**89. Dependency Security**](/Web%20Development/ExpressJS/Security/DependencySecurity.md)
   - Dependency auditing
   - `npm audit`
   - Snyk
   - Dependabot
   - Dependency security best practices
 
-- **90. Security Auditing**
+- [**90. Security Auditing**](/Web%20Development/ExpressJS/Security/SecurityAuditing.md)
   - Security auditing
   - Penetration testing
   - Vulnerability scanning

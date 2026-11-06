@@ -1,4 +1,4 @@
-# Laravel Notification Architecture & Scale — Comprehensive Programming Cheat Sheet
+# Laravel Events: A Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1270 +6,1053 @@
 
 ### Definitions
 
-**Core Definition:** Notification architecture and scale refers to the structural patterns, routing strategies, and resilience mechanisms that enable Laravel's notification system to handle high volumes of multi-channel notifications reliably, respecting user preferences and degrading gracefully under failure.
+**Core Definition**
 
-**Technical Definition:** At scale, Laravel's notification system operates as a distributed dispatch pipeline: the `NotificationSender` resolves the `via()` channels for each notification, the `ChannelManager` resolves the corresponding channel drivers, and each driver either dispatches a queued job (`SendQueuedNotifications`) or delivers synchronously. Scaling this pipeline involves: (1) **Preference resolution** — intercepting the `NotificationSending` event to filter channels based on stored user preferences; (2) **Queue isolation** — assigning notifications to dedicated queue connections with rate limiting middleware; (3) **Failure resilience** — configuring `$tries`, `$backoff`, `$maxExceptions`, and dead-letter queue routing on queue connections; and (4) **Community channel integration** — installing and configuring third-party notification channel packages for SMS, chat, and webhook delivery.
+Laravel Events provide a simple observer pattern implementation that allows you to subscribe to and listen for various things that happen within your application, decoupling the code that *triggers* an action from the code that *reacts* to it.
 
-**Beginner-Friendly Explanation:** Sending one notification is easy. Sending a million notifications without spamming users, crashing your queue, or losing messages when an external service goes down — that's architecture. This cheat sheet covers the four pillars of production-grade notification systems: letting users control what they receive (preferences), routing heavy workloads safely (async queues with rate limits), handling failures gracefully (retries and dead-letter queues), and plugging in external services like Twilio, Slack, and Discord.
+**Technical Definition**
+
+An event is a PHP class that acts as a data container, holding information related to something that happened (e.g., an order was shipped). A listener is a class that contains the logic to be executed when a specific event is dispatched. The framework's event dispatcher maps events to their listeners, invoking each listener's `handle` method when the event is fired. Events can be dispatched synchronously or queued for asynchronous processing, and listeners can be registered manually, via discovery, or through subscribers.
+
+**Beginner-Friendly Explanation**
+
+Think of events as announcements. When something important happens in your app—like a user registering or an order being placed—you “announce” it (dispatch an event). Other parts of your app can “listen” for that announcement and spring into action. For example, when an `OrderShipped` event is announced, one listener might send a shipping confirmation email, while another updates the user's loyalty points. The code that ships the order doesn't need to know about emails or loyalty points; it just makes the announcement, and the listeners handle the rest.
+
+---
 
 ### Key Characteristics
 
-- **Preference-driven dispatch:** User-defined opt-in/opt-out matrices filter channels before delivery.
-- **Queue isolation:** Notifications run on dedicated queue connections, preventing them from blocking other workloads.
-- **Rate limiting:** Per-channel and per-user throttling prevents notification spam and respects API quotas.
-- **Idempotency and deduplication:** `ShouldBeUnique` and FIFO message groups prevent duplicate deliveries.
-- **Exponential backoff:** Transient failures are retried with increasing delays to avoid overwhelming external services.
-- **Dead-letter routing:** After exhausting retries, failed notifications are routed to a dead-letter queue for inspection and replay.
-- **Community channel ecosystem:** A rich ecosystem of first-party and community packages extends Laravel's notification system to Twilio, Slack, Discord, Telegram, and more.
+- **Observer Pattern**: Implements a classic publish-subscribe mechanism where the subject (event) is decoupled from its observers (listeners).
+- **Single Event, Multiple Listeners**: One event can trigger many independent listeners, each handling a separate concern (e.g., sending emails, logging, updating caches).
+- **Automatic Discovery**: By default, Laravel automatically scans the `app/Listeners` directory and registers listeners based on the type-hinted event in their `handle` or `__invoke` method.
+- **Queueable Listeners**: Listeners can implement `ShouldQueue` to be processed asynchronously by queue workers, keeping the request cycle fast.
+- **Transactional Safety**: Events can implement `ShouldDispatchAfterCommit` to ensure they are only fired after a database transaction has been successfully committed.
+- **Testing-Friendly**: `Event::fake()` allows you to prevent listeners from executing during tests and assert that specific events were dispatched.
+
+---
 
 ### Prerequisites
 
-- PHP 8.1 or higher (Laravel 10+; Laravel 11 requires PHP 8.2+).
-- A Laravel application with a configured queue driver (Redis recommended for production).
-- For preference management: a package such as `scabarcas/laravel-notify-matrix` or a custom implementation.
-- For third-party channels: the corresponding notification channel packages installed via Composer.
-- For dead-letter queues: a queue driver that supports DLQ routing (RabbitMQ, SQS, or a Laravel package such as `xerxes/laravel-rabbitmq-communication`).
-- Laravel Horizon (recommended for monitoring Redis queues).
+- **PHP 8.1+** (Laravel 10+) or **PHP 8.2+** (Laravel 11+).
+- **A Laravel application** with the `app/Events` and `app/Listeners` directories (created automatically by Artisan).
+- **Basic knowledge of PHP classes and dependency injection**.
+- **A configured queue driver** (for queued listeners; optional but recommended for production).
+
+---
 
 ### Related Programming Areas
 
-- **Queue System** — Notifications are queued jobs; queue configuration is foundational to scaling.
-- **Event System** — The `NotificationSending` event is intercepted for preference filtering.
-- **Cache System** — Used for rate limiting locks and unique job deduplication.
-- **Horizon** — Provides dashboard monitoring, auto-scaling, and metrics for queued notifications.
-- **Broadcasting** — Real-time notification delivery via Pusher, Reverb, or Ably.
-- **Community Packages** — Third-party channel packages extend the notification system.
-
-### Core Concepts / Features
-
-1. Preference Management (Mapping matrices for user-defined communication preferences and opt-out flows)
-2. Asynchronous Routing (Queueing heavy workloads safely with custom connection assignments, rate limits, and batch operations)
-3. Failure Resiliency (Managing job exceptions, exponential backoffs, retry limits, and dead-letter queue routing)
-4. Third-Party Integration (Setting up external community channels: SMS via Twilio, chat alerts via Slack or Discord webhook systems)
+- **Eloquent Model Events**: Model lifecycle hooks (`created`, `updated`, `deleted`) are a specialized form of events handled by observers.
+- **Queues**: Queued listeners are processed by the same queue system as jobs.
+- **Broadcasting**: Events implementing `ShouldBroadcast` can be broadcast to a frontend via WebSockets.
+- **Testing**: Event fakes are part of Laravel's testing helpers for isolating side effects.
+- **Event Subscribers**: Classes that subscribe to multiple events, useful for grouping related listeners.
 
 ---
 
-## 1. Preference Management
+## Core Concepts
 
-### Definitions
+---
 
-**Core Definition:** Preference management is the system that allows users to control which notification channels they receive for different categories of notifications, with support for opt-in/opt-out flows, forced channels, and default policies.
+### 1. Events
 
-**Technical Definition:** Preference management is implemented by intercepting the `Illuminate\Notifications\Events\NotificationSending` event, which is fired before each channel dispatches a notification. A listener checks whether the notifiable entity has a stored preference for the given notification group and channel. If the user has opted out, the listener returns `false`, which cancels the dispatch for that channel. Forced channels bypass user preferences and are always delivered. The preference matrix is typically stored in a `notification_preferences` table with columns for `notifiable_id`, `notifiable_type`, `group`, `channel`, and `enabled`. Packages like `scabarcas/laravel-notify-matrix` provide this infrastructure out of the box, using a `#[NotificationGroup]` attribute to tag notification classes and a `HasNotificationPreferences` trait on the notifiable model.
+#### Definitions
 
-**Beginner-Friendly Explanation:** Users hate spam. Preference management lets each user choose which types of notifications they want to receive and through which channels — for example, "I want order updates via email and SMS, but marketing emails only via email, and never via SMS." Forced channels (like security alerts) bypass these preferences and are always delivered.
+**Core Definition**
 
-### Purposes
+An event is a simple PHP class that represents something that has happened in the application, acting as a data container that holds information relevant to that occurrence.
 
-- To allow users to opt in or out of notification channels per notification category.
-- To enforce forced channels for critical notifications (security alerts, account verification) that cannot be opted out of.
-- To provide a structured matrix of preferences that can be rendered in a user-facing settings UI.
-- To prevent notification fatigue by respecting user choices.
-- To centralise preference logic in a reusable listener rather than scattering it across notification classes.
+**Technical Definition**
 
-### Syntax Rules and Structure
+Event classes are typically stored in `app/Events` and usually contain public properties that hold the data associated with the event (e.g., an `Order` model instance). They are plain PHP objects (POPOs) and do not extend any base class, though they often use the `Dispatchable`, `InteractsWithSockets`, and `SerializesModels` traits for convenience. Events can be dispatched using the `dispatch()` helper or the static `dispatch()` method provided by the `Dispatchable` trait.
 
-#### Complete General Syntax
+**Beginner-Friendly Explanation**
 
-```php
-// Package installation
-// composer require scabarcas/laravel-notify-matrix
+An event is an announcement that “something happened.” It holds the details—like which order was shipped—so that listeners have the information they need to react.
 
-// Step 1: Add the trait to the notifiable model
-use Scabarcas\LaravelNotifyMatrix\Concerns\HasNotificationPreferences;
+#### Purposes
 
-class User extends Authenticatable
-{
-    use HasNotificationPreferences;
-}
+- To encapsulate the details of a domain occurrence in a dedicated, reusable class.
+- To decouple the code that triggers an action from the code that reacts to it.
+- To provide a structured payload for listeners to consume.
+- To enable broadcasting the occurrence to a frontend or external system.
 
-// Step 2: Tag notification classes with the group attribute
-use Scabarcas\LaravelNotifyMatrix\Attributes\NotificationGroup;
+#### Syntax Rules and Structure
 
-#[NotificationGroup('orders')]
-class OrderShipped extends Notification
-{
-    public function via($notifiable): array
-    {
-        return ['mail', 'database'];
-    }
-}
-
-// Step 3: Read and write preferences
-$user->wants('orders', 'mail');           // true | false
-$user->wants(OrderShipped::class, 'mail'); // resolves group via attribute
-$user->setPreference('orders', 'mail', false);
-$user->enable('orders', 'mail');
-$user->disable('orders', 'mail');
-$user->getPreferences();
-$user->getPreferencesForGroup('orders');
-$user->clearPreferences('orders');
-```
-
-**Configuration:**
-
-```php
-// config/notify-matrix.php
-return [
-    'table' => 'notification_preferences',
-
-    // Default policy when no preference exists: 'opt_in' or 'opt_out'
-    'default_policy' => 'opt_in',
-
-    'groups' => [
-        'marketing' => [
-            'default_policy' => 'opt_out',
-        ],
-        'security' => [
-            'default_policy' => 'opt_in',
-            'forced' => ['mail'], // Always delivered, even if opted out
-        ],
-    ],
-
-    'class_map' => [
-        // Map third-party notifications that cannot be annotated
-        \Vendor\Pkg\Notifications\InvoicePaid::class => 'billing',
-    ],
-
-    'cache' => [
-        'enabled' => true,
-        'ttl'     => 300,
-        'store'   => null,
-    ],
-];
-```
-
-**Component Breakdown:**
-
-- `#[NotificationGroup('orders')]` — Tags a notification class with a group name for preference resolution.
-- `HasNotificationPreferences` — Trait on the notifiable model providing preference read/write methods.
-- `default_policy` — Determines the default behaviour when no explicit preference exists (`opt_in` = receive by default, `opt_out` = don't receive by default).
-- `forced` — Channels listed here are always delivered, bypassing user preferences.
-- `class_map` — Maps third-party notification classes to groups when they cannot be annotated directly.
-- The package registers a listener for `NotificationSending` that runs before each channel dispatch.
-
-**Syntax Rules:**
-
-- The `HasNotificationPreferences` trait must be added to the notifiable model.
-- Notification classes must be annotated with `#[NotificationGroup]` or mapped via `class_map`.
-- The `wants()` method returns `true` or `false` based on the stored preference and default policy.
-- Forced channels are delivered regardless of user preference.
-- Preferences are cached for 5 minutes by default to avoid database queries on every dispatch.
-
-**Constraints and Limitations:**
-
-- **Preference resolution adds a database query per dispatch** unless caching is enabled. Enable the cache in production.
-- **The `class_map` is required for third-party notification classes** that cannot be annotated with `#[NotificationGroup]`.
-- **Forced channels cannot be overridden by user preference.** This is by design for security and compliance notifications.
-- **Preference management is not part of Laravel core.** A package or custom implementation is required.
-- **The listener returns `false` to cancel dispatch**, which means the notification is silently skipped for that channel.
-
-### Annotated Code Examples
-
-**Example 1: Setting Up Preference Management**
+**Complete General Syntax**
 
 ```php
 <?php
-// Step 1: Add the trait to the User model
-namespace App\Models;
+// app/Events/OrderShipped.php
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Scabarcas\LaravelNotifyMatrix\Concerns\HasNotificationPreferences;
+namespace App\Events;
 
-class User extends Authenticatable
+use App\Models\Order;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class OrderShipped
 {
-    use Notifiable, HasNotificationPreferences;
+    use Dispatchable, SerializesModels;
+
+    public function __construct(
+        public Order $order,
+    ) {}
 }
-
-// Step 2: Tag notification classes with groups
-namespace App\Notifications;
-
-use Illuminate\Notifications\Notification;
-use Scabarcas\LaravelNotifyMatrix\Attributes\NotificationGroup;
-
-#[NotificationGroup('orders')]
-class OrderShipped extends Notification
-{
-    public function via($notifiable): array
-    {
-        return ['mail', 'database'];
-    }
-}
-
-#[NotificationGroup('marketing')]
-class WeeklyNewsletter extends Notification
-{
-    public function via($notifiable): array
-    {
-        return ['mail'];
-    }
-}
-
-// Step 3: Configure default policies
-// config/notify-matrix.php
-return [
-    'default_policy' => 'opt_in',
-    'groups' => [
-        'marketing' => ['default_policy' => 'opt_out'],
-        'security' => ['default_policy' => 'opt_in', 'forced' => ['mail']],
-    ],
-];
 ```
 
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `Dispatchable` trait | Provides the static `dispatch()` method. |
+| `SerializesModels` trait | Ensures Eloquent models are serialized correctly for queued listeners. |
+| Public properties | Hold the event data (e.g., the `Order` instance). |
+
+**Syntax Rules**
+
+- Event classes do not extend a base class.
+- Public properties are the primary mechanism for carrying data.
+- `Dispatchable` and `SerializesModels` are optional but commonly used.
+
+**Constraints and Limitations**
+
+- Events should be immutable data containers; business logic belongs in listeners.
+- Large or complex objects in the payload can cause serialization issues for queued listeners.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Defining an Event**
+
 ```php
-// Step 4: Read and write preferences in a controller
+<?php
+// app/Events/OrderShipped.php
+
+namespace App\Events;
+
+use App\Models\Order;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class OrderShipped
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(public Order $order) {}
+}
+```
+
+**Expected Output**
+
+The event class is created and ready to be dispatched.
+
+**Why This Output Occurs**
+
+Artisan’s `make:event` command generates this structure, providing a clean data container with the necessary traits.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: E-commerce Order Pipeline**
+
+An `OrderShipped` event is dispatched when an order is marked as shipped. It carries the `Order` model, which listeners use to send a confirmation email, update the order status log, and notify the warehouse.
+
+**Explanation**: The event acts as a single source of truth for the shipping occurrence, and multiple listeners can react without coupling.
+
+---
+
+### 2. Event Creation (`artisan make:event`)
+
+#### Definitions
+
+**Core Definition**
+
+`artisan make:event` is the Artisan command that scaffolds a new event class in the `app/Events` directory.
+
+**Technical Definition**
+
+The command generates a PHP class with the `Dispatchable` and `SerializesModels` traits already imported (though not necessarily used, depending on the stub). It optionally prompts for the event name if not provided.
+
+**Beginner-Friendly Explanation**
+
+Creating an event is as easy as running `php artisan make:event OrderShipped`. Laravel creates the file with the right structure.
+
+#### Purposes
+
+- To scaffold a correctly structured event class without manual boilerplate.
+- To enforce Laravel’s directory and naming conventions.
+- To reduce the friction of creating new events.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```bash
+php artisan make:event OrderShipped
+```
+
+**Component Breakdown**
+
+| Command | Effect |
+|---------|--------|
+| `make:event {name}` | Creates `app/Events/{name}.php`. |
+
+**Syntax Rules**
+
+- The event name should be PascalCase (e.g., `OrderShipped`).
+- The generated file includes the `Dispatchable` and `SerializesModels` traits by default.
+
+**Constraints and Limitations**
+
+- The generated stub does not include a constructor or properties; you must add them manually.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Generating an Event**
+
+```bash
+php artisan make:event PodcastProcessed
+```
+
+**Expected Output**
+
+```
+INFO  Event [app/Events/PodcastProcessed.php] created successfully.
+```
+
+**Why This Output Occurs**
+
+The command creates the file in the correct directory with the standard namespace and traits.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Rapid Event-Driven Development**
+
+A developer needs a `UserRegistered` event and runs `php artisan make:event UserRegistered`, then immediately adds the `$user` property in the constructor.
+
+**Explanation**: The scaffold removes setup friction, allowing focus on the event’s data.
+
+---
+
+### 3. Event Classes
+
+#### Definitions
+
+**Core Definition**
+
+Event classes are the PHP classes that represent a specific occurrence, carrying the data relevant to that occurrence.
+
+**Technical Definition**
+
+An event class is a plain PHP object (POPO) that typically resides in `app/Events`. It may use the `Dispatchable`, `InteractsWithSockets`, and `SerializesModels` traits. The `SerializesModels` trait ensures that Eloquent models are correctly serialized when the event is passed to a queued listener. Event classes can also implement interfaces like `ShouldBroadcast` or `ShouldDispatchAfterCommit` to modify their behaviour.
+
+**Beginner-Friendly Explanation**
+
+An event class is the “announcement” itself. It holds the information about what happened, like the order that was shipped.
+
+#### Purposes
+
+- To serve as a typed, structured payload for listeners.
+- To provide a clear, discoverable name for a domain occurrence.
+- To enable optional behaviours like broadcasting or transactional safety via interfaces.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+<?php
+// app/Events/OrderShipped.php
+
+namespace App\Events;
+
+use App\Models\Order;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class OrderShipped implements ShouldDispatchAfterCommit
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public function __construct(public Order $order) {}
+}
+```
+
+**Component Breakdown**
+
+| Interface/Trait | Purpose |
+|-----------------|---------|
+| `ShouldDispatchAfterCommit` | Delays dispatch until the DB transaction commits. |
+| `ShouldBroadcast` | Enables WebSocket broadcasting. |
+| `Dispatchable` | Provides the static `dispatch()` method. |
+| `SerializesModels` | Ensures models are serialized for queued listeners. |
+
+**Syntax Rules**
+
+- Event classes should be immutable (readonly properties or no setters).
+- Use public properties for data access by listeners.
+- Implement interfaces only when their behaviour is needed.
+
+**Constraints and Limitations**
+
+- `ShouldDispatchAfterCommit` requires an active database transaction to have an effect.
+- Broadcasting requires a configured broadcast driver.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Event with After-Commit Safety**
+
+```php
+<?php
+// app/Events/OrderShipped.php
+
+namespace App\Events;
+
+use App\Models\Order;
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class OrderShipped implements ShouldDispatchAfterCommit
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(public Order $order) {}
+}
+```
+
+**Expected Output**
+
+The event is dispatched only after the current database transaction commits; if the transaction rolls back, the event is discarded.
+
+**Why This Output Occurs**
+
+The `ShouldDispatchAfterCommit` interface instructs Laravel to defer dispatch until after the transaction completes successfully.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Transactional Order Events**
+
+An order service dispatches an `OrderPlaced` event inside a database transaction. By implementing `ShouldDispatchAfterCommit`, the event is only fired after the order is successfully persisted, preventing listeners from acting on a rolled-back order.
+
+**Explanation**: After-commit safety prevents race conditions between database state and event-driven side effects.
+
+---
+
+### 4. Event Dispatching
+
+#### Definitions
+
+**Core Definition**
+
+Event dispatching is the act of firing an event, which triggers the event dispatcher to invoke all registered listeners for that event.
+
+**Technical Definition**
+
+Dispatching can be done via the global `dispatch()` helper or the static `dispatch()` method on the event class (provided by the `Dispatchable` trait). The dispatcher iterates over the registered listeners and calls their `handle` method, passing the event instance. Conditional dispatching is supported via `dispatchIf()` and `dispatchUnless()`. For queued listeners, the listener is pushed onto the queue instead of being executed immediately.
+
+**Beginner-Friendly Explanation**
+
+Dispatching means “announce this event.” When you dispatch, Laravel finds all the listeners that care about it and runs their code.
+
+#### Purposes
+
+- To trigger the observer pattern, notifying all interested listeners.
+- To conditionally dispatch events based on runtime conditions.
+- To enable both synchronous and asynchronous listener execution.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+use App\Events\OrderShipped;
+
+// Standard dispatch
+OrderShipped::dispatch($order);
+
+// Helper dispatch
+event(new OrderShipped($order));
+
+// Conditional dispatch
+OrderShipped::dispatchIf($condition, $order);
+OrderShipped::dispatchUnless($condition, $order);
+```
+
+**Component Breakdown**
+
+| Method | Description |
+|--------|-------------|
+| `dispatch()` | Dispatches the event unconditionally. |
+| `dispatchIf($condition, $payload)` | Dispatches only if the condition is true. |
+| `dispatchUnless($condition, $payload)` | Dispatches only if the condition is false. |
+
+**Syntax Rules**
+
+- The event instance is passed as the sole argument to `dispatch()`.
+- `dispatchIf` and `dispatchUnless` accept the condition as the first argument.
+- Dispatching returns the array of listener responses.
+
+**Constraints and Limitations**
+
+- Synchronous listeners block the request until they complete.
+- Queued listeners are dispatched asynchronously but may not preserve ordering relative to synchronous listeners.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Dispatching an Event from a Controller**
+
+```php
+<?php
+// app/Http/Controllers/OrderShipmentController.php
+
 namespace App\Http\Controllers;
 
+use App\Events\OrderShipped;
+use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
-class NotificationPreferenceController extends Controller
+class OrderShipmentController extends Controller
 {
-    public function index(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        // Get all preferences for the user
-        $preferences = $request->user()->getPreferences();
+        $order = Order::findOrFail($request->order_id);
+        $order->ship();
 
-        return response()->json([
-            'preferences' => $preferences,
-        ]);
-    }
+        OrderShipped::dispatch($order);
 
-    public function update(Request $request)
-    {
-        $request->validate([
-            'group'   => 'required|string',
-            'channel' => 'required|string',
-            'enabled' => 'required|boolean',
-        ]);
-
-        $request->user()->setPreference(
-            $request->group,
-            $request->channel,
-            $request->enabled
-        );
-
-        return response()->json(['message' => 'Preference updated.']);
+        return redirect('/orders');
     }
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 
-- The `index` endpoint returns the user's preference matrix (group, channel, enabled).
-- The `update` endpoint stores the new preference.
-- When a notification is dispatched, the listener checks preferences and skips opted-out channels.
-- Forced channels (e.g., `security.mail`) are always delivered.
+When the controller method runs, the `OrderShipped` event is dispatched, and all registered listeners execute.
 
-**Why This Output Occurs:** The `HasNotificationPreferences` trait registers a listener for `NotificationSending` that runs before each channel dispatch. The listener checks the notification's group (from the `#[NotificationGroup]` attribute or `class_map`), looks up the user's preference for that group and channel, and returns `false` if the user has opted out (and the channel is not forced). Returning `false` from a `NotificationSending` listener cancels the dispatch for that channel.
+**Why This Output Occurs**
+
+`OrderShipped::dispatch($order)` invokes the event dispatcher, which resolves and calls each listener for that event.
 
 ---
 
-**Example 2: Custom Preference Implementation Without a Package**
+#### Real-World Cases with Explanation
+
+**Case 1: Conditional Dispatch**
+
+A `UserLoggedIn` event is dispatched only if the user opted into login notifications, using `UserLoggedIn::dispatchIf($user->wants_login_notifications, $user)`.
+
+**Explanation**: Conditional dispatch avoids unnecessary listener execution when the triggering condition is not met.
+
+---
+
+### 5. Event Payloads
+
+#### Definitions
+
+**Core Definition**
+
+Event payloads are the data carried by an event instance, typically stored in public properties, that provide listeners with the information they need to react.
+
+**Technical Definition**
+
+The payload is defined by the event class’s constructor parameters and public properties. For queued listeners, the payload must be serializable; the `SerializesModels` trait handles Eloquent models by serializing only their identifiers and re-retrieving them from the database when the listener runs. Non-serializable data (e.g., closures) cannot be used in queued event payloads.
+
+**Beginner-Friendly Explanation**
+
+The payload is the “details” inside the announcement. It tells the listener which order was shipped, which user registered, etc.
+
+#### Purposes
+
+- To provide listeners with the context they need to perform their actions.
+- To decouple the event’s data structure from the listener’s implementation.
+- To ensure safe serialization for queued listeners.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+```php
+class OrderShipped
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(
+        public Order $order,
+        public string $trackingNumber,
+    ) {}
+}
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| Public properties | Hold the payload data. |
+| `SerializesModels` | Ensures Eloquent models are serialized safely. |
+
+**Syntax Rules**
+
+- Payload properties should be `public` for easy access by listeners.
+- Use `SerializesModels` when including Eloquent models.
+- Avoid closures or resources in the payload.
+
+**Constraints and Limitations**
+
+- Eloquent models in queued listeners are re-retrieved from the database, which can fail if the record was deleted.
+- Large payloads increase queue storage and processing time.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Multi-Property Payload**
+
+```php
+class OrderShipped
+{
+    use Dispatchable, SerializesModels;
+
+    public function __construct(
+        public Order $order,
+        public string $trackingNumber,
+        public \DateTimeInterface $shippedAt,
+    ) {}
+}
+```
+
+**Expected Output**
+
+Listeners can access `$event->order`, `$event->trackingNumber`, and `$event->shippedAt`.
+
+**Why This Output Occurs**
+
+The public properties expose the payload to any listener that receives the event.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Tracking Number for Shipping Emails**
+
+An `OrderShipped` event includes both the `Order` model and a `trackingNumber` string, allowing the email listener to include the tracking link without querying the order again.
+
+**Explanation**: A well-designed payload minimises extra database queries in listeners.
+
+---
+
+### 6. Event Listeners
+
+#### Definitions
+
+**Core Definition**
+
+An event listener is a class that contains the logic to be executed when a specific event is dispatched, typically implemented as a `handle` method that type-hints the event.
+
+**Technical Definition**
+
+Listeners are stored in `app/Listeners` and are automatically discovered by Laravel if their `handle` or `__invoke` method type-hints an event class. They can be synchronous (executed immediately) or queued (implementing `ShouldQueue`). Listeners can also define a `failed` method for handling failures when queued.
+
+**Beginner-Friendly Explanation**
+
+A listener is the code that “reacts” to an event. When the `OrderShipped` event is announced, the `SendShipmentNotification` listener sends the email.
+
+#### Purposes
+
+- To encapsulate the reaction to an event in a dedicated, testable class.
+- To allow multiple independent reactions to the same event.
+- To keep the event-dispatching code free of side-effect logic.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
 
 ```php
 <?php
-// File: app/Listeners/FilterNotificationChannels.php
+// app/Listeners/SendShipmentNotification.php
 
 namespace App\Listeners;
 
-use Illuminate\Notifications\Events\NotificationSending;
+use App\Events\OrderShipped;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 
-class FilterNotificationChannels
+class SendShipmentNotification implements ShouldQueue
 {
-    public function handle(NotificationSending $event): bool
+    use InteractsWithQueue;
+
+    public function handle(OrderShipped $event): void
     {
-        $notifiable = $event->notifiable;
-        $notification = $event->notification;
-        $channel = $event->channel;
+        // Access $event->order, $event->trackingNumber
+    }
 
-        // Step 1: Determine the notification group
-        $group = $this->resolveGroup($notification);
+    public function failed(OrderShipped $event, \Throwable $exception): void
+    {
+        // Handle failure
+    }
+}
+```
 
-        if (!$group) {
-            return true; // No group — always deliver
-        }
+**Component Breakdown**
 
-        // Step 2: Check if the channel is forced
-        $forced = config("notifications.groups.{$group}.forced", []);
-        if (in_array($channel, $forced)) {
-            return true;
-        }
+| Component | Description |
+|-----------|-------------|
+| `handle()` | The listener logic; receives the event instance. |
+| `ShouldQueue` | Makes the listener asynchronous. |
+| `failed()` | Handles queued listener failures. |
 
-        // Step 3: Check the user's stored preference
-        $preference = $notifiable->notificationPreferences()
-            ->where('group', $group)
-            ->where('channel', $channel)
-            ->first();
+**Syntax Rules**
 
-        if ($preference) {
-            return $preference->enabled;
-        }
+- The `handle` method must type-hint the event class.
+- Implement `ShouldQueue` for asynchronous processing.
+- Use `InteractsWithQueue` for queue-specific methods (e.g., `release`, `delete`).
 
-        // Step 4: Fall back to the group default policy
-        $defaultPolicy = config(
-            "notifications.groups.{$group}.default_policy",
-            config('notifications.default_policy', 'opt_in')
+**Constraints and Limitations**
+
+- Queued listeners share the queue system’s retry and timeout semantics.
+- Synchronous listeners block the dispatching request.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Queued Listener**
+
+```php
+<?php
+namespace App\Listeners;
+
+use App\Events\OrderShipped;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class SendShipmentNotification implements ShouldQueue
+{
+    public function handle(OrderShipped $event): void
+    {
+        Mail::to($event->order->user)->send(
+            new ShipmentConfirmation($event->order, $event->trackingNumber)
         );
-
-        return $defaultPolicy === 'opt_in';
-    }
-
-    private function resolveGroup($notification): ?string
-    {
-        $class = get_class($notification);
-
-        // Check class map
-        $map = config('notifications.class_map', []);
-        if (isset($map[$class])) {
-            return $map[$class];
-        }
-
-        // Check attribute (PHP 8)
-        $reflection = new \ReflectionClass($class);
-        $attributes = $reflection->getAttributes(\App\Attributes\NotificationGroup::class);
-
-        if (!empty($attributes)) {
-            return $attributes[0]->newInstance()->name;
-        }
-
-        return null;
     }
 }
 ```
 
-```php
-// Register the listener in AppServiceProvider
-use App\Listeners\FilterNotificationChannels;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Notifications\Events\NotificationSending;
+**Expected Output**
 
-public function boot(): void
-{
-    Event::listen(NotificationSending::class, FilterNotificationChannels::class);
-}
-```
+The listener is pushed onto the queue and processed asynchronously, sending the email without blocking the request.
 
-**Expected Output:** The listener runs before each channel dispatch, checks the user's preference, and returns `false` to skip opted-out channels. Forced channels bypass the check.
+**Why This Output Occurs**
 
-**Why This Output Occurs:** The `NotificationSending` event is dispatched by the `NotificationSender` before each channel's `send()` method is called. If any listener returns `false`, the channel is skipped. This custom implementation avoids a package dependency while providing the same functionality.
-
-### Real-World Cases
-
-- **E-commerce platforms:** Users opt out of marketing emails but cannot opt out of order confirmation and shipping notifications (forced channels).
-- **SaaS applications:** Users configure which notification types they receive via email, Slack, and in-app, with security alerts forced across all channels.
-- **Social networks:** Users control which engagement notifications (likes, comments, follows) they receive and through which channels.
-- **Healthcare systems:** Appointment reminders are forced via SMS (for patient safety), while general health tips are opt-in.
-- **Financial services:** Transaction alerts are forced via email and SMS, while promotional offers are opt-in.
+`ShouldQueue` tells the dispatcher to push the listener onto the queue instead of executing it immediately.
 
 ---
 
-## 2. Asynchronous Routing
+#### Real-World Cases with Explanation
 
-### Definitions
+**Case 1: Multiple Listeners for One Event**
 
-**Core Definition:** Asynchronous routing is the practice of dispatching notifications to dedicated queue connections with custom rate limits, batch processing, and idempotency controls, preventing notifications from blocking HTTP requests or overwhelming external services.
+An `OrderShipped` event has three listeners: one sends an email, one updates the order log, and one notifies the warehouse API. Each listener is independent and can be queued or synchronous as appropriate.
 
-**Technical Definition:** Notifications implementing `ShouldQueue` are dispatched as `SendQueuedNotifications` jobs. The queue connection and queue name are configured via the `onConnection()` and `onQueue()` methods on the notification instance or via the `$connection` and `$queue` properties on the notification class. Rate limiting is applied via the `Illuminate\Queue\Middleware\RateLimited` middleware, which uses Laravel's `RateLimiter` facade to enforce per-key throughput limits. Idempotency is achieved via the `ShouldBeUnique` interface, which acquires a cache lock before dispatching. Batch operations are supported through `Bus::batch()`, which groups multiple notification jobs and provides completion callbacks. FIFO queues require the `onGroup()` and `withDeduplicator()` methods to define message groups and deduplication IDs. Horizon's auto-balancing strategy can dynamically allocate workers to the notifications queue based on workload.
+**Explanation**: Listeners allow separation of concerns, with each handling a single responsibility.
 
-**Beginner-Friendly Explanation:** When you have thousands of notifications to send, you don't want them blocking your web requests or overwhelming Twilio's API. Asynchronous routing puts notifications on a dedicated queue, limits how fast they're sent, and prevents duplicates. It's like having a dedicated mailroom for notifications instead of making every employee deliver mail themselves.
+---
 
-### Purposes
+### 7. Event Subscribers
 
-- To prevent notification dispatch from blocking HTTP requests and degrading user experience.
-- To isolate notification workloads on dedicated queue connections, preventing them from competing with other jobs.
-- To enforce rate limits on external APIs (Twilio, Slack, etc.) to avoid throttling and bans.
-- To prevent duplicate notifications via idempotency locks.
-- To batch related notifications for efficient processing.
-- To enable dynamic worker allocation via Horizon's auto-balancing strategy.
+#### Definitions
 
-### Syntax Rules and Structure
+**Core Definition**
 
-#### Complete General Syntax
+Event subscribers are classes that subscribe to multiple events from within the subscriber class itself, allowing you to define several event handlers within a single class.
 
-```php
-// Notification class with queue configuration
-class OrderShipped extends Notification implements ShouldQueue
-{
-    use Queueable;
+**Technical Definition**
 
-    // Dedicated queue connection and name
-    public $connection = 'redis-notifications';
-    public $queue = 'notifications';
+Subscribers define a `subscribe` method that receives an event dispatcher instance. They can call `$events->listen()` to register listeners, or return an array of events and method names. Subscribers are registered via the `$subscribe` property on the `EventServiceProvider` or manually.
 
-    // Retry configuration
-    public $tries = 3;
-    public $backoff = [10, 30, 60]; // Seconds between retries
+**Beginner-Friendly Explanation**
 
-    // Rate limiting middleware
-    public function middleware(): array
-    {
-        return [new RateLimited('notifications')];
-    }
+A subscriber is a single class that listens to multiple events. Instead of creating separate listener classes, you group related event handling in one place.
 
-    // Idempotency
-    public function uniqueId(): string
-    {
-        return 'order-shipped-' . $this->order->id;
-    }
-}
-```
+#### Purposes
 
-```php
-// Rate limiter definition in AppServiceProvider
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\Facades\RateLimiter;
+- To group related event handling logic into a single class.
+- To reduce the number of listener classes for closely related events.
+- To provide a centralized place for subscribing to multiple events.
 
-public function boot(): void
-{
-    RateLimiter::for('notifications', function ($job) {
-        return Limit::perMinute(100)->by($job->notifiable->id);
-    });
-}
-```
+#### Syntax Rules and Structure
 
-```php
-// Batch dispatch
-use Illuminate\Bus\Batch;
-use Illuminate\Support\Facades\Bus;
-
-$batch = Bus::batch([
-    new SendQueuedNotifications($users, new OrderShipped($order)),
-    new SendQueuedNotifications($admins, new AdminAlert($order)),
-])->then(function (Batch $batch) {
-    // All notifications sent successfully
-})->catch(function (Batch $batch, Throwable $e) {
-    // First failure
-})->finally(function (Batch $batch) {
-    // Batch completed (success or failure)
-})->dispatch();
-```
-
-**Component Breakdown:**
-
-- `public $connection` — The queue connection to use (e.g., `redis-notifications`).
-- `public $queue` — The queue name to push the notification to (e.g., `notifications`).
-- `public $tries` — Maximum number of retry attempts.
-- `public $backoff` — Array or integer defining delay(s) between retries in seconds.
-- `RateLimited` middleware — Enforces the named rate limiter before executing the job.
-- `uniqueId()` — Returns a string that uniquely identifies the notification for deduplication.
-- `Bus::batch()` — Groups multiple jobs into a batch with completion callbacks.
-- `onGroup()` — Defines the FIFO message group for the notification.
-- `withDeduplicator()` — Defines the deduplication ID for FIFO queues.
-
-**Syntax Rules:**
-
-- The `RateLimited` middleware requires a rate limiter defined with the same name in a service provider.
-- The `ShouldBeUnique` interface must be implemented on the notification class to enable idempotency.
-- The `uniqueId()` method must return a string that uniquely identifies the notification instance.
-- The `onGroup()` and `withDeduplicator()` methods are only required for FIFO queues (SQS FIFO, RabbitMQ).
-- Batch dispatching requires the `Bus::batch()` facade and a `job_batches` table migration.
-
-**Constraints and Limitations:**
-
-- **Rate limiting requires a cache driver that supports atomic locks** (Redis, Memcached, database).
-- **Idempotency locks are not released if the process is killed with SIGKILL.** The lock expires after the configured TTL.
-- **FIFO queues have lower throughput than standard queues.** Use them only when ordering guarantees are required.
-- **Batch dispatching requires the `job_batches` table.** Run `php artisan make:queue-batches-table && php artisan migrate`.
-- **Horizon's auto-balancing requires Redis as the queue driver.** It is not available for other queue drivers.
-
-### Annotated Code Examples
-
-**Example 1: Dedicated Queue Connection with Rate Limiting**
+**Complete General Syntax**
 
 ```php
 <?php
-// File: app/Notifications/OrderShipped.php
+// app/Listeners/UserEventSubscriber.php
 
-namespace App\Notifications;
+namespace App\Listeners;
 
-use App\Models\Order;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
-use Illuminate\Queue\Middleware\RateLimited;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Events\Dispatcher;
 
-class OrderShipped extends Notification implements ShouldQueue
+class UserEventSubscriber
 {
-    use Queueable;
-
-    // Dedicated connection and queue
-    public $connection = 'redis-notifications';
-    public $queue = 'notifications';
-
-    // Retry configuration
-    public $tries = 3;
-    public $backoff = [10, 30, 60];
-
-    public function __construct(
-        public Order $order,
-    ) {}
-
-    public function via(object $notifiable): array
+    public function handleUserLogin(Login $event): void
     {
-        return ['mail', 'database'];
+        // ...
     }
 
-    // Rate limiting middleware
-    public function middleware(): array
+    public function handleUserLogout(Logout $event): void
     {
-        return [new RateLimited('notifications')];
+        // ...
     }
 
-    // Idempotency: prevent duplicate sends for the same order
-    public function uniqueId(): string
+    public function subscribe(Dispatcher $events): void
     {
-        return 'order-shipped-' . $this->order->id;
+        $events->listen(Login::class, [self::class, 'handleUserLogin']);
+        $events->listen(Logout::class, [self::class, 'handleUserLogout']);
     }
 }
 ```
 
-```php
-// File: app/Providers/AppServiceProvider.php
+**Component Breakdown**
 
-namespace App\Providers;
+| Component | Description |
+|-----------|-------------|
+| `subscribe()` | Registers the subscriber’s listeners. |
+| `$events->listen()` | Associates an event with a handler method. |
 
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\ServiceProvider;
+**Syntax Rules**
 
-class AppServiceProvider extends ServiceProvider
-{
-    public function boot(): void
-    {
-        // Define a rate limiter for notifications
-        RateLimiter::for('notifications', function ($job) {
-            return Limit::perMinute(100)
-                ->by($job->notifiable->id ?? 'global');
-        });
-    }
-}
-```
+- The `subscribe` method receives a `Dispatcher` instance.
+- Handlers can be defined as methods on the subscriber class.
+- Subscribers are registered in `EventServiceProvider::$subscribe`.
 
-```php
-// File: config/queue.php
+**Constraints and Limitations**
 
-'connections' => [
-    'redis-notifications' => [
-        'driver'     => 'redis',
-        'connection' => 'default',
-        'queue'      => 'notifications',
-        'retry_after' => 90,
-        'block_for'  => null,
-    ],
-],
-```
+- Subscribers do not support automatic discovery in the same way as individual listeners.
+- The `subscribe` method must be manually defined.
 
-```bash
-# Run a dedicated worker for the notifications queue
-php artisan queue:work redis-notifications --queue=notifications --tries=3 --backoff=10,30,60
-```
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
 
-**Expected Output:**
-
-- Notifications are pushed to the `redis-notifications` connection on the `notifications` queue.
-- The rate limiter enforces a maximum of 100 notifications per minute per notifiable.
-- If the notification fails, it is retried after 10, 30, and 60 seconds.
-- Duplicate `OrderShipped` notifications for the same order are prevented by the `uniqueId()` lock.
-
-**Why This Output Occurs:** The `$connection` and `$queue` properties tell Laravel to push the notification job to the dedicated connection and queue. The `RateLimited` middleware checks the named rate limiter before executing the job; if the limit is exceeded, the job is released back to the queue. The `ShouldBeUnique` interface (via the `uniqueId()` method) acquires a cache lock before dispatching; if the lock is already held, the duplicate is not dispatched.
-
----
-
-**Example 2: Batch Notification Dispatching**
+**Example 1: Subscriber Registration**
 
 ```php
-<?php
-// File: app/Http/Controllers/BulkNotificationController.php
-
-namespace App\Http\Controllers;
-
-use App\Notifications\OrderShipped;
-use App\Models\Order;
-use App\Models\User;
-use Illuminate\Bus\Batch;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Notification;
-use Throwable;
-
-class BulkNotificationController extends Controller
-{
-    public function send(Request $request)
-    {
-        $order = Order::findOrFail($request->order_id);
-        $customers = User::whereIn('id', $request->customer_ids)->get();
-        $admins = User::where('role', 'admin')->get();
-
-        // Step 1: Create a batch of notification jobs
-        $batch = Bus::batch([
-            new \Illuminate\Notifications\SendQueuedNotifications(
-                $customers,
-                new OrderShipped($order)
-            ),
-            new \Illuminate\Notifications\SendQueuedNotifications(
-                $admins,
-                new \App\Notifications\AdminAlert($order)
-            ),
-        ])
-            ->name('order-notifications-' . $order->id)
-            ->then(function (Batch $batch) {
-                // All notifications sent successfully
-                \Log::info('Batch completed', ['batch_id' => $batch->id]);
-            })
-            ->catch(function (Batch $batch, Throwable $e) {
-                // First failure encountered
-                \Log::error('Batch failed', [
-                    'batch_id' => $batch->id,
-                    'error'    => $e->getMessage(),
-                ]);
-            })
-            ->finally(function (Batch $batch) {
-                // Batch completed (success or failure)
-                \Log::info('Batch finalized', ['batch_id' => $batch->id]);
-            })
-            ->dispatch();
-
-        return response()->json([
-            'batch_id' => $batch->id,
-            'total_jobs' => $batch->totalJobs,
-        ]);
-    }
-}
-```
-
-**Expected Output:**
-
-```json
-{
-    "batch_id": "d3b07384-d9a0-4c9b-8e6f-1a2b3c4d5e6f",
-    "total_jobs": 2
-}
-```
-
-**Why This Output Occurs:** `Bus::batch()` creates a batch record in the `job_batches` table and dispatches each notification job to the queue. The `then()`, `catch()`, and `finally()` callbacks are invoked as the batch progresses. The batch ID allows tracking progress via the `Batch` facade. This pattern is ideal for sending notifications to large groups without overwhelming the queue or external APIs.
-
-### Real-World Cases
-
-- **E-commerce flash sales:** Batch notifications for order confirmations, shipping updates, and delivery confirmations, rate-limited to 100 per minute per customer.
-- **SaaS incident alerts:** Dedicated queue for critical system alerts, isolated from marketing email queues to ensure prompt delivery.
-- **Social media engagement:** Idempotent notifications for likes and comments, preventing duplicate alerts when the same action occurs multiple times.
-- **Financial transaction alerts:** Batch processing of transaction notifications with FIFO ordering to ensure chronological delivery.
-- **Healthcare appointment reminders:** Rate-limited SMS notifications to comply with Twilio's API quotas.
-
----
-
-## 3. Failure Resiliency
-
-### Definitions
-
-**Core Definition:** Failure resiliency is the set of mechanisms that ensure notifications are not lost when external services fail, including retry logic with exponential backoff, maximum attempt limits, and dead-letter queue routing for permanently failed notifications.
-
-**Technical Definition:** When a queued notification job fails, Laravel's queue worker catches the exception and either releases the job back to the queue (for retry) or marks it as failed. The `$tries` property on the notification class defines the maximum number of attempts. The `$backoff` property defines the delay(s) between attempts; it can be an integer (fixed delay) or an array (progressive delays). The `$maxExceptions` property limits how many exceptions are tolerated before failing. After exhausting retries, the job is written to the `failed_jobs` table. For dead-letter queue routing, queue connections can be configured with a DLQ (supported natively by RabbitMQ and SQS), or packages like `xerxes/laravel-rabbitmq-communication` provide automatic DLQ handling with exponential backoff and replay commands. The `Illuminate\Queue\Middleware\ThrottlesExceptions` middleware can also throttle exception handling, releasing jobs back to the queue with increasing delays.
-
-**Beginner-Friendly Explanation:** When Twilio's API goes down, your notification shouldn't just disappear. Failure resiliency means: try again after a short delay, then a longer delay, and if it still fails after a few attempts, send it to a "dead-letter queue" where you can inspect what went wrong and replay it later. This ensures no notification is permanently lost.
-
-### Purposes
-
-- To ensure transient failures (network blips, API rate limits) are retried automatically.
-- To prevent overwhelming external services by spacing out retries with exponential backoff.
-- To cap the number of retry attempts to avoid infinite loops.
-- To route permanently failed notifications to a dead-letter queue for inspection and manual replay.
-- To provide visibility into failure patterns through logging and monitoring.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
-
-```php
-// Notification class with retry configuration
-class OrderShipped extends Notification implements ShouldQueue
-{
-    use Queueable;
-
-    // Maximum number of attempts
-    public $tries = 5;
-
-    // Fixed delay between retries (seconds)
-    public $backoff = 30;
-
-    // OR: Progressive backoff
-    public $backoff = [10, 30, 60, 120, 300];
-
-    // Maximum exceptions before failing (Laravel 8.42+)
-    public $maxExceptions = 3;
-
-    // Timeout for the job (seconds)
-    public $timeout = 60;
-
-    // Fail the job on timeout
-    public $failOnTimeout = true;
-}
-```
-
-```php
-// Throttling exceptions middleware
-use Illuminate\Queue\Middleware\ThrottlesExceptions;
-
-public function middleware(): array
-{
-    return [
-        (new ThrottlesExceptions(5, 5)) // 5 exceptions, 5 minutes
-            ->backoff(5),
-    ];
-}
-```
-
-```php
-// RabbitMQ dead-letter queue configuration (package-based)
-// config/rabbitmq.php
-return [
-    'dlq' => [
-        'enabled'  => env('RABBITMQ_DLQ_ENABLED', true),
-        'exchange' => env('RABBITMQ_DLQ_EXCHANGE', 'dlx.failed'),
-        'max_retries' => env('RABBITMQ_DLQ_MAX_RETRIES', 3),
-    ],
+// app/Providers/EventServiceProvider.php
+protected $subscribe = [
+    \App\Listeners\UserEventSubscriber::class,
 ];
-
-// Replay failed messages
-// php artisan rabbitmq:reprocess-dlq {queue}
 ```
 
-**Component Breakdown:**
+**Expected Output**
 
-- `$tries` — Maximum number of attempts before the job is marked as failed.
-- `$backoff` — Integer (fixed) or array (progressive) delays in seconds.
-- `$maxExceptions` — Maximum number of exceptions before failing, even if `$tries` has not been reached.
-- `$timeout` — Maximum seconds the job can run before being killed.
-- `$failOnTimeout` — Whether to mark the job as failed on timeout.
-- `ThrottlesExceptions` — Middleware that releases jobs back to the queue with increasing delays after exceptions.
-- DLQ configuration — Queue-specific settings for routing failed messages to a dead-letter queue.
+The subscriber’s `subscribe` method is called, registering its event handlers.
 
-**Syntax Rules:**
+**Why This Output Occurs**
 
-- The `$backoff` array must have at least as many elements as `$tries` minus one.
-- The `$maxExceptions` property is available in Laravel 8.42+.
-- The `ThrottlesExceptions` middleware requires a cache driver that supports atomic operations.
-- Dead-letter queue configuration is queue-driver-specific. RabbitMQ and SQS support it natively; Redis and database queues do not.
-- Failed jobs are stored in the `failed_jobs` table by default. Run `php artisan queue:failed-table && php artisan migrate` if the table does not exist.
-
-**Constraints and Limitations:**
-
-- **Redis and database queues do not have native DLQ support.** Use RabbitMQ, SQS, or a package like `xerxes/laravel-rabbitmq-communication` for DLQ functionality.
-- **The `failed_jobs` table stores the job payload and exception.** It does not store the notification's rendered content.
-- **Exponential backoff increases the time between retries.** For time-sensitive notifications, consider a shorter backoff or a different strategy.
-- **Dead-letter queues require manual replay.** There is no automatic recovery from the DLQ; you must inspect and reprocess failed messages.
-
-### Annotated Code Examples
-
-**Example 1: Configuring Retry and Backoff on a Notification**
-
-```php
-<?php
-// File: app/Notifications/CriticalAlert.php
-
-namespace App\Notifications;
-
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
-use Illuminate\Queue\Middleware\ThrottlesExceptions;
-
-class CriticalAlert extends Notification implements ShouldQueue
-{
-    use Queueable;
-
-    public $connection = 'redis-critical';
-    public $queue = 'alerts';
-
-    // Retry configuration
-    public $tries = 5;
-    public $backoff = [5, 15, 60, 300, 900]; // Progressive backoff
-    public $maxExceptions = 3;
-    public $timeout = 30;
-    public $failOnTimeout = true;
-
-    public function __construct(
-        public string $message,
-        public string $severity,
-    ) {}
-
-    public function via(object $notifiable): array
-    {
-        return ['mail', 'vonage'];
-    }
-
-    public function middleware(): array
-    {
-        return [
-            // Throttle exceptions: after 5 exceptions in 5 minutes,
-            // wait before retrying
-            (new ThrottlesExceptions(5, 5))->backoff(5),
-        ];
-    }
-
-    public function toMail(object $notifiable): \Illuminate\Notifications\Messages\MailMessage
-    {
-        return (new \Illuminate\Notifications\Messages\MailMessage)
-            ->subject('Critical Alert: ' . $this->severity)
-            ->line($this->message)
-            ->action('View Dashboard', url('/dashboard'));
-    }
-
-    public function toVonage(object $notifiable): \Illuminate\Notifications\Messages\VonageMessage
-    {
-        return (new \Illuminate\Notifications\Messages\VonageMessage)
-            ->content('CRITICAL: ' . $this->message);
-    }
-}
-```
-
-```bash
-# Run a worker with the configured retry and backoff settings
-php artisan queue:work redis-critical --queue=alerts --tries=5 --backoff=5,15,60,300,900 --timeout=30
-```
-
-**Expected Output:**
-
-- The notification is attempted up to 5 times.
-- Retries are spaced at 5, 15, 60, 300, and 900 seconds.
-- If 3 exceptions occur before 5 attempts, the job fails early.
-- If the job times out after 30 seconds, it is marked as failed.
-- After all retries are exhausted, the job is written to the `failed_jobs` table.
-
-**Why This Output Occurs:** The `$tries` and `$backoff` properties configure the queue worker's retry behaviour. The `$maxExceptions` property limits early failure. The `ThrottlesExceptions` middleware adds an additional layer of protection by releasing jobs back to the queue with increasing delays after exceptions. The `$timeout` and `$failOnTimeout` properties ensure that long-running jobs do not block the queue indefinitely.
+The `$subscribe` property tells Laravel to instantiate the subscriber and call its `subscribe` method.
 
 ---
 
-**Example 2: Dead-Letter Queue Configuration with RabbitMQ**
+#### Real-World Cases with Explanation
 
-```php
-// Step 1: Install the package
-// composer require xerxes/laravel-rabbitmq-communication
+**Case 1: Authentication Event Grouping**
 
-// Step 2: Publish configuration
-// php artisan vendor:publish --tag=laravel-rabbitmq-communication-config
+A `UserEventSubscriber` handles `Login`, `Logout`, `Registered`, and `PasswordReset` events, grouping all authentication-related side effects into one cohesive class.
 
-// Step 3: Configure environment variables
-```
-
-```bash
-# .env
-RABBITMQ_HOST=127.0.0.1
-RABBITMQ_PORT=5672
-RABBITMQ_USER=guest
-RABBITMQ_PASS=guest
-RABBITMQ_VHOST=/
-
-RABBITMQ_DLQ_ENABLED=true
-RABBITMQ_DLQ_EXCHANGE=dlx.failed
-RABBITMQ_DLQ_MAX_RETRIES=3
-
-RABBITMQ_CONSUMER_MODE=sync
-RABBITMQ_CONSUMER_PREFETCH=10
-```
-
-```php
-// Step 4: Publish a notification via RabbitMQ
-use Xerxes\RabbitMQ\RabbitMQ;
-
-app(RabbitMQ::class)
-    ->message()
-    ->viaExchange('notifications.exchange')
-    ->route('order.shipped')
-    ->withPayload([
-        'event' => 'order.shipped',
-        'data'  => [
-            'order_id' => $order->id,
-            'customer' => $order->customer->email,
-        ],
-    ])
-    ->persistent()
-    ->publish();
-```
-
-```bash
-# Step 5: Replay failed messages from the dead-letter queue
-php artisan rabbitmq:reprocess-dlq notifications
-```
-
-**Expected Output:**
-
-- The notification is published to RabbitMQ.
-- If the consumer fails, the message is retried with exponential backoff.
-- After `RABBITMQ_DLQ_MAX_RETRIES` attempts, the message is moved to the dead-letter exchange (`dlx.failed`).
-- The `reprocess-dlq` command replays messages from the DLQ back to the original queue.
-
-**Why This Output Occurs:** The `xerxes/laravel-rabbitmq-communication` package configures RabbitMQ with a dead-letter exchange. When a message fails after the maximum number of retries, it is routed to the DLQ exchange. The `reprocess-dlq` command reads messages from the DLQ and republishes them to the original queue for another attempt.
-
-### Real-World Cases
-
-- **Third-party API outages:** SMS notifications retry with exponential backoff when Twilio's API returns 429 (rate limit) or 503 (service unavailable).
-- **Email delivery failures:** Mail notifications retry when the SMTP server is temporarily unreachable.
-- **Slack webhook failures:** Chat notifications route to a dead-letter queue after 5 failed attempts, allowing manual inspection and replay.
-- **Critical system alerts:** Alerts retry aggressively (short backoff) because they are time-sensitive, while marketing notifications retry conservatively (long backoff).
-- **Compliance notifications:** Failed compliance notifications are routed to a DLQ with audit logging for regulatory review.
+**Explanation**: Subscribers are ideal when several events share a common domain or concern.
 
 ---
 
-## 4. Third-Party Integration
+### 8. Event Discovery
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Third-party integration is the process of extending Laravel's notification system with community-maintained channel packages that deliver notifications through external services such as Twilio (SMS), Slack (chat), Discord (chat), Telegram (chat), and custom webhook endpoints.
+**Core Definition**
 
-**Technical Definition:** Third-party notification channels are classes that implement a `send()` method accepting the notifiable entity and the notification instance. They are registered via the `via()` method returning the channel class or alias. The channel class typically uses Laravel's HTTP client or the provider's official SDK to deliver the message. The `laravel-notification-channels` community organisation maintains packages for Twilio, Discord, Telegram, and others. Slack is supported by the first-party `laravel/slack-notification-channel` package. Each package provides its own message class (e.g., `TwilioMessage`, `SlackMessage`, `DiscordMessage`) and routing mechanism (e.g., `routeNotificationForTwilio()`, `routeNotificationForSlack()`, `routeNotificationForDiscord()`).
+Event discovery is Laravel’s automatic registration of event listeners by scanning the `app/Listeners` directory for classes with `handle` or `__invoke` methods that type-hint an event.
 
-**Beginner-Friendly Explanation:** Laravel's built-in channels cover email, database, and broadcast. For everything else — SMS via Twilio, chat via Slack or Discord, push via Firebase — there's a community package. You install the package, configure the credentials in `.env`, add a `toTwilio()`, `toSlack()`, or `toDiscord()` method to your notification, and add the channel to `via()`. It works just like a built-in channel.
+**Technical Definition**
 
-### Purposes
+By default, Laravel automatically finds and registers listeners by scanning the `Listeners` directory. The discovery process looks for any method starting with `handle` or `__invoke` and maps it to the type-hinted event. Custom directories can be added via `withEvents(discover: [...])` in `bootstrap/app.php`. In production, `event:cache` should be run to cache the listener manifest for performance.
 
-- To deliver notifications through SMS gateways (Twilio, Vonage) for time-sensitive alerts.
-- To send chat notifications to Slack, Discord, or Telegram for team collaboration.
-- To integrate with proprietary internal APIs and custom webhook endpoints.
-- To leverage the community ecosystem for channels not supported by Laravel core.
-- To provide a consistent notification API regardless of the delivery service.
+**Beginner-Friendly Explanation**
 
-### Syntax Rules and Structure
+Event discovery means Laravel automatically finds your listeners and connects them to events—you don’t have to manually register them.
 
-#### Complete General Syntax (Twilio SMS)
+#### Purposes
+
+- To eliminate manual listener registration in most cases.
+- To reduce boilerplate and configuration.
+- To keep listener registration automatic and consistent.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
+
+**Default discovery**
+
+Laravel automatically scans `app/Listeners`.
+
+**Custom directories (`bootstrap/app.php`)**
+
+```php
+->withEvents(discover: [
+    __DIR__.'/../app/Domain/Orders/Listeners',
+    __DIR__.'/../app/Domain/*/Listeners',
+])
+```
+
+**Caching for production**
 
 ```bash
-# Install the package
-composer require laravel-notification-channels/twilio
+php artisan event:cache
+php artisan event:clear
 ```
+
+**Component Breakdown**
+
+| Command/Config | Purpose |
+|----------------|---------|
+| `withEvents()` | Adds custom discovery paths. |
+| `event:cache` | Caches the listener manifest. |
+| `event:clear` | Clears the cache. |
+
+**Syntax Rules**
+
+- Discovery works by type-hint matching.
+- Listener methods must start with `handle` or `__invoke`.
+- Production deployments should run `event:cache`.
+
+**Constraints and Limitations**
+
+- Discovery adds a small overhead in development; caching mitigates this in production.
+- Complex listener registration (e.g., closures) still requires manual registration.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Custom Discovery Path**
 
 ```php
-// config/services.php
-'twilio' => [
-    'sid'         => env('TWILIO_SID'),
-    'auth_token'  => env('TWILIO_AUTH_TOKEN'),
-    'from'        => env('TWILIO_FROM'),
-],
+// bootstrap/app.php
+->withEvents(discover: [
+    __DIR__.'/../app/Domain/Orders/Listeners',
+])
 ```
 
-```php
-// Notification class
-use NotificationChannels\Twilio\TwilioChannel;
-use NotificationChannels\Twilio\TwilioSmsMessage;
+**Expected Output**
 
-class OrderShipped extends Notification
-{
-    public function via(object $notifiable): array
-    {
-        return [TwilioChannel::class];
-    }
+Laravel scans the custom directory and registers any valid listeners it finds.
 
-    public function toTwilio(object $notifiable): TwilioSmsMessage
-    {
-        return (new TwilioSmsMessage)
-            ->content('Your order #' . $this->order->number . ' has been shipped!');
-    }
-}
-```
+**Why This Output Occurs**
 
-#### Complete General Syntax (Slack)
-
-```bash
-# Install the first-party package
-composer require laravel/slack-notification-channel
-```
-
-```php
-// config/services.php
-'slack' => [
-    'notifications' => [
-        'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-        'channel'              => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
-    ],
-],
-```
-
-```php
-// Notification class
-use Illuminate\Notifications\Messages\SlackMessage;
-
-class DeploymentFailed extends Notification
-{
-    public function via(object $notifiable): array
-    {
-        return ['slack'];
-    }
-
-    public function toSlack(object $notifiable): SlackMessage
-    {
-        return (new SlackMessage)
-            ->error()
-            ->content('Deployment failed!')
-            ->attachment(function ($attachment) {
-                $attachment->title('Error Details')
-                    ->content($this->exception->getMessage())
-                    ->fields([
-                        'Environment' => $this->environment,
-                        'Commit'      => $this->commit,
-                    ]);
-            });
-    }
-}
-```
-
-#### Complete General Syntax (Discord)
-
-```bash
-# Install the community package
-composer require laravel-notification-channels/discord
-```
-
-```php
-// Notification class
-use NotificationChannels\Discord\DiscordChannel;
-use NotificationChannels\Discord\DiscordMessage;
-
-class SystemAlert extends Notification
-{
-    public function via(object $notifiable): array
-    {
-        return [DiscordChannel::class];
-    }
-
-    public function toDiscord(object $notifiable): DiscordMessage
-    {
-        return DiscordMessage::create()
-            ->content('System Alert: ' . $this->message)
-            ->embeds([
-                [
-                    'title'       => 'Severity',
-                    'description' => $this->severity,
-                    'color'       => $this->severity === 'critical' ? 0xFF0000 : 0xFFA500,
-                ],
-            ]);
-    }
-
-    // Routing: define where to send the notification
-    public function routeNotificationForDiscord(object $notifiable)
-    {
-        return $notifiable->discord_channel_id;
-    }
-}
-```
-
-**Component Breakdown:**
-
-- `TwilioChannel::class` — The channel class for Twilio SMS delivery.
-- `TwilioSmsMessage` — The message builder for Twilio SMS content.
-- `'slack'` — The channel alias for the first-party Slack channel.
-- `SlackMessage` — The message builder for Slack messages (supports attachments, fields, error levels).
-- `DiscordChannel::class` — The channel class for Discord delivery.
-- `DiscordMessage` — The message builder for Discord messages (supports embeds).
-- `routeNotificationFor{Channel}()` — Method on the notifiable entity that returns the routing information (phone number, webhook URL, channel ID).
-
-**Syntax Rules:**
-
-- The channel class or alias must be returned from the `via()` method.
-- The message-building method must return the channel-specific message instance (e.g., `TwilioSmsMessage`, `SlackMessage`, `DiscordMessage`).
-- Routing information (phone number, webhook URL, channel ID) is retrieved via the `routeNotificationFor{Channel}()` method on the notifiable entity.
-- Credentials are configured in `config/services.php` and `.env`.
-- For on-demand notifications, use `Notification::route('twilio', $phoneNumber)` instead of a notifiable entity.
-
-**Constraints and Limitations:**
-
-- **Each channel package has its own message API.** The methods available on `SlackMessage` differ from those on `TwilioSmsMessage` or `DiscordMessage`.
-- **Third-party packages may not track Laravel's release cycle.** Check compatibility before upgrading Laravel.
-- **API rate limits apply.** Twilio, Slack, and Discord all impose rate limits; use rate-limiting middleware on queued notifications.
-- **Webhook URLs are secrets.** Store them in `.env` and never commit them to version control.
-- **Discord bot setup requires a bot token and channel ID.** The webhook approach is simpler but less flexible.
-
-### Annotated Code Examples
-
-**Example 1: Twilio SMS Notification with Routing**
-
-```php
-<?php
-// File: app/Notifications/OrderShipped.php
-
-namespace App\Notifications;
-
-use App\Models\Order;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
-use NotificationChannels\Twilio\TwilioChannel;
-use NotificationChannels\Twilio\TwilioSmsMessage;
-
-class OrderShipped extends Notification implements ShouldQueue
-{
-    use Queueable;
-
-    public $tries = 3;
-    public $backoff = [10, 30, 60];
-
-    public function __construct(
-        public Order $order,
-    ) {}
-
-    public function via(object $notifiable): array
-    {
-        return [TwilioChannel::class];
-    }
-
-    public function toTwilio(object $notifiable): TwilioSmsMessage
-    {
-        return (new TwilioSmsMessage)
-            ->content(
-                'Your order #' . $this->order->number .
-                ' has been shipped! Track it here: ' .
-                $this->order->tracking_url
-            );
-    }
-}
-```
-
-```php
-// Notifiable model: routeNotificationForTwilio()
-namespace App\Models;
-
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-
-class User extends Authenticatable
-{
-    use Notifiable;
-
-    public function routeNotificationForTwilio(): string
-    {
-        return $this->phone_number;
-    }
-}
-```
-
-```bash
-# .env
-TWILIO_SID=your-twilio-sid
-TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_FROM=+15551234567
-```
-
-**Expected Output:** An SMS is sent to the user's phone number with the order shipping message. The notification is retried up to 3 times with progressive backoff if Twilio's API fails.
-
-**Why This Output Occurs:** The `via()` method returns the `TwilioChannel` class, instructing Laravel to use the Twilio channel driver. The `toTwilio()` method builds the SMS message. The `routeNotificationForTwilio()` method on the `User` model provides the recipient's phone number. The Twilio package uses the credentials from `config/services.php` to authenticate with the Twilio API.
+`withEvents()` extends the default discovery paths to include domain-specific directories.
 
 ---
 
-**Example 2: Multi-Channel Notification with Slack and Discord**
+#### Real-World Cases with Explanation
+
+**Case 1: Domain-Driven Directory Structure**
+
+A project organises listeners by domain (`app/Domain/Orders/Listeners`, `app/Domain/Users/Listeners`). The `withEvents()` method adds these paths, keeping discovery automatic while respecting the domain structure.
+
+**Explanation**: Discovery can be customised to match any architectural style.
+
+---
+
+### 9. Event Testing
+
+#### Definitions
+
+**Core Definition**
+
+Event testing is the practice of verifying that specific events are dispatched with the correct payload, using Laravel’s `Event::fake()` helper to prevent listeners from executing.
+
+**Technical Definition**
+
+`Event::fake()` swaps the event dispatcher for a fake that records all dispatched events without invoking listeners. Assertions include `assertDispatched()`, `assertDispatchedTimes()`, `assertNotDispatched()`, `assertNothingDispatched()`, and `assertDispatchedOnce()`. A subset of events can be faked by passing class names to `Event::fake([...])`.
+
+**Beginner-Friendly Explanation**
+
+Event testing checks that your code announces the right events without running the listeners.
+
+#### Purposes
+
+- To verify that events are dispatched under the correct conditions.
+- To assert on the event payload without triggering side effects.
+- To isolate the code under test from listener side effects.
+
+#### Syntax Rules and Structure
+
+**Complete General Syntax**
 
 ```php
-<?php
-// File: app/Notifications/DeploymentFailed.php
+use Illuminate\Support\Facades\Event;
+use App\Events\OrderShipped;
 
-namespace App\Notifications;
+Event::fake([OrderShipped::class]);
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\SlackMessage;
-use NotificationChannels\Discord\DiscordChannel;
-use NotificationChannels\Discord\DiscordMessage;
+// ... code that dispatches ...
 
-class DeploymentFailed extends Notification implements ShouldQueue
+Event::assertDispatched(OrderShipped::class, function ($event) use ($order) {
+    return $event->order->id === $order->id;
+});
+
+Event::assertDispatchedTimes(OrderShipped::class, 1);
+Event::assertNotDispatched(OrderCancelled::class);
+```
+
+**Component Breakdown**
+
+| Assertion | Verifies |
+|-----------|----------|
+| `assertDispatched()` | Event was dispatched (with optional closure). |
+| `assertDispatchedTimes()` | Event was dispatched a specific number of times. |
+| `assertNotDispatched()` | Event was not dispatched. |
+| `assertNothingDispatched()` | No events were dispatched. |
+
+**Syntax Rules**
+
+- `Event::fake()` must be called before the code under test.
+- Pass an array of event classes to fake a subset; other events dispatch normally.
+- Assertions are made after the code executes.
+
+**Constraints and Limitations**
+
+- `Event::fake()` prevents all listeners from running, including important side effects.
+- Model events are not faked by `Event::fake()` by default; use `Event::fake([ModelCreated::class])` for model events.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Asserting an Event Was Dispatched**
+
+```php
+test('shipping an order dispatches OrderShipped', function () {
+    Event::fake([OrderShipped::class]);
+
+    $order = Order::factory()->create();
+    $order->ship();
+
+    Event::assertDispatched(OrderShipped::class, function ($event) use ($order) {
+        return $event->order->is($order);
+    });
+});
+```
+
+**Expected Output**
+
+```
+PASS  Tests\Feature\OrderTest
+✓ shipping an order dispatches OrderShipped
+```
+
+**Why This Output Occurs**
+
+`Event::fake()` records the dispatch, and the assertion confirms the correct event and payload.
+
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Controller Event Verification**
+
+A controller dispatches a `UserRegistered` event after registration. A feature test fakes the event, posts to the registration endpoint, and asserts that the event was dispatched with the correct user.
+
+**Explanation**: Event testing verifies the contract between the triggering code and the event system without exercising listeners.
+
+---
+
+### 10. Event Best Practices
+
+#### Definitions
+
+**Core Definition**
+
+Event best practices are the guidelines for designing, dispatching, and handling events to ensure maintainability, performance, and reliability.
+
+#### Key Best Practices
+
+1. **Do Not Rely on Events for Core Logic**: Events are best for side effects (notifications, logging, third-party calls), not for essential application flow. Keep core business logic explicit and independent of event listeners.
+
+2. **Use Events for Multiple Actions**: When one occurrence should trigger multiple independent actions, events are the right tool. For a single action, a direct method call or job is simpler.
+
+3. **Keep Event Classes Immutable**: Use readonly properties or avoid setters to ensure the payload cannot be mutated after dispatch.
+
+4. **Use `SerializesModels` for Queued Listeners**: Always include the `SerializesModels` trait when the event carries Eloquent models, ensuring correct serialization.
+
+5. **Implement `ShouldDispatchAfterCommit` for Transactional Events**: When dispatching inside a database transaction, use `ShouldDispatchAfterCommit` to prevent listeners from acting on rolled-back data.
+
+6. **Queue Side-Effect Listeners**: Listeners that perform slow or unreliable work (emails, API calls) should implement `ShouldQueue` to keep the request fast.
+
+7. **Cache Listener Manifests in Production**: Run `php artisan event:cache` during deployment to eliminate discovery overhead.
+
+8. **Test Event Dispatch**: Use `Event::fake()` to assert that events are dispatched with the correct payload without executing listeners.
+
+9. **Use Subscribers for Related Events**: Group closely related event handlers (e.g., authentication events) into a single subscriber class for cohesion.
+
+10. **Monitor Queued Listener Failures**: Queued listeners can fail; ensure `failed()` methods are defined and that failed jobs are monitored and retried.
+
+#### Multiple Annotated Complete Step by Step Code Examples and Expected Outputs
+
+**Example 1: Best-Practice Event and Listener**
+
+```php
+// Event: immutable, after-commit safe, serializes models
+class OrderShipped implements ShouldDispatchAfterCommit
 {
-    use Queueable;
+    use Dispatchable, SerializesModels;
 
-    public function __construct(
-        public string $environment,
-        public string $commit,
-        public string $errorMessage,
-    ) {}
+    public function __construct(public readonly Order $order) {}
+}
 
-    public function via(object $notifiable): array
+// Listener: queued, handles its own failure
+class SendShipmentNotification implements ShouldQueue
+{
+    public function handle(OrderShipped $event): void
     {
-        return ['slack', DiscordChannel::class];
+        // Send email
     }
 
-    public function toSlack(object $notifiable): SlackMessage
+    public function failed(OrderShipped $event, \Throwable $e): void
     {
-        return (new SlackMessage)
-            ->error()
-            ->content('Deployment failed on ' . $this->environment)
-            ->attachment(function ($attachment) {
-                $attachment->title('Error Details')
-                    ->content($this->errorMessage)
-                    ->fields([
-                        'Environment' => $this->environment,
-                        'Commit'      => substr($this->commit, 0, 7),
-                        'Time'        => now()->toDateTimeString(),
-                    ]);
-            });
-    }
-
-    public function toDiscord(object $notifiable): DiscordMessage
-    {
-        return DiscordMessage::create()
-            ->content('Deployment failed on ' . $this->environment)
-            ->embeds([
-                [
-                    'title'       => 'Error',
-                    'description' => $this->errorMessage,
-                    'color'       => 0xFF0000,
-                    'fields'      => [
-                        ['name' => 'Environment', 'value' => $this->environment, 'inline' => true],
-                        ['name' => 'Commit', 'value' => substr($this->commit, 0, 7), 'inline' => true],
-                    ],
-                ],
-            ]);
-    }
-
-    public function routeNotificationForSlack(object $notifiable)
-    {
-        return config('services.slack.deploy_webhook');
-    }
-
-    public function routeNotificationForDiscord(object $notifiable)
-    {
-        return $notifiable->discord_channel_id;
+        Log::error('Shipment notification failed', ['order' => $event->order->id, 'error' => $e->getMessage()]);
     }
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 
-- A formatted Slack message is posted to the deployment channel with error-level styling and attachment fields.
-- A Discord message with an embed is posted to the configured Discord channel.
+The event is immutable, dispatched only after the transaction commits, and the queued listener sends the email asynchronously with failure logging.
 
-**Why This Output Occurs:** The `via()` method returns both `'slack'` and `DiscordChannel::class`, so both channels are used. The `toSlack()` and `toDiscord()` methods build channel-specific messages with the appropriate formatting. The routing methods provide the destination (Slack webhook URL, Discord channel ID). Each channel package uses its own API client to deliver the message.
+**Why This Output Occurs**
 
-### Real-World Cases
+Each best practice is applied: immutability, after-commit safety, serialization, queuing, and failure handling.
 
-- **E-commerce order alerts:** SMS notifications via Twilio for order confirmations, shipping updates, and delivery confirmations.
-- **DevOps incident management:** Slack notifications for deployment failures, server alerts, and security incidents.
-- **Community platforms:** Discord notifications for new member registrations, moderation alerts, and system status changes.
-- **Customer support:** Telegram notifications for support ticket escalations and SLA breaches.
-- **Internal tooling:** Custom webhook notifications to proprietary internal APIs for workflow automation.
+---
+
+#### Real-World Cases with Explanation
+
+**Case 1: Production Event Architecture**
+
+An e-commerce application dispatches an `OrderPlaced` event inside a transaction. The event implements `ShouldDispatchAfterCommit`. Three listeners handle it: one synchronous listener updates a local cache, and two queued listeners send emails and notify the warehouse API. Listener manifests are cached on deploy, and all queued listeners log failures to a monitoring service.
+
+**Explanation**: Combining transactional safety, queuing, and caching yields a robust, production-grade event system.
 
 ---
 
 ## References
 
-- Laravel Notifications Documentation (Master) — https://laravel.com/framework/docs/master/notifications
-- Laravel Notifications Documentation (Laravel 13.x) — https://laravel.com/docs/13.x/notifications
-- Laravel Notifications Documentation (Laravel 12.x) — https://laravel.com/docs/12.x/notifications
-- Laravel Queues Documentation (Master) — https://laravel.com/framework/docs/master/queues
-- Laravel Horizon Documentation — https://laravel.com/docs/master/horizon
-- Laravel `NotificationSending` Event API — https://api.laravel.com/docs/master/Illuminate/Notifications/Events/NotificationSending.html
-- Laravel `RateLimited` Middleware API — https://api.laravel.com/docs/master/Illuminate/Queue/Middleware/RateLimited.html
-- Laravel `ThrottlesExceptions` Middleware API — https://api.laravel.com/docs/master/Illuminate/Queue/Middleware/ThrottlesExceptions.html
-- Laravel `SendQueuedNotifications` API — https://api.laravel.com/docs/master/Illuminate/Notifications/SendQueuedNotifications.html
-- Laravel `BroadcastMessage` API — https://api.laravel.com/docs/master/Illuminate/Notifications/Messages/BroadcastMessage.html
-- Laravel `SlackMessage` API — https://api.laravel.com/docs/master/Illuminate/Notifications/Messages/SlackMessage.html
-- Laravel Notification Channels Community — https://laravel-notification-channels.com/
-- `scabarcas/laravel-notify-matrix` — https://github.com/scabarcas17/laravel-notify-matrix
-- `xerxes/laravel-rabbitmq-communication` — https://packagist.org/packages/xerxes/laravel-rabbitmq-communication
-- `laravel-notification-channels/twilio` — https://packagist.org/packages/laravel-notification-channels/twilio
-- `laravel-notification-channels/discord` — https://github.com/laravel-notification-channels/discord
-- `laravel/slack-notification-channel` — https://packagist.org/packages/laravel/slack-notification-channel
-- `jamesmills/laravel-notification-rate-limit` — https://packagist.org/packages/jamesmills/laravel-notification-rate-limit
-- `testmonitor/notify-floodgate` — https://packagist.org/packages/testmonitor/notify-floodgate
-- Laravel Horizon Auto-Balancing — https://laravel.com/docs/master/horizon#balance-options
-- Laravel Queue Failover Configuration — https://laravel.com/framework/docs/master/queues#queue-failover
-- Laravel FIFO Queue Notifications — https://laravel.com/framework/docs/master/queues#fifo-listeners-mail-and-notifications
-- Scaling Laravel: Optimizing Queues for High-Volume Email & Notifications — https://www.linkedin.com/pulse/scaling-laravel-optimizing-queues-high-volume-email-ciuculescu
-- Managing API Rate Limits in Laravel Through Job Throttling — https://laravel-news.com/managing-api-rate-limits-in-laravel-through-job-throttling
+- Events — Laravel 12.x Documentation — https://laravel.com/docs/12.x/events
+- Events — Laravel 13.x Documentation — https://laravel.com/framework/docs/13.x/events
+- Events — Laravel 10.x Documentation — https://laravel.com/docs/10.x/events
+- Automatic Event / Listener Discovery — Laravel Blog — https://laravel.com/blog/automatic-event-listener-discovery
+- EventFake API — https://api.laravel.com/docs/12.x/Illuminate/Support/Testing/Fakes/EventFake.html
+- Event Subscribers — Laravel 10.x Documentation — https://laravel.com/docs/10.x/events#event-subscribers
+- Recommendation: where to start with events, observers, listeners — Laracasts — https://laracasts.com/discuss/channels/general-discussion/recommendation-where-to-start-with-events-observers-listeners
+- Event-Driven Architecture Best Practices — https://github.com/turkeryildirim/ai-skills/blob/main/laravel/rules/arch-event-driven.md
+- ShouldDispatchAfterCommit — https://laravel.com/docs/10.x/events#dispatching-events-after-database-transactions
+
+---
+
+**Version Note**: This cheat sheet is based on Laravel 10.x through 13.x documentation. Event discovery, dispatching, listeners, subscribers, and testing have remained stable across these versions. The `ShouldDispatchAfterCommit` interface is available in Laravel 8+. Event discovery is enabled by default in modern Laravel applications; older versions required opt-in via `shouldDiscoverEvents()`. Always consult the documentation for your specific Laravel version.
