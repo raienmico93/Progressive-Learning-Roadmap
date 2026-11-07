@@ -77,7 +77,7 @@ The following four sections cover the requested concepts. Legacy and Stage 3 acc
 
 **General syntax (legacy accessor decorator).**
 
-```
+```ts
 function accessorDecorator(
   target: any,
   propertyKey: string | symbol,
@@ -100,7 +100,7 @@ function accessorDecorator(
 
 **General syntax (Stage 3 getter/setter decorator).**
 
-```
+```ts
 function getterDecorator<This, Value>(
   value: (this: This) => Value,
   context: ClassGetterDecoratorContext<This, Value>
@@ -114,7 +114,7 @@ function getterDecorator<This, Value>(
 
 **General syntax (Stage 3 auto-accessor decorator).**
 
-```
+```ts
 function accessorDecorator<This, Value>(
   value: { get: (this: This) => Value; set: (this: This, v: Value) => void },
   context: ClassAccessorDecoratorContext<This, Value>

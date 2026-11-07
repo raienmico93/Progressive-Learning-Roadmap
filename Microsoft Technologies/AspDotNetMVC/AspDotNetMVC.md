@@ -154,7 +154,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Logging
   - ASP.NET Core best practices
 
-- **7. First ASP.NET MVC Application**
+- [**7. First ASP.NET MVC Application**](/Microsoft%20Technologies/AspDotNetMVC/Basics/FirstApp.md)
   - Project creation
   - Project structure
   - Program.cs
@@ -166,7 +166,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Running the application
   - First application best practices
 
-- **8. Project Structure**
+- [**8. Project Structure**](/Microsoft%20Technologies/AspDotNetMVC/Basics/ProjectStructure.md)
   - Controllers
   - Views
   - Models
@@ -186,7 +186,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # II. Routing
 
-- **9. Routing Fundamentals**
+- [**9. Routing Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Routing/Routing.md)
   - Routing
   - Route matching
   - Route templates
@@ -194,7 +194,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Route constraints
   - Routing best practices
 
-- **10. Conventional Routing**
+- [**10. Conventional Routing**](/Microsoft%20Technologies/AspDotNetMVC/Routing/ConventionalRouting.md)
   - Conventional routing
   - `MapControllerRoute()`
   - Route templates
@@ -202,7 +202,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Route parameters
   - Conventional routing best practices
 
-- **11. Attribute Routing**
+- [**11. Attribute Routing**](/Microsoft%20Technologies/AspDotNetMVC/Routing/AttributeRouting.md)
   - Attribute routing
   - `[Route]`
   - `[HttpGet]`
@@ -214,7 +214,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Route constraints
   - Attribute routing best practices
 
-- **12. Route Parameters**
+- [**12. Route Parameters**](/Microsoft%20Technologies/AspDotNetMVC/Routing/RouteParameters.md)
   - Route parameters
   - `{id}`
   - `{slug}`
@@ -222,7 +222,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Default values
   - Route parameter best practices
 
-- **13. Route Constraints**
+- [**13. Route Constraints**](/Microsoft%20Technologies/AspDotNetMVC/Routing/RouteConstraints.md)
   - Route constraints
   - `int`
   - `bool`
@@ -244,20 +244,20 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Custom constraints
   - Route constraint best practices
 
-- **14. Route Naming**
+- [**14. Route Naming**](/Microsoft%20Technologies/AspDotNetMVC/Routing/RouteNaming.md)
   - Route naming
   - Named routes
   - Route generation
   - Route naming best practices
 
-- **15. Areas**
+- [**15. Areas**](/Microsoft%20Technologies/AspDotNetMVC/Routing/Areas.md)
   - Areas
   - Area registration
   - Area routing
   - Area views
   - Area best practices
 
-- **16. Route Debugging**
+- [**16. Route Debugging**](/Microsoft%20Technologies/AspDotNetMVC/Routing/RouteDebugging.md)
   - Route debugging
   - Route list
   - Route matching
@@ -267,7 +267,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # III. Controllers
 
-- **17. Controller Fundamentals**
+- [**17. Controller Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Controllers/Controller.md)
   - Controllers
   - `Controller`
   - `ControllerBase`
@@ -275,7 +275,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Controller methods
   - Controller best practices
 
-- **18. Action Methods**
+- [**18. Action Methods**](/Microsoft%20Technologies/AspDotNetMVC/Controllers/ActionMethods.md)
   - Action methods
   - Action return types
     - `IActionResult`
@@ -297,7 +297,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Action methods
   - Action method best practices
 
-- **19. Action Parameters**
+- [**19. Action Parameters**](/Microsoft%20Technologies/AspDotNetMVC/Controllers/ActionParams.md)
   - Action parameters
   - Model binding
   - `[FromQuery]`
@@ -308,7 +308,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `[FromServices]`
   - Action parameter best practices
 
-- **20. Action Results**
+- [**20. Action Results**](/Microsoft%20Technologies/AspDotNetMVC/Controllers/ActionResults.md)
   - Action results
   - `View()`
   - `PartialView()`
@@ -326,20 +326,20 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `NoContent()`
   - Action result best practices
 
-- **21. Async Actions**
+- [**21. Async Actions**](/Microsoft%20Technologies/AspDotNetMVC/Controllers/AsyncActions.md)
   - Async actions
   - `async`
   - `await`
   - `Task<IActionResult>`
   - Async action best practices
 
-- **22. Controller Organization**
+- [**22. Controller Organization**](/Microsoft%20Technologies/AspDotNetMVC/Controllers/ControllerOrg.md)
   - Controller organization
   - Controller naming
   - Controller folders
   - Controller best practices
 
-- **23. API Controllers**
+- [**23. API Controllers**](/Microsoft%20Technologies/AspDotNetMVC/Controllers/APIControllers.md)
   - API controllers
   - `[ApiController]`
   - `[Route]`
@@ -349,14 +349,14 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # IV. Views
 
-- **24. View Fundamentals**
+- [**24. View Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Views/View.md)
   - Views
   - View discovery
   - View locations
   - View naming
   - View best practices
 
-- **25. Razor Syntax**
+- [**25. Razor Syntax**](/Microsoft%20Technologies/AspDotNetMVC/Views/Razor.md)
   - Razor
   - Razor syntax
   - `@`
@@ -376,13 +376,13 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `@helper` (legacy)
   - Razor best practices
 
-- **26. View Models**
+- [**26. View Models**](/Microsoft%20Technologies/AspDotNetMVC/Views/ViewModels.md)
   - View models
   - View model creation
   - View model usage
   - View model best practices
 
-- **27. Strongly Typed Views**
+- [**27. Strongly Typed Views**](/Microsoft%20Technologies/AspDotNetMVC/Views/StronglyTypedViews.md)
   - Strongly typed views
   - `@model`
   - Model properties

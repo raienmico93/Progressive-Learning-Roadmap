@@ -89,7 +89,7 @@ type PropertyType = Type["propertyName"];
 
 **Union indexing:**
 
-```
+```ts
 type T = Person["name" | "age"]; // string | number
 ```
 
