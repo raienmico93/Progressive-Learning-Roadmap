@@ -76,7 +76,8 @@ Each concept is elaborated below using a **uniform structure**: Definitions, Pur
 ```csharp
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
 ```
 
 **Component breakdown:**
@@ -131,8 +132,8 @@ public class ProductsController : ControllerBase
 
 **Setup:** Create an ASP.NET Core MVC project (`dotnet new mvc`). Replace `Program.cs` with the following:
 
+`Program.cs`
 ```csharp
-// Program.cs
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews(); // Register MVC services
 
@@ -143,7 +144,8 @@ app.UseRouting(); // 1. Enable routing middleware
 // 2. Define a conventional route
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"
+);
 
 app.UseEndpoints(endpoints => { }); // Not strictly needed in .NET 6+ minimal hosting
 
@@ -322,8 +324,8 @@ For each incoming request:
 
 #### Example 1: Precedence – Literal vs Parameter
 
+`Program.cs`
 ```csharp
-// Program.cs
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 var app = builder.Build();
@@ -335,8 +337,10 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+```
 
-// Controllers/ProductsController.cs
+`Controllers/ProductsController.cs`
+```csharp
 public class ProductsController : Controller
 {
     public IActionResult List() => Content("Product List");

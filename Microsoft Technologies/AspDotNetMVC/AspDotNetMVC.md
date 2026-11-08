@@ -388,7 +388,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Model properties
   - Strongly typed view best practices
 
-- **28. Layouts**
+- [**28. Layouts**](/Microsoft%20Technologies/AspDotNetMVC/Views/Layouts.md)
   - Layouts
   - `_Layout.cshtml`
   - `_ViewStart.cshtml`
@@ -399,7 +399,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `@section`
   - Layout best practices
 
-- **29. Partial Views**
+- [**29. Partial Views**](/Microsoft%20Technologies/AspDotNetMVC/Views/PartialViews.md)
   - Partial views
   - `_PartialView.cshtml`
   - `@Html.Partial()`
@@ -408,7 +408,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `@Html.RenderPartialAsync()`
   - Partial view best practices
 
-- **30. View Components**
+- [**30. View Components**](/Microsoft%20Technologies/AspDotNetMVC/Views/ViewComponents.md)
   - View components
   - `ViewComponent`
   - `Invoke()`
@@ -416,7 +416,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - View component views
   - View component best practices
 
-- **31. Tag Helpers**
+- [**31. Tag Helpers**](/Microsoft%20Technologies/AspDotNetMVC/Views/TagHelpers.md)
   - Tag helpers
   - Built-in tag helpers
     - `asp-action`
@@ -442,7 +442,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `ProcessAsync()`
   - Tag helper best practices
 
-- **32. HTML Helpers**
+- [**32. HTML Helpers**](/Microsoft%20Technologies/AspDotNetMVC/Views/HTMLHelpers.md)
   - HTML helpers
   - `@Html.ActionLink()`
   - `@Html.DisplayFor()`
@@ -466,19 +466,19 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `@Html.Encode()`
   - HTML helper best practices
 
-- **33. View Data**
+- [**33. View Data**](/Microsoft%20Technologies/AspDotNetMVC/Views/ViewData.md)
   - `ViewData`
   - `ViewBag`
   - `TempData`
   - View data best practices
 
-- **34. View Compilation**
+- [**34. View Compilation**](/Microsoft%20Technologies/AspDotNetMVC/Views/ViewCompilation.md)
   - View compilation
   - Runtime compilation
   - Precompiled views
   - View compilation best practices
 
-- **35. Razor Pages**
+- [**35. Razor Pages**](/Microsoft%20Technologies/AspDotNetMVC/Views/RazorPages.md)
   - Razor Pages
   - Page models
   - Handlers
@@ -489,14 +489,14 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # V. Models
 
-- **36. Model Fundamentals**
+- [**36. Model Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Models/Model.md)
   - Models
   - Model creation
   - Model properties
   - Model validation
   - Model best practices
 
-- **37. Data Annotations**
+- [**37. Data Annotations**](/Microsoft%20Technologies/AspDotNetMVC/Models/DataAnnotations.md)
   - Data annotations
   - `[Required]`
   - `[StringLength]`
@@ -523,7 +523,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `[ConcurrencyCheck]`
   - Data annotation best practices
 
-- **38. Validation**
+- [**38. Validation**](/Microsoft%20Technologies/AspDotNetMVC/Models/Validation.md)
   - Validation
   - Server-side validation
   - Client-side validation
@@ -533,7 +533,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `ValidationAttribute`
   - Validation best practices
 
-- **39. Model Binding**
+- [**39. Model Binding**](/Microsoft%20Technologies/AspDotNetMVC/Models/ModelBinding.md)
   - Model binding
   - Simple types
   - Complex types
@@ -543,13 +543,13 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `IModelBinder`
   - Model binding best practices
 
-- **40. Model State**
+- [**40. Model State**](/Microsoft%20Technologies/AspDotNetMVC/Models/ModelState.md)
   - `ModelState`
   - `ModelState.IsValid`
   - Model state errors
   - Model state best practices
 
-- **41. View Models**
+- [**41. View Models**](/Microsoft%20Technologies/AspDotNetMVC/Models/ViewModels.md)
   - View models
   - View model creation
   - View model mapping
@@ -560,7 +560,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # VI. Dependency Injection
 
-- **42. Dependency Injection Fundamentals**
+- [**42. Dependency Injection Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Dependency%20Injection/DI.md)
   - Dependency injection
   - DI
   - DI container
@@ -570,7 +570,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
     - Singleton
   - DI best practices
 
-- **43. Service Registration**
+- [**43. Service Registration**](/Microsoft%20Technologies/AspDotNetMVC/Dependency%20Injection/ServiceReg.md)
   - `IServiceCollection`
   - `AddTransient()`
   - `AddScoped()`
@@ -581,27 +581,27 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `AddDbContext()`
   - Service registration best practices
 
-- **44. Service Resolution**
+- [**44. Service Resolution**](/Microsoft%20Technologies/AspDotNetMVC/Dependency%20Injection/ServiceRes.md)
   - `IServiceProvider`
   - `GetService()`
   - `GetRequiredService()`
   - `[FromServices]`
   - Service resolution best practices
 
-- **45. Constructor Injection**
+- [**45. Constructor Injection**](/Microsoft%20Technologies/AspDotNetMVC/Dependency%20Injection/ConstructorInjection.md)
   - Constructor injection
   - Property injection
   - Method injection
   - Constructor injection best practices
 
-- **46. Service Lifetimes**
+- [**46. Service Lifetimes**](/Microsoft%20Technologies/AspDotNetMVC/Dependency%20Injection/ServiceLifetimes.md)
   - Transient
   - Scoped
   - Singleton
   - Lifetime selection
   - Lifetime best practices
 
-- **47. Advanced DI**
+- [**47. Advanced DI**](/Microsoft%20Technologies/AspDotNetMVC/Dependency%20Injection/AdvancedDI.md)
   - Factory functions
   - Open generics
   - Keyed services
@@ -613,13 +613,13 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # VII. Middleware
 
-- **48. Middleware Fundamentals**
+- [**48. Middleware Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Middleware/Middleware.md)
   - Middleware
   - Middleware pipeline
   - Middleware order
   - Middleware best practices
 
-- **49. Built-in Middleware**
+- [**49. Built-in Middleware**](/Microsoft%20Technologies/AspDotNetMVC/Middleware/BuiltInMiddleware.md)
   - `UseRouting()`
   - `UseEndpoints()`
   - `UseAuthentication()`
@@ -637,7 +637,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `UseWelcomePage()`
   - Built-in middleware best practices
 
-- **50. Custom Middleware**
+- [**50. Custom Middleware**](/Microsoft%20Technologies/AspDotNetMVC/Middleware/CustomMiddleware.md)
   - Custom middleware
   - `IMiddleware`
   - `RequestDelegate`
@@ -646,7 +646,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Middleware extension methods
   - Custom middleware best practices
 
-- **51. Middleware Ordering**
+- [**51. Middleware Ordering**](/Microsoft%20Technologies/AspDotNetMVC/Middleware/MiddlewareOrdering.md)
   - Middleware ordering
   - Order importance
   - Order best practices
@@ -655,7 +655,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # VIII. Filters
 
-- **52. Filter Fundamentals**
+- [**52. Filter Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Filters/Filter.md)
   - Filters
   - Filter types
     - Authorization filters
@@ -665,19 +665,19 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
     - Result filters
   - Filter best practices
 
-- **53. Authorization Filters**
+- [**53. Authorization Filters**](/Microsoft%20Technologies/AspDotNetMVC/Filters/AuthorizationFilters.md)
   - Authorization filters
   - `IAuthorizationFilter`
   - `IAsyncAuthorizationFilter`
   - Authorization filter best practices
 
-- **54. Resource Filters**
+- [**54. Resource Filters**](/Microsoft%20Technologies/AspDotNetMVC/Filters/ResourceFilters.md)
   - Resource filters
   - `IResourceFilter`
   - `IAsyncResourceFilter`
   - Resource filter best practices
 
-- **55. Action Filters**
+- [**55. Action Filters**](/Microsoft%20Technologies/AspDotNetMVC/Filters/ActionFilters.md)
   - Action filters
   - `IActionFilter`
   - `IAsyncActionFilter`
@@ -685,14 +685,14 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `ActionExecutedContext`
   - Action filter best practices
 
-- **56. Exception Filters**
+- [**56. Exception Filters**](/Microsoft%20Technologies/AspDotNetMVC/Filters/ExceptionFilters.md)
   - Exception filters
   - `IExceptionFilter`
   - `IAsyncExceptionFilter`
   - `ExceptionContext`
   - Exception filter best practices
 
-- **57. Result Filters**
+- [**57. Result Filters**](/Microsoft%20Technologies/AspDotNetMVC/Filters/ResultFilters.md)
   - Result filters
   - `IResultFilter`
   - `IAsyncResultFilter`
@@ -700,14 +700,14 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `ResultExecutedContext`
   - Result filter best practices
 
-- **58. Filter Attributes**
+- [**58. Filter Attributes**](/Microsoft%20Technologies/AspDotNetMVC/Filters/FilterAttr.md)
   - Filter attributes
   - `[ServiceFilter]`
   - `[TypeFilter]`
   - `[MiddlewareFilter]`
   - Filter attribute best practices
 
-- **59. Global Filters**
+- [**59. Global Filters**](/Microsoft%20Technologies/AspDotNetMVC/Filters/GlobalFilters.md)
   - Global filters
   - `AddControllers()`
   - `options.Filters.Add()`
@@ -717,28 +717,28 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # IX. Authentication and Authorization
 
-- **60. Authentication Fundamentals**
+- [**60. Authentication Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Authentication%20and%20Authorization/Authentication.md)
   - Authentication
   - Identity
   - Credentials
   - Authentication schemes
   - Authentication best practices
 
-- **61. Cookie Authentication**
+- [**61. Cookie Authentication**](/Microsoft%20Technologies/AspDotNetMVC/Authentication%20and%20Authorization/Cookie.md)
   - Cookie authentication
   - Cookie configuration
   - Login
   - Logout
   - Cookie authentication best practices
 
-- **62. JWT Authentication**
+- [**62. JWT Authentication**](/Microsoft%20Technologies/AspDotNetMVC/Authentication%20and%20Authorization/JWT.md)
   - JWT
   - JWT authentication
   - Access tokens
   - Refresh tokens
   - JWT best practices
 
-- **63. OAuth and OpenID Connect**
+- [**63. OAuth and OpenID Connect**](/Microsoft%20Technologies/AspDotNetMVC/Authentication%20and%20Authorization/OAuthAndOpenID.md)
   - OAuth
   - OAuth2
   - OpenID Connect
@@ -746,7 +746,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - External authentication
   - OAuth best practices
 
-- **64. ASP.NET Core Identity**
+- [**64. ASP.NET Core Identity**](/Microsoft%20Technologies/AspDotNetMVC/Authentication%20and%20Authorization/CoreIndentity.md)
   - ASP.NET Core Identity
   - Identity setup
   - User management
@@ -754,7 +754,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Claims
   - Identity best practices
 
-- **65. Authorization**
+- [**65. Authorization**](/Microsoft%20Technologies/AspDotNetMVC/Authentication%20and%20Authorization/Authorization.md)
   - Authorization
   - `[Authorize]`
   - `[AllowAnonymous]`
@@ -765,14 +765,14 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Handlers
   - Authorization best practices
 
-- **66. Policy-Based Authorization**
+- [**66. Policy-Based Authorization**](/Microsoft%20Technologies/AspDotNetMVC/Authentication%20and%20Authorization/PolicyBasedAuthorization.md)
   - Policy-based authorization
   - Policy creation
   - Policy requirements
   - Policy handlers
   - Policy best practices
 
-- **67. Resource-Based Authorization**
+- [**67. Resource-Based Authorization**](/Microsoft%20Technologies/AspDotNetMVC/Authentication%20and%20Authorization/ResourceBasedAuthorization.md)
   - Resource-based authorization
   - `IAuthorizationService`
   - `AuthorizeAsync()`
@@ -782,13 +782,13 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # X. Databases
 
-- **68. Database Fundamentals**
+- [**68. Database Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Databases/Database.md)
   - Databases
   - Relational databases
   - NoSQL databases
   - Database best practices
 
-- **69. Entity Framework Core**
+- [**69. Entity Framework Core**](/Microsoft%20Technologies/AspDotNetMVC/Databases/EntityFrameworkCore.md)
   - Entity Framework Core
   - EF Core
   - `DbContext`
@@ -808,7 +808,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Performance
   - EF Core best practices
 
-- **70. Database Providers**
+- [**70. Database Providers**](/Microsoft%20Technologies/AspDotNetMVC/Databases/DBProviders.md)
   - SQL Server
   - PostgreSQL
   - MySQL
@@ -817,31 +817,31 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Cosmos DB
   - Database provider best practices
 
-- **71. Repositories**
+- [**71. Repositories**](/Microsoft%20Technologies/AspDotNetMVC/Databases/Repositories.md)
   - Repository pattern
   - Repository interfaces
   - Repository implementations
   - Repository best practices
 
-- **72. Unit of Work**
+- [**72. Unit of Work**](/Microsoft%20Technologies/AspDotNetMVC/Databases/UnitOfWork.md)
   - Unit of Work
   - Unit of Work pattern
   - Unit of Work best practices
 
-- **73. Dapper**
+- [**73. Dapper**](/Microsoft%20Technologies/AspDotNetMVC/Databases/Dapper.md)
   - Dapper
   - Micro-ORM
   - Query execution
   - Mapping
   - Dapper best practices
 
-- **74. Database Migrations**
+- [**74. Database Migrations**](/Microsoft%20Technologies/AspDotNetMVC/Databases/DBMigrations.md)
   - Migrations
   - `Add-Migration`
   - `Update-Database`
   - Migration best practices
 
-- **75. Raw SQL**
+- [**75. Raw SQL**](/Microsoft%20Technologies/AspDotNetMVC/Databases/RawSQL.md)
   - Raw SQL
   - `FromSqlRaw()`
   - `ExecuteSqlRaw()`
@@ -851,27 +851,27 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # XI. Web APIs
 
-- **76. Web API Fundamentals**
+- [**76. Web API Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/WebAPI.md)
   - Web APIs
   - REST
   - RESTful design
   - API controllers
   - Web API best practices
 
-- **77. API Controllers**
+- [**77. API Controllers**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/APIControllers.md)
   - API controllers
   - `[ApiController]`
   - `[Route]`
   - API controller best practices
 
-- **78. API Versioning**
+- [**78. API Versioning**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/APIVersioning.md)
   - API versioning
   - URI versioning
   - Header versioning
   - Query versioning
   - API versioning best practices
 
-- **79. Content Negotiation**
+- [**79. Content Negotiation**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/ContentNegotiation.md)
   - Content negotiation
   - `Accept` header
   - `Content-Type` header
@@ -879,21 +879,21 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - XML
   - Content negotiation best practices
 
-- **80. API Documentation**
+- [**80. API Documentation**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/APIDoc.md)
   - Swagger
   - OpenAPI
   - Swashbuckle
   - NSwag
   - API documentation best practices
 
-- **81. API Security**
+- [**81. API Security**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/APISecurity.md)
   - API security
   - Authentication
   - Authorization
   - Rate limiting
   - API security best practices
 
-- **82. Minimal APIs**
+- [**82. Minimal APIs**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/MinimalAPIs.md)
   - Minimal APIs
   - `MapGet()`
   - `MapPost()`
@@ -901,7 +901,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - `MapDelete()`
   - Minimal API best practices
 
-- **83. gRPC**
+- [**83. gRPC**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/gRPC.md)
   - gRPC
   - Protocol Buffers
   - Services
@@ -909,7 +909,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Streaming
   - gRPC best practices
 
-- **84. SignalR**
+- [**84. SignalR**](/Microsoft%20Technologies/AspDotNetMVC/Web%20APIs/SignalR.md)
   - SignalR
   - Real-time communication
   - Hubs
@@ -921,7 +921,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # XII. Testing
 
-- **85. Testing Fundamentals**
+- *[*85. Testing Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Testing/Testing.md)
   - Testing
   - Test types
     - Unit tests
@@ -931,7 +931,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Test-driven development
   - Testing best practices
 
-- **86. Unit Testing**
+- [**86. Unit Testing**](/Microsoft%20Technologies/AspDotNetMVC/Testing/UnitTesting.md)
   - Unit testing
   - xUnit
   - NUnit
@@ -946,7 +946,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - NSubstitute
   - Unit testing best practices
 
-- **87. Integration Testing**
+- [**87. Integration Testing**](/Microsoft%20Technologies/AspDotNetMVC/Testing/IntegrationTesting.md)
   - Integration testing
   - `WebApplicationFactory<T>`
   - TestServer
@@ -954,13 +954,13 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - API testing
   - Integration testing best practices
 
-- **88. End-to-End Testing**
+- [**88. End-to-End Testing**](/Microsoft%20Technologies/AspDotNetMVC/Testing/EndToEndTesting.md)
   - E2E testing
   - Playwright
   - Selenium
   - E2E testing best practices
 
-- **89. Test Automation**
+- [**89. Test Automation**](/Microsoft%20Technologies/AspDotNetMVC/Testing/TestAutomation.md)
   - CI integration
   - Test pipelines
   - Test reporting
@@ -971,14 +971,14 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # XIII. Performance
 
-- **90. Performance Fundamentals**
+- [**90. Performance Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Performance/Performance.md)
   - Performance
   - Latency
   - Throughput
   - Performance metrics
   - Performance best practices
 
-- **91. Caching**
+- [**91. Caching**](/Microsoft%20Technologies/AspDotNetMVC/Performance/Caching.md)
   - Caching
   - In-memory caching
   - `IMemoryCache`
@@ -989,25 +989,25 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Output caching
   - Caching best practices
 
-- **92. Response Compression**
+- [**92. Response Compression**](/Microsoft%20Technologies/AspDotNetMVC/Performance/ResponseCompression.md)
   - Response compression
   - gzip
   - Brotli
   - Response compression best practices
 
-- **93. Async Programming**
+- [**93. Async Programming**](/Microsoft%20Technologies/AspDotNetMVC/Performance/Async.md)
   - Async programming
   - `async`
   - `await`
   - Async best practices
 
-- **94. Database Performance**
+- [**94. Database Performance**](/Microsoft%20Technologies/AspDotNetMVC/Performance/DBPerformance.md)
   - Query optimization
   - Indexing
   - Connection pooling
   - Database performance best practices
 
-- **95. Profiling**
+- [**95. Profiling**](/Microsoft%20Technologies/AspDotNetMVC/Performance/Profiling.md)
   - Profiling
   - Visual Studio Profiler
   - dotTrace
@@ -1015,7 +1015,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - BenchmarkDotNet
   - Profiling best practices
 
-- **96. Benchmarking**
+- [**96. Benchmarking**](/Microsoft%20Technologies/AspDotNetMVC/Performance/Benchmarking.md)
   - Benchmarking
   - BenchmarkDotNet
   - Benchmarking best practices
@@ -1024,7 +1024,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
 
 # XIV. Security
 
-- **97. Security Fundamentals**
+- [**97. Security Fundamentals**](/Microsoft%20Technologies/AspDotNetMVC/Security/Security.md)
   - Security
   - Threat modeling
   - Attack surface
@@ -1033,7 +1033,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Secure defaults
   - Security best practices
 
-- **98. Common Vulnerabilities**
+- [**98. Common Vulnerabilities**](/Microsoft%20Technologies/AspDotNetMVC/Security/CommonVulnerabilities.md)
   - SQL injection
   - XSS
   - CSRF
@@ -1045,7 +1045,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - OWASP Top 10
   - Security best practices
 
-- **99. Secure Coding**
+- [**99. Secure Coding**](/Microsoft%20Technologies/AspDotNetMVC/Security/SecureCoding.md)
   - Input validation
   - Output encoding
   - Parameterized queries
@@ -1056,21 +1056,21 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Secret management
   - Secure coding best practices
 
-- **100. Data Protection**
+- [**100. Data Protection**](/Microsoft%20Technologies/AspDotNetMVC/Security/DataProtection.md)
   - Data protection
   - `IDataProtector`
   - Encryption
   - Hashing
   - Data protection best practices
 
-- **101. HTTPS**
+- [**101. HTTPS**](/Microsoft%20Technologies/AspDotNetMVC/Security/HTTPS.md)
   - HTTPS
   - TLS
   - Certificates
   - HSTS
   - HTTPS best practices
 
-- **102. Security Headers**
+- [**102. Security Headers**](/Microsoft%20Technologies/AspDotNetMVC/Security/SecurityHeaders.md)
   - Security headers
   - CSP
   - X-Frame-Options
@@ -1079,7 +1079,7 @@ ASP.NET MVC is best learned as more than "a framework for building web pages." T
   - Permissions-Policy
   - Security header best practices
 
-- **103. Dependency Security**
+- [**103. Dependency Security**](/Microsoft%20Technologies/AspDotNetMVC/Security/DependancySecurity.md)
   - NuGet package security
   - `dotnet list package --vulnerable`
   - Dependabot

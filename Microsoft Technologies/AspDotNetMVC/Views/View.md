@@ -115,9 +115,8 @@
 ### Multiple Annotated Complete Step-by-Step Code Examples
 
 #### Example 1: Basic Strongly Typed View
-
+`Views/Products/Details.cshtml`
 ```cshtml
-@* Views/Products/Details.cshtml *@
 @model MyApp.Models.Product
 
 @{
@@ -280,9 +279,8 @@ public IActionResult Index()
 ---
 
 #### Example 2: Custom View Location Expander (Feature Folders)
-
+`Infrastructure/FeatureViewLocationExpander.cs`
 ```csharp
-// Infrastructure/FeatureViewLocationExpander.cs
 public class FeatureViewLocationExpander : IViewLocationExpander
 {
     public void PopulateValues(ViewLocationExpanderContext context)
@@ -292,8 +290,8 @@ public class FeatureViewLocationExpander : IViewLocationExpander
 
     public IEnumerable<string> ExpandViewLocations(
         ViewLocationExpanderContext context,
-        IEnumerable<string> viewLocations)
-    {
+        IEnumerable<string> viewLocations
+    ) {
         // Feature folders: /Features/{Controller}/{View}.cshtml
         yield return "/Features/{1}/{0}.cshtml";
         yield return "/Features/Shared/{0}.cshtml";
@@ -302,8 +300,10 @@ public class FeatureViewLocationExpander : IViewLocationExpander
         foreach (var location in viewLocations) yield return location;
     }
 }
+```
 
-// Program.cs
+`Program.cs`
+```csharp
 builder.Services.Configure<RazorViewEngineOptions>(options =>
 {
     options.ViewLocationExpanders.Add(new FeatureViewLocationExpander());
