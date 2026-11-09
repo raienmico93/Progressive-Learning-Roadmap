@@ -683,7 +683,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Function composition
   - Function best practices
 
-- [**28. Scope and Namespaces**](/Programming%20Languages/Python/Functions/ScoreAndNamespaces.md)
+- [**28. Scope and Namespaces**](/Programming%20Languages/Python/Functions/ScopeAndNamespaces.md)
   - Scope
   - Local scope
   - Enclosing scope
@@ -708,7 +708,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Lambda vs def
   - Lambda best practices
 
-- [**30. Closures**](/Programming%20Languages/Python/Functions/Closures.md)
+- [**30. Closures**](/Programming%20Languages/Python/Functional/Closures.md)
   - Closures
   - Nested functions
   - Free variables
@@ -717,7 +717,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Closure pitfalls
   - Closure examples
 
-- [**31. Decorators**](/Programming%20Languages/Python/Functions/Decorators.md)
+- [**31. Decorators**](/Programming%20Languages/Python/Functional/Decorators.md)
   - Decorators
   - Decorator syntax
   - `@decorator`
@@ -762,7 +762,7 @@ Python is best learned as more than "a scripting language." The progression shou
     - Tower of Hanoi
     - Backtracking
 
-- **33. Functional Programming**
+- [**33. Functional Programming**](/Programming%20Languages/Python/Functional/FunctionalProgramming.md)
   - Functional programming
   - Pure functions
   - Immutability
@@ -779,7 +779,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - `itertools` module
   - Functional programming best practices
 
-- **34. Generators**
+- [**34. Generators**](/Programming%20Languages/Python/Functional/Generators.md)
   - Generators
   - Generator functions
   - `yield` keyword
@@ -796,7 +796,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Generator memory
   - Generator best practices
 
-- **35. Context Managers**
+- [**35. Context Managers**](/Programming%20Languages/Python/Functions/ContextManagers.md)
   - Context managers
   - `with` statement
   - `__enter__`
