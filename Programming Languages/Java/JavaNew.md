@@ -483,7 +483,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
 
 # IV. Control Flow
 
-- **20. Conditional Statements**
+- [**20. Conditional Statements**](/Programming%20Languages/Java/Basics/ConditionalStatements.md)
   - `if`
   - `else if`
   - `else`

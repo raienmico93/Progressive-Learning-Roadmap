@@ -182,7 +182,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
     - `#nullable`
     - `#pragma`
 
-- **5. First Program**
+- [**5. First Program**](/Programming%20Languages/CSharp/Basics/FirstProgram.md)
   - Hello World
   - `Console.WriteLine()`
   - `Console.ReadLine()`
@@ -197,7 +197,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # II. Variables and Data Types
 
-- **6. Variables**
+- [**6. Variables**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/Variables.md)
   - Variables
   - Variable declaration
   - Variable initialization
@@ -213,7 +213,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Variable naming
   - Variable best practices
 
-- **7. Value Types**
+- [**7. Value Types**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/ValueTypes.md)
   - Value types
   - Stack allocation
   - Built-in value types
@@ -242,7 +242,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Boxing performance
   - Value type best practices
 
-- **8. Reference Types**
+- [**8. Reference Types**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/ReferenceTypes.md)
   - Reference types
   - Heap allocation
   - `class`
@@ -260,7 +260,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `==`
   - Reference type best practices
 
-- **9. Strings**
+- [**9. Strings**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/Strings.md)
   - String
   - String immutability
   - String literals
@@ -303,7 +303,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - UTF-8
   - Encoding
 
-- **10. Nullable Types**
+- [**10. Nullable Types**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/NullableTypes.md)
   - Nullable value types
   - `int?`
   - `Nullable<T>`
@@ -324,7 +324,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `?[]`
   - Nullable best practices
 
-- **11. Arrays**
+- [**11. Arrays**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/Arrays.md)
   - Arrays
   - Array declaration
   - Array initialization
@@ -346,7 +346,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Array performance
   - Array best practices
 
-- **12. Collections**
+- [**12. Collections**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/Collections.md)
   - Collection types
   - `List<T>`
   - `Dictionary<TKey, TValue>`
@@ -375,7 +375,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Collection expressions (C# 12)
   - Collection best practices
 
-- **13. Enums**
+- [**13. Enums**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/Enums.md)
   - Enums
   - Enum declaration
   - Enum values
@@ -391,7 +391,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Flag enums
   - Enum best practices
 
-- **14. Type Conversion**
+- [**14. Type Conversion**](/Programming%20Languages/CSharp/Variables%20and%20Data%20Types/TypeConversion.md)
   - Implicit conversion
   - Explicit conversion
   - Casting
@@ -409,7 +409,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # III. Operators
 
-- **15. Arithmetic Operators**
+- [**15. Arithmetic Operators**](/Programming%20Languages/CSharp/Operators/Arithmetic.md)
   - `+`
   - `-`
   - `*`
@@ -422,7 +422,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Operator precedence
   - Operator associativity
 
-- **16. Assignment Operators**
+- [**16. Assignment Operators**](/Programming%20Languages/CSharp/Operators/Assignment.md)
   - `=`
   - `+=`
   - `-=`
@@ -438,7 +438,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Chained assignment
   - Compound assignment
 
-- **17. Comparison Operators**
+- [**17. Comparison Operators**](/Programming%20Languages/CSharp/Operators/Comparison.md)
   - `==`
   - `!=`
   - `<`
@@ -452,7 +452,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `sizeof`
   - Comparison best practices
 
-- **18. Logical Operators**
+- [**18. Logical Operators**](/Programming%20Languages/CSharp/Operators/Logical.md)
   - `&&`
   - `||`
   - `!`
@@ -460,7 +460,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Logical vs bitwise
   - Boolean operators
 
-- **19. Bitwise Operators**
+- [**19. Bitwise Operators**](/Programming%20Languages/CSharp/Operators/Bitwise.md)
   - `&`
   - `|`
   - `^`
@@ -475,7 +475,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `BinaryPrimitives`
   - Bitwise best practices
 
-- **20. Member Access Operators**
+- [**20. Member Access Operators**](/Programming%20Languages/CSharp/Operators/MemberAccess.md)
   - `.`
   - `->`
   - `?.`
@@ -485,7 +485,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `~`
   - Member access best practices
 
-- **21. Other Operators**
+- [**21. Other Operators**](/Programming%20Languages/CSharp/Operators/Other.md)
   - `?:` (ternary)
   - `??` (null-coalescing)
   - `??=` (null-coalescing assignment)
@@ -498,7 +498,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Operator overloading
   - Operator best practices
 
-- **22. Operator Overloading**
+- [**22. Operator Overloading**](/Programming%20Languages/CSharp/Operators/Overloading.md)
   - Operator overloading
   - Overloadable operators
   - Non-overloadable operators
@@ -513,7 +513,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # IV. Control Flow
 
-- **23. Conditional Statements**
+- [**23. Conditional Statements**](/Programming%20Languages/CSharp/Control%20Flow/Conditionals.md)
   - `if`
   - `else if`
   - `else`
@@ -525,7 +525,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `when` clause
   - Conditional best practices
 
-- **24. Switch Statements**
+- [**24. Switch Statements**](/Programming%20Languages/CSharp/Control%20Flow/Switch.md)
   - `switch`
   - `case`
   - `break`
@@ -543,7 +543,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - List patterns (C# 11)
   - Switch best practices
 
-- **25. Loops**
+- [**25. Loops**](/Programming%20Languages/CSharp/Control%20Flow/Loops.md)
   - `for`
   - `foreach`
   - `while`
@@ -557,7 +557,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Loop performance
   - Loop best practices
 
-- **26. Pattern Matching**
+- [**26. Pattern Matching**](/Programming%20Languages/CSharp/Control%20Flow/PatternMatching.md)
   - Pattern matching
   - `is` pattern
   - Type patterns
@@ -575,7 +575,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # V. Methods
 
-- **27. Method Fundamentals**
+- [**27. Method Fundamentals**](/Programming%20Languages/CSharp/Methods/Method.md)
   - Methods
   - Method declaration
   - Method signature
@@ -597,7 +597,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Expression-bodied methods
   - Method best practices
 
-- **28. Parameter Passing**
+- [**28. Parameter Passing**](/Programming%20Languages/CSharp/Methods/Parameter.md)
   - Value parameters
   - Reference parameters
   - `ref`
@@ -609,14 +609,14 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Default values
   - Parameter best practices
 
-- **29. Method Overloading**
+- [**29. Method Overloading**](/Programming%20Languages/CSharp/Methods/MethodOverloading.md)
   - Method overloading
   - Overloading rules
   - Overload resolution
   - Ambiguity
   - Overloading best practices
 
-- **30. Extension Methods**
+- [**30. Extension Methods**](/Programming%20Languages/CSharp/Methods/ExtensionMethods.md)
   - Extension methods
   - `static` class
   - `this` parameter
@@ -624,7 +624,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Extension method best practices
   - LINQ as extension methods
 
-- **31. Local Functions**
+- [**31. Local Functions**](/Programming%20Languages/CSharp/Methods/Local.md)
   - Local functions
   - Local function declaration
   - Local function access
@@ -632,7 +632,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Local function vs lambda
   - Local function best practices
 
-- **32. Expression-Bodied Members**
+- [**32. Expression-Bodied Members**](/Programming%20Languages/CSharp/Methods/ExtensionMethods.md)
   - Expression-bodied methods
   - Expression-bodied properties
   - Expression-bodied constructors
@@ -641,7 +641,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `=>` syntax
   - Expression-bodied best practices
 
-- **33. Recursion**
+- [**33. Recursion**](/Programming%20Languages/CSharp/Methods/Recursion.md)
   - Recursion
   - Base case
   - Recursive case
@@ -655,7 +655,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # VI. Object-Oriented Programming
 
-- **34. Classes and Objects**
+- [**34. Classes and Objects**](/Programming%20Languages/CSharp/OOP/Classes.md)
   - Classes
   - Objects
   - Instances
@@ -679,7 +679,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `ToString()`
   - Object best practices
 
-- **35. Properties**
+- [**35. Properties**](/Programming%20Languages/CSharp/OOP/Properties.md)
   - Properties
   - Auto-implemented properties
   - Property getters
@@ -694,7 +694,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Indexers
   - Property best practices
 
-- **36. Constructors**
+- [**36. Constructors**](/Programming%20Languages/CSharp/OOP/Constructors.md)
   - Constructors
   - Default constructor
   - Parameterized constructor
@@ -709,7 +709,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Object initializers
   - Constructor best practices
 
-- **37. Inheritance**
+- [**37. Inheritance**](/Programming%20Languages/CSharp/OOP/Inheritance.md)
   - Inheritance
   - `:`
   - Base class
@@ -724,7 +724,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Inheritance best practices
   - Composition over inheritance
 
-- **38. Polymorphism**
+- [**38. Polymorphism**](/Programming%20Languages/CSharp/OOP/Polymorphism.md)
   - Polymorphism
   - Compile-time polymorphism
   - Runtime polymorphism
@@ -734,7 +734,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Interface implementation
   - Polymorphism best practices
 
-- **39. Interfaces**
+- [**39. Interfaces**](/Programming%20Languages/CSharp/OOP/Interfaces.md)
   - Interfaces
   - `interface` keyword
   - Interface declaration
@@ -747,7 +747,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Interface best practices
   - Interface vs abstract class
 
-- **40. Abstract Classes**
+- [**40. Abstract Classes**](/Programming%20Languages/CSharp/OOP/AbstractClasses.md)
   - Abstract classes
   - `abstract` keyword
   - Abstract methods
@@ -756,7 +756,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Abstract class vs interface
   - Abstract class best practices
 
-- **41. Records**
+- [**41. Records**](/Programming%20Languages/CSharp/OOP/Records.md)
   - Records (C# 9)
   - Record declaration
   - Record structs (C# 10)
@@ -767,7 +767,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Record inheritance
   - Record best practices
 
-- **42. Structs**
+- [**42. Structs**](/Programming%20Languages/CSharp/OOP/Structs.md)
   - Structs
   - `struct` keyword
   - Value semantics
@@ -778,7 +778,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Struct best practices
   - Struct vs class
 
-- **43. Enums**
+- [**43. Enums**](/Programming%20Languages/CSharp/OOP/Enums.md)
   - Enums
   - Enum declaration
   - Enum values
@@ -787,7 +787,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Enum methods
   - Enum best practices
 
-- **44. Static Members**
+- [**44. Static Members**](/Programming%20Languages/CSharp/OOP/StaticMembers.md)
   - Static classes
   - Static methods
   - Static fields
@@ -795,27 +795,27 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Static constructors
   - Static members best practices
 
-- **45. Nested Classes**
+- [**45. Nested Classes**](/Programming%20Languages/CSharp/OOP/NestedClasses.md)
   - Nested classes
   - Inner classes
   - Nested class access
   - Nested class scope
   - Nested class best practices
 
-- **46. Partial Classes**
+- [**46. Partial Classes**](/Programming%20Languages/CSharp/OOP/PartialClasses.md)
   - Partial classes
   - `partial` keyword
   - Partial methods
   - Partial class best practices
   - Source generators
 
-- **47. Sealed Classes**
+- [**47. Sealed Classes**](/Programming%20Languages/CSharp/OOP/SealedClasses.md)
   - Sealed classes
   - `sealed` keyword
   - Sealed methods
   - Sealed best practices
 
-- **48. Object Initializers**
+- [**48. Object Initializers**](/Programming%20Languages/CSharp/OOP/ObjectInitializers.md)
   - Object initializers
   - Collection initializers
   - Index initializers
@@ -823,14 +823,14 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `new` with initializers
   - Object initializer best practices
 
-- **49. Anonymous Types**
+- [**49. Anonymous Types**](/Programming%20Languages/CSharp/OOP/AnonymousTypes.md)
   - Anonymous types
   - `new { }`
   - Anonymous type properties
   - Anonymous type limitations
   - Anonymous type best practices
 
-- **50. Tuples**
+- [**50. Tuples**](/Programming%20Languages/CSharp/OOP/Tuples.md)
   - Tuples
   - `ValueTuple`
   - Tuple deconstruction
@@ -842,7 +842,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # VII. Generics
 
-- **51. Generics Fundamentals**
+- [**51. Generics Fundamentals**](/Programming%20Languages/CSharp/Generics/Generic.md)
   - Generics
   - Generic classes
   - Generic interfaces
@@ -854,7 +854,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `where` clause
   - Generic best practices
 
-- **52. Generic Constraints**
+- [**52. Generic Constraints**](/Programming%20Languages/CSharp/Generics/Constraints.md)
   - Reference type constraint
   - `class`
   - Value type constraint
@@ -871,7 +871,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Multiple constraints
   - Constraint best practices
 
-- **53. Generic Collections**
+- [**53. Generic Collections**](/Programming%20Languages/CSharp/Generics/Collections.md)
   - `List<T>`
   - `Dictionary<TKey, TValue>`
   - `HashSet<T>`
@@ -880,14 +880,14 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `LinkedList<T>`
   - Generic collection best practices
 
-- **54. Generic Methods**
+- [**54. Generic Methods**](/Programming%20Languages/CSharp/Generics/Methods.md)
   - Generic method declaration
   - Type inference
   - Generic method invocation
   - Generic method constraints
   - Generic method best practices
 
-- **55. Covariance and Contravariance**
+- [**55. Covariance and Contravariance**](/Programming%20Languages/CSharp/Generics/CovarianceAndContravariance.md)
   - Covariance
   - `out`
   - Contravariance
@@ -896,7 +896,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Variance in delegates
   - Variance best practices
 
-- **56. Advanced Generics**
+- [**56. Advanced Generics**](/Programming%20Languages/CSharp/Generics/Advanced.md)
   - Generic type constraints
   - Generic delegates
   - `Func<T>`
@@ -911,7 +911,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # VIII. Delegates, Events, and Lambdas
 
-- **57. Delegates**
+- [**57. Delegates**](/Programming%20Languages/CSharp/Miscellaneous/Delegates.md)
   - Delegates
   - Delegate declaration
   - Delegate instantiation
@@ -923,7 +923,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `MulticastDelegate` class
   - Delegate best practices
 
-- **58. Built-in Delegates**
+- [**58. Built-in Delegates**](/Programming%20Languages/CSharp/Miscellaneous/BuiltInDelegates.md)
   - `Action`
   - `Action<T>`
   - `Func<TResult>`

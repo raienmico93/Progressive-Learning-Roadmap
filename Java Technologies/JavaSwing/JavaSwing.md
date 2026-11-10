@@ -791,7 +791,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - Vertical gap
   - GridLayout best practices
 
-- **48. GridBagLayout**
+- [**48. GridBagLayout**](/Java%20Technologies/JavaSwing/Layout/GridBagLayout.md)
   - `GridBagLayout`
   - Grid bag layout creation
   - `GridBagConstraints`
@@ -841,7 +841,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `VERTICAL`
   - GridBagLayout best practices
 
-- **49. CardLayout**
+- [**49. CardLayout**](/Java%20Technologies/JavaSwing/Layout/CardLayout.md)
   - `CardLayout`
   - Card layout creation
   - Card layout methods
@@ -852,7 +852,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `show()`
   - CardLayout best practices
 
-- **50. BoxLayout**
+- [**50. BoxLayout**](/Java%20Technologies/JavaSwing/Layout/BoxLayout.md)
   - `BoxLayout`
   - Box layout creation
   - Box layout properties
@@ -865,13 +865,13 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - `Box` class
   - Box layout best practices
 
-- **51. SpringLayout**
+- [**51. SpringLayout**](/Java%20Technologies/JavaSwing/Layout/SpringLayout.md)
   - `SpringLayout`
   - Spring layout creation
   - Spring layout constraints
   - Spring layout best practices
 
-- **52. GroupLayout**
+- [**52. GroupLayout**](/Java%20Technologies/JavaSwing/Layout/GroupLayout.md)
   - `GroupLayout`
   - Group layout creation
   - Group layout groups
@@ -879,7 +879,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - Parallel
   - GroupLayout best practices
 
-- **53. Custom Layout Managers**
+- [**53. Custom Layout Managers**](/Java%20Technologies/JavaSwing/Layout/CustomLayoutManagers.md)
   - Custom layout managers
   - `LayoutManager`
   - `LayoutManager2`
@@ -889,7 +889,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
 
 # V. Events
 
-- **54. Event Handling Fundamentals**
+- [**54. Event Handling Fundamentals**](/Java%20Technologies/JavaSwing/Events/EventHandling.md)
   - Events
   - Event handling
   - Event listeners
@@ -897,7 +897,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - Event dispatch thread
   - Event handling best practices
 
-- **55. Event Dispatch Thread**
+- [**55. Event Dispatch Thread**](/Java%20Technologies/JavaSwing/Events/EventDispatch.md)
   - Event dispatch thread
   - EDT
   - `SwingUtilities.invokeLater()`
@@ -906,13 +906,13 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - Thread safety
   - EDT best practices
 
-- **56. ActionListener**
+- [**56. ActionListener**](/Java%20Technologies/JavaSwing/Events/ActionListener.md)
   - `ActionListener`
   - `actionPerformed()`
   - `ActionEvent`
   - Action listener best practices
 
-- **57. MouseListener**
+- [**57. MouseListener**](/Java%20Technologies/JavaSwing/Events/MouseListener.md)
   - `MouseListener`
   - `MouseAdapter`
   - Mouse events
@@ -923,7 +923,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `mouseExited()`
   - Mouse listener best practices
 
-- **58. MouseMotionListener**
+- [**58. MouseMotionListener**](/Java%20Technologies/JavaSwing/Events/MouseMotionListener.md)
   - `MouseMotionListener`
   - `MouseMotionAdapter`
   - Mouse motion events
@@ -931,7 +931,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `mouseMoved()`
   - Mouse motion best practices
 
-- **59. KeyListener**
+- [**59. KeyListener**](/Java%20Technologies/JavaSwing/Events/KeyListener.md)
   - `KeyListener`
   - `KeyAdapter`
   - Key events
@@ -940,7 +940,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `keyReleased()`
   - Key listener best practices
 
-- **60. FocusListener**
+- [**60. FocusListener**](/Java%20Technologies/JavaSwing/Events/FocusListener.md)
   - `FocusListener`
   - `FocusAdapter`
   - Focus events
@@ -948,13 +948,13 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `focusLost()`
   - Focus listener best practices
 
-- **61. WindowListener**
+- [**61. WindowListener**](/Java%20Technologies/JavaSwing/Events/WindowListener.md)
   - `WindowListener`
   - `WindowAdapter`
   - Window events
   - Window listener best practices
 
-- **62. ComponentListener**
+- [**62. ComponentListener**](/Java%20Technologies/JavaSwing/Events/ComponentListener.md)
   - `ComponentListener`
   - `ComponentAdapter`
   - Component events
@@ -964,7 +964,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `componentHidden()`
   - Component listener best practices
 
-- **63. ContainerListener**
+- [**63. ContainerListener**](/Java%20Technologies/JavaSwing/Events/ContainerListener.md)
   - `ContainerListener`
   - `ContainerAdapter`
   - Container events
@@ -972,25 +972,25 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `componentRemoved()`
   - Container listener best practices
 
-- **64. ItemListener**
+- [**64. ItemListener**](/Java%20Technologies/JavaSwing/Events/ItemListener.md)
   - `ItemListener`
   - `itemStateChanged()`
   - `ItemEvent`
   - Item listener best practices
 
-- **65. ListSelectionListener**
+- [**65. ListSelectionListener**](/Java%20Technologies/JavaSwing/Events/ListSelectionListener.md)
   - `ListSelectionListener`
   - `valueChanged()`
   - `ListSelectionEvent`
   - List selection best practices
 
-- **66. ChangeListener**
+- [**66. ChangeListener**](/Java%20Technologies/JavaSwing/Events/ChangeListener.md)
   - `ChangeListener`
   - `stateChanged()`
   - `ChangeEvent`
   - Change listener best practices
 
-- **67. DocumentListener**
+- [**67. DocumentListener**](/Java%20Technologies/JavaSwing/Events/DocumentListener.md)
   - `DocumentListener`
   - Document events
     - `insertUpdate()`
@@ -998,19 +998,19 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `changedUpdate()`
   - Document listener best practices
 
-- **68. TableModelListener**
+- [**68. TableModelListener**](/Java%20Technologies/JavaSwing/Events/TableModelListener.md)
   - `TableModelListener`
   - `tableChanged()`
   - `TableModelEvent`
   - Table model listener best practices
 
-- **69. TreeSelectionListener**
+- [**69. TreeSelectionListener**](/Java%20Technologies/JavaSwing/Events/TreeSelectionListener.md)
   - `TreeSelectionListener`
   - `valueChanged()`
   - `TreeSelectionEvent`
   - Tree selection listener best practices
 
-- **70. TreeModelListener**
+- [**70. TreeModelListener**](/Java%20Technologies/JavaSwing/Events/TreeModelListener.md)
   - `TreeModelListener`
   - Tree model events
     - `treeNodesChanged()`
@@ -1019,7 +1019,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `treeStructureChanged()`
   - Tree model listener best practices
 
-- **71. Action Class**
+- [**71. Action Class**](/Java%20Technologies/JavaSwing/Events/ActionClass.md)
   - `Action`
   - `AbstractAction`
   - Action properties
@@ -1035,7 +1035,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - Action methods
   - Action best practices
 
-- **72. InputMap and ActionMap**
+- [**72. InputMap and ActionMap**](/Java%20Technologies/JavaSwing/Events/InputMapAndActionMap.md)
   - `InputMap`
   - `ActionMap`
   - Key bindings
@@ -1046,43 +1046,43 @@ Java Swing is best learned as more than "a library for making windows." The prog
 
 # VI. Models
 
-- **73. Model Fundamentals**
+- [**73. Model Fundamentals**](/Java%20Technologies/JavaSwing/Models/Model.md)
   - Models
   - MVC pattern
   - Model types
   - Model best practices
 
-- **74. ButtonModel**
+- [**74. ButtonModel**](/Java%20Technologies/JavaSwing/Models/ButtonModel.md)
   - `ButtonModel`
   - Button model methods
   - Button model best practices
 
-- **75. ComboBoxModel**
+- [**75. ComboBoxModel**](/Java%20Technologies/JavaSwing/Models/ComboBoxModel.md)
   - `ComboBoxModel`
   - `DefaultComboBoxModel`
   - ComboBox model methods
   - ComboBox model best practices
 
-- **76. ListModel**
+- [**76. ListModel**](/Java%20Technologies/JavaSwing/Models/ListModel.md)
   - `ListModel`
   - `DefaultListModel`
   - `AbstractListModel`
   - List model methods
   - List model best practices
 
-- **77. SpinnerModel**
+- [**77. SpinnerModel**](/Java%20Technologies/JavaSwing/Models/SpinnerModel.md)
   - `SpinnerModel`
   - `SpinnerNumberModel`
   - `SpinnerListModel`
   - `SpinnerDateModel`
   - Spinner model best practices
 
-- **78. BoundedRangeModel**
+- [**78. BoundedRangeModel**](/Java%20Technologies/JavaSwing/Models/BoundedRangeModel.md)
   - `BoundedRangeModel`
   - `DefaultBoundedRangeModel`
   - Bounded range model best practices
 
-- **79. TableModel**
+- [**79. TableModel**](/Java%20Technologies/JavaSwing/Models/TableModel.md)
   - `TableModel`
   - `AbstractTableModel`
   - `DefaultTableModel`
@@ -1096,7 +1096,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `isCellEditable()`
   - Table model best practices
 
-- **80. TreeModel**
+- [**80. TreeModel**](/Java%20Technologies/JavaSwing/Models/TreeModel.md)
   - `TreeModel`
   - `DefaultTreeModel`
   - Tree model methods
@@ -1108,7 +1108,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `valueForPathChanged()`
   - Tree model best practices
 
-- **81. Document**
+- [**81. Document**](/Java%20Technologies/JavaSwing/Models/Document.md)
   - `Document`
   - `AbstractDocument`
   - `PlainDocument`
@@ -1120,7 +1120,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `getLength()`
   - Document best practices
 
-- **82. Custom Models**
+- [**82. Custom Models**](/Java%20Technologies/JavaSwing/Models/CustomModels.md)
   - Custom models
   - Model implementation
   - Model best practices
@@ -1129,7 +1129,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
 
 # VII. Custom Painting
 
-- **83. Custom Painting Fundamentals**
+- [**83. Custom Painting Fundamentals**](/Java%20Technologies/JavaSwing/Custom%20Painting/CustomPainting.md)
   - Custom painting
   - `paintComponent()`
   - `paint()`
@@ -1137,7 +1137,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - `paintChildren()`
   - Custom painting best practices
 
-- **84. Graphics**
+- [**84. Graphics**](/Java%20Technologies/JavaSwing/Custom%20Painting/Graphics.md)
   - `Graphics`
   - `Graphics2D`
   - Graphics methods
@@ -1162,7 +1162,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - `setRenderingHint()`
   - Graphics best practices
 
-- **85. Graphics2D**
+- [**85. Graphics2D**](/Java%20Technologies/JavaSwing/Custom%20Painting/Graphics2D.md)
   - `Graphics2D`
   - Graphics2D methods
   - Rendering hints
@@ -1170,7 +1170,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - Transformations
   - Graphics2D best practices
 
-- **86. Shapes**
+- [**86. Shapes**](/Java%20Technologies/JavaSwing/Custom%20Painting/Shapes.md)
   - `Shape`
   - `Line2D`
   - `Rectangle2D`
@@ -1183,7 +1183,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - `Path2D`
   - Shape best practices
 
-- **87. Strokes**
+- [**87. Strokes**](/Java%20Technologies/JavaSwing/Custom%20Painting/Strokes.md)
   - `Stroke`
   - `BasicStroke`
   - Stroke properties
@@ -1194,7 +1194,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
     - Dash
   - Stroke best practices
 
-- **88. Paints**
+- [**88. Paints**](/Java%20Technologies/JavaSwing/Custom%20Painting/Paints.md)
   - `Paint`
   - `Color`
   - `GradientPaint`
@@ -1203,7 +1203,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - `TexturePaint`
   - Paint best practices
 
-- **89. Fonts**
+- [**89. Fonts**](/Java%20Technologies/JavaSwing/Custom%20Painting/Fonts.md)
   - `Font`
   - Font properties
     - Name
@@ -1212,7 +1212,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - Font methods
   - Font best practices
 
-- **90. Images**
+- [**90. Images**](/Java%20Technologies/JavaSwing/Custom%20Painting/Images.md)
   - `Image`
   - `BufferedImage`
   - Image loading
@@ -1220,7 +1220,7 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - Image manipulation
   - Image best practices
 
-- **91. Text Rendering**
+- [**91. Text Rendering**](/Java%20Technologies/JavaSwing/Custom%20Painting/TextRendering.md)
   - Text rendering
   - `TextLayout`
   - `FontRenderContext`
@@ -1231,13 +1231,13 @@ Java Swing is best learned as more than "a library for making windows." The prog
 
 # VIII. Look and Feel
 
-- **92. Look and Feel Fundamentals**
+- [**92. Look and Feel Fundamentals**](/Java%20Technologies/JavaSwing/Look%20and%20Feel/LookAndFeel.md)
   - Look and feel
   - L&F
   - Pluggable look and feel
   - Look and feel best practices
 
-- **93. Built-in Look and Feels**
+- [**93. Built-in Look and Feels**](/Java%20Technologies/JavaSwing/Look%20and%20Feel/BuiltInLooksAndFeels.md)
   - Metal
   - Nimbus
   - Motif
@@ -1249,20 +1249,20 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - System
   - Built-in L&F best practices
 
-- **94. Setting Look and Feel**
+- [**94. Setting Look and Feel**](/Java%20Technologies/JavaSwing/Look%20and%20Feel/SettingLooksAndFeels.md)
   - `UIManager.setLookAndFeel()`
   - `UIManager.getInstalledLookAndFeels()`
   - `UIManager.getSystemLookAndFeelClassName()`
   - `UIManager.getCrossPlatformLookAndFeelClassName()`
   - Setting L&F best practices
 
-- **95. Custom Look and Feel**
+- [**95. Custom Look and Feel**](/Java%20Technologies/JavaSwing/Look%20and%20Feel/CustomLookAndFeel.md)
   - Custom L&F
   - `LookAndFeel`
   - `BasicLookAndFeel`
   - Custom L&F best practices
 
-- **96. UI Defaults**
+- [**96. UI Defaults**](/Java%20Technologies/JavaSwing/Look%20and%20Feel/UIDefaults.md)
   - `UIManager`
   - `UIManager.getDefaults()`
   - `UIManager.put()`
@@ -1271,20 +1271,20 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - `UIManager.getIcon()`
   - UI defaults best practices
 
-- **97. UI Delegates**
+- [**97. UI Delegates**](/Java%20Technologies/JavaSwing/Look%20and%20Feel/UIDelegates.md)
   - UI delegates
   - `ComponentUI`
   - `BasicButtonUI`
   - `BasicLabelUI`
   - UI delegate best practices
 
-- **98. Synth**
+- [**98. Synth**](/Java%20Technologies/JavaSwing/Look%20and%20Feel/Synth.md)
   - Synth
   - Synth L&F
   - Synth XML
   - Synth best practices
 
-- **99. Nimbus**
+- [**99. Nimbus**](/Java%20Technologies/JavaSwing/Look%20and%20Feel/Nimbus.md)
   - Nimbus
   - Nimbus L&F
   - Nimbus customization
@@ -1294,13 +1294,13 @@ Java Swing is best learned as more than "a library for making windows." The prog
 
 # IX. Borders
 
-- **100. Border Fundamentals**
+- [**100. Border Fundamentals**](/Java%20Technologies/JavaSwing/Borders/Border.md)
   - Borders
   - `Border`
   - Border types
   - Border best practices
 
-- **101. Built-in Borders**
+- [**101. Built-in Borders**](/Java%20Technologies/JavaSwing/Borders/BuiltInBorders.md)
   - `LineBorder`
   - `EtchedBorder`
   - `BevelBorder`
@@ -1311,12 +1311,12 @@ Java Swing is best learned as more than "a library for making windows." The prog
   - `CompoundBorder`
   - Built-in border best practices
 
-- **102. Custom Borders**
+- [**102. Custom Borders**](/Java%20Technologies/JavaSwing/Borders/CustomBorders.md)
   - Custom borders
   - `AbstractBorder`
   - Custom border best practices
 
-- **103. BorderFactory**
+- [**103. BorderFactory**](/Java%20Technologies/JavaSwing/Borders/BorderFactory.md)
   - `BorderFactory`
   - Border factory methods
   - Border factory best practices
