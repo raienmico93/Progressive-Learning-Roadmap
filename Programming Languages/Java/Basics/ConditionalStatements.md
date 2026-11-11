@@ -1,493 +1,145 @@
 # Java Conditional Statements: A Comprehensive Programming Cheat Sheet
- 
+
 ---
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** Conditional statements in Java are control flow constructs that allow a program to execute different blocks of code based on whether specified boolean expressions evaluate to `true` or `false`. They are fundamental decision-making mechanisms that enable programs to respond dynamically to varying inputs and states.
+**Core Definition:** Conditional statements are programming constructs that allow a program to execute different blocks of code depending on whether a given boolean condition evaluates to `true` or `false`. They form the foundation of decision-making in Java programs.
 
-**Technical Definition:** The Java Language Specification defines the `if` statement as a construct that evaluates an expression of type `boolean` (or `Boolean`, which is unboxed) and conditionally executes a statement or block. The `if-then-else` statement provides two alternative execution paths, while the `if-then-else if` ladder extends this to multiple mutually exclusive branches. Nested conditionals occur when one `if` statement appears within the body of another, and compound conditions combine multiple boolean expressions using logical operators (`&&`, `||`, `!`, `^`).
+**Technical Definition:** In Java, conditional statements are control flow statements that evaluate a boolean expression and redirect execution based on the result. The primary constructs are the `if`, `if-else`, and `if-else-if` statements, the ternary conditional operator (`? :`), the `switch` statement, and the `switch` expression. Since Java 21, pattern matching for `switch` further extends the expressive power of conditional branching by allowing type patterns, guarded patterns (`when`), and record deconstruction within `switch` labels.
 
-**Beginner-Friendly Explanation:** Think of conditional statements as a program's way of making decisions—like a choose-your-own-adventure book. When the program reaches an `if` statement, it asks a yes-or-no question. If the answer is "yes" (`true`), it follows one path; if "no" (`false`), it follows another. This is how programs adapt: a thermostat checks if the temperature is below the target, a game checks if the player has enough health, and a login system checks if the password matches.
+**Beginner-Friendly Explanation:** Conditional statements are like a fork in the road. Depending on a condition (like whether you have money), you take one path (buy coffee) or another (skip coffee). Java gives you several ways to express these decisions: simple `if` checks, `if-else` alternatives, the compact ternary operator, and the multi-way `switch` construct. Modern Java makes these even more powerful with switch expressions that can return values and pattern matching that can inspect the shape of your data.
 
 ### Key Characteristics
 
-- **Boolean-Driven:** Every condition must evaluate to a `boolean` value (`true` or `false`). Unlike some languages, Java does not permit integer-to-boolean coercion (e.g., `if (1)` is a compile-time error).
-- **Block Scoping:** Statements executed conditionally are typically enclosed in braces `{ }`, creating a block with its own scope.
-- **Mutual Exclusivity in Ladders:** In an `if-else if` chain, only the first matching branch executes; subsequent conditions are not evaluated.
-- **Short-Circuit Evaluation:** Logical operators `&&` and `||` stop evaluating as soon as the result is determined, which can prevent errors and improve performance.
-- **Dangling Else Rule:** An `else` clause binds to the nearest preceding unmatched `if` within the same block, regardless of indentation.
+- **Boolean-Driven:** Every condition must evaluate to a `boolean` (or `Boolean`, which is auto-unboxed).
+- **Short-Circuit Evaluation:** Logical operators `&&` and `||` short-circuit; the right operand is evaluated only when necessary.
+- **Order Matters:** In `if-else-if` chains and `switch` statements with patterns, the first matching branch wins, so the order of conditions is critical.
+- **Fall-Through in Legacy Switch:** Traditional colon-based `switch` cases fall through unless terminated by `break`; arrow-based cases eliminate fall-through entirely.
+- **Exhaustiveness:** Switch expressions are required to be exhaustive (cover all possible values or include a `default`), reducing runtime surprises.
+- **Pattern Matching (Java 21+):** `switch` and `instanceof` support type patterns, guarded patterns (`when`), and record patterns for deconstruction.
 
 ### Prerequisites
 
-- Basic understanding of Java syntax: variables, data types, operators, and statements
-- Familiarity with boolean expressions and comparison operators (`==`, `!=`, `<`, `>`, `<=`, `>=`)
-- Knowledge of logical operators (`&&`, `||`, `!`) and their truth tables
-- A working Java development environment (JDK 8 or later recommended)
+- Basic understanding of Java data types (`int`, `char`, `String`, `boolean`, enums)
+- Familiarity with operators (`==`, `!=`, `&&`, `||`, `>`, `<`)
+- Knowledge of Java methods and variable scope
+- Java 14+ for switch expressions; Java 21+ for full pattern matching in `switch`
 
 ### Related Programming Areas
 
-- **Control Flow:** Loops (`for`, `while`), `switch` statements, and `break`/`continue` interact closely with conditionals.
-- **Boolean Logic:** Propositional logic, truth tables, De Morgan's laws, and short-circuit evaluation.
-- **Program Design:** Defensive programming, input validation, and state machines rely heavily on conditionals.
-- **Testing:** Branch coverage and path coverage are testing metrics directly tied to conditional logic.
+- **Control Flow:** Loops (`for`, `while`) and branching (`break`, `continue`, `return`) complement conditionals.
+- **Object-Oriented Design:** Polymorphism can often replace conditional logic (strategy pattern, visitor pattern).
+- **Functional Programming:** The ternary operator and pattern matching in `switch` encourage expression-oriented programming.
+- **Error Handling:** Conditional checks often guard against invalid states before throwing exceptions.
 
-## 1. The `if` Statement
+### Core Concepts / Features
+
+---
+
+## 1. if
 
 ### Definitions
 
-**Core Definition:** The `if` statement executes a statement or block of statements only when a specified boolean condition evaluates to `true`.
+**Core Definition:** The `if` statement is the most basic conditional construct; it executes a block of code only when its boolean condition is `true`.
 
-**Technical Definition:** According to the Java Language Specification, an `if` statement consists of the keyword `if`, a parenthesized expression of type `boolean` or `Boolean` (which is unboxed), and a statement (the "then" statement). If the expression evaluates to `true`, the then-statement is executed; otherwise, control passes to the next statement following the `if`.
+**Technical Definition:** The `if-then` statement tells the program to execute a certain section of code only if a particular test evaluates to `true`. The condition must be a boolean expression; Java does not permit integers or other types to be used directly as conditions (unlike C/C++).
 
-**Beginner-Friendly Explanation:** The `if` statement is like a gatekeeper. It checks a condition, and only if that condition is met (is `true`) does it let the code inside through. If the condition is not met, the code inside is simply skipped. For example, `if (temperature > 30)` might trigger a message saying "It's hot outside" only when the temperature actually exceeds 30 degrees.
+**Beginner-Friendly Explanation:** `if` is like saying "If it is raining, take an umbrella." The action (taking an umbrella) only happens when the condition (raining) is true.
 
 ### Purposes
 
-- **To execute code conditionally** based on whether a specific requirement is satisfied.
-- **To implement input validation** by checking whether values fall within acceptable ranges before processing.
-- **To control program flow** by making execution depend on runtime state.
-- **To guard against errors** by preventing operations on invalid data (e.g., checking for `null` or zero before division).
+- To execute a block of statements conditionally based on a boolean expression
+- To guard against invalid operations (e.g., checking for `null` before dereferencing)
+- To implement simple decision logic
 
 ### Syntax Rules and Structure
-
-**Complete General Syntax:**
 
 ```java
 if (condition) {
-    // statements to execute if condition is true
+    // statements executed when condition is true
 }
 ```
-
-**Syntax Breakdown:**
-- `if`: The keyword introducing the conditional statement.
-- `(condition)`: A parenthesized expression that must evaluate to `boolean` or `Boolean`. This expression is mandatory.
-- `{ }`: An optional block containing the statements to execute. If omitted, only the immediately following single statement is controlled by the `if`.
 
 **Syntax Rules:**
-- The condition expression must be of type `boolean`. Java does not allow implicit conversion from other types (e.g., `int`, `Object`) to `boolean`; `if (1)` or `if (object)` causes a compile-time error.
-- A single statement does not require braces, but their use is strongly recommended to prevent logic errors when code is modified later .
-- A semicolon immediately after the closing parenthesis (`if (condition);`) creates an empty statement, meaning the intended body will always execute regardless of the condition .
+- The condition must be a `boolean` expression (primitive `boolean` or `Boolean`).
+- Braces are optional for a single statement but recommended for clarity and safety.
+- The condition is evaluated once.
 
 **Constraints and Limitations:**
-- The condition is evaluated exactly once per entry into the `if` statement.
-- There is no "then" keyword in Java; the statement following the condition is the implicit "then" branch.
+- Omitting braces can lead to subtle bugs when a second statement is later added.
+- The condition cannot be a non-boolean value (e.g., `if (x)` is illegal for `int x`).
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+### Annotated Code Examples
 
-**Example 1: Basic `if` with a Single Statement**
+**Example 1: Basic `if`**
 
 ```java
-// BasicIf.java
-public class BasicIf {
+// File: IfDemo.java
+public class IfDemo {
     public static void main(String[] args) {
-        int age = 20; // Declare and initialize an integer variable
-        
-        // Check if age meets the voting requirement
-        if (age >= 18) { // Condition: is age at least 18?
-            System.out.println("You are eligible to vote."); // Executes only if true
+        int score = 85;
+
+        // Execute only if score is 90 or above
+        if (score >= 90) {
+            System.out.println("Excellent!");
         }
-        
-        System.out.println("Program continues."); // Always executes
+
+        System.out.println("Done.");
     }
 }
 ```
 
 **Expected Output:**
 ```
-You are eligible to vote.
-Program continues.
+Done.
 ```
 
-**Why This Output Occurs:** The condition `age >= 18` evaluates to `true` because 20 is greater than or equal to 18. The block containing the print statement executes. The final `println` is outside the `if` block, so it runs unconditionally.
+**Step-by-Step Explanation:** The condition `score >= 90` is `false` (85 is not ≥ 90), so the `if` block is skipped. Execution continues after the block, printing "Done."
 
-**Example 2: `if` with a `false` Condition**
+**Example 2: `if` with a Guard Clause**
 
 ```java
-// FalseCondition.java
-public class FalseCondition {
-    public static void main(String[] args) {
-        int temperature = 15; // Temperature in Celsius
-        
-        if (temperature > 30) { // Is it above 30 degrees?
-            System.out.println("It's hot outside!");
+// File: GuardClauseDemo.java
+public class GuardClauseDemo {
+    public static void process(String input) {
+        // Guard clause: exit early if input is null
+        if (input == null) {
+            System.out.println("Input is null");
+            return;
         }
-        
-        System.out.println("Have a nice day!"); // Always runs
+        System.out.println("Processing: " + input);
+    }
+
+    public static void main(String[] args) {
+        process(null);
+        process("Hello");
     }
 }
 ```
 
 **Expected Output:**
 ```
-Have a nice day!
+Input is null
+Processing: Hello
 ```
 
-**Why This Output Occurs:** The condition `temperature > 30` evaluates to `false` (15 is not greater than 30). The block inside the `if` is skipped entirely. Only the statement outside the conditional executes.
+**Step-by-Step Explanation:** The guard clause checks `input == null` and returns early, avoiding a `NullPointerException`. This is a common best practice for reducing nesting.
 
-### Real-World Cases
-
-- **Form Validation:** Checking if a username field is empty before allowing submission.
-- **Safety Checks:** Verifying that a divisor is not zero before performing division.
-- **Feature Toggles:** Enabling or disabling functionality based on configuration flags.
-- **Access Control:** Checking whether a user has administrative privileges before displaying admin options.
-
-**Explanation:** In a banking application, an `if` statement might check `if (accountBalance >= withdrawalAmount)` before processing a withdrawal, preventing overdrafts. In a game, `if (playerHealth <= 0)` might trigger a game-over sequence.
-
----
-
-## 2. The `if-else` Statement
-
-### Definitions
-
-**Core Definition:** The `if-else` statement provides two mutually exclusive execution paths: one for when the condition is `true` and another for when it is `false`.
-
-**Technical Definition:** An `if-then-else` statement consists of an `if` keyword, a parenthesized boolean expression, a "then" statement, the `else` keyword, and an "else" statement. Exactly one of the two statements executes: the then-statement if the condition is `true`, or the else-statement if the condition is `false`. The two branches are never both executed.
-
-**Beginner-Friendly Explanation:** The `if-else` statement is like a fork in the road. If the condition is true, you take the left path; if it is false, you take the right path. You never take both. For example, `if (score >= 60)` might print "Pass," and the `else` would print "Fail"—one of these two messages always prints, depending on the score.
-
-### Purposes
-
-- **To handle both outcomes** of a binary decision explicitly, ensuring no case is left unhandled.
-- **To provide alternative behavior** when the primary condition is not satisfied.
-- **To implement binary classification** such as pass/fail, valid/invalid, or on/off.
-- **To ensure exhaustive handling** of a condition, making the code's logic complete.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
+**Example 3: `if` with a Compound Condition**
 
 ```java
-if (condition) {
-    // statements if condition is true
-} else {
-    // statements if condition is false
-}
-```
-
-**Syntax Breakdown:**
-- `if (condition)`: The condition to evaluate.
-- First block: Executes when condition is `true`.
-- `else`: Keyword introducing the alternative branch.
-- Second block: Executes when condition is `false`.
-
-**Syntax Rules:**
-- The `else` must immediately follow the `if` block (or the `if` statement if braces are omitted).
-- No condition is specified after `else`; it serves as the catch-all for the negation of the `if` condition.
-- Braces are optional for single statements but strongly recommended.
-
-**Constraints and Limitations:**
-- The `else` branch cannot exist without a preceding `if`.
-- An `else` always pairs with the nearest unmatched `if` in the same block (the "dangling else" rule), which is why braces should always be used .
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Pass/Fail Decision**
-
-```java
-// PassFail.java
-public class PassFail {
-    public static void main(String[] args) {
-        int score = 72; // Student's exam score
-        
-        // Determine pass or fail based on threshold
-        if (score >= 60) { // Condition: is the score at least 60?
-            System.out.println("Pass"); // Executes when condition is true
-        } else {
-            System.out.println("Fail"); // Executes when condition is false
-        }
-        
-        System.out.println("Result processed."); // Always executes
-    }
-}
-```
-
-**Expected Output:**
-```
-Pass
-Result processed.
-```
-
-**Why This Output Occurs:** The condition `score >= 60` evaluates to `true` because 72 is greater than or equal to 60. The `if` branch executes, printing "Pass." The `else` branch is skipped entirely. The final statement runs unconditionally.
-
-**Example 2: Even or Odd**
-
-```java
-// EvenOdd.java
-public class EvenOdd {
-    public static void main(String[] args) {
-        int number = 7; // The number to test
-        
-        // Use modulo operator to check divisibility by 2
-        if (number % 2 == 0) { // Remainder is zero means even
-            System.out.println(number + " is even.");
-        } else {
-            System.out.println(number + " is odd."); // Runs for non-even numbers
-        }
-    }
-}
-```
-
-**Expected Output:**
-```
-7 is odd.
-```
-
-**Why This Output Occurs:** The expression `number % 2` computes the remainder when 7 is divided by 2, which is 1. Since 1 does not equal 0, the condition is `false`. The `else` branch executes, printing "7 is odd."
-
-### Real-World Cases
-
-- **Authentication:** `if (passwordMatches)` grants access, `else` denies it.
-- **Temperature Control:** `if (temp < setpoint)` turns on heater, `else` turns it off.
-- **E-Commerce:** `if (cartTotal >= freeShippingThreshold)` applies free shipping, `else` adds shipping cost.
-- **Game Logic:** `if (playerHasKey)` unlocks door, `else` displays "You need a key."
-
-**Explanation:** In a vending machine, `if (insertedAmount >= itemPrice)` dispenses the item; `else` displays "Insufficient funds." The `else` branch ensures the machine responds appropriately to both sufficient and insufficient payment.
-
----
-
-## 3. The `else-if` Ladder
-
-### Definitions
-
-**Core Definition:** The `else-if` ladder is a chain of conditional tests where each subsequent condition is evaluated only if all previous conditions were `false`, allowing selection from multiple mutually exclusive alternatives.
-
-**Technical Definition:** An `if-then-else if` construct consists of an initial `if` statement followed by one or more `else if` clauses, optionally terminated by a final `else`. Each `else if` provides an additional condition to test. Conditions are evaluated sequentially from top to bottom; the first condition that evaluates to `true` causes its associated block to execute, and all remaining conditions in the chain are skipped. If no condition matches, the optional final `else` block executes.
-
-**Beginner-Friendly Explanation:** The `else-if` ladder is like a series of questions where each question is only asked if the previous ones were answered "no." For example, to grade an exam: "Is the score at least 90? No? Then is it at least 80? No? Then is it at least 70?" Once a "yes" is found, the questioning stops. This is more efficient than checking every condition independently.
-
-### Purposes
-
-- **To select one option from multiple possibilities** where the conditions are mutually exclusive.
-- **To implement range-based classification** such as letter grades, temperature categories, or age groups.
-- **To avoid deep nesting** by flattening multiple decision levels into a readable ladder.
-- **To ensure only one branch executes** even when multiple conditions might theoretically be true.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```java
-if (condition1) {
-    // executes if condition1 is true
-} else if (condition2) {
-    // executes if condition2 is true AND condition1 was false
-} else if (condition3) {
-    // executes if condition3 is true AND all previous were false
-} else {
-    // executes if no condition matched
-}
-```
-
-**Syntax Breakdown:**
-- `if (condition1)`: First condition tested.
-- `else if (condition2)`: Tested only if `condition1` was `false`.
-- Additional `else if` clauses: Tested in order until one is `true` or the chain ends.
-- `else`: Optional; provides a default when no condition matches.
-
-**Syntax Rules:**
-- Conditions are evaluated **sequentially from top to bottom**; order matters for correctness.
-- Once a condition evaluates to `true`, its block executes and **all subsequent conditions are skipped** .
-- The final `else` is optional; if omitted and no condition matches, nothing happens.
-- Any number of `else if` clauses may be used.
-
-**Constraints and Limitations:**
-- If conditions overlap, the **first matching condition wins**, potentially producing unexpected results if the ladder is not ordered correctly.
-- An `else if` must follow either an `if` or another `else if` in the same block.
-- Deeply nested or very long ladders can become difficult to maintain; consider `switch` or polymorphic solutions for complex cases.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Letter Grade Assignment**
-
-```java
-// GradeCalculator.java
-public class GradeCalculator {
-    public static void main(String[] args) {
-        int score = 85; // Exam score to evaluate
-        String grade;   // Variable to hold the result
-        
-        // Ladder ordered from highest to lowest threshold
-        if (score >= 90) {          // First: check for A
-            grade = "A";
-        } else if (score >= 80) {   // Only checked if score < 90
-            grade = "B";
-        } else if (score >= 70) {   // Only checked if score < 80
-            grade = "C";
-        } else if (score >= 60) {   // Only checked if score < 70
-            grade = "D";
-        } else {                    // Runs only if all above were false
-            grade = "F";
-        }
-        
-        System.out.println("Score: " + score + " -> Grade: " + grade);
-    }
-}
-```
-
-**Expected Output:**
-```
-Score: 85 -> Grade: B
-```
-
-**Why This Output Occurs:** The first condition `score >= 90` is `false` (85 is not ≥ 90). The second condition `score >= 80` is `true` (85 ≥ 80), so `grade` is assigned `"B"`. The remaining conditions are skipped. Note that the ladder is ordered correctly: if `score >= 70` were placed before `score >= 80`, a score of 85 would incorrectly match the lower threshold.
-
-**Example 2: Time-of-Day Greeting**
-
-```java
-// Greeting.java
-public class Greeting {
-    public static void main(String[] args) {
-        int hour = 14; // 24-hour format (0-23)
-        
-        // Determine greeting based on time of day
-        if (hour < 12) {
-            System.out.println("Good morning!");
-        } else if (hour < 18) {      // 12:00 to 17:59
-            System.out.println("Good afternoon!");
-        } else if (hour < 22) {      // 18:00 to 21:59
-            System.out.println("Good evening!");
-        } else {                     // 22:00 to 23:59
-            System.out.println("Good night!");
-        }
-    }
-}
-```
-
-**Expected Output:**
-```
-Good afternoon!
-```
-
-**Why This Output Occurs:** The first condition `hour < 12` is `false` (14 is not less than 12). The second condition `hour < 18` is `true` (14 < 18), so "Good afternoon!" prints. The remaining conditions are not evaluated.
-
-### Real-World Cases
-
-- **Scholarship Eligibility:** Checking GPA ranges to determine award tiers.
-- **Insurance Premiums:** Applying rates based on age brackets.
-- **Shipping Costs:** Calculating fees based on package weight ranges.
-- **User Roles:** Determining permissions based on role hierarchy.
-
-**Explanation:** In a payroll system, an `else-if` ladder might compute tax brackets: `if (income < 10000)` → 0% tax, `else if (income < 50000)` → 15% tax, `else if (income < 100000)` → 25% tax, `else` → 35% tax. The ladder ensures each income falls into exactly one bracket.
-
----
-
-## 4. Nested Conditions
-
-### Definitions
-
-**Core Definition:** Nested conditions occur when an `if` (or `if-else`) statement appears inside the body of another `if` or `else` block, creating hierarchical decision-making where inner conditions are evaluated only after outer conditions are satisfied.
-
-**Technical Definition:** A nested conditional is any conditional statement that is itself the "then" statement or "else" statement of another conditional. The Java Language Specification defines this through the grammar's recursive structure: a statement can be an `if` statement, and the body of an `if` statement is itself a statement. Nesting depth is limited only by practical considerations (readability, stack depth).
-
-**Beginner-Friendly Explanation:** Nested conditions are like a security checkpoint. First, you must pass the outer gate (e.g., "Do you have an ID?"). Only if you pass that check are you asked the inner question (e.g., "Is your ID valid?"). If you fail the first check, the second is never asked. This allows for more complex, multi-level decision logic.
-
-### Purposes
-
-- **To refine decision-making** by applying secondary criteria only when primary conditions are met.
-- **To model real-world hierarchical logic** such as login systems (check username, then password).
-- **To implement guard clauses** that validate multiple aspects of data before processing.
-- **To reduce unnecessary computation** by deferring expensive inner checks until simpler outer conditions pass.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```java
-if (outerCondition) {
-    // executes if outerCondition is true
-    if (innerCondition) {
-        // executes if both outerCondition AND innerCondition are true
-    } else {
-        // executes if outerCondition is true but innerCondition is false
-    }
-} else {
-    // executes if outerCondition is false
-}
-```
-
-**Syntax Breakdown:**
-- `outerCondition`: Evaluated first.
-- Inner `if (innerCondition)`: Evaluated only if `outerCondition` is `true`.
-- Inner `else`: Pairs with the inner `if` (the nearest unmatched `if`).
-- Outer `else`: Pairs with the outer `if`.
-
-**Syntax Rules:**
-- Each `if` can have its own `else`, but the pairing follows the **nearest-if rule** unless braces disambiguate .
-- Indentation is not semantically meaningful in Java; braces determine scope.
-- Nested `if` statements can appear within either the `if` block, the `else` block, or both.
-
-**Constraints and Limitations:**
-- **Dangling Else Ambiguity:** Without braces, an `else` binds to the nearest unmatched `if`, which may not match the programmer's intent. Always use braces to avoid this .
-- **Complexity:** Deep nesting (3+ levels) reduces readability and increases the risk of logic errors.
-- **Alternative Approaches:** Sometimes `&&` (compound conditions) or early returns can flatten nested logic.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Login Validation (Nested `if-else`)**
-
-```java
-// LoginSystem.java
-public class LoginSystem {
-    public static void main(String[] args) {
-        String username = "admin";
-        String password = "secret123";
-        String inputUser = "admin";
-        String inputPass = "wrongpass";
-        
-        // Outer check: username
-        if (inputUser.equals(username)) {
-            // Inner check: password (only if username matched)
-            if (inputPass.equals(password)) {
-                System.out.println("Login successful");
-            } else {
-                System.out.println("Incorrect password");
-            }
-        } else {
-            System.out.println("Incorrect username");
-        }
-    }
-}
-```
-
-**Expected Output:**
-```
-Incorrect password
-```
-
-**Why This Output Occurs:** The outer condition `inputUser.equals(username)` is `true` (both are "admin"). Therefore, the inner `if-else` executes. The inner condition `inputPass.equals(password)` is `false` ("wrongpass" ≠ "secret123"), so the inner `else` runs, printing "Incorrect password." The outer `else` is skipped because the outer condition was true.
-
-**Example 2: Nested `if` with Compound Condition Alternative**
-
-```java
-// NestedVsCompound.java
-public class NestedVsCompound {
+// File: CompoundIfDemo.java
+public class CompoundIfDemo {
     public static void main(String[] args) {
         int age = 25;
         boolean hasLicense = true;
-        
-        // Nested version
-        System.out.println("Nested version:");
-        if (age >= 18) {
-            if (hasLicense) {
-                System.out.println("You can drive.");
-            } else {
-                System.out.println("You need a license.");
-            }
-        } else {
-            System.out.println("You are too young.");
-        }
-        
-        // Compound condition version (equivalent logic, flatter structure)
-        System.out.println("\nCompound version:");
+
+        // Both conditions must be true
         if (age >= 18 && hasLicense) {
-            System.out.println("You can drive.");
-        } else if (age >= 18 && !hasLicense) {
-            System.out.println("You need a license.");
-        } else {
-            System.out.println("You are too young.");
+            System.out.println("Eligible to drive");
         }
     }
 }
@@ -495,94 +147,79 @@ public class NestedVsCompound {
 
 **Expected Output:**
 ```
-Nested version:
-You can drive.
-
-Compound version:
-You can drive.
+Eligible to drive
 ```
 
-**Why This Output Occurs:** In the nested version, `age >= 18` is `true`, so the inner `if (hasLicense)` is evaluated. Since `hasLicense` is `true`, "You can drive" prints. The compound version achieves the same result using `&&`: `age >= 18 && hasLicense` is `true`, so the first branch executes. Both versions produce identical output; the choice between them is a matter of readability and logical clarity.
+**Step-by-Step Explanation:** The `&&` operator short-circuits; both `age >= 18` and `hasLicense` must be `true`.
 
 ### Real-World Cases
 
-- **Multi-Factor Authentication:** Checking password, then a one-time code.
-- **E-Commerce Checkout:** Verifying item availability, then checking payment validity.
-- **Game State:** Checking if a player has a key, then if the door is locked.
-- **Form Processing:** Validating that a field is non-empty, then checking its format.
-
-**Explanation:** In a medical diagnosis system, nested conditions might first check if a patient has a fever; if so, then check for other symptoms like cough or fatigue to narrow down potential diagnoses. The inner checks are only relevant when the outer condition is met.
+- **Input Validation:** Checking that a string is non-null and non-empty before processing.
+- **Permission Checks:** Verifying that a user has the required role before granting access.
+- **Range Checking:** Ensuring a number falls within an acceptable range.
 
 ---
 
-## 5. Compound Conditions
+## 2. else if
 
 ### Definitions
 
-**Core Definition:** Compound conditions are boolean expressions formed by combining two or more simpler boolean expressions using logical operators (`&&`, `||`, `!`, `^`), allowing a single `if` statement to test multiple criteria simultaneously.
+**Core Definition:** The `else if` construct allows chaining multiple mutually exclusive conditions, where each subsequent condition is evaluated only if all previous conditions were `false`.
 
-**Technical Definition:** The logical operators in Java are: `&&` (conditional AND), `||` (conditional OR), `!` (logical NOT), `^` (logical XOR), `&` (boolean AND), and `|` (boolean OR). The `&&` and `||` operators use short-circuit evaluation: the right operand is evaluated only if the result cannot be determined from the left operand alone. `&` and `|` always evaluate both operands. All logical operators have lower precedence than comparison and arithmetic operators.
+**Technical Definition:** An `if-else-if` ladder evaluates conditions in order. Once a condition evaluates to `true`, its associated block executes, and all remaining conditions in the chain are skipped. The first true branch wins.
 
-**Beginner-Friendly Explanation:** Compound conditions let you ask multiple questions at once. Instead of nesting one `if` inside another, you can write `if (age >= 18 && hasLicense)`—"Is the person at least 18 AND do they have a license?" Both must be true. Or `if (isWeekend || isHoliday)`—"Is it the weekend OR a holiday?" Only one needs to be true.
+**Beginner-Friendly Explanation:** `else if` is like a series of questions: "Are you a child? No. Are you a teenager? No. Are you an adult? Yes — then you're an adult."
 
 ### Purposes
 
-- **To combine multiple criteria** into a single, readable condition.
-- **To avoid unnecessary nesting** by expressing logical relationships directly.
-- **To leverage short-circuit evaluation** for efficiency and safety (e.g., preventing null pointer exceptions).
-- **To implement range checks** such as `if (x > 0 && x < 100)`.
+- To model multi-way decisions where only one outcome can occur
+- To replace deeply nested `if` statements with a flat, readable chain
+- To handle mutually exclusive categories (e.g., grade ranges, age groups)
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax:**
-
 ```java
-if (booleanExpr1 && booleanExpr2) { ... }  // AND: both must be true
-if (booleanExpr1 || booleanExpr2) { ... }  // OR: at least one must be true
-if (!booleanExpr) { ... }                  // NOT: inverts the value
-if (booleanExpr1 ^ booleanExpr2) { ... }   // XOR: exactly one must be true
+if (condition1) {
+    // block 1
+} else if (condition2) {
+    // block 2
+} else if (condition3) {
+    // block 3
+} else {
+    // fallback block
+}
 ```
-
-**Syntax Breakdown:**
-- `&&`: Logical AND. Returns `true` only if both operands are `true`. Short-circuits: if left is `false`, right is not evaluated.
-- `||`: Logical OR. Returns `true` if at least one operand is `true`. Short-circuits: if left is `true`, right is not evaluated.
-- `!`: Logical NOT. Unary operator; inverts `true` to `false` and vice versa.
-- `^`: Logical XOR. Returns `true` if operands differ; `false` if they are the same.
 
 **Syntax Rules:**
-- **Short-circuit evaluation** is the default for `&&` and `||` . This means the right operand may not be evaluated at all.
-- Parentheses should be used to group expressions and override default precedence (though `&&` and `||` have lower precedence than comparisons, mixing them can be confusing without parentheses) .
-- Comparison operators (`==`, `!=`, `<`, `>`, `<=`, `>=`) return `boolean` and are commonly used as operands.
-- The bitwise operators `&` and `|` can also operate on booleans but **do not short-circuit**.
+- Conditions are evaluated top to bottom.
+- Only the first true branch executes.
+- The final `else` is optional but recommended for exhaustiveness.
+- Order conditions from most specific to least specific to avoid shadowing.
 
 **Constraints and Limitations:**
-- **Side Effects in Short-Circuit:** If the right operand has side effects (e.g., method calls that modify state), short-circuiting may skip them unexpectedly.
-- **Null Safety:** Short-circuit evaluation is often used to guard against `NullPointerException`: `if (str != null && str.length() > 0)` is safe because the second condition is only evaluated when `str` is not null.
-- **De Morgan's Laws:** `!(a && b)` is equivalent to `!a || !b`; `!(a || b)` is equivalent to `!a && !b`. These are useful for simplifying negated compound conditions.
+- Overly long chains can become hard to maintain; consider `switch` or polymorphism.
+- A broad condition placed before a specific one will swallow the specific case.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+### Annotated Code Examples
 
-**Example 1: Range Validation with `&&`**
+**Example 1: Grade Classifier**
 
 ```java
-// RangeCheck.java
-public class RangeCheck {
+// File: ElseIfGradeDemo.java
+public class ElseIfGradeDemo {
     public static void main(String[] args) {
-        int score = 85; // Score to validate
-        
-        // Check if score is within the valid range 0-100
-        if (score >= 0 && score <= 100) {
-            System.out.println("Valid score: " + score);
+        int score = 76;
+
+        if (score >= 90) {
+            System.out.println("Grade A");
+        } else if (score >= 80) {
+            System.out.println("Grade B");
+        } else if (score >= 70) {
+            System.out.println("Grade C");
+        } else if (score >= 60) {
+            System.out.println("Grade D");
         } else {
-            System.out.println("Invalid score: " + score);
-        }
-        
-        // Test with invalid value
-        int badScore = 150;
-        if (badScore >= 0 && badScore <= 100) {
-            System.out.println("Valid score: " + badScore);
-        } else {
-            System.out.println("Invalid score: " + badScore);
+            System.out.println("Grade F");
         }
     }
 }
@@ -590,62 +227,911 @@ public class RangeCheck {
 
 **Expected Output:**
 ```
-Valid score: 85
-Invalid score: 150
+Grade C
 ```
 
-**Why This Output Occurs:** For `score = 85`, both `85 >= 0` and `85 <= 100` are `true`, so the compound condition is `true`. For `badScore = 150`, `150 >= 0` is `true` but `150 <= 100` is `false`; since `&&` requires both to be true, the condition is `false`.
+**Step-by-Step Explanation:** `76 >= 90` is false, `76 >= 80` is false, `76 >= 70` is true, so "Grade C" is printed and the remaining branches are skipped.
 
-**Example 2: Short-Circuit Evaluation with `||`**
+**Example 2: Ordering Conditions Correctly**
 
 ```java
-// ShortCircuit.java
-public class ShortCircuit {
-    public static void main(String[] args) {
-        String input = null;
-        
-        // Without short-circuit: would throw NullPointerException
-        // if (input.length() > 0 || input == null) { ... } // BAD
-        
-        // With short-circuit: safe because second check only runs if first is false
-        if (input == null || input.length() == 0) {
-            System.out.println("Input is null or empty.");
-        } else {
-            System.out.println("Input: " + input);
+// File: OrderingDemo.java
+public class OrderingDemo {
+    public static void classify(int n) {
+        // WRONG order: broad condition first swallows specific ones
+        if (n > 0) {
+            System.out.println("Positive");
+        } else if (n > 100) {
+            System.out.println("Large positive"); // unreachable!
         }
-        
-        // Demonstrate left-to-right evaluation
-        int x = 5;
-        boolean result = (x > 0) && (x < 10) && (x % 2 != 0);
-        System.out.println("x is positive, less than 10, and odd: " + result);
+    }
+
+    public static void classifyCorrectly(int n) {
+        // CORRECT order: most specific first
+        if (n > 100) {
+            System.out.println("Large positive");
+        } else if (n > 0) {
+            System.out.println("Positive");
+        }
+    }
+
+    public static void main(String[] args) {
+        classifyCorrectly(150); // Large positive
+        classifyCorrectly(5);   // Positive
     }
 }
 ```
 
 **Expected Output:**
 ```
-Input is null or empty.
-x is positive, less than 10, and odd: true
+Large positive
+Positive
 ```
 
-**Why This Output Occurs:** In the first condition, `input == null` is `true`. Because `||` short-circuits when the left side is `true`, `input.length() == 0` is **not evaluated**, avoiding a `NullPointerException`. In the second example, all three conditions are `true` (5 > 0, 5 < 10, 5 % 2 = 1 ≠ 0), so the compound expression evaluates to `true`.
+**Step-by-Step Explanation:** In the wrong version, any `n > 0` (including `n > 100`) matches the first branch, making the second branch unreachable. Always order from most specific to least specific.
+
+**Example 3: `else if` with Enums**
+
+```java
+// File: ElseIfEnumDemo.java
+public class ElseIfEnumDemo {
+    enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }
+
+    public static void main(String[] args) {
+        Day today = Day.SATURDAY;
+
+        if (today == Day.SATURDAY || today == Day.SUNDAY) {
+            System.out.println("Weekend");
+        } else if (today == Day.MONDAY) {
+            System.out.println("Start of work week");
+        } else {
+            System.out.println("Weekday");
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Weekend
+```
+
+**Step-by-Step Explanation:** The enum comparison uses `==` (safe for enums). `SATURDAY` matches the first condition.
 
 ### Real-World Cases
 
-- **Age Verification:** `if (age >= 18 && age <= 65)` for employment eligibility.
-- **Discount Eligibility:** `if (isMember || purchaseTotal > 100)` for applying promotions.
-- **Date Validation:** `if (month >= 1 && month <= 12 && day >= 1 && day <= 31)`.
-- **Null-Safe Navigation:** `if (user != null && user.isActive())`.
-- **Exclusive Conditions:** `if (isWeekend ^ isHoliday)` for special scheduling.
+- **Pricing Tiers:** Determining a discount based on order size.
+- **Tax Brackets:** Computing tax rate based on income ranges.
+- **User Roles:** Assigning permissions based on role hierarchy.
 
-**Explanation:** In a weather application, `if (temperature < 0 || windChill < -10)` might trigger a severe weather alert. In a game, `if (playerHealth <= 0 || playerLives == 0)` determines game over. Compound conditions allow expressing such rules directly without nesting.
+---
+
+## 3. else
+
+### Definitions
+
+**Core Definition:** The `else` clause provides a fallback block that executes when the preceding `if` (or `if-else-if` chain) condition evaluates to `false`.
+
+**Technical Definition:** The `if-then-else` statement provides a secondary path of execution when an `if` clause evaluates to `false`.
+
+**Beginner-Friendly Explanation:** `else` is the "otherwise" branch — what to do when the main condition is not met.
+
+### Purposes
+
+- To specify the default behaviour when no condition matches
+- To ensure that all code paths are handled (exhaustiveness)
+- To provide user-friendly error messages for invalid input
+
+### Syntax Rules and Structure
+
+```java
+if (condition) {
+    // then block
+} else {
+    // else block
+}
+```
+
+**Syntax Rules:**
+- `else` must immediately follow an `if` or `else if` block.
+- An `else` cannot exist without a preceding `if`.
+- Braces are optional for a single statement but recommended.
+
+**Constraints and Limitations:**
+- Overusing `else` can lead to deeply nested code; guard clauses (early returns) are often cleaner.
+
+### Annotated Code Example
+
+```java
+// File: ElseDemo.java
+public class ElseDemo {
+    public static void main(String[] args) {
+        int age = 16;
+
+        if (age >= 18) {
+            System.out.println("Adult");
+        } else {
+            System.out.println("Minor");
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Minor
+```
+
+**Step-by-Step Explanation:** `age >= 18` is false, so the `else` block executes.
+
+### Real-World Cases
+
+- **Form Validation:** Showing an error message when a field is invalid.
+- **Default Configuration:** Applying default settings when no override is provided.
+- **Fallback Logic:** Using a backup value when a primary source is unavailable.
+
+---
+
+## 4. Nested Conditionals
+
+### Definitions
+
+**Core Definition:** Nested conditionals are conditional statements placed inside the blocks of other conditional statements, creating multiple levels of decision-making.
+
+**Technical Definition:** An `if` statement can contain another `if` statement within its `then` or `else` block. While legal, deep nesting reduces readability and maintainability; flattening techniques (guard clauses, combining conditions, extracting methods) are recommended.
+
+**Beginner-Friendly Explanation:** Nested conditionals are like a decision tree: "If it is a weekday, then if it is morning, then if you have time, get coffee."
+
+### Purposes
+
+- To model complex, hierarchical decision logic
+- To handle multi-dimensional conditions (e.g., user role *and* resource state)
+
+### Syntax Rules and Structure
+
+```java
+if (outerCondition) {
+    if (innerCondition) {
+        // both true
+    } else {
+        // outer true, inner false
+    }
+} else {
+    // outer false
+}
+```
+
+**Syntax Rules:**
+- Each `if` introduces a new scope.
+- The `dangling else` problem: an `else` binds to the nearest unmatched `if`. Braces prevent ambiguity.
+
+**Constraints and Limitations:**
+- Deep nesting (3+ levels) is considered a code smell and should be refactored.
+
+### Annotated Code Examples
+
+**Example 1: Nested `if` for Multi-Factor Decisions**
+
+```java
+// File: NestedDemo.java
+public class NestedDemo {
+    public static void main(String[] args) {
+        boolean isMember = true;
+        double purchase = 150.0;
+
+        if (isMember) {
+            if (purchase > 100) {
+                System.out.println("Member discount: 20%");
+            } else {
+                System.out.println("Member discount: 10%");
+            }
+        } else {
+            System.out.println("No discount");
+        }
+    }
+}
+```
+
+**Expected Output:**
+```
+Member discount: 20%
+```
+
+**Step-by-Step Explanation:** The outer `if` checks membership; the inner `if` checks purchase amount.
+
+**Example 2: Flattening with Guard Clauses**
+
+```java
+// File: FlattenedDemo.java
+public class FlattenedDemo {
+    public static void process(boolean isMember, double purchase) {
+        // Flattened: early return instead of nesting
+        if (!isMember) {
+            System.out.println("No discount");
+            return;
+        }
+        if (purchase > 100) {
+            System.out.println("Member discount: 20%");
+            return;
+        }
+        System.out.println("Member discount: 10%");
+    }
+
+    public static void main(String[] args) {
+        process(true, 150);  // Member discount: 20%
+        process(false, 150); // No discount
+    }
+}
+```
+
+**Expected Output:**
+```
+Member discount: 20%
+No discount
+```
+
+**Step-by-Step Explanation:** The guard clauses eliminate nesting, making the logic easier to follow.
+
+### Real-World Cases
+
+- **Access Control:** Checking role *and* resource ownership.
+- **Game Logic:** Checking whether a move is valid *and* whether the player has enough resources.
+
+---
+
+## 5. Ternary Operator
+
+### Definitions
+
+**Core Definition:** The ternary operator (`? :`) is a compact, expression-based conditional that returns one of two values depending on a boolean condition.
+
+**Technical Definition:** The ternary conditional operator has the form `condition ? expressionIfTrue : expressionIfFalse`. It is the only operator in Java that takes three operands. It can be used wherever an expression is expected (assignment, method argument, return statement).
+
+**Beginner-Friendly Explanation:** The ternary operator is a one-line `if-else` that gives you a value. Instead of "if the score is high, set grade to A; otherwise set it to B," you write `grade = score >= 90 ? 'A' : 'B';`.
+
+### Purposes
+
+- To provide a concise alternative to simple `if-else` assignments
+- To enable conditional values within expressions
+- To improve readability for trivial decisions
+
+### Syntax Rules and Structure
+
+```java
+result = condition ? valueIfTrue : valueIfFalse;
+```
+
+**Syntax Rules:**
+- The condition must be boolean.
+- Both branches must produce compatible types.
+- Can be nested, but nesting reduces readability.
+- The ternary operator is an expression, not a statement; it produces a value.
+
+**Constraints and Limitations:**
+- Overuse leads to unreadable code; use `if-else` for complex logic.
+- Both branches are evaluated lazily (only the selected branch is evaluated).
+
+### Annotated Code Examples
+
+**Example 1: Basic Assignment**
+
+```java
+// File: TernaryDemo.java
+public class TernaryDemo {
+    public static void main(String[] args) {
+        int num = 8;
+        String msg = (num > 10) ? "Greater than 10" : "10 or less";
+        System.out.println(msg);
+    }
+}
+```
+
+**Expected Output:**
+```
+10 or less
+```
+
+**Step-by-Step Explanation:** `num > 10` is false, so the value of the ternary expression is `"10 or less"`.
+
+**Example 2: Ternary in Method Return**
+
+```java
+// File: TernaryReturnDemo.java
+public class TernaryReturnDemo {
+    public static String parity(int n) {
+        return (n % 2 == 0) ? "even" : "odd";
+    }
+
+    public static void main(String[] args) {
+        System.out.println(parity(4)); // even
+        System.out.println(parity(7)); // odd
+    }
+}
+```
+
+**Expected Output:**
+```
+even
+odd
+```
+
+**Step-by-Step Explanation:** The ternary expression is the return value, eliminating a temporary variable.
+
+**Example 3: Nested Ternary (Use Sparingly)**
+
+```java
+// File: NestedTernaryDemo.java
+public class NestedTernaryDemo {
+    public static void main(String[] args) {
+        int score = 85;
+        String grade = (score >= 90) ? "A"
+                     : (score >= 80) ? "B"
+                     : (score >= 70) ? "C"
+                     : "F";
+        System.out.println(grade); // B
+    }
+}
+```
+
+**Expected Output:**
+```
+B
+```
+
+**Step-by-Step Explanation:** Nested ternaries can be readable for simple ladders but should be replaced by `switch` or `if-else` when logic grows.
+
+### Real-World Cases
+
+- **Configuration Defaults:** `String env = System.getenv("ENV") != null ? System.getenv("ENV") : "production";`
+- **Null-Safe Values:** `String name = user != null ? user.getName() : "Guest";`
+- **Simple Classification:** `String size = length < 10 ? "small" : "large";`
+
+---
+
+## 6. Switch Statement
+
+### Definitions
+
+**Core Definition:** The `switch` statement is a multi-way branching construct that transfers control to one of many `case` labels based on the value of an expression.
+
+**Technical Definition:** Unlike `if-then` and `if-then-else`, the `switch` statement can have a number of possible execution paths. A `switch` works with `byte`, `short`, `char`, `int`, their boxed variants, enums, and `String`. The body is a switch block containing `case` and `default` labels. In the legacy colon form, execution falls through to subsequent cases unless a `break` statement terminates the branch.
+
+**Beginner-Friendly Explanation:** `switch` is like a train station with multiple platforms. You look at your ticket (the expression's value) and go to the matching platform (case). Without `break`, you accidentally ride through to the next platform.
+
+### Purposes
+
+- To replace long `if-else-if` chains that compare a single value against constants
+- To provide a more readable, declarative structure for multi-way branching
+- To group multiple constants that share the same behaviour
+
+### Syntax Rules and Structure
+
+```java
+switch (expression) {
+    case constant1:
+        // statements
+        break;
+    case constant2:
+    case constant3:
+        // shared statements
+        break;
+    default:
+        // fallback
+}
+```
+
+**Syntax Rules:**
+- The expression must be of type `byte`, `short`, `char`, `int` (or boxed), `String`, or an enum.
+- Case labels must be compile-time constants (literals, `static final` constants, enum constants).
+- `break` exits the switch block; without it, execution falls through.
+- `default` is optional and can appear anywhere (usually last).
+- Multiple `case` labels can be stacked to share code.
+
+**Constraints and Limitations:**
+- Fall-through is a common source of bugs; always add `break` unless intentional.
+- Cannot switch on `long`, `float`, `double`, or `boolean`.
+- Cannot use non-constant expressions as case labels.
+
+### Annotated Code Examples
+
+**Example 1: Day-of-Week Name**
+
+```java
+// File: SwitchStatementDemo.java
+public class SwitchStatementDemo {
+    public static void main(String[] args) {
+        int day = 3;
+        String name;
+
+        switch (day) {
+            case 1: name = "Monday";    break;
+            case 2: name = "Tuesday";   break;
+            case 3: name = "Wednesday"; break;
+            case 4: name = "Thursday";  break;
+            case 5: name = "Friday";    break;
+            case 6: name = "Saturday";  break;
+            case 7: name = "Sunday";    break;
+            default: name = "Invalid";  break;
+        }
+
+        System.out.println(name); // Wednesday
+    }
+}
+```
+
+**Expected Output:**
+```
+Wednesday
+```
+
+**Step-by-Step Explanation:** `day = 3` matches `case 3`, assigns "Wednesday", and `break` exits the switch.
+
+**Example 2: Grouping Cases**
+
+```java
+// File: SwitchGroupingDemo.java
+public class SwitchGroupingDemo {
+    public static void main(String[] args) {
+        char grade = 'B';
+        String description;
+
+        switch (grade) {
+            case 'A':
+                description = "Excellent";
+                break;
+            case 'B':
+            case 'C':
+                description = "Good";
+                break;
+            case 'D':
+                description = "Passing";
+                break;
+            default:
+                description = "Unknown";
+        }
+
+        System.out.println(description); // Good
+    }
+}
+```
+
+**Expected Output:**
+```
+Good
+```
+
+**Step-by-Step Explanation:** `'B'` matches, falls through to the `'C'` label (no `break` after `'B'`), and both share the "Good" assignment.
+
+**Example 3: Intentional Fall-Through (Rare)**
+
+```java
+// File: SwitchFallThroughDemo.java
+public class SwitchFallThroughDemo {
+    public static void main(String[] args) {
+        int month = 2;
+        int days = 0;
+
+        switch (month) {
+            case 2:
+                days = 28;
+                // intentional fall-through for leap year check
+            case 1: case 3: case 5: case 7:
+            case 8: case 10: case 12:
+                if (days == 0) days = 31;
+                break;
+            case 4: case 6: case 9: case 11:
+                days = 30;
+                break;
+            default:
+                System.out.println("Invalid month");
+        }
+
+        System.out.println("Days: " + days); // Days: 28
+    }
+}
+```
+
+**Expected Output:**
+```
+Days: 28
+```
+
+**Step-by-Step Explanation:** Intentional fall-through is occasionally useful but should be clearly commented.
+
+### Real-World Cases
+
+- **Command Dispatchers:** Routing commands to handlers based on a string.
+- **State Machines:** Transitioning between states based on an enum.
+- **Menu Systems:** Executing different actions for different menu choices.
+
+---
+
+## 7. Switch Expression
+
+### Definitions
+
+**Core Definition:** A switch expression is a modern form of `switch` (standard since Java 14) that returns a value and uses arrow labels (`->`) to eliminate fall-through and the need for `break`.
+
+**Technical Definition:** A switch expression evaluates to a single value and can be used wherever an expression is expected (assignment, return, method argument). Arrow cases (`case L ->`) execute only the code to the right of the arrow, with no fall-through. For multi-statement blocks, the `yield` statement specifies the value of the switch expression. Switch expressions must be exhaustive: all possible values must be covered, or a `default` must be provided.
+
+**Beginner-Friendly Explanation:** A switch expression is a `switch` that gives you an answer. Instead of assigning to a variable inside each case, the whole `switch` becomes the value. The arrow syntax makes it impossible to accidentally fall through.
+
+### Purposes
+
+- To produce a value directly from a multi-way decision
+- To eliminate fall-through bugs with arrow labels
+- To enforce exhaustiveness at compile time
+- To enable cleaner, expression-oriented code
+
+### Syntax Rules and Structure
+
+```java
+// Arrow form (single expression)
+result = switch (expression) {
+    case constant1 -> value1;
+    case constant2, constant3 -> value2;
+    default -> value3;
+};
+
+// Block form with yield
+result = switch (expression) {
+    case constant1 -> {
+        // multiple statements
+        yield value1;
+    }
+    default -> value3;
+};
+```
+
+**Syntax Rules:**
+- Arrow cases do not fall through.
+- Multiple constants can share a case with commas: `case A, B ->`.
+- For blocks, `yield` must be used to produce a value.
+- The switch must be exhaustive (cover all possibilities or include `default`).
+- Supported types include all legacy switch types plus pattern matching (Java 21+).
+
+**Constraints and Limitations:**
+- `break` is not used in arrow form; `yield` is used in blocks.
+- Exhaustiveness is enforced; missing cases cause compile errors.
+
+### Annotated Code Examples (Three Examples)
+
+**Example 1: Day-of-Week Letter Count**
+
+```java
+// File: SwitchExpressionDemo.java
+public class SwitchExpressionDemo {
+    enum Day { MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY }
+
+    public static void main(String[] args) {
+        Day day = Day.WEDNESDAY;
+
+        int numLetters = switch (day) {
+            case MONDAY, FRIDAY, SUNDAY -> 6;
+            case TUESDAY -> 7;
+            case THURSDAY, SATURDAY -> 8;
+            case WEDNESDAY -> 9;
+        };
+
+        System.out.println(numLetters); // 9
+    }
+}
+```
+
+**Expected Output:**
+```
+9
+```
+
+**Step-by-Step Explanation:** The switch expression returns `9` for `WEDNESDAY`; no `break` or variable assignment inside the cases.
+
+**Example 2: Switch Expression with `yield`**
+
+```java
+// File: SwitchYieldDemo.java
+public class SwitchYieldDemo {
+    public static void main(String[] args) {
+        int x = 42;
+
+        String result = switch (x) {
+            case 1, 2, 3 -> "small";
+            case 42 -> {
+                String note = "answer";
+                yield "The " + note; // yield returns the block's value
+            }
+            default -> "other";
+        };
+
+        System.out.println(result); // The answer
+    }
+}
+```
+
+**Expected Output:**
+```
+The answer
+```
+
+**Step-by-Step Explanation:** The block case uses `yield` to produce "The answer"; `yield` replaces `return` inside a switch expression block.
+
+**Example 3: Exhaustive Switch Expression over an Enum**
+
+```java
+// File: SwitchExhaustiveDemo.java
+public class SwitchExhaustiveDemo {
+    enum Season { SPRING, SUMMER, FALL, WINTER }
+
+    public static String activity(Season season) {
+        return switch (season) {
+            case SPRING -> "Planting";
+            case SUMMER -> "Swimming";
+            case FALL -> "Harvesting";
+            case WINTER -> "Skiing";
+            // No default needed — exhaustive over enum
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(activity(Season.SUMMER)); // Swimming
+    }
+}
+```
+
+**Expected Output:**
+```
+Swimming
+```
+
+**Step-by-Step Explanation:** Because all enum constants are covered, no `default` is required; the compiler verifies exhaustiveness.
+
+### Real-World Cases
+
+- **HTTP Status Mapping:** `String category = switch (status) { case 200, 201 -> "Success"; case 400, 404 -> "Client Error"; ... };`
+- **Configuration Selection:** Returning different configuration objects based on an environment enum.
+- **Mathematical Classification:** Categorising numbers (positive, negative, zero) as a value.
+
+---
+
+## 8. Pattern Matching
+
+### Definitions
+
+**Core Definition:** Pattern matching is a language feature (Java 21+) that allows `switch` and `instanceof` to test not only values but also types and structures, binding matched components to variables.
+
+**Technical Definition:** Pattern matching for `switch` was finalized in Java 21. It supports type patterns (`case String s ->`), guarded patterns (`case Integer i when i > 10 ->`), and record patterns that deconstruct records into their components (`case Point(int x, int y) ->`). Dominance rules prevent unreachable cases (e.g., a `Number` pattern before an `Integer` pattern is a compile error).
+
+**Beginner-Friendly Explanation:** Pattern matching lets a `switch` ask "What kind of thing are you?" and "What are your parts?" in one step. Instead of checking the type and then casting, you check the type and bind variables simultaneously.
+
+### Purposes
+
+- To replace `instanceof`-and-cast chains with concise, type-safe branching
+- To deconstruct records and extract their components in a single pattern
+- To express complex, type-driven decisions declaratively
+- To enable exhaustiveness checking over sealed hierarchies
+
+### Syntax Rules and Structure
+
+```java
+// Type pattern
+switch (obj) {
+    case String s -> ...
+    case Integer i -> ...
+}
+
+// Guarded pattern
+case Integer i when i > 10 -> ...
+
+// Record pattern (deconstruction)
+case Point(int x, int y) -> ...
+```
+
+**Syntax Rules:**
+- Type patterns bind the matched value to a variable of the specified type.
+- Guards (`when`) add a boolean condition that must also hold.
+- Record patterns recursively deconstruct record components.
+- The switch must be exhaustive; `default` or a sealed hierarchy is required.
+- Dominance rules prevent unreachable cases.
+
+**Constraints and Limitations:**
+- Requires Java 21+ for full switch pattern matching.
+- Null handling requires an explicit `case null` or `default`.
+- Not all types are permitted in patterns (primitive patterns are preview).
+
+### Annotated Code Examples
+
+**Example 1: Type Pattern with `instanceof`**
+
+```java
+// File: PatternInstanceofDemo.java
+public class PatternInstanceofDemo {
+    public static void printType(Object obj) {
+        if (obj instanceof String s) {
+            System.out.println("String of length " + s.length() + ": " + s);
+        } else if (obj instanceof Integer i) {
+            System.out.println("Integer: " + i);
+        } else {
+            System.out.println("Unknown type");
+        }
+    }
+
+    public static void main(String[] args) {
+        printType("Hello"); // String of length 5: Hello
+        printType(42);      // Integer: 42
+    }
+}
+```
+
+**Expected Output:**
+```
+String of length 5: Hello
+Integer: 42
+```
+
+**Step-by-Step Explanation:** The type pattern `String s` both tests the type and binds the cast value to `s`, eliminating a manual cast.
+
+**Example 2: Switch with Type Patterns and Guards**
+
+```java
+// File: PatternSwitchDemo.java
+public class PatternSwitchDemo {
+    public static String describe(Object obj) {
+        return switch (obj) {
+            case String s when s.isEmpty() -> "Empty string";
+            case String s -> "String: " + s;
+            case Integer i when i > 100 -> "Large integer: " + i;
+            case Integer i -> "Integer: " + i;
+            default -> "Other: " + obj;
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(describe(""));    // Empty string
+        System.out.println(describe("Hi"));  // String: Hi
+        System.out.println(describe(150));   // Large integer: 150
+        System.out.println(describe(5));     // Integer: 5
+    }
+}
+```
+
+**Expected Output:**
+```
+Empty string
+String: Hi
+Large integer: 150
+Integer: 5
+```
+
+**Step-by-Step Explanation:** Guards (`when`) refine type patterns; the first matching label wins.
+
+**Example 3: Record Pattern Deconstruction**
+
+```java
+// File: RecordPatternDemo.java
+public class RecordPatternDemo {
+    record Point(int x, int y) {}
+
+    public static void printPoint(Object obj) {
+        if (obj instanceof Point(int x, int y)) {
+            System.out.println("Point at (" + x + ", " + y + ")");
+        } else {
+            System.out.println("Not a point");
+        }
+    }
+
+    public static void main(String[] args) {
+        printPoint(new Point(3, 4)); // Point at (3, 4)
+    }
+}
+```
+
+**Expected Output:**
+```
+Point at (3, 4)
+```
+
+**Step-by-Step Explanation:** The record pattern `Point(int x, int y)` deconstructs the record, binding `x` and `y` directly.
+
+### Real-World Cases
+
+- **AST Processing:** Matching on different node types in a compiler or interpreter.
+- **Event Handling:** Dispatching events based on their concrete type.
+- **Data Validation:** Checking the shape of incoming data structures.
+
+---
+
+## 9. Conditional Best Practices
+
+### Definitions
+
+**Core Definition:** Conditional best practices are guidelines for writing conditional code that is readable, maintainable, and free of common pitfalls.
+
+**Technical Definition:** Best practices include ordering conditions from most specific to least specific, using braces consistently, preferring guard clauses to deep nesting, choosing the right abstraction (if-else vs. switch vs. polymorphism), and leveraging pattern matching to eliminate `instanceof`-and-cast chains.
+
+**Beginner-Friendly Explanation:** Best practices help you write conditionals that are easy to read and less likely to contain hidden bugs.
+
+### Key Best Practices
+
+| Practice | Description |
+|----------|-------------|
+| **Order conditions specific → general** | In `else if` chains and pattern switches, place the most specific conditions first to avoid unreachable branches. |
+| **Always use braces** | Even for single statements, braces prevent bugs when code is later modified. |
+| **Use guard clauses** | Return early for invalid or edge cases to reduce nesting. |
+| **Choose the right construct** | Use `if-else` for ranges/complex conditions, `switch` for discrete constants, pattern matching for types. |
+| **Avoid `==` for String comparison** | Use `equals()` or `equalsIgnoreCase()` for strings. |
+| **Prefer arrow-based switch** | Arrow cases eliminate fall-through and the need for `break`. |
+| **Make switch exhaustive** | Cover all enum constants or include a `default` in switch expressions. |
+| **Use pattern matching instead of instanceof-cast** | `if (obj instanceof String s)` is cleaner than `if (obj instanceof String) { String s = (String) obj; ... }`. |
+| **Extract complex conditions into methods** | Named boolean methods improve readability (e.g., `isEligibleForDiscount()`). |
+| **Keep case bodies small** | Extract multi-step logic into methods to keep switch blocks readable. |
+
+### Annotated Code Example
+
+```java
+// File: ConditionalBestPractices.java
+public class ConditionalBestPractices {
+
+    // GOOD: Guard clause reduces nesting
+    public static String classify(int n) {
+        if (n < 0) {
+            return "Negative";
+        }
+        if (n == 0) {
+            return "Zero";
+        }
+        return "Positive";
+    }
+
+    // GOOD: Arrow switch expression is exhaustive and clear
+    enum Status { SUCCESS, FAILURE, PENDING }
+
+    public static String describe(Status status) {
+        return switch (status) {
+            case SUCCESS -> "Operation succeeded";
+            case FAILURE -> "Operation failed";
+            case PENDING -> "Operation pending";
+        };
+    }
+
+    // GOOD: Pattern matching replaces instanceof-and-cast
+    public static String format(Object obj) {
+        return switch (obj) {
+            case Integer i when i > 100 -> "Large integer";
+            case Integer i -> "Integer";
+            case String s -> "String: " + s;
+            default -> "Other";
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(classify(-5));               // Negative
+        System.out.println(describe(Status.SUCCESS));   // Operation succeeded
+        System.out.println(format(150));                // Large integer
+    }
+}
+```
+
+**Expected Output:**
+```
+Negative
+Operation succeeded
+Large integer
+```
+
+### Real-World Cases
+
+- **API Validation:** Using guard clauses to reject invalid input early.
+- **State Machines:** Exhaustive switch expressions over enums ensure all states are handled.
+- **Legacy Refactoring:** Replacing long `if-else-if` chains with pattern-matching switches.
 
 ---
 
 ## References Links
 
-- Oracle. "Chapter 14. Blocks, Statements, and Patterns." Java Language Specification, Java SE 21 Edition. https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html
-- Oracle. "Chapter 15. Expressions." Java Language Specification, Java SE 21 Edition. https://docs.oracle.com/javase/specs/jls/se21/html/jls-15.html
-- Oracle. "The if-then and if-then-else Statements." The Java Tutorials. https://docs.oracle.com/javase/tutorial/java/nutsandbolts/if.html
-- Runestone Academy. "If Statement Traps and Pitfalls." BHSawesome AP CSA. https://runestone.academy/ns/books/published/BHSawesome2/if-traps.html
-- CS 124. "Compound Conditionals." CS 124 Course Materials, Fall 2026. https://www.cs124.org/lessons/Fall2026/java/004_compoundconditionals
+- The if-then and if-then-else Statements — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/java/nutsandbolts/if.html
+- The switch Statement — Oracle Java Tutorials - https://docs.oracle.com/javase/tutorial/java/nutsandbolts/switch.html
+- Switch Expressions and Statements — Oracle Java SE Language Updates - https://docs.oracle.com/en/java/javase/26/language/switch-expressions-statements.html
+- Guide to the yield Keyword in Java — Baeldung - https://www.baeldung.com/java-yield-switch
+- Pattern Matching for switch — Oracle Java Language Updates - https://docs.oracle.com/en/java/javase/21/language/pattern-matching-switch.html
+- Record Patterns — Oracle Java Language Updates - https://docs.oracle.com/en/java/javase/21/language/record-patterns.html
+- Java switch Statement: Syntax, Expressions, Pattern Matching, and Best Practices — Cleverence - https://www.cleverence.com/articles/oracle-documentation/the-switch-statement-java-tutorials-4827/
+- Ternary Operator in Java — Baeldung - https://www.baeldung.com/java-ternary-operator

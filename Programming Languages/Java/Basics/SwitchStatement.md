@@ -1,810 +1,915 @@
-# Java Switch Statement: A Comprehensive Programming Cheat Sheet
- 
+# Java Switch Expressions: A Comprehensive Programming Cheat Sheet
+
+---
+
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:**
-The Java `switch` statement is a multiway selection control structure that transfers control to one of several branches based on the value of a single expression. It provides a cleaner alternative to long chains of `if-else if` statements when the condition involves equality against discrete constant values.
+**Core Definition:** A switch expression is an enhanced form of the traditional `switch` statement that evaluates to a single value, supports concise arrow labels, and enforces exhaustiveness. Pattern matching for `switch` (standard since Java 21) extends this by allowing cases to match on types, guarded conditions, and `null`.
 
-**Technical Definition:**
-Per the Java Language Specification, a `switch` statement evaluates a selector expression and compares its value against the values specified by `case` labels. The selector expression must be of type `char`, `byte`, `short`, `int`, a corresponding wrapper class, `String`, or an enum type (prior to modern preview features). The statement body, called a switch block, contains labeled statement groups or switch rules that define the possible execution paths.
+**Technical Definition:** The Java Language Specification (JLS) distinguishes between the traditional `switch` statement (colon labels, fall-through, `break`) and modern `switch` expressions/statements (arrow labels, no fall-through, `yield`). An enhanced `switch` statement or expression must be exhaustive if it uses pattern or `null` labels. The arrow form (`case L ->`) executes only the code to the right and never falls through. Pattern matching for `switch` allows case labels to contain type patterns, record patterns, and guarded patterns (`when` clauses).
 
-**Beginner-Friendly Explanation:**
-Think of a `switch` statement like a railway switchyard. A train (the expression’s value) arrives at the junction, and based on which track number (case label) matches, it is routed down that path. If no track matches, the train goes down a default path if one exists. This makes it perfect for situations where you have one value and several specific actions to choose from—like selecting a menu option by number.
+**Beginner-Friendly Explanation:** Think of `switch` as a more organised alternative to a long chain of `if-else` checks. The old `switch` works like a set of stairs — if you forget to stop (`break`), you fall down to the next step. The new `switch` expression works like a lift: you select a floor, the doors open exactly there, and you get a result. Arrow labels (`->`) eliminate the “fall-through” bug entirely. Pattern matching takes this further: instead of only matching constant values, you can say “if the object is a `Circle`, bind it to a variable and do something with it.”
 
 ### Key Characteristics
 
-- **Single-expression evaluation:** The selector expression is evaluated only once, then compared against each case constant.
-- **Discrete equality matching:** `switch` checks for exact equality; it cannot evaluate ranges or complex boolean conditions (unlike `if-else`).
-- **Fall-through behavior:** Without a `break` (or the modern `->` arrow syntax), execution continues into subsequent cases until a `break` is encountered or the switch block ends.
-- **Type restrictions:** Traditional `switch` does not support `long`, `float`, `double`, or `boolean` selector types.
-- **Two syntax styles:** The classic colon syntax (`case x:`) and the modern arrow syntax (`case x ->`) coexist; arrow syntax prevents accidental fall-through.
-- **Optional default clause:** The `default` case handles values not matched by any explicit case; it is optional but recommended.
+- **Expression Form:** Switch expressions return a value; switch statements do not.
+- **Arrow Labels:** `case L ->` eliminates fall-through and the need for `break`.
+- **`yield` Keyword:** Returns a value from a block within a switch expression.
+- **Multiple Labels:** A single case can list several comma-separated labels (`case A, B, C ->`).
+- **Exhaustiveness:** Switch expressions (and enhanced switch statements using patterns/null) must cover all possible values or include a `default`.
+- **Pattern Matching (Java 21+):** Cases can match on types, record patterns, and guarded conditions.
+- **Guarded Patterns:** `case Type t when condition ->` adds a boolean guard to a pattern.
+- **Null Handling:** `case null` can be used explicitly; without it, a `null` selector throws `NullPointerException` (except with `default` in some cases).
+- **Compile-Time Safety:** Sealed hierarchies enable exhaustiveness checks without `default`.
 
 ### Prerequisites
 
-To fully understand the Java `switch` statement, you should be familiar with:
-
-- **Java primitive data types** (`byte`, `short`, `char`, `int`) and their wrapper classes (`Byte`, `Short`, `Character`, `Integer`).
-- **Enumerated types (`enum`)** and how to define and use them.
-- **The `String` class** and string equality semantics (since `switch` on strings uses `equals()`, not `==`).
-- **Basic control flow statements:** `if-else`, `break`, and `return`.
-- **Constants and final variables**, since case labels must be compile-time constants.
+- Basic Java syntax and control flow
+- Familiarity with `switch` statements
+- Understanding of Java 14+ features (switch expressions)
+- Basic knowledge of Java 21+ pattern matching (sealed classes, records)
 
 ### Related Programming Areas
 
-- **Conditional Logic and Control Flow:** `switch` is a fundamental control structure alongside `if-else`, loops, and `try-catch`. Understanding when to use `switch` versus `if-else` is key to writing readable code.
-- **Enum-Based State Machines:** `switch` statements on enum values are a common pattern for implementing state transitions in workflows, parsers, and game logic.
-- **Pattern Matching (Modern Java):** Java 21+ introduced pattern matching for `switch`, allowing type-based dispatch, record destructuring, and guards (`when` clauses), extending `switch` far beyond constant comparison.
-- **String Processing and Command Parsing:** Switching on `String` values (since Java 7) enables elegant command dispatch in CLI tools and configuration parsers.
-- **Bytecode Optimization:** The JVM compiles `switch` on `int` and enum types into efficient `tableswitch` or `lookupswitch` instructions, which can offer performance benefits over long `if-else` chains.
+- **Pattern Matching:** Type patterns, record patterns, and guarded patterns.
+- **Sealed Classes:** Enable exhaustive switches without `default`.
+- **Records:** Record patterns in switch cases.
+- **Control Flow:** `if-else`, loops, and branching.
+- **Expression-Oriented Programming:** Switch expressions as first-class values.
 
-## Core Concept 1: The Traditional Switch Statement (Colon Syntax)
+---
 
-**Core Definition:**
-The traditional `switch` statement uses colon-labeled `case` branches and optional `break` statements to implement multiway selection. Execution falls through from one case to the next unless explicitly terminated.
+## Core Concepts / Features
 
-**Technical Definition:**
-In the colon syntax, the switch block contains one or more `SwitchBlockStatementGroup`s. Each group consists of one or more switch labels (each a `case` or `default` label) followed by a colon (`:`) and a sequence of block statements. Control enters at the matching case label and continues executing statements sequentially until a `break` statement is encountered or the switch block ends.
+---
 
-**Beginner-Friendly Explanation:**
-This is the “classic” way of writing switch statements. Each case is like a labeled doorway. When the switch finds a matching label, it enters there and keeps walking through all the open doors that follow—unless you tell it to stop by writing `break`. This “fall-through” is often a source of bugs, but it can also be used intentionally to group cases.
+## 1. Traditional Switch
 
-### Basic Case Matching with Break
+### Definitions
 
-**Definitions:**
+**Core Definition:** The traditional `switch` statement selects a branch of code based on the value of an expression, using colon labels and `break` to prevent fall-through.
 
-- **Core Definition:** Using `case` labels to match the selector value and `break` to exit the switch after executing the matched case’s statements.
-- **Technical Definition:** A `break` statement (without a label) transfers control out of the innermost enclosing `switch`, `for`, `while`, or `do` statement. In a `switch` statement, `break` terminates the switch block and continues execution at the first statement after it.
-- **Beginner-Friendly Explanation:** The `break` is like a “stop” sign at the end of each case. Without it, you’d keep executing the code for the next cases even if they didn’t match.
+**Technical Definition:** A traditional `switch` statement consists of a selector expression and a switch block containing `case` labels (`case L:`) and an optional `default` label. If a `case` matches, execution begins at that label and continues until a `break` or the end of the block (fall-through).
 
-**Purposes:**
+**Beginner-Friendly Explanation:** The old `switch` is like a staircase. You step onto the stair that matches your value. If you don’t stop (`break`), you slide down to the next stair — sometimes useful, often a bug.
 
-- To execute exactly one branch of code based on a matching value.
-- To prevent unintended fall-through into subsequent case branches.
-- To implement clean multiway selection that mirrors `if-else if` chains.
-- To improve code readability by organizing discrete value-based logic into labeled sections.
+### Purposes
 
-**Syntax Structures and Rules:**
+- To select one of many branches based on a value
+- To improve readability over long `if-else` chains
+- To support primitive, enum, and `String` selectors (with limitations)
 
-**General Syntax:**
+### Syntax Rules and Structure
+
+**Complete General Syntax:**
 
 ```java
-switch (expression) {
+switch (selector) {
     case value1:
-        // statements
+        // code
         break;
     case value2:
-        // statements
+    case value3:
+        // code for both
         break;
     default:
-        // statements
-        break;
+        // default code
 }
 ```
 
 **Component Breakdown:**
 
-- `switch`: Keyword introducing the statement.
-- `expression`: The selector expression (must be `char`, `byte`, `short`, `int`, wrapper, `String`, or enum).
-- `case value1`: A labeled branch that matches if the expression equals `value1`.
-- `break`: Terminates the switch block.
-- `default`: Optional catch-all branch for unmatched values.
-
-**Syntax Rules:**
-
-- Case values must be **compile-time constants** (literals, `final` variables, or enum constants).
-- No two case values in the same switch may be identical.
-- The `default` label is optional and can appear anywhere, though convention places it last.
-- A `break` is technically optional, but omitting it causes fall-through.
+| Component | Description |
+|-----------|-------------|
+| `selector` | An expression of type `byte`, `short`, `char`, `int`, `String`, or enum. |
+| `case L:` | A label; execution begins here if it matches. |
+| `break` | Exits the switch block. |
+| `default` | Executes if no case matches. |
 
 **Constraints and Limitations:**
 
-- **No ranges or conditions:** Case labels cannot express `case x > 10` or `case x <= 5`; only exact values are permitted.
-- **No `long`, `float`, `double`, or `boolean`:** The selector expression cannot be these types in traditional switch.
-- **No `null` handling in classic switch:** A `null` selector expression on a `String` switch throws `NullPointerException`.
+- Fall-through can cause bugs if `break` is forgotten.
+- The selector cannot be `long`, `float`, `double`, or `boolean`.
+- The selector cannot be `null` (throws `NullPointerException`).
 
-**Multiple Annotated Complete Code Examples:**
-
-**Example 1: Month Name Lookup**
+### Annotated Code Example
 
 ```java
-public class SwitchDemo {
+// File: TraditionalSwitchDemo.java
+public class TraditionalSwitchDemo {
     public static void main(String[] args) {
-        int month = 8;
-        String monthString;
+        char grade = 'B';
+        String description;
 
-        switch (month) {
-            case 1:
-                monthString = "January";
-                break;  // Exit switch after this case
-            case 2:
-                monthString = "February";
+        switch (grade) {
+            case 'A':
+                description = "Excellent";
                 break;
-            case 3:
-                monthString = "March";
+            case 'B':
+            case 'C':
+                description = "Good"; // Fall-through from 'B'
                 break;
-            case 4:
-                monthString = "April";
-                break;
-            case 5:
-                monthString = "May";
-                break;
-            case 6:
-                monthString = "June";
-                break;
-            case 7:
-                monthString = "July";
-                break;
-            case 8:
-                monthString = "August";
-                break;
-            case 9:
-                monthString = "September";
-                break;
-            case 10:
-                monthString = "October";
-                break;
-            case 11:
-                monthString = "November";
-                break;
-            case 12:
-                monthString = "December";
+            case 'D':
+                description = "Passing";
                 break;
             default:
-                monthString = "Invalid month";
-                break;  // Recommended even though it's last
+                description = "Unknown";
         }
 
-        System.out.println(monthString);
+        System.out.println(description); // Output: Good
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-August
+Good
 ```
 
-**Why This Output:**
+**Step-by-Step Explanation:**
 
-- The expression `month` evaluates to `8`.
-- The switch finds `case 8:` and executes `monthString = "August";`.
-- The `break` exits the switch, skipping all subsequent cases.
-- The result `"August"` is printed.
+1. `grade = 'B'` matches `case 'B'`.
+2. Execution falls through to `case 'C'` because there is no `break` after `'B'`.
+3. The code under `'C'` runs, setting `description = "Good"`, then `break` exits.
+4. The result is printed.
 
-**Example 2: Intentional Fall-Through for Case Grouping**
+### Real-World Cases
+
+- **Legacy Codebases:** Many existing Java projects use traditional `switch`.
+- **Simple Routing:** Quick branching on enum values where fall-through is intentional.
+
+---
+
+## 2. Switch Expression
+
+### Definitions
+
+**Core Definition:** A switch expression evaluates to a single value, using either arrow labels or colon labels with `yield`.
+
+**Technical Definition:** A switch expression is a `switch` used in an expression context. It must be exhaustive. It can use arrow labels (`case L ->`) or colon labels (`case L:`) with `yield` to produce a value.
+
+**Beginner-Friendly Explanation:** A switch expression is a `switch` that gives you something back. Instead of assigning a value inside each case, the whole `switch` becomes the value.
+
+### Purposes
+
+- To produce a value directly from a `switch`
+- To eliminate temporary variables
+- To enable switch usage in assignments, returns, and method arguments
+- To enforce exhaustiveness and reduce runtime surprises
+
+### Syntax Rules and Structure
+
+**Complete General Syntax (Arrow Form):**
 
 ```java
-public class FallThroughDemo {
-    public static void main(String[] args) {
-        int month = 2;
-        int year = 2024;
-        int numDays = 0;
-
-        switch (month) {
-            case 1:
-            case 3:
-            case 5:
-            case 7:
-            case 8:
-            case 10:
-            case 12:
-                numDays = 31;  // All these months have 31 days
-                break;
-            case 4:
-            case 6:
-            case 9:
-            case 11:
-                numDays = 30;  // All these months have 30 days
-                break;
-            case 2:
-                // February: check for leap year
-                if (((year % 4 == 0) && !(year % 100 == 0)) || (year % 400 == 0)) {
-                    numDays = 29;  // Leap year
-                } else {
-                    numDays = 28;  // Non-leap year
-                }
-                break;
-            default:
-                System.out.println("Invalid month.");
-                break;
-        }
-
-        System.out.println("Number of Days = " + numDays);
-    }
-}
-```
-
-**Expected Output:**
-
-```
-Number of Days = 29
-```
-
-**Why This Output:**
-
-- `month` is `2`, matching `case 2:`.
-- The fall-through from earlier cases does not apply because execution enters at `case 2:` directly.
-- The year `2024` is a leap year (divisible by 4, not by 100), so `numDays` becomes `29`.
-- The `break` exits and prints the result.
-
-**Real-World Cases:**
-
-1. **Menu-driven CLI applications:** Mapping numeric menu choices to actions.
-2. **Grade classification:** Converting a numeric score or letter grade to a descriptive result.
-3. **HTTP status code handling:** Dispatching behavior based on response codes (e.g., 200, 404, 500).
-4. **Leap-year and calendar calculations:** Grouping months by number of days.
-
-**References:**
-
-- Oracle Java Tutorials: The switch Statement - https://docs.oracle.com/javase/tutorial/java/nutsandbolts/switch.html
-- Java Language Specification, §14.11 The switch Statement - https://docs.oracle.com/javase/specs/jls/se11/html/jls-14.html
-
-### Switch with String Selectors
-
-**Definitions:**
-
-- **Core Definition:** Using a `String` expression as the selector in a `switch` statement, introduced in Java 7.
-- **Technical Definition:** When the selector expression is of type `String`, the compiler generates a hash-based dispatch followed by `String.equals()` comparisons to disambiguate hash collisions. The comparison is case-sensitive and uses `equals()`, not `==`.
-- **Beginner-Friendly Explanation:** You can now switch on text values, not just numbers. However, if the string is `null`, the switch will throw a `NullPointerException`, so you must check for `null` first.
-
-**Purposes:**
-
-- To dispatch behavior based on textual commands or identifiers.
-- To replace long `if-else if` chains comparing strings.
-- To improve readability when handling discrete string categories.
-- To normalize input and route it to the appropriate handler.
-
-**Syntax Structures and Rules:**
-
-**General Syntax:**
-
-```java
-switch (stringExpression) {
-    case "value1":
-        // statements
-        break;
-    case "value2":
-        // statements
-        break;
-    default:
-        // statements
-        break;
-}
-```
-
-**Component Breakdown:**
-
-- `stringExpression`: A `String` variable or expression.
-- `case "value1"`: A string literal or constant expression.
-
-**Syntax Rules:**
-
-- The selector must be of type `String` (or a subclass, though `final` semantics apply).
-- Case labels must be string **literals** or `final` string variables.
-- Comparison is case-sensitive; use `toLowerCase()` or `equalsIgnoreCase()`-style normalization before switching.
-- The switch internally uses `String.hashCode()` then `equals()` to resolve collisions.
-
-**Constraints and Limitations:**
-
-- **`NullPointerException` on null selector:** Always check for `null` before switching on a `String`.
-- **No regex or pattern matching:** Only exact string equality is supported.
-- **Performance overhead:** Hash computation and `equals()` calls add minor overhead compared to integer switches, though negligible in most applications.
-
-**Multiple Annotated Complete Code Examples:**
-
-**Example 1: String Switch with Null Check**
-
-```java
-public class StringSwitchDemo {
-    public static void main(String[] args) {
-        String month = "August";
-        int monthNumber;
-
-        // Critical: null check before switch
-        if (month == null) {
-            System.out.println("Month cannot be null");
-            return;
-        }
-
-        switch (month.toLowerCase()) {  // Normalize to lowercase
-            case "january":
-                monthNumber = 1;
-                break;
-            case "february":
-                monthNumber = 2;
-                break;
-            case "march":
-                monthNumber = 3;
-                break;
-            case "april":
-                monthNumber = 4;
-                break;
-            case "may":
-                monthNumber = 5;
-                break;
-            case "june":
-                monthNumber = 6;
-                break;
-            case "july":
-                monthNumber = 7;
-                break;
-            case "august":
-                monthNumber = 8;
-                break;
-            case "september":
-                monthNumber = 9;
-                break;
-            case "october":
-                monthNumber = 10;
-                break;
-            case "november":
-                monthNumber = 11;
-                break;
-            case "december":
-                monthNumber = 12;
-                break;
-            default:
-                monthNumber = 0;
-                break;
-        }
-
-        System.out.println("Month number: " + monthNumber);
-    }
-}
-```
-
-**Expected Output:**
-
-```
-Month number: 8
-```
-
-**Why This Output:**
-
-- The `null` check prevents `NullPointerException`.
-- `month.toLowerCase()` converts `"August"` to `"august"`.
-- The switch matches `case "august":` and sets `monthNumber = 8`.
-
-**Real-World Cases:**
-
-1. **Command-line parsers:** Dispatching on user-typed commands like `"start"`, `"stop"`, `"restart"`.
-2. **Configuration handling:** Routing based on string keys from properties files.
-3. **REST API routing:** Simple frameworks dispatch on HTTP method strings (`"GET"`, `"POST"`).
-4. **Localization:** Selecting behavior based on language codes (`"en"`, `"fr"`, `"es"`).
-
-**References:**
-
-- Oracle Java Tutorials: Using Strings in switch Statements - https://docs.oracle.com/javase/tutorial/java/nutsandbolts/switch.html
-- Java Language Specification, §14.11 The switch Statement - https://docs.oracle.com/javase/specs/jls/se11/html/jls-14.html
-
-## Core Concept 2: Modern Switch Expressions (Arrow Syntax)
-
-**Core Definition:**
-Switch expressions, introduced as a preview in Java 12 and finalized in Java 14, use arrow (`->`) syntax and can produce a value. They eliminate fall-through and can be used as expressions (assigned to variables, returned from methods).
-
-**Technical Definition:**
-A switch expression is a `SwitchExpression` that evaluates to a value. Its switch block uses `SwitchRule`s (arrow syntax) or `yield` statements. The selector expression may be any type except `long`, `float`, `double`, or `boolean` (prior to preview features). A switch expression must be **exhaustive**: all possible values must be covered, either by explicit cases or a `default` clause.
-
-**Beginner-Friendly Explanation:**
-The modern switch is like a vending machine: you put in a value, and it directly gives you back a result. There’s no risk of accidentally continuing into the next case, and you can use the whole switch as an expression—like `String result = switch (day) { ... };`.
-
-### Arrow Syntax and Exhaustiveness
-
-**Definitions:**
-
-- **Core Definition:** A switch style using `->` to separate case labels from their expressions/statements, with no fall-through and mandatory exhaustiveness for expressions.
-- **Technical Definition:** In a switch rule, `case L -> Expression`, `case L -> Block`, or `case L -> ThrowStatement` is permitted. Only one case label is allowed per switch rule. Multiple values can be combined with commas: `case 1, 2, 3 ->`.
-- **Beginner-Friendly Explanation:** The arrow means “do this and then get out.” No `break` needed. And if you’re using it to produce a value, you must cover every possible input.
-
-**Purposes:**
-
-- To prevent accidental fall-through bugs by design.
-- To enable switch to be used as an expression that returns a value.
-- To write more concise and readable multiway selection code.
-- To support exhaustiveness checking, ensuring all cases are handled.
-
-**Syntax Structures and Rules:**
-
-**General Syntax (Statement):**
-
-```java
-switch (expression) {
-    case value1 -> statement1;
-    case value2 -> statement2;
-    default -> defaultStatement;
-}
-```
-
-**General Syntax (Expression):**
-
-```java
-resultType result = switch (expression) {
-    case value1 -> expression1;
-    case value2 -> expression2;
-    default -> defaultExpression;
+Type result = switch (selector) {
+    case L1 -> expression1;
+    case L2 -> expression2;
+    default -> expressionN;
 };
 ```
 
-**General Syntax (Block with yield):**
+**Complete General Syntax (Colon + `yield`):**
 
 ```java
-resultType result = switch (expression) {
-    case value1 -> {
-        // multiple statements
-        yield value1Result;  // yield returns the value
-    }
-    case value2 -> expression2;
-    default -> defaultExpression;
+Type result = switch (selector) {
+    case L1:
+        yield expression1;
+    default:
+        yield expressionN;
 };
 ```
 
 **Component Breakdown:**
 
-- `->`: Arrow operator separating case label from body.
-- `yield`: Returns a value from a block within a switch expression.
-- Multiple labels: `case 1, 2 ->` combines cases.
+| Component | Description |
+|-----------|-------------|
+| `selector` | Same as traditional switch. |
+| `case L ->` | Arrow rule; no fall-through. |
+| `yield` | Returns a value from a block (colon form only). |
+| `default` | Required unless exhaustive by other means. |
 
 **Syntax Rules:**
 
-- No `break` is needed (or allowed) within a switch rule.
-- Fall-through does not occur between switch rules.
-- A switch expression **must** be exhaustive: all possible selector values must be covered.
-- `yield` is required only when the rule body is a block (`{ }`) and the switch is an expression.
+- A switch expression must be exhaustive.
+- Arrow rules and colon groups cannot be mixed in the same switch.
+- A block in an arrow rule must contain `yield` to produce a value.
 
-**Constraints and Limitations:**
-
-- `yield` is a **restricted identifier**: it cannot be used as a variable name in switch blocks.
-- Exhaustiveness is required for expressions but not for statements (unless enhanced).
-- The selector type restrictions still apply: no `long`, `float`, `double`, or `boolean` in traditional switch expressions.
-
-**Multiple Annotated Complete Code Examples:**
-
-**Example 1: Switch Expression with Arrow Syntax (Returning a String)**
+### Annotated Code Example
 
 ```java
+// File: SwitchExpressionDemo.java
 public class SwitchExpressionDemo {
     public static void main(String[] args) {
-        int day = 5;
+        char grade = 'B';
 
-        String dayType = switch (day) {
-            case 1, 7 -> "Weekend";        // Multiple labels
+        String description = switch (grade) {
+            case 'A' -> "Excellent";
+            case 'B', 'C' -> "Good";
+            case 'D' -> "Passing";
+            default -> "Unknown";
+        };
+
+        System.out.println(description); // Output: Good
+    }
+}
+```
+
+**Expected Output:**
+```
+Good
+```
+
+**Step-by-Step Explanation:**
+
+1. `grade = 'B'` matches the arrow rule `case 'B', 'C'`.
+2. The expression `"Good"` is the value of the switch expression.
+3. The value is assigned to `description`.
+4. No fall-through, no `break`, no temporary variable.
+
+### Real-World Cases
+
+- **Configuration Mapping:** Mapping enum values to descriptions or codes.
+- **Stream Operations:** Using switch expressions inside lambdas.
+- **Method Returns:** Returning a computed value directly.
+
+---
+
+## 3. Arrow Syntax
+
+### Definitions
+
+**Core Definition:** Arrow syntax (`case L ->`) is a concise switch label form that executes only the code to the right of the arrow, with no fall-through.
+
+**Technical Definition:** An arrow case has the form `case label_1, ..., label_n -> expression; | throw-statement; | block`. When a label matches, the code to the right executes and control leaves the switch — no subsequent cases run.
+
+**Beginner-Friendly Explanation:** The arrow is a one-way door. Once you go through it, you don’t come back to the switch. This completely eliminates the “forgot `break`” bug.
+
+### Purposes
+
+- To eliminate accidental fall-through
+- To make switch code more concise and readable
+- To allow switch expressions and statements to be used safely
+- To group multiple labels without fall-through
+
+### Syntax Rules and Structure
+
+```java
+case label -> expression;          // single expression (value in switch expression)
+case label -> throw new ...;       // throws
+case label -> { /* block */ };     // block (statement; use yield if expression)
+case A, B, C -> ...;               // multiple labels
+```
+
+**Syntax Rules:**
+
+- No `break` is needed (or allowed) after an arrow rule.
+- The right side can be an expression, a `throw`, or a block.
+- In a switch expression, a block must contain `yield` to produce a value.
+- Arrow and colon forms cannot be mixed in the same switch.
+
+**Constraints and Limitations:**
+
+- Arrow form cannot use fall-through (intentional, by design).
+- Cannot use `continue` to jump out of a switch expression.
+
+### Annotated Code Example
+
+```java
+// File: ArrowSyntaxDemo.java
+public class ArrowSyntaxDemo {
+    public static void main(String[] args) {
+        int day = 3;
+
+        String type = switch (day) {
+            case 1, 7 -> "Weekend";
             case 2, 3, 4, 5, 6 -> "Weekday";
-            default -> "Invalid day";
+            default -> throw new IllegalArgumentException("Invalid day: " + day);
         };
 
-        System.out.println("Day " + day + " is a " + dayType);
+        System.out.println(type); // Output: Weekday
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Day 5 is a Weekday
+Weekday
 ```
 
-**Why This Output:**
+**Step-by-Step Explanation:**
 
-- `day` is `5`, matching `case 2, 3, 4, 5, 6 -> "Weekday"`.
-- The arrow syntax prevents fall-through, so each branch executes independently.
+1. `day = 3` matches `case 2, 3, 4, 5, 6`.
+2. The arrow rule returns `"Weekday"`.
+3. No `break` or fall-through occurs.
+4. The result is printed.
 
-**Example 2: Switch Expression with Arrow Syntax (block and yield)**
+### Real-World Cases
+
+- **Enum Routing:** Clean mapping of enum constants to behaviour.
+- **State Machines:** Simple state transitions without fall-through bugs.
+- **Validation:** Throwing exceptions from arrow rules for invalid inputs.
+
+---
+
+## 4. `yield`
+
+### Definitions
+
+**Core Definition:** `yield` is a statement that returns a value from a block within a switch expression (or colon-form switch expression).
+
+**Technical Definition:** A `yield` statement transfers control out of a switch expression, making its operand the value of the switch expression. It is required when a switch expression uses a block or colon-form group that must produce a value.
+
+**Beginner-Friendly Explanation:** When a switch case needs multiple lines of code to compute its result, you write a block and use `yield` to say “this block’s result is this value.”
+
+### Purposes
+
+- To return a value from a multi-statement case in a switch expression
+- To support complex logic within a case while still producing a value
+- To replace the traditional “assign to a temp variable then break” pattern
+
+### Syntax Rules and Structure
 
 ```java
-public class SwitchExpressionDemo {
-    public static void main(String[] args) {
-        int month = 2;
+Type result = switch (selector) {
+    case A -> {
+        // statements
+        yield value;
+    }
+    default -> value;
+};
+```
 
-        int daysInMonth = switch (month) {
-            case 1, 3, 5, 7, 8, 10, 12 -> 31;
-            case 4, 6, 9, 11 -> 30;
-            case 2 -> {
-                int year = 2024;
-                if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
-                    yield 29;  // yield returns 29 from the block
-                } else {
-                    yield 28;
-                }
+**Syntax Rules:**
+
+- `yield` is a contextual keyword (not reserved).
+- A block in an arrow rule must contain `yield` if the switch expression needs a value.
+- A colon-form group must contain `yield` to produce a value.
+- `yield` cannot be used outside a switch expression.
+
+**Constraints and Limitations:**
+
+- A switch expression cannot complete without a value or an exception; every path must yield or throw.
+- `break`, `return`, and `continue` cannot be used to jump through a switch expression.
+
+### Annotated Code Example
+
+```java
+// File: YieldDemo.java
+public class YieldDemo {
+    public static void main(String[] args) {
+        int value = 42;
+
+        String result = switch (value) {
+            case 1, 2, 3 -> "small";
+            case 42 -> {
+                String note = "answer";
+                yield "The " + note; // yield returns the value
             }
-            default -> throw new IllegalArgumentException("Invalid month: " + month);
+            default -> "other";
         };
 
-        System.out.println("Days in month " + month + ": " + daysInMonth);
+        System.out.println(result); // Output: The answer
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Days in month 2: 29
+The answer
 ```
 
-**Why This Output:**
+**Step-by-Step Explanation:**
 
-- `month` is `2`, entering the block case. The year `2024` is a leap year, so `yield 29` returns `29`.
-- The arrow syntax prevents fall-through, so each branch executes independently.
+1. `value = 42` matches `case 42`.
+2. The block executes, creating `note = "answer"`.
+3. `yield "The " + note` returns `"The answer"` as the switch expression’s value.
+4. The result is printed.
 
-**Example 3: Exhaustiveness with Enums**
+### Real-World Cases
+
+- **Complex Calculations:** Cases that require multiple steps before returning a value.
+- **Conditional Logic:** Using `if` statements inside a case block and yielding a result.
+
+---
+
+## 5. Multiple Labels
+
+### Definitions
+
+**Core Definition:** Multiple labels allow a single case to match several values, separated by commas.
+
+**Technical Definition:** In an arrow rule, `case A, B, C ->` matches if the selector equals any of the listed labels. In colon form, multiple labels are stacked (`case A: case B:`), which implies fall-through between them.
+
+**Beginner-Friendly Explanation:** Multiple labels are like a single key that opens several locks. One case handles several values without duplicating code.
+
+### Purposes
+
+- To group related values under one case
+- To reduce code duplication
+- To make the mapping from values to behaviour explicit
+
+### Syntax Rules and Structure
 
 ```java
-enum Season { SPRING, SUMMER, FALL, WINTER }
+// Arrow form (preferred)
+case A, B, C -> action;
 
-public class EnumSwitchDemo {
-    public static void main(String[] args) {
-        Season current = Season.SUMMER;
-
-        // Enum switch expression: exhaustive without default
-        String activity = switch (current) {
-            case SPRING -> "Planting";
-            case SUMMER -> "Swimming";
-            case FALL   -> "Harvesting";
-            case WINTER -> "Skiing";
-        };
-
-        System.out.println("In " + current + ", go " + activity);
-    }
-}
+// Colon form (fall-through grouping)
+case A:
+case B:
+case C:
+    action;
+    break;
 ```
-
-**Expected Output:**
-
-```
-In SUMMER, go Swimming
-```
-
-**Why This Output:**
-
-- The enum has exactly four constants, and all four are covered.
-- The compiler recognizes exhaustiveness, so no `default` is needed.
-- If a new enum constant were added, the code would fail to compile until updated—a valuable safety feature.
-
-**Real-World Cases:**
-
-1. **API versioning:** Returning response formats based on version enums.
-2. **State machines:** Computing next states in workflow engines.
-3. **Unit conversion:** Converting between measurement systems based on unit enums.
-4. **Feature flags:** Returning boolean or configuration values based on feature name strings.
-
-**References:**
-
-- Java Language Specification, §15.28 switch Expressions - https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html
-- JEP 361: Switch Expressions - https://openjdk.org/jeps/361
-
-## Core Concept 3: Pattern Matching for switch (Modern Java)
-
-**Core Definition:**
-Pattern matching for `switch` (introduced in Java 21) allows `case` labels to contain type patterns, record patterns, and guards (`when` clauses), enabling type-based dispatch and destructuring within a single switch.
-
-**Technical Definition:**
-A `case` label may contain a `CasePattern` (a `Pattern` optionally followed by a `Guard`). Patterns include type patterns (`String s`) and record patterns (`Point(int x, int y)`). The selector expression may be any reference type. Dominance rules prevent unreachable or ambiguous patterns. Switch expressions with pattern matching must be exhaustive, often achievable without `default` when using sealed hierarchies.
-
-**Beginner-Friendly Explanation:**
-Instead of writing a chain of `if (obj instanceof String) { String s = (String) obj; ... }`, you can now write `case String s ->`. Java handles the type check and the cast for you. You can even deconstruct records directly in the case label.
-
-### Type Patterns and Guards
-
-**Definitions:**
-
-- **Core Definition:** Using `case Type variableName` to match objects of a specific type and bind them to a variable, optionally with a `when` guard condition.
-- **Technical Definition:** A type pattern `T t` matches any object that is an instance of `T` and binds the matched object to the pattern variable `t`. A guard `when Expression` further restricts the match.
-- **Beginner-Friendly Explanation:** This replaces the old `instanceof` + cast pattern. You say “if it’s a String, call it `s` and do this” all in one line.
-
-**Purposes:**
-
-- To eliminate verbose `instanceof` + cast chains.
-- To dispatch behavior based on runtime type in a type-safe manner.
-- To add conditional logic within a case using guards.
-- To improve readability of polymorphic code analysis.
-
-**Syntax Structures and Rules:**
-
-**General Syntax:**
-
-```java
-switch (object) {
-    case Type1 var1 -> // handle Type1
-    case Type2 var2 when condition -> // handle Type2 with guard
-    default -> // fallback
-}
-```
-
-**Component Breakdown:**
-
-- `Type1 var1`: Type pattern—matches if object is `Type1`, binds to `var1`.
-- `when condition`: Guard—additional boolean condition.
-- `default`: Required if not exhaustive without it.
 
 **Syntax Rules:**
 
-- Pattern variables are in scope only within their case body.
-- Guards use `when`, not `if`.
-- Dominance rules apply: a more general pattern before a more specific one causes a compile error if it dominates.
-- For a switch expression with pattern matching, exhaustiveness is required.
+- Arrow form supports comma-separated labels directly.
+- Colon form requires stacking labels and a shared `break`.
+- Labels must be distinct within a switch block (no duplicate labels).
 
-**Constraints and Limitations:**
-
-- **Preview feature in Java 17–20**, finalized in Java 21.
-- A `case` label may not have more than one pattern.
-- `case null` must be explicitly handled if the selector can be null (and if present, must precede type patterns in some versions).
-
-**Multiple Annotated Complete Code Examples:**
-
-**Example 1: Type-Based Dispatch with Guards**
+### Annotated Code Example
 
 ```java
-public class PatternSwitchDemo {
-    static String describe(Object o) {
-        return switch (o) {
-            case null -> "null value";
-            case Integer i -> "Integer: " + i;
-            case String s when s.length() > 10 -> "Long string: " + s;
-            case String s -> "Short string: " + s;
-            case Double d -> "Double: " + d;
-            default -> "Unknown type: " + o.getClass().getName();
-        };
-    }
-
+// File: MultipleLabelsDemo.java
+public class MultipleLabelsDemo {
     public static void main(String[] args) {
-        System.out.println(describe(42));
-        System.out.println(describe("Hello"));
-        System.out.println(describe("Hello, World!"));
-        System.out.println(describe(3.14));
-        System.out.println(describe(null));
+        int month = 4;
+
+        String season = switch (month) {
+            case 12, 1, 2 -> "Winter";
+            case 3, 4, 5 -> "Spring";
+            case 6, 7, 8 -> "Summer";
+            case 9, 10, 11 -> "Autumn";
+            default -> "Invalid month";
+        };
+
+        System.out.println(season); // Output: Spring
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Integer: 42
-Short string: Hello
-Long string: Hello, World!
-Double: 3.14
-null value
+Spring
 ```
 
-**Why This Output:**
+**Step-by-Step Explanation:**
 
-- `42` matches `case Integer i`.
-- `"Hello"` (length 5) fails the guard `s.length() > 10`, so it matches the next `case String s`.
-- `"Hello, World!"` (length 13) satisfies the guard and matches the first String case.
-- `3.14` matches `case Double d`.
-- `null` matches `case null`.
+1. `month = 4` matches `case 3, 4, 5`.
+2. The arrow rule returns `"Spring"`.
+3. No separate case for each month is needed.
 
-**Real-World Cases:**
+### Real-World Cases
 
-1. **JSON/XML processing:** Dispatching on node types (object, array, string, number) parsed from data.
-2. **AST (Abstract Syntax Tree) visitors:** Traversing and processing different node types in compilers.
-3. **Event handling:** Routing UI events to handlers based on event subtype.
-4. **Serialization frameworks:** Determining how to serialize objects based on their runtime types.
+- **Date Handling:** Grouping months into seasons.
+- **Status Mapping:** Mapping several HTTP status codes to one category.
+- **Enum Grouping:** Grouping enum constants by shared behaviour.
 
-**References:**
+---
 
-- Java Language Specification, §14.30 Patterns - https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html
-- JEP 441: Pattern Matching for switch - https://openjdk.org/jeps/441
+## 6. Pattern Matching for `switch`
 
-### Record Patterns and Destructuring
+### Definitions
 
-**Definitions:**
+**Core Definition:** Pattern matching for `switch` allows case labels to contain type patterns, record patterns, and guarded patterns, extending switch beyond constant matching.
 
-- **Core Definition:** Using record patterns to deconstruct record components directly in case labels.
-- **Technical Definition:** A record pattern `RecordName(ComponentType1 var1, ComponentType2 var2, ...)` matches if the object is an instance of the record and its components match the specified patterns. This enables nested destructuring.
-- **Beginner-Friendly Explanation:** If you have a `Point(int x, int y)` record, you can write `case Point(int x, int y)` and Java automatically extracts the `x` and `y` values for you.
+**Technical Definition:** Since Java 21, a switch case can use a type pattern (`case String s ->`), a record pattern (`case Point(int x, int y) ->`), or a guarded pattern (`case Integer i when i > 10 ->`). The selector must be of a reference type (or a primitive preview). Exhaustiveness rules apply when patterns are used.
 
-**Purposes:**
+**Beginner-Friendly Explanation:** Instead of only checking “is this value equal to 5?”, pattern matching lets you check “is this object a `String`? If so, bind it to `s` and run this code.” It’s like having a smart sorting machine that recognises the type and shape of each item.
 
-- To extract record components without accessor method calls.
-- To perform nested pattern matching on complex data structures.
-- To write concise case analysis for algebraic data types.
-- To improve readability when working with records.
+### Purposes
 
-**Syntax Structures and Rules:**
+- To replace `if (x instanceof Type)` + cast chains with concise switch cases
+- To deconstruct records directly in case labels
+- To handle heterogeneous data types uniformly
+- To enable exhaustiveness checking with sealed hierarchies
 
-**General Syntax:**
+### Syntax Rules and Structure
 
 ```java
-switch (point) {
-    case Point(int x, int y) when x == 0 && y == 0 -> "Origin";
-    case Point(int x, int y) -> "Point at (" + x + ", " + y + ")";
-    default -> "Not a point";
+switch (obj) {
+    case String s -> ...;                // Type pattern
+    case Point(int x, int y) -> ...;     // Record pattern
+    case Integer i when i > 10 -> ...;   // Guarded pattern
+    case null -> ...;                     // Null case
+    default -> ...;
 }
 ```
 
-**Component Breakdown:**
-
-- `Point(int x, int y)`: Record pattern matching `Point` and binding `x`, `y`.
-- Components can themselves be patterns for nested destructuring.
-
 **Syntax Rules:**
 
-- Record patterns work with records that have **canonical constructors**.
-- Nested patterns are allowed: `case Line(Point(int x1, int y1), Point(int x2, int y2)) ->`.
-- Guards can use the extracted components.
+- Type patterns bind a variable (`s`) of the matched type.
+- Record patterns deconstruct records into their components.
+- Guarded patterns use `when` to add a boolean condition.
+- The selector can be any reference type (or primitive preview).
+- If any pattern or `null` label is used, the switch must be exhaustive.
 
 **Constraints and Limitations:**
 
-- Only works with `record` types, not arbitrary classes.
-- Component patterns must match the record’s component types.
-- Requires Java 21+ (finalized; preview in Java 19–20).
+- Pattern matching for `switch` is standard in Java 21+.
+- Dominance rules: a more specific pattern must precede a more general one.
+- Guarded patterns do not contribute to exhaustiveness (an unguarded fallback is required).
 
-**Multiple Annotated Complete Code Examples:**
-
-**Example 1: Record Destructuring in Switch**
+### Annotated Code Example
 
 ```java
-record Point(int x, int y) {}
-record Circle(Point center, int radius) {}
+// File: PatternMatchingSwitchDemo.java
+public class PatternMatchingSwitchDemo {
+    sealed interface Shape permits Circle, Rectangle {}
+    record Circle(double radius) implements Shape {}
+    record Rectangle(double width, double height) implements Shape {}
 
-public class RecordPatternDemo {
-    static String describe(Object shape) {
+    static double area(Shape shape) {
         return switch (shape) {
-            case Point(int x, int y) when x == 0 && y == 0 -> "Origin";
-            case Point(int x, int y) when x > 0 && y > 0 -> "First quadrant";
-            case Point(int x, int y) -> "Point(" + x + ", " + y + ")";
-            case Circle(Point(int cx, int cy), int r) ->
-                "Circle at (" + cx + ", " + cy + ") with radius " + r;
-            default -> "Unknown shape";
-        };
+            case Circle(double r) -> Math.PI * r * r;
+            case Rectangle(double w, double h) -> w * h;
+        }; // exhaustive — no default needed
     }
 
     public static void main(String[] args) {
-        System.out.println(describe(new Point(0, 0)));
-        System.out.println(describe(new Point(3, 4)));
-        System.out.println(describe(new Circle(new Point(1, 2), 5)));
+        Shape circle = new Circle(5);
+        Shape rect = new Rectangle(4, 3);
+
+        System.out.println("Circle area: " + area(circle));
+        System.out.println("Rectangle area: " + area(rect));
     }
 }
 ```
 
 **Expected Output:**
-
 ```
-Origin
-First quadrant
-Circle at (1, 2) with radius 5
+Circle area: 78.53981633974483
+Rectangle area: 12.0
 ```
 
-**Why This Output:**
+**Step-by-Step Explanation:**
 
-- `new Point(0, 0)` matches the guard `x == 0 && y == 0`.
-- `new Point(3, 4)` fails the origin guard, then matches `x > 0 && y > 0`.
-- `new Circle(new Point(1, 2), 5)` matches the nested record pattern, extracting `cx=1`, `cy=2`, `r=5`.
+1. `Shape` is sealed, permitting only `Circle` and `Rectangle`.
+2. The switch uses record patterns to deconstruct each type.
+3. No `default` is needed because the sealed hierarchy is fully covered.
+4. The compiler enforces exhaustiveness.
 
-**Real-World Cases:**
+### Real-World Cases
 
-1. **Geometric computations:** Processing points, lines, circles, and polygons with pattern matching.
-2. **Expression evaluators:** Matching on AST record types for arithmetic expressions.
-3. **Configuration parsing:** Extracting nested configuration records from parsed data.
-4. **Game development:** Handling entity types with positional records.
+- **AST Processing:** Matching different node types in a compiler.
+- **Event Handling:** Dispatching on event subtypes.
+- **Data Validation:** Matching and validating different record shapes.
 
-**References:**
+---
 
-- JEP 440: Record Patterns - https://openjdk.org/jeps/440
-- Java Language Specification, §14.30.3 Record Patterns - https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html
+## 7. Guarded Patterns
 
-## Summary Table: Switch Variants
+### Definitions
 
-| Feature           | Syntax                | Fall-Through?       | Exhaustiveness           | Java Version |
-| ----------------- | --------------------- | ------------------- | ------------------------ | ------------ |
-| Classic switch    | `case x:` + `break`   | Yes (without break) | Not required             | 1.0+         |
-| String switch     | `case "text":`        | Yes                 | Not required             | 7+           |
-| Switch expression | `case x ->` + `yield` | No                  | Required                 | 14+          |
-| Pattern matching  | `case Type t ->`      | No                  | Required for expressions | 21+          |
-| Record patterns   | `case Rec(int a) ->`  | No                  | Required for expressions | 21+          |
+**Core Definition:** A guarded pattern adds a boolean condition (`when`) to a pattern, so the case matches only if both the pattern matches and the guard evaluates to `true`.
+
+**Technical Definition:** A guarded pattern has the form `case Pattern when Expr ->`. The pattern is matched first; if it succeeds, the guard `Expr` is evaluated. If the guard is `false`, the case does not match and the next case is tried.
+
+**Beginner-Friendly Explanation:** A guarded pattern is a pattern with a filter. “Match this type, but only if this extra condition is true.”
+
+### Purposes
+
+- To add conditions to type or record patterns
+- To express range checks or validity checks inline
+- To avoid nested `if` statements inside cases
+
+### Syntax Rules and Structure
+
+```java
+case Integer i when i > 10 -> "big";
+case Integer i -> "small";
+```
+
+**Syntax Rules:**
+
+- `when` is a contextual keyword.
+- The guard is a boolean expression.
+- Guarded patterns do not count toward exhaustiveness; an unguarded fallback (or `default`) is required.
+- The pattern variable is in scope in the guard.
+
+**Constraints and Limitations:**
+
+- Guarded patterns are not considered for exhaustiveness computation.
+- The compiler does not reason about complementary guards (e.g., `i > 0` and `i <= 0`).
+
+### Annotated Code Example
+
+```java
+// File: GuardedPatternDemo.java
+public class GuardedPatternDemo {
+    static String classify(Object obj) {
+        return switch (obj) {
+            case null -> "null";
+            case Integer i when i > 100 -> "large integer: " + i;
+            case Integer i -> "integer: " + i;
+            case String s when s.isBlank() -> "blank string";
+            case String s -> "string: " + s;
+            default -> "other";
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(classify(150));   // large integer: 150
+        System.out.println(classify(42));    // integer: 42
+        System.out.println(classify("  "));  // blank string
+        System.out.println(classify("hello")); // string: hello
+        System.out.println(classify(null));  // null
+    }
+}
+```
+
+**Expected Output:**
+```
+large integer: 150
+integer: 42
+blank string
+string: hello
+null
+```
+
+**Step-by-Step Explanation:**
+
+1. `150` matches `Integer i` and the guard `i > 100` is `true` → “large integer”.
+2. `42` matches `Integer i` but the guard is `false`; the next case `Integer i` matches.
+3. `"  "` matches `String s` and the guard `s.isBlank()` is `true` → “blank string”.
+4. `"hello"` matches `String s` but the guard is `false`; the next case matches.
+5. `null` matches `case null`.
+
+### Real-World Cases
+
+- **Validation:** Checking ranges or formats inline.
+- **Domain Rules:** Applying business conditions in pattern matching.
+- **Parsing:** Matching tokens only if they meet syntactic constraints.
+
+---
+
+## 8. Null Handling
+
+### Definitions
+
+**Core Definition:** `switch` expressions and pattern-matching switch statements can handle `null` explicitly via `case null`, or indirectly through `default` (in some contexts). Without explicit handling, a `null` selector throws `NullPointerException`.
+
+**Technical Definition:** A `case null` label matches a `null` selector. A total pattern (a pattern that matches all values of the selector type) also matches `null` in Java 21+. If no `null`-compatible label exists, a `null` selector causes `NullPointerException` (except for older switch semantics).
+
+**Beginner-Friendly Explanation:** `null` is a special value. The new switch lets you say `case null -> "it's null"` instead of crashing. If you don’t handle `null`, the switch will throw an exception when the value is `null`.
+
+### Purposes
+
+- To handle `null` gracefully without separate `if (x == null)` checks
+- To make `null` handling explicit and readable
+- To avoid `NullPointerException` in switch expressions
+
+### Syntax Rules and Structure
+
+```java
+switch (obj) {
+    case null -> "null";
+    case String s -> "string";
+    default -> "other";
+}
+```
+
+**Syntax Rules:**
+
+- `case null` must appear before `default` (or anywhere, but dominance rules apply).
+- A `case null` label counts toward exhaustiveness.
+- A total pattern (e.g., `case Object o ->`) also matches `null` in Java 21+.
+
+**Constraints and Limitations:**
+
+- Without `case null` or a total pattern, a `null` selector throws `NullPointerException`.
+- `case null` cannot be combined with other labels in a comma-separated list (in some versions).
+
+### Annotated Code Example
+
+```java
+// File: NullSwitchDemo.java
+public class NullSwitchDemo {
+    static String describe(String s) {
+        return switch (s) {
+            case null -> "null value";
+            case "" -> "empty string";
+            default -> "string of length " + s.length();
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(describe(null));  // null value
+        System.out.println(describe(""));    // empty string
+        System.out.println(describe("hi"));  // string of length 2
+    }
+}
+```
+
+**Expected Output:**
+```
+null value
+empty string
+string of length 2
+```
+
+**Step-by-Step Explanation:**
+
+1. `null` matches `case null`.
+2. `""` matches `case ""`.
+3. `"hi"` matches `default`.
+
+### Real-World Cases
+
+- **API Responses:** Handling nullable fields from external services.
+- **Optional Alternatives:** Using switch instead of `Optional` checks.
+- **Data Cleaning:** Classifying values including `null`.
+
+---
+
+## 9. Exhaustiveness
+
+### Definitions
+
+**Core Definition:** A switch is exhaustive if it covers all possible values of the selector, either through explicit cases or a `default`. Switch expressions must be exhaustive; enhanced switch statements using patterns or `null` must also be exhaustive.
+
+**Technical Definition:** The compiler checks exhaustiveness by computing the type coverage of the switch labels. A `default` label covers all types. A sealed hierarchy is exhaustive if all permitted subtypes are covered. A `case null` label is required for `null` coverage unless a total pattern is present.
+
+**Beginner-Friendly Explanation:** Exhaustiveness means “no value can slip through the cracks.” The compiler forces you to handle every possibility. This is especially powerful with sealed classes: if you add a new subtype, the compiler tells you exactly which switches need updating.
+
+### Purposes
+
+- To prevent runtime surprises from unhandled values
+- To enable safe evolution of sealed hierarchies
+- To eliminate the need for `default` in many cases
+- To make switch logic complete and verifiable at compile time
+
+### Syntax Rules and Structure
+
+**Exhaustiveness Mechanisms:**
+
+| Mechanism | Covers |
+|-----------|--------|
+| `default` | All remaining values |
+| All enum constants | All values of the enum |
+| All permitted subtypes of a sealed type | All instances of the sealed type |
+| `case null` | The `null` value |
+| Total pattern (`case Object o`) | All values including `null` (Java 21+) |
+
+**Syntax Rules:**
+
+- Switch expressions require exhaustiveness.
+- Enhanced switch statements using patterns or `null` require exhaustiveness.
+- Traditional switch statements (colon labels, no patterns) are not required to be exhaustive.
+
+**Constraints and Limitations:**
+
+- Guarded patterns do not count toward exhaustiveness.
+- If a sealed hierarchy changes and is not recompiled with the switch, a `MatchException` may be thrown at runtime.
+- Floating-point representationally equivalent labels are rejected as duplicates.
+
+### Annotated Code Example
+
+```java
+// File: ExhaustivenessDemo.java
+public class ExhaustivenessDemo {
+    sealed interface Result permits Success, Failure {}
+    record Success(String data) implements Result {}
+    record Failure(String error) implements Result {}
+
+    static String handle(Result result) {
+        return switch (result) {
+            case Success(String data) -> "OK: " + data;
+            case Failure(String error) -> "ERROR: " + error;
+            // No default needed — exhaustive over sealed hierarchy
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(handle(new Success("data")));
+        System.out.println(handle(new Failure("oops")));
+    }
+}
+```
+
+**Expected Output:**
+```
+OK: data
+ERROR: oops
+```
+
+**Step-by-Step Explanation:**
+
+1. `Result` is sealed, permitting only `Success` and `Failure`.
+2. The switch covers both permitted subtypes.
+3. The compiler verifies exhaustiveness; no `default` is required.
+4. If a new subtype were added to `Result`, the switch would fail to compile until updated.
+
+### Real-World Cases
+
+- **Domain Modelling:** Sealed hierarchies with exhaustive pattern matching.
+- **Compiler Design:** AST node handling with sealed types.
+- **State Machines:** Exhaustive state transitions.
+
+---
+
+## 10. Switch Best Practices
+
+### Definitions
+
+**Core Definition:** Switch best practices are guidelines for using switch expressions and statements safely, concisely, and maintainably.
+
+**Technical Definition:** Best practices derive from the JLS, JEPs, and community experience. Key principles include preferring arrow labels to eliminate fall-through, using switch expressions when a value is needed, handling `null` explicitly, leveraging sealed hierarchies for exhaustiveness, and keeping case logic simple.
+
+**Beginner-Friendly Explanation:** Best practices help you avoid the classic `switch` bugs (fall-through, missing `default`, `null` crashes) and write code that is easy to read and evolve.
+
+### Key Best Practices Table
+
+| Practice | Description |
+|----------|-------------|
+| Prefer arrow labels (`->`) | Eliminates fall-through and the need for `break`. |
+| Use switch expressions for values | Avoid temporary variables; return values directly. |
+| Handle `null` explicitly | Use `case null` when the selector may be `null`. |
+| Leverage sealed hierarchies | Enable exhaustiveness without `default`. |
+| Avoid guarded patterns for exhaustiveness | Guards do not count toward coverage; provide an unguarded fallback. |
+| Use `yield` only when necessary | Single expressions do not need a block or `yield`. |
+| Do not mix arrow and colon forms | Choose one style per switch block. |
+| Keep cases focused | Avoid overly complex logic inside a single case. |
+| Order cases by dominance | More specific patterns must precede more general ones. |
+| Recompile after changing sealed hierarchies | Avoid `MatchException` at runtime. |
+
+### Annotated Complete Step-by-Step Code Examples
+
+```java
+// File: SwitchBestPractices.java
+public sealed interface Payment permits Card, Cash, Wallet {}
+record Card(String number) implements Payment {}
+record Cash(double amount) implements Payment {}
+record Wallet(String id, double balance) implements Payment {}
+
+public class SwitchBestPractices {
+    // BEST PRACTICE: Arrow labels + sealed exhaustiveness (no default)
+    static String describe(Payment p) {
+        return switch (p) {
+            case Card(String n) -> "Card ending " + n.substring(n.length() - 4);
+            case Cash(double a) -> "Cash: $" + a;
+            case Wallet(String id, double b) -> "Wallet " + id + ": $" + b;
+        };
+    }
+
+    // BEST PRACTICE: Explicit null handling with guard
+    static String safeDescribe(Payment p) {
+        return switch (p) {
+            case null -> "No payment";
+            case Card(String n) -> "Card";
+            case Cash(double a) when a > 100 -> "Large cash";
+            case Cash(double a) -> "Cash";
+            case Wallet(String id, double b) -> "Wallet";
+        };
+    }
+
+    public static void main(String[] args) {
+        System.out.println(describe(new Card("1234567890123456")));
+        System.out.println(describe(new Cash(50)));
+        System.out.println(describe(new Wallet("W1", 200)));
+        System.out.println(safeDescribe(null));
+    }
+}
+```
+
+**Expected Output:**
+```
+Card ending 3456
+Cash: $50.0
+Wallet W1: $200.0
+No payment
+```
+
+**Step-by-Step Explanation:**
+
+1. Arrow labels are used throughout — no fall-through.
+2. Record patterns deconstruct each `Payment` subtype.
+3. The sealed hierarchy makes `describe` exhaustive without `default`.
+4. `safeDescribe` handles `null` explicitly and uses a guard (`when a > 100`).
+5. Best practices are applied consistently.
+
+### Real-World Cases
+
+- **Domain-Driven Design:** Exhaustive switches over sealed domain types.
+- **API Response Handling:** Explicit `null` and error case handling.
+- **Configuration Mapping:** Concise mapping with multiple labels and arrows.
+
+---
 
 ## References
 
-1. Oracle Java Tutorials: The switch Statement - https://docs.oracle.com/javase/tutorial/java/nutsandbolts/switch.html
-2. Java Language Specification, §14.11 The switch Statement - https://docs.oracle.com/javase/specs/jls/se11/html/jls-14.html
-3. Java Language Specification, §15.28 switch Expressions - https://docs.oracle.com/javase/specs/jls/se17/html/jls-15.html
-4. JEP 361: Switch Expressions - https://openjdk.org/jeps/361
-5. JEP 441: Pattern Matching for switch - https://openjdk.org/jeps/441
-6. JEP 440: Record Patterns - https://openjdk.org/jeps/440
-7. Runestone Academy: Java, Java, Java - Switch Multiway Selection - https://runestone.academy/ns/books/published/javajavajava/switch.html
-8. Kansas State University CIS 200: Switch Statements - https://textbooks.cs.ksu.edu/cis200/02-conditionals/02_4-switchstatements/index.print.html
-9. ISO/IEC JTC 1/SC 22/WG 23 N1469: Notes on Java Switch Statement - https://www.rap.no/JTC1/SC22/WG23/docs/ISO-IECJTC1-SC22-WG23_N1469-notes-on-java-switch-stmt-EP-SM-20250218.pdf
+- Java Language Updates — Switch Expressions and Statements, Oracle (Java SE 26) — https://docs.oracle.com/en/java/javase/26/language/switch-expressions-statements.html
+- Java Language Updates — Pattern Matching for `switch`, Oracle (Java SE 26) — https://docs.oracle.com/en/java/javase/26/language/pattern-matching-switch.html
+- Java Language Specification, §14.11 The `switch` Statement — https://docs.oracle.com/javase/specs/jls/se21/html/jls-14.html
+- JEP 361: Switch Expressions — OpenJDK — https://openjdk.org/jeps/361
+- JEP 441: Pattern Matching for `switch` — OpenJDK — https://openjdk.org/jeps/441
+- JEP 406: Pattern Matching for `switch` (Preview) — OpenJDK — https://openjdk.org/jeps/406
+- Pattern Matching for `switch` — Changes to the JLS (Java 17 preview) — https://docs.oracle.com/javase/specs/jls/se17/preview/specs/patterns-switch-jls.html
+- Java switch Statement: Syntax, Expressions, Pattern Matching, and Best Practices — Cleverence — https://www.cleverence.com/articles/oracle-documentation/the-switch-statement-java-tutorials-4827/
+- The Art of Code — Chapter 4: Expressiveness with patterns and the enhanced switch — Manning — https://www-qa.manning.com/preview/the-art-of-code/chapter-4
+- Modern Java idioms by release — GitHub Copilot Skill — https://github.com/github/awesome-copilot/blob/18362138723066ce0dbaf7976d1a2921e79a54e4/skills/java-development/references/modern-java.md
+- Java 21 guarded pattern exhaustiveness — Stack Overflow — https://stackoverflow.com/questions/77189424/java-21-guarded-pattern-exhaustiveness

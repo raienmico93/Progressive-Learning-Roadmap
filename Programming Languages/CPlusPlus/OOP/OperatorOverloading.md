@@ -1,4 +1,4 @@
-# C++ Operator Overloading Fundamentals & Semantics — Comprehensive Cheat Sheet
+# Operator Overloading in Classes — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -7,1950 +7,1283 @@
 ### Definitions
 
 **Core Definition**
-Operator overloading is a C++ feature that allows programmers to redefine the behavior of built-in operators (such as `+`, `==`, `<<`) for user-defined types, enabling those types to be used with the same syntax and semantics as fundamental types.
+Operator overloading is a C++ feature that allows programmers to define the behavior of standard operators (such as `+`, `==`, `<<`, `[]`, `()`) for user-defined types, making class objects behave like built-in types.
 
 **Technical Definition**
-When an operator appears in an expression and at least one of its operands has a class type or an enumeration type, overload resolution is used to determine the user-defined function to be called among all functions whose signatures match the operator syntax. An overloaded operator is a function with a special name: `operator` followed by the operator symbol (e.g., `operator+`, `operator==`). An operator function must either be a non-static member function or be a non-member function with at least one parameter whose type is a class, a reference to a class, an enumeration, or a reference to an enumeration.
+Operator overloading is implemented by defining functions with special names (`operator+`, `operator==`, `operator<<`, etc.). These functions can be **member functions**, **non-member functions**, or **friend functions**. The operator's meaning is resolved through overload resolution, which considers both the operator's built-in meanings and user-defined overloads. Certain operators cannot be overloaded (`::`, `.`, `.*`, `?:`, `sizeof`, `typeid`, `alignof`, `noexcept`, `static_cast`, `dynamic_cast`, `reinterpret_cast`, `const_cast`, `co_await`); others must be members (`=`, `[]`, `()`, `->`, `->*`, conversion functions). The C++ Core Guidelines provide extensive rules on operator overloading: **C.160** (define operators primarily to mimic conventional usage), **C.161** (use nonmember functions for symmetric operators), **C.162** (overload operations that are roughly equivalent), **C.163** (overload only for operations that are roughly equivalent), **C.164** (avoid implicit conversions), **C.165** (use `==` when appropriate), **C.166** (overload `==` to compare equivalent values), **C.167** (overload `==` and `!=` consistently), **C.168** (define `==` and `!=` together), **C.170** (use `operator<<` for stream output), and **C.171** (avoid `operator` abuse).
 
 **Beginner-Friendly Explanation**
-When you write `a + b` for two integers, C++ knows what to do. But if `a` and `b` are your own custom objects — say, two `Vector2D` objects — the compiler doesn't inherently know how to add them. Operator overloading lets you teach the compiler what `+` means for your type. You write a function called `operator+`, and from then on, you can write `v1 + v2` just like you would with numbers. The same applies to comparison operators (`==`, `<`), stream operators (`<<`), and many others.
-
----
+Operator overloading lets you use familiar symbols like `+`, `==`, and `<<` with your own classes. For example, you can define `operator+` for a `Complex` class so that `a + b` adds two complex numbers, or `operator<<` for a `Point` class so that `std::cout << p` prints it. It makes your types feel natural and readable. But with great power comes responsibility: only overload operators when the meaning is **obvious and intuitive**, and follow conventional patterns so other programmers aren't surprised.
 
 ### Key Characteristics
 
-- **Member or non-member**: Overloaded operators can be implemented as member functions or free functions.
-- **At least one user-defined operand**: A non-member operator function must have at least one parameter of class or enumeration type.
-- **Cannot change arity or precedence**: You cannot change the number of operands, the precedence, or the associativity of an operator.
-- **No default arguments**: Operator functions cannot have default arguments (except `operator()`).
-- **`::`, `.`, `.*`, `?:` cannot be overloaded**.
-- **C++20 spaceship operator**: The three-way comparison operator `<=>` automatically generates all six relational operators from a single definition.
-- **Best practices**: Overload operators judiciously; define them only when their meaning is obvious and unsurprising.
-
----
+- **Natural syntax**: Overloaded operators let user-defined types use familiar notation.
+- **Multiple forms**: Member, non-member, and friend functions can implement operators.
+- **Restrictions**: Some operators cannot be overloaded; some must be members.
+- **Conventional semantics**: Operators should mimic their built-in meanings.
+- **Symmetry**: Non-member functions are often better for symmetric binary operators.
+- **Implicit conversions**: Member operators may cause asymmetric conversions; non-members can avoid this.
+- **Consistency**: Related operators (`==`/`!=`, `+`/`+=`, `<`/`>`) should be consistent.
 
 ### Prerequisites
 
-- Solid understanding of classes, member functions, and free functions.
-- Familiarity with constructors, copy/move semantics, and the Rule of Three/Five.
-- Knowledge of references, `const` correctness, and rvalue references.
-- (For C++20 features) A compiler supporting C++20: GCC 10+, Clang 10+, or MSVC 2019 16.3+.
-
----
+- Understanding of classes, member functions, and access control.
+- Familiarity with function overloading and overload resolution.
+- Knowledge of references, const-correctness, and value semantics.
+- Basic awareness of friend functions and templates.
 
 ### Related Programming Areas
 
-- **Class design** (value semantics, resource management).
-- **Templates and generic programming** (operator overloads in template classes).
-- **Stream I/O** (`std::ostream`, `std::istream`).
-- **Smart pointers** (`operator*`, `operator->`).
-- **Functors and lambdas** (`operator()`).
-- **Comparison and sorting** (`operator<`, `operator<=>`).
-
----
+- **Classes and objects** – operators are functions that operate on objects.
+- **Overload resolution** – the compiler selects the best operator function.
+- **Templates** – operators can be templated (e.g., `operator<<` for any type).
+- **Standard library** – stream operators, comparison operators, and arithmetic operators are heavily overloaded.
+- **C++20 spaceship operator** – `<=>` provides a unified comparison mechanism.
+- **Design patterns** – operators are used in many library interfaces (iterators, smart pointers).
 
 ### Core Concepts / Features
 
-1. **Arithmetic Operators** (`+`, `-`, `*`, `/`, `%`) and Compound Assignments (`+=`, `-=`, etc.)
-2. **Comparison Operators** (Traditional `==`, `!=`, `<`, `>`, `<=`, `>=` vs. Modern C++20)
-3. **The Spaceship Operator** (`<=>`) and Comparison Categories (`std::strong_ordering`, `std::weak_ordering`, `std::partial_ordering`)
-4. **Defaulted Comparison Operators** (`= default`)
-5. **Stream Insertion and Extraction Operators** (`<<`, `>>`)
-6. **Assignment Operators** (Copy and Move Assignment)
-7. **Increment/Decrement Operators** (Prefix vs. Postfix Dummy Parameter)
-8. **Function-Call Operator** (`()`) and Its Relation to Functors and Lambdas
-9. **Subscript Operator** (`[]`) and Multi-Dimensional Subscripting (C++23)
-10. **Smart Pointer Operators** (Dereference `*` and Member Selection `->`)
-11. **Conversion Operators** (Implicit vs. Explicit)
-12. **Memory Management Operators** (`new`, `delete`, `new[]`, `delete[]`)
+1. Member Operator Overloading
+2. Non-Member Operator Overloading
+3. Friend Operator Overloading
+4. Comparison Operators
+5. Arithmetic Operators
+6. Assignment Operators
+7. Stream Operators
+8. Subscript Operators
+9. Function Call Operators
+10. Conversion Operators
+11. Increment/Decrement Operators
+12. Operator Overloading Best Practices
 
 ---
 
-## 1. Arithmetic Operators and Compound Assignments
+## 1. Member Operator Overloading
 
 ### Definitions
 
 **Core Definition**
-Arithmetic operators (`+`, `-`, `*`, `/`, `%`) perform mathematical operations on user-defined types. Compound assignment operators (`+=`, `-=`, `*=`, `/=`, `%=`) combine an arithmetic operation with assignment.
+Member operator overloading defines an operator as a **non-static member function** of a class, with the left-hand operand as the implicit `*this` object.
 
 **Technical Definition**
-Binary arithmetic operators are typically implemented as non-member functions to allow implicit conversions on both operands. The canonical pattern is to implement the compound assignment operators as member functions and the binary arithmetic operators in terms of the compound assignments. For example, `operator+` can be implemented as `a += b; return a;` where `a` is a copy of the left operand.
+A member operator function is declared inside the class as `return_type operator@(parameters)`. The left-hand operand is the object on which the operator is called (the `*this` object); the right-hand operand(s) are the function parameters. Certain operators **must** be members: `=`, `[]`, `()`, `->`, `->*`, and conversion functions. Member operators are often used for mutating operators (`+=`, `-=`, `++`) and operators that require direct access to the object's state.
 
 **Beginner-Friendly Explanation**
-If you have a `Complex` number class, you want to write `c1 + c2` and `c1 += c2`. The `+=` operator modifies the object in place, while `+` creates a new object. Implementing `+` in terms of `+=` reduces code duplication and ensures consistency.
+A member operator is an operator defined **inside the class**. The object on the left of the operator is the object itself, and the object on the right is passed as a parameter. For example, `a += b` calls `a.operator+=(b)`.
 
----
+### Purposes
 
-### Purposes (all begin with "To")
-
-- **To** enable mathematical notation for user-defined types.
-- **To** provide intuitive syntax for operations like addition, subtraction, multiplication, and division.
-- **To** allow user-defined types to interoperate with algorithms and expressions that expect arithmetic operations.
-- **To** reduce code duplication by implementing binary operators in terms of compound assignments.
-- **To** support mixed-type arithmetic through implicit conversions.
-
----
+- To implement operators that modify the object (`+=`, `++`, `=`, `[]`).
+- To provide direct access to private members.
+- To satisfy the requirement that certain operators be members.
+- To implement operators that logically belong to the class.
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntaxes with Breakdowns
-
-**Member compound assignment:**
+**General Syntax**
 ```cpp
-class T {
+class X {
 public:
-    T& operator+=(const T& rhs) {
-        // modify *this
-        return *this;
-    }
+    X& operator+=(const X& rhs);       // binary member
+    X& operator++();                    // prefix increment
+    X operator++(int);                  // postfix increment
+    int& operator[](std::size_t i);     // subscript (must be member)
+    int operator()(int arg);            // function call (must be member)
 };
 ```
-- `operator+=` — modifies the left operand and returns a reference to it.
 
-**Non-member binary arithmetic:**
-```cpp
-T operator+(T lhs, const T& rhs) {
-    lhs += rhs;
-    return lhs;
-}
-```
-- `lhs` is taken by value (a copy), modified, and returned.
+**Component Breakdown**
 
-#### Syntax Rules
+| Form | Meaning |
+|------|---------|
+| `operator+=(const X&)` | Binary member operator (`a += b`). |
+| `operator++()` | Prefix increment. |
+| `operator++(int)` | Postfix increment (dummy `int` parameter). |
+| `operator[]` | Subscript (must be member). |
+| `operator()` | Function call (must be member). |
 
-- Binary arithmetic operators can be member or non-member functions.
-- Compound assignment operators should be member functions (they modify the left operand).
-- Non-member binary operators should take the left operand by value if it will be modified and returned.
-- Return a reference from compound assignments (`T&`) and a value from binary operators (`T`).
+**Syntax Rules**
+- The left-hand operand is the implicit `*this` object.
+- The right-hand operand is the parameter.
+- Unary member operators take no parameters (except postfix `++`/`--` with a dummy `int`).
+- Certain operators must be members: `=`, `[]`, `()`, `->`, `->*`, conversion functions.
+- Member operators are often declared `const` when they don't modify the object.
 
-#### Constraints and Limitations
+**Constraints and Limitations**
+- Member operators may cause asymmetric implicit conversions (the left operand must be an object of the class).
+- Binary symmetric operators (e.g., `==`, `+`) are often better as non-members.
+- Member operators cannot be used if the left operand is not of the class type.
 
-- `%` is typically meaningful only for integral types, but can be overloaded for user-defined types.
-- Overloading arithmetic operators for types where the operation is not mathematically meaningful leads to confusing code.
-- Mixed-type operations require careful handling of conversions.
+### Annotated Code Examples
 
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Complex Number Arithmetic
+**Example 1: Member arithmetic and assignment operators**
 
 ```cpp
 #include <iostream>
 
 class Complex {
+    double real_, imag_;
 public:
-    Complex(double re = 0, double im = 0) : re_(re), im_(im) {}
+    Complex(double r = 0, double i = 0) : real_(r), imag_(i) {}
 
-    // Compound assignment (member)
-    Complex& operator+=(const Complex& rhs) {
-        re_ += rhs.re_;
-        im_ += rhs.im_;
+    Complex& operator+=(const Complex& rhs) {   // member +=
+        real_ += rhs.real_;
+        imag_ += rhs.imag_;
         return *this;
     }
 
-    Complex& operator-=(const Complex& rhs) {
-        re_ -= rhs.re_;
-        im_ -= rhs.im_;
-        return *this;
-    }
-
-    void print() const {
-        std::cout << re_ << (im_ >= 0 ? "+" : "") << im_ << "i" << std::endl;
-    }
-
-private:
-    double re_, im_;
+    double real() const { return real_; }
+    double imag() const { return imag_; }
 };
 
-// Binary arithmetic (non-member, in terms of compound assignment)
-Complex operator+(Complex lhs, const Complex& rhs) {
-    lhs += rhs;
-    return lhs;
-}
-
-Complex operator-(Complex lhs, const Complex& rhs) {
-    lhs -= rhs;
-    return lhs;
-}
-
 int main() {
-    Complex a(3, 4), b(1, 2);
-    Complex c = a + b;
-    c.print();  // 4+6i
-
-    Complex d = a - b;
-    d.print();  // 2+2i
-
+    Complex a(1, 2), b(3, 4);
     a += b;
-    a.print();  // 4+6i
-    return 0;
+    std::cout << a.real() << '+' << a.imag() << "i\n";
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-4+6i
-2+2i
 4+6i
 ```
 
-**Why this output:** `operator+=` modifies `a` in place. `operator+` creates a copy of the left operand, applies `+=`, and returns the result. This pattern ensures that `a + b` and `a += b` are consistent.
+**Why this output?**  
+`a += b` calls `a.operator+=(b)`, which adds `b`'s components to `a` and returns `a`.
+
+### Real-World Cases
+
+- **Compound assignment** – `+=`, `-=`, `*=`, `/=`.
+- **Increment/decrement** – `++`, `--`.
+- **Subscript** – `operator[]` (must be member).
+- **Function call** – `operator()` (functors).
 
 ---
 
-### Real-World Cases with Explanation
-
-**Case 1 — `std::complex`:** The standard library's `std::complex<T>` overloads arithmetic operators for complex arithmetic, enabling `c1 + c2`, `c1 * c2`, etc.
-
-**Case 2 — Matrix/Vector libraries:** Linear algebra libraries like Eigen and GLM overload arithmetic operators for matrices and vectors, enabling natural mathematical syntax.
-
-**Case 3 — Fixed-point arithmetic:** Financial and embedded libraries overload arithmetic operators for fixed-point types, providing exact decimal arithmetic without floating-point errors.
-
-**Case 4 — Big integer libraries:** Arbitrary-precision integer libraries (e.g., GMP, Boost.Multiprecision) overload arithmetic operators to make big integers behave like built-in integers.
-
----
-
-### References Links
-
-- operator overloading — cppreference.com - https://en.cppreference.com/w/cpp/language/operators
-- Operator Overloading (Chapter 13) — Cambridge University Press - https://www.cambridge.org
-- Overloading the arithmetic operators using friend functions — Learn C++ - https://www.learncpp.com/cpp-tutorial/overloading-the-arithmetic-operators-using-friend-functions/
-
----
-
-## 2. Comparison Operators (Traditional C++11 to C++17)
+## 2. Non-Member Operator Overloading
 
 ### Definitions
 
 **Core Definition**
-Comparison operators (`==`, `!=`, `<`, `>`, `<=`, `>=`) determine the relationship between two objects. Before C++20, each of the six operators had to be defined separately.
+Non-member operator overloading defines an operator as a **free function** (not a member), with all operands passed as parameters.
 
 **Technical Definition**
-The comparison operators return `bool` (though any type is allowed in custom overloads). For a class that supports equality (`==`), the `!=` operator is typically defined as `!(a == b)`. For ordering, if `a < b` is defined, `a > b` is `b < a`, `a <= b` is `!(b < a)`, and `a >= b` is `!(a < b)`. Before C++20, the programmer had to write all six operators manually, which was repetitive and error-prone.
+A non-member operator function is declared at namespace scope as `return_type operator@(parameters)`. Both operands are parameters; the function may be a friend of the class to access private members. Non-member operators are preferred for **symmetric binary operators** (`==`, `!=`, `+`, `-`, `*`, `/`, `<`, `>`, etc.) because they allow implicit conversions on both operands. The C++ Core Guidelines recommend non-member functions for symmetric operators (C.161).
 
 **Beginner-Friendly Explanation**
-If you define `==` for your type, you also want `!=`. If you define `<`, you also want `>`, `<=`, and `>=`. Before C++20, you had to write each one by hand. This was tedious and easy to get wrong (e.g., writing `a <= b` as `a < b || a == b` when you meant `!(a > b)`).
+A non-member operator is an operator defined **outside the class** as a free function. Both operands are passed as parameters, so implicit conversions can apply to both sides. This makes expressions like `2 + complex` work as naturally as `complex + 2`.
 
----
+### Purposes
 
-### Purposes (all begin with "To")
-
-- **To** allow user-defined types to be compared for equality and ordering.
-- **To** enable user-defined types to be used in algorithms that require comparison (e.g., `std::sort`, `std::find`).
-- **To** support containers that require ordering (e.g., `std::map`, `std::set`).
-- **To** provide intuitive syntax for comparing objects.
-- **To** establish a consistent ordering for a type.
-
----
+- To implement symmetric binary operators.
+- To allow implicit conversions on both operands.
+- To support operators where the left operand is not of the class type (e.g., `std::ostream << object`).
+- To keep the class interface minimal.
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntaxes with Breakdowns
-
-**Member `operator==`:**
+**General Syntax**
 ```cpp
-class T {
+class X {
+    int value_;
 public:
-    bool operator==(const T& rhs) const {
-        return this->member == rhs.member;
-    }
+    int value() const { return value_; }
 };
+
+X operator+(const X& lhs, const X& rhs);   // non-member
+bool operator==(const X& lhs, const X& rhs);
 ```
 
-**Non-member `operator<`:**
-```cpp
-bool operator<(const T& lhs, const T& rhs) {
-    return lhs.member < rhs.member;
-}
-```
+**Component Breakdown**
 
-#### Syntax Rules
+| Form | Meaning |
+|------|---------|
+| `operator+(const X&, const X&)` | Binary non-member operator. |
+| `operator==(const X&, const X&)` | Comparison operator. |
+| `friend` | Optional, for access to private members. |
 
-- `==` and `!=` should be defined consistently: `a != b` should be equivalent to `!(a == b)`.
-- `<` should define a strict weak ordering: irreflexive (`!(a < a)`), asymmetric (`a < b` implies `!(b < a)`), and transitive.
-- If `a < b` is defined, `a > b` should be `b < a`, `a <= b` should be `!(b < a)`, and `a >= b` should be `!(a < b)`.
+**Syntax Rules**
+- Both operands are parameters.
+- The function is declared at namespace scope.
+- It may be a friend to access private members.
+- It can be a template (e.g., `operator<<` for streams).
 
-#### Constraints and Limitations
+**Constraints and Limitations**
+- Non-member operators cannot be used for operators that must be members (`=`, `[]`, `()`, `->`).
+- They must be found via argument-dependent lookup (ADL) or be in scope.
+- They cannot access private members without friendship or public accessors.
 
-- Defining all six operators manually is repetitive and error-prone.
-- Inconsistent definitions (e.g., `==` and `!=` disagreeing) lead to subtle bugs.
-- Comparison operators should not modify their operands (they should be `const`).
+### Annotated Code Examples
 
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Traditional Comparison Operators
+**Example 1: Non-member symmetric operator**
 
 ```cpp
 #include <iostream>
 
-class Fraction {
+class Complex {
+    double real_, imag_;
 public:
-    Fraction(int num, int den) : num_(num), den_(den) {}
-
-    bool operator==(const Fraction& rhs) const {
-        return num_ * rhs.den_ == rhs.num_ * den_;
-    }
-
-    bool operator!=(const Fraction& rhs) const {
-        return !(*this == rhs);
-    }
-
-    bool operator<(const Fraction& rhs) const {
-        return num_ * rhs.den_ < rhs.num_ * den_;
-    }
-
-    bool operator>(const Fraction& rhs) const { return rhs < *this; }
-    bool operator<=(const Fraction& rhs) const { return !(rhs < *this); }
-    bool operator>=(const Fraction& rhs) const { return !(*this < rhs); }
-
-private:
-    int num_, den_;
+    Complex(double r = 0, double i = 0) : real_(r), imag_(i) {}
+    double real() const { return real_; }
+    double imag() const { return imag_; }
 };
 
+Complex operator+(const Complex& lhs, const Complex& rhs) {
+    return Complex(lhs.real() + rhs.real(), lhs.imag() + rhs.imag());
+}
+
 int main() {
-    Fraction a(1, 2), b(2, 4), c(1, 3);
-    std::cout << std::boolalpha;
-    std::cout << "a == b: " << (a == b) << std::endl;  // true
-    std::cout << "a != c: " << (a != c) << std::endl;  // true
-    std::cout << "a < c: " << (a < c) << std::endl;    // false
-    std::cout << "a > c: " << (a > c) << std::endl;    // true
-    return 0;
+    Complex a(1, 2), b(3, 4);
+    Complex c = a + b;
+    std::cout << c.real() << '+' << c.imag() << "i\n";
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-a == b: true
-a != c: true
-a < c: false
-a > c: true
+4+6i
 ```
 
-**Why this output:** `a` is 1/2, `b` is 2/4 (equal to 1/2), and `c` is 1/3. `a == b` is true because 1/2 equals 2/4. `a != c` is true. `a < c` is false (1/2 is not less than 1/3). `a > c` is true (1/2 is greater than 1/3). This example shows the traditional pre-C++20 approach requiring all six operators.
+**Why this output?**  
+`a + b` calls `operator+(a, b)`, which returns a new `Complex` with the summed components.
+
+### Real-World Cases
+
+- **Symmetric arithmetic** – `operator+(const T&, const T&)`.
+- **Comparison** – `operator==`, `operator!=`, `operator<`.
+- **Stream insertion** – `operator<<(std::ostream&, const T&)`.
+- **Iterator operators** – `operator+(iterator, difference_type)`.
 
 ---
 
-### Real-World Cases with Explanation
-
-**Case 1 — `std::map` keys:** User-defined types used as keys in `std::map` must provide `operator<` to establish the ordering.
-
-**Case 2 — `std::set` elements:** Elements in `std::set` must be comparable via `operator<`.
-
-**Case 3 — Sorting algorithms:** `std::sort` uses `operator<` by default, so user-defined types must provide it to be sortable.
-
-**Case 4 — Equality checks in containers:** `std::find`, `std::count`, and similar algorithms use `operator==` to locate elements.
-
----
-
-### References Links
-
-- Comparison operators — cppreference.com - https://en.cppreference.com/w/cpp/language/operator_comparison
-- Default comparisons (N4175) — ISO C++ - https://isocpp.org/files/papers/N4175.pdf
-- Comparison operators — Microsoft Learn - https://learn.microsoft.com/en-us/cpp/cpp/equality-operators-equal-equal-and-exclamation-equal
-
----
-
-## 3. The Spaceship Operator (`<=>`) and Comparison Categories (C++20)
+## 3. Friend Operator Overloading
 
 ### Definitions
 
 **Core Definition**
-The three-way comparison operator `<=>`, informally called the spaceship operator, compares two objects and returns a comparison category object that indicates whether the left operand is less than, equal to, or greater than the right operand.
+Friend operator overloading defines an operator as a **non-member function declared as a friend** of the class, giving it access to private and protected members.
 
 **Technical Definition**
-The spaceship operator `<=>` returns one of three comparison category types: `std::strong_ordering`, `std::weak_ordering`, or `std::partial_ordering`. These categories express different guarantees about the comparison. The C++20 standard defines a rewrite mechanism: `a < b` is rewritten to `(a <=> b) < 0`, `a > b` to `(a <=> b) > 0`, `a <= b` to `(a <=> b) <= 0`, and `a >= b` to `(a <=> b) >= 0`. For `==` and `!=`, the rewrite uses `operator==` (not `<=>`) unless `<=>` is defaulted.
+A friend operator function is declared inside the class with the `friend` keyword but is not a member. It is a non-member function with access to the class's private and protected members. Friend operators are commonly used for stream operators (`operator<<`, `operator>>`) and symmetric binary operators that need private access. Friendship is granted by the class, not taken by the function.
 
 **Beginner-Friendly Explanation**
-The spaceship operator is a single operator that does the work of all six traditional comparison operators. When you define `<=>` for your type, the compiler automatically generates `<`, `>`, `<=`, and `>=` from it. The "comparison category" tells the compiler what kind of ordering your type has: strong (like integers — if `a == b`, they're identical), weak (like case-insensitive strings — "abc" and "ABC" are equivalent but not identical), or partial (like floating-point numbers — some values might be unordered, e.g., NaN).
+A friend operator is an **outside function that the class trusts**. It's not a member, but the class gives it special permission to access private members. This is useful for operators like `<<` that need to read private data but must be non-members (so the left operand can be `std::ostream`).
 
----
+### Purposes
 
-### Purposes (all begin with "To")
-
-- **To** replace six manually written comparison operators with a single `<=>` definition.
-- **To** express the exact ordering guarantees of a type through the return type.
-- **To** reduce boilerplate and eliminate inconsistency between comparison operators.
-- **To** enable the compiler to synthesize all relational operators automatically.
-- **To** support defaulted comparisons for lexicographical member-wise comparison.
-
----
+- To give non-member operators access to private members.
+- To implement stream operators (`<<`, `>>`).
+- To implement symmetric binary operators without public accessors.
+- To keep the class interface minimal while allowing operator access.
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntaxes with Breakdowns
-
-**Defaulted `<=>`:**
+**General Syntax**
 ```cpp
-struct Point {
-    int x, y;
-    auto operator<=>(const Point&) const = default;
-};
-```
-- The compiler generates lexicographical comparison of members in declaration order.
-
-**Custom `<=>` returning `std::strong_ordering`:**
-```cpp
-std::strong_ordering operator<=>(const T& rhs) const {
-    if (this->value < rhs.value) return std::strong_ordering::less;
-    if (this->value > rhs.value) return std::strong_ordering::greater;
-    return std::strong_ordering::equal;
-}
-```
-
-**Custom `<=>` returning `std::weak_ordering`:**
-```cpp
-std::weak_ordering operator<=>(const CIString& rhs) const {
-    // compare case-insensitively
-    return std::weak_ordering::equivalent;  // or less / greater
-}
-```
-
-**Custom `<=>` returning `std::partial_ordering`:**
-```cpp
-std::partial_ordering operator<=>(const T& rhs) const {
-    if (std::isnan(this->value) || std::isnan(rhs.value))
-        return std::partial_ordering::unordered;
-    // compare
-}
-```
-
-#### Comparison Category Table
-
-| Category | Named Values | Unordered? | Equal ⇒ Identical? | Use Case |
-|---|---|---|---|---|
-| `std::strong_ordering` | `less`, `equal`, `greater` | No | Yes | `int`, `std::string`, IDs |
-| `std::weak_ordering` | `less`, `equivalent`, `greater` | No | No | Case-insensitive strings |
-| `std::partial_ordering` | `less`, `equivalent`, `greater`, `unordered` | Yes | No | `double` (NaN), intervals |
-
-#### Syntax Rules
-
-- The return type of `<=>` can be `auto`, `std::strong_ordering`, `std::weak_ordering`, or `std::partial_ordering`.
-- If `<=>` is defaulted, the compiler performs lexicographical comparison of base classes (depth-first, left-to-right) and non-static data members (in declaration order).
-- Defaulted `<=>` implicitly declares a defaulted `==` if one is not already declared.
-- `strong_ordering` implicitly converts to `weak_ordering`, and `weak_ordering` implicitly converts to `partial_ordering` (widening). Narrowing requires an explicit cast.
-
-#### Constraints and Limitations
-
-- `<=>` alone does not automatically provide `==` and `!=` unless defaulted; a defaulted `<=>` implicitly declares a defaulted `==`.
-- If you define `<=>` manually (not defaulted), you must also define `==` separately for equality comparisons.
-- The comparison category must be appropriate for the type's semantics; using `strong_ordering` for a case-insensitive string would be incorrect.
-
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Defaulted `<=>` for Strong Ordering
-
-```cpp
-#include <iostream>
-#include <compare>
-
-struct StudentID {
-    int id;
-    auto operator<=>(const StudentID&) const = default;
-};
-
-int main() {
-    StudentID a{101}, b{102}, c{101};
-    std::cout << std::boolalpha;
-    std::cout << "a < b: " << (a < b) << std::endl;    // true
-    std::cout << "a == c: " << (a == c) << std::endl;  // true
-    std::cout << "a > b: " << (a > b) << std::endl;    // false
-    std::cout << "a <= c: " << (a <= c) << std::endl;  // true
-    return 0;
-}
-```
-
-**Expected Output:**
-```
-a < b: true
-a == c: true
-a > b: false
-a <= c: true
-```
-
-**Why this output:** The defaulted `<=>` compares `id` lexicographically. Since `int` has `strong_ordering`, the return type is `std::strong_ordering`. The compiler automatically generates `<`, `>`, `<=`, `>=`, `==`, and `!=`. `a < b` is true because 101 < 102. `a == c` is true because both have id 101.
-
----
-
-#### Example 2 — Custom `<=>` for Weak Ordering (Case-Insensitive String)
-
-```cpp
-#include <iostream>
-#include <compare>
-#include <string>
-#include <cctype>
-
-struct CIString {
-    std::string data;
-
-    std::weak_ordering operator<=>(const CIString& other) const {
-        auto to_lower = [](char c) {
-            return static_cast<char>(std::tolower(c));
-        };
-        auto it1 = data.begin(), it2 = other.data.begin();
-        for (; it1 != data.end() && it2 != other.data.end(); ++it1, ++it2) {
-            char c1 = to_lower(*it1), c2 = to_lower(*it2);
-            if (c1 < c2) return std::weak_ordering::less;
-            if (c1 > c2) return std::weak_ordering::greater;
-        }
-        if (data.size() < other.data.size())
-            return std::weak_ordering::less;
-        if (data.size() > other.data.size())
-            return std::weak_ordering::greater;
-        return std::weak_ordering::equivalent;
-    }
-
-    bool operator==(const CIString& other) const {
-        return (*this <=> other) == 0;
-    }
-};
-
-int main() {
-    CIString a{"Hello"}, b{"HELLO"}, c{"World"};
-    std::cout << std::boolalpha;
-    std::cout << "a == b: " << (a == b) << std::endl;  // true
-    std::cout << "a < c: " << (a < c) << std::endl;    // true
-    std::cout << "a > c: " << (a > c) << std::endl;    // false
-    return 0;
-}
-```
-
-**Expected Output:**
-```
-a == b: true
-a < c: true
-a > c: false
-```
-
-**Why this output:** The custom `<=>` compares strings case-insensitively. "Hello" and "HELLO" are equivalent (returning `std::weak_ordering::equivalent`), so `a == b` is true. "Hello" is less than "World" case-insensitively, so `a < c` is true. The `operator==` is defined in terms of `<=>` to ensure consistency.
-
----
-
-### Real-World Cases with Explanation
-
-**Case 1 — `std::string` comparison:** `std::string` uses `<=>` for lexicographical comparison, returning `std::strong_ordering`.
-
-**Case 2 — Floating-point comparison:** `double` uses `<=>` returning `std::partial_ordering` because of NaN values, which are unordered.
-
-**Case 3 — Case-insensitive identifiers:** Configuration systems and databases often use case-insensitive string comparison, requiring `std::weak_ordering`.
-
-**Case 4 — Three-way comparison in sorting:** Algorithms like `std::sort` can use `<=>` to determine the ordering of elements with a single comparison.
-
----
-
-### References Links
-
-- Three-way comparison — cppreference.com - https://en.cppreference.com/w/cpp/language/operator_comparison#Three-way_comparison
-- `std::strong_ordering` — cppreference.com - https://en.cppreference.com/w/cpp/utility/compare/strong_ordering
-- Understand three-way comparison operator `<=>` (C++20) — Dr-Sergey/learn_cpp (GitHub) - https://github.com/Dr-Sergey/learn_cpp
-- Use `std::strong_ordering`, `weak_ordering`, `partial_ordering` as `<=>` return types — Dr-Sergey/learn_cpp (GitHub) - https://github.com/Dr-Sergey/learn_cpp
-
----
-
-## 4. Defaulted Comparison Operators (`= default`)
-
-### Definitions
-
-**Core Definition**
-A defaulted comparison operator is a comparison operator function whose definition is `= default`. The compiler generates the comparison by comparing base classes and non-static data members in order.
-
-**Technical Definition**
-A comparison operator function can be explicitly defaulted to request that the compiler generate the corresponding default comparison for the class. A defaulted comparison operator function must be a non-template function declared in the member-specification of the class. Defaulted `operator==` performs member-wise equality; defaulted `operator<=>` performs lexicographical comparison of base classes (left-to-right, depth-first) and then non-static data members (in declaration order). If the declared return type of a defaulted `<=>` is `auto`, the return type is deduced as the common comparison type of the members.
-
-**Beginner-Friendly Explanation**
-Instead of writing out all six comparison operators by hand, you can write `auto operator<=>(const T&) const = default;` and the compiler generates the comparison for you by comparing each member in order. For simple value types like points, IDs, and records, this is exactly what you want. If your type has a custom ordering (like case-insensitive strings), you write the `<=>` yourself.
-
----
-
-### Purposes (all begin with "To")
-
-- **To** eliminate the repetitive and error-prone task of writing all six comparison operators manually.
-- **To** ensure consistency between equality and ordering comparisons.
-- **To** provide lexicographical comparison of members and base classes automatically.
-- **To** reduce boilerplate code for simple value types.
-- **To** allow the compiler to generate the most appropriate return type based on member types.
-
----
-
-### Syntax Rules and Structure
-
-#### Complete General Syntaxes with Breakdowns
-
-**Defaulted `==`:**
-```cpp
-struct Point {
-    int x, y;
-    bool operator==(const Point&) const = default;
-};
-```
-- Member-wise equality: `x == other.x && y == other.y`.
-
-**Defaulted `<=>`:**
-```cpp
-struct Point {
-    int x, y;
-    auto operator<=>(const Point&) const = default;
-};
-```
-- Lexicographical comparison: `x <=> other.x`, then `y <=> other.y`.
-- Return type is deduced from the members' comparison categories.
-
-**Defaulted both `==` and `<=>`:**
-```cpp
-struct Point {
-    int x, y;
-    bool operator==(const Point&) const = default;
-    auto operator<=>(const Point&) const = default;
+class X {
+    int value_;
+public:
+    friend X operator+(const X& lhs, const X& rhs);   // friend declaration
+    friend std::ostream& operator<<(std::ostream& os, const X& x);
 };
 ```
 
-#### Syntax Rules
+**Component Breakdown**
 
-- A defaulted comparison operator must be a non-template function declared in the class.
-- Defaulted `<=>` with return type `auto` deduces the common comparison type from the members.
-- If the common comparison type is `void`, the defaulted `<=>` is defined as deleted.
-- Defaulted `<=>` implicitly declares a defaulted `==` if one is not already declared.
-- Defaulted `==` can be used alone if only equality is needed.
+| Component | Description |
+|-----------|-------------|
+| `friend` | Grants access to private members. |
+| Non-member function | The operator is not a member. |
+| Access | Can access private/protected members. |
 
-#### Constraints and Limitations
+**Syntax Rules**
+- The `friend` declaration appears inside the class.
+- The function is defined at namespace scope (or inline inside the class).
+- Friendship is not transitive, inherited, or mutual.
+- Friend functions should be declared in the class and defined outside.
 
-- Defaulted comparisons compare members in declaration order; if a different order is needed, write a custom `<=>`.
-- Defaulted comparisons require all members and bases to be comparable.
-- If a member's comparison returns `std::partial_ordering`, the defaulted `<=>` returns `std::partial_ordering`.
-- Defaulted `==` is not generated if the class has a user-declared `operator==` or a user-declared `<=>` that is not defaulted.
+**Constraints and Limitations**
+- Friendship breaks encapsulation; use sparingly.
+- Friend functions cannot be virtual.
+- Friendship is not inherited by derived classes.
 
----
+### Annotated Code Examples
 
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Defaulted `<=>` for a Point
-
-```cpp
-#include <iostream>
-#include <compare>
-
-struct Point {
-    int x, y;
-    auto operator<=>(const Point&) const = default;
-};
-
-int main() {
-    Point a{1, 2}, b{1, 3}, c{1, 2};
-    std::cout << std::boolalpha;
-    std::cout << "a < b: " << (a < b) << std::endl;    // true (1==1, 2<3)
-    std::cout << "a == c: " << (a == c) << std::endl;  // true
-    std::cout << "a > b: " << (a > b) << std::endl;    // false
-    return 0;
-}
-```
-
-**Expected Output:**
-```
-a < b: true
-a == c: true
-a > b: false
-```
-
-**Why this output:** The defaulted `<=>` compares `x` first, then `y`. For `a < b`, `x` values are equal (1 == 1), so `y` is compared: 2 < 3, yielding `std::strong_ordering::less`, so `a < b` is true. For `a == c`, both `x` and `y` are equal, so equality is true.
-
----
-
-#### Example 2 — Defaulted `==` for a Record
-
-```cpp
-#include <iostream>
-#include <string>
-
-struct Employee {
-    std::string name;
-    int id;
-    bool operator==(const Employee&) const = default;
-};
-
-int main() {
-    Employee e1{"Alice", 101};
-    Employee e2{"Alice", 101};
-    Employee e3{"Bob", 102};
-
-    std::cout << std::boolalpha;
-    std::cout << "e1 == e2: " << (e1 == e2) << std::endl;  // true
-    std::cout << "e1 == e3: " << (e1 == e3) << std::endl;  // false
-    return 0;
-}
-```
-
-**Expected Output:**
-```
-e1 == e2: true
-e1 == e3: false
-```
-
-**Why this output:** The defaulted `==` compares `name` then `id`. `e1` and `e2` have identical `name` and `id`, so they are equal. `e3` differs in both, so it is not equal.
-
----
-
-### Real-World Cases with Explanation
-
-**Case 1 — Value types in domain modeling:** Domain types like `Money`, `Date`, and `Coordinate` benefit from defaulted comparisons, which provide correct equality and ordering with minimal code.
-
-**Case 2 — Data transfer objects (DTOs):** DTOs that hold configuration or serialized data often need equality comparison for testing and caching; defaulted `==` provides this automatically.
-
-**Case 3 — Keys in ordered containers:** Defaulted `<=>` provides the ordering required by `std::map` and `std::set` keys.
-
-**Case 4 — Records in databases:** Structs representing database rows can use defaulted comparisons for sorting and deduplication.
-
----
-
-### References Links
-
-- Default comparisons (since C++20) — cppreference.com - https://en.cppreference.com/w/cpp/language/default_comparisons
-- Default comparisons (N4175) — ISO C++ - https://isocpp.org/files/papers/N4175.pdf
-- Understand defaulted comparison operators — Dr-Sergey/learn_cpp (GitHub) - https://github.com/Dr-Sergey/learn_cpp
-
----
-
-## 5. Stream Insertion and Extraction Operators (`<<`, `>>`)
-
-### Definitions
-
-**Core Definition**
-The stream insertion operator `<<` writes data to an output stream, and the stream extraction operator `>>` reads data from an input stream. Both can be overloaded for user-defined types.
-
-**Technical Definition**
-The insertion operator is overloaded for all built-in types and many standard library types. When you insert or extract a value to or from a stream, C++ function overload resolution chooses the correct operator based on the value's type. For user-defined types, the operator must be a non-member function (because the left operand is a stream, not the user-defined type). The canonical signature for insertion is `std::ostream& operator<<(std::ostream& os, const T& value)`, and for extraction `std::istream& operator>>(std::istream& is, T& value)`.
-
-**Beginner-Friendly Explanation**
-`std::cout << x` works for integers, strings, and many other types. For your own type `MyType`, you can make `std::cout << myObj` work by writing a function called `operator<<` that takes an `std::ostream&` and a `const MyType&`. Similarly, `std::cin >> myObj` can be made to work by overloading `operator>>`. Both operators return a reference to the stream so they can be chained.
-
----
-
-### Purposes (all begin with "To")
-
-- **To** allow user-defined types to be printed to output streams (e.g., `std::cout`).
-- **To** allow user-defined types to be read from input streams (e.g., `std::cin`).
-- **To** support formatted I/O for custom types.
-- **To** enable user-defined types to be used with stream-based logging and serialization.
-- **To** provide a consistent, type-safe I/O interface.
-
----
-
-### Syntax Rules and Structure
-
-#### Complete General Syntaxes with Breakdowns
-
-**Insertion operator (non-member):**
-```cpp
-std::ostream& operator<<(std::ostream& os, const T& value) {
-    os << value.member;
-    return os;
-}
-```
-
-**Extraction operator (non-member):**
-```cpp
-std::istream& operator>>(std::istream& is, T& value) {
-    is >> value.member;
-    return is;
-}
-```
-
-**Friend declaration inside the class:**
-```cpp
-class T {
-    friend std::ostream& operator<<(std::ostream&, const T&);
-    friend std::istream& operator>>(std::istream&, T&);
-};
-```
-
-#### Syntax Rules
-
-- The insertion and extraction operators must be non-member functions because the left operand is a stream.
-- They return a reference to the stream to allow chaining (`os << a << b`).
-- The extraction operator takes the user-defined type by non-const reference (it modifies the object).
-- The operators should be declared as friends if they need access to private members.
-
-#### Constraints and Limitations
-
-- The operators cannot be member functions of the user-defined type (the left operand would be the user-defined type, not the stream).
-- The operators must be in the same namespace as the user-defined type or found via ADL.
-- The extraction operator should handle input failures gracefully (e.g., set the stream's failbit).
-
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Stream Insertion for a Point
+**Example 1: Friend stream operator**
 
 ```cpp
 #include <iostream>
 
 class Point {
-public:
-    Point(int x = 0, int y = 0) : x_(x), y_(y) {}
-
-    friend std::ostream& operator<<(std::ostream& os, const Point& p) {
-        os << "(" << p.x_ << ", " << p.y_ << ")";
-        return os;
-    }
-
-    friend std::istream& operator>>(std::istream& is, Point& p) {
-        char ch;
-        if (is >> ch && ch == '(' &&
-            is >> p.x_ >> ch && ch == ',' &&
-            is >> p.y_ >> ch && ch == ')') {
-            return is;
-        }
-        is.setstate(std::ios::failbit);
-        return is;
-    }
-
-private:
     int x_, y_;
+public:
+    Point(int x, int y) : x_(x), y_(y) {}
+    friend std::ostream& operator<<(std::ostream& os, const Point& p);
 };
+
+std::ostream& operator<<(std::ostream& os, const Point& p) {
+    return os << '(' << p.x_ << ", " << p.y_ << ')';
+}
 
 int main() {
     Point p(3, 4);
-    std::cout << "Point: " << p << std::endl;  // Point: (3, 4)
-
-    Point q;
-    std::cout << "Enter a point (x, y): ";
-    if (std::cin >> q) {
-        std::cout << "You entered: " << q << std::endl;
-    } else {
-        std::cout << "Invalid input" << std::endl;
-    }
-    return 0;
+    std::cout << p << '\n';
 }
 ```
 
-**Expected Output (with input "7, 8"):**
+**Expected Output**
 ```
-Point: (3, 4)
-Enter a point (x, y): 7, 8
-You entered: (7, 8)
+(3, 4)
 ```
 
-**Why this output:** `operator<<` writes the point as `(x, y)`. `operator>>` reads the parentheses and comma, extracting the coordinates. If the input format is invalid, the failbit is set. The operators return the stream reference, allowing chaining.
+**Why this output?**  
+`operator<<` is a friend, so it can access `p.x_` and `p.y_` to print the point.
+
+### Real-World Cases
+
+- **Stream operators** – `operator<<`, `operator>>`.
+- **Symmetric arithmetic** – `operator+`, `operator-`.
+- **Comparison** – `operator==`, `operator<`.
+- **Debugging helpers** – friend functions for printing.
 
 ---
 
-### Real-World Cases with Explanation
-
-**Case 1 — Logging frameworks:** User-defined types overload `operator<<` to provide readable logging output.
-
-**Case 2 — Serialization libraries:** `operator<<` and `operator>>` are used for text-based serialization of custom types.
-
-**Case 3 — Debugging output:** Overloading `operator<<` for a class makes it easy to print objects during debugging.
-
-**Case 4 — Configuration parsing:** `operator>>` can be used to parse configuration values from input streams.
-
----
-
-### References Links
-
-- Input and Output Operators — Apache C++ Standard Library User's Guide - https://svn.apache.org/repos/asf/stdcxx/branches/4.2.x/doc/stdlibug/28-2.html
-- Overloading the I/O operators — Learn C++ - https://www.learncpp.com/cpp-tutorial/overloading-the-io-operators/
-- Stream insertion and extraction operators — Microsoft Learn - https://learn.microsoft.com/en-us/cpp/standard-library/overloading-the-output-operator-for-your-own-classes
-
----
-
-## 6. Assignment Operators (Copy and Move Assignment)
+## 4. Comparison Operators
 
 ### Definitions
 
 **Core Definition**
-The copy assignment operator assigns the contents of one object to another object of the same type. The move assignment operator transfers ownership of resources from a temporary (rvalue) object to an existing object.
+Comparison operators (`==`, `!=`, `<`, `<=`, `>`, `>=`, and since C++20 `<=>`) define how objects of a class are compared for equality and ordering.
 
 **Technical Definition**
-An assignment operator shall be implemented by a non-static member function with exactly one parameter. Because a copy assignment operator `operator=` is implicitly declared for a class if not declared by the user, a base class assignment operator is always hidden by the copy assignment operator of the derived class. The copy assignment operator takes `const T&` and performs a deep copy. The move assignment operator takes `T&&` and transfers resources, leaving the source in a valid but unspecified state.
+Comparison operators can be member or non-member functions. `operator==` and `operator!=` define equality; `<`, `<=`, `>`, `>=` define ordering. Since C++20, the three-way comparison operator `operator<=>` (spaceship operator) can generate all six comparison operators automatically. The C++ Core Guidelines state: define `==` and `!=` together (C.168), make `==` symmetric (C.161), and use `==` when appropriate (C.165). In C++20, `operator==` is automatically generated as `!=` when defined.
 
 **Beginner-Friendly Explanation**
-Copy assignment is like photocopying a document: both the original and the copy have their own complete content. Move assignment is like handing over the original document: the recipient takes ownership, and the giver is left with an empty folder. Move assignment is more efficient when dealing with expensive resources like dynamically allocated memory because it avoids copying.
+Comparison operators let you compare your objects with `==`, `<`, etc. For example, `a == b` checks if two `Complex` numbers are equal, and `a < b` checks ordering. Since C++20, defining `<=>` gives you all six comparisons for free.
 
----
+### Purposes
 
-### Purposes (all begin with "To")
-
-- **To** allow objects to be assigned new values from other objects.
-- **To** enable value semantics (copy assignment) and move semantics (move assignment).
-- **To** manage resource ownership correctly (Rule of Three/Five).
-- **To** support self-assignment safely.
-- **To** enable efficient transfer of resources from temporaries.
-
----
+- To define equality and ordering for user-defined types.
+- To allow objects to be used in containers (`std::map`, `std::set`).
+- To support algorithms (`std::sort`, `std::find`).
+- To provide natural syntax for comparisons.
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntaxes with Breakdowns
-
-**Copy assignment:**
+**General Syntax**
 ```cpp
-T& operator=(const T& other) {
-    if (this != &other) {
-        // deep copy
-    }
-    return *this;
-}
+class X {
+public:
+    bool operator==(const X& rhs) const;   // member equality
+    bool operator<(const X& rhs) const;    // member ordering
+};
+
+// Or non-member:
+bool operator==(const X& lhs, const X& rhs);
+bool operator<(const X& lhs, const X& rhs);
+
+// C++20 spaceship:
+auto operator<=>(const X& rhs) const = default;
 ```
 
-**Move assignment:**
-```cpp
-T& operator=(T&& other) noexcept {
-    if (this != &other) {
-        // steal resources
-        // leave other in valid state
-    }
-    return *this;
-}
-```
+**Component Breakdown**
 
-#### Syntax Rules
+| Operator | Meaning |
+|----------|---------|
+| `==`, `!=` | Equality. |
+| `<`, `<=`, `>`, `>=` | Ordering. |
+| `<=>` | Three-way comparison (C++20). |
 
-- Assignment operators must be non-static member functions with exactly one parameter.
-- They return `T&` to allow chaining.
-- The move assignment operator should be marked `noexcept` when possible.
-- Self-assignment must be checked (especially in copy assignment).
-- The copy assignment should use the copy-and-swap idiom for exception safety.
+**Syntax Rules**
+- `==` and `!=` should be consistent (C.167, C.168).
+- Comparison operators should be `const` and not modify the object.
+- In C++20, `operator==` generates `!=`; `operator<=>` generates all six.
+- `operator<=>` can be `= default` for member-wise comparison.
+- Comparison operators should be symmetric (non-member for symmetry).
 
-#### Constraints and Limitations
+**Constraints and Limitations**
+- `operator==` and `operator<=>` must be consistent.
+- Ordering must be a strict weak ordering for `std::sort` and ordered containers.
+- Floating-point comparisons require care (NaN, precision).
 
-- If a class declares a copy assignment operator, the move assignment operator is not implicitly declared.
-- If a class declares a move assignment operator, the copy assignment operator is defined as deleted.
-- The implicit copy assignment operator performs member-wise copy.
-- Virtual assignment operators are possible but do not override base class assignment operators as expected.
+### Annotated Code Examples
 
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Copy and Move Assignment for a Dynamic Array
+**Example 1: Comparison operators (pre-C++20)**
 
 ```cpp
 #include <iostream>
-#include <utility>
 
-class IntArray {
+class Point {
+    int x_, y_;
 public:
-    explicit IntArray(int size) : size_(size), data_(new int[size]{}) {}
+    Point(int x, int y) : x_(x), y_(y) {}
 
-    ~IntArray() { delete[] data_; }
-
-    // Copy constructor
-    IntArray(const IntArray& other)
-        : size_(other.size_), data_(new int[other.size_]) {
-        std::copy(other.data_, other.data_ + size_, data_);
+    bool operator==(const Point& rhs) const {
+        return x_ == rhs.x_ && y_ == rhs.y_;
     }
-
-    // Copy assignment (copy-and-swap)
-    IntArray& operator=(const IntArray& other) {
-        if (this != &other) {
-            IntArray temp(other);
-            swap(temp);
-        }
-        return *this;
+    bool operator!=(const Point& rhs) const {
+        return !(*this == rhs);
     }
-
-    // Move constructor
-    IntArray(IntArray&& other) noexcept
-        : size_(other.size_), data_(other.data_) {
-        other.size_ = 0;
-        other.data_ = nullptr;
+    bool operator<(const Point& rhs) const {
+        return x_ < rhs.x_ || (x_ == rhs.x_ && y_ < rhs.y_);
     }
-
-    // Move assignment
-    IntArray& operator=(IntArray&& other) noexcept {
-        if (this != &other) {
-            delete[] data_;
-            size_ = other.size_;
-            data_ = other.data_;
-            other.size_ = 0;
-            other.data_ = nullptr;
-        }
-        return *this;
-    }
-
-    void swap(IntArray& other) noexcept {
-        std::swap(size_, other.size_);
-        std::swap(data_, other.data_);
-    }
-
-    int& operator[](int i) { return data_[i]; }
-    int size() const { return size_; }
-
-private:
-    int size_;
-    int* data_;
 };
 
 int main() {
-    IntArray a(3);
-    a[0] = 1; a[1] = 2; a[2] = 3;
-
-    IntArray b = a;  // copy
-    std::cout << "b size: " << b.size() << ", b[1]: " << b[1] << std::endl;
-
-    IntArray c = std::move(a);  // move
-    std::cout << "c size: " << c.size() << ", c[2]: " << c[2] << std::endl;
-    std::cout << "a size after move: " << a.size() << std::endl;
-    return 0;
+    Point a(1, 2), b(1, 3);
+    std::cout << (a == b) << ' ' << (a != b) << ' ' << (a < b) << '\n';
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-b size: 3, b[1]: 2
-c size: 3, c[2]: 3
-a size after move: 0
+0 1 1
 ```
 
-**Why this output:** `IntArray b = a` invokes the copy constructor, creating a deep copy. `IntArray c = std::move(a)` invokes the move constructor, transferring ownership of the dynamic array to `c` and leaving `a` with `size_ = 0` and `data_ = nullptr`. The move assignment operator would be used in `c = std::move(a)` for an existing object.
+**Why this output?**  
+`a == b` is false (`0`), `a != b` is true (`1`), and `a < b` is true (`1`) because `(1,2) < (1,3)`.
+
+**Example 2: C++20 spaceship operator**
+
+```cpp
+#include <iostream>
+#include <compare>
+
+class Point {
+    int x_, y_;
+public:
+    Point(int x, int y) : x_(x), y_(y) {}
+    auto operator<=>(const Point&) const = default;   // generates all six
+};
+
+int main() {
+    Point a(1, 2), b(1, 3);
+    std::cout << (a == b) << ' ' << (a != b) << ' ' << (a < b) << '\n';
+}
+```
+
+**Expected Output**
+```
+0 1 1
+```
+
+**Why this output?**  
+`operator<=>` with `= default` generates all comparison operators via member-wise comparison.
+
+### Real-World Cases
+
+- **Containers** – `std::map` and `std::set` require `operator<` or `<=>`.
+- **Algorithms** – `std::sort`, `std::find`.
+- **Value types** – `Point`, `Complex`, `Date`.
 
 ---
 
-### Real-World Cases with Explanation
-
-**Case 1 — `std::vector`:** `std::vector` implements copy and move assignment to manage its dynamic array efficiently. Move assignment transfers the internal buffer without copying elements.
-
-**Case 2 — `std::string`:** `std::string` uses copy assignment for deep copies and move assignment for efficient transfer of character data.
-
-**Case 3 — Smart pointers:** `std::unique_ptr` has move assignment (transferring ownership) but no copy assignment (ownership cannot be duplicated).
-
-**Case 4 — Resource-managing classes:** Any class that owns a resource (file handle, network socket, GPU buffer) should implement the Rule of Five: destructor, copy constructor, copy assignment, move constructor, and move assignment.
-
----
-
-### References Links
-
-- Copy assignment operator — cppreference.com - https://en.cppreference.com/w/cpp/language/copy_assignment
-- Move assignment operator — cppreference.com - https://en.cppreference.com/w/cpp/language/move_assignment
-- Assignment operators — Microsoft Learn - https://learn.microsoft.com/en-us/cpp/cpp/assignment-operators
-- C++ Core Guidelines C.60: Make copy assignment non-virtual, take the parameter by const&, and return by non-const& - https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Rc-copy-assignment
-
----
-
-## 7. Increment/Decrement Operators (Prefix vs. Postfix)
+## 5. Arithmetic Operators
 
 ### Definitions
 
 **Core Definition**
-The increment (`++`) and decrement (`--`) operators come in two forms: prefix (e.g., `++x`) and postfix (e.g., `x++`). The prefix form modifies the object and returns a reference to it; the postfix form returns a copy of the original value and then modifies the object.
+Arithmetic operators (`+`, `-`, `*`, `/`, `%`) define arithmetic operations for user-defined types.
 
 **Technical Definition**
-The prefix form of the operator is declared exactly the same way as any other unary operator; the postfix form accepts an extra argument of type `int`. When specifying an overloaded operator for the postfix form, the additional argument must be of type `int`; specifying any other type generates an error. The `int` parameter is a dummy parameter used solely to distinguish the postfix from the prefix form; it is never used to pass an actual value.
+Arithmetic operators are typically implemented as **non-member functions** for symmetry, with compound assignment operators (`+=`, `-=`, etc.) as members. The standard pattern is to implement the compound assignment as a member and the binary arithmetic operator as a non-member in terms of the compound assignment. This ensures consistency and avoids duplication. The C++ Core Guidelines state: define binary operators as non-members (C.161), and implement `a + b` as `a += b` then return `a` (copy).
 
 **Beginner-Friendly Explanation**
-When you write `++x` (prefix), the object increments itself and returns a reference to itself. When you write `x++` (postfix), the object saves a copy of its current value, increments itself, and returns the copy. The postfix form is slightly less efficient because it creates a copy. The dummy `int` parameter is how the compiler tells the two forms apart: the prefix form has no parameter, and the postfix form has an `int` parameter.
+Arithmetic operators let you use `+`, `-`, `*`, `/` with your objects. For example, `a + b` adds two vectors. The common pattern is to implement `+=` as a member, then define `+` as a non-member that copies the left operand, applies `+=`, and returns the result.
 
----
+### Purposes
 
-### Purposes (all begin with "To")
-
-- **To** enable user-defined types to be incremented and decremented like built-in types.
-- **To** support both prefix and postfix semantics for iterators and smart pointers.
-- **To** allow user-defined iterators to work with standard algorithms.
-- **To** provide efficient prefix increment (no copy) and correct postfix increment (returns old value).
-- **To** distinguish between the two forms through the dummy `int` parameter.
-
----
+- To provide natural arithmetic syntax for numeric types.
+- To support expression templates and chaining.
+- To implement vector/matrix arithmetic.
+- To maintain consistency between `+` and `+=`.
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntaxes with Breakdowns
-
-**Member prefix increment:**
+**General Syntax**
 ```cpp
-T& operator++() {
-    ++value_;
-    return *this;
+class X {
+public:
+    X& operator+=(const X& rhs);   // member compound assignment
+};
+
+X operator+(X lhs, const X& rhs) {   // non-member binary, by value
+    lhs += rhs;
+    return lhs;
 }
 ```
 
-**Member postfix increment:**
+**Component Breakdown**
+
+| Operator | Typical Form |
+|----------|--------------|
+| `+=`, `-=`, `*=`, `/=` | Member, mutating. |
+| `+`, `-`, `*`, `/` | Non-member, returns new object. |
+| Unary `-`, `+` | Member or non-member. |
+
+**Syntax Rules**
+- Compound assignment should be members and return `*this`.
+- Binary arithmetic should be non-members and take the left operand by value (or `const&`).
+- Binary operators can be implemented in terms of compound assignment.
+- Unary operators are often members.
+
+**Constraints and Limitations**
+- Arithmetic operators should not have surprising semantics.
+- Overloading `&&`, `||`, and `,` is discouraged (they lose short-circuiting/sequencing).
+- Arithmetic on user-defined types should follow the usual algebraic laws where possible.
+
+### Annotated Code Examples
+
+**Example 1: Arithmetic operators**
+
 ```cpp
-T operator++(int) {
-    T temp = *this;
-    ++(*this);
-    return temp;
+#include <iostream>
+
+class Vec2 {
+    double x_, y_;
+public:
+    Vec2(double x = 0, double y = 0) : x_(x), y_(y) {}
+
+    Vec2& operator+=(const Vec2& rhs) {
+        x_ += rhs.x_;
+        y_ += rhs.y_;
+        return *this;
+    }
+
+    friend Vec2 operator+(Vec2 lhs, const Vec2& rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+
+    void print() const { std::cout << '(' << x_ << ", " << y_ << ")\n"; }
+};
+
+int main() {
+    Vec2 a(1, 2), b(3, 4);
+    Vec2 c = a + b;
+    c.print();
 }
 ```
 
-**Non-member prefix increment (friend):**
-```cpp
-friend T& operator++(T& obj) {
-    ++obj.value_;
-    return obj;
-}
+**Expected Output**
+```
+(4, 6)
 ```
 
-**Non-member postfix increment (friend):**
-```cpp
-friend T operator++(T& obj, int) {
-    T temp = obj;
-    ++obj;
-    return temp;
-}
-```
+**Why this output?**  
+`a + b` calls `operator+`, which copies `a`, applies `+=` with `b`, and returns the result `(4, 6)`.
 
-#### Syntax Rules
+### Real-World Cases
 
-- The prefix form takes no parameters and returns `T&`.
-- The postfix form takes an `int` parameter (unused) and returns `T` (by value).
-- The postfix form should be implemented in terms of the prefix form.
-- The `int` parameter is never named in the definition (to avoid unused parameter warnings).
-
-#### Constraints and Limitations
-
-- The postfix form is inherently less efficient because it must create a copy.
-- The `int` parameter cannot be used to pass meaningful data through normal operator syntax (only through explicit function call syntax).
-- Both forms should be provided for iterators to support both `++it` and `it++` idioms.
+- **Vector/matrix math** – `Vec2`, `Matrix`.
+- **Complex numbers** – `Complex`.
+- **Big integers** – `BigInt`.
+- **Date arithmetic** – `Date + days`.
 
 ---
 
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
+## 6. Assignment Operators
 
-#### Example 1 — Prefix and Postfix Increment for a Counter
+### Definitions
+
+**Core Definition**
+Assignment operators (`=`, `+=`, `-=`, `*=`, `/=`, `%=`, etc.) assign a new value to an existing object, replacing its previous value.
+
+**Technical Definition**
+The **copy assignment operator** (`operator=(const X&)`) and **move assignment operator** (`operator=(X&&)`) are special members with specific rules (Rule of Three/Five/Zero). Compound assignment operators (`+=`, etc.) are typically members that modify the object and return `*this`. The simple assignment operator must be a non-static member function and cannot be a friend. Assignment operators should handle self-assignment and provide the strong exception guarantee where possible.
+
+**Beginner-Friendly Explanation**
+Assignment operators change an object's value. `a = b` copies `b` into `a`; `a += b` adds `b` to `a`. The copy and move assignment operators are special because they're automatically generated or deleted by the compiler under certain rules.
+
+### Purposes
+
+- To assign new values to objects.
+- To support compound assignment (`+=`, `-=`).
+- To implement deep copies or move semantics.
+- To maintain consistency with constructors.
+
+### Syntax Rules and Structure
+
+**General Syntax**
+```cpp
+class X {
+public:
+    X& operator=(const X& rhs);       // copy assignment (member)
+    X& operator=(X&& rhs) noexcept;   // move assignment (member)
+    X& operator+=(const X& rhs);      // compound assignment (member)
+};
+```
+
+**Component Breakdown**
+
+| Operator | Form | Notes |
+|----------|------|-------|
+| `=` | Member, non-virtual | Special member function. |
+| `+=` etc. | Member | Returns `*this`. |
+| Copy assignment | `operator=(const X&)` | Rule of Three/Five. |
+| Move assignment | `operator=(X&&)` | `noexcept` recommended. |
+
+**Syntax Rules**
+- `operator=` must be a non-static member function.
+- It cannot be a friend or a static function.
+- It should return `*this` for chaining.
+- It should handle self-assignment.
+- Move assignment should be `noexcept`.
+
+**Constraints and Limitations**
+- The simple assignment operator cannot be a non-member.
+- The compiler generates copy/move assignment unless suppressed.
+- Assignment operators should be exception-safe.
+
+### Annotated Code Examples
+
+**Example 1: Compound assignment**
 
 ```cpp
 #include <iostream>
 
 class Counter {
+    int value_ = 0;
 public:
-    Counter(int value = 0) : value_(value) {}
-
-    // Prefix increment
-    Counter& operator++() {
-        ++value_;
+    Counter& operator+=(int n) {
+        value_ += n;
         return *this;
     }
-
-    // Postfix increment
-    Counter operator++(int) {
-        Counter temp = *this;
-        ++(*this);
-        return temp;
-    }
-
     int value() const { return value_; }
-
-private:
-    int value_;
 };
 
 int main() {
-    Counter c(5);
-
-    // Prefix
-    Counter& pref = ++c;
-    std::cout << "After ++c: c = " << c.value()
-              << ", pref = " << pref.value() << std::endl;
-
-    // Postfix
-    Counter post = c++;
-    std::cout << "After c++: c = " << c.value()
-              << ", post = " << post.value() << std::endl;
-
-    return 0;
+    Counter c;
+    c += 5;
+    c += 10;
+    std::cout << c.value() << '\n';
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-After ++c: c = 6, pref = 6
-After c++: c = 7, post = 6
+15
 ```
 
-**Why this output:** `++c` increments `c` to 6 and returns a reference to `c`, so `pref` refers to the same object and shows 6. `c++` saves a copy of `c` (value 6), increments `c` to 7, and returns the copy, so `post` shows 6 while `c` shows 7.
+**Why this output?**  
+`c += 5` and `c += 10` call `operator+=`, which adds to `value_` and returns `*this`.
+
+### Real-World Cases
+
+- **Numeric types** – `Complex`, `BigInt`, `Matrix`.
+- **String builders** – `operator+=` for strings.
+- **Container assignment** – `std::vector::operator=`.
 
 ---
 
-### Real-World Cases with Explanation
-
-**Case 1 — Iterators:** Standard library iterators implement both prefix and postfix increment. Prefix (`++it`) is more efficient and is preferred in loops.
-
-**Case 2 — Smart pointers:** `std::unique_ptr` and `std::shared_ptr` do not overload `++`, but custom smart pointers might.
-
-**Case 3 — Date/time types:** Date classes overload `++` to advance to the next day, with prefix and postfix semantics matching built-in types.
-
-**Case 4 — Enumerated state machines:** State machine types use `++` to advance to the next state, with postfix returning the previous state.
-
----
-
-### References Links
-
-- Increment and Decrement Operator Overloading (C++) — Microsoft Learn - https://learn.microsoft.com/en-us/cpp/cpp/increment-and-decrement-operator-overloading-cpp
-- Increment/decrement operators — cppreference.com - https://en.cppreference.com/w/cpp/language/operator_incdec
-- Overloading the increment and decrement operators — Learn C++ - https://www.learncpp.com/cpp-tutorial/overloading-the-increment-and-decrement-operators/
-
----
-
-## 8. Function-Call Operator (`()`) — Functors and Lambdas
+## 7. Stream Operators
 
 ### Definitions
 
 **Core Definition**
-The function-call operator `operator()` allows an object to be called as if it were a function. Objects that overload `operator()` are called function objects or functors. Lambda expressions create unnamed function objects whose `operator()` is defined by the lambda body.
+Stream operators (`<<` for output, `>>` for input) allow objects of user-defined types to be written to or read from standard library streams.
 
 **Technical Definition**
-`operator()` shall be a non-static member function with an arbitrary number of parameters. It can have default arguments. It implements the function call syntax where the postfix-expression evaluates to a class object and the possibly empty expression-list matches the parameter list of an `operator()` member function of the class. Thus, a call `x(arg1, ...)` is interpreted as `x.operator()(arg1, ...)` for a class object `x` of type `T` if `T::operator()(T1, T2, T3)` exists and is selected by overload resolution.
+`operator<<(std::ostream& os, const T& value)` writes a value to an output stream and returns `os` for chaining. `operator>>(std::istream& is, T& value)` reads a value and returns `is`. Stream operators are **non-member functions** (usually friends) because the left operand is a stream, not the user-defined type. They are the idiomatic way to support formatted I/O for user-defined types.
 
 **Beginner-Friendly Explanation**
-A functor is an object that can be called like a function. If you have a class with `operator()`, you can write `myObject(args)` just like calling a function. Lambdas are a convenient syntax for creating functors on the fly: `auto f = [](int x) { return x * 2; };` creates a function object whose `operator()` returns twice its argument. Functors and lambdas are the foundation of C++'s functional programming style and are used extensively with algorithms like `std::sort`, `std::for_each`, and `std::transform`.
+Stream operators let you write `std::cout << myObject` or `std::cin >> myObject`. They're non-member functions because the stream is on the left. They return the stream so you can chain: `std::cout << a << b << c`.
 
----
+### Purposes
 
-### Purposes (all begin with "To")
-
-- **To** create objects that behave like functions.
-- **To** pass custom behavior to standard algorithms (e.g., custom comparators for `std::sort`).
-- **To** enable stateful function-like objects (functors can have member variables).
-- **To** provide a concise syntax for simple function objects (lambdas).
-- **To** support generic algorithms that accept callable objects.
-
----
+- To provide formatted output and input for user-defined types.
+- To integrate with `std::cout`, `std::cin`, `std::ostringstream`, etc.
+- To support chaining.
+- To define textual representations of objects.
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntaxes with Breakdowns
-
-**Functor class:**
+**General Syntax**
 ```cpp
+class X {
+    int value_;
+public:
+    friend std::ostream& operator<<(std::ostream& os, const X& x);
+    friend std::istream& operator>>(std::istream& is, X& x);
+};
+
+std::ostream& operator<<(std::ostream& os, const X& x) {
+    return os << x.value_;
+}
+```
+
+**Component Breakdown**
+
+| Operator | Signature |
+|----------|-----------|
+| Output | `std::ostream& operator<<(std::ostream&, const T&)` |
+| Input | `std::istream& operator>>(std::istream&, T&)` |
+
+**Syntax Rules**
+- The first parameter is the stream (by reference).
+- The second parameter is the object (`const&` for output, `&` for input).
+- The operator returns the stream reference for chaining.
+- Usually non-member, often friend for private access.
+- Include `<ostream>` or `<istream>`.
+
+**Constraints and Limitations**
+- The stream operator cannot be a member of the user-defined type (the left operand would be the object).
+- Input operators should handle malformed input gracefully.
+- Stream operators should not throw unless the stream is configured to.
+
+### Annotated Code Examples
+
+**Example 1: Stream output and input**
+
+```cpp
+#include <iostream>
+
+class Point {
+    int x_, y_;
+public:
+    Point(int x = 0, int y = 0) : x_(x), y_(y) {}
+
+    friend std::ostream& operator<<(std::ostream& os, const Point& p) {
+        return os << '(' << p.x_ << ", " << p.y_ << ')';
+    }
+    friend std::istream& operator>>(std::istream& is, Point& p) {
+        return is >> p.x_ >> p.y_;
+    }
+};
+
+int main() {
+    Point p(3, 4);
+    std::cout << p << '\n';
+    Point q;
+    std::cin >> q;
+    std::cout << q << '\n';
+}
+```
+
+**Expected Output** (for input `5 6`)
+```
+(3, 4)
+(5, 6)
+```
+
+**Why this output?**  
+`operator<<` prints `(3, 4)`. `operator>>` reads two integers into `q`, and the second `operator<<` prints `(5, 6)`.
+
+### Real-World Cases
+
+- **Debugging output** – printing objects.
+- **Serialization** – writing to string streams.
+- **Parsing** – reading from input streams.
+- **Logging** – formatted log messages.
+
+---
+
+## 8. Subscript Operators
+
+### Definitions
+
+**Core Definition**
+The subscript operator (`operator[]`) provides array-like element access for user-defined types.
+
+**Technical Definition**
+`operator[]` must be a **non-static member function**. It can be overloaded for `const` and non-`const` objects to provide mutable and read-only access. The parameter is typically an index type (`std::size_t`, or any type for associative containers). The return type is usually a reference to the element, allowing assignment. Since C++23, `operator[]` can take multiple parameters for multidimensional subscripting.
+
+**Beginner-Friendly Explanation**
+`operator[]` lets your class be indexed like an array: `obj[i]`. For example, a custom vector class can define `operator[]` so `v[2]` returns the third element.
+
+### Purposes
+
+- To provide array-like access to elements.
+- To support both mutable and read-only access.
+- To implement custom containers.
+- To support associative lookup (e.g., `map[key]`).
+
+### Syntax Rules and Structure
+
+**General Syntax**
+```cpp
+class Container {
+public:
+    T& operator[](std::size_t index);              // mutable access
+    const T& operator[](std::size_t index) const;  // read-only access
+};
+```
+
+**Component Breakdown**
+
+| Form | Meaning |
+|------|---------|
+| `operator[]` | Must be a non-static member. |
+| Return reference | Allows assignment (`c[i] = x`). |
+| `const` overload | Read-only access on `const` objects. |
+
+**Syntax Rules**
+- `operator[]` must be a non-static member.
+- It is typically overloaded for `const` and non-`const` objects.
+- It should return a reference to the element.
+- The index type can be any type (often `std::size_t`).
+- Since C++23, `operator[]` can take multiple parameters.
+
+**Constraints and Limitations**
+- Bounds checking is not automatic; `std::vector::at()` provides it.
+- Returning by value prevents assignment; return by reference for mutable access.
+- `operator[]` cannot be a non-member.
+
+### Annotated Code Examples
+
+**Example 1: Subscript operator**
+
+```cpp
+#include <iostream>
+#include <stdexcept>
+
+class IntArray {
+    int data_[3] = {10, 20, 30};
+public:
+    int& operator[](std::size_t i) {
+        if (i >= 3) throw std::out_of_range("index");
+        return data_[i];
+    }
+    const int& operator[](std::size_t i) const {
+        if (i >= 3) throw std::out_of_range("index");
+        return data_[i];
+    }
+};
+
+int main() {
+    IntArray a;
+    a[1] = 99;
+    std::cout << a[1] << '\n';
+}
+```
+
+**Expected Output**
+```
+99
+```
+
+**Why this output?**  
+`a[1] = 99` calls the non-`const` `operator[]`, which returns a reference to `data_[1]`, allowing assignment.
+
+### Real-World Cases
+
+- **Custom containers** – `IntArray`, `Matrix`.
+- **Associative containers** – `std::map::operator[]`.
+- **Multidimensional access** – `Matrix[row][col]`.
+
+---
+
+## 9. Function Call Operators
+
+### Definitions
+
+**Core Definition**
+The function call operator (`operator()`) allows an object to be **called like a function**, creating a *function object* (functor).
+
+**Technical Definition**
+`operator()` must be a **non-static member function**. It can take any number and type of parameters, be overloaded, and be templated. Objects with `operator()` are called **function objects** or **functors**. They can be used wherever a callable is expected (e.g., `std::function`, algorithms). Since C++11, lambdas are syntactic sugar for function objects.
+
+**Beginner-Friendly Explanation**
+`operator()` lets your object behave like a function. For example, a `Multiplier` class with `operator()(int)` can be called as `mult(5)`. Functors are useful because they can hold state.
+
+### Purposes
+
+- To create function objects (functors) that carry state.
+- To pass callable objects to algorithms.
+- To implement strategy patterns.
+- To support lambdas (which are functors under the hood).
+
+### Syntax Rules and Structure
+
+**General Syntax**
+```cpp
+class Functor {
+public:
+    ReturnType operator()(Parameters) const;   // function call operator
+};
+```
+
+**Component Breakdown**
+
+| Form | Meaning |
+|------|---------|
+| `operator()` | Must be a non-static member. |
+| Parameters | Any number and types. |
+| `const` | Recommended for stateless functors. |
+
+**Syntax Rules**
+- `operator()` must be a non-static member.
+- It can be overloaded and templated.
+- It can be `const`, `noexcept`, etc.
+- It can take any number of parameters.
+
+**Constraints and Limitations**
+- `operator()` cannot be a non-member.
+- Overloading `operator()` can make objects callable with different signatures.
+
+### Annotated Code Examples
+
+**Example 1: Function object**
+
+```cpp
+#include <iostream>
+
 class Multiplier {
     int factor_;
 public:
-    Multiplier(int factor) : factor_(factor) {}
-    int operator()(int x) const {
-        return x * factor_;
-    }
-};
-```
-
-**Lambda expression:**
-```cpp
-auto multiply = [factor = 10](int x) {
-    return x * factor;
-};
-```
-
-**Lambda with capture:**
-```cpp
-int factor = 10;
-auto multiply = [factor](int x) { return x * factor; };
-```
-
-#### Syntax Rules
-
-- `operator()` must be a non-static member function.
-- It can take any number of parameters and can have default arguments.
-- It can be overloaded (multiple `operator()` with different parameters).
-- Lambda expressions create a closure type with a compiler-generated `operator()`.
-- Captures in lambdas become member variables of the closure type.
-
-#### Constraints and Limitations
-
-- `operator()` cannot be static.
-- Lambdas cannot be used where a named function is required (e.g., in a function pointer that outlives the lambda).
-- Capturing lambdas are not convertible to function pointers (only captureless lambdas are, since C++17).
-- Functors can be more verbose than lambdas for simple cases.
-
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Functor for Custom Sorting
-
-```cpp
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
-struct DescendingOrder {
-    bool operator()(int a, int b) const {
-        return a > b;
-    }
+    explicit Multiplier(int factor) : factor_(factor) {}
+    int operator()(int x) const { return x * factor_; }
 };
 
 int main() {
-    std::vector<int> data = {3, 1, 4, 1, 5, 9, 2, 6};
-
-    // Functor as comparator
-    std::sort(data.begin(), data.end(), DescendingOrder{});
-
-    std::cout << "Sorted descending: ";
-    for (int v : data) std::cout << v << " ";
-    std::cout << std::endl;
-
-    // Lambda as comparator
-    std::sort(data.begin(), data.end(),
-              [](int a, int b) { return a < b; });
-
-    std::cout << "Sorted ascending: ";
-    for (int v : data) std::cout << v << " ";
-    std::cout << std::endl;
-
-    return 0;
+    Multiplier times3(3);
+    std::cout << times3(5) << '\n';
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Sorted descending: 9 6 5 4 3 2 1 1
-Sorted ascending: 1 1 2 3 4 5 6 9
+15
 ```
 
-**Why this output:** `DescendingOrder` is a functor whose `operator()` returns `a > b`, causing `std::sort` to sort in descending order. The lambda `[](int a, int b) { return a < b; }` is a function object whose `operator()` returns `a < b`, causing ascending order. Both are passed as the third argument to `std::sort`.
+**Why this output?**  
+`times3(5)` calls `times3.operator()(5)`, which returns `5 * 3 = 15`.
+
+### Real-World Cases
+
+- **STL algorithms** – passing functors to `std::sort`, `std::transform`.
+- **`std::function`** – storing callable objects.
+- **Strategy pattern** – interchangeable algorithms.
+- **Lambdas** – compiler-generated functors.
 
 ---
 
-### Real-World Cases with Explanation
-
-**Case 1 — Standard algorithms:** `std::sort`, `std::find_if`, `std::transform`, and `std::for_each` accept functors and lambdas as customization points.
-
-**Case 2 — Hash functions:** `std::unordered_map` and `std::unordered_set` accept custom hash functors.
-
-**Case 3 — Event handling:** GUI frameworks use functors as callbacks for button clicks, key presses, and other events.
-
-**Case 4 — Thread pools:** Task queues store functors (often lambdas) to be executed by worker threads.
-
-**Case 5 — ECS (Entity-Component-System) architectures:** Game engines use functors for system updates and component queries.
-
----
-
-### References Links
-
-- Function call operator — cppreference.com - https://en.cppreference.com/w/cpp/language/operators#Function_call_operator
-- Functors and Lambdas — ETH Zurich - https://lec.inf.ethz.ch
-- Function objects and lambda expressions — Linköping University - https://www.ida.liu.se
-
----
-
-## 9. Subscript Operator (`[]`) and Multi-Dimensional Subscripting (C++23)
+## 10. Conversion Operators
 
 ### Definitions
 
 **Core Definition**
-The subscript operator `[]` provides array-like access to elements of a user-defined type. Since C++23, `operator[]` can accept multiple arguments, enabling natural multi-dimensional indexing.
+A conversion operator is a member function that defines how an object of a class is **converted to another type**.
 
 **Technical Definition**
-`operator[]` shall be a non-static member function with exactly one parameter (until C++23). It implements the subscripting syntax `postfix-expression[expression]` or `postfix-expression[braced-init-list]`. Since C++23 (P2128R6), `operator[]` can take zero or more arguments, including variadic arguments, enabling multi-dimensional subscripting. The built-in operator requires exactly one assignment expression, but the user-defined operator can accept multiple parameters.
+A conversion operator is declared as `operator TargetType() const;` (or without `const`). It must be a **non-static member function**. It can be `explicit` (since C++11) to prevent implicit conversions. Conversion operators enable objects to be used where the target type is expected. They can be templated (e.g., `operator T()`), but this can lead to ambiguity. The C++ Core Guidelines recommend making conversion operators `explicit` by default (C.164).
 
 **Beginner-Friendly Explanation**
-For a 2D matrix class, the traditional C++ approach was to use `operator()` with two arguments: `matrix(i, j)`. C++23 allows `operator[]` to take multiple arguments, so you can write `matrix[i, j]`, which is more natural and consistent with array syntax. This is especially useful for `std::mdspan` and other multi-dimensional containers.
+A conversion operator lets your object be **converted to another type**. For example, a `Fraction` class might define `operator double()` so it can be used where a `double` is expected.
 
----
+### Purposes
 
-### Purposes (all begin with "To")
-
-- **To** provide array-like access to elements of user-defined containers.
-- **To** enable natural syntax for multi-dimensional indexing (C++23).
-- **To** support both read and write access through const and non-const overloads.
-- **To** allow braced-init-list as a subscript (e.g., `map[{1, 2}]`).
-- **To** provide bounds-checked or unchecked access depending on the container's requirements.
-
----
+- To allow objects to be used as other types.
+- To support implicit or explicit conversions.
+- To provide alternative representations.
+- To integrate with APIs expecting other types.
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntaxes with Breakdowns
-
-**Single-argument subscript (traditional):**
+**General Syntax**
 ```cpp
-T& operator[](std::size_t index) {
-    return data_[index];
-}
-
-const T& operator[](std::size_t index) const {
-    return data_[index];
-}
+class X {
+public:
+    operator TargetType() const;           // implicit conversion
+    explicit operator TargetType() const;  // explicit conversion (C++11)
+};
 ```
 
-**Multi-dimensional subscript (C++23):**
-```cpp
-T& operator[](std::size_t row, std::size_t col) {
-    return data_[row * cols_ + col];
-}
-```
+**Component Breakdown**
 
-**Variadic subscript (C++23):**
-```cpp
-template <typename... Indices>
-T& operator[](Indices... indices) {
-    return data_[compute_offset(indices...)];
-}
-```
+| Form | Meaning |
+|------|---------|
+| `operator TargetType()` | Conversion to `TargetType`. |
+| `explicit` | Prevents implicit conversion. |
+| `const` | Recommended. |
 
-#### Syntax Rules
+**Syntax Rules**
+- Conversion operators must be non-static members.
+- They take no parameters.
+- They can be `explicit` to prevent implicit conversions.
+- They can be templated, but this can cause ambiguity.
 
-- `operator[]` must be a non-static member function.
-- Before C++23, it takes exactly one parameter (no default arguments, no variadic).
-- Since C++23, it can take zero or more parameters, including a parameter pack.
-- The return type is typically `T&` (for mutable access) or `const T&` (for const access).
-- Braced-init-list can be used as a subscript if the operator accepts a suitable type.
+**Constraints and Limitations**
+- Multiple conversion operators can cause ambiguous conversions.
+- Implicit conversions can lead to surprising behavior.
+- Conversion to `bool` should be `explicit` (to avoid accidental arithmetic).
 
-#### Constraints and Limitations
+### Annotated Code Examples
 
-- The C++23 multi-dimensional subscript operator changes the meaning of `a[i, j]` from a comma expression to a function call with two arguments. Code that relied on the comma operator in subscripts (rare) will break.
-- The `-Wcomma-subscript` warning controls the pedantic diagnostic for the old comma-expression behavior in C++23.
-- Not all compilers support the C++23 multi-dimensional subscript operator yet (GCC 12+, Clang 16+).
-
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Multi-Dimensional Matrix Subscript (C++23)
+**Example 1: Conversion operator**
 
 ```cpp
 #include <iostream>
-#include <vector>
-#include <cstddef>
 
-class Matrix {
-public:
-    Matrix(std::size_t rows, std::size_t cols)
-        : rows_(rows), cols_(cols), data_(rows * cols, 0) {}
-
-    // C++23 multi-dimensional subscript
-    int& operator[](std::size_t row, std::size_t col) {
-        return data_[row * cols_ + col];
-    }
-
-    int operator[](std::size_t row, std::size_t col) const {
-        return data_[row * cols_ + col];
-    }
-
-    std::size_t rows() const { return rows_; }
-    std::size_t cols() const { return cols_; }
-
-private:
-    std::size_t rows_, cols_;
-    std::vector<int> data_;
-};
-
-int main() {
-    Matrix m(3, 4);
-    m[0, 0] = 1;
-    m[1, 2] = 42;
-    m[2, 3] = 99;
-
-    std::cout << "m[0, 0] = " << m[0, 0] << std::endl;
-    std::cout << "m[1, 2] = " << m[1, 2] << std::endl;
-    std::cout << "m[2, 3] = " << m[2, 3] << std::endl;
-
-    return 0;
-}
-```
-
-**Expected Output:**
-```
-m[0, 0] = 1
-m[1, 2] = 42
-m[2, 3] = 99
-```
-
-**Why this output:** The C++23 `operator[]` takes two `std::size_t` parameters, one for the row and one for the column. `m[0, 0]` calls `m.operator[](0, 0)`, which computes the flat index `0 * 4 + 0 = 0`. `m[1, 2]` computes `1 * 4 + 2 = 6`. This provides natural multi-dimensional indexing syntax.
-
----
-
-### Real-World Cases with Explanation
-
-**Case 1 — `std::mdspan`:** The C++23 multi-dimensional span uses the multi-dimensional subscript operator for natural indexing of multi-dimensional arrays.
-
-**Case 2 — Image processing:** Image classes use multi-dimensional subscripting to access pixel values by row and column: `image[y, x]`.
-
-**Case 3 — Matrix libraries:** Linear algebra libraries can use `matrix[i, j]` instead of `matrix(i, j)`, providing syntax consistent with mathematical notation.
-
-**Case 4 — Tensor libraries:** Machine learning tensor libraries use multi-dimensional subscripting for accessing tensor elements by multiple indices.
-
----
-
-### References Links
-
-- Array subscript operator — cppreference.com - https://en.cppreference.com/w/cpp/language/operators#Array_subscript_operator
-- P2128R6: Multidimensional subscript operator — WG21 - https://wg21.link/P2128R6
-- Understand multidimensional subscript operator `[]` (C++23) — Dr-Sergey/learn_cpp (GitHub) - https://github.com/Dr-Sergey/learn_cpp
-
----
-
-## 10. Smart Pointer Operators: Dereference (`*`) and Member Selection (`->`)
-
-### Definitions
-
-**Core Definition**
-Smart pointer classes overload the dereference operator `*` to return a reference to the pointed-to object, and the member selection operator `->` to provide access to members of the pointed-to object.
-
-**Technical Definition**
-The `operator->` overload must either return a raw pointer, or return an object (by reference or by value) for which `operator->` is in turn overloaded. This recursive behavior means that `p->member` is interpreted as `(p.operator->())->member`, and if `p.operator->()` returns another smart pointer, the process repeats until a raw pointer is obtained. The `operator*` overload returns a reference to the pointed-to object (`T&`), allowing both read and write access.
-
-**Beginner-Friendly Explanation**
-A smart pointer behaves like a regular pointer. `*p` gives you the object that `p` points to, and `p->member` accesses a member of that object. When you write `p->member`, the compiler calls `p.operator->()`, which returns something that can be dereferenced (usually a raw pointer). If it returns another smart pointer, the compiler repeats the process until it reaches a raw pointer. This recursion is why `operator->` is sometimes called the "drill-down" operator.
-
----
-
-### Purposes (all begin with "To")
-
-- **To** make smart pointer classes behave like raw pointers.
-- **To** provide transparent access to the pointed-to object's members.
-- **To** enable smart pointers to be used in generic code that expects pointer-like syntax.
-- **To** support chained `operator->` calls through multiple layers of smart pointers.
-- **To** allow both const and non-const access to the pointed-to object.
-
----
-
-### Syntax Rules and Structure
-
-#### Complete General Syntaxes with Breakdowns
-
-**Dereference operator:**
-```cpp
-T& operator*() const {
-    return *ptr_;
-}
-```
-
-**Member selection operator:**
-```cpp
-T* operator->() const {
-    return ptr_;
-}
-```
-
-**Recursive `operator->`:**
-```cpp
-SmartPtr<T> operator->() const {
-    return SmartPtr<T>(ptr_->next);
-}
-```
-- Returns another smart pointer; the compiler continues the recursion.
-
-#### Syntax Rules
-
-- `operator*` should return `T&` (or `const T&` for const overloads).
-- `operator->` must return either a raw pointer or another object that itself overloads `operator->`.
-- Both operators should be `const` member functions if the smart pointer itself is not modified.
-- The recursion in `operator->` stops when a raw pointer is returned.
-
-#### Constraints and Limitations
-
-- `operator->` cannot return `void` or an object that does not overload `operator->`.
-- The recursion depth is limited by the compiler's template instantiation depth.
-- `operator*` should not perform null checks unless the smart pointer is designed to throw on null dereference.
-
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Simple Smart Pointer
-
-```cpp
-#include <iostream>
-#include <memory>
-
-template <typename T>
-class SimplePtr {
-public:
-    explicit SimplePtr(T* ptr) : ptr_(ptr) {}
-    ~SimplePtr() { delete ptr_; }
-
-    T& operator*() const { return *ptr_; }
-    T* operator->() const { return ptr_; }
-
-private:
-    T* ptr_;
-};
-
-class Widget {
-public:
-    Widget(int value) : value_(value) {}
-    void print() const {
-        std::cout << "Widget: " << value_ << std::endl;
-    }
-    int value() const { return value_; }
-
-private:
-    int value_;
-};
-
-int main() {
-    SimplePtr<Widget> p(new Widget(42));
-
-    // Dereference
-    std::cout << "Value: " << (*p).value() << std::endl;
-
-    // Member selection
-    p->print();
-
-    return 0;
-}
-```
-
-**Expected Output:**
-```
-Value: 42
-Widget: 42
-```
-
-**Why this output:** `(*p).value()` calls `p.operator*()` to get a reference to the `Widget`, then calls `value()` on it. `p->print()` calls `p.operator->()` to get a raw `Widget*`, then calls `print()` on it. The `operator->` recursion stops immediately because `operator->` returns a raw pointer.
-
----
-
-### Real-World Cases with Explanation
-
-**Case 1 — `std::unique_ptr`:** Overloads `operator*` and `operator->` to provide pointer-like access to the owned object.
-
-**Case 2 — `std::shared_ptr`:** Same as `unique_ptr`, but with shared ownership semantics.
-
-**Case 3 — `std::weak_ptr`:** Does not overload `operator*` or `operator->` directly; you must lock it to obtain a `shared_ptr` first.
-
-**Case 4 — Iterator classes:** Standard iterators overload `operator*` and `operator->` to provide access to container elements.
-
-**Case 5 — Lazy evaluation wrappers:** A lazy pointer might return a proxy object from `operator->` that itself overloads `operator->`, enabling on-demand computation.
-
----
-
-### References Links
-
-- Member access operators — cppreference.com - https://en.cppreference.com/w/cpp/language/operator_member_access
-- Smart pointer implementation — Kiwix - https://browse.library.kiwix.org
-- Clarification on smart pointer's `operator*` and `operator->` overloading — Stack Overflow - https://stackoverflow.com
-
----
-
-## 11. Conversion Operators (Implicit vs. Explicit)
-
-### Definitions
-
-**Core Definition**
-A conversion operator (also called a cast operator) defines how an object of a class type can be converted to another type. Implicit conversion operators are used automatically by the compiler; explicit conversion operators (C++11) require a cast.
-
-**Technical Definition**
-User-defined conversions allow you to specify object conversions with constructors or with conversion functions. A conversion function is a member function with the name `operator type`, where `type` is the target type. The compiler can use only one user-defined conversion (either a conversion constructor or a conversion function) when implicitly converting a single value. Since C++11, a conversion function can be marked `explicit`, preventing implicit conversions and requiring direct-initialization or an explicit cast.
-
-**Beginner-Friendly Explanation**
-If you have a `Fraction` class, you might want it to convert to `double` automatically. You write `operator double() const { return num_ / den_; }` and then `double d = fraction;` works. But sometimes automatic conversions are dangerous — for example, a smart pointer converting to `bool` could accidentally be used in arithmetic. The `explicit` keyword prevents these accidental conversions: `explicit operator bool() const` requires `if (ptr)` but disallows `int x = ptr`.
-
----
-
-### Purposes (all begin with "To")
-
-- **To** allow user-defined types to be converted to other types automatically (implicit) or on request (explicit).
-- **To** enable user-defined types to interoperate with functions and expressions expecting built-in types.
-- **To** prevent dangerous or surprising implicit conversions using `explicit`.
-- **To** support contexts like `if (smartPtr)` through `explicit operator bool`.
-- **To** provide a controlled, type-safe conversion mechanism.
-
----
-
-### Syntax Rules and Structure
-
-#### Complete General Syntaxes with Breakdowns
-
-**Implicit conversion operator:**
-```cpp
 class Fraction {
+    int num_, den_;
 public:
-    operator double() const {
+    Fraction(int num, int den) : num_(num), den_(den) {}
+    explicit operator double() const {
         return static_cast<double>(num_) / den_;
     }
 };
-```
-- `Fraction f(1, 2); double d = f;` works automatically.
-
-**Explicit conversion operator (C++11):**
-```cpp
-class SafeBool {
-public:
-    explicit operator bool() const {
-        return value_ != 0;
-    }
-};
-```
-- `if (obj)` works; `bool b = obj;` does not (requires `static_cast<bool>(obj)`).
-
-#### Syntax Rules
-
-- The conversion function must be a non-static member function.
-- It cannot have a return type (the return type is the target type in the function name).
-- It cannot take parameters.
-- `explicit` prevents implicit conversion; direct-initialization and casts are still allowed.
-- Only one user-defined conversion is applied implicitly.
-
-#### Constraints and Limitations
-
-- Conversion operators to `void` are allowed but rarely useful.
-- Conversion to array or function types is not allowed.
-- Implicit conversions can cause ambiguity if multiple conversion paths exist.
-- `explicit operator bool` is the standard way to make a type usable in boolean contexts without allowing arithmetic conversions.
-
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Implicit and Explicit Conversion Operators
-
-```cpp
-#include <iostream>
-
-class Temperature {
-public:
-    Temperature(double celsius) : celsius_(celsius) {}
-
-    // Implicit conversion to double (Celsius)
-    operator double() const { return celsius_; }
-
-    // Explicit conversion to Fahrenheit
-    explicit operator float() const {
-        return static_cast<float>(celsius_ * 9.0 / 5.0 + 32.0);
-    }
-
-    double celsius() const { return celsius_; }
-
-private:
-    double celsius_;
-};
 
 int main() {
-    Temperature t(25.0);
-
-    // Implicit conversion to double
-    double c = t;
-    std::cout << "Celsius: " << c << std::endl;
-
-    // Explicit conversion to float (Fahrenheit)
-    float f = static_cast<float>(t);
-    std::cout << "Fahrenheit: " << f << std::endl;
-
-    // Implicit conversion to float would not compile:
-    // float f2 = t;  // Error: explicit conversion
-
-    return 0;
+    Fraction f(1, 4);
+    std::cout << static_cast<double>(f) << '\n';
+    // double d = f;   // error: explicit conversion
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Celsius: 25
-Fahrenheit: 77
+0.25
 ```
 
-**Why this output:** `operator double()` is implicit, so `double c = t;` works automatically. `explicit operator float()` requires `static_cast<float>(t)`, which computes the Fahrenheit value. Attempting `float f2 = t;` would be a compile error because the conversion is explicit.
+**Why this output?**  
+`static_cast<double>(f)` calls `operator double()`, returning `1.0 / 4 = 0.25`. The commented line would be an error because the conversion is `explicit`.
+
+### Real-World Cases
+
+- **Numeric types** – `Complex::operator double()`.
+- **Smart pointers** – `operator bool()` for null checks.
+- **String types** – `operator const char*()`.
+- **Ranges** – conversion to iterators.
 
 ---
 
-### Real-World Cases with Explanation
-
-**Case 1 — `std::unique_ptr::operator bool`:** `std::unique_ptr` has `explicit operator bool()` to allow `if (ptr)` without allowing accidental arithmetic conversions.
-
-**Case 2 — `std::optional::operator bool`:** `std::optional` has `explicit operator bool()` to check whether it contains a value.
-
-**Case 3 — `std::string::operator std::string_view`:** `std::string` provides an implicit conversion to `std::string_view` for interoperability.
-
-**Case 4 — Numeric wrappers:** Types like `std::chrono::duration` provide conversion operators between different duration units.
-
----
-
-### References Links
-
-- Conversion operators — cppreference.com - https://en.cppreference.com/w/cpp/language/cast_operator
-- User-defined conversions — Microsoft Learn - https://learn.microsoft.com/en-us/cpp/cpp/user-defined-type-conversions
-- explicit specifier — cppreference.com - https://en.cppreference.com/w/cpp/language/explicit
-
----
-
-## 12. Memory Management Operators (`new`, `delete`, `new[]`, `delete[]`)
+## 11. Increment/Decrement Operators
 
 ### Definitions
 
 **Core Definition**
-The `new` and `delete` operators allocate and deallocate dynamic memory. Overloading them allows custom memory management strategies for a class or globally.
+Increment (`++`) and decrement (`--`) operators define how objects are incremented or decremented, with both **prefix** and **postfix** forms.
 
 **Technical Definition**
-The allocation and deallocation functions, `operator new`, `operator new[]`, `operator delete`, and `operator delete[]`, are described in the standard's dynamic storage duration section. The allocation function `operator new` must return `void*` and take a `std::size_t` parameter. The deallocation function `operator delete` must return `void` and take a `void*` as its first parameter. Each deallocation function shall return `void` and its first parameter shall be `void*`. If you overload `operator new`, you should always also overload the matching `operator delete`, even if you never intend to call it directly.
+Prefix increment (`++x`) is a member function taking no parameters: `X& operator++();`. Postfix increment (`x++`) is a member function taking a dummy `int` parameter: `X operator++(int);`. Prefix returns a reference to the modified object; postfix returns a copy of the original object. The postfix form is typically implemented in terms of the prefix form. The same pattern applies to `--`.
 
 **Beginner-Friendly Explanation**
-When you write `new Widget()`, the compiler calls `operator new` to allocate memory, then calls the `Widget` constructor. When you write `delete ptr`, the compiler calls the destructor, then calls `operator delete` to free the memory. By overloading these operators, you can use custom memory pools, track allocations, or use specialized allocators. Overloading `new` without also overloading `delete` is dangerous because the runtime may use a different deallocation path.
+Prefix increment (`++x`) increments and returns the new value; postfix increment (`x++`) returns the old value and then increments. The dummy `int` parameter distinguishes the two forms.
 
----
+### Purposes
 
-### Purposes (all begin with "To")
-
-- **To** implement custom memory allocation strategies (pools, arenas, tracking).
-- **To** optimize allocation for specific types or use cases.
-- **To** track memory usage for debugging and profiling.
-- **To** support embedded systems with limited or specialized memory.
-- **To** integrate with custom allocators and memory management frameworks.
-
----
+- To support iteration and counting.
+- To increment/decrement counters and iterators.
+- To provide natural syntax for state machines.
+- To support loop constructs.
 
 ### Syntax Rules and Structure
 
-#### Complete General Syntaxes with Breakdowns
-
-**Global `operator new`:**
+**General Syntax**
 ```cpp
-void* operator new(std::size_t size) {
-    void* ptr = std::malloc(size);
-    if (!ptr) throw std::bad_alloc();
-    return ptr;
-}
-```
-
-**Global `operator delete`:**
-```cpp
-void operator delete(void* ptr) noexcept {
-    std::free(ptr);
-}
-```
-
-**Class-specific `operator new`:**
-```cpp
-class T {
+class Counter {
 public:
-    static void* operator new(std::size_t size) {
-        return ::operator new(size);
-    }
-
-    static void operator delete(void* ptr) noexcept {
-        ::operator delete(ptr);
-    }
+    Counter& operator++();       // prefix ++
+    Counter operator++(int);     // postfix ++ (dummy int)
+    Counter& operator--();       // prefix --
+    Counter operator--(int);     // postfix --
 };
 ```
 
-**Array versions:**
-```cpp
-void* operator new[](std::size_t size);
-void operator delete[](void* ptr) noexcept;
-```
+**Component Breakdown**
 
-#### Syntax Rules
+| Form | Signature | Returns |
+|------|-----------|---------|
+| Prefix `++` | `operator++()` | Reference to `*this` |
+| Postfix `++` | `operator++(int)` | Copy of original |
+| Prefix `--` | `operator--()` | Reference to `*this` |
+| Postfix `--` | `operator--(int)` | Copy of original |
 
-- `operator new` must return `void*` and take `std::size_t` as its first parameter.
-- `operator delete` must return `void` and take `void*` as its first parameter.
-- `operator delete` must be declared `noexcept`.
-- The class-specific versions are static member functions.
-- The global versions are replaced at link time.
+**Syntax Rules**
+- Prefix operators return `*this` (by reference).
+- Postfix operators return a copy of the original value.
+- The dummy `int` parameter distinguishes postfix from prefix.
+- Postfix is typically implemented in terms of prefix.
 
-#### Constraints and Limitations
+**Constraints and Limitations**
+- Postfix operators are less efficient (they create a copy).
+- Increment/decrement should preserve invariants.
+- Overloading both forms is recommended for consistency.
 
-- Overloading `new` without `delete` is dangerous; the runtime may use the default `delete` with a different allocator.
-- The `new` and `delete` operators cannot be overloaded for `void*` (they already have the correct signature).
-- Custom `operator new` must throw `std::bad_alloc` on failure (or return `nullptr` with the nothrow version).
-- Memory allocated by a custom `operator new` must be freed by the matching `operator delete`.
+### Annotated Code Examples
 
----
-
-### Multiple Annotated Complete Step-by-Step Code Examples and Their Expected Outputs
-
-#### Example 1 — Tracking Allocations with Custom `new` and `delete`
+**Example 1: Prefix and postfix increment**
 
 ```cpp
 #include <iostream>
-#include <cstdlib>
-#include <new>
 
-// Step 1: Global tracking counters
-static std::size_t alloc_count = 0;
-static std::size_t free_count = 0;
-
-// Step 2: Custom global operator new
-void* operator new(std::size_t size) {
-    ++alloc_count;
-    void* ptr = std::malloc(size);
-    if (!ptr) throw std::bad_alloc();
-    return ptr;
-}
-
-// Step 3: Custom global operator delete
-void operator delete(void* ptr) noexcept {
-    if (ptr) {
-        ++free_count;
-        std::free(ptr);
+class Counter {
+    int value_ = 0;
+public:
+    Counter& operator++() {          // prefix
+        ++value_;
+        return *this;
     }
-}
+    Counter operator++(int) {        // postfix
+        Counter tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+    int value() const { return value_; }
+};
 
 int main() {
-    int* a = new int(42);
-    int* b = new int(100);
-
-    delete a;
-    delete b;
-
-    std::cout << "Allocations: " << alloc_count << std::endl;
-    std::cout << "Deallocations: " << free_count << std::endl;
-
-    return 0;
+    Counter c;
+    Counter a = ++c;
+    Counter b = c++;
+    std::cout << a.value() << ' ' << b.value() << ' ' << c.value() << '\n';
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Allocations: 2
-Deallocations: 2
+1 1 2
 ```
 
-**Why this output:** The custom `operator new` increments `alloc_count` each time memory is allocated. The custom `operator delete` increments `free_count` each time memory is freed. After two `new` calls and two `delete` calls, both counters are 2.
+**Why this output?**  
+`++c` increments `c` to `1` and returns `a` (value `1`). `c++` returns `b` (value `1`), then increments `c` to `2`. Final `c` is `2`.
+
+### Real-World Cases
+
+- **Iterators** – `++it`, `it++`.
+- **Counters** – `++count`.
+- **State machines** – advancing states.
+- **Loops** – `for (auto it = v.begin(); it != v.end(); ++it)`.
 
 ---
 
-### Real-World Cases with Explanation
+## 12. Operator Overloading Best Practices
 
-**Case 1 — Memory pools:** Game engines and real-time systems use custom `operator new` to allocate from pre-allocated memory pools, reducing fragmentation and allocation latency.
+### Definitions
 
-**Case 2 — Debug allocators:** Debug builds use custom `operator new` and `operator delete` to track memory leaks, detect double-frees, and fill allocated memory with patterns.
+**Core Definition**
+Operator overloading best practices are guidelines for overloading operators in ways that are intuitive, consistent, safe, and maintainable, based on the C++ Core Guidelines.
 
-**Case 3 — Embedded systems:** Embedded firmware uses custom allocators that allocate from fixed-size static buffers instead of the heap.
+**Technical Definition**
+The C++ Core Guidelines provide operator overloading rules: **C.160** (define operators primarily to mimic conventional usage), **C.161** (use nonmember functions for symmetric operators), **C.162** (overload operations that are roughly equivalent), **C.163** (overload only for operations that are roughly equivalent), **C.164** (avoid implicit conversions), **C.165** (use `==` when appropriate), **C.166** (overload `==` to compare equivalent values), **C.167** (overload `==` and `!=` consistently), **C.168** (define `==` and `!=` together), **C.170** (use `operator<<` for stream output), and **C.171** (avoid `operator` abuse). Additional guidance: prefer `explicit` conversion operators, implement compound assignment as members, implement binary arithmetic as non-members in terms of compound assignment, and use the C++20 spaceship operator for comparisons.
 
-**Case 4 — GPU memory:** GPU programming libraries overload `operator new` to allocate from device memory pools.
+**Beginner-Friendly Explanation**
+Best practices for operator overloading are simple: **only overload operators when the meaning is obvious**, **follow the built-in semantics**, **use non-members for symmetric operators**, **keep related operators consistent**, **make conversion operators `explicit`**, and **don't abuse operators**.
 
-**Case 5 — Object pools:** High-performance servers use object pools with custom `new`/`delete` to recycle objects and avoid repeated heap allocations.
+### Key Guidelines (Summary Table)
+
+| Guideline | Summary | Recommendation |
+|-----------|---------|----------------|
+| **C.160** | Define operators primarily to mimic conventional usage. | `+` should add, not subtract. |
+| **C.161** | Use nonmember functions for symmetric operators. | `==`, `+`, `<` as non-members. |
+| **C.162** | Overload operations that are roughly equivalent. | `+` and `+=` should be consistent. |
+| **C.163** | Overload only for operations that are roughly equivalent. | Don't give `+` unrelated meanings. |
+| **C.164** | Avoid implicit conversions. | Make conversion operators `explicit`. |
+| **C.165** | Use `==` when appropriate. | Prefer `==` over `!=` alone. |
+| **C.166** | Overload `==` to compare equivalent values. | `==` should mean “equal value.” |
+| **C.167** | Overload `==` and `!=` consistently. | `a != b` ≡ `!(a == b)`. |
+| **C.168** | Define `==` and `!=` together. | Or use C++20 `<=>`. |
+| **C.170** | Use `operator<<` for stream output. | Don't use `operator<<` for other purposes. |
+| **C.171** | Avoid `operator` abuse. | Don't overload `&&`, `||`, `,` without strong reason. |
+
+### Annotated Code Examples
+
+**Example 1: Non-member symmetric comparison (C.161, C.168)**
+
+```cpp
+#include <iostream>
+
+class Point {
+    int x_, y_;
+public:
+    Point(int x, int y) : x_(x), y_(y) {}
+
+    friend bool operator==(const Point& a, const Point& b) {
+        return a.x_ == b.x_ && a.y_ == b.y_;
+    }
+    friend bool operator!=(const Point& a, const Point& b) {
+        return !(a == b);
+    }
+};
+
+int main() {
+    Point a(1, 2), b(1, 2);
+    std::cout << (a == b) << ' ' << (a != b) << '\n';
+}
+```
+
+**Expected Output**
+```
+1 0
+```
+
+**Why this is best practice?**  
+`==` and `!=` are non-member functions for symmetry (C.161) and are defined together consistently (C.168).
+
+**Example 2: Consistent arithmetic (C.162)**
+
+```cpp
+#include <iostream>
+
+class Vec2 {
+    double x_, y_;
+public:
+    Vec2(double x = 0, double y = 0) : x_(x), y_(y) {}
+
+    Vec2& operator+=(const Vec2& rhs) {
+        x_ += rhs.x_;
+        y_ += rhs.y_;
+        return *this;
+    }
+
+    friend Vec2 operator+(Vec2 lhs, const Vec2& rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+
+    void print() const { std::cout << '(' << x_ << ", " << y_ << ")\n"; }
+};
+
+int main() {
+    Vec2 a(1, 2), b(3, 4);
+    Vec2 c = a + b;
+    c.print();
+}
+```
+
+**Expected Output**
+```
+(4, 6)
+```
+
+**Why this is best practice?**  
+`+=` is a member (mutating); `+` is a non-member implemented in terms of `+=` (C.162). The semantics are consistent.
+
+### Real-World Cases
+
+- **Standard library** – `std::complex`, `std::string`, `std::vector`.
+- **Code review** – Core Guidelines C.160–C.171 are common checkpoints.
+- **Static analysis** – clang-tidy enforces many operator overloading rules.
 
 ---
 
-### References Links
+## References
 
-- `operator new`, `operator new[]` — cppreference.com - https://en.cppreference.com/w/cpp/memory/new/operator_new
-- `operator delete`, `operator delete[]` — cppreference.com - https://en.cppreference.com/w/cpp/memory/new/operator_delete
-- Overloading `new` and `delete` — Stack Overflow - https://stackoverflow.com
-- Overloading `new` and `delete`: A Few Adjustments — GitHub - https://github.com
+- Operator overloading (cppreference) – https://en.cppreference.com/w/cpp/language/operators
+- Operator overloading (Microsoft Learn) – https://learn.microsoft.com/en-us/cpp/cpp/operator-overloading
+- Member operator overloading (Microsoft Learn) – https://learn.microsoft.com/en-us/cpp/cpp/operator-overloading
+- Non-member operator overloading (Microsoft Learn) – https://learn.microsoft.com/en-us/cpp/cpp/operator-overloading
+- Friend functions (cppreference) – https://en.cppreference.com/w/cpp/language/friend
+- Comparison operators (cppreference) – https://en.cppreference.com/w/cpp/language/operator_comparison
+- Three-way comparison (`<=>`) (cppreference) – https://en.cppreference.com/w/cpp/language/operator_comparison#Three-way_comparison
+- Stream extraction and insertion (cppreference) – https://en.cppreference.com/w/cpp/io/basic_ostream/operator_ltlt
+- Subscript operator (cppreference) – https://en.cppreference.com/w/cpp/language/operator_member_access#Built-in_subscript_operator
+- Function call operator (cppreference) – https://en.cppreference.com/w/cpp/language/operators#Function_call_operator
+- Conversion operators (cppreference) – https://en.cppreference.com/w/cpp/language/cast_operator
+- Increment/decrement operators (cppreference) – https://en.cppreference.com/w/cpp/language/operator_incdec
+- C++ Core Guidelines — C.160: Define operators primarily to mimic conventional usage – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-conventional
+- C++ Core Guidelines — C.161: Use nonmember functions for symmetric operators – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-symmetric
+- C++ Core Guidelines — C.162: Overload operations that are roughly equivalent – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-equivalent
+- C++ Core Guidelines — C.163: Overload only for operations that are roughly equivalent – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-equivalent-2
+- C++ Core Guidelines — C.164: Avoid implicit conversion operators – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-conversion
+- C++ Core Guidelines — C.165: Use `==` when appropriate – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-eq
+- C++ Core Guidelines — C.166: Overload `==` to compare equivalent values – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-eq-2
+- C++ Core Guidelines — C.167: Overload `==` and `!=` consistently – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-eq-3
+- C++ Core Guidelines — C.168: Define `==` and `!=` together – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-eq-4
+- C++ Core Guidelines — C.170: Use `operator<<` for stream output – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-stream
+- C++ Core Guidelines — C.171: Avoid `operator` abuse – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Ro-abuse
 
 ---
 
-## Summary Table of Operator Categories
-
-| Operator Category | Key Operators | Typical Form | Key Consideration |
-|---|---|---|---|
-| Arithmetic | `+`, `-`, `*`, `/`, `%`, `+=`, `-=` | Non-member for binary; member for compound | Implement binary in terms of compound |
-| Comparison (Traditional) | `==`, `!=`, `<`, `>`, `<=`, `>=` | Member or non-member | Define all six consistently |
-| Spaceship (C++20) | `<=>` | Member or non-member | Choose correct ordering category |
-| Defaulted Comparison | `= default` | Member | Use for simple value types |
-| Stream I/O | `<<`, `>>` | Non-member (friend) | Return stream reference for chaining |
-| Assignment | `=`, move assignment | Member | Rule of Five; self-assignment safe |
-| Increment/Decrement | `++`, `--` | Member | Postfix uses dummy `int` parameter |
-| Function Call | `()` | Member | Foundation of functors and lambdas |
-| Subscript | `[]` | Member | C++23 supports multi-argument |
-| Smart Pointer | `*`, `->` | Member | `->` must return pointer or pointer-like |
-| Conversion | `operator T()` | Member | Use `explicit` to prevent surprises |
-| Memory Management | `new`, `delete`, `new[]`, `delete[]` | Static member or global | Always overload both `new` and `delete` |
-
----
-
-## References (Consolidated)
-
-- operator overloading — cppreference.com - https://en.cppreference.com/w/cpp/language/operators
-- Default comparisons (since C++20) — cppreference.com - https://en.cppreference.com/w/cpp/language/default_comparisons
-- Three-way comparison — cppreference.com - https://en.cppreference.com/w/cpp/language/operator_comparison#Three-way_comparison
-- Increment and Decrement Operator Overloading (C++) — Microsoft Learn - https://learn.microsoft.com/en-us/cpp/cpp/increment-and-decrement-operator-overloading-cpp
-- Input and Output Operators — Apache C++ Standard Library User's Guide - https://svn.apache.org/repos/asf/stdcxx/branches/4.2.x/doc/stdlibug/28-2.html
-- P2128R6: Multidimensional subscript operator — WG21 - https://wg21.link/P2128R6
-- User-defined conversions — IBM - https://www.vm.ibm.com/library/other/481530.pdf
-- Copy assignment operator — cppreference.com - https://en.cppreference.com/w/cpp/language/copy_assignment
-- Move assignment operator — cppreference.com - https://en.cppreference.com/w/cpp/language/move_assignment
-- `operator new`, `operator new[]` — cppreference.com - https://en.cppreference.com/w/cpp/memory/new/operator_new
-- `operator delete`, `operator delete[]` — cppreference.com - https://en.cppreference.com/w/cpp/memory/new/operator_delete
-- Default comparisons (N4175) — ISO C++ - https://isocpp.org/files/papers/N4175.pdf
-- Google C++ Style Guide: Operator Overloading - https://android.googlesource.com/platform/external/google-styleguide
-- Use `std::strong_ordering`, `weak_ordering`, `partial_ordering` as `<=>` return types — Dr-Sergey/learn_cpp (GitHub) - https://github.com/Dr-Sergey/learn_cpp
-- Understand multidimensional subscript operator `[]` (C++23) — Dr-Sergey/learn_cpp (GitHub) - https://github.com/Dr-Sergey/learn_cpp
-- Overloading `new` and `delete` — Stack Overflow - https://stackoverflow.com
+This cheat sheet provides a complete, structured reference for C++ operator overloading in classes, covering member, non-member, and friend operators; comparison, arithmetic, assignment, stream, subscript, function call, conversion, and increment/decrement operators; and best practices. Each section follows a uniform template with definitions, purposes, syntax rules, annotated examples, expected outputs, and authoritative references.

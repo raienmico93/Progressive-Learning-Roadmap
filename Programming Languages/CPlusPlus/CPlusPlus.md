@@ -616,7 +616,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
 
 
 ---
-
+ 
 # XI. Namespaces, Headers, and Modular Programming
 
 * [**57. Namespaces**](/Programming%20Languages/CPlusPlus/Miscellaneous/Namespaces.md)

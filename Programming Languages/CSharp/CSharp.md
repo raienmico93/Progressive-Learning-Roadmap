@@ -935,14 +935,14 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `EventHandler<TEventArgs>`
   - Built-in delegate best practices
 
-- **59. Anonymous Methods**
+- [**59. Anonymous Methods**](/Programming%20Languages/CSharp/Miscellaneous/AnonymousMethods.md)
   - Anonymous methods
   - `delegate` keyword
   - Anonymous method syntax
   - Anonymous method limitations
   - Anonymous method best practices
 
-- **60. Lambda Expressions**
+- [**60. Lambda Expressions**](/Programming%20Languages/CSharp/Miscellaneous/LambdaEx.md)
   - Lambda expressions
   - Lambda syntax
   - Expression lambdas
@@ -953,7 +953,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Lambda best practices
   - Lambda performance
 
-- **61. Events**
+- [**61. Events**](/Programming%20Languages/CSharp/Miscellaneous/Events.md)
   - Events
   - `event` keyword
   - Event declaration
@@ -964,7 +964,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Event best practices
   - Weak event pattern
 
-- **62. Expression Trees**
+- [**62. Expression Trees**](/Programming%20Languages/CSharp/Miscellaneous/ExpressionTrees.md)
   - Expression trees
   - `Expression<TDelegate>`
   - Expression tree construction
@@ -977,7 +977,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # IX. LINQ (Language Integrated Query)
 
-- **63. LINQ Fundamentals**
+- [**63. LINQ Fundamentals**](/Programming%20Languages/CSharp/LINQ/LINQ.md)
   - LINQ
   - Language Integrated Query
   - LINQ providers
@@ -990,7 +990,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - PLINQ
   - LINQ best practices
 
-- **64. LINQ Query Syntax**
+- [**64. LINQ Query Syntax**](/Programming%20Languages/CSharp/LINQ/QuerySyntax.md)
   - `from`
   - `where`
   - `select`
@@ -1002,7 +1002,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Multiple `from`
   - Query syntax best practices
 
-- **65. LINQ Method Syntax**
+- [**65. LINQ Method Syntax**](/Programming%20Languages/CSharp/LINQ/MethodSyntax.md)
   - `Where()`
   - `Select()`
   - `SelectMany()`
@@ -1051,7 +1051,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `OfType()`
   - Method syntax best practices
 
-- **66. LINQ Operations**
+- [**66. LINQ Operations**](/Programming%20Languages/CSharp/LINQ/Operations.md)
   - Filtering
   - Projection
   - Sorting
@@ -1066,7 +1066,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Generation operations
   - LINQ operation best practices
 
-- **67. Deferred Execution**
+- [**67. Deferred Execution**](/Programming%20Languages/CSharp/LINQ/DeferredExecution.md)
   - Deferred execution
   - Lazy evaluation
   - Immediate execution
@@ -1076,7 +1076,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Deferred execution best practices
   - Deferred execution pitfalls
 
-- **68. LINQ Performance**
+- [**68. LINQ Performance**](/Programming%20Languages/CSharp/LINQ/Performance.md)
   - LINQ performance
   - Deferred execution
   - Multiple enumeration
@@ -1085,7 +1085,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Expression trees
   - LINQ performance best practices
 
-- **69. PLINQ**
+- [**69. PLINQ**](/Programming%20Languages/CSharp/LINQ/PLINQ.md)
   - PLINQ
   - Parallel LINQ
   - `AsParallel()`
@@ -1100,7 +1100,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # X. Asynchronous Programming
 
-- **70. Asynchronous Fundamentals**
+- [**70. Asynchronous Fundamentals**](/Programming%20Languages/CSharp/Asynchronous/Async.md)
   - Asynchronous programming
   - Synchronous vs asynchronous
   - Blocking vs non-blocking
@@ -1113,7 +1113,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `async` and `await`
   - Asynchronous best practices
 
-- **71. Async/Await**
+- [**71. Async/Await**](/Programming%20Languages/CSharp/Asynchronous/AsyncAwait.md)
   - `async` keyword
   - `await` keyword
   - Async method
@@ -1127,7 +1127,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Async best practices
   - Async pitfalls
 
-- **72. Task-Based Asynchronous Pattern**
+- [**72. Task-Based Asynchronous Pattern**](/Programming%20Languages/CSharp/Asynchronous/TaskBasedAsync.md)
   - TAP
   - Task-based Asynchronous Pattern
   - Task creation
@@ -1140,7 +1140,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `Task.CompletedTask`
   - TAP best practices
 
-- **73. Asynchronous Streams**
+- [**73. Asynchronous Streams**](/Programming%20Languages/CSharp/Asynchronous/AsyncStreams.md)
   - Asynchronous streams
   - `IAsyncEnumerable<T>`
   - `await foreach`
@@ -1148,14 +1148,14 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `[EnumeratorCancellation]`
   - Asynchronous streams best practices
 
-- **74. Cancellation**
+- [**74. Cancellation**](/Programming%20Languages/CSharp/Asynchronous/Cancellation.md)
   - Cancellation
   - `CancellationToken`
   - `CancellationTokenSource`
   - Cancellation propagation
   - Cancellation best practices
 
-- **75. Concurrency**
+- [**75. Concurrency**](/Programming%20Languages/CSharp/Asynchronous/Concurrency.md)
   - Concurrency
   - Parallelism
   - `Parallel.For()`
@@ -1168,7 +1168,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `BlockingCollection<T>`
   - Concurrency best practices
 
-- **76. Async Patterns**
+- [**76. Async Patterns**](/Programming%20Languages/CSharp/Asynchronous/AsyncPatterns.md)
   - Async all the way
   - Avoid async void
   - ConfigureAwait
@@ -1182,7 +1182,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # XI. Memory Management
 
-- **77. Memory Model**
+- [**77. Memory Model**](/Programming%20Languages/CSharp/Memory%20Management/MemoryModel.md)
   - Memory model
   - Stack
   - Heap
@@ -1193,7 +1193,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Memory layout
   - Memory model best practices
 
-- **78. Garbage Collection**
+- [**78. Garbage Collection**](/Programming%20Languages/CSharp/Memory%20Management/GarbageCollection.md)
   - Garbage collection
   - GC generations
     - Generation 0
@@ -1215,7 +1215,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - GC best practices
   - GC performance
 
-- **79. IDisposable Pattern**
+- [**79. IDisposable Pattern**](/Programming%20Languages/CSharp/Memory%20Management/IDisposablePattern.md)
   - `IDisposable`
   - `Dispose()` method
   - `Dispose(bool)` pattern
@@ -1224,7 +1224,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `SafeHandle`
   - IDisposable best practices
 
-- **80. Memory Optimization**
+- [**80. Memory Optimization**](/Programming%20Languages/CSharp/Memory%20Management/MemoryOptimization.md)
   - Memory allocation
   - Object pooling
   - `ArrayPool<T>`
@@ -1237,7 +1237,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `ref` locals
   - Memory optimization best practices
 
-- **81. Span and Memory**
+- [**81. Span and Memory**](/Programming%20Languages/CSharp/Memory%20Management/SpanAndMemory.md)
   - `Span<T>`
   - `ReadOnlySpan<T>`
   - `Memory<T>`
@@ -1251,7 +1251,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # XII. .NET Runtime and Internals
 
-- **82. CLR**
+- [**82. CLR**](/Programming%20Languages/CSharp/NET%20Runtime%20and%20Internals/CLR.md)
   - CLR
   - Common Language Runtime
   - Runtime architecture
@@ -1259,7 +1259,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Runtime services
   - Runtime best practices
 
-- **83. JIT Compilation**
+- [**83. JIT Compilation**](/Programming%20Languages/CSharp/NET%20Runtime%20and%20Internals/JITCompilation.md)
   - JIT compilation
   - Tiered compilation
   - ReadyToRun
@@ -1268,7 +1268,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - JIT optimization
   - JIT best practices
 
-- **84. Assembly Loading**
+- [**84. Assembly Loading**](/Programming%20Languages/CSharp/NET%20Runtime%20and%20Internals/AssemblyLoading.md)
   - Assemblies
   - Assembly loading
   - Assembly resolution
@@ -1279,7 +1279,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - GAC
   - Assembly best practices
 
-- **85. Reflection**
+- [**85. Reflection**](/Programming%20Languages/CSharp/NET%20Runtime%20and%20Internals/Reflection.md)
   - Reflection
   - `Type`
   - `Assembly`
@@ -1290,7 +1290,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Reflection best practices
   - `System.Reflection.Metadata`
 
-- **86. Attributes**
+- [**86. Attributes**](/Programming%20Languages/CSharp/NET%20Runtime%20and%20Internals/Attributes.md)
   - Attributes
   - Attribute declaration
   - Attribute usage
@@ -1308,7 +1308,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
     - `[MaybeNull]`
   - Attribute best practices
 
-- **87. Dynamic Programming**
+- [**87. Dynamic Programming**](/Programming%20Languages/CSharp/NET%20Runtime%20and%20Internals/DynamicProgramming.md)
   - `dynamic`
   - Dynamic binding
   - Dynamic Language Runtime
@@ -1318,7 +1318,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Dynamic performance
   - Dynamic best practices
 
-- **88. Unsafe Code**
+- [**88. Unsafe Code**](/Programming%20Languages/CSharp/NET%20Runtime%20and%20Internals/UnsafeCode.md)
   - Unsafe code
   - `unsafe` keyword
   - Pointers
@@ -1332,7 +1332,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # XIII. Error Handling
 
-- **89. Exceptions**
+- [**89. Exceptions**](/Programming%20Languages/CSharp/Error%20Handling/Exceptions.md)
   - Exceptions
   - `Exception` class
   - Exception hierarchy
@@ -1368,7 +1368,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
     - `TargetSite`
   - Exception best practices
 
-- **90. Try-Catch-Finally**
+- [**90. Try-Catch-Finally**](/Programming%20Languages/CSharp/Error%20Handling/TryCatchFinally.md)
   - `try`
   - `catch`
   - `finally`
@@ -1380,14 +1380,14 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `throw ex`
   - Exception best practices
 
-- **91. Custom Exceptions**
+- [**91. Custom Exceptions**](/Programming%20Languages/CSharp/Error%20Handling/CustomExceptions.md)
   - Custom exceptions
   - Exception inheritance
   - Exception constructors
   - Exception serialization
   - Exception best practices
 
-- **92. Exception Patterns**
+- [**92. Exception Patterns**](/Programming%20Languages/CSharp/Error%20Handling/ExceptionPatterns.md)
   - Fail fast
   - Fail safe
   - Graceful degradation
@@ -1401,7 +1401,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # XIV. ASP.NET Core
 
-- **93. ASP.NET Core Fundamentals**
+- [**93. ASP.NET Core Fundamentals**](/Programming%20Languages/CSharp/ASP%20NET%20Core/Fundamentals.md)
   - ASP.NET Core
   - ASP.NET Core architecture
   - Middleware pipeline
@@ -1414,7 +1414,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - HTTP.sys
   - ASP.NET Core best practices
 
-- **94. Minimal APIs**
+- [**94. Minimal APIs**](/Programming%20Languages/CSharp/ASP%20NET%20Core/MinimalAPIs.md)
   - Minimal APIs
   - `MapGet()`
   - `MapPost()`
@@ -1426,7 +1426,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Response
   - Minimal API best practices
 
-- **95. MVC**
+- [**95. MVC**](/Programming%20Languages/CSharp/ASP%20NET%20Core/MVC.md)
   - MVC pattern
   - Controllers
   - Actions
@@ -1438,14 +1438,14 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Model validation
   - MVC best practices
 
-- **96. Razor Pages**
+- [**96. Razor Pages**](/Programming%20Languages/CSharp/ASP%20NET%20Core/RazorPages.md)
   - Razor Pages
   - Page models
   - Handlers
   - Routing
   - Razor Pages best practices
 
-- **97. Web API**
+- [**97. Web API**](/Programming%20Languages/CSharp/ASP%20NET%20Core/WebAPI.md)
   - Web API
   - REST APIs
   - `[ApiController]`
@@ -1460,7 +1460,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Swagger/OpenAPI
   - Web API best practices
 
-- **98. Middleware**
+- [**98. Middleware**](/Programming%20Languages/CSharp/ASP%20NET%20Core/Middleware.md)
   - Middleware
   - Middleware pipeline
   - Custom middleware
@@ -1469,7 +1469,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Middleware ordering
   - Middleware best practices
 
-- **99. Dependency Injection**
+- [**99. Dependency Injection**](/Programming%20Languages/CSharp/ASP%20NET%20Core/DependencyInjection.md)
   - Dependency injection
   - `IServiceCollection`
   - `IServiceProvider`
@@ -1482,7 +1482,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - DI best practices
   - DI anti-patterns
 
-- **100. Configuration**
+- [**100. Configuration**](/Programming%20Languages/CSharp/ASP%20NET%20Core/Configuration.md)
   - Configuration
   - `IConfiguration`
   - `appsettings.json`
@@ -1496,7 +1496,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `IOptionsMonitor<T>`
   - Configuration best practices
 
-- **101. Logging**
+- [**101. Logging**](/Programming%20Languages/CSharp/ASP%20NET%20Core/Logging.md)
   - Logging
   - `ILogger<T>`
   - Log levels
@@ -1506,7 +1506,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - NLog
   - Logging best practices
 
-- **102. Authentication**
+- [**102. Authentication**](/Programming%20Languages/CSharp/ASP%20NET%20Core/Authentication.md)
   - Authentication
   - Cookie authentication
   - JWT authentication
@@ -1517,7 +1517,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - ASP.NET Core Identity
   - Authentication best practices
 
-- **103. Authorization**
+- [**103. Authorization**](/Programming%20Languages/CSharp/ASP%20NET%20Core/Authorization.md)
   - Authorization
   - `[Authorize]`
   - Policies
@@ -1528,7 +1528,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Policy-based authorization
   - Authorization best practices
 
-- **104. SignalR**
+- [**104. SignalR**](/Programming%20Languages/CSharp/ASP%20NET%20Core/SignalR.md)
   - SignalR
   - Real-time communication
   - Hubs
@@ -1536,7 +1536,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Groups
   - SignalR best practices
 
-- **105. gRPC**
+- [**105. gRPC**](/Programming%20Languages/CSharp/ASP%20NET%20Core/gPRC.md)
   - gRPC
   - Protocol Buffers
   - Services
@@ -1544,7 +1544,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Streaming
   - gRPC best practices
 
-- **106. Blazor**
+- [**106. Blazor**](/Programming%20Languages/CSharp/ASP%20NET%20Core/Blazor.md)
   - Blazor
   - Blazor Server
   - Blazor WebAssembly
@@ -1558,7 +1558,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # XV. Databases
 
-- **107. ADO.NET**
+- [**107. ADO.NET**](/Programming%20Languages/CSharp/Databases/ADONET.md)
   - ADO.NET
   - `SqlConnection`
   - `SqlCommand`
@@ -1570,7 +1570,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Connection pooling
   - ADO.NET best practices
 
-- **108. Entity Framework Core**
+- [**108. Entity Framework Core**](/Programming%20Languages/CSharp/Databases/EntityFramewordCore.md)
   - Entity Framework Core
   - EF Core
   - DbContext
@@ -1591,7 +1591,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - EF Core best practices
   - EF Core pitfalls
 
-- **109. Dapper**
+- [**109. Dapper**](/Programming%20Languages/CSharp/Databases/Dapper.md)
   - Dapper
   - Micro-ORM
   - Query execution
@@ -1599,14 +1599,14 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Performance
   - Dapper best practices
 
-- **110. NoSQL Databases**
+- [**110. NoSQL Databases**](/Programming%20Languages/CSharp/Databases/NoSQL.md)
   - MongoDB
   - Redis
   - Cassandra
   - Couchbase
   - NoSQL best practices
 
-- **111. Database Design**
+- [**111. Database Design**](/Programming%20Languages/CSharp/Databases/DBDesign.md)
   - Data modeling
   - Normalization
   - Indexing

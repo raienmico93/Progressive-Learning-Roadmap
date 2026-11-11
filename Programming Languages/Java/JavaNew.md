@@ -494,7 +494,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Pattern matching
   - Conditional best practices
 
-- **21. Switch Expressions**
+- [**21. Switch Expressions**](/Programming%20Languages/Java/Basics/SwitchStatement.md)
   - Traditional switch
   - Switch expression
   - Arrow syntax
@@ -506,12 +506,12 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Exhaustiveness
   - Switch best practices
 
-- **22. Loops**
+- [**22. Loops**](/Programming%20Languages/Java/Control%20Flow/Loops.md)
   - `for` loop
   - Enhanced `for` loop
   - `while` loop
   - `do...while` loop
-  - Loop control
+  - [Loop control](/Programming%20Languages/Java/Control%20Flow/LoopControl.md)
     - `break`
     - `continue`
   - Labels
@@ -520,7 +520,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Loop performance
   - Loop best practices
 
-- **23. Enhanced For Loop**
+- [**23. Enhanced For Loop**](/Programming%20Languages/Java/Control%20Flow/EnhancedLoop.md)
   - For-each loop
   - Iterable interface
   - Iterator
@@ -530,7 +530,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Limitations
   - Best practices
 
-- **24. Branching Statements**
+- [**24. Branching Statements**](/Programming%20Languages/Java/Control%20Flow/Branching.md)
   - `break`
   - `continue`
   - `return`
@@ -538,6 +538,49 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Labeled break
   - Labeled continue
   - Best practices
+
+---
+
+# Arrays and Strings
+
+- [**15. Arrays**](/Programming%20Languages/Java/Basics/Arrays.md)
+  - One-dimensional arrays
+  - Multidimensional arrays
+  - Array declaration
+  - Array initialization
+  - Array indexing
+  - Array traversal
+  - Array length
+  - Arrays of objects
+  - Irregular multidimensional arrays
+
+- **16. Array Algorithms**
+  - Searching
+  - Sorting
+  - Counting
+  - Minimum and maximum
+  - Aggregation
+  - Duplicate detection
+  - Array comparison
+  - Array copying
+
+- [**17. Strings**](/Programming%20Languages/Java/Basics/String.md)
+  - `String`
+  - String literals
+  - String immutability
+  - String concatenation
+  - String comparison
+  - String searching
+  - Substrings
+  - String replacement
+  - String splitting
+  - String formatting
+
+- **18. Mutable Text**
+  - `StringBuilder`
+  - `StringBuffer`
+  - Performance considerations
+  - String concatenation strategies
 
 ---
 
@@ -1661,7 +1704,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - GC logs
   - GC best practices
 
-- **90. Class Loading**
+- [**90. Class Loading**](/Programming%20Languages/Java/JVM/ClassLoading.md)
   - Class loading
   - Bootstrap class loader
   - Extension class loader
@@ -1676,7 +1719,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - Initialization
   - Class loading best practices
 
-- **91. JIT Compilation**
+- [**91. JIT Compilation**](/Programming%20Languages/Java/JVM/JITCompilation.md)
   - JIT compilation
   - HotSpot
   - C1 compiler
@@ -1688,7 +1731,7 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Dead code elimination
   - JIT best practices
 
-- **92. JVM Tuning**
+- [**92. JVM Tuning**](/Programming%20Languages/Java/JVM/JVMTuning.md)
   - Heap sizing
     - `-Xms`
     - `-Xmx`

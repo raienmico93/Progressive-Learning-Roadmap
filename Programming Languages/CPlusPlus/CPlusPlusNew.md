@@ -546,7 +546,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # IV. Control Flow
 
-- **23. Conditional Statements**
+- [**23. Conditional Statements**](/Programming%20Languages/CPlusPlus/Control%20Flow/Conditionals.md)
   - `if`
   - `else if`
   - `else`
@@ -557,7 +557,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `if consteval` (C++23)
   - Conditional best practices
 
-- **24. Switch Statements**
+- [**24. Switch Statements**](/Programming%20Languages/CPlusPlus/Control%20Flow/Switch.md)
   - `switch`
   - `case`
   - `break`
@@ -569,7 +569,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Switch best practices
   - Switch vs if-else
 
-- **25. Loops**
+- [**25. Loops**](/Programming%20Languages/CPlusPlus/Control%20Flow/Loops.md)
   - `for`
   - Range-based `for`
   - `while`
@@ -583,7 +583,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Loop optimization
   - Loop best practices
 
-- **26. Range-Based For Loop**
+- [**26. Range-Based For Loop**](/Programming%20Languages/CPlusPlus/Control%20Flow/RangeBasedForLoop.md)
   - Range-based for loop
   - `for (auto& x : container)`
   - `for (const auto& x : container)`
@@ -592,7 +592,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Range-based for with structured bindings
   - Range-based for best practices
 
-- **27. Jump Statements**
+- [**27. Jump Statements**](/Programming%20Languages/CPlusPlus/Control%20Flow/Jump.md)
   - `break`
   - `continue`
   - `return`
@@ -604,7 +604,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # V. Functions
 
-- **28. Function Fundamentals**
+- [**28. Function Fundamentals**](/Programming%20Languages/CPlusPlus/Functions/Functions.md)
   - Functions
   - Function declaration
   - Function definition
@@ -626,7 +626,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `noexcept`
   - Function best practices
 
-- **29. Parameter Passing**
+- [**29. Parameter Passing**](/Programming%20Languages/CPlusPlus/Functions/Parameters.md)
   - Pass by value
   - Pass by reference
   - Pass by pointer
@@ -636,7 +636,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::forward`
   - Parameter passing best practices
 
-- **30. Return Values**
+- [**30. Return Values**](/Programming%20Languages/CPlusPlus/Functions/ReturnValues.md)
   - Return by value
   - Return by reference
   - Return by pointer
@@ -648,7 +648,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Guaranteed copy elision (C++17)
   - Return best practices
 
-- **31. Function Overloading**
+- [**31. Function Overloading**](/Programming%20Languages/CPlusPlus/Functions/Overloading.md)
   - Function overloading
   - Overloading rules
   - Overload resolution
@@ -657,21 +657,21 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `extern "C"`
   - Overloading best practices
 
-- **32. Default Arguments**
+- [**32. Default Arguments**](/Programming%20Languages/CPlusPlus/Functions/DefaultArgs.md)
   - Default arguments
   - Default argument rules
   - Default argument pitfalls
   - Default arguments vs overloads
   - Default argument best practices
 
-- **33. Inline Functions**
+- [**33. Inline Functions**](/Programming%20Languages/CPlusPlus/Functions/InlineFunc.md)
   - `inline` keyword
   - Inline expansion
   - Inline functions vs macros
   - Inline variables (C++17)
   - Inline best practices
 
-- **34. Constexpr**
+- [**34. Constexpr**](/Programming%20Languages/CPlusPlus/Functions/Constexpr.md)
   - `constexpr`
   - Compile-time evaluation
   - Constant expressions
@@ -684,7 +684,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `static_assert`
   - Constexpr best practices
 
-- **35. Lambda Expressions**
+- [**35. Lambda Expressions**](/Programming%20Languages/CPlusPlus/Functions/Lambda.md)
   - Lambda expressions
   - Lambda syntax
   - Capture list
@@ -699,7 +699,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Lambda in STL algorithms
   - Lambda best practices
 
-- **36. Function Pointers**
+- [**36. Function Pointers**](/Programming%20Languages/CPlusPlus/Functions/FuncPointers.md)
   - Function pointers
   - Function pointer syntax
   - Function pointer declaration
@@ -710,7 +710,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::bind`
   - Function pointer best practices
 
-- **37. Variadic Functions**
+- [**37. Variadic Functions**](/Programming%20Languages/CPlusPlus/Functions/VariadicFunc.md)
   - Variadic functions
   - `...`
   - `<cstdarg>`
@@ -723,7 +723,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Fold expressions
   - Variadic best practices
 
-- **38. Recursion**
+- [**38. Recursion**](/Programming%20Languages/CPlusPlus/Functions/Recursion.md)
   - Recursion
   - Base case
   - Recursive case
@@ -738,7 +738,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # VI. Pointers and References
 
-- **39. Pointers**
+- [**39. Pointers**](/Programming%20Languages/CPlusPlus/Pointers%20and%20References/Pointers.md)
   - Pointers
   - Pointer declaration
   - Pointer initialization
@@ -759,7 +759,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Pointer best practices
   - Pointer pitfalls
 
-- **40. References**
+- [**40. References**](/Programming%20Languages/CPlusPlus/Pointers%20and%20References/References.md)
   - References
   - Lvalue references
   - `T&`
@@ -772,7 +772,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Reference vs pointer
   - Reference best practices
 
-- **41. Const Correctness**
+- [**41. Const Correctness**](/Programming%20Languages/CPlusPlus/Pointers%20and%20References/ConstCorrectness.md)
   - `const`
   - Const variables
   - Const pointers
@@ -783,7 +783,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Mutable
   - Const correctness best practices
 
-- **42. Smart Pointers**
+- [**42. Smart Pointers**](/Programming%20Languages/CPlusPlus/Pointers%20and%20References/SmartPointers.md)
   - Smart pointers
   - `std::unique_ptr`
   - `std::shared_ptr`
@@ -799,7 +799,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Smart pointer pitfalls
   - Circular references
 
-- **43. Memory Management**
+- [**43. Memory Management**](/Programming%20Languages/CPlusPlus/Pointers%20and%20References/MemoryManagement.md)
   - Stack memory
   - Heap memory
   - Static memory
@@ -824,7 +824,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::pmr`
   - Memory management best practices
 
-- **44. RAII**
+- [**44. RAII**](/Programming%20Languages/CPlusPlus/Pointers%20and%20References/RAII.md)
   - RAII
   - Resource Acquisition Is Initialization
   - Resource management
@@ -834,7 +834,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - RAII best practices
   - RAII examples
 
-- **45. Move Semantics**
+- [**45. Move Semantics**](/Programming%20Languages/CPlusPlus/Pointers%20and%20References/MoveSemantics.md)
   - Move semantics
   - Rvalue references
   - `std::move`
@@ -848,7 +848,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::forward`
   - Move semantics best practices
 
-- **46. Value Categories**
+- [**46. Value Categories**](/Programming%20Languages/CPlusPlus/Pointers%20and%20References/ValueCategories.md)
   - Lvalues
   - Rvalues
   - Xvalues
@@ -863,7 +863,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # VII. Object-Oriented Programming
 
-- **47. Classes and Objects**
+- [**47. Classes and Objects**](/Programming%20Languages/CPlusPlus/OOP/ClassesAndObjects.md)
   - Classes
   - Objects
   - Instances
@@ -890,7 +890,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `= delete`
   - Class best practices
 
-- **48. Constructors and Destructors**
+- [**48. Constructors and Destructors**](/Programming%20Languages/CPlusPlus/OOP/ConsAndDest.md)
   - Constructors
   - Default constructors
   - Parameterized constructors
@@ -907,7 +907,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Pure virtual destructors
   - Constructor/destructor best practices
 
-- **49. Inheritance**
+- [**49. Inheritance**](/Programming%20Languages/CPlusPlus/OOP/Inheritance.md)
   - Inheritance
   - Base classes
   - Derived classes
@@ -925,7 +925,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Inheritance best practices
   - Composition over inheritance
 
-- **50. Polymorphism**
+- [**50. Polymorphism**](/Programming%20Languages/CPlusPlus/OOP/Polymorphism.md)
   - Polymorphism
   - Compile-time polymorphism
   - Runtime polymorphism
@@ -942,7 +942,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `override`
   - Polymorphism best practices
 
-- **51. Virtual Functions**
+- [**51. Virtual Functions**](/Programming%20Languages/CPlusPlus/OOP/VirtualFunc.md)
   - Virtual functions
   - `virtual` keyword
   - Virtual function table
@@ -958,7 +958,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Covariant return types
   - Virtual function best practices
 
-- **52. Abstract Classes and Interfaces**
+- [**52. Abstract Classes and Interfaces**](/Programming%20Languages/CPlusPlus/OOP/Abstractions.md)
   - Abstract classes
   - Pure virtual functions
   - Interface classes
@@ -967,7 +967,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Abstract class best practices
   - Interface best practices
 
-- **53. Operator Overloading in Classes**
+- [**53. Operator Overloading in Classes**](/Programming%20Languages/CPlusPlus/OOP/OperatorOverloading.md)
   - Member operator overloading
   - Non-member operator overloading
   - Friend operator overloading
@@ -981,7 +981,15 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Increment/decrement operators
   - Operator overloading best practices
 
-- **54. Special Member Functions**
+- [**Member Versus Non-Member Operators**](/Programming%20Languages/CPlusPlus/OOP/MemberVsNonMember.md)
+  - Member overloads
+  - Non-member overloads 
+  - Friend overloads
+  - Symmetric operators
+  - The Overload Resolution Process
+  - Perfect forwarding in operators
+
+- [**54. Special Member Functions**](/Programming%20Languages/CPlusPlus/OOP/SpecialMemberFunc.md)
   - Default constructor
   - Destructor
   - Copy constructor
@@ -993,7 +1001,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Rule of Zero
   - Special member function best practices
 
-- **55. Friend Functions and Classes**
+- [**55. Friend Functions and Classes**](/Programming%20Languages/CPlusPlus/OOP/friend.md)
   - Friend functions
   - Friend classes
   - `friend` keyword
@@ -1002,7 +1010,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Friend best practices
   - Friend pitfalls
 
-- **56. Static Members**
+- [**56. Static Members**](/Programming%20Languages/CPlusPlus/OOP/StaticMembers.md)
   - Static data members
   - Static member functions
   - Static member initialization
@@ -1010,14 +1018,14 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Inline static members (C++17)
   - Static member best practices
 
-- **57. Nested Classes**
+- [**57. Nested Classes**](/Programming%20Languages/CPlusPlus/OOP/NestedClasses.md)
   - Nested classes
   - Inner classes
   - Nested class access
   - Nested class scope
   - Nested class best practices
 
-- **58. Object Layout**
+- [**58. Object Layout**](/Programming%20Languages/CPlusPlus/OOP/ObjectLayout.md)
   - Object layout
   - Memory layout
   - Data member ordering

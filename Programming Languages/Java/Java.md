@@ -176,7 +176,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Arrow-style cases
   - Returning values from switch expressions
 
-- [**13. Loops**](/Programming%20Languages/Java/Basics/Loops.md)
+- **13. Loops**
   - `for`
   - Enhanced `for`
   - `while`
@@ -185,7 +185,7 @@ This roadmap structures **Java** as a progressive curriculum: first establishing
   - Loop counters
   - Infinite loops
 
-- [**14. Loop Control**](/Programming%20Languages/Java/Basics/LoopControl.md)
+- **14. Loop Control**
   - `break`
   - `continue`
   - Labeled statements
