@@ -1042,7 +1042,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # VIII. Templates
 
-- **59. Template Fundamentals**
+- [**59. Template Fundamentals**](/Programming%20Languages/CPlusPlus/Templates/Templates.md)
   - Templates
   - Function templates
   - Class templates
@@ -1056,7 +1056,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Partial specialization
   - Template best practices
 
-- **60. Function Templates**
+- [**60. Function Templates**](/Programming%20Languages/CPlusPlus/Templates/FunctionTemplates.md)
   - Function templates
   - Template parameter deduction
   - Template argument deduction
@@ -1065,7 +1065,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Template function overloading
   - Function template best practices
 
-- **61. Class Templates**
+- [**61. Class Templates**](/Programming%20Languages/CPlusPlus/Templates/ClassTemplates.md)
   - Class templates
   - Template member functions
   - Template member variables
@@ -1074,14 +1074,20 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Nested templates
   - Class template best practices
 
-- **62. Template Specialization**
+- [**62. Template Specialization**](/Programming%20Languages/CPlusPlus/Templates/TemplateSpec.md)
   - Full specialization
   - Partial specialization
   - Template specialization rules
   - Specialization vs overloading
   - Specialization best practices
 
-- **63. Variadic Templates**
+- [**Non-Type Template Parameters**](/Programming%20Languages/CPlusPlus/Templates/NonTypeTemplateParam.md)
+  - Integral parameters
+  - Compile-time values
+  - `auto` parameters
+  - Structural types in newer C++
+
+- [**63. Variadic Templates**](/Programming%20Languages/CPlusPlus/Templates/Variadic.md)
   - Variadic templates
   - Parameter packs
   - Pack expansion
@@ -1089,7 +1095,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Recursive variadic templates
   - Variadic template best practices
 
-- **64. Template Metaprogramming**
+- [**64. Template Metaprogramming**](/Programming%20Languages/CPlusPlus/Templates/Metaprogramming.md)
   - Template metaprogramming
   - TMP
   - Compile-time computation
@@ -1110,7 +1116,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Concepts (C++20)
   - Template metaprogramming best practices
 
-- **65. SFINAE**
+- [**65. SFINAE**](/Programming%20Languages/CPlusPlus/Templates/SPINAE.md)
   - SFINAE
   - Substitution Failure Is Not An Error
   - `std::enable_if`
@@ -1119,7 +1125,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - SFINAE best practices
   - SFINAE alternatives
 
-- **66. Concepts (C++20)**
+- [**66. Concepts (C++20)**](/Programming%20Languages/CPlusPlus/Templates/Concepts.md)
   - Concepts
   - `concept` keyword
   - `requires` clause
@@ -1138,13 +1144,19 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Concept best practices
   - Concepts vs SFINAE
 
-- **67. Template Aliases**
+- [**Generic Programming**](/Programming%20Languages/CPlusPlus/Templates/GenericProgramming.md)
+  - Type-independent algorithms
+  - Constraints
+  - Customization
+  - Compile-time abstraction
+
+- [**67. Template Aliases**](/Programming%20Languages/CPlusPlus/Templates/TemplateAliases.md)
   - Template aliases
   - `using` aliases
   - Alias templates
   - Template alias best practices
 
-- **68. CRTP**
+- [**68. CRTP**](/Programming%20Languages/CPlusPlus/Templates/CRTP.md)
   - CRTP
   - Curiously Recurring Template Pattern
   - Static polymorphism
@@ -1152,7 +1164,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - CRTP best practices
   - CRTP examples
 
-- **69. Policy-Based Design**
+- [**69. Policy-Based Design**](/Programming%20Languages/CPlusPlus/Templates/PolicyBasedDesign.md)
   - Policy-based design
   - Policy classes
   - Policy composition
@@ -1162,7 +1174,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # IX. Standard Template Library (STL)
 
-- **70. STL Fundamentals**
+- [**70. STL Fundamentals**](/Programming%20Languages/CPlusPlus/STL/STL.md)
   - STL
   - Standard Template Library
   - Containers
@@ -1174,14 +1186,14 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - STL components
   - STL best practices
 
-- **71. Containers**
-  - Sequence containers
+- [**71. Containers**](/Programming%20Languages/CPlusPlus/STL/Containers.md)
+  - [Sequence containers](/Programming%20Languages/CPlusPlus/STL/Sequence.md)
     - `std::vector`
     - `std::array`
     - `std::deque`
     - `std::list`
     - `std::forward_list`
-  - Associative containers
+  - [Associative containers](/Programming%20Languages/CPlusPlus/STL/Associative.md)
     - `std::set`
     - `std::multiset`
     - `std::map`
@@ -1200,7 +1212,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Container selection
   - Container best practices
 
-- **72. Vectors**
+- [**72. Vectors**](/Programming%20Languages/CPlusPlus/STL/Vectors.md)
   - `std::vector`
   - Vector declaration
   - Vector initialization
@@ -1226,7 +1238,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Vector performance
   - Vector best practices
 
-- **73. Arrays**
+- [**73. Arrays**](/Programming%20Languages/CPlusPlus/STL/Arrays.md)
   - `std::array`
   - Array declaration
   - Array initialization
@@ -1234,7 +1246,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Array vs C-style array
   - Array best practices
 
-- **74. Lists**
+- [**74. Lists**](/Programming%20Languages/CPlusPlus/STL/Lists.md)
   - `std::list`
   - Doubly linked list
   - List operations
@@ -1244,14 +1256,14 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Singly linked list
   - Forward list best practices
 
-- **75. Deques**
+- [**75. Deques**](/Programming%20Languages/CPlusPlus/STL/Deques.md)
   - `std::deque`
   - Double-ended queue
   - Deque operations
   - Deque performance
   - Deque best practices
 
-- **76. Sets and Maps**
+- [**76. Sets and Maps**](/Programming%20Languages/CPlusPlus/STL/SetsAndMaps.md)
   - `std::set`
   - `std::multiset`
   - `std::map`
@@ -1263,7 +1275,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Set best practices
   - Map best practices
 
-- **77. Unordered Containers**
+- [**77. Unordered Containers**](/Programming%20Languages/CPlusPlus/STL/UnorderedContainers.md)
   - `std::unordered_set`
   - `std::unordered_multiset`
   - `std::unordered_map`
@@ -1274,14 +1286,14 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Rehashing
   - Unordered container best practices
 
-- **78. Container Adaptors**
+- [**78. Container Adaptors**](/Programming%20Languages/CPlusPlus/STL/ContainerAdaptors.md)
   - `std::stack`
   - `std::queue`
   - `std::priority_queue`
   - Adaptor operations
   - Adaptor best practices
 
-- **79. Iterators**
+- [**79. Iterators**](/Programming%20Languages/CPlusPlus/STL/Iterators.md)
   - Iterators
   - Iterator categories
     - Input iterators
@@ -1300,7 +1312,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Iterator traits
   - Iterator best practices
 
-- **80. Algorithms**
+- [**80. Algorithms**](/Programming%20Languages/CPlusPlus/STL/Algorithms.md)
   - `<algorithm>`
   - Non-modifying algorithms
     - `std::all_of`
@@ -1400,7 +1412,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
     - `std::transform_inclusive_scan`
   - Algorithm best practices
 
-- **81. Ranges (C++20)**
+- [**81. Ranges (C++20)**](/Programming%20Languages/CPlusPlus/STL/Ranges.md)
   - Ranges
   - `<ranges>`
   - Range concepts
@@ -1412,7 +1424,12 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Lazy evaluation
   - Range best practices
 
-- **82. Function Objects**
+- [**The Ranges & Views Revolution (C++20 / C++23)**](/Programming%20Languages/CPlusPlus/STL/RangeViews.md)
+  - Views vs. Containers
+  - The Pipe Operator (|)
+  - Key Modern Views
+
+- [**82. Function Objects**](/Programming%20Languages/CPlusPlus/STL/FunctionObj.md)
   - Function objects
   - Functors
   - `operator()`
@@ -1438,7 +1455,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
     - `std::bit_not`
   - Function object best practices
 
-- **83. Smart Pointers**
+- [**83. Smart Pointers**](/Programming%20Languages/CPlusPlus/STL/SmartPointers.md)
   - `std::unique_ptr`
   - `std::shared_ptr`
   - `std::weak_ptr`
@@ -1446,7 +1463,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Custom deleters
   - Smart pointer best practices
 
-- **84. Utility Components**
+- [**84. Utility Components**](/Programming%20Languages/CPlusPlus/STL/UtilityComponents.md)
   - `std::pair`
   - `std::tuple`
   - `std::optional`
@@ -1460,7 +1477,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::cref`
   - Utility best practices
 
-- **85. Time and Date**
+- [**85. Time and Date**](/Programming%20Languages/CPlusPlus/STL/TimeAndDate.md)
   - `<chrono>`
   - Duration
   - Time point
@@ -1476,7 +1493,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # X. Exception Handling
 
-- **86. Exception Fundamentals**
+- [**86. Exception Fundamentals**](/Programming%20Languages/CPlusPlus/Exception%20Handling/Exception.md)
   - Exceptions
   - `throw`
   - `try`
@@ -1489,7 +1506,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Stack unwinding
   - Exception best practices
 
-- **87. Try-Catch**
+- [**87. Try-Catch**](/Programming%20Languages/CPlusPlus/Exception%20Handling/TryCatch.md)
   - `try` block
   - `catch` block
   - Multiple catch blocks
@@ -1501,7 +1518,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Exception messages
   - Exception best practices
 
-- **88. Exception Safety**
+- [**88. Exception Safety**](/Programming%20Languages/CPlusPlus/Exception%20Handling/ExceptionSafety.md)
   - Exception safety
   - Basic guarantee
   - Strong guarantee
@@ -1510,7 +1527,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - RAII and exception safety
   - Exception safety best practices
 
-- **89. Noexcept**
+- [**89. Noexcept**](/Programming%20Languages/CPlusPlus/Exception%20Handling/Noexcept.md)
   - `noexcept`
   - `noexcept` specifier
   - `noexcept` operator
@@ -1518,7 +1535,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `noexcept` best practices
   - `noexcept` pitfalls
 
-- **90. Custom Exceptions**
+- [**90. Custom Exceptions**](/Programming%20Languages/CPlusPlus/Exception%20Handling/CustomExceptions.md)
   - Custom exception classes
   - Exception inheritance
   - `std::exception`
@@ -1526,7 +1543,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Exception constructors
   - Exception best practices
 
-- **91. Error Handling Patterns**
+- [**91. Error Handling Patterns**](/Programming%20Languages/CPlusPlus/Exception%20Handling/ErrorHandlingPatterns.md)
   - Error codes
   - `std::error_code`
   - `std::error_condition`
@@ -1538,7 +1555,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # XI. Modern C++ Features
 
-- **92. C++11 Features**
+- [**92. C++11 Features**](/Programming%20Languages/CPlusPlus/Modern%20Features/11.md)
   - `auto`
   - Range-based for
   - Lambda expressions
@@ -1567,7 +1584,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `alignof`
   - Attributes
 
-- **93. C++14 Features**
+- [**93. C++14 Features**](/Programming%20Languages/CPlusPlus/Modern%20Features/14.md)
   - Generic lambdas
   - Return type deduction
   - Variable templates
@@ -1580,7 +1597,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::exchange`
   - `std::quoted`
 
-- **94. C++17 Features**
+- [**94. C++17 Features**](/Programming%20Languages/CPlusPlus/Modern%20Features/17.md)
   - Structured bindings
   - `if constexpr`
   - `if` with initializer
@@ -1616,7 +1633,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::empty`
   - `std::bool_constant`
 
-- **95. C++20 Features**
+- [**95. C++20 Features**](/Programming%20Languages/CPlusPlus/Modern%20Features/20.md)
   - Concepts
   - Ranges
   - Coroutines
@@ -1656,7 +1673,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `[[no_unique_address]]`
   - `[[nodiscard]]` with message
 
-- **96. C++23 Features**
+- [**96. C++23 Features**](/Programming%20Languages/CPlusPlus/Modern%20Features/23.md)
   - `std::expected`
   - `std::optional` monadic operations
   - `std::mdspan`
@@ -1683,7 +1700,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Deducing `this`
   - `constexpr` improvements
 
-- **97. C++26 Features**
+- [**97. C++26 Features**](/Programming%20Languages/CPlusPlus/Modern%20Features/26.md)
   - Contracts
   - Reflection
   - Pattern matching
@@ -1706,7 +1723,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # XII. Memory Management and RAII
 
-- **98. Memory Model**
+- [**98. Memory Model**](/Programming%20Languages/CPlusPlus/Memory%20Management%20and%20RAII/MemoryModel.md)
   - Memory model
   - Object model
   - Storage duration
@@ -1719,7 +1736,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Memory barriers
   - Memory model best practices
 
-- **99. Dynamic Memory**
+- [**99. Dynamic Memory**](/Programming%20Languages/CPlusPlus/Memory%20Management%20and%20RAII/DynamicMemory.md)
   - `new`
   - `delete`
   - `new[]`
@@ -1735,7 +1752,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Memory fragmentation
   - Dynamic memory best practices
 
-- **100. Smart Pointers**
+- [**100. Smart Pointers**](/Programming%20Languages/CPlusPlus/Memory%20Management%20and%20RAII/SmartPointers.md)
   - `std::unique_ptr`
   - `std::shared_ptr`
   - `std::weak_ptr`
@@ -1750,7 +1767,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Smart pointer pitfalls
   - Circular references
 
-- **101. Allocators**
+- [**101. Allocators**](/Programming%20Languages/CPlusPlus/Memory%20Management%20and%20RAII/Allocators.md)
   - Allocators
   - `std::allocator`
   - Allocator traits
@@ -1766,7 +1783,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::pmr::synchronized_pool_resource`
   - Allocator best practices
 
-- **102. RAII**
+- [**102. RAII**](/Programming%20Languages/CPlusPlus/Memory%20Management%20and%20RAII/RAII.md)
   - RAII
   - Resource Acquisition Is Initialization
   - Resource management
@@ -1777,7 +1794,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - RAII examples
   - RAII wrappers
 
-- **103. Move Semantics**
+- [**103. Move Semantics**](/Programming%20Languages/CPlusPlus/Memory%20Management%20and%20RAII/MoveSemantics.md)
   - Move semantics
   - Rvalue references
   - `std::move`
@@ -1790,7 +1807,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::forward`
   - Move semantics best practices
 
-- **104. Garbage Collection**
+- [**104. Garbage Collection**](/Programming%20Languages/CPlusPlus/Memory%20Management%20and%20RAII/GarbageCollection.md)
   - Garbage collection
   - C++ GC
   - `std::gc`
@@ -1799,7 +1816,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Reference counting
   - Smart pointers
 
-- **105. Memory Profiling**
+- [**105. Memory Profiling**](/Programming%20Languages/CPlusPlus/Memory%20Management%20and%20RAII/MemoryProfiling.md)
   - Memory profiling
   - Valgrind
   - Massif
@@ -1813,7 +1830,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # XIII. Concurrency and Multithreading
 
-- **106. Concurrency Fundamentals**
+- [**106. Concurrency Fundamentals**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/Concurrency.md)
   - Concurrency
   - Parallelism
   - Threads
@@ -1823,7 +1840,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Context switching
   - Concurrency best practices
 
-- **107. Threads**
+- [**107. Threads**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/Threads.md)
   - `std::thread`
   - Thread creation
   - Thread join
@@ -1836,7 +1853,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::this_thread::yield`
   - Thread best practices
 
-- **108. Mutexes**
+- [**108. Mutexes**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/Mutexes.md)
   - `std::mutex`
   - `std::recursive_mutex`
   - `std::timed_mutex`
@@ -1852,7 +1869,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::try_lock`
   - Mutex best practices
 
-- **109. Condition Variables**
+- [**109. Condition Variables**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/ConditionVariables.md)
   - `std::condition_variable`
   - `std::condition_variable_any`
   - Condition variable operations
@@ -1864,7 +1881,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Predicate wait
   - Condition variable best practices
 
-- **110. Atomics**
+- [**110. Atomics**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/Atomics.md)
   - `std::atomic`
   - Atomic types
   - Atomic operations
@@ -1879,7 +1896,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::atomic_ref` (C++20)
   - Atomic best practices
 
-- **111. Futures and Promises**
+- [**111. Futures and Promises**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/FuturesAndPromises.md)
   - `std::future`
   - `std::promise`
   - `std::packaged_task`
@@ -1893,7 +1910,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::shared_future`
   - Future best practices
 
-- **112. Thread Synchronization**
+- [**112. Thread Synchronization**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/ThreadSync.md)
   - Synchronization primitives
   - Barriers
     - `std::barrier` (C++20)
@@ -1903,7 +1920,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
     - `std::binary_semaphore` (C++20)
   - Synchronization best practices
 
-- **113. Memory Model**
+- [**113. Memory Model**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/MemoryModel.md)
   - C++ memory model
   - Memory ordering
   - Happens-before
@@ -1915,7 +1932,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::atomic_signal_fence`
   - Memory model best practices
 
-- **114. Lock-Free Programming**
+- [**114. Lock-Free Programming**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/LockFree.md)
   - Lock-free programming
   - Wait-free programming
   - Lock-free data structures

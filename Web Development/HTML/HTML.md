@@ -104,7 +104,7 @@
 
 # III. Text and Content Structure
 
-- [**8. Headings**](/Web%20Development/HTML/Basics/Headings.md)
+- [**8. Headings**](/Web%20Development/HTML/Text%20Content/Headings.md)
   - `<h1>`
   - `<h2>`
   - `<h3>`
@@ -123,7 +123,7 @@
   - Whitespace behavior
   - Line breaks versus paragraph breaks
 
-- [**10. Text Semantics**](/Web%20Development/HTML/Basics/TextFormatting.md)
+- [**10. Text Semantics**](/Web%20Development/HTML/Text%20Content/TextFormatting.md)
   - `<strong>`
   - `<em>`
   - `<b>`
@@ -138,7 +138,7 @@
   - `<sup>`
   - Choosing semantic elements rather than purely visual elements
 
-- [**11. Quotations and References**](/Web%20Development/HTML/Basics/QuotationsAndReferences.md)
+- [**11. Quotations and References**](/Web%20Development/HTML/Text%20Content/QuotationsAndReferences.md)
   - `<blockquote>`
   - `<q>`
   - `<cite>`

@@ -1,4 +1,4 @@
-# Modern Constrained Algorithms & Parallelism — Comprehensive Cheat Sheet
+# C++ Algorithms — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -7,833 +7,1820 @@
 ### Definitions
 
 **Core Definition**
-Modern C++ algorithms encompass two major evolutionary shifts: the C++20 Ranges library, which replaces iterator pairs with composable range wrappers and adds projections and concepts, and the C++17 Parallelism TS, which introduces execution policies that let standard algorithms run across multiple threads and leverage SIMD vectorization. Together, these features transform how developers write searching, sorting, transforming, and numeric operations.
+The C++ algorithms library provides a collection of function templates that operate on ranges of elements (typically defined by iterator pairs) to perform common operations such as searching, sorting, counting, and modifying data.
 
 **Technical Definition**
-The Ranges library (C++20) provides constrained versions of most standard algorithms in the namespace `std::ranges`. These algorithms accept either an iterator-sentinel pair or a single range argument, support projections (a callable applied to each element before comparison or predicate evaluation), and return structured result types instead of raw iterators. The parallel algorithms library (C++17) adds an `ExecutionPolicy` template parameter to most standard algorithms, allowing them to execute sequentially (`std::execution::seq`), in parallel (`std::execution::par`), or in parallel with vectorization (`std::execution::par_unseq`). The `<numeric>` header has also evolved, adding `std::reduce` (C++17) as a parallel-friendly alternative to `std::accumulate`, and `std::midpoint` (C++20) as an overflow-safe midpoint computation.
+The `<algorithm>` and `<numeric>` headers define a large set of function templates that operate on ranges defined as `[first, last)`. These algorithms are decoupled from the containers they operate on—they accept iterators as arguments, allowing them to work with any sequence that satisfies the required iterator category. The standard specifies complexity guarantees for each algorithm, and many algorithms are `constexpr` (since C++20) and support execution policies for parallelisation (since C++17) .
 
 **Beginner-Friendly Explanation**
-Imagine you have a toolbox full of algorithms (sort, find, copy, etc.). The classic toolbox requires you to say "start here, end there" every single time — like telling a librarian "search between shelf 3 and shelf 7" instead of just "search the shelf." The Ranges library lets you say "search the shelf" and the algorithm figures out the boundaries. The Parallelism library is like having multiple librarians work on the same shelf simultaneously, or even having each librarian use a magnifying glass to process multiple books at once (SIMD). And the numeric additions give you safer, faster ways to do math on whole collections.
-
----
+Think of the algorithms library as a toolbox of ready-made operations you can apply to any collection of data—vectors, lists, arrays, or even raw C arrays. Instead of writing loops by hand to search, sort, or transform data, you call a named algorithm that does the job correctly and efficiently.
 
 ### Key Characteristics
 
-- **Range-based algorithms** accept containers, arrays, and views directly, eliminating repetitive `.begin()`/`.end()` calls.
-- **Projections** allow sorting or searching by a member, a transformation, or any callable without writing a custom comparator lambda.
-- **Concepts** provide clearer compile errors (e.g., “does not satisfy sortable”) and prevent misuse of algorithms on incompatible ranges.
-- **Structured return types** (e.g., `in_out_result`) replace raw iterator returns, making multi-output algorithms easier to use.
-- **Execution policies** enable multi-threading (`par`), SIMD vectorization (`par_unseq`), and pure sequential execution (`seq`).
-- **Parallel numeric algorithms** like `std::reduce` permit arbitrary reordering and reassociation, unlocking parallel speedups.
-- **`std::midpoint`** avoids integer overflow when computing midpoints, a common source of bugs in binary search implementations.
-
----
+- **Range-based** – algorithms operate on half-open ranges `[first, last)`, where `first` points to the first element and `last` points one past the last element .
+- **Iterator-driven** – algorithms are parameterised by iterator types, so they work with any container that provides suitable iterators.
+- **Complexity guarantees** – each algorithm has a specified time complexity (e.g., O(n), O(log n), O(n log n)).
+- **Non-modifying vs. modifying** – some algorithms only read elements; others modify them or write to output ranges.
+- **Policy-based** – many algorithms accept an optional execution policy for parallel execution (C++17).
+- **Overload sets** – most algorithms come in multiple overloads (with and without predicates/comparators).
 
 ### Prerequisites
 
-- Basic C++ syntax: templates, lambdas, iterators, and containers.
-- Familiarity with classic `<algorithm>` and `<numeric>` functions (e.g., `std::sort`, `std::find`, `std::accumulate`).
-- Understanding of iterators and their categories.
-- (For parallel algorithms) A compiler supporting C++17 parallelism (e.g., GCC with TBB, MSVC with `/std:c++17` and the Windows Thread Pool).
-- (For ranges) A compiler supporting C++20 or later.
-
----
+- Basic C++ syntax (variables, types, control flow).
+- Understanding of iterators and iterator categories.
+- Familiarity with STL containers (`vector`, `list`, `map`, etc.).
+- Awareness of Big-O notation and algorithmic complexity.
 
 ### Related Programming Areas
 
-- **Generic programming**: Concepts and ranges make generic code safer and more expressive.
-- **High-performance computing**: Execution policies bring standard-library algorithms to multi-core and SIMD hardware.
-- **Data processing pipelines**: Range adaptors (views) enable lazy, composable transformations.
-- **Numerical computing**: `std::reduce`, `std::transform_reduce`, and `std::midpoint` improve correctness and parallelism for numeric workloads.
-
----
+- **Iterators** – the interface between algorithms and containers.
+- **Containers** – the data structures algorithms operate on.
+- **Ranges (C++20)** – a higher-level abstraction built on top of iterators and algorithms.
+- **Numeric computation** – `<numeric>` provides accumulation, reduction, and scan operations.
+- **Parallelism** – execution policies enable parallel algorithm execution.
 
 ### Core Concepts / Features
 
-1. **Classic vs. Ranges Algorithms** — Moving from iterator pairs to cleaner range wrappers.
-2. **Execution Policies & Parallelism** — Accelerating algorithms via multi-threading and SIMD vectorization.
-3. **Functional Sub-categories** — Searching/sorting, mutating/copying, partitioning, heap actions, and modern numeric operations.
+1. `<algorithm>` (the header and library)
+2. Non-modifying algorithms
+3. Modifying algorithms
+4. Sorting algorithms
+5. Binary search algorithms
+6. Set operations
+7. Heap operations
+8. Min/max operations
+9. Numeric algorithms
+10. Algorithm best practices
 
 ---
 
-## 1. Classic vs. Ranges Algorithms
+## 1. `<algorithm>` — The Algorithms Header
 
 ### Definitions
 
 **Core Definition**
-Classic algorithms take an iterator pair (`first`, `last`) that defines a range. Range algorithms (C++20) take a single range object (a container, view, or any type with `begin()`/`end()`) and optionally a projection and comparator, eliminating boilerplate and enabling composability.
+`<algorithm>` is the standard library header that declares the non-modifying, modifying, sorting, searching, set, heap, and min/max algorithms.
 
 **Technical Definition**
-The Ranges library, defined in `<ranges>`, provides constrained algorithm function objects (niebloids) in the namespace `std::ranges`. These algorithms accept either `(I first, S last)` or `R&& r` where `R` models a range. They support a projection parameter (`Proj proj = std::identity{}`), which is applied to each element before the comparator or predicate. Return types are often structured (e.g., `std::ranges::in_out_result`) rather than raw iterators. Projections and concepts are first-class features, and algorithms are constrained via concepts like `std::sortable` and `std::random_access_range`. Classic algorithms in namespace `std` remain available and are not deprecated.
+The header `<algorithm>` provides the majority of the general-purpose algorithm function templates. The related header `<numeric>` provides numeric algorithms such as `accumulate`, `reduce`, and `partial_sum`. Most algorithms are function templates that accept iterator ranges and optional predicates or comparison functions .
 
 **Beginner-Friendly Explanation**
-Classic C++ algorithms require you to always pass two iterators: `std::sort(v.begin(), v.end())`. Range algorithms let you just say `std::ranges::sort(v)`. More importantly, range algorithms let you sort by a member without writing a lambda: `std::ranges::sort(people, {}, &Person::age)`. They also give clearer error messages and protect against dangling references.
+`<algorithm>` is the main toolbox header. If you want to sort, search, count, or transform data, you include this header.
 
----
+### Purposes
 
-### Sub-Feature: Range-Based Algorithm Syntax
+- To provide reusable, tested implementations of common operations.
+- To replace hand-written loops with clear, declarative code.
+- To offer complexity guarantees and optimised implementations.
+- To support generic programming across all container types.
 
-#### Definitions
+### Syntax Rules and Structure
 
-**Core Definition**
-Range-based syntax is the call pattern where a range is passed as a single argument, and projections/comparators are optional trailing arguments.
-
-**Technical Definition**
-The general form is `std::ranges::algorithm_name(range, comparator, projection)`. The comparator defaults to `std::ranges::less{}` and the projection defaults to `std::identity{}`. For algorithms that write output, the range is passed first, then output iterators. Range algorithms are niebloids — function objects that inhibit ADL and prevent explicit template argument specification. They are constrained by concepts and return structured types when multiple outputs are produced.
-
-**Beginner-Friendly Explanation**
-Instead of `std::sort(v.begin(), v.end())`, you write `std::ranges::sort(v)`. If you want to sort by a field, you write `std::ranges::sort(v, {}, &T::field)`. The `{}` is the default comparator, and `&T::field` is the projection that extracts the field to compare.
-
-#### Purposes (all begin with "To")
-
-- **To** reduce boilerplate by eliminating repetitive `.begin()`/`.end()` pairs.
-- **To** prevent mismatched iterator errors (e.g., passing `begin()` from one container and `end()` from another).
-- **To** enable sorting/searching by a member or transformation without writing a lambda.
-- **To** provide clearer compile-time errors through concept constraints.
-- **To** protect against dangling references with `std::ranges::dangling`.
-
-#### Syntax Rules and Structure
-
+**General Syntax**
 ```cpp
-// Classic (C++98–C++17)
-std::sort(v.begin(), v.end());
-std::find(v.begin(), v.end(), 42);
-std::count_if(v.begin(), v.end(), pred);
-
-// Ranges (C++20)
-std::ranges::sort(v);
-std::ranges::find(v, 42);
-std::ranges::count_if(v, pred);
-
-// Ranges with projection
-std::ranges::sort(people, std::less{}, &Person::age);
+#include <algorithm>
+std::algorithm_name(first, last, ...);
 ```
 
-**Component breakdown:**
-- `std::ranges::sort` — the constrained algorithm function object.
-- `v` — the range (container, view, array, etc.).
-- `std::less{}` — the comparator (default is `std::ranges::less{}`).
-- `&Person::age` — the projection (applied to each element before comparison).
+**Component Breakdown**
 
-**Constraints and limitations:**
-- Requires C++20 or later.
-- Not all classic algorithms have range equivalents (e.g., `std::accumulate` has no `std::ranges` counterpart; use `std::reduce` or `std::fold_left` in C++23).
-- Range algorithms are niebloids: explicit template arguments cannot be specified, and ADL is inhibited.
-- Passing a temporary where the result would dangle returns `std::ranges::dangling` rather than a silent bug.
+| Component | Description |
+|-----------|-------------|
+| `first`, `last` | Iterators defining the range `[first, last)`. |
+| Optional arguments | Predicates, comparators, values, output iterators. |
 
-#### Annotated Code Example
+**Syntax Rules**
+- The range `[first, last)` must be valid; `last` must be reachable from `first`.
+- Predicates must be callable with the element type and return a value convertible to `bool`.
+- Comparators must impose a strict weak ordering.
+- Algorithms do not resize containers; output must fit in pre-allocated space or use insert iterators.
+
+**Constraints and Limitations**
+- Algorithms cannot change the size of a container; use container member functions for resizing.
+- Iterator invalidation rules of the underlying container still apply.
+- Some algorithms require specific iterator categories (e.g., `std::sort` requires random access).
+
+### Annotated Code Example
 
 ```cpp
-// File: ranges_vs_classic.cpp
-// Compile with: g++ -std=c++20 ranges_vs_classic.cpp -o ranges_vs_classic
-
 #include <algorithm>
-#include <iostream>
-#include <ranges>
-#include <string>
 #include <vector>
-
-struct Person {
-    std::string name;
-    int age;
-};
+#include <iostream>
 
 int main() {
-    // Step 1: Classic iterator-pair algorithms
-    std::vector<int> v1 = {5, 2, 8, 1, 9};
-    std::sort(v1.begin(), v1.end());
-    std::cout << "Classic sort: ";
-    for (int x : v1) std::cout << x << " ";
-    std::cout << std::endl;
-
-    // Step 2: Range-based algorithms — no iterators
-    std::vector<int> v2 = {5, 2, 8, 1, 9};
-    std::ranges::sort(v2);
-    std::cout << "Ranges sort: ";
-    for (int x : v2) std::cout << x << " ";
-    std::cout << std::endl;
-
-    // Step 3: Projection — sort by member without a lambda
-    std::vector<Person> people = {
-        {"Alice", 30}, {"Bob", 25}, {"Charlie", 35}
-    };
-    std::ranges::sort(people, {}, &Person::age);
-    std::cout << "Sorted by age:" << std::endl;
-    for (const auto& p : people) {
-        std::cout << "  " << p.name << " (" << p.age << ")" << std::endl;
-    }
-
-    // Step 4: Range algorithms work with subranges
-    std::vector<int> v3 = {9, 7, 5, 3, 1, 8, 6, 4, 2};
-    std::ranges::sort(std::ranges::subrange(v3.begin() + 2, v3.begin() + 7));
-    std::cout << "Partial sort: ";
-    for (int x : v3) std::cout << x << " ";
-    std::cout << std::endl;
-
-    return 0;
+    std::vector<int> v = {3, 1, 4, 1, 5};
+    std::sort(v.begin(), v.end());         // sort the range
+    for (int x : v) std::cout << x << ' ';
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Classic sort: 1 2 5 8 9
-Ranges sort: 1 2 5 8 9
-Sorted by age:
-  Bob (25)
-  Alice (30)
-  Charlie (35)
-Partial sort: 9 7 1 3 5 8 6 4 2
+1 1 3 4 5
 ```
 
-**Why this output:** `std::ranges::sort(v2)` deduces the range boundaries from the container. The projection `&Person::age` extracts the age field for comparison, so people are sorted by age. `std::ranges::subrange` creates a view over a portion of the vector, and sorting that subrange reorders only elements at indices 2–6.
-
-#### Real-World Cases with Explanation
-
-**Case 1 — Sorting records by a field**: Instead of writing `std::sort(v.begin(), v.end(), [](const auto& a, const auto& b) { return a.age < b.age; })`, you write `std::ranges::sort(v, {}, &Person::age)`.
-
-**Case 2 — Finding in a container**: `std::ranges::find(container, value)` replaces `std::find(container.begin(), container.end(), value)`, eliminating a common source of bugs.
-
-**Case 3 — Pipeline composition**: Range algorithms can be combined with range adaptors (views) for lazy processing: `auto result = data | std::views::filter(pred) | std::views::transform(fn);`.
+**Why this output?**  
+`std::sort` reorders the elements in `[v.begin(), v.end())` into ascending order.
 
 ---
 
-## 2. Execution Policies & Parallelism
+## 2. Non-Modifying Algorithms
 
 ### Definitions
 
 **Core Definition**
-Execution policies are tags passed as the first argument to standard algorithms to specify whether they should run sequentially, in parallel, or in parallel with SIMD vectorization.
+Non-modifying algorithms read elements from a range without changing them.
 
 **Technical Definition**
-C++17 introduces three execution policies in `<execution>`: `std::execution::seq` (sequential), `std::execution::par` (parallel), and `std::execution::par_unseq` (parallel + unsequenced/vectorized). C++20 adds `std::execution::unseq` (unsequenced, single-threaded vectorization). Algorithms overloaded with an `ExecutionPolicy&&` parameter execute according to the policy’s guarantees. `par` permits multiple threads; `par_unseq` additionally permits vectorization and migration across threads. The programmer is responsible for ensuring that element access functions are thread-safe and free of data races when using `par` or `par_unseq`.
+These algorithms satisfy the `NonModifyingSequenceOperation` requirements: they operate on input ranges and do not modify any element. They include checks (`all_of`, `any_of`, `none_of`), iteration (`for_each`), counting (`count`, `count_if`), searching (`find`, `find_if`, `find_if_not`, `find_end`, `find_first_of`, `adjacent_find`, `search`, `search_n`), and comparison (`mismatch`, `equal`, `is_permutation`) .
 
 **Beginner-Friendly Explanation**
-Normally, `std::sort` uses one CPU core. By adding `std::execution::par`, you tell the library it may use multiple cores. Adding `par_unseq` also allows the compiler to use SIMD instructions — processing multiple data elements with one instruction. This can make algorithms dramatically faster on large datasets, but you must ensure your comparison functions and predicates are safe to run concurrently.
+Non-modifying algorithms answer questions about your data or visit each element without changing anything.
 
 ---
 
-### Sub-Feature: Execution Policies
+### 2.1 `std::all_of`, `std::any_of`, `std::none_of`
 
 #### Definitions
 
 **Core Definition**
-An execution policy is a tag type that conveys to an algorithm the level of parallelism and vectorization permitted during execution.
+These algorithms check whether a predicate holds for all, any, or none of the elements in a range.
 
 **Technical Definition**
-The execution policies are defined in namespace `std::execution` in header `<execution>`:
-
-- `sequenced_policy` (`std::execution::seq`): Execution may not be parallelized. Element access functions are indeterminately sequenced in the calling thread.
-- `parallel_policy` (`std::execution::par`): Execution may be parallelized. Element access functions may run in the invoking thread or in threads implicitly created by the library. Any two invocations in the same thread are indeterminately sequenced.
-- `parallel_unsequenced_policy` (`std::execution::par_unseq`): Execution may be parallelized, vectorized, or migrated across threads. Element access functions are unsequenced with respect to one another within each thread and unordered across threads. Vectorization-unsafe operations (e.g., `std::atomic` synchronisation) are not permitted.
-- `unsequenced_policy` (`std::execution::unseq`, C++20): Execution may be vectorized on a single thread but not parallelized.
+`all_of` returns `true` if the predicate returns `true` for every element (or if the range is empty). `any_of` returns `true` if the predicate returns `true` for at least one element. `none_of` returns `true` if the predicate returns `false` for every element .
 
 **Beginner-Friendly Explanation**
-- `seq`: “Run this on one core, one operation at a time.”
-- `par`: “You may use multiple cores, but each core does one operation at a time.”
-- `par_unseq`: “Use multiple cores and process multiple data elements per instruction (SIMD).”
-- `unseq`: “Use SIMD on a single core.”
-
-#### Purposes (all begin with "To")
-
-- **To** accelerate standard algorithms on multi-core hardware without rewriting them.
-- **To** enable SIMD vectorization for data-parallel workloads.
-- **To** let the library choose the optimal parallel decomposition based on the algorithm and data size.
-- **To** provide a portable, standard interface for parallel execution across compilers and platforms.
-- **To** allow the same algorithm code to run sequentially or in parallel by changing one argument.
-
-#### Syntax Rules and Structure
-
-```cpp
-#include <execution>
-#include <algorithm>
-#include <vector>
-
-std::vector<int> v = /* ... */;
-
-// Sequential (default, same as no policy)
-std::sort(std::execution::seq, v.begin(), v.end());
-
-// Parallel (multi-threaded)
-std::sort(std::execution::par, v.begin(), v.end());
-
-// Parallel + vectorized (SIMD)
-std::sort(std::execution::par_unseq, v.begin(), v.end());
-```
-
-**Component breakdown:**
-- `std::execution::par` — the execution policy tag.
-- `v.begin(), v.end()` — the range to process (or use ranges with policies in C++26).
-
-**Constraints and limitations:**
-- Parallel algorithms require random-access iterators; other iterator types fall back to serial execution.
-- The programmer must avoid data races: all element access functions must be thread-safe when using `par` or `par_unseq`.
-- Exceptions thrown in parallel element access functions cause `std::terminate` to be called.
-- `par_unseq` forbids vectorization-unsafe operations like locks and atomics.
-- Compiler/library support varies: GCC requires Intel TBB; MSVC uses the Windows Thread Pool.
-- Not all algorithms support parallel execution efficiently (e.g., `includes`, `inplace_merge`, `merge`, `nth_element`).
-
-#### Annotated Code Example
-
-```cpp
-// File: execution_policies.cpp
-// Compile with: g++ -std=c++17 -ltbb execution_policies.cpp -o execution_policies
-// Or with MSVC: cl /std:c++17 /EHsc execution_policies.cpp
-
-#include <algorithm>
-#include <chrono>
-#include <execution>
-#include <iostream>
-#include <numeric>
-#include <vector>
-
-int main() {
-    constexpr int N = 10'000'000;
-    std::vector<double> data(N);
-    std::iota(data.begin(), data.end(), 1.0);
-
-    // Step 1: Sequential transform
-    auto start = std::chrono::high_resolution_clock::now();
-    std::transform(std::execution::seq,
-                   data.begin(), data.end(),
-                   data.begin(),
-                   [](double x) { return std::sqrt(x); });
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "seq time: "
-              << std::chrono::duration<double>(end - start).count()
-              << "s" << std::endl;
-
-    // Step 2: Parallel transform
-    start = std::chrono::high_resolution_clock::now();
-    std::transform(std::execution::par,
-                   data.begin(), data.end(),
-                   data.begin(),
-                   [](double x) { return std::sqrt(x); });
-    end = std::chrono::high_resolution_clock::now();
-    std::cout << "par time: "
-              << std::chrono::duration<double>(end - start).count()
-              << "s" << std::endl;
-
-    // Step 3: Parallel + unsequenced (SIMD) transform
-    start = std::chrono::high_resolution_clock::now();
-    std::transform(std::execution::par_unseq,
-                   data.begin(), data.end(),
-                   data.begin(),
-                   [](double x) { return std::sqrt(x); });
-    end = std::chrono::high_resolution_clock::now();
-    std::cout << "par_unseq time: "
-              << std::chrono::duration<double>(end - start).count()
-              << "s" << std::endl;
-
-    // Step 4: Parallel reduce (sum)
-    double sum = std::reduce(std::execution::par,
-                             data.begin(), data.end(),
-                             0.0);
-    std::cout << "Parallel sum: " << sum << std::endl;
-
-    return 0;
-}
-```
-
-**Expected Output (timings vary):**
-```
-seq time: 0.045s
-par time: 0.012s
-par_unseq time: 0.008s
-Parallel sum: 6.66667e+10
-```
-
-**Why this output:** The sequential transform processes 10 million elements one at a time. The parallel version splits the work across threads, reducing wall-clock time. `par_unseq` additionally uses SIMD instructions, processing multiple elements per instruction. The parallel `std::reduce` computes the sum by splitting the range into chunks, summing each chunk in parallel, then combining the partial sums.
-
-#### Real-World Cases with Explanation
-
-**Case 1 — Image processing**: Applying a filter to a large pixel buffer using `std::transform` with `par_unseq` for SIMD-accelerated per-pixel operations.
-
-**Case 2 — Financial Monte Carlo simulations**: Using `std::reduce` with `par` to compute portfolio risk metrics across millions of scenarios.
-
-**Case 3 — Data analytics**: Sorting large datasets with `std::sort(std::execution::par, ...)` to reduce query latency.
-
-**Case 4 — Scientific computing**: Computing element-wise operations on large arrays with `std::for_each(par_unseq, ...)`.
-
----
-
-## 3. Functional Sub-categories
-
-### Definitions
-
-**Core Definition**
-Functional sub-categories group standard algorithms by the kind of operation they perform: searching/sorting, mutating/copying, partitioning, heap operations, and numeric operations.
-
-**Technical Definition**
-The C++ standard classifies algorithms into several sub-clauses: non-modifying sequence operations (searching, counting, comparing), mutating sequence operations (copying, transforming, removing, replacing), partitioning operations, sorting operations, binary search operations, set operations, heap operations, and numeric operations (`<numeric>`). The Ranges library provides constrained versions in `std::ranges` with the same categorisation. Modern numeric operations include `std::reduce` (C++17), `std::transform_reduce` (C++17), and `std::midpoint` (C++20).
-
-**Beginner-Friendly Explanation**
-Think of algorithms as tools in a workshop. Some are for finding things (searching), some for rearranging (sorting), some for copying data (mutating), some for splitting data into groups (partitioning), some for building special tree-like structures (heaps), and some for doing math (numeric).
-
----
-
-### Sub-Feature: Searching & Sorting Algorithms
-
-#### Definitions
-
-**Core Definition**
-Searching algorithms locate elements or subranges matching a value or predicate. Sorting algorithms arrange elements in a specified order.
-
-**Technical Definition**
-Searching algorithms include `std::ranges::find`, `std::ranges::find_if`, `std::ranges::binary_search`, `std::ranges::lower_bound`, and `std::ranges::upper_bound`. Sorting algorithms include `std::ranges::sort`, `std::ranges::stable_sort`, `std::ranges::partial_sort`, and `std::ranges::nth_element`. Binary search algorithms require the range to be sorted.
-
-**Beginner-Friendly Explanation**
-Searching is like looking for a specific book in a library. Sorting is like arranging the books in alphabetical order so you can find them faster next time.
+These are “yes/no” questions about a whole range: “Are all elements even?” “Is any element negative?” “Are none of them zero?”
 
 #### Purposes
 
-- **To** locate elements efficiently using linear or binary search.
-- **To** arrange elements in ascending or custom order.
-- **To** support binary search operations on sorted data.
-- **To** provide stable sorting that preserves the relative order of equivalent elements.
+- To test a condition across an entire range.
+- To replace explicit loops with declarative checks.
+- To short-circuit as soon as the answer is known.
 
 #### Syntax Rules and Structure
 
+**General Syntax**
 ```cpp
-// Searching
-std::ranges::find(range, value);
-std::ranges::find_if(range, predicate);
-std::ranges::binary_search(range, value);
-
-// Sorting
-std::ranges::sort(range);
-std::ranges::stable_sort(range, comp, proj);
-std::ranges::nth_element(range, nth);
+bool all_of(InputIt first, InputIt last, Predicate pred);
+bool any_of(InputIt first, InputIt last, Predicate pred);
+bool none_of(InputIt first, InputIt last, Predicate pred);
 ```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `first`, `last` | Input iterators defining the range. |
+| `pred` | Unary predicate returning `bool`. |
+
+**Complexity**
+- At most `last - first` applications of `pred`.
 
 #### Annotated Code Example
 
 ```cpp
-// File: searching_sorting.cpp
-// Compile with: g++ -std=c++20 searching_sorting.cpp -o searching_sorting
-
 #include <algorithm>
-#include <iostream>
-#include <ranges>
 #include <vector>
+#include <iostream>
 
 int main() {
-    std::vector<int> v = {50, 20, 80, 10, 40, 70, 30};
-
-    // Step 1: Sort the range
-    std::ranges::sort(v);
-    std::cout << "Sorted: ";
-    for (int x : v) std::cout << x << " ";
-    std::cout << std::endl;
-
-    // Step 2: Binary search
-    bool found = std::ranges::binary_search(v, 40);
-    std::cout << "40 found: " << found << std::endl;
-
-    // Step 3: lower_bound / upper_bound
-    auto lb = std::ranges::lower_bound(v, 40);
-    std::cout << "lower_bound(40): " << *lb << std::endl;
-
-    // Step 4: find_if with projection
-    struct Item { int id; };
-    std::vector<Item> items = {{1}, {2}, {3}, {4}};
-    auto it = std::ranges::find_if(items, [](int x) { return x > 2; }, &Item::id);
-    if (it != items.end()) {
-        std::cout << "First id > 2: " << it->id << std::endl;
-    }
-
-    return 0;
+    std::vector<int> v = {2, 4, 6};
+    std::cout << std::boolalpha;
+    std::cout << std::all_of(v.begin(), v.end(), [](int x){ return x % 2 == 0; }) << '\n'; // true
+    std::cout << std::any_of(v.begin(), v.end(), [](int x){ return x > 5; }) << '\n';       // true
+    std::cout << std::none_of(v.begin(), v.end(), [](int x){ return x < 0; }) << '\n';      // true
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Sorted: 10 20 30 40 50 70 80
-40 found: 1
-lower_bound(40): 40
-First id > 2: 3
+true
+true
+true
 ```
 
-#### Real-World Cases
-
-- **Database indexing**: Binary search on sorted indexes for O(log n) lookups.
-- **Leaderboards**: Sorting player scores with `std::ranges::sort` and projection.
-- **Log analysis**: Finding entries matching a timestamp with `std::ranges::find_if`.
+**Why this output?**  
+All elements are even; at least one is greater than 5; none are negative.
 
 ---
 
-### Sub-Feature: Mutating & Copying Algorithms
+### 2.2 `std::for_each`
 
 #### Definitions
 
 **Core Definition**
-Mutating algorithms modify the elements of a range (e.g., transform, replace, remove). Copying algorithms copy elements from a source range to a destination.
+`std::for_each` applies a function to every element in a range.
 
 **Technical Definition**
-Mutating operations include `std::ranges::transform`, `std::ranges::replace`, `std::ranges::remove`, `std::ranges::fill`, and `std::ranges::generate`. Copying operations include `std::ranges::copy`, `std::ranges::copy_if`, `std::ranges::move`, and `std::ranges::reverse_copy`. Many return structured results (e.g., `in_out_result`) indicating the end of the input and output ranges.
+`for_each(first, last, f)` applies `f` to the result of dereferencing every iterator in `[first, last)` and returns `std::move(f)` (since C++11). The function object may modify elements if the iterator is mutable.
 
 **Beginner-Friendly Explanation**
-Mutating algorithms change the data in place. Copying algorithms duplicate data to a new location.
+`for_each` is like a `for` loop that visits every element and does something with it.
 
 #### Purposes
 
-- **To** apply a function to every element in a range.
-- **To** copy elements conditionally to a destination.
-- **To** replace or remove elements matching a criterion.
-- **To** fill a range with a generated sequence.
+- To apply an operation to each element.
+- To replace explicit loops with a named algorithm.
+- To support side effects (printing, accumulating, modifying).
+
+#### Syntax Rules and Structure
+
+**General Syntax**
+```cpp
+Function for_each(InputIt first, InputIt last, Function f);
+```
+
+**Complexity**
+- Exactly `last - first` applications of `f`.
 
 #### Annotated Code Example
 
 ```cpp
-// File: mutating_copying.cpp
-// Compile with: g++ -std=c++20 mutating_copying.cpp -o mutating_copying
-
 #include <algorithm>
-#include <iostream>
-#include <ranges>
 #include <vector>
+#include <iostream>
 
 int main() {
-    std::vector<int> v = {1, 2, 3, 4, 5};
+    std::vector<int> v = {1, 2, 3};
+    std::for_each(v.begin(), v.end(), [](int x){ std::cout << x * 2 << ' '; });
+}
+```
 
-    // Step 1: Transform in place
-    std::ranges::transform(v, v.begin(), [](int x) { return x * x; });
-    std::cout << "Squared: ";
-    for (int x : v) std::cout << x << " ";
-    std::cout << std::endl;
+**Expected Output**
+```
+2 4 6
+```
 
-    // Step 2: Copy_if to a new vector
+**Why this output?**  
+The lambda is applied to each element, printing its double.
+
+---
+
+### 2.3 `std::count`, `std::count_if`
+
+#### Definitions
+
+**Core Definition**
+`count` counts elements equal to a value; `count_if` counts elements satisfying a predicate.
+
+**Technical Definition**
+`count(first, last, value)` returns the number of iterators `i` in `[first, last)` for which `*i == value`. `count_if(first, last, pred)` returns the number of iterators for which `pred(*i)` is `true`.
+
+**Beginner-Friendly Explanation**
+These algorithms tell you how many items match a condition or equal a particular value.
+
+#### Syntax Rules and Structure
+
+**General Syntax**
+```cpp
+difference_type count(InputIt first, InputIt last, const T& value);
+difference_type count_if(InputIt first, InputIt last, Predicate pred);
+```
+
+**Complexity**
+- Exactly `last - first` comparisons/applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 2, 3, 2};
+    std::cout << std::count(v.begin(), v.end(), 2) << '\n';           // 3
+    std::cout << std::count_if(v.begin(), v.end(), [](int x){ return x > 1; }) << '\n'; // 4
+}
+```
+
+**Expected Output**
+```
+3
+4
+```
+
+**Why this output?**  
+There are three 2s; four elements are greater than 1.
+
+---
+
+### 2.4 `std::find`, `std::find_if`, `std::find_if_not`
+
+#### Definitions
+
+**Core Definition**
+These algorithms locate the first element that matches a value or satisfies (or fails) a predicate.
+
+**Technical Definition**
+`find` returns an iterator to the first element equal to `value`, or `last` if none. `find_if` returns an iterator to the first element for which `pred` is `true`, or `last`. `find_if_not` returns an iterator to the first element for which `pred` is `false`, or `last` .
+
+**Beginner-Friendly Explanation**
+These are search functions: they find the first item that meets a condition.
+
+#### Syntax Rules and Structure
+
+**General Syntax**
+```cpp
+InputIt find(InputIt first, InputIt last, const T& value);
+InputIt find_if(InputIt first, InputIt last, Predicate pred);
+InputIt find_if_not(InputIt first, InputIt last, Predicate pred);
+```
+
+**Complexity**
+- At most `last - first` comparisons/applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {10, 20, 30, 40};
+    auto it = std::find(v.begin(), v.end(), 30);
+    if (it != v.end()) std::cout << "Found: " << *it << '\n';
+
+    auto it2 = std::find_if(v.begin(), v.end(), [](int x){ return x > 25; });
+    std::cout << "First > 25: " << *it2 << '\n';
+}
+```
+
+**Expected Output**
+```
+Found: 30
+First > 25: 30
+```
+
+---
+
+### 2.5 `std::find_end`, `std::find_first_of`, `std::adjacent_find`
+
+#### Definitions
+
+**Core Definition**
+These algorithms search for subsequences or adjacent equal elements within a range.
+
+**Technical Definition**
+`find_end` searches for the last occurrence of a subsequence `[s_first, s_last)`. `find_first_of` searches for the first element that matches any element in a given set. `adjacent_find` finds the first pair of adjacent elements that are equal (or satisfy a predicate) .
+
+**Complexity**
+- `find_end`: at most `(last1 - first1) * (last2 - first2)` comparisons.
+- `find_first_of`: at most `(last1 - first1) * (last2 - first2)` comparisons.
+- `adjacent_find`: exactly `min((last - first) - 1, ...)` applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 2, 3, 4};
+    std::vector<int> sub = {2, 3};
+
+    auto it = std::find_end(v.begin(), v.end(), sub.begin(), sub.end());
+    std::cout << "Last occurrence starts at index: " << (it - v.begin()) << '\n'; // 3
+
+    std::vector<int> targets = {3, 5};
+    auto it2 = std::find_first_of(v.begin(), v.end(), targets.begin(), targets.end());
+    std::cout << "First match: " << *it2 << '\n'; // 3
+
+    std::vector<int> adj = {1, 1, 2, 2, 3};
+    auto it3 = std::adjacent_find(adj.begin(), adj.end());
+    std::cout << "Adjacent equal: " << *it3 << '\n'; // 1
+}
+```
+
+**Expected Output**
+```
+Last occurrence starts at index: 3
+First match: 3
+Adjacent equal: 1
+```
+
+---
+
+### 2.6 `std::search`, `std::search_n`
+
+#### Definitions
+
+**Core Definition**
+`search` finds the first occurrence of a subsequence; `search_n` finds the first occurrence of `count` consecutive copies of a value.
+
+**Technical Definition**
+`search` returns an iterator to the beginning of the first occurrence of the subsequence `[s_first, s_last)` in `[first, last)`. `search_n` returns an iterator to the beginning of the first sequence of `count` consecutive elements equal to `value` (or satisfying a predicate).
+
+**Complexity**
+- `search`: at most `(last1 - first1) * (last2 - first2)` comparisons.
+- `search_n`: at most `(last - first) * count` comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 4, 5, 3, 4};
+    std::vector<int> sub = {3, 4};
+
+    auto it = std::search(v.begin(), v.end(), sub.begin(), sub.end());
+    std::cout << "First occurrence at index: " << (it - v.begin()) << '\n'; // 2
+
+    auto it2 = std::search_n(v.begin(), v.end(), 2, 3);
+    std::cout << "Two consecutive 3s: " << (it2 != v.end()) << '\n'; // 0 (false)
+}
+```
+
+**Expected Output**
+```
+First occurrence at index: 2
+Two consecutive 3s: 0
+```
+
+---
+
+### 2.7 `std::mismatch`, `std::equal`, `std::is_permutation`
+
+#### Definitions
+
+**Core Definition**
+These algorithms compare two ranges.
+
+**Technical Definition**
+`mismatch` returns a pair of iterators pointing to the first position where two ranges differ (or `last` if they are equal up to that point). `equal` returns `true` if two ranges are element-wise equal. `is_permutation` returns `true` if one range is a permutation of the other.
+
+**Complexity**
+- `mismatch`/`equal`: at most `min(last1 - first1, last2 - first2)` comparisons.
+- `is_permutation`: at most O(n²) comparisons in the worst case.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> a = {1, 2, 3, 4};
+    std::vector<int> b = {1, 2, 9, 4};
+
+    auto [mi1, mi2] = std::mismatch(a.begin(), a.end(), b.begin());
+    std::cout << "Mismatch: " << *mi1 << " vs " << *mi2 << '\n'; // 3 vs 9
+
+    std::cout << std::boolalpha;
+    std::cout << std::equal(a.begin(), a.end(), b.begin(), b.end()) << '\n'; // false
+
+    std::vector<int> p = {3, 1, 4, 2};
+    std::cout << std::is_permutation(a.begin(), a.end(), p.begin(), p.end()) << '\n'; // true
+}
+```
+
+**Expected Output**
+```
+Mismatch: 3 vs 9
+false
+true
+```
+
+---
+
+## 3. Modifying Algorithms
+
+### Definitions
+
+**Core Definition**
+Modifying algorithms change the elements of a range or write elements to an output range.
+
+**Technical Definition**
+These algorithms include copy/move operations, swap operations, transformation operations (`replace`, `transform`), generation operations (`fill`, `generate`), removal operations (`remove`, `remove_if`, `unique`), order-changing operations (`reverse`, `rotate`, `shuffle`, `sample`), and assignment operations .
+
+**Beginner-Friendly Explanation**
+Modifying algorithms change your data—they copy, replace, fill, remove, reverse, or shuffle elements.
+
+---
+
+### 3.1 `std::copy`, `std::copy_if`, `std::copy_n`, `std::copy_backward`
+
+#### Definitions
+
+**Core Definition**
+These algorithms copy elements from a source range to a destination range.
+
+**Technical Definition**
+`copy` copies all elements from `[first, last)` to `d_first`. `copy_if` copies only elements satisfying a predicate. `copy_n` copies exactly `n` elements. `copy_backward` copies elements in reverse order (starting from the end) to handle overlapping ranges.
+
+**Complexity**
+- `copy`, `copy_if`, `copy_n`: exactly `last - first` (or `n`) assignments.
+- `copy_backward`: exactly `last - first` assignments.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <iterator>
+
+int main() {
+    std::vector<int> src = {1, 2, 3, 4, 5};
+    std::vector<int> dst;
+
+    std::copy(src.begin(), src.end(), std::back_inserter(dst));
+    // dst = {1, 2, 3, 4, 5}
+
     std::vector<int> evens;
-    std::ranges::copy_if(v, std::back_inserter(evens),
-                         [](int x) { return x % 2 == 0; });
-    std::cout << "Evens: ";
-    for (int x : evens) std::cout << x << " ";
-    std::cout << std::endl;
+    std::copy_if(src.begin(), src.end(), std::back_inserter(evens),
+                 [](int x){ return x % 2 == 0; });
+    // evens = {2, 4}
 
-    // Step 3: Remove_if (in-place removal)
-    std::vector<int> w = {1, 2, 3, 4, 5, 6};
-    auto [in, out] = std::ranges::remove_if(w, [](int x) { return x % 2 == 0; });
-    w.erase(out, w.end());
-    std::cout << "After remove_if: ";
-    for (int x : w) std::cout << x << " ";
-    std::cout << std::endl;
-
-    return 0;
+    for (int x : evens) std::cout << x << ' ';
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Squared: 1 4 9 16 25
-Evens: 4 16
-After remove_if: 1 3 5
+2 4
 ```
-
-#### Real-World Cases
-
-- **Data cleaning**: `std::ranges::remove_if` to filter out invalid records.
-- **Image processing**: `std::ranges::transform` to apply a colour filter to every pixel.
-- **Bulk initialisation**: `std::ranges::fill` to set all elements to a default value.
 
 ---
 
-### Sub-Feature: Partitioning Algorithms
+### 3.2 `std::move`, `std::move_backward`
 
 #### Definitions
 
 **Core Definition**
-Partitioning algorithms rearrange elements so that those satisfying a predicate come before those that do not.
+These algorithms move elements from a source range to a destination range, leaving the source in a moved-from state.
 
 **Technical Definition**
-`std::ranges::partition` reorders elements based on a predicate and returns a subrange from the partition point to the end. `std::ranges::stable_partition` preserves the relative order of elements within each group. `std::ranges::is_partitioned` checks whether a range is partitioned. `std::ranges::partition_point` finds the partition point in a partitioned range.
+`move` moves all elements from `[first, last)` to `d_first` using move assignment. `move_backward` moves elements in reverse order, useful for overlapping ranges.
 
-**Beginner-Friendly Explanation**
-Partitioning is like separating a deck of cards into red and black piles. The partition algorithm does this in one pass, without fully sorting.
-
-#### Purposes
-
-- **To** separate elements into two groups based on a predicate.
-- **To** support quicksort’s partitioning step.
-- **To** enable efficient “find all elements satisfying X” operations.
-- **To** maintain stability (relative order) when required.
+**Complexity**
+- Exactly `last - first` move assignments.
 
 #### Annotated Code Example
 
 ```cpp
-// File: partitioning.cpp
-// Compile with: g++ -std=c++20 partitioning.cpp -o partitioning
-
 #include <algorithm>
-#include <iostream>
-#include <ranges>
 #include <vector>
+#include <iostream>
+#include <string>
 
 int main() {
-    std::vector<int> v = {1, 2, 3, 4, 5, 6, 7, 8};
+    std::vector<std::string> src = {"hello", "world"};
+    std::vector<std::string> dst(2);
 
-    // Step 1: Partition into even and odd
-    auto result = std::ranges::partition(v, [](int x) { return x % 2 == 0; });
+    std::move(src.begin(), src.end(), dst.begin());
 
-    std::cout << "Partitioned: ";
-    for (int x : v) std::cout << x << " ";
-    std::cout << std::endl;
-
-    // Step 2: The subrange [result.begin(), result.end()) contains odds
-    std::cout << "Odds: ";
-    for (auto it = result.begin(); it != result.end(); ++it) {
-        std::cout << *it << " ";
-    }
-    std::cout << std::endl;
-
-    // Step 3: Check if partitioned
-    bool is_part = std::ranges::is_partitioned(v, [](int x) { return x % 2 == 0; });
-    std::cout << "Is partitioned: " << is_part << std::endl;
-
-    return 0;
+    std::cout << dst[0] << ' ' << dst[1] << '\n'; // hello world
+    std::cout << "src[0] empty: " << src[0].empty() << '\n'; // 1
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Partitioned: 8 2 6 4 5 3 7 1
-Odds: 5 3 7 1
-Is partitioned: 1
+hello world
+src[0] empty: 1
 ```
-
-**Why this output:** `std::ranges::partition` moves all even numbers to the front and odd numbers to the back. The returned subrange points to the first odd element through the end. `is_partitioned` confirms the property holds.
-
-#### Real-World Cases
-
-- **Quicksort**: Partitioning is the core step of quicksort.
-- **Load balancing**: Separating “heavy” and “light” tasks before scheduling.
-- **Data filtering**: Quickly grouping records that meet a condition.
 
 ---
 
-### Sub-Feature: Heap Operations
+### 3.3 `std::fill`, `std::fill_n`
 
 #### Definitions
 
 **Core Definition**
-Heap operations construct and manipulate a binary heap — a tree-like structure stored in a contiguous range where every parent satisfies a comparison relationship with its children.
+`fill` assigns a value to every element in a range; `fill_n` assigns a value to `n` elements starting from a given iterator.
 
-**Technical Definition**
-`std::ranges::make_heap` arranges a range into a heap in O(n) time. `std::ranges::push_heap` and `std::ranges::pop_heap` maintain the heap property after insertion or removal. `std::ranges::sort_heap` sorts a heap in O(n log n). `std::ranges::is_heap` checks the heap property.
-
-**Beginner-Friendly Explanation**
-A heap is like a tournament bracket stored in an array. `make_heap` builds the bracket, `push_heap` adds a new contestant, `pop_heap` removes the winner, and `sort_heap` turns the bracket into a fully sorted list.
-
-#### Purposes
-
-- **To** implement priority queues efficiently.
-- **To** sort data using heap sort.
-- **To** support algorithms like Dijkstra’s and Huffman’s that need a priority queue.
-- **To** maintain a dynamic set with fast access to the maximum element.
+**Complexity**
+- Exactly `last - first` (or `n`) assignments.
 
 #### Annotated Code Example
 
 ```cpp
-// File: heap_ops.cpp
-// Compile with: g++ -std=c++20 heap_ops.cpp -o heap_ops
-
 #include <algorithm>
-#include <iostream>
-#include <ranges>
 #include <vector>
+#include <iostream>
 
 int main() {
-    std::vector<int> v = {3, 1, 4, 1, 5, 9, 2, 6};
+    std::vector<int> v(5);
+    std::fill(v.begin(), v.end(), 7);
+    for (int x : v) std::cout << x << ' '; // 7 7 7 7 7
+}
+```
 
-    // Step 1: Make a heap (max-heap by default)
-    std::ranges::make_heap(v);
-    std::cout << "Heap: ";
-    for (int x : v) std::cout << x << " ";
-    std::cout << std::endl;
+**Expected Output**
+```
+7 7 7 7 7
+```
 
-    // Step 2: Push a new element
-    v.push_back(10);
-    std::ranges::push_heap(v);
-    std::cout << "After push(10): ";
-    for (int x : v) std::cout << x << " ";
-    std::cout << std::endl;
+---
 
-    // Step 3: Pop the max
-    std::ranges::pop_heap(v);
-    int max = v.back();
+### 3.4 `std::transform`
+
+#### Definitions
+
+**Core Definition**
+`transform` applies a function to each element of a range and stores the result in an output range.
+
+**Technical Definition**
+The unary version applies a unary operation to each element in `[first, last)` and writes the result to `d_first`. The binary version applies a binary operation to corresponding elements from two input ranges.
+
+**Complexity**
+- Exactly `last - first` applications of the operation.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3};
+    std::vector<int> out(v.size());
+
+    std::transform(v.begin(), v.end(), out.begin(),
+                   [](int x){ return x * x; });
+
+    for (int x : out) std::cout << x << ' '; // 1 4 9
+}
+```
+
+**Expected Output**
+```
+1 4 9
+```
+
+---
+
+### 3.5 `std::generate`, `std::generate_n`
+
+#### Definitions
+
+**Core Definition**
+`generate` assigns the result of successive calls to a generator function to every element in a range; `generate_n` does so for `n` elements.
+
+**Complexity**
+- Exactly `last - first` (or `n`) invocations of the generator.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v(5);
+    int counter = 0;
+    std::generate(v.begin(), v.end(), [&counter]{ return counter++; });
+    for (int x : v) std::cout << x << ' '; // 0 1 2 3 4
+}
+```
+
+**Expected Output**
+```
+0 1 2 3 4
+```
+
+---
+
+### 3.6 `std::remove`, `std::remove_if`, `std::remove_copy`, `std::remove_copy_if`
+
+#### Definitions
+
+**Core Definition**
+`remove` and `remove_if` logically remove elements by moving non-removed elements to the front of the range (they do not actually erase elements from the container). The `_copy` variants copy non-removed elements to a destination range.
+
+**Technical Definition**
+`remove(first, last, value)` moves all elements not equal to `value` to the front and returns an iterator to the new logical end. `remove_if` uses a predicate instead of a value. `remove_copy` and `remove_copy_if` write the kept elements to an output range .
+
+**Complexity**
+- Exactly `last - first` applications of the predicate/comparison.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 2, 4};
+    auto new_end = std::remove(v.begin(), v.end(), 2);
+
+    // Actually erase the removed elements
+    v.erase(new_end, v.end());
+
+    for (int x : v) std::cout << x << ' '; // 1 3 4
+}
+```
+
+**Expected Output**
+```
+1 3 4
+```
+
+**Important note:** `std::remove` does not change the container’s size; you must call `erase` to physically remove the elements.
+
+---
+
+### 3.7 `std::replace`, `std::replace_if`, `std::replace_copy`, `std::replace_copy_if`
+
+#### Definitions
+
+**Core Definition**
+`replace` replaces all elements equal to a value with a new value. `replace_if` replaces elements satisfying a predicate. The `_copy` variants write the result to a destination range.
+
+**Complexity**
+- Exactly `last - first` comparisons/applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 2, 4};
+    std::replace(v.begin(), v.end(), 2, 99);
+    for (int x : v) std::cout << x << ' '; // 1 99 3 99 4
+}
+```
+
+**Expected Output**
+```
+1 99 3 99 4
+```
+
+---
+
+### 3.8 `std::swap`, `std::swap_ranges`, `std::iter_swap`
+
+#### Definitions
+
+**Core Definition**
+`swap` exchanges the values of two objects; `swap_ranges` exchanges the elements of two ranges; `iter_swap` swaps the values pointed to by two iterators.
+
+**Complexity**
+- `swap`: O(1) for most types.
+- `swap_ranges`: exactly `last1 - first1` swaps.
+- `iter_swap`: O(1).
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> a = {1, 2, 3};
+    std::vector<int> b = {4, 5, 6};
+
+    std::swap_ranges(a.begin(), a.end(), b.begin());
+    for (int x : a) std::cout << x << ' '; // 4 5 6
+}
+```
+
+**Expected Output**
+```
+4 5 6
+```
+
+---
+
+### 3.9 `std::reverse`, `std::reverse_copy`
+
+#### Definitions
+
+**Core Definition**
+`reverse` reverses the order of elements in a range. `reverse_copy` writes the reversed sequence to a destination range.
+
+**Complexity**
+- `reverse`: exactly `(last - first) / 2` swaps.
+- `reverse_copy`: exactly `last - first` assignments.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 4};
+    std::reverse(v.begin(), v.end());
+    for (int x : v) std::cout << x << ' '; // 4 3 2 1
+}
+```
+
+**Expected Output**
+```
+4 3 2 1
+```
+
+---
+
+### 3.10 `std::rotate`, `std::rotate_copy`
+
+#### Definitions
+
+**Core Definition**
+`rotate` performs a left rotation on a range such that `middle` becomes the new first element. `rotate_copy` writes the rotated sequence to a destination range.
+
+**Complexity**
+- `rotate`: at most `last - first` swaps.
+- `rotate_copy`: exactly `last - first` assignments.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 4, 5};
+    std::rotate(v.begin(), v.begin() + 2, v.end());
+    for (int x : v) std::cout << x << ' '; // 3 4 5 1 2
+}
+```
+
+**Expected Output**
+```
+3 4 5 1 2
+```
+
+---
+
+### 3.11 `std::shuffle`, `std::sample`
+
+#### Definitions
+
+**Core Definition**
+`shuffle` randomly reorders the elements of a range using a uniform random bit generator. `sample` selects `n` elements from a range without replacement.
+
+**Complexity**
+- `shuffle`: O(n) swaps.
+- `sample`: O(n) applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <random>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 4, 5};
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(v.begin(), v.end(), g);
+    for (int x : v) std::cout << x << ' '; // some permutation
+}
+```
+
+**Expected Output** (example)
+```
+3 1 5 2 4
+```
+
+---
+
+### 3.12 `std::unique`, `std::unique_copy`
+
+#### Definitions
+
+**Core Definition**
+`unique` eliminates consecutive duplicate elements from a range (logically, by moving kept elements to the front). `unique_copy` writes the unique elements to a destination range.
+
+**Technical Definition**
+`unique` returns an iterator to the new logical end; the elements between the new end and the original end are unspecified. To physically remove them, call `erase` .
+
+**Complexity**
+- Exactly `last - first - 1` comparisons (or predicate applications).
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 1, 2, 2, 3, 3, 3, 4};
+    auto new_end = std::unique(v.begin(), v.end());
+    v.erase(new_end, v.end());
+    for (int x : v) std::cout << x << ' '; // 1 2 3 4
+}
+```
+
+**Expected Output**
+```
+1 2 3 4
+```
+
+---
+
+## 4. Sorting Algorithms
+
+### Definitions
+
+**Core Definition**
+Sorting algorithms rearrange the elements of a range into a specified order (by default, ascending).
+
+**Technical Definition**
+The standard provides several sorting algorithms with different complexity and stability guarantees: `sort` (O(n log n) average, not stable), `stable_sort` (O(n log n) with memory, stable), `partial_sort` (sorts only the first k elements), `partial_sort_copy`, `nth_element` (places the n-th element in its sorted position), `is_sorted`, and `is_sorted_until` .
+
+**Beginner-Friendly Explanation**
+Sorting algorithms put your data in order—either all of it, part of it, or just enough to find the n-th element.
+
+---
+
+### 4.1 `std::sort`
+
+#### Definitions
+
+**Core Definition**
+`std::sort` sorts the elements of a range in ascending order (or according to a comparator).
+
+**Technical Definition**
+`sort(first, last)` sorts `[first, last)` using an introsort variant. Average complexity is O(n log n); worst case is O(n log n). The algorithm is **not stable**—equal elements may change relative order.
+
+**Complexity**
+- O(n log n) comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {3, 1, 4, 1, 5};
+    std::sort(v.begin(), v.end());
+    for (int x : v) std::cout << x << ' '; // 1 1 3 4 5
+}
+```
+
+**Expected Output**
+```
+1 1 3 4 5
+```
+
+---
+
+### 4.2 `std::stable_sort`
+
+#### Definitions
+
+**Core Definition**
+`std::stable_sort` sorts the range while preserving the relative order of equivalent elements.
+
+**Technical Definition**
+Uses a merge-sort variant. Complexity is O(n log n) with additional memory, or O(n log²n) without.
+
+**Complexity**
+- O(n log n) with O(n) extra memory, or O(n log²n) in-place.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <string>
+
+struct Person { std::string name; int age; };
+
+int main() {
+    std::vector<Person> people = {{"Alice", 30}, {"Bob", 25}, {"Charlie", 30}};
+    std::stable_sort(people.begin(), people.end(),
+                     [](const Person& a, const Person& b){ return a.age < b.age; });
+    for (const auto& p : people) std::cout << p.name << ' '; // Bob Alice Charlie
+}
+```
+
+**Expected Output**
+```
+Bob Alice Charlie
+```
+
+**Why stable?** Alice and Charlie have the same age; Alice appears before Charlie because stable_sort preserves their original relative order.
+
+---
+
+### 4.3 `std::partial_sort`, `std::partial_sort_copy`
+
+#### Definitions
+
+**Core Definition**
+`partial_sort` sorts only the first `k` elements of a range, leaving the rest unspecified. `partial_sort_copy` copies and partially sorts into a destination range.
+
+**Complexity**
+- `partial_sort`: O(n log k) comparisons.
+- `partial_sort_copy`: O(n log k) comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {5, 2, 4, 1, 3};
+    std::partial_sort(v.begin(), v.begin() + 3, v.end());
+    for (int x : v) std::cout << x << ' '; // 1 2 3 ? ?
+}
+```
+
+**Expected Output** (first three sorted; remainder unspecified)
+```
+1 2 3 5 4
+```
+
+---
+
+### 4.4 `std::is_sorted`, `std::is_sorted_until`
+
+#### Definitions
+
+**Core Definition**
+`is_sorted` checks whether a range is sorted. `is_sorted_until` returns an iterator to the first element that violates sorted order.
+
+**Complexity**
+- `is_sorted`: at most `last - first - 1` comparisons.
+- `is_sorted_until`: at most `last - first - 1` comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 5, 4};
+    std::cout << std::boolalpha;
+    std::cout << std::is_sorted(v.begin(), v.end()) << '\n'; // false
+
+    auto it = std::is_sorted_until(v.begin(), v.end());
+    std::cout << "First unsorted element: " << *it << '\n'; // 4
+}
+```
+
+**Expected Output**
+```
+false
+First unsorted element: 4
+```
+
+---
+
+### 4.5 `std::nth_element`
+
+#### Definitions
+
+**Core Definition**
+`nth_element` places the element that would be at position `n` if the range were fully sorted, with all smaller elements before it and all larger elements after it.
+
+**Technical Definition**
+Average complexity is O(n). The relative order of elements before and after `n` is unspecified.
+
+**Complexity**
+- O(n) comparisons on average.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {5, 2, 4, 1, 3};
+    std::nth_element(v.begin(), v.begin() + 2, v.end());
+    std::cout << "Median: " << v[2] << '\n'; // 3
+}
+```
+
+**Expected Output**
+```
+Median: 3
+```
+
+---
+
+## 5. Binary Search Algorithms
+
+### Definitions
+
+**Core Definition**
+Binary search algorithms operate on sorted (or partitioned) ranges to find elements or insertion points in logarithmic time.
+
+**Technical Definition**
+The standard provides `lower_bound` (first element not less than a value), `upper_bound` (first element greater than a value), `binary_search` (whether a value exists), and `equal_range` (pair of `lower_bound` and `upper_bound`). They require the range to be partitioned with respect to the search key .
+
+**Beginner-Friendly Explanation**
+Binary search is like looking up a word in a dictionary—you halve the search space each time. These algorithms require the data to already be sorted.
+
+---
+
+### 5.1 `std::lower_bound`, `std::upper_bound`
+
+#### Definitions
+
+**Core Definition**
+`lower_bound` returns an iterator to the first element that is **not less than** a given value. `upper_bound` returns an iterator to the first element that is **greater than** the value.
+
+**Complexity**
+- O(log n) comparisons for random-access iterators.
+- O(n) for non-random-access iterators (due to linear advancement).
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {10, 20, 30, 40, 50};
+
+    auto lb = std::lower_bound(v.begin(), v.end(), 30);
+    std::cout << "lower_bound(30): index " << (lb - v.begin()) << '\n'; // 2
+
+    auto ub = std::upper_bound(v.begin(), v.end(), 30);
+    std::cout << "upper_bound(30): index " << (ub - v.begin()) << '\n'; // 3
+}
+```
+
+**Expected Output**
+```
+lower_bound(30): index 2
+upper_bound(30): index 3
+```
+
+---
+
+### 5.2 `std::binary_search`
+
+#### Definitions
+
+**Core Definition**
+`binary_search` checks whether a given value exists in a sorted range.
+
+**Technical Definition**
+Returns `true` if there is an element equivalent to `value`; otherwise `false`.
+
+**Complexity**
+- O(log n) comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {10, 20, 30, 40};
+    std::cout << std::boolalpha;
+    std::cout << std::binary_search(v.begin(), v.end(), 30) << '\n'; // true
+    std::cout << std::binary_search(v.begin(), v.end(), 35) << '\n'; // false
+}
+```
+
+**Expected Output**
+```
+true
+false
+```
+
+---
+
+### 5.3 `std::equal_range`
+
+#### Definitions
+
+**Core Definition**
+`equal_range` returns a pair of iterators delimiting the subrange of elements equivalent to a given value.
+
+**Technical Definition**
+Equivalent to `{lower_bound(first, last, value), upper_bound(first, last, value)}`.
+
+**Complexity**
+- O(log n) comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {10, 20, 20, 20, 30};
+    auto [lo, hi] = std::equal_range(v.begin(), v.end(), 20);
+    std::cout << "Number of 20s: " << (hi - lo) << '\n'; // 3
+}
+```
+
+**Expected Output**
+```
+Number of 20s: 3
+```
+
+---
+
+## 6. Set Operations
+
+### Definitions
+
+**Core Definition**
+Set operations compute unions, intersections, differences, and related operations on sorted ranges.
+
+**Technical Definition**
+The set algorithms (`set_union`, `set_intersection`, `set_difference`, `set_symmetric_difference`, `includes`, `merge`, `inplace_merge`) require sorted input ranges and produce sorted output. Their semantics generalise to multisets: `set_union` contains the maximum number of occurrences, `set_intersection` the minimum, and so on .
+
+**Beginner-Friendly Explanation**
+Set operations treat your sorted data as mathematical sets, computing combinations like “everything in both sets” or “everything in one but not the other.”
+
+---
+
+### 6.1 `std::merge`, `std::inplace_merge`
+
+#### Definitions
+
+**Core Definition**
+`merge` combines two sorted ranges into a single sorted output range. `inplace_merge` merges two consecutive sorted subranges within the same range.
+
+**Complexity**
+- `merge`: O(n + m) comparisons.
+- `inplace_merge`: O(n log n) worst case, O(n) with extra memory.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> a = {1, 3, 5};
+    std::vector<int> b = {2, 4, 6};
+    std::vector<int> out;
+
+    std::merge(a.begin(), a.end(), b.begin(), b.end(),
+               std::back_inserter(out));
+
+    for (int x : out) std::cout << x << ' '; // 1 2 3 4 5 6
+}
+```
+
+**Expected Output**
+```
+1 2 3 4 5 6
+```
+
+---
+
+### 6.2 `std::includes`
+
+#### Definitions
+
+**Core Definition**
+`includes` checks whether one sorted range is a subset of another.
+
+**Complexity**
+- O(n + m) comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> big = {1, 2, 3, 4, 5};
+    std::vector<int> sub = {2, 4};
+
+    std::cout << std::boolalpha;
+    std::cout << std::includes(big.begin(), big.end(), sub.begin(), sub.end()) << '\n'; // true
+}
+```
+
+**Expected Output**
+```
+true
+```
+
+---
+
+### 6.3 `std::set_difference`, `std::set_intersection`, `std::set_symmetric_difference`, `std::set_union`
+
+#### Definitions
+
+**Core Definition**
+These algorithms compute the difference, intersection, symmetric difference, and union of two sorted ranges.
+
+**Complexity**
+- All are O(n + m) comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <iterator>
+
+int main() {
+    std::vector<int> a = {1, 3, 5, 7};
+    std::vector<int> b = {2, 3, 5, 8};
+
+    std::vector<int> u, i, d, sd;
+    std::set_union(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(u));
+    std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(i));
+    std::set_difference(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(d));
+    std::set_symmetric_difference(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(sd));
+
+    std::cout << "union: "; for (int x : u) std::cout << x << ' '; std::cout << '\n';
+    std::cout << "intersection: "; for (int x : i) std::cout << x << ' '; std::cout << '\n';
+    std::cout << "difference: "; for (int x : d) std::cout << x << ' '; std::cout << '\n';
+    std::cout << "symmetric: "; for (int x : sd) std::cout << x << ' '; std::cout << '\n';
+}
+```
+
+**Expected Output**
+```
+union: 1 2 3 5 7 8
+intersection: 3 5
+difference: 1 7
+symmetric: 1 2 7 8
+```
+
+---
+
+## 7. Heap Operations
+
+### Definitions
+
+**Core Definition**
+Heap operations maintain a heap data structure within a random-access range.
+
+**Technical Definition**
+A heap is a tree-like structure stored in an array where each parent is greater than or equal to its children (max-heap by default). The standard provides `make_heap`, `push_heap`, `pop_heap`, `sort_heap`, `is_heap`, and `is_heap_until` .
+
+**Beginner-Friendly Explanation**
+A heap is a special arrangement of data where the largest element is always at the front. These algorithms let you build and maintain that arrangement.
+
+---
+
+### 7.1 `std::make_heap`, `std::push_heap`, `std::pop_heap`, `std::sort_heap`, `std::is_heap`, `std::is_heap_until`
+
+#### Definitions
+
+**Core Definition**
+These algorithms create, maintain, and query a heap within a range.
+
+**Technical Definition**
+`make_heap` rearranges a range into a heap in O(n). `push_heap` inserts an element (already placed at the end) into the heap in O(log n). `pop_heap` moves the largest element to the end and restores the heap in O(log n). `sort_heap` sorts a heap into ascending order in O(n log n). `is_heap` checks whether a range is a heap in O(n) .
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {3, 1, 4, 1, 5};
+
+    std::make_heap(v.begin(), v.end());    // O(n)
+    std::cout << "Max: " << v.front() << '\n'; // 5
+
+    v.push_back(6);
+    std::push_heap(v.begin(), v.end());    // O(log n)
+    std::cout << "Max after push: " << v.front() << '\n'; // 6
+
+    std::pop_heap(v.begin(), v.end());     // O(log n)
     v.pop_back();
-    std::cout << "Popped max: " << max << std::endl;
+    std::cout << "Max after pop: " << v.front() << '\n'; // 5
 
-    // Step 4: Sort the heap
-    std::ranges::sort_heap(v);
-    std::cout << "Sorted heap: ";
-    for (int x : v) std::cout << x << " ";
-    std::cout << std::endl;
-
-    return 0;
+    std::sort_heap(v.begin(), v.end());    // O(n log n)
+    for (int x : v) std::cout << x << ' '; // 1 1 3 4 5
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Heap: 9 6 4 1 5 3 2 1
-After push(10): 10 9 4 6 5 3 2 1 1
-Popped max: 10
-Sorted heap: 1 1 2 3 4 5 6 9
+Max: 5
+Max after push: 6
+Max after pop: 5
+1 1 3 4 5
 ```
-
-#### Real-World Cases
-
-- **Priority queues**: `std::priority_queue` is built on heap operations.
-- **Heap sort**: `std::ranges::sort_heap` provides an in-place O(n log n) sort.
-- **Event simulation**: Using a heap to process events in priority order.
 
 ---
 
-### Sub-Feature: Modern Numeric Operations (`std::reduce`, `std::midpoint`)
+## 8. Min/Max Operations
+
+### Definitions
+
+**Core Definition**
+Min/max algorithms find the smallest or largest of given values or elements in a range.
+
+**Technical Definition**
+The standard provides `min`, `max`, `minmax` (for two values or an initializer list), `min_element`, `max_element`, `minmax_element` (for ranges), and `clamp` (to bound a value within a range) .
+
+**Beginner-Friendly Explanation**
+These algorithms answer “what is the smallest/largest value?” or “keep this value between these limits.”
+
+---
+
+### 8.1 `std::min`, `std::max`, `std::minmax`, `std::clamp`
 
 #### Definitions
 
 **Core Definition**
-`std::reduce` (C++17) is a parallel-friendly numeric algorithm that combines elements using an associative and commutative binary operation. `std::midpoint` (C++20) computes the midpoint between two integers, floating-point numbers, or pointers without overflow.
+`min`/`max` return the smaller/larger of two values. `minmax` returns both. `clamp` bounds a value to a range.
 
-**Technical Definition**
-`std::reduce` is defined in `<numeric>`. It behaves like `std::accumulate` but permits arbitrary reordering and reassociation of elements, enabling parallel execution via execution policies. The overloads include `reduce(first, last)`, `reduce(first, last, init)`, `reduce(first, last, init, binary_op)`, and execution-policy variants. `std::midpoint(a, b)` returns half the sum of `a` and `b`, rounded towards `a` if the sum is odd. It works for arithmetic types and pointers, and never overflows.
-
-**Beginner-Friendly Explanation**
-`std::reduce` is like `std::accumulate`, but it doesn’t care about the order in which elements are combined. This makes it suitable for parallel execution. `std::midpoint` solves a subtle bug: computing `(a + b) / 2` can overflow for large integers. `std::midpoint` avoids that.
-
-#### Purposes
-
-- **To** perform parallel reductions over large ranges.
-- **To** compute sums, products, or custom reductions with associative operations.
-- **To** safely compute the midpoint of two values without overflow.
-- **To** support numeric algorithms in parallel execution policies.
-
-#### Syntax Rules and Structure
-
-```cpp
-// std::reduce
-template<class InputIt>
-typename iterator_traits<InputIt>::value_type
-reduce(InputIt first, InputIt last);
-
-template<class InputIt, class T>
-T reduce(InputIt first, InputIt last, T init);
-
-template<class InputIt, class T, class BinaryOperation>
-T reduce(InputIt first, InputIt last, T init, BinaryOperation binary_op);
-
-// With execution policy
-template<class ExecutionPolicy, class ForwardIt>
-typename iterator_traits<ForwardIt>::value_type
-reduce(ExecutionPolicy&& exec, ForwardIt first, ForwardIt last);
-
-// std::midpoint
-template<class T>
-constexpr T midpoint(T a, T b) noexcept;
-
-template<class T>
-constexpr T* midpoint(T* a, T* b);
-```
-
-**Constraints and limitations:**
-- `std::reduce` requires the binary operation to be associative and commutative; otherwise, the result is non-deterministic.
-- `std::reduce` may reorder operands and reassociate arbitrarily.
-- `std::midpoint` for integers rounds towards `a` when the sum is odd.
-- `std::midpoint` for pointers requires both pointers to point to elements of the same array (or one past the end).
+**Complexity**
+- O(1) for two-value versions; O(n) for initializer-list versions.
 
 #### Annotated Code Example
 
 ```cpp
-// File: numeric_modern.cpp
-// Compile with: g++ -std=c++20 numeric_modern.cpp -o numeric_modern
-
+#include <algorithm>
 #include <iostream>
+
+int main() {
+    std::cout << std::min(3, 7) << '\n';      // 3
+    std::cout << std::max(3, 7) << '\n';      // 7
+
+    auto [lo, hi] = std::minmax({4, 1, 9, 2});
+    std::cout << lo << ' ' << hi << '\n';    // 1 9
+
+    std::cout << std::clamp(15, 0, 10) << '\n'; // 10
+}
+```
+
+**Expected Output**
+```
+3
+7
+1 9
+10
+```
+
+---
+
+### 8.2 `std::min_element`, `std::max_element`, `std::minmax_element`
+
+#### Definitions
+
+**Core Definition**
+These algorithms return iterators to the smallest/largest element(s) in a range.
+
+**Complexity**
+- `min_element`/`max_element`: exactly `max(last - first - 1, 0)` comparisons.
+- `minmax_element`: at most `max(floor(3/2 * (last - first - 1)), 0)` comparisons.
+
+#### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {4, 1, 9, 2, 7};
+
+    auto min_it = std::min_element(v.begin(), v.end());
+    auto max_it = std::max_element(v.begin(), v.end());
+    std::cout << "min: " << *min_it << ", max: " << *max_it << '\n'; // min: 1, max: 9
+
+    auto [lo, hi] = std::minmax_element(v.begin(), v.end());
+    std::cout << "minmax: " << *lo << ' ' << *hi << '\n'; // 1 9
+}
+```
+
+**Expected Output**
+```
+min: 1, max: 9
+minmax: 1 9
+```
+
+---
+
+## 9. Numeric Algorithms
+
+### Definitions
+
+**Core Definition**
+Numeric algorithms perform accumulation, reduction, inner product, partial sums, and scan operations on numeric ranges.
+
+**Technical Definition**
+Defined in `<numeric>`: `accumulate` (sequential fold), `reduce` (unordered fold, parallelisable), `inner_product`, `adjacent_difference`, `partial_sum`, `exclusive_scan`, `inclusive_scan`, `transform_reduce`, and `transform_scan` variants .
+
+**Beginner-Friendly Explanation**
+Numeric algorithms crunch numbers: they sum, multiply, accumulate, and transform sequences of values.
+
+---
+
+### 9.1 `std::accumulate`
+
+#### Definitions
+
+**Core Definition**
+`accumulate` computes a sequential fold (by default, a sum) of a range.
+
+**Technical Definition**
+`accumulate(first, last, init)` returns the result of successively applying `operator+` to `init` and each element. An overload accepts a binary operation.
+
+**Complexity**
+- Exactly `last - first` applications of the operation.
+
+#### Annotated Code Example
+
+```cpp
 #include <numeric>
 #include <vector>
+#include <iostream>
 
 int main() {
-    // Step 1: std::reduce — sequential
-    std::vector<int> v = {1, 2, 3, 4, 5};
-    int sum = std::reduce(v.begin(), v.end(), 0);
-    std::cout << "Sequential sum: " << sum << std::endl;
-
-    // Step 2: std::reduce with multiplication
-    int product = std::reduce(v.begin(), v.end(), 1, std::multiplies<int>());
-    std::cout << "Product: " << product << std::endl;
-
-    // Step 3: std::midpoint — integer
-    int a = 2'000'000'000;
-    int b = 2'000'000'002;
-    // (a + b) / 2 would overflow on 32-bit int
-    int mid = std::midpoint(a, b);
-    std::cout << "Midpoint: " << mid << std::endl;
-
-    // Step 4: std::midpoint — pointer
-    int arr[10] = {};
-    int* p1 = &arr[2];
-    int* p2 = &arr[8];
-    int* pm = std::midpoint(p1, p2);
-    std::cout << "Pointer midpoint index: " << (pm - arr) << std::endl;
-
-    // Step 5: std::midpoint — floating point
-    double x = 1.0, y = 2.0;
-    std::cout << "Float midpoint: " << std::midpoint(x, y) << std::endl;
-
-    return 0;
+    std::vector<int> v = {1, 2, 3, 4};
+    int sum = std::accumulate(v.begin(), v.end(), 0);
+    std::cout << sum << '\n'; // 10
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Sequential sum: 15
-Product: 120
-Midpoint: 2000000001
-Pointer midpoint index: 5
-Float midpoint: 1.5
+10
 ```
-
-**Why this output:** `std::reduce` sums the vector elements. `std::midpoint(2'000'000'000, 2'000'000'002)` returns 2'000'000'001 without overflow, whereas `(a + b) / 2` would overflow 32-bit `int`. For pointers, `std::midpoint(p1, p2)` returns a pointer to the element halfway between them.
-
-#### Real-World Cases with Explanation
-
-**Case 1 — Parallel summation**: Computing the sum of a large array using `std::reduce(std::execution::par, ...)` to split the work across threads.
-
-**Case 2 — Binary search**: Using `std::midpoint(lo, hi)` to compute the midpoint safely in binary search implementations.
-
-**Case 3 — Image averaging**: Using `std::reduce` with a custom binary operation to average pixel values in parallel.
-
-**Case 4 — Financial calculations**: Using `std::transform_reduce` (C++17) to compute weighted sums or dot products in parallel.
 
 ---
 
-## Summary Table: Classic vs. Ranges vs. Parallel
+### 9.2 `std::reduce` (C++17)
 
-| Feature | Classic (C++98–C++17) | Ranges (C++20) | Parallel (C++17) |
-|---|---|---|---|
-| Call syntax | `std::sort(v.begin(), v.end())` | `std::ranges::sort(v)` | `std::sort(std::execution::par, v.begin(), v.end())` |
-| Projections | Manual lambda | `std::ranges::sort(v, {}, &T::member)` | Not available in classic API |
-| Return types | Iterator | Structured (`in_out_result`, etc.) | Iterator |
-| Concept constraints | None | `std::sortable`, `std::random_access_range`, etc. | None |
-| Dangling protection | None | `std::ranges::dangling` | None |
-| Execution policies | Not supported | C++26 adds range+policy overloads | `seq`, `par`, `par_unseq`, `unseq` |
-| Parallel numeric | `std::accumulate` (sequential only) | N/A | `std::reduce`, `std::transform_reduce` |
+#### Definitions
+
+**Core Definition**
+`reduce` is an unordered, parallelisable version of `accumulate`.
+
+**Technical Definition**
+The order of operations is unspecified, allowing parallel execution. The operation must be associative and commutative.
+
+**Complexity**
+- O(n) applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <numeric>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 4};
+    int sum = std::reduce(v.begin(), v.end(), 0);
+    std::cout << sum << '\n'; // 10
+}
+```
+
+**Expected Output**
+```
+10
+```
+
+---
+
+### 9.3 `std::inner_product`
+
+#### Definitions
+
+**Core Definition**
+`inner_product` computes the dot product of two ranges (or a generalised version with custom operations).
+
+**Complexity**
+- Exactly `last1 - first1` applications of the operations.
+
+#### Annotated Code Example
+
+```cpp
+#include <numeric>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> a = {1, 2, 3};
+    std::vector<int> b = {4, 5, 6};
+    int dot = std::inner_product(a.begin(), a.end(), b.begin(), 0);
+    std::cout << dot << '\n'; // 32 (1*4 + 2*5 + 3*6)
+}
+```
+
+**Expected Output**
+```
+32
+```
+
+---
+
+### 9.4 `std::partial_sum`, `std::adjacent_difference`
+
+#### Definitions
+
+**Core Definition**
+`partial_sum` computes running totals; `adjacent_difference` computes differences between adjacent elements.
+
+**Complexity**
+- Exactly `last - first - 1` applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <numeric>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 4};
+    std::vector<int> ps(v.size());
+    std::partial_sum(v.begin(), v.end(), ps.begin());
+    for (int x : ps) std::cout << x << ' '; // 1 3 6 10
+}
+```
+
+**Expected Output**
+```
+1 3 6 10
+```
+
+---
+
+### 9.5 `std::exclusive_scan`, `std::inclusive_scan`
+
+#### Definitions
+
+**Core Definition**
+Scan algorithms compute prefix sums (or generalised folds). Inclusive scan includes the current element; exclusive scan excludes it.
+
+**Complexity**
+- O(n) applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <numeric>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3, 4};
+    std::vector<int> inc(v.size()), exc(v.size());
+
+    std::inclusive_scan(v.begin(), v.end(), inc.begin());
+    std::exclusive_scan(v.begin(), v.end(), exc.begin(), 0);
+
+    for (int x : inc) std::cout << x << ' '; // 1 3 6 10
+    std::cout << '\n';
+    for (int x : exc) std::cout << x << ' '; // 0 1 3 6
+}
+```
+
+**Expected Output**
+```
+1 3 6 10
+0 1 3 6
+```
+
+---
+
+### 9.6 `std::transform_reduce`, `std::transform_exclusive_scan`, `std::transform_inclusive_scan`
+
+#### Definitions
+
+**Core Definition**
+These combine a transformation with a reduction or scan.
+
+**Complexity**
+- O(n) applications.
+
+#### Annotated Code Example
+
+```cpp
+#include <numeric>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {1, 2, 3};
+    int result = std::transform_reduce(
+        v.begin(), v.end(), 0,
+        std::plus<>(),
+        [](int x){ return x * x; }
+    );
+    std::cout << result << '\n'; // 14 (1 + 4 + 9)
+}
+```
+
+**Expected Output**
+```
+14
+```
+
+---
+
+## 10. Algorithm Best Practices
+
+### Definitions
+
+**Core Definition**
+Algorithm best practices are guidelines for using standard algorithms effectively, safely, and idiomatically.
+
+**Technical Definition**
+These practices are grounded in the C++ Core Guidelines, which recommend preferring standard algorithms over hand-written loops (ES.5, ES.3), using the appropriate algorithm for the task, and understanding complexity and iterator requirements .
+
+**Beginner-Friendly Explanation**
+Best practices mean choosing the right algorithm, using it correctly, and letting the library do the work instead of writing error-prone loops.
+
+### Key Guidelines
+
+| Guideline | Summary |
+|-----------|---------|
+| **Prefer algorithms to hand-written loops** | They are clearer, safer, and often faster. |
+| **Choose the right algorithm** | `find` for search, `sort` for ordering, `transform` for mapping. |
+| **Know the complexity** | Avoid accidentally quadratic algorithms. |
+| **Respect iterator requirements** | `sort` needs random access; `list` has its own `sort`. |
+| **Use predicates and lambdas** | Customise behaviour without writing new functions. |
+| **Remember `remove` does not erase** | Call `erase` after `remove` to physically remove elements. |
+| **Use `back_inserter` for output ranges** | When the destination size is unknown. |
+| **Be aware of stability** | Use `stable_sort` when relative order of equal elements matters. |
+| **Use execution policies for parallelism** | `std::execution::par` (C++17). |
+| **Prefer `const` iterators for read-only algorithms** | `cbegin()`/`cend()`. |
+
+### Annotated Code Example
+
+```cpp
+#include <algorithm>
+#include <vector>
+#include <iostream>
+
+int main() {
+    std::vector<int> v = {5, 2, 8, 1, 9};
+
+    // Use algorithm instead of manual loop
+    auto it = std::find_if(v.cbegin(), v.cend(),
+                           [](int x){ return x > 5; });
+    if (it != v.cend())
+        std::cout << "First > 5: " << *it << '\n'; // 8
+
+    // Sort with a custom comparator
+    std::sort(v.begin(), v.end(), std::greater<>());
+    for (int x : v) std::cout << x << ' '; // 9 8 5 2 1
+}
+```
+
+**Expected Output**
+```
+First > 5: 8
+9 8 5 2 1
+```
 
 ---
 
 ## References
 
-- Constrained algorithms (since C++20) — cppreference.com - https://en.cppreference.com/w/cpp/algorithm/ranges
-- std::ranges::sort — cppreference.com - https://en.cppreference.com/w/cpp/algorithm/ranges/sort
-- Ranges library (C++20) — cppreference.com - https://en.cppreference.com/w/cpp/ranges
-- std::execution::sequenced_policy, std::execution::parallel_policy, std::execution::parallel_unsequenced_policy — cppreference.com - https://en.cppreference.com/w/cpp/algorithm/execution_policy_tag_t
-- Execution policy — cppreference.com - https://en.cppreference.com/w/cpp/algorithm/execution_policy_tag
-- std::reduce — cppreference.com - https://en.cppreference.com/w/cpp/algorithm/reduce
-- std::midpoint — cppreference.com - https://en.cppreference.com/w/cpp/numeric/midpoint
-- Standard library header <numeric> — cppreference.com - https://en.cppreference.com/w/cpp/header/numeric
-- <execution> — Microsoft Learn - https://learn.microsoft.com/en-us/cpp/standard-library/execution
-- Parallel algorithms — cppreference.com - https://en.cppreference.com/w/cpp/algorithm#Parallel_algorithms
-- Use range algorithms instead of iterator-pair algorithms — Dr-Sergey/learn_cpp (GitHub) - https://github.com/Dr-Sergey/learn_cpp/blob/main/14_Ranges_Cpp20/Use_range_algorithms_instead_of_iterator-pair_algorithms.md
-- Use parallel execution policies (C++17) for algorithm parallelism — Dr-Sergey/learn_cpp (GitHub) - https://github.com/Dr-Sergey/learn_cpp/blob/main/08_Standard_Library_Algorithms/Use_parallel_execution_policies_C++17_for_algorithm_parallelism.md
-- P0350R1: Integrating SIMD with Parallel Algorithms — Open-Std - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0350r1.pdf
-- N4861: Working Draft, Standard for Programming Language C++ (C++20) — Open-Std - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4861.pdf
-- NVIDIA HPC Compilers User's Guide: Parallel Algorithms — NVIDIA - https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html
+- Algorithms library — cppreference – https://en.cppreference.com/w/cpp/algorithm
+- Non-modifying sequence operations — cppreference – https://en.cppreference.com/w/cpp/algorithm#Non-modifying_sequence_operations
+- Modifying sequence operations — cppreference – https://en.cppreference.com/w/cpp/algorithm#Modifying_sequence_operations
+- Sorting operations — cppreference – https://en.cppreference.com/w/cpp/algorithm#Sorting_operations
+- Binary search operations — cppreference – https://en.cppreference.com/w/cpp/algorithm#Binary_search_operations
+- Set operations — cppreference – https://en.cppreference.com/w/cpp/algorithm#Set_operations
+- Heap operations — cppreference – https://en.cppreference.com/w/cpp/algorithm#Heap_operations
+- Minimum/maximum operations — cppreference – https://en.cppreference.com/w/cpp/algorithm#Minimum/maximum_operations
+- Numeric operations — cppreference – https://en.cppreference.com/w/cpp/header/numeric
+- C++ Core Guidelines — ES.5: Keep scopes small – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Res-scope
+- C++ Core Guidelines — SL.con: Containers – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-stdlib
+- Understand and use `std::sort`, `partial_sort`, `nth_element`, and `stable_sort` — Dr-Sergey/learn_cpp – https://github.com/Dr-Sergey/learn_cpp/blob/575e0775d6aa9df1b80d1343af811215cf9c1745/08_Standard_Library_Algorithms/Understand_and_use_stdsort_partial_sort_nth_element_and_stable_sort.md
+- Use binary search algorithms on sorted ranges — Dr-Sergey/learn_cpp – https://github.com/Dr-Sergey/learn_cpp/blob/e2c54b8163b274e4f724168226553ae2ab4d7ddd/08_Standard_Library_Algorithms/Use_binary_search_algorithms_on_sorted_ranges.md
+- Know set and heap algorithms — Dr-Sergey/learn_cpp – https://github.com/Dr-Sergey/learn_cpp/blob/575e0775d6aa9df1b80d1343af811215cf9c1745/08_Standard_Library_Algorithms/Know_set_and_heap_algorithms_set_union_merge_push_heap_pop_heap.md
+- C++ Working Draft (N4950) — Algorithms library – https://eel.is/c++draft/algorithms
+
+---
+
+This cheat sheet provides a comprehensive, structured reference for the C++ algorithms library, covering all major categories with definitions, purposes, syntax rules, annotated code examples with expected outputs, real-world cases, and authoritative references.

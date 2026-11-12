@@ -1,4 +1,4 @@
-# HTML Input Elements: Comprehensive Programming Cheat Sheet
+# HTML Input Elements — Comprehensive Programming Cheat Sheet & Research
 
 ---
 
@@ -7,1390 +7,2958 @@
 ### Definitions
 
 **Core Definition**
-
-HTML input elements are the interactive controls created with the `<input>` element, whose behaviour and data type are determined by the `type` attribute, enabling users to enter, select, and submit data to a web server.
+The `<input>` element is the most versatile interactive control in HTML. Through its `type` attribute it morphs into a text field, a password box, an email address field, a date picker, a colour swatch, a checkbox, a radio button, a file picker, a range slider, or a button — all using the same element name and a large shared attribute vocabulary.
 
 **Technical Definition**
-
-The `<input>` element represents a typed data field, usually with a form control to allow the user to edit the data. It is categorised as flow content, phrasing content, interactive content (if not `type="hidden"`), and palpable content (if not `type="hidden"`). Its content model is nothing (it is a void element with no closing tag). Its permitted parent is any element that accepts phrasing content. Its DOM interface is `HTMLInputElement`. The `type` attribute is an enumerated attribute that determines which of the many input control types the element represents, and therefore how the element behaves, what attributes apply, and what value it submits.
+`HTMLInputElement` is a form-associated, phrasing-content, interactive, palpable element with a content model of *nothing* (it is a void element). Its behaviour is the union of the selected `type`'s state and the attributes applicable to that state. The input participates in constraint validation via `validity`, `validationMessage`, `willValidate`, and `setCustomValidity()`. It is listed in the form's `elements` collection and contributes a name/value entry on submission if it is a *successful control*.
 
 **Beginner-Friendly Explanation**
-
-The `<input>` tag is the Swiss Army knife of HTML forms. It can be a text box, a checkbox, a radio button, a date picker, a colour picker, a file upload button, or many other controls — all depending on what you put in the `type` attribute. If you want a text field, you write `<input type="text">`. If you want a checkbox, you write `<input type="checkbox">`. One tag, many possibilities.
+`<input>` is the “Swiss Army knife” of HTML. With one tag and a `type` setting, you can ask for a name, a password, an email, a date, a colour, a file — or create a clickable button. Its `type` and its attributes determine what the user sees and what the browser checks before submission.
 
 ---
 
 ### Key Characteristics
 
-| Characteristic | Description |
-|---|---|
-| **Void element** | `<input>` has no closing tag and no content |
-| **Type-driven** | The `type` attribute determines the control's behaviour and appearance |
-| **Default type** | If `type` is omitted, the default is `text` |
-| **Self-contained** | Each input is a single element; no child elements |
-| **Accessibility-critical** | Every input needs a label associated via `for`/`id` or wrapping |
-| **Global attributes** | Supports all global attributes plus type-specific attributes |
-| **DOM interface** | `HTMLInputElement` |
+- **Void element**: `<input>` has no closing tag and no children.
+- **Type-driven behaviour**: The `type` attribute selects an input state; each state has its own value semantics, default UI, applicable attributes, and validation rules.
+- **Form-associated**: It contributes a name/value to its owning form unless disabled, unnamed, or not successful.
+- **Constraint-validated**: Most types participate in HTML constraint validation (`required`, `pattern`, `min`, `max`, `step`, `minlength`, `maxlength`, `type`-specific rules).
+- **Scriptable**: Exposes `value`, `checked`, `files`, `valueAsNumber`, `valueAsDate`, `selectionStart`, `setSelectionRange()`, `checkValidity()`, `select()`, etc.
+- **Accessible when labelled**: Every input must have an accessible name (`<label>`, `aria-label`, or `aria-labelledby`).
 
 ---
 
 ### Prerequisites
 
-- Basic familiarity with HTML document structure
-- Understanding of the `<form>` element and form submission
-- Awareness of the `<label>` element and accessibility
-- Basic knowledge of HTTP methods (GET/POST) and form data
+1. **HTML form fundamentals** — `<form>`, `action`, `method`, `enctype`, submission.
+2. **Element fundamentals** — attributes, void elements, content models.
+3. **Basic CSS** — sizing and layout of controls.
+4. **Browser developer tools** — Elements panel, Console, Network panel.
+5. **Basic HTTP awareness** — to understand what a form's data looks like when submitted.
 
 ---
 
 ### Related Programming Areas
 
-- **Web Accessibility (A11y)** – Labels, ARIA attributes, and keyboard navigation are essential
-- **Client-Side Validation** – HTML5 constraint validation uses input attributes
-- **Mobile Input** – `type` and `inputmode` control mobile keyboards
-- **CSS Styling** – Pseudo-classes like `:valid`, `:invalid`, `:focus` style inputs
-- **JavaScript** – The Constraint Validation API and FormData interact with inputs
+| Area | Relationship |
+|---|---|
+| **Forms & submission** | `<input>` provides the values that forms submit. |
+| **Constraint validation** | The HTML validity API and CSS `:valid`/`:invalid` selectors. |
+| **Accessibility** | Labels, `aria-describedby`, error messaging, keyboard support. |
+| **JavaScript/DOM** | `value`, `files`, `validity`, events (`input`, `change`, `invalid`). |
+| **Mobile UX** | `type` and `inputmode` select virtual keyboard layouts. |
+| **Security** | File upload restrictions, secret handling, autofill and password managers. |
 
 ---
 
-## Core Concepts / Features
+### Core Concepts / Features
+
+1. **`<input>`** (the element)
+2. **Input types** — `text`, `password`, `email`, `url`, `tel`, `number`, `range`, `date`, `time`, `datetime-local`, `month`, `week`, `color`, `file`, `checkbox`, `radio`, `hidden`, `submit`, `reset`, `button`, `image`, `search`
+3. **Input attributes** — `type`, `name`, `value`, `placeholder`, `required`, `disabled`, `readonly`, `autocomplete`, `autofocus`, `multiple`, `accept`, `min`, `max`, `step`, `pattern`, `minlength`, `maxlength`, `size`, `list`, `form`, `formaction`, `formenctype`, `formmethod`, `formnovalidate`, `formtarget`, `dirname`
+4. **Input best practices**
+
+Every concept below follows the same uniform structure: Definitions → Purposes → Syntax Rules and Structure → Annotated Code Examples → Real-World Cases → References.
 
 ---
 
-### 1. The `<input>` Element (Base)
+## 1. `<input>`
 
-#### Definitions
+### Definitions
 
 **Core Definition**
-
-The `<input>` element is a void element that creates an interactive form control, with its behaviour determined by the `type` attribute.
+`<input>` is a void, form-associated element whose type, appearance, behaviour, and validation rules are determined by its `type` attribute and the other attributes present.
 
 **Technical Definition**
-
-The `<input>` HTML element is used to create interactive controls for web-based forms to accept data from the user. It is one of the most powerful and complex elements in HTML due to the sheer number of combinations of input types and attributes. The element is a void element, meaning it has no content and no closing tag. It is categorised as flow content, phrasing content, interactive content, and palpable content (except for `type="hidden"`, which is not interactive or palpable). Its DOM interface is `HTMLInputElement`.
+`HTMLInputElement` implements the `HTMLInputElement` interface. It has a `type` IDL attribute that reflects one of 22 standard type states, each with its own definition of *value sanitisation algorithm*, *default value*, *value*, and *applicability* of attributes. It is phrasing content, flow content, interactive content, and palpable content. Its content model is *nothing*; end tags are not permitted.
 
 **Beginner-Friendly Explanation**
+`<input>` is the interactive field you type into, tick, or click. What kind of field it is depends on the `type` you give it.
 
-The `<input>` tag creates a control that the user can interact with. The `type` attribute tells the browser what kind of control to show — a text box, a checkbox, a button, and so on. Without a `type`, it defaults to a text box.
+---
 
-#### Purposes
+### Purposes
 
-- To create interactive form controls for data entry
-- To accept user input of various data types
-- To submit data to a server via a form
-- To provide accessible, keyboard-navigable controls
+- **To collect user data** of many shapes (text, numbers, dates, files, choices).
+- **To trigger actions** such as submitting or resetting a form via button-like types.
+- **To submit auxiliary data** (e.g., `hidden` inputs carrying identifiers).
+- **To provide UI affordances** with built-in browser controls (date pickers, colour pickers, sliders).
+- **To enable constraint validation** so invalid input is caught before submission.
 
-#### Syntax Rules and Structure
+---
 
-**General Syntax**
+### Syntax Rules and Structure
+
+**Complete general syntax**
 
 ```html
-<input type="text" name="username" id="username">
+<input
+  type="text"
+  name="fieldName"
+  value="initial value"
+  placeholder="hint"
+  required
+  minlength="2"
+  maxlength="64"
+  autocomplete="name">
 ```
 
-**Component Breakdown**
+**Component breakdown**
 
 | Component | Description |
 |---|---|
-| `<input>` | Void element; no closing tag |
-| `type` | Determines the control type; defaults to `text` |
-| `name` | The key used when submitting the form |
-| `id` | Unique identifier for label association |
-| `value` | The initial value of the control |
+| `<input` | Start tag; no end tag is permitted. |
+| `type="…"` | Selects the input state; defaults to `text`. |
+| `name="…"` | The key under which the value is submitted. |
+| Other attributes | Apply conditionally based on `type`. |
+| `>` | Closes the start tag; the element has no content. |
 
-**Common Attributes**
+#### Syntax Rules
 
-| Attribute | Applies To | Description |
-|---|---|---|
-| `name` | All | The form data key |
-| `value` | All | Initial/current value |
-| `id` | All | Unique identifier |
-| `required` | Most | Field must be filled before submission |
-| `disabled` | All | Control is not interactive or submitted |
-| `readonly` | Text-like | Value cannot be edited but is submitted |
-| `placeholder` | Text-like | Hint text shown when empty |
-| `autocomplete` | Most | Controls browser autofill |
-| `autofocus` | All | Automatically focuses on page load |
+1. `<input>` is a **void element**; `</input>` is invalid.
+2. Unknown `type` values fall back to `text` (the *invalid value default*).
+3. Attributes not applicable to the current type are *ignored* (but still reflected on the element).
+4. Only successful controls (named, not disabled, and, where relevant, checked/selected) submit data.
+5. The `value` attribute sets the initial value; the IDL property `value` reflects the current value.
 
-**Syntax Rules**
+#### Constraints and Limitations
 
-- The `<input>` element must have a `name` attribute to be submitted
-- The `type` attribute is case-insensitive
-- If `type` is invalid or unsupported, the browser falls back to `text`
-- Every input should have an associated `<label>` for accessibility
-
-**Constraints and Limitations**
-
-- The `type` attribute cannot be changed dynamically without side effects
-- Some types have browser-specific rendering differences
-- `disabled` inputs are not submitted with the form
+- `<input>` has no child content; use `aria-label`/`aria-labelledby` or `<label>` for accessible names.
+- Some attributes (`pattern`, `minlength`, `maxlength`, `min`, `max`, `step`) only apply to specific types.
+- Hidden inputs are invisible to users but visible in the page source; never store secrets there.
 
 ---
 
-### 2. Text Input (`type="text"`)
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: A Basic Text Input
+
+**Setup guide**: Save as `input-basic.html` and open in a browser.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Basic Input</title>
+</head>
+<body>
+  <form action="/submit" method="post">
+    <label for="fullname">Full name</label>
+    <!-- type="text" is the default; name is the submission key -->
+    <input id="fullname" type="text" name="fullname" placeholder="Jane Doe" required>
+    <button>Send</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A single text field with the placeholder “Jane Doe”, labelled “Full name”, and a Send button. Submitting sends `fullname=Jane+Doe` (or an error bubble if empty).
+
+**Why this output occurs**: `<input type="text">` creates a single-line text control. The `required` attribute causes constraint validation; the label is programmatically associated via `for`/`id`; and `name="fullname"` makes the value part of the submission.
+
+---
+
+#### Example 2: Several Input Types Together
+
+**Setup guide**: Save as `input-many.html`; submit and inspect the request.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Inputs</title>
+</head>
+<body>
+  <form action="/demo" method="get">
+    <p><label for="name">Name</label>
+      <input id="name" type="text" name="name" value="Ada"></p>
+    <p><label for="color">Favourite colour</label>
+      <input id="color" type="color" name="color" value="#3366cc"></p>
+    <p><label for="age">Age</label>
+      <input id="age" type="number" name="age" min="0" max="120" value="36"></p>
+    <button>Submit</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: On submit, URL becomes something like `/demo?name=Ada&color=%233366cc&age=36`.
+
+**Why this output occurs**: Each named input contributes one entry. The colour value’s `#` is percent-encoded (`%23`).
+
+---
+
+### Real-World Cases
+
+1. **Login and registration** — `<input type="email">` and `<input type="password">`.
+2. **Checkout** — number, date, tel, and address fields with autocomplete tokens.
+3. **Settings pages** — checkboxes and radio groups for preferences.
+4. **Admin panels** — hidden inputs carrying IDs; file inputs for uploads.
+
+---
+
+### References
+
+- MDN Web Docs — `<input>` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input
+- WHATWG — The input element — https://html.spec.whatwg.org/multipage/input.html#the-input-element
+- MDN Web Docs — HTMLInputElement — https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement
+
+---
+
+## 2. Input Types
+
+Each input type is a distinct *state* with its own UI, value format, and applicable attributes. All twenty-two standard types are covered below with the same structure.
+
+---
+
+### 2.1 `text`
 
 #### Definitions
 
 **Core Definition**
-
-A single-line text input that accepts any character.
+The `text` type is a single-line plain text field.
 
 **Technical Definition**
-
-The `text` type creates a single-line text field. It is the default type if the `type` attribute is omitted or invalid. It supports `maxlength`, `minlength`, `pattern`, `placeholder`, `readonly`, `size`, and `spellcheck`. The value is sanitised with newlines stripped.
+The *text* state has no automatic value sanitisation beyond newline removal (which the value sanitisation algorithm strips). It supports `dirname`, `list`, `maxlength`, `minlength`, `pattern`, `placeholder`, `readonly`, `required`, `size`, `autocomplete`. Its `value` is a free-form string.
 
 **Beginner-Friendly Explanation**
-
-A text box. The user can type anything. This is the most basic and common input type.
+A normal text box where users can type anything.
 
 #### Purposes
 
-- To accept free-form single-line text
-- To collect names, usernames, and short answers
-- To serve as the default input when no type is specified
+- **To collect short free-form strings** (names, titles, usernames).
+- **To allow arbitrary input** where no specialised type applies.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="text" name="username" id="username"
-       maxlength="20" minlength="3" placeholder="Enter username" required>
+<input type="text" name="username" minlength="3" maxlength="20" required>
 ```
 
-**Constraints and Limitations**
+**Constraints**: No automatic format validation; use `pattern`, `minlength`, `maxlength`, or script for control.
 
-- No format validation; accepts any text
-- Use `pattern` for simple validation
-
-#### Annotated Code Example
+#### Annotated Example
 
 ```html
-<form action="/submit" method="post">
-    <label for="fullname">Full Name:</label>
-    <input type="text" id="fullname" name="fullname"
-           placeholder="e.g., Jane Doe" maxlength="50" required>
-    <button type="submit">Submit</button>
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>text</title></head>
+<body>
+  <form action="/save" method="post">
+    <label for="title">Title</label>
+    <input id="title" type="text" name="title" minlength="2" maxlength="80" required>
+    <button>Save</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A text field enforcing length 2–80; submitting with one character shows a validation error.
+
+**Why this output occurs**: `minlength`/`maxlength` participate in constraint validation for the text state.
+
+#### Real-World Cases
+
+- Display names, usernames, post titles, search keywords.
+- Forms that accept structured-looking strings (for which `pattern` adds validation).
+
+#### References
+
+- MDN Web Docs — `<input type="text">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/text
+- WHATWG — Text state — https://html.spec.whatwg.org/multipage/input.html#text-(type=text)-state-and-search-state-(type=search)
+
+---
+
+### 2.2 `password`
+
+#### Definitions
+
+**Core Definition**
+The `password` type is a single-line text field whose value is obscured by the user agent.
+
+**Technical Definition**
+The *password* state obscures the display of its value but otherwise behaves like a text input. It supports `maxlength`, `minlength`, `pattern`, `placeholder`, `readonly`, `required`, `size`, `autocomplete` (with `new-password`/`current-password` tokens).
+
+**Beginner-Friendly Explanation**
+A text box that hides the characters as dots, so nobody looking over your shoulder can read a password.
+
+#### Purposes
+
+- **To collect passwords** without displaying them on screen.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="password" name="password" autocomplete="current-password" required>
+```
+
+**Constraints**: The value is *not* encrypted; HTTPS is required to protect it in transit.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>password</title></head>
+<body>
+  <form action="/login" method="post">
+    <label for="pw">Password</label>
+    <input id="pw" type="password" name="password"
+           autocomplete="current-password" minlength="8" required>
+    <button>Log in</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: Dots appear as you type. Submitting with fewer than 8 characters fails validation.
+
+**Why this output occurs**: The UA masks the value and enforces `minlength`.
+
+#### Real-World Cases
+
+- Login, registration (with `autocomplete="new-password"`), password reset.
+- Should *never* be used for non-secret hidden strings — use `hidden` or server-side state.
+
+#### References
+
+- MDN Web Docs — `<input type="password">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/password
+
+---
+
+### 2.3 `email`
+
+#### Definitions
+
+**Core Definition**
+The `email` type is a text field for a valid email address; with `multiple`, it accepts a comma-separated list.
+
+**Technical Definition**
+The *email* state applies an *email address validation algorithm* — a simplified version of RFC 5322 that permits basic `local@domain` forms and IDN domains. The `multiple` attribute allows a list; browsers auto-strip surrounding whitespace and split on commas.
+
+**Beginner-Friendly Explanation**
+A text field that knows what an email address looks like and warns you if you typed something wrong.
+
+#### Purposes
+
+- **To collect one or more email addresses** with format validation.
+- **To trigger email-optimised mobile keyboards**.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="email" name="email" autocomplete="email" required>
+<input type="email" name="cc" multiple>
+```
+
+**Constraints**: The validation is deliberately loose (technically `a@b` is accepted); the only real proof is sending a confirmation email.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>email</title></head>
+<body>
+  <form action="/subscribe" method="post">
+    <label for="em">Email</label>
+    <input id="em" type="email" name="email" autocomplete="email" required>
+    <label for="cc">Notify also (optional, comma-separated)</label>
+    <input id="cc" type="email" name="cc" multiple>
+    <button>Subscribe</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: `abc` triggers a validation error; `a@b.com` passes; the `cc` field accepts `a@b.com, c@d.com`.
+
+**Why this output occurs**: The email state uses the standard email validation algorithm; `multiple` enables comma-separated values.
+
+#### Real-World Cases
+
+- Newsletters, contact forms, account recovery addresses.
+- Invitation forms that accept several recipients at once.
+
+#### References
+
+- MDN Web Docs — `<input type="email">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/email
+- WHATWG — E-mail state — https://html.spec.whatwg.org/multipage/input.html#e-mail-state-(type=email)
+
+---
+
+### 2.4 `url`
+
+#### Definitions
+
+**Core Definition**
+The `url` type is a text field constrained to a valid absolute URL.
+
+**Technical Definition**
+The *URL* state requires a value matching the URL parser with a non-empty scheme (e.g. `https://`). It supports `maxlength`, `minlength`, `pattern`, `placeholder`, `readonly`, `required`, `size`.
+
+**Beginner-Friendly Explanation**
+A text box that only accepts a proper web address.
+
+#### Purposes
+
+- **To collect absolute URLs** (websites, links, redirect targets).
+
+#### Syntax Rules and Structure
+
+```html
+<input type="url" name="website" placeholder="https://example.com" required>
+```
+
+**Constraints**: Relative URLs are invalid; only absolute URLs pass native validation.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>url</title></head>
+<body>
+  <form action="/save" method="post">
+    <label for="site">Website</label>
+    <input id="site" type="url" name="website" placeholder="https://example.com" required>
+    <button>Save</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: `example.com` fails validation; `https://example.com` passes.
+
+**Why this output occurs**: The URL parser requires a scheme for the value to be valid.
+
+#### Real-World Cases
+
+- Profile website fields, redirect target configuration.
+- Backlink submissions and partner referral forms.
+
+#### References
+
+- MDN Web Docs — `<input type="url">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/url
+
+---
+
+### 2.5 `tel`
+
+#### Definitions
+
+**Core Definition**
+The `tel` type is a text field for a telephone number; the browser does **not** validate the format.
+
+**Technical Definition**
+The *telephone* state has no automatic validation. It supports `maxlength`, `minlength`, `pattern`, `placeholder`, `readonly`, `required`, `size`. Its main benefit is invoking a telephone-optimised virtual keyboard on mobile devices.
+
+**Beginner-Friendly Explanation**
+A phone-number field that brings up the numeric keypad on phones. It doesn’t check whether the number is real.
+
+#### Purposes
+
+- **To collect phone numbers** with a convenient keyboard.
+- **To avoid over-constraining formats** that vary worldwide.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="tel" name="phone" pattern="\+?[0-9 ()-]{7,20}" autocomplete="tel">
+```
+
+**Constraints**: No built-in validation; use `pattern` if you want a format check.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>tel</title></head>
+<body>
+  <form action="/contact" method="post">
+    <label for="tel">Phone</label>
+    <input id="tel" type="tel" name="phone"
+           pattern="\+?[0-9 ()-]{7,20}"
+           placeholder="+1 (555) 123-4567"
+           autocomplete="tel">
+    <button>Send</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: `123` fails the pattern; `+1 (555) 123-4567` passes.
+
+**Why this output occurs**: `pattern` supplies what the browser does not.
+
+#### Real-World Cases
+
+- Contact and delivery forms where numbers vary internationally.
+- Two-factor authentication backup numbers.
+
+#### References
+
+- MDN Web Docs — `<input type="tel">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/tel
+
+---
+
+### 2.6 `number`
+
+#### Definitions
+
+**Core Definition**
+The `number` type is a numeric input with optional spinners and built-in range/step validation.
+
+**Technical Definition**
+The *number* state uses the *floating-point number* value sanitisation algorithm; its `valueAsNumber` property gives a double. It supports `min`, `max`, `step`, `required`, `readonly`. Invalid non-numeric text is treated as an empty (bad input) value for validation.
+
+**Beginner-Friendly Explanation**
+A box that only accepts numbers, with arrows to increase or decrease the value.
+
+#### Purposes
+
+- **To collect numeric quantities** with built-in constraints.
+- **To allow fine control** via `step` and keyboard arrows.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="number" name="qty" min="1" max="10" step="1" value="1">
+```
+
+**Constraints**: The value must be a valid floating-point number; otherwise the input is invalid. Localisation of decimal separators varies by browser locale.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>number</title></head>
+<body>
+  <form action="/order" method="post">
+    <label for="qty">Quantity</label>
+    <input id="qty" type="number" name="qty" min="1" max="10" step="1" value="1" required>
+    <button>Order</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: Values below 1 or above 10 fail validation; arrows step by 1.
+
+**Why this output occurs**: `min`/`max`/`step` participate in constraint validation for the number state.
+
+#### Real-World Cases
+
+- Quantities, ages, dimensions.
+- Not recommended for phone numbers, postal codes, or credit card numbers (leading zeros are lost).
+
+#### References
+
+- MDN Web Docs — `<input type="number">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/number
+
+---
+
+### 2.7 `range`
+
+#### Definitions
+
+**Core Definition**
+The `range` type is a slider for choosing a number within a given range.
+
+**Technical Definition**
+The *range* state shares the numeric value algorithm with `number` but renders a slider control. It supports `min`, `max`, `step`; a default of `min=0, max=100, step=1` applies when absent.
+
+**Beginner-Friendly Explanation**
+A draggable slider that picks a value between a minimum and maximum.
+
+#### Purposes
+
+- **To provide a low-precision numeric choice** with immediate visual feedback.
+- **To avoid typing** for values such as volume or brightness.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="range" name="volume" min="0" max="100" step="5" value="50">
+```
+
+**Constraints**: Ranges have an *implied* default when attributes are omitted; users cannot type arbitrary values.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>range</title></head>
+<body>
+  <form action="/settings" method="post">
+    <label for="vol">Volume</label>
+    <input id="vol" type="range" name="volume" min="0" max="100" step="10" value="50">
+    <button>Save</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A slider starting at 50; moving it snaps to multiples of 10 between 0 and 100.
+
+**Why this output occurs**: `step` snaps values; `value` sets initial position.
+
+#### Real-World Cases
+
+- Audio/video volume, brightness, price filters.
+- Surveys with 1–10 scales.
+
+#### References
+
+- MDN Web Docs — `<input type="range">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/range
+
+---
+
+### 2.8 `date`
+
+#### Definitions
+
+**Core Definition**
+The `date` type accepts a calendar date (year, month, day) in `YYYY-MM-DD` form.
+
+**Technical Definition**
+The *date* state uses the *date* value sanitisation algorithm; its `valueAsDate` returns a `Date` or `null`. It supports `min`, `max`, `step` (in days), `required`, `readonly`. The wire format is always `YYYY-MM-DD` regardless of local display.
+
+**Beginner-Friendly Explanation**
+A date picker that lets the user choose a day from a calendar.
+
+#### Purposes
+
+- **To collect calendar dates** without manual format checking.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="date" name="dob" min="1900-01-01" max="2100-12-31">
+```
+
+**Constraints**: The submitted value is always ISO-formatted; browsers with no picker fall back to text and still enforce the format.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>date</title></head>
+<body>
+  <form action="/book" method="post">
+    <label for="d">Booking date</label>
+    <input id="d" type="date" name="date" min="2025-01-01" required>
+    <button>Book</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A date picker; selecting a date before 2025-01-01 fails validation.
+
+**Why this output occurs**: `min` constrains the date state.
+
+#### Real-World Cases
+
+- Booking, scheduling, date of birth.
+- Filtering by date in admin dashboards.
+
+#### References
+
+- MDN Web Docs — `<input type="date">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/date
+
+---
+
+### 2.9 `time`
+
+#### Definitions
+
+**Core Definition**
+The `time` type accepts a time of day, in `HH:MM` or `HH:MM:SS` form (optional fractional seconds).
+
+**Technical Definition**
+The *time* state uses the *time* value sanitisation algorithm; `valueAsNumber` returns milliseconds since midnight. Supports `min`, `max`, `step` (seconds), `required`, `readonly`.
+
+**Beginner-Friendly Explanation**
+A field for choosing a clock time.
+
+#### Purposes
+
+- **To collect times of day** with built-in validation.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="time" name="alarm" min="06:00" max="22:00" step="60">
+```
+
+**Constraints**: Time zone is local; no date component.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>time</title></head>
+<body>
+  <form action="/schedule" method="post">
+    <label for="start">Start time</label>
+    <input id="start" type="time" name="start" min="08:00" max="18:00" required>
+    <button>Schedule</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A time picker restricted to 08:00–18:00.
+
+**Why this output occurs**: `min`/`max` define the acceptable time window.
+
+#### Real-World Cases
+
+- Appointment scheduling, shift planning, alarms.
+
+#### References
+
+- MDN Web Docs — `<input type="time">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/time
+
+---
+
+### 2.10 `datetime-local`
+
+#### Definitions
+
+**Core Definition**
+The `datetime-local` type accepts a date and a time *without* time-zone information, e.g. `YYYY-MM-DDTHH:MM`.
+
+**Technical Definition**
+The *local date and time* state combines date and time algorithms. It is intended for wall-clock timestamps without time zone, and serialises as `YYYY-MM-DDTHH:MM(:SS(.sss))`.
+
+**Beginner-Friendly Explanation**
+A field for a specific date *and* time — like “2025-03-15 at 14:30” — with no time zone attached.
+
+#### Purposes
+
+- **To collect combined date/time** values in a single control.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="datetime-local" name="meeting" step="900">
+```
+
+**Constraints**: No time-zone; servers must interpret it in a known zone.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>datetime-local</title></head>
+<body>
+  <form action="/meet" method="post">
+    <label for="m">Meeting start</label>
+    <input id="m" type="datetime-local" name="meeting" step="900" required>
+    <button>Create</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A combined picker; `step="900"` snaps to 15-minute intervals.
+
+**Why this output occurs**: The step is measured in seconds for datetime-local.
+
+#### Real-World Cases
+
+- Event planning, meeting scheduling.
+- Appointment forms that don’t need time zones.
+
+#### References
+
+- MDN Web Docs — `<input type="datetime-local">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/datetime-local
+
+---
+
+### 2.11 `month`
+
+#### Definitions
+
+**Core Definition**
+The `month` type accepts a year and month, in `YYYY-MM` form.
+
+**Technical Definition**
+The *month* state uses the *month* value sanitisation algorithm; `valueAsNumber` returns the number of months since January 1970 UTC.
+
+**Beginner-Friendly Explanation**
+A picker for a month in a year — like “2025-06” — without a specific day.
+
+#### Purposes
+
+- **To collect month-level periods** (expiry dates, reporting months).
+
+#### Syntax Rules and Structure
+
+```html
+<input type="month" name="expiry" min="2025-01" max="2035-12">
+```
+
+**Constraints**: No day component; wire format `YYYY-MM`.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>month</title></head>
+<body>
+  <form action="/report" method="get">
+    <label for="r">Reporting month</label>
+    <input id="r" type="month" name="month" min="2020-01" required>
+    <button>Run report</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A month picker; submitting yields `?month=2025-06` (for example).
+
+**Why this output occurs**: The month state serialises exactly in `YYYY-MM`.
+
+#### Real-World Cases
+
+- Billing cycles and credit-card expiry.
+- Monthly analytics and reports.
+
+#### References
+
+- MDN Web Docs — `<input type="month">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/month
+
+---
+
+### 2.12 `week`
+
+#### Definitions
+
+**Core Definition**
+The `week` type accepts an ISO week (year and week number), in `YYYY-Www` form (e.g. `2025-W07`).
+
+**Technical Definition**
+The *week* state uses the *week* value sanitisation algorithm; `valueAsNumber` returns the number of weeks since 1970-W01.
+
+**Beginner-Friendly Explanation**
+A picker for a calendar week — like “2025 week 07”.
+
+#### Purposes
+
+- **To collect week-level periods**.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="week" name="week" min="2025-W01" max="2025-W52">
+```
+
+**Constraints**: ISO 8601 week numbering; the year can differ from the calendar year around January 1.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>week</title></head>
+<body>
+  <form action="/timesheet" method="post">
+    <label for="w">Week</label>
+    <input id="w" type="week" name="week" required>
+    <button>Submit</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A week picker; submitting sends `week=2025-W07` for the seventh ISO week of 2025.
+
+**Why this output occurs**: Wire format uses `YYYY-Www`.
+
+#### Real-World Cases
+
+- Timesheets, sprint planning, weekly reporting.
+
+#### References
+
+- MDN Web Docs — `<input type="week">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/week
+
+---
+
+### 2.13 `color`
+
+#### Definitions
+
+**Core Definition**
+The `color` type provides a colour picker, returning a 7-character lowercase `#rrggbb` value.
+
+**Technical Definition**
+The *colour* state uses the *simple colour* value sanitisation algorithm. Its value is always `#rrggbb` in lowercase; alpha channels are not supported by the standard. Browsers may present additional UI (alpha/eyedropper).
+
+**Beginner-Friendly Explanation**
+A field that opens a colour picker and returns a colour code like `#3366cc`.
+
+#### Purposes
+
+- **To let users pick a colour** visually.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="color" name="theme" value="#3366cc">
+```
+
+**Constraints**: Value must be a valid simple colour; the browser normalises it to lowercase.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>color</title></head>
+<body>
+  <form action="/theme" method="post">
+    <label for="c">Theme colour</label>
+    <input id="c" type="color" name="theme" value="#3366cc">
+    <button>Save</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A colour swatch opens the system picker; submitting sends `theme=%233366cc`.
+
+**Why this output occurs**: The wire format is `#rrggbb`; `#` is URL-encoded in urlencoded submissions.
+
+#### Real-World Cases
+
+- Theme/branding pickers, drawing apps, chart configuration.
+
+#### References
+
+- MDN Web Docs — `<input type="color">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/color
+
+---
+
+### 2.14 `file`
+
+#### Definitions
+
+**Core Definition**
+The `file` type lets users choose files from their device; the selected files are exposed via the `files` property as a `FileList`.
+
+**Technical Definition**
+The *file upload* state returns a `FileList` whose entries are `File` objects. The `accept` attribute hints allowed MIME types/extensions; `multiple` allows multiple selections. The form must use `enctype="multipart/form-data"` to transmit file bytes. The `value` property can only be set to the empty string programmatically for security reasons.
+
+**Beginner-Friendly Explanation**
+A button that opens the file picker so users can upload documents or pictures.
+
+#### Purposes
+
+- **To upload files** to a server.
+- **To constrain** the picker by type and quantity.
+
+#### Syntax Rules and Structure
+
+```html
+<form method="post" enctype="multipart/form-data">
+  <input type="file" name="docs" accept=".pdf,image/*" multiple required>
 </form>
 ```
 
-**Expected Output**
+**Constraints**: Must use multipart encoding; you cannot prefill `value` except to empty; file type validation on the client is only a hint.
 
-A text box with placeholder “e.g., Jane Doe.” Submitting sends `fullname=Jane+Doe`.
+#### Annotated Example
 
-**Why This Output Occurs**
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>file</title></head>
+<body>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <label for="att">Attachments</label>
+    <input id="att" type="file" name="attachments" accept=".pdf,image/*" multiple required>
+    <button>Upload</button>
+  </form>
+  <script>
+    const input = document.getElementById('att');
+    input.addEventListener('change', () => {
+      console.log('Selected files:', [...input.files].map(f => f.name));
+    });
+  </script>
+</body>
+</html>
+```
 
-The `text` type renders a single-line input. The `placeholder` shows hint text. The `maxlength` limits input to 50 characters. The `required` attribute prevents empty submission.
+**Expected output**: The picker allows PDFs and images; multiple selection; the console logs the selected filenames.
+
+**Why this output occurs**: `accept` filters choices; `multiple` enables several files; the `files` property exposes the selection.
 
 #### Real-World Cases
 
-- **Registration forms** – Username and full name fields
-- **Search bars** – Free-text search queries
-- **Comment forms** – Short subject lines
+- Profile picture upload, document submission, media upload in CMS.
+
+#### References
+
+- MDN Web Docs — `<input type="file">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/file
+- WHATWG — File upload state — https://html.spec.whatwg.org/multipage/input.html#file-upload-state-(type=file)
 
 ---
 
-### 3. Password Input (`type="password"`)
+### 2.15 `checkbox`
 
 #### Definitions
 
 **Core Definition**
-
-A single-line text input that obscures entered characters.
+The `checkbox` type is an independently toggleable control; it can be checked or unchecked, and multiple checkboxes may be checked at once.
 
 **Technical Definition**
-
-The `password` type creates a text field where the value is obscured (typically with dots or asterisks) to prevent shoulder-surfing. It supports the same attributes as `text`. The value is not masked at the protocol level — it is transmitted in plaintext unless HTTPS is used.
+The *checkbox* state has the `checked` content attribute and `indeterminate` IDL property. If checked, its `value` (default `on`) is submitted; if unchecked, nothing is submitted. It supports `required` — a checkbox group requires at least one checked member if any member of the same-named group has `required`.
 
 **Beginner-Friendly Explanation**
-
-A text box where the characters are hidden. Use it for passwords and other secrets.
+A tick box: on or off, independent of other tick boxes.
 
 #### Purposes
 
-- To collect sensitive credentials
-- To prevent visual exposure of typed characters
-- To provide a familiar password-entry experience
+- **To allow independent yes/no choices**.
+- **To let users pick zero or more options** from a list.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="password" name="password" id="password"
-       minlength="8" autocomplete="current-password" required>
+<input type="checkbox" id="terms" name="terms" value="accepted" required>
+<label for="terms">I accept the terms</label>
 ```
 
-**Constraints and Limitations**
+**Constraints**: Unchecked checkboxes submit nothing; checkboxes must use `<label>` for accessible names.
 
-- Obscuring is visual only; HTTPS is required for real security
-- Browsers may offer password managers
-
-#### Annotated Code Example
+#### Annotated Example
 
 ```html
-<form action="/login" method="post">
-    <label for="pwd">Password:</label>
-    <input type="password" id="pwd" name="password"
-           minlength="8" autocomplete="current-password" required>
-    <button type="submit">Log In</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>checkbox</title></head>
+<body>
+  <form action="/signup" method="post">
+    <fieldset>
+      <legend>Interests</legend>
+      <label><input type="checkbox" name="interest" value="js" checked> JavaScript</label>
+      <label><input type="checkbox" name="interest" value="css"> CSS</label>
+      <label><input type="checkbox" name="interest" value="html"> HTML</label>
+    </fieldset>
+    <label><input type="checkbox" name="terms" required> I accept the terms</label>
+    <button>Sign up</button>
+  </form>
+</body>
+</html>
 ```
 
-**Expected Output**
+**Expected output**: Ticking JS and HTML and submitting yields `interest=js&interest=html&terms=on`; leaving the terms unticked prevents submission.
 
-A text field where typed characters appear as dots. Submitting sends the password in the request body.
-
-**Why This Output Occurs**
-
-The `password` type obscures the value visually. The `autocomplete="current-password"` hints to password managers. The `minlength="8"` enforces a minimum length.
+**Why this output occurs**: Each checked checkbox produces an entry; `required` on the terms checkbox enforces acceptance.
 
 #### Real-World Cases
 
-- **Login forms** – Password entry
-- **Registration** – Creating new passwords
-- **Admin panels** – Sensitive credential entry
+- Filter lists, newsletter preferences, T&C acceptance.
+
+#### References
+
+- MDN Web Docs — `<input type="checkbox">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/checkbox
 
 ---
 
-### 4. Email Input (`type="email"`)
+### 2.16 `radio`
 
 #### Definitions
 
 **Core Definition**
-
-A text input that validates the value against the email address format.
+The `radio` type is a mutually exclusive choice: only one radio button in a group may be selected at a time.
 
 **Technical Definition**
-
-The `email` type creates a text field that validates the value as an email address. It supports the `multiple` attribute to allow comma-separated addresses. On mobile devices, it triggers an email-optimised keyboard.
+The *radio button* state groups radios sharing the same `name` and the same form owner. Selecting one unselects others. A radio group is *required* if any of its radios has `required`; the selected radio contributes its value.
 
 **Beginner-Friendly Explanation**
-
-A text box specifically for email addresses. The browser checks that what you type looks like an email before submitting.
+A set of small circles where you can pick only one.
 
 #### Purposes
 
-- To collect email addresses with validation
-- To trigger email-optimised mobile keyboards
-- To support multiple email addresses
+- **To collect single-choice values** from a small set of options.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="email" name="email" id="email" multiple required>
+<input type="radio" id="a" name="size" value="s" checked>
+<label for="a">Small</label>
+<input type="radio" id="b" name="size" value="m">
+<label for="b">Medium</label>
 ```
 
-**Constraints and Limitations**
+**Constraints**: All radios in a group must share `name`; only the checked one submits.
 
-- Basic format validation only; does not verify the address exists
-- Use `pattern` for stricter validation
-
-#### Annotated Code Example
+#### Annotated Example
 
 ```html
-<label for="email">Email Address:</label>
-<input type="email" id="email" name="email"
-       placeholder="you@example.com" required>
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>radio</title></head>
+<body>
+  <form action="/order" method="post">
+    <fieldset>
+      <legend>Size</legend>
+      <label><input type="radio" name="size" value="s"> Small</label>
+      <label><input type="radio" name="size" value="m" checked> Medium</label>
+      <label><input type="radio" name="size" value="l"> Large</label>
+    </fieldset>
+    <button>Order</button>
+  </form>
+</body>
+</html>
 ```
 
-**Expected Output**
+**Expected output**: Only the checked radio submits (`size=m`); choosing another replaces it.
 
-A text field that validates email format. Submitting an invalid email shows a browser error.
-
-**Why This Output Occurs**
-
-The `email` type triggers built-in validation. The browser checks for an `@` symbol and a domain.
+**Why this output occurs**: Radio groups enforce mutual exclusivity by shared `name`.
 
 #### Real-World Cases
 
-- **Newsletter signup** – Email collection
-- **Contact forms** – Reply-to addresses
-- **Account registration** – Email verification
+- Size choice, payment method, shipping speed, plan selection.
+
+#### References
+
+- MDN Web Docs — `<input type="radio">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/radio
 
 ---
 
-### 5. Search Input (`type="search"`)
+### 2.17 `hidden`
 
 #### Definitions
 
 **Core Definition**
-
-A text input semantically intended for search queries.
+The `hidden` type provides a non-visible form field whose value is submitted with the form.
 
 **Technical Definition**
-
-The `search` type creates a text field for entering search queries. It may render with a clear button in some browsers. It is functionally similar to `text` but carries semantic meaning.
+The *hidden* state is not rendered, not focusable, and cannot be activated. It is a successful control if named. Its value can be set declaratively or by script. `hidden` has no constraint validation (the `required` attribute does not apply).
 
 **Beginner-Friendly Explanation**
-
-A text box for searching. Some browsers add a little “x” to clear the field.
+A value stored invisibly in the form — like an ID or a CSRF token — that travels with the submission.
 
 #### Purposes
 
-- To semantically identify search fields
-- To trigger search-optimised mobile keyboards
-- To enable browser-specific search UI
+- **To carry metadata** (IDs, tokens, redirect URLs) with submissions.
+- **To preserve state** across multi-page forms.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="search" name="q" id="search" placeholder="Search...">
+<input type="hidden" name="csrf_token" value="…">
+<input type="hidden" name="product_id" value="42">
 ```
 
-#### Annotated Code Example
+**Constraints**: Value is visible in page source; never store secrets.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>hidden</title></head>
+<body>
+  <form action="/buy" method="post">
+    <input type="hidden" name="product_id" value="42">
+    <input type="hidden" name="csrf_token" value="abc123">
+    <label for="q">Quantity</label>
+    <input id="q" type="number" name="qty" value="1" min="1">
+    <button>Buy</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: Only the quantity field is visible; submitting sends `product_id=42&csrf_token=abc123&qty=1`.
+
+**Why this output occurs**: Hidden inputs are successful controls with fixed values.
+
+#### Real-World Cases
+
+- CSRF tokens, product IDs, multi-step form state, A/B-test bucket markers.
+
+#### References
+
+- MDN Web Docs — `<input type="hidden">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/hidden
+
+---
+
+### 2.18 `submit`
+
+#### Definitions
+
+**Core Definition**
+The `submit` type renders a button that submits the form when activated.
+
+**Technical Definition**
+The *submit button* state is a button whose activation behaviour is to submit the form (firing the `submit` event and running validation unless suppressed). Its `value` becomes the button's label (in `input`) and is included in the submission as an entry if it has a `name`.
+
+**Beginner-Friendly Explanation**
+A button that sends the form.
+
+#### Purposes
+
+- **To provide a native submit trigger**.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="submit" value="Save changes">
+```
+
+**Constraints**: Prefer `<button type="submit">` for richer content and consistent styling; use `form*` attributes (e.g. `formaction`) to override the form's settings.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>submit</title></head>
+<body>
+  <form action="/save" method="post">
+    <label for="t">Title</label>
+    <input id="t" name="title" required>
+    <input type="submit" value="Save">
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A "Save" button that validates and submits.
+
+**Why this output occurs**: The submit button triggers the submission algorithm.
+
+#### Real-World Cases
+
+- Simple forms where `<input type="submit">` is sufficient.
+
+#### References
+
+- MDN Web Docs — `<input type="submit">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/submit
+
+---
+
+### 2.19 `reset`
+
+#### Definitions
+
+**Core Definition**
+The `reset` type renders a button that resets the form to its initial values.
+
+**Technical Definition**
+The *reset button* state fires a cancellable `reset` event and, unless cancelled, resets controls to their default values (content-attribute initial state). Reset buttons are not included in submissions.
+
+**Beginner-Friendly Explanation**
+A button that undoes all your typing, restoring the form to how it looked when loaded.
+
+#### Purposes
+
+- **To let users clear form entries** in one click.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="reset" value="Clear form">
+```
+
+**Constraints**: Resets are destructive and often harmful to UX; use sparingly.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>reset</title></head>
+<body>
+  <form action="/save" method="post">
+    <label for="n">Name</label>
+    <input id="n" name="name" value="Alice">
+    <input type="reset" value="Reset">
+    <button>Save</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: Changing "Alice" to something else and clicking Reset restores "Alice".
+
+**Why this output occurs**: Reset restores the `value` content attributes as the default values.
+
+#### Real-World Cases
+
+- Rarely recommended; mostly legacy.
+
+#### References
+
+- MDN Web Docs — `<input type="reset">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/reset
+
+---
+
+### 2.20 `button`
+
+#### Definitions
+
+**Core Definition**
+The `button` type renders a button with no default behaviour.
+
+**Technical Definition**
+The *button* state is a generic button that does nothing unless given a script handler. It is not a submit or reset button; it is form-associated but does not submit.
+
+**Beginner-Friendly Explanation**
+A button with no default action — you attach an onclick to make it do something.
+
+#### Purposes
+
+- **To provide a trigger for scripts**.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="button" value="Do something" onclick="doIt()">
+```
+
+**Constraints**: Prefer `<button type="button">` for rich content and easier styling.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>button</title></head>
+<body>
+  <form action="/save" method="post">
+    <input id="t" name="title">
+    <input type="button" value="Preview" onclick="alert(document.getElementById('t').value)">
+    <button>Save</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: "Preview" shows an alert with the current title; "Save" submits the form.
+
+**Why this output occurs**: `type="button"` performs no default action; the `onclick` script runs on click.
+
+#### Real-World Cases
+
+- Preview actions, custom widgets, “add another” controls.
+
+#### References
+
+- MDN Web Docs — `<input type="button">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/button
+
+---
+
+### 2.21 `image`
+
+#### Definitions
+
+**Core Definition**
+The `image` type is a submit button rendered as an image.
+
+**Technical Definition**
+The *image button* state submits the form when clicked, including the coordinates `name.x` and `name.y` in the submission when the `name` attribute is present. `src` is required; `alt` is strongly recommended.
+
+**Beginner-Friendly Explanation**
+A clickable image that submits the form.
+
+#### Purposes
+
+- **To submit forms with an image button** (legacy, decorative).
+
+#### Syntax Rules and Structure
+
+```html
+<input type="image" src="submit.png" alt="Submit" width="120" height="32">
+```
+
+**Constraints**: `alt` and `src` are required; coordinates are submitted as `<name>.x` and `<name>.y` if `name` is set.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>image</title></head>
+<body>
+  <form action="/search" method="get">
+    <input name="q" value="test">
+    <input type="image" src="go.png" alt="Submit search" name="go" width="40" height="40">
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: Clicking the image submits to `/search?q=test&go.x=20&go.y=10` (coordinates vary).
+
+**Why this output occurs**: Image buttons add click coordinates to the submission when named.
+
+#### Real-World Cases
+
+- Legacy image submit buttons; custom-branded buttons (prefer CSS-styled `<button>` now).
+
+#### References
+
+- MDN Web Docs — `<input type="image">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/image
+
+---
+
+### 2.22 `search`
+
+#### Definitions
+
+**Core Definition**
+The `search` type is a text field semantically intended for search queries.
+
+**Technical Definition**
+The *search* state shares behaviour with `text`, but exposes additional UI (e.g. clear button in Safari) and has the semantic role `searchbox`. It supports `list`, `maxlength`, `minlength`, `pattern`, `placeholder`, `readonly`, `required`, `size`.
+
+**Beginner-Friendly Explanation**
+A text box for searching, often with an X button to clear it.
+
+#### Purposes
+
+- **To mark fields as search queries** for accessibility and UA UI.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="search" name="q" placeholder="Search…">
+```
+
+**Constraints**: Fallback is text where unsupported; form must still be GET for shareable results.
+
+#### Annotated Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>search</title></head>
+<body>
+  <form action="/search" method="get">
+    <label for="q">Search</label>
+    <input id="q" type="search" name="q" placeholder="Type keywords">
+    <button>Search</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: A search-style field; submitting yields `?q=…`.
+
+**Why this output occurs**: The search state provides UI hints and shares text-submission semantics.
+
+#### Real-World Cases
+
+- Site search, filters, admin tables.
+
+#### References
+
+- MDN Web Docs — `<input type="search">` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/search
+
+---
+
+## 3. Input Attributes
+
+Each attribute below follows the same uniform structure. Attributes apply only to specific types unless noted.
+
+---
+
+### 3.1 `type`
+
+#### Definitions
+
+**Core Definition**
+`type` selects the input state, determining UI, value semantics, and applicable attributes.
+
+**Technical Definition**
+Enumerated attribute with keywords matching the 22 standard input states; unknown keywords fall back to `text` (the *invalid value default*).
+
+**Beginner-Friendly Explanation**
+It decides what kind of input box it is.
+
+#### Purposes
+
+- **To select the input's behaviour**.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="email">
+```
+
+**Constraints**: Certain attributes only apply to certain types; type-specific value sanitisation runs on each value change.
+
+#### Annotated Example
+
+```html
+<input type="email" name="email" required>
+```
+
+**Expected output**: Email keyboard on mobile, format validation on submit.
+
+**Why this output occurs**: The `email` state applies email validation and mobile hints.
+
+#### Real-World Cases
+
+- Everywhere; `type` is the primary discriminator.
+
+#### References
+
+- MDN Web Docs — `type` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#type
+
+---
+
+### 3.2 `name`
+
+#### Definitions
+
+**Core Definition**
+`name` is the key under which the input's value is submitted.
+
+**Technical Definition**
+Content attribute reflected to `HTMLInputElement.name`. Only named, successful controls contribute to the entry list. Radio groups share `name`.
+
+**Beginner-Friendly Explanation**
+The label on the answer so the server knows what it is.
+
+#### Purposes
+
+- **To identify the value on submission**.
+- **To group radios** by shared name.
+
+#### Syntax Rules and Structure
+
+```html
+<input name="email" type="email">
+```
+
+**Constraints**: Unnamed inputs never submit; duplicate names for non-radio inputs can be valid but ambiguous.
+
+#### Annotated Example
+
+```html
+<input type="text" name="first_name" value="Ada">
+```
+
+**Expected output**: Submits `first_name=Ada`.
+
+**Why this output occurs**: The `name` provides the key.
+
+#### Real-World Cases
+
+- Every form control in production.
+
+#### References
+
+- MDN Web Docs — `name` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#name
+
+---
+
+### 3.3 `value`
+
+#### Definitions
+
+**Core Definition**
+`value` is the control's current/default value as a string.
+
+**Technical Definition**
+Content attribute reflected to `HTMLInputElement.value` as the *default value*, but the live *value* is the IDL property's current value (dirty value flag). For non-text types (number, date, etc.) the content attribute provides a default that is parsed/sanitised against the type's grammar.
+
+**Beginner-Friendly Explanation**
+The starting text inside the field.
+
+#### Purposes
+
+- **To prefill controls**.
+- **To set button labels** (submit/reset/button).
+
+#### Syntax Rules and Structure
+
+```html
+<input type="text" value="Hello">
+<input type="submit" value="Save">
+```
+
+**Constraints**: Programmatically setting `value` does not update the `value` attribute (and vice versa); use `defaultValue`/`value` to control separately.
+
+#### Annotated Example
+
+```html
+<input type="text" name="city" value="Manila">
+```
+
+**Expected output**: Field starts with "Manila".
+
+**Why this output occurs**: The content attribute seeds the initial value.
+
+#### Real-World Cases
+
+- Edit forms pre-populated with server data.
+
+#### References
+
+- MDN Web Docs — `value` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#value
+
+---
+
+### 3.4 `placeholder`
+
+#### Definitions
+
+**Core Definition**
+`placeholder` is a hint shown inside the field when empty.
+
+**Technical Definition**
+Content attribute applicable to text-like types; not a label and not a substitute for one. It is not announced reliably on all ATs and is not used by validation.
+
+**Beginner-Friendly Explanation**
+Faint grey example text inside an empty box.
+
+#### Purposes
+
+- **To give a formatting hint**.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="email" placeholder="you@example.com">
+```
+
+**Constraints**: Do not rely on it for labelling; it disappears on typing; screenshots/autofill may show it.
+
+#### Annotated Example
+
+```html
+<input type="tel" name="phone" placeholder="+1 (555) 123-4567">
+```
+
+**Expected output**: Hint appears; typing clears it.
+
+**Why this output occurs**: Placeholder is a presentation aid only.
+
+#### Real-World Cases
+
+- Search boxes, format hints (never the only label).
+
+#### References
+
+- MDN Web Docs — `placeholder` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#placeholder
+
+---
+
+### 3.5 `required`
+
+#### Definitions
+
+**Core Definition**
+`required` marks a control as mandatory.
+
+**Technical Definition**
+Boolean constraint attribute. For text-like types, the value must be non-empty; for checkbox, it must be checked; for radio, at least one in the same-named group must be checked. It participates in constraint validation before submission (unless novalidate/formnovalidate).
+
+**Beginner-Friendly Explanation**
+Makes the field compulsory.
+
+#### Purposes
+
+- **To enforce mandatory data**.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="text" name="username" required>
+```
+
+**Constraints**: Client-side only; must be re-checked on the server.
+
+#### Annotated Example
+
+```html
+<input type="email" name="email" required>
+```
+
+**Expected output**: Submitting empty triggers the browser's "please fill out" bubble.
+
+**Why this output occurs**: `required` sets a *valueMissing* validity state.
+
+#### Real-World Cases
+
+- Sign-up fields, T&C acceptance, mandatory survey answers.
+
+#### References
+
+- MDN Web Docs — `required` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/required
+
+---
+
+### 3.6 `disabled`
+
+#### Definitions
+
+**Core Definition**
+`disabled` makes a control non-interactive, unfocusable, and non-submitting.
+
+**Technical Definition**
+Boolean attribute; sets `disabled` IDL. Disabled controls are barred from constraint validation and from the submission entry list. They are still rendered (usually greyed out).
+
+**Beginner-Friendly Explanation**
+Greys out a field and stops it from being used or sent.
+
+#### Purposes
+
+- **To reflect an unavailable state** (e.g. plan limitations).
+
+#### Syntax Rules and Structure
+
+```html
+<input type="text" name="coupon" disabled>
+```
+
+**Constraints**: Its value is *never* submitted; if you need the value, use `readonly` instead.
+
+#### Annotated Example
+
+```html
+<label>Coupon <input name="coupon" value="SAVE10" disabled></label>
+```
+
+**Expected output**: Field is greyed out; no `coupon` entry on submit.
+
+**Why this output occurs**: Disabled controls are not successful.
+
+#### Real-World Cases
+
+- Temporarily unavailable options, plan-gated features.
+
+#### References
+
+- MDN Web Docs — `disabled` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/disabled
+
+---
+
+### 3.7 `readonly`
+
+#### Definitions
+
+**Core Definition**
+`readonly` makes a control's value non-editable by the user but still submitted and focusable.
+
+**Technical Definition**
+Boolean attribute applicable to text-like types (not checkbox/radio/file/buttons). A read-only control's value participates in constraint validation (except `required`, which is ignored for read-only). The user can still focus and select, and it is submitted normally.
+
+**Beginner-Friendly Explanation**
+A locked field you can read but not change; its value still goes to the server.
+
+#### Purposes
+
+- **To display a value the user shouldn't edit** while still submitting it.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="text" name="account_id" value="A-42" readonly>
+```
+
+**Constraints**: Not supported on checkbox, radio, file, range, colour, or button-like types; `required` has no effect.
+
+#### Annotated Example
+
+```html
+<input name="order_no" value="SO-2025-0001" readonly>
+```
+
+**Expected output**: Field is selectable but not editable; submits `order_no=SO-2025-0001`.
+
+**Why this output occurs**: The value is preserved and included in the entry list.
+
+#### Real-World Cases
+
+- Auto-generated IDs, pre-filled but fixed values.
+
+#### References
+
+- MDN Web Docs — `readonly` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/readonly
+
+---
+
+### 3.8 `autocomplete`
+
+#### Definitions
+
+**Core Definition**
+`autocomplete` hints whether the UA may auto-fill a field and with what kind of data.
+
+**Technical Definition**
+Enumerated attribute. Values include `on`/`off` and standard tokens like `email`, `name`, `tel`, `street-address`, `cc-number`, `current-password`, `new-password`, `one-time-code`. Browsers may ignore `off` for password fields.
+
+**Beginner-Friendly Explanation**
+Tells the browser whether to help fill this field, and with what kind of saved info.
+
+#### Purposes
+
+- **To improve autofill reliability** with tokens.
+- **To disable autofill for sensitive/non-standard fields**.
+
+#### Syntax Rules and Structure
+
+```html
+<input type="email" autocomplete="email">
+<input type="password" autocomplete="new-password">
+```
+
+**Constraints**: Tokens must be spelled correctly to be useful; `off` is a hint, not a guarantee.
+
+#### Annotated Example
+
+```html
+<input type="text" name="city" autocomplete="address-level2">
+```
+
+**Expected output**: Password managers and browser profiles offer the city value.
+
+**Why this output occurs**: Recognised tokens map to fields in the user's profile.
+
+#### Real-World Cases
+
+- Login/registration, checkout, address forms.
+
+#### References
+
+- MDN Web Docs — `autocomplete` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete
+- WHATWG — Autofill — https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill
+
+---
+
+### 3.9 `autofocus`
+
+#### Definitions
+
+**Core Definition**
+`autofocus` makes an element receive focus when the page loads.
+
+**Technical Definition**
+Boolean attribute. Only one element per document should be autofocused; UAs may refuse (e.g. on mobile to avoid keyboard popup). Not applicable to `hidden` or `disabled` controls.
+
+**Beginner-Friendly Explanation**
+Puts the cursor in the field automatically when the page opens.
+
+#### Purposes
+
+- **To speed up single-field flows** (search, login).
+
+#### Syntax Rules and Structure
+
+```html
+<input type="search" name="q" autofocus>
+```
+
+**Constraints**: Avoid when there are multiple interactive tasks; accessibility guidance advises against autofocus for users with cognitive disabilities.
+
+#### Annotated Example
 
 ```html
 <form action="/search" method="get">
-    <label for="search">Search:</label>
-    <input type="search" id="search" name="q" placeholder="Search products...">
-    <button type="submit">Go</button>
+  <input type="search" name="q" autofocus>
+  <button>Search</button>
 </form>
 ```
 
-**Expected Output**
+**Expected output**: The search field is focused on load; typing goes straight in.
 
-A search field with placeholder text. Submitting navigates to `/search?q=...`.
-
-**Why This Output Occurs**
-
-The `search` type signals to the browser that this is a search field, enabling search-specific UI and mobile keyboards.
+**Why this output occurs**: The UA focuses the autofocused control once the document loads.
 
 #### Real-World Cases
 
-- **Site search** – Product or content search
-- **Documentation** – API or guide search
-- **E-commerce** – Catalogue search
+- Search pages, single-input login pages.
+
+#### References
+
+- MDN Web Docs — `autofocus` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autofocus
 
 ---
 
-### 6. URL Input (`type="url"`)
+### 3.10 `multiple`
 
 #### Definitions
 
 **Core Definition**
-
-A text input that validates the value as an absolute URL.
+`multiple` allows more than one value in an input.
 
 **Technical Definition**
-
-The `url` type creates a text field that validates the value as an absolute URL (must include a scheme like `https://`). It triggers a URL-optimised keyboard on mobile.
+Boolean attribute applicable to `email`, `file`, and `select`. In `email`, comma-separated lists are accepted; in `file`, several files may be selected; in `<select>`, several options.
 
 **Beginner-Friendly Explanation**
-
-A text box for web addresses. The browser checks that what you type looks like a valid URL.
+Lets the field hold several values at once.
 
 #### Purposes
 
-- To collect website addresses with validation
-- To trigger URL-optimised mobile keyboards
-- To ensure values include a scheme
+- **To collect multiple files, emails, or options**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="url" name="website" id="website" placeholder="https://example.com">
+<input type="file" name="docs" multiple>
+<input type="email" name="cc" multiple>
 ```
 
-#### Annotated Code Example
+**Constraints**: Not supported on checkbox/radio/text/number.
+
+#### Annotated Example
 
 ```html
-<label for="website">Your Website:</label>
-<input type="url" id="website" name="website"
-       placeholder="https://example.com" required>
+<input type="file" name="photos" accept="image/*" multiple>
 ```
 
-**Expected Output**
+**Expected output**: The file picker permits selecting several photos; the `files` list contains all of them.
 
-A text field that validates URL format. Invalid URLs (e.g., “example”) trigger a browser error.
-
-**Why This Output Occurs**
-
-The `url` type requires an absolute URL with a scheme.
+**Why this output occurs**: `multiple` opens a multi-selection picker.
 
 #### Real-World Cases
 
-- **Profile forms** – Personal website
-- **Business listings** – Company URL
-- **Portfolio submissions** – Project links
+- Media uploads, bulk email entry, filter selections.
+
+#### References
+
+- MDN Web Docs — `multiple` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/multiple
 
 ---
 
-### 7. Telephone Input (`type="tel"`)
+### 3.11 `accept`
 
 #### Definitions
 
 **Core Definition**
-
-A text input semantically intended for telephone numbers.
+`accept` hints which file types are valid for a file input.
 
 **Technical Definition**
-
-The `tel` type creates a text field for telephone numbers. It does not perform format validation (telephone formats vary globally) but triggers a telephone-optimised keyboard on mobile. Use `pattern` for format validation.
+Attribute applicable to `<input type="file">`; value is a comma-separated list of unique file type specifiers (MIME types, extensions like `.pdf`, or `audio/*`). It is a *hint* to the picker, not a security filter.
 
 **Beginner-Friendly Explanation**
-
-A text box for phone numbers. It doesn‘t validate the format because phone numbers vary by country, but it shows a number keyboard on mobile.
+Tells the file picker which types of files to show.
 
 #### Purposes
 
-- To collect telephone numbers
-- To trigger telephone-optimised mobile keyboards
-- To semantically identify phone fields
+- **To filter the file picker** by type.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="tel" name="phone" id="phone" pattern="[0-9\-\+\s\(\)]{7,20}">
+<input type="file" name="avatar" accept="image/png, image/jpeg">
 ```
 
-#### Annotated Code Example
+**Constraints**: Easily bypassed by renaming files or using drag-and-drop; always validate server-side.
+
+#### Annotated Example
 
 ```html
-<label for="phone">Phone Number:</label>
-<input type="tel" id="phone" name="phone"
-       placeholder="+1 (555) 123-4567"
-       pattern="[0-9\-\+\s\(\)]{7,20}">
+<input type="file" name="cv" accept=".pdf,.doc,.docx">
 ```
 
-**Expected Output**
+**Expected output**: The picker shows PDFs and Word documents by default.
 
-A text field that accepts phone numbers. On mobile, a numeric keypad appears.
-
-**Why This Output Occurs**
-
-The `tel` type triggers a telephone keyboard. The `pattern` attribute enforces a basic format.
+**Why this output occurs**: Browsers translate specifiers into picker filters.
 
 #### Real-World Cases
 
-- **Contact forms** – Phone number collection
-- **Checkout** – Billing phone
-- **Appointment booking** – Contact number
+- Upload flows for images, PDFs, documents.
+
+#### References
+
+- MDN Web Docs — `accept` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/accept
 
 ---
 
-### 8. Number Input (`type="number"`)
+### 3.12 `min`
 
 #### Definitions
 
 **Core Definition**
-
-A numeric input with spinner controls and optional range constraints.
+`min` specifies the minimum acceptable value for numeric/date/time/range types.
 
 **Technical Definition**
-
-The `number` type creates a field for entering a number. It supports `min`, `max`, and `step` attributes. Browsers render spinner buttons. On mobile, a numeric keyboard appears.
+Attribute interpreted according to the type: number → smallest float; date/time → smallest timestamp; range → lower bound. Participates in the *rangeUnderflow* validity check.
 
 **Beginner-Friendly Explanation**
-
-A text box for numbers with up/down arrows. You can set a minimum, maximum, and step value.
+The lowest value allowed.
 
 #### Purposes
 
-- To collect numeric values with validation
-- To provide spinner controls for incrementing/decrementing
-- To constrain values to a range
+- **To enforce a lower bound**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="number" name="quantity" id="quantity"
-       min="1" max="100" step="1" value="1">
+<input type="number" min="0">
+<input type="date" min="2025-01-01">
 ```
 
-**Constraints and Limitations**
+**Constraints**: Ignored for text/email/etc.
 
-- Not suitable for credit card numbers or phone numbers (use `text` with `inputmode="numeric"`)
-
-#### Annotated Code Example
+#### Annotated Example
 
 ```html
-<label for="quantity">Quantity:</label>
-<input type="number" id="quantity" name="quantity"
-       min="1" max="10" step="1" value="1" required>
+<input type="number" name="qty" min="1" value="1">
 ```
 
-**Expected Output**
+**Expected output**: Setting 0 triggers rangeUnderflow.
 
-A numeric field with spinner arrows, constrained between 1 and 10.
-
-**Why This Output Occurs**
-
-The `min`, `max`, and `step` attributes constrain the value. The browser provides spinner controls.
+**Why this output occurs**: Value < min invalidates.
 
 #### Real-World Cases
 
-- **E-commerce** – Quantity selection
-- **Booking** – Number of guests
-- **Surveys** – Age or rating input
+- Quantities, dates in the future, price ranges.
+
+#### References
+
+- MDN Web Docs — `min` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/min
 
 ---
 
-### 9. Range Input (`type="range"`)
+### 3.13 `max`
 
 #### Definitions
 
 **Core Definition**
-
-A slider control for selecting a numeric value within a range.
+`max` specifies the maximum acceptable value for numeric/date/time/range types.
 
 **Technical Definition**
-
-The `range` type creates a slider. It supports `min`, `max`, `step`, and `value`. The exact value is not shown to the user by default (use `<output>` or JavaScript to display it). It is ideal for imprecise numeric input.
+Attribute interpreted according to the type; participates in *rangeOverflow*.
 
 **Beginner-Friendly Explanation**
-
-A slider you drag left or right to pick a number. Good for things like volume or price filters.
+The highest value allowed.
 
 #### Purposes
 
-- To provide a visual, imprecise numeric selector
-- To improve UX for bounded numeric input
-- To enable touch-friendly value selection
+- **To enforce an upper bound**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="range" name="volume" id="volume"
-       min="0" max="100" step="10" value="50">
+<input type="number" max="999">
 ```
 
-#### Annotated Code Example
+**Constraints**: Ignored for non-applicable types.
+
+#### Annotated Example
 
 ```html
-<label for="volume">Volume:</label>
-<input type="range" id="volume" name="volume"
-       min="0" max="100" step="10" value="50"
-       oninput="document.getElementById('vol-out').value = this.value">
-<output id="vol-out">50</output>
+<input type="date" name="dob" max="2025-12-31">
 ```
 
-**Expected Output**
+**Expected output**: Selecting a later date invalidates.
 
-A slider with a value display that updates as you drag.
-
-**Why This Output Occurs**
-
-The `range` type renders a slider. The `oninput` handler updates the `<output>` element.
+**Why this output occurs**: Value > max fails rangeOverflow.
 
 #### Real-World Cases
 
-- **Media players** – Volume control
-- **E-commerce** – Price range filters
-- **Settings** – Brightness or zoom sliders
+- Age, quantity limits, booking windows.
+
+#### References
+
+- MDN Web Docs — `max` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/max
 
 ---
 
-### 10. Color Input (`type="color"`)
+### 3.14 `step`
 
 #### Definitions
 
 **Core Definition**
-
-A colour picker control that returns a hexadecimal colour value.
+`step` specifies the granularity of numeric/date/time values.
 
 **Technical Definition**
-
-The `color` type creates a control that opens the browser‘s native colour picker. The value is always a 7-character hexadecimal string (e.g., `#ff0000`). The default value is `#000000` if none is specified.
+Attribute applicable to number, range, date, time, datetime-local, month, week. Value is either a positive float or the keyword `any`. It participates in the *stepMismatch* validation.
 
 **Beginner-Friendly Explanation**
-
-A button that opens a colour picker. The value is a hex colour code.
+The allowed increment (e.g. multiples of 5 minutes).
 
 #### Purposes
 
-- To let users pick colours visually
-- To collect colour preferences
-- To enable theme customisation
+- **To constrain values to a grid**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="color" name="theme" id="theme" value="#0066cc">
+<input type="number" step="0.01">
+<input type="time" step="900"> <!-- 15 minutes -->
 ```
 
-#### Annotated Code Example
+**Constraints**: `step="any"` disables the check but you may also want to handle precision manually.
+
+#### Annotated Example
 
 ```html
-<label for="theme">Choose a theme colour:</label>
-<input type="color" id="theme" name="theme" value="#4a6cf7">
+<input type="number" name="price" min="0" step="0.01">
 ```
 
-**Expected Output**
+**Expected output**: 10.005 triggers stepMismatch; 10.01 does not.
 
-A colour swatch button. Clicking it opens the native colour picker.
-
-**Why This Output Occurs**
-
-The `color` type triggers the browser‘s colour picker.
+**Why this output occurs**: Value must be min + n × step.
 
 #### Real-World Cases
 
-- **Profile customisation** – Avatar or theme colours
-- **Design tools** – Colour palette selection
-- **Form builders** – Colour settings
+- Currency (0.01), time slots (900 s), quantities (1).
+
+#### References
+
+- MDN Web Docs — `step` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/step
 
 ---
 
-### 11. Date Input (`type="date"`)
+### 3.15 `pattern`
 
 #### Definitions
 
 **Core Definition**
-
-A date picker control for selecting a calendar date.
+`pattern` is a regular expression the entire value must match.
 
 **Technical Definition**
-
-The `date` type creates a control for entering a date (year, month, day). The value is in `YYYY-MM-DD` format. Browsers provide a date picker UI. It supports `min`, `max`, and `step` (in days).
+Attribute applicable to text, search, url, tel, email, password. Regex compiled with `v` flag (or `u` in some UAs); implicit anchoring (^…$). Participates in *patternMismatch*.
 
 **Beginner-Friendly Explanation**
-
-A date picker. The browser shows a calendar, and the value is a date like “2026-09-27.”
+A rule describing what the text must look like.
 
 #### Purposes
 
-- To collect dates with a picker UI
-- To validate date ranges
-- To provide mobile-optimised date entry
+- **To enforce a format**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="date" name="birthdate" id="birthdate"
-       min="1900-01-01" max="2026-12-31">
+<input type="text" name="zip" pattern="\d{5}(-\d{4})?" title="5 or 9-digit ZIP">
 ```
 
-#### Annotated Code Example
+**Constraints**: Provide a `title` describing the rule; unsupported lookarounds in some engines; not a substitute for server validation.
+
+#### Annotated Example
 
 ```html
-<label for="start">Start Date:</label>
-<input type="date" id="start" name="start"
-       min="2026-01-01" max="2026-12-31" required>
+<input type="text" name="username" pattern="[A-Za-z0-9_]{3,16}" required>
 ```
 
-**Expected Output**
+**Expected output**: "ab!" fails; "ada_42" passes.
 
-A date field with a calendar picker, constrained to 2026.
-
-**Why This Output Occurs**
-
-The `date` type renders a date picker. The `min` and `max` attributes restrict the range.
+**Why this output occurs**: The regex tests the whole value.
 
 #### Real-World Cases
 
-- **Booking systems** – Check-in dates
-- **Forms** – Date of birth
-- **Reports** – Reporting period selection
+- Usernames, ZIP/postal codes, coupon codes.
+
+#### References
+
+- MDN Web Docs — `pattern` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/pattern
 
 ---
 
-### 12. Time Input (`type="time"`)
+### 3.16 `minlength`
 
 #### Definitions
 
 **Core Definition**
-
-A time picker control for selecting a time of day.
+`minlength` requires the value to be at least N characters.
 
 **Technical Definition**
-
-The `time` type creates a control for entering a time (hours, minutes, optionally seconds). The value is in `HH:MM` or `HH:MM:SS` format. It supports `min`, `max`, and `step` (in seconds).
+Applies to text-like types. Participates in *tooShort*. Ignored when the value is empty (use `required` for that). Measured in UTF-16 code units.
 
 **Beginner-Friendly Explanation**
-
-A time picker. The browser shows a clock, and the value is like “14:30.”
+The field must have at least N characters.
 
 #### Purposes
 
-- To collect times with a picker UI
-- To validate time ranges
-- To provide mobile-optimised time entry
+- **To enforce a lower bound on length**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="time" name="appointment" id="appointment"
-       min="09:00" max="17:00" step="900">
+<input type="text" name="bio" minlength="10">
 ```
 
-#### Annotated Code Example
+**Constraints**: Values with emoji may count in code units; pair with `required` for "non-empty".
+
+#### Annotated Example
 
 ```html
-<label for="meeting">Meeting Time:</label>
-<input type="time" id="meeting" name="meeting"
-       min="09:00" max="17:00" required>
+<input type="password" minlength="8">
 ```
 
-**Expected Output**
+**Expected output**: 7 characters fails; 8 passes.
 
-A time picker constrained to 9 AM – 5 PM.
-
-**Why This Output Occurs**
-
-The `time` type renders a time picker. The `min` and `max` attributes restrict the range.
+**Why this output occurs**: tooShort triggers under the minimum.
 
 #### Real-World Cases
 
-- **Scheduling** – Appointment times
-- **Booking** – Reservation times
-- **Forms** – Preferred contact times
+- Password minimums, bio minimums.
+
+#### References
+
+- MDN Web Docs — `minlength` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/minlength
 
 ---
 
-### 13. Datetime-Local Input (`type="datetime-local"`)
+### 3.17 `maxlength`
 
 #### Definitions
 
 **Core Definition**
-
-A control for selecting both a date and a time, without timezone information.
+`maxlength` limits the value to at most N characters.
 
 **Technical Definition**
-
-The `datetime-local` type creates a control for entering a date and time (year, month, day, hours, minutes). The value is in `YYYY-MM-DDTHH:MM` format. It supports `min`, `max`, and `step`.
+Applies to text-like types; participates in *tooLong*; the UA generally prevents further input beyond the limit.
 
 **Beginner-Friendly Explanation**
-
-A picker that lets you choose both a date and a time. Useful for scheduling.
+The field can hold at most N characters.
 
 #### Purposes
 
-- To collect date-and-time combinations
-- To schedule events or appointments
-- To provide a combined picker UI
+- **To enforce an upper bound on length**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="datetime-local" name="event" id="event"
-       min="2026-01-01T00:00" max="2026-12-31T23:59">
+<input type="text" name="tweet" maxlength="280">
 ```
 
-#### Annotated Code Example
+**Constraints**: Measured in code units (counts emoji as multiple).
+
+#### Annotated Example
 
 ```html
-<label for="appointment">Appointment:</label>
-<input type="datetime-local" id="appointment" name="appointment"
-       min="2026-09-27T09:00" max="2026-09-27T17:00" required>
+<input type="text" name="nickname" maxlength="20">
 ```
 
-**Expected Output**
+**Expected output**: You cannot type more than 20 characters.
 
-A combined date-and-time picker.
-
-**Why This Output Occurs**
-
-The `datetime-local` type renders a date picker and a time picker together.
+**Why this output occurs**: The UA blocks further input and validates tooLong.
 
 #### Real-World Cases
 
-- **Event scheduling** – Meeting or event times
-- **Booking systems** – Appointment selection
-- **Reminders** – Date and time for reminders
+- Title limits, tweet-like limits, fixed-format fields.
+
+#### References
+
+- MDN Web Docs — `maxlength` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/maxlength
 
 ---
 
-### 14. Month Input (`type="month"`)
+### 3.18 `size`
 
 #### Definitions
 
 **Core Definition**
-
-A control for selecting a month and year.
+`size` sets the visual width of a text input in “characters”.
 
 **Technical Definition**
-
-The `month` type creates a control for entering a month and year. The value is in `YYYY-MM` format. It supports `min`, `max`, and `step`.
+Positive integer; affects CSS width in character units (typically ~1ch * size). Does not impose a length limit; use `minlength`/`maxlength` for that.
 
 **Beginner-Friendly Explanation**
-
-A picker for a month and year. Useful for things like credit card expiration dates.
+Roughly how wide the box appears.
 
 #### Purposes
 
-- To collect month-and-year values
-- To provide a picker for monthly data
-- To validate month ranges
+- **To control the field's visible width**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="month" name="expiry" id="expiry" min="2026-01" max="2036-12">
+<input type="text" name="code" size="10">
 ```
 
-#### Annotated Code Example
+**Constraints**: Presentation only; CSS `width` overrides it.
+
+#### Annotated Example
 
 ```html
-<label for="expiry">Card Expiry:</label>
-<input type="month" id="expiry" name="expiry"
-       min="2026-01" max="2036-12" required>
+<input type="text" name="zip" size="6">
 ```
 
-**Expected Output**
+**Expected output**: A short text box fitting about 6 characters.
 
-A month-and-year picker.
-
-**Why This Output Occurs**
-
-The `month` type renders a month picker.
+**Why this output occurs**: The UA sizes the field accordingly.
 
 #### Real-World Cases
 
-- **Payment forms** – Card expiry
-- **Reports** – Monthly reporting periods
-- **Subscriptions** – Billing month
+- Compact fields (ZIP, CVV), longer fields (address).
+
+#### References
+
+- MDN Web Docs — `size` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/size
 
 ---
 
-### 15. Week Input (`type="week"`)
+### 3.19 `list`
 
 #### Definitions
 
 **Core Definition**
-
-A control for selecting a week and year.
+`list` associates an input with a `<datalist>` providing suggested values.
 
 **Technical Definition**
-
-The `week` type creates a control for entering a week number and year. The value is in `YYYY-Www` format (e.g., `2026-W39`). It supports `min`, `max`, and `step`.
+References a `<datalist>` by id. Supported on text, search, url, tel, email, date, month, week, time, datetime-local, number, range, colour. Suggestions appear in a dropdown; the user may still type free-form values (except on range/colour, where the datalist renders tickmarks).
 
 **Beginner-Friendly Explanation**
-
-A picker for a week of the year. Less common but useful for weekly planning.
+A dropdown of suggestions the user can pick from or ignore.
 
 #### Purposes
 
-- To collect week-and-year values
-- To provide a picker for weekly data
-- To validate week ranges
+- **To provide autocompletion suggestions** without restricting values.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="week" name="week" id="week" min="2026-W01" max="2026-W52">
+<input list="fruits" name="fruit">
+<datalist id="fruits">
+  <option value="Apple">
+  <option value="Banana">
+</datalist>
 ```
 
-#### Annotated Code Example
+**Constraints**: Suggestions only; enforce validity separately.
+
+#### Annotated Example
 
 ```html
-<label for="week">Select Week:</label>
-<input type="week" id="week" name="week" required>
+<label for="browser">Browser</label>
+<input id="browser" name="browser" list="browsers">
+<datalist id="browsers">
+  <option value="Chrome">
+  <option value="Firefox">
+  <option value="Safari">
+</datalist>
 ```
 
-**Expected Output**
+**Expected output**: Typing shows Chrome/Firefox/Safari; the user can still enter others.
 
-A week-and-year picker.
-
-**Why This Output Occurs**
-
-The `week` type renders a week picker.
+**Why this output occurs**: The UA uses the datalist as a suggestion source.
 
 #### Real-World Cases
 
-- **Project planning** – Weekly sprints
-- **Timesheets** – Weekly reporting
-- **Scheduling** – Week selection
+- Country/city pickers, tag input, browser choice.
+
+#### References
+
+- MDN Web Docs — `list` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#list
+- MDN Web Docs — `<datalist>` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/datalist
 
 ---
 
-### 16. Checkbox Input (`type="checkbox"`)
+### 3.20 `form`
 
 #### Definitions
 
 **Core Definition**
-
-A toggle control that allows zero or more selections from a set of options.
+`form` associates an input with a form by its `id`, even if the input is outside that form in the DOM.
 
 **Technical Definition**
-
-The `checkbox` type creates a toggle that can be checked or unchecked. Multiple checkboxes can be selected independently. The `value` attribute defines what is submitted when checked. The `checked` attribute sets the initial state. The `indeterminate` property can be set via JavaScript for a third state.
+Attribute holding the id of a form element. If present, the input's form owner becomes that form. Enables controls outside a `<form>` (e.g. after a table, in a portal) to participate in submission.
 
 **Beginner-Friendly Explanation**
-
-A small box you click to check or uncheck. You can select multiple checkboxes at once. Good for “choose all that apply” questions.
+Links a field to a form even if it's not inside it.
 
 #### Purposes
 
-- To allow multiple independent selections
-- To toggle options on and off
-- To collect multiple values under one name
+- **To decouple placement from association** (e.g. toolbar outside a table).
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="checkbox" name="interests" value="coding" id="coding" checked>
-<label for="coding">Coding</label>
+<input form="myform" name="x">
+<form id="myform">…</form>
 ```
 
-**Constraints and Limitations**
+**Constraints**: The referenced form must exist; otherwise, the input has no owner.
 
-- Only the checked checkboxes‘ values are submitted
-- The `value` attribute is required for meaningful submission
-
-#### Annotated Code Example
+#### Annotated Example
 
 ```html
-<fieldset>
-    <legend>Interests:</legend>
-    <input type="checkbox" id="coding" name="interests" value="coding" checked>
-    <label for="coding">Coding</label>
-
-    <input type="checkbox" id="design" name="interests" value="design">
-    <label for="design">Design</label>
-</fieldset>
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>form attr</title></head>
+<body>
+  <input type="text" name="coupon" form="checkout">
+  <form id="checkout" action="/pay" method="post">
+    <input name="total" value="10">
+    <button>Pay</button>
+  </form>
+</body>
+</html>
 ```
 
-**Expected Output**
+**Expected output**: Submitting includes `coupon` even though it’s outside the form.
 
-Two checkboxes, one pre-checked. Submitting sends `interests=coding`.
-
-**Why This Output Occurs**
-
-The `checked` attribute pre-selects the first checkbox. Only checked values are submitted.
+**Why this output occurs**: `form="checkout"` gives the input that form owner.
 
 #### Real-World Cases
 
-- **Signup forms** – Newsletter preferences
-- **Surveys** – Multiple-choice questions
-- **Settings** – Feature toggles
+- Toolbars above wide tables; portal-rendered inputs.
+
+#### References
+
+- MDN Web Docs — `form` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/form
 
 ---
 
-### 17. Radio Input (`type="radio"`)
+### 3.21 `formaction`
 
 #### Definitions
 
 **Core Definition**
-
-A selection control that allows exactly one choice from a set of options.
+`formaction` overrides the form's `action` for a specific submit button.
 
 **Technical Definition**
-
-The `radio` type creates a radio button. Radio buttons with the same `name` attribute form a group, and only one can be selected at a time. The `value` attribute defines what is submitted when selected. The `checked` attribute sets the initial selection.
+Applicable to submit-capable controls (`submit`, `image`). Content attribute whose value is a URL, overriding `form.action` for that submission.
 
 **Beginner-Friendly Explanation**
-
-A round button you click to select one option from a group. You can only pick one.
+Lets one submit button send to a different URL.
 
 #### Purposes
 
-- To allow exactly one selection from a group
-- To present mutually exclusive options
-- To collect a single value from a set
+- **To offer alternative destinations** from one form.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="radio" name="gender" value="female" id="female" checked>
-<label for="female">Female</label>
+<input type="submit" value="Save draft" formaction="/drafts" formnovalidate>
+<input type="submit" value="Publish" formaction="/publish">
 ```
 
-**Constraints and Limitations**
+**Constraints**: Applies only to submit-capable controls.
 
-- Radio buttons with the same `name` must have different `value` attributes
-- No radio button in a group can be pre-selected if none has `checked`
-
-#### Annotated Code Example
+#### Annotated Example
 
 ```html
-<fieldset>
-    <legend>Gender:</legend>
-    <input type="radio" id="female" name="gender" value="female" checked>
-    <label for="female">Female</label>
-
-    <input type="radio" id="male" name="gender" value="male">
-    <label for="male">Male</label>
-
-    <input type="radio" id="other" name="gender" value="other">
-    <label for="other">Other</label>
-</fieldset>
-```
-
-**Expected Output**
-
-Three radio buttons, one pre-selected. Selecting another deselects the first.
-
-**Why This Output Occurs**
-
-All three share the same `name`, making them a group. The `checked` attribute pre-selects “Female.”
-
-#### Real-World Cases
-
-- **Forms** – Gender, title, or salutation
-- **Surveys** – Single-choice questions
-- **Checkout** – Shipping method
-
----
-
-### 18. File Input (`type="file"`)
-
-#### Definitions
-
-**Core Definition**
-
-A control for selecting files from the user‘s device for upload.
-
-**Technical Definition**
-
-The `file` type creates a control that allows the user to select one or more files. It requires the form to use `enctype="multipart/form-data"` for submission. The `accept` attribute filters file types. The `multiple` attribute allows multiple file selection. The `capture` attribute specifies the camera to use on mobile.
-
-**Beginner-Friendly Explanation**
-
-A button that opens your device‘s file picker. Use it to upload documents, images, or other files.
-
-#### Purposes
-
-- To upload files to a server
-- To filter selectable file types
-- To allow multiple file selection
-
-#### Syntax Rules and Structure
-
-```html
-<form enctype="multipart/form-data" method="post">
-    <input type="file" name="avatar" id="avatar" accept="image/*">
+<form action="/default" method="post">
+  <input name="title">
+  <input type="submit" value="Save" formaction="/save">
+  <input type="submit" value="Preview" formaction="/preview">
 </form>
 ```
 
-**Constraints and Limitations**
+**Expected output**: "Save" posts to `/save`; "Preview" to `/preview`.
 
-- Requires `enctype="multipart/form-data"`
-- The `value` cannot be set programmatically for security reasons
-
-#### Annotated Code Example
-
-```html
-<form action="/upload" method="post" enctype="multipart/form-data">
-    <label for="avatar">Profile Picture:</label>
-    <input type="file" id="avatar" name="avatar"
-           accept="image/png, image/jpeg" required>
-    <button type="submit">Upload</button>
-</form>
-```
-
-**Expected Output**
-
-A file picker that only accepts PNG and JPEG images.
-
-**Why This Output Occurs**
-
-The `accept` attribute filters the file picker. The `enctype` on the form enables multipart upload.
+**Why this output occurs**: The submitter's `formaction` overrides the form.
 
 #### Real-World Cases
 
-- **Profile pictures** – Avatar uploads
-- **Document submission** – PDF uploads
-- **Image sharing** – Photo uploads
+- Save vs Publish vs Delete buttons.
+
+#### References
+
+- MDN Web Docs — `formaction` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#formaction
 
 ---
 
-### 19. Hidden Input (`type="hidden"`)
+### 3.22 `formenctype`
 
 #### Definitions
 
 **Core Definition**
-
-A non-visible input that stores data to be submitted with the form.
+`formenctype` overrides `enctype` for a specific submit button.
 
 **Technical Definition**
-
-The `hidden` type creates an input that is not displayed but whose value is submitted. It is not interactive and has no accessible role. It is useful for CSRF tokens, record IDs, and state tracking. Hidden inputs are not rendered and cannot be focused.
+Applicable to submit controls; enumerated like `enctype`.
 
 **Beginner-Friendly Explanation**
-
-A form field the user can‘t see. It stores data that gets submitted without the user knowing — like a record ID or a security token.
+Lets one submit button use a different encoding.
 
 #### Purposes
 
-- To store data that should be submitted but not displayed
-- To include CSRF tokens
-- To track record IDs
-- To persist state across form submissions
+- **To support file-including vs file-excluding submit paths**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="hidden" name="record_id" value="12345">
+<input type="submit" formenctype="multipart/form-data">
 ```
 
-**Constraints and Limitations**
+**Constraints**: Applies only to submit controls.
 
-- Not accessible; do not use for important information the user needs
-- Values are visible in the page source and can be modified
-
-#### Annotated Code Example
+#### Annotated Example
 
 ```html
-<form action="/update" method="post">
-    <input type="hidden" name="record_id" value="12345">
-    <input type="hidden" name="csrf_token" value="abc123xyz">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
-    <button type="submit">Update</button>
+<form action="/x" method="post" enctype="application/x-www-form-urlencoded">
+  <input type="file" name="f">
+  <input type="submit" value="Upload" formenctype="multipart/form-data">
+  <input type="submit" value="Text only">
 </form>
 ```
 
-**Expected Output**
+**Expected output**: "Upload" sends multipart; "Text only" sends urlencoded (the file is lost).
 
-A visible Name field and two hidden inputs. Submitting sends all three values.
-
-**Why This Output Occurs**
-
-Hidden inputs are not rendered but are included in the form data set.
+**Why this output occurs**: The submitter's formenctype overrides the form.
 
 #### Real-World Cases
 
-- **CRUD operations** – Record IDs
-- **Security** – CSRF tokens
-- **Multi-step forms** – Step tracking
+- Hybrid forms with optional file input.
+
+#### References
+
+- MDN Web Docs — `formenctype` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#formenctype
 
 ---
 
-### 20. Submit Input (`type="submit"`)
+### 3.23 `formmethod`
 
 #### Definitions
 
 **Core Definition**
-
-A button that submits the form when activated.
+`formmethod` overrides `method` for a specific submit button.
 
 **Technical Definition**
-
-The `submit` type creates a button that triggers form submission. The `value` attribute sets the button label. It can be overridden by `formaction`, `formmethod`, `formenctype`, `formnovalidate`, and `formtarget` attributes.
+Applicable to submit controls; keywords `get`, `post`, `dialog`.
 
 **Beginner-Friendly Explanation**
-
-The button you click to submit the form.
+Lets one submit button use GET while the other uses POST.
 
 #### Purposes
 
-- To trigger form submission
-- To provide a labelled submit control
-- To override form-level submission attributes
+- **To mix idempotent preview and state-changing submit**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="submit" value="Send">
+<input type="submit" formmethod="get" value="Preview">
+<input type="submit" formmethod="post" value="Save">
 ```
 
-#### Annotated Code Example
+**Constraints**: Only on submit controls.
+
+#### Annotated Example
 
 ```html
-<form action="/submit" method="post">
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-    <input type="submit" value="Subscribe">
+<form action="/editor" method="post">
+  <textarea name="body">Hello</textarea>
+  <input type="submit" value="Preview" formmethod="get" formaction="/preview">
+  <input type="submit" value="Publish" formaction="/publish">
 </form>
 ```
 
-**Expected Output**
+**Expected output**: "Preview" navigates with query string; "Publish" posts.
 
-A button labelled “Subscribe” that submits the form.
-
-**Why This Output Occurs**
-
-The `submit` type creates a submission button with the label from `value`.
+**Why this output occurs**: formmethod overrides form.method.
 
 #### Real-World Cases
 
-- **All forms** – The primary action button
-- **Multi-button forms** – Different submit actions
+- Editor previews, read-only vs mutating operations.
+
+#### References
+
+- MDN Web Docs — `formmethod` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#formmethod
 
 ---
 
-### 21. Button Input (`type="button"`)
+### 3.24 `formnovalidate`
 
 #### Definitions
 
 **Core Definition**
-
-A clickable button with no default behaviour, typically used with JavaScript.
+`formnovalidate` disables constraint validation for a specific submission.
 
 **Technical Definition**
-
-The `button` type creates a button with no built-in action. It is used with JavaScript event handlers. It does not submit the form. The `value` attribute sets the button label.
+Boolean attribute applicable to submit controls; equivalent to setting `novalidate` on the form for this submission only.
 
 **Beginner-Friendly Explanation**
-
-A button that doesn‘t do anything by itself. You attach JavaScript to make it do something.
+Skips checking for this button only.
 
 #### Purposes
 
-- To create a button for JavaScript interaction
-- To provide a non-submitting action button
-- To trigger custom behaviour
+- **To allow Save-draft buttons to bypass validation**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="button" value="Click Me" onclick="doSomething()">
+<input type="submit" value="Save draft" formnovalidate>
 ```
 
-#### Annotated Code Example
+**Constraints**: Only on submit controls; still submit normally.
+
+#### Annotated Example
 
 ```html
-<form action="/submit" method="post">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name">
-    <input type="button" value="Check Availability" onclick="checkName()">
-    <input type="submit" value="Submit">
+<form action="/post" method="post">
+  <input name="title" required>
+  <input type="submit" value="Publish">
+  <input type="submit" value="Save draft" formnovalidate formaction="/drafts">
 </form>
 ```
 
-**Expected Output**
+**Expected output**: "Publish" enforces `required`; "Save draft" submits even when empty.
 
-Two buttons: “Check Availability” (runs JavaScript) and “Submit” (submits the form).
-
-**Why This Output Occurs**
-
-The `button` type does not submit. The `submit` type does.
+**Why this output occurs**: The submitter's formnovalidate suppresses validation.
 
 #### Real-World Cases
 
-- **Form validation** – Check before submit
-- **Interactive forms** – Dynamic field addition
-- **Preview buttons** – Show a preview
+- Draft saving, progressive workflows.
+
+#### References
+
+- MDN Web Docs — `formnovalidate` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#formnovalidate
 
 ---
 
-### 22. Reset Input (`type="reset"`)
+### 3.25 `formtarget`
 
 #### Definitions
 
 **Core Definition**
-
-A button that resets all form controls to their initial values.
+`formtarget` overrides `target` for a specific submit button.
 
 **Technical Definition**
-
-The `reset` type creates a button that resets the form‘s controls to their default values (the values specified in the HTML, or empty). It fires a `reset` event that can be cancelled. It is generally discouraged for usability reasons.
+Applicable to submit controls; value is a browsing-context name.
 
 **Beginner-Friendly Explanation**
-
-A button that clears the form and puts everything back to how it started. Use it carefully — users sometimes click it by accident.
+Lets a specific button open the result in a different tab.
 
 #### Purposes
 
-- To reset form fields to their initial values
-- To provide a “clear form” action
-- To undo user input
+- **To choose per-submit response destination**.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="reset" value="Reset Form">
+<input type="submit" formtarget="_blank" value="Open in new tab">
 ```
 
-**Constraints and Limitations**
+**Constraints**: Only on submit controls.
 
-- Can cause accidental data loss
-- Not recommended for large or complex forms
-
-#### Annotated Code Example
+#### Annotated Example
 
 ```html
-<form action="/submit" method="post">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" value="">
-    <input type="reset" value="Clear">
-    <input type="submit" value="Submit">
+<form action="/report" method="get">
+  <input name="q">
+  <input type="submit" value="Search">
+  <input type="submit" value="Open in new tab" formtarget="_blank">
 </form>
 ```
 
-**Expected Output**
+**Expected output**: First button replaces the page; second opens a new tab.
 
-A “Clear” button that empties the form and a “Submit” button that submits it.
-
-**Why This Output Occurs**
-
-The `reset` type restores controls to their initial values.
+**Why this output occurs**: formtarget overrides form.target.
 
 #### Real-World Cases
 
-- **Simple forms** – Quick clear
-- **Search forms** – Reset filters
-- **Internal tools** – Testing workflows
+- "Compare" or "Open report" secondary actions.
+
+#### References
+
+- MDN Web Docs — `formtarget` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#formtarget
 
 ---
 
-### 23. Image Input (`type="image"`)
+### 3.26 `dirname`
 
 #### Definitions
 
 **Core Definition**
-
-A graphical submit button that sends the click coordinates along with the form data.
+`dirname` submits the text direction of a field as an extra name/value pair.
 
 **Technical Definition**
-
-The `image` type creates a submit button rendered as an image. It requires the `src` attribute and supports `alt`, `width`, `height`, and the form-override attributes. When clicked, it submits the form and includes the `x` and `y` coordinates of the click relative to the image.
+Applies to text/search inputs and to `<textarea>`. The submitted key is the `dirname` value; the value is `ltr` or `rtl` reflecting the element's computed directionality.
 
 **Beginner-Friendly Explanation**
-
-An image that acts as a submit button. When clicked, it also sends the coordinates of where you clicked.
+Also submits "this was typed left-to-right" or "right-to-left".
 
 #### Purposes
 
-- To provide a graphically styled submit button
-- To capture click coordinates
-- To create image-based form controls
+- **To preserve directionality** for multilingual content.
 
 #### Syntax Rules and Structure
 
 ```html
-<input type="image" src="submit-button.png" alt="Submit" width="100" height="40">
+<input type="text" name="comment" dirname="comment.dir">
 ```
 
-#### Annotated Code Example
+**Constraints**: Submits an extra entry `comment.dir=ltr|rtl`.
+
+#### Annotated Example
 
 ```html
-<form action="/submit" method="post">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required>
-    <input type="image" src="submit.png" alt="Submit Form" width="120" height="40">
+<form action="/save" method="post">
+  <input type="text" name="comment" dirname="comment.dir" value="مرحبا">
+  <button>Save</button>
 </form>
 ```
 
-**Expected Output**
+**Expected output**: POST includes `comment=مرحبا&comment.dir=rtl`.
 
-An image that submits the form when clicked, sending `name` plus `x` and `y` coordinates.
-
-**Why This Output Occurs**
-
-The `image` type renders the `src` image as a submit button and includes click coordinates in the submission.
+**Why this output occurs**: The UA computes directionality and appends it.
 
 #### Real-World Cases
 
-- **Legacy forms** – Image-based submit buttons
-- **Graphical interfaces** – Custom button designs
-- **Image maps** – Coordinate-based interaction
+- Multilingual comment systems, chat.
+
+#### References
+
+- MDN Web Docs — `dirname` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input#dirname
 
 ---
 
-## References
+## 4. Input Best Practices
 
-- MDN Web Docs – `<input>`: The Input (Form Input) element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input
-- MDN Web Docs – The HTML5 input types – https://developer.mozilla.org/en-US/docs/Learn/Forms/HTML5_input_types
-- MDN Web Docs – `<input type="text">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/text
-- MDN Web Docs – `<input type="password">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/password
-- MDN Web Docs – `<input type="email">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/email
-- MDN Web Docs – `<input type="search">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/search
-- MDN Web Docs – `<input type="url">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/url
-- MDN Web Docs – `<input type="tel">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/tel
-- MDN Web Docs – `<input type="number">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/number
-- MDN Web Docs – `<input type="range">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/range
-- MDN Web Docs – `<input type="color">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/color
-- MDN Web Docs – `<input type="date">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/date
-- MDN Web Docs – `<input type="time">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/time
-- MDN Web Docs – `<input type="datetime-local">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/datetime-local
-- MDN Web Docs – `<input type="month">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/month
-- MDN Web Docs – `<input type="week">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/week
-- MDN Web Docs – `<input type="checkbox">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/checkbox
-- MDN Web Docs – `<input type="radio">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/radio
-- MDN Web Docs – `<input type="file">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/file
-- MDN Web Docs – `<input type="hidden">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/hidden
-- MDN Web Docs – `<input type="submit">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/submit
-- MDN Web Docs – `<input type="button">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/button
-- MDN Web Docs – `<input type="reset">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/reset
-- MDN Web Docs – `<input type="image">` – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/image
-- WHATWG HTML Living Standard – Form control infrastructure – https://html.spec.whatwg.org/multipage/form-control-infrastructure.html
-- W3C – WCAG 2.1 Understanding Success Criterion 1.3.5: Identify Input Purpose – https://www.w3.org/WAI/WCAG21/Understanding/identify-input-purpose.html
-- W3C – WCAG 2.1 Understanding Success Criterion 3.3.2: Labels or Instructions – https://www.w3.org/WAI/WCAG21/Understanding/labels-or-instructions.html
+### Definitions
+
+**Core Definition**
+Input best practices are guidelines for producing inputs that are accessible, usable, safe, and maintainable beyond raw specification conformance.
+
+**Technical Definition**
+They combine HTML conformance with WCAG success criteria, platform conventions (mobile keyboards, autofill), and security guidance (server validation, no secrets in hidden fields, file-type validation). They also cover programmatic hooks (`checkValidity`, `setCustomValidity`, `formdata`).
+
+**Beginner-Friendly Explanation**
+The habits that make fields easy for everyone to use and safe for the server.
+
+---
+
+### Purposes
+
+- **To maximise accessibility and mobile usability**.
+- **To make errors obvious and recoverable**.
+- **To improve autofill reliability and reduce typing**.
+- **To prevent security issues** (client-trusted data, file-type bypass, secret leakage).
+- **To enable progressive enhancement**.
+
+---
+
+### Syntax Rules and Structure
+
+Best practices are principles; the table summarises the core rules.
+
+| Practice | Rule |
+|---|---|
+| **Always label inputs** | `<label for>`, wrapping label, `aria-label`, or `aria-labelledby`. |
+| **Pick the right type** | Use `email`, `tel`, `url`, `date`, `number`, etc. to bring UI and validation. |
+| **Add `autocomplete` tokens** | `email`, `current-password`, `new-password`, `one-time-code`, `cc-number`, etc. |
+| **Group related controls** | `<fieldset>` + `<legend>` for radios/checkboxes. |
+| **Associate errors** | `aria-describedby` + inline messages; focus the first invalid control. |
+| **Validate on both sides** | Client-side for UX, server-side for security. |
+| **Never store secrets in `hidden`** | Page source is readable; use server-side state. |
+| **Constrain files correctly** | `accept` for UX, but validate type/size/extensions server-side. |
+| **Avoid `readonly` for security** | Users can modify via dev tools; enforce on server. |
+| **Prefer native UI** | `<input type="date">` beats hand-rolled pickers for a11y. |
+| **Don't disable paste** | It breaks password managers and harms usability. |
+| **Use `<button type="submit">`** | More styling/content options than `<input type="submit">`. |
+| **Handle double submission** | Disable submit button or use idempotency keys server-side. |
+| **Avoid autofocus overload** | Use only for single-field flows; never in multi-task pages. |
+
+#### Syntax Rules
+
+1. Every control must have an accessible name and, when relevant, a description.
+2. Errors must be programmatically associated with their fields and surfaced non-visually (via `role="alert"` or `aria-live`).
+3. Server-side validation must mirror every client-side constraint.
+4. Inputs must work without JavaScript whenever the form does.
+
+#### Constraints and Limitations
+
+- Native UI varies by browser/OS; visual consistency requires CSS work.
+- Autofill support varies; recognised tokens are essential.
+- Some types (e.g. `datetime-local`, `week`) have weaker support in older browsers; provide fallbacks.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: Accessible, Mobile-Friendly Form
+
+**Setup guide**: Save as `input-best-practices.html`.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Best Practices</title>
+  <style>
+    label { display: block; margin-top: .75rem; font-weight: 600; }
+    .error { color: #b00020; font-size: .9rem; }
+    input { padding: .5rem; width: 100%; max-width: 24rem; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <form action="/register" method="post" novalidate>
+    <fieldset>
+      <legend>Account</legend>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email"
+             autocomplete="email" inputmode="email"
+             aria-describedby="email-help email-err" required>
+      <small id="email-help">We'll never share your email.</small>
+      <p id="email-err" class="error" hidden></p>
+
+      <label for="pw">Password</label>
+      <input id="pw" type="password" name="password"
+             autocomplete="new-password"
+             minlength="8" aria-describedby="pw-err" required>
+      <p id="pw-err" class="error" hidden></p>
+    </fieldset>
+
+    <button type="submit">Create account</button>
+  </form>
+
+  <script>
+    const form = document.querySelector('form');
+    // Inline error display on submit
+    form.addEventListener('submit', (e) => {
+      // Clear old errors
+      form.querySelectorAll('.error').forEach(p => p.hidden = true);
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        form.querySelectorAll(':invalid').forEach(el => {
+          const err = document.getElementById(el.id + '-err');
+          if (err) { err.hidden = false; err.textContent = el.validationMessage; }
+        });
+        form.querySelector(':invalid')?.focus();
+      }
+    });
+  </script>
+</body>
+</html>
+```
+
+**Expected output**: Submitting empty/invalid values reveals inline error messages and focuses the first invalid field. Valid values submit natively.
+
+**Why this output occurs**: `checkValidity()` inspects all constraints; `validationMessage` provides a user-facing explanation; `:invalid` finds failing controls; focus management improves keyboard UX.
+
+---
+
+#### Example 2: Autofill-Optimised Checkout Fields
+
+**Setup guide**: Save as `checkout.html`.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout</title>
+</head>
+<body>
+  <form action="/pay" method="post" autocomplete="on">
+    <label for="name">Cardholder name</label>
+    <input id="name" name="ccname" autocomplete="cc-name" required>
+
+    <label for="ccnum">Card number</label>
+    <input id="ccnum" name="ccnumber" inputmode="numeric"
+           autocomplete="cc-number" required>
+
+    <label for="exp">Expiry</label>
+    <input id="exp" name="ccexp" autocomplete="cc-exp" required>
+
+    <label for="cvv">CVV</label>
+    <input id="cvv" name="cvc" inputmode="numeric"
+           autocomplete="cc-csc" required>
+
+    <button type="submit">Pay</button>
+  </form>
+</body>
+</html>
+```
+
+**Expected output**: Browsers and password managers can autofill card details from saved payment methods.
+
+**Why this output occurs**: Standard `cc-*` tokens map fields to payment autofill entries; `inputmode="numeric"` selects numeric keyboards on mobile.
+
+---
+
+### Real-World Cases
+
+1. **Banking and payments** — strict autocomplete tokens, HTTPS, server-side validation.
+2. **Healthcare intake** — accessible labels, error associations, progressive enhancement.
+3. **Public-sector services** — WCAG 2.2 AA requirements, mobile-first layouts.
+4. **Developer tools** — search inputs with `type="search"` and sensible `autofocus`.
+
+---
+
+### References
+
+- W3C WAI — Forms Tutorial — https://www.w3.org/WAI/tutorials/forms/
+- MDN Web Docs — Input attributes — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes
+- WHATWG — The input element — https://html.spec.whatwg.org/multipage/input.html
+- MDN Web Docs — Constraint validation — https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
+- OWASP — Input Validation Cheat Sheet — https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
+
+---
+
+## Summary Tables
+
+### Input Types at a Glance
+
+| Type | Purpose | Wire format |
+|---|---|---|
+| `text` | Free text | any string |
+| `password` | Obscured text | any string |
+| `email` | Email address(es) | `local@domain` |
+| `url` | Absolute URL | `https://…` |
+| `tel` | Phone number | any (pattern optional) |
+| `number` | Numeric value | float |
+| `range` | Numeric slider | float |
+| `date` | Calendar date | `YYYY-MM-DD` |
+| `time` | Time of day | `HH:MM[:SS]` |
+| `datetime-local` | Date + time (no TZ) | `YYYY-MM-DDTHH:MM` |
+| `month` | Year + month | `YYYY-MM` |
+| `week` | ISO week | `YYYY-Www` |
+| `color` | Colour | `#rrggbb` |
+| `file` | Files | multipart parts |
+| `checkbox` | Multi-select bool | value if checked |
+| `radio` | Single-select | value if checked |
+| `hidden` | Invisible payload | string |
+| `submit` | Submits form | label |
+| `reset` | Resets form | — |
+| `button` | No default action | — |
+| `image` | Image submit | coordinates |
+| `search` | Search box | string |
+
+### Attribute Applicability Quick Reference
+
+| Attribute | Applies to |
+|---|---|
+| `placeholder` | text, search, url, tel, email, password, number |
+| `required` | text, search, url, tel, email, password, number, checkbox, radio, file, and date/time types |
+| `readonly` | text-like and date/time types (not checkbox/radio/file/buttons) |
+| `multiple` | email, file, select |
+| `accept` | file |
+| `min`/`max`/`step` | number, range, date, time, datetime-local, month, week |
+| `pattern` | text, search, url, tel, email, password |
+| `minlength`/`maxlength` | text-like |
+| `size` | text-like |
+| `list` | text, search, url, tel, email, number, range, colour, date/time types |
+| `dirname` | text, search, textarea |
+| `form*` overrides | submit, image |
+| `hidden` | all types (invisible) |
+| `disabled` | all (non-submitting) |
+
+---
+
+## Final Notes on Deprecated, Version-Specific, and Security-Sensitive Features
+
+- **`<input type="image">`** is legacy; prefer a CSS-styled `<button type="submit">` with an `<img>` child.
+- **`type="range"`** has limited precision and accessibility; consider a number input paired with ARIA if precision matters.
+- **`datetime-local`, `week`** have weaker browser support in legacy browsers; consider progressive enhancement.
+- **`accept`** on file inputs is a picker hint only; always validate MIME type, extension, size, and content server-side.
+- **`readonly`** is not a security mechanism; users can edit via dev tools.
+- **`hidden`** inputs are visible in page source; never store secrets.
+- **Autofill `off`** is often ignored for passwords; use `current-password`/`new-password` tokens.
+- **`pattern`** regex syntax is the `v` (or `u`) flag flavour, not PCRE; avoid exotic features.
+- **Client-side validation** is UX only; always re-validate server-side.
+- **`inputmode`** (e.g. `numeric`, `email`, `tel`, `decimal`) is an extra hint not covered above but highly recommended alongside `type`.
+
+---
+
+This cheat sheet has covered `<input>` in full: the element itself, all 22 standard input types, all 26 input attributes, and production-grade best practices — with annotated, executable examples and authoritative references throughout. Use it as a reference and a teaching aid, and validate markup against the WHATWG HTML Living Standard and WCAG guidance.

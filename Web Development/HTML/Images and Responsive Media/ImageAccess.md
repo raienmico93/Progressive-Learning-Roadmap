@@ -1,4 +1,4 @@
-# HTML Image Accessibility: Comprehensive Programming Cheat Sheet
+# Image Accessibility — Comprehensive Programming Cheat Sheet & Research
 
 ---
 
@@ -7,820 +7,782 @@
 ### Definitions
 
 **Core Definition**
-
-HTML image accessibility is the practice of providing textual alternatives for images so that users who cannot see them — including screen reader users, users with low vision, and users with images disabled — can understand the information or function conveyed by the image.
+Image accessibility is the practice of providing text alternatives for images so that people who cannot see them — including screen-reader users, people with low vision, and users in low-bandwidth environments — can understand the information or function that the image conveys. It is governed primarily by WCAG Success Criterion 1.1.1 (Non-text Content, Level A), which requires that all non-text content presented to the user has a text alternative that serves the equivalent purpose.
 
 **Technical Definition**
-
-Image accessibility is governed by WCAG Success Criterion 1.1.1 (Non-text Content, Level A), which requires that "all non-text content that is presented to the user has a text alternative that serves the equivalent purpose" with specific exceptions for controls, time-based media, tests, sensory experiences, CAPTCHA, and pure decoration. In HTML, the primary mechanism for providing text alternatives is the `alt` attribute on the `<img>` element. The W3C Images Tutorial identifies five primary categories of images requiring different text alternative strategies: informative images, decorative images, functional images, images of text, and complex images.
+In the WHATWG HTML Living Standard and WCAG 2.2, image accessibility is implemented through the `alt` attribute on `<img>` elements, supplemented by ARIA attributes (`role="presentation"`, `aria-label`, `aria-labelledby`) and structural techniques (`<figure>` with `<figcaption>`, adjacent text descriptions, and links to long descriptions) for complex images. The W3C Images Tutorial defines a taxonomy of image purposes — **informative**, **decorative**, **functional**, **images of text**, **complex**, **groups of images**, and **image maps** — each with its own alt-text strategy. The `alt` attribute's value must convey the **meaning** of the image, not necessarily describe its visual characteristics.
 
 **Beginner-Friendly Explanation**
-
-Not everyone can see images on a webpage. Some people use screen readers that read text aloud, some have images turned off to save data, and some simply cannot see. Image accessibility means writing a short text description (called "alt text") for every image so that everyone can understand what the image shows or does. The description you write depends on what the image is for: a photo needs a description of what it shows, a decorative image needs nothing, and a button image needs to describe what it does.
+Image accessibility means making sure every picture on your website has a text description that tells people who cannot see it what the picture is for. If the picture shows a product, the description says what the product is. If the picture is just decoration, you mark it so screen readers skip it. If the picture is a button, the description says what the button does. The goal is simple: no one should miss information or functionality just because they cannot see an image.
 
 ---
 
 ### Key Characteristics
 
-| Characteristic | Description |
-|---|---|
-| **`alt` is required** | Every `<img>` element must have an `alt` attribute, even if its value is empty |
-| **Context determines content** | The same image may require different alt text depending on its purpose on the page |
-| **Decorative images are hidden** | Empty `alt=""` tells assistive technology to ignore purely decorative images |
-| **Functional images describe actions** | Images used as links or buttons must describe the function, not the visual appearance |
-| **Complex images need two-part alternatives** | Graphs and diagrams require a short `alt` plus a longer textual equivalent |
-| **WCAG 1.1.1 is Level A** | This is a minimum conformance requirement for all websites |
+- **Purpose-driven**: The alt text depends on the **purpose** of the image, not its visual content. A logo used as a link needs the link destination; a logo used decoratively needs nothing.
+- **`alt` is mandatory (with narrow exceptions)**: Every meaningful `<img>` must have an `alt` attribute; decorative images must have `alt=""`, not a missing attribute.
+- **Missing `alt` is worse than empty `alt`**: Screen readers may announce the filename or URL when `alt` is absent, which is useless and confusing.
+- **Complex images require two parts**: A short `alt` to identify the image, plus a long description (adjacent text, a linked page, or a `<figure>` with a table) to convey the essential data.
+- **Functional images describe actions, not objects**: A magnifying-glass icon that triggers search should say “Search,” not “magnifying glass”.
+- **Images of text should be avoided**: Real text is more accessible, scalable, and localisable; when unavoidable, `alt` must contain the same words as the image.
 
 ---
 
 ### Prerequisites
 
-- Basic familiarity with the `<img>` element and its attributes
-- Understanding of HTML document structure
-- Awareness of screen readers and assistive technology
-- Basic knowledge of WCAG guidelines (helpful but not required)
+1. **Basic HTML image syntax**: familiarity with `<img src alt>`.
+2. **WCAG 2.2 awareness**: understanding of Success Criterion 1.1.1 (Non-text Content, Level A).
+3. **Screen-reader basics**: awareness of how assistive technologies announce images and `alt` text.
+4. **The W3C alt Decision Tree**: familiarity with the decision process for categorising image purposes.
 
 ---
 
 ### Related Programming Areas
 
-- **Web Accessibility (A11y)** – Image accessibility is a cornerstone of accessible web design
-- **Semantic HTML** – The `alt` attribute is a semantic mechanism for conveying meaning
-- **SEO** – Alt text is used by search engines to index image content
-- **Responsive Images** – `srcset` and `<picture>` interact with alt text
-- **ARIA** – `aria-describedby` and `aria-label` supplement alt text for complex cases
+| Area | Relationship |
+|---|---|
+| **WCAG conformance** | 1.1.1 (Non-text Content) is the foundational criterion; other criteria (1.4.3 Contrast, 1.4.5 Images of Text) also apply. |
+| **SEO** | Descriptive `alt` text makes images indexable and improves image search visibility. |
+| **Speech input** | `alt` text enables voice-control users to activate buttons and links by name. |
+| **Mobile and low-bandwidth** | `alt` text provides information when images are turned off or fail to load. |
+| **Internationalisation** | Alt text should be written in the language of the surrounding content (`lang` attribute). |
 
 ---
 
-## Core Concepts / Features
+### Core Concepts / Features
+
+The cheat sheet treats the following concepts, each with the same uniform structure:
+
+1. **Alt text** — the text alternative for images
+2. **Decorative images** — images that add no information
+3. **Functional images** — images that trigger actions
+4. **Complex images** — images that convey substantial data
+5. **Image accessibility best practices** — consolidated guidelines
 
 ---
 
-### 1. Alternative Text (The `alt` Attribute)
+## 1. Alt Text — The Text Alternative
 
-#### Definitions
+### Definitions
 
 **Core Definition**
-
-Alternative text (alt text) is a brief textual description of an image, provided via the `alt` attribute on the `<img>` element, that serves as a replacement for the image when it cannot be seen.
+Alt text (alternative text) is the value of the `alt` attribute on an `<img>` element. It provides a textual replacement for the image that screen readers announce and that browsers display when the image cannot load.
 
 **Technical Definition**
-
-The `alt` attribute defines text that can replace the image in the page. Browsers do not always display images — for example, in non-visual browsers, when the user chooses not to display images, or when the image is invalid. In these cases, the browser may replace the image with the text in the `alt` attribute. Setting the `alt` attribute to an empty string (`alt=""`) indicates that the image is not a key part of the content (it is decoration or a tracking pixel), and non-visual browsers may omit it from rendering. The `alt` attribute is also used when copying and pasting the image to text, or saving a linked image to a bookmark. According to MDN, the most important reason to use `alt` is to support accessibility, as the alt text may be used by screen readers.
+Per WCAG 2.2 SC 1.1.1, every `<img>` element that conveys meaning must have an `alt` attribute whose value serves the **equivalent purpose** of the image. Technique H37 specifies that the alt text should be a **short text alternative** and that when the image contains words important to understanding the content, those words must be included in the alt text. The alt text does **not** need to describe the visual characteristics of the image; it must convey the same **meaning**. The value should be concise, neutral, accurate, and free of redundancy.
 
 **Beginner-Friendly Explanation**
+Alt text is the words you put in the `alt` attribute to describe the picture. It is what a screen reader reads aloud. It should tell the listener what the picture is **for**, not necessarily what it looks like. Keep it short — a sentence or less for most images.
 
-Alt text is a short description you write for an image. It‘s what a screen reader reads aloud to someone who can’t see the image. It‘s also what shows up if the image fails to load. You put it in the `alt` attribute: `<img src="photo.jpg" alt="A sunset over the ocean">`. Every image needs one — even if it’s empty.
+---
 
-#### Purposes
+### Purposes
 
-- To provide a textual equivalent for screen reader users
-- To display descriptive text when an image fails to load
-- To enable users with speech input software to target images
-- To improve SEO by giving search engines context about image content
-- To satisfy WCAG Success Criterion 1.1.1
+- **To provide an accessible name** for the image to screen readers and other assistive technologies.
+- **To display fallback text** when the image fails to load or is turned off.
+- **To enable speech-input users** to identify and activate image-based links and buttons by name.
+- **To make images indexable by search engines**.
+- **To satisfy WCAG 1.1.1 (Non-text Content, Level A)**.
 
-#### Syntax Rules and Structure
+---
 
-**General Syntax**
+### Syntax Rules and Structure
+
+#### Complete General Syntax
 
 ```html
-<img src="URL" alt="text alternative">
-<img src="URL" alt="">  <!-- Decorative image -->
+<img src="image.jpg" alt="Concise description of the image's purpose">
 ```
 
-**Component Breakdown**
+**Component breakdown**
 
 | Component | Description |
 |---|---|
-| `alt` | Attribute name |
-| `"text alternative"` | A brief, descriptive text conveying the image‘s purpose or content |
-| `""` | Empty string; indicates a decorative image |
+| `src` | The image URL. |
+| `alt` | **Required** for meaningful images. A short text alternative conveying the image's purpose. |
 
-**Syntax Rules**
+#### Syntax Rules (Six Core Rules)
 
-- The `alt` attribute must be present on every `<img>` element
-- The value must be appropriate for the image‘s purpose, not a description of the file
-- For decorative images, use `alt=""`
-- Alt text should be brief and concise — the W3C recommends keeping it short (e.g., around four-word length as a guideline)
-- Do not include “image of” or “picture of” in the alt text
+1. **Describe the purpose, not the picture**: Say what the image communicates or does, not a literal visual inventory.
+2. **Skip “image of” and “picture of”**: Screen readers already announce “image”; these phrases add noise.
+3. **Keep it to a sentence or so**: Be concise; long alt text is rarely read in full.
+4. **Do not repeat the caption**: If a visible caption already describes the image, the alt text should add new information or be empty.
+5. **Include important words in the image**: If the image contains text essential to understanding, include those words in the alt text.
+6. **Never use the filename**: Filenames like `IMG_1234.jpg` are meaningless to users.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- Alt text cannot convey complex information like graphs or charts; use a two-part alternative for those
-- The `title` attribute is not a substitute for `alt` and is not reliably announced by screen readers
-- Overly long alt text is burdensome for screen reader users
+- **Missing `alt` is not the same as empty `alt`**: A missing attribute may cause screen readers to announce the filename or URL.
+- **Alt text cannot be empty for meaningful images**: Empty `alt` is reserved for decorative images only.
+- **Alt text cannot contain markup**: It is plain text.
 
-#### Annotated Complete Step-by-Step Code Examples
+---
 
-**Example 1: Basic Alt Text**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: Meaningful Alt Text for an Informative Image
+
+**Setup Guide**: Save as `alt-informative.html` and test with a screen reader.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Alt Text Demo</title>
+  <meta charset="UTF-8">
+  <title>Informative Image Alt Text</title>
 </head>
 <body>
-    <!-- Informative image with descriptive alt text -->
-    <img
-        src="https://github.com/mdn/learning-area/blob/main/html/multimedia-and-embedding/tasks/images/images/blueberries.jpg?raw=true"
-        alt="A pile of small blue berries"
-        width="400"
-        height="272"
-    >
+  <p>
+    Our new office features
+    <img src="office.jpg" alt="An open-plan office with standing desks and large windows">
+    and plenty of natural light.
+  </p>
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: A screen reader announces “An open-plan office with standing desks and large windows,” conveying the essential information about the office.
 
-The image displays visually. When a screen reader encounters it, it announces “A pile of small blue berries, image.”
-
-**Why This Output Occurs**
-
-The `alt` attribute provides a textual equivalent of the image‘s content. The browser renders the image visually, and the screen reader uses the alt text to convey the image’s meaning to users who cannot see it.
+**Why this output occurs**: The `alt` text describes the **purpose** of the image (showing the office environment) in a single, descriptive sentence, following the six core rules.
 
 ---
 
-**Example 2: Alt Text in a Functional Context**
+#### Example 2: Alt Text That Includes Image Text
+
+**Setup Guide**: Save as `alt-image-text.html`. This image contains the words “Free newsletter. Get free recipes, news, and more. Learn more.”
 
 ```html
-<p>
-    <img src="search-icon.png" alt="Search" width="16" height="16">
-    <input type="text" placeholder="Enter search term">
-</p>
+<img src="newsletter.gif" alt="Free newsletter. Get free recipes, news, and more. Learn more.">
 ```
 
-**Expected Output**
+**Expected output**: The screen reader announces the full text content of the image, preserving the information the image was designed to convey.
 
-A small search icon appears next to a text input field. Screen readers announce “Search, image” followed by the input field.
-
-**Why This Output Occurs**
-
-The alt text “Search” describes the function of the icon, not its visual appearance. This helps screen reader users understand the purpose of the icon within the interface.
-
-#### Real-World Cases
-
-**Case 1: E-Commerce Product Images**
-
-Product images use descriptive alt text: `alt="Red leather jacket with silver zipper and front pockets"`.
-
-**Case 2: News Article Photographs**
-
-News images use alt text that describes the scene: `alt="Protesters holding signs outside the city hall"`.
-
-**Case 3: User Avatars**
-
-Profile pictures use alt text like `alt="Profile picture of Jane Doe"`.
+**Why this output occurs**: Technique H37 requires that when an image contains words important to understanding the content, those words are included in the alt text.
 
 ---
 
-### 2. Decorative Images
+#### Example 3: Alt Text Without “Image of”
 
-#### Definitions
+**Setup Guide**: Save as `alt-no-image-of.html`.
+
+```html
+<!-- GOOD: describes the purpose directly -->
+<img src="chart.png" alt="Revenue increased 20% from Q1 to Q4">
+
+<!-- BAD: redundant "image of" prefix -->
+<!-- <img src="chart.png" alt="Image of a chart showing revenue increased 20% from Q1 to Q4"> -->
+```
+
+**Expected output**: The good version announces the meaningful data; the bad version wastes the listener’s time with “Image of.”
+
+**Why this output occurs**: The rule “Skip image of and picture of” reduces audible clutter, because screen readers already announce the element as an image.
+
+---
+
+### Real-World Cases
+
+1. **News articles**: Every content image carries alt text describing the scene or the point the image illustrates.
+2. **E-commerce**: Product images use alt text naming the product and its key visible attributes.
+3. **Documentation**: Screenshots use alt text identifying the interface and the task being demonstrated.
+
+---
+
+### References
+
+- W3C — Understanding SC 1.1.1: Non-text Content — https://w3c.github.io/wcag/understanding/non-text-content.html
+- W3C — Technique H37: Using alt attributes on img elements — https://w3c.github.io/wcag/techniques/html/H37
+- W3C — Images Tutorial — https://w3c.github.io/wai-website/tutorials/images/
+- W3C — Tips and Tricks: Choosing appropriate text alternatives — https://www.w3.org/WAI/tips/writing/
+
+---
+
+## 2. Decorative Images — Images That Add No Information
+
+### Definitions
 
 **Core Definition**
-
-Decorative images are images that serve only a visual purpose — such as adding aesthetic appeal or separating content — and do not convey information that is essential to understanding the page.
+A decorative image is an image that adds no information to the content of the page. It may be purely visual styling, “eye candy,” or supplementary to adjacent text that already conveys the information. Decorative images must be marked with `alt=""` (a null alt) so assistive technologies skip them.
 
 **Technical Definition**
-
-Decorative images are images that do not add information to the content of a page. Text values for these types of images would add audible clutter to screen reader output or could distract users if the topic is different from that in adjacent text. In these cases, a null (empty) alt text should be provided (`alt=""`) so that they can be ignored by assistive technologies, such as screen readers. The W3C recommends using CSS background images for decorative images rather than `<img>` elements.
+WCAG 2.2 SC 1.1.1 explicitly exempts pure decoration: if non-text content is pure decoration, used only for visual formatting, or not presented to users, it is implemented in a way that assistive technology can ignore. Techniques H67 and F39 define the correct implementation: `alt=""` with no `title` attribute allows AT to ignore the image, while a non-null alt like `alt="spacer"` or `alt="image"` is a failure. The judgment of whether an image is decorative belongs to the author, based on the reason for including it.
 
 **Beginner-Friendly Explanation**
+A decorative image is a picture that does not tell the reader anything they need to know. It might be a background flourish, a dividing line, or a photo that just makes the page look nice. You mark these with an empty `alt=""` so screen readers skip them entirely. If you leave the alt attribute out entirely, screen readers might read the filename, which is annoying and useless.
 
-A decorative image is just for looks — like a background pattern, a decorative divider, or a pretty photo that doesn‘t add any information. Since it doesn’t mean anything, you don‘t need to describe it. You tell screen readers to ignore it by using an empty `alt=""`.
+---
 
-#### Purposes
+### Purposes
 
-- To add visual appeal without conveying information
-- To separate content sections visually
-- To create atmosphere or mood
-- To avoid cluttering screen reader output with unnecessary descriptions
+- **To prevent screen readers from announcing meaningless content** that would add audible clutter.
+- **To satisfy WCAG 1.1.1** by implementing pure decoration in a way that AT can ignore.
+- **To improve the listening experience** for screen-reader users by removing noise.
+- **To distinguish decorative images from informative images** in an accessibility audit.
 
-#### Syntax Rules and Structure
+---
 
-**General Syntax**
+### Syntax Rules and Structure
+
+#### Complete General Syntax
 
 ```html
-<img src="decorative-pattern.png" alt="" width="100" height="100">
+<img src="decorative.png" alt="">
 ```
 
-**Component Breakdown**
+**Component breakdown**
 
 | Component | Description |
 |---|---|
-| `alt=""` | Empty string; signals decorative image |
-| `role="presentation"` | Optional; reinforces that the image is decorative |
+| `alt=""` | A null (empty) alt attribute. |
+| No `title` | The `title` attribute must be absent or empty. |
+| Optional: `role="presentation"` | An alternative way to signal that the image should be ignored. |
 
-**Syntax Rules**
+#### Syntax Rules
 
-- Use `alt=""` (empty string) for decorative images
-- Do not omit the `alt` attribute entirely; that signals the image is informative but no alt text is available
-- Consider using CSS background images instead of `<img>` for purely decorative images
+1. **Use `alt=""` (empty string)**, not a missing `alt` attribute.
+2. **Do not use a descriptive alt** like `alt="spacer"` or `alt="divider"` — this is a failure of SC 1.1.1.
+3. **Do not use a `title` attribute** on decorative images; it can override the null alt.
+4. **`role="presentation"` or `role="none"` may be used** as an alternative or supplement to `alt=""`.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- An empty `alt` attribute is not the same as a missing `alt` attribute
-- Visual browsers hide the broken image icon when `alt=""` and the image fails to load
-- Decorative images should not be given `role="presentation"` on `<img>` elements; the empty `alt` is sufficient
+- **Leaving `alt` off entirely is not acceptable**: Some screen readers will announce the filename.
+- **Decorative vs. informative is a judgment call**: The author must decide whether the image contributes information.
+- **Overusing `alt=""`** can hide images that actually convey information; do not use it as a shortcut.
 
-#### Annotated Complete Step-by-Step Code Examples
+---
 
-**Example 1: Decorative Background Pattern**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: Decorative Divider with `alt=""`
+
+**Setup Guide**: Save as `decorative-divider.html`.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Decorative Image Demo</title>
+  <meta charset="UTF-8">
+  <title>Decorative Divider</title>
 </head>
 <body>
-    <!-- Decorative divider image -->
-    <img src="divider-pattern.png" alt="" width="600" height="20">
-
-    <p>This is the main content of the page.</p>
+  <p>
+    <img src="divider.png" alt="">
+    Welcome to our site.
+  </p>
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: The decorative divider is completely ignored by screen readers; only “Welcome to our site” is announced.
 
-The decorative divider displays visually, but screen readers skip it entirely — no announcement is made.
-
-**Why This Output Occurs**
-
-The empty `alt=""` tells assistive technology that the image is not a key part of the content. The browser still renders it visually, but the screen reader ignores it.
+**Why this output occurs**: The empty `alt=""` signals to assistive technology that the image can be safely skipped.
 
 ---
 
-**Example 2: Decorative Icon in a Button**
+#### Example 2: Failure — Non-Null Alt on a Decorative Image
+
+**Setup Guide**: Save as `decorative-failure.html`. An accessibility checker will flag this.
+
+```html
+<!-- FAILURE: alt="spacer" is announced by screen readers -->
+<div>
+  Tree type: <img src="spacer.gif" width="100" height="1" alt="spacer"> Cedrus deodara
+</div>
+```
+
+**Expected output**: A screen reader announces “spacer” between “Tree type:” and “Cedrus deodara,” adding meaningless noise.
+
+**Why this output occurs**: Technique F39 defines this as a failure: the image is meant to be ignored, but its non-null alt text is announced.
+
+---
+
+#### Example 3: Decorative Image with `role="none"`
+
+**Setup Guide**: Save as `decorative-role.html`.
+
+```html
+<p>Happy new year!</p>
+<img src="fireworks.jpg" role="none" alt="">
+```
+
+**Expected output**: The fireworks image is ignored by assistive technologies.
+
+**Why this output occurs**: The explicit `role="none"` (or `role="presentation"`) combined with `alt=""` tells AT to skip the image.
+
+---
+
+### Real-World Cases
+
+1. **Design flourishes**: Background patterns, corner ornaments, and decorative borders.
+2. **Spacing elements**: Images used to create blank space (though CSS is preferable).
+3. **Supplementary “eye candy”**: Photos that make a page attractive but add no information beyond the adjacent text.
+
+---
+
+### References
+
+- W3C — Method: Decorative Images — https://www.w3.org/WAI/GL/WCAG3/2022/methods/decorative-images/
+- W3C — Technique H67: Using null alt text — https://www.w3.org/WAI/WCAG21/Techniques/html/H67
+- W3C — Technique F39: Failure due to non-null alt — https://www.w3.org/WAI/WCAG22/Techniques/failures/F39
+- W3C — Technique F38: Failure due to not marking up decorative images — https://w3c.github.io/wcag/techniques/failures/F38
+
+---
+
+## 3. Functional Images — Images That Trigger Actions
+
+### Definitions
+
+**Core Definition**
+A functional image is an image used as a link, button, or other interactive control. Its text alternative must describe the **action** that the control performs, not the visual appearance of the image.
+
+**Technical Definition**
+The W3C Images Tutorial defines functional images as images used as links or buttons, where “the text alternative of an image used as a link or as a button should describe the functionality of the link or button rather than the visual image”. The text alternative should convey the action — “print this page” rather than “printer,” “search” rather than “magnifying lens,” “W3C home” rather than “W3C logo”. When a link or button contains one or more images and no text, the alt text must together convey the purpose of the link or button.
+
+**Beginner-Friendly Explanation**
+A functional image is a picture you click to do something. It might be a search icon, a print button, or a logo that links to the homepage. The alt text should say what **happens** when you click it — “Search,” “Print this page,” “Go to homepage” — not what the picture looks like.
+
+---
+
+### Purposes
+
+- **To communicate the action** of an image-based control to screen-reader users.
+- **To enable speech-input users** to activate controls by speaking their name.
+- **To satisfy WCAG 1.1.1** for non-text content that functions as a control.
+- **To prevent screen readers from announcing the filename or URL** of a functional image.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax (Image Link)
+
+```html
+<a href="https://www.w3.org/">
+  <img src="w3c.png" alt="W3C home">
+</a>
+```
+
+#### Complete General Syntax (Image Button)
+
+```html
+<button>
+  <img src="magnifier.svg" alt="Search">
+</button>
+```
+
+**Component breakdown**
+
+| Component | Description |
+|---|---|
+| `<a>` or `<button>` | The interactive control. |
+| `<img>` | The functional image. |
+| `alt` | Describes the **action**, not the object. |
+
+#### Syntax Rules
+
+1. **Describe the action**: “Search,” “Print,” “Download,” “W3C home” — not “magnifying glass,” “printer,” or “logo”.
+2. **If the image is the only content of the link/button**, its alt text is the accessible name.
+3. **If the link has both text and an image**, the image may have `alt=""` if the text already describes the action.
+4. **Do not use the filename or URL as alt text**; this is unhelpful to users.
+
+#### Constraints and Limitations
+
+- **Missing or empty alt on a functional image is a severe failure**: The control becomes unusable to screen-reader users.
+- **The alt text must match the visible label** if one is present, to avoid mismatches for sighted and screen-reader users.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: Linked Logo with Descriptive Alt
+
+**Setup Guide**: Save as `functional-logo.html`. The image is the only content of a link to the W3C homepage.
+
+```html
+<a href="https://www.w3.org/">
+  <img src="w3c.png" alt="W3C home">
+</a>
+```
+
+**Expected output**: The link is announced as “W3C home, link,” telling the user where the link goes.
+
+**Why this output occurs**: The alt text describes the **function** of the image (navigating to the homepage), not the visual content (“W3C logo”).
+
+---
+
+#### Example 2: Search Button with Icon
+
+**Setup Guide**: Save as `functional-search.html`.
 
 ```html
 <button type="button">
-    <img src="arrow-icon.png" alt="" width="16" height="16">
-    Next
+  <img src="magnifier.svg" alt="Search">
 </button>
 ```
 
-**Expected Output**
+**Expected output**: The button is announced as “Search, button,” enabling the user to activate it.
 
-The button displays with an arrow icon and the text “Next.” Screen readers announce “Next, button” and ignore the decorative icon.
-
-**Why This Output Occurs**
-
-The icon is decorative because the button‘s text “Next” already describes its purpose. Giving the icon alt text would cause screen readers to announce redundant information.
-
-#### Real-World Cases
-
-**Case 1: Background Textures**
-
-Websites use decorative textures as backgrounds. These should be CSS background images or have `alt=""`.
-
-**Case 2: Decorative Icons in Lists**
-
-Bulleted lists with custom decorative icons use `alt=""` to avoid cluttering screen reader output.
-
-**Case 3: Spacer Images**
-
-Legacy spacer images (used for layout) should have `alt=""` or be replaced with CSS.
+**Why this output occurs**: The alt text describes the action (“Search”), not the visual object (“magnifying glass”).
 
 ---
 
-### 3. Informative Images
+#### Example 3: Icon with Additional Link Text
 
-#### Definitions
+**Setup Guide**: Save as `functional-icon-text.html`. The icon conveys “opens in new window” alongside the link text.
+
+```html
+<a href="https://www.w3.org/" target="_blank">
+  W3C Homepage
+  <img src="external.svg" alt="Opens in new window">
+</a>
+```
+
+**Expected output**: The link is announced as “W3C Homepage, Opens in new window, link,” conveying both the destination and the behaviour.
+
+**Why this output occurs**: The icon’s alt text adds essential information (new-window behaviour) that the link text alone does not convey.
+
+---
+
+### Real-World Cases
+
+1. **Social media icons**: Each icon links to a profile; alt text should say “Visit our Instagram page,” not “Instagram logo”.
+2. **Navigation icons**: A home icon should say “Home,” not “house.”
+3. **Action buttons**: Print, download, share, and search icons should describe their actions.
+
+---
+
+### References
+
+- W3C — Method: Functional Images — https://www.w3.org/WAI/GL/WCAG3/2020/methods/functional-images/
+- W3C — Images Tutorial: Functional Images — https://www.w3.org/WAI/tutorials/images/functional/
+- W3C — Technique H37: Using alt attributes — https://w3c.github.io/wcag/techniques/html/H37
+
+---
+
+## 4. Complex Images — Images That Convey Substantial Data
+
+### Definitions
 
 **Core Definition**
-
-Informative images are images that graphically represent concepts and information — typically pictures, photos, and illustrations — and convey meaning that is essential to understanding the surrounding content.
+A complex image is an image that contains substantial information — more than can be conveyed in a short phrase or sentence. Examples include graphs, charts, diagrams, flowcharts, and illustrations that the page text depends on for understanding.
 
 **Technical Definition**
-
-Informative images are used to graphically illustrate concepts and information, typically pictures and illustrations. The text alternative needs to be at least a short description conveying the essential information presented by the image. The alt text should convey the essential information that the image provides, but does not need to describe every visual detail — only what is relevant in the context of the page.
+The W3C defines complex images as those requiring a **two-part text alternative**: first, a **short description** (in the `alt` attribute) to identify the image and, where appropriate, indicate the location of the second part; and second, a **long description** that provides a textual representation of the essential information conveyed by the image. The long description must include scales, values, relationships, and trends for data visualisations. Several approaches are recommended: a link to a separate long-description page, a text link adjacent to the image, a `<figure>` element enclosing both the image and a data table, or an `alt` attribute that points to the location of the long description.
 
 **Beginner-Friendly Explanation**
-
-An informative image is a picture that actually tells you something. A photo in a news article, an illustration in a textbook, or a product image on a shopping site — these all convey information. You need to describe what the image shows so that people who can‘t see it still get the information.
-
-#### Purposes
-
-- To convey information visually that is essential to understanding the content
-- To provide a textual equivalent for screen reader users
-- To ensure that all users have access to the same information
-- To support users who browse with images disabled
-
-#### Syntax Rules and Structure
-
-**General Syntax**
-
-```html
-<img src="URL" alt="concise description of essential information">
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|---|---|
-| `alt` | The text alternative |
-| `"concise description"` | A brief text conveying the essential information of the image |
-
-**Syntax Rules**
-
-- The alt text should be a short description conveying the essential information
-- Include the most important information first
-- Avoid redundancy with adjacent text
-- The exact level of detail depends on context — a bird identification website needs more detail than a general park website
-
-**Constraints and Limitations**
-
-- Alt text cannot convey all the information of a complex image; use complex-image techniques for graphs and charts
-- Overly detailed alt text is burdensome; focus on what matters in context
-
-#### Annotated Complete Step-by-Step Code Examples
-
-**Example 1: Informative Photograph**
-
-```html
-<img
-    src="eiffel-tower.jpg"
-    alt="The Eiffel Tower at sunset, with the Paris skyline in the background"
-    width="600"
-    height="400"
->
-```
-
-**Expected Output**
-
-The photograph displays visually. Screen readers announce the alt text, conveying the scene.
-
-**Why This Output Occurs**
-
-The alt text provides a concise description of the image‘s essential content — the Eiffel Tower at sunset with the Paris skyline — enabling users who cannot see the image to understand what it depicts.
+A complex image is a picture that contains a lot of information — like a chart, a graph, or a detailed diagram. You cannot fit all that information into a short alt text. So you provide two things: a short alt that says what the image is and where to find more, and a longer description — either nearby, on a linked page, or in a table — that gives all the important data.
 
 ---
 
-**Example 2: Informative Illustration**
+### Purposes
+
+- **To convey the essential data** of charts, graphs, and diagrams to users who cannot see them.
+- **To satisfy WCAG 1.1.1** for non-text content that conveys substantial information.
+- **To provide equal access to data-driven content** in reports, dashboards, and educational materials.
+- **To support users who prefer text** or who are using low-bandwidth connections.
+
+---
+
+### Syntax Rules and Structure
+
+#### Complete General Syntax (Short Alt + Adjacent Long Description)
 
 ```html
 <p>
-    The water cycle describes how water moves through the environment.
-    <img
-        src="water-cycle.png"
-        alt="Diagram showing evaporation, condensation, precipitation, and collection"
-        width="500"
-        height="300"
-    >
+  <img src="chart.png" alt="2013 first quarter example.com website visitors bar chart">
+  <br>
+  <a href="2013first_qtr_text.html">Example.com Site visitors Jan to March 2013 text description of the bar chart</a>
 </p>
 ```
 
-**Expected Output**
-
-The diagram displays, and screen readers announce the alt text describing the water cycle stages.
-
-**Why This Output Occurs**
-
-The alt text identifies the key stages shown in the diagram, conveying the essential information without describing every visual detail.
-
-#### Real-World Cases
-
-**Case 1: News Article Images**
-
-News images use alt text that describes the scene, such as `alt="Firefighters battling a blaze at a warehouse"`.
-
-**Case 2: Recipe Photos**
-
-Recipe images use alt text like `alt="Golden-brown chocolate chip cookies on a wire rack"`.
-
-**Case 3: Travel Photography**
-
-Travel images use alt text that captures the mood and key features: `alt="Sunset over the Grand Canyon with vibrant orange and purple sky"`.
-
----
-
-### 4. Functional Images
-
-#### Definitions
-
-**Core Definition**
-
-Functional images are images used as links, buttons, or other interactive controls, where the image‘s purpose is to initiate an action rather than to convey information.
-
-**Technical Definition**
-
-Functional images are images which perform an action, e.g., a button, an icon to open a Word document, or a shopping cart. The text alternative of an image used as a link or as a button should describe the functionality of the link or button rather than the visual image. Examples of such images are a printer icon to represent the print function or a button to submit a form. The W3C alt decision tree states that if an image is used in a link or button and it would be hard or impossible to understand what the link or button does without the image, use the `alt` attribute to communicate the destination of the link or action taken.
-
-**Beginner-Friendly Explanation**
-
-A functional image is one you click on to do something — like a button with a printer icon that prints the page, or a shopping cart icon that goes to your cart. The alt text should describe what the image *does*, not what it looks like. So for a printer icon, use `alt="Print this page"`, not `alt="Printer"`.
-
-#### Purposes
-
-- To describe the function or destination of an interactive image
-- To enable screen reader users to understand what a button or link does
-- To support speech input users who say “click [function]”
-- To satisfy WCAG Success Criterion 1.1.1 for functional content
-
-#### Syntax Rules and Structure
-
-**General Syntax**
+#### Complete General Syntax (Figure with Data Table)
 
 ```html
-<a href="URL"><img src="icon.png" alt="Function description"></a>
-<button><img src="icon.png" alt="Action description"></button>
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|---|---|
-| `alt` | The text alternative describing the function |
-| `"Function description"` | A verb or action phrase describing what happens |
-
-**Syntax Rules**
-
-- Describe the function, not the visual appearance
-- Use action words like “Search,” “Print,” “Submit,” “Go to cart”
-- If the image is the only content of a link, the alt text serves as the link text
-- If the link also has text, the image may be decorative (`alt=""`)
-
-**Constraints and Limitations**
-
-- If the link text already describes the function, the image inside may need `alt=""` to avoid redundancy
-- Functional images inside buttons may need `alt=""` if the button has text
-
-#### Annotated Complete Step-by-Step Code Examples
-
-**Example 1: Functional Image as Link**
-
-```html
-<a href="/search">
-    <img src="search-icon.svg" alt="Search" width="24" height="24">
-</a>
-```
-
-**Expected Output**
-
-The search icon displays as a clickable link. Screen readers announce “Search, link” and pressing Enter navigates to the search page.
-
-**Why This Output Occurs**
-
-The alt text “Search” describes the function of the link. The image is the only content of the link, so its alt text serves as the link text.
-
----
-
-**Example 2: Functional Image in a Button**
-
-```html
-<button type="button" onclick="window.print()">
-    <img src="print-icon.svg" alt="Print this page" width="20" height="20">
-</button>
-```
-
-**Expected Output**
-
-A print button displays with a printer icon. Screen readers announce “Print this page, button.”
-
-**Why This Output Occurs**
-
-The alt text describes the action that the button performs — printing the page.
-
----
-
-**Example 3: Redundant Functional Image**
-
-```html
-<a href="/cart">
-    <img src="cart-icon.svg" alt="" width="20" height="20">
-    View Cart
-</a>
-```
-
-**Expected Output**
-
-The cart icon and text “View Cart” display together. Screen readers announce “View Cart, link” and skip the icon.
-
-**Why This Output Occurs**
-
-The link text “View Cart” already describes the function. The icon is decorative in this context, so `alt=""` prevents redundant announcements.
-
-#### Real-World Cases
-
-**Case 1: Social Media Share Buttons**
-
-Share buttons use functional alt text: `alt="Share on Twitter"`.
-
-**Case 2: Navigation Icons**
-
-Hamburger menu icons use `alt="Open menu"` or `alt="Menu"`.
-
-**Case 3: Form Submit Buttons**
-
-Submit buttons with icons use `alt="Submit form"` or `alt="Search"`.
-
----
-
-### 5. Complex-Image Descriptions
-
-#### Definitions
-
-**Core Definition**
-
-Complex-image descriptions provide a two-part text alternative for images that contain substantial information — such as graphs, charts, diagrams, and maps — consisting of a short `alt` text plus a longer textual equivalent.
-
-**Technical Definition**
-
-Complex images contain substantial information — more than can be conveyed in a short phrase or sentence. These are typically graphs and charts, including flow charts and organizational charts; diagrams and illustrations where the page text relies on the user being able to understand the image; and maps showing locations or other information. In these situations a two-part text alternative is required. The first part is the short description to identify the image and, where appropriate, indicate the location of the long description. The second part is the long description — a textual representation of the essential information conveyed by the image.
-
-**Beginner-Friendly Explanation**
-
-Some images contain a lot of information — like a chart showing sales data or a diagram of a process. A short description isn‘t enough. You need to provide a longer explanation somewhere on the page or in a linked document. The `alt` attribute gives a brief summary, and then the longer description is available nearby.
-
-#### Purposes
-
-- To provide a full textual equivalent of complex visual information
-- To enable screen reader users to access the data presented in charts and graphs
-- To satisfy WCAG 1.1.1 for complex non-text content
-- To ensure that information is not lost when images cannot be seen
-
-#### Syntax Rules and Structure
-
-**Method 1: `longdesc` Attribute**
-
-```html
-<img src="chart.png"
-     alt="Bar chart showing monthly visitors for Q1 2014"
-     longdesc="chart-description.html">
-```
-
-**Method 2: `aria-describedby`**
-
-```html
-<img src="chart.png"
-     alt="Bar chart showing monthly visitors for Q1 2014"
-     aria-describedby="chart-desc">
-<div id="chart-desc">
-    <p>Detailed description of the chart data...</p>
-</div>
-```
-
-**Method 3: Adjacent Text Description**
-
-```html
-<img src="chart.png" alt="Bar chart showing monthly visitors for Q1 2014">
-<div>
-    <h3>Chart Data: Monthly Visitors, Q1 2014</h3>
-    <p>January: Site 1 had 500 visitors, Site 2 had 300, Site 3 had 200...</p>
-</div>
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|---|---|
-| `alt` | Short description identifying the image and its purpose |
-| `longdesc` | URI of a page containing the long description |
-| `aria-describedby` | ID of an element containing the long description |
-| Adjacent text | A visible paragraph or section providing the full description |
-
-**Syntax Rules**
-
-- Provide a short `alt` that identifies the image and, where appropriate, indicates where the long description is located
-- Provide the long description either on the same page or via a linked document
-- The long description should include the essential information: scales, values, relationships, and trends
-- Use `longdesc` for a separate page; use `aria-describedby` or adjacent text for same-page descriptions
-
-**Constraints and Limitations**
-
-- `longdesc` is not supported by all screen readers; `aria-describedby` has better support
-- The long description should not simply repeat the alt text
-- The description should be a textual representation of the information, not a visual description of the image
-
-#### Annotated Complete Step-by-Step Code Examples
-
-**Example 1: `longdesc` for a Separate Page**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Complex Image with longdesc</title>
-</head>
-<body>
-    <h1>Quarterly Report</h1>
-
-    <img src="q1-sales-chart.png"
-         alt="Bar chart showing monthly and total visitors for the first quarter 2014 for sites 1 to 3"
-         longdesc="q1-sales-description.html"
-         width="600"
-         height="400">
-
-    <p>The chart above shows visitor statistics for three websites.</p>
-</body>
-</html>
-```
-
-**Expected Output**
-
-The chart displays visually. Screen readers announce the short alt text and provide a way to access the linked long description.
-
-**Why This Output Occurs**
-
-The `longdesc` attribute provides a URI to a page containing the full textual description. The short alt identifies the image; the long description provides the data.
-
----
-
-**Example 2: `aria-describedby` for Same-Page Description**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Complex Image with aria-describedby</title>
-</head>
-<body>
-    <h1>Website Traffic Analysis</h1>
-
-    <img src="traffic-chart.png"
-         alt="Line chart showing daily traffic for January 2026"
-         aria-describedby="traffic-description"
-         width="600"
-         height="400">
-
-    <div id="traffic-description">
-        <h2>Traffic Data: January 2026</h2>
-        <p>Daily traffic ranged from 1,200 visitors on January 1st to a peak
-        of 5,800 visitors on January 15th. Traffic declined steadily after
-        the 15th, ending the month at approximately 2,100 visitors per day.</p>
-    </div>
-</body>
-</html>
-```
-
-**Expected Output**
-
-The chart displays, and screen readers announce the alt text followed by the long description from the referenced element.
-
-**Why This Output Occurs**
-
-The `aria-describedby` attribute creates a programmatic association between the image and the long description. Screen readers announce the alt text and then the description content.
-
----
-
-**Example 3: Adjacent Text Description**
-
-```html
-<figure>
-    <img src="organizational-chart.png"
-         alt="Organizational chart for the company"
-         width="600" height="400">
-    <figcaption>
-        <h2>Company Organizational Chart</h2>
-        <p>The chart shows the CEO at the top, with three direct reports:
-        the CFO, the CTO, and the COO. The CFO oversees Finance and Accounting.
-        The CTO oversees Engineering and Product. The COO oversees Operations
-        and Human Resources.</p>
-    </figcaption>
+<figure role="group">
+  <img src="chart.png" alt="2013 first quarter example.com website visitors bar chart">
+  <table>
+    <caption>Example.com Site visitors Jan to March 2013</caption>
+    <tr><th>Month</th><th>Visitors</th></tr>
+    <tr><td>January</td><td>12,000</td></tr>
+    <tr><td>February</td><td>15,000</td></tr>
+    <tr><td>March</td><td>18,000</td></tr>
+  </table>
 </figure>
 ```
 
-**Expected Output**
+**Component breakdown**
 
-The chart displays with a visible caption containing the full description. Screen readers announce the alt text and then the caption content.
+| Component | Description |
+|---|---|
+| `alt` | Short description identifying the image. |
+| Long description | Adjacent text, linked page, or data table providing the essential data. |
+| `<figure role="group">` | Structurally associates the image with its long description. |
 
-**Why This Output Occurs**
+#### Syntax Rules
 
-The `<figure>` and `<figcaption>` elements create a semantic association between the image and its description. The description is visible on the page and programmatically associated with the image.
+1. **The short alt identifies the image** and, where appropriate, points to the long description.
+2. **The long description provides the essential information** — values, trends, relationships, and scales.
+3. **Use `<figure>` with a data table** for charts generated from tabular data.
+4. **Make the long description available to all users**, not just screen-reader users.
+5. **The long description must serve the same purpose** as the image; otherwise it fails SC 1.1.1.
 
-#### Real-World Cases
+#### Constraints and Limitations
 
-**Case 1: Financial Reports**
-
-Bar charts and line graphs in financial reports use `aria-describedby` or `longdesc` to provide the underlying data.
-
-**Case 2: Scientific Papers**
-
-Diagrams and flow charts in scientific papers use adjacent text descriptions or linked long descriptions.
-
-**Case 3: Government Data Visualizations**
-
-Government websites use `aria-describedby` to provide accessible alternatives for data visualizations.
+- **A short alt alone is insufficient** for complex images; it cannot convey the data.
+- **The `longdesc` attribute has limited browser support**; a regular link or `<figure>` is more reliable.
+- **The long description must be accurate and complete**; an inadequate description is a failure technique.
 
 ---
 
-### 6. Choosing the Right Approach
+### Multiple Annotated Complete Step-by-Step Code Examples
 
-#### Definitions
+#### Example 1: Chart with Adjacent Text Link
 
-**Core Definition**
-
-Choosing the right approach for image accessibility means selecting the appropriate alt text strategy — empty, descriptive, functional, or complex — based on the image‘s purpose in context.
-
-**Technical Definition**
-
-The W3C alt decision tree provides a systematic method for determining the appropriate `alt` attribute value based on the image’s role: whether it contains text, is used in a link or button, contributes meaning to the page, or is purely decorative. The decision depends on the image‘s purpose, not its visual appearance.
-
-**Beginner-Friendly Explanation**
-
-Not every image needs the same kind of description. Ask yourself: What is this image for? If it’s just decoration, use `alt=""`. If it shows information, describe it. If it‘s a button, describe what it does. If it’s a chart, provide a longer description. The W3C decision tree helps you decide.
-
-#### Purposes
-
-- To ensure the correct alt text strategy for each image
-- To avoid common accessibility mistakes
-- To provide consistent, appropriate text alternatives across a website
-- To satisfy WCAG 1.1.1 for all image types
-
-#### Syntax Rules and Structure
-
-**Decision Tree Summary**
-
-| Question | If Yes | If No |
-|---|---|---|
-| Does the image contain text? | Depends on context (see below) | Continue |
-| Is the image used in a link/button and needs to convey function? | Use functional alt text | Continue |
-| Does the image contribute meaning? | Is it simple? Use informative alt. Is it complex? Use two-part alt | Continue |
-| Is the image purely decorative? | Use `alt=""` | Review context |
-
-**Syntax Rules**
-
-- Use empty `alt=""` for decorative images and redundant images
-- Use descriptive alt text for informative images
-- Use action-oriented alt text for functional images
-- Use two-part alternatives for complex images
-- Always consider context; the same image may need different alt text on different pages
-
-**Constraints and Limitations**
-
-- The decision tree does not cover every possible case
-- Context is critical; there is no one-size-fits-all alt text
-- When in doubt, consult the W3C Images Tutorial for detailed guidance
-
-#### Annotated Complete Step-by-Step Code Examples
-
-**Example 1: Applying the Decision Tree**
+**Setup Guide**: Save as `complex-chart.html`. Provide a chart image and a linked description page.
 
 ```html
-<!-- Decorative divider: no meaning -->
-<img src="divider.png" alt="" width="600" height="20">
-
-<!-- Informative photo: conveys information -->
-<img src="mountain.jpg" alt="Snow-capped mountain peak at sunrise" width="600" height="400">
-
-<!-- Functional icon: initiates action -->
-<a href="/print"><img src="printer.png" alt="Print this page" width="24" height="24"></a>
-
-<!-- Complex chart: needs two-part alternative -->
-<img src="sales-chart.png"
-     alt="Bar chart showing quarterly sales figures"
-     aria-describedby="sales-data">
-<div id="sales-data">
-    <p>Q1: $1.2M, Q2: $1.5M, Q3: $1.8M, Q4: $2.1M</p>
-</div>
+<p>
+  <img src="chart.png" alt="2013 first quarter example.com website visitors bar chart">
+  <br>
+  <a href="2013first_qtr_text.html">
+    Example.com Site visitors Jan to March 2013 text description of the bar chart
+  </a>
+</p>
 ```
 
-**Expected Output**
+**Expected output**: The screen reader announces the short alt identifying the chart, and the user can follow the link to read the full text description.
 
-Each image receives appropriate treatment based on its purpose.
-
-**Why This Output Occurs**
-
-The decorative divider uses `alt=""`. The photo uses descriptive alt text. The print icon uses functional alt text. The chart uses a short alt plus a long description.
-
-#### Real-World Cases
-
-**Case 1: Government Websites**
-
-Government accessibility guidelines require applying the decision tree to every image on a page.
-
-**Case 2: Content Management Systems**
-
-CMS platforms provide alt text fields and guidance based on image purpose.
-
-**Case 3: Design Systems**
-
-Design systems document alt text conventions for common image patterns.
+**Why this output occurs**: The two-part approach provides a short identifier and a path to the complete data, satisfying the complex-image requirement.
 
 ---
 
-## References
+#### Example 2: Chart with Inline Data Table in `<figure>`
 
-- W3C – Understanding Success Criterion 1.1.1: Non-text Content – https://w3c.github.io/wcag/understanding/non-text-content
-- W3C – Images Tutorial – https://raw.githubusercontent.com/w3c/wai-tutorial-images/master/content/index.md
-- W3C – Decorative Images – https://www.w3.org/WAI/tutorials/images/decorative/
-- W3C – Informative Images – https://www.w3.org/WAI/tutorials/images/informative/
-- W3C – Functional Images – https://www.w3.org/WAI/tutorials/images/functional/
-- W3C – Complex Images – https://www.w3.org/WAI/tutorials/images/complex/
-- W3C – An alt Decision Tree – https://www.w3.org/WAI/tutorials/images/decision-tree/
-- MDN Web Docs – `<img>`: The Image Embed element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/img
-- MDN Web Docs – HTMLImageElement: alt property – https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/alt
-- MDN Web Docs – HTML images – https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Images_in_HTML
-- WebAIM – Alternative Text – https://webaim.org/techniques/alttext/
-- W3C – WCAG 2.1 Understanding Success Criterion 1.1.1: Non-text Content – https://www.w3.org/WAI/WCAG21/Understanding/non-text-content.html
-- W3C – H37: Using alt attributes on img elements – https://www.w3.org/WAI/WCAG21/Techniques/html/H37
-- W3C – G95: Providing short text alternatives that provide a brief description of the non-text content – https://www.w3.org/WAI/WCAG21/Techniques/general/G95
+**Setup Guide**: Save as `complex-figure.html`.
+
+```html
+<figure role="group">
+  <img src="chart.png" alt="2013 first quarter example.com website visitors bar chart">
+  <table>
+    <caption>Example.com Site visitors Jan to March 2013</caption>
+    <thead>
+      <tr><th>Month</th><th>Visitors</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>January</td><td>12,000</td></tr>
+      <tr><td>February</td><td>15,000</td></tr>
+      <tr><td>March</td><td>18,000</td></tr>
+    </tbody>
+  </table>
+</figure>
+```
+
+**Expected output**: The screen reader announces the image and the associated data table, giving the user direct access to the underlying numbers.
+
+**Why this output occurs**: The `<figure>` element with `role="group"` structurally associates the image with its data table, providing the long description inline.
+
+---
+
+#### Example 3: Alt Text Pointing to On-Page Description
+
+**Setup Guide**: Save as `complex-pointer.html`.
+
+```html
+<p>
+  <img src="chart.png" alt="2013 first quarter example.com website visitors bar chart. Described under the heading Site visitors full text">
+</p>
+<h4>Site visitors full text</h4>
+<p>January: 12,000 visitors. February: 15,000. March: 18,000.</p>
+```
+
+**Expected output**: The alt text tells the user what the image is and where to find the full description on the same page.
+
+**Why this output occurs**: This approach is acceptable when the location of the long description can be accurately pinpointed by description.
+
+---
+
+### Real-World Cases
+
+1. **Financial reports**: Bar charts and line graphs with data tables as long descriptions.
+2. **Scientific papers**: Diagrams and flowcharts with detailed textual explanations.
+3. **Dashboards**: Interactive charts with accessible data summaries.
+
+---
+
+### References
+
+- W3C — Complex Images (Draft) — https://www.w3.org/WAI/EO/Drafts/app-notes/images/complex
+- W3C — Technique G73: Linking complex images to a long description — https://wcagrules.com/techniques/G73
+- W3C — Technique F67: Failure due to inadequate long descriptions — https://www.w3.org/WAI/WCAG22/Techniques/failures/F67
+- W3C — Images Tutorial: Complex Images — https://www.w3.org/WAI/tutorials/images/complex/
+
+---
+
+## 5. Image Accessibility Best Practices
+
+### Definitions
+
+**Core Definition**
+Image accessibility best practices are the consolidated guidelines for providing appropriate text alternatives for every image on a page — covering informative, decorative, functional, complex, and text-containing images — so that no information or functionality is lost to users who cannot see the image.
+
+**Technical Definition**
+Best practices are informed by WCAG 2.2 SC 1.1.1, the W3C Images Tutorial, and the alt Decision Tree. They encompass purpose-driven alt text, null alt for decorative images, action-oriented alt for functional images, two-part descriptions for complex images, avoidance of images of text, and colour-contrast requirements for graphical information.
+
+**Beginner-Friendly Explanation**
+Best practices are the habits that make every image accessible: describe what the image is for, skip purely decorative images, describe what functional images do, give complex images a full text description somewhere, and avoid putting important text inside images.
+
+---
+
+### Purposes
+
+- **To satisfy WCAG 1.1.1** across all image types.
+- **To ensure no information is lost** for screen-reader, low-vision, or low-bandwidth users.
+- **To improve usability for speech-input and mobile users**.
+- **To support SEO** through descriptive alt text.
+
+---
+
+### Syntax Rules and Structure
+
+| Practice | Rule |
+|---|---|
+| **Provide `alt` on every meaningful image** | Mandatory for informative, functional, and complex images. |
+| **Use `alt=""` for decorative images** | Never omit the attribute; use an empty string. |
+| **Describe the purpose, not the picture** | Focus on what the image communicates or does. |
+| **Skip “image of” and “picture of”** | Screen readers already announce the element type. |
+| **Include important image text in `alt`** | If the image contains words essential to understanding, include them. |
+| **Use action-oriented alt for functional images** | “Search,” “Print,” “W3C home” — not the visual object. |
+| **Provide two-part descriptions for complex images** | Short alt + long description (adjacent, linked, or in a `<figure>`). |
+| **Avoid images of text** | Use real text; when unavoidable, alt text must match the words in the image. |
+| **Ensure 3:1 contrast for graphical information** | Lines, icons, and chart elements that convey meaning must meet contrast requirements. |
+
+#### Syntax Rules
+
+1. **Purpose first**: Alt text reflects the image's purpose in context, not its visual content.
+2. **Null alt for decoration**: Empty string, not a missing attribute.
+3. **Action-oriented for controls**: Functional images describe what happens, not what is pictured.
+4. **Two-part for data**: Complex images need a short identifier and a long description.
+5. **Real text over text images**: Avoid embedding essential text in images.
+
+#### Constraints and Limitations
+
+- **Alt text cannot convey complex data**: Charts and graphs require long descriptions beyond the alt attribute.
+- **Decorative vs. informative is a judgment call**: The author must decide, and can err in either direction.
+- **Colour contrast for graphics**: Meaningful graphical elements need sufficient contrast, not just text.
+
+---
+
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: A Page with All Image Types
+
+**Setup Guide**: Save as `best-practice-images.html`. Test with a screen reader and an accessibility checker.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Accessible Images</title>
+</head>
+<body>
+  <!-- Informative image -->
+  <img src="team.jpg" alt="The customer support team smiling at their desks" width="800" height="600">
+
+  <!-- Decorative image -->
+  <img src="divider.png" alt="">
+
+  <!-- Functional image -->
+  <a href="/donate">
+    <img src="donate-button.png" alt="Donate now">
+  </a>
+
+  <!-- Complex image with adjacent long description -->
+  <img src="revenue-chart.png" alt="Revenue bar chart for Q1–Q4 2025">
+  <a href="revenue-description.html">Full text description of the revenue chart</a>
+
+  <!-- Image of text (avoid if possible) -->
+  <img src="logo.png" alt="Example Company">
+</body>
+</html>
+```
+
+**Expected output**: A screen reader announces the team photo, skips the divider, announces the “Donate now” link, announces the revenue chart with its description link, and announces the company logo.
+
+**Why this output occurs**: Each image is marked up according to its purpose: informative images get descriptive alt, decorative images get `alt=""`, functional images get action-oriented alt, complex images get a short alt plus a long-description link, and the logo gets its text equivalent.
+
+---
+
+#### Example 2: Common Failures
+
+**Setup Guide**: Save as `image-failures.html`. An accessibility checker will flag each issue.
+
+```html
+<!-- FAILURE: missing alt -->
+<img src="photo.jpg">
+
+<!-- FAILURE: non-null alt on decorative image -->
+<img src="spacer.gif" alt="spacer">
+
+<!-- FAILURE: filename as alt -->
+<img src="IMG_1234.jpg" alt="IMG_1234.jpg">
+
+<!-- FAILURE: functional image without alt -->
+<button><img src="search.svg"></button>
+
+<!-- FAILURE: complex image with only a short alt -->
+<img src="chart.png" alt="Chart">
+```
+
+**Expected output**: Each failure degrades accessibility: missing alt may cause the filename to be announced, non-null alt on decorative images adds noise, filenames are meaningless, functional images become unusable, and complex images lose their data.
+
+**Why this output occurs**: These are the most common image accessibility failures identified by WCAG Techniques F39, F38, and H37.
+
+---
+
+### Real-World Cases
+
+1. **Government and public-sector sites**: WCAG 1.1.1 compliance is legally required; image accessibility is audited.
+2. **E-commerce**: Product images with descriptive alt text improve both accessibility and SEO.
+3. **News and media**: Article images require meaningful alt text and, for charts, long descriptions.
+
+---
+
+### References
+
+- W3C — Understanding SC 1.1.1: Non-text Content — https://w3c.github.io/wcag/understanding/non-text-content.html
+- W3C — Images Tutorial — https://w3c.github.io/wai-website/tutorials/images/
+- W3C — alt Decision Tree — https://www.w3.org/WAI/tutorials/images/decision-tree/
+- W3C — Technique H37: Using alt attributes — https://w3c.github.io/wcag/techniques/html/H37
+- W3C — Technique H67: Using null alt text — https://www.w3.org/WAI/WCAG21/Techniques/html/H67
+- W3C — Technique F39: Failure due to non-null alt — https://www.w3.org/WAI/WCAG22/Techniques/failures/F39
+- W3C — Technique F38: Failure due to not marking up decorative images — https://w3c.github.io/wcag/techniques/failures/F38
+- W3C — Method: Decorative Images — https://www.w3.org/WAI/GL/WCAG3/2022/methods/decorative-images/
+- W3C — Method: Functional Images — https://www.w3.org/WAI/GL/WCAG3/2020/methods/functional-images/
+
+---
+
+## Summary Table of Image Accessibility Concepts
+
+| Concept | WCAG Criterion | Key Rule | Common Failure |
+|---|---|---|---|
+| **Alt text** | 1.1.1 (A) | Describe the purpose, not the picture | Missing alt, filename as alt, “image of” prefix |
+| **Decorative images** | 1.1.1 (A) | `alt=""` with no `title` | Non-null alt like “spacer,” or missing alt |
+| **Functional images** | 1.1.1 (A) | Describe the action, not the object | Missing alt, describing the visual object |
+| **Complex images** | 1.1.1 (A) | Short alt + long description | Short alt alone with no data |
+| **Best practices** | Multiple | Purpose-driven, concise, accurate | Overly long alt, keyword stuffing, images of text |
+
+---
+
+## Final Notes
+
+- **Purpose is the organising principle**: Every alt-text decision flows from the image's purpose — informative, decorative, functional, or complex.
+- **`alt=""` is not the same as no `alt`**: A missing attribute can cause filenames to be announced; an empty attribute tells AT to skip the image.
+- **Functional images describe actions**: “Search,” “Print,” “W3C home” — not “magnifying glass” or “logo”.
+- **Complex images need two parts**: A short identifier and a long description that conveys the essential data.
+- **Images of text should be avoided**: Real text is more accessible, scalable, and localisable.
+- **Test with real assistive technologies**: Automated checkers catch missing `alt` and null-alt misuse, but only screen-reader testing verifies that the alt text actually conveys the right meaning.
+
+---
+
+This cheat sheet has covered image accessibility — alt text, decorative images, functional images, complex images, and best practices — with uniform definitions, purposes, syntax rules, annotated examples, real-world cases, and authoritative references. Use it as a reference and a teaching aid, and validate image accessibility against WCAG 2.2 Success Criterion 1.1.1 (Non-text Content) and the W3C Images Tutorial taxonomy.

@@ -1,4 +1,4 @@
-# C++ Container Adaptors & Custom Priorities — Comprehensive Cheat Sheet
+# C++ Container Adaptors — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -7,683 +7,682 @@
 ### Definitions
 
 **Core Definition**
-Container adaptors are standard library class templates that wrap an existing sequence container and restrict its interface to provide a specific abstract data type — `std::stack` (LIFO), `std::queue` (FIFO), or `std::priority_queue` (heap-ordered). They do not own the underlying storage directly; instead, they delegate operations to an encapsulated container object.
+A container adaptor is a class template that provides a restricted, specialised interface on top of an existing sequence container, implementing a classic data structure such as a stack, queue, or priority queue.
 
 **Technical Definition**
-A container adaptor is a class template that takes a sequence container type as a template parameter and provides a limited set of member functions that map to operations on that underlying container. `std::stack<T, Container = std::deque<T>>` provides `push`, `pop`, `top`, `empty`, and `size`, delegating to `back`, `push_back`, and `pop_back` of the underlying container. `std::queue<T, Container = std::deque<T>>` provides `push`, `pop`, `front`, `back`, `empty`, and `size`, delegating to `push_back`, `pop_front`, `front`, and `back`. `std::priority_queue<T, Container = std::vector<T>, Compare = std::less<T>>` maintains a binary heap over the underlying container using the standard heap algorithms `std::make_heap`, `std::push_heap`, and `std::pop_heap`. All three adaptors are defined in `<stack>` and `<queue>`.
+The C++ Standard Library defines three container adaptors: `std::stack`, `std::queue`, and `std::priority_queue`. Each adaptor takes a `Container` template parameter denoting the type of the underlying sequence container it adapts. The adaptor does not provide iterators, does not support direct element access beyond its specified interface, and enforces a specific access discipline (LIFO, FIFO, or priority-based). The underlying container must satisfy the `SequenceContainer` requirements, plus a small set of additional operations specific to each adaptor.
 
 **Beginner-Friendly Explanation**
-A container adaptor is like a specialised tool built on top of a general-purpose box. Imagine you have a `std::deque` — a flexible container that supports adding and removing at both ends. If you cover up all the openings except the back, you get a stack (last in, first out, like a stack of plates). If you cover up the front for removal and the back for insertion, you get a queue (first in, first out, like a line at a ticket counter). The adaptor doesn't create new storage — it just restricts how you can interact with the container you already have.
-
----
+A container adaptor is like a specialised “shell” around a normal container. You give it a `vector`, `deque`, or `list`, and it hides most of that container’s functions, exposing only the operations that make sense for a stack (last in, first out), a queue (first in, first out), or a priority queue (highest priority first). This restriction prevents accidental misuse and makes the intent of the code clear.
 
 ### Key Characteristics
 
-- **Interface restriction**: Adaptors expose only the operations appropriate for their abstract data type; iterators are not provided.
-- **Underlying container flexibility**: The backing container can be customised via a template parameter, subject to operation requirements.
-- **Default backings**: `std::stack` and `std::queue` default to `std::deque`; `std::priority_queue` defaults to `std::vector`.
-- **Heap-based priority**: `std::priority_queue` maintains a binary heap and uses a `Compare` predicate (default `std::less`) to determine priority.
-- **Zero runtime abstraction overhead**: The adaptor layer is thin and fully inlined by the compiler; there is no virtual dispatch or type-erasure cost.
-- **No iterator support**: Unlike sequence containers, adaptors deliberately omit `begin()`/`end()` to enforce their restricted interface.
-
----
+- **Restricted interface** – only a specific set of member functions is provided; iterators are deliberately absent.
+- **Underlying container** – the adaptor stores its elements in a sequence container that can be customised via a template parameter.
+- **No iteration** – you cannot traverse the elements; you can only access the element(s) designated by the adaptor’s discipline.
+- **Efficient operations** – `stack` and `queue` provide O(1) insertion, removal, and access; `priority_queue` provides O(1) `top` and O(log n) insertion/removal.
+- **Value semantics** – copying an adaptor copies its underlying container and all elements.
 
 ### Prerequisites
 
-- Familiarity with sequence containers (`std::deque`, `std::vector`, `std::list`) and their member functions.
-- Understanding of iterators and template parameters.
-- Basic knowledge of comparison predicates and strict weak ordering.
-- (For `std::priority_queue` custom comparators) Familiarity with function objects and lambdas.
-- A compiler supporting C++11 or later for `emplace` and lambda-based comparators.
-
----
+- Basic C++ syntax (variables, types, control flow).
+- Familiarity with sequence containers (`std::vector`, `std::deque`, `std::list`).
+- Understanding of templates and function objects (for `priority_queue` comparators).
+- Awareness of Big-O notation.
 
 ### Related Programming Areas
 
-- **Algorithm design**: LIFO/FIFO/heap structures underpin parsing, scheduling, and graph algorithms.
-- **Operating systems**: Stack-based call management, queue-based process scheduling, priority-based interrupt handling.
-- **Data structures and algorithms**: Heap sort, Dijkstra's algorithm, and Huffman coding rely on priority queues.
-- **Template metaprogramming**: Adaptors demonstrate the power of compile-time container substitution.
-- **Performance engineering**: Choosing the right backing container affects cache locality and allocation patterns.
-
----
+- **Sequence containers** – adaptors are built on top of `deque`, `vector`, or `list`.
+- **Algorithms** – `std::make_heap`, `std::push_heap`, and `std::pop_heap` underlie `priority_queue`.
+- **Graph algorithms** – BFS uses `queue`, DFS uses `stack`, Dijkstra uses `priority_queue`.
+- **Expression evaluation** – stacks are used for parsing and evaluating expressions.
 
 ### Core Concepts / Features
 
-1. **Underlying Backings** — Restricting container interfaces using `std::stack` and `std::queue`.
-2. **Priority Queues** — Heap-based sorting mechanisms in `std::priority_queue` with custom comparison predicates.
-3. **Performance Overheads** — Recognizing when container adaptors introduce virtual layout overheads vs. compile-time stripping.
+1. `std::stack`
+2. `std::queue`
+3. `std::priority_queue`
+4. Adaptor operations
+5. Adaptor best practices
 
 ---
 
-## 1. Underlying Backings
+## 1. `std::stack`
 
 ### Definitions
 
 **Core Definition**
-Underlying backing (or backing container) refers to the sequence container that a container adaptor wraps and delegates its operations to. The adaptor's behaviour is determined by the capabilities and performance characteristics of this backing container.
+`std::stack` is a container adaptor that provides the functionality of a stack — specifically, a LIFO (last-in, first-out) data structure.
 
 **Technical Definition**
-`std::stack<T, Container>` requires `Container` to satisfy the SequenceContainer requirements and provide `back()`, `push_back()`, and `pop_back()`. `std::queue<T, Container>` additionally requires `front()` and `pop_front()`. The standard containers `std::deque` and `std::list` satisfy all requirements for both. `std::vector` satisfies the requirements for `std::stack` but not for `std::queue` (no `pop_front()`). The default backing for both `stack` and `queue` is `std::deque<T>`.
-
-**Beginner-Friendly Explanation**
-The backing container is the "engine" under the hood of the adaptor. A `std::stack` built on a `std::deque` grows efficiently without reallocation, while a `std::stack` built on a `std::vector` has better cache locality but may pay for reallocation when it grows. The adaptor itself adds no storage — it just forwards your operations to the container you chose.
-
----
-
-### Sub-Feature: `std::stack` (LIFO)
-
-#### Definitions
-
-**Core Definition**
-`std::stack` is a container adaptor that provides last-in, first-out (LIFO) semantics: elements are added and removed from the same end, called the top.
-
-**Technical Definition**
-`template<class T, class Container = std::deque<T>> class stack;`. It pushes and pops from the back of the underlying container. Only `back()`, `push_back()`, and `pop_back()` are required from `Container`. Since C++26, all member functions are `constexpr`. The adaptor does not provide iterators.
-
-**Beginner-Friendly Explanation**
-A stack is like a stack of plates — you put a new plate on top and take the top plate off. You can't reach the plates in the middle. This is useful for undo operations, expression evaluation, and backtracking.
-
-#### Purposes (all begin with "To")
-
-- **To** provide LIFO semantics for algorithms that require last-in, first-out processing.
-- **To** restrict the interface of a sequence container to prevent accidental access to non-top elements.
-- **To** allow the backing container to be swapped (e.g., `std::vector` for cache locality) without changing the algorithm's logic.
-- **To** serve as the implementation backbone for recursive algorithms, expression parsers, and undo systems.
-- **To** eliminate iterator-based access that could violate the stack abstraction.
-
-#### Syntax Rules and Structure
-
+Declared in `<stack>`:
 ```cpp
 template<class T, class Container = std::deque<T>>
 class stack;
 ```
-
-**Component breakdown:**
-- `T` — the type of stored elements.
-- `Container` — the underlying sequence container (default `std::deque<T>`).
-
-**Common operations:**
-- `s.push(x)` / `s.emplace(args...)` — adds an element at the top (amortised O(1)).
-- `s.pop()` — removes the top element (O(1)); does not return the value.
-- `s.top()` — returns a reference to the top element (O(1)).
-- `s.empty()` — checks if the stack is empty.
-- `s.size()` — returns the number of elements.
-
-**Constraints and limitations:**
-- No iterators — cannot traverse the stack without popping.
-- `pop()` returns `void`; to retrieve and remove, call `top()` then `pop()`.
-- The backing container must provide `back()`, `push_back()`, and `pop_back()`.
-- `std::vector` is a valid backing for `stack` but may reallocate on growth.
-
-#### Annotated Code Example
-
-```cpp
-// File: stack_example.cpp
-// Compile with: g++ -std=c++17 stack_example.cpp -o stack_example
-
-#include <stack>
-#include <iostream>
-#include <vector>
-
-int main() {
-    // Step 1: Default stack (backed by std::deque)
-    std::stack<int> s;
-
-    // Step 2: Push elements
-    s.push(10);
-    s.push(20);
-    s.push(30);
-
-    // Step 3: Access top (LIFO — last pushed is on top)
-    std::cout << "Top: " << s.top() << std::endl;  // 30
-
-    // Step 4: Pop and print
-    std::cout << "Popping: ";
-    while (!s.empty()) {
-        std::cout << s.top() << " ";
-        s.pop();
-    }
-    std::cout << std::endl;
-
-    // Step 5: Stack backed by std::vector (better cache locality)
-    std::stack<int, std::vector<int>> vs;
-    vs.push(1);
-    vs.push(2);
-    std::cout << "Vector-backed top: " << vs.top() << std::endl;
-
-    return 0;
-}
-```
-
-**Expected Output:**
-```
-Top: 30
-Popping: 30 20 10
-Vector-backed top: 2
-```
-
-**Why this output:** `std::stack` pushes and pops from the back of the underlying container. The last element pushed (`30`) is the top. Popping removes elements in reverse order of insertion (LIFO). The vector-backed stack behaves identically; only the underlying storage strategy differs.
-
-#### Real-World Cases with Explanation
-
-**Case 1 — Expression evaluation**: Compilers and calculators use stacks to evaluate postfix expressions and to match parentheses during parsing.
-
-**Case 2 — Undo/redo systems**: Each action is pushed onto an undo stack; undoing pops the most recent action.
-
-**Case 3 — Depth-first search**: Graph traversal uses a stack (explicit or via recursion) to track the path.
-
-**Case 4 — Function call management**: The call stack of a running program is conceptually a stack of activation records.
-
----
-
-### Sub-Feature: `std::queue` (FIFO)
-
-#### Definitions
-
-**Core Definition**
-`std::queue` is a container adaptor that provides first-in, first-out (FIFO) semantics: elements are inserted at the back and removed from the front.
-
-**Technical Definition**
-`template<class T, class Container = std::deque<T>> class queue;`. It requires `front()`, `back()`, `push_back()`, and `pop_front()` from `Container`. `std::deque` and `std::list` satisfy these requirements; `std::vector` does not (no `pop_front()`). Since C++26, all member functions are `constexpr`. No iterators are provided.
+The class template acts as a wrapper to the underlying container; only a specific set of functions is provided. The stack pushes and pops elements from the **back** of the underlying container, which is called the *top* of the stack. The underlying container must satisfy `SequenceContainer` and provide `back()`, `push_back()`, and `pop_back()`. All member functions are `constexpr` since C++26.
 
 **Beginner-Friendly Explanation**
-A queue is like a line at a supermarket — the first person in line is the first to be served. New people join at the back. You can only see the person at the front and the person at the back, not those in the middle.
+A stack is like a pile of plates: you add a plate to the top, and you remove the most recently added plate first. You can only see or touch the top plate — the ones underneath are hidden.
 
-#### Purposes (all begin with "To")
+### Purposes
 
-- **To** provide FIFO semantics for algorithms that require first-in, first-out processing.
-- **To** restrict a container's interface so that insertion and removal happen at opposite ends.
-- **To** support breadth-first traversal of trees and graphs.
-- **To** model real-world waiting lines in simulations and scheduling systems.
-- **To** allow the backing container to be swapped (e.g., `std::list`) without changing the algorithm.
+- To model LIFO behaviour with a clear, restricted interface.
+- To prevent accidental access to elements other than the top.
+- To allow the underlying container to be customised for performance or memory characteristics.
+- To support algorithms and parsing tasks that naturally require last-in-first-out access.
 
-#### Syntax Rules and Structure
+### Syntax Rules and Structure
 
+**General Syntax**
 ```cpp
-template<class T, class Container = std::deque<T>>
-class queue;
+#include <stack>
+std::stack<T> s;                        // default: deque<T>
+std::stack<T, Container> s;             // custom underlying container
 ```
 
-**Component breakdown:**
-- `T` — element type.
-- `Container` — underlying sequence container (default `std::deque<T>`).
+**Component Breakdown**
 
-**Common operations:**
-- `q.push(x)` / `q.emplace(args...)` — adds at the back (amortised O(1)).
-- `q.pop()` — removes the front element (O(1)); returns `void`.
-- `q.front()` — reference to the front element.
-- `q.back()` — reference to the back element.
-- `q.empty()` / `q.size()` — capacity checks.
+| Component | Description |
+|-----------|-------------|
+| `T` | The type of elements stored. Must be the same as `Container::value_type`. |
+| `Container` | The underlying sequence container; default `std::deque<T>`. |
 
-**Constraints and limitations:**
-- No iterators.
-- `pop()` returns `void`; retrieve via `front()` before popping.
-- The backing container must support `pop_front()`; `std::vector` is not valid.
-- No random access to middle elements.
+**Member Function Complexity**
 
-#### Annotated Code Example
+| Operation | Complexity | Notes |
+|-----------|------------|-------|
+| `push` / `emplace` | O(1) | Inserts at the top |
+| `pop` | O(1) | Removes the top element |
+| `top` | O(1) | Accesses the top element |
+| `empty` | O(1) | Checks whether the stack is empty |
+| `size` | O(1) | Returns the number of elements |
+
+**Syntax Rules**
+- `top()` returns a reference to the top element; calling it on an empty stack is undefined behaviour.
+- `pop()` removes the top element but does not return it; call `top()` first if the value is needed.
+- `push` inserts a copy (or moves) an existing object; `emplace` constructs the element directly in place.
+- There are no iterators, no `begin()`/`end()`, and no direct access to elements below the top.
+
+**Constraints and Limitations**
+- No traversal or iteration over elements.
+- Only the top element is accessible.
+- The underlying container must support `back()`, `push_back()`, and `pop_back()`; `std::vector`, `std::deque`, and `std::list` all qualify.
+
+### Annotated Code Examples
+
+**Example 1: Basic stack operations**
 
 ```cpp
-// File: queue_example.cpp
-// Compile with: g++ -std=c++17 queue_example.cpp -o queue_example
-
-#include <queue>
+#include <stack>
 #include <iostream>
 
 int main() {
-    // Step 1: Default queue (backed by std::deque)
-    std::queue<std::string> q;
+    std::stack<int> s;
 
-    // Step 2: Enqueue elements
-    q.push("Alice");
-    q.push("Bob");
-    q.push("Charlie");
+    s.push(1);                             // bottom
+    s.push(2);
+    s.push(3);                             // top
 
-    // Step 3: Inspect front and back
-    std::cout << "Front: " << q.front() << std::endl;  // Alice
-    std::cout << "Back:  " << q.back()  << std::endl;  // Charlie
-
-    // Step 4: Dequeue and print (FIFO order)
-    std::cout << "Dequeuing: ";
-    while (!q.empty()) {
-        std::cout << q.front() << " ";
-        q.pop();
-    }
-    std::cout << std::endl;
-
-    // Step 5: Queue backed by std::list
-    std::queue<int, std::list<int>> lq;
-    lq.push(100);
-    lq.push(200);
-    std::cout << "List-backed front: " << lq.front() << std::endl;
-
-    return 0;
+    std::cout << s.top() << '\n';          // 3
+    s.pop();                               // removes 3
+    std::cout << s.top() << '\n';          // 2
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Front: Alice
-Back:  Charlie
-Dequeuing: Alice Bob Charlie
-List-backed front: 100
+3
+2
 ```
 
-**Why this output:** Elements are inserted at the back (`push`) and removed from the front (`pop`). The first element inserted (`Alice`) is the first removed (FIFO). The list-backed queue behaves identically.
+**Why this output?**  
+`push` adds elements in order; `top` returns the most recently pushed element (LIFO). After `pop`, the next element becomes the top.
 
-#### Real-World Cases with Explanation
+**Example 2: Stack with `vector` as the underlying container**
 
-**Case 1 — Print spoolers**: Print jobs are queued in arrival order and processed sequentially.
+```cpp
+#include <stack>
+#include <vector>
+#include <iostream>
 
-**Case 2 — Breadth-first search**: BFS uses a queue to visit nodes level by level.
+int main() {
+    std::stack<int, std::vector<int>> s;
 
-**Case 3 — Message queues**: Inter-process communication often uses FIFO queues for message delivery.
+    s.push(10);
+    s.push(20);
 
-**Case 4 — Task scheduling**: Operating systems use queues to manage ready processes.
+    std::cout << s.top() << '\n';          // 20
+    std::cout << s.size() << '\n';         // 2
+}
+```
+
+**Expected Output**
+```
+20
+2
+```
+
+**Why this output?**  
+The underlying container is `std::vector<int>`, but the interface remains LIFO. `top` still returns the last pushed element.
+
+**Example 3: `emplace` for in-place construction**
+
+```cpp
+#include <stack>
+#include <iostream>
+#include <string>
+
+int main() {
+    std::stack<std::string> s;
+
+    s.emplace("hello");                    // construct in place
+    s.emplace("world");
+
+    std::cout << s.top() << '\n';          // world
+}
+```
+
+**Expected Output**
+```
+world
+```
+
+**Why this output?**  
+`emplace` forwards arguments to the element’s constructor, constructing the string directly in the stack’s storage.
+
+### Real-World Cases
+
+- **Expression evaluation** – parsing and evaluating postfix expressions.
+- **Undo/redo systems** – storing states for reversal.
+- **Depth-first search (DFS)** – iterative graph traversal.
+- **Syntax parsing** – matching parentheses and tags.
 
 ---
 
-## 2. Priority Queues
+## 2. `std::queue`
 
 ### Definitions
 
 **Core Definition**
-`std::priority_queue` is a container adaptor that provides constant-time access to the largest (by default) element, with logarithmic-time insertion and extraction, using a binary heap.
+`std::queue` is a container adaptor that provides the functionality of a queue — specifically, a FIFO (first-in, first-out) data structure.
 
 **Technical Definition**
-`template<class T, class Container = std::vector<T>, class Compare = std::less<typename Container::value_type>> class priority_queue;`. The adaptor requires `Container` to satisfy SequenceContainer and provide random-access iterators (LegacyRandomAccessIterator), plus `front()`, `push_back()`, and `pop_back()`. It maintains a heap by calling `std::make_heap` on construction and `std::push_heap` / `std::pop_heap` on modification. The `Compare` parameter defines a strict weak ordering; the element that is "greatest" according to `Compare` is at the top. The default `std::less` makes it a max-heap; `std::greater` makes it a min-heap.
+Declared in `<queue>`:
+```cpp
+template<class T, class Container = std::deque<T>>
+class queue;
+```
+The queue pushes elements on the **back** of the underlying container and pops them from the **front**. The underlying container must satisfy `SequenceContainer` and provide `back()`, `front()`, `push_back()`, and `pop_front()`. Standard containers `std::deque` and `std::list` satisfy these requirements.
 
 **Beginner-Friendly Explanation**
-A priority queue is like a hospital emergency room — patients are not treated in arrival order; the most critical case is seen first. Internally, it uses a binary heap stored in a contiguous array. The "top" element is always the one with the highest priority. You can insert new elements and remove the top, but you cannot access elements in the middle.
+A queue is like a line at a ticket counter: the first person to join the line is the first to be served. You add people to the back of the line and serve them from the front.
+
+### Purposes
+
+- To model FIFO behaviour with a clear, restricted interface.
+- To prevent access to elements other than the front and back.
+- To support breadth-first search and task scheduling.
+- To allow the underlying container to be customised.
+
+### Syntax Rules and Structure
+
+**General Syntax**
+```cpp
+#include <queue>
+std::queue<T> q;                        // default: deque<T>
+std::queue<T, Container> q;             // custom underlying container
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `T` | The type of elements stored. |
+| `Container` | The underlying sequence container; default `std::deque<T>`. |
+
+**Member Function Complexity**
+
+| Operation | Complexity | Notes |
+|-----------|------------|-------|
+| `push` / `emplace` | O(1) | Inserts at the back |
+| `pop` | O(1) | Removes the front element |
+| `front` | O(1) | Accesses the front element |
+| `back` | O(1) | Accesses the back element |
+| `empty` / `size` | O(1) | |
+
+**Syntax Rules**
+- `front()` returns the oldest element; `back()` returns the newest.
+- `pop()` removes the front element without returning it.
+- `push` adds at the back; `emplace` constructs in place at the back.
+- No iterators are provided; `begin()`/`end()` are not available.
+
+**Constraints and Limitations**
+- No traversal or iteration.
+- Only the front and back elements are accessible.
+- The underlying container must support `pop_front()`; `std::vector` cannot be used because it lacks `pop_front()`.
+
+### Annotated Code Examples
+
+**Example 1: Basic queue operations**
+
+```cpp
+#include <queue>
+#include <iostream>
+
+int main() {
+    std::queue<int> q;
+
+    q.push(1);                             // front
+    q.push(2);
+    q.push(3);                             // back
+
+    std::cout << q.front() << '\n';        // 1
+    std::cout << q.back() << '\n';         // 3
+
+    q.pop();                               // removes 1
+    std::cout << q.front() << '\n';        // 2
+}
+```
+
+**Expected Output**
+```
+1
+3
+2
+```
+
+**Why this output?**  
+`push` adds at the back; `front` returns the oldest element; `pop` removes the front element, revealing the next one.
+
+**Example 2: Queue with `list` as the underlying container**
+
+```cpp
+#include <queue>
+#include <list>
+#include <iostream>
+
+int main() {
+    std::queue<int, std::list<int>> q;
+
+    q.push(10);
+    q.push(20);
+
+    std::cout << q.front() << '\n';        // 10
+    std::cout << q.back() << '\n';         // 20
+}
+```
+
+**Expected Output**
+```
+10
+20
+```
+
+**Why this output?**  
+`std::list` satisfies the queue’s requirements, and the FIFO interface is preserved.
+
+**Example 3: Using `emplace`**
+
+```cpp
+#include <queue>
+#include <iostream>
+#include <string>
+
+int main() {
+    std::queue<std::string> q;
+
+    q.emplace("first");
+    q.emplace("second");
+
+    std::cout << q.front() << '\n';        // first
+}
+```
+
+**Expected Output**
+```
+first
+```
+
+**Why this output?**  
+`emplace` constructs the string directly at the back of the queue.
+
+### Real-World Cases
+
+- **Breadth-first search (BFS)** – exploring graph levels in order.
+- **Printer spooling** – processing jobs in arrival order.
+- **Message queues** – asynchronous communication between components.
+- **Task scheduling** – fair, first-come-first-served execution.
 
 ---
 
-### Sub-Feature: Heap-Based Sorting Mechanisms
+## 3. `std::priority_queue`
 
-#### Definitions
+### Definitions
 
 **Core Definition**
-The heap is a binary tree stored in an array where every parent is "greater" than its children according to a comparison predicate, enabling efficient retrieval of the maximum (or minimum) element.
+`std::priority_queue` is a container adaptor that provides constant-time access to the largest (by default) element, at the cost of logarithmic-time insertion and extraction.
 
 **Technical Definition**
-`std::priority_queue` maintains an implicit binary heap in the underlying container. The heap property is: for all `i`, `comp(c[i], c[parent(i)])` is `false` (i.e., the parent is not "less than" the child). In a max-heap with `std::less`, the root is the largest element. Insertion uses `std::push_heap` (percolate up), and extraction uses `std::pop_heap` (swap root with last, then percolate down). Both operations are O(log n). Top access is O(1).
-
-**Beginner-Friendly Explanation**
-A heap is like a tournament bracket where the winner (largest element) is always at the top. When you add a new contestant, they climb up the bracket until they find their level. When the winner leaves, the last contestant takes their place and sinks down until the bracket is valid again. All of this happens in an array, not a tree of pointers, so it is cache-friendly.
-
-#### Purposes (all begin with "To")
-
-- **To** provide O(1) access to the highest-priority element.
-- **To** support O(log n) insertion and removal of the highest-priority element.
-- **To** implement algorithms such as Dijkstra's shortest path, Huffman coding, and A* search.
-- **To** maintain a dynamically changing set of elements ordered by priority.
-- **To** allow custom priority definitions via a `Compare` predicate.
-
-#### Syntax Rules and Structure
-
+Declared in `<queue>`:
 ```cpp
 template<class T, class Container = std::vector<T>,
          class Compare = std::less<typename Container::value_type>>
 class priority_queue;
 ```
+The underlying container must satisfy `SequenceContainer` and provide random-access iterators, plus `front()`, `push_back()`, and `pop_back()`. The `Compare` parameter imposes a strict weak ordering; by default, `std::less<T>` makes the largest element the top. Using `std::greater<T>` makes the smallest element the top.
 
-**Component breakdown:**
-- `T` — element type.
-- `Container` — underlying container (default `std::vector<T>`; must support random access).
-- `Compare` — comparison predicate (default `std::less<T>`, giving a max-heap).
+**Beginner-Friendly Explanation**
+A priority queue is like a hospital emergency room: the most urgent case is treated first, regardless of arrival order. By default, the “largest” element has the highest priority.
 
-**Common operations:**
-- `pq.push(x)` / `pq.emplace(args...)` — inserts and reheapifies (O(log n)).
-- `pq.pop()` — removes the top element (O(log n)).
-- `pq.top()` — returns the top element (O(1)).
-- `pq.empty()` / `pq.size()` — capacity checks.
+### Purposes
 
-**Constraints and limitations:**
-- No iterators; cannot traverse the heap.
-- `pop()` returns `void`; retrieve via `top()` first.
-- The `Compare` must define a strict weak ordering; violating this causes undefined behaviour.
-- `std::vector<bool>` is a valid backing container but is a specialised bit-packed template.
+- To model priority-based access with O(1) `top` and O(log n) insertion/removal.
+- To support algorithms that repeatedly need the maximum (or minimum) element.
+- To provide a safer alternative to manually managing a heap.
+- To allow custom priority ordering via a comparator.
 
-#### Annotated Code Example
+### Syntax Rules and Structure
+
+**General Syntax**
+```cpp
+#include <queue>
+std::priority_queue<T> pq;                          // max-heap
+std::priority_queue<T, Container, Compare> pq;       // custom
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `T` | The type of elements stored. |
+| `Container` | Underlying container; default `std::vector<T>`. |
+| `Compare` | Strict weak ordering; default `std::less<T>` (max-heap). |
+
+**Member Function Complexity**
+
+| Operation | Complexity | Notes |
+|-----------|------------|-------|
+| `top` | O(1) | Accesses the highest-priority element |
+| `push` / `emplace` | O(log n) | Inserts and restores heap order |
+| `pop` | O(log n) | Removes the top element |
+| `empty` / `size` | O(1) | |
+
+**Syntax Rules**
+- `top()` returns a const reference to the highest-priority element.
+- `pop()` removes the top element but does not return it.
+- The comparator must provide a strict weak ordering; an invalid comparator leads to undefined behaviour.
+- With `std::greater<T>`, the smallest element becomes the top (min-heap).
+
+**Constraints and Limitations**
+- No iteration or direct access to elements other than the top.
+- The underlying container must support random access; `std::list` cannot be used.
+- Building a priority queue from a range is O(n), but individual insertions are O(log n).
+
+### Annotated Code Examples
+
+**Example 1: Max-heap (default)**
 
 ```cpp
-// File: priority_queue_basic.cpp
-// Compile with: g++ -std=c++17 priority_queue_basic.cpp -o priority_queue_basic
-
 #include <queue>
 #include <iostream>
 
 int main() {
-    // Step 1: Default max-heap
-    std::priority_queue<int> max_pq;
-    max_pq.push(30);
-    max_pq.push(10);
-    max_pq.push(50);
-    max_pq.push(20);
+    std::priority_queue<int> pq;
 
-    std::cout << "Max-heap order: ";
-    while (!max_pq.empty()) {
-        std::cout << max_pq.top() << " ";
-        max_pq.pop();
-    }
-    std::cout << std::endl;
+    pq.push(3);
+    pq.push(1);
+    pq.push(4);
 
-    // Step 2: Min-heap using std::greater
-    std::priority_queue<int, std::vector<int>, std::greater<int>> min_pq;
-    min_pq.push(30);
-    min_pq.push(10);
-    min_pq.push(50);
-    min_pq.push(20);
-
-    std::cout << "Min-heap order: ";
-    while (!min_pq.empty()) {
-        std::cout << min_pq.top() << " ";
-        min_pq.pop();
-    }
-    std::cout << std::endl;
-
-    return 0;
+    std::cout << pq.top() << '\n';         // 4 (largest)
+    pq.pop();
+    std::cout << pq.top() << '\n';         // 3
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Max-heap order: 50 30 20 10
-Min-heap order: 10 20 30 50
+4
+3
 ```
 
-**Why this output:** With `std::less` (default), the heap puts the largest element at the top. With `std::greater`, the comparison is reversed, so the smallest element is at the top. Popping removes the top and reheapifies the remaining elements.
+**Why this output?**  
+The default comparator `std::less<int>` makes the largest element the top. After `pop`, the next largest element becomes the top.
 
----
-
-### Sub-Feature: Custom Comparison Predicates
-
-#### Definitions
-
-**Core Definition**
-A custom comparison predicate is a user-provided function object or lambda that defines the priority ordering for a `std::priority_queue`.
-
-**Technical Definition**
-The `Compare` template parameter must be a type that is callable as `comp(a, b)` returning `bool`, and it must define a strict weak ordering. The element for which `comp(other, top)` is `false` for all other elements is the top. For a max-heap with a custom "priority" notion (e.g., smaller numbers mean higher priority), the predicate should return `true` when the first argument has lower priority than the second. The predicate is stored as a member and default-constructed unless a comparator instance is passed to the constructor.
-
-**Beginner-Friendly Explanation**
-Sometimes "largest number" is not the right priority. Maybe you want the smallest number first (min-heap), or the patient with the highest severity score, or the task with the earliest deadline. A custom comparator lets you define exactly what "higher priority" means.
-
-#### Purposes (all begin with "To")
-
-- **To** reverse the default ordering (min-heap instead of max-heap).
-- **To** define priority based on a member of a struct or class (e.g., deadline, severity).
-- **To** implement priority queues where "higher priority" means a smaller numeric value.
-- **To** support lambda-based comparators for context-dependent priority logic.
-- **To** use stateful comparators that capture external data.
-
-#### Syntax Rules and Structure
+**Example 2: Min-heap with `std::greater`**
 
 ```cpp
-// Using a function object
-struct MyCompare {
-    bool operator()(const T& a, const T& b) const {
-        return a.priority > b.priority;  // smaller value = higher priority
-    }
-};
-std::priority_queue<T, std::vector<T>, MyCompare> pq;
+#include <queue>
+#include <iostream>
+#include <functional>
 
-// Using a lambda (must pass instance to constructor)
-auto cmp = [](const T& a, const T& b) { return a.deadline > b.deadline; };
-std::priority_queue<T, std::vector<T>, decltype(cmp)> pq(cmp);
+int main() {
+    std::priority_queue<int, std::vector<int>, std::greater<int>> pq;
+
+    pq.push(3);
+    pq.push(1);
+    pq.push(4);
+
+    std::cout << pq.top() << '\n';         // 1 (smallest)
+}
 ```
 
-**Constraints and limitations:**
-- The comparator must define a strict weak ordering.
-- A lambda comparator cannot be default-constructed, so it must be passed to the constructor.
-- The comparator must not modify the elements it compares.
-- Stateful comparators must be copy-constructible.
+**Expected Output**
+```
+1
+```
 
-#### Annotated Code Example
+**Why this output?**  
+`std::greater<int>` reverses the ordering, so the smallest element has the highest priority.
+
+**Example 3: Custom comparator for a struct**
 
 ```cpp
-// File: priority_queue_custom.cpp
-// Compile with: g++ -std=c++17 priority_queue_custom.cpp -o priority_queue_custom
-
 #include <queue>
 #include <iostream>
 #include <string>
-#include <vector>
 
-// Step 1: A task with a deadline (smaller deadline = higher priority)
 struct Task {
+    int priority;
     std::string name;
-    int deadline;  // smaller = more urgent
 };
 
-// Step 2: Custom comparator — urgent tasks first (min-heap on deadline)
-struct UrgentFirst {
+struct CompareTask {
     bool operator()(const Task& a, const Task& b) const {
-        return a.deadline > b.deadline;  // "greater" deadline = lower priority
+        return a.priority < b.priority;    // lower number = lower priority
     }
 };
 
 int main() {
-    // Step 3: Priority queue with custom comparator
-    std::priority_queue<Task, std::vector<Task>, UrgentFirst> pq;
+    std::priority_queue<Task, std::vector<Task>, CompareTask> pq;
 
-    pq.push({"Write report", 5});
-    pq.push({"Fix bug", 1});
-    pq.push({"Attend meeting", 3});
-    pq.push({"Review PR", 2});
+    pq.push({2, "email"});
+    pq.push({5, "emergency"});
+    pq.push({1, "laundry"});
 
-    // Step 4: Process tasks in priority order
-    std::cout << "Task order (most urgent first):" << std::endl;
-    while (!pq.empty()) {
-        const Task& t = pq.top();
-        std::cout << "  " << t.name << " (deadline: " << t.deadline << ")"
-                  << std::endl;
-        pq.pop();
-    }
-
-    // Step 5: Lambda-based comparator (capturing a threshold)
-    int threshold = 2;
-    auto lambda_cmp = [threshold](const Task& a, const Task& b) {
-        // Tasks at or below threshold are "urgent" and come first
-        bool a_urgent = a.deadline <= threshold;
-        bool b_urgent = b.deadline <= threshold;
-        if (a_urgent != b_urgent) return !a_urgent;  // urgent first
-        return a.deadline > b.deadline;  // among same urgency, smaller first
-    };
-
-    std::priority_queue<Task, std::vector<Task>, decltype(lambda_cmp)>
-        pq2(lambda_cmp);
-
-    pq2.push({"Write report", 5});
-    pq2.push({"Fix bug", 1});
-    pq2.push({"Attend meeting", 3});
-    pq2.push({"Review PR", 2});
-
-    std::cout << "\nLambda-ordered tasks:" << std::endl;
-    while (!pq2.empty()) {
-        const Task& t = pq2.top();
-        std::cout << "  " << t.name << " (deadline: " << t.deadline << ")"
-                  << std::endl;
-        pq2.pop();
-    }
-
-    return 0;
+    std::cout << pq.top().name << '\n';    // emergency
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Task order (most urgent first):
-  Fix bug (deadline: 1)
-  Review PR (deadline: 2)
-  Attend meeting (deadline: 3)
-  Write report (deadline: 5)
-
-Lambda-ordered tasks:
-  Fix bug (deadline: 1)
-  Review PR (deadline: 2)
-  Attend meeting (deadline: 3)
-  Write report (deadline: 5)
+emergency
 ```
 
-**Why this output:** The `UrgentFirst` comparator returns `true` when `a.deadline > b.deadline`, meaning a task with a larger deadline is "less than" a task with a smaller deadline. Therefore, the smallest deadline is at the top. The lambda comparator adds a threshold: tasks with `deadline <= 2` are treated as urgent and come before non-urgent tasks, regardless of their relative deadlines.
+**Why this output?**  
+The custom comparator defines the priority ordering; the task with the highest `priority` value is at the top.
 
-#### Real-World Cases with Explanation
+### Real-World Cases
 
-**Case 1 — Operating system schedulers**: Real-time schedulers use priority queues to run the highest-priority task first, often with custom comparators for deadline-based ordering.
-
-**Case 2 — Dijkstra's algorithm**: A min-heap priority queue (with `std::greater`) stores vertices by tentative distance, always extracting the closest unvisited vertex.
-
-**Case 3 — Huffman coding**: A min-heap priority queue combines the two least frequent characters at each step to build an optimal prefix code.
-
-**Case 4 — Event-driven simulation**: Events are stored in a priority queue ordered by simulation time; the next event to occur is always at the top.
+- **Dijkstra’s shortest-path algorithm** – repeatedly extracting the nearest unvisited node.
+- **Huffman coding** – merging the two lowest-frequency nodes.
+- **Task schedulers** – executing the highest-priority task next.
+- **Event simulation** – processing events in order of scheduled time.
 
 ---
 
-## 3. Performance Overheads
+## 4. Adaptor Operations
 
 ### Definitions
 
 **Core Definition**
-Performance overhead in the context of container adaptors refers to any runtime cost introduced by the adaptor layer itself, as opposed to the cost of the underlying container operations. In practice, this overhead is effectively zero due to inlining and compile-time resolution.
+Adaptor operations are the member functions shared by all three container adaptors for inserting, removing, accessing, and querying elements within the constraints of their respective disciplines.
 
 **Technical Definition**
-Container adaptors are class templates that contain an instance of the backing container as a member. All adaptor member functions are defined inline in the header and forward directly to the underlying container's member functions. There is no virtual dispatch, no type erasure, and no runtime indirection. The compiler resolves the adaptor's operations at compile time and typically inlines them entirely. Any perceived overhead is actually attributable to the backing container (e.g., `std::deque`'s block management vs. `std::vector`'s reallocation) rather than to the adaptor itself.
+All three adaptors provide a common core: `empty()`, `size()`, `push()`, `pop()`, `emplace()`, `swap()`, and assignment. `stack` additionally provides `top()`; `queue` provides `front()` and `back()`; `priority_queue` provides `top()`. None provide iterators or `begin()`/`end()`.
 
 **Beginner-Friendly Explanation**
-You might worry that wrapping a container in an adaptor adds a layer of "slowness." It doesn't. The adaptor's functions are so simple that the compiler replaces them entirely with direct calls to the underlying container. If you write `s.push(5)` on a `std::stack`, the compiler sees it as `c.push_back(5)` on the deque — no extra function call, no extra memory. The only performance differences come from which backing container you choose.
+Even though stacks, queues, and priority queues behave differently, they share many of the same commands: you can check if they are empty, see how many items they hold, add an item, and remove an item. The difference is *which* item is added and removed, and how you access it.
 
----
+### Common Interface
 
-### Sub-Feature: Compile-Time Stripping vs. Virtual Layout Overheads
+| Operation | `stack` | `queue` | `priority_queue` |
+|-----------|---------|---------|------------------|
+| `empty()` | ✓ | ✓ | ✓ |
+| `size()` | ✓ | ✓ | ✓ |
+| `push(value)` | ✓ (top) | ✓ (back) | ✓ (heap) |
+| `emplace(args...)` | ✓ | ✓ | ✓ |
+| `pop()` | ✓ (top) | ✓ (front) | ✓ (top) |
+| `top()` | ✓ | — | ✓ |
+| `front()` | — | ✓ | — |
+| `back()` | — | ✓ | — |
+| `swap(other)` | ✓ | ✓ | ✓ |
 
-#### Definitions
+**Syntax Rules**
+- `pop()` on all adaptors returns `void`; retrieve the element first via `top()` or `front()`.
+- `push` and `emplace` add to the discipline-appropriate end: top for stack, back for queue, heap for priority_queue.
+- `swap` exchanges the underlying containers and is generally O(1).
 
-**Core Definition**
-Compile-time stripping (or zero-overhead abstraction) means the compiler eliminates the adaptor layer entirely, leaving only the underlying container's operations. Virtual layout overhead refers to the cost of runtime polymorphism (vtables, virtual dispatch), which adaptors do not incur.
+**Constraints and Limitations**
+- No iterators: range-based `for` cannot be used directly on adaptors.
+- No `clear()` member function in the standard (before C++23 proposals); to clear, assign an empty adaptor or pop all elements.
+- The underlying container is protected, not public; you cannot modify it directly without subclassing.
 
-**Technical Definition**
-Since container adaptors are templates, their member functions are instantiated for each backing container type and are candidates for inlining. The resulting machine code is identical to what you would get by calling the backing container's methods directly. There is no vtable, no indirect call, and no type-erased wrapper. In contrast, a hypothetical runtime-polymorphic container adaptor (e.g., one holding a `std::unique_ptr<ContainerBase>`) would incur virtual dispatch overhead for every operation, which can be significant on superscalar architectures.
-
-**Beginner-Friendly Explanation**
-Adaptors are like a thin coat of paint on a car — the paint does not make the car heavier or slower. The engine (backing container) determines performance. If you instead built a "generic container" using virtual functions (runtime polymorphism), that would be like adding a heavy trailer — every operation would pay the cost of an indirect call.
-
-#### Purposes (all begin with "To")
-
-- **To** reassure developers that container adaptors introduce no runtime penalty compared to using the backing container directly.
-- **To** demonstrate why template-based adaptors are preferable to runtime-polymorphic alternatives.
-- **To** identify where the real performance costs lie (in the backing container, not the adaptor).
-- **To** guide the choice of backing container for a given performance profile.
-- **To** understand the trade-offs between compile-time flexibility (templates) and runtime flexibility (virtual dispatch).
-
-#### Syntax Rules and Structure
-
-There is no special syntax for achieving zero overhead — it is a property of the template design. The relevant rule is:
-
-> Always choose the backing container based on the performance characteristics you need; the adaptor itself adds nothing.
-
-**Backing container performance comparison for `std::stack`:**
-
-| Backing | Push | Pop | Memory | Cache | Growth |
-|---|---|---|---|---|---|
-| `std::vector` | Amortised O(1) | O(1) | Minimal | Excellent | Reallocation copies all elements |
-| `std::deque` | Amortised O(1) | O(1) | Block overhead | Good | No reallocation of existing elements |
-| `std::list` | O(1) | O(1) | High (node pointers) | Poor | No reallocation |
-
-**Constraints and limitations:**
-- The zero-overhead property depends on the compiler's ability to inline; with optimisations disabled (`-O0`), there may be a small function-call cost.
-- The adaptor cannot eliminate the backing container's inherent costs (e.g., `std::deque`'s block allocation).
-- If you need runtime polymorphism (e.g., choosing the backing container at runtime), you must use virtual dispatch, which does introduce overhead.
-
-#### Annotated Code Example
+### Annotated Code Example
 
 ```cpp
-// File: zero_overhead.cpp
-// Compile with: g++ -O2 -std=c++17 zero_overhead.cpp -o zero_overhead
-// Verify with: objdump -d zero_overhead | grep -A20 "main"
-
 #include <stack>
-#include <vector>
-#include <deque>
+#include <queue>
 #include <iostream>
 
-// Step 1: A function using std::stack (adaptor)
-void use_stack(std::stack<int>& s, int n) {
-    for (int i = 0; i < n; ++i) {
-        s.push(i);
-    }
-    while (!s.empty()) {
-        s.pop();
-    }
-}
-
-// Step 2: The same logic using std::vector directly (no adaptor)
-void use_vector(std::vector<int>& v, int n) {
-    for (int i = 0; i < n; ++i) {
-        v.push_back(i);
-    }
-    while (!v.empty()) {
-        v.pop_back();
-    }
-}
-
 int main() {
-    // Step 3: Both should generate nearly identical machine code
-    std::stack<int, std::vector<int>> s;
-    std::vector<int> v;
+    std::stack<int> s;
+    s.push(1);
+    s.push(2);
+    s.emplace(3);
+    std::cout << s.top() << ' ' << s.size() << '\n'; // 3 3
 
-    use_stack(s, 1000000);
-    use_vector(v, 1000000);
+    std::queue<int> q;
+    q.push(1);
+    q.push(2);
+    q.emplace(3);
+    std::cout << q.front() << ' ' << q.back() << ' ' << q.size() << '\n'; // 1 3 3
 
-    std::cout << "Both operations completed." << std::endl;
-    return 0;
+    std::priority_queue<int> pq;
+    pq.push(1);
+    pq.push(3);
+    pq.emplace(2);
+    std::cout << pq.top() << ' ' << pq.size() << '\n'; // 3 3
 }
 ```
 
-**Expected Output:**
+**Expected Output**
 ```
-Both operations completed.
+3 3
+1 3 3
+3 3
 ```
 
-**Why this output:** The program runs both versions without error. At `-O2`, the generated assembly for `use_stack` and `use_vector` is effectively identical — the adaptor's `push` and `pop` are inlined to the vector's `push_back` and `pop_back`. There is no extra function call or memory access introduced by the adaptor.
-
-#### Real-World Cases with Explanation
-
-**Case 1 — High-frequency trading**: Low-latency systems use `std::stack` and `std::queue` backed by pre-allocated vectors to avoid dynamic allocation; the adaptor layer adds no measurable latency.
-
-**Case 2 — Game engines**: Command queues (`std::queue`) and undo stacks (`std::stack`) are used per-frame; the zero-overhead adaptor ensures no frame-time impact.
-
-**Case 3 — Embedded systems**: Memory-constrained devices choose `std::vector` as the backing for `std::stack` to avoid `std::deque`'s block-management overhead, while the adaptor itself uses no extra memory.
-
-**Case 4 — Real-time audio processing**: Priority queues for event scheduling use custom comparators and `std::vector` backing; the adaptor's inlined operations keep jitter below microseconds.
+**Why this output?**  
+Each adaptor applies its own insertion/access discipline while sharing the `push`, `emplace`, `size`, and `pop` interface.
 
 ---
 
-## Summary Table
+## 5. Adaptor Best Practices
 
-| Adaptor | Semantics | Default Backing | Required Backing Operations | Access | Insert | Remove | Iterators |
-|---|---|---|---|---|---|---|---|
-| `std::stack` | LIFO | `std::deque` | `back`, `push_back`, `pop_back` | `top()` O(1) | `push` amortised O(1) | `pop` O(1) | No |
-| `std::queue` | FIFO | `std::deque` | `front`, `back`, `push_back`, `pop_front` | `front()`, `back()` O(1) | `push` amortised O(1) | `pop` O(1) | No |
-| `std::priority_queue` | Heap (max by default) | `std::vector` | `front`, `push_back`, `pop_back`, random access | `top()` O(1) | `push` O(log n) | `pop` O(log n) | No |
+### Definitions
+
+**Core Definition**
+Adaptor best practices are guidelines for choosing the right adaptor, using it safely, and understanding its performance and interface constraints.
+
+**Technical Definition**
+These practices are grounded in the C++ Core Guidelines (SL.con.2: prefer `vector` by default unless there is a reason to use another container) and community consensus: use adaptors to express intent clearly, choose the underlying container deliberately, and avoid operations that the adaptor does not support.
+
+**Beginner-Friendly Explanation**
+Best practices for adaptors are simple: use a stack when you need last-in-first-out, a queue for first-in-first-out, and a priority queue for highest-priority-first. Don’t try to iterate over an adaptor or access elements it doesn’t expose. Choose the underlying container based on your performance needs.
+
+### Key Guidelines
+
+| Guideline | Summary |
+|-----------|---------|
+| **Use the adaptor that matches the discipline** | `stack` for LIFO, `queue` for FIFO, `priority_queue` for priority. |
+| **Choose the underlying container deliberately** | `deque` is the default for `stack`/`queue`; `vector` for `priority_queue`. `vector` is viable for `stack` but not `queue` (lacks `pop_front`). |
+| **Check `empty()` before `top()` / `front()`** | Calling `top()` or `front()` on an empty adaptor is undefined behaviour. |
+| **Prefer `emplace` over `push`** | Constructs elements in place, avoiding temporaries. |
+| **Do not rely on iteration** | Adaptors intentionally omit iterators; use the designated access function. |
+| **Use `priority_queue` with a custom comparator for min-heaps** | Default is max-heap; `std::greater<T>` gives min-heap. |
+| **Understand the cost model** | `stack`/`queue` are O(1) for all core operations; `priority_queue` is O(log n) for push/pop. |
+| **Consider `deque` for `stack` with large elements** | `deque` never copies existing elements on growth, unlike `vector`. |
+| **Avoid subclassing to expose the underlying container** | Protected member `c` is an implementation detail; use composition if you need more control. |
+
+### Annotated Code Example
+
+```cpp
+#include <stack>
+#include <queue>
+#include <iostream>
+#include <functional>
+
+int main() {
+    // Safe stack usage
+    std::stack<int> s;
+    s.push(10);
+    s.push(20);
+    if (!s.empty()) {
+        std::cout << s.top() << '\n';      // 20
+        s.pop();
+    }
+
+    // Min-heap priority queue
+    std::priority_queue<int, std::vector<int>, std::greater<int>> min_pq;
+    min_pq.push(3);
+    min_pq.push(1);
+    min_pq.push(4);
+    if (!min_pq.empty()) {
+        std::cout << min_pq.top() << '\n'; // 1
+    }
+}
+```
+
+**Expected Output**
+```
+20
+1
+```
+
+**Why this output?**  
+The empty check prevents undefined behaviour; the custom comparator makes the smallest element the top of the priority queue.
+
+### Real-World Cases
+
+- **Code reviews** – confirming that the adaptor matches the intended discipline.
+- **Performance tuning** – choosing `deque` or `vector` as the underlying container based on element size and insertion patterns.
+- **API design** – exposing only adaptor operations to prevent misuse.
 
 ---
 
 ## References
 
-- std::stack — cppreference.com - https://en.cppreference.com/w/cpp/container/stack
-- std::queue — cppreference.com - https://en.cppreference.com/w/cpp/container/queue
-- std::priority_queue — cppreference.com - https://en.cppreference.com/w/cpp/container/priority_queue
-- Container adaptors — cppreference.com - https://en.cppreference.com/w/cpp/container#Container_adaptors
-- priority_queue Class — Microsoft Learn - https://learn.microsoft.com/en-us/cpp/standard-library/priority-queue-class
-- std::make_heap — cppreference.com - https://en.cppreference.com/w/cpp/algorithm/make_heap
-- std::push_heap — cppreference.com - https://en.cppreference.com/w/cpp/algorithm/push_heap
-- std::pop_heap — cppreference.com - https://en.cppreference.com/w/cpp/algorithm/pop_heap
-- N3337: Working Draft, Standard for Programming Language C++ — ISO/IEC 14882:2011 - https://github.com/cplusplus/draft/raw/master/papers/n3337.pdf
-- Boost Mailing List: Re: [boost] [gsoc] heaps & queues — Andrew Sutton - https://listarchives.boost.org/Archives/boost/2010/05/166171.php
-- Add pop_value methods to container adaptors — P3136R0, Open-Std - https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p3136r0.html
-- Issue 2194: Impossible container requirements for adaptor types — Open-Std - https://isocpp.open-std.org/jtc1/sc22/wg21/docs/lwg-active.html#2194
-- std::greater — cppreference.com - https://en.cppreference.com/w/cpp/utility/functional/greater
-- Why does std::stack use std::deque by default? — Stack Overflow - https://stackoverflow.com/questions/102459/why-does-stdstack-use-stddeque-by-default
-- C++ priority_queue with lambda comparator — Stack Overflow - https://stackoverflow.com/questions/16111337/declaring-a-priority-queue-in-c-with-a-custom-comparator
+- `std::stack` — cppreference – https://en.cppreference.com/w/cpp/container/stack
+- `std::queue` — cppreference – https://en.cppreference.com/w/cpp/container/queue
+- `std::priority_queue` — cppreference – https://en.cppreference.com/w/cpp/container/priority_queue
+- Containers library — cppreference – https://en.cppreference.com/w/cpp/container
+- SequenceContainer named requirement — cppreference – https://en.cppreference.com/w/cpp/named_req/SequenceContainer
+- C++ Core Guidelines — SL.con: Containers – https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-stdlib
+- Stack (abstract data type) — Wikipedia – https://en.wikipedia.org/wiki/Stack_(abstract_data_type)
+- Queue (abstract data type) — Wikipedia – https://en.wikipedia.org/wiki/Queue_(abstract_data_type)
+- Container adaptors — cppreference (Containers library overview) – https://en.cppreference.com/w/cpp/container#Container_adaptors
+
+---
+
+This cheat sheet provides a comprehensive, structured reference for C++ container adaptors, covering `std::stack`, `std::queue`, `std::priority_queue`, their operations, underlying container requirements, performance characteristics, and best practices, with annotated code examples, expected outputs, real-world cases, and authoritative references.

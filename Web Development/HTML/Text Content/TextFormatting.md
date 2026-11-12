@@ -1717,6 +1717,248 @@ Government websites must comply with WCAG guidelines that require semantic HTML.
 
 ---
 
+### 14. Text Formatting Best Practices
+
+#### Definitions
+
+**Core Definition**
+Text formatting best practices are guidelines for choosing the right element for the meaning of the text, rather than for its visual appearance, and for using semantic markup that assistive technologies can interpret.
+
+**Technical Definition**
+WCAG Technique H49 requires that semantic markup be used to mark emphasized or special text so that it can be programmatically determined. The technique identifies `<em>` and `<strong>` as the appropriate elements for emphasis and importance, and states that `<sub>` and `<sup>` must be used only for typographical conventions with specific meanings. The WAI HTML Author Guidelines recommend using elements and attributes that convey structure rather than presentation.
+
+**Beginner-Friendly Explanation**
+The best practice is simple: choose the element that describes what the text means, not how it looks. Use `<strong>` for important text, `<em>` for stressed text, `<mark>` for relevant text, and `<s>` for outdated text. Use `<b>`, `<i>`, and `<u>` only when no semantic element fits. And always use CSS for purely visual styling.
+
+---
+
+#### Purposes
+
+- **To maximise accessibility** by using semantic elements that screen readers can interpret.
+- **To improve maintainability** by separating meaning (HTML) from appearance (CSS).
+- **To satisfy WCAG Technique H49** for programmatically determinable emphasis.
+- **To avoid ambiguity** caused by visually identical but semantically different elements.
+
+---
+
+#### Syntax Rules and Structure
+
+| Practice | Rule |
+|---|---|
+| **Choose semantics over appearance** | Use `<strong>` for importance, `<em>` for stress emphasis, `<mark>` for relevance, `<s>` for outdated content. |
+| **Do not use `<b>` for importance** | `<b>` draws attention without implying importance; use `<strong>` for importance. |
+| **Do not use `<i>` for emphasis** | `<i>` is for alternate voice or mood; use `<em>` for stress emphasis. |
+| **Do not use `<u>` for decoration** | `<u>` is for non-textual annotations; use CSS for decorative underlines. |
+| **Do not use `<s>` for document edits** | Use `<del>` and `<ins>` for revisions. |
+| **Use `<sub>` and `<sup>` only for meaning** | Use them for chemical formulas, exponents, and ordinals, not for visual positioning. |
+| **Use CSS for visual styling** | `font-weight`, `font-style`, `text-decoration`, and `background-color` are the correct tools for appearance. |
+
+##### Syntax Rules
+
+1. **Semantic correctness**: Match the element to the meaning of the text.
+2. **Accessibility first**: Screen readers distinguish `<strong>` from `<b>` and `<em>` from `<i>`.
+3. **Separation of concerns**: HTML for structure and meaning; CSS for presentation.
+
+##### Constraints and Limitations
+
+- **`<b>`, `<i>`, `<u>`, and `<s>` are not obsolete**: They have defined semantics in HTML5 and are appropriate in specific contexts. The issue is misuse, not the elements themselves.
+
+---
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Semantic vs Presentational Choices
+
+**Setup Guide**: Save as `best-practice-formatting.html`.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Semantic vs Presentational</title>
+  <style>
+    .bold-visual { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <!-- GOOD: semantic importance -->
+  <p><strong>Warning:</strong> Do not proceed.</p>
+
+  <!-- GOOD: semantic emphasis -->
+  <p>I <em>never</em> said that.</p>
+
+  <!-- GOOD: semantic relevance -->
+  <p>Search results for <mark>HTML</mark>.</p>
+
+  <!-- VISUAL ONLY: no semantic importance -->
+  <p>The <b class="product-name">UltraLite</b> is our newest model.</p>
+
+  <!-- BAD: using <b> where <strong> is intended -->
+  <!-- <p><b>Warning:</b> Do not proceed.</p> -->
+
+  <!-- BAD: using CSS class instead of semantic element for emphasis -->
+  <!-- <p>I <span class="bold-visual">never</span> said that.</p> -->
+</body>
+</html>
+```
+
+**Expected output**: The semantic elements convey meaning to screen readers, while `<b>` is used only for visual attention. The bad examples show how misuse loses semantic information.
+
+**Why this output occurs**: `<strong>` and `<em>` are announced with semantic meaning by screen readers, while `<b>` and CSS-only bold are not. Technique H49 requires the semantic approach for emphasized or special text.
+
+---
+
+#### Real-World Cases
+
+1. **Government and public-sector websites**: WCAG compliance requires semantic markup for emphasized text.
+2. **Screen-reader user testing**: Users rely on `<strong>` and `<em>` to understand importance and emphasis; `<b>` and `<i>` may not be announced distinctly.
+3. **Design systems**: Typography components map visual styles to the correct semantic elements.
+
+---
+
+#### References
+
+- W3C — Technique H49: Using semantic markup to mark emphasized or special text — https://www.w3.org/WAI/WCAG22/Techniques/html/H49
+- W3C — WAI HTML Author Guidelines: Use elements and attributes that convey structure — https://www.w3.org/WAI/GL/1998/01/draft-author-guidelines.html
+- MDN Web Docs — `<strong>` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/strong
+- MDN Web Docs — `<em>` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/em
+
+---
+
+### 15. Semantic vs Presentational
+
+#### Definitions
+
+**Core Definition**
+Semantic elements describe the meaning or role of content; presentational elements or attributes describe how content should look. In HTML5, the recommended practice is to use semantic markup and CSS for presentation.
+
+**Technical Definition**
+The distinction is fundamental to modern HTML. Semantic markup (`<strong>`, `<em>`, `<mark>`, `<s>`, `<sub>`, `<sup>`) is programmatically determinable and can be interpreted by assistive technologies. Presentational markup (or presentational use of elements) focuses on appearance and may not be conveyed to users who cannot see the visual rendering. The WAI guidelines recommend using elements and attributes that convey structure rather than presentation.
+
+**Beginner-Friendly Explanation**
+Semantic means "meaningful." A `<strong>` element tells the browser "this is important." A `<b>` element just makes the text bold. The first is semantic; the second is closer to presentational. Modern HTML encourages you to use semantic elements whenever a meaning exists, and save CSS for pure appearance.
+
+---
+
+#### Purposes
+
+- **To improve accessibility** by conveying meaning to assistive technologies.
+- **To improve maintainability** by separating content from presentation.
+- **To support machine interpretation** by search engines and other tools.
+- **To satisfy WCAG Technique H49** and related guidelines.
+
+---
+
+#### Syntax Rules and Structure
+
+| Element | Semantic Meaning | Presentational Default |
+|---|---|---|
+| `<strong>` | Strong importance | Bold |
+| `<em>` | Stress emphasis | Italic |
+| `<b>` | Attention (utilitarian) | Bold |
+| `<i>` | Alternate voice/mood | Italic |
+| `<u>` | Non-textual annotation | Underline |
+| `<s>` | No longer accurate | Strikethrough |
+| `<mark>` | Relevance | Yellow highlight |
+| `<small>` | Side comment / fine print | Smaller font |
+| `<sub>` | Subscript (typographical) | Lowered, smaller |
+| `<sup>` | Superscript (typographical) | Raised, smaller |
+
+##### Syntax Rules
+
+1. **Semantic elements are preferred** when a meaning exists.
+2. **`<b>`, `<i>`, `<u>`, and `<s>` are not "purely presentational"** in HTML5 — they have specific semantics — but they are often used presentationally.
+3. **CSS is the correct tool for pure appearance** (`font-weight`, `font-style`, `text-decoration`, `background-color`).
+
+##### Constraints and Limitations
+
+- **Visual appearance alone is not sufficient** for accessibility; semantic markup is required for emphasized or special text (Technique H49).
+- **Screen readers may not distinguish `<b>` from normal text**, but they do distinguish `<strong>`.
+
+---
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Semantic vs Presentational in Practice
+
+**Setup Guide**: Save as `semantic-vs-presentational.html`.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Semantic vs Presentational</title>
+</head>
+<body>
+  <!-- Semantic: conveys importance -->
+  <p><strong>Important:</strong> Save your work.</p>
+
+  <!-- Presentational: bold without importance -->
+  <p>The <b>UltraLite</b> model is new.</p>
+
+  <!-- Semantic: conveys stress emphasis -->
+  <p>I <em>never</em> said that.</p>
+
+  <!-- Presentational: italic without emphasis -->
+  <p>The <i>Queen Mary 2</i> docked today.</p>
+
+  <!-- Semantic: conveys outdated information -->
+  <p><s>$50</s> $35</p>
+</body>
+</html>
+```
+
+**Expected output**: All elements render with their default visual styles, but only the semantic elements (`<strong>`, `<em>`, `<s>`) convey their meaning to screen readers.
+
+**Why this output occurs**: `<strong>` and `<em>` are announced with semantic meaning; `<b>` and `<i>` may be rendered visually but not announced semantically. `<s>` conveys that content is outdated.
+
+---
+
+#### Real-World Cases
+
+1. **Accessibility audits**: Teams check that emphasized text uses semantic elements, not just visual styling.
+2. **Design systems**: Component libraries map visual styles to semantic elements, ensuring that bold-looking text is `<strong>` only when it is actually important.
+3. **Content strategy**: Editorial guidelines specify when to use `<strong>`, `<em>`, and `<mark>` versus purely visual styling.
+
+---
+
+#### References
+
+- W3C — Technique H49: Using semantic markup to mark emphasized or special text — https://www.w3.org/WAI/WCAG22/Techniques/html/H49
+- Microsoft Learn — To strong or to b — https://learn.microsoft.com/en-us/archive/blogs/ To strong or to b
+- W3C — WAI HTML Author Guidelines: Use elements and attributes that convey structure rather than presentation — https://www.w3.org/WAI/GL/1998/01/draft-author-guidelines.html
+
+---
+
+### Summary Table of Text Formatting Elements
+
+| Element | Semantic Meaning | Default Rendering | Primary Use |
+|---|---|---|---|
+| `<strong>` | Strong importance, seriousness, urgency | Bold | Warnings, critical information |
+| `<em>` | Stress emphasis | Italic | Words that change meaning when stressed |
+| `<b>` | Attention without importance | Bold | Product names, keywords, lede sentences |
+| `<i>` | Alternate voice or mood | Italic | Foreign words, thoughts, technical terms |
+| `<u>` | Unarticulated non-textual annotation | Underline | Spelling errors, proper-name marks |
+| `<s>` | No longer accurate or relevant | Strikethrough | Old prices, corrected information |
+| `<mark>` | Relevance in context | Yellow highlight | Search matches, highlighted passages |
+| `<small>` | Side comment / fine print | Smaller font | Copyright, legal text, disclaimers |
+| `<sub>` | Subscript (typographical) | Lowered, smaller | Chemical formulas, footnote markers |
+| `<sup>` | Superscript (typographical) | Raised, smaller | Exponents, ordinals |
+
+---
+
+### Final Notes
+
+- **Semantic markup is the foundation**: WCAG Technique H49 requires semantic elements for emphasized or special text.
+- **`<b>`, `<i>`, `<u>`, and `<s>` are not obsolete**: They have defined semantics in HTML5. The problem is using them where a more meaningful element exists.
+- **CSS is for appearance**: Use `font-weight`, `font-style`, `text-decoration`, and `background-color` for pure visual styling.
+- **Screen readers distinguish semantic elements**: `<strong>` is announced with force; `<b>` may not be. `<em>` conveys stress; `<i>` does not.
+- **Test with assistive technologies**: Automated checkers catch some issues, but screen-reader testing verifies semantic interpretation.
+
+---
+
 ## References
 
 - MDN Web Docs – `<strong>`: The Strong Importance element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/strong

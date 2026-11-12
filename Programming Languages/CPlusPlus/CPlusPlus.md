@@ -3,7 +3,7 @@
 ## From Foundational Concepts to Advanced Practical Mastery
 
 This roadmap presents C++ as a **progressive learning system**, beginning with programming fundamentals and the language core, then advancing through object-oriented programming, templates, the Standard Library, modern C++, memory management, concurrency, systems programming, performance engineering, and advanced software architecture.
-
+ 
 ---
 
 # I. C++ Foundations and Programming Fundamentals
@@ -693,40 +693,40 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
 
 # XIII. Templates and Generic Programming
 
-* [**65. Function Templates**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/FunctionTemplates.md)
+* [**65. Function Templates**](/Programming%20Languages/CPlusPlus/Templates/FunctionTemplates.md)
 
   * Template parameters
   * Template argument deduction
   * Multiple template parameters
   * Default template parameters
 
-* [**66. Class Templates**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/ClassTemplates.md)
+* [**66. Class Templates**](/Programming%20Languages/CPlusPlus/Templates/ClassTemplates.md)
 
   * Generic classes
   * Template members
   * Template specialization
 
-* [**67. Template Specialization**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/TemplateSpec.md)
+* [**67. Template Specialization**](/Programming%20Languages/CPlusPlus/Templates/TemplateSpec.md)
 
   * Full specialization
   * Partial specialization
   * Specialization rules
 
-* [**68. Non-Type Template Parameters**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/NonTypeTemplateParam.md)
+* [**68. Non-Type Template Parameters**](/Programming%20Languages/CPlusPlus/Templates/NonTypeTemplateParam.md)
 
   * Integral parameters
   * Compile-time values
   * `auto` parameters
   * Structural types in newer C++
 
-* [**69. Variadic Templates**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/Variadic.md)
+* [**69. Variadic Templates**](/Programming%20Languages/CPlusPlus/Templates/Variadic.md)
 
   * Parameter packs
   * Pack expansion
   * Fold expressions
   * Variadic generic interfaces
 
-* [**70. Concepts**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/Concepts.md)
+* [**70. Concepts**](/Programming%20Languages/CPlusPlus/Templates/Concepts.md)
 
   * Concept definition
   * `requires`
@@ -734,7 +734,7 @@ This roadmap presents C++ as a **progressive learning system**, beginning with p
   * Constrained templates
   * Improving template diagnostics
 
-* [**71. Generic Programming**](/Programming%20Languages/CPlusPlus/Templates%20and%20Generic/GenericProgramming.md)
+* [**71. Generic Programming**](/Programming%20Languages/CPlusPlus/Templates/GenericProgramming.md)
 
   * Type-independent algorithms
   * Constraints

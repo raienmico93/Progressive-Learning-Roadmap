@@ -923,7 +923,7 @@ TypeScript is best learned as more than "JavaScript with types." The progression
 
 # XII. Async Programming
 
-- **85. Promises**
+- [**85. Promises**](/Web%20Development/TypeScript/Async%20Programming/Promises.md)
   - Promises
   - `Promise<T>`
   - Promise creation
@@ -937,32 +937,32 @@ TypeScript is best learned as more than "JavaScript with types." The progression
     - `any`
   - Promise best practices
 
-- **86. Async/Await**
+- [**86. Async/Await**](/Web%20Development/TypeScript/Async%20Programming/AsyncAwait.md)
   - Async functions
   - `async`
   - `await`
   - Error handling
   - Async best practices
 
-- **87. Typing Async Functions**
+- [**87. Typing Async Functions**](/Web%20Development/TypeScript/Async%20Programming/TypingAsyncFunc.md)
   - Typing async functions
   - `Promise<T>` return type
   - Async function best practices
 
-- **88. Typing Errors**
+- [**88. Typing Errors**](/Web%20Development/TypeScript/Async%20Programming/TypingErrors.md)
   - Typing errors
   - `try/catch`
   - Error types
   - Error handling best practices
 
-- **89. Generators**
+- [**89. Generators**](/Web%20Development/TypeScript/Async%20Programming/Generators.md)
   - Generators
   - `function*`
   - `yield`
   - Generator types
   - Generator best practices
 
-- **90. Async Iterators**
+- [**90. Async Iterators**](/Web%20Development/TypeScript/Async%20Programming/AsyncIterators.md)
   - Async iterators
   - `for await...of`
   - Async iterable types

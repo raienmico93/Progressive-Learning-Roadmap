@@ -219,7 +219,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `<figcaption>`
   - Grouping content best practices
 
-- **11. Text-Level Semantics**
+- [**11. Text-Level Semantics**](/Web%20Development/HTML/Elements/TextLevel.md)
   - `<a>`
   - `<em>`
   - `<strong>`
@@ -251,7 +251,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `<wbr>`
   - Text-level semantic best practices
 
-- **12. Embedded Content Elements**
+- [**12. Embedded Content Elements**](/Web%20Development/HTML/Elements/Embedded.md)
   - `<img>`
   - `<picture>`
   - `<source>`
@@ -269,7 +269,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `<math>`
   - Embedded content best practices
 
-- **13. Interactive Elements**
+- [**13. Interactive Elements**](/Web%20Development/HTML/Elements/Interactive.md)
   - `<a>`
   - `<button>`
   - `<details>`
@@ -290,7 +290,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `<datalist>`
   - Interactive element best practices
 
-- **14. Scripting Elements**
+- [**14. Scripting Elements**](/Web%20Development/HTML/Elements/Scripting.md)
   - `<script>`
   - `<noscript>`
   - `<template>`
@@ -298,7 +298,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `<canvas>`
   - Scripting element best practices
 
-- **15. Deprecated Elements**
+- [**15. Deprecated Elements**](/Web%20Development/HTML/Elements/Deprecated.md)
   - `<applet>`
   - `<acronym>`
   - `<bgsound>`
@@ -326,7 +326,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - Deprecated element alternatives
   - Deprecated element best practices
 
-- **16. Custom Elements**
+- [**16. Custom Elements**](/Web%20Development/HTML/Elements/Custom.md)
   - Custom elements
   - `<custom-element>`
   - Web Components
@@ -338,7 +338,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
 
 # III. Attributes
 
-- **17. Attribute Fundamentals**
+- [**17. Attribute Fundamentals**](/Web%20Development/HTML/Attributes/Attribute.md)
   - Attributes
   - Global attributes
   - Element-specific attributes
@@ -348,7 +348,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - Attribute quoting
   - Attribute best practices
 
-- **18. Global Attributes**
+- [**18. Global Attributes**](/Web%20Development/HTML/Attributes/Global.md)
   - `accesskey`
   - `autocapitalize`
   - `autocorrect`
@@ -383,14 +383,14 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `virtualkeyboardpolicy`
   - Global attribute best practices
 
-- **19. Data Attributes**
+- [**19. Data Attributes**](/Web%20Development/HTML/Attributes/Data.md)
   - `data-*`
   - Data attribute naming
   - Data attribute access
   - Data attribute usage
   - Data attribute best practices
 
-- **20. ARIA Attributes**
+- [**20. ARIA Attributes**](/Web%20Development/HTML/Attributes/ARIA.md)
   - ARIA
   - `role`
   - `aria-label`
@@ -426,7 +426,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - ARIA pitfalls
   - First rule of ARIA
 
-- **21. Microdata**
+- [**21. Microdata**](/Web%20Development/HTML/Attributes/Microdata.md)
   - Microdata
   - `itemscope`
   - `itemtype`
@@ -435,7 +435,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `itemref`
   - Microdata best practices
 
-- **22. RDFa**
+- [**22. RDFa**](/Web%20Development/HTML/Attributes/RDFa.md)
   - RDFa
   - `vocab`
   - `typeof`
@@ -444,7 +444,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `prefix`
   - RDFa best practices
 
-- **23. Custom Attributes**
+- [**23. Custom Attributes**](/Web%20Development/HTML/Attributes/Custom.md)
   - Custom attributes
   - Attribute naming
   - Attribute usage
@@ -454,7 +454,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
 
 # IV. Text Content
 
-- **24. Headings**
+- [**24. Headings**](/Web%20Development/HTML/Text%20Content/Headings.md)
   - `<h1>` to `<h6>`
   - Heading hierarchy
   - Heading best practices
@@ -462,91 +462,88 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - Heading SEO
   - Heading pitfalls
 
-- **25. Paragraphs**
+- [**25. Paragraphs**](/Web%20Development/HTML/Text%20Content/Paragraphs.md)
   - `<p>`
   - Paragraph best practices
   - Paragraph spacing
   - Paragraph content
 
-- **26. Text Formatting**
+- [**26. Text Formatting**](/Web%20Development/HTML/Text%20Content/TextFormatting.md)
   - `<strong>`
   - `<em>`
   - `<b>`
   - `<i>`
   - `<u>`
-  - `<s>`
   - `<mark>`
   - `<small>`
+  - `<del>`
+  - `<ins>`
+  - `<s>`
   - `<sub>`
   - `<sup>`
+  - Choosing semantic elements rather than purely visual elements
   - Text formatting best practices
   - Semantic vs presentational
 
-- **27. Quotations**
+- [**27. Quotations and References**](/Web%20Development/HTML/Text%20Content/QuotationsAndReferences.md)
   - `<blockquote>`
   - `<q>`
   - `<cite>`
+  - `<abbr>`
+  - `<dfn>`
+  - `<address>`
+  - `<time>`
   - Quotation best practices
 
-- **28. Abbreviations**
-  - `<abbr>`
-  - Abbreviation best practices
-
-- **29. Code and Preformatted Text**
+- [**28. Code and Preformatted Text**](/Web%20Development/HTML/Text%20Content/CodeAndTechnicalText.md)
   - `<code>`
   - `<pre>`
   - `<kbd>`
   - `<samp>`
   - `<var>`
+  - Formatting source code
+  - Representing user input
+  - Representing program output
   - Code best practices
   - Preformatted text best practices
 
-- **30. Line Breaks and Rules**
+- [**29. Line Breaks and Rules**](/Web%20Development/HTML/Text%20Content/LineBreaksAndRules.md)
   - `<br>`
   - `<hr>`
   - `<wbr>`
   - Line break best practices
 
-- **31. Address**
-  - `<address>`
-  - Address best practices
-
-- **32. Time and Data**
+- [**30. Time and Data**](/Web%20Development/HTML/Text%20Content/TimeAndData.md)
   - `<time>`
   - `<data>`
   - `datetime` attribute
   - `value` attribute
   - Time and data best practices
 
-- **33. Bidirectional Text**
+- [**31. Bidirectional Text**](/Web%20Development/HTML/Text%20Content/Bidirectional.md)
   - `<bdi>`
   - `<bdo>`
   - `dir` attribute
   - Bidirectional text best practices
 
-- **34. Ruby Annotations**
+- [**32. Ruby Annotations**](/Web%20Development/HTML/Text%20Content/RubyAnnotations.md)
   - `<ruby>`
   - `<rt>`
   - `<rp>`
   - Ruby annotation best practices
 
-- **35. Edits**
-  - `<ins>`
-  - `<del>`
-  - Edit best practices
-
 ---
 
 # V. Links
 
-- **36. Link Fundamentals**
+- [**33. Link Fundamentals**](/Web%20Development/HTML/Links/Link.md)
   - `<a>`
   - `href` attribute
   - Link text
   - Link targets
   - Link best practices
 
-- **37. Link Types**
+- [**34. Link Types**](/Web%20Development/HTML/Links/LinkTypes.md)
   - Internal links
   - External links
   - Anchor links
@@ -559,7 +556,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - Download links
   - Link type best practices
 
-- **38. Link Attributes**
+- [**35. Link Attributes**](/Web%20Development/HTML/Links/LinkAttr.md)
   - `href`
   - `target`
     - `_self`
@@ -584,14 +581,14 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `referrerpolicy`
   - Link attribute best practices
 
-- **39. Link Accessibility**
+- [**36. Link Accessibility**](/Web%20Development/HTML/Links/LinkAccess.md)
   - Link text
   - Descriptive links
   - Skip links
   - Focus states
   - Link accessibility best practices
 
-- **40. Link SEO**
+- [**37. Link SEO**](/Web%20Development/HTML/Links/LinkSEO.md)
   - Link SEO
   - Anchor text
   - Internal linking
@@ -603,14 +600,14 @@ HTML is best learned as more than "tags for text." The progression should cover 
 
 # VI. Images and Media
 
-- **41. Image Fundamentals**
+- [**41. Image Fundamentals**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/Images.md)
   - Images
   - `<img>`
   - `src` attribute
   - `alt` attribute
   - Image best practices
 
-- **42. Image Attributes**
+- [**42. Image Attributes**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/ImageAttr.md)
   - `src`
   - `alt`
   - `width`
@@ -631,7 +628,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `referrerpolicy`
   - Image attribute best practices
 
-- **43. Responsive Images**
+- [**43. Responsive Images**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/ResponsiveImg.md)
   - Responsive images
   - `srcset`
   - `sizes`
@@ -642,7 +639,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - Format switching
   - Responsive image best practices
 
-- **44. Image Formats**
+- [**44. Image Formats**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/ImageFormat.md)
   - JPEG
   - PNG
   - GIF
@@ -653,19 +650,27 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - Format selection
   - Format best practices
 
-- **45. Image Accessibility**
+- [**45. Image Accessibility**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/ImageAccess.md)
   - Alt text
   - Decorative images
   - Functional images
   - Complex images
   - Image accessibility best practices
 
-- **46. Image SEO**
+- [**46. Image SEO**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/ImageSEO.md)
   - Image SEO
   - File names
   - Alt text
   - Image sitemaps
   - Image SEO best practices
+
+- [**Figure Content**](/Web%20Development/HTML/Images%20and%20Responsive%20Media/FigureContent.md)
+  - `<figure>`
+  - `<figcaption>`
+  - Images with captions
+  - Diagrams
+  - Illustrations
+  - Code examples
 
 - **47. Video**
   - `<video>`
@@ -739,12 +744,13 @@ HTML is best learned as more than "tags for text." The progression should cover 
 
 # VII. Lists
 
-- **54. Unordered Lists**
+- [**54. Unordered Lists**](/Web%20Development/HTML/Lists/UnorderedLists.md)
   - `<ul>`
   - `<li>`
+  - Nested unordered lists
   - Unordered list best practices
 
-- **55. Ordered Lists**
+- [**55. Ordered Lists**](/Web%20Development/HTML/Lists/OrderedLists.md)
   - `<ol>`
   - `<li>`
   - `type` attribute
@@ -752,22 +758,29 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `reversed` attribute
   - Ordered list best practices
 
-- **56. Description Lists**
+- [**56. Description Lists**](/Web%20Development/HTML/Lists/DescriptionLists.md)
   - `<dl>`
   - `<dt>`
   - `<dd>`
+  - Terms and definitions
+  - Metadata-style lists
   - Description list best practices
 
-- **57. Menu**
+- [**57. Menu**](/Web%20Development/HTML/Lists/Menu.md)
   - `<menu>`
   - `<li>`
   - Menu best practices
 
-- **58. Nested Lists**
+- [**58. Nested Lists**](/Web%20Development/HTML/Lists/NestedAndComplexLists.md)
   - Nested lists
+  - Multi-level structures
+  - Mixed list types
+  - Semantic list usage
+  - Navigation lists
+  - Content lists
   - Nesting best practices
 
-- **59. List Accessibility**
+- [**59. List Accessibility**](/Web%20Development/HTML/Lists/ListAccess.md)
   - List accessibility
   - Screen reader support
   - List accessibility best practices
@@ -776,12 +789,12 @@ HTML is best learned as more than "tags for text." The progression should cover 
 
 # VIII. Tables
 
-- **60. Table Fundamentals**
+- [**60. Table Fundamentals**](/Web%20Development/HTML/Tables/Table.md)
   - Tables
   - `<table>`
   - Table best practices
 
-- **61. Table Structure**
+- [**61. Table Structure**](/Web%20Development/HTML/Tables/TableStructure.md)
   - `<caption>`
   - `<thead>`
   - `<tbody>`
@@ -793,7 +806,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `<col>`
   - Table structure best practices
 
-- **62. Table Attributes**
+- [**62. Table Attributes**](/Web%20Development/HTML/Tables/TableAttr.md)
   - `colspan`
   - `rowspan`
   - `headers`
@@ -805,24 +818,37 @@ HTML is best learned as more than "tags for text." The progression should cover 
   - `abbr`
   - Table attribute best practices
 
-- **63. Table Accessibility**
+- [**63. Table Accessibility**](/Web%20Development/HTML/Tables/TableAccess.md)
   - Table accessibility
   - Table headers
   - Table captions
   - Table summaries
   - Table accessibility best practices
 
-- **64. Responsive Tables**
+- [**64. Responsive Tables**](/Web%20Development/HTML/Tables/ResponsiveTable.md)
   - Responsive tables
   - Horizontal scrolling
   - Stacked tables
   - Responsive table best practices
 
+- [**Table Relationships**](/Web%20Development/HTML/Tables/TableRelationship.md)
+  - `scope`
+  - Row headers
+  - Column headers
+  - Complex header relationships
+  - `colspan`
+  - `rowspan`
+
+- [**Accessible Data Tables**](/Web%20Development/HTML/Tables/AccessibleDataTables.md)
+  - Proper header association
+  - Table captions
+  - Avoiding tables for layout
+  - Complex-table accessibility
 ---
 
 # IX. Forms
 
-- **65. Form Fundamentals**
+- [**65. Form Fundamentals**](/Web%20Development/HTML/Forms/Form.md)
   - Forms
   - `<form>`
   - Form attributes
@@ -835,9 +861,12 @@ HTML is best learned as more than "tags for text." The progression should cover 
     - `autocomplete`
     - `accept-charset`
     - `rel`
+  - GET requests
+  - POST requests
+  - Form submission lifecycle
   - Form best practices
 
-- **66. Input Elements**
+- [**66. Input Elements**](/Web%20Development/HTML/Forms/InputElements.md)
   - `<input>`
   - Input types
     - `text`
@@ -891,14 +920,14 @@ HTML is best learned as more than "tags for text." The progression should cover 
     - `dirname`
   - Input best practices
 
-- **67. Labels**
+- [**67. Labels**](/Web%20Development/HTML/Forms/Labels.md)
   - `<label>`
   - `for` attribute
   - Implicit labels
   - Explicit labels
   - Label best practices
 
-- **68. Select Elements**
+- [**68. Select Elements**](/Web%20Development/HTML/Forms/SelectElements.md)
   - `<select>`
   - `<option>`
   - `<optgroup>`
@@ -915,7 +944,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
     - `label`
   - Select best practices
 
-- **69. Textarea**
+- [**69. Textarea**](/Web%20Development/HTML/Forms/Textarea.md)
   - `<textarea>`
   - Textarea attributes
     - `name`
@@ -930,7 +959,7 @@ HTML is best learned as more than "tags for text." The progression should cover 
     - `wrap`
   - Textarea best practices
 
-- **70. Buttons**
+- [**70. Buttons**](/Web%20Development/HTML/Forms/Buttons.md)
   - `<button>`
   - Button types
     - `submit`

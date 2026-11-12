@@ -1,4 +1,4 @@
-# HTML Unordered Lists: Comprehensive Programming Cheat Sheet
+# Unordered Lists — Comprehensive Programming Cheat Sheet & Research
 
 ---
 
@@ -7,939 +7,674 @@
 ### Definitions
 
 **Core Definition**
-
-An HTML unordered list is a semantic grouping of items whose order is not important, typically rendered as a bulleted list.
+Unordered lists are HTML structures that group a set of related items whose order is not meaningful. They are created with the `<ul>` element, which contains one or more `<li>` list-item elements. Browsers typically render unordered lists with bullet markers, but the semantics are "a group of items with no defined sequence", not "a bulleted list".
 
 **Technical Definition**
-
-The `<ul>` element represents a list of items, where the order of the items is not important — that is, where changing the order would not materially change the meaning of the document. The items of the list are the `<li>` element child nodes of the `<ul>` element. The `<ul>` element is categorised as flow content, and if its children include at least one `<li>` element, it is also palpable content. Its content model is zero or more `<li>` elements, and it accepts global attributes. Its DOM interface is `HTMLUListElement`. The `<li>` element represents a list item, and if its parent element is an `<ol>`, `<ul>`, or `<menu>` element, then the element is an item of the parent element‘s list.
+In the WHATWG HTML Living Standard, `<ul>` belongs to the **flow content** and **palpable content** categories. Its content model is **zero or more `<li>` elements** and script-supporting elements (`<script>`, `<template>`). The `<li>` element has no category of its own; its role is defined by its parent, and its content model is **flow content** (prose content) when the parent is `<ul>` or `<ol>`, and **phrasing content** when the parent is `<menu>`. In the accessibility tree, `<ul>` maps to the ARIA role `list`, and `<li>` maps to `listitem`. The `compact` and `type` attributes are obsolete; visual presentation is controlled by CSS (`list-style-type`, `list-style-position`, and `list-style-image`).
 
 **Beginner-Friendly Explanation**
-
-Think of an unordered list like a shopping list. It doesn’t matter if “milk” comes before “bread” or after “eggs” — the list means the same thing regardless of order. HTML gives you the `<ul>` tag to wrap the whole list and the `<li>` tag for each individual item. Browsers automatically add bullet points to make the items easy to scan.
+An unordered list is a group of related things where the order does not matter. You wrap the group in `<ul>` and each item in `<li>`. Browsers show bullets by default, but the important part is the meaning: screen readers announce "list, 4 items" and let users jump between them. Use `<ul>` for shopping lists, feature lists, navigation menus, and any collection where sequence is irrelevant.
 
 ---
 
 ### Key Characteristics
 
-| Characteristic | Description |
-|---|---|
-| **Order is meaningless** | Changing the order of items does not change the meaning of the document |
-| **Default bulleted rendering** | Browsers display list items with bullets, typically a disc, circle, or square |
-| **Only `<li>` as direct children** | The `<ul>` element may contain only `<li>` elements as direct children |
-| **Accessibility-critical** | Screen readers announce the list and its items, enabling efficient navigation |
-| **ARIA role** | The `<ul>` element has an implicit ARIA role of `list` |
-| **Nesting allowed** | Lists may be nested inside `<li>` elements to create hierarchical structures |
-| **Deprecated attributes** | The `compact` and `type` attributes are deprecated; use CSS `list-style-type` instead |
+- **Order is not meaningful**: If reordering the items changes the meaning, use `<ol>` instead.
+- **Direct children are `<li>` elements**: The `<ul>` element accepts only `<li>` and script-supporting elements as direct children.
+- **Automatic bullet markers**: Browsers apply `list-style-type: disc` by default; CSS can change or remove markers.
+- **Accessibility semantics**: `<ul>` is exposed as `list` and `<li>` as `listitem`; screen readers announce the item count and allow list navigation.
+- **Nesting via `<li>`**: Sub-lists must be placed inside a parent `<li>` element, never as a direct child of another `<ul>`.
+- **Universal support**: `<ul>` and `<li>` are supported in every browser and every screen reader.
 
 ---
 
 ### Prerequisites
 
-- Basic familiarity with HTML document structure (`<html>`, `<head>`, `<body>`)
-- Understanding of HTML elements, tags, and attributes
-- Awareness of block-level vs. inline-level elements
-- Basic knowledge of CSS (helpful for understanding list styling)
-- Basic knowledge of accessibility principles (helpful but not required)
+1. **Basic HTML document structure**: familiarity with elements and content models.
+2. **Flow vs. phrasing content**: understanding what may appear inside a list item.
+3. **CSS list properties**: awareness of `list-style-type`, `list-style-position`, and `margin`/`padding` on lists.
+4. **Accessibility basics**: understanding that screen readers expose list semantics and item counts.
 
 ---
 
 ### Related Programming Areas
 
-- **Semantic HTML** – Unordered lists are a core semantic grouping element
-- **Web Accessibility (A11y)** – Lists are a primary navigation mechanism for screen reader users
-- **CSS Styling** – Bullet styles, spacing, and layout are controlled via CSS
-- **Navigation Menus** – Most website navigation menus are built from `<ul>` and `<li>` elements
-- **Ordered Lists (`<ol>`)** – The sibling element for lists where order matters
-- **Description Lists (`<dl>`)** – For term–description pairs
+| Area | Relationship |
+|---|---|
+| **CSS** | `list-style-type`, `list-style-position`, and `display: flex/grid` on `<ul>` control presentation. |
+| **Accessibility (WCAG)** | WCAG 1.3.1 (Info and Relationships) and Technique H48 require semantic list markup. |
+| **Navigation menus** | `<ul>` inside `<nav>` is the standard pattern for site navigation. |
+| **SEO** | Lists can be eligible for featured snippets, FAQ rich results, and other search features. |
+| **JavaScript** | `<ul>` and `<li>` are common targets for dynamic list rendering and event delegation. |
 
 ---
 
-## Core Concepts / Features
+### Core Concepts / Features
+
+The cheat sheet treats the following concepts, each with the same uniform structure:
+
+1. **`<ul>`** — the unordered list container
+2. **`<li>`** — the list item
+3. **Nested unordered lists** — sub-lists inside list items
+4. **Unordered list best practices** — consolidated guidelines
 
 ---
 
-### 1. The `<ul>` Element (Unordered List Container)
+## 1. `<ul>` — The Unordered List Container
 
-#### Definitions
+### Definitions
 
 **Core Definition**
-
-The `<ul>` element represents an unordered list of items, typically rendered as a bulleted list.
+The `<ul>` element represents an unordered list of items — a list in which changing the order of the items would not change the meaning.
 
 **Technical Definition**
-
-The `<ul>` element represents a list of items, where the order of the items is not important — that is, where changing the order would not materially change the meaning of the document. The items of the list are the `<li>` element child nodes of the `<ul>` element. It is categorised as flow content and, if it contains at least one `<li>` child, palpable content. Its content model is zero or more `<li>` elements. It accepts only global attributes (the `compact` and `type` attributes are deprecated). Its DOM interface is `HTMLUListElement`. The element has an implicit ARIA role of `list`.
+`<ul>` belongs to the **flow content** and **palpable content** categories. Its content model is **zero or more `<li>` elements** plus script-supporting elements. The element has no element-specific content attributes; `compact` and `type` are obsolete. In the accessibility tree, `<ul>` is exposed as the ARIA role `list`. By default, browsers apply `display: block`, `list-style-type: disc`, and padding to reserve space for markers.
 
 **Beginner-Friendly Explanation**
+`<ul>` is the container for an unordered list. You put your items inside it as `<li>` elements, and the browser shows them as a bulleted group.
 
-The `<ul>` tag is the container for your bulleted list. You put all your list items inside it. The `<ul>` itself doesn’t display any content — it just holds the items and tells the browser “these things belong together, and their order doesn’t matter.”
+---
 
-#### Purposes
+### Purposes
 
-- To group a collection of items whose order is not important
-- To provide a semantic container for bulleted lists
-- To enable screen readers to announce the list and its item count
-- To serve as the structural basis for navigation menus
-- To create hierarchical structures through nesting
+- **To group items without a meaningful order** — a shopping list, a feature list, a set of tags.
+- **To provide semantic list structure** so screen readers can announce the number of items and allow list navigation.
+- **To serve as the structural base for navigation menus** and other link groups.
+- **To enable CSS-driven layouts** such as flexbox navigation bars and grid-based card lists.
 
-#### Syntax Rules and Structure
+---
 
-**General Syntax**
+### Syntax Rules and Structure
+
+#### Complete General Syntax
 
 ```html
 <ul>
-    <li>List item 1</li>
-    <li>List item 2</li>
-    <li>List item 3</li>
+  <li>Item one</li>
+  <li>Item two</li>
+  <li>Item three</li>
 </ul>
 ```
 
-**Component Breakdown**
+**Component breakdown**
 
 | Component | Description |
 |---|---|
-| `<ul>` | Opening tag; indicates the start of an unordered list |
-| `<li>` | List item elements; the only permitted direct children |
-| `</ul>` | Closing tag; required |
+| `<ul>` | The unordered list container. |
+| `<li>` | One or more list items; the only permitted non-script direct children. |
+| `</ul>` | The end tag. |
 
-**Syntax Rules**
+#### Syntax Rules
 
-- Both start and end tags are mandatory
-- The content model is zero or more `<li>` elements
-- Only `<li>` elements are permitted as direct children of `<ul>`
-- The `<ul>` element accepts only global attributes
-- List elements (including `<ul>`) cannot be children of `<p>` elements
+1. **Content model is zero or more `<li>` elements** plus script-supporting elements.
+2. **Use `<ul>` when order does not matter**; use `<ol>` when it does.
+3. **The `type` and `compact` attributes are obsolete**; use CSS `list-style-type` instead.
+4. **Place nested lists inside an `<li>`**, never as a direct child of `<ul>`.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- The `compact` attribute is **deprecated** and browser-specific; use CSS `line-height` instead
-- The `type` attribute is **deprecated**; use CSS `list-style-type` instead
-- An empty `<ul>` element should not be used; lists must contain at least one `<li>` element
-- The `<ul>` element must not contain other elements besides `<li>` as direct children
-- Do not use `<ul>` for formatting or indentation; use it only for actual lists
+- **`<ul>` must not contain elements other than `<li>`** (and `<script>`/`<template>`) as direct children.
+- **Empty `<ul>` elements are not palpable** and should be avoided.
+- **Styling `<ul>` for layout** can remove list semantics if `list-style: none` is applied without a fallback; Safari historically removed list semantics when `list-style: none` was applied, though this has been corrected in modern versions.
 
-#### Annotated Complete Step-by-Step Code Examples
+---
 
-**Example 1: Basic Unordered List**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: A Basic Feature List
+
+**Setup Guide**: Save as `ul-basic.html` and open it in a browser. Inspect the accessibility tree to see the list role.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Basic Unordered List</title>
+  <meta charset="UTF-8">
+  <title>Unordered List</title>
 </head>
 <body>
-    <h1>My Shopping List</h1>
-
-    <!-- ul wraps the entire list -->
-    <ul>
-        <!-- Each li is a single item -->
-        <li>Milk</li>
-        <li>Bread</li>
-        <li>Eggs</li>
-        <li>Cheese</li>
-    </ul>
+  <!-- The ul groups related items with no meaningful order -->
+  <h2>Product Features</h2>
+  <ul>
+    <!-- Each li is a single item in the list -->
+    <li>Lightweight design</li>
+    <li>Long battery life</li>
+    <li>Water-resistant</li>
+    <li>Two-year warranty</li>
+  </ul>
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: A bulleted list of four features. A screen reader announces "list, 4 items" and allows navigation between items.
 
-A heading followed by a bulleted list with four items, each preceded by a filled circle (disc) bullet.
-
-**Why This Output Occurs**
-
-Browsers apply default user-agent stylesheets that render `<ul>` elements with `list-style-type: disc` and add appropriate padding and margin. The `<li>` elements are displayed as list items, each with a bullet marker.
+**Why this output occurs**: The `<ul>` element creates a list container, and the browser applies default `list-style-type: disc` styling. The accessibility tree exposes the list role and item count, which screen readers use for navigation.
 
 ---
 
-**Example 2: Unordered List with CSS Styling**
+#### Example 2: A Navigation Menu Built from `<ul>`
+
+**Setup Guide**: Save as `ul-nav.html`. Tab through the page to verify keyboard access.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Styled Unordered List</title>
-    <style>
-        ul {
-            list-style-type: square;       /* Change bullet to square */
-            list-style-position: inside;   /* Move bullets inside the content flow */
-            padding-left: 0;
-        }
-        li {
-            margin-bottom: 0.5em;
-            padding: 0.25em 0.5em;
-            background-color: #f4f4f4;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>List-Based Navigation</title>
+  <style>
+    /* Remove default list styling and lay items out horizontally */
+    nav ul {
+      list-style: none;   /* remove bullet markers */
+      display: flex;      /* lay items out in a row */
+      gap: 16px;          /* spacing between items */
+      padding: 0;
+      margin: 0;
+    }
+    nav a { text-decoration: none; }
+  </style>
 </head>
 <body>
-    <h1>Features</h1>
+  <!-- The ul provides list semantics for the navigation links -->
+  <nav aria-label="Primary">
     <ul>
-        <li>Responsive design</li>
-        <li>Dark mode support</li>
-        <li>Accessibility compliant</li>
-        <li>Cross-browser compatible</li>
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/contact">Contact</a></li>
     </ul>
+  </nav>
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: A horizontal navigation bar with three links and no bullet markers. Screen readers announce "Primary navigation, list, 3 items" and expose each link as a list item.
 
-A list with square bullets positioned inside the content area, where each list item has a light grey background, rounded corners, and spacing between items.
-
-**Why This Output Occurs**
-
-The CSS `list-style-type: square` changes the bullet from the default disc to a filled square. `list-style-position: inside` moves the bullet inside the text flow. The `padding-left: 0` removes the default indentation. The `<li>` styling adds visual separation and emphasis to each item.
+**Why this output occurs**: The `<ul>` retains its semantic list role even when CSS removes the visual markers and changes the layout to flexbox. This is the standard navigation pattern: semantic structure with CSS presentation.
 
 ---
 
-**Example 3: Using `role="list"` for Accessibility**
+### Real-World Cases
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Accessible List</title>
-    <style>
-        .nav {
-            list-style: none;    /* Remove bullets for navigation */
-            padding: 0;
-            display: flex;
-            gap: 1em;
-        }
-    </style>
-</head>
-<body>
-    <!-- Removing list-style can cause some screen readers to stop announcing it as a list -->
-    <!-- Adding role="list" preserves the list semantics -->
-    <ul class="nav" role="list">
-        <li><a href="/">Home</a></li>
-        <li><a href="/about">About</a></li>
-        <li><a href="/contact">Contact</a></li>
-    </ul>
-</body>
-</html>
-```
-
-**Expected Output**
-
-A horizontal navigation bar with three links, no bullet points.
-
-**Why This Output Occurs**
-
-The `list-style: none` CSS removes the visual bullets. Some screen readers (such as VoiceOver on Safari) stop announcing the element as a list when `list-style: none` is applied. Adding `role="list"` explicitly preserves the list semantics for assistive technology.
-
-#### Real-World Cases
-
-**Case 1: Navigation Menus**
-
-The vast majority of website navigation menus are built using `<ul>` and `<li>` elements. The list structure provides semantic grouping, while CSS transforms it into a horizontal or vertical navigation bar.
-
-```html
-<nav>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/products">Products</a></li>
-        <li><a href="/services">Services</a></li>
-        <li><a href="/contact">Contact</a></li>
-    </ul>
-</nav>
-```
-
-**Case 2: Feature Lists**
-
-Product pages and landing pages use unordered lists to present features, benefits, or specifications:
-
-```html
-<h2>Key Features</h2>
-<ul>
-    <li>Real-time collaboration</li>
-    <li>Unlimited storage</li>
-    <li>Advanced security</li>
-    <li>24/7 customer support</li>
-</ul>
-```
-
-**Case 3: Ingredient Lists**
-
-Recipe websites use unordered lists for ingredients where the order of addition may vary:
-
-```html
-<h2>Ingredients</h2>
-<ul>
-    <li>2 cups all-purpose flour</li>
-    <li>1 teaspoon baking soda</li>
-    <li>1/2 teaspoon salt</li>
-    <li>1 cup butter, softened</li>
-</ul>
-```
+1. **Feature and benefit lists**: Marketing pages list product features with `<ul>`.
+2. **Navigation menus**: `<ul>` inside `<nav>` is the standard site navigation pattern.
+3. **Shopping and ingredient lists**: Items without a required order.
 
 ---
 
-### 2. The `<li>` Element (List Item)
+### References
 
-#### Definitions
+- MDN Web Docs — `<ul>`: The Unordered List element — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/ul
+- WHATWG — The `ul` element — https://html.spec.whatwg.org/dev/grouping-content.html#the-ul-element
+- W3C — Technique H48: Using ol, ul and dl for lists or groups of links — https://www.w3.org/WAI/WCAG21/Techniques/html/H48
+
+---
+
+## 2. `<li>` — The List Item Element
+
+### Definitions
 
 **Core Definition**
-
-The `<li>` element represents a single item within a list.
+The `<li>` element represents a single item in a list. It must be a child of an `<ul>`, `<ol>`, or `<menu>` element, and its content model depends on which of those parents it belongs to.
 
 **Technical Definition**
-
-The `<li>` element represents a list item. If its parent element is an `<ol>`, `<ul>`, or `<menu>` element, then the element is an item of the parent element‘s list, as defined for those elements. Its content model is flow content, meaning it can contain text, other lists, images, links, or any other flow content. The end tag may be omitted if the `<li>` element is immediately followed by another `<li>` element or if there is no more content in the parent element. Its DOM interface is `HTMLLIElement`. The `value` attribute is only meaningful when the parent is an `<ol>` element.
+`<li>` has no content category of its own; its role is defined by its parent list. Its content model is **flow content** (prose content) when the parent is `<ul>` or `<ol>`, and **phrasing content** when the parent is `<menu>`. The `value` attribute is permitted only when the parent is `<ol>`, where it sets the item's ordinal value. In the accessibility tree, `<li>` maps to the ARIA role `listitem`. The `li` end tag may be omitted when the item is immediately followed by another `<li>` or when there is no more content in the parent.
 
 **Beginner-Friendly Explanation**
+`<li>` is one item in a list. It always lives inside a `<ul>`, `<ol>`, or `<menu>`. Its meaning depends on its parent: inside `<ul>` it is a bulleted item; inside `<ol>` it is a numbered step.
 
-The `<li>` tag is one item in your list. You can put almost anything inside it — text, links, images, even another whole list. The `<li>` element is the only thing that can go directly inside a `<ul>`.
+---
 
-#### Purposes
+### Purposes
 
-- To represent a single item within a list
-- To contain the content of each list item
-- To serve as the parent for nested lists
-- To enable styling of individual list items via CSS
+- **To represent a single item in a list**.
+- **To provide the content of unordered, ordered, or menu lists**.
+- **To serve as the container for nested sub-lists**.
+- **To allow custom numbering** in ordered lists via the `value` attribute (not applicable to `<ul>`).
 
-#### Syntax Rules and Structure
+---
 
-**General Syntax**
+### Syntax Rules and Structure
+
+#### Complete General Syntax
 
 ```html
-<li>List item content</li>
+<ul>
+  <li>Item content</li>
+</ul>
 ```
 
-**Component Breakdown**
+**Component breakdown**
 
 | Component | Description |
 |---|---|
-| `<li>` | Opening tag; indicates a list item |
-| `Content` | Flow content; the item’s content |
-| `</li>` | Closing tag; optional if followed by another `<li>` or end of parent |
+| `<li>` | The list item start tag. |
+| Content | Flow content when the parent is `<ul>` or `<ol>`; phrasing content when the parent is `<menu>`. |
+| `</li>` | The end tag; may be omitted before another `<li>` or at the end of the parent. |
 
-**Syntax Rules**
+#### Syntax Rules
 
-- The `<li>` element must be contained within a parent `<ul>`, `<ol>`, or `<menu>` element
-- Its content model is flow content (can contain text, links, images, other lists, etc.)
-- The end tag is optional in specific circumstances (followed by another `<li>` or no more content in parent)
-- The `value` attribute is only meaningful when the parent is an `<ol>` element
-- The `type` attribute on `<li>` is **obsolete** and must not be used
+1. **`<li>` must be a child of `<ul>`, `<ol>`, or `<menu>`** (or a script-supporting element in a list context).
+2. **Content model is flow content** when the parent is `<ul>` or `<ol>`; `<li>` may contain paragraphs, nested lists, and other flow-level elements.
+3. **The `value` attribute is only valid when the parent is `<ol>`**; it has no effect inside `<ul>`.
+4. **The `li` end tag may be omitted** when followed by another `<li>` or when there is no more content in the parent.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- An `<li>` element outside of a list context has no defined list-related relationship to other `<li>` elements
-- The `value` attribute has no effect when the parent is a `<ul>` element
-- Nested lists must be placed inside an `<li>` element, not directly inside the `<ul>`
+- **`<li>` outside a list parent has no defined list relationship**.
+- **`<li>` cannot be a direct child of a `<ul>` inside another `<ul>`**; nested lists go inside an `<li>`.
 
-#### Annotated Complete Step-by-Step Code Examples
+---
 
-**Example 1: List Items with Rich Content**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: `<li>` with Rich Flow Content
+
+**Setup Guide**: Save as `li-rich.html`.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Rich List Items</title>
+  <meta charset="UTF-8">
+  <title>Rich List Items</title>
 </head>
 <body>
-    <h1>Apollo Astronauts</h1>
-    <ul>
-        <li><strong>Neil Armstrong</strong> — First person to walk on the Moon</li>
-        <li><strong>Buzz Aldrin</strong> — Lunar Module Pilot</li>
-        <li><strong>Michael Collins</strong> — Command Module Pilot</li>
-    </ul>
+  <ul>
+    <!-- Each li can contain flow content: headings, paragraphs, links -->
+    <li>
+      <h3>Wireless Headphones</h3>
+      <p>Lightweight design with 30-hour battery life.</p>
+      <a href="/products/wireless-headphones">View details</a>
+    </li>
+    <li>
+      <h3>Charging Case</h3>
+      <p>Compact case with USB-C charging.</p>
+      <a href="/products/charging-case">View details</a>
+    </li>
+  </ul>
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: A list of two products, each with a heading, a paragraph, and a link inside its `<li>`.
 
-A bulleted list where each item contains bold names followed by descriptive text.
-
-**Why This Output Occurs**
-
-The `<li>` element accepts flow content, so it can contain inline formatting elements like `<strong>`. The browser renders each item as a bulleted list item with the formatted content inside.
+**Why this output occurs**: When the parent is `<ul>`, `<li>`'s content model is flow content, so headings, paragraphs, and links are all valid children. This enables rich product or card lists without losing list semantics.
 
 ---
 
-**Example 2: List Item with Link**
+#### Example 2: End-Tag Omission
+
+**Setup Guide**: Save as `li-omission.html` and inspect the parsed DOM.
 
 ```html
-<ul>
-    <li><a href="https://developer.mozilla.org/">MDN Web Docs</a> — Comprehensive web development documentation</li>
-    <li><a href="https://www.w3.org/">W3C</a> — International standards organisation for the Web</li>
-    <li><a href="https://whatwg.org/">WHATWG</a> — Maintains the HTML Living Standard</li>
-</ul>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Li Tag Omission</title>
+</head>
+<body>
+  <ul>
+    <!-- The </li> end tags are omitted; the parser closes them automatically -->
+    <li>First item
+    <li>Second item
+    <li>Third item
+  </ul>
+</body>
+</html>
 ```
 
-**Expected Output**
+**Expected output**: Three list items render correctly; the DOM inspector shows that each `<li>` was automatically closed before the next one.
 
-A bulleted list where each item contains a clickable link followed by a description.
-
-**Why This Output Occurs**
-
-The `<a>` element is phrasing content, which is a subset of flow content. The `<li>` element permits flow content, so links are valid inside list items.
-
-#### Real-World Cases
-
-**Case 1: Navigation Menus**
-
-Each navigation link is wrapped in an `<li>` element:
-
-```html
-<ul class="nav">
-    <li><a href="/">Home</a></li>
-    <li><a href="/products">Products</a></li>
-    <li><a href="/about">About</a></li>
-</ul>
-```
-
-**Case 2: Table of Contents**
-
-Generated tables of contents use `<li>` elements for each entry:
-
-```html
-<ul>
-    <li><a href="#introduction">Introduction</a></li>
-    <li><a href="#installation">Installation</a></li>
-    <li><a href="#usage">Usage</a></li>
-</ul>
-```
-
-**Case 3: Checklists**
-
-Task management interfaces use `<li>` elements for each task:
-
-```html
-<ul>
-    <li>Review pull request #42</li>
-    <li>Update documentation</li>
-    <li>Deploy to staging</li>
-</ul>
-```
+**Why this output occurs**: The `<li>` end tag may be omitted when the item is immediately followed by another `<li>`. The parser applies the omission rule and creates sibling list items.
 
 ---
 
-### 3. Nested Unordered Lists
+### Real-World Cases
 
-#### Definitions
+1. **Navigation menus**: Each navigation link is wrapped in an `<li>` inside a `<ul>`.
+2. **Product cards**: Each card is an `<li>` containing a heading, image, price, and link.
+3. **Comment threads**: Each comment is an `<li>` in a nested `<ul>`.
+
+---
+
+### References
+
+- MDN Web Docs — `<li>`: The List Item element — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/li
+- WHATWG — The `li` element — https://html.spec.whatwg.org/dev/grouping-content.html#the-li-element
+- W3C — HTML 5.2: The `li` element — https://www.w3.org/TR/html52/grouping-content.html#the-li-element
+
+---
+
+## 3. Nested Unordered Lists — Sub-Lists Inside List Items
+
+### Definitions
 
 **Core Definition**
-
-A nested unordered list is an unordered list placed inside a list item of another unordered list, creating a hierarchical structure.
+A nested unordered list is a `<ul>` element placed inside an `<li>` element of another list. It represents a sub-list of items belonging to the parent item.
 
 **Technical Definition**
-
-List elements may be nested within other lists. When unordered lists are nested within each other, browsers automatically display a different bullet for each consecutive level, usually disc, then circle, then square. For the markup to be valid, the nested list must be contained within a list item (`<li>`) and may not be a direct child of the `<ul>` element. The `<li>` element‘s content model is flow content, which includes other `<ul>` elements, enabling this nesting.
+Nesting is expressed structurally: a `<ul>` is a child of an `<li>`, and that `<ul>` contains its own `<li>` children. This preserves the parent–child relationship in the accessibility tree, so screen readers announce the nesting depth and the number of items at each level. The common mistake is placing a `<ul>` directly inside another `<ul>` (invalid) rather than inside an `<li>` (valid).
 
 **Beginner-Friendly Explanation**
+A nested unordered list is a list inside a list. For example, a "Fruits" item might contain a sub-list of "Apples", "Bananas", and "Cherries". The sub-list goes inside the "Fruits" list item, not directly inside the outer list.
 
-A nested list is a list inside another list — like subcategories in a menu, or sub-points in an outline. You put the inner list inside an `<li>` element of the outer list. Browsers automatically change the bullet style for each level so you can tell them apart.
+---
 
-#### Purposes
+### Purposes
 
-- To create hierarchical structures within lists
-- To represent categories and subcategories
-- To build multi-level navigation menus
-- To organise complex information in an outline format
-- To show relationships between parent and child items
+- **To represent hierarchical relationships** within a group of items.
+- **To create multi-level navigation menus** with dropdown sub-menus.
+- **To express categories and sub-categories** in a list context.
+- **To preserve the nesting structure** for assistive technologies and search engines.
 
-#### Syntax Rules and Structure
+---
 
-**General Syntax**
+### Syntax Rules and Structure
+
+#### Complete General Syntax
 
 ```html
 <ul>
-    <li>Parent item
-        <ul>
-            <li>Child item 1</li>
-            <li>Child item 2</li>
-        </ul>
-    </li>
-    <li>Another parent item</li>
+  <li>
+    Parent item
+    <ul>
+      <li>Child item</li>
+      <li>Child item</li>
+    </ul>
+  </li>
 </ul>
 ```
 
-**Component Breakdown**
+**Component breakdown**
 
 | Component | Description |
 |---|---|
-| Outer `<ul>` | The main list container |
-| Outer `<li>` | A parent item that contains a nested list |
-| Inner `<ul>` | The nested list, placed inside the parent `<li>` |
-| Inner `<li>` | Child items within the nested list |
+| Outer `<ul>` | The top-level list. |
+| Parent `<li>` | The item that owns the sub-list. |
+| Inner `<ul>` | The nested list; must be a child of the `<li>`, not of the outer `<ul>`. |
+| Inner `<li>` | The child items. |
 
-**Syntax Rules**
+#### Syntax Rules
 
-- The nested `<ul>` must be placed inside an `<li>` element of the outer list
-- The nested `<ul>` must **not** be a direct child of the outer `<ul>` element
-- All elements must be properly closed and nested (no overlapping tags)
-- Browsers automatically assign different bullet styles to each nesting level
+1. **The nested `<ul>` must be a child of an `<li>`**, not a direct child of the outer `<ul>`.
+2. **The nested `<ul>` should follow the parent item's content** (text, link, or other content) within the same `<li>`.
+3. **Each level of nesting is exposed as a nested list** in the accessibility tree, with its own item count.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- Nesting too deeply (beyond 3–4 levels) can make content hard to read and navigate
-- Screen readers announce the nesting level, which can become verbose with deep nesting
-- The default bullet style cycling (disc → circle → square) stops cycling after the third level
-- CSS can override the default bullet styles at each level
+- **A `<ul>` directly inside another `<ul>` is invalid** and produces parser error recovery.
+- **Very deep nesting** can be difficult for screen-reader users to navigate; keep nesting to two or three levels where possible.
+- **CSS must not collapse the visual hierarchy**; indentation or other visual cues should reflect the nesting depth.
 
-#### Annotated Complete Step-by-Step Code Examples
+---
 
-**Example 1: Basic Nested List**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: A Two-Level Category List
+
+**Setup Guide**: Save as `ul-nested.html`.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Nested List Demo</title>
+  <meta charset="UTF-8">
+  <title>Nested Unordered List</title>
 </head>
 <body>
-    <h1>Countries and Cities</h1>
+  <ul>
+    <li>
+      <!-- Parent item contains the sub-list -->
+      Fruits
+      <ul>
+        <li>Apples</li>
+        <li>Bananas</li>
+        <li>Cherries</li>
+      </ul>
+    </li>
+    <li>
+      Vegetables
+      <ul>
+        <li>Carrots</li>
+        <li>Broccoli</li>
+      </ul>
+    </li>
+  </ul>
+</body>
+</html>
+```
 
+**Expected output**: A bulleted list with two top-level items, each containing a nested bulleted sub-list.
+
+**Why this output occurs**: The inner `<ul>` is placed inside the parent `<li>`, so the browser renders it as a sub-list. The accessibility tree exposes the nesting, and screen readers announce the parent item followed by the nested list and its item count.
+
+---
+
+#### Example 2: Invalid Nesting (Anti-Pattern)
+
+**Setup Guide**: Save as `ul-nested-invalid.html` and inspect the parsed DOM.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invalid Nesting</title>
+</head>
+<body>
+  <!-- INVALID: the inner ul is a direct child of the outer ul -->
+  <ul>
+    <li>Fruits</li>
     <ul>
-        <!-- Parent item: Europe -->
-        <li>Europe
-            <ul>
-                <!-- Child items of Europe -->
-                <li>France
-                    <ul>
-                        <!-- Grandchild items of France -->
-                        <li>Paris</li>
-                        <li>Lyon</li>
-                        <li>Marseille</li>
-                    </ul>
-                </li>
-                <li>Germany
-                    <ul>
-                        <li>Berlin</li>
-                        <li>Munich</li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-
-        <!-- Parent item: Asia -->
-        <li>Asia
-            <ul>
-                <li>Japan
-                    <ul>
-                        <li>Tokyo</li>
-                        <li>Osaka</li>
-                    </ul>
-                </li>
-                <li>China
-                    <ul>
-                        <li>Beijing</li>
-                        <li>Shanghai</li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
+      <li>Apples</li>
+      <li>Bananas</li>
     </ul>
+  </ul>
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: The browser renders something, but the DOM inspector reveals that the parser has restructured the markup; the inner list is not associated with the "Fruits" item, and the nesting relationship is lost.
 
-A three-level hierarchical list:
-
-- Level 1 (Europe, Asia): disc bullets (filled circles)
-- Level 2 (France, Germany, Japan, China): circle bullets (unfilled circles)
-- Level 3 (Paris, Lyon, etc.): square bullets (filled squares)
-
-**Why This Output Occurs**
-
-Browsers automatically cycle through bullet styles for each nesting level: `disc` at level 1, `circle` at level 2, and `square` at level 3. Each nested `<ul>` is placed inside its parent `<li>` element, maintaining valid HTML structure.
+**Why this output occurs**: `<ul>` accepts only `<li>` and script-supporting elements as direct children. A direct `<ul>` child violates the content model and triggers parser error recovery.
 
 ---
 
-**Example 2: Navigation Menu with Nested Lists**
+### Real-World Cases
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Nested Navigation</title>
-    <style>
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        nav > ul > li {
-            display: inline-block;
-            position: relative;
-            padding: 10px 20px;
-            background: #333;
-            color: white;
-        }
-        /* Hide nested lists by default */
-        nav ul ul {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: #444;
-            min-width: 150px;
-        }
-        /* Show nested lists on hover */
-        nav ul li:hover > ul {
-            display: block;
-        }
-        nav ul ul li {
-            display: block;
-            padding: 8px 15px;
-            color: white;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <nav>
-        <ul>
-            <li>
-                <a href="/">Home</a>
-            </li>
-            <li>
-                <a href="/products">Products</a>
-                <!-- Nested list for dropdown menu -->
-                <ul>
-                    <li><a href="/products/laptops">Laptops</a></li>
-                    <li><a href="/products/phones">Phones</a></li>
-                    <li><a href="/products/tablets">Tablets</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="/support">Support</a>
-                <!-- Nested list for dropdown menu -->
-                <ul>
-                    <li><a href="/support/faq">FAQ</a></li>
-                    <li><a href="/support/contact">Contact Us</a></li>
-                </ul>
-            </li>
-        </ul>
-    </nav>
-</body>
-</html>
-```
-
-**Expected Output**
-
-A horizontal navigation bar with dropdown menus that appear on hover.
-
-**Why This Output Occurs**
-
-The outer `<ul>` creates the main navigation bar. Each nested `<ul>` inside an `<li>` creates a dropdown menu. The CSS hides the nested lists by default and shows them on hover, creating a functional dropdown navigation system.
+1. **Multi-level navigation menus**: Top-level links with dropdown sub-menus.
+2. **Documentation tables of contents**: Chapters with nested sections.
+3. **Category trees**: Product categories with sub-categories.
 
 ---
 
-**Example 3: CSS-Controlled Nested Bullet Styles**
+### References
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Custom Nested Bullets</title>
-    <style>
-        /* Level 1: filled circle */
-        ul { list-style-type: disc; }
-        /* Level 2: unfilled circle */
-        ul ul { list-style-type: circle; }
-        /* Level 3: filled square */
-        ul ul ul { list-style-type: square; }
-        /* Level 4: custom dash */
-        ul ul ul ul { list-style-type: "- "; }
-    </style>
-</head>
-<body>
-    <ul>
-        <li>Level 1 — disc
-            <ul>
-                <li>Level 2 — circle
-                    <ul>
-                        <li>Level 3 — square
-                            <ul>
-                                <li>Level 4 — dash</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
-    </ul>
-</body>
-</html>
-```
-
-**Expected Output**
-
-Four levels of nested lists, each with a different bullet style.
-
-**Why This Output Occurs**
-
-The CSS rules explicitly set the `list-style-type` for each nesting level using descendant selectors (`ul ul`, `ul ul ul`, etc.). This overrides the browser‘s automatic cycling and provides complete control over the bullet appearance at each level.
-
-#### Real-World Cases
-
-**Case 1: Multi-Level Navigation Menus**
-
-E-commerce and corporate websites use nested lists for multi-level navigation:
-
-```html
-<ul class="main-nav">
-    <li>Products
-        <ul>
-            <li>Electronics
-                <ul>
-                    <li>Laptops</li>
-                    <li>Phones</li>
-                </ul>
-            </li>
-            <li>Clothing</li>
-        </ul>
-    </li>
-    <li>About</li>
-</ul>
-```
-
-**Case 2: Documentation Outlines**
-
-Technical documentation uses nested lists to show hierarchical structure:
-
-```html
-<ul>
-    <li>Getting Started
-        <ul>
-            <li>Installation</li>
-            <li>Configuration</li>
-        </ul>
-    </li>
-    <li>API Reference
-        <ul>
-            <li>Authentication</li>
-            <li>Endpoints</li>
-        </ul>
-    </li>
-</ul>
-```
-
-**Case 3: File System Trees**
-
-File explorers and directory trees use nested lists:
-
-```html
-<ul>
-    <li>src/
-        <ul>
-            <li>components/
-                <ul>
-                    <li>Button.js</li>
-                    <li>Modal.js</li>
-                </ul>
-            </li>
-            <li>utils/
-                <ul>
-                    <li>helpers.js</li>
-                </ul>
-            </li>
-        </ul>
-    </li>
-    <li>package.json</li>
-</ul>
-```
+- MDN Web Docs — `<ul>`: Nesting lists — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/ul#nesting_lists
+- WHATWG — The `ul` element: Content model — https://html.spec.whatwg.org/dev/grouping-content.html#the-ul-element
 
 ---
 
-### 4. Choosing Semantic Elements Rather Than Purely Visual Elements
+## 4. Unordered List Best Practices
 
-#### Definitions
+### Definitions
 
 **Core Definition**
-
-Choosing semantic elements means selecting HTML elements based on the meaning and structure of the content, not on how it should look visually.
+Unordered list best practices are guidelines for choosing `<ul>` appropriately, structuring list items correctly, nesting safely, and presenting lists accessibly — so that list semantics are preserved for assistive technologies and search engines.
 
 **Technical Definition**
-
-Semantic HTML is the practice of using HTML elements according to their defined meaning and purpose as specified by the WHATWG HTML Living Standard. For lists, this means using `<ul>` and `<li>` for actual lists of items, rather than using `<div>`, `<span>`, or text characters (like asterisks) to simulate a list. WCAG Success Criterion 1.3.1 requires that “information, structure, and relationships conveyed through presentation can be programmatically determined or are available in text”. Section H48 of the W3C Techniques for WCAG 2.0 recommends using `<ul>` and `<li>` tags instead of coding that gives a similar look (e.g., using asterisks and `<br>` tags), noting that “when markup is used that visually formats items as a list but does not indicate the list relationship, users [of assistive technologies] may have difficulty in navigating the information”.
+Best practices are informed by the WHATWG HTML Living Standard, WCAG 1.3.1 (Info and Relationships), and W3C Technique H48 (Using `ol`, `ul` and `dl` for lists or groups of links). They encompass choosing `<ul>` only when order is irrelevant, using `<li>` for every item, nesting sub-lists inside `<li>`, avoiding non-`<li>` direct children, preserving list semantics when removing markers with CSS, and ensuring that visual presentation matches the underlying structure.
 
 **Beginner-Friendly Explanation**
+Best practices help you build lists that are correct and accessible: use `<ul>` only when order does not matter, put every item in an `<li>`, nest sub-lists inside the parent `<li>`, and do not break the list semantics when you style away the bullets.
 
-Don’t use `<div>` or `<span>` to fake a list. Don’t type asterisks at the start of lines to make it look like a list. Use the real `<ul>` and `<li>` tags. That way, screen readers can announce “list, 5 items” and users can navigate between items with keyboard shortcuts. The visual bullet points are just a bonus — the real value is the structure.
+---
 
-#### Purposes
+### Purposes
 
-- To ensure content is accessible to screen readers and other assistive technologies
-- To make HTML meaningful and understandable to search engines
-- To separate content structure (HTML) from visual presentation (CSS)
-- To comply with web standards and accessibility guidelines
-- To improve code maintainability and consistency
+- **To ensure semantic correctness** and valid markup.
+- **To preserve accessibility** for screen-reader users who rely on list semantics and item counts.
+- **To support SEO** by providing clear structure that search engines can parse.
+- **To maintain visual and structural consistency** across a site.
 
-#### Syntax Rules and Structure
+---
 
-**Correct vs. Incorrect Patterns**
+### Syntax Rules and Structure
 
-| If you want to… | Use… | Not… |
-|---|---|---|
-| Create a bulleted list | `<ul><li>` | `<div>` with bullet characters |
-| Create a numbered list | `<ol><li>` | `<p>` with numbers typed manually |
-| Create a navigation menu | `<ul><li><a>` | `<div><a>` |
-| Create an indented block of text | CSS `margin` or `padding` | `<ul>` with no `<li>` items |
-| Create a single-line list of items | `<ul><li>` | `<span>` separated by `<br>` |
+| Practice | Rule |
+|---|---|
+| **Use `<ul>` only when order is irrelevant** | If reordering changes the meaning, use `<ol>`. |
+| **Every item must be an `<li>`** | Do not use `<div>` or `<span>` as direct children of `<ul>`. |
+| **Nest sub-lists inside `<li>`** | A nested `<ul>` must be a child of the parent `<li>`. |
+| **Use `<ul>` inside `<nav>` for navigation** | The standard pattern for site menus. |
+| **Do not remove list semantics with CSS** | `list-style: none` removes bullets; ensure the list role is preserved or use alternative styling. |
+| **Use `<ul>` for groups of links** | Technique H48 recommends lists for groups of related links. |
+| **Keep nesting shallow** | Two or three levels are manageable; deeper nesting is harder for screen-reader users. |
+| **Do not use empty `<ul>` elements** | Empty lists are not palpable and provide no value. |
 
-**Syntax Rules**
+#### Syntax Rules
 
-- Use `<ul>` only for actual lists of items
-- Use `<li>` for each item in the list
-- Use CSS for visual styling (bullets, spacing, layout)
-- Never use `<ul>` for formatting or indentation purposes
-- Never use empty `<ul>` elements
+1. **Semantic correctness**: `<ul>` for unordered groups, `<ol>` for ordered sequences, `<dl>` for term–definition pairs.
+2. **Structural correctness**: `<li>` for every item; nested `<ul>` inside `<li>`.
+3. **Accessibility preservation**: When styling lists, ensure the list role and item count remain exposed to assistive technologies.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- Using `<ul>` for non-list content violates semantic HTML principles
-- Using `<br>` tags with asterisks for lists fails accessibility requirements
-- `<ul>` elements must contain at least one `<li>` element
+- **`list-style: none` can remove list semantics in some browsers**, particularly older Safari; adding `role="list"` to the `<ul>` restores the semantics.
+- **CSS `display: flex` or `display: grid` on `<ul>`** changes the layout but should preserve the list role in modern browsers.
 
-#### Annotated Complete Step-by-Step Code Examples
+---
 
-**Example 1: Correct vs. Incorrect List Markup**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: Accessible Styled Navigation List
+
+**Setup Guide**: Save as `best-practice-nav.html`. Inspect the accessibility tree to confirm the list role is preserved.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Semantic List Choice</title>
-    <style>
-        .fake-list {
-            margin-bottom: 1em;
-        }
-        .fake-list span::before {
-            content: "* ";
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Accessible Navigation</title>
+  <style>
+    nav ul {
+      list-style: none;   /* remove bullets */
+      display: flex;
+      gap: 16px;
+      padding: 0;
+      margin: 0;
+    }
+    nav a { text-decoration: none; }
+  </style>
 </head>
 <body>
-    <!-- CORRECT: Semantic list markup -->
-    <h2>Correct: Semantic List</h2>
-    <ul>
-        <li>First item</li>
-        <li>Second item</li>
-        <li>Third item</li>
+  <nav aria-label="Primary">
+    <!-- role="list" restores list semantics when list-style: none is used -->
+    <ul role="list">
+      <li><a href="/">Home</a></li>
+      <li><a href="/products">Products</a></li>
+      <li><a href="/contact">Contact</a></li>
     </ul>
-
-    <!-- INCORRECT: Fake list using spans and CSS -->
-    <h2>Incorrect: Fake List</h2>
-    <div class="fake-list">
-        <span>First item</span><br>
-        <span>Second item</span><br>
-        <span>Third item</span>
-    </div>
+  </nav>
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: A horizontal navigation bar with no bullets. Screen readers still announce "Primary navigation, list, 3 items" because the `role="list"` restores the semantics that `list-style: none` can remove in some browsers.
 
-Both look similar visually, but the first is semantically correct. Screen readers announce the first as “list, 3 items” and allow navigation between items. The second is just a block of text with asterisks — no list semantics.
-
-**Why This Output Occurs**
-
-The `<ul>` and `<li>` elements carry semantic meaning that assistive technology can interpret. The `<div>` and `<span>` elements carry no list semantics, so screen readers cannot identify or navigate the content as a list.
+**Why this output occurs**: The `role="list"` attribute explicitly exposes the list semantics, ensuring that screen readers announce the item count even after the visual markers are removed.
 
 ---
 
-**Example 2: Using Lists for Navigation**
+#### Example 2: Correct vs Incorrect List Structure
+
+**Setup Guide**: Save as `best-practice-structure.html`. Run an HTML validator.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Navigation List</title>
-    <style>
-        .nav {
-            list-style: none;   /* Remove visual bullets */
-            padding: 0;
-            display: flex;
-            gap: 1em;
-        }
-        .nav a {
-            text-decoration: none;
-            color: #0066cc;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>List Structure</title>
 </head>
 <body>
-    <!-- CORRECT: Semantic list for navigation -->
-    <nav>
-        <ul class="nav">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/contact">Contact</a></li>
-        </ul>
-    </nav>
+  <!-- GOOD: every item is an li; nesting is inside li -->
+  <ul>
+    <li>Fruits
+      <ul>
+        <li>Apples</li>
+        <li>Bananas</li>
+      </ul>
+    </li>
+    <li>Vegetables</li>
+  </ul>
 
-    <!-- INCORRECT: Non-semantic navigation -->
-    <nav>
-        <div class="nav">
-            <a href="/">Home</a>
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-        </div>
-    </nav>
+  <!-- BAD: div as a direct child of ul -->
+  <!--
+  <ul>
+    <div>Fruits</div>
+    <div>Vegetables</div>
+  </ul>
+  -->
+
+  <!-- BAD: ul directly inside ul -->
+  <!--
+  <ul>
+    <li>Fruits</li>
+    <ul>
+      <li>Apples</li>
+    </ul>
+  </ul>
+  -->
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: The good example produces valid, accessible markup. The bad examples fail validation and lose the parent–child list relationship.
 
-Both render as horizontal navigation bars. The first is semantically correct; the second lacks list structure.
-
-**Why This Output Occurs**
-
-The `<ul>` element provides semantic grouping that screen readers can announce (“navigation, list, 3 items”). The `<div>` version provides no such structure.
-
-#### Real-World Cases
-
-**Case 1: Government Accessibility Compliance**
-
-Government websites must comply with WCAG guidelines that require semantic HTML. Using `<ul>` and `<li>` for lists is part of meeting Success Criterion 1.3.1 (Info and Relationships).
-
-**Case 2: Screen Reader Navigation**
-
-Screen reader users frequently use list navigation shortcuts to jump between lists and list items. A page with five semantic lists is far more navigable than a page with five fake lists made from `<div>` and `<br>`.
-
-**Case 3: Search Engine Optimization**
-
-Search engines use list markup to understand content structure. Properly marked-up lists can improve content indexing and search result presentation.
+**Why this output occurs**: `<ul>` accepts only `<li>` and script-supporting elements as direct children, and nested lists must be inside an `<li>`. Violating these rules triggers parser error recovery and breaks the accessibility tree.
 
 ---
 
-## References
+### Real-World Cases
 
-- MDN Web Docs – `<ul>`: The Unordered List element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/ul
-- MDN Web Docs – `<li>`: The List Item element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/li
-- WHATWG HTML Living Standard – Grouping content: The ul element – https://html.spec.whatwg.org/multipage/grouping-content.html#the-ul-element
-- WHATWG HTML Living Standard – Grouping content: The li element – https://html.spec.whatwg.org/multipage/grouping-content.html#the-li-element
-- W3C – HTML 5.1: The ul element – https://www.w3.org/TR/2015/WD-html51-20150929/semantics.html#the-ul-element
-- W3C – HTML 5.1: The li element – https://www.w3.org/TR/2015/WD-html51-20150929/semantics.html#the-li-element
-- W3C – WCAG 2.1 Understanding Success Criterion 1.3.1: Info and Relationships – https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships.html
-- W3C – H48: Using ol, ul and dl for lists or groups of links – https://www.w3.org/WAI/WCAG21/Techniques/html/H48
-- MDN Web Docs – `list-style-type` CSS property – https://developer.mozilla.org/en-US/docs/Web/CSS/list-style-type
-- MDN Web Docs – Styling lists – https://developer.mozilla.org/en-US/docs/Learn/CSS/Styling_text/Styling_lists
-- web.dev – Lists – https://web.dev/learn/html/lists
-- Web Design in a Nutshell, 3rd Edition – Nesting Lists – https://www.oreilly.com/library/view/web-design-in/0596009879/ch10s06s04.html
+1. **Government and public-sector sites**: WCAG 1.3.1 compliance requires semantic list markup; audits check for `<div>`-based fake lists.
+2. **E-commerce**: Product feature lists and category trees use `<ul>` and nested `<ul>` for structure.
+3. **Documentation sites**: Navigation sidebars and tables of contents use `<ul>` with nested sub-lists.
+
+---
+
+### References
+
+- W3C — Technique H48: Using ol, ul and dl for lists or groups of links — https://www.w3.org/WAI/WCAG21/Techniques/html/H48
+- MDN Web Docs — `<ul>`: Accessibility — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/ul#accessibility
+- WHATWG — The `ul` element — https://html.spec.whatwg.org/dev/grouping-content.html#the-ul-element
+- WebAIM — Creating Accessible Lists — https://webaim.org/techniques/semanticstructure/
+
+---
+
+## Summary Table of Unordered List Concepts
+
+| Concept | Key Takeaway |
+|---|---|
+| **`<ul>`** | Container for unordered groups; content model is zero or more `<li>` plus script-supporting elements; exposed as `list`. |
+| **`<li>`** | One list item; flow content when the parent is `<ul>` or `<ol>`; end tag may be omitted before another `<li>`. |
+| **Nested unordered lists** | A nested `<ul>` must be inside an `<li>`, never a direct child of another `<ul>`. |
+| **Best practices** | Use `<ul>` only when order is irrelevant; every item must be `<li>`; preserve list semantics when styling. |
+
+---
+
+## Final Notes
+
+- **Order matters**: If reordering the items changes the meaning, use `<ol>` instead of `<ul>`.
+- **Every item must be an `<li>`**: `<div>`-based fake lists lose the accessibility semantics that screen readers rely on.
+- **Nest inside `<li>`**: A nested `<ul>` belongs inside the parent `<li>`, not directly inside the outer `<ul>`.
+- **Preserve semantics when styling**: `list-style: none` can remove list semantics in some browsers; add `role="list"` to restore them.
+- **Navigation menus are lists**: The standard pattern is `<nav><ul><li><a>…</a></li></ul></nav>`, which combines landmark and list semantics.
+- **Validate and test**: Use HTML validators and accessibility checkers to catch non-`<li>` children and invalid nesting.
+
+---
+
+This cheat sheet has covered unordered lists — the `<ul>` container, the `<li>` list item, nested unordered lists, and best practices — with uniform definitions, purposes, syntax rules, annotated examples, real-world cases, and authoritative references. Use it as a reference and a teaching aid, and validate list markup against the WHATWG HTML Living Standard and WCAG 1.3.1 (Info and Relationships) with Technique H48.

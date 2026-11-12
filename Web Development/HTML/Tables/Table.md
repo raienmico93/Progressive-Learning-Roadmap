@@ -1,4 +1,4 @@
-# HTML Table Fundamentals: Comprehensive Programming Cheat Sheet
+# Table Fundamentals — Comprehensive Programming Cheat Sheet & Research
 
 ---
 
@@ -7,866 +7,587 @@
 ### Definitions
 
 **Core Definition**
-
-HTML tables are a semantic structure for organising and presenting two-dimensional tabular data — information arranged in a grid of rows and columns — using a set of interconnected elements that define the table‘s container, rows, header cells, and data cells.
+Tables are HTML structures that represent **data with more than one dimension** — information arranged in a grid of rows and columns where the intersection of a row and a column forms a cell containing data. The `<table>` element is the container for this tabular data, and its descendant elements (`<tr>`, `<th>`, `<td>`, `<caption>`, `<thead>`, `<tbody>`, `<tfoot>`) define the table's structure, headers, and content.
 
 **Technical Definition**
-
-The `<table>` element represents tabular data — that is, information presented in a two-dimensional table comprised of rows and columns of cells containing data. It is categorised as flow content and palpable content. Its permitted content model consists of, in order: an optional `<caption>` element, zero or more `<colgroup>` elements, an optional `<thead>` element, either zero or more `<tbody>` elements or one or more `<tr>` elements, and an optional `<tfoot>` element. Its implicit ARIA role is `table`, and its DOM interface is `HTMLTableElement`. The `<tr>` element represents a row of cells in a table. Its permitted content is zero or more `<td>` or `<th>` elements, or a mixture of them. Its permitted parents are `<table>`, `<thead>`, `<tbody>`, or `<tfoot>`. The `<th>` element defines a cell as header of a group of table cells, with the exact nature of the group defined by the `scope` and `headers` attributes. The `<td>` element defines a cell of a table that contains data and may be used as a child of the `<tr>` element.
+In the WHATWG HTML Living Standard, `<table>` belongs to the **flow content** and **palpable content** categories. Its content model is, in order: an optional `<caption>` element, followed by zero or more `<colgroup>` elements, followed optionally by a `<thead>` element, followed by either zero or more `<tbody>` elements or one or more `<tr>` elements, followed optionally by a `<tfoot>` element, optionally intermixed with script-supporting elements. Neither the start tag nor the end tag is omissible. The table element takes part in the **table model**, which defines how rows, columns, and cells form a grid; a table's cells must completely cover that grid without overlap. The `HTMLTableElement` DOM interface provides properties and methods such as `caption`, `tHead`, `tFoot`, `insertRow()`, and `insertCell()` for scripting table structure.
 
 **Beginner-Friendly Explanation**
-
-A table on a webpage is exactly like a table in a spreadsheet or a printed document — it organises information into rows and columns so you can quickly look up values. Think of a bus timetable: the rows are different routes, the columns are different times, and you find the information you need by matching a row with a column. HTML gives you four main tags to build tables: `<table>` wraps the whole thing, `<tr>` creates each row, `<th>` creates header cells (for labels), and `<td>` creates data cells (for actual values). The browser then arranges everything into a grid.
+A table is a grid of information. Think of a spreadsheet or a train timetable: rows run across, columns run down, and each cell at the intersection holds a value. In HTML, you build a table with `<table>`, put rows inside with `<tr>`, mark header cells with `<th>`, and mark data cells with `<td>`. A `<caption>` gives the table a title. Tables are for **data**, not for page layout — using them to arrange the visual layout of a page is explicitly non-conforming and causes serious problems for screen-reader users.
 
 ---
 
 ### Key Characteristics
 
-| Characteristic | Description |
-|---|---|
-| **Tabular data** | Tables are for data with relationships between rows and columns — not for page layout |
-| **Nested structure** | `<td>` and `<th>` go inside `<tr>`, which go inside `<table>` |
-| **Header cells** | `<th>` defines headings for rows or columns; `<td>` contains data |
-| **Scope attribute** | The `scope` attribute on `<th>` defines whether a header applies to a row, column, or group |
-| **Colspan and rowspan** | Cells can span multiple columns or rows using `colspan` and `rowspan` |
-| **Accessibility-critical** | Proper table markup enables screen readers to announce header-data relationships |
-| **Deprecated attributes** | Presentational attributes like `align`, `bgcolor`, and `border` are obsolete; use CSS instead |
+- **Two-dimensional data only**: Tables represent information with meaningful relationships across both rows and columns; one-dimensional lists belong in `<ul>`, `<ol>`, or `<dl>`.
+- **Grid must be complete**: The table's cells must completely cover the grid formed by rows and columns, without overlap.
+- **Header cells are mandatory for data tables**: `<th>` elements (with `scope` or `id`/`headers`) make headers programmatically determinable; using only `<td>` for headers fails WCAG 1.3.1.
+- **Caption is the table's accessible name**: The `<caption>` element provides a title that screen readers can navigate to and that programmatically identifies the table.
+- **Layout tables are prohibited**: The specification states: “Tables must not be used as layout aids”.
+- **CSS controls presentation**: Presentational attributes such as `align`, `bgcolor`, `border`, and `width` are obsolete; all visual styling must be done with CSS.
+- **Responsive techniques are essential**: Tables must remain usable on small screens through horizontal scrolling, sticky headers, or stacked card layouts.
 
 ---
 
 ### Prerequisites
 
-- Basic familiarity with HTML document structure (`<html>`, `<head>`, `<body>`)
-- Understanding of HTML elements, tags, and attributes
-- Awareness of block-level vs. inline-level elements
-- Basic knowledge of accessibility principles (helpful but not required)
-- Basic knowledge of CSS (helpful for styling tables)
+1. **Basic HTML document structure**: familiarity with elements, attributes, and content models.
+2. **The distinction between data and layout**: understanding that tables are for tabular data, not page structure.
+3. **CSS fundamentals**: `border-collapse`, `display: block/grid`, `position: sticky`, and `overflow`.
+4. **Accessibility awareness**: understanding WCAG 1.3.1 (Info and Relationships) and how screen readers navigate tables.
+5. **The table model**: awareness that cells form a grid and that `colspan` and `rowspan` affect the grid.
 
 ---
 
 ### Related Programming Areas
 
-- **Semantic HTML** – Tables are a core semantic grouping element for tabular data
-- **Web Accessibility (A11y)** – Tables are one of the most common sources of accessibility problems when misused
-- **CSS** – Table styling, borders, spacing, and responsive behaviour are controlled via CSS
-- **Data Presentation** – Tables are used for financial data, schedules, comparison charts, and statistics
-- **WCAG Compliance** – Tables must be properly structured to satisfy WCAG Success Criterion 1.3.1
+| Area | Relationship |
+|---|---|
+| **Accessibility (WCAG)** | 1.3.1 (Info and Relationships) is the core criterion; Techniques H51, H39, H43, and failures F91/F46 apply directly. |
+| **Responsive design** | `overflow-x: auto`, sticky headers, and stacked card layouts adapt tables to small screens. |
+| **CSS** | `border-collapse`, `table-layout: fixed`, and container queries control table presentation. |
+| **JavaScript** | `HTMLTableElement` provides `insertRow()`, `insertCell()`, and properties for dynamic tables. |
+| **Data visualisation** | Tables are the accessible foundation for charts and dashboards. |
+| **SEO** | Well-structured tables can be parsed for featured snippets and structured data. |
 
 ---
 
-## Core Concepts / Features
+### Core Concepts / Features
+
+The cheat sheet treats the following concepts, each with the same uniform structure:
+
+1. **Tables** — the general concept of tabular data
+2. **`<table>`** — the table container and its child elements
+3. **Table best practices** — accessibility, responsive, and structural guidelines
 
 ---
 
-### 1. The `<table>` Element
+## 1. Tables — The General Concept
 
-#### Definitions
+### Definitions
 
 **Core Definition**
-
-The `<table>` element is the wrapper element that defines the start and end of a table, containing all rows, cells, and related structural elements.
+A table is a structured set of data arranged in rows and columns, where the position of each cell conveys meaning through its relationship to row and column headers.
 
 **Technical Definition**
-
-The `<table>` HTML element represents tabular data — information presented in a two-dimensional table comprised of rows and columns of cells containing data. It is categorised as flow content and palpable content. Its permitted content, in order, is: an optional `<caption>` element, zero or more `<colgroup>` elements, an optional `<thead>` element, either zero or more `<tbody>` elements or one or more `<tr>` elements, and an optional `<tfoot>` element. The tag omission is none — both start and end tags are mandatory. Its implicit ARIA role is `table`, and its DOM interface is `HTMLTableElement`.
+In HTML, a table is represented by the `<table>` element and its descendants. The table model defines the grid formed by rows and columns; cells must completely cover the grid without overlap. Information is considered tabular when logical relationships among text, numbers, images, or other data exist in two dimensions (vertical and horizontal); these relationships are represented in columns and rows, and the columns and rows must be recognizable for the logical relationships to be perceived. Using `<table>` with `<tr>`, `<th>`, and `<td>` makes these relationships perceivable, whereas techniques such as inserting tabs or using `<pre>` are purely visual and lose the logical relationships when the presentation changes.
 
 **Beginner-Friendly Explanation**
+A table is any set of data where you need both the row and the column to understand each cell. A timetable, a price comparison, or a sports league standings are all tables. If you only need a list, do not use a table — use a list element.
 
-The `<table>` tag is the container for your entire table. It tells the browser “everything inside me is part of a table.” You put rows (`<tr>`) inside it, and each row contains cells (`<td>` or `<th>`). Without the `<table>` wrapper, the browser wouldn‘t know that the rows belong together.
+---
 
-#### Purposes
+### Purposes
 
-- To represent tabular data with relationships between rows and columns
-- To provide a semantic container for table rows and cells
-- To enable screen readers to identify and navigate tabular data
-- To serve as the root element for table structure
+- **To present two-dimensional data** where row and column relationships convey meaning.
+- **To make those relationships programmatically determinable** for assistive technologies.
+- **To provide a navigable structure** that screen readers can traverse cell by cell, announcing headers as context changes.
+- **To support data comparison, lookup, and analysis** in a structured format.
 
-#### Syntax Rules and Structure
+---
 
-**General Syntax**
+### Syntax Rules and Structure
+
+#### Complete General Syntax
 
 ```html
 <table>
-    <!-- optional caption -->
-    <!-- optional colgroup elements -->
-    <!-- optional thead -->
-    <!-- zero or more tbody elements OR one or more tr elements -->
-    <!-- optional tfoot -->
+  <caption>Table title</caption>
+  <thead>
+    <tr>
+      <th scope="col">Column header</th>
+      <th scope="col">Column header</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Row header</th>
+      <td>Data</td>
+    </tr>
+  </tbody>
 </table>
 ```
 
-**Component Breakdown**
+**Component breakdown**
 
-| Component | Description |
+| Component | Role |
 |---|---|
-| `<table>` | Opening tag; indicates the start of a table |
-| `Content` | Table rows (`<tr>`) and optional structural elements |
-| `</table>` | Closing tag; required |
+| `<table>` | The table container. |
+| `<caption>` | The table's title; optional but strongly recommended. |
+| `<thead>` | Groups header rows. |
+| `<tbody>` | Groups data rows. |
+| `<tfoot>` | Groups footer rows. |
+| `<tr>` | A table row. |
+| `<th>` | A header cell; uses `scope` or `id`/`headers`. |
+| `<td>` | A data cell. |
 
-**Syntax Rules**
+#### Syntax Rules
 
-- Both start and end tags are mandatory
-- The content model is: optional `<caption>`, zero or more `<colgroup>`, optional `<thead>`, either zero or more `<tbody>` or one or more `<tr>`, optional `<tfoot>`
-- Only global attributes are permitted on `<table>` (the `align`, `bgcolor`, and `border` attributes are deprecated)
-- The element must not appear as a descendant of a `<caption>` element
+1. **A table must have meaningful two-dimensional data**; one-dimensional lists do not qualify.
+2. **Cells must completely cover the grid** without overlap; `colspan` and `rowspan` must be used correctly.
+3. **Header cells must use `<th>`**, not `<td>` with styling; this is a WCAG 1.3.1 failure otherwise.
+4. **A `<caption>` should identify the table** and is the appropriate markup for a table title.
+5. **Tables must not be used for layout**; the specification explicitly prohibits it.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- Tables must not be used for page layout; use CSS Grid or Flexbox instead
-- The `align` attribute is deprecated; use CSS `margin-left` and `margin-right` for alignment
-- The `bgcolor` attribute is deprecated; use CSS `background-color`
-- The `border` attribute is deprecated; use CSS `border`
+- **Layout tables are non-conforming** and cause serious navigation problems for screen-reader users.
+- **Empty rows or columns are not permitted** in the table model.
+- **`<th>` must not be used merely for bold, centered text**; use `<td>` and CSS instead.
 
-#### Annotated Complete Step-by-Step Code Examples
+---
 
-**Example 1: Basic Table Structure**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: A Simple Data Table
+
+**Setup Guide**: Save as `table-basic.html` and test with a screen reader to confirm header announcements.
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Basic Table Demo</title>
+  <meta charset="UTF-8">
+  <title>Simple Data Table</title>
 </head>
 <body>
-    <!-- table wraps the entire table -->
-    <table>
-        <!-- tr creates a row -->
-        <tr>
-            <!-- th creates header cells -->
-            <th>Name</th>
-            <th>Age</th>
-            <th>City</th>
-        </tr>
-        <!-- second row -->
-        <tr>
-            <!-- td creates data cells -->
-            <td>Alice</td>
-            <td>30</td>
-            <td>New York</td>
-        </tr>
-        <!-- third row -->
-        <tr>
-            <td>Bob</td>
-            <td>25</td>
-            <td>London</td>
-        </tr>
-    </table>
+  <table>
+    <!-- The caption identifies the table -->
+    <caption>Front-end developer training 2021</caption>
+    <thead>
+      <tr>
+        <!-- Column headers with scope="col" -->
+        <th scope="col">Name</th>
+        <th scope="col">Primary interest</th>
+        <th scope="col">Age</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <!-- Row header with scope="row" -->
+        <th scope="row">Chris</th>
+        <td>HTML tables</td>
+        <td>22</td>
+      </tr>
+      <tr>
+        <th scope="row">Dennis</th>
+        <td>Web accessibility</td>
+        <td>45</td>
+      </tr>
+    </tbody>
+  </table>
 </body>
 </html>
 ```
 
-**Expected Output**
+**Expected output**: A table with a caption, column headers, and row headers. A screen reader announces the caption and, when navigating cells, announces the relevant row and column headers as context.
 
-A table with three columns (Name, Age, City) and two data rows (Alice and Bob). The header cells are bold and centred by default.
-
-**Why This Output Occurs**
-
-The `<table>` element creates the table container. The `<tr>` elements create rows. The `<th>` elements create header cells, which browsers render with `font-weight: bold` and `text-align: center` by default. The `<td>` elements create data cells, which are left-aligned by default.
+**Why this output occurs**: The `<caption>` provides the table's accessible name, the `<th scope="col">` elements identify column headers, and the `<th scope="row">` elements identify row headers. Together they make the relationships programmatically determinable, satisfying WCAG 1.3.1.
 
 ---
 
-**Example 2: Table with Caption**
+#### Example 2: A Layout Table (Anti-Pattern)
+
+**Setup Guide**: Save as `table-layout.html`. This is explicitly non-conforming.
 
 ```html
+<!-- ANTI-PATTERN: table used for page layout -->
 <table>
-    <caption>Employee Directory</caption>
-    <tr>
-        <th scope="col">Name</th>
-        <th scope="col">Department</th>
-        <th scope="col">Extension</th>
-    </tr>
-    <tr>
-        <th scope="row">Sarah Chen</th>
-        <td>Engineering</td>
-        <td>4201</td>
-    </tr>
-    <tr>
-        <th scope="row">Marcus Johnson</th>
-        <td>Marketing</td>
-        <td>3105</td>
-    </tr>
+  <tr>
+    <td>Sidebar content</td>
+    <td>Main content</td>
+  </tr>
 </table>
 ```
 
-**Expected Output**
+**Expected output**: The table renders visually, but screen readers announce a data table with no meaningful headers, making the page confusing and difficult to navigate.
 
-A table with a caption “Employee Directory” displayed above the table. The first column contains row headers (bold), and the first row contains column headers.
-
-**Why This Output Occurs**
-
-The `<caption>` element provides a visible title for the table. The `scope="col"` attribute on `<th>` elements in the first row identifies them as column headers. The `scope="row"` attribute on `<th>` elements in the first column identifies them as row headers.
-
-#### Real-World Cases
-
-**Case 1: Financial Data Tables**
-
-Bank statements and financial reports use tables to display transactions, balances, and dates in a structured grid.
-
-**Case 2: Comparison Tables**
-
-Product comparison pages use tables to show features across different products, with features as rows and products as columns.
-
-**Case 3: Timetables and Schedules**
-
-Bus, train, and flight schedules use tables with routes as rows and times as columns.
+**Why this output occurs**: The specification states that tables must not be used as layout aids, because tools attempting to extract tabular data would obtain confusing results and screen-reader users would find it very difficult to navigate.
 
 ---
 
-### 2. The `<tr>` Element (Table Row)
+### Real-World Cases
 
-#### Definitions
+1. **Financial reports**: Quarterly revenue by product line.
+2. **Timetables**: Schedules with days as columns and times as rows.
+3. **Comparison tables**: Product features compared across models.
+
+---
+
+### References
+
+- WHATWG — The `table` element — https://html.spec.whatwg.org/dev/tables.html#the-table-element
+- W3C — Technique H51: Using table markup to present tabular information — https://www.w3.org/WAI/WCAG22/Techniques/html/H51.html
+- W3C — Technique F91: Failure due to not correctly marking up table headers — https://www.w3.org/WAI/WCAG22/Techniques/failures/F91.html
+
+---
+
+## 2. `<table>` — The Table Container and Its Children
+
+### Definitions
 
 **Core Definition**
-
-The `<tr>` element is the container element used to group table cells into horizontal rows.
-
-**Technical Definition**
-
-The `<tr>` HTML element defines a row of cells in a table. The row‘s cells can then be established with a mix of `<td>` (data cell) and `<th>` (header cell) elements. Its content model is zero or more `<td>` or `<th>` elements, or a mixture of them. Its permitted parents are `<table>`, `<thead>`, `<tbody>`, or `<tfoot>`. The start tag is mandatory; the end tag may be omitted if the `<tr>` element is immediately followed by another `<tr>` element, or if the parent table group has no more content. Its implicit ARIA role is `row`, and its DOM interface is `HTMLTableRowElement`.
-
-**Beginner-Friendly Explanation**
-
-The `<tr>` tag creates one horizontal row in your table. You put all the cells for that row inside it — some may be header cells (`<th>`) and some may be data cells (`<td>`). If you have a table with 5 rows, you‘ll have 5 `<tr>` elements.
-
-#### Purposes
-
-- To group table cells into horizontal rows
-- To provide the structural unit for table rows
-- To enable row-level styling and scripting
-- To define the horizontal axis of the table grid
-
-#### Syntax Rules and Structure
-
-**General Syntax**
-
-```html
-<tr>
-    <td>Cell 1</td>
-    <td>Cell 2</td>
-    <td>Cell 3</td>
-</tr>
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|---|---|
-| `<tr>` | Opening tag; indicates a row |
-| `<td>` or `<th>` | Cells within the row |
-| `</tr>` | Closing tag; optional in specific circumstances |
-
-**Syntax Rules**
-
-- The start tag is mandatory; the end tag may be omitted if immediately followed by another `<tr>` or if the parent table group has no more content
-- The content model is zero or more `<td>` or `<th>` elements
-- Only global attributes are permitted (the `align` attribute is deprecated)
-- The `<tr>` element must be a child of `<table>`, `<thead>`, `<tbody>`, or `<tfoot>`
-
-**Constraints and Limitations**
-
-- The `align` attribute is deprecated; use CSS `text-align` instead
-- The `<tr>` element cannot contain text directly; all content must be inside cells
-- Rows without cells are technically valid but serve no purpose
-
-#### Annotated Complete Step-by-Step Code Examples
-
-**Example 1: Multiple Rows**
-
-```html
-<table>
-    <!-- First row: headers -->
-    <tr>
-        <th>Product</th>
-        <th>Price</th>
-        <th>Stock</th>
-    </tr>
-
-    <!-- Second row: data -->
-    <tr>
-        <td>Laptop</td>
-        <td>$999</td>
-        <td>15</td>
-    </tr>
-
-    <!-- Third row: data -->
-    <tr>
-        <td>Mouse</td>
-        <td>$29</td>
-        <td>50</td>
-    </tr>
-
-    <!-- Fourth row: data -->
-    <tr>
-        <td>Keyboard</td>
-        <td>$79</td>
-        <td>30</td>
-    </tr>
-</table>
-```
-
-**Expected Output**
-
-A table with one header row and three data rows.
-
-**Why This Output Occurs**
-
-Each `<tr>` element creates a distinct horizontal row. The browser stacks the rows vertically, creating the table grid. The `<th>` cells in the first row are rendered as bold, centred headers; the `<td>` cells in subsequent rows are rendered as standard data cells.
-
----
-
-**Example 2: Row with Mixed Header and Data Cells**
-
-```html
-<table>
-    <tr>
-        <th scope="row">January</th>
-        <td>$1,200</td>
-        <td>$800</td>
-        <td>$400</td>
-    </tr>
-    <tr>
-        <th scope="row">February</th>
-        <td>$1,500</td>
-        <td>$900</td>
-        <td>$600</td>
-    </tr>
-</table>
-```
-
-**Expected Output**
-
-A table where the first column contains row headers (bold) and the remaining columns contain data.
-
-**Why This Output Occurs**
-
-The `<th scope="row">` elements identify the first cell in each row as a row header. This creates a semantic relationship between the row header and the data cells in the same row, which screen readers can announce.
-
-#### Real-World Cases
-
-**Case 1: Invoice Line Items**
-
-Invoices use table rows for each line item, with columns for description, quantity, unit price, and total.
-
-**Case 2: Sports League Standings**
-
-Sports standings tables use rows for each team, with columns for wins, losses, and points.
-
-**Case 3: Grade Books**
-
-Teachers use table rows for each student, with columns for assignment scores and final grades.
-
----
-
-### 3. The `<th>` Element (Table Header)
-
-#### Definitions
-
-**Core Definition**
-
-The `<th>` element defines a cell as a header for a group of table cells, providing a label or heading for a row or column of data.
+The `<table>` element is the container for tabular data. Its child elements — `<caption>`, `<colgroup>`, `<thead>`, `<tbody>`, `<tfoot>`, `<tr>`, `<th>`, and `<td>` — define the table's caption, column groups, header rows, body rows, footer rows, and individual cells.
 
 **Technical Definition**
-
-The `<th>` HTML element defines a cell as header of a group of table cells. The exact nature of this group is defined by the `scope` and `headers` attributes. It has no content categories. Its permitted content is flow content, but with no header, footer, sectioning content, or heading content descendants. The start tag is mandatory; the end tag may be omitted if immediately followed by a `<th>` or `<td>` element or if there is no more data in its parent element. Its permitted parent is a `<tr>` element. Its implicit ARIA role is `columnheader` or `rowheader`, and its DOM interface is `HTMLTableCellElement`.
+`<table>` belongs to the **flow content** and **palpable content** categories. Its content model is, in order: an optional `<caption>`, zero or more `<colgroup>` elements, an optional `<thead>`, either zero or more `<tbody>` elements or one or more `<tr>` elements, and an optional `<tfoot>`. The table element takes part in the table model, and its cells must completely cover the grid formed by rows and columns without overlap. The DOM interface is `HTMLTableElement`, which exposes `caption`, `tHead`, `tFoot`, `rows`, `insertRow()`, and related members.
 
 **Beginner-Friendly Explanation**
-
-The `<th>` tag creates a header cell — a cell that labels other cells. For example, in a table of student grades, the top row might have `<th>` cells saying “Name,” “Math,” and “Science.” These labels help everyone understand what the data in each column means. Browsers display `<th>` cells in bold and centred by default.
-
-#### Purposes
-
-- To define header cells that label rows or columns of data
-- To provide semantic structure for screen readers
-- To enable the `scope` attribute to define header-data relationships
-- To distinguish labels from actual data
-
-#### Syntax Rules and Structure
-
-**General Syntax**
-
-```html
-<th scope="col">Column Header</th>
-<th scope="row">Row Header</th>
-```
-
-**Component Breakdown**
-
-| Component | Description |
-|---|---|
-| `<th>` | Opening tag; indicates a header cell |
-| `scope` | Defines whether the header applies to a column, row, or group |
-| `Content` | Flow content; the header text |
-| `</th>` | Closing tag; optional in specific circumstances |
-
-**Scope Attribute Values**
-
-| Value | Description |
-|---|---|
-| `col` | Header applies to the column below it |
-| `row` | Header applies to the row beside it |
-| `colgroup` | Header applies to a group of columns |
-| `rowgroup` | Header applies to a group of rows |
-
-**Syntax Rules**
-
-- The `<th>` element must be a child of a `<tr>` element
-- The `scope` attribute defines the header‘s relationship to data cells
-- The `abbr` attribute can provide an abbreviated description for screen readers
-- The `colspan` and `rowspan` attributes allow headers to span multiple columns or rows
-
-**Constraints and Limitations**
-
-- The `align`, `bgcolor`, `char`, and `valign` attributes are deprecated; use CSS instead
-- Without `scope`, screen readers may not correctly associate headers with data cells
-- The `<th>` element should not be used for data that is not a header
-
-#### Annotated Complete Step-by-Step Code Examples
-
-**Example 1: Column Headers with Scope**
-
-```html
-<table>
-    <thead>
-        <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Email</th>
-            <th scope="col">Role</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Jane Doe</td>
-            <td>jane@example.com</td>
-            <td>Admin</td>
-        </tr>
-        <tr>
-            <td>John Smith</td>
-            <td>john@example.com</td>
-            <td>Editor</td>
-        </tr>
-    </tbody>
-</table>
-```
-
-**Expected Output**
-
-A table with bold column headers and two data rows.
-
-**Why This Output Occurs**
-
-The `scope="col"` attribute tells screen readers that these headers apply to the columns below them. When a screen reader user navigates to a data cell, it can announce the associated column header.
+`<table>` is the outer container. Inside it, you build the table from the top down: a caption (title), a header section (`<thead>`), a body section (`<tbody>`), and optionally a footer section (`<tfoot>`). Each section contains rows (`<tr>`), and each row contains header cells (`<th>`) or data cells (`<td>`).
 
 ---
 
-**Example 2: Row Headers with Scope**
+### Purposes
 
-```html
-<table>
-    <tr>
-        <th scope="row">Monday</th>
-        <td>Math</td>
-        <td>Science</td>
-        <td>English</td>
-    </tr>
-    <tr>
-        <th scope="row">Tuesday</th>
-        <td>History</td>
-        <td>Art</td>
-        <td>Music</td>
-    </tr>
-</table>
-```
-
-**Expected Output**
-
-A table where the first column contains bold row headers.
-
-**Why This Output Occurs**
-
-The `scope="row"` attribute tells screen readers that these headers apply to the data cells in the same row. When navigating to “Math,” the screen reader announces “Monday, Math.”
-
-#### Real-World Cases
-
-**Case 1: Financial Statements**
-
-Financial statements use `<th scope="col">` for years and `<th scope="row">` for line items like revenue and expenses.
-
-**Case 2: Scientific Data Tables**
-
-Scientific papers use `<th>` for variable names and units, with `scope` attributes defining the relationships.
-
-**Case 3: Sports Statistics**
-
-Sports statistics tables use `<th>` for player names and statistical categories.
+- **To declare a tabular data structure** and define its grid.
+- **To group header, body, and footer rows** semantically via `<thead>`, `<tbody>`, and `<tfoot>`.
+- **To provide a caption** that identifies the table.
+- **To expose the table to assistive technologies** through the table model and accessibility tree.
 
 ---
 
-### 4. The `<td>` Element (Table Data)
+### Syntax Rules and Structure
 
-#### Definitions
-
-**Core Definition**
-
-The `<td>` element defines a standard data cell that contains the actual data or content of the table.
-
-**Technical Definition**
-
-The `<td>` HTML element defines a cell of a table that contains data and may be used as a child of the `<tr>` element. It supports the `colspan`, `headers`, and `rowspan` attributes. The `colspan` attribute contains a non-negative integer indicating how many columns the cell spans; its default value is 1, and values higher than 1000 are treated as 1. The `rowspan` attribute indicates how many rows the cell spans; its default value is 1, and if set to 0, it extends to the end of the table section. Its DOM interface is `HTMLTableCellElement`.
-
-**Beginner-Friendly Explanation**
-
-The `<td>` tag creates a data cell — a cell that contains actual information, like a number, a name, or a date. In a table of student grades, the cells containing the actual grades would be `<td>` elements. Browsers display `<td>` cells left-aligned by default.
-
-#### Purposes
-
-- To contain the actual data or content of a table
-- To provide the grid cells that hold values
-- To support spanning multiple columns or rows via `colspan` and `rowspan`
-- To enable association with header cells via the `headers` attribute
-
-#### Syntax Rules and Structure
-
-**General Syntax**
+#### Complete General Syntax
 
 ```html
-<td>Cell content</td>
-<td colspan="2">Cell spanning two columns</td>
-<td rowspan="3">Cell spanning three rows</td>
+<table>
+  <caption>Table title</caption>
+  <colgroup>
+    <col span="2">
+  </colgroup>
+  <thead>
+    <tr>
+      <th scope="col">Header 1</th>
+      <th scope="col">Header 2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Data</td>
+      <td>Data</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td>Footer</td>
+      <td>Footer</td>
+    </tr>
+  </tfoot>
+</table>
 ```
 
-**Component Breakdown**
+**Component breakdown**
 
-| Component | Description |
-|---|---|
-| `<td>` | Opening tag; indicates a data cell |
-| `Content` | Flow content; the data or content |
-| `</td>` | Closing tag; optional in specific circumstances |
-
-**Spanning Attributes**
-
-| Attribute | Description | Default |
+| Element | Role | Required? |
 |---|---|---|
-| `colspan` | Number of columns the cell spans | 1 |
-| `rowspan` | Number of rows the cell spans | 1 |
-| `headers` | Space-separated list of header cell IDs | — |
+| `<caption>` | Table title and accessible name | Strongly recommended |
+| `<colgroup>` / `<col>` | Column groups and column styling | Optional |
+| `<thead>` | Header rows | Optional but recommended |
+| `<tbody>` | Body rows | Optional (implicit if `<tr>` used directly) |
+| `<tfoot>` | Footer rows | Optional |
+| `<tr>` | A row | Required |
+| `<th>` | Header cell | Required for data tables |
+| `<td>` | Data cell | Required |
 
-**Syntax Rules**
+#### Syntax Rules
 
-- The `<td>` element must be a child of a `<tr>` element
-- The `colspan` and `rowspan` attributes accept non-negative integers
-- The `headers` attribute associates the cell with specific header cells by ID
-- The `abbr`, `align`, `bgcolor`, `char`, and `valign` attributes are deprecated
+1. **Neither the `<table>` start tag nor end tag is omissible**.
+2. **The content model order must be respected**: caption → colgroup* → thead? → (tbody* | tr+) → tfoot?.
+3. **Header cells must use `<th>` with `scope`** or `id`/`headers` for complex tables.
+4. **A `<caption>` is the appropriate markup for a table title** and remains associated with the table.
+5. **The `align`, `bgcolor`, `border`, `cellpadding`, `cellspacing`, `frame`, `rules`, and `width` attributes are obsolete**; use CSS instead.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- The `<td>` element cannot contain block-level elements like `<div>` or `<p>` in strict HTML4, but HTML5 permits flow content
-- Values higher than 1000 for `colspan` are treated as 1
-- Values higher than 65534 for `rowspan` are clipped to 65534
+- **Complex tables (multiple header rows or columns)** require `id` and `headers` attributes to associate data cells with all relevant headers.
+- **Empty rows or columns are not permitted** in the table model.
+- **Cells must not overlap**; `colspan` and `rowspan` must be used correctly.
 
-#### Annotated Complete Step-by-Step Code Examples
+---
 
-**Example 1: Basic Data Cells**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: A Simple Table with Row and Column Headers
+
+**Setup Guide**: Save as `table-headers.html`. This is the W3C Technique H51 schedule example.
 
 ```html
 <table>
-    <tr>
-        <th>Name</th>
-        <th>Score</th>
-    </tr>
-    <tr>
-        <td>Alice</td>
-        <td>95</td>
-    </tr>
-    <tr>
-        <td>Bob</td>
-        <td>87</td>
-    </tr>
+  <tr>
+    <th>Time</th>
+    <th>Monday</th>
+    <th>Tuesday</th>
+    <th>Wednesday</th>
+    <th>Thursday</th>
+    <th>Friday</th>
+  </tr>
+  <tr>
+    <th scope="row">8:00-9:00</th>
+    <td>Meet with Sam</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <th scope="row">9:00-10:00</th>
+    <td></td>
+    <td></td>
+    <td>Doctor Williams</td>
+    <td>Sam again</td>
+    <td>Leave for San Antonio</td>
+  </tr>
 </table>
 ```
 
-**Expected Output**
+**Expected output**: A schedule where screen readers announce the day of the week (column header) when moving left or right, and the time interval (row header) when moving up or down.
 
-A table with two columns and three rows (one header row, two data rows).
-
-**Why This Output Occurs**
-
-Each `<td>` element creates a data cell. The browser arranges the cells into a grid based on the number of cells in each row.
+**Why this output occurs**: The `<th>` elements identify the days as column headers and the time intervals as row headers, and the `scope="row"` attribute makes the row-header relationship programmatically determinable.
 
 ---
 
-**Example 2: Cells Spanning Columns and Rows**
+#### Example 2: A Complex Table with `id` and `headers`
+
+**Setup Guide**: Save as `table-complex.html`. This is the W3C Technique H43 example.
 
 ```html
-<table border="1">
-    <tr>
-        <th>Name</th>
-        <th colspan="2">Contact Information</th>
-    </tr>
-    <tr>
-        <td>Jane</td>
-        <td>jane@example.com</td>
-        <td>555-0101</td>
-    </tr>
-    <tr>
-        <td rowspan="2">John</td>
-        <td>john@example.com</td>
-        <td>555-0102</td>
-    </tr>
-    <tr>
-        <td>john.work@example.com</td>
-        <td>555-0103</td>
-    </tr>
+<table>
+  <tr>
+    <th rowspan="2" id="h">Homework</th>
+    <th colspan="3" id="e">Exams</th>
+    <th colspan="3" id="p">Projects</th>
+  </tr>
+  <tr>
+    <th id="e1" headers="e">1</th>
+    <th id="e2" headers="e">2</th>
+    <th id="ef" headers="e">Final</th>
+    <th id="p1" headers="p">1</th>
+    <th id="p2" headers="p">2</th>
+    <th id="pf" headers="p">Final</th>
+  </tr>
+  <tr>
+    <td headers="h">15%</td>
+    <td headers="e e1">15%</td>
+    <td headers="e e2">15%</td>
+    <td headers="e ef">20%</td>
+    <td headers="p p1">10%</td>
+    <td headers="p p2">10%</td>
+    <td headers="p pf">15%</td>
+  </tr>
 </table>
 ```
 
-**Expected Output**
+**Expected output**: A complex grade breakdown table where each data cell is associated with all relevant headers, including the category (Exams, Projects) and the specific assessment (1, 2, Final).
 
-A table where the “Contact Information” header spans two columns, and the “John” cell spans two rows.
-
-**Why This Output Occurs**
-
-The `colspan="2"` attribute on the “Contact Information” header makes it span two columns. The `rowspan="2"` attribute on the “John” cell makes it span two rows. The browser merges the cells accordingly.
-
-#### Real-World Cases
-
-**Case 1: Price Comparison Tables**
-
-E-commerce sites use `<td>` for prices, product names, and availability across different vendors.
-
-**Case 2: Sports Scoreboards**
-
-Sports scoreboards use `<td>` for scores, team names, and game times.
-
-**Case 3: Inventory Lists**
-
-Warehouse systems use `<td>` for item names, quantities, and locations.
+**Why this output occurs**: The `id` attributes on the header cells and the `headers` attributes on the data cells explicitly associate each data cell with every header that applies to it, satisfying Technique H43 for tables where a data cell is associated with more than one row or column header.
 
 ---
 
-### 5. Rows and Columns (The Grid Matrix)
+### Real-World Cases
 
-#### Definitions
+1. **Schedule tables**: Days as columns and times as rows.
+2. **Grade breakdowns**: Categories, assessments, and weights with multiple header levels.
+3. **Product comparison tables**: Features and models with row and column headers.
+
+---
+
+### References
+
+- MDN Web Docs — `<table>`: The Table element — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/table
+- W3C — Technique H39: Using caption elements to associate data table captions — https://w3c.github.io/wcag/techniques/html/H39
+- W3C — Technique H43: Using id and headers attributes — https://w3c.github.io/wcag/techniques/html/H43
+
+---
+
+## 3. Table Best Practices
+
+### Definitions
 
 **Core Definition**
-
-Rows and columns are the two axes of a table grid, formed by nesting `<td>` and `<th>` cells inside `<tr>` rows; the table model builds a grid of cells from these rows and columns.
+Table best practices are the consolidated guidelines for building tables that are semantically correct, accessible, responsive, and maintainable — covering headers, captions, complex-table associations, layout-table avoidance, and responsive techniques.
 
 **Technical Definition**
-
-A table is a structured set of data made up of rows and columns (tabular data). The table model consists of a grid of cells. Each `<tr>` element defines a row, and the cells within that row (`<td>` and `<th>`) occupy columns. The browser‘s table model determines the column positions based on the order of cells, accounting for `colspan` and `rowspan` attributes. The point of a table is that it is rigid — information is easily interpreted by making visual associations between row and column headers.
+Best practices are informed by WCAG 1.3.1 (Info and Relationships), Techniques H51, H39, H43, failures F91 and F46, the WHATWG HTML Living Standard, and responsive table guidance from Chrome for Developers. They encompass using semantic table markup (`<table>`, `<tr>`, `<th>`, `<td>`), providing captions, marking headers with `scope` or `id`/`headers`, avoiding layout tables, using CSS for presentation, and adapting tables to small screens with horizontal scrolling or stacked layouts.
 
 **Beginner-Friendly Explanation**
+Best practices help you build tables that are correct and usable: use real table tags, give every table a caption, mark headers as headers, never use tables for layout, style with CSS, and make sure tables work on phones.
 
-A table is like a grid. The rows go across (left to right), and the columns go down (top to bottom). When you put cells inside a row, they line up to form columns. The browser figures out which column each cell belongs to based on where it is in the row. This grid structure is what makes tables useful for looking up information — you find the row you want, then find the column you want, and the cell where they meet has your answer.
+---
 
-#### Purposes
+### Purposes
 
-- To provide the two-dimensional structure for tabular data
-- To enable quick lookups by matching row and column headers
-- To create visual associations between headers and data
-- To support complex table structures with spanning cells
+- **To satisfy WCAG 1.3.1** by making table structure programmatically determinable.
+- **To ensure screen-reader users can navigate tables** and hear the correct headers for each cell.
+- **To keep tables usable on small screens** through responsive techniques.
+- **To separate structure from presentation** by replacing deprecated attributes with CSS.
 
-#### Syntax Rules and Structure
+---
 
-**Row-Column Relationship**
+### Syntax Rules and Structure
 
-| Concept | Description |
+| Practice | Rule |
 |---|---|
-| Row | Defined by a `<tr>` element; a horizontal group of cells |
-| Column | The vertical alignment of cells across multiple rows |
-| Cell | A `<td>` or `<th>` element; the intersection of a row and column |
+| **Use semantic table markup** | `<table>`, `<tr>`, `<th>`, `<td>`; not `<div>` grids or `<pre>` formatting. |
+| **Provide a `<caption>`** | Identifies the table and gives it an accessible name. |
+| **Mark headers with `<th>`** | Use `<th>` for headers, not `<td>` with bold styling. |
+| **Use `scope` for simple tables** | `scope="col"` and `scope="row"` associate headers with cells. |
+| **Use `id` and `headers` for complex tables** | Associate data cells with multiple headers when `scope` is insufficient. |
+| **Never use tables for layout** | The specification prohibits it; use CSS Grid or Flexbox. |
+| **Replace deprecated attributes with CSS** | `align`, `bgcolor`, `border`, `width`, `cellpadding`, `cellspacing` are obsolete. |
+| **Make tables responsive** | Wrap in a scrollable container with `tabindex="0"` and `role="region"`, or use a stacked layout on small screens. |
+| **Keep headers visible while scrolling** | Use `position: sticky` on column and row headers. |
 
-**Syntax Rules**
+#### Syntax Rules
 
-- Cells are placed in columns in the order they appear in the row
-- The `colspan` attribute makes a cell occupy multiple column positions
-- The `rowspan` attribute makes a cell occupy multiple row positions
-- The table model calculates the grid based on the sequence and spanning of cells
+1. **Semantic correctness**: Use `<th>` for headers and `<td>` for data; `<td>` styled as a header fails WCAG 1.3.1.
+2. **Association correctness**: Simple tables use `scope`; complex tables use `id` and `headers`.
+3. **Responsive correctness**: Provide keyboard-accessible scrolling or a stacked layout on narrow screens.
+4. **Presentation correctness**: All visual styling belongs in CSS, not obsolete HTML attributes.
 
-**Constraints and Limitations**
+#### Constraints and Limitations
 
-- Irregular tables (with cells spanning multiple rows/columns) are harder for screen readers to navigate
-- The table model algorithm handles implicit cell placement based on available slots
-- Tables with complex spanning should include `scope` and `headers` attributes for accessibility
-
-#### Annotated Complete Step-by-Step Code Examples
-
-**Example 1: Basic Grid Structure**
-
-```html
-<table>
-    <tr>
-        <th>Name</th>
-        <th>Math</th>
-        <th>Science</th>
-    </tr>
-    <tr>
-        <td>Alice</td>
-        <td>95</td>
-        <td>88</td>
-    </tr>
-    <tr>
-        <td>Bob</td>
-        <td>87</td>
-        <td>92</td>
-    </tr>
-</table>
-```
-
-**Expected Output**
-
-A 3×3 grid: 3 columns (Name, Math, Science) and 3 rows (header row, Alice, Bob).
-
-**Why This Output Occurs**
-
-The browser creates a grid with 3 columns based on the 3 cells in the first row. The second and third rows each have 3 cells that align with the columns defined by the header row.
+- **Layout tables are non-conforming** and cause navigation difficulties for screen-reader users.
+- **Simple tables should generally have only one level of headers**; complex multi-level headers require `id`/`headers`.
+- **Complex nested tables should be avoided**; simpler layouts are easier for screen readers to process.
 
 ---
 
-**Example 2: Column Association with Headers Attribute**
+### Multiple Annotated Complete Step-by-Step Code Examples
+
+#### Example 1: A Responsive Accessible Table
+
+**Setup Guide**: Save as `table-responsive.html`. Test on a narrow screen and with a screen reader.
 
 ```html
-<table>
-    <tr>
-        <th id="name">Name</th>
-        <th id="math">Math</th>
-        <th id="science">Science</th>
-    </tr>
-    <tr>
-        <td headers="name">Alice</td>
-        <td headers="math">95</td>
-        <td headers="science">88</td>
-    </tr>
-</table>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Responsive Accessible Table</title>
+  <style>
+    .table-wrapper {
+      overflow: auto;
+      max-inline-size: 100%;
+      max-block-size: min(500px, 80vh);
+    }
+    table { border-collapse: separate; border-spacing: 0; }
+    thead { position: sticky; inset-block-start: 0; z-index: 1; }
+    tbody th { position: sticky; inset-inline-start: 0; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+  </style>
+</head>
+<body>
+  <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="employee-caption">
+    <table>
+      <caption id="employee-caption">Current employee directory</caption>
+      <thead>
+        <tr>
+          <th scope="col">Employee</th>
+          <th scope="col">Role</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Alex Rivera</th>
+          <td>Engineer</td>
+          <td>Active</td>
+        </tr>
+        <tr>
+          <th scope="row">Sam Chen</th>
+          <td>Designer</td>
+          <td>Active</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
 ```
 
-**Expected Output**
+**Expected output**: A table that scrolls horizontally on narrow screens while the header row and row headers remain sticky. The scrollable region is keyboard-focusable (`tabindex="0"`) and has an accessible name (`aria-labelledby` pointing to the caption).
 
-A table where each data cell is explicitly associated with its column header.
-
-**Why This Output Occurs**
-
-The `headers` attribute on each `<td>` references the `id` of the corresponding `<th>` element, creating an explicit programmatic association. This is especially useful in complex tables where `scope` alone is insufficient.
-
-#### Real-World Cases
-
-**Case 1: NASA Planetary Fact Sheet**
-
-The MDN table basics tutorial uses NASA‘s Planetary Fact Sheet as an example, demonstrating a complex table with rows for each planet and columns for mass, diameter, density, gravity, and other properties.
-
-**Case 2: Census Data**
-
-Government census data uses large tables with rows for geographic areas and columns for population statistics.
-
-**Case 3: Sports League Tables**
-
-Football league tables use rows for teams and columns for played, won, drawn, lost, and points.
+**Why this output occurs**: The wrapper provides `overflow: auto` and `tabindex="0"` so keyboard users can scroll; `role="region"` and `aria-labelledby` give the scrollable area an accessible name; `position: sticky` keeps headers visible during scrolling. The semantic `<th scope>` attributes make the table accessible.
 
 ---
 
-### 6. Choosing Semantic Elements Rather Than Purely Visual Elements
+#### Example 2: Common Table Accessibility Failures
 
-#### Definitions
-
-**Core Definition**
-
-Choosing semantic table elements means using `<table>`, `<tr>`, `<th>`, and `<td>` for actual tabular data, and using CSS Grid or Flexbox for page layout, rather than using tables to achieve visual layouts.
-
-**Technical Definition**
-
-Semantic table markup requires using the `<table>` element only for tabular data — information that has a logical relationship between rows and columns. For page layout, CSS Grid and Flexbox are the appropriate tools. WCAG Success Criterion 1.3.1 (Info and Relationships) requires that information, structure, and relationships conveyed through presentation can be programmatically determined. Using tables for layout fails this criterion because there is no logical row-column relationship in the content.
-
-**Beginner-Friendly Explanation**
-
-Use tables for data, not for layout. If you‘re arranging items on a page — like a sidebar and a main content area — use CSS, not a table. Tables are rigid grids that are perfect for data but terrible for flexible page layouts. Screen readers also get confused when tables are used for layout because they try to announce non-existent row-column relationships.
-
-#### Correct vs. Incorrect Patterns
-
-| If you want to… | Use… | Not… |
-|---|---|---|
-| Display tabular data | `<table>`, `<tr>`, `<th>`, `<td>` | `<div>` with CSS Grid |
-| Create a page layout | CSS Grid or Flexbox | `<table>` |
-| Show a comparison | `<table>` with `<th>` headers | `<div>` with columns |
-| Display a schedule | `<table>` with time rows | `<ul>` with CSS |
-
-**Syntax Rules**
-
-- Use `<table>` only for data that has a logical row-column relationship
-- Use `<th>` for headers and `<td>` for data
-- Use CSS for all visual styling (borders, spacing, colours)
-- Never use tables for layout; use CSS Grid or Flexbox
-
-**Constraints and Limitations**
-
-- Tables used for layout confuse screen readers and violate accessibility guidelines
-- Tables are rigid and do not adapt well to responsive design
-- The deprecated `align`, `bgcolor`, and `border` attributes must not be used
-
-#### Annotated Complete Step-by-Step Code Examples
-
-**Example 1: Correct vs. Incorrect Table Usage**
+**Setup Guide**: Save as `table-failures.html`. Run an accessibility checker.
 
 ```html
-<!-- CORRECT: Table for tabular data -->
-<h2>Employee Directory</h2>
+<!-- FAILURE 1: headers marked with td instead of th -->
+<!--
 <table>
-    <tr>
-        <th scope="col">Name</th>
-        <th scope="col">Department</th>
-    </tr>
-    <tr>
-        <td>Jane Doe</td>
-        <td>Engineering</td>
-    </tr>
+  <tr><td>Name</td><td>Age</td></tr>
+  <tr><td>Linda</td><td>33</td></tr>
 </table>
+-->
 
-<!-- INCORRECT: Table for page layout -->
+<!-- FAILURE 2: no caption -->
+<!--
 <table>
-    <tr>
-        <td width="200">Sidebar content</td>
-        <td>Main content</td>
-    </tr>
+  <tr><th scope="col">Name</th><th scope="col">Age</th></tr>
+  <tr><td>Linda</td><td>33</td></tr>
 </table>
+-->
+
+<!-- FAILURE 3: layout table -->
+<!--
+<table>
+  <tr><td>Sidebar</td><td>Main content</td></tr>
+</table>
+-->
+
+<!-- FAILURE 4: deprecated presentational attributes -->
+<!-- <table border="1" cellpadding="10" bgcolor="#eee"> -->
 ```
 
-**Expected Output**
+**Expected output**: Each failure violates a table accessibility or conformance rule: `<td>` headers fail F91, missing captions lose the table's identity, layout tables are non-conforming, and deprecated attributes should be replaced with CSS.
 
-The correct example displays a data table with clear headers. The incorrect example may look like a layout, but it confuses screen readers.
-
-**Why This Output Occurs**
-
-The correct example uses a table for actual tabular data — information with a row-column relationship. The incorrect example uses a table purely for visual layout, which has no semantic row-column relationship. Screen readers will announce the layout table as a table with rows and columns, which is misleading.
-
-#### Real-World Cases
-
-**Case 1: Government Accessibility Compliance**
-
-Government websites must not use tables for layout to comply with WCAG 2.1 Success Criterion 1.3.1.
-
-**Case 2: Screen Reader Navigation**
-
-Screen readers announce table structure, including row and column counts. Layout tables create confusing announcements.
-
-**Case 3: Responsive Design**
-
-CSS Grid and Flexbox are responsive and adapt to different screen sizes; tables are rigid and require horizontal scrolling on mobile.
+**Why this output occurs**: Technique F91 defines `<td>` headers as a WCAG 1.3.1 failure; the specification prohibits layout tables; and MDN marks the presentational attributes as obsolete.
 
 ---
 
-## References
+### Real-World Cases
 
-- MDN Web Docs – `<table>`: The Table element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/table
-- MDN Web Docs – `<tr>`: The Table Row element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/tr
-- MDN Web Docs – `<th>`: The Table Header element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/th
-- MDN Web Docs – `<td>`: The Table Data Cell element – https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/td
-- MDN Web Docs – HTML table basics – https://developer.mozilla.org/en-US/docs/Learn/HTML/Tables/Basics
-- WHATWG HTML Living Standard – The table element – https://html.spec.whatwg.org/multipage/tables.html#the-table-element
-- WHATWG HTML Living Standard – The tr element – https://html.spec.whatwg.org/multipage/tables.html#the-tr-element
-- WHATWG HTML Living Standard – The th element – https://html.spec.whatwg.org/multipage/tables.html#the-th-element
-- WHATWG HTML Living Standard – The td element – https://html.spec.whatwg.org/multipage/tables.html#the-td-element
-- W3C – HTML 5: The table element – https://dev.w3.org/html5/spec-author-view/tabular-data.html#the-table-element
-- W3C – WCAG 2.1 Understanding Success Criterion 1.3.1: Info and Relationships – https://www.w3.org/WAI/WCAG21/Understanding/info-and-relationships.html
-- W3C – H51: Using table markup to present tabular information – https://www.w3.org/WAI/WCAG21/Techniques/html/H51
-- W3C – H63: Using the scope attribute to associate header cells and data cells in data tables – https://www.w3.org/WAI/WCAG21/Techniques/html/H63
-- web.dev – HTML tables – https://web.dev/learn/html/tables
+1. **Government and public-sector sites**: WCAG 1.3.1 audits check for `<th>`, `scope`, captions, and responsive behaviour.
+2. **E-commerce comparison tables**: Responsive stacked layouts on mobile with semantic headers.
+3. **Data dashboards**: Tables with sticky headers and keyboard-accessible scrolling.
+
+---
+
+### References
+
+- W3C — Technique H51: Using table markup to present tabular information — https://www.w3.org/WAI/WCAG22/Techniques/html/H51.html
+- W3C — Technique F91: Failure due to not correctly marking up table headers — https://www.w3.org/WAI/WCAG22/Techniques/failures/F91.html
+- W3C — Technique H39: Using caption elements — https://w3c.github.io/wcag/techniques/html/H39
+- W3C — Technique H43: Using id and headers attributes — https://w3c.github.io/wcag/techniques/html/H43
+- Chrome for Developers — Adaptive tables — https://developer.chrome.com/docs/modern-web-guidance/guides/ui-atoms/responsive-table
+- MDN Web Docs — `<table>` — https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/table
+
+---
+
+## Summary Table of Table Concepts
+
+| Concept | Key Takeaway |
+|---|---|
+| **Tables** | Two-dimensional data where rows and columns both convey meaning; one-dimensional lists do not qualify. |
+| **`<table>`** | Container for tabular data; content model is caption → colgroup* → thead? → (tbody* \| tr+) → tfoot?; neither tag is omissible. |
+| **Best practices** | Use semantic markup; provide `<caption>`; use `<th>` with `scope` or `id`/`headers`; never use layout tables; style with CSS; make tables responsive. |
+
+---
+
+## Final Notes
+
+- **Tables are for data, not layout**: The specification explicitly prohibits using tables as layout aids, and doing so causes serious accessibility problems.
+- **`<th>` is mandatory for headers**: Using `<td>` with bold styling is a WCAG 1.3.1 failure.
+- **`<caption>` is the table's accessible name**: It identifies the table and allows screen readers to navigate to it.
+- **Simple tables use `scope`; complex tables use `id`/`headers`**: Choose the association mechanism based on the table's header complexity.
+- **Responsive tables need keyboard-accessible scrolling**: Wrap tables in a container with `tabindex="0"`, `role="region"`, and an accessible name.
+- **Validate and test**: Use HTML validators to catch obsolete attributes and accessibility checkers to verify header associations, captions, and keyboard access.
+
+---
+
+This cheat sheet has covered table fundamentals — the general concept of tables, the `<table>` element and its children, and table best practices — with uniform definitions, purposes, syntax rules, annotated examples, real-world cases, and authoritative references. Use it as a reference and a teaching aid, and validate table markup against the WHATWG HTML Living Standard, WCAG 1.3.1 (Info and Relationships), and the W3C table techniques H51, H39, H43, and failures F91/F46.
