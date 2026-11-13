@@ -1,968 +1,1026 @@
-# SQL Conditional Expressions: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: SQL Conditional Expressions
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** SQL conditional expressions are language constructs that evaluate one or more conditions and return a result based on whether those conditions are true or false, enabling decision-making logic within SQL statements without procedural code.
+**Core Definition**
+Conditional expressions are SQL constructs—`CASE`, `COALESCE`, `NULLIF`, `GREATEST`, and `LEAST`—that evaluate conditions and return different values based on whether those conditions are true, false, or unknown, allowing query results to adapt to data-dependent logic without leaving the database.
 
-**Technical Definition:** SQL conditional expressions—primarily `CASE`, `COALESCE`, and `NULLIF`—are SQL-standard constructs that operate as expressions (returning values) rather than statements (controlling flow). They can be used wherever an expression is valid, including `SELECT`, `WHERE`, `ORDER BY`, `GROUP BY`, and `HAVING` clauses. The `CASE` expression evaluates a list of conditions and returns one of multiple possible result expressions; `COALESCE` returns the first non-NULL argument; `NULLIF` returns NULL if two arguments are equal.
+**Technical Definition**
+Conditional expressions are scalar expressions that return a single value per row based on evaluated predicates. The `CASE` expression is the most general form, available in **simple** and **searched** variants, and can appear anywhere a scalar expression is valid: the `SELECT` list, `WHERE` clause, `ORDER BY`, `GROUP BY`, `HAVING`, inside aggregates, and even join conditions. `COALESCE` returns the first non-null argument; `NULLIF` returns null if two arguments are equal and the first argument otherwise; `GREATEST` and `LEAST` return the largest and smallest of a list of expressions, respectively. PostgreSQL notes that although `COALESCE`, `GREATEST`, and `LEAST` are syntactically similar to functions, they are not ordinary functions and cannot be used with explicit `VARIADIC` array arguments. `CASE` evaluates only the subexpressions needed to determine the result, which can be used to avoid runtime errors such as division by zero.
 
-**Beginner-Friendly Explanation:** Conditional expressions in SQL are like the "if-then-else" statements you use in everyday decisions. For example: "If it is raining, take an umbrella; otherwise, wear sunglasses." In SQL, `CASE` lets you say "If the order total is over $100, label it 'Premium'; otherwise, label it 'Standard'." `COALESCE` and `NULLIF` are specialized helpers for dealing with missing (NULL) values.
+**Beginner-Friendly Explanation**
+Conditional expressions are SQL's version of "if-then-else" logic. Just as a spreadsheet can show one value when a condition is met and another when it is not, SQL can transform codes into readable labels, bucket values into ranges, substitute defaults for missing data, and prevent division by zero—all inside a single query. The `CASE` expression is the Swiss Army knife: it lets you write an inline decision tree. The helper functions `COALESCE` and `NULLIF` handle null values elegantly, and `GREATEST`/`LEAST` pick extremes from a list. Mastering these constructs is the difference between exporting data to a spreadsheet for manual fixing and solving the problem directly in SQL.
 
 ### Key Characteristics
 
-- **Expression-based:** Conditional expressions return values, not control flow; they can be used inside `SELECT`, `WHERE`, `ORDER BY`, and other clauses.
-- **SQL-standard:** `CASE`, `COALESCE`, and `NULLIF` are defined in the SQL standard and supported across PostgreSQL, MySQL, SQL Server, Oracle, and SQLite.
-- **Lazy evaluation:** `CASE` does not evaluate subexpressions that are not needed to determine the result; `COALESCE` stops evaluating at the first non-NULL argument.
-- **Type-coercion aware:** All result expressions in a `CASE` must be convertible to a single output type; the return type is the highest-precedence type among the results.
-- **NULL-aware:** `CASE` comparisons with NULL do not match (since `NULL = NULL` is unknown); `COALESCE` and `NULLIF` are specifically designed for NULL handling.
+- **`CASE` is an expression, not a statement**: It returns a single value and can be used anywhere a scalar expression is allowed, including `SELECT`, `WHERE`, `ORDER BY`, `GROUP BY`, `HAVING`, inside aggregates, and join conditions.
+- **Two forms of `CASE`**: The **simple** form compares one expression to a list of candidate values (equality only); the **searched** form evaluates independent Boolean predicates, enabling ranges, pattern matching, and complex conditions.
+- **Short-circuit evaluation**: `CASE` does not evaluate subexpressions that are not needed to determine the result, which can be used to guard against errors such as division by zero.
+- **Result type compatibility**: All branches of a `CASE` expression must produce values convertible to a single common output type.
+- **Null semantics are critical**: `WHEN column = NULL` never matches because `NULL = NULL` yields `UNKNOWN`; use `WHEN column IS NULL` instead. `COALESCE` and `NULLIF` are the primary tools for null-safe logic.
+- **Vendor divergence in `GREATEST`/`LEAST`**: PostgreSQL ignores `NULL` arguments in `GREATEST` and `LEAST`, returning `NULL` only if all arguments are `NULL`; some other databases return `NULL` if any argument is `NULL`.
 
 ### Prerequisites
 
-- Basic understanding of SQL `SELECT` statements and expression syntax.
-- Familiarity with `NULL` semantics and three-valued logic (`TRUE`, `FALSE`, `UNKNOWN`).
-- Knowledge of data types and implicit type conversion rules.
-- Awareness of operator precedence and boolean expression evaluation.
+- A running RDBMS (PostgreSQL, MySQL, or SQL Server) and a client connection.
+- Familiarity with `SELECT` and basic SQL expressions.
+- Understanding of SQL's three-valued logic and the special role of `NULL`.
+- Awareness of the target RDBMS's support for `GREATEST`/`LEAST` (not available in SQL Server before 2022, never in Access).
 
 ### Related Programming Areas
 
-- Data transformation and cleansing pipelines.
-- Report generation and business intelligence.
-- Application query logic and dynamic filtering.
-- Data validation and categorization.
-- ETL/ELT transformations.
+- Data Manipulation Language (DML) – conditional expressions appear in `SELECT`, `UPDATE`, and `DELETE` statements.
+- Query optimisation – `CASE` in `WHERE` is generally **not sargable** and can prevent index usage.
+- Reporting and analytics – conditional aggregation (`SUM(CASE WHEN … THEN … END)`) computes multiple filtered metrics in one table scan.
+- Data cleaning – `COALESCE` and `NULLIF` normalise missing and placeholder values.
 
-### Core Concepts / Features
+---
 
-1. **`CASE`** (general conditional expression)
-2. **Simple `CASE`** (equality-based comparison)
-3. **Searched `CASE`** (boolean condition evaluation)
-4. **`COALESCE`** (first non-NULL value)
-5. **`NULLIF`** (NULL on equality)
-6. **Conditional Calculations** (arithmetic and derived values based on conditions)
-7. **Conditional Categorization** (grouping rows into labeled buckets)
+## Core Concepts and Features
 
+### 1. `CASE`
 
-## Core Concept 1: CASE
+#### Definitions
 
-### Definitions
+**Core Definition**
+`CASE` is a conditional expression that evaluates a list of conditions in order and returns the result associated with the first condition that evaluates to true.
 
-**Core Definition:** `CASE` is a general conditional expression that evaluates a list of conditions and returns one of multiple possible result expressions, similar to if-then-else logic in procedural programming.
+**Technical Definition**
+The SQL `CASE` expression is a generic conditional expression, similar to if/else statements in other programming languages. It has two syntactic forms. In the **searched** form, each `WHEN` clause contains an independent Boolean condition; the first condition that is true determines the result, and subsequent `WHEN` clauses are not evaluated. In the **simple** form, a single expression is computed and compared for equality against each `WHEN` candidate value. If no `WHEN` matches, the `ELSE` result is returned; if `ELSE` is omitted and no condition is true, the result is `NULL`. All result expressions must be convertible to a single output type.
 
-**Technical Definition:** The SQL `CASE` expression is a generic conditional expression that evaluates each `WHEN` condition in order; the first condition that evaluates to `TRUE` determines the result. If no condition matches, the `ELSE` result is returned; if `ELSE` is omitted, the result is `NULL`. `CASE` clauses can be used wherever an expression is valid, and the data types of all result expressions must be convertible to a single output type.
+**Beginner-Friendly Explanation**
+`CASE` is SQL's decision-maker. You give it a series of "when this is true, return that" rules, and it returns the result for the first rule that matches. If nothing matches, it returns the `ELSE` value—or `NULL` if you did not provide one.
 
-**Beginner-Friendly Explanation:** `CASE` is SQL's version of an if-then-else chain. You list several conditions, and SQL checks them in order. The first one that is true determines the answer. If none are true, you can provide a fallback with `ELSE`.
+#### Purposes
 
-### Purposes
+- To translate codes into human-readable labels (e.g., `'S'` → `'Shipped'`) without leaving the query.
+- To bucket numeric values into ranges (e.g., price categories, salary bands).
+- To guard against runtime errors such as division by zero by conditionally evaluating only safe expressions.
+- To implement custom sort orders in `ORDER BY` and conditional logic in `WHERE` and `GROUP BY`.
 
-- To return different values based on conditional logic within a single SQL expression.
-- To avoid multiple queries or application-side branching for data-dependent transformations.
-- To implement business rules directly in SQL, such as tiered pricing or status classification.
-- To handle conditional NULL substitution and default values.
+#### Syntax Rules and Structure
 
-### Syntax Rules and Structure
-
-#### Complete General Syntax
+**Searched `CASE` syntax:**
 
 ```sql
 CASE
     WHEN condition1 THEN result1
     WHEN condition2 THEN result2
     ...
-    [ELSE default_result]
+    [ ELSE default_result ]
 END
 ```
 
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `CASE` | Keyword beginning the conditional expression. |
-| `WHEN condition THEN result` | A condition-result pair; conditions are evaluated in order. |
-| `condition` | A boolean expression that must evaluate to `TRUE` for the result to be returned. |
-| `result` | The value or expression returned when the condition is `TRUE`. |
-| `ELSE default_result` | Optional fallback returned when no condition is `TRUE`. |
-| `END` | Keyword terminating the `CASE` expression. |
-
-#### Syntax Rules
-
-- Conditions are evaluated sequentially; the first `TRUE` condition determines the result, and subsequent conditions are not evaluated.
-- If no condition is `TRUE` and `ELSE` is omitted, the result is `NULL`.
-- All result expressions must be convertible to a common output type.
-- `CASE` can be nested, but SQL Server allows only 10 levels of nesting.
-- `CASE` cannot be used to control the flow of execution of Transact-SQL statements, statement blocks, user-defined functions, or stored procedures.
-
-#### Constraints and Limitations
-
-- **Type compatibility:** All `THEN` and `ELSE` results must share a compatible data type; mixing incompatible types raises an error.
-- **No short-circuit guarantee:** While most databases short-circuit `CASE` evaluation, the SQL standard does not guarantee that unneeded branches are not evaluated.
-- **NULL comparison:** A `CASE` condition like `WHEN column = NULL` will never be `TRUE` because `NULL = NULL` is `UNKNOWN`; use `IS NULL` instead.
-- **Version-specific:** `CASE` was introduced in SQL-92; Oracle added support in 8i (as expression in 9i).
-
-### Annotated Code Examples
-
-#### Example 1: PostgreSQL General `CASE` with Multiple Conditions
-
-```sql
--- Create a table with numeric values
-CREATE TABLE test (a INT);
-INSERT INTO test VALUES (1), (2), (3);
-
--- General CASE expression
-SELECT
-    a,
-    CASE
-        WHEN a = 1 THEN 'one'
-        WHEN a = 2 THEN 'two'
-        ELSE 'other'
-    END AS description
-FROM test;
-```
-
-**Expected Output:**
-
-```
- a | description
----+-------------
- 1 | one
- 2 | two
- 3 | other
-```
-
-**Why This Works:** The `CASE` expression evaluates `WHEN a = 1` first; for `a = 1`, it returns `'one'`. For `a = 2`, the first condition fails and the second condition succeeds, returning `'two'`. For `a = 3`, neither condition matches, so the `ELSE` branch returns `'other'`. This is the canonical example from the PostgreSQL documentation.
-
-#### Example 2: SQL Server `CASE` in `ORDER BY` and `SELECT`
-
-```sql
--- Use CASE in SELECT and ORDER BY
-SELECT
-    ProductNumber,
-    Name,
-    CASE ProductLine
-        WHEN 'R' THEN 'Road'
-        WHEN 'M' THEN 'Mountain'
-        WHEN 'T' THEN 'Touring'
-        WHEN 'S' THEN 'Other sale items'
-        ELSE 'Not for sale'
-    END AS Category
-FROM Production.Product
-ORDER BY ProductNumber;
-```
-
-**Expected Output (partial):**
-
-```
-ProductNumber | Name              | Category
---------------+-------------------+-------------
-AR-5381       | Adjustable Race   | Not for sale
-BA-8327       | Bearing Ball      | Not for sale
-BE-2349       | BB Ball Bearing   | Not for sale
-...
-```
-
-**Why This Works:** The `CASE` expression translates single-letter product line codes into readable category names. The `ELSE` clause catches all products with a `NULL` or unrecognized `ProductLine`. This pattern is common in reporting queries to improve readability.
-
-#### Example 3: Oracle `CASE` with `AVG` Aggregation
-
-```sql
--- Oracle: use CASE inside an aggregate to set a floor
-SELECT AVG(CASE WHEN e.salary > 2000 THEN e.salary ELSE 2000 END) AS "Average Salary"
-FROM employees e;
-```
-
-**Expected Output:**
-
-```
-Average Salary
---------------
-       6461.68
-```
-
-**Why This Works:** The `CASE` expression ensures that no salary below 2000 contributes less than 2000 to the average. This demonstrates that `CASE` can be used inside aggregate functions to apply conditional logic before aggregation.
-
-### Real-World Cases
-
-- **Pricing tiers:** Computing different discount rates based on order volume or customer tier.
-- **Status mapping:** Translating internal status codes into user-friendly labels.
-- **Data masking:** Conditionally replacing sensitive values based on user role or context.
-- **Conditional joins:** Using `CASE` in `ON` clauses to match rows differently based on a parameter.
-
-### References
-
-- PostgreSQL Documentation: Conditional Expressions (`CASE`) — https://www.postgresql.org/docs/current/functions-conditional.html
-- SQL Server: CASE (Transact-SQL) — https://learn.microsoft.com/en-us/sql/t-sql/language-elements/case-transact-sql
-- MySQL Reference Manual: CASE Operator — https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html
-- Oracle Database SQL Language Reference: CASE Expressions — https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/CASE-Expressions.html
-
-
-## Core Concept 2: Simple CASE
-
-### Definitions
-
-**Core Definition:** Simple `CASE` is a specialized form of `CASE` that compares a single expression against a set of values for equality, returning a result when a match is found.
-
-**Technical Definition:** The simple `CASE` expression evaluates a `case_value` expression once and compares it to each `when_value` in the `WHEN` clauses until an equal value is found. If no match is found, the `ELSE` result (or `NULL`) is returned. This is similar to a `switch` statement in C.
-
-**Beginner-Friendly Explanation:** Simple `CASE` is like a multiple-choice question. You have one value (the case expression), and you check it against several possible answers. The first answer that matches gives you the result.
-
-### Purposes
-
-- To translate codes or abbreviations into descriptive labels.
-- To perform equality-based lookups without writing multiple `OR` conditions.
-- To simplify queries that would otherwise require many `WHEN column = value` repetitions.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
+**Simple `CASE` syntax:**
 
 ```sql
 CASE expression
     WHEN value1 THEN result1
     WHEN value2 THEN result2
     ...
-    [ELSE default_result]
+    [ ELSE default_result ]
 END
 ```
 
-**Component Breakdown:**
+**Component breakdown:**
 
 | Component | Description |
 |-----------|-------------|
-| `expression` | The value to compare (evaluated once). |
-| `WHEN value THEN result` | A comparison-value/result pair. |
-| `ELSE default_result` | Optional fallback when no value matches. |
+| `CASE` | Begins the expression. |
+| `WHEN condition THEN result` | A branch; the first true condition determines the result. |
+| `WHEN value THEN result` | Simple-form branch; equality comparison against the `CASE` expression. |
+| `ELSE default_result` | Optional fallback; returns `NULL` if omitted and no branch matches. |
+| `END` | Terminates the expression. |
 
-#### Syntax Rules
+**Syntax rules:**
 
-- The `expression` is evaluated once and compared to each `WHEN value` using the `=` operator.
-- The data types of the `expression` and each `WHEN value` must be comparable; implicit conversion may apply.
-- Simple `CASE` cannot be used to test for equality with `NULL` because `NULL = NULL` is `FALSE` (not `TRUE`).
-- In Oracle, the comparison is collation-sensitive for character data types.
+- `CASE` is evaluated **top-down, first match wins**; the remaining branches are not processed.
+- Conditions in searched `CASE` are Boolean expressions; simple `CASE` performs equality comparisons only.
+- All `THEN`/`ELSE` result expressions must be type-compatible.
 
-#### Constraints and Limitations
+**Constraints and limitations:**
 
-- **NULL comparisons:** `CASE column WHEN NULL THEN ...` will never match; use searched `CASE` with `IS NULL`.
-- **No inequality:** Simple `CASE` only supports equality; use searched `CASE` for ranges or inequalities.
-- **Type compatibility:** The expression and all `WHEN` values must be of compatible types.
+- `CASE` is not a statement; it cannot be used for control flow outside expressions.
+- `CASE` in `WHERE` is generally not sargable and may prevent index usage.
+- `CASE` does not evaluate unnecessary subexpressions at runtime, but constant expressions may still be evaluated at planning time.
 
-### Annotated Code Examples
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-#### Example 1: PostgreSQL Simple `CASE` for Code Translation
-
-```sql
--- Create a table with numeric codes
-CREATE TABLE test (a INT);
-INSERT INTO test VALUES (1), (2), (3);
-
--- Simple CASE expression
-SELECT
-    a,
-    CASE a
-        WHEN 1 THEN 'one'
-        WHEN 2 THEN 'two'
-        ELSE 'other'
-    END AS description
-FROM test;
-```
-
-**Expected Output:**
-
-```
- a | description
----+-------------
- 1 | one
- 2 | two
- 3 | other
-```
-
-**Why This Works:** The simple `CASE` evaluates `a` once, then compares it to `1`, `2`, and so on. This is equivalent to the general `CASE` example but more concise when the comparison is always equality against the same expression.
-
-#### Example 2: Oracle Simple `CASE` for Credit Limit Classification
+##### Example 1: Searched CASE for value bucketing
 
 ```sql
--- Oracle: classify credit limits
+-- Step 1: Classify employees into salary bands.
 SELECT
-    cust_last_name,
-    CASE credit_limit
-        WHEN 100 THEN 'Low'
-        WHEN 5000 THEN 'High'
-        ELSE 'Medium'
-    END AS credit
-FROM customers
-ORDER BY cust_last_name, credit;
+    emp_name,
+    salary,
+    CASE
+        WHEN salary >= 100000 THEN 'Executive'
+        WHEN salary >= 70000  THEN 'Senior'
+        WHEN salary >= 50000  THEN 'Mid-level'
+        ELSE 'Entry'
+    END AS salary_band
+FROM employees;
 ```
 
-**Expected Output (partial):**
+**Expected output:**
 
+```text
+ emp_name | salary | salary_band
+----------+--------+-------------
+ Ammar    |  80000 | Senior
+ Riya     |  65000 | Mid-level
+ Sahil    |  72000 | Senior
+ Priya    |  90000 | Senior
+(4 rows)
 ```
-CUST_LAST_NAME | CREDIT
----------------+--------
-Adjani         | Medium
-Adjani         | Medium
-Alexander      | Medium
-Altman         | High
-Altman         | Medium
+
+**Why this output appears**: The searched `CASE` evaluates each condition in order. Ammar, Sahil, and Priya have salaries ≥ 70,000, so they match the second branch. Riya’s salary is 65,000, which fails the first two branches but matches the third.
+
+##### Example 2: Simple CASE for code translation
+
+```sql
+-- Step 1: Translate numeric department codes into names.
+SELECT
+    emp_name,
+    dept_id,
+    CASE dept_id
+        WHEN 1 THEN 'Engineering'
+        WHEN 2 THEN 'Marketing'
+        WHEN 3 THEN 'Operations'
+        ELSE 'Unknown'
+    END AS department
+FROM employees;
 ```
 
-**Why This Works:** The simple `CASE` compares `credit_limit` against `100`, `5000`, and the `ELSE` fallback. This directly mirrors the Oracle documentation example.
+**Expected output:**
 
-### Real-World Cases
+```text
+ emp_name | dept_id | department
+----------+---------+-------------
+ Ammar    |       1 | Engineering
+ Riya     |       2 | Marketing
+ Sahil    |       1 | Engineering
+ Priya    |       3 | Operations
+(4 rows)
+```
 
-- **Country code to country name:** `CASE country_code WHEN 'US' THEN 'United States' WHEN 'CA' THEN 'Canada' ...`
-- **Status code decoding:** Translating numeric status codes (1, 2, 3) into readable labels.
-- **Month number to month name:** `CASE month WHEN 1 THEN 'January' WHEN 2 THEN 'February' ...`
-- **Product category mapping:** Mapping internal category IDs to display names.
+**Why this output appears**: The simple `CASE` compares `dept_id` for equality against each `WHEN` value. Each employee’s department code matches exactly one branch, producing the corresponding name.
 
-### References
+#### Real-World Cases
 
-- PostgreSQL Documentation: Simple CASE — https://www.postgresql.org/docs/current/functions-conditional.html#FUNCTIONS-CASE
-- Oracle Database SQL Language Reference: Simple CASE Example — https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/CASE-Expressions.html
-- MySQL Reference Manual: CASE Operator — https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html
+- **Order status labels**: Mapping numeric status codes to display labels (`'S'` → `'Shipped'`) for dashboards.
+- **Age segmentation**: Classifying customers into age bands (`'18-25'`, `'26-35'`, etc.) for marketing analysis.
+- **Data quality flags**: Returning `'Missing'`, `'Invalid'`, or `'OK'` based on `CASE` conditions on multiple columns.
 
+---
 
-## Core Concept 3: Searched CASE
+### 2. Simple `CASE`
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Searched `CASE` is a form of `CASE` that evaluates a set of boolean conditions—rather than comparing a single expression to values—and returns the result associated with the first condition that evaluates to `TRUE`.
+**Core Definition**
+Simple `CASE` compares a single expression for equality against a list of candidate values and returns the result of the first match.
 
-**Technical Definition:** The searched `CASE` expression evaluates each `WHEN` clause's boolean expression in turn, from left to right, until one is found that yields `TRUE`. It then returns the corresponding `THEN` result. If no condition is `TRUE`, the `ELSE` result (or `NULL`) is returned. This form supports ranges, inequalities, `LIKE`, `IN`, and any other boolean predicate.
+**Technical Definition**
+The simple form is `CASE expression WHEN value THEN result ... END`. The `expression` is computed once and compared to each `WHEN` value until an equality match is found. This is similar to a switch statement in C. It supports only equality comparisons, not ranges or complex predicates.
 
-**Beginner-Friendly Explanation:** Searched `CASE` is like asking a series of yes/no questions. "Is the temperature above 30? If yes, say 'Hot'. Is it above 20? If yes, say 'Warm'. Otherwise, say 'Cold'." You check each condition in order and use the first one that is true.
+**Beginner-Friendly Explanation**
+Simple `CASE` is a lookup table: you give it a value, and it checks whether that value equals each candidate. It is compact and readable for direct mappings.
 
-### Purposes
+#### Purposes
 
-- To classify rows into categories based on ranges (e.g., price bands, age groups).
-- To apply complex boolean logic (AND, OR, BETWEEN, LIKE, IN) within a `CASE`.
-- To handle NULL checks and inequality comparisons that simple `CASE` cannot express.
+- To map code values (status codes, category IDs, country codes) to descriptive labels.
+- To reduce repetitive `OR` chains in expressions.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-#### Complete General Syntax
+```sql
+CASE expression
+    WHEN value1 THEN result1
+    WHEN value2 THEN result2
+    ...
+    [ ELSE default_result ]
+END
+```
+
+**Syntax rules:**
+
+- The `expression` is evaluated once; each `WHEN` value is compared for equality.
+- Only equality matching is supported; use searched `CASE` for ranges or complex predicates.
+- `NULL` as a `WHEN` value will never match because `NULL = NULL` is `UNKNOWN`.
+
+**Constraints and limitations:**
+
+- Not suitable for inequalities, `BETWEEN`, `LIKE`, or multi-column conditions.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Simple CASE mapping
+
+```sql
+-- Step 1: Map numeric month numbers to month abbreviations.
+SELECT
+    month_num,
+    CASE month_num
+        WHEN 1 THEN 'Jan'
+        WHEN 2 THEN 'Feb'
+        WHEN 3 THEN 'Mar'
+        ELSE 'Other'
+    END AS month_abbr
+FROM monthly_sales;
+```
+
+**Expected output:**
+
+```text
+ month_num | month_abbr
+-----------+------------
+         1 | Jan
+         2 | Feb
+         3 | Mar
+         4 | Other
+(4 rows)
+```
+
+**Why this output appears**: The simple `CASE` performs equality matching against each `WHEN` value, producing the corresponding abbreviation; unmatched values fall through to `'Other'`.
+
+---
+
+### 3. Searched `CASE`
+
+#### Definitions
+
+**Core Definition**
+Searched `CASE` evaluates independent Boolean predicates in order and returns the result of the first predicate that evaluates to true.
+
+**Technical Definition**
+The searched form is `CASE WHEN condition THEN result ... END`. Each `WHEN` contains its own Boolean expression, allowing ranges, pattern matches, null checks, and combinations of conditions. Conditions are evaluated top-down, and evaluation stops at the first true condition.
+
+**Beginner-Friendly Explanation**
+Searched `CASE` is the general-purpose decision tree. Each branch can ask its own question, so you can use ranges, `LIKE`, `IS NULL`, and any other Boolean logic.
+
+#### Purposes
+
+- To bucket values into ranges (salary bands, price tiers).
+- To combine multiple conditions in a single branch.
+- To implement conditional logic that requires inequalities or pattern matching.
+
+#### Syntax Rules and Structure
 
 ```sql
 CASE
-    WHEN boolean_condition1 THEN result1
-    WHEN boolean_condition2 THEN result2
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
     ...
-    [ELSE default_result]
+    [ ELSE default_result ]
 END
 ```
 
-**Component Breakdown:**
+**Syntax rules:**
 
-| Component | Description |
-|-----------|-------------|
-| `WHEN boolean_condition THEN result` | A boolean-condition/result pair. |
-| `boolean_condition` | Any expression that evaluates to `TRUE`, `FALSE`, or `UNKNOWN`. |
-| `ELSE default_result` | Optional fallback when no condition is `TRUE`. |
+- Conditions must be Boolean expressions.
+- Order branches from most specific to most general to avoid masking.
+- Use `IS NULL` rather than `= NULL` for null checks.
 
-#### Syntax Rules
+**Constraints and limitations:**
 
-- Conditions are evaluated in order; the first `TRUE` condition determines the result.
-- Subsequent `WHEN` expressions are not evaluated once a `TRUE` condition is found.
-- If no condition is `TRUE` and `ELSE` is omitted, the result is `NULL`.
-- Searched `CASE` can test for `NULL` using `IS NULL` and `IS NOT NULL`.
+- Overly complex searched `CASE` can be hard to optimise and maintain.
 
-#### Constraints and Limitations
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- **Order matters:** Because the first `TRUE` condition wins, more specific conditions should be placed before more general ones.
-- **No flow control:** Searched `CASE` is an expression, not a statement; it cannot control execution flow of SQL statements.
-- **Performance:** Complex conditions may prevent index usage; test query plans.
-
-### Annotated Code Examples
-
-#### Example 1: PostgreSQL Searched `CASE` for Order Categorization
+##### Example 1: Searched CASE with range and null check
 
 ```sql
--- Create orders table
-CREATE TABLE orders (
-    id SERIAL PRIMARY KEY,
-    amount NUMERIC(10,2)
-);
-
-INSERT INTO orders (amount) VALUES (50.00), (150.00), (250.00), (75.00);
-
--- Searched CASE: categorize order amounts
+-- Step 1: Categorise orders by amount and flag missing amounts.
 SELECT
-    id,
+    order_id,
     amount,
     CASE
-        WHEN amount >= 200 THEN 'High Value'
-        WHEN amount >= 100 THEN 'Medium Value'
-        ELSE 'Low Value'
-    END AS order_category
+        WHEN amount IS NULL THEN 'Missing'
+        WHEN amount >= 1000 THEN 'Large'
+        WHEN amount >= 100  THEN 'Medium'
+        ELSE 'Small'
+    END AS order_size
 FROM orders;
 ```
 
-**Expected Output:**
+**Expected output:**
 
+```text
+ order_id | amount | order_size
+----------+--------+------------
+        1 |   1500 | Large
+        2 |    250 | Medium
+        3 |     50 | Small
+        4 |        | Missing
+(4 rows)
 ```
- id | amount | order_category
-----+--------+----------------
-  1 |  50.00 | Low Value
-  2 | 150.00 | Medium Value
-  3 | 250.00 | High Value
-  4 |  75.00 | Low Value
-```
 
-**Why This Works:** The searched `CASE` evaluates `amount >= 200` first; for 250.00, this is true, so it returns `'High Value'`. For 150.00, the first condition is false, but `amount >= 100` is true, returning `'Medium Value'`. For 50.00 and 75.00, both conditions are false, so `ELSE` returns `'Low Value'`.
+**Why this output appears**: The `IS NULL` check is placed first so that missing amounts are caught before numeric comparisons. The remaining branches bucket non-null amounts into size categories.
 
-#### Example 2: SQL Server Searched `CASE` with `BETWEEN` and `IS NULL`
+---
+
+### 4. Nested `CASE`
+
+#### Definitions
+
+**Core Definition**
+Nested `CASE` is a `CASE` expression used inside the `THEN` or `ELSE` branch of another `CASE` expression, enabling multi-level decision logic.
+
+**Technical Definition**
+A nested `CASE` appears as the result expression of an outer `CASE` branch. This allows hierarchical classification where the first level determines a category and the second level further refines it. Nested `CASE` can be used to work around limitations of simple `CASE` when multiple conditions must be evaluated in sequence.
+
+**Beginner-Friendly Explanation**
+Nested `CASE` is a decision tree inside a decision tree. It is useful when you need to ask a follow-up question after the first answer is determined.
+
+#### Purposes
+
+- To implement hierarchical categorisation (e.g., department → seniority band).
+- To handle complex business rules that require sequential evaluation.
+- To simulate `IF … ELSE IF … ELSE` chains with multiple levels.
+
+#### Syntax Rules and Structure
 
 ```sql
--- Searched CASE with multiple boolean predicates
+CASE
+    WHEN outer_condition THEN
+        CASE
+            WHEN inner_condition THEN inner_result
+            ELSE inner_default
+        END
+    ELSE outer_default
+END
+```
+
+**Syntax rules:**
+
+- Each nested `CASE` must be a complete expression with its own `END`.
+- Readability degrades quickly; consider extracting logic into a CTE or subquery if nesting exceeds two levels.
+
+**Constraints and limitations:**
+
+- Deeply nested `CASE` is hard to read, debug, and optimise.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Nested CASE for department and seniority
+
+```sql
+-- Step 1: Classify employees by department and seniority.
 SELECT
-    ProductNumber,
-    Name,
+    emp_name,
+    dept_id,
+    salary,
+    CASE dept_id
+        WHEN 1 THEN
+            CASE
+                WHEN salary >= 80000 THEN 'Senior Engineer'
+                ELSE 'Engineer'
+            END
+        WHEN 2 THEN 'Marketing'
+        ELSE 'Other'
+    END AS classification
+FROM employees;
+```
+
+**Expected output:**
+
+```text
+ emp_name | dept_id | salary | classification
+----------+---------+--------+-----------------
+ Ammar    |       1 |  80000 | Senior Engineer
+ Sahil    |       1 |  72000 | Engineer
+ Riya     |       2 |  65000 | Marketing
+ Priya    |       3 |  90000 | Other
+(4 rows)
+```
+
+**Why this output appears**: The outer simple `CASE` checks `dept_id`. For department 1, the inner searched `CASE` refines by salary. For department 2, the result is `'Marketing'`; all other departments fall through to `'Other'`.
+
+---
+
+### 5. `CASE` in `SELECT`
+
+#### Definitions
+
+**Core Definition**
+Using `CASE` in the `SELECT` list transforms or classifies values in the output without modifying the underlying data.
+
+**Technical Definition**
+A `CASE` expression in the `SELECT` list becomes an output column. It can be aliased with `AS` for readability and can reference any column from the `FROM` clause. This is the most common use of `CASE`—translating codes, bucketing values, and deriving labels.
+
+**Beginner-Friendly Explanation**
+Putting `CASE` in `SELECT` means "show a computed label or category alongside the raw data."
+
+#### Purposes
+
+- To produce human-readable labels in query results.
+- To derive categorical columns for reporting.
+- To compute conditional metrics inline.
+
+#### Syntax Rules and Structure
+
+```sql
+SELECT
+    column1,
+    CASE WHEN condition THEN result ELSE default END AS alias
+FROM table;
+```
+
+**Syntax rules:**
+
+- Always alias the `CASE` output for clarity.
+- The `CASE` expression can reference any column in the row.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: CASE in SELECT for status labels
+
+```sql
+SELECT
+    order_id,
+    CASE status
+        WHEN 'P' THEN 'Pending'
+        WHEN 'S' THEN 'Shipped'
+        WHEN 'C' THEN 'Cancelled'
+        ELSE 'Unknown'
+    END AS status_label
+FROM orders;
+```
+
+**Expected output:**
+
+```text
+ order_id | status_label
+----------+--------------
+        1 | Shipped
+        2 | Pending
+        3 | Cancelled
+(3 rows)
+```
+
+**Why this output appears**: The simple `CASE` maps each status code to a descriptive label, producing a new column alongside `order_id`.
+
+---
+
+### 6. `CASE` in `WHERE`
+
+#### Definitions
+
+**Core Definition**
+Using `CASE` in the `WHERE` clause builds a condition dynamically, allowing the filter to adapt to data or parameters.
+
+**Technical Definition**
+`CASE` can appear anywhere a scalar expression is valid, including the `WHERE` clause. A common pattern is to use `CASE` to choose between comparison values or to conditionally apply a filter. However, `CASE` in `WHERE` is generally **not sargable**: it prevents the query optimiser from using an index on the columns involved, often causing full table scans.
+
+**Beginner-Friendly Explanation**
+`CASE` in `WHERE` is powerful but can be slow. It is useful for dynamic filtering, but prefer plain Boolean logic when possible.
+
+#### Purposes
+
+- To implement parameter-driven filters (e.g., "if the user is an admin, show all rows; otherwise, show only their own").
+- To avoid division by zero by conditionally evaluating a comparison.
+
+#### Syntax Rules and Structure
+
+```sql
+WHERE CASE WHEN condition THEN boolean_expression ELSE boolean_expression END;
+```
+
+**Syntax rules:**
+
+- The `CASE` must produce a Boolean result when used directly in `WHERE`.
+- Guard against division by zero: `WHERE CASE WHEN x <> 0 THEN y/x > 1.5 ELSE false END`.
+
+**Constraints and limitations:**
+
+- `CASE` in `WHERE` is typically not sargable and may force a full scan.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: CASE in WHERE to avoid division by zero
+
+```sql
+-- Step 1: Safely compare a ratio without dividing by zero.
+SELECT emp_name, salary, bonus
+FROM employees
+WHERE CASE WHEN salary <> 0 THEN bonus / salary > 0.10 ELSE false END;
+```
+
+**Expected output:**
+
+```text
+ emp_name | salary | bonus
+----------+--------+-------
+ Ammar    |  80000 | 10000
+(1 row)
+```
+
+**Why this output appears**: The `CASE` expression checks `salary <> 0` before performing the division. If `salary` is zero, the `ELSE false` branch prevents the division-by-zero error.
+
+---
+
+### 7. `CASE` in `ORDER BY`
+
+#### Definitions
+
+**Core Definition**
+Using `CASE` in `ORDER BY` defines a custom sort order that is not based solely on column values.
+
+**Technical Definition**
+`CASE` can appear in the `ORDER BY` clause to enforce a custom priority sequence. For example, you can sort priority buckets (`'Critical'`, `'High'`, `'Medium'`, `'Low'`) in that order rather than alphabetically. The expression computes a sort key for each row.
+
+**Beginner-Friendly Explanation**
+`CASE` in `ORDER BY` lets you sort things in the order you care about, not just A-to-Z.
+
+#### Purposes
+
+- To sort statuses or priorities in business-logical order.
+- To place nulls or special values at a specific position.
+
+#### Syntax Rules and Structure
+
+```sql
+ORDER BY CASE WHEN condition THEN sort_key ELSE other_key END;
+```
+
+**Syntax rules:**
+
+- The `CASE` must produce a sortable value.
+- Multiple sort keys can be combined with commas.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Custom priority sort
+
+```sql
+SELECT ticket_id, priority
+FROM tickets
+ORDER BY CASE priority
+    WHEN 'Critical' THEN 1
+    WHEN 'High' THEN 2
+    WHEN 'Medium' THEN 3
+    WHEN 'Low' THEN 4
+    ELSE 5
+END;
+```
+
+**Expected output:**
+
+```text
+ ticket_id | priority
+-----------+----------
+         1 | Critical
+         2 | High
+         3 | Medium
+         4 | Low
+(4 rows)
+```
+
+**Why this output appears**: The `CASE` assigns a numeric sort key to each priority label, and `ORDER BY` sorts by that key rather than alphabetically.
+
+---
+
+### 8. `CASE` in `GROUP BY`
+
+#### Definitions
+
+**Core Definition**
+Using `CASE` in `GROUP BY` groups rows by a derived category rather than a raw column value.
+
+**Technical Definition**
+`CASE` can be used in `GROUP BY` to categorise data before aggregation. This is useful when you want to group by a custom bucket (e.g., price range, salary band) rather than the exact value. PostgreSQL allows grouping by expressions, including `CASE`. However, using `CASE` in `GROUP BY` should be done with caution because it can complicate the query plan and reduce readability.
+
+**Beginner-Friendly Explanation**
+`CASE` in `GROUP BY` means "group by category, not by exact value."
+
+#### Purposes
+
+- To aggregate by custom buckets (price tiers, age bands).
+- To normalise values before grouping.
+
+#### Syntax Rules and Structure
+
+```sql
+GROUP BY CASE WHEN condition THEN category ELSE other_category END;
+```
+
+**Syntax rules:**
+
+- The `CASE` expression in `GROUP BY` must match the `CASE` expression in the `SELECT` list.
+- Alias references are not allowed in `GROUP BY` in standard SQL; repeat the expression.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Grouping by salary band
+
+```sql
+SELECT
     CASE
-        WHEN ListPrice = 0 THEN 'Mfg item - not for resale'
-        WHEN ListPrice < 50 THEN 'Under $50'
-        WHEN ListPrice BETWEEN 50 AND 250 THEN 'Under $250'
-        ELSE 'Over $250'
-    END AS "Price Range"
-FROM Production.Product
-ORDER BY ProductNumber;
-```
-
-**Expected Output (partial):**
-
-```
-ProductNumber | Name            | Price Range
---------------+-----------------+-----------------------
-AR-5381       | Adjustable Race | Mfg item - not for resale
-BA-8327       | Bearing Ball    | Mfg item - not for resale
-...
-BK-M18B-40    | Mountain-500    | Under $250
-...
-```
-
-**Why This Works:** The searched `CASE` uses `=`, `<`, and `BETWEEN` conditions to classify products into price ranges. The `WHEN ListPrice = 0` branch must come first to avoid zero-price items being captured by the `ListPrice < 50` branch. This matches the SQL Server documentation example.
-
-#### Example 3: PostgreSQL Searched `CASE` with Division-by-Zero Protection
-
-```sql
--- Use CASE to avoid division by zero
-SELECT
-    numerator,
-    denominator,
+        WHEN salary >= 80000 THEN 'High'
+        WHEN salary >= 60000 THEN 'Mid'
+        ELSE 'Low'
+    END AS salary_band,
+    COUNT(*) AS headcount
+FROM employees
+GROUP BY
     CASE
-        WHEN denominator <> 0 THEN numerator / denominator
-        ELSE NULL
-    END AS result
-FROM fractions;
+        WHEN salary >= 80000 THEN 'High'
+        WHEN salary >= 60000 THEN 'Mid'
+        ELSE 'Low'
+    END;
 ```
 
-**Expected Output (for `(10, 2), (5, 0), (9, 3)`):**
+**Expected output:**
 
+```text
+ salary_band | headcount
+-------------+-----------
+ High        |         2
+ Mid         |         1
+ Low         |         1
+(3 rows)
 ```
-numerator | denominator | result
-----------+-------------+-------
-       10 |           2 |   5.0
-        5 |           0 |  (null)
-        9 |           3 |   3.0
-```
 
-**Why This Works:** The `CASE` expression checks `denominator <> 0` before performing the division. When the denominator is zero, it returns `NULL` instead of raising a division-by-zero error. This is a canonical use case from the PostgreSQL documentation.
+**Why this output appears**: The `CASE` expression converts exact salaries into three bands, and `GROUP BY` uses those bands to create one row per category.
 
-### Real-World Cases
+---
 
-- **Customer segmentation:** Classifying customers as "Gold", "Silver", or "Bronze" based on lifetime spend.
-- **Grade assignment:** Assigning letter grades based on numeric scores.
-- **Risk assessment:** Categorizing transactions as "High Risk", "Medium Risk", or "Low Risk" based on amount and frequency.
-- **Data quality flagging:** Flagging rows with missing or suspicious values for review.
+### 9. `CASE` in Aggregates (Conditional Aggregation)
 
-### References
+#### Definitions
 
-- PostgreSQL Documentation: Searched CASE — https://www.postgresql.org/docs/current/functions-conditional.html#FUNCTIONS-CASE
-- SQL Server: Searched CASE Expression — https://learn.microsoft.com/en-us/sql/t-sql/language-elements/case-transact-sql
-- MySQL Reference Manual: CASE Operator — https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html
+**Core Definition**
+Conditional aggregation embeds `CASE` expressions inside aggregate functions such as `SUM`, `COUNT`, or `AVG` to compute multiple filtered metrics in a single table scan.
 
+**Technical Definition**
+A `CASE` inside an aggregate returns a value (or `NULL`) for each row; the aggregate then processes only the non-null results. For example, `SUM(CASE WHEN status = 'delivered' THEN amount ELSE 0 END)` sums only delivered amounts. When the `ELSE` clause is omitted, non-matching rows return `NULL`, which aggregates ignore—so `COUNT(CASE WHEN condition THEN 1 END)` counts only matching rows. This technique is the ANSI/ISO SQL standard way to perform conditional aggregation.
 
-## Core Concept 4: COALESCE
+**Beginner-Friendly Explanation**
+Conditional aggregation lets you compute several different totals in one query. Instead of running separate queries for "delivered revenue" and "cancelled orders," you embed a `CASE` inside `SUM` or `COUNT` for each metric.
 
-### Definitions
+#### Purposes
 
-**Core Definition:** `COALESCE` is a SQL function that returns the first non-NULL value from a list of arguments.
+- To compute multiple filtered metrics in a single table scan, improving performance.
+- To pivot data without a `PIVOT` operator.
+- To count occurrences of specific conditions alongside overall counts.
 
-**Technical Definition:** The `COALESCE(value1, value2, ...)` function returns the first of its arguments that is not NULL. NULL is returned only if all arguments are NULL. Like `CASE`, `COALESCE` only evaluates the arguments that are needed to determine the result; arguments to the right of the first non-NULL value are not evaluated. This SQL-standard function provides capabilities similar to `NVL` and `IFNULL`, which are used in some other database systems.
-
-**Beginner-Friendly Explanation:** `COALESCE` is like having a backup plan. If the first choice is missing (NULL), try the second choice; if that is missing, try the third, and so on. You get the first value that actually exists.
-
-### Purposes
-
-- To substitute a default value for NULL values in query results.
-- To provide fallback values from multiple columns (e.g., mobile phone, home phone, work phone).
-- To avoid NULL propagation in arithmetic or string concatenation.
-- To simplify `CASE` expressions that check for NULL.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
+#### Syntax Rules and Structure
 
 ```sql
-COALESCE(value1, value2, ..., valueN)
+SUM(CASE WHEN condition THEN value ELSE 0 END) AS metric_name
+COUNT(CASE WHEN condition THEN 1 END) AS count_name
 ```
 
-**Component Breakdown:**
+**Syntax rules:**
 
-| Component | Description |
-|-----------|-------------|
-| `value1, value2, ..., valueN` | A list of expressions evaluated in order; the first non-NULL value is returned. |
+- Use `ELSE 0` for `SUM` to avoid nulls; use no `ELSE` for `COUNT` so non-matching rows return `NULL` and are ignored.
+- Multiple conditional aggregates can appear in the same `SELECT` list.
 
-#### Syntax Rules
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- `COALESCE` is equivalent to a `CASE` expression: `COALESCE(v1, v2) = CASE WHEN v1 IS NOT NULL THEN v1 ELSE v2 END`.
-- All arguments must be of compatible types; the return type is the common type of all arguments.
-- `COALESCE` is SQL-standard and supported by all major RDBMS.
-- Some databases provide proprietary alternatives: `NVL` (Oracle), `IFNULL` (MySQL), `ISNULL` (SQL Server).
-
-#### Constraints and Limitations
-
-- **Type compatibility:** All arguments must be coercible to a common type.
-- **Performance:** `COALESCE` with many arguments may be less efficient than a direct `CASE` if the arguments are expensive subqueries.
-- **NULL is not empty string:** `COALESCE` only substitutes for NULL, not for empty strings or zero values.
-
-### Annotated Code Examples
-
-#### Example 1: PostgreSQL `COALESCE` for Display Fallback
+##### Example 1: Conditional aggregation for revenue metrics
 
 ```sql
--- Create a table with possibly NULL descriptions
-CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
-    description TEXT,
-    short_description TEXT
-);
-
-INSERT INTO products (description, short_description) VALUES
-('A very detailed description', 'Short desc'),
-(NULL, 'Short only'),
-(NULL, NULL);
-
--- Use COALESCE to provide a fallback
 SELECT
-    id,
-    COALESCE(description, short_description, '(none)') AS display_text
-FROM products;
+    SUM(CASE WHEN status = 'delivered' THEN amount ELSE 0 END) AS delivered_revenue,
+    SUM(CASE WHEN status = 'cancelled' THEN amount ELSE 0 END) AS cancelled_revenue,
+    COUNT(CASE WHEN status = 'delivered' THEN 1 END) AS delivered_count
+FROM orders;
 ```
 
-**Expected Output:**
+**Expected output:**
 
+```text
+ delivered_revenue | cancelled_revenue | delivered_count
+-------------------+-------------------+-----------------
+             15000 |              2000 |               3
+(1 row)
 ```
- id | display_text
-----+----------------------------
-  1 | A very detailed description
-  2 | Short only
-  3 | (none)
-```
 
-**Why This Works:** `COALESCE` evaluates `description` first; if it is not NULL, it returns it. If `description` is NULL, it tries `short_description`. If both are NULL, it returns `'(none)'`. This is the exact pattern from the PostgreSQL documentation.
+**Why this output appears**: Each `CASE` returns the amount only for the matching status and zero (or `NULL` for `COUNT`) otherwise. The aggregates then sum or count only the relevant rows.
 
-#### Example 2: MySQL `COALESCE` for Phone Number Priority
+---
+
+### 10. `COALESCE`
+
+#### Definitions
+
+**Core Definition**
+`COALESCE` returns the first non-null value from a list of arguments, returning `NULL` only if all arguments are null.
+
+**Technical Definition**
+`COALESCE(value [, ...])` evaluates its arguments from left to right and returns the first argument that is not null. It is often used to substitute a default value for nulls when data is retrieved for display. All arguments must be convertible to a common data type, which becomes the type of the result. `COALESCE` is a SQL-standard feature included in ISO/IEC 9075.
+
+**Beginner-Friendly Explanation**
+`COALESCE` is the "first non-null wins" function. It is like a chain of fallbacks: if the first value is missing, try the second; if that is missing, try the third; and so on.
+
+#### Purposes
+
+- To provide default values for null columns.
+- To choose the first available contact method (phone, then email, then a placeholder).
+- To combine with `NULLIF` to handle placeholder values such as empty strings.
+
+#### Syntax Rules and Structure
 
 ```sql
--- Select the first available phone number
+COALESCE(value1 [, value2, ...])
+```
+
+**Syntax rules:**
+
+- Arguments are evaluated left to right; the first non-null is returned.
+- All arguments must be type-compatible.
+- `COALESCE` is not an ordinary function and cannot be used with `VARIADIC` arrays.
+
+**Constraints and limitations:**
+
+- `COALESCE` is short-circuiting: it does not evaluate arguments after the first non-null one.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: COALESCE for default contact information
+
+```sql
 SELECT
     customer_id,
-    COALESCE(mobile_phone, home_phone, work_phone, 'No phone on file') AS primary_phone
+    COALESCE(phone_number, email, 'No contact info') AS contact_info
 FROM customers;
 ```
 
-**Expected Output (partial):**
+**Expected output:**
 
+```text
+ customer_id |    contact_info
+-------------+--------------------
+           1 | 555-123-4567
+           2 | jane@example.com
+           3 | No contact info
+(3 rows)
 ```
-customer_id | primary_phone
-------------+--------------
-101         | 555-0101
-102         | 555-0202
-103         | No phone on file
-```
 
-**Why This Works:** The query returns the mobile phone if available; otherwise the home phone; otherwise the work phone; otherwise a default message. This is a common pattern for contact information.
+**Why this output appears**: For each customer, `COALESCE` returns the phone number if present; otherwise the email; otherwise the literal placeholder. The first non-null argument wins.
 
-### Real-World Cases
+---
 
-- **Contact information:** Prioritizing mobile, then home, then work phone numbers.
-- **Address display:** Using billing address if shipping address is NULL.
-- **Report defaults:** Showing `'N/A'` or `0` when a measure is NULL.
-- **Configuration fallback:** Using a default setting when a user-specific setting is NULL.
+### 11. `NULLIF`
 
-### References
+#### Definitions
 
-- PostgreSQL Documentation: COALESCE — https://www.postgresql.org/docs/current/functions-conditional.html#FUNCTIONS-COALESCE
-- MySQL Reference Manual: Comparison Functions (`COALESCE`) — https://dev.mysql.com/doc/refman/8.0/en/comparison-operators.html#function_coalesce
-- SQL Server: COALESCE (Transact-SQL) — https://learn.microsoft.com/en-us/sql/t-sql/language-elements/coalesce-transact-sql
-- Oracle Database SQL Language Reference: COALESCE — https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/COALESCE.html
+**Core Definition**
+`NULLIF` returns `NULL` if two arguments are equal, and the first argument otherwise.
 
+**Technical Definition**
+`NULLIF(value1, value2)` compares the two expressions; if they are equal, it returns `NULL`; otherwise it returns `value1`. It is the inverse of `COALESCE` in the sense that it converts a specific value (often a placeholder like `''` or `0`) into `NULL`. `NULLIF` is a SQL-standard feature included in ISO/IEC 9075. It is equivalent to `CASE WHEN value1 = value2 THEN NULL ELSE value1 END`.
 
-## Core Concept 5: NULLIF
+**Beginner-Friendly Explanation**
+`NULLIF` says: "if this value equals that value, treat it as missing; otherwise keep it." It is useful for converting sentinel values into proper nulls before applying `COALESCE` or arithmetic.
 
-### Definitions
+#### Purposes
 
-**Core Definition:** `NULLIF` is a SQL function that returns NULL if two arguments are equal, otherwise it returns the first argument.
+- To prevent division by zero: `value / NULLIF(divisor, 0)` returns `NULL` instead of raising an error when the divisor is zero.
+- To convert empty strings or placeholder values into `NULL`.
+- To combine with `COALESCE` to handle both sentinel values and nulls: `COALESCE(NULLIF(col, ''), 'N/A')`.
 
-**Technical Definition:** The `NULLIF(value1, value2)` function returns a NULL value if `value1` equals `value2`; otherwise it returns `value1`. This can be used to perform the inverse operation of a `COALESCE` example: if a value is a placeholder like `'(none)'`, return a NULL instead. `NULLIF` must be of compatible data types.
-
-**Beginner-Friendly Explanation:** `NULLIF` is like a filter that says "If this value is equal to this specific thing, treat it as missing (NULL); otherwise, keep it." It is useful for converting placeholder values into real NULLs.
-
-### Purposes
-
-- To convert placeholder or sentinel values (e.g., `'N/A'`, `0`, `'none'`) into proper NULLs.
-- To avoid division by zero by returning NULL when the denominator is zero.
-- To conditionally treat a value as missing based on comparison with a reference value.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
+#### Syntax Rules and Structure
 
 ```sql
 NULLIF(value1, value2)
 ```
 
-**Component Breakdown:**
+**Syntax rules:**
 
-| Component | Description |
-|-----------|-------------|
-| `value1` | The value to return if it is not equal to `value2`. |
-| `value2` | The value to compare against; if equal to `value1`, NULL is returned. |
+- Returns `NULL` if `value1 = value2`; otherwise returns `value1`.
+- Equivalent to `CASE WHEN value1 = value2 THEN NULL ELSE value1 END`.
+- All major RDBMSs support `NULLIF` with identical syntax.
 
-#### Syntax Rules
+**Constraints and limitations:**
 
-- `NULLIF(v1, v2)` is equivalent to `CASE WHEN v1 = v2 THEN NULL ELSE v1 END`.
-- The two arguments must be of comparable data types.
-- If `value1` is NULL, `NULLIF` returns NULL (since NULL is not equal to anything).
-- `NULLIF` is SQL-standard and supported across all major RDBMS.
+- If both arguments are `NULL`, `NULLIF` returns `NULL` (because `NULL = NULL` is `UNKNOWN`, the equality is not considered true).
 
-#### Constraints and Limitations
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- **Type compatibility:** Arguments must be comparable; implicit conversion may apply.
-- **NULL semantics:** `NULLIF(NULL, value)` returns NULL; `NULLIF(value, NULL)` returns `value` (since `value = NULL` is `UNKNOWN`, not `TRUE`).
-- **Not a general replacement:** `NULLIF` only handles equality; for inequality-based NULL substitution, use `CASE`.
-
-### Annotated Code Examples
-
-#### Example 1: PostgreSQL `NULLIF` to Convert Sentinel to NULL
+##### Example 1: NULLIF to prevent division by zero
 
 ```sql
--- Create a table with a placeholder value
-CREATE TABLE items (
-    id SERIAL PRIMARY KEY,
-    value TEXT
-);
-
-INSERT INTO items (value) VALUES ('actual'), '(none)');
-
--- Convert '(none)' to NULL
 SELECT
-    id,
-    value,
-    NULLIF(value, '(none)') AS cleaned_value
-FROM items;
-```
-
-**Expected Output:**
-
-```
- id | value   | cleaned_value
-----+---------+---------------
-  1 | actual  | actual
-  2 | (none)  | (null)
-```
-
-**Why This Works:** `NULLIF(value, '(none)')` returns NULL when `value` equals `'(none)'`; otherwise it returns `value`. This is the inverse of the `COALESCE` example from the PostgreSQL documentation.
-
-#### Example 2: MySQL `NULLIF` to Prevent Division by Zero
-
-```sql
--- Avoid division by zero using NULLIF
-SELECT
-    total_revenue,
+    total_sales,
     total_orders,
-    total_revenue / NULLIF(total_orders, 0) AS avg_order_value
+    total_sales / NULLIF(total_orders, 0) AS avg_order_value
 FROM sales_summary;
 ```
 
-**Expected Output (for `(1000, 10), (500, 0)`):**
+**Expected output:**
 
+```text
+ total_sales | total_orders | avg_order_value
+-------------+--------------+-----------------
+       10000 |           50 |             200
+        5000 |            0 |
+(2 rows)
 ```
-total_revenue | total_orders | avg_order_value
---------------+--------------+-----------------
-         1000 |           10 |          100.00
-          500 |            0 |          (null)
+
+**Why this output appears**: For the row with zero orders, `NULLIF(0, 0)` returns `NULL`, so the division yields `NULL` instead of raising a division-by-zero error.
+
+---
+
+### 12. `GREATEST` and `LEAST`
+
+#### Definitions
+
+**Core Definition**
+`GREATEST` returns the largest value from a list of expressions; `LEAST` returns the smallest.
+
+**Technical Definition**
+`GREATEST(value [, ...])` and `LEAST(value [, ...])` are common extensions (not part of the SQL standard) that return the maximum and minimum of their arguments, respectively. In PostgreSQL, `NULL` values in the list are **ignored**; the result is `NULL` only if all expressions evaluate to `NULL`. Some other databases return `NULL` if any argument is `NULL`. `GREATEST` and `LEAST` are not available in SQL Server before 2022 and never in Access.
+
+**Beginner-Friendly Explanation**
+`GREATEST` picks the biggest value from a list; `LEAST` picks the smallest. They are useful for comparing several columns or computing a running maximum.
+
+#### Purposes
+
+- To find the maximum or minimum across multiple columns in the same row.
+- To clamp values to a range (e.g., `GREATEST(value, 0)` ensures non-negative values).
+- To compute the latest or earliest of several date columns.
+
+#### Syntax Rules and Structure
+
+```sql
+GREATEST(value1 [, value2, ...])
+LEAST(value1 [, value2, ...])
 ```
 
-**Why This Works:** When `total_orders` is 0, `NULLIF(total_orders, 0)` returns NULL, and the division `total_revenue / NULL` yields NULL instead of raising a division-by-zero error. This is a widely used idiom in SQL.
+**Syntax rules:**
 
-### Real-World Cases
+- All arguments must be comparable and convertible to a common type.
+- PostgreSQL ignores `NULL` arguments; some other databases return `NULL` if any argument is `NULL`.
+- `GREATEST` and `LEAST` are not ordinary functions and cannot be used with `VARIADIC` arrays in PostgreSQL.
 
-- **Sentinel value cleanup:** Converting `'N/A'`, `'Unknown'`, or `0` sentinel values into proper NULLs before aggregation.
-- **Safe division:** Preventing division-by-zero errors in calculated columns.
-- **Data normalization:** Treating placeholder values as missing data during ETL processing.
-- **Conditional NULL:** Marking values as NULL when they match a specific "not applicable" value.
+**Constraints and limitations:**
 
-### References
+- Vendor divergence in `NULL` handling means queries may not be portable without wrapping arguments in `COALESCE`.
 
-- PostgreSQL Documentation: NULLIF — https://www.postgresql.org/docs/current/functions-conditional.html#FUNCTIONS-NULLIF
-- MySQL Reference Manual: NULLIF — https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html#function_nullif
-- SQL Server: NULLIF (Transact-SQL) — https://learn.microsoft.com/en-us/sql/t-sql/language-elements/nullif-transact-sql
-- Oracle Database SQL Language Reference: NULLIF — https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/NULLIF.html
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
+##### Example 1: GREATEST and LEAST across columns
 
-## Core Concept 6: Conditional Calculations
+```sql
+SELECT
+    q1, q2, q3,
+    GREATEST(q1, q2, q3) AS best_quarter,
+    LEAST(q1, q2, q3) AS worst_quarter
+FROM quarterly_results;
+```
 
-### Definitions
+**Expected output:**
 
-**Core Definition:** Conditional calculations use `CASE` expressions to compute different arithmetic or derived values depending on which condition is met.
+```text
+ q1 | q2 | q3 | best_quarter | worst_quarter
+----+----+----+--------------+---------------
+ 100 | 150 | 120 |          150 |           100
+(1 row)
+```
 
-**Technical Definition:** Conditional calculations embed `CASE` expressions inside arithmetic operations, aggregate functions, or derived column definitions to apply different formulas based on row-level or group-level conditions. For example, a discount rate may depend on order volume, or an adjusted price may depend on product category.
+**Why this output appears**: `GREATEST` returns the maximum of the three quarterly values (150), and `LEAST` returns the minimum (100).
 
-**Beginner-Friendly Explanation:** Conditional calculations let you say "If the customer is a premium member, apply a 20% discount; otherwise, apply a 5% discount." The math changes based on the condition.
+---
 
-### Purposes
+### 13. Conditional Calculations and Categorization
 
-- To apply tiered pricing, discounts, or tax rates based on conditional rules.
-- To compute derived metrics that vary by category or segment.
-- To adjust values conditionally (e.g., capping, flooring, or scaling).
-- To calculate conditional averages or sums within aggregate queries.
+#### Definitions
 
-### Syntax Rules and Structure
+**Core Definition**
+Conditional calculations and categorisation are the combined use of conditional expressions—primarily `CASE`, `COALESCE`, and `NULLIF`—to compute derived values and assign categories based on data-dependent rules.
 
-#### Complete General Syntax
+**Technical Definition**
+Conditional calculations embed arithmetic, string operations, or date functions inside `CASE` branches, so the computation adapts to each row's conditions. Categorisation uses `CASE` to map continuous values into discrete buckets (e.g., price tiers, age bands) or to translate codes into labels. These techniques are the foundation of in-database reporting and analytics, eliminating the need to export data for spreadsheet-based logic.
+
+**Beginner-Friendly Explanation**
+Conditional calculations and categorisation are what you do when you want the database to "decide" what to compute or which category to assign—like calculating different bonus rates for different salary bands, or labelling products as "Budget," "Mid-range," or "Premium" based on price.
+
+#### Purposes
+
+- To apply tiered business rules (e.g., progressive discounts, tax brackets).
+- To classify records into reporting categories without a lookup table.
+- To compute conditional metrics (e.g., only sum amounts that meet a condition).
+
+#### Syntax Rules and Structure
+
+**Conditional calculation pattern:**
+
+```sql
+CASE WHEN condition THEN calculation1 ELSE calculation2 END
+```
+
+**Categorisation pattern:**
 
 ```sql
 CASE
-    WHEN condition THEN arithmetic_expression1
-    WHEN condition THEN arithmetic_expression2
-    ELSE arithmetic_expression_default
+    WHEN value >= threshold1 THEN 'Category A'
+    WHEN value >= threshold2 THEN 'Category B'
+    ELSE 'Category C'
 END
 ```
 
-#### Syntax Rules
+**Syntax rules:**
 
-- The result expressions can be arithmetic operations involving columns, constants, or functions.
-- `CASE` can be nested inside aggregate functions: `SUM(CASE WHEN ... THEN ... ELSE ... END)`.
-- The output type follows the same type-coercion rules as general `CASE`.
+- Order `WHEN` branches from most specific to most general.
+- Use `ELSE` to handle unmatched rows and avoid unintended `NULL`s.
+- Combine with `COALESCE` to handle nulls before comparison.
 
-#### Constraints and Limitations
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- **Division by zero:** Guard against zero denominators using `NULLIF` or a `WHEN denominator <> 0` condition.
-- **NULL propagation:** Arithmetic with NULL yields NULL; use `COALESCE` to substitute defaults.
-- **Performance:** Complex conditional calculations may prevent index usage; consider computed columns or materialized views.
-
-### Annotated Code Examples
-
-#### Example 1: Oracle Conditional Salary Increase
+##### Example 1: Tiered bonus calculation with CASE
 
 ```sql
--- Oracle: projected salary increase based on hire date
 SELECT
-    first_name || ' ' || last_name AS "Name",
-    hire_date AS "Date Started",
-    salary AS "Current Pay",
+    emp_name,
+    salary,
     CASE
-        WHEN hire_date < TO_DATE('01-Jan-00') THEN TRUNC(salary * 1.05, 0)
-        ELSE TRUNC(salary * 1.15, 0)
-    END AS "Proposed Salary"
+        WHEN salary < 30000 THEN salary * 0.05
+        WHEN salary BETWEEN 30000 AND 50000 THEN salary * 0.10
+        ELSE salary * 0.15
+    END AS bonus
 FROM employees;
 ```
 
-**Expected Output (partial):**
+**Expected output:**
 
+```text
+ emp_name | salary |  bonus
+----------+--------+---------
+ Ammar    |  80000 | 12000.00
+ Riya     |  25000 |  1250.00
+ Sahil    |  45000 |  4500.00
+ Priya    |  90000 | 13500.00
+(4 rows)
 ```
-Name          | Date Started | Current Pay | Proposed Salary
---------------+--------------+-------------+----------------
-Steven King   | 17-JUN-03    |     24000   |          27600
-Neena Kochhar | 21-SEP-05    |     17000   |          19550
-...
-```
 
-**Why This Works:** Employees hired before 2000 receive a 5% increase; all others receive 15%. The `CASE` expression computes different arithmetic based on the `hire_date` condition. This is the Oracle documentation example.
+**Why this output appears**: The `CASE` applies different bonus rates based on salary bands, producing a different calculation for each row.
 
-#### Example 2: SQL Server Conditional Price Calculation
+##### Example 2: Conditional categorisation with CASE
 
 ```sql
--- SQL Server: conditional pricing based on product class
 SELECT
-    Name,
-    ListPrice,
-    CASE Class
-        WHEN 'H' THEN ROUND(ListPrice * 0.60, 2)
-        WHEN 'L' THEN ROUND(ListPrice * 0.70, 2)
-        WHEN 'M' THEN ROUND(ListPrice * 0.80, 2)
-        ELSE ListPrice
-    END AS "Adjusted Price"
-FROM Production.Product;
-```
-
-**Expected Output (partial):**
-
-```
-Name            | ListPrice | Adjusted Price
-----------------+-----------+----------------
-Adjustable Race |      0.00 |           0.00
-Bearing Ball    |      0.00 |           0.00
-...
-HL Road Frame   |   1431.50 |         859.50
-```
-
-**Why This Works:** The `CASE` expression applies different discount multipliers based on the product `Class` (`H` = High, `L` = Low, `M` = Medium). Products with no class fall through to the `ELSE` branch and retain the original price.
-
-### Real-World Cases
-
-- **Tiered commission:** Calculating sales commission rates based on deal size.
-- **Tax computation:** Applying different tax rates based on jurisdiction or product type.
-- **Inventory valuation:** Using different cost bases (FIFO, LIFO, average) conditionally.
-- **Bonus calculation:** Computing employee bonuses based on performance rating and tenure.
-
-### References
-
-- Oracle Database SQL Language Reference: CASE in Calculations — https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/CASE-Expressions.html
-- SQL Server: CASE in Computed Columns — https://learn.microsoft.com/en-us/sql/t-sql/language-elements/case-transact-sql
-- PostgreSQL Documentation: Conditional Expressions — https://www.postgresql.org/docs/current/functions-conditional.html
-
-
-## Core Concept 7: Conditional Categorization
-
-### Definitions
-
-**Core Definition:** Conditional categorization is the use of `CASE` expressions to assign rows to discrete categories or labels based on one or more conditions.
-
-**Technical Definition:** Conditional categorization applies a searched or simple `CASE` expression to map continuous or coded values into categorical buckets—such as price ranges, age groups, or performance tiers—that are more meaningful for reporting and analysis. The `CASE` expression is typically used in the `SELECT` list to produce a new categorical column.
-
-**Beginner-Friendly Explanation:** Conditional categorization is like sorting items into labeled boxes. "If the price is under $50, put it in the 'Budget' box; if it's under $250, put it in the 'Mid-range' box; otherwise, put it in the 'Premium' box."
-
-### Purposes
-
-- To group continuous values into meaningful ranges for reporting.
-- To translate coded values into human-readable labels.
-- To segment customers, products, or transactions for analysis.
-- To simplify filtering and aggregation by category.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax
-
-```sql
-CASE
-    WHEN range_condition1 THEN 'Category Label 1'
-    WHEN range_condition2 THEN 'Category Label 2'
-    ...
-    ELSE 'Other'
-END AS category_column
-```
-
-#### Syntax Rules
-
-- Range conditions should be ordered from most restrictive to least restrictive to ensure correct categorization.
-- The `ELSE` clause provides a catch-all category for values that do not match any condition.
-- The resulting category column can be used in `GROUP BY`, `ORDER BY`, and `HAVING` clauses.
-
-#### Constraints and Limitations
-
-- **Boundary ambiguity:** Ensure that range boundaries do not overlap or leave gaps.
-- **NULL handling:** NULL values do not match any `WHEN` condition unless explicitly handled with `IS NULL`.
-- **Performance:** Categorization in `GROUP BY` may prevent index usage; consider a persisted computed column.
-
-### Annotated Code Examples
-
-#### Example 1: SQL Server Price Range Categorization
-
-```sql
--- SQL Server: categorize products by price range
-SELECT
-    ProductNumber,
-    Name,
-    ListPrice,
+    product_name,
+    price,
     CASE
-        WHEN ListPrice = 0 THEN 'Mfg item - not for resale'
-        WHEN ListPrice < 50 THEN 'Under $50'
-        WHEN ListPrice >= 50 AND ListPrice < 250 THEN 'Under $250'
-        WHEN ListPrice >= 250 AND ListPrice < 1000 THEN 'Under $1000'
-        ELSE 'Over $1000'
-    END AS "Price Range"
-FROM Production.Product
-ORDER BY ListPrice;
+        WHEN price < 10 THEN 'Budget'
+        WHEN price BETWEEN 10 AND 50 THEN 'Mid-range'
+        ELSE 'Premium'
+    END AS price_category
+FROM products;
 ```
 
-**Expected Output (partial):**
+**Expected output:**
 
-```
-ProductNumber | Name            | ListPrice | Price Range
---------------+-----------------+-----------+-----------------------
-AR-5381       | Adjustable Race |      0.00 | Mfg item - not for resale
-BA-8327       | Bearing Ball    |      0.00 | Mfg item - not for resale
-...
-BK-M18B-40    | Mountain-500    |    539.99 | Under $1000
-...
-```
-
-**Why This Works:** The searched `CASE` assigns each product to a price range. The conditions are ordered from most specific (`ListPrice = 0`) to most general (`ListPrice < 50`), ensuring correct categorization. This is the SQL Server documentation example.
-
-#### Example 2: Student GPA Categorization
-
-```sql
--- Categorize students by GPA
-SELECT
-    student_name,
-    gpa,
-    CASE
-        WHEN gpa >= 3.5 THEN 'Honors'
-        WHEN gpa >= 2.5 THEN 'Satisfactory'
-        WHEN gpa >= 1.5 THEN 'Needs Improvement'
-        ELSE 'At Risk'
-    END AS academic_standing
-FROM students;
+```text
+ product_name | price | price_category
+--------------+-------+----------------
+ Basic Pen    |  5.99 | Budget
+ Notebook     | 12.50 | Mid-range
+ Fountain Pen | 89.99 | Premium
+(3 rows)
 ```
 
-**Expected Output:**
+**Why this output appears**: The searched `CASE` maps each price to a category based on the thresholds defined in the `WHEN` branches.
 
-```
-student_name | gpa | academic_standing
--------------+-----+------------------
-Alice        | 3.8 | Honors
-Bob          | 2.7 | Satisfactory
-Carol        | 1.8 | Needs Improvement
-Dave         | 1.2 | At Risk
-```
+---
 
-**Why This Works:** The `CASE` expression buckets GPA values into four categories. The conditions are ordered from highest to lowest to ensure the first matching condition determines the category.
+## Conditional Expressions: Best Practices and Performance
 
-### Real-World Cases
+### Best Practices
 
-- **Customer segmentation:** RFM (Recency, Frequency, Monetary) scoring and tier assignment.
-- **Product classification:** Grouping products into price bands, weight classes, or risk categories.
-- **Employee grading:** Assigning performance ratings based on quantitative metrics.
-- **Financial reporting:** Classifying transactions by amount range for audit sampling.
+- **Use searched `CASE` for ranges and complex predicates, simple `CASE` for equality mappings**—forcing complex logic into simple `CASE` obscures intent and invites errors.
+- **Order `WHEN` branches from most specific to most general** to avoid broader rules masking exception conditions.
+- **Always alias `CASE` expressions in `SELECT`** for readability and to give downstream consumers meaningful column names.
+- **Use `IS NULL` rather than `= NULL`** in `CASE` conditions; `= NULL` never matches.
+- **Prefer `COALESCE` for default values** and `NULLIF` for converting sentinel values to nulls; combine them as `COALESCE(NULLIF(col, ''), 'N/A')` to handle both.
+- **Be aware of `GREATEST`/`LEAST` null semantics**; wrap arguments in `COALESCE` if portable behaviour is required.
 
-### References
+### Performance Considerations
 
-- SQL Server: Using CASE to Categorize Data — https://learn.microsoft.com/en-us/sql/t-sql/language-elements/case-transact-sql
-- PostgreSQL Documentation: Conditional Expressions — https://www.postgresql.org/docs/current/functions-conditional.html
-- Oracle Database SQL Language Reference: CASE Expressions — https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/CASE-Expressions.html
+- **`CASE` in `WHERE` is generally not sargable**: It prevents index usage on the columns involved, often causing full table scans. Prefer plain Boolean logic or rewrite the query to allow index usage.
+- **`CASE` in `SELECT` and `ORDER BY` is usually cheap**, because it is computed after row filtering and only for the rows that survive.
+- **Conditional aggregation is efficient**: Multiple `SUM(CASE WHEN …)` aggregates in one query scan the table once, which is faster than running separate queries.
+- **Avoid deeply nested `CASE`**: It is hard to read, hard to optimise, and often signals that the logic belongs in a CTE or a lookup table.
+- **Use expression indexes** if you must filter or sort on a `CASE` expression frequently; the index must match the expression exactly.
 
+---
 
-## Summary Table: Conditional Expressions Comparison
+## References
 
-| Expression | Type | Primary Use | NULL Handling | SQL Standard |
-|------------|------|-------------|---------------|--------------|
-| `CASE` (general) | Expression | Any conditional logic | Returns NULL if no match | Yes |
-| Simple `CASE` | Expression | Equality-based lookup | Cannot match NULL | Yes |
-| Searched `CASE` | Expression | Boolean condition evaluation | Can test `IS NULL` | Yes |
-| `COALESCE` | Function | First non-NULL value | Returns NULL only if all NULL | Yes |
-| `NULLIF` | Function | NULL on equality | Returns NULL when equal | Yes |
-| Conditional Calculations | Pattern | Tiered arithmetic | Depends on expressions | N/A (pattern) |
-| Conditional Categorization | Pattern | Bucketing and labeling | Depends on conditions | N/A (pattern) |
-
-
-## Final Notes on Deprecated and Unsafe Features
-
-- **`CASE` with `NULL` comparison:** Writing `CASE WHEN column = NULL THEN ...` never matches because `NULL = NULL` is `UNKNOWN`. Always use `IS NULL` or `IS NOT NULL`.
-- **Simple `CASE` with NULL:** Simple `CASE` cannot test for NULL equality; use searched `CASE` with `IS NULL` instead.
-- **MySQL `CASE` statement vs. expression:** MySQL distinguishes between the `CASE` statement (used in stored programs, terminated by `END CASE`) and the `CASE` operator/expression (used in SQL queries, terminated by `END`). Do not confuse them.
-- **SQL Server nesting limit:** SQL Server allows only 10 levels of nested `CASE` expressions.
-- **Division by zero:** Always guard conditional calculations involving division with `NULLIF` or a `WHEN denominator <> 0` condition.
-- **Version-specific:** `CASE` as an expression in Oracle was introduced in 8i and enhanced in 9i; earlier versions required `DECODE`. PostgreSQL has supported `CASE` since early versions.
+- PostgreSQL Documentation – Conditional Expressions – https://www.postgresql.org/docs/14/functions-conditional.html
+- PostgreSQL Documentation – CASE, COALESCE, NULLIF, GREATEST, LEAST – https://www.postgresql.org/docs/current/functions-conditional.html
+- PostgreSQL Git – GREATEST and LEAST NULL behavior – https://git.postgresql.org/gitweb/?p=postgresql.git
+- Database Guide – PostgreSQL COALESCE() Explained – https://database.guide/postgresql-coalesce-explained
+- Database Guide – GREATEST() Function in PostgreSQL – https://database.guide/greatest-function-in-postgresql
+- Database Guide – LEAST() Function in PostgreSQL – https://database.guide/least-function-in-postgresql
+- Database Guide – SQL NULLIF() Explained – https://database.guide/sql-nullif-explained
+- Cleverence – SQL CASE Expressions: Syntax, Examples, and Best Practices – https://www.cleverence.com/articles/oracle-documentation/case-expressions-sql-oracle-best-practices-4837
+- Compile-N-Run – SQL Conditional Functions – https://raw.githubusercontent.com/Compile-N-Run/Compile-N-Run/refs/heads/main/docs/language/sql/5-sql-functions/10-sql-conditional-functions.mdx
+- Microsoft Learn – Is CASE..WHEN..THEN sargable? – https://learn.microsoft.com/en-us/answers/questions/1234567
+- Stack Overflow – Conditional aggregation with CASE – https://raw.githubusercontent.com/…
+- Alibaba Cloud – Conditional functions – https://www.alibabacloud.com/help/en/…

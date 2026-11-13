@@ -453,49 +453,107 @@ Python is best learned as more than "a scripting language." The progression shou
 
 # IV. Control Flow
 
-- **19. Conditional Statements**
-  - `if`
-  - `elif`
-  - `else`
-  - Nested conditionals
-  - Truthy and falsy
+- [**9. Conditional Statements**](/Programming%20Languages/Python/Control%20Flow/ConditionalStatements.md)
+  - if
+  - elif
+  - else
+  - Nested conditions
+  - Compound conditions
   - Conditional expressions
-  - `match` statement
-  - Structural pattern matching
-  - Pattern matching
-    - Literal patterns
-    - Capture patterns
-    - Wildcard patterns
-    - Value patterns
-    - Group patterns
-    - Sequence patterns
-    - Mapping patterns
-    - Class patterns
-    - OR patterns
-    - Guard clauses
-  - Pattern matching use cases
-  - Pattern matching best practices
+  - Truthiness and falsiness
+  - Short-circuit evaluation
+  - Conditional performance and best Practices
 
-- **20. Loops**
-  - `for` loops
-  - `while` loops
-  - `for...else`
-  - `while...else`
-  - Loop control
-    - `break`
-    - `continue`
-    - `pass`
+• [**10. Loops**](/Programming%20Languages/Python/Control%20Flow/Loops.md)
+  - for loops
+  - while loops
   - Nested loops
-  - Loop else clause
-  - Iteration protocols
-  - Iterators
-  - Iterables
-  - `iter()`
-  - `next()`
-  - `StopIteration`
+  - Loop conditions
   - Infinite loops
-  - Loop performance
-  - Loop best practices
+  - Iteration over collections
+  - Iteration over ranges and range()
+  - Iteration protocols (Iterables, Iterators, iter(), next(), StopIteration)
+  - Loop performance and best practices
+
+- [**11. Loop Control**](/Programming%20Languages/Python/Control%20Flow/LoopControls.md)
+  - break
+  - continue
+  - pass
+  - Loop else (for...else and while...else)
+  - Early termination
+  - Sentinel-controlled loops
+  - Loop Control best practices
+
+• [**12. Structural Pattern Matching**](/Programming%20Languages/Python/Control%20Flow/MatchStatement.md)
+  - match and case
+  - Literal patterns
+  - Capture patterns
+  - Wildcard patterns
+  - Value patterns
+  - Group patterns
+  - OR patterns
+  - Sequence patterns
+  - Mapping patterns
+  - Class patterns
+  - Guard clauses
+  - Pattern matching design, use cases, and best practices
+
+---
+
+# IV. Strings and Text Processing
+
+- [**String Fundamentals**](/Programming%20Languages/Python/Strings/String.md)
+  - String literals
+  - Single quotes
+  - Double quotes
+  - Triple-quoted strings
+  - String immutability
+  - Escape sequences
+  - Raw strings
+  - Unicode
+
+- [**String Operations**](/Programming%20Languages/Python/Strings/StringOperations.md)
+  - Indexing
+  - Slicing
+  - Concatenation
+  - Repetition
+  - Membership
+  - Comparison
+
+- [**String Methods**](/Programming%20Languages/Python/Strings/StringMethods.md)
+  - Case conversion
+  - Searching
+  - Replacement
+  - Splitting
+  - Joining
+  - Stripping
+  - Padding
+  - Prefix/suffix operations
+  - Validation methods
+
+- [**String Formatting**](/Programming%20Languages/Python/Strings/StringFormatting.md)
+  - `%` formatting
+  - `str.format()`
+  - f-strings
+  - Format specifications
+  - Alignment
+  - Width and precision
+  - Numeric formatting
+  - Date/time formatting
+
+- [**Regular Expressions**](/Programming%20Languages/Python/Strings/RegEx.md)
+  - `re` module
+  - Patterns
+  - Character classes
+  - Quantifiers
+  - Groups
+  - Capturing
+  - Non-capturing groups
+  - Lookahead
+  - Lookbehind
+  - Substitution
+  - Validation
+  - Regex performance considerations
 
 ---
 
@@ -602,7 +660,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Dictionary performance
   - Dictionary best practices
 
-- **25. Comprehensions**
+- [**25. Comprehensions**](/Programming%20Languages/Python/Collections/Comprehensions.md)
   - List comprehensions
   - Set comprehensions
   - Dictionary comprehensions
@@ -615,7 +673,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Comprehension readability
   - Comprehension best practices
 
-- **26. Iteration Tools**
+- [**26. Iteration Tools**](/Programming%20Languages/Python/Collections/IterationTools.md)
   - `range()`
   - `enumerate()`
   - `zip()`
@@ -1431,7 +1489,15 @@ Python is best learned as more than "a scripting language." The progression shou
   - File errors
   - File best practices
 
-- **58. Paths**
+- [**Context Managers**](/Programming%20Languages/Python/File%20Handling/ContextManagers.md)
+  - `with`
+  - Resource management
+  - Custom context managers
+  - `__enter__`
+  - `__exit__`
+  - `contextlib`
+
+- [**58. Paths**](/Programming%20Languages/Python/File%20Handling/Paths.md)
   - `os.path`
   - `pathlib`
   - `Path` objects
@@ -1444,7 +1510,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Path manipulation
   - Path best practices
 
-- **59. Directory Operations**
+- [**59. Directory Operations**](/Programming%20Languages/Python/File%20Handling/DirectoryOperations.md)
   - Directory creation
   - Directory deletion
   - Directory listing
@@ -1457,7 +1523,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - `Path.rglob()`
   - Directory best practices
 
-- **60. JSON**
+- [**60. JSON**](/Programming%20Languages/Python/File%20Handling/JSON.md)
   - JSON
   - `json` module
   - `json.loads()`
@@ -1470,7 +1536,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Custom JSON decoders
   - JSON best practices
 
-- **61. CSV**
+- [**61. CSV**](/Programming%20Languages/Python/File%20Handling/CSV.md)
   - CSV
   - `csv` module
   - `csv.reader()`
@@ -1481,7 +1547,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - CSV formatting
   - CSV best practices
 
-- **62. XML**
+- [**62. XML**](/Programming%20Languages/Python/File%20Handling/XML.md)
   - XML
   - `xml.etree.ElementTree`
   - `xml.dom`
@@ -1491,21 +1557,21 @@ Python is best learned as more than "a scripting language." The progression shou
   - XML generation
   - XML best practices
 
-- **63. YAML**
+- [**63. YAML**](/Programming%20Languages/Python/File%20Handling/YAML.md)
   - YAML
   - PyYAML
   - `yaml.safe_load()`
   - `yaml.safe_dump()`
   - YAML best practices
 
-- **64. TOML**
+- [**64. TOML**](/Programming%20Languages/Python/File%20Handling/TOML.md)
   - TOML
   - `tomllib`
   - `tomli`
   - `tomli-w`
   - TOML best practices
 
-- **65. Pickle**
+- [**65. Pickle**](/Programming%20Languages/Python/File%20Handling/Pickle.md)
   - Pickle
   - `pickle` module
   - `pickle.dumps()`
@@ -1516,7 +1582,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Pickle best practices
   - Pickle alternatives
 
-- **66. Other Serialization**
+- [**66. Other Serialization**](/Programming%20Languages/Python/File%20Handling/OtherSerialization.md)
   - MessagePack
   - Protocol Buffers
   - Avro

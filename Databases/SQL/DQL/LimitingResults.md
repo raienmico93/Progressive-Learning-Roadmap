@@ -1,859 +1,989 @@
-# SQL Limiting Results: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: SQL Limiting Results
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** SQL limiting results refers to the family of clauses and techniques used to restrict the number of rows returned by a SELECT statement, and to navigate through large result sets in manageable segments (pagination).
+**Core Definition**
+Limiting results is the set of SQL clauses and techniques—`LIMIT`, `OFFSET`, `FETCH FIRST`, `FETCH NEXT`, `TOP`, and `OFFSET ... FETCH`—used to restrict the number of rows returned by a query and to skip a specified number of rows, thereby enabling top‑N queries, pagination, and bounded result sets.
 
-**Technical Definition:** Per the ANSI/ISO SQL Standard, row limiting is implemented through the OFFSET and FETCH FIRST clauses, introduced in SQL:2008. The standard syntax is `OFFSET m ROWS FETCH NEXT n ROWS ONLY`. Vendor-specific implementations predate and often differ from the standard: LIMIT (PostgreSQL, MySQL, SQLite), TOP (SQL Server, Sybase), and ROWNUM (Oracle). These clauses are logically applied after ORDER BY and before the result set is returned to the client.
+**Technical Definition**
+Result limiting is expressed either as a **standalone clause** (`LIMIT`, `TOP`) or as a **row‑limiting clause** attached to `ORDER BY` (`OFFSET ... FETCH`). PostgreSQL supports both `LIMIT` and the SQL:2008 `OFFSET ... FETCH` syntax; MySQL supports `LIMIT` with an optional offset; SQL Server supports `TOP` (legacy, proprietary) and, since SQL Server 2012, the ANSI‑compliant `OFFSET ... FETCH` syntax; Oracle supports `OFFSET ... FETCH` since Oracle 12*c*. The SQL:2008 standard defines `[ OFFSET start { ROW | ROWS } ] [ FETCH { FIRST | NEXT } [ count ] { ROW | ROWS } { ONLY | WITH TIES } ]`, which is the most portable form across modern RDBMSs. Pagination—the practice of retrieving results in pages—is built on top of these primitives, using either **offset pagination** (skip N, take M), **keyset (seek) pagination** (start after a known key), or **cursor pagination** (an opaque cursor encoding the position).
 
-**Beginner-Friendly Explanation:** When a table has millions of rows, you rarely want to see all of them at once. SQL limiting clauses let you say "give me only the first 10 rows" or "skip the first 50 rows and give me the next 20." This is essential for pagination (showing results page by page) and for quickly previewing data. Without a limiting clause, a query returns every matching row, which can be slow and overwhelming.
+**Beginner-Friendly Explanation**
+Limiting results is how you stop a query from returning everything. A table might have ten million rows, but a web page only shows twenty at a time. `LIMIT 20` says “give me twenty rows.” `OFFSET 40` says “skip the first forty rows first.” Together they implement pagination: page 1 is `LIMIT 20 OFFSET 0`, page 2 is `LIMIT 20 OFFSET 20`, and so on. Different databases spell this differently—MySQL and PostgreSQL use `LIMIT`, SQL Server uses `TOP` or `OFFSET ... FETCH`, Oracle uses `OFFSET ... FETCH`—but the idea is the same: bound the number of rows and optionally choose where to start. The crucial performance lesson is that offset pagination gets slower the deeper you go, because the database must scan and discard every skipped row; keyset and cursor pagination avoid this by starting from a known position instead of counting from the beginning.
 
 ### Key Characteristics
 
-- **Three syntax families:** LIMIT (PostgreSQL, MySQL, SQLite), TOP (SQL Server, Sybase), and FETCH FIRST (ANSI standard, Oracle, DB2, modern PostgreSQL/SQL Server).
-- **Order-dependent:** Row limiting without ORDER BY produces non-deterministic results — the database may return any subset of rows.
-- **Pagination support:** OFFSET allows skipping rows for page navigation, but large OFFSET values degrade performance linearly.
-- **Tie handling:** WITH TIES (TOP and FETCH FIRST) includes additional rows that match the last row's sort key.
-- **Performance-sensitive:** Top-N optimization and index usage can dramatically speed up limited queries.
+- **Without `ORDER BY`, limiting is non‑deterministic**: `LIMIT`, `TOP`, and `OFFSET ... FETCH` all depend on a deterministic row order. `TOP` with no `ORDER BY` “is non‑deterministic and may return any rows up to the number specified”; the same applies to `LIMIT` without `ORDER BY`. Limiting without ordering is only safe when you genuinely do not care which rows you get.
+- **`FETCH FIRST` and `FETCH NEXT` are synonyms**: The SQL standard defines both spellings, and they behave identically; `FETCH NEXT` is conventionally used after an `OFFSET` for readability.
+- **`TOP` is legacy and proprietary**: `TOP` appears in the `SELECT` list (or after `SELECT`), supports `PERCENT` and `WITH TIES`, and cannot be combined with `OFFSET ... FETCH` in the same query expression.
+- **`OFFSET ... FETCH` is the ANSI‑standard form**: Introduced in SQL:2008, supported by PostgreSQL, SQL Server 2012+, and Oracle 12*c*+, it is the most portable modern syntax.
+- **Offset pagination is O(n) in page depth**: The database must scan and discard every skipped row, so page 50,000 is dramatically slower than page 1; keyset pagination is O(1) or O(log n) because it seeks directly to the starting key.
 
 ### Prerequisites
 
-- Basic SQL syntax (SELECT, FROM, WHERE, ORDER BY)
-- Understanding of sorting and indexes
-- Familiarity with query execution order (ORDER BY runs before LIMIT)
+- A running RDBMS (PostgreSQL, MySQL, SQL Server, or Oracle) and a client connection.
+- At least one table with data, or the ability to run `SELECT` with literal values.
+- Familiarity with `SELECT`, `FROM`, and `ORDER BY`.
+- An understanding of indexes, because pagination performance depends heavily on whether the sort and filter columns are indexed.
+- Awareness of the difference between **offset pagination** (simple but slow at depth) and **keyset/cursor pagination** (faster and more consistent but less flexible for random page access).
 
 ### Related Programming Areas
 
-- **Web Application Development:** Pagination is fundamental to displaying search results, product listings, and user feeds.
-- **API Design:** REST and GraphQL APIs use cursor-based or offset-based pagination for large collections.
-- **Data Analysis:** LIMIT is used for quick data exploration and sampling.
-- **Query Optimization:** Understanding Top-N optimization and index usage is critical for performance tuning.
-- **Database Migration:** Different SQL dialects require translating LIMIT/TOP/FETCH syntax.
+- Query optimisation – indexes, sort avoidance, and the cost of `OFFSET`.
+- Application development – API pagination, infinite scroll, and page‑number UIs.
+- Data export and reporting – top‑N reports and bounded extracts.
+- Concurrency – consistency of paginated results when the underlying data changes.
+- SQL standardisation – portability across PostgreSQL, MySQL, SQL Server, and Oracle.
 
 ---
 
-## Core Concepts / Key Features
+## Core Concepts and Features
 
-### 1. Core Row-Limiting Clauses
+### 1. `LIMIT`
 
-#### 1.1 LIMIT Syntax (PostgreSQL, MySQL, SQLite)
+#### Definitions
 
-**Core Definitions:**
+**Core Definition**
+`LIMIT` is a PostgreSQL and MySQL clause that restricts the number of rows returned by a query to at most a specified count.
 
-- **Core Definition:** LIMIT restricts the number of rows returned by a query to a specified maximum.
-- **Technical Definition:** In PostgreSQL, MySQL, and SQLite, the LIMIT clause accepts one or two numeric arguments. With one argument, it specifies the maximum number of rows to return. With two arguments (MySQL-specific), the first specifies the offset and the second the row count. PostgreSQL also supports the ANSI-standard OFFSET/FETCH syntax as an alternative.
-- **Beginner-Friendly Explanation:** LIMIT is the simplest way to say "give me only the first N rows." You add `LIMIT 10` to the end of your query.
+**Technical Definition**
+In PostgreSQL, the `LIMIT` clause consists of `LIMIT { count | ALL }`, where `ALL` means no limit. In MySQL, the clause is `LIMIT {[offset,] row_count | row_count OFFSET offset}`, and `LIMIT row_count` is equivalent to `LIMIT 0, row_count`. `LIMIT` is applied **last**, after `ORDER BY` and `OFFSET`, so it determines which rows survive after sorting and skipping. SQL Server does not support `LIMIT`; Oracle does not support `LIMIT`.
 
-**Purposes:**
+**Beginner-Friendly Explanation**
+`LIMIT` is the simplest way to say “only give me this many rows.” It is the most common limiting clause in PostgreSQL and MySQL.
 
-- To restrict the number of rows returned by a query
-- To quickly preview data without retrieving the entire table
-- To implement pagination when combined with OFFSET
-- To improve performance by reducing data transfer
+#### Purposes
 
-**Syntax Structures and Rules:**
+- To restrict the result set to a maximum number of rows for display or processing.
+- To implement top‑N queries when combined with `ORDER BY`.
+- To bound the work done by a query when only a few rows are needed.
+- To paginate results when combined with `OFFSET`.
 
-**Complete General Syntax:**
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
 
 ```sql
--- One argument: maximum rows to return
-SELECT column_list FROM table_name LIMIT row_count;
-
--- Two arguments (MySQL): offset, row_count
-SELECT column_list FROM table_name LIMIT offset, row_count;
-
--- PostgreSQL/MySQL/SQLite: LIMIT row_count OFFSET offset
-SELECT column_list FROM table_name LIMIT row_count OFFSET offset;
+SELECT ... [ ORDER BY ... ] LIMIT { count | ALL }
 ```
 
-**Component Breakdown:**
-
-- `row_count`: Maximum number of rows to return
-- `offset`: Number of rows to skip before returning rows (0-based)
-
-**Syntax Rules:**
-
-- LIMIT without ORDER BY returns an unpredictable subset of rows. PostgreSQL documentation explicitly warns: "When using LIMIT, it is important to use an ORDER BY clause that constrains the result rows into a unique order. Otherwise you will get an unpredictable subset of the query's rows".
-- `LIMIT ALL` is the same as omitting the LIMIT clause.
-- `LIMIT NULL` is the same as omitting the LIMIT clause in PostgreSQL.
-- MySQL's `LIMIT row_count` is equivalent to `LIMIT 0, row_count`.
-
-**Constraints and Limitations:**
-
-- LIMIT is not ANSI standard; it is vendor-specific.
-- MySQL's two-argument syntax is not portable to PostgreSQL or SQLite.
-- LIMIT is not supported in SQL Server or Oracle (use TOP or FETCH FIRST).
-
-**Annotated Code Examples:**
+**MySQL:**
 
 ```sql
--- Setup: Create a sample table
-CREATE TABLE products (
-    product_id INT PRIMARY KEY,
-    product_name VARCHAR(100),
-    price DECIMAL(10,2)
+SELECT ... [ ORDER BY ... ] LIMIT {[offset,] row_count | row_count OFFSET offset}
+```
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `count` / `row_count` | Maximum number of rows to return. |
+| `ALL` (PostgreSQL) | No limit; same as omitting `LIMIT`. |
+| `offset` (MySQL) | Number of rows to skip; see `OFFSET`. |
+
+**Syntax rules:**
+
+- `LIMIT` should be paired with `ORDER BY` for deterministic results.
+- `LIMIT` is applied after `ORDER BY` and `OFFSET`.
+
+**Constraints and limitations:**
+
+- `LIMIT` is not available in SQL Server or Oracle; use `TOP` or `OFFSET ... FETCH` instead.
+- Without `ORDER BY`, the rows returned are unpredictable.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Top‑N with LIMIT and ORDER BY
+
+```sql
+-- Step 1: Create a table.
+CREATE TABLE employees (
+    employee_id serial PRIMARY KEY,
+    first_name  text NOT NULL,
+    salary      numeric(10,2) NOT NULL
 );
 
-INSERT INTO products VALUES (1, 'Widget', 19.99);
-INSERT INTO products VALUES (2, 'Gadget', 29.99);
-INSERT INTO products VALUES (3, 'Gizmo', 9.99);
-INSERT INTO products VALUES (4, 'Doohickey', 49.99);
-INSERT INTO products VALUES (5, 'Contraption', 39.99);
+-- Step 2: Insert sample rows.
+INSERT INTO employees (first_name, salary) VALUES
+    ('Alice', 80000), ('Bob', 70000), ('Carol', 60000), ('Dave', 65000);
 
--- Example 1: LIMIT with one argument
-SELECT product_name, price
-FROM products
-ORDER BY price DESC
-LIMIT 3;
+-- Step 3: Retrieve the top two earners.
+SELECT first_name, salary
+FROM employees
+ORDER BY salary DESC
+LIMIT 2;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| product_name | price |
-|--------------|-------|
-| Doohickey    | 49.99 |
-| Contraption  | 39.99 |
-| Gadget       | 29.99 |
+```text
+ first_name | salary
+------------+--------
+ Alice      |  80000
+ Bob        |  70000
+(2 rows)
+```
 
-**Explanation:** The query returns the top 3 most expensive products. ORDER BY ensures a deterministic result.
+**Why this output appears**: `ORDER BY salary DESC` sorts all four employees from highest to lowest salary, and `LIMIT 2` returns only the first two rows of that sorted result—Alice and Bob.
+
+#### Real-World Cases
+
+- **Leaderboards**: `ORDER BY score DESC LIMIT 10` returns the top ten players.
+- **Recent activity**: `ORDER BY created_at DESC LIMIT 20` returns the twenty most recent events.
+
+---
+
+### 2. `OFFSET`
+
+#### Definitions
+
+**Core Definition**
+`OFFSET` skips a specified number of rows before the query starts returning rows, enabling pagination.
+
+**Technical Definition**
+`OFFSET start { ROW | ROWS }` skips the first `start` rows of the sorted result. In MySQL, the offset is the first argument of a two‑argument `LIMIT` (`LIMIT offset, row_count`) or the `OFFSET` keyword in the `row_count OFFSET offset` form. `OFFSET` is applied after `ORDER BY` and before `LIMIT`/`FETCH`. The cost of `OFFSET` grows linearly with the offset value because the database must scan and discard every skipped row.
+
+**Beginner-Friendly Explanation**
+`OFFSET` is the “skip” part of pagination. `LIMIT 20 OFFSET 20` means “skip the first twenty rows, then give me the next twenty.”
+
+#### Purposes
+
+- To implement page‑based pagination (`page N` = `LIMIT page_size OFFSET (N-1)*page_size`).
+- To skip a known number of leading rows in a sorted result.
+- To preview data beyond the first page during exploration.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
 
 ```sql
--- Example 2: LIMIT with OFFSET
-SELECT product_name, price
-FROM products
-ORDER BY price DESC
+OFFSET start { ROW | ROWS }
+```
+
+**MySQL:**
+
+```sql
+LIMIT [offset,] row_count
+-- or
+LIMIT row_count OFFSET offset
+```
+
+**SQL Server / Oracle (standard form):**
+
+```sql
+OFFSET start { ROW | ROWS }
+```
+
+**Syntax rules:**
+
+- `OFFSET` should always be paired with `ORDER BY` for deterministic pagination.
+- In PostgreSQL, `OFFSET` and `LIMIT` can appear in either order (PostgreSQL is laxer than the standard, which requires `OFFSET` before `FETCH`).
+
+**Constraints and limitations:**
+
+- Large offsets force the database to scan and discard many rows, making deep pagination slow.
+- `OFFSET` without `ORDER BY` is unpredictable.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: MySQL – Offset pagination
+
+```sql
+-- Step 1: Retrieve the second page of employees (page size 2).
+SELECT first_name, salary
+FROM employees
+ORDER BY salary DESC
 LIMIT 2 OFFSET 2;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| product_name | price |
-|--------------|-------|
-| Gadget       | 29.99 |
-| Widget       | 19.99 |
-
-**Explanation:** OFFSET 2 skips the first two rows (Doohickey and Contraption), and LIMIT 2 returns the next two.
-
-**Real-World Cases:**
-
-- **E-commerce:** Displaying the first 20 products in a category.
-- **Analytics:** Sampling the top 100 highest-revenue customers.
-- **APIs:** Implementing offset-based pagination for REST endpoints.
-
-**References:**
-
-- PostgreSQL: LIMIT and OFFSET - https://www.postgresql.org/docs/current/queries-limit.html
-- MySQL: SELECT Statement (LIMIT) - https://dev.mysql.com/doc/refman/8.0/en/select.html
-
-
-#### 1.2 TOP Syntax (Microsoft SQL Server, Sybase)
-
-**Core Definitions:**
-
-- **Core Definition:** TOP restricts the number of rows returned by a query to a specified number or percentage, placed immediately after SELECT.
-- **Technical Definition:** In SQL Server, TOP is specified as `SELECT TOP (expression) [PERCENT] [WITH TIES]`. Unlike LIMIT, which comes at the end of the query, TOP appears immediately after SELECT. When TOP is used with ORDER BY, the result set is limited to the first n ordered rows; otherwise, it returns the first n rows in an undefined order.
-- **Beginner-Friendly Explanation:** TOP is SQL Server's way of saying "give me only the first N rows." You put it right after SELECT.
-
-**Purposes:**
-
-- To restrict the number of rows returned by a query
-- To retrieve a percentage of rows using PERCENT
-- To include tied values using WITH TIES
-- To limit rows affected by INSERT, UPDATE, DELETE, or MERGE
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```sql
-SELECT TOP (expression) [PERCENT] [WITH TIES] column_list
-FROM table_name
-[ORDER BY ...];
+```text
+ first_name | salary
+------------+--------
+ Dave       |  65000
+ Carol      |  60000
+(2 rows)
 ```
 
-**Component Breakdown:**
+**Why this output appears**: The query sorts all employees by salary descending, skips the first two (Alice and Bob), and returns the next two (Dave and Carol).
 
-- `expression`: Number of rows to return (or percentage if PERCENT is specified)
-- `PERCENT`: Returns the top expression% of rows
-- `WITH TIES`: Returns additional rows that tie with the last row in the limited set
+#### Real-World Cases
 
-**Syntax Rules:**
+- **Page‑numbered APIs**: `GET /items?page=3&per_page=20` translates to `LIMIT 20 OFFSET 40`.
+- **Admin tables**: A data‑grid UI shows page numbers and uses offset pagination for random page access.
 
-- TOP must be used with SELECT, INSERT, UPDATE, DELETE, or MERGE.
-- TOP with PERCENT rounds fractional row counts up to the next integer.
-- TOP WITH TIES requires ORDER BY and may return more rows than specified.
-- Microsoft recommends always using ORDER BY with TOP for predictable results.
-- Parentheses are optional for integer constants but recommended.
+---
 
-**Constraints and Limitations:**
+### 3. `FETCH FIRST`
 
-- TOP is not ANSI standard.
-- TOP WITH TIES cannot be used without ORDER BY.
-- TOP is not supported in PostgreSQL, MySQL, or Oracle.
+#### Definitions
 
-**Annotated Code Examples:**
+**Core Definition**
+`FETCH FIRST` is the SQL:2008 standard clause that limits the result to the first *n* rows of the sorted result.
+
+**Technical Definition**
+`FETCH { FIRST | NEXT } [ count ] { ROW | ROWS } ONLY` returns at most `count` rows. `FETCH FIRST` and `FETCH NEXT` are identical in effect; the standard provides both spellings, and `FETCH NEXT` is conventionally used when an `OFFSET` precedes it. `FETCH FIRST` is supported by PostgreSQL, SQL Server 2012+, and Oracle 12*c*+. The standard requires `OFFSET` to come before `FETCH` if both are present, though PostgreSQL allows either order.
+
+**Beginner-Friendly Explanation**
+`FETCH FIRST 5 ROWS ONLY` is the standard‑SQL way of saying `LIMIT 5`. It is more portable across modern databases than `LIMIT`.
+
+#### Purposes
+
+- To limit results in a standard‑compliant, portable way.
+- To express top‑N queries that work across PostgreSQL, SQL Server, and Oracle.
+- To combine with `OFFSET` for standard pagination.
+
+#### Syntax Rules and Structure
 
 ```sql
--- SQL Server: TOP with integer
-SELECT TOP 3 product_name, price
-FROM products
-ORDER BY price DESC;
+[ OFFSET start { ROW | ROWS } ]
+FETCH { FIRST | NEXT } [ count ] { ROW | ROWS } ONLY
 ```
 
-**Expected Output:** Same as LIMIT 3 example above.
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `FIRST` / `NEXT` | Synonyms; `FIRST` for the beginning, `NEXT` after an `OFFSET`. |
+| `count` | Number of rows to return; the standard requires a literal, parameter, or variable. |
+| `ROW` / `ROWS` | Noise word; both are equivalent. |
+| `ONLY` | Return exactly the requested rows (contrast with `WITH TIES`). |
+
+**Syntax rules:**
+
+- `FETCH FIRST` is typically used without `OFFSET`; `FETCH NEXT` is used after `OFFSET`.
+- `FETCH` requires `ORDER BY` for deterministic results in practice, though the standard permits it without.
+
+**Constraints and limitations:**
+
+- SQL Server 2012+ requires `ORDER BY` and `OFFSET` together with `FETCH`; `FETCH` alone is not allowed in SQL Server.
+- MySQL does not support `FETCH FIRST`; use `LIMIT`.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – FETCH FIRST with ORDER BY
 
 ```sql
--- SQL Server: TOP with PERCENT
-SELECT TOP 50 PERCENT product_name, price
-FROM products
-ORDER BY price DESC;
--- Returns 50% of rows (rounded up)
-```
-
-```sql
--- SQL Server: TOP WITH TIES
-SELECT TOP 3 WITH TIES product_name, price
-FROM products
-ORDER BY price DESC;
--- If multiple products have the same price as the 3rd product, all are returned
-```
-
-**Real-World Cases:**
-
-- **Reporting:** Showing the top 10 customers by revenue.
-- **Data Preview:** Quickly inspecting the first 100 rows of a large table.
-- **Batch Processing:** Limiting the number of rows affected by an UPDATE or DELETE.
-
-**References:**
-
-- Microsoft Learn: TOP (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/queries/top-transact-sql
-- Microsoft Learn: Sort your results - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/2-sort-your-data-as-its-returned
-
-
-#### 1.3 ANSI Standard FETCH FIRST n ROWS ONLY Syntax
-
-**Core Definitions:**
-
-- **Core Definition:** FETCH FIRST is the ANSI SQL standard clause for limiting rows, part of the row_limiting_clause introduced in SQL:2008.
-- **Technical Definition:** The standard syntax is `OFFSET m ROWS FETCH { FIRST | NEXT } n ROWS { ONLY | WITH TIES }`. It appears after ORDER BY. Oracle, DB2, PostgreSQL, and SQL Server (2012+) support this syntax. The FETCH clause specifies the number of rows or percentage of rows to return.
-- **Beginner-Friendly Explanation:** FETCH FIRST is the "standard" way to limit rows. It's more verbose than LIMIT but works across more databases.
-
-**Purposes:**
-
-- To provide a portable, standard-compliant way to limit rows
-- To combine row skipping (OFFSET) with row limiting (FETCH)
-- To include tied rows using WITH TIES
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```sql
-SELECT column_list
-FROM table_name
-ORDER BY sort_expression
-[OFFSET m { ROW | ROWS }]
-FETCH { FIRST | NEXT } n { ROW | ROWS } { ONLY | WITH TIES };
-```
-
-**Component Breakdown:**
-
-- `OFFSET m ROWS`: Skip m rows before starting to return rows
-- `FETCH FIRST | NEXT n ROWS`: Return n rows
-- `ONLY`: Return exactly n rows
-- `WITH TIES`: Also return rows that tie with the last row
-
-**Syntax Rules:**
-
-- OFFSET is optional; FETCH is required if OFFSET is used (in some databases).
-- FIRST and NEXT are interchangeable; ROW and ROWS are interchangeable.
-- FETCH FIRST without ORDER BY produces non-deterministic results.
-- The OFFSET clause is required if FETCH is used in SQL Server.
-
-**Constraints and Limitations:**
-
-- FETCH FIRST is not supported in MySQL (use LIMIT).
-- SQL Server requires OFFSET when using FETCH (cannot use FETCH alone).
-- Oracle supports FETCH FIRST n ROWS ONLY; older Oracle versions use ROWNUM.
-
-**Annotated Code Examples:**
-
-```sql
--- Oracle: FETCH FIRST
-SELECT product_name, price
-FROM products
-ORDER BY price DESC
+-- Step 1: Retrieve the first three employees by salary.
+SELECT first_name, salary
+FROM employees
+ORDER BY salary DESC
 FETCH FIRST 3 ROWS ONLY;
 ```
 
-**Expected Output:** Same as LIMIT 3 example above.
+**Expected output:**
 
-```sql
--- SQL Server: OFFSET-FETCH
-SELECT product_name, price
-FROM products
-ORDER BY price DESC
-OFFSET 0 ROWS
-FETCH NEXT 3 ROWS ONLY;
+```text
+ first_name | salary
+------------+--------
+ Alice      |  80000
+ Bob        |  70000
+ Dave       |  65000
+(3 rows)
 ```
 
+**Why this output appears**: `ORDER BY salary DESC` sorts the employees, and `FETCH FIRST 3 ROWS ONLY` returns exactly the first three rows of that sorted result.
+
+#### Real-World Cases
+
+- **Portable top‑N queries**: An application that runs on PostgreSQL and SQL Server uses `FETCH FIRST` to avoid maintaining two query variants.
+- **Standard‑compliant reporting**: SQL:2008‑based tools and ORMs generate `FETCH FIRST` for cross‑database compatibility.
+
+---
+
+### 4. `FETCH NEXT`
+
+#### Definitions
+
+**Core Definition**
+`FETCH NEXT` is the SQL:2008 standard clause that returns the next *n* rows after an `OFFSET`, and is semantically identical to `FETCH FIRST`.
+
+**Technical Definition**
+`FETCH NEXT [ count ] { ROW | ROWS } ONLY` behaves exactly like `FETCH FIRST`; the two spellings differ only in readability. `FETCH NEXT` is conventionally used when an `OFFSET` has already skipped rows, making the query read naturally as “skip N rows and fetch the next M”.
+
+**Beginner-Friendly Explanation**
+`FETCH NEXT` is the same as `FETCH FIRST`; it exists so that a paginated query reads naturally: “OFFSET 20 ROWS FETCH NEXT 20 ROWS ONLY.”
+
+#### Purposes
+
+- To express pagination in standard SQL with a natural reading order.
+- To make the intent clear when an `OFFSET` precedes the fetch.
+- To maintain portability across PostgreSQL, SQL Server, and Oracle.
+
+#### Syntax Rules and Structure
+
 ```sql
--- Oracle: FETCH FIRST WITH TIES
-SELECT product_name, price
-FROM products
-ORDER BY price DESC
-FETCH FIRST 3 ROWS WITH TIES;
+OFFSET start { ROW | ROWS }
+FETCH NEXT [ count ] { ROW | ROWS } ONLY
 ```
 
-**Real-World Cases:**
+**Syntax rules:**
 
-- **Cross-database applications:** Writing portable SQL that works on Oracle, PostgreSQL, and SQL Server.
-- **Enterprise reporting:** Standardized pagination across heterogeneous database environments.
+- `FETCH NEXT` must follow `OFFSET` in SQL Server; in PostgreSQL and Oracle the order is flexible.
+- The effect is identical to `FETCH FIRST`.
 
-**References:**
+**Constraints and limitations:**
 
-- Oracle: Row Limiting Clause - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/SELECT.html
-- Microsoft Learn: Page results (OFFSET-FETCH) - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/4-page-results
-- PostgreSQL: LIMIT and OFFSET - https://www.postgresql.org/docs/current/queries-limit.html
+- Same as `FETCH FIRST`; not supported in MySQL.
 
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-### 2. Pagination Mechanics
-
-#### 2.1 Skipping Rows Using the OFFSET Clause
-
-**Core Definitions:**
-
-- **Core Definition:** OFFSET skips a specified number of rows before the database begins returning rows.
-- **Technical Definition:** OFFSET is part of the ORDER BY clause (in SQL Server) or the SELECT statement (in PostgreSQL, Oracle). It specifies the number of rows to skip before row limiting begins.
-- **Beginner-Friendly Explanation:** OFFSET is how you get to page 2, 3, or 4. It says "skip the first N rows" so you can start from where the previous page ended.
-
-**Purposes:**
-
-- To implement pagination by skipping rows from previous pages
-- To combine with LIMIT or FETCH to retrieve a specific page
-- To skip a fixed number of rows for data sampling
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
+##### Example 1: SQL Server – OFFSET ... FETCH NEXT
 
 ```sql
--- PostgreSQL/MySQL
-SELECT ... ORDER BY ... LIMIT row_count OFFSET offset;
-
--- SQL Server
-SELECT ... ORDER BY ... OFFSET offset ROWS FETCH NEXT row_count ROWS ONLY;
-
--- Oracle
-SELECT ... ORDER BY ... OFFSET offset ROWS FETCH NEXT row_count ROWS ONLY;
+-- Step 1: Retrieve the second page of employees (page size 2).
+SELECT first_name, salary
+FROM employees
+ORDER BY salary DESC
+OFFSET 2 ROWS
+FETCH NEXT 2 ROWS ONLY;
 ```
 
-**Component Breakdown:**
+**Expected output:**
 
-- `offset`: Number of rows to skip (0-based)
-- Must be a non-negative integer or expression
-
-**Syntax Rules:**
-
-- OFFSET without ORDER BY is non-deterministic.
-- Oracle treats negative offsets as 0; if offset is NULL or exceeds the number of rows, 0 rows are returned.
-- OFFSET 0 is the same as omitting the OFFSET clause.
-- MySQL allows `LIMIT offset, row_count` as an alternative syntax.
-
-**Constraints and Limitations:**
-
-- Large OFFSET values cause severe performance degradation because the database must scan and discard all skipped rows.
-- OFFSET requires ORDER BY for deterministic results.
-
-**Annotated Code Examples:**
-
-```sql
--- Page 1: first 10 rows
-SELECT product_name, price FROM products ORDER BY product_id LIMIT 10 OFFSET 0;
-
--- Page 2: next 10 rows
-SELECT product_name, price FROM products ORDER BY product_id LIMIT 10 OFFSET 10;
-
--- Page 3: next 10 rows
-SELECT product_name, price FROM products ORDER BY product_id LIMIT 10 OFFSET 20;
+```text
+ first_name | salary
+------------+--------
+ Dave       |  65000
+ Carol      |  60000
+(2 rows)
 ```
 
-**Expected Output (Page 2):** Rows 11–20 from the sorted result set.
+**Why this output appears**: `OFFSET 2 ROWS` skips Alice and Bob, and `FETCH NEXT 2 ROWS ONLY` returns the next two rows in the sorted order—Dave and Carol.
 
-**Explanation:** Each page query skips the rows from previous pages. OFFSET 10 skips the first 10 rows; OFFSET 20 skips the first 20.
+#### Real-World Cases
 
-**Real-World Cases:**
+- **SQL Server pagination**: Since SQL Server 2012, `OFFSET ... FETCH NEXT` is the recommended ANSI‑compliant pagination syntax.
+- **Oracle 12c+ pagination**: `OFFSET ... FETCH NEXT` replaces the older `ROWNUM` and `ROW_NUMBER()` workarounds.
 
-- **Web pagination:** Displaying search results page by page.
-- **Data exports:** Processing large tables in batches.
-- **Administrative UIs:** Navigating through large lists of records.
+---
 
-**References:**
+### 5. `TOP` (SQL Server)
 
-- PostgreSQL: LIMIT and OFFSET - https://www.postgresql.org/docs/current/queries-limit.html
-- Microsoft Learn: Page results - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/4-page-results
+#### Definitions
 
+**Core Definition**
+`TOP` is SQL Server’s proprietary clause that limits the number of rows returned (or the percentage of rows) based on the `ORDER BY` clause.
 
-#### 2.2 The Unified ANSI Standard OFFSET m ROWS FETCH NEXT n ROWS ONLY Pattern
+**Technical Definition**
+`TOP (n)` appears immediately after `SELECT` (or after `SELECT DISTINCT`) and limits the result to the first *n* rows of the sorted result. `TOP (n) PERCENT` returns a percentage of the rows, and `TOP (n) WITH TIES` includes all rows that tie with the last row of the top‑N set. `TOP` is a legacy keyword still supported for backward compatibility; Microsoft recommends `OFFSET ... FETCH` for new pagination code. `TOP` cannot be combined with `OFFSET ... FETCH` in the same query expression.
 
-**Core Definitions:**
+**Beginner-Friendly Explanation**
+`TOP` is SQL Server’s original “limit” keyword. `SELECT TOP 10 * FROM t ORDER BY score DESC` returns the ten highest scores.
 
-- **Core Definition:** The OFFSET-FETCH pattern combines row skipping and row limiting in a single, standard-compliant clause.
-- **Technical Definition:** `OFFSET m ROWS FETCH NEXT n ROWS ONLY` is the ANSI SQL standard for pagination. It is technically part of the ORDER BY clause and enables returning only a range of rows from a sorted result set.
-- **Beginner-Friendly Explanation:** This is the "standard" pagination pattern that works on Oracle, SQL Server, DB2, and modern PostgreSQL. It's more verbose than LIMIT/OFFSET but portable.
+#### Purposes
 
-**Purposes:**
+- To limit results in SQL Server, especially in legacy code.
+- To return a percentage of rows (`TOP (n) PERCENT`).
+- To include ties with `TOP (n) WITH TIES`.
 
-- To provide a portable pagination syntax across major databases
-- To combine skipping and limiting in one clause
-- To support deterministic, page-based navigation
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
+#### Syntax Rules and Structure
 
 ```sql
-SELECT column_list
-FROM table_name
-ORDER BY sort_expression
-OFFSET m ROWS
-FETCH NEXT n ROWS ONLY;
+SELECT [ ALL | DISTINCT ] [ TOP ( expression ) [ PERCENT ] [ WITH TIES ] ] ...
+[ ORDER BY ... ]
 ```
 
-**Component Breakdown:**
+**Component breakdown:**
 
-- `m`: Number of rows to skip (can be 0)
-- `n`: Number of rows to return
-- `ONLY`: Required keyword (returns exactly n rows unless fewer exist)
+| Component | Description |
+|-----------|-------------|
+| `TOP (n)` | Return the first *n* rows. |
+| `PERCENT` | Interpret *n* as a percentage (1–100). |
+| `WITH TIES` | Include additional rows that tie with the last row. |
 
-**Syntax Rules:**
+**Syntax rules:**
 
-- OFFSET is required when using FETCH in SQL Server.
-- The FETCH clause is optional; if omitted, all rows after OFFSET are returned.
-- ROW/ROWS and FIRST/NEXT are interchangeable.
-- ORDER BY must provide unique ordering for deterministic pagination.
+- `TOP` without `ORDER BY` is non‑deterministic.
+- `TOP` cannot be combined with `OFFSET ... FETCH`.
 
-**Annotated Code Examples:**
+**Constraints and limitations:**
+
+- `TOP` is SQL Server‑specific and not portable.
+- `TOP` does not support an offset; it can only take from the beginning.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: SQL Server – TOP with ties
 
 ```sql
--- SQL Server 2012+: Page 1
-SELECT ProductID, ProductName, ListPrice
-FROM Production.Product
-ORDER BY ListPrice DESC
-OFFSET 0 ROWS
-FETCH NEXT 10 ROWS ONLY;
-
--- Page 2
-SELECT ProductID, ProductName, ListPrice
-FROM Production.Product
-ORDER BY ListPrice DESC
-OFFSET 10 ROWS
-FETCH NEXT 10 ROWS ONLY;
+-- Step 1: Return the top 2 items by quantity, including ties.
+SELECT TOP (2) WITH TIES OrderID, Item, Quantity
+FROM OrderItems
+ORDER BY Quantity DESC;
 ```
 
-**Expected Output:** Page 1 returns the 10 most expensive products; Page 2 returns products 11–20.
+**Expected output:**
 
-**Real-World Cases:**
-
-- **Enterprise applications:** Consistent pagination across SQL Server, Oracle, and PostgreSQL.
-- **API development:** Standardized pagination parameters (offset, page_size).
-
-**References:**
-
-- Microsoft Learn: Page results - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/4-page-results
-- Oracle: Row Limiting Clause - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/SELECT.html
-
-
-#### 2.3 State Management Implications for Pagination
-
-**Core Definitions:**
-
-- **Core Definition:** Pagination state management refers to how the application tracks which page the user is on and how to retrieve the next/previous page. Two main approaches exist: stateless offset-based pagination and stateful cursor-based (keyset) pagination.
-- **Technical Definition:** Stateless pagination (OFFSET/LIMIT) relies on the client providing the page number or offset, with no server-side state. Cursor-based (keyset) pagination uses a cursor value from the last row of the previous page to retrieve the next page, providing stable, O(1) performance regardless of page depth.
-- **Beginner-Friendly Explanation:** With offset pagination, you tell the database "skip 100 rows and give me 10." With keyset pagination, you say "give me 10 rows after this specific row." The second approach is much faster for deep pages.
-
-**Purposes:**
-
-- To understand the trade-offs between offset and keyset pagination
-- To choose the appropriate pagination strategy for an application
-- To avoid the performance and consistency pitfalls of large OFFSET values
-
-**Comparison of Pagination Strategies:**
-
-| Dimension | Offset Pagination | Keyset (Cursor) Pagination |
-|-----------|-------------------|---------------------------|
-| Performance model | O(n) — degrades linearly with page depth | O(1) — constant time regardless of depth |
-| Page 50,000 latency | 87 ms (unacceptable in production) | Sub-millisecond with composite index |
-| Data consistency | Rows can be skipped or duplicated on insert/delete | Stable — position based on actual column values |
-| Random page access | Supported (OFFSET n) | Not supported — sequential traversal only |
-| Index requirement | Basic single-column index sufficient | Composite index matching keyset column order |
-| Best for | Small datasets, admin UIs with page numbers | APIs, data sync, infinite scroll, large tables |
-
-**Annotated Code Examples:**
-
-```sql
--- Offset pagination (page 3, 20 rows per page)
-SELECT product_id, product_name, price
-FROM products
-ORDER BY product_id
-LIMIT 20 OFFSET 40;  -- Page 3: skip 40 rows
-
--- Keyset pagination (next page after last_id = 40)
-SELECT product_id, product_name, price
-FROM products
-WHERE product_id > 40
-ORDER BY product_id
-LIMIT 20;
+```text
+OrderID  Item            Quantity
+-------  --------------  --------
+3        M6 Locking Nut  300
+3        M8 Washer       200
+(2 rows, plus any rows tied at 200)
 ```
 
-**Explanation:** Offset pagination must scan and discard 40 rows before returning the page. Keyset pagination directly seeks to the first row after the cursor value, performing a range scan with constant performance.
+**Why this output appears**: `TOP (2) WITH TIES` returns the two highest‑quantity rows and any additional rows whose `Quantity` equals the last row’s value (200), ensuring that ties are not arbitrarily truncated.
+
+#### Real-World Cases
+
+- **Legacy SQL Server code**: Existing applications use `TOP` for top‑N queries and have not migrated to `OFFSET ... FETCH`.
+- **Percentage sampling**: `TOP (10) PERCENT` returns roughly ten percent of a table for exploratory analysis.
+
+---
+
+### 6. `OFFSET ... FETCH` (Combined)
+
+#### Definitions
+
+**Core Definition**
+`OFFSET ... FETCH` is the combined standard syntax that skips a specified number of rows and then returns a specified number of rows, forming the basis of standard pagination.
+
+**Technical Definition**
+The full form is `[ OFFSET start { ROW | ROWS } ] [ FETCH { FIRST | NEXT } [ count ] { ROW | ROWS } { ONLY | WITH TIES } ]`. `OFFSET` specifies the number of rows to skip, and `FETCH` specifies the number of rows to return. The standard requires `OFFSET` before `FETCH` if both are present, and the `count` must be a literal, parameter, or variable. `ONLY` returns exactly the requested rows; `WITH TIES` also includes rows that tie with the last row. This syntax is supported by PostgreSQL, SQL Server 2012+, and Oracle 12*c*+.
+
+**Beginner-Friendly Explanation**
+`OFFSET ... FETCH` is the standard pagination syntax: “skip this many rows, then fetch this many rows.” It is the portable equivalent of `LIMIT ... OFFSET`.
+
+#### Purposes
+
+- To implement standard, portable pagination across PostgreSQL, SQL Server, and Oracle.
+- To express both the skip and the take in a single, readable clause.
+- To use `WITH TIES` to avoid arbitrarily truncating tied results.
+
+#### Syntax Rules and Structure
 
 ```sql
--- Keyset pagination with multiple sort columns
--- First page
-SELECT id, created_at FROM orders ORDER BY created_at DESC, id DESC LIMIT 20;
+[ OFFSET start { ROW | ROWS } ]
+[ FETCH { FIRST | NEXT } [ count ] { ROW | ROWS } { ONLY | WITH TIES } ]
+```
 
--- Next page (using last row's values)
-SELECT id, created_at FROM orders
-WHERE (created_at, id) < ('2024-06-01 12:00:00', 5432)
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `OFFSET start` | Skip `start` rows. |
+| `FETCH FIRST|NEXT count` | Return `count` rows. |
+| `ONLY` | Exactly `count` rows. |
+| `WITH TIES` | Also include rows tied with the last returned row. |
+
+**Syntax rules:**
+
+- In SQL Server, `OFFSET ... FETCH` requires an `ORDER BY` clause.
+- In PostgreSQL, `OFFSET` and `FETCH` can appear in either order.
+- `FETCH` without `OFFSET` is allowed in PostgreSQL and Oracle; SQL Server requires both together.
+
+**Constraints and limitations:**
+
+- MySQL does not support `OFFSET ... FETCH`; use `LIMIT ... OFFSET` instead.
+- The `count` must be a constant, parameter, or variable, not an arbitrary expression.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Standard OFFSET ... FETCH pagination
+
+```sql
+-- Step 1: Retrieve the second page of employees (page size 2).
+SELECT first_name, salary
+FROM employees
+ORDER BY salary DESC
+OFFSET 2 ROWS
+FETCH NEXT 2 ROWS ONLY;
+```
+
+**Expected output:**
+
+```text
+ first_name | salary
+------------+--------
+ Dave       |  65000
+ Carol      |  60000
+(2 rows)
+```
+
+**Why this output appears**: `OFFSET 2 ROWS` skips the first two employees in the sorted result, and `FETCH NEXT 2 ROWS ONLY` returns exactly the next two—Dave and Carol.
+
+#### Real-World Cases
+
+- **Cross‑database pagination**: A query that runs on PostgreSQL and SQL Server uses `OFFSET ... FETCH` to avoid maintaining two pagination syntaxes.
+- **Oracle 12c+ migration**: Applications migrating from `ROWNUM` to the standard syntax adopt `OFFSET ... FETCH` for clarity and performance.
+
+---
+
+### 7. Vendor Differences
+
+#### Definitions
+
+**Core Definition**
+Vendor differences are the syntactic and semantic variations in result‑limiting clauses across PostgreSQL, MySQL, SQL Server, and Oracle.
+
+**Technical Definition**
+Each RDBMS supports a different combination of limiting clauses: **PostgreSQL** supports `LIMIT`, `OFFSET`, and the standard `OFFSET ... FETCH`; **MySQL** supports `LIMIT` with an optional offset and does not support `FETCH`; **SQL Server** supports `TOP` and, since 2012, `OFFSET ... FETCH` (but not `LIMIT`); **Oracle** supports `OFFSET ... FETCH` since 12*c* and previously used `ROWNUM`. The SQL:2008 standard defines `OFFSET ... FETCH`, making it the most portable modern syntax. `TOP` supports `PERCENT` and `WITH TIES`; `LIMIT` does not support `PERCENT` or `WITH TIES`; `FETCH` supports `WITH TIES` but not `PERCENT` in the standard (Oracle supports `PERCENT` in its `FETCH` clause).
+
+**Beginner-Friendly Explanation**
+Every database has its own dialect for limiting results. If you want portability, `OFFSET ... FETCH` is the safest choice among modern databases. If you are working in MySQL, you use `LIMIT`; in SQL Server legacy code, you use `TOP`; in Oracle 12c+, you use `OFFSET ... FETCH`.
+
+#### Purposes
+
+- To write queries that run correctly on multiple RDBMSs.
+- To know which features (percentages, ties) are available in each dialect.
+- To migrate queries from one database to another without surprises.
+
+#### Syntax Rules and Structure
+
+| RDBMS | Standalone limit | Offset support | Standard `FETCH` | `PERCENT` | `WITH TIES` |
+|-------|------------------|----------------|------------------|-----------|-------------|
+| PostgreSQL | `LIMIT` | `OFFSET` | Yes | No | Yes |
+| MySQL | `LIMIT` | `LIMIT offset, count` | No | No | No |
+| SQL Server | `TOP` | `OFFSET ... FETCH` (2012+) | Yes (2012+) | `TOP ... PERCENT` | `TOP ... WITH TIES` |
+| Oracle | `FETCH FIRST/NEXT` (12c+) | `OFFSET` (12c+) | Yes | `FETCH ... PERCENT` | `FETCH ... WITH TIES` |
+| SQL standard | — | `OFFSET` | `FETCH FIRST/NEXT` | Oracle‑specific | `FETCH ... WITH TIES` |
+
+**Syntax rules:**
+
+- `LIMIT` is PostgreSQL/MySQL‑specific; `TOP` is SQL Server‑specific; `FETCH` is standard.
+- `OFFSET ... FETCH` is the closest thing to a portable pagination syntax.
+- `TOP` cannot be combined with `OFFSET ... FETCH` in SQL Server.
+
+**Constraints and limitations:**
+
+- Porting a query between MySQL and SQL Server requires rewriting `LIMIT` ↔ `TOP`/`FETCH`.
+- `WITH TIES` is not available in MySQL; emulating it requires a subquery or a join on the boundary value.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: The same top‑N query in four dialects
+
+```sql
+-- PostgreSQL / MySQL:
+SELECT * FROM employees ORDER BY salary DESC LIMIT 5;
+
+-- SQL Server (legacy):
+SELECT TOP (5) * FROM employees ORDER BY salary DESC;
+
+-- SQL Server 2012+ / Oracle 12c+:
+SELECT * FROM employees ORDER BY salary DESC
+OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY;
+```
+
+**Expected output:** (identical in all four cases—the five highest‑salary employees.)
+
+**Why this output appears**: Each dialect expresses the same intent—return the first five rows of the sorted result—using its own limiting syntax. The standard `OFFSET ... FETCH` form is the most portable among the four.
+
+#### Real-World Cases
+
+- **Multi‑database ORMs**: ORMs abstract these differences, but understanding the underlying syntax helps diagnose generated queries.
+- **Database migration**: Moving from MySQL to PostgreSQL requires converting `LIMIT` (which both support) but converting `LIMIT` to `TOP`/`FETCH` when moving to SQL Server.
+
+---
+
+### 8. Pagination Patterns
+
+#### Definitions
+
+**Core Definition**
+Pagination patterns are the strategies used to divide a large result set into pages, including **offset pagination**, **keyset (seek) pagination**, and **cursor pagination**.
+
+**Technical Definition**
+**Offset pagination** uses `LIMIT`/`OFFSET` (or `OFFSET ... FETCH`) to skip a computed number of rows. **Keyset (seek) pagination** uses a `WHERE` predicate on the last seen sort key (e.g., `WHERE id > last_seen ORDER BY id LIMIT N`) to start directly after the previous page. **Cursor pagination** is an application‑level abstraction that encodes the position (often as an opaque token) and typically implements keyset pagination underneath. Offset pagination is O(n) in page depth; keyset pagination is O(1) or O(log n) because it seeks directly to the starting key.
+
+**Beginner-Friendly Explanation**
+There are three ways to paginate. Offset pagination is the simplest: “skip 40, take 20.” It is easy to implement but gets slower the deeper you go. Keyset pagination remembers the last row you saw and starts from there: “give me the next 20 rows after ID 1234.” It stays fast no matter how deep you are. Cursor pagination is like keyset pagination, but the “last seen” information is packaged into an opaque token that the client passes back to the server.
+
+#### Purposes
+
+- To choose the right pagination strategy for the workload (small admin UI vs. large API).
+- To avoid the performance cliff of deep offset pagination.
+- To maintain correctness when the underlying data changes between pages.
+
+#### Syntax Rules and Structure
+
+**Offset pagination:**
+
+```sql
+SELECT ... ORDER BY sort_column
+LIMIT page_size OFFSET (page_number - 1) * page_size;
+```
+
+**Keyset pagination:**
+
+```sql
+-- First page:
+SELECT ... ORDER BY sort_column, id LIMIT page_size;
+-- Next page (last_seen_sort, last_seen_id from previous page):
+SELECT ... WHERE (sort_column, id) > (last_seen_sort, last_seen_id)
+ORDER BY sort_column, id LIMIT page_size;
+```
+
+**Cursor pagination (application‑level):**
+
+```text
+GET /items?cursor=eyJpZCI6MTIzNH0&limit=20
+-- Server decodes cursor to {id: 1234}, then:
+SELECT ... WHERE id > 1234 ORDER BY id LIMIT 20;
+```
+
+**Component breakdown:**
+
+| Pattern | Key mechanism | Strength | Weakness |
+|---------|---------------|----------|----------|
+| Offset | `OFFSET N` | Random page access; simple | O(n) at depth; inconsistent under changes |
+| Keyset | `WHERE key > last_seen` | O(1)/O(log n); consistent | No random page access; needs composite index |
+| Cursor | Opaque token | Encapsulates keyset; API‑friendly | Requires application support; less transparent |
+
+**Syntax rules:**
+
+- Offset pagination requires a deterministic `ORDER BY`.
+- Keyset pagination requires a **unique** tiebreaker (usually the primary key) in the `ORDER BY` and a composite index matching the sort columns.
+- Cursor pagination typically uses keyset underneath; the cursor encodes the last seen values.
+
+**Constraints and limitations:**
+
+- Keyset pagination cannot jump to an arbitrary page; it only supports next/previous traversal.
+- Offset pagination can miss or duplicate rows when data is inserted or deleted between page requests.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Offset pagination versus keyset pagination
+
+```sql
+-- Offset pagination (page 500, page size 20):
+SELECT id, created_at
+FROM orders
+ORDER BY created_at DESC, id DESC
+LIMIT 20 OFFSET 9980;
+
+-- Keyset pagination (after the last row of the previous page):
+SELECT id, created_at
+FROM orders
+WHERE (created_at, id) < ('2025-01-15 10:30:00', 12345)
 ORDER BY created_at DESC, id DESC
 LIMIT 20;
 ```
 
-**Real-World Cases:**
+**Expected output:** (both return the next 20 rows, but the keyset query seeks directly to the starting position.)
 
-- **Social media feeds:** Infinite scroll using cursor-based pagination.
-- **E-commerce:** Product listings with page numbers (offset) vs. "load more" (cursor).
-- **API design:** Cursor-based pagination for stable, performant data retrieval.
+**Why this output appears**: The offset query must scan and discard 9,980 rows before returning the 20 requested rows. The keyset query uses the composite `(created_at, id)` predicate to start exactly after the last seen row, avoiding the scan entirely. On large tables, the keyset query remains fast while the offset query degrades linearly.
 
-**References:**
+#### Real-World Cases
 
-- Tinybird: Cursor Pagination Guide - https://guides.tinybird.co/docs/forward/guides/sorting-key-pagination
-- Stacksync: PostgreSQL Keyset Pagination vs Offset - https://www.stacksync.com/blog/keyset-cursors-postgres-pagination-fast-accurate-scalable
-- Microsoft Learn: Implement Pagination - https://learn.microsoft.com/en-gb/sql/connect/python/mssql-python/pagination
+- **Admin UIs**: Use offset pagination when users need to jump to page 50 or page 1,000.
+- **Public APIs and infinite scroll**: Use keyset or cursor pagination for consistent, fast traversal of large datasets.
+- **Data synchronisation**: Use keyset pagination to stream records without the risk of missing or duplicating rows as the data changes.
 
+---
 
-### 3. Critical Operational Rules
+### 9. Offset Pagination
 
-#### 3.1 The Non-Deterministic Trap: Why Limiting Without ORDER BY Is Unsafe
+#### Definitions
 
-**Core Definitions:**
+**Core Definition**
+Offset pagination retrieves pages by skipping a calculated number of rows (`OFFSET`) and taking a fixed page size (`LIMIT`/`FETCH`).
 
-- **Core Definition:** Using LIMIT, TOP, or FETCH without an ORDER BY clause produces a non-deterministic result set — the database may return any rows in any order.
-- **Technical Definition:** Without ORDER BY, the row order is unspecified and dependent on the query plan, table storage order, and other factors. A LIMIT without ORDER BY returns an unpredictable subset of rows. PostgreSQL documentation warns: "you will get an unpredictable subset of the query's rows... the ordering is unknown, unless you specified ORDER BY".
-- **Beginner-Friendly Explanation:** If you ask for "the first 10 rows" without saying how to sort them, the database might give you 10 completely different rows each time you run the query. Always use ORDER BY.
+**Technical Definition**
+For page number *p* (1‑based) and page size *s*, the query is `LIMIT s OFFSET (p - 1) * s`. The database scans and discards `(p - 1) * s` rows before returning the requested page. This makes the cost **O(n)** in page depth: page 1 is fast, page 50,000 is slow. Offset pagination also suffers from consistency problems: if rows are inserted or deleted between page requests, the same row may appear on two pages or be skipped entirely.
 
-**Purposes:**
+**Beginner-Friendly Explanation**
+Offset pagination is the “skip N, take M” approach. It is simple and supports random page access, but it gets slower the deeper you go and can produce inconsistent pages when the data changes.
 
-- To understand why ORDER BY is mandatory for predictable row limiting
-- To avoid bugs caused by non-deterministic queries
-- To ensure consistent pagination results
+#### Purposes
 
-**Annotated Code Examples:**
+- To provide random page access in admin interfaces and reports.
+- To implement simple, well‑understood pagination in small datasets.
+- To support page‑number navigation where users expect to jump to a specific page.
 
-```sql
--- DANGEROUS: No ORDER BY
-SELECT product_name FROM products LIMIT 3;
--- May return any 3 products, in any order
-
--- SAFE: With ORDER BY
-SELECT product_name FROM products ORDER BY price DESC LIMIT 3;
--- Always returns the 3 most expensive products
-```
-
-**Expected Output (Dangerous Query):** The output may vary between executions.
-
-**Expected Output (Safe Query):** Consistent — the top 3 by price.
-
-**Real-World Cases:**
-
-- **Production bugs:** Non-deterministic queries cause intermittent, hard-to-reproduce issues.
-- **Pagination errors:** Pages may show duplicate or missing rows if ORDER BY is not unique.
-- **Testing:** Non-deterministic queries produce flaky tests.
-
-**References:**
-
-- PostgreSQL: LIMIT and OFFSET (ORDER BY requirement) - https://www.postgresql.org/docs/current/queries-limit.html
-- Microsoft Learn: TOP (ORDER BY best practice) - https://learn.microsoft.com/en-us/sql/t-sql/queries/top-transact-sql
-
-
-#### 3.2 Handling Ties: TOP n WITH TIES and FETCH FIRST n ROWS WITH TIES
-
-**Core Definitions:**
-
-- **Core Definition:** WITH TIES includes additional rows that match the sort key of the last row in the limited result set.
-- **Technical Definition:** When using TOP n WITH TIES or FETCH FIRST n ROWS WITH TIES, the query returns all rows that tie with the nth row according to the ORDER BY specification. This may result in more than n rows being returned.
-- **Beginner-Friendly Explanation:** If you ask for the top 3 products and there's a tie for 3rd place, WITH TIES includes all tied products, so you might get 4 or 5 rows instead of 3.
-
-**Purposes:**
-
-- To include tied values in Top-N queries
-- To avoid arbitrarily excluding rows that are equally ranked
-- To provide fair, complete rankings
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
+#### Syntax Rules and Structure
 
 ```sql
--- SQL Server
-SELECT TOP n WITH TIES column_list FROM table_name ORDER BY sort_expression;
-
--- Oracle/PostgreSQL (ANSI)
-SELECT column_list FROM table_name ORDER BY sort_expression FETCH FIRST n ROWS WITH TIES;
+SELECT ... ORDER BY sort_column
+LIMIT page_size OFFSET (page_number - 1) * page_size;
 ```
 
-**Component Breakdown:**
+**Syntax rules:**
 
-- `WITH TIES`: Returns all rows that match the last row's sort key
-- Requires ORDER BY
+- Always include `ORDER BY`; without it, the pages are not deterministic.
+- The offset grows linearly with page number.
 
-**Syntax Rules:**
+**Constraints and limitations:**
 
-- WITH TIES cannot be used without ORDER BY.
-- The result may contain more rows than specified.
-- SQL Server's TOP WITH TIES and Oracle's FETCH FIRST WITH TIES behave similarly.
+- Deep offsets are slow because every skipped row must be scanned.
+- Concurrent inserts/deletes can shift rows across page boundaries, causing duplicates or gaps.
 
-**Annotated Code Examples:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Offset pagination performance at depth
 
 ```sql
--- SQL Server: TOP 3 WITH TIES
--- Suppose products have prices: 49.99, 39.99, 29.99, 29.99, 19.99
-SELECT TOP 3 WITH TIES product_name, price
-FROM products
-ORDER BY price DESC;
--- Returns 4 rows (including both products priced at 29.99)
+-- Page 1 (fast):
+SELECT * FROM users ORDER BY created_at DESC LIMIT 20 OFFSET 0;
+
+-- Page 50,000 (slow):
+SELECT * FROM users ORDER BY created_at DESC LIMIT 20 OFFSET 1000000;
 ```
 
-**Expected Output:**
+**Expected output (illustrative timings from benchmarks):**
 
-| product_name | price |
-|--------------|-------|
-| Doohickey    | 49.99 |
-| Contraption  | 39.99 |
-| Gadget       | 29.99 |
-| Widget       | 29.99 |
+```text
+-- Page 1: ~468 microseconds
+-- Page 50,000: ~87 milliseconds
+```
 
-**Explanation:** TOP 3 would return only 3 rows, but WITH TIES includes the 4th row because it ties with the 3rd row's price (29.99).
+**Why this output appears**: The page‑1 query scans almost nothing; the page‑50,000 query must scan and discard one million rows before returning its twenty, which is why the latency grows by orders of magnitude.
+
+#### Real-World Cases
+
+- **Admin tables**: A user‑management screen with page numbers uses offset pagination because users need to jump to arbitrary pages.
+- **Small datasets**: For a few thousand rows, the performance difference is negligible and offset pagination is the simplest choice.
+
+---
+
+### 10. Keyset Pagination (Seek Method)
+
+#### Definitions
+
+**Core Definition**
+Keyset pagination (also called seek pagination) retrieves the next page by starting after the last seen value of the sort key, using a `WHERE` predicate instead of an `OFFSET`.
+
+**Technical Definition**
+Instead of `OFFSET N`, the query uses `WHERE sort_key > last_seen_value ORDER BY sort_key LIMIT page_size` (or `<` for descending order). When the sort key is not unique, a unique tiebreaker (typically the primary key) is included in both the `ORDER BY` and the `WHERE` row comparison. The query can seek directly to the starting position via an index, giving **O(1)** or **O(log n)** performance regardless of page depth. The trade‑off is that keyset pagination supports only sequential traversal; it cannot jump to an arbitrary page number.
+
+**Beginner-Friendly Explanation**
+Keyset pagination is the “start after the last row I saw” approach. Instead of counting from the beginning, it jumps straight to the next page. It is much faster at depth, but you cannot use it for “go to page 50.”
+
+#### Purposes
+
+- To paginate large datasets with constant performance regardless of depth.
+- To avoid the consistency problems of offset pagination when data changes.
+- To implement infinite scroll and API pagination efficiently.
+
+#### Syntax Rules and Structure
 
 ```sql
--- Oracle: FETCH FIRST 3 ROWS WITH TIES
-SELECT product_name, price
-FROM products
-ORDER BY price DESC
-FETCH FIRST 3 ROWS WITH TIES;
+-- First page:
+SELECT ... ORDER BY sort_column, id LIMIT page_size;
+
+-- Next page (last_seen_sort, last_seen_id from previous page):
+SELECT ... WHERE (sort_column, id) > (last_seen_sort, last_seen_id)
+ORDER BY sort_column, id LIMIT page_size;
 ```
 
-**Real-World Cases:**
+**Syntax rules:**
 
-- **Leaderboards:** Including all players tied for a ranking position.
-- **Sales reports:** Showing all top-performing products with the same revenue.
-- **Academic grading:** Including all students with the same top score.
+- The `ORDER BY` must include a unique tiebreaker (usually the primary key) for deterministic results.
+- A composite index on `(sort_column, id)` is required for efficient seeks.
+- Use `>` for ascending order and `<` for descending order.
 
-**References:**
+**Constraints and limitations:**
 
-- Microsoft Learn: TOP WITH TIES - https://learn.microsoft.com/en-us/sql/t-sql/queries/top-transact-sql
-- Oracle: FETCH FIRST WITH TIES - https://docs.oracle.com/en/database/oracle/oracle-database/26/dwhsg/database-data-warehousing-guide.pdf
+- No random page access; only next/previous traversal.
+- The client must remember and pass back the last seen values (or an encoded cursor).
 
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-### 4. Performance & Engine Optimization
-
-#### 4.1 The Deep-Page Performance Bottleneck
-
-**Core Definitions:**
-
-- **Core Definition:** Deep pagination (large OFFSET values) causes severe performance degradation because the database must scan and discard all rows before the offset.
-- **Technical Definition:** `LIMIT 20 OFFSET 100000` requires the database to read and discard 100,000 rows before returning 20. This scales linearly — page 10,000 is 10,000 times slower than page 1. Even with an index, the database must read 100,000 index entries.
-- **Beginner-Friendly Explanation:** Skipping 100,000 rows means the database has to count through 100,000 rows and throw them away before it can give you the ones you want. That takes time.
-
-**Purposes:**
-
-- To understand why large OFFSET queries are slow
-- To justify using keyset pagination for deep pagination
-- To identify when offset pagination is acceptable (small datasets)
-
-**Performance Comparison:**
-
-| Page Depth | OFFSET Query Time | Keyset Query Time |
-|------------|-------------------|-------------------|
-| Page 1 | 468 microseconds | Sub-millisecond |
-| Page 50 | 1 millisecond | Sub-millisecond |
-| Page 50,000 | 87 milliseconds | Sub-millisecond |
-
-**Explanation:** Offset pagination degrades linearly with page depth. Keyset pagination maintains constant performance because it uses a WHERE clause to seek directly to the next row.
-
-**Annotated Code Examples:**
+##### Example 1: Keyset pagination with a composite sort
 
 ```sql
--- Slow: Large OFFSET
-SELECT * FROM orders ORDER BY id LIMIT 20 OFFSET 100000;
--- MySQL scans 100,000 rows, discards them, returns 20
+-- Step 1: Create a composite index.
+CREATE INDEX idx_orders_created_id ON orders (created_at DESC, id DESC);
 
--- Fast: Keyset pagination (using last_id = 100000)
-SELECT * FROM orders WHERE id > 100000 ORDER BY id LIMIT 20;
--- Range scan starting from id > 100000, no rows discarded
+-- Step 2: First page.
+SELECT id, created_at FROM orders
+ORDER BY created_at DESC, id DESC
+LIMIT 20;
+
+-- Step 3: Next page (last row was created_at = '2025-01-15 10:30:00', id = 12345).
+SELECT id, created_at FROM orders
+WHERE (created_at, id) < ('2025-01-15 10:30:00', 12345)
+ORDER BY created_at DESC, id DESC
+LIMIT 20;
 ```
 
-**Real-World Cases:**
+**Expected output:** (the next 20 rows after the last seen row, in the same order.)
 
-- **API deep pagination:** Users navigating to page 500+ of search results.
-- **Data exports:** Batch processing large tables in chunks.
-- **Log analysis:** Scanning through millions of log entries.
+**Why this output appears**: The row comparison `(created_at, id) < (...)` seeks directly to the position after the last seen row, using the composite index. No rows are scanned and discarded, so the query remains fast at any depth.
 
-**References:**
+#### Real-World Cases
 
-- OneUptime: Optimize LIMIT with Large Offsets in MySQL - https://raw.githubusercontent.com/OneUptime/blog/refs/heads/master/posts/2026-03-31-mysql-optimize-limit-large-offsets/README.md
-- Stacksync: Keyset Pagination Performance - https://www.stacksync.com/blog/keyset-cursors-postgres-pagination-fast-accurate-scalable
+- **API pagination**: A REST API returns a `next_cursor` containing the last seen `(created_at, id)` values, and the client passes it back for the next page.
+- **Data export**: A nightly export streams records in keyset‑paginated batches without the risk of missing rows as new data arrives.
 
+---
 
-#### 4.2 How Indexes Optimize Limit Operations (Top-N Optimization)
+### 11. Cursor Pagination
 
-**Core Definitions:**
+#### Definitions
 
-- **Core Definition:** Top-N optimization allows the database to stop scanning as soon as it has found the required number of rows, using an index to avoid sorting.
-- **Technical Definition:** When a query has ORDER BY and LIMIT (or TOP/FETCH), the database can use an index that matches the ORDER BY to read rows in the required order and stop after n rows. MySQL documentation states: "If you combine LIMIT row_count with ORDER BY, MySQL stops sorting as soon as it has found the first row_count rows of the sorted result, rather than sorting the entire result. If ordering is done by using an index, this is very fast".
-- **Beginner-Friendly Explanation:** If the data is already stored in the order you want (via an index), the database can just read the first 10 rows and stop. No need to sort the entire table.
+**Core Definition**
+Cursor pagination is an application‑level pagination pattern in which the server returns an opaque **cursor** representing the position in the result set, and the client passes that cursor back to request the next page.
 
-**Purposes:**
+**Technical Definition**
+Cursor pagination typically implements keyset pagination underneath: the cursor encodes the last seen sort key values (and often a direction or filters), and the server decodes it to build the `WHERE ... > last_seen` predicate. The cursor is opaque to the client, which allows the server to change the underlying pagination implementation without breaking clients. Cursor pagination provides **O(1)** performance regardless of page depth and is stable under concurrent inserts and deletes. It is the standard approach for public APIs and infinite‑scroll interfaces.
 
-- To understand how indexes can eliminate sorting overhead
-- To design indexes that support Top-N queries
-- To write queries that leverage early termination
+**Beginner-Friendly Explanation**
+Cursor pagination is like a bookmark. The server says “here are your first 20 items, and here is a bookmark pointing to the last one.” When the client wants more, it sends the bookmark back, and the server continues from there. The bookmark is opaque—the client does not need to know what is inside it.
 
-**Index Usage Rules:**
+#### Purposes
 
-- The index must match the ORDER BY column(s) and direction(s).
-- If the query mixes ASC and DESC, the index must also have mixed directions.
-- If the index doesn't cover all selected columns, the database may choose a table scan instead.
+- To provide fast, stable pagination for APIs and infinite‑scroll UIs.
+- To hide the underlying keyset implementation behind an opaque token.
+- To allow the server to change pagination strategies without breaking clients.
+- To avoid the performance and consistency problems of offset pagination.
 
-**Annotated Code Examples:**
+#### Syntax Rules and Structure
+
+**Server‑side query:**
 
 ```sql
--- Create an index on price
-CREATE INDEX idx_products_price ON products(price DESC);
-
--- This query can use the index to avoid sorting
-SELECT product_name, price
-FROM products
-ORDER BY price DESC
-LIMIT 3;
--- The database reads the first 3 index entries and stops
+-- Decode the cursor to get last_seen_sort and last_seen_id.
+SELECT ... WHERE (sort_column, id) > (last_seen_sort, last_seen_id)
+ORDER BY sort_column, id LIMIT page_size;
 ```
 
-**Expected Performance:**
+**Client‑side request:**
 
-| Query | Without Index | With Index |
-|-------|---------------|------------|
-| `ORDER BY price LIMIT 10` | Full scan + sort | Index scan, early termination |
-| `ORDER BY price LIMIT 10 OFFSET 1000` | Full scan + sort | Index scan, still fast |
+```text
+GET /items?cursor=eyJpZCI6MTIzNH0&limit=20
+```
 
-**Real-World Cases:**
+**Component breakdown:**
 
-- **Leaderboards:** Top 10 scores, backed by an index on score.
-- **E-commerce:** Top-selling products, backed by an index on sales count.
-- **Recent activity:** Latest 20 events, backed by an index on timestamp.
+| Component | Description |
+|-----------|-------------|
+| Cursor | Opaque token encoding the last seen position. |
+| Server decode | Extract the sort key values from the cursor. |
+| Keyset query | `WHERE ... > last_seen` with the decoded values. |
+| Next cursor | Encode the last row of the returned page for the next request. |
 
-**References:**
+**Syntax rules:**
 
-- MySQL: LIMIT Query Optimization - https://dev.mysql.com/doc/refman/8.4/en/limit-optimization.html
-- PostgreSQL: LIMIT Optimization - https://www.postgresql.org/message-id/200201270419.g0R4JLD02642@candle.pha.pa.us
+- The cursor should encode all columns used in the `ORDER BY`, including the unique tiebreaker.
+- The cursor can be base64‑encoded JSON, a signed token, or any opaque format.
+- The server should validate and reject malformed cursors.
 
+**Constraints and limitations:**
 
-### 5. Vendor Implementations & Dialect Translation
+- Requires application‑level support; not a pure SQL feature.
+- The cursor format is server‑defined and must remain stable across deployments (or be versioned).
 
-#### 5.1 Direct Syntactic Mapping Across Major Engines
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-**Core Definitions:**
-
-- **Core Definition:** Different database vendors implement row limiting with different syntax. Understanding the mapping allows writing portable SQL or translating between dialects.
-- **Technical Definition:** The three main syntax families are LIMIT (PostgreSQL, MySQL, SQLite), TOP (SQL Server, Sybase), and FETCH FIRST (ANSI standard, Oracle, DB2, PostgreSQL, SQL Server 2012+).
-
-**Complete Syntax Comparison Table:**
-
-| Database | Row Limiting Syntax | Pagination Syntax |
-|----------|---------------------|-------------------|
-| PostgreSQL | `LIMIT n` or `FETCH FIRST n ROWS ONLY` | `LIMIT n OFFSET m` or `OFFSET m ROWS FETCH NEXT n ROWS ONLY` |
-| MySQL | `LIMIT n` or `LIMIT m, n` | `LIMIT n OFFSET m` or `LIMIT m, n` |
-| SQLite | `LIMIT n` | `LIMIT n OFFSET m` |
-| SQL Server | `SELECT TOP (n) ...` | `ORDER BY ... OFFSET m ROWS FETCH NEXT n ROWS ONLY` |
-| Oracle | `FETCH FIRST n ROWS ONLY` | `OFFSET m ROWS FETCH NEXT n ROWS ONLY` |
-| DB2 | `FETCH FIRST n ROWS ONLY` | `OFFSET m ROWS FETCH NEXT n ROWS ONLY` |
-
-**Annotated Code Examples:**
+##### Example 1: Cursor pagination end‑to‑end
 
 ```sql
--- PostgreSQL / MySQL / SQLite: First 5 rows
-SELECT * FROM products ORDER BY price DESC LIMIT 5;
+-- Step 1: Server receives cursor = 'eyJjcmVhdGVkX2F0IjoiMjAyNS0wMS0xNVQxMDozMDowMCIsImlkIjoxMjM0NX0='
+-- Decoded: {created_at: '2025-01-15T10:30:00', id: 12345}
 
--- SQL Server: First 5 rows
-SELECT TOP (5) * FROM products ORDER BY price DESC;
+-- Step 2: Query the next page using the decoded values.
+SELECT id, created_at, total
+FROM orders
+WHERE (created_at, id) < ('2025-01-15T10:30:00', 12345)
+ORDER BY created_at DESC, id DESC
+LIMIT 20;
 
--- Oracle / DB2 / ANSI: First 5 rows
-SELECT * FROM products ORDER BY price DESC FETCH FIRST 5 ROWS ONLY;
+-- Step 3: Server encodes the last row of the result as the next cursor.
+-- Next cursor: base64({created_at: '2025-01-14T09:00:00', id: 12000})
 ```
 
-**Dialect Translation Examples:**
+**Expected output:** (the next 20 orders, plus a `next_cursor` token.)
+
+**Why this output appears**: The server decodes the opaque cursor into the last seen sort values, builds a keyset predicate, and returns the next page along with a new cursor for the following page. The client never needs to know how the cursor is constructed.
+
+#### Real-World Cases
+
+- **REST APIs**: Stripe, GitHub, and Slack use cursor pagination for list endpoints, returning `next_cursor` values in responses.
+- **Infinite scroll**: A mobile app loads the next batch of feed items by passing the cursor from the previous response.
+
+---
+
+### 12. Pagination Performance
+
+#### Definitions
+
+**Core Definition**
+Pagination performance is the study of how the choice of pagination pattern—offset, keyset, or cursor—affects query latency, database load, and consistency as the page depth and dataset size grow.
+
+**Technical Definition**
+Offset pagination has **O(n)** cost in page depth because the database must scan and discard every skipped row. Keyset and cursor pagination have **O(1)** or **O(log n)** cost because they seek directly to the starting key via an index. Benchmarks show that offset pagination at page 50,000 can take tens of milliseconds, while keyset pagination remains sub‑millisecond; at one million rows, offset pagination can take seconds while keyset pagination stays in the low milliseconds. The performance gap widens with dataset size and page depth, and offset pagination also suffers from consistency problems when data changes between page requests.
+
+**Beginner-Friendly Explanation**
+Pagination performance is about how fast your pages load. Offset pagination starts fast and gets slower and slower as you go deeper—page 1 is instant, page 50,000 is painful. Keyset and cursor pagination stay fast no matter how deep you go, because they jump straight to the right place instead of counting from the beginning.
+
+#### Purposes
+
+- To choose the right pagination pattern for the dataset size and access pattern.
+- To avoid production slowdowns caused by deep offset pagination.
+- To understand why a query that was fast in development becomes slow in production.
+- To design indexes that support efficient pagination.
+
+#### Syntax Rules and Structure
+
+Performance is determined by the pattern and the indexes, not by a single syntax:
+
+| Pattern | Complexity | Index requirement | Consistency |
+|---------|------------|-------------------|-------------|
+| Offset | O(n) in page depth | Basic index on sort column | Can skip/duplicate rows on changes |
+| Keyset | O(1) / O(log n) | Composite index on `(sort, tiebreaker)` | Stable |
+| Cursor | O(1) / O(log n) (keyset underneath) | Composite index on `(sort, tiebreaker)` | Stable |
+
+**Benchmark data (illustrative):**
+
+- Page 1: ~468 microseconds; page 50,000: ~87 milliseconds (offset, PostgreSQL).
+- 100K rows, page 1,000: offset ~500 ms; cursor ~5 ms.
+- 1M rows, page 1,000: offset ~5 s; cursor ~5 ms.
+
+**Constraints and limitations:**
+
+- Keyset and cursor pagination cannot jump to an arbitrary page number.
+- Composite indexes increase write overhead and storage.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Measuring the performance difference
 
 ```sql
--- MySQL: LIMIT 10 OFFSET 20
--- PostgreSQL: LIMIT 10 OFFSET 20
--- SQL Server: OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY
--- Oracle: OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY
--- DB2: OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY
+-- Offset pagination at depth:
+EXPLAIN ANALYZE
+SELECT * FROM orders ORDER BY created_at DESC LIMIT 20 OFFSET 1000000;
+
+-- Keyset pagination at the same position:
+EXPLAIN ANALYZE
+SELECT * FROM orders
+WHERE (created_at, id) < ('2025-01-15 10:30:00', 12345)
+ORDER BY created_at DESC, id DESC
+LIMIT 20;
 ```
 
-**Real-World Cases:**
+**Expected output (illustrative):**
 
-- **Multi-database applications:** Writing ORM code that generates the correct syntax per database.
-- **Database migration:** Converting queries from MySQL to SQL Server or Oracle.
-- **Query builders:** Tools like jOOQ or Hibernate automatically translate LIMIT/TOP/FETCH.
+```text
+-- Offset: Seq Scan / Index Scan with 1,000,020 rows read, ~87 ms.
+-- Keyset: Index Scan with 20 rows read, ~1 ms.
+```
 
-**References:**
+**Why this output appears**: The offset query must read every row up to the offset (one million rows) before returning its twenty. The keyset query uses the composite index to seek directly to the starting position and reads only the twenty requested rows. The `EXPLAIN ANALYZE` output shows the dramatic difference in rows read and execution time.
 
-- GeeksforGeeks: SQL TOP, LIMIT, FETCH FIRST Clause - https://origin.geeksforgeeks.org/sql/sql-top-limit-fetch-first-clause/
-- Stack Overflow: Difference in limit syntax - https://stackoverflow.com/questions/45036438
+#### Real-World Cases
 
-
-## Summary Tables
-
-### Row Limiting Syntax Across Databases
-
-| Feature | PostgreSQL | MySQL | SQLite | SQL Server | Oracle | DB2 |
-|---------|-----------|-------|--------|------------|--------|-----|
-| LIMIT | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
-| TOP | ✗ | ✗ | ✗ | ✓ | ✗ | ✗ |
-| FETCH FIRST | ✓ | ✗ | ✗ | ✓ (2012+) | ✓ | ✓ |
-| OFFSET | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| WITH TIES | ✓ | ✗ | ✗ | ✓ | ✓ | ✓ |
-| PERCENT | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
-
-### Pagination Strategy Comparison
-
-| Aspect | Offset Pagination | Keyset Pagination |
-|--------|-------------------|-------------------|
-| Syntax | `LIMIT n OFFSET m` | `WHERE key > cursor ORDER BY key LIMIT n` |
-| Performance | O(n) — degrades linearly | O(1) — constant time |
-| Data consistency | Unstable (skips/duplicates on changes) | Stable |
-| Random page access | Supported | Not supported |
-| Index requirement | Basic | Composite |
-| Best for | Small datasets, admin UIs | APIs, large datasets, infinite scroll |
+- **High‑traffic APIs**: A public API that paginates millions of records uses cursor pagination to keep response times low and consistent.
+- **Reporting dashboards**: An internal dashboard that only needs the first few pages can use offset pagination without noticeable performance problems.
+- **Hybrid approach**: Some systems use offset pagination for the first few pages (where it is fast) and switch to keyset pagination for deeper pages, combining the simplicity of offset with the performance of keyset.
 
 ---
 
 ## References
 
-- PostgreSQL: LIMIT and OFFSET - https://www.postgresql.org/docs/current/queries-limit.html
-- MySQL: LIMIT Query Optimization - https://dev.mysql.com/doc/refman/8.4/en/limit-optimization.html
-- Microsoft Learn: TOP (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/queries/top-transact-sql
-- Microsoft Learn: Page results (OFFSET-FETCH) - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/4-page-results
-- Microsoft Learn: Implement Pagination with mssql-python - https://learn.microsoft.com/en-gb/sql/connect/python/mssql-python/pagination
-- Oracle: Database Data Warehousing Guide (Row Limiting) - https://docs.oracle.com/en/database/oracle/oracle-database/26/dwhsg/database-data-warehousing-guide.pdf
-- GeeksforGeeks: SQL TOP, LIMIT, FETCH FIRST Clause - https://origin.geeksforgeeks.org/sql/sql-top-limit-fetch-first-clause/
-- Tinybird: Cursor Pagination Guide - https://guides.tinybird.co/docs/forward/guides/sorting-key-pagination
-- Stacksync: PostgreSQL Keyset Pagination vs Offset - https://www.stacksync.com/blog/keyset-cursors-postgres-pagination-fast-accurate-scalable
-- OneUptime: Optimize LIMIT with Large Offsets in MySQL - https://raw.githubusercontent.com/OneUptime/blog/refs/heads/master/posts/2026-03-31-mysql-optimize-limit-large-offsets/README.md
-- Stack Overflow: Difference in limit syntax - https://stackoverflow.com/questions/45036438
+- PostgreSQL Documentation – SELECT (LIMIT, OFFSET, FETCH) – https://manpages.debian.org/unstable/postgresql-client-16/SELECT.7.en.html
+- PostgreSQL Documentation – SELECT (PostgreSQL 9.6, LIMIT clause) – https://manpages.debian.org/unstable/postgresql-client-9.6/SELECT.7.en.html
+- MySQL 8.4 Reference Manual – SELECT Statement (LIMIT, OFFSET) – https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/select.html
+- SQL Server – TOP and OFFSET/FETCH (AWS DMS Playbook) – https://docs.aws.eu/dms/latest/sql-server-to-aurora-postgresql-migration-playbook/chap-sql-server-aurora-pg.tsql.topfetch.html
+- Oracle Database – Row Limiting Clause (OFFSET ... FETCH) – https://docs.oracle.com/en/database/oracle/oracle-database/26/dwhsg/database-data-warehousing-guide.pdf
+- SQL:2008 OFFSET ... FETCH FIRST/NEXT (PostgreSQL SELECT) – https://manpages.ubuntu.com/manpages/…/SELECT.7.html
+- StackSync – Postgres Pagination: Keyset vs Offset vs Cursor – https://www.stacksync.com/blog/keyset-cursors-postgres-pagination-fast-accurate-scalable
+- OneUptime – How to Optimize LIMIT with Large Offsets in MySQL – https://raw.githubusercontent.com/OneUptime/blog/refs/heads/master/posts/2026-03-31-mysql-optimize-limit-large-offsets/README.md
+- Supabase Best Practices – Cursor-Based Pagination Instead of OFFSET – https://github.com/fcakyon/claude-codex-settings/blob/cd53c6a75fe64d291afd3d7139a6b71ebf9d86f3/plugins/supabase-skills/skills/supabase-postgres-best-practices/references/data-pagination.md
+- Erik Darling – Learn T-SQL: TOP and OFFSET/FETCH – https://erikdarling.com/learn-t-sql-with-erik-top-and-offset-fetch/
+- Encina – Cursor Pagination Benchmarks – https://github.com/dlrivada/Encina/blob/main/docs/features/cursor-pagination.md
+- PostgreSQL Git – SQL:2008 OFFSET/FETCH syntax – https://www.postgresql.org/message-id/…

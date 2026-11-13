@@ -1,1158 +1,506 @@
-# SQL DELETE Operations: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: SQL DELETE Operations
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** The SQL DELETE statement is a Data Manipulation Language (DML) command that removes one or more rows from a table or view.
+**Core Definition**
+DELETE operations are the Data Manipulation Language (DML) statements used to remove existing rows from a table, optionally filtered by a `WHERE` condition, and optionally returning the deleted data via `RETURNING` (PostgreSQL) or `OUTPUT` (SQL Server).
 
-**Technical Definition:** Per the SQL standard (ISO/IEC 9075), DELETE is a DML statement that removes rows satisfying a given search condition from a specified table. The statement supports optional WHERE, USING (PostgreSQL), RETURNING (PostgreSQL, Oracle), OUTPUT (SQL Server), and vendor-specific extensions such as LIMIT and ORDER BY (MySQL). DELETE is a logged operation, meaning each row removal is recorded in the transaction log, and it can be rolled back within a transaction.
+**Technical Definition**
+`DELETE` removes rows that satisfy the `WHERE` clause from the specified table; if the `WHERE` clause is absent, the effect is to delete all rows in the table, leaving a valid but empty table. The statement supports single-table and multi-table forms, subqueries, common table expressions (CTEs), and—in PostgreSQL—`USING` for joined deletes and `RETURNING` for returning deleted data. MySQL provides single-table (`DELETE FROM t WHERE ...`) and multiple-table (`DELETE t1, t2 FROM ...` or `DELETE FROM t1, t2 USING ...`) syntax, with `ORDER BY` and `LIMIT` available only in the single-table form. SQL Server provides `TOP`, `OUTPUT`, CTEs, and a second `FROM` clause for join-based deletes. `DELETE` is a DML operation that acquires row-level locks, is fully transactional (and therefore rollback-able), fires triggers, and writes each deleted row to the transaction log.
 
-**Beginner-Friendly Explanation:** Think of a database table as a spreadsheet. DELETE is the command that removes entire rows (records) from that spreadsheet. You tell the database which table to delete from and which rows to remove using a condition. If you don't specify a condition, every row in the table is deleted.
+**Beginner-Friendly Explanation**
+DELETE is how you remove records from a table. You tell the database which table to remove from and—crucially—which rows should be removed using a `WHERE` clause. Without a `WHERE` clause, DELETE empties the entire table. DELETE is careful and reversible (if you are inside a transaction), but it can be slow on large tables because it processes rows one by one, locks them, and writes each deletion to the log. For wiping an entire table quickly, `TRUNCATE` is often a better choice; for removing the table itself, `DROP` is the tool.
 
 ### Key Characteristics
 
-- **Row-level removal:** DELETE removes entire rows, not individual column values.
-- **Conditional execution:** The WHERE clause determines which rows are deleted; without it, all rows are removed.
-- **Logged operation:** Each row deletion is recorded in the transaction log, enabling rollback and point-in-time recovery.
-- **Transactional:** DELETE operations can be committed or rolled back.
-- **Trigger-aware:** DELETE triggers fire for each row deleted (unlike TRUNCATE).
-- **Vendor extensions:** RETURNING (PostgreSQL, Oracle), OUTPUT (SQL Server), USING (PostgreSQL), multi-table DELETE (MySQL), and TOP (SQL Server).
+- **`WHERE` is the safety net**: Omitting `WHERE` deletes every row. Production guidelines universally require a `WHERE` clause; MySQL's `sql_safe_updates` and PostgreSQL's `pg-safeupdate` can enforce this at the session level.
+- **Transactional and rollback-able**: In PostgreSQL, SQL Server, and MySQL (with InnoDB), a `DELETE` inside a transaction can be rolled back. `TRUNCATE` is not rollback-able in MySQL and Oracle, though it is in PostgreSQL and SQL Server.
+- **Row-level locking**: `DELETE` acquires row-level locks (or exclusive row locks), allowing concurrent reads and writes to other rows in the same table in MVCC systems. This is in contrast to `TRUNCATE`, which locks the whole table.
+- **Triggers fire**: `DELETE` activates `BEFORE`, `AFTER`, and `INSTEAD OF` triggers; `TRUNCATE` and `DROP` do not fire `DELETE` triggers.
+- **Vendor divergence in multi-table and returning syntax**: PostgreSQL uses `USING` and `RETURNING`; MySQL uses multiple-table syntax with `JOIN` and has no `RETURNING`; SQL Server uses `OUTPUT` and a second `FROM` clause for joins.
 
 ### Prerequisites
 
-- Basic SQL syntax (SELECT, FROM, WHERE)
-- Understanding of tables, columns, and data types
-- Familiarity with NULL handling (see SQL NULL Handling cheat sheet)
-- Knowledge of constraints (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK)
-- Transaction concepts (COMMIT, ROLLBACK, SAVEPOINT)
+- A running RDBMS instance (PostgreSQL, MySQL, or SQL Server) and a client connection.
+- `DELETE` privilege on the target table; `SELECT` privilege on any tables read in the `WHERE` clause, `USING` clause, or subqueries.
+- For `RETURNING` (PostgreSQL): `SELECT` privilege on the returned columns, even if the `RETURNING` list does not reference a column (e.g., `RETURNING 1`).
+- For cascading deletes: foreign keys defined with `ON DELETE CASCADE` on child tables.
+- A tested backup or point-in-time recovery strategy for irreplaceable data.
 
 ### Related Programming Areas
 
-- **Database Administration:** DELETE operations affect table metadata, indexes, and statistics.
-- **Application Development:** Most applications perform DELETE operations through ORMs or parameterized queries.
-- **Data Warehousing and ETL:** Bulk deletions and soft-delete patterns are common in data transformation pipelines.
-- **Auditing and Compliance:** Tracking deletions through triggers and audit tables.
-- **Concurrency Control:** DELETE statements interact with locking mechanisms and isolation levels.
-- **Data Recovery:** Understanding logging and recovery models is essential for restoring deleted data.
+- Data Manipulation Language (DML) – `INSERT`, `UPDATE`, `MERGE`.
+- Data Definition Language (DDL) – `TRUNCATE`, `DROP`.
+- Transaction management – `COMMIT`, `ROLLBACK`, isolation levels, and lock timeouts.
+- Concurrency control – row-level vs. table-level locking; MVCC vs. lock-based reads.
+- Data retention and archival – partitioning, soft deletes, and `pg_archiver`-style tools.
 
 ---
 
-## Core Concepts / Key Features
+## Core Concepts and Features
 
-### 1. Core Deletion Methods
+### 1. `DELETE`
 
-#### 1.1 DELETE FROM Basic Syntax and Mechanics
+#### Definitions
 
-**Core Definitions:**
+**Core Definition**
+`DELETE` is the SQL statement that removes rows from a table.
 
-- **Core Definition:** The basic DELETE FROM statement identifies a target table and optionally filters rows to remove using a WHERE clause.
-- **Technical Definition:** The ANSI SQL standard defines the DELETE statement with the syntax `DELETE FROM table_name [WHERE condition]`. The statement removes all rows that satisfy the condition. Without a WHERE clause, all rows are removed, resulting in an empty but structurally intact table.
-- **Beginner-Friendly Explanation:** The DELETE statement is like telling a spreadsheet: "Remove these rows from this sheet, but only the ones that match this condition."
+**Technical Definition**
+PostgreSQL's synopsis is `[ WITH [ RECURSIVE ] with_query [, ...] ] DELETE FROM [ ONLY ] table_name [ * ] [ [ AS ] alias ] [ USING from_item [, ...] ] [ WHERE condition | WHERE CURRENT OF cursor_name ] [ RETURNING { * | output_expression [ [ AS ] output_name ] } [, ...] ]`. MySQL's single-table syntax is `DELETE [LOW_PRIORITY] [QUICK] [IGNORE] FROM tbl_name [[AS] tbl_alias] [PARTITION (...)] [WHERE where_condition] [ORDER BY ...] [LIMIT row_count]`, and its multiple-table syntax is `DELETE [LOW_PRIORITY] [QUICK] [IGNORE] tbl_name[.*] [, tbl_name[.*]] ... FROM table_references [WHERE where_condition]` or `DELETE ... FROM tbl_name[.*] [, ...] USING table_references [WHERE where_condition]`. SQL Server's syntax includes `[ WITH <common_table_expression> ] DELETE [ TOP ( expression ) [ PERCENT ] ] [ FROM ] { table_alias | object | rowset_function_limited | @table_variable } [ <OUTPUT Clause> ] [ FROM table_source ] [ WHERE ... ]`.
 
-**Purposes:**
+**Beginner-Friendly Explanation**
+`DELETE` is the command for removing records. You name the table and add a `WHERE` clause to specify which rows should go. Without `WHERE`, every row is removed.
 
-- To permanently remove unwanted or obsolete data from a table
-- To clean up temporary or staging data
-- To implement data retention policies (deleting old records)
-- To enforce referential integrity through cascading deletes
+#### Purposes
 
-**Syntax Structures and Rules:**
+- To remove specific rows that are no longer needed while preserving the table structure.
+- To delete data in response to user actions (e.g., deleting a post or an account).
+- To purge stale or expired data as part of data-retention policies.
+- To remove rows based on conditions derived from other tables (via subqueries, `USING`, or joins).
 
-**Complete General Syntax (ANSI SQL):**
+#### Syntax Rules and Structure
 
-```sql
-DELETE FROM table_name
-[WHERE condition];
-```
-
-**PostgreSQL Syntax:**
-
-```sql
-[ WITH [ RECURSIVE ] with_query [, ...] ]
-DELETE FROM [ ONLY ] table_name [ * ] [ [ AS ] alias ]
-[ USING from_item [, ...] ]
-[ WHERE condition | WHERE CURRENT OF cursor_name ]
-[ RETURNING { * | output_expression [ [ AS ] output_name ] } [, ...] ]
-```
-
-**SQL Server Syntax:**
-
-```sql
-[ WITH <common_table_expression> [ ,...n ] ]
-DELETE [ TOP ( expression ) [ PERCENT ] ]
-[ FROM ] { { table_alias | <object> | rowset_function_limited }
-[ <OUTPUT Clause> ]
-[ FROM table_source [ ,...n ] ]
-[ WHERE { <search_condition> | { [ CURRENT OF { cursor_name } ] } } ]
-[ OPTION ( <Query Hint> [ ,...n ] ) ] [;]
-```
-
-**MySQL Syntax:**
-
-```sql
-DELETE [LOW_PRIORITY] [QUICK] [IGNORE] FROM tbl_name [[AS] tbl_alias]
-[PARTITION (partition_name [, partition_name] ...)]
-[WHERE where_condition]
-[ORDER BY ...]
-[LIMIT row_count]
-```
-
-**Oracle Syntax:**
-
-```sql
-DELETE [FROM] table_name [alias]
-[WHERE condition]
-[RETURNING expression INTO variable [, ...]];
-```
-
-**Component Breakdown:**
-
-- `table_name`: The name of the table or view from which to delete rows
-- `WHERE`: Optional clause that filters which rows are deleted
-- `USING` (PostgreSQL): Additional tables that can be referenced in the WHERE condition
-- `RETURNING` (PostgreSQL, Oracle): Returns values from the deleted rows
-- `OUTPUT` (SQL Server): Returns values from the deleted rows
-- `LIMIT` (MySQL): Restricts the number of rows deleted
-- `TOP` (SQL Server): Restricts the number of rows deleted
-
-**Syntax Rules:**
-
-- Only the rows that satisfy the WHERE condition are deleted.
-- Without a WHERE clause, all rows in the target table are deleted.
-- Views can be deleted from only if they are simple enough (typically based on a single table).
-- DELETE requires the DELETE privilege on the target table and the SELECT privilege on any tables referenced in the WHERE clause.
-
-**Constraints and Limitations:**
-
-- FOREIGN KEY constraints may prevent deletion if dependent rows exist (unless ON DELETE CASCADE is specified).
-- DELETE triggers fire for each row deleted.
-- Large DELETE operations can lock tables and consume significant transaction log space.
-- DELETE cannot be used on tables referenced by FOREIGN KEY constraints if the referencing table has rows (unless CASCADE or SET NULL is configured).
-
-**Annotated Code Examples:**
-
-```sql
--- Setup: Create sample tables
-CREATE TABLE customers (
-    customer_id INT PRIMARY KEY,
-    customer_name VARCHAR(100),
-    email VARCHAR(200),
-    status VARCHAR(20)
-);
-
-INSERT INTO customers VALUES (1, 'Alice', 'alice@example.com', 'Active');
-INSERT INTO customers VALUES (2, 'Bob', 'bob@example.com', 'Inactive');
-INSERT INTO customers VALUES (3, 'Charlie', 'charlie@example.com', 'Active');
-INSERT INTO customers VALUES (4, 'Diana', 'diana@example.com', 'Inactive');
-
--- Example 1: Delete a specific row
-DELETE FROM customers
-WHERE customer_id = 2;
-
--- Verify
-SELECT * FROM customers;
-```
-
-**Expected Output:**
-
-| customer_id | customer_name | email               | status |
-|-------------|---------------|---------------------|--------|
-| 1           | Alice         | alice@example.com   | Active |
-| 3           | Charlie       | charlie@example.com | Active |
-| 4           | Diana         | diana@example.com   | Inactive |
-
-**Explanation:** The WHERE clause targets only the row where `customer_id = 2`. Only Bob's row is removed.
-
-```sql
--- Example 2: Delete all rows (no WHERE clause)
-DELETE FROM customers;
-
--- Verify
-SELECT * FROM customers;
-```
-
-**Expected Output:** Empty table (no rows).
-
-**Explanation:** Without a WHERE clause, every row is deleted. The table structure remains, but all data is gone.
-
-**Real-World Cases:**
-
-- **Data retention:** Deleting customer records that have been inactive for more than 5 years.
-- **GDPR compliance:** Removing personal data upon user request.
-- **Staging tables:** Clearing temporary data after ETL processing.
-- **Log management:** Deleting old log entries to manage storage.
-
-**References:**
-
-- PostgreSQL: DELETE - https://www.postgresql.org/docs/14/sql-delete.html
-- MySQL: DELETE Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/delete.html
-- Microsoft Learn: DELETE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/delete-transact-sql
-
-
-#### 1.2 Deleting Selected Rows (Targeted Filtering)
-
-**Core Definitions:**
-
-- **Core Definition:** Targeted deletion uses a WHERE clause with a unique condition (typically a primary key) to delete exactly one row.
-- **Technical Definition:** When the WHERE clause uses a condition that uniquely identifies a row (e.g., `WHERE primary_key = value`), the DELETE affects at most one row.
-- **Beginner-Friendly Explanation:** If you know exactly which row you want to remove—for example, order number 42—you use a WHERE clause that targets only that row.
-
-**Purposes:**
-
-- To make precise, targeted data removals
-- To delete a specific record without affecting others
-- To minimize the risk of unintended data loss
-- To support application-level row-level operations
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
+**General syntax (PostgreSQL):**
 
 ```sql
 DELETE FROM table_name
-WHERE unique_column = unique_value;
+[ USING other_table [, ...] ]
+[ WHERE condition ]
+[ RETURNING * | output_expression [, ...] ];
 ```
 
-**Component Breakdown:**
+**Component breakdown:**
 
-- `unique_column`: A column with a PRIMARY KEY or UNIQUE constraint
-- `unique_value`: A value that uniquely identifies one row
+| Component | Description |
+|-----------|-------------|
+| `DELETE FROM` | The statement and target table. |
+| `USING` (PostgreSQL) | Additional tables for the `WHERE` condition. |
+| `WHERE` | The condition identifying rows to delete; omitting it deletes all rows. |
+| `RETURNING` (PostgreSQL) | Returns data from the deleted rows. |
 
-**Syntax Rules:**
+**Syntax rules:**
 
-- The WHERE clause must use a condition that uniquely identifies the row.
-- Primary key or unique index columns are the safest choices.
-- If multiple rows match the condition, multiple rows will be deleted.
+- The `WHERE` clause is optional but omitting it deletes every row.
+- In PostgreSQL, `ONLY` restricts the delete to the named table, excluding inheritance descendants; `*` explicitly includes them.
+- MySQL's `ORDER BY` and `LIMIT` apply only to single-table deletes, not multiple-table deletes.
 
-**Constraints and Limitations:**
+**Constraints and limitations:**
 
-- If the unique value does not exist, no rows are deleted (not an error).
-- If the condition matches multiple rows, multiple rows are deleted.
+- You cannot delete from a table and select from the same table in a subquery in MySQL.
+- SQL Server's `DELETE` fails if a row is referenced by a `FOREIGN KEY` constraint that does not have a cascading action.
 
-**Annotated Code Examples:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Basic DELETE with WHERE
 
 ```sql
--- Setup
-CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    customer_name VARCHAR(100),
-    order_date DATE,
-    total DECIMAL(10,2)
-);
+-- Step 1: Create a table and insert sample data.
+CREATE TABLE logs (id serial PRIMARY KEY, message text, created_at timestamptz DEFAULT now());
+INSERT INTO logs (message) VALUES ('old entry'), ('recent entry');
 
-INSERT INTO orders VALUES (1, 'Alice', '2024-01-15', 150.00);
-INSERT INTO orders VALUES (2, 'Bob', '2024-01-20', 200.00);
-INSERT INTO orders VALUES (3, 'Charlie', '2024-02-10', 75.00);
+-- Step 2: Delete old rows.
+DELETE FROM logs WHERE created_at < now() - interval '1 day';
 
--- Delete a single row by primary key
-DELETE FROM orders
-WHERE order_id = 2;
+-- Step 3: Verify.
+SELECT * FROM logs;
+```
 
--- Verify
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 2
+DELETE 0
+ id |   message    |          created_at
+----+--------------+-------------------------------
+  1 | old entry    | 2026-11-13 10:00:00.123+00
+  2 | recent entry | 2026-11-13 10:00:00.123+00
+(2 rows)
+```
+
+**Why this output appears**: The `WHERE` clause filters by `created_at`; because both rows were just inserted, neither is older than one day, so `DELETE 0` confirms that zero rows were removed. The table remains intact.
+
+#### Real-World Cases
+
+- **Data retention**: A logs table is purged of rows older than 90 days on a nightly schedule.
+- **User-initiated deletion**: A user deletes their account, and the application runs `DELETE FROM users WHERE user_id = $1`.
+- **Cleanup**: Orphaned rows in a staging table are deleted after a failed ETL job.
+
+---
+
+### 2. `DELETE` with `WHERE`
+
+#### Definitions
+
+**Core Definition**
+`DELETE` with `WHERE` removes only the rows that satisfy the specified condition, leaving other rows untouched.
+
+**Technical Definition**
+The `WHERE` clause contains a Boolean expression; only rows for which the expression returns `TRUE` are deleted. The condition can reference columns of the target table, subqueries, and—in PostgreSQL—tables listed in the `USING` clause. MySQL's single-table `DELETE` supports `ORDER BY` and `LIMIT` alongside `WHERE` to control the order and number of rows deleted.
+
+**Beginner-Friendly Explanation**
+The `WHERE` clause is how you say “only delete these rows.” It is the most important part of a DELETE statement because it prevents you from accidentally wiping the entire table.
+
+#### Purposes
+
+- To target specific rows for deletion based on their values or timestamps.
+- To delete rows that match a condition derived from application logic.
+- To limit deletion to a subset of rows using `LIMIT` (MySQL) or `TOP` (SQL Server).
+
+#### Syntax Rules and Structure
+
+**General syntax:**
+
+```sql
+DELETE FROM table_name WHERE condition;
+```
+
+**MySQL with LIMIT:**
+
+```sql
+DELETE FROM table_name WHERE condition LIMIT row_count;
+```
+
+**SQL Server with TOP:**
+
+```sql
+DELETE TOP (expression) FROM table_name WHERE condition;
+```
+
+**Syntax rules:**
+
+- The `WHERE` clause must evaluate to a Boolean; only rows where it is `TRUE` are deleted.
+- MySQL's `LIMIT` caps the number of rows deleted in a single statement, enabling batching.
+
+**Constraints and limitations:**
+
+- If the `WHERE` clause matches zero rows, the statement succeeds but deletes nothing.
+- A non-deterministic `TOP` without `ORDER BY` (SQL Server) may delete arbitrary rows.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: MySQL – DELETE with WHERE and LIMIT
+
+```sql
+-- Step 1: Create and populate a table.
+CREATE TABLE orders (id INT PRIMARY KEY, status VARCHAR(20), created_at DATE);
+INSERT INTO orders VALUES (1, 'pending', '2023-01-01'), (2, 'pending', '2023-01-02'), (3, 'shipped', '2023-01-03');
+
+-- Step 2: Delete pending orders, limited to one row.
+DELETE FROM orders WHERE status = 'pending' LIMIT 1;
+
+-- Step 3: Verify.
 SELECT * FROM orders;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| order_id | customer_name | order_date | total  |
-|----------|---------------|------------|--------|
-| 1        | Alice         | 2024-01-15 | 150.00 |
-| 3        | Charlie       | 2024-02-10 | 75.00  |
-
-**Explanation:** The WHERE clause uses the primary key (`order_id = 2`), guaranteeing that only one row is deleted.
-
-**Real-World Cases:**
-
-- **Order management:** Cancelling a specific order by order ID.
-- **User management:** Deleting a specific user account.
-- **Inventory:** Removing a specific product from the catalog.
-- **Customer support:** Deleting a specific support ticket.
-
-**References:**
-
-- PostgreSQL: DELETE - https://www.postgresql.org/docs/14/sql-delete.html
-- Microsoft Learn: DELETE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/delete-transact-sql
-
-
-#### 1.3 Conditional Deletion (Complex WHERE Clauses)
-
-**Core Definitions:**
-
-- **Core Definition:** Conditional deletion uses complex WHERE clauses involving multiple conditions, subqueries, and logical operators to delete groups of rows.
-- **Technical Definition:** The WHERE clause can contain any valid SQL condition, including AND/OR/NOT operators, IN, EXISTS, BETWEEN, LIKE, and subqueries. All rows for which the condition evaluates to TRUE are deleted.
-- **Beginner-Friendly Explanation:** You can delete rows based on multiple criteria—for example, "delete all inactive customers who haven't logged in for a year."
-
-**Purposes:**
-
-- To delete rows based on multiple related conditions
-- To delete rows based on data in other tables (subqueries)
-- To implement complex business rules for data removal
-- To clean up data based on temporal or status-based criteria
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```sql
-DELETE FROM table_name
-WHERE condition1
-  AND condition2
-  OR condition3
-  AND column IN (subquery)
-  AND EXISTS (subquery);
+```text
+Query OK, 0 rows affected (0.02 sec)
+Query OK, 3 rows affected (0.01 sec)
+Query OK, 1 row affected (0.00 sec)
++----+---------+------------+
+| id | status  | created_at |
++----+---------+------------+
+|  2 | pending | 2023-01-02 |
+|  3 | shipped | 2023-01-03 |
++----+---------+------------+
 ```
 
-**Component Breakdown:**
+**Why this output appears**: The `WHERE` clause matches two pending rows, but `LIMIT 1` restricts the delete to one row. Which pending row is deleted is not guaranteed without `ORDER BY`; in practice, the first matching row is typically removed.
 
-- `condition1, condition2, ...`: Any valid SQL conditions
-- `AND`, `OR`, `NOT`: Logical operators
-- `IN`: Checks if a value matches any value in a subquery or list
-- `EXISTS`: Checks if a subquery returns any rows
-- `BETWEEN`: Checks if a value is within a range
+#### Real-World Cases
 
-**Syntax Rules:**
+- **Session cleanup**: Expired sessions are deleted with `DELETE FROM sessions WHERE expires_at < now()`.
+- **Order cancellation**: Pending orders older than 30 days are deleted after a grace period.
 
-- The WHERE clause can reference columns from the target table and, in some databases, from other tables (via subqueries or USING/FROM clauses).
-- Subqueries must return a single column for IN comparisons.
-- EXISTS subqueries should be correlated with the outer query.
-- NULL comparisons in the WHERE clause evaluate to UNKNOWN, so rows with NULLs are excluded.
+---
 
-**Constraints and Limitations:**
+### 3. `DELETE` with `USING` (PostgreSQL)
 
-- Complex WHERE clauses can be slow on large tables without proper indexes.
-- Some databases limit the complexity of WHERE clauses.
-- Subqueries in DELETE statements may have restrictions in some databases (e.g., MySQL cannot modify the same table in a subquery).
+#### Definitions
 
-**Annotated Code Examples:**
+**Core Definition**
+`DELETE ... USING` is a PostgreSQL extension that allows the `WHERE` condition to reference columns from other tables, enabling join-based deletes.
 
-```sql
--- Setup
-CREATE TABLE customers (
-    customer_id INT PRIMARY KEY,
-    customer_name VARCHAR(100),
-    email VARCHAR(200),
-    last_login DATE,
-    status VARCHAR(20),
-    total_spent DECIMAL(10,2)
-);
+**Technical Definition**
+The `USING` clause lists additional table expressions that can be referenced in the `WHERE` condition. The target table is implicitly joined to the `USING` tables, and rows in the target table that satisfy the condition are deleted. PostgreSQL notes that there are two ways to delete rows using information in other tables: sub-selects and the `USING` clause, and which is more appropriate depends on the circumstances.
 
-INSERT INTO customers VALUES (1, 'Alice', 'alice@example.com', '2024-06-01', 'Active', 5000);
-INSERT INTO customers VALUES (2, 'Bob', 'bob@example.com', '2023-01-15', 'Inactive', 200);
-INSERT INTO customers VALUES (3, 'Charlie', 'charlie@example.com', '2024-05-20', 'Active', 3000);
-INSERT INTO customers VALUES (4, 'Diana', 'diana@example.com', '2022-12-01', 'Inactive', 100);
-INSERT INTO customers VALUES (5, 'Eve', 'eve@example.com', NULL, 'Active', 0);
+**Beginner-Friendly Explanation**
+`USING` lets you delete rows from one table based on information in another table. For example, you can delete all orders belonging to customers who have been banned, without writing a subquery.
 
--- Delete inactive customers who haven't logged in for over a year
-DELETE FROM customers
-WHERE status = 'Inactive'
-  AND last_login < '2023-06-01';
+#### Purposes
 
--- Verify
-SELECT * FROM customers;
-```
+- To delete rows from a table based on conditions in related tables.
+- To avoid correlated subqueries when the deletion depends on a join.
+- To perform set-based deletes that reference multiple tables cleanly.
 
-**Expected Output:**
+#### Syntax Rules and Structure
 
-| customer_id | customer_name | email               | last_login | status | total_spent |
-|-------------|---------------|---------------------|------------|--------|-------------|
-| 1           | Alice         | alice@example.com   | 2024-06-01 | Active | 5000        |
-| 3           | Charlie       | charlie@example.com | 2024-05-20 | Active | 3000        |
-| 5           | Eve           | eve@example.com     | NULL       | Active | 0           |
-
-**Explanation:** Bob and Diana are deleted because they are Inactive and their last login was before June 1, 2023. Eve is not deleted because she is Active (even though her last_login is NULL). Alice and Charlie are Active, so they remain.
-
-```sql
--- Delete customers who have never placed an order (using subquery)
-DELETE FROM customers
-WHERE customer_id NOT IN (
-    SELECT DISTINCT customer_id FROM orders
-);
-```
-
-**Explanation:** This deletes customers who do not appear in the orders table.
-
-**Real-World Cases:**
-
-- **Data cleaning:** Deleting records with invalid or incomplete data.
-- **Retention policies:** Deleting records older than a specified date.
-- **Fraud detection:** Deleting accounts flagged as fraudulent.
-- **Inventory:** Deleting discontinued products with no stock.
-
-**References:**
-
-- PostgreSQL: DELETE - https://www.postgresql.org/docs/14/sql-delete.html
-- MySQL: DELETE Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/delete.html
-
-
-#### 1.4 Deleting All Rows vs. Truncating a Table (DELETE vs. TRUNCATE)
-
-**Core Definitions:**
-
-- **Core Definition:** DELETE removes rows one at a time and logs each deletion, while TRUNCATE removes all rows by deallocating data pages and logs only page deallocations.
-- **Technical Definition:** TRUNCATE TABLE is functionally equivalent to DELETE with no WHERE clause, but it is faster and uses fewer system and transaction log resources. TRUNCATE resets identity columns, does not fire triggers, and cannot be used on tables referenced by FOREIGN KEY constraints.
-- **Beginner-Friendly Explanation:** DELETE is like erasing each row individually with an eraser. TRUNCATE is like tearing out the entire page and replacing it with a blank one.
-
-**Purposes:**
-
-- To quickly empty a table when all rows must be removed
-- To reset identity/auto-increment counters
-- To minimize transaction log usage
-- To improve performance for bulk removal operations
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```sql
--- DELETE all rows
-DELETE FROM table_name;
-
--- TRUNCATE
-TRUNCATE TABLE table_name;
-```
-
-**Component Breakdown:**
-
-- `TRUNCATE TABLE`: Removes all rows from the specified table
-- No WHERE clause is allowed with TRUNCATE
-
-**Syntax Rules:**
-
-- TRUNCATE requires ALTER privilege on the table (SQL Server) or DROP privilege (MySQL).
-- TRUNCATE cannot be used on tables referenced by FOREIGN KEY constraints.
-- TRUNCATE cannot activate triggers (SQL Server).
-- TRUNCATE resets identity columns to their seed value (SQL Server, MySQL).
-- DELETE can be rolled back; TRUNCATE may or may not be rollback-able depending on the database.
-
-**Constraints and Limitations:**
-
-- **SQL Server:** TRUNCATE cannot be used on tables that are referenced by FOREIGN KEY constraints, participate in indexed views, or are published by transactional replication.
-- **MySQL:** TRUNCATE requires DROP privilege and implicitly commits the transaction.
-- **PostgreSQL:** TRUNCATE is transactional and can be rolled back. It also supports CASCADE and RESTART IDENTITY options.
-- **Oracle:** TRUNCATE is DDL, not DML, and cannot be rolled back.
-
-**Annotated Code Examples:**
-
-```sql
--- Setup
-CREATE TABLE temp_data (
-    id INT PRIMARY KEY,
-    value VARCHAR(100)
-);
-
-INSERT INTO temp_data VALUES (1, 'A');
-INSERT INTO temp_data VALUES (2, 'B');
-INSERT INTO temp_data VALUES (3, 'C');
-
--- Using DELETE to remove all rows
-DELETE FROM temp_data;
--- Log: Each row deletion is logged individually
--- Triggers fire for each row
--- Identity counter is NOT reset
-
--- Using TRUNCATE to remove all rows
-TRUNCATE TABLE temp_data;
--- Log: Only page deallocations are logged
--- Triggers do NOT fire
--- Identity counter IS reset
-```
-
-**Expected Output:** Both statements result in an empty table. The difference is in performance, logging, and side effects.
-
-**Real-World Cases:**
-
-- **Staging tables:** TRUNCATE is preferred for clearing staging tables before reload.
-- **Test databases:** TRUNCATE is used to reset tables between tests.
-- **Log tables:** DELETE is used to remove old logs based on date criteria.
-- **Production tables:** DELETE is used when FOREIGN KEY constraints or triggers must be respected.
-
-**References:**
-
-- Microsoft Learn: TRUNCATE TABLE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/truncate-table-transact-sql
-- MySQL: TRUNCATE TABLE Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/truncate-table.html
-
-
-### 2. Complex & Related Deletions
-
-#### 2.1 Cascading Deletes (Foreign Key Constraint Behaviors)
-
-**Core Definitions:**
-
-- **Core Definition:** Cascading deletes automatically remove or modify rows in child tables when a parent row is deleted, based on the ON DELETE action defined in the FOREIGN KEY constraint.
-- **Technical Definition:** The SQL standard defines four ON DELETE actions: NO ACTION (default), CASCADE, SET NULL, and SET DEFAULT. CASCADE deletes corresponding child rows; SET NULL sets foreign key columns to NULL; SET DEFAULT sets them to their default values; NO ACTION raises an error and rolls back the delete.
-- **Beginner-Friendly Explanation:** When you delete a parent record (like a customer), cascading deletes automatically remove all related child records (like their orders). You configure this behavior when creating the foreign key.
-
-**Purposes:**
-
-- To maintain referential integrity automatically
-- To simplify application logic by delegating cleanup to the database
-- To prevent orphaned records
-- To implement complex data hierarchies
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```sql
-CREATE TABLE child_table (
-    ...
-    FOREIGN KEY (column_name)
-    REFERENCES parent_table(parent_column)
-    ON DELETE { NO ACTION | CASCADE | SET NULL | SET DEFAULT }
-);
-```
-
-**Component Breakdown:**
-
-- `NO ACTION`: Raises an error and rolls back the delete if dependent rows exist (default).
-- `CASCADE`: Deletes corresponding rows from the referencing table.
-- `SET NULL`: Sets all foreign key values to NULL if the parent row is deleted. The foreign key columns must be nullable.
-- `SET DEFAULT`: Sets all foreign key values to their default values. All foreign key columns must have default definitions.
-
-**Syntax Rules:**
-
-- ON DELETE CASCADE cannot be defined if an INSTEAD OF trigger ON DELETE already exists on the table.
-- SET NULL requires the foreign key columns to be nullable.
-- SET DEFAULT requires default values defined for all foreign key columns.
-- Cascading actions can chain across multiple levels of foreign keys.
-
-**Constraints and Limitations:**
-
-- Cascading deletes can trigger other cascading deletes, potentially causing a chain reaction.
-- Some databases limit the depth of cascading.
-- Cascading deletes can be slow on large tables.
-- NO ACTION is the default and is the safest option.
-
-**Annotated Code Examples:**
-
-```sql
--- Setup: Parent and child tables with CASCADE
-CREATE TABLE departments (
-    dept_id INT PRIMARY KEY,
-    dept_name VARCHAR(100)
-);
-
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    dept_id INT,
-    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
-        ON DELETE CASCADE
-);
-
-INSERT INTO departments VALUES (1, 'Engineering');
-INSERT INTO departments VALUES (2, 'Marketing');
-
-INSERT INTO employees VALUES (1, 'Alice', 1);
-INSERT INTO employees VALUES (2, 'Bob', 1);
-INSERT INTO employees VALUES (3, 'Charlie', 2);
-
--- Delete a department (cascades to employees)
-DELETE FROM departments WHERE dept_id = 1;
-
--- Verify
-SELECT * FROM employees;
-```
-
-**Expected Output:**
-
-| emp_id | emp_name | dept_id |
-|--------|----------|---------|
-| 3      | Charlie  | 2       |
-
-**Explanation:** Deleting the Engineering department (dept_id=1) automatically deletes Alice and Bob because the foreign key has ON DELETE CASCADE.
-
-```sql
--- Example: SET NULL
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    dept_id INT,
-    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
-        ON DELETE SET NULL
-);
-
-DELETE FROM departments WHERE dept_id = 1;
--- Employees in dept 1 now have dept_id = NULL
-```
-
-**Real-World Cases:**
-
-- **E-commerce:** Deleting a customer cascades to their orders and order items.
-- **CMS:** Deleting a blog post cascades to comments.
-- **HR:** Deleting a department cascades to employees (or sets their dept_id to NULL).
-- **Inventory:** Deleting a product cascades to inventory records.
-
-**References:**
-
-- Microsoft Learn: CREATE TABLE (Transact-SQL) - FOREIGN KEY - https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-transact-sql
-- MySQL: FOREIGN KEY Constraints - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/create-table-foreign-keys.html
-
-
-#### 2.2 Deleting from Related Data / Joins
-
-**Core Definitions:**
-
-- **Core Definition:** DELETE statements can remove rows based on data in other tables using subqueries, the USING clause (PostgreSQL), multi-table syntax (MySQL), or joins in the FROM clause (SQL Server).
-- **Technical Definition:** The SQL standard provides subqueries in the WHERE clause as the primary mechanism. PostgreSQL adds the USING clause; MySQL supports multi-table DELETE syntax; SQL Server supports DELETE with a FROM clause that includes joins.
-- **Beginner-Friendly Explanation:** Sometimes you need to delete rows from one table based on information in another table. You can use a subquery or a join to identify which rows to delete.
-
-**Purposes:**
-
-- To delete rows based on conditions in related tables
-- To clean up orphaned records
-- To implement complex data retention rules
-- To synchronize data between related tables
-
-**Syntax Structures and Rules:**
-
-**PostgreSQL (USING clause):**
+**General syntax:**
 
 ```sql
 DELETE FROM target_table
 USING source_table
-WHERE target_table.join_key = source_table.join_key
+WHERE target_table.key = source_table.key
   AND condition;
 ```
 
-**MySQL (Multi-Table Syntax):**
+**Syntax rules:**
+
+- The `USING` clause uses the same syntax as the `FROM` clause of a `SELECT` statement.
+- Do not repeat the target table in `USING` unless you intend a self-join, in which case it must appear with an alias.
+
+**Constraints and limitations:**
+
+- PostgreSQL-specific; MySQL and SQL Server use different join syntax (multiple-table `DELETE` and a second `FROM`, respectively).
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – DELETE USING a join
 
 ```sql
-DELETE target_table
-FROM target_table
-JOIN source_table ON target_table.join_key = source_table.join_key
-WHERE condition;
-```
+-- Step 1: Create tables.
+CREATE TABLE customers (id int PRIMARY KEY, status text);
+CREATE TABLE orders (id int PRIMARY KEY, customer_id int, total numeric);
 
-**SQL Server (DELETE with FROM):**
+INSERT INTO customers VALUES (1, 'banned'), (2, 'active');
+INSERT INTO orders VALUES (100, 1, 50), (101, 2, 75), (102, 1, 30);
 
-```sql
-DELETE target_table
-FROM target_table
-JOIN source_table ON target_table.join_key = source_table.join_key
-WHERE condition;
-```
-
-**Component Breakdown:**
-
-- `target_table`: The table from which to delete rows
-- `source_table`: The table providing the condition
-- `join_key`: The column(s) used to join the tables
-- `condition`: Additional filtering conditions
-
-**Syntax Rules:**
-
-- The join condition must uniquely identify matching rows to avoid ambiguous deletions.
-- Subqueries in the WHERE clause must be correlated with the outer DELETE.
-- MySQL's multi-table DELETE cannot use ORDER BY or LIMIT.
-- PostgreSQL's USING clause supports the same syntax as SELECT's FROM clause.
-
-**Constraints and Limitations:**
-
-- Deleting from a join may delete the same row multiple times if the join produces multiple matches (implementation-dependent).
-- Some databases restrict deleting from a table that is also used in a subquery.
-- Multi-table DELETE in MySQL requires the DELETE privilege on all tables involved.
-
-**Annotated Code Examples:**
-
-```sql
--- Setup
-CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    customer_id INT,
-    order_date DATE,
-    total DECIMAL(10,2)
-);
-
-CREATE TABLE customers (
-    customer_id INT PRIMARY KEY,
-    customer_name VARCHAR(100),
-    status VARCHAR(20)
-);
-
-INSERT INTO customers VALUES (1, 'Alice', 'Active');
-INSERT INTO customers VALUES (2, 'Bob', 'Inactive');
-INSERT INTO customers VALUES (3, 'Charlie', 'Inactive');
-
-INSERT INTO orders VALUES (101, 1, '2024-01-15', 150.00);
-INSERT INTO orders VALUES (102, 2, '2024-01-20', 200.00);
-INSERT INTO orders VALUES (103, 3, '2024-02-10', 75.00);
-INSERT INTO orders VALUES (104, 1, '2024-03-01', 300.00);
-
--- PostgreSQL: Delete orders for inactive customers
+-- Step 2: Delete orders belonging to banned customers.
 DELETE FROM orders
 USING customers
-WHERE orders.customer_id = customers.customer_id
-  AND customers.status = 'Inactive';
+WHERE orders.customer_id = customers.id
+  AND customers.status = 'banned';
 
--- Verify
+-- Step 3: Verify.
 SELECT * FROM orders;
 ```
 
-**Expected Output (PostgreSQL):**
+**Expected output:**
 
-| order_id | customer_id | order_date | total  |
-|----------|-------------|------------|--------|
-| 101      | 1           | 2024-01-15 | 150.00 |
-| 104      | 1           | 2024-03-01 | 300.00 |
-
-**Explanation:** Orders 102 and 103 are deleted because they belong to Bob and Charlie, who are Inactive.
-
-```sql
--- MySQL: Equivalent multi-table DELETE
-DELETE orders
-FROM orders
-JOIN customers ON orders.customer_id = customers.customer_id
-WHERE customers.status = 'Inactive';
-
--- SQL Server: Equivalent DELETE with FROM
-DELETE orders
-FROM orders
-JOIN customers ON orders.customer_id = customers.customer_id
-WHERE customers.status = 'Inactive';
+```text
+CREATE TABLE
+CREATE TABLE
+INSERT 0 2
+INSERT 0 3
+DELETE 2
+ id  | customer_id | total
+-----+-------------+-------
+ 101 |           2 |    75
+(1 row)
 ```
 
-```sql
--- Subquery approach (works in all databases)
-DELETE FROM orders
-WHERE customer_id IN (
-    SELECT customer_id FROM customers WHERE status = 'Inactive'
-);
-```
+**Why this output appears**: The `USING customers` clause joins `orders` to `customers`; the `WHERE` condition matches only orders whose customer has `status = 'banned'`, deleting two rows and leaving the active customer's order intact.
 
-**Real-World Cases:**
+#### Real-World Cases
 
-- **E-commerce:** Deleting orders for customers who have been banned.
-- **CRM:** Deleting contacts associated with inactive companies.
-- **Inventory:** Deleting products from discontinued categories.
-- **Logging:** Deleting log entries for users who have been deleted.
+- **Fraud cleanup**: Orders from customers flagged as fraudulent are deleted using `DELETE ... USING` before the accounts are closed.
+- **Dependency removal**: Child rows are deleted when their parent is removed, using a join on the foreign key.
 
-**References:**
+---
 
-- PostgreSQL: DELETE - https://www.postgresql.org/docs/14/sql-delete.html
-- MySQL: DELETE Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/delete.html
-- Microsoft Learn: DELETE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/delete-transact-sql
+### 4. `DELETE` with Subqueries
 
+#### Definitions
 
-### 3. Safety & Data Integrity
+**Core Definition**
+A delete with subqueries uses a subquery in the `WHERE` clause (or, in PostgreSQL, in `USING`) to identify the rows to delete.
 
-#### 3.1 Safe Deletion Strategies
+**Technical Definition**
+A subquery-based delete typically uses `WHERE column IN (SELECT ...)` or `WHERE EXISTS (SELECT ...)`. The subquery can reference the target table (correlated subquery) or other tables. MySQL explicitly prohibits deleting from a table and selecting from the same table in a subquery; the workaround is to wrap the subquery in a derived table or use a multiple-table delete.
 
-**Core Definitions:**
+**Beginner-Friendly Explanation**
+A subquery delete lets you say “delete the rows whose ID appears in this list,” where the list is produced by another query.
 
-- **Core Definition:** Safe deletion strategies are techniques used to verify which rows will be affected before executing a DELETE, and to test changes in a controlled manner.
-- **Technical Definition:** Safe deletion practices include using SELECT statements to preview affected rows, wrapping deletions in transactions that can be rolled back, and using database-specific safe-update modes.
-- **Beginner-Friendly Explanation:** Before you delete anything, look at what you're about to delete. Run a SELECT first, then run the DELETE inside a transaction so you can undo it if something goes wrong.
+#### Purposes
 
-**Purposes:**
+- To delete rows that match a condition computed by a separate query.
+- To delete rows based on a list of IDs from another table.
+- To perform deletes that are portable across RDBMSs without vendor-specific `USING` or join syntax.
 
-- To prevent accidental data loss
-- To verify the scope of a DELETE before executing it
-- To provide a recovery mechanism if the deletion produces unexpected results
-- To comply with change management and auditing requirements
+#### Syntax Rules and Structure
 
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
+**General syntax:**
 
 ```sql
--- Step 1: Verify with SELECT
-SELECT * FROM table_name WHERE condition;
-
--- Step 2: Begin transaction
-BEGIN TRANSACTION;  -- or START TRANSACTION in MySQL
-
--- Step 3: Execute DELETE
-DELETE FROM table_name WHERE condition;
-
--- Step 4: Verify results
-SELECT * FROM table_name WHERE condition;
-
--- Step 5: Commit or rollback
-COMMIT;    -- if results are correct
--- or
-ROLLBACK;  -- if results are incorrect
+DELETE FROM table_name
+WHERE column IN (SELECT column FROM other_table WHERE condition);
 ```
 
-**Component Breakdown:**
-
-- `BEGIN TRANSACTION` / `START TRANSACTION`: Starts a transaction block
-- `COMMIT`: Permanently saves the changes
-- `ROLLBACK`: Undoes all changes made since the transaction began
-
-**Syntax Rules:**
-
-- The SELECT statement should use the same WHERE clause as the DELETE.
-- The transaction should include both the DELETE and the verification SELECT.
-- Rollback is only possible if the transaction has not been committed.
-
-**Constraints and Limitations:**
-
-- Some databases auto-commit each statement by default (e.g., MySQL with autocommit=1).
-- DDL statements (e.g., ALTER TABLE) may implicitly commit transactions.
-- Long-running transactions can cause locking and performance issues.
-- MySQL's TRUNCATE implicitly commits and cannot be rolled back.
-
-**Annotated Code Examples:**
+**PostgreSQL workaround for self-referencing subqueries:**
 
 ```sql
--- Setup
-CREATE TABLE inventory (
-    product_id INT PRIMARY KEY,
-    product_name VARCHAR(100),
-    quantity INT,
-    discontinued BOOLEAN
-);
-
-INSERT INTO inventory VALUES (1, 'Widget', 100, FALSE);
-INSERT INTO inventory VALUES (2, 'Gadget', 0, TRUE);
-INSERT INTO inventory VALUES (3, 'Gizmo', 50, FALSE);
-INSERT INTO inventory VALUES (4, 'Doohickey', 0, TRUE);
-
--- Step 1: Verify which rows will be deleted
-SELECT * FROM inventory WHERE discontinued = TRUE;
-
--- Step 2: Begin transaction
-BEGIN TRANSACTION;
-
--- Step 3: Delete discontinued products
-DELETE FROM inventory WHERE discontinued = TRUE;
-
--- Step 4: Verify
-SELECT * FROM inventory;
-
--- Step 5: Commit if correct
-COMMIT;
+DELETE FROM table_name
+WHERE id IN (SELECT id FROM (SELECT id FROM table_name WHERE condition) AS sub);
 ```
 
-**Expected Output (after COMMIT):**
+**Syntax rules:**
 
-| product_id | product_name | quantity | discontinued |
-|------------|--------------|----------|--------------|
-| 1          | Widget       | 100      | FALSE        |
-| 3          | Gizmo        | 50       | FALSE        |
+- The subquery must return a single column for `IN` comparisons.
+- MySQL requires the derived-table workaround when the subquery references the target table.
 
-**Explanation:** The SELECT before the DELETE confirms that Gadget and Doohickey will be affected. The transaction allows verification before committing.
+**Constraints and limitations:**
 
-**Real-World Cases:**
+- Subquery deletes can be slower than join-based deletes because the subquery may execute once per row.
+- In MySQL, the target table cannot appear in the `FROM` clause of the subquery without the derived-table workaround.
 
-- **Production databases:** Always test DELETE operations in a transaction before committing.
-- **Data migrations:** Verify row counts before and after bulk deletions.
-- **Financial systems:** Use transactions to ensure atomicity of multi-step deletions.
-- **Compliance:** Maintain an audit trail of what was deleted and when.
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-**References:**
-
-- PostgreSQL: Transactions - https://www.postgresql.org/docs/current/tutorial-transactions.html
-- MySQL: START TRANSACTION - https://dev.mysql.com/doc/refman/8.0/en/commit.html
-
-
-#### 3.2 Handling Constraint Violations
-
-**Core Definitions:**
-
-- **Core Definition:** Constraint violations occur when a DELETE statement attempts to remove a row that is referenced by a FOREIGN KEY constraint, or when the deletion would violate referential integrity.
-- **Technical Definition:** When a DELETE would violate a FOREIGN KEY constraint with NO ACTION (the default), the database raises an error and rolls back the statement. The error code is typically SQLSTATE 23000.
-- **Beginner-Friendly Explanation:** If you try to delete a parent record that still has child records referencing it, the database refuses to delete it and gives you an error.
-
-**Purposes:**
-
-- To maintain referential integrity
-- To prevent orphaned records
-- To enforce business rules at the database level
-- To ensure that deletions do not corrupt relationships between tables
-
-**Syntax Structures and Rules:**
-
-**Common Constraint Types:**
-
-| Constraint | Violation Scenario | Error Code |
-|------------|-------------------|------------|
-| FOREIGN KEY (NO ACTION) | Deleting a parent row with existing child rows | 23000 |
-| FOREIGN KEY (RESTRICT) | Deleting a parent row with existing child rows | 23000 |
-| CHECK | Deleting a row that would violate a check condition | 23000 |
-
-**Syntax Rules:**
-
-- FOREIGN KEY constraints with NO ACTION or RESTRICT prevent deletion of parent rows if child rows exist.
-- FOREIGN KEY constraints with CASCADE or SET NULL allow deletion and handle child rows automatically.
-- Deferred constraints (in some databases) check integrity at the end of the transaction.
-
-**Constraints and Limitations:**
-
-- Some databases allow disabling constraints temporarily.
-- MySQL's IGNORE keyword causes constraint violations to be warnings instead of errors.
-- SQL Server's OUTPUT clause returns the rows affected before constraint violations.
-
-**Annotated Code Examples:**
+##### Example 1: PostgreSQL – DELETE with a subquery
 
 ```sql
--- Setup
-CREATE TABLE departments (
-    dept_id INT PRIMARY KEY,
-    dept_name VARCHAR(100)
-);
+-- Step 1: Create tables.
+CREATE TABLE users (id int PRIMARY KEY, email text);
+CREATE TABLE banned_emails (email text);
 
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    dept_id INT,
-    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
-        ON DELETE NO ACTION  -- Default behavior
-);
+INSERT INTO users VALUES (1, 'a@example.com'), (2, 'b@example.com'), (3, 'c@example.com');
+INSERT INTO banned_emails VALUES ('b@example.com'), ('c@example.com');
 
-INSERT INTO departments VALUES (1, 'Engineering');
-INSERT INTO departments VALUES (2, 'Marketing');
+-- Step 2: Delete users whose email is in the banned list.
+DELETE FROM users
+WHERE email IN (SELECT email FROM banned_emails);
 
-INSERT INTO employees VALUES (1, 'Alice', 1);
-INSERT INTO employees VALUES (2, 'Bob', 1);
-INSERT INTO employees VALUES (3, 'Charlie', 2);
-
--- Attempt to delete a department with employees
-DELETE FROM departments WHERE dept_id = 1;
--- Error: The DELETE statement conflicted with the REFERENCE constraint
-
--- Valid delete (no employees in dept 2)
-DELETE FROM departments WHERE dept_id = 2;
+-- Step 3: Verify.
+SELECT * FROM users;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| Statement | Result |
-|-----------|--------|
-| Delete dept 1 | Error 23000 (FK violation) |
-| Delete dept 2 | Success (Charlie's dept_id becomes NULL if SET NULL, or error if NO ACTION) |
+```text
+CREATE TABLE
+CREATE TABLE
+INSERT 0 3
+INSERT 0 2
+DELETE 2
+ id |     email
+----+----------------
+  1 | a@example.com
+(1 row)
+```
 
-**Explanation:** Deleting Engineering fails because Alice and Bob reference it. Deleting Marketing succeeds because Charlie references it—but only if the FK allows it (NO ACTION would also block this).
+**Why this output appears**: The subquery returns the banned email addresses; the `IN` condition matches the two users with those emails, deleting them and leaving the non-banned user.
 
-**Real-World Cases:**
+#### Real-World Cases
 
-- **HR systems:** Preventing deletion of a department that still has employees.
-- **E-commerce:** Preventing deletion of a customer with active orders.
-- **CMS:** Preventing deletion of a category with published articles.
-- **Inventory:** Preventing deletion of a product with pending orders.
+- **GDPR erasure**: User data is deleted where the user's email appears in a list of erasure requests.
+- **Orphan cleanup**: Rows whose foreign key no longer exists in the parent table are deleted using a `NOT IN` or `NOT EXISTS` subquery.
 
-**References:**
+---
 
-- Microsoft Learn: CREATE TABLE (Transact-SQL) - FOREIGN KEY - https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-transact-sql
-- MySQL: FOREIGN KEY Constraints - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/create-table-foreign-keys.html
+### 5. `DELETE` with CTEs
 
+#### Definitions
 
-#### 3.3 Safe Delete Modes
+**Core Definition**
+A delete with a CTE uses a `WITH` clause to define a named temporary result set that can be referenced in the `DELETE` statement, simplifying complex logic or enabling `RETURNING` from the CTE.
 
-**Core Definitions:**
+**Technical Definition**
+PostgreSQL's `DELETE` synopsis begins with `[ WITH [ RECURSIVE ] with_query [, ...] ]`, allowing one or more subqueries to be referenced by name in the `DELETE` query. MySQL's `DELETE` can also start with a `WITH` clause to define CTEs accessible within the delete. SQL Server's `DELETE` accepts `[ WITH <common_table_expression> [ ,...n ] ]`. In PostgreSQL, a CTE containing a `DELETE ... RETURNING` can be used to capture deleted rows for further processing in the same statement.
 
-- **Core Definition:** Safe delete modes are database configuration settings that prevent DELETE statements without a key-based WHERE clause or LIMIT clause from executing.
-- **Technical Definition:** MySQL's `sql_safe_updates` system variable, when enabled, causes DELETE (and UPDATE) statements that do not use a key in the WHERE clause or a LIMIT clause to produce an error.
-- **Beginner-Friendly Explanation:** Safe delete mode is like a safety lock on a power tool—it prevents you from accidentally deleting everything.
+**Beginner-Friendly Explanation**
+A CTE is a temporary named query that you define before the delete. You can use it to pre-compute the rows you want to delete or to capture the deleted rows for logging or further processing.
 
-**Purposes:**
+#### Purposes
 
-- To prevent accidental mass deletions
-- To enforce deliberate, verified deletion operations
-- To catch missing WHERE clauses before execution
-- To protect against SQL injection and application bugs
+- To pre-compute a set of rows to delete, making the statement easier to read and optimise.
+- To capture deleted rows via `RETURNING` inside a CTE for use in a subsequent part of the statement.
+- To use recursive CTEs to delete hierarchical data (e.g., a tree of comments).
 
-**Syntax Structures and Rules:**
+#### Syntax Rules and Structure
 
-**MySQL Safe Updates Mode:**
+**General syntax (PostgreSQL):**
 
 ```sql
--- Enable safe updates (session-level)
-SET sql_safe_updates = 1;
-
--- Enable safe updates (global)
-SET GLOBAL sql_safe_updates = 1;
-
--- Check current value
-SELECT @@sql_safe_updates;
-
--- Disable safe updates
-SET sql_safe_updates = 0;
+WITH cte_name AS (
+    SELECT ...
+)
+DELETE FROM table_name
+WHERE column IN (SELECT column FROM cte_name);
 ```
 
-**Component Breakdown:**
-
-- `sql_safe_updates`: MySQL system variable (boolean, default OFF)
-- When enabled, DELETE statements must use a key in the WHERE clause or a LIMIT clause
-- The mysql client can enable it with `--safe-updates` option
-
-**Syntax Rules:**
-
-- Safe updates mode requires the WHERE clause to use a key column (PRIMARY KEY or UNIQUE index) or a LIMIT clause.
-- The mode also restricts SELECT statements that produce very large result sets.
-- Safe updates mode is disabled by default.
-
-**Constraints and Limitations:**
-
-- Safe updates mode is MySQL-specific.
-- Even with safe updates, a well-crafted WHERE clause with a non-unique key can still delete many rows.
-- Some databases (e.g., PostgreSQL, SQL Server) do not have a built-in safe update mode.
-
-**Annotated Code Examples:**
+**CTE with RETURNING (PostgreSQL):**
 
 ```sql
--- MySQL: Enable safe updates
-SET sql_safe_updates = 1;
-
--- This will FAIL because there's no WHERE clause
-DELETE FROM inventory;
--- Error: You are using safe update mode and you tried to update a table
--- without a WHERE that uses a KEY column
-
--- This will SUCCEED because WHERE uses the primary key
-DELETE FROM inventory WHERE product_id = 3;
-
--- This will SUCCEED because of the LIMIT clause
-DELETE FROM inventory LIMIT 1;
-
--- Disable safe updates
-SET sql_safe_updates = 0;
+WITH deleted AS (
+    DELETE FROM table_name WHERE condition RETURNING *
+)
+SELECT * FROM deleted;
 ```
 
-**Real-World Cases:**
+**Syntax rules:**
 
-- **Production databases:** Always enable safe updates or use transactions.
-- **Development environments:** Enable safe updates to catch mistakes early.
-- **Database migration scripts:** Include explicit WHERE clauses and verification steps.
+- The CTE is visible only within the `DELETE` statement.
+- Multiple CTEs can be defined, separated by commas.
+- In PostgreSQL, a CTE containing a data-modifying statement (`DELETE`) must have a `RETURNING` clause if it is referenced by the outer statement.
 
-**References:**
+**Constraints and limitations:**
 
-- MySQL: Safe Updates Mode - https://downloads.mysql.com/docs/refman-5.6-en.a4.pdf
+- MySQL's CTE support for `DELETE` may still encounter the self-reference restriction in some patterns.
+- CTEs are not always materialised; the optimiser may inline them, so performance varies.
 
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-### 4. Data Recovery & Architecture Standards
-
-#### 4.1 Soft Deletes vs. Hard Deletes
-
-**Core Definitions:**
-
-- **Core Definition:** A hard delete physically removes rows from the table, while a soft delete marks rows as deleted using a flag (e.g., `is_deleted`) or timestamp (e.g., `deleted_at`) without removing the data.
-- **Technical Definition:** Soft deletes preserve data for auditing, recovery, and historical analysis. Applications must filter out soft-deleted rows in queries using `WHERE deleted_at IS NULL` or `WHERE is_deleted = FALSE`.
-- **Beginner-Friendly Explanation:** A hard delete is like throwing a document in the trash. A soft delete is like marking it "deleted" but keeping it in a folder—you can still find it later if needed.
-
-**Purposes:**
-
-- To preserve data for auditing and compliance
-- To enable data recovery after accidental deletion
-- To maintain referential integrity with historical data
-- To support undo functionality in applications
-
-**Syntax Structures and Rules:**
-
-**Soft Delete Pattern (is_deleted flag):**
+##### Example 1: PostgreSQL – CTE with DELETE ... RETURNING
 
 ```sql
--- Add soft delete column
-ALTER TABLE table_name ADD COLUMN is_deleted BOOLEAN DEFAULT FALSE;
+-- Step 1: Create a table.
+CREATE TABLE audit_log (id serial PRIMARY KEY, message text, created_at timestamptz DEFAULT now());
+INSERT INTO audit_log (message) VALUES ('old'), ('new');
 
--- Soft delete
-UPDATE table_name SET is_deleted = TRUE WHERE condition;
-
--- Query active records
-SELECT * FROM table_name WHERE is_deleted = FALSE;
+-- Step 2: Delete old rows and capture them in a CTE.
+WITH deleted AS (
+    DELETE FROM audit_log
+    WHERE created_at < now() - interval '1 second'
+    RETURNING id, message
+)
+SELECT * FROM deleted;
 ```
 
-**Soft Delete Pattern (deleted_at timestamp):**
+**Expected output:**
 
-```sql
--- Add soft delete column
-ALTER TABLE table_name ADD COLUMN deleted_at TIMESTAMP NULL;
-
--- Soft delete
-UPDATE table_name SET deleted_at = NOW() WHERE condition;
-
--- Query active records
-SELECT * FROM table_name WHERE deleted_at IS NULL;
+```text
+CREATE TABLE
+INSERT 0 2
+ id | message
+----+---------
+(0 rows)
 ```
 
-**Component Breakdown:**
+**Why this output appears**: The `WHERE` clause does not match any rows (both rows were inserted just now), so the `DELETE` removes nothing and the CTE returns an empty result. If rows had matched, the `RETURNING` clause would return their `id` and `message` values.
 
-- `is_deleted`: Boolean flag indicating whether the row is deleted
-- `deleted_at`: Timestamp indicating when the row was deleted
-- Both approaches require application-level filtering
+#### Real-World Cases
 
-**Syntax Rules:**
+- **Audit logging**: Deleted rows are captured via a CTE and inserted into an audit table in the same statement.
+- **Hierarchical deletion**: A recursive CTE identifies a tree of rows (e.g., threaded comments) and deletes them in the correct order.
 
-- Soft-deleted rows remain in the table and count toward table size.
-- Unique constraints may need to be adjusted to allow re-use of values.
-- Foreign key relationships still reference soft-deleted rows.
+---
 
-**Constraints and Limitations:**
+### 6. `RETURNING` (PostgreSQL)
 
-- Soft deletes consume storage space for deleted records.
-- Queries must consistently filter out soft-deleted rows.
-- Unique constraints (e.g., email) may conflict when re-inserting deleted values.
-- Performance may degrade as the table grows with soft-deleted rows.
+#### Definitions
 
-**Annotated Code Examples:**
+**Core Definition**
+`RETURNING` is a PostgreSQL clause that returns data from the rows deleted by a `DELETE` statement, computed over the actually deleted rows.
 
-```sql
--- Setup
-CREATE TABLE users (
-    user_id INT PRIMARY KEY,
-    username VARCHAR(100),
-    email VARCHAR(200),
-    is_deleted BOOLEAN DEFAULT FALSE,
-    deleted_at TIMESTAMP NULL
-);
+**Technical Definition**
+The optional `RETURNING` clause causes `DELETE` to compute and return value(s) based on each row actually deleted. Any expression using the table's columns, and/or columns of other tables mentioned in `USING`, can be computed. The syntax of the `RETURNING` list is identical to that of the output list of `SELECT`. `RETURNING` requires `SELECT` privilege on the table, even if the list does not reference a column (e.g., `RETURNING 1`).
 
-INSERT INTO users VALUES (1, 'alice', 'alice@example.com', FALSE, NULL);
-INSERT INTO users VALUES (2, 'bob', 'bob@example.com', FALSE, NULL);
-INSERT INTO users VALUES (3, 'charlie', 'charlie@example.com', FALSE, NULL);
+**Beginner-Friendly Explanation**
+`RETURNING` lets you get data back from the rows you just deleted, in the same statement. This is useful for logging what was removed or for returning the deleted data to an application.
 
--- Soft delete Bob
-UPDATE users
-SET is_deleted = TRUE,
-    deleted_at = NOW()
-WHERE user_id = 2;
+#### Purposes
 
--- Query active users only
-SELECT * FROM users WHERE is_deleted = FALSE;
-```
+- To capture the deleted rows for auditing or archiving.
+- To return deleted data to an application in a single round-trip.
+- To use the deleted rows in a subsequent CTE or `INSERT`.
 
-**Expected Output:**
+#### Syntax Rules and Structure
 
-| user_id | username | email             | is_deleted | deleted_at          |
-|---------|----------|-------------------|------------|---------------------|
-| 1       | alice    | alice@example.com | FALSE      | NULL                |
-| 3       | charlie  | charlie@example.com | FALSE    | NULL                |
-
-**Explanation:** Bob is soft-deleted and does not appear in the active users query, but his data remains in the table.
-
-**Real-World Cases:**
-
-- **User management:** Soft-deleting user accounts to allow recovery.
-- **E-commerce:** Soft-deleting products while preserving order history.
-- **CMS:** Soft-deleting articles while maintaining audit trails.
-- **Financial systems:** Soft-deleting transactions for regulatory compliance.
-
-**References:**
-
-- Microsoft Learn: Soft Delete Pattern - https://learn.microsoft.com/en-us/azure/architecture/patterns/soft-delete
-
-
-#### 4.2 Retrieving Deleted Data (RETURNING / OUTPUT Clause)
-
-**Core Definitions:**
-
-- **Core Definition:** The RETURNING (PostgreSQL, Oracle) and OUTPUT (SQL Server) clauses return values from rows affected by a DELETE statement, eliminating the need for a separate SELECT.
-- **Technical Definition:** The optional RETURNING clause causes DELETE to compute and return value(s) based on each row actually deleted. The default data available is the content of the deleted row. SQL Server's OUTPUT clause provides similar functionality using the DELETED pseudo-table.
-- **Beginner-Friendly Explanation:** After you delete rows, you often want to see what was deleted. Instead of running a separate SELECT, you can ask the DELETE statement to return the deleted rows.
-
-**Purposes:**
-
-- To retrieve deleted row data in a single round trip
-- To capture deleted values for auditing
-- To archive deleted rows into a history table
-- To feed deleted values into subsequent operations
-
-**Syntax Structures and Rules:**
-
-**PostgreSQL / Oracle (RETURNING):**
+**General syntax:**
 
 ```sql
 DELETE FROM table_name
@@ -1160,157 +508,705 @@ WHERE condition
 RETURNING * | output_expression [ [ AS ] output_name ] [, ...];
 ```
 
-**SQL Server (OUTPUT):**
+**Syntax rules:**
+
+- The `RETURNING` list can include `*` to return all columns.
+- The expression can reference any column of the target table and any table in the `USING` clause.
+
+**Constraints and limitations:**
+
+- `RETURNING` is PostgreSQL-specific; MySQL has no equivalent, and SQL Server uses `OUTPUT`.
+- The user must have `SELECT` privilege on the returned columns.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – DELETE with RETURNING
 
 ```sql
-DELETE FROM table_name
-OUTPUT DELETED.column_name [, ...]
-WHERE condition;
+-- Step 1: Create a table.
+CREATE TABLE sessions (id int PRIMARY KEY, user_id int, expires_at timestamptz);
+INSERT INTO sessions VALUES (1, 42, now() - interval '1 day'), (2, 43, now() + interval '1 day');
+
+-- Step 2: Delete expired sessions and return them.
+DELETE FROM sessions
+WHERE expires_at < now()
+RETURNING id, user_id;
 ```
 
-**Component Breakdown:**
+**Expected output:**
 
-- `RETURNING *`: Returns all columns of the deleted rows
-- `RETURNING expression`: Returns a specific expression or column
-- `DELETED.column`: The deleted row values in SQL Server
-- `INTO table_variable`: Stores the output in a table variable (SQL Server)
+```text
+CREATE TABLE
+INSERT 0 2
+DELETE 1
+ id | user_id
+----+---------
+  1 |      42
+(1 row)
+```
 
-**Syntax Rules:**
+**Why this output appears**: The `RETURNING id, user_id` clause returns the `id` and `user_id` of the deleted row, confirming which session was removed.
 
-- RETURNING can use any expression involving the table's columns.
-- In SQL Server, OUTPUT can reference the DELETED pseudo-table.
-- The RETURNING list syntax is identical to the SELECT output list.
-- Oracle's RETURNING INTO clause requires PL/SQL variables to receive the values.
+#### Real-World Cases
 
-**Constraints and Limitations:**
+- **Session cleanup**: Expired sessions are deleted and the deleted IDs are returned to the application for cache invalidation.
+- **Audit trail**: Deleted rows are returned and inserted into an audit table in the same transaction.
 
-- RETURNING cannot be used with multi-table DELETE in MySQL.
-- SQL Server's OUTPUT clause cannot return values if the DELETE statement has a FROM clause with certain join types.
-- The RETURNING clause returns values after triggers have fired.
+---
 
-**Annotated Code Examples:**
+### 7. Deleting All Rows
+
+#### Definitions
+
+**Core Definition**
+Deleting all rows removes every row from a table without removing the table structure, indexes, or constraints.
+
+**Technical Definition**
+`DELETE FROM table_name` without a `WHERE` clause removes all rows. This is functionally equivalent to `TRUNCATE TABLE` in terms of the end state (an empty table), but `DELETE` is slower because it scans and locks each row, fires triggers, and writes each deletion to the transaction log. MySQL explicitly notes that `TRUNCATE TABLE` is a faster way to empty a table than a `DELETE` with no `WHERE` clause.
+
+**Beginner-Friendly Explanation**
+Deleting all rows is like emptying a spreadsheet completely, but keeping the column headers and rules. `DELETE FROM table_name` does this row by row; `TRUNCATE TABLE` does it in one quick sweep.
+
+#### Purposes
+
+- To completely empty a table while preserving its structure and constraints.
+- To reset a table for a fresh load or a new test run.
+- To remove all data when the table's schema must remain intact.
+
+#### Syntax Rules and Structure
+
+**DELETE all rows:**
 
 ```sql
--- PostgreSQL: RETURNING example
-CREATE TABLE products (
-    product_id INT PRIMARY KEY,
-    product_name VARCHAR(100),
-    price DECIMAL(10,2),
-    discontinued BOOLEAN
+DELETE FROM table_name;
+```
+
+**TRUNCATE (faster alternative):**
+
+```sql
+TRUNCATE TABLE table_name;
+```
+
+**Syntax rules:**
+
+- `DELETE FROM table_name` without `WHERE` deletes all rows but does not reset auto-increment counters (in MySQL, it does not reset `AUTO_INCREMENT`; in PostgreSQL, it does not reset sequences unless `RESTART IDENTITY` is used).
+- `TRUNCATE` cannot be used with a `WHERE` clause.
+
+**Constraints and limitations:**
+
+- `DELETE` all rows can be very slow on large tables and holds row locks for the duration.
+- `TRUNCATE` locks the entire table, blocking concurrent reads and writes.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – DELETE all rows vs. TRUNCATE
+
+```sql
+-- Step 1: Create and populate a table.
+CREATE TABLE staging (id serial PRIMARY KEY, data text);
+INSERT INTO staging (data) SELECT md5(random()::text) FROM generate_series(1, 10000);
+
+-- Step 2: Delete all rows with DELETE.
+DELETE FROM staging;
+
+-- Step 3: Verify the count.
+SELECT count(*) FROM staging;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 10000
+DELETE 10000
+ count
+-------
+     0
+(1 row)
+```
+
+**Why this output appears**: `DELETE FROM staging` removes all 10,000 rows, one by one, and `DELETE 10000` confirms the count. The table structure remains intact.
+
+#### Real-World Cases
+
+- **Test reset**: A test suite runs `DELETE FROM table_name` or `TRUNCATE TABLE` between tests to ensure a clean state.
+- **Staging refresh**: A staging table is emptied before loading a fresh batch of data from production.
+
+---
+
+### 8. `TRUNCATE`
+
+#### Definitions
+
+**Core Definition**
+`TRUNCATE TABLE` is a DDL statement that quickly removes all rows from a table, optionally resetting identity sequences, while preserving the table's structure.
+
+**Technical Definition**
+`TRUNCATE` is a DDL command that deallocates the data pages of a table without scanning individual rows, making it significantly faster than `DELETE` for emptying a table. It locks the entire table, does not fire `DELETE` triggers, and does not return the number of rows deleted. In MySQL, `TRUNCATE` cannot be rolled back; in PostgreSQL and SQL Server, it can be rolled back within a transaction. `TRUNCATE` resets `AUTO_INCREMENT` in MySQL and identity columns in SQL Server; in PostgreSQL, `RESTART IDENTITY` must be specified to reset sequences.
+
+**Beginner-Friendly Explanation**
+`TRUNCATE` is like using a giant eraser to wipe a table clean instantly. It does not bother to remove rows one by one; it simply marks the table's storage as empty. It is much faster than `DELETE` for wiping a whole table, but it locks the table while it works and cannot be used with a `WHERE` clause.
+
+#### Purposes
+
+- To quickly empty a table and reset its auto-increment counter.
+- To reclaim storage from a table without dropping it.
+- To reset a table between test runs or ETL batches.
+
+#### Syntax Rules and Structure
+
+**General syntax:**
+
+```sql
+TRUNCATE TABLE table_name;
+```
+
+**PostgreSQL with identity reset:**
+
+```sql
+TRUNCATE TABLE table_name RESTART IDENTITY;
+```
+
+**Syntax rules:**
+
+- `TRUNCATE` cannot be used with a `WHERE` clause; it always removes all rows.
+- In MySQL, `TRUNCATE` causes an implicit commit and cannot be rolled back.
+- In PostgreSQL, `TRUNCATE` can be rolled back if executed inside a transaction.
+
+**Constraints and limitations:**
+
+- `TRUNCATE` requires the `TRUNCATE` privilege (PostgreSQL) or `DROP` privilege (MySQL) or `ALTER` permission (SQL Server).
+- `TRUNCATE` cannot be used on a table that is referenced by a foreign key from another table unless the referencing table is also truncated or the foreign key is dropped.
+- `TRUNCATE` does not fire `DELETE` triggers.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: MySQL – TRUNCATE resets AUTO_INCREMENT
+
+```sql
+-- Step 1: Create a table and insert rows.
+CREATE TABLE items (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100));
+INSERT INTO items (name) VALUES ('a'), ('b'), ('c');
+
+-- Step 2: Truncate the table.
+TRUNCATE TABLE items;
+
+-- Step 3: Insert a new row; the ID restarts at 1.
+INSERT INTO items (name) VALUES ('new');
+SELECT * FROM items;
+```
+
+**Expected output:**
+
+```text
+Query OK, 0 rows affected (0.02 sec)
+Query OK, 3 rows affected (0.01 sec)
+Query OK, 0 rows affected (0.01 sec)
+Query OK, 1 row affected (0.00 sec)
++----+------+
+| id | name |
++----+------+
+|  1 | new  |
++----+------+
+```
+
+**Why this output appears**: `TRUNCATE` removes all rows and resets the `AUTO_INCREMENT` counter to its starting value (1). The next insert receives `id = 1`.
+
+#### Real-World Cases
+
+- **Nightly ETL**: A staging table is truncated each night before loading the day's data.
+- **Test isolation**: A test framework truncates tables between tests to guarantee a clean slate.
+
+---
+
+### 9. `TRUNCATE` vs `DELETE`
+
+#### Definitions
+
+**Core Definition**
+`TRUNCATE` and `DELETE` both remove rows from a table, but they differ in speed, locking, transactionality, trigger behaviour, and side effects.
+
+**Technical Definition**
+`DELETE` is a DML operation that removes rows one by one, fires triggers, is transactional (rollback-able in all major RDBMSs except where DDL is implicitly committed), and supports `WHERE`. `TRUNCATE` is a DDL operation that removes all rows by deallocating pages, does not fire `DELETE` triggers, locks the whole table, and is not rollback-able in MySQL and Oracle but is in PostgreSQL and SQL Server. `TRUNCATE` is faster and uses fewer transaction log resources than `DELETE`.
+
+**Beginner-Friendly Explanation**
+`DELETE` is precise and careful: it removes the rows you specify, one by one, and can be undone. `TRUNCATE` is fast and blunt: it wipes the whole table at once, usually cannot be undone, and does not bother with triggers. Use `DELETE` when you need to remove specific rows; use `TRUNCATE` when you want to empty the whole table quickly.
+
+#### Purposes
+
+- To choose the right tool for removing data based on speed, safety, and side effects.
+- To understand the trade-offs between row-level precision and table-level speed.
+- To avoid accidentally using `TRUNCATE` when rollback or triggers are required.
+
+#### Syntax Rules and Structure
+
+| Aspect | `DELETE` | `TRUNCATE` |
+|--------|----------|------------|
+| Type | DML | DDL |
+| `WHERE` clause | Yes | No |
+| Speed | Slower (row by row) | Faster (page deallocation) |
+| Locking | Row-level locks | Table-level lock |
+| Rollback | Yes (all major RDBMSs) | MySQL: No; PostgreSQL/SQL Server: Yes |
+| Triggers | Fires `DELETE` triggers | Does not fire `DELETE` triggers |
+| Auto-increment | Not reset | Reset (MySQL, SQL Server); PostgreSQL: optional |
+| Transaction log | Logs each row | Minimal logging |
+
+**Syntax rules:**
+
+- `DELETE` supports `WHERE`, `ORDER BY`, and `LIMIT` (MySQL single-table); `TRUNCATE` supports none of these.
+- `TRUNCATE` requires a higher privilege level than `DELETE` (e.g., `DROP` in MySQL).
+
+**Constraints and limitations:**
+
+- `TRUNCATE` cannot be used on a table referenced by a foreign key from another table unless the referencing table is also truncated or the foreign key is dropped.
+- `DELETE` without `WHERE` is functionally equivalent to `TRUNCATE` in end state but is much slower and fires triggers.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – DELETE vs. TRUNCATE rollback behaviour
+
+```sql
+-- Step 1: Create a table and insert rows.
+CREATE TABLE test_delete (id int, val text);
+INSERT INTO test_delete VALUES (1, 'a'), (2, 'b');
+
+-- Step 2: DELETE inside a transaction and roll back.
+BEGIN;
+DELETE FROM test_delete;
+ROLLBACK;
+SELECT count(*) FROM test_delete;
+
+-- Step 3: TRUNCATE inside a transaction and roll back.
+BEGIN;
+TRUNCATE TABLE test_delete;
+ROLLBACK;
+SELECT count(*) FROM test_delete;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 2
+BEGIN
+DELETE 2
+ROLLBACK
+ count
+-------
+     2
+(1 row)
+BEGIN
+TRUNCATE TABLE
+ROLLBACK
+ count
+-------
+     2
+(1 row)
+```
+
+**Why this output appears**: In PostgreSQL, both `DELETE` and `TRUNCATE` are transactional; rolling back restores the rows in both cases. In MySQL, the `TRUNCATE` rollback would fail because `TRUNCATE` causes an implicit commit.
+
+#### Real-World Cases
+
+- **Audit-sensitive tables**: A table with an `AFTER DELETE` trigger that logs deletions must use `DELETE`, not `TRUNCATE`, because `TRUNCATE` bypasses triggers.
+- **Large staging tables**: A nightly ETL job uses `TRUNCATE` to quickly empty a staging table, accepting that the operation cannot be rolled back.
+
+---
+
+### 10. `DROP` vs `TRUNCATE` vs `DELETE`
+
+#### Definitions
+
+**Core Definition**
+`DROP`, `TRUNCATE`, and `DELETE` are three distinct operations for removing data or structures, ranging from removing specific rows (`DELETE`) to emptying a table (`TRUNCATE`) to removing the table entirely (`DROP`).
+
+**Technical Definition**
+`DELETE` removes rows (DML, row-level locks, rollback-able, fires triggers). `TRUNCATE` removes all rows and preserves the table structure (DDL, table lock, faster, may not be rollback-able). `DROP TABLE` removes the table definition, data, indexes, constraints, triggers, and privileges from the database (DDL, table lock, not rollback-able in MySQL, rollback-able in PostgreSQL and SQL Server). The choice depends on whether you need to remove specific rows, empty the table, or eliminate the table entirely.
+
+**Beginner-Friendly Explanation**
+Think of a table as a filing cabinet. `DELETE` removes selected files. `TRUNCATE` empties the entire cabinet but keeps the cabinet itself. `DROP` removes the cabinet and everything in it from the room.
+
+#### Purposes
+
+- To choose the correct operation for the desired scope of removal.
+- To avoid accidentally dropping a table when only the data should be removed.
+- To understand the reversibility and side effects of each operation.
+
+#### Syntax Rules and Structure
+
+| Operation | Removes | Structure preserved? | Rollback? | Triggers? |
+|-----------|---------|----------------------|-----------|-----------|
+| `DELETE` | Specific rows | Yes | Yes | Yes |
+| `TRUNCATE` | All rows | Yes | Depends on RDBMS | No |
+| `DROP TABLE` | Table + data + structure | No | Depends on RDBMS | No |
+
+**Syntax rules:**
+
+- `DELETE FROM t WHERE ...` removes selected rows.
+- `TRUNCATE TABLE t` removes all rows.
+- `DROP TABLE t` removes the table entirely.
+
+**Constraints and limitations:**
+
+- `DROP TABLE` fails if the table is referenced by a foreign key from another table (unless `CASCADE` is used in PostgreSQL).
+- `TRUNCATE` cannot be used with `WHERE`.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – DELETE, TRUNCATE, and DROP in sequence
+
+```sql
+-- Step 1: Create a table.
+CREATE TABLE demo (id int PRIMARY KEY, val text);
+INSERT INTO demo VALUES (1, 'a'), (2, 'b');
+
+-- Step 2: DELETE one row.
+DELETE FROM demo WHERE id = 1;
+
+-- Step 3: TRUNCATE the table.
+TRUNCATE TABLE demo;
+
+-- Step 4: DROP the table.
+DROP TABLE demo;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 2
+DELETE 1
+TRUNCATE TABLE
+DROP TABLE
+```
+
+**Why this output appears**: `DELETE` removes one row, `TRUNCATE` removes all remaining rows and preserves the table, and `DROP` removes the table entirely. After `DROP`, the table no longer exists.
+
+#### Real-World Cases
+
+- **Retention policy**: Old rows are removed with `DELETE`; if the entire dataset is obsolete, `TRUNCATE` is used; if the table itself is no longer needed, `DROP` is used.
+- **Decommissioning**: A legacy table is `DROP`ped after its data is archived, while a staging table is `TRUNCATE`d nightly.
+
+---
+
+### 11. Cascading Deletes
+
+#### Definitions
+
+**Core Definition**
+A cascading delete automatically removes child rows when their parent row is deleted, as specified by the `ON DELETE CASCADE` action on a foreign-key constraint.
+
+**Technical Definition**
+When a foreign key is defined with `ON DELETE CASCADE`, deleting a row in the parent table automatically deletes all rows in the child table that reference it, maintaining referential integrity. Without the cascade action, a `DELETE` that would orphan child rows fails with a foreign-key violation (SQL Server rolls back the entire statement). Cascading deletes can be recursive if multiple levels of foreign keys have `ON DELETE CASCADE`.
+
+**Beginner-Friendly Explanation**
+A cascading delete is like a chain reaction. If you delete a customer, all of that customer's orders are automatically deleted too, so you never have orders pointing to a customer that no longer exists.
+
+#### Purposes
+
+- To maintain referential integrity by automatically removing orphaned child rows.
+- To simplify application logic by letting the database handle dependency cleanup.
+- To ensure that deleting a parent does not leave dangling references.
+
+#### Syntax Rules and Structure
+
+**Foreign key with cascade:**
+
+```sql
+CREATE TABLE child (
+    ...
+    parent_id int REFERENCES parent(id) ON DELETE CASCADE
+);
+```
+
+**Syntax rules:**
+
+- `ON DELETE CASCADE` is specified on the foreign-key constraint in the child table.
+- Other `ON DELETE` actions include `NO ACTION` (default, error if child rows exist), `RESTRICT` (similar to `NO ACTION` but not deferrable in some systems), `SET NULL`, and `SET DEFAULT`.
+
+**Constraints and limitations:**
+
+- Cascading deletes can be slow and lock-intensive on large graphs of related tables.
+- Multiple levels of `ON DELETE CASCADE` can delete far more data than intended; use with caution.
+- In SQL Server, cascading deletes may conflict with other cascading paths, causing an error.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Cascading delete
+
+```sql
+-- Step 1: Create parent and child tables with ON DELETE CASCADE.
+CREATE TABLE customers (id int PRIMARY KEY, name text);
+CREATE TABLE orders (
+    id int PRIMARY KEY,
+    customer_id int REFERENCES customers(id) ON DELETE CASCADE
 );
 
-INSERT INTO products VALUES (1, 'Widget', 19.99, FALSE);
-INSERT INTO products VALUES (2, 'Gadget', 29.99, TRUE);
-INSERT INTO products VALUES (3, 'Gizmo', 9.99, TRUE);
+INSERT INTO customers VALUES (1, 'Acme');
+INSERT INTO orders VALUES (100, 1), (101, 1);
 
--- Delete discontinued products and return them
-DELETE FROM products
-WHERE discontinued = TRUE
-RETURNING product_id, product_name, price;
+-- Step 2: Delete the customer; orders are cascaded.
+DELETE FROM customers WHERE id = 1;
+
+-- Step 3: Verify that the orders are gone.
+SELECT * FROM orders;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| product_id | product_name | price |
-|------------|--------------|-------|
-| 2          | Gadget       | 29.99 |
-| 3          | Gizmo        | 9.99  |
+```text
+CREATE TABLE
+CREATE TABLE
+INSERT 0 1
+INSERT 0 2
+DELETE 1
+ id | customer_id
+----+-------------
+(0 rows)
+```
 
-**Explanation:** The RETURNING clause shows the deleted rows in a single statement.
+**Why this output appears**: The `ON DELETE CASCADE` clause automatically deletes the two `orders` rows when the `customers` row is deleted, leaving the `orders` table empty.
+
+#### Real-World Cases
+
+- **User account deletion**: Deleting a user cascades to their posts, comments, and sessions, ensuring no orphaned data remains.
+- **Order cancellation**: Deleting an order cascades to its line items, keeping the order history consistent.
+
+---
+
+### 12. Delete Performance
+
+#### Definitions
+
+**Core Definition**
+Delete performance is the measure of how efficiently a `DELETE` statement executes, influenced by the number of rows, locking, transaction log volume, index maintenance, and batching strategy.
+
+**Technical Definition**
+`DELETE` performance is dominated by several factors: (1) **rows affected**—deleting many rows in one transaction holds locks for a long time and generates large transaction logs; (2) **locking**—`DELETE` acquires row-level locks, which can block concurrent writes and, in some systems, escalate to table locks; (3) **triggers**—every deleted row fires applicable triggers, adding overhead; (4) **index maintenance**—each deletion updates all indexes on the table; and (5) **WAL/redo volume**—large deletes generate significant write-ahead log traffic, causing replication lag and I/O pressure. The universal mitigation is **batching**: deleting rows in small chunks (typically 1,000–10,000 rows) with a commit after each batch, optionally with a short sleep between batches to reduce I/O demand. MySQL provides `LIMIT row_count` for single-table deletes to cap rows per statement; SQL Server uses `DELETE TOP (N)` in a `WHILE` loop; PostgreSQL uses a subquery with `LIMIT` or a CTE to select the batch of IDs to delete.
+
+**Beginner-Friendly Explanation**
+Deleting a million rows in one statement is slow and risky: it locks the table for a long time, fills the transaction log, and can cause replication to fall behind. Breaking the delete into batches of 1,000–10,000 rows, committing each batch, and pausing briefly between batches keeps the database responsive and safe.
+
+#### Purposes
+
+- To delete large volumes of data without causing lock contention or replication lag.
+- To reduce transaction log growth and avoid long-running transactions.
+- To maintain predictable performance for production workloads.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL batch delete:**
 
 ```sql
--- SQL Server: OUTPUT example
-DELETE FROM products
-OUTPUT DELETED.product_id, DELETED.product_name, DELETED.price
-WHERE discontinued = 1;
+DELETE FROM logs
+WHERE id IN (
+    SELECT id FROM logs
+    WHERE created_at < now() - interval '90 days'
+    LIMIT 5000
+);
+-- commit; repeat
 ```
 
-**Expected Output (SQL Server):** Same as above.
+**MySQL batch delete:**
 
 ```sql
--- Archiving deleted rows (PostgreSQL)
-INSERT INTO product_archive
-SELECT * FROM products WHERE discontinued = TRUE
-RETURNING *;
--- Or more practically:
-WITH deleted AS (
-    DELETE FROM products
-    WHERE discontinued = TRUE
-    RETURNING *
-)
-INSERT INTO product_archive
-SELECT * FROM deleted;
+DELETE FROM logs
+WHERE created_at < NOW() - INTERVAL 90 DAY
+LIMIT 1000;
+-- repeat until affected rows = 0
 ```
 
-**Real-World Cases:**
+**SQL Server batch delete:**
 
-- **Auditing:** Capturing deleted rows for audit trails.
-- **Archiving:** Moving deleted rows to a history table.
-- **Application development:** Getting deleted values without a second query.
-- **Data synchronization:** Feeding deleted values into other systems.
+```sql
+WHILE 1 = 1
+BEGIN
+    DELETE TOP (5000) FROM logs
+    WHERE created_at < DATEADD(DAY, -90, GETDATE());
+    IF @@ROWCOUNT < 5000 BREAK;
+END
+```
 
-**References:**
+**Syntax rules:**
 
-- PostgreSQL: Returning Data from Modified Rows - https://www.postgresql.org/docs/19/dml-returning.html
-- Microsoft Learn: OUTPUT Clause - https://learn.microsoft.com/en-us/sql/t-sql/queries/output-clause-transact-sql
+- Each batch should be its own transaction (or autocommitted) to release locks promptly.
+- A brief sleep (50–200 ms) between batches reduces I/O pressure and allows autovacuum or other maintenance to run.
+- The `WHERE` clause should use an indexed column to avoid scanning the entire table for each batch.
 
+**Constraints and limitations:**
 
-## Summary Tables
+- `LIMIT` without an indexed `WHERE` clause can cause full-table scans and defeat the purpose of batching.
+- In SQL Server, `TOP` rows are not ordered; without a key-based `WHERE` or `ORDER BY`, successive batches may miss rows or revisit the same rows.
+- Dropping indexes before a large delete and recreating them afterwards can be faster but requires exclusive access to the table.
 
-### DELETE Syntax Comparison Across Databases
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-| Feature | PostgreSQL | SQL Server | MySQL | Oracle |
-|---------|-----------|------------|-------|--------|
-| Basic DELETE | ✓ | ✓ | ✓ | ✓ |
-| DELETE ... USING | ✓ | ✗ | ✗ | ✗ |
-| Multi-table DELETE | ✗ | ✗ | ✓ | ✗ |
-| DELETE ... FROM (join) | ✗ | ✓ | ✗ | ✗ |
-| RETURNING clause | ✓ | ✗ | ✗ | ✓ |
-| OUTPUT clause | ✗ | ✓ | ✗ | ✗ |
-| LIMIT clause | ✗ | ✗ | ✓ | ✗ (use ROWNUM) |
-| ORDER BY in DELETE | ✗ | ✗ | ✓ | ✗ |
-| TOP clause | ✗ | ✓ | ✗ | ✗ |
-| Safe updates mode | ✗ | ✗ | ✓ | ✗ |
+##### Example 1: MySQL – Batched delete with LIMIT
 
-### DELETE vs. TRUNCATE Comparison
+```sql
+-- Step 1: Create a table with many rows.
+CREATE TABLE logs (id INT PRIMARY KEY, created_at DATE);
+INSERT INTO logs SELECT seq, '2023-01-01' FROM seq_1_to_10000;
 
-| Feature | DELETE | TRUNCATE |
-|---------|--------|----------|
-| WHERE clause | ✓ | ✗ |
-| Transaction log | Row-by-row | Page deallocations |
-| Triggers | Fire | Do not fire |
-| Identity reset | ✗ | ✓ |
-| Rollback | ✓ (in transaction) | Varies by database |
-| FK constraints | Works with CASCADE | Cannot be used |
-| Speed | Slower | Faster |
-| Privilege | DELETE | ALTER (SQL Server) / DROP (MySQL) |
+-- Step 2: Delete in batches of 1000 (conceptual loop; run repeatedly).
+DELETE FROM logs WHERE created_at < '2024-01-01' LIMIT 1000;
 
-### ON DELETE Actions Comparison
+-- Step 3: Verify progress.
+SELECT COUNT(*) AS remaining FROM logs WHERE created_at < '2024-01-01';
+```
 
-| Action | Behavior | Requirements |
-|--------|----------|--------------|
-| NO ACTION | Raises error, rolls back | None (default) |
-| CASCADE | Deletes child rows | None |
-| SET NULL | Sets FK to NULL | FK columns must be nullable |
-| SET DEFAULT | Sets FK to default | FK columns must have defaults |
+**Expected output (after one batch):**
+
+```text
+Query OK, 10000 rows affected (0.05 sec)
+Query OK, 1000 rows affected (0.01 sec)
+Rows matched: 1000  Changed: 1000  Warnings: 0
++-----------+
+| remaining |
++-----------+
+|      9000 |
++-----------+
+```
+
+**Why this output appears**: Each `DELETE ... LIMIT 1000` removes 1,000 rows and commits, releasing locks. Repeating the statement eventually removes all 10,000 rows without a single long-running transaction.
+
+#### Real-World Cases
+
+- **Time-series purge**: Old log rows are deleted in daily batches of 5,000 with a short sleep between batches to keep replication lag under control.
+- **Data archival**: Rows older than the retention period are archived to a cold-storage table and then deleted in batches from the hot table.
+
+---
+
+### 13. Safe Deletion Strategies
+
+#### Definitions
+
+**Core Definition**
+Safe deletion strategies are the practices and patterns used to prevent accidental or destructive `DELETE` operations, including mandatory `WHERE` clauses, pre-checks, batching, soft deletes, and database-level safeguards.
+
+**Technical Definition**
+Safe deletion strategies include: (1) **mandatory `WHERE` clause**—unconditional `DELETE` is prohibited in production guidelines; MySQL's `sql_safe_updates` and PostgreSQL's `pg-safeupdate` enforce this at the session level; (2) **pre-check the affected rows**—run a `SELECT COUNT(*)` with the same `WHERE` clause before executing the delete; (3) **batching**—limit the number of rows deleted per statement to control locking and replication impact; (4) **soft deletes**—add a `deleted_at` timestamp column and mark rows as deleted instead of physically removing them, allowing recovery and preserving foreign-key references; (5) **use transactions**—wrap the delete in a transaction and `ROLLBACK` to test before committing; (6) **set lock timeouts**—`lock_timeout` (PostgreSQL) or `innodb_lock_wait_timeout` (MySQL) to prevent indefinite blocking; and (7) **back up critical data** or use partitioning to make large deletes reversible by dropping partitions.
+
+**Beginner-Friendly Explanation**
+Safe deletion means never running a `DELETE` without a `WHERE` clause, checking how many rows will be affected before you commit, breaking large deletes into batches, and considering a “soft delete” that just marks rows as hidden instead of actually removing them.
+
+#### Purposes
+
+- To prevent accidental full-table deletes that destroy data.
+- To limit the blast radius of a mistake.
+- To keep production systems responsive during data removal.
+- To retain the ability to recover deleted data.
+
+#### Syntax Rules and Structure
+
+**Pre-check pattern:**
+
+```sql
+-- Step 1: Check the affected rows.
+SELECT COUNT(*) FROM table_name WHERE condition;
+
+-- Step 2: Execute the delete.
+DELETE FROM table_name WHERE condition;
+```
+
+**Soft delete pattern (PostgreSQL):**
+
+```sql
+ALTER TABLE orders ADD COLUMN deleted_at timestamptz;
+
+-- "Delete" a row:
+UPDATE orders SET deleted_at = now() WHERE id = 42;
+
+-- Exclude soft-deleted rows:
+CREATE VIEW active_orders AS SELECT * FROM orders WHERE deleted_at IS NULL;
+```
+
+**MySQL `sql_safe_updates`:**
+
+```sql
+SET SESSION sql_safe_updates = 1;
+-- Now DELETE without a WHERE clause or LIMIT fails.
+```
+
+**Component breakdown:**
+
+| Practice | Implementation |
+|----------|----------------|
+| Mandatory `WHERE` | `sql_safe_updates`, `pg-safeupdate`, code review |
+| Pre-check row count | `SELECT COUNT(*)` with the same `WHERE` |
+| Batching | `LIMIT` / `TOP` / subquery batches |
+| Soft delete | `deleted_at` timestamp + views |
+| Lock timeout | `SET lock_timeout = '3s'` (PostgreSQL) |
+| Backup / PITR | Regular backups and point-in-time recovery |
+
+**Syntax rules:**
+
+- `sql_safe_updates` requires a `WHERE` clause that uses a key column or a `LIMIT` clause.
+- `pg-safeupdate` prevents `DELETE` and `UPDATE` without a `WHERE` clause.
+- Soft-deleted rows must be excluded from queries, typically via a view or a `WHERE deleted_at IS NULL` predicate.
+
+**Constraints and limitations:**
+
+- `sql_safe_updates` can be disabled per session; it is not a hard security boundary.
+- Pre-checks are point-in-time; the actual delete may affect a different number of rows if the data changes between the check and the delete.
+- Soft deletes increase storage usage and require a scheduled hard-delete job to purge old soft-deleted rows.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Soft delete and active view
+
+```sql
+-- Step 1: Add a deleted_at column to an existing table.
+ALTER TABLE orders ADD COLUMN deleted_at timestamptz;
+
+-- Step 2: "Delete" a row by setting deleted_at.
+UPDATE orders SET deleted_at = now() WHERE id = 42;
+
+-- Step 3: Create a view that excludes soft-deleted rows.
+CREATE VIEW active_orders AS
+SELECT * FROM orders WHERE deleted_at IS NULL;
+
+-- Step 4: Verify that the soft-deleted row is hidden from the view.
+SELECT COUNT(*) FROM active_orders;
+SELECT COUNT(*) FROM orders WHERE deleted_at IS NOT NULL;
+```
+
+**Expected output:**
+
+```text
+ALTER TABLE
+UPDATE 1
+CREATE VIEW
+ count
+-------
+   999
+(1 row)
+ count
+-------
+     1
+(1 row)
+```
+
+**Why this output appears**: The soft-deleted row (`id = 42`) is excluded from `active_orders` but remains physically present in the `orders` table, allowing recovery or audit access.
+
+#### Real-World Cases
+
+- **Regulatory compliance**: Financial records are soft-deleted to retain an audit trail while hiding them from normal application views.
+- **User-facing deletes**: A user “deletes” a post, but the row is retained with a `deleted_at` timestamp for moderation and recovery.
+- **Large-scale cleanup**: Old data is soft-deleted first, then a scheduled job hard-deletes it in batches during low-traffic periods.
 
 ---
 
 ## References
 
-- PostgreSQL: DELETE - https://www.postgresql.org/docs/14/sql-delete.html
-- PostgreSQL: Returning Data from Modified Rows - https://www.postgresql.org/docs/19/dml-returning.html
-- PostgreSQL: Transactions - https://www.postgresql.org/docs/current/tutorial-transactions.html
-- MySQL: DELETE Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/delete.html
-- MySQL: FOREIGN KEY Constraints - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/create-table-foreign-keys.html
-- MySQL: TRUNCATE TABLE Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/truncate-table.html
-- MySQL: Safe Updates Mode - https://downloads.mysql.com/docs/refman-5.6-en.a4.pdf
-- MySQL: START TRANSACTION - https://dev.mysql.com/doc/refman/8.0/en/commit.html
-- Microsoft Learn: DELETE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/delete-transact-sql
-- Microsoft Learn: TRUNCATE TABLE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/truncate-table-transact-sql
-- Microsoft Learn: CREATE TABLE (Transact-SQL) - FOREIGN KEY - https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-transact-sql
-- Microsoft Learn: OUTPUT Clause - https://learn.microsoft.com/en-us/sql/t-sql/queries/output-clause-transact-sql
-- Microsoft Learn: MERGE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/merge-transact-sql
-- Microsoft Learn: Soft Delete Pattern - https://learn.microsoft.com/en-us/azure/architecture/patterns/soft-delete
-- Oracle: DELETE Statement - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/DELETE.html
-- Oracle: RETURNING INTO Clause - https://docs.oracle.com/en/database/oracle/oracle-database/19/lnpls/RETURNING-INTO-clause.html
+- PostgreSQL Documentation – DELETE – https://www.postgresql.org/docs/17/sql-delete.html
+- MySQL 8.0 Reference Manual – DELETE Statement – https://dev.mysql.com/doc/refman/26.7/en/delete.html
+- Microsoft Learn – DELETE (Transact-SQL) – https://github.com/microsoftdocs/sql-docs/blob/4c7374e97347c3723cd42ea99fb540a4d09e1ae6/docs/t-sql/statements/delete-transact-sql.md
+- LearnSQL – Comparing TRUNCATE TABLE, DELETE, and DROP TABLE in SQL – https://learnsql.com/blog/difference-between-truncate-delete-and-drop-table-in-sql/
+- Supabase Docs – Deleting data and dropping objects safely – https://supabase.com/docs/guides/database/postgres/data-deletion
+- Redgate – How to Monitor and Optimize Batched Deletion Processes in SQL Server – https://www.red-gate.com/blog/how-to-monitor-and-optimize-batched-deletion-processes-in-sql-server
+- Infobip Developers Hub – Delete without DELETE: Smarter strategies for removing high-volume, short-lived data – https://www.infobip.com/developers/blog/delete-without-delete-smarter-strategies-for-removing-high-volume-short-lived-data
+- PostgreSQL Mailing List – Need an idea to operate massive delete operation on big size table – https://www.postgresql.org/message-id/...
+- GitHub – SQL Server batch delete patterns – https://github.com/...
+- Oracle Documentation – ON DELETE CASCADE – https://docs.oracle.com/...
+- Microsoft Learn – Cascading Referential Integrity Constraints – https://learn.microsoft.com/...

@@ -1,1085 +1,914 @@
 # Python Comprehensions: A Comprehensive Programming Cheat Sheet
 
+---
+
 ## Topic Overview
 
 ### Definitions
 
 **Core Definition**
-A comprehension is a concise syntactic construct in Python for building a new collection (list, set, or dictionary) by applying an expression to each item in an iterable, optionally filtering with conditions.
+
+A comprehension is a concise, declarative syntax in Python for creating a new collection (list, set, or dictionary) or a lazy iterator (generator expression) by transforming and filtering elements from one or more iterables in a single expression.
 
 **Technical Definition**
-Comprehensions are a syntactical extension to Python that provide a more concise way to create lists, sets, and dictionaries in situations where `map()`, `filter()`, and/or nested loops would otherwise be used. They consist of a single expression followed by at least one `for` clause and zero or more `for` or `if` clauses. The elements of the new collection are produced by considering each `for` or `if` clause as a block, nesting from left to right, and evaluating the expression each time the innermost block is reached. Python supports four types of comprehensions: list, set, dictionary, and generator expressions.
+
+Comprehensions are syntactic constructs that combine iteration, optional filtering, and expression evaluation into a single statement. Python supports four primary forms: list comprehensions `[expr for x in it]`, set comprehensions `{expr for x in it}`, dictionary comprehensions `{k: v for x in it}`, and generator expressions `(expr for x in it)`. List comprehensions were introduced by PEP 202 in Python 2.0. Dictionary comprehensions were standardized by PEP 274 in Python 2.7 and 3.0, with set comprehensions introduced alongside them. Generator expressions were introduced by PEP 289 in Python 2.4 to avoid materializing entire lists in memory. Comprehensions have their own function-like scope; the loop variable does not leak into the enclosing namespace in Python 3.
 
 **Beginner-Friendly Explanation**
-A comprehension is a shortcut for building a collection in a single line. Instead of writing a loop that appends items one by one, you write a single expression that describes what you want. For example, `[x**2 for x in range(10)]` creates a list of squares without an explicit loop. Comprehensions are not just shorter—they're often faster and more readable than the equivalent loop-based code.
+
+A comprehension is a shortcut for building a collection. Instead of writing a multi-line `for` loop that creates an empty list and appends to it, you write a single expression that reads almost like English: “give me `x * x` for each `x` in `numbers`.” You can add a condition to filter items, nest multiple loops, or even build dictionaries and sets. Once you learn the pattern, comprehensions make your code shorter and often faster.
 
 ### Key Characteristics
 
-| Characteristic | Description |
-|---|---|
-| **Concise Syntax** | Expresses iteration, transformation, and filtering in a single line |
-| **Eager Evaluation** | List, set, and dict comprehensions build the entire collection in memory immediately |
-| **Variable Isolation** | In Python 3, the loop variable does not leak into the enclosing scope |
-| **Optimized Performance** | Comprehensions are optimized in the Python interpreter compared to manual loops |
-| **Nesting Support** | Multiple `for` and `if` clauses can be combined for complex transformations |
-| **Collection-Specific** | Square brackets produce lists, curly braces produce sets or dicts |
+- **Concise and Declarative**: Expresses *what* to build rather than *how* to loop and append.
+- **Four Variants**: List (`[...]`), set (`{...}`), dictionary (`{k: v ...}`), and generator (`(...)`) expressions.
+- **Optional Filtering**: An `if` clause restricts which items are included.
+- **Nestable**: Multiple `for` clauses allow iteration over multiple iterables.
+- **Performance**: CPython compiles list comprehensions into optimized bytecode that runs significantly faster than equivalent `for` loops.
+- **Scope-Isolated**: The loop variable does not leak into the surrounding scope (Python 3).
+- **Lazy or Eager**: Generator expressions are lazy; list, set, and dict comprehensions are eager.
 
 ### Prerequisites
 
-- **Basic Python syntax**: variables, expressions, and statements
-- **Loop fundamentals**: `for` loops and iteration over iterables
-- **Conditional statements**: `if` and `if-else` for filtering and mapping
-- **Data structures**: lists, sets, and dictionaries
-- **Understanding of iterables**: ranges, strings, lists, and generator expressions
+- Basic understanding of Python `for` loops and `if` statements.
+- Familiarity with iterables (lists, tuples, strings, ranges, dictionaries).
+- Knowledge of Python expressions and operators.
+- Awareness of function calls and method invocation.
 
 ### Related Programming Areas
 
-- **Generator Expressions**: Lazy evaluation of sequences without building a collection
-- **Functional Programming**: `map()` and `filter()` as alternatives to comprehensions
-- **Iterators and Iterables**: The iteration protocol underlying comprehensions
-- **Lambda Expressions**: Often used with `map()`/`filter()` alternatives
-- **Data Transformation**: ETL pipelines and data cleaning
+- **Functional Programming**: Comprehensions replace `map()` and `filter()` for many use cases.
+- **Data Processing**: Transforming, filtering, and aggregating datasets.
+- **Data Science**: Building feature lists, parsing records, and creating lookup tables.
+- **Web Development**: Extracting and reshaping API or database results.
+- **Performance Optimization**: Using generator expressions to reduce memory usage.
 
-### Core Concepts / Features
+---
 
-1. **List Comprehensions** (Building lists concisely)
-2. **Set Comprehensions** (Building sets with automatic deduplication)
-3. **Dictionary Comprehensions** (Building key-value mappings)
-4. **Conditional Comprehensions** (Filtering with `if` vs. mapping with `if-else`)
-5. **Nested Comprehensions** (Flattening matrices vs. creating nested structures)
-6. **Side-Effects and Scope Leakage** (Python 3 variable isolation)
-7. **Readability and Performance Considerations** (Comprehensions vs. `map()`/`filter()` vs. loops)
+## Core Concepts / Features
 
+---
 
-## Core Concept 1: List Comprehensions
+### 1. List Comprehensions
 
-### Definitions
+#### Definitions
 
 **Core Definition**
-A list comprehension is a concise syntax for creating a new list by applying an expression to each item in an iterable, optionally filtering with a condition.
+
+A list comprehension is an expression that creates a new list by applying an expression to each item of an iterable, optionally filtering items with a condition.
 
 **Technical Definition**
-List comprehensions provide a more concise way to create lists in situations where `map()` and `filter()` and/or nested loops would currently be used. The syntax is `[expression for item in iterable]` or `[expression for item in iterable if condition]`. The resulting list is built by evaluating `expression` for each item that satisfies the optional condition. List comprehensions were introduced in Python 2.0 via PEP 202 and have become one of Python's most distinctive and widely used features.
+
+The general form is `[expression for item in iterable]` or `[expression for item in iterable if condition]`. It is semantically equivalent to building a list with a `for` loop and `append()`, but is compiled into optimized bytecode and evaluated in its own scope. List comprehensions are eager: the entire list is materialized in memory.
 
 **Beginner-Friendly Explanation**
-A list comprehension is a one-line way to build a list from another sequence. Instead of writing a loop that appends items, you write what you want directly: `[x * 2 for x in numbers]` gives you a new list with every number doubled. You can also filter: `[x for x in numbers if x > 0]` keeps only the positive numbers.
 
-### Purposes
+A list comprehension is a one-line way to build a list. You write `[n ** 2 for n in numbers]` and Python squares every number and collects the results into a new list.
 
-- **To create lists concisely** from existing iterables without explicit loops
-- **To replace `map()` and `filter()`** with more readable inline expressions
-- **To transform and filter data** in a single expression
-- **To improve code readability** when the transformation is simple
-- **To build lists dynamically** from computations or input
+#### Purposes
 
-### Syntax Rules and Structure
+- To create lists concisely without boilerplate loop-and-append code.
+- To transform and filter data in a single readable expression.
+- To replace simple uses of `map()` and `filter()` with clearer syntax.
+- To improve performance for simple list-building tasks.
 
-**Complete General Syntax**
+#### Syntax Rules and Structure
 
 ```
 [expression for item in iterable]
 [expression for item in iterable if condition]
 [expression for item1 in iterable1 for item2 in iterable2]
-[expression for item in iterable if cond1 if cond2]
 ```
 
-**Breakdown:**
-- `expression`: The value to include in the new list (can use `item`).
-- `for item in iterable`: The iteration clause (one or more).
-- `if condition`: Optional filter; only items satisfying the condition are included.
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `expression` | The value to include in the new list. |
+| `for item in iterable` | Iterates over the source iterable. |
+| `if condition` | Optional filter; only items satisfying the condition are included. |
+| Multiple `for` clauses | Create nested loops (last iterable varies fastest). |
 
 **Syntax Rules**
 
-| Rule | Description |
-|---|---|
-| Expression first | The output expression comes before the `for` keyword |
-| Scope isolation | Loop variables are local to the comprehension (Python 3) |
-| Multiple clauses | Multiple `for` and `if` clauses allowed; applied left to right |
-| Tuple expressions | Must be parenthesised: `[(x, y) for ...]` |
-| No statements | Only expressions allowed; no `break`, `continue`, or assignment statements |
+- The expression can be any valid Python expression.
+- Multiple `for` and `if` clauses are allowed.
+- The loop variable is scoped to the comprehension.
+- A list comprehension always returns a new list.
 
 **Constraints and Limitations**
 
-- **Memory**: Creates the entire list in memory at once; use generator expressions for lazy evaluation.
-- **Readability**: Overly complex comprehensions should be replaced with explicit loops.
-- **No `break` or `continue`**: Comprehensions do not support loop control statements.
-- **Variable leakage**: In Python 2, the loop variable leaked into the enclosing scope; this was fixed in Python 3.
+- Complex or deeply nested comprehensions reduce readability.
+- Comprehensions are eager; they materialize the entire list.
+- Side effects inside comprehensions are discouraged.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Basic List Comprehension**
+**Example 1: Basic and Filtered List Comprehensions**
 
 ```python
-# Step 1: Squares using a loop
-squares_loop = []
-for x in range(6):
-    squares_loop.append(x ** 2)
-print(f"Loop: {squares_loop}")
+numbers = [1, 2, 3, 4, 5, 6]
 
-# Step 2: Squares using a list comprehension
-squares_comp = [x ** 2 for x in range(6)]
-print(f"Comp: {squares_comp}")
+# Basic transformation
+squares = [n ** 2 for n in numbers]
+print(squares)  # [1, 4, 9, 16, 25, 36]
 
-# Step 3: With a filter condition
-even_squares = [x ** 2 for x in range(6) if x % 2 == 0]
-print(f"Even squares: {even_squares}")
+# Filtering with if
+evens = [n for n in numbers if n % 2 == 0]
+print(evens)    # [2, 4, 6]
 ```
 
 **Expected Output:**
+
 ```
-Loop: [0, 1, 4, 9, 16, 25]
-Comp: [0, 1, 4, 9, 16, 25]
-Even squares: [0, 4, 16]
-```
-
-**Breakdown:** The comprehension produces the same result as the loop but in a single expression. The `if` clause filters items before the expression is applied.
-
-**Example 2: Transforming Strings**
-
-```python
-# Step 1: Define a list of words
-words = ["hello", "world", "python", "code"]
-
-# Step 2: Uppercase each word
-upper_words = [word.upper() for word in words]
-print(upper_words)
-
-# Step 3: Filter by length and transform
-long_upper = [word.upper() for word in words if len(word) > 4]
-print(long_upper)
+[1, 4, 9, 16, 25, 36]
+[2, 4, 6]
 ```
 
-**Expected Output:**
-```
-['HELLO', 'WORLD', 'PYTHON', 'CODE']
-['HELLO', 'WORLD', 'PYTHON']
-```
+**Step-by-Step Breakdown:**
 
-**Breakdown:** The expression `word.upper()` transforms each word. The `if` clause keeps only words longer than 4 characters.
+1. `[n ** 2 for n in numbers]` iterates over `numbers`, squares each `n`, and collects the results.
+2. `[n for n in numbers if n % 2 == 0]` includes only even numbers.
 
-**Example 3: Multiple `for` Clauses**
+**Why the Output is Produced:**
 
-```python
-# Step 1: Cartesian product
-pairs = [(x, y) for x in [1, 2, 3] for y in ['a', 'b']]
-print(pairs)
+The comprehension applies the expression to each item and optionally filters with the condition.
 
-# Step 2: With filtering
-filtered = [(x, y) for x in [1, 2, 3] for y in ['a', 'b'] if x % 2 == 1]
-print(filtered)
-```
+#### Real-World Cases
 
-**Expected Output:**
-```
-[(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b'), (3, 'a'), (3, 'b')]
-[(1, 'a'), (1, 'b'), (3, 'a'), (3, 'b')]
-```
+- **Data Cleaning**: Converting strings to numbers, stripping whitespace, filtering invalid entries.
+- **Feature Engineering**: Computing derived values from raw data.
+- **API Response Parsing**: Extracting specific fields from a list of dictionaries.
 
-**Breakdown:** Multiple `for` clauses nest like nested loops. The last `for` varies fastest. The `if` clause filters the combined results.
+---
 
-### Real-World Cases with Explanation
+### 2. Set Comprehensions
 
-**Case 1: Data Cleaning**
-
-```python
-raw_data = ["  Alice  ", " bob", "Charlie  ", ""]
-cleaned = [name.strip() for name in raw_data if name.strip()]
-# ['Alice', 'bob', 'Charlie']
-```
-
-**Why it matters:** List comprehensions cleanly strip whitespace and remove empty strings in one expression.
-
-**Case 2: Extracting Fields from Records**
-
-```python
-users = [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
-names = [user["name"] for user in users]
-# ['Alice', 'Bob']
-```
-
-**Why it matters:** Comprehensions extract specific fields from lists of dictionaries, a common pattern in data processing.
-
-
-## Core Concept 2: Set Comprehensions
-
-### Definitions
+#### Definitions
 
 **Core Definition**
-A set comprehension is a concise syntax for creating a set by applying an expression to each item in an iterable, with automatic deduplication of the results.
+
+A set comprehension is an expression that creates a new set by applying an expression to each item of an iterable, optionally filtering items.
 
 **Technical Definition**
-Set comprehensions are like list comprehensions but with braces replacing the square brackets, and they produce sets instead of lists. The syntax is `{expression for item in iterable [if condition]}`. Sets cannot contain duplicate elements, so the resulting set automatically eliminates duplicates. Set comprehensions were introduced in Python 2.7 alongside dictionary comprehensions.
+
+The syntax is `{expression for item in iterable}` or with an `if` clause. Set comprehensions automatically enforce uniqueness, discarding duplicate results. They were introduced alongside dictionary comprehensions in Python 2.7 and 3.0.
 
 **Beginner-Friendly Explanation**
-A set comprehension is like a list comprehension but produces a set instead of a list. The key difference: duplicates are automatically removed. If you want a collection of unique values, a set comprehension is the natural choice.
 
-### Purposes
+A set comprehension is like a list comprehension, but it produces a set—so duplicates are automatically removed.
 
-- **To create sets concisely** from existing iterables
-- **To deduplicate and transform** in one expression
-- **To filter elements** while building a set
-- **To replace explicit loops** with a more readable expression
-- **To normalise data** (e.g., lowercase emails) and remove duplicates simultaneously
+#### Purposes
 
-### Syntax Rules and Structure
+- To create sets concisely while transforming and filtering data.
+- To deduplicate results automatically.
+- To support fast membership testing on the resulting collection.
 
-**Complete General Syntax**
+#### Syntax Rules and Structure
 
 ```
 {expression for item in iterable}
 {expression for item in iterable if condition}
 ```
 
-**Breakdown:**
-- `expression`: The value to include in the set (can use `item`).
-- `for item in iterable`: The iteration clause.
-- `if condition`: Optional filter.
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `{...}` | Curly braces denote a set comprehension. |
+| `expression` | The value to include in the set. |
+| `for item in iterable` | Iterates over the source. |
+| `if condition` | Optional filter. |
 
 **Syntax Rules**
 
-| Rule | Description |
-|---|---|
-| Curly braces | Set comprehensions use `{}` |
-| Unique results | Duplicates are automatically removed |
-| Hashable results | The expression must produce hashable values |
-| Scope isolation | Loop variables are local to the comprehension |
-| Any iterable | Can iterate over lists, tuples, strings, ranges, etc. |
+- The result is a `set`; duplicate values are removed.
+- Elements must be hashable.
+- Same nesting and filtering rules as list comprehensions.
 
 **Constraints and Limitations**
 
-- **Memory**: Creates the entire set in memory at once.
-- **Unhashable elements**: The expression cannot produce unhashable values (lists, dicts).
-- **No `break` or `continue`**: Comprehensions do not support loop control statements.
+- Sets are unordered; you cannot rely on element order.
+- Unhashable elements (e.g., lists) cannot be included.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Basic Set Comprehension**
-
-```python
-# Step 1: Unique squares from a list with duplicates
-numbers = [1, 2, 2, 3, 3, 3, 4]
-unique_squares = {x ** 2 for x in numbers}
-print(unique_squares)
-
-# Step 2: With filter
-even_unique = {x for x in numbers if x % 2 == 0}
-print(even_unique)
-```
-
-**Expected Output:**
-```
-{1, 4, 9, 16}
-{2, 4}
-```
-
-**Breakdown:** The set comprehension automatically removes duplicate results. The `if` clause filters items before the expression is applied.
-
-**Example 2: Extracting Unique Characters**
+**Example 1: Set Comprehension with Deduplication**
 
 ```python
-# Step 1: Unique vowels from a string
-text = "abracadabra"
-vowels = {c for c in text if c in 'aeiou'}
-print(vowels)
+words = ["apple", "banana", "apple", "cherry", "banana"]
 
-# Step 2: Unique words from a sentence
-sentence = "the quick brown fox jumps over the lazy dog"
-unique_words = {word for word in sentence.split()}
-print(unique_words)
+# Unique first letters
+first_letters = {w[0] for w in words}
+print(first_letters)  # {'a', 'b', 'c'} (order may vary)
+
+# Unique word lengths
+lengths = {len(w) for w in words}
+print(lengths)        # {5, 6} (order may vary)
 ```
 
-**Expected Output:**
+**Expected Output (order may vary):**
+
 ```
-{'a'}
-{'the', 'quick', 'brown', 'fox', 'jumps', 'over', 'lazy', 'dog'}
-```
-
-**Breakdown:** Set comprehensions naturally extract unique elements. The first example finds only `'a'`; the second deduplicates the words.
-
-**Example 3: Data Normalisation and Deduplication**
-
-```python
-# Step 1: Raw emails with mixed casing
-raw_emails = [
-    "Alice@Gmail.COM",
-    "bob@yahoo.com",
-    "ALICE@gmail.com",
-    "carol@outlook.com"
-]
-
-# Step 2: Normalise and deduplicate
-unique_emails = {email.lower() for email in raw_emails}
-print(unique_emails)
+{'a', 'b', 'c'}
+{5, 6}
 ```
 
-**Expected Output:**
-```
-{'alice@gmail.com', 'bob@yahoo.com', 'carol@outlook.com'}
-```
+**Step-by-Step Breakdown:**
 
-**Breakdown:** The comprehension lowercases each email and deduplicates automatically. The two "Alice" variants collapse into one after lowercasing.
+1. `{w[0] for w in words}` extracts the first letter of each word and collects unique letters.
+2. `{len(w) for w in words}` collects unique word lengths.
 
-### Real-World Cases with Explanation
+**Why the Output is Produced:**
 
-**Case 1: Unique Tags**
+The set comprehension automatically removes duplicates, leaving only unique values.
 
-```python
-tags = ["python", "programming", "python", "code", "programming"]
-unique_tags = {tag.strip().lower() for tag in tags}
-# {'python', 'programming', 'code'}
-```
+#### Real-World Cases
 
-**Why it matters:** Set comprehensions normalise and deduplicate tags in one expression.
+- **Tag Extraction**: Collecting unique tags from a list of posts.
+- **Vocabulary Building**: Extracting unique words from text.
+- **Deduplication**: Removing duplicate IDs or email addresses.
 
-**Case 2: Finding Unique Values Across Records**
+---
 
-```python
-records = [{"city": "NYC"}, {"city": "LA"}, {"city": "NYC"}]
-unique_cities = {r["city"] for r in records}
-# {'NYC', 'LA'}
-```
+### 3. Dictionary Comprehensions
 
-**Why it matters:** Extracting unique values from nested records is a common data analysis task.
-
-
-## Core Concept 3: Dictionary Comprehensions
-
-### Definitions
+#### Definitions
 
 **Core Definition**
-A dictionary comprehension is a concise syntax for creating a dictionary by applying expressions to each item in an iterable, producing key-value pairs.
+
+A dictionary comprehension is an expression that creates a new dictionary by evaluating a key expression and a value expression for each item of an iterable, optionally filtering items.
 
 **Technical Definition**
-Dict comprehensions are just like list comprehensions, except that they produce Python dictionary objects instead of list objects. The syntax uses curly braces instead of square braces, and the left part before the `for` keyword expresses both a key and a value, separated by a colon. Dict comprehensions were introduced in Python 2.7 and 3.0 via PEP 274.
+
+The syntax is `{key_expr: value_expr for item in iterable}` or with an `if` clause. Dictionary comprehensions are similar to list comprehensions but produce dictionary objects; they were standardized by PEP 274. The part before the `for` keyword expresses both a key and a value, separated by a colon.
 
 **Beginner-Friendly Explanation**
-A dictionary comprehension is a one-line way to build a dictionary from another sequence. You specify both the key and the value before the `for`: `{k: v for k, v in items}`. It's perfect for transforming or inverting dictionaries and building lookup tables.
 
-### Purposes
+A dictionary comprehension builds a dictionary in one line. You specify what the key and value should be for each item, and Python assembles the mapping.
 
-- **To create dictionaries concisely** from existing iterables
-- **To transform existing dictionaries** (e.g., invert keys and values)
-- **To filter dictionary entries** while building
-- **To replace explicit loops** with a more readable expression
-- **To build lookup tables** from parallel sequences
+#### Purposes
 
-### Syntax Rules and Structure
+- To create dictionaries concisely from existing data.
+- To transform and filter key-value pairs.
+- To invert mappings or build lookup tables.
+- To replace verbose dictionary-building loops.
 
-**Complete General Syntax**
+#### Syntax Rules and Structure
 
 ```
 {key_expr: value_expr for item in iterable}
 {key_expr: value_expr for item in iterable if condition}
-{key_expr: value_expr for k, v in dict.items()}
 ```
 
-**Breakdown:**
-- `key_expr`: Expression for the key (must be hashable).
-- `value_expr`: Expression for the value.
-- `for item in iterable`: The iteration clause.
-- `if condition`: Optional filter.
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `key_expr` | Expression for each key (must be hashable). |
+| `value_expr` | Expression for each value. |
+| `for item in iterable` | Iterates over the source. |
+| `if condition` | Optional filter. |
 
 **Syntax Rules**
 
-| Rule | Description |
-|---|---|
-| Curly braces | Dict comprehensions use `{}` |
-| Colon separates | Key and value expressions separated by `:` |
-| Unique keys | Later keys overwrite earlier ones |
-| Hashable keys | Keys must be hashable (strings, numbers, tuples) |
-| Scope isolation | Loop variables are local |
+- Keys must be hashable.
+- Duplicate keys result in the last value winning.
+- The expression before the colon is the key; after the colon is the value.
 
 **Constraints and Limitations**
 
-- **Memory**: Creates the entire dictionary in memory at once.
-- **Unhashable keys**: Keys must be hashable; lists and dicts cannot be keys.
-- **Readability**: Overly complex comprehensions should be replaced with explicit loops.
+- Keys must be hashable.
+- Duplicate keys silently overwrite earlier values.
+- Complex key/value expressions can reduce readability.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Basic Dictionary Comprehension**
-
-```python
-# Step 1: Squares using a loop
-squares_loop = {}
-for x in range(6):
-    squares_loop[x] = x ** 2
-print(f"Loop: {squares_loop}")
-
-# Step 2: Squares using a dict comprehension
-squares_comp = {x: x ** 2 for x in range(6)}
-print(f"Comp: {squares_comp}")
-
-# Step 3: With filter
-even_squares = {x: x ** 2 for x in range(6) if x % 2 == 0}
-print(f"Even squares: {even_squares}")
-```
-
-**Expected Output:**
-```
-Loop: {0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
-Comp: {0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
-Even squares: {0: 0, 2: 4, 4: 16}
-```
-
-**Breakdown:** The comprehension produces the same result as the loop but in a single expression. The `if` clause filters items.
-
-**Example 2: Inverting a Dictionary**
-
-```python
-# Step 1: Original dictionary
-original = {"a": 1, "b": 2, "c": 3}
-
-# Step 2: Invert keys and values
-inverted = {v: k for k, v in original.items()}
-print(f"Inverted: {inverted}")
-```
-
-**Expected Output:**
-```
-Inverted: {1: 'a', 2: 'b', 3: 'c'}
-```
-
-**Breakdown:** The comprehension iterates over `items()` and swaps keys and values. This works only if values are unique and hashable.
-
-**Example 3: Building a Lookup Table**
-
-```python
-# Step 1: Lists of keys and values
-keys = ["name", "age", "city"]
-values = ["Alice", 30, "NYC"]
-
-# Step 2: Build dictionary
-lookup = {k: v for k, v in zip(keys, values)}
-print(lookup)
-
-# Step 3: Transform values
-uppercased = {k: str(v).upper() for k, v in lookup.items()}
-print(uppercased)
-```
-
-**Expected Output:**
-```
-{'name': 'Alice', 'age': 30, 'city': 'NYC'}
-{'name': 'ALICE', 'age': '30', 'city': 'NYC'}
-```
-
-**Breakdown:** `zip()` pairs keys and values, and the comprehension builds the dictionary. The second comprehension transforms each value to uppercase.
-
-### Real-World Cases with Explanation
-
-**Case 1: Word Length Mapping**
+**Example 1: Dictionary Comprehension**
 
 ```python
 words = ["apple", "banana", "cherry"]
-word_lengths = {word: len(word) for word in words}
-# {'apple': 5, 'banana': 6, 'cherry': 6}
+
+# Map word to length
+lengths = {w: len(w) for w in words}
+print(lengths)  # {'apple': 5, 'banana': 6, 'cherry': 6}
+
+# Invert a dictionary
+original = {"a": 1, "b": 2, "c": 3}
+inverted = {v: k for k, v in original.items()}
+print(inverted)  # {1: 'a', 2: 'b', 3: 'c'}
 ```
 
-**Why it matters:** Dict comprehensions quickly build mappings from sequences, a common data transformation task.
+**Expected Output:**
 
-**Case 2: Grouping Data**
-
-```python
-records = [("a", 1), ("b", 2), ("a", 3)]
-grouped = {}
-for key, value in records:
-    grouped.setdefault(key, []).append(value)
-# Use dict comprehension for transformation:
-transformed = {k: sum(v) for k, v in grouped.items()}
+```
+{'apple': 5, 'banana': 6, 'cherry': 6}
+{1: 'a', 2: 'b', 3: 'c'}
 ```
 
-**Why it matters:** Dict comprehensions are ideal for aggregating and transforming grouped data.
+**Step-by-Step Breakdown:**
 
+1. `{w: len(w) for w in words}` creates a mapping from each word to its length.
+2. `{v: k for k, v in original.items()}` swaps keys and values.
 
-## Core Concept 4: Conditional Comprehensions
+**Why the Output is Produced:**
 
-### Definitions
+The comprehension evaluates the key and value expressions for each item and inserts them into a new dictionary.
+
+#### Real-World Cases
+
+- **Lookup Tables**: Mapping IDs to objects or names to values.
+- **Data Reshaping**: Converting lists of records into dictionaries keyed by an ID field.
+- **Inverting Mappings**: Swapping keys and values for reverse lookups.
+
+---
+
+### 4. Generator Expressions
+
+#### Definitions
 
 **Core Definition**
-Conditional comprehensions add filtering (`if`) or mapping (`if-else`) logic to comprehensions, controlling which items are included and how they are transformed.
+
+A generator expression is a lazy comprehension that produces values one at a time on demand, without materializing the entire collection in memory.
 
 **Technical Definition**
-A comprehension can include an `if` clause to filter items (only items satisfying the condition are included) or a conditional expression in the output to map items differently based on a condition (`expression_if_true if condition else expression_if_false`). The `if` clause filters; the `if-else` expression transforms. Multiple `if` clauses can be chained, and the filtering happens before the expression is evaluated.
+
+The syntax is `(expression for item in iterable)` or with an `if` clause. Generator expressions were introduced by PEP 289 (Python 2.4) to address the memory limitations of list comprehensions for large datasets. They return a generator object that implements the iterator protocol. The loop variable is not accessible outside the generator expression.
 
 **Beginner-Friendly Explanation**
-There are two ways to add conditions to a comprehension. The first is filtering: `[x for x in numbers if x > 0]` keeps only positive numbers. The second is mapping: `["even" if x % 2 == 0 else "odd" for x in numbers]` labels each number as even or odd. Filtering removes items; mapping transforms them.
 
-### Purposes
+A generator expression is like a list comprehension that doesn’t build the whole list. Instead, it produces each value only when you ask for it—perfect for large or infinite sequences.
 
-- **To filter items** based on a condition (inclusion/exclusion)
-- **To transform items differently** based on a condition (if-else mapping)
-- **To combine filtering and mapping** in a single expression
-- **To implement conditional logic** concisely without separate loops
-- **To classify or categorise** data during collection building
+#### Purposes
 
-### Syntax Rules and Structure
+- To process large datasets without loading everything into memory.
+- To pass lazy sequences to functions like `sum()`, `max()`, `any()`.
+- To replace `map()` and `filter()` with a more readable syntax.
+- To support streaming and incremental data processing.
 
-**Complete General Syntax**
+#### Syntax Rules and Structure
 
 ```
-# Filtering (inclusion/exclusion)
-[expression for item in iterable if condition]
-
-# Mapping (transform based on condition)
-[value_if_true if condition else value_if_false for item in iterable]
-
-# Combined filtering and mapping
-[value_if_true if condition else value_if_false for item in iterable if filter_condition]
+(expression for item in iterable)
+(expression for item in iterable if condition)
 ```
 
-**Breakdown:**
-- **Filtering `if`**: Placed after the `for` clause; controls which items are processed.
-- **Mapping `if-else`**: Placed in the output expression; controls how each item is transformed.
-- **Multiple filters**: `if cond1 if cond2` applies both conditions.
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `(...)` | Parentheses denote a generator expression (or can be omitted as a sole function argument). |
+| `expression` | The value to yield. |
+| `for item in iterable` | Iterates over the source. |
+| `if condition` | Optional filter. |
 
 **Syntax Rules**
 
-| Rule | Description |
-|---|---|
-| Filter position | `if` comes after the `for` clause |
-| Mapping position | `if-else` comes in the output expression |
-| Multiple filters | Multiple `if` clauses are allowed |
-| No `elif` | Only `if-else` (no `elif`) in comprehensions |
-| Evaluation order | Filtering happens before mapping |
+- Generator expressions are enclosed in parentheses.
+- When used as a sole function argument, the parentheses can be omitted: `sum(x*x for x in nums)`.
+- They are single-pass; once exhausted, they cannot be reused.
+- They do not support indexing or slicing.
 
 **Constraints and Limitations**
 
-- **Readability**: Complex conditional expressions reduce comprehension readability.
-- **No `elif`**: Only two-way branching is supported in the output expression.
-- **Filter evaluates first**: The `if` clause is checked before the output expression.
+- Cannot be reused after consumption.
+- Slightly slower per item than list comprehensions due to generator overhead.
+- Not suitable when multiple passes or random access are needed.
 
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
+#### Annotated Code Examples
 
-**Example 1: Filtering with `if`**
-
-```python
-# Step 1: Filter positive numbers
-numbers = [-3, -1, 0, 2, 5, -4, 7]
-positives = [x for x in numbers if x > 0]
-print(f"Positives: {positives}")
-
-# Step 2: Multiple filter conditions
-filtered = [x for x in numbers if x > 0 if x < 6]
-print(f"Filtered: {filtered}")
-```
-
-**Expected Output:**
-```
-Positives: [2, 5, 7]
-Filtered: [2, 5]
-```
-
-**Breakdown:** The `if` clause filters items. Multiple `if` clauses apply both conditions (logical AND).
-
-**Example 2: Mapping with `if-else`**
-
-```python
-# Step 1: Label numbers as even or odd
-numbers = [1, 2, 3, 4, 5]
-labels = ["even" if x % 2 == 0 else "odd" for x in numbers]
-print(labels)
-
-# Step 2: Conditional transformation
-values = [10, -5, 20, -3, 15]
-abs_values = [v if v >= 0 else -v for v in values]
-print(abs_values)
-```
-
-**Expected Output:**
-```
-['odd', 'even', 'odd', 'even', 'odd']
-[10, 5, 20, 3, 15]
-```
-
-**Breakdown:** The `if-else` expression transforms each item based on the condition. In the first example, numbers are labelled; in the second, negative values are made positive.
-
-**Example 3: Combined Filtering and Mapping**
-
-```python
-# Step 1: Filter and then map
-numbers = range(-5, 6)
-result = [x ** 2 if x > 0 else 0 for x in numbers if x != 0]
-print(result)
-```
-
-**Expected Output:**
-```
-[25, 16, 9, 4, 1, 1, 4, 9, 16, 25]
-```
-
-**Breakdown:** The `if x != 0` filter removes zero. The `if-else` expression squares positive numbers and returns 0 for negative numbers (but negatives are already filtered out in this example, so all outputs are squares).
-
-### Real-World Cases with Explanation
-
-**Case 1: Data Categorisation**
-
-```python
-scores = [85, 42, 91, 67, 78]
-grades = ["Pass" if s >= 60 else "Fail" for s in scores]
-# ['Pass', 'Fail', 'Pass', 'Pass', 'Pass']
-```
-
-**Why it matters:** Conditional mapping categorises data during collection building.
-
-**Case 2: Filtering and Transforming API Responses**
-
-```python
-users = [{"name": "Alice", "active": True}, {"name": "Bob", "active": False}]
-active_names = [u["name"].upper() for u in users if u["active"]]
-# ['ALICE']
-```
-
-**Why it matters:** Filtering and mapping combine to extract and transform relevant data in one expression.
-
-
-## Core Concept 5: Nested Comprehensions
-
-### Definitions
-
-**Core Definition**
-A nested comprehension is a comprehension that contains another comprehension, either as the output expression (creating nested structures) or as multiple `for` clauses (flattening structures).
-
-**Technical Definition**
-Nested comprehensions allow for creating multi-dimensional arrays and processing nested data structures. They work inside-out, with the leftmost `for` clause being the outermost loop. For flattening, the comprehension `[item for row in matrix for item in row]` produces a flat list. For creating nested structures, `[[i + j for j in range(3)] for i in range(0, 9, 3)]` produces a matrix.
-
-**Beginner-Friendly Explanation**
-There are two types of nested comprehensions. Flattening takes a list of lists and produces a single flat list: `[item for row in matrix for item in row]`. Creating nested structures builds a list of lists: `[[i + j for j in range(3)] for i in range(3)]`. The order of the `for` clauses matters—they nest like nested loops.
-
-### Purposes
-
-- **To flatten nested structures** (e.g., matrices, nested lists) into a single list
-- **To create multi-dimensional structures** (matrices, grids) from flat data
-- **To process nested data** without explicit nested loops
-- **To transform data at multiple levels** of nesting
-- **To combine multiple iterables** in a single comprehension
-
-### Syntax Rules and Structure
-
-**Complete General Syntax**
-
-```
-# Flattening (multiple for clauses)
-[expression for outer in outer_iterable for inner in outer]
-
-# Creating nested structures (comprehension as expression)
-[[expression for inner in inner_iterable] for outer in outer_iterable]
-
-# Transposing (comprehension with indexing)
-[[row[i] for row in matrix] for i in range(len(matrix[0]))]
-```
-
-**Breakdown:**
-- **Flattening**: Multiple `for` clauses; the leftmost is the outer loop.
-- **Nested creation**: A comprehension as the expression inside another comprehension.
-- **Order matters**: In flattening, the order of `for` clauses matches the nesting order of equivalent loops.
-
-**Syntax Rules**
-
-| Rule | Description |
-|---|---|
-| Leftmost is outer | In flattening, the leftmost `for` is the outermost loop |
-| Expression can be comprehension | Nested creation uses a comprehension as the output expression |
-| Scope isolation | Each comprehension has its own scope |
-| Tuple expressions | Must be parenthesised |
-
-**Constraints and Limitations**
-
-- **Readability**: Deeply nested comprehensions become hard to read; consider refactoring.
-- **Performance**: Nested comprehensions can be slower than equivalent loops for complex operations.
-- **Memory**: Nested creation builds the entire structure in memory.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Flattening a Matrix**
-
-```python
-# Step 1: Define a matrix
-matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-# Step 2: Flatten using nested comprehension
-flattened = [item for row in matrix for item in row]
-print(f"Flattened: {flattened}")
-
-# Step 3: Flatten with a filter
-evens = [item for row in matrix for item in row if item % 2 == 0]
-print(f"Evens: {evens}")
-```
-
-**Expected Output:**
-```
-Flattened: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-Evens: [2, 4, 6, 8]
-```
-
-**Breakdown:** The `for row in matrix` is the outer loop; `for item in row` is the inner loop. The result is a flat list.
-
-**Example 2: Creating a Matrix**
-
-```python
-# Step 1: Create a 3x3 matrix
-matrix = [[i + j for j in range(3)] for i in range(0, 9, 3)]
-print(f"Matrix: {matrix}")
-
-# Step 2: Transpose the matrix
-transposed = [[row[i] for row in matrix] for i in range(3)]
-print(f"Transposed: {transposed}")
-```
-
-**Expected Output:**
-```
-Matrix: [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
-Transposed: [[0, 3, 6], [1, 4, 7], [2, 5, 8]]
-```
-
-**Breakdown:** The outer comprehension creates rows; the inner comprehension creates columns. Transposing swaps the roles of rows and columns.
-
-**Example 3: Nested Dictionary Comprehension**
-
-```python
-# Step 1: Create a nested dictionary
-matrix_dict = {i: {j: i * j for j in range(1, 4)} for i in range(1, 4)}
-print(matrix_dict)
-```
-
-**Expected Output:**
-```
-{1: {1: 1, 2: 2, 3: 3}, 2: {1: 2, 2: 4, 3: 6}, 3: {1: 3, 2: 6, 3: 9}}
-```
-
-**Breakdown:** The outer comprehension creates the outer dictionary; the inner comprehension creates each nested dictionary.
-
-### Real-World Cases with Explanation
-
-**Case 1: Flattening JSON Data**
-
-```python
-data = [{"tags": ["a", "b"]}, {"tags": ["c"]}, {"tags": ["d", "e"]}]
-all_tags = [tag for item in data for tag in item["tags"]]
-# ['a', 'b', 'c', 'd', 'e']
-```
-
-**Why it matters:** Flattening nested JSON structures into a single list is common in data processing.
-
-**Case 2: Matrix Operations**
-
-```python
-matrix = [[1, 2], [3, 4], [5, 6]]
-# Create a 2x2 identity-like matrix
-result = [[1 if i == j else 0 for j in range(2)] for i in range(2)]
-```
-
-**Why it matters:** Nested comprehensions create matrices and grids in a single expression.
-
-
-## Core Concept 6: Side-Effects and Scope Leakage Rules
-
-### Definitions
-
-**Core Definition**
-Side effects in comprehensions refer to modifying external state (e.g., appending to an external list, updating a variable); scope leakage refers to the loop variable becoming accessible outside the comprehension.
-
-**Technical Definition**
-In Python 3, comprehensions have their own scope. Aside from the iterable expression in the leftmost `for` clause, the comprehension is executed in a separate implicitly nested scope. This ensures that names assigned to in the target list don't "leak" into the enclosing scope. In Python 2, list comprehensions leaked their control variables into the containing scope, but this behaviour was deprecated and does not work in Python 3. Comprehensions can still have side effects if they call functions or use the walrus operator (`:=`) to modify external state.
-
-**Beginner-Friendly Explanation**
-In Python 3, the loop variable inside a comprehension doesn't exist outside it. This prevents accidental bugs. However, comprehensions can still cause side effects if you call functions that modify external state. The Python community generally discourages side effects in comprehensions—use them for building collections, not for performing actions.
-
-### Purposes
-
-- **To isolate loop variables** from the enclosing scope (Python 3)
-- **To prevent accidental variable leakage** and naming conflicts
-- **To encourage pure transformations** rather than side-effecting operations
-- **To allow safe use of variable names** without cluttering the outer scope
-- **To enable walrus operator** for deliberate external variable updates when needed
-
-### Syntax Rules and Structure
-
-**Scope Rules**
-
-| Rule | Description |
-|---|---|
-| Own scope | Comprehension has its own implicitly nested scope |
-| Leftmost iterable | The leftmost `for` clause's iterable is evaluated in the enclosing scope |
-| No leakage | Loop variables do not leak into the enclosing scope (Python 3) |
-| Walrus operator | `:=` can deliberately update variables in the enclosing scope |
-| Class scope exception | Name resolution skips class scopes; comprehensions inside class definitions have special behaviour |
-
-**Constraints and Limitations**
-
-- **No `break` or `continue`**: Comprehensions do not support loop control statements.
-- **Side effects discouraged**: Using comprehensions purely for side effects is considered an anti-pattern.
-- **Walrus scope**: The walrus operator in comprehensions can leak variables, which is intentional but can be surprising.
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Scope Isolation in Python 3**
-
-```python
-# Step 1: Loop variable does not leak
-x = "outer"
-squares = [x ** 2 for x in range(5)]
-print(f"Squares: {squares}")
-print(f"x after comprehension: {x}")
-```
-
-**Expected Output:**
-```
-Squares: [0, 1, 4, 9, 16]
-x after comprehension: outer
-```
-
-**Breakdown:** The comprehension's `x` is local to the comprehension. The outer `x` remains unchanged. This is the Python 3 behaviour that prevents variable leakage.
-
-**Example 2: Side Effects via Function Calls (Anti-Pattern)**
-
-```python
-# Step 1: Side effect — appending to an external list
-results = []
-squares = [results.append(x ** 2) for x in range(5)]
-print(f"Results: {results}")
-print(f"Squares: {squares}")  # List of None values!
-```
-
-**Expected Output:**
-```
-Results: [0, 1, 4, 9, 16]
-Squares: [None, None, None, None, None]
-```
-
-**Breakdown:** Using a comprehension for side effects produces a list of `None` values (because `append()` returns `None`). This is an anti-pattern—use an explicit loop instead.
-
-**Example 3: Walrus Operator for Deliberate Scope Update**
-
-```python
-# Step 1: Using walrus operator in a comprehension
-data = [1, 2, 3, 4, 5]
-filtered = [y for x in data if (y := x ** 2) > 5]
-
-print(f"Filtered: {filtered}")
-print(f"y after comprehension: {y}")
-```
-
-**Expected Output:**
-```
-Filtered: [9, 16, 25]
-y after comprehension: 25
-```
-
-**Breakdown:** The walrus operator (`:=`) assigns `x ** 2` to `y` and uses it in the condition. The variable `y` leaks into the enclosing scope because the walrus operator is explicitly designed to do so.
-
-### Real-World Cases with Explanation
-
-**Case 1: Avoiding Variable Leakage Bugs**
-
-```python
-# Safe: loop variable doesn't affect outer scope
-x = 10
-result = [x for x in range(3)]
-# x is still 10 after the comprehension
-```
-
-**Why it matters:** Scope isolation prevents accidental bugs where a comprehension's variable overwrites an important outer variable.
-
-**Case 2: Using Comprehensions for Pure Transformations**
-
-```python
-# Good: pure transformation
-squares = [x ** 2 for x in numbers]
-
-# Bad: side effects (avoid)
-[send_email(user) for user in users]
-```
-
-**Why it matters:** Comprehensions should build collections, not perform actions. Use explicit loops for side effects.
-
-
-## Core Concept 7: Readability and Performance Considerations
-
-### Definitions
-
-**Core Definition**
-Readability and performance considerations involve choosing between comprehensions, `map()`/`filter()`, and explicit loops based on clarity, speed, and memory usage.
-
-**Technical Definition**
-Comprehensions are optimized in the Python interpreter and are often faster than equivalent `map()`/`filter()` calls with `lambda`, but can be slower than `map()` with built-in functions for simple operations. List comprehensions build the entire list in memory, while generator expressions evaluate lazily. PEP 8 recommends limiting lines to 79 characters and using comprehensions where they improve readability, but avoiding them when they become too complex.
-
-**Beginner-Friendly Explanation**
-Comprehensions are usually the most readable and Pythonic choice for simple transformations and filters. For very simple operations, `map()` and `filter()` with built-in functions can be faster, but comprehensions are often faster when a `lambda` would be needed. The key trade-off is readability: if a comprehension becomes hard to read, use an explicit loop instead.
-
-### Purposes
-
-- **To choose the right tool** for collection building based on readability and performance
-- **To understand performance trade-offs** between comprehensions, `map()`/`filter()`, and loops
-- **To write Pythonic code** that is both efficient and readable
-- **To avoid premature optimization** by prioritizing clarity
-- **To make informed decisions** about memory usage (eager vs. lazy evaluation)
-
-### Syntax Rules and Structure
-
-**Comparison Table**
-
-| Approach | Readability | Performance | Memory |
-|---|---|---|---|
-| **List comprehension** | High (for simple cases) | Fast (optimized bytecode) | Eager (full list in memory) |
-| **Generator expression** | High | Similar to comprehension | Lazy (one item at a time) |
-| **`map()`/`filter()` with lambda** | Lower (lambda adds noise) | Slower (extra function calls) | Eager |
-| **`map()`/`filter()` with built-in** | High | Fastest (C-level) | Eager |
-| **Explicit `for` loop** | High (for complex logic) | Slowest (Python bytecode) | Depends |
-
-**Readability Guidelines**
-
-| Guideline | Description |
-|---|---|
-| Keep it simple | Use comprehensions for simple transformations and filters |
-| Avoid nesting | More than two `for` clauses is usually too complex |
-| Use explicit loops for side effects | Comprehensions should build collections, not perform actions |
-| Break long lines | PEP 8 recommends 79-character limit; use parentheses to wrap |
-| Prefer built-in functions | `sum()`, `any()`, `all()` are often clearer than comprehensions |
-
-**Performance Guidelines**
-
-| Guideline | Description |
-|---|---|
-| Comprehensions are optimized | Faster than equivalent `for` loops in most cases |
-| `map()` with built-in functions | Fastest for simple operations (C-level) |
-| Generator expressions save memory | Use when you don't need the full list at once |
-| Avoid `lambda` in `map()`/`filter()` | Comprehensions are faster than `lambda` |
-| Measure before optimizing | Use `timeit` to compare approaches for your specific case |
-
-### Multiple Annotated Complete Code Examples and Their Expected Outputs
-
-**Example 1: Performance Comparison**
-
-```python
-import timeit
-
-# Step 1: Define test data
-data = list(range(1000))
-
-# Step 2: List comprehension
-time_comp = timeit.timeit('[x ** 2 for x in data if x % 2 == 0]',
-                          globals=globals(), number=10000)
-print(f"List comp: {time_comp:.4f} seconds")
-
-# Step 3: map() with lambda
-time_map = timeit.timeit('list(map(lambda x: x ** 2, filter(lambda x: x % 2 == 0, data)))',
-                         globals=globals(), number=10000)
-print(f"map/filter: {time_map:.4f} seconds")
-
-# Step 4: For loop
-time_loop = timeit.timeit('''
-result = []
-for x in data:
-    if x % 2 == 0:
-        result.append(x ** 2)
-''', globals=globals(), number=10000)
-print(f"For loop: {time_loop:.4f} seconds")
-```
-
-**Expected Output:**
-```
-List comp: 1.2345 seconds
-map/filter: 2.3456 seconds
-For loop: 1.5678 seconds
-```
-
-**Breakdown:** The list comprehension is faster than the `map()`/`filter()` version with lambdas because it avoids function call overhead. The explicit `for` loop is slower due to Python bytecode interpretation.
-
-**Example 2: Generator Expression for Memory Efficiency**
+**Example 1: Generator Expression vs List Comprehension**
 
 ```python
 import sys
 
-# Step 1: List comprehension (eager)
-list_comp = [x ** 2 for x in range(1000000)]
-print(f"List size: {sys.getsizeof(list_comp)} bytes")
+# List comprehension: eager
+squares_list = [x * x for x in range(1_000_000)]
+print(f"List size: {sys.getsizeof(squares_list):,} bytes")
 
-# Step 2: Generator expression (lazy)
-gen_expr = (x ** 2 for x in range(1000000))
-print(f"Generator size: {sys.getsizeof(gen_expr)} bytes")
+# Generator expression: lazy
+squares_gen = (x * x for x in range(1_000_000))
+print(f"Generator size: {sys.getsizeof(squares_gen):,} bytes")
 
-# Step 3: Use the generator
-total = sum(x ** 2 for x in range(1000000))
-print(f"Sum: {total}")
+# Consume on demand
+print(sum(next(squares_gen) for _ in range(5)))  # 0 + 1 + 4 + 9 + 16 = 30
+```
+
+**Expected Output (approximate):**
+
+```
+List size: 8,000,056 bytes
+Generator size: 208 bytes
+30
+```
+
+**Step-by-Step Breakdown:**
+
+1. The list comprehension materializes one million integers.
+2. The generator expression creates a small generator object.
+3. `next()` produces values one at a time.
+
+**Why the Output is Produced:**
+
+The list stores all values; the generator stores only its current state and produces values lazily.
+
+#### Real-World Cases
+
+- **Log Processing**: Filtering and aggregating log lines without loading the entire file.
+- **Streaming Aggregation**: `sum(x for x in data if x > 0)`.
+- **Short-Circuit Evaluation**: `any(condition(x) for x in items)` stops at the first match.
+
+---
+
+### 5. Nested Comprehensions
+
+#### Definitions
+
+**Core Definition**
+
+A nested comprehension contains multiple `for` clauses, iterating over two or more iterables (or the same iterable multiple times) to produce combinations or flattened results.
+
+**Technical Definition**
+
+Multiple `for` clauses in a comprehension create nested loops, with the last (rightmost) `for` varying fastest. The overall comprehension is equivalent to nested `for` loops in the same order.
+
+**Beginner-Friendly Explanation**
+
+A nested comprehension is a comprehension inside another comprehension (or with multiple `for` clauses). It’s useful for working with grids, matrices, or combinations of items.
+
+#### Purposes
+
+- To generate combinations of items from multiple iterables.
+- To flatten nested data structures.
+- To create matrices or grids in a single expression.
+
+#### Syntax Rules and Structure
+
+```
+[expression for item1 in iterable1 for item2 in iterable2]
+[[expression for item2 in iterable2] for item1 in iterable1]
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| Multiple `for` clauses | The last `for` varies fastest (like nested loops). |
+| Nested brackets | Inner comprehensions build sub-collections. |
+
+**Syntax Rules**
+
+- The order of `for` clauses mirrors nested loops: the first `for` is the outermost loop.
+- Multiple `if` clauses can appear, applying to the current loop level.
+- Deeply nested comprehensions are often hard to read.
+
+**Constraints and Limitations**
+
+- Nested comprehensions can quickly become unreadable.
+- Each additional `for` clause multiplies the number of iterations.
+
+#### Annotated Code Examples
+
+**Example 1: Nested Comprehension for Pairs**
+
+```python
+numbers = [1, 2, 3]
+letters = ["A", "B"]
+
+pairs = [(n, l) for n in numbers for l in letters]
+print(pairs)
 ```
 
 **Expected Output:**
+
 ```
-List size: 8448728 bytes
-Generator size: 200 bytes
-Sum: 333332833333500000
+[(1, 'A'), (1, 'B'), (2, 'A'), (2, 'B'), (3, 'A'), (3, 'B')]
 ```
 
-**Breakdown:** The list comprehension builds the entire list in memory (8.4 MB). The generator expression uses only 200 bytes because it produces items lazily. Use generators when you don't need the full list at once.
+**Step-by-Step Breakdown:**
 
-**Example 3: Readability — When to Use a Loop**
+1. The outer loop iterates over `numbers`.
+2. The inner loop iterates over `letters` for each number.
+3. The result is the Cartesian product.
+
+**Why the Output is Produced:**
+
+The last `for` varies fastest, producing all combinations in order.
+
+#### Real-World Cases
+
+- **Matrix Operations**: Creating and transforming 2D grids.
+- **Combinations**: Generating test cases or parameter grids.
+- **Flattening**: Extracting elements from nested lists.
+
+---
+
+### 6. Conditional Comprehensions and Multiple Conditions
+
+#### Definitions
+
+**Core Definition**
+
+A conditional comprehension includes one or more `if` clauses to filter which items are included. Multiple conditions can be combined using consecutive `if` clauses or logical operators.
+
+**Technical Definition**
+
+The `if` clause in a comprehension acts as a filter: only items for which the condition is truthy are included. Multiple `if` clauses are equivalent to logical `and`: all conditions must be true. A conditional expression (`A if cond else B`) can also appear in the expression part, allowing transformation based on a condition.
+
+**Beginner-Friendly Explanation**
+
+You can add one or more “only if” conditions to a comprehension. For example, `[x for x in nums if x > 0 if x % 2 == 0]` keeps only positive even numbers.
+
+#### Purposes
+
+- To filter data based on one or more criteria.
+- To apply different transformations conditionally.
+- To reduce the size of the resulting collection to only relevant items.
+
+#### Syntax Rules and Structure
+
+```
+[expression for item in iterable if condition1 if condition2]
+[expr_if_true if condition else expr_if_false for item in iterable]
+```
+
+**Component Breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `if condition` | Filters items; only those passing all conditions are included. |
+| Conditional expression | `A if cond else B` chooses between two expressions. |
+
+**Syntax Rules**
+
+- Multiple `if` clauses are applied as consecutive filters (logical AND).
+- The conditional expression is part of the output expression, not a filter.
+- Conditions are evaluated left to right.
+
+**Constraints and Limitations**
+
+- Many conditions make the comprehension harder to read.
+- The order of conditions can affect performance if some are cheaper to evaluate.
+
+#### Annotated Code Examples
+
+**Example 1: Multiple Conditions**
 
 ```python
-# Step 1: Complex comprehension (hard to read)
-result = [x * y for x in range(5) if x > 2 for y in range(5) if y < 3 if x != y]
+numbers = range(20)
 
-# Step 2: Equivalent loop (more readable)
-result = []
+# Only even numbers greater than 5
+result = [n for n in numbers if n > 5 if n % 2 == 0]
+print(result)  # [6, 8, 10, 12, 14, 16, 18]
+
+# Conditional expression in the output
+labels = ["even" if n % 2 == 0 else "odd" for n in range(5)]
+print(labels)  # ['even', 'odd', 'even', 'odd', 'even']
+```
+
+**Expected Output:**
+
+```
+[6, 8, 10, 12, 14, 16, 18]
+['even', 'odd', 'even', 'odd', 'even']
+```
+
+**Step-by-Step Breakdown:**
+
+1. The first comprehension applies two filters: `n > 5` and `n % 2 == 0`.
+2. The second uses a conditional expression to choose the output string.
+
+**Why the Output is Produced:**
+
+Multiple `if` clauses act as logical AND; the conditional expression chooses between two output values.
+
+#### Real-World Cases
+
+- **Data Validation**: Keeping only records that meet multiple criteria.
+- **Categorization**: Labeling items based on conditions.
+- **Filtering Pipelines**: Applying successive filters to a dataset.
+
+---
+
+### 7. Multiple Iterables
+
+#### Definitions
+
+**Core Definition**
+
+A comprehension can iterate over multiple iterables using multiple `for` clauses or by using `zip()` to pair elements.
+
+**Technical Definition**
+
+Multiple `for` clauses create nested iteration over independent iterables. Using `zip(iter1, iter2)` iterates over pairs in lockstep, which is often more appropriate when the iterables are meant to be traversed in parallel.
+
+**Beginner-Friendly Explanation**
+
+You can loop over two lists at the same time. If you want every combination, use multiple `for` clauses. If you want to pair items one-to-one, use `zip()`.
+
+#### Purposes
+
+- To generate combinations from multiple sources.
+- To pair corresponding elements from parallel iterables.
+- To flatten or combine data from different structures.
+
+#### Syntax Rules and Structure
+
+```
+[expression for x in iter1 for y in iter2]          # Cartesian product
+[expression for x, y in zip(iter1, iter2)]          # Parallel iteration
+```
+
+**Component Breakdown**
+
+| Pattern | Description |
+|---------|-------------|
+| Multiple `for` | Nested loops; every combination. |
+| `zip()` | Pairs elements from parallel iterables. |
+
+**Syntax Rules**
+
+- Multiple `for` clauses create nested loops.
+- `zip()` stops at the shortest iterable.
+- The expression can unpack tuples from `zip()`.
+
+**Constraints and Limitations**
+
+- Cartesian products grow multiplicatively.
+- `zip()` truncates to the shortest iterable.
+
+#### Annotated Code Examples
+
+**Example 1: Cartesian Product vs `zip()`**
+
+```python
+numbers = [1, 2, 3]
+letters = ["A", "B", "C"]
+
+# Cartesian product
+pairs = [(n, l) for n in numbers for l in letters]
+print(pairs)
+
+# Parallel iteration with zip
+paired = [(n, l) for n, l in zip(numbers, letters)]
+print(paired)
+```
+
+**Expected Output:**
+
+```
+[(1, 'A'), (1, 'B'), (1, 'C'), (2, 'A'), (2, 'B'), (2, 'C'), (3, 'A'), (3, 'B'), (3, 'C')]
+[(1, 'A'), (2, 'B'), (3, 'C')]
+```
+
+**Step-by-Step Breakdown:**
+
+1. Multiple `for` clauses produce every combination.
+2. `zip()` pairs elements at the same positions.
+
+**Why the Output is Produced:**
+
+Nested `for` loops iterate over all combinations; `zip()` iterates in lockstep.
+
+#### Real-World Cases
+
+- **Parameter Grids**: Generating all combinations of hyperparameters.
+- **Data Alignment**: Pairing IDs with corresponding values.
+- **Test Case Generation**: Combining input dimensions.
+
+---
+
+### 8. Comprehension Performance
+
+#### Definitions
+
+**Core Definition**
+
+Comprehension performance refers to the execution speed and memory characteristics of comprehensions compared to equivalent `for` loops and `map()`/`filter()` constructs.
+
+**Technical Definition**
+
+CPython compiles list, set, and dictionary comprehensions into optimized bytecode that avoids repeated method lookups and function call overhead, making them faster than equivalent `for` loops for simple transformations. Benchmarks show list comprehensions can be 10–40% faster than `for` loops and often 2–3× faster for iteration-heavy tasks. Generator expressions are slower per item but use dramatically less memory, making them superior for large datasets.
+
+**Beginner-Friendly Explanation**
+
+Comprehensions are usually faster than writing a loop because Python optimizes them behind the scenes. Generator expressions are the most memory-efficient choice for big data.
+
+#### Purposes
+
+- To understand when comprehensions offer performance benefits.
+- To choose between eager comprehensions and lazy generator expressions.
+- To avoid premature optimization while knowing the trade-offs.
+
+#### Performance Comparison Table
+
+| Construct | Speed | Memory | Best For |
+|-----------|-------|--------|----------|
+| List comprehension | Fast (10–40% faster than loop) | O(n) | Small to medium eager lists |
+| Set/Dict comprehension | Fast | O(n) | Unique items or mappings |
+| Generator expression | Slower per item | O(1) | Large or streaming data |
+| `for` loop with `append` | Slower | O(n) | Complex logic, side effects |
+| `map()`/`filter()` | Often faster than loop | O(n) or lazy | Functional-style pipelines |
+
+**Constraints and Limitations**
+
+- Comprehensions are eager (except generator expressions); memory grows with output size.
+- Generator expressions cannot be reused.
+- Performance gains diminish for very small datasets.
+
+#### Annotated Code Examples
+
+**Example 1: Timing List Comprehension vs For Loop**
+
+```python
+import time
+
+N = 1_000_000
+
+# For loop
+start = time.perf_counter()
+result_loop = []
+for i in range(N):
+    result_loop.append(i * i)
+loop_time = time.perf_counter() - start
+
+# List comprehension
+start = time.perf_counter()
+result_comp = [i * i for i in range(N)]
+comp_time = time.perf_counter() - start
+
+print(f"For loop: {loop_time:.4f}s")
+print(f"Comprehension: {comp_time:.4f}s")
+```
+
+**Expected Output (approximate):**
+
+```
+For loop: 0.0800s
+Comprehension: 0.0500s
+```
+
+**Step-by-Step Breakdown:**
+
+1. The `for` loop repeatedly calls `append()`.
+2. The list comprehension is optimized to build the list directly.
+
+**Why the Output is Produced:**
+
+CPython’s comprehension bytecode avoids the overhead of repeated method calls and function invocation.
+
+#### Real-World Cases
+
+- **Data Transformation**: Comprehensions speed up ETL pipelines.
+- **Large File Processing**: Generator expressions keep memory constant.
+- **Aggregation**: `sum(x for x in data)` avoids building an intermediate list.
+
+---
+
+### 9. Comprehension Readability
+
+#### Definitions
+
+**Core Definition**
+
+Comprehension readability refers to how easily a comprehension can be understood by a human reader. Readable comprehensions are simple, flat, and express a single clear intent.
+
+**Technical Definition**
+
+Readability is subjective but is strongly correlated with comprehension length, nesting depth, and the number of conditions. The Python community generally agrees that a comprehension should fit comfortably on one line and read like a short English sentence. Complex logic, multiple conditions, or nested loops inside a comprehension degrade readability and should be replaced with explicit loops or helper functions.
+
+**Beginner-Friendly Explanation**
+
+A good comprehension reads like a sentence: “give me the squares of even numbers.” If you have to squint or trace through multiple loops and conditions, it’s time to use a regular `for` loop instead.
+
+#### Purposes
+
+- To write code that is easy to understand and maintain.
+- To know when a comprehension is the right tool and when it is not.
+- To balance conciseness with clarity.
+
+#### Guidelines
+
+| Signal | Recommendation |
+|--------|----------------|
+| Single transformation, no conditions | Comprehension is ideal. |
+| One simple filter | Comprehension is fine. |
+| Multiple conditions | Consider a `for` loop or helper function. |
+| Nested loops | Consider explicit loops for clarity. |
+| Side effects (I/O, mutation) | Use a regular loop. |
+| Logic spans multiple lines | Break it up. |
+
+**Constraints and Limitations**
+
+- Readability is audience-dependent; experienced Python developers may tolerate more complex comprehensions.
+- Team style guides may impose stricter rules.
+
+#### Annotated Code Examples
+
+**Example 1: Readable vs Unreadable Comprehension**
+
+```python
+# Readable: simple transformation
+squares = [x * x for x in range(10)]
+
+# Less readable: multiple conditions and nested loops
+complex_result = [
+    (x, y) for x in range(5) for y in range(5)
+    if x != y if x + y > 3 if x % 2 == 0
+]
+
+# More readable alternative
+complex_result = []
 for x in range(5):
-    if x > 2:
-        for y in range(5):
-            if y < 3 and x != y:
-                result.append(x * y)
-
-print(result)
+    if x % 2 != 0:
+        continue
+    for y in range(5):
+        if x == y or x + y <= 3:
+            continue
+        complex_result.append((x, y))
 ```
 
-**Expected Output:**
-```
-[6, 8, 8, 12]
-```
+**Why the Choice Matters:**
 
-**Breakdown:** The comprehension is compact but hard to read. The explicit loop is longer but clearer. PEP 8 emphasizes readability; use the loop when the comprehension becomes complex.
+The first comprehension is immediately clear. The second is difficult to parse; the explicit loop, while longer, is easier to follow and debug.
 
-### Real-World Cases with Explanation
+#### Real-World Cases
 
-**Case 1: Data Processing Pipeline**
+- **Code Reviews**: Readable comprehensions pass review faster.
+- **Maintenance**: Future maintainers can understand simple comprehensions at a glance.
+- **Documentation**: Self-documenting code reduces the need for comments.
+
+---
+
+### 10. Comprehension Best Practices
+
+#### Definitions
+
+**Core Definition**
+
+Comprehension best practices are guidelines for using comprehensions correctly, efficiently, and readably in Python code.
+
+**Technical Definition**
+
+Best practices include using comprehensions for simple transformations and filtering, keeping them flat, choosing the right comprehension type (list vs set vs dict vs generator), avoiding side effects, and switching to explicit loops when clarity suffers. These guidelines align with community standards and the recommendations of authoritative sources such as the Python documentation, PEPs, and Real Python.
+
+**Beginner-Friendly Explanation**
+
+Best practices are good habits: use comprehensions for simple jobs, don’t nest them too deeply, use generator expressions for big data, and don’t try to do too much in one line.
+
+#### Best Practices Table
+
+| Practice | Description |
+|----------|-------------|
+| Use comprehensions for simple transformations | Concise and faster for straightforward cases. |
+| Keep comprehensions flat | Avoid deep nesting and many conditions. |
+| Pick the right type | List for ordered collections, set for uniqueness, dict for mappings. |
+| Prefer generator expressions for large data | Constant memory; lazy evaluation. |
+| Avoid side effects | Comprehensions should compute values, not perform I/O or mutation. |
+| Switch to a loop when clarity drops | Multiple conditions or nested loops often read better as explicit loops. |
+| Don’t use a comprehension just to copy | `list(x)` is clearer than `[x for x in x]`. |
+| Document complex comprehensions | Add a comment if the logic is non-obvious. |
+
+#### Annotated Code Examples
+
+**Example 1: Good and Bad Comprehension Usage**
 
 ```python
-# Readable comprehension for simple transformation
-names = [user["name"].strip().title() for user in users if user["active"]]
+# GOOD: Simple transformation
+cubes = [n ** 3 for n in range(10)]
 
-# Use a loop for complex logic
-result = []
-for user in users:
-    if user["active"]:
-        name = user["name"].strip().title()
-        if len(name) > 3:
-            result.append(name)
+# GOOD: Simple filter
+evens = [n for n in range(20) if n % 2 == 0]
+
+# GOOD: Generator expression for large data
+total = sum(n * n for n in range(1_000_000))
+
+# BAD: Too complex; use a loop instead
+# result = [f(x) for x in data if p1(x) if p2(x) for y in other if q(x, y)]
 ```
 
-**Why it matters:** Choose the approach that best communicates intent. Simple transformations suit comprehensions; complex logic suits loops.
+**Why the Output is Produced:**
 
-**Case 2: Large Dataset Processing**
+The good examples are concise and readable; the bad example sacrifices clarity for brevity.
 
-```python
-# Memory-efficient generator for large data
-total = sum(x ** 2 for x in huge_dataset)
+#### Real-World Cases
 
-# List comprehension for small data
-squares = [x ** 2 for x in small_dataset]
-```
+- **Library Code**: Following best practices makes APIs predictable and maintainable.
+- **Data Science**: Generator expressions keep memory usage low in large pipelines.
+- **Team Projects**: Consistent comprehension style improves collaboration.
 
-**Why it matters:** Use generator expressions for large datasets to avoid memory exhaustion; use list comprehensions for small data where you need the full list.
-
+---
 
 ## References
 
-- Python Software Foundation. *PEP 202 – List Comprehensions*. https://peps.python.org/pep-0202/
-- Python Software Foundation. *PEP 274 – Dict Comprehensions*. https://peps.python.org/pep-0274/
-- Python Software Foundation. *PEP 8 – Style Guide for Python Code*. https://peps.python.org/pep-0008/
-- Python Software Foundation. *Data Structures — Python Tutorial (List Comprehensions)*. https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions
-- Python Software Foundation. *Expressions — Displays for lists, sets, and dictionaries*. https://docs.python.org/3/reference/expressions.html#displays-for-lists-sets-and-dictionaries
-- Real Python. *Python Set Comprehensions: How and When to Use Them*. https://realpython.com/python-set-comprehension/
-- Real Python. *When to Use a List Comprehension in Python*. https://realpython.com/list-comprehension-python/
-- Python Software Foundation. *PEP 572 – Assignment Expressions (Walrus Operator)*. https://peps.python.org/pep-0572/
-- Python Mailing List. *List comprehension performance vs. map() and filter()*. https://mail.python.org/pipermail/python-list/2001-December/096256.html
-- Python Bug Tracker. *Issue 34517: Scope of comprehensions inside class definitions*. https://mail.python.org/pipermail/python-bugs-list/2018-August/377388.html
-- Python Mailing List. *Generator expressions vs. list comprehensions*. https://mail.python.org/pipermail/python-list/attachments/20100119/a4ff146d/attachment-0001.html
-- Python Mailing List. *Side effects in comprehensions*. https://mail.python.org/archives/list/python-ideas@python.org/message/3TOB5D6B66QW4R7G6L6NX4GGONRN45PO/
+- PEP 202 – List Comprehensions - https://peps.python.org/pep-0202/
+- PEP 274 – Dict Comprehensions - https://peps.python.org/pep-0274/
+- PEP 289 – Generator Expressions - https://peps.python.org/pep-0289/
+- Python Official Documentation – List Comprehensions - https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions
+- Python Official Documentation – Generator Expressions - https://docs.python.org/3/reference/expressions.html#generator-expressions
+- Python Official Documentation – Displays for lists, sets, and dictionaries - https://docs.python.org/3/reference/expressions.html#displays-for-lists-sets-and-dictionaries
+- Real Python – Python Best Practices: Comprehensions - https://realpython.com/ref/best-practices/comprehensions/
+- Real Python – Python List Comprehension: Tutorial With Examples - https://realpython.com/list-comprehension-python/
+- Kanaries – Python List Comprehension: Complete Guide with Examples and Performance Tips - https://docs.kanaries.net/topics/Python/python-list-comprehension
+- Codeling.dev – List, Dict, Set and Generator Comprehensions in Python - https://codeling.dev/blog/python-comprehensions/
+- Python 2.4 What’s New – PEP 289: Generator Expressions - https://docs.python.org/release/2.4.4/whatsnew/node4.html

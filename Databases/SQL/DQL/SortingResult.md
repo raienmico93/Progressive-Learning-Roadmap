@@ -1,723 +1,1105 @@
-# SQL Sorting Results: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: SQL Sorting Data
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** The ORDER BY clause is a SELECT statement clause that sorts the rows of a result set by one or more expressions, producing an ordered output.
+**Core Definition**
+Sorting data is the process of imposing a deterministic order on the rows returned by a query using the `ORDER BY` clause, which specifies one or more sort expressions, each with an optional direction (ascending or descending), an optional null-placement rule, and an optional collation that governs string comparison.
 
-**Technical Definition:** Per the ANSI/ISO SQL Standard, the ORDER BY clause is an optional component of a query expression that specifies a sort specification — a list of sort keys, each with an optional sort direction (ASC or DESC) and optional null ordering (NULLS FIRST or NULLS LAST). It is logically evaluated after the SELECT list has been processed, after DISTINCT, and before LIMIT/OFFSET. If no ORDER BY is specified, the row order is unspecified and dependent on the query plan.
+**Technical Definition**
+After a query has produced an output table (after the select list has been processed), it can optionally be sorted. If sorting is not chosen, the rows will be returned in an unspecified order; the actual order depends on the scan and join plan types and the order on disk, and it must not be relied upon. The `ORDER BY` clause specifies the sort order: `ORDER BY sort_expression1 [ASC | DESC] [NULLS { FIRST | LAST }] [, sort_expression2 [ASC | DESC] [NULLS { FIRST | LAST }] ...]`. Each sort expression can be any expression valid in the query's select list, including column names, computed expressions, output column aliases, and ordinal positions. `ASC` is the default direction. When multiple sort expressions are specified, later expressions break ties in earlier ones. String sorting is governed by collations, which can be set at the database, column, or expression level.
 
-**Beginner-Friendly Explanation:** A database table has no guaranteed order — rows come back however the database finds them most efficient. ORDER BY is how you tell the database "give me these results sorted by this column, from smallest to largest" or "from newest to oldest." It's the equivalent of clicking "Sort A to Z" in a spreadsheet.
+**Beginner-Friendly Explanation**
+Sorting is how you put query results in a predictable order. A table has no inherent order—rows come back however the database finds them convenient. `ORDER BY` lets you say “show me the newest orders first,” “list employees alphabetically by last name,” or “sort products by price, cheapest first, and within the same price by name.” You can sort by one column or many, in ascending (`ASC`) or descending (`DESC`) order, and you can control where `NULL` values appear. When sorting text, the rules of the language—its collation—determine whether `'a'` comes before `'A'` and whether accented characters sort next to their unaccented counterparts.
 
 ### Key Characteristics
 
-- **Logically last:** ORDER BY is the last phase of a SELECT statement to be executed in the logical order of query processing.
-- **Default ascending:** If no direction is specified, ASC is assumed.
-- **Multi-key sorting:** Multiple sort expressions can be specified, each with its own direction.
-- **NULL-aware:** NULL ordering can be controlled explicitly with NULLS FIRST and NULLS LAST.
-- **Alias and expression support:** Can sort by column aliases, expressions, and (in most databases) positional numbers.
-- **Index-sensitive:** A sorted result can be delivered by an index scan instead of an explicit sort operation, which is much faster on large tables.
+- **Without `ORDER BY`, order is not guaranteed**: The database may return rows in any order, and that order can change between executions. A particular output ordering can only be guaranteed if the sort step is explicitly chosen.
+- **`ASC` is the default**: Ascending order puts smaller values first, where “smaller” is defined in terms of the `<` operator for the expression's data type; descending order is determined with the `>` operator.
+- **Multiple keys are evaluated left to right**: Later sort expressions are used only to break ties among rows that are equal according to earlier expressions. Each expression's direction is independent: `ORDER BY x, y DESC` means `ORDER BY x ASC, y DESC`, which is not the same as `ORDER BY x DESC, y DESC`.
+- **NULL placement is configurable (except in MySQL and SQL Server)**: PostgreSQL and Oracle support `NULLS FIRST` / `NULLS LAST`. MySQL and SQL Server do not have this syntax; null ordering must be emulated with a `CASE` expression or an `IS NULL` auxiliary sort key.
+- **Collations determine string order**: Character-string data is sorted according to the collation that applies to the column being sorted. That can be overridden at need by including a `COLLATE` clause in the expression, for example `ORDER BY mycolumn COLLATE "en_US"`.
 
 ### Prerequisites
 
-- Basic SQL syntax (SELECT, FROM, WHERE)
-- Understanding of data types and comparison operators
-- Familiarity with NULL handling
-- Basic knowledge of indexes
+- A running RDBMS (PostgreSQL, MySQL, or SQL Server) and a client connection.
+- At least one table with data to sort, or the ability to run `SELECT` with literal values.
+- Familiarity with the `SELECT` and `FROM` clauses.
+- An understanding of what `NULL` means and why its sort position must be specified explicitly.
+- Awareness of the database's default collation and the availability of language-specific collations.
 
 ### Related Programming Areas
 
-- **Query Optimization:** Sorting is one of the most expensive operations; understanding how to avoid it via indexes is a core tuning skill.
-- **Reporting and Analytics:** Sorted output is essential for reports, dashboards, and data presentation.
-- **Pagination:** ORDER BY combined with LIMIT/OFFSET is the standard approach for paginated results.
-- **Window Functions:** ORDER BY within OVER() clauses controls the order in which window functions process rows.
-- **Application Development:** ORMs and query builders expose ORDER BY through API methods.
+- Query optimisation – indexes can satisfy `ORDER BY` without a sort step when the index order matches the requested order.
+- Pagination – `LIMIT` and `OFFSET` are only deterministic when paired with `ORDER BY`.
+- Reporting and analytics – sorted output is essential for leaderboards, timelines, and ranked lists.
+- Internationalisation – collations determine whether sorting is case-sensitive, accent-sensitive, and language-aware.
+- Window functions – `ORDER BY` inside `OVER()` defines the ordering used by ranking and cumulative functions.
 
 ---
 
-## Core Concepts / Key Features
+## Core Concepts and Features
 
-### 1. The Core Ordering Clause
+### 1. `ORDER BY`
 
-#### 1.1 ORDER BY Syntax and Logical Execution Order
+#### Definitions
 
-**Core Definitions:**
+**Core Definition**
+`ORDER BY` is the clause that specifies the sort order of a query's result rows.
 
-- **Core Definition:** ORDER BY is an optional clause that specifies the sort order of the rows returned by a SELECT statement.
-- **Technical Definition:** The ORDER BY clause is evaluated after the SELECT list, DISTINCT, and before LIMIT/OFFSET. This means it has access to column aliases defined in the SELECT list. The general form is `ORDER BY sort_expression1 [ASC | DESC] [NULLS { FIRST | LAST }] [, sort_expression2 ...]`.
-- **Beginner-Friendly Explanation:** ORDER BY runs almost last — after all the rows have been gathered and filtered, the database sorts them as the final step before sending them to you.
+**Technical Definition**
+The `ORDER BY` clause appears after the `SELECT` list and `FROM` clause (and after `GROUP BY`/`HAVING` if present). It accepts one or more `sort_expression` items, each optionally followed by `ASC` or `DESC` and, in PostgreSQL, `NULLS FIRST` or `NULLS LAST`. The sort expressions are evaluated for each row, and rows are compared lexicographically: the first expression determines the primary order, the second breaks ties, and so on. If all specified expressions compare equal, the rows are returned in an implementation-dependent order. `ORDER BY` can also be applied to the result of `UNION`, `INTERSECT`, or `EXCEPT`, but in that case only output column names or numbers are permitted, not arbitrary expressions.
 
-**Purposes:**
+**Beginner-Friendly Explanation**
+`ORDER BY` is the “sort these results” instruction. It is the only clause that guarantees a specific row order.
 
-- To guarantee a specific, predictable order of rows in the result set
-- To prepare data for presentation (reports, user interfaces)
-- To support pagination (with LIMIT/OFFSET)
-- To define processing order for window functions
+#### Purposes
 
-**Syntax Structures and Rules:**
+- To produce a deterministic row order for display, reporting, and pagination.
+- To control which rows survive `LIMIT`/`OFFSET` by defining a stable ordering.
+- To satisfy the ordering requirements of window functions and ranked output.
+- To present data in the order most meaningful to the user (newest first, highest score first, alphabetical).
 
-**Complete General Syntax:**
+#### Syntax Rules and Structure
+
+**General syntax (PostgreSQL):**
 
 ```sql
 SELECT select_list
 FROM table_expression
 ORDER BY sort_expression1 [ASC | DESC] [NULLS { FIRST | LAST }]
-       [, sort_expression2 [ASC | DESC] [NULLS { FIRST | LAST }] ...];
+       [, sort_expression2 [ASC | DESC] [NULLS { FIRST | LAST }]] ...
 ```
 
-**Component Breakdown:**
+**Component breakdown:**
 
-- `sort_expression`: A column name, column alias, positional number, or arbitrary expression
-- `ASC | DESC`: Sort direction (ASC is default)
-- `NULLS FIRST | NULLS LAST`: Controls where NULLs appear (optional, database-dependent)
+| Component | Description |
+|-----------|-------------|
+| `sort_expression` | Any expression valid in the select list: column, computation, alias, or ordinal position. |
+| `ASC` / `DESC` | Sort direction; `ASC` is the default. |
+| `NULLS FIRST` / `NULLS LAST` | Null placement; PostgreSQL only. |
+| Multiple items | Comma-separated; later items break ties in earlier ones. |
 
-**Syntax Rules:**
+**Syntax rules:**
 
-- ORDER BY is always the last clause in a SELECT statement (before LIMIT/OFFSET in databases that support them).
-- Without ORDER BY, the row order is unspecified and must not be relied upon.
-- Each sort expression is considered independently for direction and NULL ordering.
-- In a UNION/INTERSECT/EXCEPT query, only output column names or numbers can be used, not expressions.
+- `ASC` puts smaller values first (`<` ordering); `DESC` puts larger values first (`>` ordering).
+- An output column name used as a sort expression must stand alone; it cannot be embedded in a larger expression (e.g., `ORDER BY sum + c` is invalid when `sum` is an alias).
+- `ORDER BY` can reference columns not present in the select list.
 
-**Constraints and Limitations:**
+**Constraints and limitations:**
 
-- ORDER BY on a very large result set can be slow because it requires materializing and sorting all rows.
-- Some databases limit the number of columns in ORDER BY (e.g., SQL Server allows up to 8,060 bytes; SAP allows up to 400 columns).
-- ORDER BY does not guarantee a stable order for rows with equal sort keys unless a unique key is included in the sort.
+- Without `ORDER BY`, row order is unspecified and must not be relied upon.
+- In a `UNION`/`INTERSECT`/`EXCEPT` result, only output column names or numbers may be used for sorting.
 
-**Annotated Code Examples:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Basic ORDER BY on a single column
 
 ```sql
--- Setup
+-- Step 1: Create a table.
 CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    department VARCHAR(50),
-    salary DECIMAL(10,2)
+    employee_id serial PRIMARY KEY,
+    first_name  text NOT NULL,
+    last_name   text NOT NULL,
+    salary      numeric(10,2) NOT NULL,
+    hire_date   date NOT NULL
 );
 
-INSERT INTO employees 
-VALUES 
-    (1, 'Alice', 'Engineering', 85000),
-    (2, 'Bob', 'Marketing', 62000),
-    (3, 'Charlie', 'Engineering', 95000),
-    (4, 'Diana', 'Sales', 48000),
-    (5, 'Eve', 'Engineering', 110000)
+-- Step 2: Insert sample rows.
+INSERT INTO employees (first_name, last_name, salary, hire_date) VALUES
+    ('Alice', 'Smith',  80000, '2020-01-15'),
+    ('Bob',   'Jones',  70000, '2021-03-10'),
+    ('Carol', 'White',  60000, '2019-07-01'),
+    ('Dave',  'Brown',  65000, '2022-11-20');
 
--- Basic ORDER BY
-SELECT emp_name, salary
+-- Step 3: Sort by salary ascending (default).
+SELECT first_name, salary
 FROM employees
 ORDER BY salary;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| emp_name | salary |
-|----------|--------|
-| Diana    | 48000  |
-| Bob      | 62000  |
-| Alice    | 85000  |
-| Charlie  | 95000  |
-| Eve      | 110000 |
-
-**Explanation:** The result is sorted by salary in ascending order (the default). Diana (48,000) comes first, Eve (110,000) last.
-
-**Real-World Cases:**
-
-- **Reports:** Monthly sales reports sorted by revenue descending.
-- **User interfaces:** Contact lists sorted alphabetically.
-- **Pagination:** Combined with LIMIT/OFFSET to fetch pages of sorted data.
-
-**References:**
-
-- PostgreSQL: Sorting Rows (ORDER BY) - https://www.postgresql.org/docs/17/queries-order.html
-- Microsoft Learn: Sort your results - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/2-sort-your-data-as-its-returned
-
-
-### 2. Sorting Directions
-
-#### 2.1 Ascending Order (ASC, the Default)
-
-**Core Definitions:**
-
-- **Core Definition:** ASC specifies ascending sort order: smallest values first, largest last.
-- **Technical Definition:** In ascending order, values are compared using the `<` operator; the smallest value comes first. For character data, this depends on the collation (e.g., A-Z, 0-9).
-- **Beginner-Friendly Explanation:** ASC is "A to Z" or "1 to 9" order. It's the default, so you don't even need to write it.
-
-**Annotated Code Examples:**
-
-```sql
--- ASC is the default (explicit and implicit are equivalent)
-SELECT emp_name, salary 
-FROM employees 
-ORDER BY salary ASC;
-
-SELECT emp_name, salary 
-FROM employees 
-ORDER BY salary;
+```text
+ first_name | salary
+------------+--------
+ Carol      |  60000
+ Dave       |  65000
+ Bob        |  70000
+ Alice      |  80000
+(4 rows)
 ```
 
-**Real-World Cases:**
+**Why this output appears**: `ORDER BY salary` sorts rows by the `salary` column in ascending order (the default). Carol has the lowest salary, so she appears first; Alice has the highest, so she appears last.
 
-- **Names:** Alphabetical listing of customers.
-- **Dates:** Chronological order (oldest first).
-- **Prices:** Lowest price first for budget-conscious users.
+#### Real-World Cases
 
-**References:**
+- **Leaderboards**: `ORDER BY score DESC` returns the highest scores first.
+- **Timelines**: `ORDER BY created_at DESC` shows the newest records first.
+- **Pagination**: `ORDER BY id` with `LIMIT`/`OFFSET` gives stable page boundaries.
 
-- PostgreSQL: Sorting Rows - https://www.postgresql.org/docs/17/queries-order.html
-- Microsoft Learn: Sort your results - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/2-sort-your-data-as-its-returned
+---
 
+### 2. Ascending Order (`ASC`)
 
-#### 2.2 Descending Order (DESC)
+#### Definitions
 
-**Core Definitions:**
+**Core Definition**
+`ASC` specifies that rows should be sorted from smallest to largest according to the sort expression.
 
-- **Core Definition:** DESC specifies descending sort order: largest values first, smallest last.
-- **Technical Definition:** In descending order, values are compared using the `>` operator; the largest value comes first.
-- **Beginner-Friendly Explanation:** DESC is "Z to A" or "9 to 1" order. You must explicitly write DESC.
+**Technical Definition**
+`ASC` is the default sort direction. Ascending order puts smaller values first, where “smaller” is defined in terms of the `<` operator for the expression's data type. For numbers, this means numerical order; for dates, chronological order; for strings, the collation-defined order. PostgreSQL uses the default B-tree operator class for the expression's data type to determine the sort ordering for `ASC` and `DESC`.
 
-**Annotated Code Examples:**
+**Beginner-Friendly Explanation**
+`ASC` means “smallest first” or “A to Z.” It is what you get if you do not specify a direction.
+
+#### Purposes
+
+- To present data in the natural order of the domain: lowest price, earliest date, alphabetical name.
+- To provide a predictable, stable order for pagination and reporting.
+- To serve as the default when no direction is specified, reducing query verbosity.
+
+#### Syntax Rules and Structure
 
 ```sql
--- Descending order
-SELECT emp_name, salary 
-FROM employees 
+ORDER BY expression ASC
+-- or simply
+ORDER BY expression
+```
+
+**Syntax rules:**
+
+- `ASC` is optional and is the default.
+- It can be applied to any sort expression, including computed expressions and aliases.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Explicit ASC and implicit default
+
+```sql
+-- Step 1: Explicit ASC.
+SELECT first_name, hire_date FROM employees ORDER BY hire_date ASC;
+
+-- Step 2: Implicit ASC (default).
+SELECT first_name, hire_date FROM employees ORDER BY hire_date;
+```
+
+**Expected output:**
+
+```text
+ first_name | hire_date
+------------+------------
+ Carol      | 2019-07-01
+ Alice      | 2020-01-15
+ Bob        | 2021-03-10
+ Dave       | 2022-11-20
+(4 rows)
+```
+
+**Why this output appears**: Both queries produce the same result because `ASC` is the default. The rows are ordered from the earliest hire date to the latest, which is the natural chronological order.
+
+#### Real-World Cases
+
+- **Alphabetical directories**: `ORDER BY last_name ASC` lists people from A to Z.
+- **Price listings**: `ORDER BY price ASC` shows the cheapest items first.
+
+---
+
+### 3. Descending Order (`DESC`)
+
+#### Definitions
+
+**Core Definition**
+`DESC` specifies that rows should be sorted from largest to smallest according to the sort expression.
+
+**Technical Definition**
+Descending order is determined with the `>` operator for the expression's data type. It puts larger values first. `DESC` can be combined with `NULLS FIRST` or `NULLS LAST` in PostgreSQL to control where nulls appear; by default, nulls sort as if larger than any non-null value, so `NULLS FIRST` is the default for `DESC`.
+
+**Beginner-Friendly Explanation**
+`DESC` means “largest first” or “Z to A.” It is the reverse of `ASC`.
+
+#### Purposes
+
+- To surface the highest, latest, or most important values first.
+- To show the most recent records at the top of a timeline.
+- To rank results from highest to lowest.
+
+#### Syntax Rules and Structure
+
+```sql
+ORDER BY expression DESC
+```
+
+**Syntax rules:**
+
+- `DESC` applies only to the expression it follows; other expressions in the same `ORDER BY` retain their own directions.
+- In PostgreSQL, `DESC` defaults to `NULLS FIRST`.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: DESC ordering
+
+```sql
+-- Step 1: Sort salaries from highest to lowest.
+SELECT first_name, salary
+FROM employees
 ORDER BY salary DESC;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| emp_name | salary |
-|----------|--------|
-| Eve      | 110000 |
-| Charlie  | 95000  |
-| Alice    | 85000  |
-| Bob      | 62000  |
-| Diana    | 48000  |
+```text
+ first_name | salary
+------------+--------
+ Alice      |  80000
+ Bob        |  70000
+ Dave       |  65000
+ Carol      |  60000
+(4 rows)
+```
 
-**Explanation:** The highest salary comes first, the lowest last.
+**Why this output appears**: `DESC` reverses the ascending order, putting Alice’s 80000 first and Carol’s 60000 last.
 
-**Real-World Cases:**
+#### Real-World Cases
 
-- **Leaderboards:** Highest scores first.
-- **News feeds:** Newest articles first.
-- **Financial reports:** Largest revenue first.
+- **Recent activity**: `ORDER BY created_at DESC` shows the newest events first.
+- **Top scores**: `ORDER BY score DESC LIMIT 10` returns the top ten.
 
-**References:**
+---
 
-- PostgreSQL: Sorting Rows - https://www.postgresql.org/docs/17/queries-order.html
-- Oracle: SQL Beginner's Guide - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/SELECT.html
+### 4. Multiple Sort Keys
 
+#### Definitions
 
-### 3. Sorting Drivers & Targets
+**Core Definition**
+Multiple sort keys allow a query to sort by two or more expressions, with each subsequent expression breaking ties in the previous ones.
 
-#### 3.1 Multi-Column Sorting (Primary, Secondary, Tertiary Hierarchies)
+**Technical Definition**
+When more than one expression is specified, the later values are used to sort rows that are equal according to the earlier values. Each expression can have its own direction and, in PostgreSQL, its own null-placement rule. The ordering options are considered independently for each sort column. For example, `ORDER BY x, y DESC` means `ORDER BY x ASC, y DESC`, which is not the same as `ORDER BY x DESC, y DESC`.
 
-**Core Definitions:**
+**Beginner-Friendly Explanation**
+Multiple sort keys let you say “sort by department, and within each department sort by salary.” The first key does the primary grouping, and the second key orders within each group.
 
-- **Core Definition:** Multi-column sorting uses two or more sort expressions to establish a hierarchy: the first column is the primary sort, the second breaks ties in the first, and so on.
-- **Technical Definition:** When more than one expression is specified, later values are used to sort rows that are equal according to earlier values. Each column has its own independent direction and NULL ordering.
-- **Beginner-Friendly Explanation:** Think of sorting a phone book by last name, then first name. The last name is the primary sort; for people with the same last name, the first name breaks the tie.
+#### Purposes
 
-**Purposes:**
+- To break ties deterministically when a single column has duplicate values.
+- To produce hierarchical ordering (category, then price; last name, then first name).
+- To ensure stable pagination even when the primary key is not unique.
+- To control null placement independently per column.
 
-- To create hierarchical sort orders (e.g., country → state → city)
-- To break ties in a meaningful way
-- To produce fully deterministic output
-
-**Annotated Code Examples:**
+#### Syntax Rules and Structure
 
 ```sql
--- Sort by department (ASC), then salary (DESC) within each department
-SELECT emp_name, department, salary
+ORDER BY expression1 [ASC | DESC] [NULLS { FIRST | LAST }],
+         expression2 [ASC | DESC] [NULLS { FIRST | LAST }], ...
+```
+
+**Syntax rules:**
+
+- Later expressions are evaluated only when earlier expressions compare equal.
+- Each expression’s direction is independent.
+- In PostgreSQL, each expression’s null placement is independent.
+
+**Constraints and limitations:**
+
+- If all sort expressions compare equal, the row order is implementation-dependent.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Sorting by department and then salary
+
+```sql
+-- Step 1: Sort by department ascending, then salary descending.
+SELECT first_name, department, salary
 FROM employees
 ORDER BY department ASC, salary DESC;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| emp_name | department   | salary |
-|----------|--------------|--------|
-| Eve      | Engineering  | 110000 |
-| Charlie  | Engineering  | 95000  |
-| Alice    | Engineering  | 85000  |
-| Bob      | Marketing    | 62000  |
-| Diana    | Sales        | 48000  |
+```text
+ first_name | department  | salary
+------------+-------------+--------
+ Alice      | Engineering |  80000
+ Bob        | Engineering |  70000
+ Dave       | Marketing   |  65000
+ Carol      | Sales       |  60000
+(4 rows)
+```
 
-**Explanation:** Departments are sorted alphabetically (Engineering, Marketing, Sales). Within Engineering, salaries are sorted descending (Eve, Charlie, Alice).
+**Why this output appears**: The primary sort is `department` ascending, so Engineering rows come before Marketing, which comes before Sales. Within Engineering, the secondary sort `salary DESC` puts Alice (80000) before Bob (70000).
 
-**Real-World Cases:**
+#### Real-World Cases
 
-- **E-commerce:** Sort by category, then by price.
-- **HR:** Sort by department, then by hire date.
-- **Logistics:** Sort by region, then by priority.
+- **Customer directories**: `ORDER BY country, city, last_name` groups customers by geography and then alphabetises within each group.
+- **Product listings**: `ORDER BY category, price DESC` shows the most expensive product first in each category.
 
-**References:**
+---
 
-- PostgreSQL: Sorting Rows - https://www.postgresql.org/docs/17/queries-order.html
-- Microsoft Learn: Sort your results - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/2-sort-your-data-as-its-returned
+### 5. Sort Priority
 
+#### Definitions
 
-#### 3.2 Sorting by Column Aliases
+**Core Definition**
+Sort priority is the rule that earlier expressions in the `ORDER BY` list take precedence over later ones: the first expression is the primary sort key, the second is the secondary key, and so on.
 
-**Core Definitions:**
+**Technical Definition**
+The `ORDER BY` expressions are evaluated left to right. A row is placed according to the first expression; only if two rows compare equal on the first expression does the second expression determine their relative order, and so on. If all expressions compare equal, the rows are returned in an implementation-dependent order. This left-to-right precedence is independent of the sort directions, which apply only to their own expressions.
 
-- **Core Definition:** Because ORDER BY is processed after SELECT, it can reference column aliases defined in the SELECT list.
-- **Technical Definition:** A sort expression can be the column label (alias) of an output column. The alias must stand alone; it cannot be used within an expression in ORDER BY.
-- **Beginner-Friendly Explanation:** If you rename a column in your SELECT (e.g., `salary AS pay`), you can use that new name in ORDER BY.
+**Beginner-Friendly Explanation**
+Sort priority is “which key wins.” The first key is the boss; the second key only gets a say when the first key ties.
 
-**Annotated Code Examples:**
+#### Purposes
+
+- To predict the outcome of a multi-key sort without running it.
+- To design `ORDER BY` lists whose most important criterion comes first.
+- To diagnose why a query produces an unexpected order (often because the intended primary key is not first).
+
+#### Syntax Rules and Structure
+
+The position in the `ORDER BY` list determines priority: leftmost = highest priority.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Reversing priority changes the result
 
 ```sql
--- Sorting by a column alias
-SELECT emp_name AS name, salary * 12 AS annual_salary
+-- Step 1: Salary first, department second.
+SELECT first_name, department, salary
+FROM employees
+ORDER BY salary DESC, department ASC;
+
+-- Step 2: Department first, salary second.
+SELECT first_name, department, salary
+FROM employees
+ORDER BY department ASC, salary DESC;
+```
+
+**Expected output:**
+
+```text
+-- Step 1:
+ first_name | department  | salary
+------------+-------------+--------
+ Alice      | Engineering |  80000
+ Bob        | Engineering |  70000
+ Dave       | Marketing   |  65000
+ Carol      | Sales       |  60000
+(4 rows)
+
+-- Step 2:
+ first_name | department  | salary
+------------+-------------+--------
+ Alice      | Engineering |  80000
+ Bob        | Engineering |  70000
+ Dave       | Marketing   |  65000
+ Carol      | Sales       |  60000
+(4 rows)
+```
+
+**Why this output appears**: In this particular data set, both orderings happen to produce the same result because salaries are unique. In general, the first expression in the list determines the primary grouping, and the second only breaks ties within that grouping.
+
+#### Real-World Cases
+
+- **Ranked search**: Relevance score first, then date, then title—changing the priority changes which result appears first.
+
+---
+
+### 6. Sorting by Expressions
+
+#### Definitions
+
+**Core Definition**
+Sorting by expressions allows the `ORDER BY` clause to use computed values—arithmetic, function calls, `CASE` expressions—rather than bare column names.
+
+**Technical Definition**
+The sort expression(s) can be any expression that would be valid in the query's select list. Examples include `ORDER BY a + b, c` and `ORDER BY lower(last_name)`. The expression is evaluated for each row, and the resulting values determine the order. Expressions in `ORDER BY` can reference columns that do not appear in the `SELECT` output list, subject to the usual privileges on those columns.
+
+**Beginner-Friendly Explanation**
+Sorting by an expression means sorting by a calculated value—like sorting employees by `salary * 12` (annual salary) or products by `price * quantity` (inventory value).
+
+#### Purposes
+
+- To sort by a derived metric that is not stored as a column.
+- To sort case-insensitively or by a substring without adding a column.
+- To implement conditional ordering with `CASE`.
+- To sort by the result of a function call (e.g., `length(name)`).
+
+#### Syntax Rules and Structure
+
+```sql
+ORDER BY expression
+```
+
+**Syntax rules:**
+
+- The expression may reference any column of the tables in `FROM`.
+- It may use functions, operators, and `CASE`.
+- An output column name cannot be embedded in a larger expression; use the underlying expression instead.
+
+**Constraints and limitations:**
+
+- Expression-based sorts cannot always use an index unless a matching expression index exists.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Sorting by an arithmetic expression
+
+```sql
+-- Step 1: Sort by annual salary (salary * 12).
+SELECT first_name, salary, salary * 12 AS annual_salary
+FROM employees
+ORDER BY salary * 12 DESC;
+```
+
+**Expected output:**
+
+```text
+ first_name | salary | annual_salary
+------------+--------+---------------
+ Alice      |  80000 |        960000
+ Bob        |  70000 |        840000
+ Dave       |  65000 |        780000
+ Carol      |  60000 |        720000
+(4 rows)
+```
+
+**Why this output appears**: `ORDER BY salary * 12 DESC` computes the annual salary for each row and sorts the rows by that computed value, highest first. The alias `annual_salary` is shown for readability but the sort expression repeats the computation.
+
+#### Real-World Cases
+
+- **Inventory value**: `ORDER BY quantity * unit_cost DESC` prioritises the most valuable stock.
+- **Name length**: `ORDER BY length(name) DESC` finds the longest names first.
+
+---
+
+### 7. Sorting by Aliases
+
+#### Definitions
+
+**Core Definition**
+Sorting by an alias uses the output column name defined in the `SELECT` list as the `ORDER BY` expression.
+
+**Technical Definition**
+A `sort_expression` can be the column label or number of an output column. For example, `SELECT a + b AS sum, c FROM table1 ORDER BY sum` sorts by the alias `sum`. The alias must stand alone; it cannot be used inside a larger expression (`ORDER BY sum + c` is invalid). If an `ORDER BY` item is a simple name that could match either an output column name or a column from the table expression, the output column is used. `ORDER BY` can also use ordinal positions (e.g., `ORDER BY 1`) referring to the select-list position.
+
+**Beginner-Friendly Explanation**
+Sorting by an alias means “sort by the name I gave this column in the `SELECT` list.” It is convenient for computed columns and for keeping the `ORDER BY` readable.
+
+#### Purposes
+
+- To sort by a computed column without repeating the expression.
+- To make `ORDER BY` lists shorter and easier to read.
+- To sort by an output column that has been renamed for presentation.
+- To use ordinal positions for quick, positional sorting.
+
+#### Syntax Rules and Structure
+
+```sql
+SELECT expression AS alias_name
+FROM table
+ORDER BY alias_name;
+
+SELECT a, b
+FROM table
+ORDER BY 1;  -- sorts by the first output column
+```
+
+**Syntax rules:**
+
+- The alias must match exactly (case-sensitive unless quoted).
+- The alias must stand alone; it cannot be embedded in an expression.
+- Ordinal positions refer to the left-to-right position of the output column.
+
+**Constraints and limitations:**
+
+- Aliases are visible in `ORDER BY` but **not** in `WHERE`, because `WHERE` is evaluated before `SELECT`.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Sorting by an alias and by ordinal position
+
+```sql
+-- Step 1: Sort by the alias annual_salary.
+SELECT first_name, salary * 12 AS annual_salary
 FROM employees
 ORDER BY annual_salary DESC;
-```
 
-**Expected Output:**
-
-| name    | annual_salary |
-|---------|---------------|
-| Eve     | 1320000       |
-| Charlie | 1140000       |
-| Alice   | 1020000       |
-| Bob     | 744000        |
-| Diana   | 576000        |
-
-**Explanation:** The alias `annual_salary` is defined in the SELECT list and used in ORDER BY. This works because ORDER BY is logically evaluated after SELECT.
-
-**Constraints and Limitations:**
-
-- In a UNION query, aliases must come from the first SELECT list.
-- The alias cannot be used inside an expression in ORDER BY (e.g., `ORDER BY annual_salary + 1000` is invalid).
-
-**References:**
-
-- PostgreSQL: Sorting Rows - https://www.postgresql.org/docs/17/queries-order.html
-- Microsoft Learn: Sort your results - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/2-sort-your-data-as-its-returned
-
-
-#### 3.3 Sorting by Expressions, Calculations, or Functions
-
-**Core Definitions:**
-
-- **Core Definition:** ORDER BY can sort by arbitrary expressions, calculations, or function results, not just plain column names.
-- **Technical Definition:** A sort expression can be any expression that would be valid in the query's select list. This includes arithmetic expressions, string functions, date functions, and CASE expressions.
-- **Beginner-Friendly Explanation:** You can sort by a computed value — for example, by the length of a name, or by a mathematical formula.
-
-**Annotated Code Examples:**
-
-```sql
--- Sort by the length of the employee name
-SELECT emp_name, LENGTH(emp_name) AS name_length
+-- Step 2: Sort by the first output column.
+SELECT first_name, salary
 FROM employees
-ORDER BY LENGTH(emp_name);
+ORDER BY 1;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| emp_name | name_length |
-|----------|-------------|
-| Bob      | 3           |
-| Eve      | 3           |
-| Alice    | 5           |
-| Diana    | 5           |
-| Charlie  | 7           |
+```text
+-- Step 1:
+ first_name | annual_salary
+------------+---------------
+ Alice      |        960000
+ Bob        |        840000
+ Dave       |        780000
+ Carol      |        720000
+(4 rows)
 
-**Explanation:** Employees are sorted by the length of their name. Bob and Eve (both 3 characters) come first, Charlie (7 characters) last.
+-- Step 2:
+ first_name | salary
+------------+--------
+ Alice      |  80000
+ Bob        |  70000
+ Carol      |  60000
+ Dave       |  65000
+(4 rows)
+```
+
+**Why this output appears**: In Step 1, `ORDER BY annual_salary` sorts by the alias defined in the `SELECT` list. In Step 2, `ORDER BY 1` sorts by the first output column (`first_name`), producing alphabetical order.
+
+#### Real-World Cases
+
+- **Report columns**: Sorting by a renamed column alias keeps the `ORDER BY` aligned with the displayed header.
+- **Quick ad-hoc queries**: `ORDER BY 2` is a shorthand for sorting by the second selected column.
+
+---
+
+### 8. Sorting NULLs
+
+#### Definitions
+
+**Core Definition**
+Sorting NULLs is the behaviour that determines where `NULL` values appear in an ordered result set relative to non-null values.
+
+**Technical Definition**
+In PostgreSQL, by default, null values sort as if larger than any non-null value; that is, `NULLS FIRST` is the default for `DESC` order, and `NULLS LAST` otherwise. MySQL and SQL Server do not support the `NULLS FIRST` / `NULLS LAST` syntax. In MySQL, `NULL` values are presented first for `ORDER BY ... ASC` and last for `ORDER BY ... DESC`. In SQL Server, `NULL` values are treated as the lowest possible values, so they appear first in `ASC` order and last in `DESC` order. Portable null placement requires an auxiliary sort key, typically `CASE WHEN col IS NULL THEN ... END` or `col IS NULL`.
+
+**Beginner-Friendly Explanation**
+`NULL` means “unknown,” so the database needs a rule for where to put it. In PostgreSQL, `NULL` is treated as larger than everything else. That means ascending order puts nulls last, and descending order puts them first. MySQL and SQL Server have their own conventions, and neither supports the `NULLS FIRST` / `NULLS LAST` syntax, so you must emulate it.
+
+#### Purposes
+
+- To control whether missing values appear at the top or bottom of a report.
+- To make null placement consistent across databases using portable emulation.
+- To avoid the surprise of nulls dominating a descending sort.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
 
 ```sql
--- Sort by a computed expression
-SELECT emp_name, salary, salary * 0.10 AS bonus
-FROM employees
-ORDER BY salary * 0.10 DESC;
+ORDER BY column [ASC | DESC] [NULLS { FIRST | LAST }]
 ```
 
-**Real-World Cases:**
-
-- **E-commerce:** Sort products by `price * discount` to show best deals first.
-- **HR:** Sort employees by `YEAR(CURRENT_DATE) - YEAR(hire_date)` for tenure.
-- **Logistics:** Sort shipments by `DATEDIFF(day, ship_date, CURRENT_DATE)` for aging analysis.
-
-**References:**
-
-- PostgreSQL: Sorting Rows - https://www.postgresql.org/docs/17/queries-order.html
-- Oracle: SELECT - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/SELECT.html
-
-
-#### 3.4 Sorting by Positional Column Index Numbers
-
-**Core Definitions:**
-
-- **Core Definition:** ORDER BY can reference columns by their ordinal position in the SELECT list (e.g., `ORDER BY 1, 2`).
-- **Technical Definition:** A sort column can be specified as a nonnegative integer representing the position of the name or alias in the select list. Positional references are resolved to the corresponding SELECT list item.
-- **Beginner-Friendly Explanation:** Instead of writing the column name, you write its position number. `ORDER BY 1` means "sort by the first column in my SELECT list."
-
-**Purposes:**
-
-- To quickly sort by a column without repeating its name
-- To sort by a complex expression that doesn't have an alias
-- To debug queries by sorting on different columns without editing the SELECT list
-
-**Annotated Code Examples:**
+**MySQL / SQL Server emulation:**
 
 ```sql
--- Sort by the first column (emp_name)
-SELECT emp_name, salary FROM employees ORDER BY 1;
-
--- Sort by the second column (salary) descending
-SELECT emp_name, salary FROM employees ORDER BY 2 DESC;
+-- Nulls last:
+ORDER BY CASE WHEN column IS NULL THEN 1 ELSE 0 END, column;
+-- Nulls first:
+ORDER BY CASE WHEN column IS NULL THEN 0 ELSE 1 END, column;
+-- or:
+ORDER BY column IS NULL, column;  -- nulls last
 ```
 
-**Expected Output (for `ORDER BY 1`):**
+**Default null placement by RDBMS:**
 
-| emp_name | salary |
-|----------|--------|
-| Alice    | 85000  |
-| Bob      | 62000  |
-| Charlie  | 95000  |
-| Diana    | 48000  |
-| Eve      | 110000 |
+| RDBMS | `ASC` default | `DESC` default | `NULLS FIRST/LAST` syntax |
+|-------|---------------|----------------|---------------------------|
+| PostgreSQL | NULLS LAST | NULLS FIRST | Yes |
+| MySQL | NULLS FIRST | NULLS LAST | No |
+| SQL Server | NULLS FIRST | NULLS LAST | No |
 
-**Constraints and Limitations:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- **Bad practice in production:** Microsoft documentation explicitly states that using position is not recommended in applications due to decreased readability and the need for careful maintenance of the ORDER BY list.
-- Positional references are fragile: adding, removing, or reordering a column in the SELECT list silently changes the sort order.
-- Not supported in all databases (e.g., some versions of SQL Server have limitations).
-
-**Real-World Cases:**
-
-- **Ad-hoc queries:** Quickly sorting by different columns during exploration.
-- **Troubleshooting:** Debugging complex queries with many columns.
-
-**References:**
-
-- Microsoft Learn: Sort your results (positional references) - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/2-sort-your-data-as-its-returned
-- PostgreSQL: Sorting Rows (positional references) - https://www.postgresql.org/docs/17/queries-order.html
-
-
-### 4. Specialized Sort Mechanics
-
-#### 4.1 NULL Ordering Behaviors and Explicit Controls (NULLS FIRST / NULLS LAST)
-
-**Core Definitions:**
-
-- **Core Definition:** By default, NULL values sort as if they are larger than any non-NULL value. This means NULLs appear last in ASC order and first in DESC order. The NULLS FIRST and NULLS LAST options override this.
-- **Technical Definition:** The NULLS FIRST and NULLS LAST options determine whether NULLs appear before or after non-NULL values. By default, NULLS FIRST is the default for DESC order, and NULLS LAST otherwise.
-- **Beginner-Friendly Explanation:** NULLs are treated as "bigger than everything," so they end up at the bottom in ascending order. You can force them to the top or bottom with explicit options.
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
+##### Example 1: Default null placement in PostgreSQL
 
 ```sql
-ORDER BY column_name [ASC | DESC] [NULLS { FIRST | LAST }]
+-- Step 1: Create a table with nulls.
+CREATE TABLE scores (name text, score int);
+INSERT INTO scores VALUES ('Alice', 90), ('Bob', NULL), ('Carol', 75);
+
+-- Step 2: ASC default puts NULL last.
+SELECT name, score FROM scores ORDER BY score ASC;
+
+-- Step 3: DESC default puts NULL first.
+SELECT name, score FROM scores ORDER BY score DESC;
 ```
 
-**Component Breakdown:**
+**Expected output:**
 
-- `NULLS FIRST`: NULLs appear before all non-NULL values
-- `NULLS LAST`: NULLs appear after all non-NULL values
-- The options are considered independently for each sort column
+```text
+-- Step 2:
+ name  | score
+-------+-------
+ Carol |    75
+ Alice |    90
+ Bob   |
+(3 rows)
 
-**Database Support:**
+-- Step 3:
+ name  | score
+-------+-------
+ Bob   |
+ Alice |    90
+ Carol |    75
+(3 rows)
+```
 
-| Database | NULLS FIRST/LAST | Default Behavior |
-|----------|-----------------|------------------|
-| PostgreSQL | ✓ | NULLS LAST for ASC, NULLS FIRST for DESC |
-| Oracle | ✓ | NULLS LAST for ASC, NULLS FIRST for DESC |
-| SQL Server | ✗ | NULLs sort as lowest values (NULLS FIRST for ASC) |
-| MySQL | ✗ | NULLs sort as lowest values (NULLS FIRST for ASC) |
+**Why this output appears**: In PostgreSQL, nulls sort as if larger than any non-null value. Ascending order puts the largest (null) last; descending order puts it first.
 
-**Annotated Code Examples:**
+#### Real-World Cases
+
+- **Optional ratings**: A product list sorted by rating descending may show unrated products first unless `NULLS LAST` is specified.
+- **Portable reporting**: A `CASE`-based auxiliary key ensures the same null placement on PostgreSQL, MySQL, and SQL Server.
+
+---
+
+### 9. `NULLS FIRST`
+
+#### Definitions
+
+**Core Definition**
+`NULLS FIRST` is a PostgreSQL sort modifier that places `NULL` values before all non-null values in the sort order.
+
+**Technical Definition**
+`NULLS FIRST` overrides the default null placement for the sort expression it follows. In PostgreSQL, `NULLS FIRST` is the default for `DESC` order, so specifying it explicitly is mainly useful for `ASC` sorts where nulls should appear at the top. The ordering option is considered independently for each sort column. MySQL and SQL Server do not support this syntax and require emulation with `CASE` or `IS NULL`.
+
+**Beginner-Friendly Explanation**
+`NULLS FIRST` means “put the missing values at the top.” It is useful when you want to see records with no value before records with a value.
+
+#### Purposes
+
+- To surface missing or unset values at the top of a report.
+- To make the presence of nulls immediately visible.
+- To override the PostgreSQL default for `ASC` (which would otherwise put nulls last).
+
+#### Syntax Rules and Structure
 
 ```sql
--- PostgreSQL: Explicit NULL ordering
-SELECT emp_name, salary
-FROM employees
-ORDER BY salary ASC NULLS FIRST;
+ORDER BY column ASC NULLS FIRST;
 ```
 
-**Expected Output (with NULL salaries):**
+**Syntax rules:**
 
-| emp_name | salary |
-|----------|--------|
-| [NULL]   | NULL   |
-| Diana    | 48000  |
-| Bob      | 62000  |
-| Alice    | 85000  |
-| Charlie  | 95000  |
-| Eve      | 110000 |
+- PostgreSQL only.
+- Applies to the expression it follows; other expressions keep their own null placement.
+- `NULLS FIRST` is the default for `DESC`.
 
-**Explanation:** NULLS FIRST forces the NULL salary to the top, even though ASC would normally place it last.
+**Constraints and limitations:**
+
+- Not portable to MySQL or SQL Server.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Nulls first in ascending order
 
 ```sql
--- PostgreSQL: NULLS LAST with DESC
-SELECT emp_name, salary
-FROM employees
-ORDER BY salary DESC NULLS LAST;
+-- Step 1: Put nulls at the top of an ascending sort.
+SELECT name, score FROM scores ORDER BY score ASC NULLS FIRST;
 ```
 
-**Real-World Cases:**
+**Expected output:**
 
-- **Reports:** Showing "unknown" values last in a sorted list.
-- **Data quality:** Identifying rows with missing data by sorting them to the top.
-- **User interfaces:** Placing incomplete records at the bottom of a list.
+```text
+ name  | score
+-------+-------
+ Bob   |
+ Carol |    75
+ Alice |    90
+(3 rows)
+```
 
-**References:**
+**Why this output appears**: `NULLS FIRST` overrides PostgreSQL’s default (`NULLS LAST` for `ASC`), placing Bob’s null score before the non-null scores.
 
-- PostgreSQL: Sorting Rows (NULLS FIRST/LAST) - https://www.postgresql.org/docs/17/queries-order.html
-- SQL Server: ORDER BY Clause - https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql
+#### Real-World Cases
 
+- **Data quality reports**: Listing records with missing required fields first highlights gaps.
+- **Optional deadlines**: Tasks with no due date appear at the top of a to-do list.
 
-#### 4.2 Conditional Sorting Using CASE Expressions
+---
 
-**Core Definitions:**
+### 10. `NULLS LAST`
 
-- **Core Definition:** A CASE expression within ORDER BY allows the sort order to change dynamically based on row values or external input.
-- **Technical Definition:** The CASE expression returns different values for different rows, and those values determine the sort order. SQL Server documentation demonstrates using CASE to conditionally determine the sort order based on a column value.
-- **Beginner-Friendly Explanation:** You can tell the database "sort by column A if this condition is true, otherwise sort by column B."
+#### Definitions
 
-**Purposes:**
+**Core Definition**
+`NULLS LAST` is a PostgreSQL sort modifier that places `NULL` values after all non-null values in the sort order.
 
-- To implement dynamic sorting based on user input (e.g., a dropdown that changes the sort column)
-- To sort by different columns for different subsets of rows
-- To implement custom priority ordering
+**Technical Definition**
+`NULLS LAST` overrides the default null placement for the sort expression it follows. In PostgreSQL, `NULLS LAST` is the default for `ASC` order, so specifying it explicitly is mainly useful for `DESC` sorts where nulls should appear at the bottom. MySQL and SQL Server do not support this syntax and require emulation.
 
-**Syntax Structures and Rules:**
+**Beginner-Friendly Explanation**
+`NULLS LAST` means “put the missing values at the bottom.” It is the natural choice when you want to see the records that have values first.
 
-**Complete General Syntax:**
+#### Purposes
+
+- To keep nulls out of the way at the end of a sorted list.
+- To ensure that unrated or unset records do not dominate a “top N” report.
+- To override the PostgreSQL default for `DESC` (which would otherwise put nulls first).
+
+#### Syntax Rules and Structure
 
 ```sql
-ORDER BY CASE
-    WHEN condition1 THEN expression1
-    WHEN condition2 THEN expression2
-    ELSE expression3
-END [ASC | DESC];
+ORDER BY column DESC NULLS LAST;
 ```
 
-**Annotated Code Examples:**
+**Syntax rules:**
+
+- PostgreSQL only.
+- Applies to the expression it follows.
+- `NULLS LAST` is the default for `ASC`.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Nulls last in descending order
 
 ```sql
--- Sort employees: salaried employees by ID descending, hourly by ID ascending
-SELECT emp_name, salary, job_type
-FROM employees
-ORDER BY 
-    CASE WHEN job_type = 'Salaried' THEN emp_id END DESC,
-    CASE WHEN job_type = 'Hourly' THEN emp_id END ASC;
+-- Step 1: Put nulls at the bottom of a descending sort.
+SELECT name, score FROM scores ORDER BY score DESC NULLS LAST;
 ```
 
-**Explanation:** This uses two CASE expressions. The first sorts salaried employees by ID descending; the second sorts hourly employees by ID ascending. NULLs (from the ELSE-less CASE) cause the other expression to take over.
+**Expected output:**
+
+```text
+ name  | score
+-------+-------
+ Alice |    90
+ Carol |    75
+ Bob   |
+(3 rows)
+```
+
+**Why this output appears**: `NULLS LAST` overrides PostgreSQL’s default (`NULLS FIRST` for `DESC`), placing Bob’s null score after the non-null scores.
+
+#### Real-World Cases
+
+- **Top-N leaderboards**: `ORDER BY score DESC NULLS LAST LIMIT 10` excludes unrated players from the top ten.
+- **Optional sort fields**: A directory sorted by phone number descending keeps records without a phone number at the end.
+
+---
+
+### 11. Collations
+
+#### Definitions
+
+**Core Definition**
+A collation is a set of rules that determines how character strings are compared and sorted, including case sensitivity, accent sensitivity, and language-specific ordering.
+
+**Technical Definition**
+A collation is an SQL schema object that maps an SQL name to locales provided by libraries installed in the operating system. A collation definition has a provider that specifies which library supplies the locale data: `libc` uses the operating system’s C library, and `icu` uses the external ICU library. A collation object provided by `libc` maps to a combination of `LC_COLLATE` and `LC_CTYPE` settings; a collation provided by `icu` maps to a named collator provided by the ICU library. The same collation name may exist for different encodings with `libc`, whereas ICU collations are independent of the encoding. In MySQL, collation names encode their characteristics with suffixes: `_ci` (case-insensitive), `_cs` (case-sensitive), `_ai` (accent-insensitive), `_as` (accent-sensitive), `_bin` (binary). In SQL Server, collation names use `CI`/`CS` for case sensitivity and `AI`/`AS` for accent sensitivity (e.g., `Latin1_General_CI_AI`, `Latin1_General_CS_AS`).
+
+**Beginner-Friendly Explanation**
+A collation is the “sorting rulebook” for text. It decides whether uppercase `A` comes before lowercase `a`, whether `é` sorts next to `e`, and whether `ä` sorts after `z` in Swedish. Different languages and different business rules call for different collations.
+
+#### Purposes
+
+- To sort strings according to the rules of a specific language or locale.
+- To control case sensitivity and accent sensitivity in sorting.
+- To ensure that comparisons in `ORDER BY`, `WHERE`, and indexes are consistent.
+- To override the column’s default collation at the expression level.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
 
 ```sql
--- Dynamic sort based on a variable (PostgreSQL example)
-SELECT emp_name, department, salary
-FROM employees
-ORDER BY 
-    CASE WHEN :sort_by = 'name' THEN emp_name END ASC,
-    CASE WHEN :sort_by = 'salary' THEN salary END DESC;
+-- Sort with a specific collation.
+ORDER BY column COLLATE "en_US";
+
+-- Create a collation.
+CREATE COLLATION german (provider = icu, locale = 'de-DE');
+
+-- Use a collation in a column definition.
+CREATE TABLE t (name text COLLATE "de-DE-x-icu");
 ```
 
-**Real-World Cases:**
-
-- **User interfaces:** Sorting by different columns based on a dropdown selection.
-- **Reports:** Different sort orders for different report sections.
-- **Priority queues:** Sorting by priority, then by date within each priority level.
-
-**References:**
-
-- SQL Server: ORDER BY Clause (CASE examples) - https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql
-- PostgreSQL: CASE in ORDER BY - https://www.postgresql.org/docs/current/functions-conditional.html
-
-
-### 5. Under-the-Hood Mechanics & Constraints
-
-#### 5.1 Collation and Case Sensitivity
-
-**Core Definitions:**
-
-- **Core Definition:** Collation defines the rules for comparing and sorting character data, including case sensitivity, accent sensitivity, and language-specific ordering.
-- **Technical Definition:** The sort order of a result set depends on the collation applied to the database or specified in a COLLATE clause at the expression level of the query. Collation affects whether 'a' sorts before 'B', whether 'é' equals 'e', and whether case matters.
-- **Beginner-Friendly Explanation:** Collation is the rulebook for how letters are compared. Different languages and configurations sort letters differently — for example, in some collations 'a' and 'A' are equal, in others they are not.
-
-**Purposes:**
-
-- To understand why the same data sorts differently in different databases
-- To choose the correct collation for language-specific sorting
-- To control case sensitivity in ORDER BY
-
-**Annotated Code Examples:**
+**MySQL:**
 
 ```sql
--- SQL Server: Case-sensitive vs case-insensitive collation
-SELECT emp_name FROM employees ORDER BY emp_name COLLATE Latin1_General_CS_AS;
--- 'Alice' and 'alice' are treated as different
-
-SELECT emp_name FROM employees ORDER BY emp_name COLLATE Latin1_General_CI_AS;
--- 'Alice' and 'alice' are treated as equal
+ORDER BY column COLLATE utf8mb4_unicode_ci;
 ```
 
-**Expected Output (CS collation):** Uppercase letters sort before lowercase letters.
-**Expected Output (CI collation):** Case is ignored in sorting.
-
-**Real-World Cases:**
-
-- **International applications:** Sorting names correctly in different languages (e.g., German 'ö' sorts with 'o', Swedish 'ö' sorts after 'z').
-- **Data migration:** Understanding collation differences when moving data between systems.
-- **Search:** Case-insensitive sorting for user-friendly interfaces.
-
-**References:**
-
-- Microsoft Learn: Collation and Unicode Support - https://learn.microsoft.com/en-us/sql/relational-databases/collations/collation-and-unicode-support
-- Oracle: Database Globalization Support Guide - https://docs.oracle.com/en/database/oracle/oracle-database/19/nlspg/
-
-
-#### 5.2 The DISTINCT Constraint
-
-**Core Definitions:**
-
-- **Core Definition:** When SELECT DISTINCT is used, all ORDER BY expressions must appear in the SELECT list. This is an ANSI SQL requirement.
-- **Technical Definition:** ORDER BY is evaluated after DISTINCT, so ORDER BY can only reference columns that are part of the DISTINCT result set. A query like `SELECT DISTINCT a FROM t ORDER BY b` is invalid ANSI SQL because `b` is not in the SELECT list.
-- **Beginner-Friendly Explanation:** When you ask for unique rows, you can only sort by columns that are part of those unique rows. You can't sort by a column that isn't in the result.
-
-**Syntax Structures and Rules:**
-
-**Valid:**
+**SQL Server:**
 
 ```sql
-SELECT DISTINCT department FROM employees ORDER BY department;
--- department is in the SELECT list
+ORDER BY column COLLATE Latin1_General_CS_AS;
 ```
 
-**Invalid (ANSI SQL):**
+**Collation naming conventions (MySQL):**
+
+| Suffix | Meaning |
+|--------|---------|
+| `_ai` | Accent-insensitive |
+| `_as` | Accent-sensitive |
+| `_ci` | Case-insensitive |
+| `_cs` | Case-sensitive |
+| `_bin` | Binary |
+
+**Collation naming conventions (SQL Server):**
+
+| Suffix | Meaning |
+|--------|---------|
+| `CI` | Case-insensitive |
+| `CS` | Case-sensitive |
+| `AI` | Accent-insensitive |
+| `AS` | Accent-sensitive |
+
+**Syntax rules:**
+
+- `COLLATE` can be applied in `ORDER BY`, in column definitions, and in `CREATE COLLATION`.
+- The collation must be compatible with the database encoding (PostgreSQL `libc` collations are encoding-dependent).
+- PostgreSQL considers distinct collation objects incompatible even when they have identical properties; mixing stripped and non-stripped names is not recommended.
+
+**Constraints and limitations:**
+
+- ICU collations are independent of encoding and offer more customisation than `libc` collations.
+- Collation changes can affect index usability; indexes built with one collation may not be usable under another.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Overriding collation in ORDER BY (PostgreSQL)
 
 ```sql
-SELECT DISTINCT department FROM employees ORDER BY salary;
--- salary is NOT in the SELECT list
+-- Step 1: Compare default and explicit collation.
+SELECT name FROM customers ORDER BY name;
+SELECT name FROM customers ORDER BY name COLLATE "C";
 ```
 
-**Workaround:** Use GROUP BY instead of DISTINCT, with an aggregate function:
+**Expected output:**
+
+```text
+-- Default (database collation, e.g., en_US):
+ name
+-------
+ Alice
+ bob
+ Carol
+(3 rows)
+
+-- COLLATE "C" (byte order):
+ name
+-------
+ Alice
+ Carol
+ bob
+(3 rows)
+```
+
+**Why this output appears**: The default collation (e.g., `en_US`) sorts case-insensitively and places `bob` between `Alice` and `Carol`. The `C` collation sorts by byte value, so uppercase letters come before lowercase, placing `bob` last.
+
+#### Real-World Cases
+
+- **International directories**: Sorting names by a language-specific collation (`de-DE`, `sv-SE`) respects local alphabetisation rules.
+- **Case-sensitive identifiers**: Using a `_cs` or `CS` collation in `ORDER BY` distinguishes `ABC` from `abc`.
+
+---
+
+### 12. Case-Sensitive Sorting
+
+#### Definitions
+
+**Core Definition**
+Case-sensitive sorting orders text so that uppercase and lowercase letters are treated as distinct characters, with a deterministic (often byte-based or collation-defined) order between them.
+
+**Technical Definition**
+Case sensitivity is a property of the collation. In MySQL, collations with the `_cs` suffix are case-sensitive; `_bin` collations compare numeric character code values. In SQL Server, collations with `CS` are case-sensitive. In PostgreSQL, the `C` collation is case-sensitive (byte order), while language collations such as `en_US` are typically case-insensitive. PostgreSQL also supports nondeterministic ICU collations that can be case-sensitive or case-insensitive. The `COLLATE` clause in `ORDER BY` overrides the column’s default collation for the sort.
+
+**Beginner-Friendly Explanation**
+Case-sensitive sorting treats `'A'` and `'a'` as different letters. In a case-sensitive sort, all uppercase letters might come before all lowercase letters (as in byte order), or the collation might interleave them according to language rules.
+
+#### Purposes
+
+- To distinguish between values that differ only in case.
+- To produce a deterministic, reproducible order independent of language rules.
+- To satisfy business rules that treat case as meaningful (e.g., codes, identifiers).
+
+#### Syntax Rules and Structure
+
+**MySQL:**
 
 ```sql
-SELECT department FROM employees GROUP BY department ORDER BY MAX(salary);
+ORDER BY column COLLATE utf8mb4_0900_as_cs;
 ```
 
-**Real-World Cases:**
-
-- **Reporting:** Getting unique combinations and sorting by a derived value.
-- **Data exploration:** Understanding the constraint when building queries interactively.
-
-**References:**
-
-- Stack Overflow: DISTINCT and ORDER BY ANSI constraint - https://stackoverflow.com/revisions/6b7be6fa-3c81-4b4d-9b5d-b094102331a7/view-source
-- PostgreSQL: SELECT DISTINCT - https://www.postgresql.org/docs/current/sql-select.html
-
-
-#### 5.3 Performance Implications of Sorting
-
-**Core Definitions:**
-
-- **Core Definition:** Sorting is an expensive operation that requires the database to materialize and order all rows. It can be avoided if an index provides the required order.
-- **Technical Definition:** MySQL uses a filesort operation when no index can satisfy the ORDER BY. PostgreSQL's planner considers either scanning an index that matches the sort specification or scanning the table and performing an explicit sort. An explicit sort is often faster than an index scan for large result sets because it uses sequential I/O.
-- **Beginner-Friendly Explanation:** Sorting a million rows is slow. But if the data is already stored in sorted order (via an index), the database can just read it out in order — much faster.
-
-**Purposes:**
-
-- To understand when sorting will be slow
-- To design indexes that support ORDER BY
-- To write queries that avoid unnecessary sorts
-
-**Key Performance Guidelines:**
-
-| Scenario | Recommendation |
-|----------|----------------|
-| ORDER BY on indexed columns | Database can use index scan (no sort) |
-| ORDER BY on non-indexed columns | Filesort (MySQL) or explicit sort (PostgreSQL) |
-| ORDER BY with LIMIT | "Top N" sort — database only needs the top N rows |
-| Large result set, sorted | Consider adding an index that matches the sort |
-
-**Annotated Code Examples:**
+**SQL Server:**
 
 ```sql
--- Create an index that supports the ORDER BY
-CREATE INDEX idx_emp_salary ON employees(salary);
-
--- This query can use the index to avoid sorting
-SELECT * FROM employees ORDER BY salary;
+ORDER BY column COLLATE Latin1_General_CS_AS;
 ```
 
-**Expected Performance:**
+**PostgreSQL:**
 
-| Query | Rows | With Index | Without Index |
-|-------|------|------------|---------------|
-| `ORDER BY salary` | 1M | 50ms | 2s |
+```sql
+ORDER BY column COLLATE "C";
+-- or a case-sensitive ICU collation
+ORDER BY column COLLATE "en-u-ks-level2";
+```
 
-**Index Usage Rules:**
+**Syntax rules:**
 
-- The index must match the ORDER BY column(s) and direction(s).
-- If the query mixes ASC and DESC, the index must also have mixed directions.
-- If the index doesn't cover all selected columns, the database may choose a table scan instead of an index scan.
+- Case-sensitive collations are identified by `_cs` (MySQL), `CS` (SQL Server), or specific ICU/`C` collations (PostgreSQL).
+- The collation must be available in the database.
 
-**Real-World Cases:**
+**Constraints and limitations:**
 
-- **E-commerce:** Sorting products by price — an index on price makes this fast.
-- **Log analysis:** Sorting by timestamp — an index on timestamp enables fast range queries.
-- **Reporting:** Sorting by multiple columns — a composite index can cover the sort.
+- Case-sensitive sorting can surprise users who expect dictionary-style ordering.
+- Indexes built with a case-insensitive collation cannot satisfy a case-sensitive sort without a separate expression index.
 
-**References:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- MySQL: ORDER BY Optimization - https://dev.mysql.com/doc/refman/8.0/en/order-by-optimization.html
-- PostgreSQL: Indexes and ORDER BY - https://www.postgresql.org/docs/17/indexes-ordering.html
+##### Example 1: Case-sensitive sort in SQL Server
 
+```sql
+-- Step 1: Create a table with a case-insensitive default collation.
+CREATE TABLE #names (name nvarchar(20) COLLATE Latin1_General_CI_AI);
+INSERT INTO #names VALUES (N'Alice'), (N'alice'), (N'Bob');
 
-## Summary Tables
+-- Step 2: Sort with the column's case-insensitive collation.
+SELECT name FROM #names ORDER BY name;
 
-### ORDER BY Clause Elements
+-- Step 3: Sort with a case-sensitive collation.
+SELECT name FROM #names ORDER BY name COLLATE Latin1_General_CS_AS;
+```
 
-| Element | Syntax | Description |
-|---------|--------|-------------|
-| Column name | `ORDER BY last_name` | Sort by a table column |
-| Column alias | `ORDER BY annual_salary` | Sort by a SELECT alias |
-| Positional number | `ORDER BY 1, 2` | Sort by SELECT list position |
-| Expression | `ORDER BY salary * 12` | Sort by a computed value |
-| CASE expression | `ORDER BY CASE WHEN ... END` | Conditional sorting |
-| Direction | `ASC` / `DESC` | Ascending (default) or descending |
-| NULL ordering | `NULLS FIRST` / `NULLS LAST` | Control NULL placement |
+**Expected output:**
 
-### NULL Ordering Defaults by Database
+```text
+-- Step 2 (case-insensitive):
+ name
+-------
+ Alice
+ alice
+ Bob
+(3 rows)
 
-| Database | ASC Default | DESC Default | Explicit Control |
-|----------|-------------|--------------|------------------|
-| PostgreSQL | NULLS LAST | NULLS FIRST | ✓ |
-| Oracle | NULLS LAST | NULLS FIRST | ✓ |
-| SQL Server | NULLS FIRST | NULLS LAST | ✗ (workaround with CASE) |
-| MySQL | NULLS FIRST | NULLS LAST | ✗ (workaround with CASE) |
+-- Step 3 (case-sensitive):
+ name
+-------
+ Alice
+ Bob
+ alice
+(3 rows)
+```
 
-### Index Usage for ORDER BY
+**Why this output appears**: The case-insensitive collation treats `Alice` and `alice` as equal for sorting, so their relative order is unspecified; `Bob` follows. The case-sensitive collation distinguishes uppercase from lowercase, and the `CS_AS` collation sorts uppercase before lowercase, placing `alice` after `Bob`.
 
-| ORDER BY Pattern | Index Usage | Notes |
-|------------------|-------------|-------|
-| `ORDER BY indexed_col` | ✓ | Direct index scan |
-| `ORDER BY indexed_col ASC, indexed_col2 ASC` | ✓ | Composite index |
-| `ORDER BY indexed_col ASC, indexed_col2 DESC` | ✓ (with matching index) | Requires mixed-direction index |
-| `ORDER BY non_indexed_col` | ✗ | Filesort / explicit sort |
-| `ORDER BY expression` | ✗ | Unless functional index exists |
+#### Real-World Cases
+
+- **Product codes**: Sorting SKUs case-sensitively preserves the meaning of codes like `ab-123` vs `AB-123`.
+- **Username directories**: A case-sensitive sort distinguishes `Alice` from `alice` in systems where usernames are case-sensitive.
+
+---
+
+### 13. Locale-Aware Sorting
+
+#### Definitions
+
+**Core Definition**
+Locale-aware sorting orders text according to the linguistic rules of a specific language or regional locale, including alphabetisation, diacritic handling, and special character ordering.
+
+**Technical Definition**
+Locale-aware sorting uses a collation tied to a locale—for example, `de-DE` for German, `sv-SE` for Swedish, or `fr-FR` for French. In PostgreSQL, ICU collations are named with BCP 47 language tags (e.g., `de-x-icu`, `sv-x-icu`) and can be customised with collation attributes. In MySQL, language-specific collations such as `utf8mb4_swedish_ci` and `utf8mb4_german_ci` apply the sorting rules of those languages. In SQL Server, collations such as `German_PhoneBook_CI_AS` and `French_CI_AS` apply language-specific dictionary sorting. The choice of locale affects where accented characters, ligatures, and special letters (e.g., `ä`, `ö`, `å`) appear relative to the basic Latin alphabet.
+
+**Beginner-Friendly Explanation**
+Locale-aware sorting respects the rules of a language. In Swedish, `ä` sorts after `z`; in German phone-book order, `ö` sorts like `oe`. Using the right locale makes sorted output look natural to native speakers.
+
+#### Purposes
+
+- To produce sorted output that matches the expectations of speakers of a particular language.
+- To handle diacritics and special letters correctly (e.g., `é` near `e`, `ä` after `z` in Swedish).
+- To support multilingual applications that need different sort orders for different audiences.
+- To comply with localisation requirements in reporting and user interfaces.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
+
+```sql
+ORDER BY name COLLATE "sv-SE-x-icu";  -- Swedish
+ORDER BY name COLLATE "de-DE-x-icu";  -- German
+```
+
+**MySQL:**
+
+```sql
+ORDER BY name COLLATE utf8mb4_swedish_ci;
+ORDER BY name COLLATE utf8mb4_german_ci;
+```
+
+**SQL Server:**
+
+```sql
+ORDER BY name COLLATE Swedish_CI_AS;
+ORDER BY name COLLATE German_PhoneBook_CI_AS;
+```
+
+**Syntax rules:**
+
+- The collation must be installed and compatible with the column’s character set/encoding.
+- ICU collations in PostgreSQL are independent of encoding; `libc` collations are encoding-dependent.
+- Collation attributes in ICU language tags can fine-tune case, accent, and variant handling.
+
+**Constraints and limitations:**
+
+- Locale-aware sorting may be slower than binary sorting because it applies complex rules.
+- Different databases may ship different sets of locales; verify availability before relying on a specific collation.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Swedish versus German sorting of `ä`
+
+```sql
+-- Step 1: Create a table with Swedish and German names.
+CREATE TABLE names (name text);
+INSERT INTO names VALUES ('Zebra'), ('Ärlig'), ('Apple');
+
+-- Step 2: Sort with Swedish collation (ä after z).
+SELECT name FROM names ORDER BY name COLLATE "sv-SE-x-icu";
+
+-- Step 3: Sort with German collation (ä treated like a).
+SELECT name FROM names ORDER BY name COLLATE "de-DE-x-icu";
+```
+
+**Expected output:**
+
+```text
+-- Step 2 (Swedish):
+  name
+---------
+ Apple
+ Zebra
+ Ärlig
+(3 rows)
+
+-- Step 3 (German):
+  name
+---------
+ Ärlig
+ Apple
+ Zebra
+(3 rows)
+```
+
+**Why this output appears**: In Swedish collation, `ä` is a distinct letter that sorts after `z`, so `Ärlig` comes last. In German collation, `ä` is treated as equivalent to `a` for primary sorting, so `Ärlig` sorts near `Apple` and before `Zebra`.
+
+#### Real-World Cases
+
+- **International customer lists**: Sorting a customer directory with the collation of each customer’s country produces natural-looking results.
+- **Multilingual catalogues**: A product catalogue uses `sv-SE` for Swedish listings and `de-DE` for German listings.
+- **Localised reports**: Financial reports sorted by company name use the locale of the report’s audience.
 
 ---
 
 ## References
 
-- PostgreSQL: Sorting Rows (ORDER BY) - https://www.postgresql.org/docs/17/queries-order.html
-- PostgreSQL: Indexes and ORDER BY - https://www.postgresql.org/docs/17/indexes-ordering.html
-- PostgreSQL: SELECT - https://www.postgresql.org/docs/current/sql-select.html
-- Microsoft Learn: Sort your results - https://learn.microsoft.com/en-us/training/modules/sort-filter-queries/2-sort-your-data-as-its-returned
-- Microsoft Learn: ORDER BY Clause (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql
-- Microsoft Learn: Collation and Unicode Support - https://learn.microsoft.com/en-us/sql/relational-databases/collations/collation-and-unicode-support
-- MySQL: ORDER BY Optimization - https://dev.mysql.com/doc/refman/8.0/en/order-by-optimization.html
-- Oracle: SQL Beginner's Guide - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/SELECT.html
-- Oracle: Database Globalization Support Guide - https://docs.oracle.com/en/database/oracle/oracle-database/19/nlspg/
-- Stack Overflow: DISTINCT and ORDER BY ANSI constraint - https://stackoverflow.com/revisions/6b7be6fa-3c81-4b4d-9b5d-b094102331a7/view-source
+- PostgreSQL Documentation – Sorting Rows (`ORDER BY`) – https://www.postgresql.org/docs/current/queries-order.html
+- PostgreSQL Documentation – Sorting Rows (`ORDER BY`, PostgreSQL 16) – https://www.postgresql.org/docs/16/queries-order.html
+- PostgreSQL Documentation – Collation – https://www.postgresql.org/docs/current/collation.html
+- PostgreSQL Documentation – CREATE COLLATION – https://www.postgresql.org/docs/current/sql-createcollation.html
+- MySQL 8.0 Reference Manual – ORDER BY Optimization – https://dev.mysql.com/doc/refman/8.0/en/order-by-optimization.html
+- MySQL 8.0 Reference Manual – Collation Naming Conventions – https://downloads.mysql.com/docs/refman-8.1-en.pdf#303#989
+- Microsoft Learn – ORDER BY Clause (Transact-SQL) – https://learn.microsoft.com/en-us/sql/t-sql/queries/select-order-by-clause-transact-sql
+- Microsoft Learn – SQL Server Collation Name (Transact-SQL) – https://learn.microsoft.com/en-us/sql/t-sql/statements/windows-collation-name-transact-sql
+- Microsoft Learn – Collation and Unicode Support – https://learn.microsoft.com/en-us/sql/relational-databases/collations/collation-and-unicode-support
+- Apache Calcite – NULLS FIRST/LAST emulation for MySQL and SQL Server – https://issues.apache.org/jira/browse/CALCITE-6798
+- Stack Overflow – SQL Server equivalent to Oracle's NULLS FIRST – https://stackoverflow.com/questions/…

@@ -1507,6 +1507,104 @@ DEBUG and log("This won't print")
 
 ---
 
+
+## Core Concept 9: Conditional Performance and Best Practices
+
+### Definitions
+
+**Core Definition**
+
+Conditional performance refers to the execution cost of conditional statements, and best practices are guidelines for writing conditionals that are correct, readable, and efficient.
+
+**Technical Definition**
+
+Conditional statements are compiled to bytecode (`POP_JUMP_IF_FALSE`, `POP_JUMP_IF_TRUE`, etc.), and performance is dominated by the cost of evaluating conditions rather than by branching itself. Best practices include: ordering `elif` branches from most to least likely (or most to least specific), using truthiness idioms where appropriate, avoiding deep nesting, preferring `in` for membership checks in sets/dicts (O(1) vs O(n) for lists), using `match`/`case` (Python 3.10+) for structural matching instead of long `elif` chains, and factoring complex conditions into named variables for readability. PEP 8 and the Zen of Python both emphasize clarity.
+
+**Beginner-Friendly Explanation**
+
+Best practices for conditionals are simple: put the most likely branch first, keep conditions short and clear, don’t nest too deeply, and use the right tool—like `in` for membership tests or `match` for structured data.
+
+### Purposes
+
+- To write conditionals that are readable and maintainable.
+- To avoid performance pitfalls (e.g., O(n) membership checks in long `elif` chains).
+- To align with Pythonic style and PEP 8.
+- To prevent bugs caused by subtle precedence or truthiness issues.
+
+### Best Practices Table
+
+| Practice | Description |
+|----------|-------------|
+| Order `elif` from most to least likely/specific | Short-circuits earlier; improves performance. |
+| Use `in` for membership in sets/dicts | O(1) vs O(n) for lists. |
+| Avoid deep nesting | Prefer `elif`, guard clauses, or early returns. |
+| Extract complex conditions to variables | Improves readability and testability. |
+| Use truthiness idioms for empties | `if items:` instead of `if len(items) > 0:`. |
+| Use parentheses for mixed operators | Prevents precedence bugs. |
+| Use `match` for structural cases | Python 3.10+; cleaner than long `elif` chains. |
+| Avoid side effects in conditions | Conditions should be pure; separate actions. |
+| Prefer explicit comparisons for `None` | `if x is None:` (not `if x == None:`). |
+| Use `is` for identity, `==` for equality | Semantics matter for `None`, `True`, `False`. |
+
+### Annotated Code Examples
+
+**Example 1: Refactoring for Readability and Performance**
+
+```python
+# BAD: deep nesting and O(n) membership
+def classify_bad(x):
+    if x == 1 or x == 2 or x == 3:
+        return "small"
+    else:
+        if x == 4 or x == 5 or x == 6:
+            return "medium"
+        else:
+            return "large"
+
+# GOOD: set membership and flat structure
+SMALL = {1, 2, 3}
+MEDIUM = {4, 5, 6}
+
+def classify_good(x):
+    if x in SMALL:
+        return "small"
+    if x in MEDIUM:
+        return "medium"
+    return "large"
+```
+
+**Why the Output is Produced:**
+
+The refactored version is flatter, uses O(1) set membership, and returns early—improving both readability and speed for large `elif` chains.
+
+---
+
+**Example 2: Guard Clauses**
+
+```python
+def process(data):
+    if not data:
+        return None
+    if not isinstance(data, list):
+        raise TypeError("Expected list")
+    if len(data) > 1000:
+        raise ValueError("Too many items")
+    # Main logic here, unindented
+    return sum(data)
+```
+
+**Why the Output is Produced:**
+
+Guard clauses handle edge cases early, keeping the main logic at the top indentation level and avoiding deeply nested `if` blocks.
+
+### Real-World Cases
+
+- **Web request handling**: Early returns for authentication and validation.
+- **Data pipelines**: Guard clauses for missing fields before processing.
+- **Configuration**: Ordered `elif` chains for environment-specific settings.
+
+---
+
 ## References
 
 - Python Software Foundation. *More Control Flow Tools — Python 3.12.0 documentation*. https://docs.python.org/3/tutorial/controlflow.html

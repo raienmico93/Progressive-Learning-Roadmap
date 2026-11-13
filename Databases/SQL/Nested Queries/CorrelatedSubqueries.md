@@ -6,1050 +6,902 @@
 
 ### Definitions
 
-**Core Definition:** A correlated subquery is a subquery that references one or more columns from the outer query, creating a dependency that causes the subquery to be evaluated once for each row processed by the outer query.
+**Core Definition**
+A correlated subquery is a subquery that references one or more columns from the outer query, causing it to be logically evaluated once for each row processed by the outer query.
 
-**Technical Definition:** Per the SQL standard (ISO/IEC 9075-2), a correlated subquery contains an outer reference — a column from a table that appears in a parent statement (the outer query) rather than in the subquery's own `FROM` clause. The correlated subquery cannot be evaluated independently of the outer query because it uses the values of the parent statement. The parent statement can be a `SELECT`, `UPDATE`, or `DELETE` statement in which the subquery is nested. Conceptually, the subquery is evaluated once for each row processed by the parent statement; however, the query optimizer may rewrite the query as a join or use other techniques to produce a semantically equivalent result.
+**Technical Definition**
+In SQL, a correlated subquery is a `SELECT` statement nested inside another statement that depends on the outer query for its values—it cannot be executed independently. The subquery contains an outer reference (a column from a table in the outer query), which creates a correlation between the inner and outer query blocks. PostgreSQL documentation describes correlated subqueries as queries that reference columns of the current outer query level, and notes that they can become performance traps because they may introduce nested-loop execution. SQL Server documentation states that correlated subqueries reference a column in the outer query and execute once per row. MySQL documentation distinguishes correlated subqueries (also called repeating subqueries) as those that depend on the outer query and are re-evaluated for each row, in contrast to non-correlated subqueries, which are evaluated only once.
 
-**Beginner-Friendly Explanation:** A correlated subquery is a query inside another query that depends on the outer query. For each row the outer query looks at, the inner query runs again using that row's values. It's like asking a question that changes depending on which row you're currently examining. For example, "Find employees who earn more than the average salary of their own department" — the subquery recalculates the average for each employee's department.
+**Beginner-Friendly Explanation**
+A correlated subquery is a subquery that "looks at" the current row of the outer query. Instead of running once and producing a single result that the whole outer query uses, it runs again for every row the outer query processes—like asking a fresh question about each row. For example: "For each customer, find their most recent order" requires the subquery to know which customer it is currently processing.
+
+---
 
 ### Key Characteristics
 
-- **Outer reference dependency:** The subquery references at least one column from the outer query, making it dependent on the outer query for its values.
-- **Per-row evaluation:** The subquery is conceptually evaluated once for each row processed by the outer query.
-- **Cannot run independently:** A correlated subquery cannot be executed separately from the outer query, which complicates testing and debugging.
-- **Nested-loop execution model:** Think of it as a nested loop — for each row in the outer query, the database evaluates the subquery using that row's values.
-- **Optimizer transformations:** Modern query optimizers often transform correlated subqueries into equivalent joins internally for better performance.
-- **EXISTS affinity:** Correlated subqueries are most commonly used with the `EXISTS` and `NOT EXISTS` predicates.
-- **Dialect variations:** MySQL evaluates from inside to outside for scoping; Oracle allows up to 255 levels of nesting in the `WHERE` clause.
+1. **Dependency on the Outer Query**: A correlated subquery contains at least one outer reference—a column from a table in the outer query—which makes it dependent on the outer query's current row.
+2. **Row-by-Row Logical Evaluation**: Conceptually, the subquery is evaluated once per outer row. The database may optimise this into a join or semi-join, but the logical semantics are per-row.
+3. **Cannot Execute Independently**: A correlated subquery cannot be run as a standalone query; it requires the context of the outer query.
+4. **Nested-Loop Execution Risk**: Correlated subqueries often translate into nested-loop execution, which can be slow on large tables. PostgreSQL documentation explicitly warns that correlated subqueries can be performance traps for this reason.
+5. **Optimiser Transformations**: Many RDBMS can rewrite correlated subqueries into joins or semi-joins (e.g., Aurora PostgreSQL's `apg_enable_correlated_scalar_transform`), but these transformations are not guaranteed.
+6. **`NULL` Sensitivity**: Correlated `NOT IN` subqueries inherit the `NOT IN` `NULL` trap; `NOT EXISTS` is `NULL`-safe and generally preferred for anti-join logic.
+
+---
 
 ### Prerequisites
 
-- **Basic SQL knowledge:** Familiarity with `SELECT`, `FROM`, and `WHERE` clauses.
-- **Subquery fundamentals:** Understanding of scalar, single-row, and multi-row subqueries.
-- **Table aliasing:** Ability to use table aliases (also called correlation names) to distinguish the outer and inner table references.
-- **Logical operators:** Knowledge of `EXISTS`, `NOT EXISTS`, `IN`, `ANY`, and `ALL`.
-- **Relational concepts:** Understanding of primary keys, foreign keys, and table relationships.
+- **Subquery fundamentals**: Scalar, row, table, correlated, and non-correlated subqueries.
+- **Table aliases**: Required to disambiguate outer and inner table references.
+- **`NULL` semantics**: Three-valued logic and how `NULL` propagates through predicates.
+- **Execution plans**: Reading `EXPLAIN` / `EXPLAIN ANALYZE` output to detect nested loops.
+- **Basic join concepts**: `INNER JOIN`, `LEFT JOIN`, and semi-join/anti-join patterns.
+
+---
 
 ### Related Programming Areas
 
-- **Data Analysis and Business Intelligence:** Correlated subqueries enable row-by-row comparisons and group-relative calculations.
-- **Application Development:** Backend services use correlated subqueries for existence checks, hierarchical queries, and conditional updates.
-- **Data Engineering (ETL):** Correlated subqueries are used in data validation, anti-join patterns, and row-level transformations.
-- **Database Administration:** DBAs use correlated subqueries to identify anomalies and perform data audits.
+| Area | Connection |
+|------|------------|
+| **Existence Checks** | `EXISTS`/`NOT EXISTS` are the standard correlated subquery patterns. |
+| **Per-Row Lookups** | Correlated scalar subqueries retrieve a single value per outer row. |
+| **Query Optimisation** | Correlated subqueries often translate to nested loops; rewriting as joins can dramatically improve performance. |
+| **Data Quality** | Correlated `NOT IN` is a common source of incorrect results due to `NULL`s. |
+| **Reporting** | Correlated subqueries implement "latest per group" and "top-N per group" logic. |
+
+---
 
 ### Core Concepts / Features
 
-1. Correlated Subquery Fundamentals
-2. Scalar Correlated Subqueries
-3. Multi-Valued Correlated Subqueries
-4. Correlated Subqueries with EXISTS / NOT EXISTS
-5. Correlated Subqueries in UPDATE and DELETE Statements
-6. Performance Optimisation and Decorrelation
-7. Correlated vs. Non-Correlated Subqueries
+1. **Correlated Subqueries**
+2. **Outer-Query References**
+3. **Outer References**
+4. **Row-by-Row Logical Evaluation**
+5. **Execution Model**
+6. **Performance Implications**
+7. **Rewriting as Joins**
+8. **Appropriate Use Cases**
+9. **`EXISTS` / `NOT EXISTS`**
+10. **`IN` / `NOT IN`**
+11. **`ANY` / `ALL`**
 
 ---
 
-## 1. Correlated Subquery Fundamentals
+## 1. Correlated Subqueries
 
 ### Definitions
 
-**Core Definition:** A correlated subquery is a nested `SELECT` statement that references a column from a table in the outer query, creating a logical dependency between the two queries.
+**Core Definition**
+A correlated subquery is a subquery that references columns from the outer query, making its result dependent on the outer query's current row.
 
-**Technical Definition:** Oracle performs a correlated subquery when a nested subquery references a column from a table referred to in a parent statement one or more levels above the subquery or nested subquery. The parent statement can be a `SELECT`, `UPDATE`, or `DELETE` statement in which the subquery is nested. A correlated subquery conceptually is evaluated once for each row processed by the parent statement. However, the optimizer may choose to rewrite the query as a join or use some other technique to formulate a query that is semantically equivalent.
+**Technical Definition**
+A correlated subquery is a nested `SELECT` that contains at least one outer reference—a column belonging to a table in the outer query block. The subquery cannot be evaluated independently; it is logically evaluated once for each row of the outer query. The correlation is expressed through table aliases that allow the subquery to refer to the outer table's columns. The SQL standard permits correlated subqueries in `WHERE`, `HAVING`, `SELECT`, and `FROM` (with `LATERAL`) clauses.
 
-**Beginner-Friendly Explanation:** A correlated subquery is a subquery that uses information from the outer query. For each row the outer query processes, the subquery runs again with that row's values. It's like a conversation where the outer query asks, "What's the average salary for this department?" and the subquery answers based on the current department being examined.
+**Beginner-Friendly Explanation**
+A correlated subquery is a subquery that "knows about" the outer query's current row. It is like a per-row assistant: for each row the outer query processes, the subquery runs again with that row's values.
+
+---
 
 ### Purposes
 
-- To answer multiple-part questions whose answers depend on the value in each row processed by the parent statement.
-- To perform row-by-row comparisons that cannot be expressed with a single static value.
-- To filter rows based on conditions relative to their own group or category.
-- To check for the existence or absence of related rows for each outer row.
-- To update or delete rows based on values from related tables.
-- To implement anti-join patterns (finding rows with no matches) using `NOT EXISTS`.
+- To perform per-row existence checks (e.g., "does this customer have any orders?").
+- To retrieve the latest or maximum value per group (e.g., most recent order per customer).
+- To compare each row to a group-level aggregate without using window functions.
+- To implement complex anti-join and semi-join logic.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax (SELECT):**
-
-```sql
-SELECT select_list
-FROM table1 t_alias1
-WHERE expr operator (
-    SELECT column_list
-    FROM table2 t_alias2
-    WHERE t_alias1.column operator t_alias2.column
-);
+**General Syntax**
 ```
-
-**Complete General Syntax (UPDATE):**
-
-```sql
-UPDATE table1 t_alias1
-SET column = (
-    SELECT expr
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-```
-
-**Complete General Syntax (DELETE):**
-
-```sql
-DELETE FROM table1 t_alias1
+SELECT ...
+FROM outer_table o
 WHERE column operator (
-    SELECT expr
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
+  SELECT ... FROM inner_table i WHERE i.col = o.col
 );
 ```
 
-**Component Breakdown:**
+**Component Breakdown**
 
-| Component | Purpose |
-|-----------|---------|
-| `table1 t_alias1` | The outer query's table and its alias |
-| `table2 t_alias2` | The subquery's table and its alias |
-| `t_alias1.column` | The outer reference — a column from the outer query |
-| `t_alias2.column` | The inner column compared against the outer reference |
-| `operator` | Comparison operator (`=`, `>`, `<`, `<>`) or set operator (`IN`, `EXISTS`) |
-
-**Syntax Rules:**
-
-- The subquery must reference at least one column from the outer query (the outer reference).
-- Table aliases (correlation names) are required to distinguish the outer and inner tables.
-- The correlated column can be present only in the subquery's `WHERE` clause (and not in the `SELECT` list) for certain optimizer transformations.
-- The correlated column must be resolved in the query block directly containing the subquery being considered for transformation.
-- Scoping rule: MySQL evaluates from inside to outside; an alias defined in an inner query block shadows the same alias in an outer block.
-- Oracle allows up to 255 levels of nesting in the `WHERE` clause.
-- SQL Server allows up to 32 levels of nesting.
-
-**Constraints and Limitations:**
-
-- Correlated subqueries cannot be executed separately from the outer query, which complicates testing and debugging.
-- Performance can degrade significantly on large tables because the subquery runs once per outer row (N × M loop).
-- Not all correlated subqueries can be decorrelated (rewritten as joins) by the optimizer.
-- A correlated column cannot be present in a nested scalar subquery in the `WHERE` clause for MySQL transformation eligibility.
-- The subquery cannot contain window functions for MySQL transformation eligibility.
-
-### Annotated Complete Code Examples
-
-**Example 1: Basic Correlated Subquery with Comparison Operator**
-
-```sql
--- Setup: Create employees table
-CREATE TABLE employees (
-    emp_id        INTEGER PRIMARY KEY,
-    emp_name      VARCHAR(50),
-    department_id INTEGER,
-    salary        NUMERIC(10, 2)
-);
-
-INSERT INTO employees VALUES
-    (1, 'Alice',   10, 95000.00),
-    (2, 'Bob',     20, 72000.00),
-    (3, 'Carol',   10, 105000.00),
-    (4, 'David',   30, 68000.00),
-    (5, 'Eve',     20, 88000.00);
-
--- Query: Find employees earning more than their department's average
-SELECT department_id, emp_name, salary
-FROM employees x
-WHERE salary > (
-    SELECT AVG(salary)
-    FROM employees
-    WHERE x.department_id = department_id
-)
-ORDER BY department_id;
-```
-
-Expected Output:
- department_id | emp_name  |   salary
-----|-----------|-----------
- 10 | Alice     |  95000.00
- 10 | Carol     | 105000.00
- 20 | Eve       |  88000.00
-
-**Why this output occurs:** For each row in the `employees` table (aliased as `x`), the correlated subquery computes the average salary for that employee's department by matching `x.department_id` with `department_id` in the subquery. Alice and Carol both earn above the Engineering average (100,000); Eve earns above the Marketing average (80,000). Bob and David do not exceed their department averages.
-
-**Example 2: Correlated Subquery with EXISTS**
-
-```sql
--- Setup: Create customers and orders tables
-CREATE TABLE customers (
-    customer_id   INTEGER PRIMARY KEY,
-    customer_name VARCHAR(50)
-);
-
-CREATE TABLE orders (
-    order_id    INTEGER PRIMARY KEY,
-    customer_id INTEGER,
-    order_total NUMERIC(10, 2)
-);
-
-INSERT INTO customers VALUES 
-    (1, 'Alice'), 
-    (2, 'Bob'), 
-    (3, 'Carol'), 
-    (4, 'David');
-
-INSERT INTO orders VALUES 
-    (101, 1, 250.00), 
-    (102, 1, 300.00), 
-    (103, 2, 150.00), 
-    (104, 3, 400.00);
-
--- Query: Find customers who have placed at least one order
-SELECT customer_name FROM customers c
-WHERE EXISTS (
-    SELECT 1 FROM orders o
-    WHERE o.customer_id = c.customer_id
-);
-
--- Expected Output:
---  customer_name
--- ---------------
---  Alice
---  Bob
---  Carol
-```
-
-**Why this output occurs:** For each customer row, the `EXISTS` subquery checks whether any order exists with that customer's ID. If at least one order exists, `EXISTS` returns `TRUE` and the customer is returned. David (no orders) is excluded. The subquery references `c.customer_id` from the outer query, making it correlated.
-
-### Real-World Cases
-
-**Case 1: Department Average Salary Comparison**
-
-An HR system uses a correlated subquery to identify employees earning above their department's average salary, as shown in the example above. This is a classic pattern for identifying outliers within groups.
-
-**Case 2: Most Recent Order per Customer**
-
-An e-commerce system uses a correlated subquery to find the most recent order for each customer: `SELECT SalesOrderID, CustomerID, OrderDate FROM SalesOrderHeader AS o1 WHERE SalesOrderID = (SELECT MAX(SalesOrderID) FROM SalesOrderHeader AS o2 WHERE o2.CustomerID = o1.CustomerID)`.
-
-**Case 3: Customer Existence Check**
-
-A CRM system uses `EXISTS` with a correlated subquery to find customers who have placed at least one order, enabling targeted marketing campaigns.
-
-### References
-
-- Oracle Database SQL Language Reference — Using Subqueries (Correlated Subqueries) - https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/Using-Subqueries.html
-- Oracle Database SQL Language Reference — SELECT (Correlated Subquery Syntax) - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/SELECT.html
-- MySQL 8.0 Reference Manual — Correlated Subqueries - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/correlated-subqueries.html
-- Microsoft Learn — Use Self-Contained or Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-subqueries/4-self-contained-correlated-subqueries
-- Microsoft Learn — Compare Rows with Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-advanced-sql-code/8-correlated-queries
-
----
-
-## 2. Scalar Correlated Subqueries
-
-### Definitions
-
-**Core Definition:** A scalar correlated subquery is a correlated subquery that returns exactly one row and one column — a single value — which the outer query uses in a comparison or expression.
-
-**Technical Definition:** A scalar correlated subquery is a correlated subquery that returns a single column value from a single row. It is a valid form of expression and can be used in most places where a value expression is allowed, including the `SELECT` list, `WHERE` clause, and `HAVING` clause. If the subquery returns zero rows, the scalar result is `NULL`. If it returns more than one row, the database raises an error.
-
-**Beginner-Friendly Explanation:** A scalar correlated subquery gives you exactly one value per outer row. For example, for each employee, it might return the average salary of that employee's department. You can use that value in a comparison, like `WHERE salary > (correlated scalar subquery)`.
-
-### Purposes
-
-- To provide a single value per outer row for use in a comparison or calculation.
-- To compute group-relative aggregates (e.g., department average) for each row.
-- To retrieve a specific related value based on the outer row's attributes.
-- To use in `SELECT`, `WHERE`, and `HAVING` clauses as a dynamic value.
-- To support row-by-row conditional logic.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
-SELECT select_list,
-       (SELECT single_value
-        FROM table2 t_alias2
-        WHERE t_alias1.column = t_alias2.column) AS derived_column
-FROM table1 t_alias1
-WHERE columnN operator (
-    SELECT single_value
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `(SELECT single_value ...)` | Scalar correlated subquery returning one row and one column |
-| `t_alias1.column` | The outer reference linking the subquery to the outer query |
-| `operator` | Comparison operator (`=`, `>`, `<`, etc.) |
-| `derived_column` | Alias for the scalar result in the `SELECT` list |
-
-**Syntax Rules:**
-
-- The subquery must return exactly one column and at most one row.
-- If the subquery returns no rows, the scalar result is `NULL`.
-- If the subquery returns more than one row, an error occurs (e.g., "subquery returned more than 1 row").
-- Scalar correlated subqueries can be used in the `SELECT` list, `WHERE` clause, and `HAVING` clause.
-- Parentheses are required even when the subquery is an operand of a function.
-
-**Constraints and Limitations:**
-
-- Scalar correlated subqueries cannot return multiple columns.
-- Using a scalar correlated subquery in the `SELECT` list causes it to be evaluated once per outer row.
-- Performance can degrade significantly on large tables because the subquery runs once per outer row.
-- MySQL's optimizer can transform correlated scalar subqueries into derived tables when the `subquery_to_derived` flag is enabled (MySQL 8.0.24+).
-
-### Annotated Complete Code Examples
-
-**Example 1: Scalar Correlated Subquery in WHERE Clause**
-
-```sql
--- Using the employees table from Example 1
-SELECT department_id, last_name, salary
-FROM employees x
-WHERE salary > (
-    SELECT AVG(salary)
-    FROM employees
-    WHERE x.department_id = department_id
-)
-ORDER BY department_id, last_name;
-
--- Expected Output:
---  department_id | last_name |  salary
--- ---------------+-----------+----------
---             10 | Alice     | 95000.00
---             10 | Carol     |105000.00
---             20 | Eve       | 88000.00
-```
-
-**Why this output occurs:** For each employee row, the scalar correlated subquery computes the average salary for that employee's department. The outer query compares the employee's salary to this dynamically calculated average. Alice and Carol (Engineering, avg 100,000) and Eve (Marketing, avg 80,000) earn above their department averages.
-
-**Example 2: Scalar Correlated Subquery in SELECT List**
-
-```sql
--- Query: Show each employee's salary and their department's average
-SELECT last_name,
-       salary,
-       (SELECT AVG(salary)
-        FROM employees
-        WHERE department_id = x.department_id) AS dept_avg
-FROM employees x
-ORDER BY department_id, last_name;
-
--- Expected Output:
---  last_name |  salary  |     dept_avg
--- -----------+----------+--------------------
---  Alice     | 95000.00 | 100000.000000000000
---  Carol     |105000.00 | 100000.000000000000
---  Bob       | 72000.00 |  80000.000000000000
---  Eve       | 88000.00 |  80000.000000000000
---  David     | 68000.00 |  68000.000000000000
-```
-
-**Why this output occurs:** The scalar correlated subquery in the `SELECT` list computes the average salary for each employee's department. The result is a new column (`dept_avg`) showing each employee's department average alongside their individual salary.
-
-### Real-World Cases
-
-**Case 1: Salary Benchmarking**
-
-An HR system uses a scalar correlated subquery to show each employee's salary alongside their department's average, enabling managers to quickly identify who is above or below the benchmark.
-
-**Case 2: Product Price Comparison**
-
-An e-commerce analyst uses a scalar correlated subquery to compare each product's price to the average price in its category: `SELECT product_name, price, (SELECT AVG(price) FROM products WHERE category = p.category) AS avg_category_price FROM products p`.
-
-### References
-
-- Oracle Database SQL Language Reference — Scalar Subquery Expressions - https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/Using-Subqueries.html
-- MySQL 8.0 Reference Manual — Correlated Subqueries (Scalar Transform) - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/correlated-subqueries.html
-- Microsoft Learn — Compare Rows with Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-advanced-sql-code/8-correlated-queries
-
----
-
-## 3. Multi-Valued Correlated Subqueries
-
-### Definitions
-
-**Core Definition:** A multi-valued correlated subquery is a correlated subquery that returns multiple rows (and typically one column), used with set operators such as `IN`, `ANY`, or `ALL`.
-
-**Technical Definition:** A multi-valued correlated subquery returns a set of rows, much like a single-column table. It is used with operators that can handle multiple values: `IN` (equality to any value in the list), `ANY` (comparison with any value returned), and `ALL` (comparison with all values returned). The subquery must return only one column when used with `IN`, `ANY`, or `ALL`. The subquery references at least one column from the outer query, making it correlated.
-
-**Beginner-Friendly Explanation:** A multi-valued correlated subquery gives you a list of values per outer row. You use it when you want to check if something is in that list (`IN`), or compare against all of them (`ALL`), or compare against any of them (`ANY`). For example, "Find products whose price is higher than all products in a specific category."
-
-### Purposes
-
-- To filter rows based on membership in a set of values that depends on the outer row.
-- To compare a value against all values returned by a correlated subquery (`ALL`).
-- To compare a value against any value returned by a correlated subquery (`ANY`).
-- To use a correlated subquery result as a set for further filtering.
-- To check for existence or absence of related rows using `IN` or `NOT IN`.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
-SELECT select_list
-FROM table1 t_alias1
-WHERE columnN IN (
-    SELECT columnX
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-
-WHERE columnN operator ANY (
-    SELECT columnX
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-
-WHERE columnN operator ALL (
-    SELECT columnX
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-```
-
-**Component Breakdown:**
-
-| Operator | Purpose |
-|----------|---------|
-| `IN` | True if the value matches any value in the subquery result |
-| `ANY` | True if the comparison is true for at least one value in the result |
-| `ALL` | True if the comparison is true for all values in the result |
-
-**Syntax Rules:**
-
-- The subquery must return exactly one column when used with `IN`, `ANY`, or `ALL`.
-- `ANY` and `ALL` are used with comparison operators (`=`, `>`, `<`, etc.).
-- `IN` is equivalent to `= ANY`.
-- `NOT IN` is equivalent to `<> ALL`.
-- The subquery references at least one column from the outer query.
-
-**Constraints and Limitations:**
-
-- `NOT IN` with a subquery that returns `NULL` can produce unexpected results (returns no rows).
-- `ANY` and `ALL` cannot be used with `EXISTS`.
-- Multi-valued correlated subqueries can be less efficient than `EXISTS` in some RDBMSs.
-
-### Annotated Complete Code Examples
-
-**Example 1: Multi-Valued Correlated Subquery with IN**
-
-```sql
--- Setup: Create products and categories tables
-CREATE TABLE categories (
-    category_id   INTEGER PRIMARY KEY,
-    category_name VARCHAR(50)
-);
-
-CREATE TABLE products (
-    product_id   INTEGER PRIMARY KEY,
-    product_name VARCHAR(50),
-    category_id  INTEGER,
-    price        NUMERIC(10, 2)
-);
-
-INSERT INTO categories VALUES (10, 'Electronics'), (20, 'Clothing');
-INSERT INTO products VALUES
-    (1, 'Laptop', 10, 1200.00),
-    (2, 'Phone',  10, 800.00),
-    (3, 'Shirt',  20, 50.00),
-    (4, 'Jeans',  20, 75.00);
-
--- Query: Find products in categories that have at least one product over $1000
-SELECT product_name, price
-FROM products p
-WHERE category_id IN (
-    SELECT category_id
-    FROM products
-    WHERE price > 1000
-);
-
--- Expected Output:
---  product_name |  price
--- --------------+---------
---  Laptop       | 1200.00
---  Phone        |  800.00
-```
-
-**Why this output occurs:** The correlated subquery returns the category IDs (10) that have at least one product priced over $1,000. The outer query then returns all products in those categories. Only category 10 (Electronics) qualifies, so Laptop and Phone are returned.
-
-**Example 2: Multi-Valued Correlated Subquery with ALL**
-
-```sql
--- Query: Find products priced higher than all products in category 20
-SELECT product_name, price
-FROM products p
-WHERE price > ALL (
-    SELECT price
-    FROM products
-    WHERE category_id = 20
-);
-
--- Expected Output:
---  product_name |  price
--- --------------+---------
---  Laptop       | 1200.00
---  Phone        |  800.00
-```
-
-**Why this output occurs:** The correlated subquery returns all prices in category 20 (50, 75). The outer query uses `> ALL` to find products priced higher than both 50 and 75. Laptop (1200) and Phone (800) both exceed 75, so they are returned. This is a non-correlated example for clarity, but the pattern applies to correlated subqueries as well.
-
-### Real-World Cases
-
-**Case 1: Products in High-Value Categories**
-
-A retail analyst uses a multi-valued correlated subquery to find all products in categories that contain at least one premium product (price > $1000), identifying categories worth expanding.
-
-**Case 2: Employees in Departments with High Average Salaries**
-
-An HR system uses `IN` with a correlated subquery to find employees in departments where the average salary exceeds a threshold.
-
-### References
-
-- MySQL 8.0 Reference Manual — Subqueries with ANY, IN, or SOME - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/any-in-some-subqueries.html
-- MySQL 8.0 Reference Manual — Subqueries with ALL - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/all-subqueries.html
-- Oracle Database SQL Language Reference — Using Subqueries (Multi-Row Subqueries) - https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/Using-Subqueries.html
-
----
-
-## 4. Correlated Subqueries with EXISTS / NOT EXISTS
-
-### Definitions
-
-**Core Definition:** `EXISTS` is a Boolean predicate that returns `TRUE` if a correlated subquery returns at least one row, while `NOT EXISTS` returns `TRUE` if the subquery returns no rows.
-
-**Technical Definition:** The `EXISTS` predicate determines whether any rows meeting a specified condition exist. Rather than returning the rows, it returns `TRUE` or `FALSE`. When a subquery is related to the outer query using the `EXISTS` predicate, the database handles the results of the subquery in a special way — it does not retrieve a scalar value or a multi-valued list but simply checks for the existence of any row. The `EXISTS` subquery is almost always correlated because it references a column from the outer query to check for matching rows.
-
-**Beginner-Friendly Explanation:** `EXISTS` asks "does at least one row exist that matches this condition?" It's like checking if a box contains anything without actually opening it and listing the contents. `NOT EXISTS` asks the opposite: "does no matching row exist?" These are the most common and often the most efficient ways to write correlated subqueries.
-
-### Purposes
-
-- To check for the existence of related rows without retrieving them.
-- To filter the outer table based on whether matching rows exist in another table.
-- To implement anti-join patterns using `NOT EXISTS` (finding rows with no matches).
-- To validate data without incurring the overhead of retrieving and processing results.
-- To enable the optimizer to stop processing as soon as the first match is found.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
-SELECT select_list
-FROM table1 t_alias1
-WHERE EXISTS (
-    SELECT 1
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `EXISTS` | Returns `TRUE` if the subquery returns at least one row |
-| `NOT EXISTS` | Returns `TRUE` if the subquery returns no rows |
-| `SELECT 1` | The select list is irrelevant; `1` is a common convention |
-| `t_alias1.column = t_alias2.column` | The correlation condition |
-
-**Syntax Rules:**
-
-- The `SELECT` list in the subquery is irrelevant; `SELECT 1`, `SELECT *`, or `SELECT column` all work identically.
-- `EXISTS` returns `TRUE` if the subquery returns one or more rows, `FALSE` otherwise.
-- `EXISTS` is almost always correlated; the correlation condition is in the `WHERE` clause.
-- `EXISTS` can be negated with `NOT EXISTS`.
-- `EXISTS` typically has better performance than `IN` with subqueries, especially when checking existence in large tables, because the optimizer can stop after finding the first match.
-
-**Constraints and Limitations:**
-
-- `EXISTS` cannot be used with comparison operators like `=`, `>`, `<`.
-- `EXISTS` does not return the values from the subquery; it only checks for existence.
-- `NOT EXISTS` with a subquery that returns `NULL` values behaves correctly (unlike `NOT IN`).
-- The subquery must reference at least one column from the outer query to be correlated.
-
-### Annotated Complete Code Examples
-
-**Example 1: EXISTS to Find Customers with Orders**
-
-```sql
--- Using the customers and orders tables from Example 2
-SELECT customer_name
-FROM customers c
-WHERE EXISTS (
-    SELECT 1
-    FROM orders o
-    WHERE o.customer_id = c.customer_id
-);
-
--- Expected Output:
---  customer_name
--- ---------------
---  Alice
---  Bob
---  Carol
-```
-
-**Why this output occurs:** For each customer row, the `EXISTS` subquery checks whether any order exists with that customer's ID. Alice, Bob, and Carol have orders; David does not. The subquery returns `TRUE` for the first three customers and `FALSE` for David.
-
-**Example 2: NOT EXISTS to Find Customers Without Orders**
-
-```sql
--- Query: Find customers who have never placed an order
-SELECT customer_name
-FROM customers c
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM orders o
-    WHERE o.customer_id = c.customer_id
-);
-
--- Expected Output:
---  customer_name
--- ---------------
---  David
-```
-
-**Why this output occurs:** For each customer row, the `NOT EXISTS` subquery checks whether no order exists with that customer's ID. Only David has no orders, so only David is returned. This is the classic anti-join pattern.
-
-### Real-World Cases
-
-**Case 1: Churn Analysis**
-
-A subscription business uses `NOT EXISTS` to find users who have not logged in for 30 days: `SELECT user_id FROM users WHERE NOT EXISTS (SELECT 1 FROM logins WHERE logins.user_id = users.id AND logins.login_date > NOW() - INTERVAL '30 days')`.
-
-**Case 2: Missing Data Audit**
-
-A data engineer uses `NOT EXISTS` to find products in an inventory table that have no corresponding record in a suppliers table, flagging them for investigation.
-
-**Case 3: Active User Identification**
-
-A social media platform uses `EXISTS` to find users who have posted at least one comment: `SELECT user_id FROM users WHERE EXISTS (SELECT 1 FROM comments WHERE comments.user_id = users.user_id)`.
-
-### References
-
-- MySQL 8.0 Reference Manual — Subqueries with EXISTS or NOT EXISTS - https://dev.mysqld.com.cn/
-- Oracle Database SQL Language Reference — EXISTS and NOT EXISTS - https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/Using-Subqueries.html
-- Microsoft Learn — Use Self-Contained or Correlated Subqueries (EXISTS) - https://learn.microsoft.com/en-us/training/modules/write-subqueries/4-self-contained-correlated-subqueries
-- PostgreSQL Documentation — Subquery Expressions (EXISTS) - https://www.postgresql.org/docs/current/functions-subquery.html
-
----
-
-## 5. Correlated Subqueries in UPDATE and DELETE Statements
-
-### Definitions
-
-**Core Definition:** Correlated subqueries can be used in `UPDATE` and `DELETE` statements to modify or remove rows based on values from related tables.
-
-**Technical Definition:** A correlated subquery in an `UPDATE` statement provides the value for the `SET` clause based on the current row being updated. In a `DELETE` statement, the correlated subquery defines which rows to delete based on conditions involving other tables. The subquery references a column from the table being updated or deleted from, creating the correlation.
-
-**Beginner-Friendly Explanation:** You can use a correlated subquery to update or delete rows based on information from other tables. For example, "Update all employees' salaries to the average salary of their department" or "Delete all customers who have no orders."
-
-### Purposes
-
-- To update rows in one table based on values from related tables.
-- To delete rows from one table based on conditions involving another table.
-- To perform data synchronisation and reconciliation tasks.
-- To implement complex business rules that depend on related data.
-
-### Syntax Rules and Structure
-
-**UPDATE with Correlated Subquery:**
-
-```sql
-UPDATE table1 t_alias1
-SET column = (
-    SELECT expr
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-```
-
-**DELETE with Correlated Subquery:**
-
-```sql
-DELETE FROM table1 t_alias1
-WHERE column operator (
-    SELECT expr
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `UPDATE table1 t_alias1` | The table being updated, with an alias |
-| `SET column = (subquery)` | The value to assign, computed per row |
-| `DELETE FROM table1 t_alias1` | The table being deleted from, with an alias |
-| `WHERE column operator (subquery)` | The condition determining which rows to delete |
-
-**Syntax Rules:**
-
-- The correlated subquery must reference a column from the table being updated or deleted from.
-- The subquery must return exactly one row and one column for `SET` assignments.
-- For `DELETE`, the subquery can return multiple rows when used with `IN`.
-- Oracle supports correlated subqueries in `UPDATE` and `DELETE` statements.
-
-**Constraints and Limitations:**
-
-- The subquery must return a single value for `SET` assignments; multiple rows cause an error.
-- Updating a table based on a subquery that references the same table can cause unexpected results.
-- Performance can be slow for large tables because the subquery runs per row.
-
-### Annotated Complete Code Examples
-
-**Example 1: Correlated UPDATE**
-
-```sql
--- Setup: Departments table with average salaries
-CREATE TABLE departments (
-    dept_id       INTEGER PRIMARY KEY,
-    dept_name     VARCHAR(50),
-    avg_salary    NUMERIC(10, 2)
-);
-
-INSERT INTO departments VALUES
-    (10, 'Engineering', 100000.00),
-    (20, 'Marketing',   80000.00),
-    (30, 'Sales',       68000.00);
-
--- Query: Update each department's average salary to the actual average
-UPDATE departments d
-SET avg_salary = (
-    SELECT AVG(salary)
-    FROM employees
-    WHERE department_id = d.dept_id
-);
-
--- Expected Output:
--- UPDATE 3
-```
-
-**Why this output occurs:** For each department row, the correlated subquery computes the actual average salary from the `employees` table for that department. The `SET` clause assigns this value to `avg_salary`. All three departments are updated.
-
-**Example 2: Correlated DELETE**
-
-```sql
--- Query: Delete customers who have never placed an order
-DELETE FROM customers c
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM orders o
-    WHERE o.customer_id = c.customer_id
-);
-
--- Expected Output:
--- DELETE 1
-```
-
-**Why this output occurs:** For each customer row, the `NOT EXISTS` subquery checks whether no order exists for that customer. David has no orders, so his row is deleted. The other customers are retained.
-
-### Real-World Cases
-
-**Case 1: Salary Adjustment**
-
-An HR system uses a correlated `UPDATE` to adjust salaries based on department performance metrics: `UPDATE employees e SET salary = salary * 1.05 WHERE department_id IN (SELECT dept_id FROM departments WHERE performance_rating = 'Excellent')`.
-
-**Case 2: Orphan Cleanup**
-
-A database maintenance script uses a correlated `DELETE` to remove orphaned records: `DELETE FROM orders WHERE NOT EXISTS (SELECT 1 FROM customers WHERE customers.customer_id = orders.customer_id)`.
-
-### References
-
-- Oracle Database SQL Language Reference — Correlated UPDATE and DELETE - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/SELECT.html
-- Oracle Database SQL Language Reference — Using Subqueries (UPDATE, DELETE) - https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/Using-Subqueries.html
-
----
-
-## 6. Performance Optimisation and Decorrelation
-
-### Definitions
-
-**Core Definition:** Decorrelation is a query optimisation technique that removes correlation from a subquery, transforming it into an equivalent set-oriented operation (typically a join) that can be executed more efficiently.
-
-**Technical Definition:** Correlated subqueries refer to columns defined by their outer queries and can be evaluated by tuple-at-a-time execution strategies, which are generally slow. Query decorrelation is a technique that removes correlation from subqueries and typically results in faster set-oriented execution. The query optimizer often transforms correlated subqueries into equivalent joins internally. MySQL 8.0.24+ can transform a correlated scalar subquery to a derived table when the `subquery_to_derived` flag is enabled. Aurora PostgreSQL can accelerate correlated subqueries by transforming them into equivalent outer joins.
-
-**Beginner-Friendly Explanation:** Decorrelation is the database's way of rewriting a slow correlated subquery into a faster join. Instead of running the subquery once for every row (like a nested loop), the database rewrites it as a single set-based operation. This can make a huge difference in performance.
-
-### Purposes
-
-- To improve query performance by converting row-by-row processing into set-based operations.
-- To reduce the number of times the subquery is executed.
-- To enable the use of hash joins and merge joins, which are more efficient than nested loops.
-- To optimise queries that would otherwise cause N × M loops on large tables.
-- To leverage optimizer transformations without rewriting the query manually.
-
-### Syntax Rules and Structure
-
-**Decorrelation Techniques:**
-
-| Technique | Description |
+| Component | Description |
 |-----------|-------------|
-| Subquery transformation | Rewriting correlated subqueries as equivalent outer joins |
-| Subquery caching | Storing the results of correlated subqueries for reuse (Aurora PostgreSQL) |
-| Derived table transformation | Converting a correlated scalar subquery into a derived table (MySQL 8.0.24+) |
-| Query flattening | Removing correlated subqueries by merging them into the outer query (SQL Server) |
+| `outer_table o` | The outer query's table with alias `o`. |
+| `inner_table i` | The subquery's table with alias `i`. |
+| `i.col = o.col` | The correlation condition (outer reference). |
 
-**Syntax Rules (Enabling Transformation):**
+**Syntax Rules**
 
-```sql
--- Aurora PostgreSQL: Enable correlated scalar transformation
-SET apg_enable_correlated_scalar_transform TO ON;
+1. The subquery must reference at least one column from the outer query to be correlated.
+2. Table aliases are required to disambiguate outer and inner references.
+3. The subquery is logically evaluated once per outer row.
+4. Correlated subqueries can appear in `WHERE`, `HAVING`, `SELECT`, and (with `LATERAL`) `FROM`.
 
--- MySQL: Enable subquery-to-derived transformation
-SET optimizer_switch = 'subquery_to_derived=on';
-```
+**Constraints and Limitations**
 
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `apg_enable_correlated_scalar_transform` | Aurora PostgreSQL parameter to enable transformation |
-| `subquery_to_derived` | MySQL optimizer switch to enable derived table transformation |
-| `EXPLAIN` | Command to verify whether transformation occurred |
-
-**Constraints and Limitations:**
-
-- Not all correlated subqueries can be decorrelated; some must be executed as nested loops.
-- MySQL transformation eligibility requires the correlated column to be in the subquery's `WHERE` clause only, not in the `SELECT` list.
-- The correlated column must be resolved in the query block directly containing the subquery.
-- Aurora PostgreSQL transformation applies only to subqueries that return a single aggregate value in the `SELECT` list or `WHERE` clause.
-- Transformation parameters are version-specific (Aurora PostgreSQL 16.8+, MySQL 8.0.24+).
-
-### Annotated Complete Code Examples
-
-**Example 1: Verifying Transformation with EXPLAIN (Aurora PostgreSQL)**
-
-```sql
--- Setup
-CREATE TABLE ot (a INT, b INT);
-CREATE TABLE it (a INT, b INT);
-
--- Enable transformation
-SET apg_enable_correlated_scalar_transform TO ON;
-
--- Query with correlated subquery
-EXPLAIN (COSTS FALSE)
-SELECT ot.a, ot.b
-FROM ot
-WHERE ot.b < (SELECT AVG(it.b) FROM it WHERE it.a = ot.a);
-
--- Expected Output (transformed):
---  QUERY PLAN
--- ----------------------------------------------------------------------
---  Hash Join
---    Hash Cond: (ot.a = apg_scalar_subquery.scalar_output)
---    Join Filter: ((ot.b)::numeric < apg_scalar_subquery.avg)
---    ->  Seq Scan on ot
---    ->  Hash
---          ->  Subquery Scan on apg_scalar_subquery
---                ->  HashAggregate
---                      Group Key: it.a
---                      ->  Seq Scan on it
-```
-
-**Why this plan occurs:** With the transformation enabled, Aurora PostgreSQL rewrites the correlated subquery as a hash join between the outer table (`ot`) and a derived table that pre-aggregates the inner table (`it`) by the join key (`it.a`). This avoids executing the subquery once per row.
-
-**Example 2: MySQL Derived Table Transformation**
-
-```sql
--- Query with correlated scalar subquery
-SELECT * FROM t1 WHERE (SELECT a FROM t2 WHERE t2.a = t1.a) > 0;
-
--- Transformed equivalent (conceptual)
-SELECT t1.*
-FROM t1
-LEFT OUTER JOIN (
-    SELECT a, COUNT(*) AS ct
-    FROM t2
-    GROUP BY a
-) AS derived
-ON t1.a = derived.a
-WHERE derived.a > 0;
-```
-
-**Why this transformation occurs:** MySQL 8.0.24+ can transform the correlated scalar subquery into a derived table that groups the inner table by the join column, then joins it to the outer table. This materialises the subquery result once instead of executing it per row.
-
-### Real-World Cases
-
-**Case 1: Large-Scale Reporting**
-
-A data warehouse runs a report with a correlated subquery that calculates a per-customer aggregate. Without decorrelation, the query takes hours. With the optimizer's decorrelation transformation, it completes in minutes.
-
-**Case 2: OLTP Query Tuning**
-
-A DBA notices a slow order-processing query with a correlated subquery. By enabling `subquery_to_derived` in MySQL, the query is rewritten as a join and the response time drops from seconds to milliseconds.
-
-### References
-
-- MySQL 8.0 Reference Manual — Correlated Subqueries (Optimizer Transformations) - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/correlated-subqueries.html
-- Amazon Aurora User Guide — Optimizing Correlated Subqueries in Aurora PostgreSQL - https://docs.amazonaws.cn/en_us/AmazonRDS/latest/AuroraUserGuide/apg-correlated-subquery.html
-- Microsoft Learn — Decorrelating Subqueries - https://learn.microsoft.com/en-us/archive/blogs/conorvsql/decorrelating-subqueries
-- ACM Digital Library — Query Decorrelation in the Fabric Data Warehouse - https://dl.acm.org/
-- ACM Digital Library — Orthogonal Optimization of Subqueries and Aggregation - https://dlnext.acm.org/
+- Correlated subqueries cannot be executed independently.
+- They often translate to nested-loop execution, which can be slow on large tables.
+- Some optimisers cannot transform complex correlated subqueries into joins.
 
 ---
 
-## 7. Correlated vs. Non-Correlated Subqueries
+### Annotated Code Examples
+
+**Example 1: Correlated Subquery for Most Recent Order**
+
+```sql
+SELECT SalesOrderID, CustomerID, OrderDate
+FROM SalesLT.SalesOrderHeader AS o1
+WHERE SalesOrderID = (
+  SELECT MAX(SalesOrderID)
+  FROM SalesLT.SalesOrderHeader AS o2
+  WHERE o2.CustomerID = o1.CustomerID
+)
+ORDER BY CustomerID, OrderDate;
+```
+
+**Step-by-Step Explanation**
+
+1. The outer query iterates over each row of `SalesOrderHeader` (alias `o1`).
+2. For each row, the subquery finds the maximum `SalesOrderID` for that customer (`o2.CustomerID = o1.CustomerID`).
+3. The outer query keeps only the row whose `SalesOrderID` equals that maximum—the most recent order per customer.
+
+**Expected Output (illustrative)**:
+
+| SalesOrderID | CustomerID | OrderDate  |
+|--------------|------------|------------|
+| 71782        | 29485      | 2008-03-11 |
+| 71783        | 29486      | 2008-04-01 |
+
+**Why This Output Occurs**: The correlated subquery computes the maximum order ID per customer; the outer query returns only that most recent order.
+
+---
+
+### Real-World Cases
+
+- **Latest record per entity**: Most recent order per customer, latest login per user.
+- **Per-row comparisons**: Employees earning more than their department average.
+- **Conditional filtering**: Products with sales above the category average.
+
+---
+
+## 2. Outer-Query References
 
 ### Definitions
 
-**Core Definition:** A non-correlated subquery is a subquery that can be evaluated independently of the outer query, while a correlated subquery depends on the outer query for its values.
+**Core Definition**
+An outer-query reference is a reference within a subquery to a column of a table in the outer query, establishing the correlation.
 
-**Technical Definition:** A non-correlated subquery does not contain references to objects in a parent statement; it can be evaluated as if it were an independent query. It executes once and returns a fixed result to the outer query. A correlated subquery contains an outer reference and cannot be evaluated independently; it conceptually executes once for each row processed by the outer query.
+**Technical Definition**
+An outer-query reference (also called an outer reference) is a column reference in a subquery that resolves to a table in an enclosing query block rather than to a table in the subquery's own `FROM` clause. The SQL standard defines the scope rules: a column reference resolves to the innermost query block that contains a matching column; if no match is found, it resolves to the next outer block, and so on. Outer references are what make a subquery correlated.
 
-**Beginner-Friendly Explanation:** A non-correlated subquery runs once and gives the same answer to the outer query every time. A correlated subquery runs again for each row of the outer query, giving a different answer each time based on the current row.
+**Beginner-Friendly Explanation**
+An outer-query reference is the "link" between the subquery and the outer query. It is the specific column in the outer query that the subquery uses to do its per-row work.
+
+---
 
 ### Purposes
 
-- To understand the fundamental difference in evaluation behaviour between the two subquery types.
-- To choose the appropriate subquery type for a given problem.
-- To predict performance characteristics (non-correlated is generally faster).
-- To recognise when a correlated subquery can be rewritten as a non-correlated one or a join.
+- To establish the correlation between inner and outer query blocks.
+- To allow the subquery to compute a per-row result.
+- To enable per-row filtering and lookups.
+
+---
 
 ### Syntax Rules and Structure
 
-**Non-Correlated Subquery:**
-
-```sql
-SELECT select_list
-FROM table1
-WHERE columnN operator (
-    SELECT columnX
-    FROM table2
-    WHERE condition
-);
--- No reference to table1 inside the subquery
+```
+WHERE inner_table.col = outer_table.col
 ```
 
-**Correlated Subquery:**
+**Syntax Rules**
 
-```sql
-SELECT select_list
-FROM table1 t_alias1
-WHERE columnN operator (
-    SELECT columnX
-    FROM table2 t_alias2
-    WHERE t_alias1.column = t_alias2.column
-);
--- References t_alias1.column from the outer query
-```
+1. The outer reference must be resolvable through the alias of a table in the outer query.
+2. The inner table must not have a column with the same name that would shadow the outer reference (aliases prevent ambiguity).
+3. Outer references can appear in `WHERE`, `HAVING`, `SELECT`, and `ON` clauses of the subquery.
 
-**Component Breakdown:**
+**Constraints and Limitations**
 
-| Aspect | Non-Correlated | Correlated |
-|--------|---------------|------------|
-| Outer reference | None | At least one column from the outer query |
-| Execution | Once | Once per outer row |
-| Independent execution | Yes | No |
-| Performance | Generally faster | Can be slower on large tables |
-| Common operators | `IN`, `=`, `>`, `<` | `EXISTS`, `NOT EXISTS`, `IN` |
-
-**Syntax Rules:**
-
-- The presence of an outer reference is the sole distinguishing factor.
-- A non-correlated subquery can be converted to a correlated one by adding a reference to the outer query (though this is usually not desirable).
-- A correlated subquery can sometimes be rewritten as a non-correlated one using joins or CTEs.
-
-**Constraints and Limitations:**
-
-- Non-correlated subqueries cannot reference outer query columns.
-- Correlated subqueries cannot be tested independently.
-- The optimizer may transform a correlated subquery into a non-correlated equivalent (decorrelation) for performance.
-
-### Annotated Complete Code Examples
-
-**Example 1: Non-Correlated vs. Correlated Comparison**
-
-```sql
--- Non-correlated subquery (executes once)
-SELECT ProductID, Name, ListPrice
-FROM SalesLT.Product
-WHERE ListPrice > (SELECT AVG(ListPrice) FROM SalesLT.Product);
-
--- Correlated subquery (executes per outer row)
-SELECT p1.ProductID, p1.Name, p1.ListPrice
-FROM SalesLT.Product AS p1
-WHERE p1.ListPrice > (
-    SELECT AVG(p2.ListPrice)
-    FROM SalesLT.Product AS p2
-    WHERE p2.ProductCategoryID = p1.ProductCategoryID
-);
-```
-
-**Why this difference matters:** In the non-correlated example, the subquery calculates a single average price across all products. This value is computed once and every product is compared to it. In the correlated example, the subquery calculates the average price for each product's specific category. A product in "Bicycles" is compared with the average of bicycles, while a product in "Accessories" is compared with the average of accessories.
-
-### Real-World Cases
-
-**Case 1: Choosing the Right Subquery Type**
-
-A business analyst needs to find products priced above the company-wide average. A non-correlated subquery is the right choice because the comparison is against a single static value. If the analyst needs to find products priced above their category average, a correlated subquery is required because the comparison value changes per row.
-
-**Case 2: Performance Decision**
-
-A developer notices a slow query with a correlated subquery on a large table. By understanding the difference, they rewrite the query as a join, achieving significant performance improvement.
-
-### References
-
-- Oracle Ask TOM — Difference Between Correlated and Non-Correlated Subqueries - https://asktom.oracle.com/
-- SAP Help — Correlated and Uncorrelated Subqueries - https://help.sap.com/
-- Microsoft Learn — Compare Rows with Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-advanced-sql-code/8-correlated-queries
+- Ambiguous column names can cause the reference to resolve to the wrong query block.
+- Outer references in deeply nested subqueries can be hard to read and optimise.
 
 ---
 
-## Summary Table of Correlated Subquery Features
+### Annotated Code Examples
 
-| Feature | Purpose | Key Limitation |
-|---------|---------|----------------|
-| Correlated Subquery Fundamentals | Row-by-row dependency | Cannot run independently |
-| Scalar Correlated Subqueries | Single value per outer row | Returns error if more than one row |
-| Multi-Valued Correlated Subqueries | Set of values per outer row | `NOT IN` with `NULL` returns no rows |
-| EXISTS / NOT EXISTS | Existence checking | Does not return subquery values |
-| Correlated UPDATE / DELETE | Modify rows based on related data | Subquery must return single value for SET |
-| Performance & Decorrelation | Optimise execution via joins | Not all subqueries can be decorrelated |
-| Correlated vs. Non-Correlated | Understand evaluation differences | Correlated is generally slower |
+**Example 1: Outer Reference in a Correlated Subquery**
+
+```sql
+SELECT c.customer_name
+FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
+```
+
+**Explanation**: `c.customer_id` is the outer reference; it links the subquery (`orders o`) to the outer query (`customers c`).
 
 ---
 
-## Dialect Support for Correlated Subqueries
+## 3. Outer References
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle | SQLite |
-|---------|-----------|-------|------------|--------|--------|
-| Correlated Subqueries | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `EXISTS` / `NOT EXISTS` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `ANY` / `ALL` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Correlated `UPDATE` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Correlated `DELETE` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Decorrelation Transform | ✅ | ✅ (8.0.24+) | ✅ | ✅ | ❌ |
-| Subquery Caching | ✅ (Aurora 16.8+) | ❌ | ❌ | ❌ | ❌ |
+### Definitions
+
+**Core Definition**
+Outer references are the set of all references in a subquery to columns of tables in enclosing query blocks.
+
+**Technical Definition**
+Outer references are the mechanism by which a subquery accesses data from its enclosing query. They are resolved at query compilation time using the SQL scoping rules: the innermost query block is searched first, then enclosing blocks. In correlated subqueries, outer references are the only way the subquery can "see" the outer row.
+
+**Beginner-Friendly Explanation**
+Outer references are all the "outside" columns that a subquery uses. They are what make the subquery depend on the outer query.
+
+---
+
+### Purposes (of Understanding Outer References)
+
+- To identify whether a subquery is correlated or non-correlated.
+- To reason about the subquery's evaluation frequency.
+- To rewrite correlated subqueries as joins when appropriate.
+- To debug ambiguous column resolution.
+
+---
+
+### Syntax Rules and Structure
+
+The same as Section 2; the distinction is conceptual (a single outer reference vs. the set of all outer references).
+
+**Constraints and Limitations**
+
+- More outer references generally mean more complex correlation and potentially worse performance.
+- Outer references to columns not in the `GROUP BY` of the outer query can cause errors.
+
+---
+
+### Annotated Code Examples
+
+**Example 1: Multiple Outer References**
+
+```sql
+SELECT e.employee_id, e.salary
+FROM employees e
+WHERE e.salary > (
+  SELECT AVG(e2.salary)
+  FROM employees e2
+  WHERE e2.department_id = e.department_id
+    AND e2.manager_id = e.manager_id
+);
+```
+
+**Explanation**: The subquery references both `e.department_id` and `e.manager_id` from the outer query, computing the average salary for employees in the same department and under the same manager.
+
+---
+
+## 4. Row-by-Row Logical Evaluation
+
+### Definitions
+
+**Core Definition**
+Row-by-row logical evaluation means the correlated subquery is conceptually evaluated once for each row of the outer query, using that row's values.
+
+**Technical Definition**
+The SQL standard defines the semantics of correlated subqueries as if the subquery were evaluated once per outer row. This is the **logical** evaluation model. The **physical** execution may differ—the optimiser may rewrite the subquery as a join, use a hash semi-join, or cache results—but the result must be equivalent to the row-by-row model.
+
+**Beginner-Friendly Explanation**
+Logically, the database runs the subquery again for every row of the outer query. Physically, it might be smarter than that and run it once—but the result is the same as if it had run it row by row.
+
+---
+
+### Purposes (of Understanding the Model)
+
+- To predict query results correctly.
+- To reason about performance (the logical model suggests N executions; the physical model may be better or worse).
+- To identify when rewriting is necessary.
+
+---
+
+### Syntax Rules and Structure
+
+The logical model is not a syntax construct; it is a semantic definition.
+
+**Constraints and Limitations**
+
+- The logical model can be misleading for performance: a query that looks like N executions may be optimised into one join.
+- Conversely, a query that looks simple may actually execute the subquery N times if the optimiser cannot rewrite it.
+
+---
+
+### Annotated Code Examples
+
+**Example 1: Logical Row-by-Row Evaluation**
+
+```sql
+SELECT o.order_id,
+       (SELECT SUM(oi.amount) FROM order_items oi WHERE oi.order_id = o.order_id) AS order_total
+FROM orders o;
+```
+
+**Logical Evaluation**: For each order row, the subquery sums the order items for that order. If there are 10,000 orders, the subquery logically runs 10,000 times.
+
+**Physical Execution**: The optimiser may rewrite this as a `LEFT JOIN` with `GROUP BY`, running once. The result is identical.
+
+---
+
+## 5. Execution Model
+
+### Definitions
+
+**Core Definition**
+The execution model of correlated subqueries describes how the database physically evaluates them—typically as nested loops, though optimiser transformations may rewrite them as joins.
+
+**Technical Definition**
+The naive execution model for a correlated subquery is a nested-loop join: for each row of the outer table, execute the subquery (often using an index on the correlation column) and evaluate the predicate. Modern optimisers can transform correlated subqueries into semi-joins, anti-joins, or regular joins, eliminating the per-row execution. PostgreSQL documentation notes that the planner may treat a scalar subquery as a "black box," leading to poor selectivity estimates; Aurora PostgreSQL can transform correlated scalar subqueries into outer joins when `apg_enable_correlated_scalar_transform` is enabled.
+
+**Beginner-Friendly Explanation**
+The execution model is how the database actually runs the query. It might do a nested loop (slow for large tables) or it might be smart and rewrite it as a join (fast). The query text stays the same; the execution plan changes.
+
+---
+
+### Purposes (of Understanding Execution)
+
+- To interpret execution plans and identify performance bottlenecks.
+- To decide when to rewrite a correlated subquery as a join.
+- To configure optimiser transformations (e.g., Aurora PostgreSQL settings).
+
+---
+
+### Syntax Rules and Structure
+
+The execution model is not a syntax construct; it is determined by the optimiser.
+
+**Constraints and Limitations**
+
+- Nested-loop execution is O(N×M) in the worst case.
+- Optimiser transformations are not guaranteed.
+- SQL Server's assert operator (for scalar subquery single-row validation) can force nested loops.
+
+---
+
+### Annotated Code Examples
+
+**Example 1: Nested-Loop Execution Plan**
+
+```sql
+EXPLAIN ANALYZE
+SELECT c.customer_name
+FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
+```
+
+**Execution Plan (illustrative)**: A `Nested Loop Semi Join` with an `Index Scan` on `orders.customer_id`. For each customer, the index is used to check for orders—efficient when the index exists.
+
+**Without Index**: A `Seq Scan` on `orders` for each customer—catastrophically slow on large tables.
+
+---
+
+## 6. Performance Implications
+
+### Definitions
+
+**Core Definition**
+Performance implications of correlated subqueries are the costs associated with per-row evaluation, including nested-loop execution, repeated index lookups, and the optimiser's difficulty in estimating selectivity.
+
+**Technical Definition**
+Correlated subqueries can be performance traps because they often force nested-loop execution: for each outer row, the subquery is executed, potentially scanning the inner table or performing an index lookup. PostgreSQL documentation explicitly warns about this. The cost scales with the number of outer rows and the cost of each subquery execution. Optimiser transformations (semi-join, anti-join, scalar subquery to outer join) can eliminate the per-row cost, but they are not always applicable.
+
+**Beginner-Friendly Explanation**
+Correlated subqueries can be slow because they run again for every row. If the outer table has 1,000,000 rows and each subquery scans a 10,000-row table, that is 10 billion row comparisons. Indexes and optimiser rewrites can help, but sometimes the only fix is to rewrite the query.
+
+---
+
+### Purposes (of Understanding Performance)
+
+- To diagnose slow queries caused by correlated subqueries.
+- To decide between correlated subqueries, joins, and window functions.
+- To configure indexes and optimiser settings.
+- To write scalable SQL.
+
+---
+
+### Syntax Rules and Structure (Optimisation Guidelines)
+
+1. **Index the correlation column**: An index on the inner table's correlation column (e.g., `orders.customer_id`) enables efficient nested-loop lookups.
+2. **Prefer `EXISTS` over `IN` for existence checks**: `EXISTS` can short-circuit.
+3. **Avoid `NOT IN` with `NULL`s**: Use `NOT EXISTS`.
+4. **Rewrite as joins when possible**: `LEFT JOIN` + `GROUP BY`, or window functions.
+5. **Check execution plans**: Look for nested loops with repeated subquery execution.
+6. **Leverage optimiser transformations**: e.g., Aurora PostgreSQL `apg_enable_correlated_scalar_transform`.
+
+**Constraints and Limitations**
+
+- Indexes help only if the correlation column is indexed.
+- Some subqueries cannot be rewritten automatically.
+- Window functions may be a better alternative in many cases.
+
+---
+
+### Annotated Code Examples
+
+**Example 1: Correlated Subquery vs. Join**
+
+```sql
+-- Correlated: may execute per row
+SELECT o.order_id,
+       (SELECT SUM(oi.amount) FROM order_items oi WHERE oi.order_id = o.order_id) AS total
+FROM orders o;
+
+-- Join: executes once
+SELECT o.order_id, SUM(oi.amount) AS total
+FROM orders o
+LEFT JOIN order_items oi ON oi.order_id = o.order_id
+GROUP BY o.order_id;
+```
+
+**Explanation**: The join version scans both tables once and aggregates, often much faster than the correlated subquery on large data sets.
+
+---
+
+## 7. Rewriting as Joins
+
+### Definitions
+
+**Core Definition**
+Rewriting a correlated subquery as a join means transforming the per-row subquery into an equivalent join operation that the optimiser can execute more efficiently.
+
+**Technical Definition**
+Many correlated subqueries have join equivalents: `EXISTS` → semi-join (`INNER JOIN` with `DISTINCT` or `WHERE ... IS NOT NULL`); `NOT EXISTS` → anti-join (`LEFT JOIN ... WHERE right.key IS NULL`); correlated scalar aggregate → `LEFT JOIN` + `GROUP BY`; "latest per group" → window function (`ROW_NUMBER()` or `DISTINCT ON`). These rewrites are semantically equivalent but often produce better execution plans.
+
+**Beginner-Friendly Explanation**
+Rewriting a correlated subquery as a join means turning "for each row, run this subquery" into "join the tables once." It is usually faster and easier for the optimiser to handle.
+
+---
+
+### Purposes
+
+- To eliminate nested-loop execution.
+- To enable hash and merge join algorithms.
+- To improve scalability on large data sets.
+- To make the query easier to optimise.
+
+---
+
+### Syntax Rules and Structure (Common Rewrites)
+
+| Correlated Pattern | Join Rewrite |
+|--------------------|--------------|
+| `EXISTS (SELECT 1 ...)` | `INNER JOIN` + `DISTINCT` (semi-join) |
+| `NOT EXISTS (SELECT 1 ...)` | `LEFT JOIN ... WHERE right.key IS NULL` (anti-join) |
+| Correlated scalar aggregate | `LEFT JOIN` + `GROUP BY` |
+| "Latest per group" | `ROW_NUMBER() OVER (PARTITION BY ...)` or `DISTINCT ON` |
+| `IN (subquery)` | `INNER JOIN` (with `DISTINCT` if needed) |
+| `NOT IN (subquery)` | `LEFT JOIN ... WHERE right.key IS NULL` (with `NOT EXISTS` safety) |
+
+**Constraints and Limitations**
+
+- Rewrites must preserve `NULL` semantics (especially for `NOT IN`).
+- Some correlated subqueries (e.g., with complex `OR` conditions) are difficult to rewrite.
+- Window functions may be the best rewrite for "latest per group."
+
+---
+
+### Annotated Code Examples
+
+**Example 1: Rewriting `EXISTS` as a Semi-Join**
+
+```sql
+-- Correlated EXISTS
+SELECT c.customer_name
+FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
+
+-- Rewritten as semi-join
+SELECT DISTINCT c.customer_name
+FROM customers c
+INNER JOIN orders o ON o.customer_id = c.customer_id;
+```
+
+**Explanation**: The `INNER JOIN` + `DISTINCT` produces the same result (customers with at least one order) but can use hash or merge join.
+
+---
+
+**Example 2: Rewriting "Latest Per Group" as a Window Function**
+
+```sql
+-- Correlated subquery
+SELECT o.order_id, o.customer_id, o.order_date
+FROM orders o
+WHERE o.order_id = (
+  SELECT MAX(o2.order_id) FROM orders o2 WHERE o2.customer_id = o.customer_id
+);
+
+-- Window function rewrite
+SELECT order_id, customer_id, order_date
+FROM (
+  SELECT order_id, customer_id, order_date,
+         ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_id DESC) AS rn
+  FROM orders
+) t
+WHERE rn = 1;
+```
+
+**Explanation**: The window function computes the row number per customer in one pass, avoiding per-row subquery execution.
+
+---
+
+## 8. Appropriate Use Cases
+
+### Definitions
+
+**Core Definition**
+Appropriate use cases for correlated subqueries are scenarios where the per-row semantics are natural, the data volume is manageable, or the optimiser can transform the subquery efficiently.
+
+**Technical Definition**
+Correlated subqueries are appropriate when: (1) the query expresses an existence or per-row comparison naturally; (2) the outer result set is small or highly filtered; (3) an index on the correlation column makes per-row lookups efficient; (4) the subquery cannot be easily expressed as a join (e.g., complex `OR` conditions); or (5) readability is more important than maximum performance, and the data volume is modest.
+
+**Beginner-Friendly Explanation**
+Correlated subqueries are fine to use when the outer query returns few rows, when the correlation column is indexed, or when the query is naturally "for each X, check Y."
+
+---
+
+### Purposes (of Knowing Appropriate Use)
+
+- To choose the right tool for the job.
+- To avoid premature optimisation that hurts readability.
+- To recognise when rewriting is necessary.
+
+---
+
+### Syntax Rules and Structure
+
+No separate syntax; this is a judgment call.
+
+**Constraints and Limitations**
+
+- On large tables without indexes, correlated subqueries can be disastrously slow.
+- In high-volume production queries, rewriting is usually preferred.
+
+---
+
+### Annotated Code Examples
+
+**Example 1: Appropriate Correlated Subquery (Small Outer Set + Index)**
+
+```sql
+SELECT c.customer_name
+FROM customers c
+WHERE c.region = 'North'
+  AND EXISTS (
+    SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+  );
+```
+
+**Explanation**: The outer query is filtered to a small region, and `orders.customer_id` is indexed—per-row lookups are cheap.
+
+---
+
+## 9. `EXISTS`
+
+### Definitions
+
+**Core Definition**
+`EXISTS` tests whether a correlated subquery returns any rows, returning `TRUE` if at least one row exists.
+
+**Technical Definition**
+`EXISTS (subquery)` returns `TRUE` if the subquery returns one or more rows, and `FALSE` otherwise. It ignores the subquery's `SELECT` list. It is most commonly used with correlated subqueries for existence checks. PostgreSQL documentation states that `EXISTS` is usually the best choice when testing for existence.
+
+**Beginner-Friendly Explanation**
+`EXISTS` asks: "Does a matching row exist?" It stops looking as soon as it finds one.
+
+---
+
+### Purposes
+
+- To check for the existence of related rows.
+- To implement semi-join logic.
+- To filter rows based on correlated conditions.
+
+---
+
+### Syntax Rules and Structure
+
+```
+WHERE EXISTS (subquery)
+```
+
+**Syntax Rules**
+
+1. The subquery may return any number of columns; the `SELECT` list is irrelevant.
+2. Returns `TRUE` if the subquery returns at least one row.
+3. Typically correlated.
+4. Can short-circuit evaluation.
+
+**Constraints and Limitations**
+
+- Uncorrelated `EXISTS` is rarely useful (same result for every outer row).
+
+---
+
+### Annotated Code Examples
+
+**Example 1: `EXISTS`**
+
+```sql
+SELECT c.customer_name
+FROM customers c
+WHERE EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
+```
+
+**Expected Output (illustrative)**:
+
+| customer_name |
+|---------------|
+| Alice         |
+| Bob           |
+
+---
+
+## 10. `NOT EXISTS`
+
+### Definitions
+
+**Core Definition**
+`NOT EXISTS` tests whether a correlated subquery returns zero rows, returning `TRUE` if no rows exist.
+
+**Technical Definition**
+`NOT EXISTS (subquery)` returns `TRUE` if the subquery returns zero rows, and `FALSE` otherwise. It is the `NULL`-safe way to implement anti-join logic, unlike `NOT IN`. PostgreSQL documentation states that `NOT EXISTS` is the most efficient and safest way to implement anti-join logic.
+
+**Beginner-Friendly Explanation**
+`NOT EXISTS` asks: "Is there no matching row?" It is the safe way to find rows without a match.
+
+---
+
+### Purposes
+
+- To implement anti-join logic safely.
+- To find rows with no related data.
+- To replace `NOT IN` where `NULL`s are a concern.
+
+---
+
+### Syntax Rules and Structure
+
+```
+WHERE NOT EXISTS (subquery)
+```
+
+**Syntax Rules**
+
+1. Returns `TRUE` if the subquery returns zero rows.
+2. `NULL`-safe (unlike `NOT IN`).
+3. Typically correlated.
+
+**Constraints and Limitations**
+
+- Same performance considerations as `EXISTS` (index the correlation column).
+
+---
+
+### Annotated Code Examples
+
+**Example 1: `NOT EXISTS` Anti-Join**
+
+```sql
+SELECT c.customer_name
+FROM customers c
+WHERE NOT EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
+```
+
+**Expected Output (illustrative)**:
+
+| customer_name |
+|---------------|
+| Carol         |
+
+**Why This Output Occurs**: `NOT EXISTS` returns `TRUE` for customers with no orders.
+
+---
+
+## 11. `IN`
+
+### Definitions
+
+**Core Definition**
+`IN` tests whether a value appears in the result set of a subquery; it can be correlated when the subquery references outer columns.
+
+**Technical Definition**
+`value IN (subquery)` returns `TRUE` if `value` equals any row in the subquery result. When the subquery is correlated, `IN` behaves as a correlated membership test. `IN` can often be rewritten as a semi-join.
+
+**Beginner-Friendly Explanation**
+`IN` asks: "Is this value in the list produced by the subquery?"
+
+---
+
+### Purposes
+
+- To filter rows based on membership in a set.
+- To express semi-join logic.
+- To compare against a dynamic list.
+
+---
+
+### Syntax Rules and Structure
+
+```
+WHERE value IN (subquery)
+```
+
+**Syntax Rules**
+
+1. The subquery must return one column.
+2. `IN` returns `TRUE` if the value matches any row.
+3. Correlated `IN` is evaluated per outer row.
+
+**Constraints and Limitations**
+
+- `NOT IN` with `NULL`s returns no rows (the famous `NULL` trap).
+
+---
+
+### Annotated Code Examples
+
+**Example 1: Correlated `IN`**
+
+```sql
+SELECT c.customer_name
+FROM customers c
+WHERE c.customer_id IN (
+  SELECT o.customer_id FROM orders o WHERE o.customer_id = c.customer_id
+);
+```
+
+**Explanation**: The subquery references `c.customer_id` (correlation); `IN` returns `TRUE` if the customer has an order.
+
+---
+
+## 12. `NOT IN`
+
+### Definitions
+
+**Core Definition**
+`NOT IN` tests whether a value does **not** appear in the result set of a subquery.
+
+**Technical Definition**
+`value NOT IN (subquery)` returns `TRUE` if `value` does not equal any row in the subquery result. However, if the subquery returns any `NULL`, `NOT IN` evaluates to `UNKNOWN` for non-matching rows, and the query returns no rows. This is the well-known `NOT IN` `NULL` trap. `NOT EXISTS` is the safe alternative.
+
+**Beginner-Friendly Explanation**
+`NOT IN` asks: "Is this value **not** in the list?" But if the list contains a `NULL`, the answer becomes "unknown" for everything—and the query returns nothing.
+
+---
+
+### Purposes
+
+- To filter rows that are not in a set.
+- To express anti-join logic (with caution).
+
+---
+
+### Syntax Rules and Structure
+
+```
+WHERE value NOT IN (subquery)
+```
+
+**Syntax Rules**
+
+1. Returns `TRUE` if the value matches no row in the subquery result.
+2. **If the subquery returns any `NULL`, the result is `UNKNOWN` (no rows returned).**
+3. Must be used with care when `NULL`s are possible.
+
+**Constraints and Limitations**
+
+- The `NULL` trap is the primary limitation.
+- Use `NOT EXISTS` instead when `NULL`s may be present.
+
+---
+
+### Annotated Code Examples
+
+**Example 1: The `NOT IN` `NULL` Trap**
+
+```sql
+-- If subquery returns any NULL, this returns zero rows
+SELECT c.customer_name
+FROM customers c
+WHERE c.customer_id NOT IN (
+  SELECT o.customer_id FROM orders o
+);
+```
+
+**Safe Alternative**:
+```sql
+SELECT c.customer_name
+FROM customers c
+WHERE NOT EXISTS (
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
+);
+```
+
+---
+
+## 13. `ANY` / `ALL`
+
+### Definitions
+
+**Core Definition**
+`ANY` and `ALL` compare a value to any or all rows in a subquery result, and can be correlated.
+
+**Technical Definition**
+`value operator ANY (subquery)` returns `TRUE` if the comparison is true for at least one row; `value operator ALL (subquery)` returns `TRUE` if the comparison is true for every row. When the subquery is correlated, the comparison is per outer row. `= ANY` is equivalent to `IN`; `<> ALL` is equivalent to `NOT IN` (with the same `NULL` traps).
+
+**Beginner-Friendly Explanation**
+`ANY` means "at least one"; `ALL` means "every one." They let you compare against a set of values.
+
+---
+
+### Purposes
+
+- To compare a value against any or all rows in a correlated set.
+- To express "greater than the minimum" (`> ANY`) or "greater than the maximum" (`> ALL`).
+- To implement set-wide comparisons.
+
+---
+
+### Syntax Rules and Structure
+
+```
+WHERE value operator ANY (subquery)
+WHERE value operator ALL (subquery)
+```
+
+**Syntax Rules**
+
+1. `= ANY` ≡ `IN`; `<> ALL` ≡ `NOT IN`.
+2. `> ANY` means "greater than the minimum."
+3. `> ALL` means "greater than the maximum."
+4. `ANY`/`ALL` must be used with a comparison operator.
+
+**Constraints and Limitations**
+
+- `<> ANY` is usually `TRUE` for non-empty sets (rarely the intended meaning).
+- `ALL` with an empty subquery returns `TRUE` (vacuous truth).
+- `NOT IN` (`<> ALL`) inherits the `NULL` trap.
+
+---
+
+### Annotated Code Examples
+
+**Example 1: Correlated `> ANY`**
+
+```sql
+SELECT e.employee_id, e.salary
+FROM employees e
+WHERE e.salary > ANY (
+  SELECT e2.salary FROM employees e2 WHERE e2.department_id = e.department_id
+);
+```
+
+**Explanation**: For each employee, the subquery returns the salaries of all employees in the same department. `> ANY` returns `TRUE` if the employee earns more than at least one colleague—i.e., more than the department minimum.
 
 ---
 
 ## References
 
-- Oracle Database SQL Language Reference — Using Subqueries - https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/Using-Subqueries.html
-- Oracle Database SQL Language Reference — SELECT (Correlated Subquery Syntax) - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/SELECT.html
-- MySQL 8.0 Reference Manual — Correlated Subqueries - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/correlated-subqueries.html
-- MySQL 8.0 Reference Manual — Subqueries with EXISTS or NOT EXISTS - https://dev.mysqld.com.cn/
-- MySQL 8.0 Reference Manual — Subqueries with ANY, IN, or SOME - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/any-in-some-subqueries.html
-- MySQL 8.0 Reference Manual — Subqueries with ALL - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/all-subqueries.html
-- Microsoft Learn — Use Self-Contained or Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-subqueries/4-self-contained-correlated-subqueries
-- Microsoft Learn — Compare Rows with Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-advanced-sql-code/8-correlated-queries
-- Microsoft Learn — Decorrelating Subqueries - https://learn.microsoft.com/en-us/archive/blogs/conorvsql/decorrelating-subqueries
-- Amazon Aurora User Guide — Optimizing Correlated Subqueries in Aurora PostgreSQL - https://docs.amazonaws.cn/en_us/AmazonRDS/latest/AuroraUserGuide/apg-correlated-subquery.html
-- PostgreSQL Documentation — Subquery Expressions - https://www.postgresql.org/docs/current/functions-subquery.html
-- SAP Help — Correlated and Uncorrelated Subqueries - https://help.sap.com/
-- Oracle Ask TOM — Difference Between Correlated and Non-Correlated Subqueries - https://asktom.oracle.com/
-- ACM Digital Library — Query Decorrelation in the Fabric Data Warehouse - https://dl.acm.org/
-- ACM Digital Library — Orthogonal Optimization of Subqueries and Aggregation - https://dlnext.acm.org/
-- ISO/IEC 9075-2 — SQL Standard (Subqueries) - https://jtc1sc32.org/doc/N0251-0300/32N0254.pdf
+1. **PostgreSQL Documentation — Subquery Expressions (EXISTS, IN, ANY, ALL)** — https://www.postgresql.org/docs/current/functions-subquery.html
+2. **PostgreSQL Documentation — Scalar Subqueries and Correlated Subqueries** — https://www.postgresql.org/docs/current/sql-expressions.html#SQL-SYNTAX-SCALAR-SUBQUERIES
+3. **MySQL 8.0 Reference Manual — Correlated Subqueries** — https://dev.mysql.com/doc/refman/8.0/en/correlated-subqueries.html
+4. **MySQL 8.0 Reference Manual — Subqueries with EXISTS or NOT EXISTS** — https://dev.mysql.com/doc/refman/8.0/en/exists-and-not-exists-subqueries.html
+5. **Microsoft Learn — Use Self-Contained or Correlated Subqueries** — https://learn.microsoft.com/en-us/training/modules/write-subqueries/4-self-contained-correlated-subqueries
+6. **Amazon Aurora PostgreSQL — Optimizing Correlated Subqueries** — https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/apg-correlated-subquery.html
+7. **Airbyte — PostgreSQL Subquery: A Complete Guide** — https://airbyte.com/data-engineering-resources/postgresql-subquery
+8. **SQL:2016 Standard — ISO/IEC 9075-2:2016 (Foundation)** — https://www.iso.org/standard/63555.html
+
+---
+
+This cheat sheet provides a comprehensive reference for SQL correlated subqueries, covering outer references, row-by-row evaluation, execution models, performance implications, join rewrites, appropriate use cases, and the `EXISTS`, `NOT EXISTS`, `IN`, `NOT IN`, `ANY`, and `ALL` operators. Always index correlation columns, prefer `NOT EXISTS` over `NOT IN` when `NULL`s are possible, and consider rewriting correlated subqueries as joins or window functions for large data sets.

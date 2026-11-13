@@ -6,696 +6,902 @@
 
 ### Definitions
 
-**Core Definition:** A SQL subquery is a `SELECT` statement nested within another SQL statement (the outer query), used to return data that the outer query uses as a condition, a value, or a table source.
+**Core Definition**
+A subquery is a `SELECT` statement nested inside another SQL statement—often called the outer query—that returns a result set used by the outer statement to filter rows, compute values, or derive tables.
 
-**Technical Definition:** Per the SQL standard (ISO/IEC 9075-2), a subquery is a `<query expression>` enclosed in parentheses that appears within a `<query specification>`, `<predicate>`, or other SQL construct. The subquery is evaluated to produce a result set that the outer query consumes. Subqueries are classified by the shape of their result: a scalar subquery returns exactly one row and one column; a row subquery returns exactly one row but may return multiple columns; a table subquery returns a set of rows and columns. Subqueries may be self-contained (independent of the outer query) or correlated (referencing columns from the outer query).
+**Technical Definition**
+In SQL, a subquery (also called a sub-select or nested select) is a complete `SELECT` expression enclosed in parentheses that appears within another SQL statement. The outer statement may be a `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `SET`, or `DO` statement. Subqueries can return a scalar value (one row, one column), a row (one row, multiple columns), a column (multiple rows, one column), or a table (multiple rows and columns). They may be self-contained (non-correlated)—executed once and independent of the outer query—or correlated—referencing columns from the outer query and conceptually evaluated once per outer row. Subqueries can appear in the `SELECT` list, `FROM` clause (as derived tables), `WHERE` clause, `HAVING` clause, and `JOIN` clauses.
 
-**Beginner-Friendly Explanation:** A subquery is a query inside another query. The inner query runs first (or conceptually first), and its result is used by the outer query. It's like asking a question to get an answer that you then use to ask another question. For example, "Find employees who earn more than the average salary" — the subquery calculates the average, and the outer query finds employees above that average.
+**Beginner-Friendly Explanation**
+A subquery is a query inside a query. Imagine you are writing a query to find employees who earn more than the company average. You could first write a separate query to calculate the average salary, note the result, and then write a second query using that number. A subquery lets you combine both steps into one statement: the inner query (the subquery) calculates the average, and the outer query uses that result to filter employees. Subqueries make complex questions expressible as a single, readable SQL statement.
+
+---
 
 ### Key Characteristics
 
-- **Nested structure:** A subquery is enclosed in parentheses and embedded within an outer query.
-- **Result-driven classification:** Subqueries are categorised by the shape of their result set: scalar (one value), single-row (one row), multi-row (multiple rows), or correlated (dependent on the outer query).
-- **Evaluation order:** Self-contained subqueries are evaluated once, before the outer query. Correlated subqueries are re-evaluated for each row of the outer query.
-- **Flexible placement:** Subqueries can appear in the `SELECT` list, `FROM` clause, `WHERE` clause, `HAVING` clause, and other SQL clauses.
-- **Operator compatibility:** The operators used with a subquery depend on its result shape: scalar subqueries use comparison operators (`=`, `>`, `<`); multi-row subqueries use `IN`, `ANY`, `ALL`, `EXISTS`.
-- **Dialect variations:** Column aliasing requirements, row constructor support, and correlated subquery optimisations vary across RDBMSs.
+1. **Parentheses Are Mandatory**: A subquery must always be enclosed in parentheses.
+2. **Result Shape Determines Usage**: The number of rows and columns a subquery returns determines where it can be used. Scalar subqueries (one value) can appear in expressions; row subqueries (one row, multiple columns) support composite comparisons; table subqueries (multiple rows and columns) can be used in `FROM` or `JOIN` clauses.
+3. **Correlated vs. Non-Correlated**: Non-correlated subqueries execute once and their result is reused; correlated subqueries reference outer columns and execute once per outer row, often creating nested-loop execution patterns.
+4. **Placement Flexibility**: Subqueries can appear in the `SELECT` list, `FROM` clause, `WHERE` clause, `HAVING` clause, and `JOIN` clauses, each with different semantics and performance implications.
+5. **Readability vs. Performance Trade-offs**: Subqueries can make queries more readable and modular, but correlated subqueries and derived tables can introduce performance overhead compared to joins or CTEs.
+6. **NULL Sensitivity**: Scalar subqueries returning no rows yield `NULL`; `NOT IN` with `NULL`s in the subquery result can produce unexpected behaviour. `EXISTS` and `NOT EXISTS` are often safer for existence checks.
+
+---
 
 ### Prerequisites
 
-- **Basic SQL knowledge:** Familiarity with `SELECT`, `FROM`, and `WHERE` clauses.
-- **Comparison operators:** Understanding of `=`, `>`, `<`, `>=`, `<=`, `<>`.
-- **Logical operators:** Knowledge of `IN`, `ANY`, `ALL`, `EXISTS`, `NOT EXISTS`.
-- **Table aliasing:** Ability to use table aliases to distinguish tables in correlated subqueries.
+- **Basic `SELECT` syntax**: `SELECT`, `FROM`, `WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`.
+- **Comparison operators**: `=`, `<>`, `>`, `<`, `IN`, `ANY`, `ALL`, `EXISTS`.
+- **`NULL` semantics**: How `NULL` behaves in comparisons and subquery results.
+- **Table aliases**: Required for correlated subqueries and derived tables.
+- **Execution plan basics**: To reason about correlated subquery performance.
+
+---
 
 ### Related Programming Areas
 
-- **Data Analysis and Business Intelligence:** Subqueries enable complex filtering and comparison against aggregate values.
-- **Application Development:** Backend services use subqueries for conditional data retrieval and hierarchical queries.
-- **Data Engineering (ETL):** Subqueries are used in transformations, filtering, and data validation.
-- **Database Administration:** DBAs use subqueries to identify data anomalies and perform audits.
+| Area | Connection |
+|------|------------|
+| **Query Composition** | Subqueries allow complex logic to be broken into modular, readable steps. |
+| **Data Filtering** | Subqueries in `WHERE` and `HAVING` enable dynamic, data-driven filtering. |
+| **Derived Tables & CTEs** | Subqueries in `FROM` are the foundation of derived tables and CTEs. |
+| **Query Performance** | Correlated subqueries can cause N×M nested loops; joins and CTEs are often faster. |
+| **Data Existence Checks** | `EXISTS`/`NOT EXISTS` subqueries are the standard way to test for related data. |
+
+---
 
 ### Core Concepts / Features
 
-1. Definition of Subqueries
-2. Scalar Subqueries
-3. Single-Row Subqueries
-4. Multi-Row Subqueries
-5. Correlated Subqueries
+1. **What Subqueries Are**
+2. **Subquery Types** — Scalar, Row, Table, Correlated, Non-Correlated, Single-Row, Multi-Row
+3. **Subquery Placement** — `SELECT`, `FROM`, `WHERE`, `HAVING`, `JOIN`
 
 ---
 
-## 1. Definition of Subqueries
+## 1. What Subqueries Are
 
 ### Definitions
 
-**Core Definition:** A subquery (also called an inner query or nested query) is a `SELECT` statement embedded within another SQL statement, returning a result that the outer query uses.
+**Core Definition**
+A subquery is a `SELECT` statement nested inside another SQL statement, enclosed in parentheses, whose result is consumed by the outer statement.
 
-**Technical Definition:** A subquery is a `<query expression>` enclosed in parentheses that appears inside an outer `<query specification>`, `<predicate>`, or other SQL construct. The subquery is evaluated to produce a result set, and the outer query consumes that result. Subqueries are classified by the shape of their result: a scalar subquery returns exactly one row and one column; a row subquery returns exactly one row but may return multiple columns; a table subquery returns a set of rows and columns. Subqueries may be self-contained (independent of the outer query) or correlated (referencing columns from the outer query).
+**Technical Definition**
+A subquery is a complete query expression that appears within the scope of an outer query. The outer query is the statement containing the subquery; the subquery is the nested `SELECT`. The subquery is evaluated (either once or per outer row, depending on correlation) and its result is used by the outer query in one of several ways: as a scalar value in an expression, as a set of values for `IN`/`ANY`/`ALL`, as a row for composite comparison, or as a table in the `FROM` clause. MySQL documentation notes that subqueries allow queries to be structured so that each part can be isolated, and they provide alternative ways to perform operations that would otherwise require complex joins and unions.
 
-**Beginner-Friendly Explanation:** A subquery is a query inside another query. Think of it as a question within a question: you ask the inner query to get a value or a set of values, and then the outer query uses that result to decide what to return.
+**Beginner-Friendly Explanation**
+A subquery is a "query within a query." The outer query is the main question; the subquery is a smaller question whose answer the main question uses. For example, "find employees who earn more than the average salary"—the subquery calculates the average, and the outer query uses that number to filter employees.
 
 ### Purposes
 
-- To break complex problems into smaller, manageable pieces.
-- To filter data based on the result of another query.
-- To compare values against aggregate results (e.g., average, maximum).
-- To check for existence or absence of related rows.
-- To derive values for calculations without needing a separate query.
-- To create derived tables in the `FROM` clause.
+- To break complex queries into modular, readable steps.
+- To filter rows based on the result of another query.
+- To compute intermediate values (averages, totals, maxima) for use in the outer query.
+- To check for the existence of related data.
+- To derive temporary tables for joining or further processing.
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax:**
-
-```sql
-SELECT column1, column2
-FROM main_table
-WHERE columnN operator (
-    SELECT expression 
-    FROM subquery_table 
-    WHERE condition
-);
+**General Syntax**
+```
+SELECT select_list
+FROM table
+WHERE column operator (SELECT column FROM table2 WHERE condition);
 ```
 
-**Component Breakdown:**
+**Component Breakdown**
 
-| Component | Purpose |
-|-----------|---------|
-| `main_table` | The outer query's source table |
-| `columnN` | The column compared against the subquery result |
-| `operator` | Comparison or set operator (`=`, `>`, `IN`, `EXISTS`, etc.) |
-| `(SELECT ...)` | The subquery, enclosed in parentheses |
-| `subquery_table` | The subquery's source table |
+| Component | Description |
+|-----------|-------------|
+| Outer query | The main `SELECT` statement. |
+| `(` and `)` | Parentheses enclosing the subquery (required). |
+| Subquery | The nested `SELECT` statement. |
+| Operator | Comparison operator (`=`, `IN`, `EXISTS`, etc.) connecting outer column to subquery result. |
 
-**Syntax Rules:**
+**Syntax Rules**
 
-- A subquery must be enclosed in parentheses.
-- The subquery must be placed on the right side of the comparison operator.
-- The `ORDER BY` clause cannot be used in a subquery unless `TOP`/`LIMIT` is also specified.
-- Column aliases or fully qualified names should be used to prevent ambiguity in correlated subqueries.
-- Subqueries can be nested within other subqueries.
+1. Subqueries must be enclosed in parentheses.
+2. The subquery may contain `DISTINCT`, `GROUP BY`, `ORDER BY`, `LIMIT`, joins, and other `SELECT` clauses, subject to vendor restrictions.
+3. The subquery's `SELECT` list must have a single column when used with `IN`, `ANY`, or `ALL` (unless row constructors are used).
+4. The subquery cannot contain a `WITH` clause in some systems (e.g., PostgreSQL subqueries do not support `WITH` inside the subquery itself in certain contexts).
 
-**Constraints and Limitations:**
+**Constraints and Limitations**
 
-- Subqueries in the `SELECT` clause must be scalar (one row, one column).
-- Subqueries in the `FROM` clause must have a table alias.
-- Correlated subqueries can be resource-intensive because they are evaluated per outer row.
-- Some RDBMSs restrict `ORDER BY` in subqueries.
+- Correlated subqueries can be performance-intensive on large tables.
+- `NOT IN` with `NULL`s in the subquery result can return no rows; `NOT EXISTS` is often safer.
+- Scalar subqueries returning more than one row cause runtime errors.
 
-### Annotated Complete Code Examples
+### Annotated Code Examples
 
-**Example 1: Subquery in WHERE Clause**
+**Example 1: Basic Subquery in `WHERE`**
 
 ```sql
--- Setup: Create employees table
-CREATE TABLE employees (
-    emp_id     SERIAL PRIMARY KEY,
-    first_name VARCHAR(50),
-    department VARCHAR(50),
-    salary     NUMERIC(10, 2)
-);
-
-INSERT INTO employees (first_name, department, salary) VALUES
-    ('Alice', 'Engineering', 95000.00),
-    ('Bob',   'Marketing',   72000.00),
-    ('Carol', 'Engineering', 105000.00),
-    ('David', 'Sales',       68000.00),
-    ('Eve',   'Engineering', 88000.00);
-
--- Query: Find employees earning more than the average salary
-SELECT first_name, salary
+SELECT employee_id, first_name, salary
 FROM employees
-WHERE salary > (
-    SELECT AVG(salary) 
-    FROM employees
-);
-
--- Expected Output:
---  first_name |   salary
--- ------------+-----------
---  Alice      |  95000.00
---  Carol      | 105000.00
+WHERE salary > (SELECT AVG(salary) FROM employees);
 ```
 
-**Why this output occurs:** The subquery `(SELECT AVG(salary) FROM employees)` computes the average salary across all employees (85,600). The outer query then filters employees whose salary exceeds this average. Alice (95,000) and Carol (105,000) qualify; Bob (72,000), David (68,000), and Eve (88,000) do not.
+**Expected Output (illustrative)**
+
+| employee_id | first_name | salary |
+|-------------|------------|--------|
+| 101         | Alice      | 85000  |
+| 102         | Bob        | 92000  |
+
+**Why This Output Occurs**: The subquery computes the average salary once; the outer query returns employees whose salary exceeds that average.
+
+---
 
 ### Real-World Cases
 
-**Case 1: Dynamic Filtering**
-
-A sales dashboard uses a subquery to find products priced above the average product price, enabling dynamic comparison without hardcoding values.
-
-**Case 2: Data Validation**
-
-A data engineer uses a subquery to find records in a staging table that do not exist in a master table, identifying data quality issues.
-
-### References
-
-- Microsoft Learn — Understand Subqueries - https://learn.microsoft.com/en-gb/training/modules/write-subqueries/2-understand-subqueries
-- Microsoft Learn — Use Scalar or Multi-Valued Subqueries - https://learn.microsoft.com/en-us/training/modules/write-subqueries/2-understand-subqueries
-- Educative — SQL Subquery: A Complete Guide - https://www.educative.io/blog/sql-subquery
-- Snowflake — Working with Subqueries - https://docs.snowflake.com/en/user-guide/queries-subqueries
+- **Dynamic filtering**: "Show orders whose amount is above the average order amount."
+- **Existence checks**: "Find customers who have placed at least one order."
+- **Intermediate calculations**: "Compare each employee's salary to the department average."
 
 ---
 
-## 2. Scalar Subqueries
+## 2. Subquery Types
 
-### Definitions
+### 2.1 Scalar Subqueries
 
-**Core Definition:** A scalar subquery is a subquery that returns exactly one row and one column — a single value.
+#### Definitions
 
-**Technical Definition:** A scalar subquery is an ordinary `SELECT` query in parentheses that returns exactly one row with one column. The query is executed, and the single returned value is used in the surrounding value expression. If the subquery returns zero rows, the result is `NULL`. If it returns more than one row, the database raises an error (or the behaviour is implementation-defined).
+**Core Definition**
+A scalar subquery returns exactly one row with exactly one column—a single value.
 
-**Beginner-Friendly Explanation:** A scalar subquery gives you exactly one value — like a single number or a single name. You can use it anywhere you would use a literal value. For example, you can put it in a calculation, a comparison, or a `SELECT` list.
+**Technical Definition**
+A scalar subquery is a `SELECT` query in parentheses that returns a single value (one row, one column). PostgreSQL documentation states that it is an error for a scalar subquery to return more than one row or more than one column; if the subquery returns zero rows, the scalar result is `NULL`. Scalar subqueries are commonly used in the `SELECT` list, `WHERE` clause, and `HAVING` clause.
 
-### Purposes
+**Beginner-Friendly Explanation**
+A scalar subquery gives you one answer—one number, one date, one name. You can use it anywhere you would use a literal value.
 
-- To provide a single value for use in an expression or comparison.
-- To compute aggregate values (e.g., average, maximum) for use in the outer query.
-- To avoid hardcoding values that depend on the data.
-- To retrieve a specific value from another table based on a condition.
-- To use in `SELECT`, `WHERE`, and `HAVING` clauses.
+#### Purposes
 
-### Syntax Rules and Structure
+- To compute a single aggregate value (average, total, maximum) for use in the outer query.
+- To look up a single related value (e.g., a customer's name by ID).
+- To compare each row to a single computed benchmark.
+- To embed dynamic values in `SELECT` expressions.
 
-**Complete General Syntax:**
+#### Syntax Rules and Structure
 
-```sql
-SELECT column1, (SELECT single_value FROM table2 WHERE condition) AS derived_column
-FROM table1
-WHERE columnN operator (SELECT single_value FROM table2 WHERE condition);
+```
+SELECT ( scalar_subquery ) FROM table;
+WHERE column operator ( scalar_subquery );
 ```
 
-**Component Breakdown:**
+**Syntax Rules**
 
-| Component | Purpose |
-|-----------|---------|
-| `(SELECT single_value ...)` | Scalar subquery returning one row and one column |
-| `operator` | Comparison operator (`=`, `>`, `<`, etc.) |
-| `derived_column` | Alias for the scalar result in the `SELECT` list |
+1. The subquery must return exactly one column and at most one row.
+2. Zero rows → result is `NULL`.
+3. More than one row → runtime error.
 
-**Syntax Rules:**
+**Constraints and Limitations**
 
-- The subquery must return exactly one column and at most one row.
-- If the subquery returns no rows, the scalar result is `NULL`.
-- If the subquery returns more than one row, an error occurs (e.g., "subquery returned more than 1 row").
-- Scalar subqueries can be used in `SELECT`, `WHERE`, `HAVING`, and `ORDER BY` clauses.
-- Parentheses are required even when the subquery is an operand of a function.
+- Cannot return multiple rows or multiple columns.
+- Correlated scalar subqueries execute per outer row and can be slow.
 
-**Constraints and Limitations:**
+#### Annotated Code Examples
 
-- Scalar subqueries cannot return multiple columns.
-- Using a scalar subquery in the `SELECT` list causes it to be evaluated once per outer row if it is correlated.
-- Performance can degrade if the scalar subquery is correlated and the outer table is large.
-
-### Annotated Complete Code Examples
-
-**Example 1: Scalar Subquery in SELECT List**
+**Example 1: Scalar Subquery in `SELECT`**
 
 ```sql
--- Query: Show each employee's salary and the company-wide average
-SELECT first_name,
-       salary,
-       (SELECT AVG(salary) FROM employees) AS company_avg
+SELECT username, level,
+       (SELECT AVG(level) FROM Players) AS avg_level
+FROM Players;
+```
+
+**Expected Output (based on Google Cloud documentation)**
+
+| username | level | avg_level |
+|----------|-------|-----------|
+| gorbie   | 29    | 24.66     |
+| junelyn  | 2     | 24.66     |
+| corba    | 43    | 24.66     |
+
+**Why This Output Occurs**: The scalar subquery computes the average level once and attaches it to each row.
+
+**Example 2: Scalar Subquery in `WHERE`**
+
+```sql
+SELECT order_id, total_amount
+FROM orders
+WHERE total_amount > (SELECT AVG(total_amount) FROM orders);
+```
+
+**Expected Output (illustrative)**
+
+| order_id | total_amount |
+|----------|--------------|
+| 1001     | 250.00       |
+| 1003     | 300.00       |
+
+**Why This Output Occurs**: The subquery returns the average order amount; the outer query filters orders above that average.
+
+#### Real-World Cases
+
+- **Compensation benchmarking**: Comparing each employee's salary to the company average.
+- **Sales reporting**: Finding orders above the average order value.
+- **Data validation**: Checking whether a value equals the maximum in its category.
+
+---
+
+### 2.2 Row Subqueries
+
+#### Definitions
+
+**Core Definition**
+A row subquery returns exactly one row but may contain multiple columns, allowing composite value comparison.
+
+**Technical Definition**
+A row subquery is a subquery variant that returns a single row and can return more than one column value. It is used with row constructors—parenthesised lists of columns—to perform element-wise comparison. For example, `WHERE (col1, col2) = (SELECT col3, col4 FROM t2 WHERE id = 10)` compares two columns against two subquery columns simultaneously.
+
+**Beginner-Friendly Explanation**
+A row subquery gives you one row with several fields—like a single record—and lets you compare multiple columns at once against the outer query.
+
+#### Purposes
+
+- To compare composite keys (multiple columns) against a single row.
+- To avoid verbose `AND` chains when matching on multiple columns.
+- To retrieve a complete record from a related table for comparison.
+
+#### Syntax Rules and Structure
+
+```
+WHERE (col1, col2) = (SELECT col3, col4 FROM table WHERE condition);
+```
+
+**Syntax Rules**
+
+1. The subquery must return exactly one row.
+2. Both sides of the comparison must have the same number of columns.
+3. If either side contains `NULL`, the comparison resolves to `NULL` (not `TRUE`).
+4. More than one row from the subquery triggers an error; zero rows make the comparison `NULL`.
+
+**Constraints and Limitations**
+
+- Only one row is allowed; multiple rows cause errors.
+- `NULL` handling can make comparisons return `UNKNOWN` rather than `FALSE`.
+
+#### Annotated Code Examples
+
+**Example 1: Row Subquery Comparison**
+
+```sql
+SELECT employee_id, first_name, last_name
 FROM employees
-ORDER BY first_name;
-
--- Expected Output:
---  first_name |   salary  |     company_avg
--- ------------+-----------+--------------------
---  Alice      |  95000.00 | 85600.000000000000
---  Bob        |  72000.00 | 85600.000000000000
---  Carol      | 105000.00 | 85600.000000000000
---  David      |  68000.00 | 85600.000000000000
---  Eve        |  88000.00 | 85600.000000000000
+WHERE (department_id, manager_id) = (
+  SELECT department_id, manager_id
+  FROM departments
+  WHERE location_id = 1800
+);
 ```
 
-**Why this output occurs:** The scalar subquery `(SELECT AVG(salary) FROM employees)` computes the average salary (85,600). It is evaluated once and the same value is repeated for each row in the result. This is a self-contained scalar subquery, so it does not depend on the outer row.
+**Explanation**: The row subquery returns one row with `department_id` and `manager_id`; the outer query finds employees matching both values simultaneously.
 
-**Example 2: Scalar Subquery in WHERE Clause**
+#### Real-World Cases
+
+- **Composite key matching**: Finding records that match a specific combination of department and manager.
+- **Data validation**: Comparing a set of columns against a reference record.
+
+---
+
+### 2.3 Table Subqueries
+
+#### Definitions
+
+**Core Definition**
+A table subquery returns a full result set—multiple rows and multiple columns—and is used in the `FROM` or `JOIN` clause as a derived table.
+
+**Technical Definition**
+A table subquery (also called a derived table) is a subquery in the `FROM` clause that acts as a temporary result set. It can be joined, filtered, and aggregated like any real table. MySQL documentation categorises table subqueries as returning "a table (one or more rows of one or more columns)".
+
+**Beginner-Friendly Explanation**
+A table subquery is a query result that you treat as if it were a table. You can join it to other tables just like a regular table.
+
+#### Purposes
+
+- To join pre-aggregated or pre-filtered results without creating temporary tables.
+- To simplify complex queries by isolating intermediate results.
+- To enable condition pushdown optimisations in derived tables.
+
+#### Syntax Rules and Structure
+
+```
+SELECT ...
+FROM (SELECT ... FROM table WHERE ...) AS derived_alias
+[JOIN ...];
+```
+
+**Syntax Rules**
+
+1. The subquery must have an alias.
+2. It cannot reference columns from other tables in the same `FROM` clause (unless using `LATERAL`).
+3. It can be joined using any join type.
+
+**Constraints and Limitations**
+
+- Derived tables may prevent predicate pushdown if the optimiser cannot merge them.
+- Without an alias, the query is invalid.
+
+#### Annotated Code Examples
+
+**Example 1: Derived Table Join**
 
 ```sql
--- Query: Find employees earning the maximum salary
-SELECT first_name, salary
+SELECT c.customer_name, totals.total_spent
+FROM customers c
+JOIN (
+  SELECT customer_id, SUM(amount) AS total_spent
+  FROM orders
+  GROUP BY customer_id
+) AS totals ON c.customer_id = totals.customer_id;
+```
+
+**Expected Output (illustrative)**
+
+| customer_name | total_spent |
+|---------------|-------------|
+| Alice         | 550         |
+| Bob           | 150         |
+
+**Why This Output Occurs**: The subquery aggregates orders per customer; the outer query joins the aggregated result to the customers table.
+
+#### Real-World Cases
+
+- **Pre-aggregation**: Joining summary statistics to detail tables.
+- **Complex filtering**: Building a filtered subset and joining it to other tables.
+
+---
+
+### 2.4 Correlated Subqueries
+
+#### Definitions
+
+**Core Definition**
+A correlated subquery is a subquery that references one or more columns from the outer query, causing it to be evaluated once per outer row.
+
+**Technical Definition**
+A correlated subquery depends on the outer query for its values. It cannot be executed independently of the outer query. SQL Server documentation explains that correlated subqueries reference a column in the outer query and conceptually execute once per row. PostgreSQL documentation notes that correlated subqueries can become performance traps because they may introduce nested-loop execution.
+
+**Beginner-Friendly Explanation**
+A correlated subquery is a subquery that "looks at" the current row of the outer query. It runs again for every row the outer query processes—like a per-row lookup.
+
+#### Purposes
+
+- To perform per-row existence checks (e.g., "does this customer have any orders?").
+- To retrieve the most recent or maximum value per group.
+- To compare each row to a group-level aggregate without using window functions.
+
+#### Syntax Rules and Structure
+
+```
+SELECT ...
+FROM outer_table o
+WHERE column operator (
+  SELECT ... FROM inner_table i WHERE i.col = o.col
+);
+```
+
+**Syntax Rules**
+
+1. The subquery references at least one column from the outer query.
+2. Table aliases are required to disambiguate the outer and inner tables.
+3. The subquery is evaluated once for each row processed by the outer query.
+
+**Constraints and Limitations**
+
+- Can be very slow on large tables due to N×M nested-loop execution.
+- Cannot be executed separately from the outer query, complicating testing and debugging.
+- PostgreSQL can only execute scalar correlated subqueries as nested loops.
+
+#### Annotated Code Examples
+
+**Example 1: Correlated Subquery for Most Recent Order**
+
+```sql
+SELECT SalesOrderID, CustomerID, OrderDate
+FROM SalesLT.SalesOrderHeader AS o1
+WHERE SalesOrderID = (
+  SELECT MAX(SalesOrderID)
+  FROM SalesLT.SalesOrderHeader AS o2
+  WHERE o2.CustomerID = o1.CustomerID
+)
+ORDER BY CustomerID, OrderDate;
+```
+
+**Expected Output (illustrative)**
+
+| SalesOrderID | CustomerID | OrderDate  |
+|--------------|------------|------------|
+| 71782        | 29485      | 2008-03-11 |
+| 71783        | 29486      | 2008-04-01 |
+
+**Why This Output Occurs**: For each customer row, the subquery finds the maximum order ID for that customer; the outer query returns only that most recent order.
+
+#### Real-World Cases
+
+- **Latest record per entity**: Most recent order per customer.
+- **Existence checks**: Customers who have at least one order.
+- **Per-row comparisons**: Employees earning more than their department average.
+
+---
+
+### 2.5 Non-Correlated Subqueries
+
+#### Definitions
+
+**Core Definition**
+A non-correlated (self-contained) subquery is a subquery that does not reference any columns from the outer query and can be executed independently.
+
+**Technical Definition**
+A self-contained subquery is independent of the outer query; it executes once and returns its result to the outer query. Non-correlated subqueries are evaluated once, and their result is used as a constant or set by the outer query. This makes their performance predictable and often better than correlated subqueries.
+
+**Beginner-Friendly Explanation**
+A non-correlated subquery is a subquery that does not need anything from the outer query. It runs once, produces a result, and the outer query uses that result.
+
+#### Purposes
+
+- To compute a constant benchmark (average, total, maximum) once for the entire query.
+- To filter rows against a static set of values from another table.
+- To improve performance by avoiding per-row subquery execution.
+
+#### Syntax Rules and Structure
+
+```
+SELECT ...
+FROM table
+WHERE column operator (SELECT ... FROM other_table WHERE condition);
+```
+
+**Syntax Rules**
+
+1. The subquery does not reference outer-query columns.
+2. It is evaluated once.
+3. Its result is treated as a constant or set for the outer query.
+
+**Constraints and Limitations**
+
+- If the subquery returns multiple rows and is used with `=`, an error occurs.
+- `NOT IN` with `NULL`s from a non-correlated subquery can produce no rows.
+
+#### Annotated Code Examples
+
+**Example 1: Non-Correlated Subquery**
+
+```sql
+SELECT order_id, total_amount
+FROM orders
+WHERE total_amount > (SELECT AVG(total_amount) FROM orders);
+```
+
+**Explanation**: The subquery computes the average once; the outer query compares every row to that single value.
+
+#### Real-World Cases
+
+- **Benchmark comparisons**: Products priced above the overall average.
+- **Static filtering**: Customers in a specific set of cities.
+
+---
+
+### 2.6 Single-Row Subqueries
+
+#### Definitions
+
+**Core Definition**
+A single-row subquery returns zero or one row and is used with single-row comparison operators (`=`, `<`, `>`, `<=`, `>=`, `<>`).
+
+**Technical Definition**
+A single-row subquery returns at most one row. It is used with scalar comparison operators. If it returns zero rows, the comparison evaluates to `UNKNOWN` (effectively `NULL`); if it returns more than one row, a runtime error occurs. Single-row subqueries may be scalar (one column) or row (multiple columns) in shape.
+
+**Beginner-Friendly Explanation**
+A single-row subquery gives you one row—either one value (scalar) or one record (row). You use it with operators like `=` or `>`.
+
+#### Purposes
+
+- To compare against a single value or single record.
+- To enforce cardinality expectations (error if more than one row).
+- To support composite comparisons with row subqueries.
+
+#### Syntax Rules and Structure
+
+```
+WHERE column = (single-row subquery);
+WHERE (col1, col2) = (single-row subquery);
+```
+
+**Syntax Rules**
+
+1. Returns zero or one row.
+2. Zero rows → comparison is `NULL`.
+3. More than one row → error.
+4. Can be scalar or row-shaped.
+
+**Constraints and Limitations**
+
+- Cardinality violations cause runtime errors.
+- `NULL` results require careful handling.
+
+#### Annotated Code Examples
+
+**Example 1: Single-Row Scalar Subquery**
+
+```sql
+SELECT employee_id, salary
 FROM employees
 WHERE salary = (SELECT MAX(salary) FROM employees);
-
--- Expected Output:
---  first_name |  salary
--- ------------+----------
---  Carol      |105000.00
 ```
 
-**Why this output occurs:** The scalar subquery computes the maximum salary (105,000). The outer query returns the employee(s) whose salary matches that maximum. Carol is the only employee with that salary.
-
-### Real-World Cases
-
-**Case 1: Pricing Benchmark**
-
-An e-commerce analyst uses a scalar subquery to compare each product's price to the average price in its category: `SELECT product_name, price, (SELECT AVG(price) FROM products WHERE category = p.category) AS avg_category_price FROM products p`.
-
-**Case 2: Most Recent Record**
-
-A support system uses a scalar subquery to find the most recent ticket for each customer: `SELECT customer_id, (SELECT MAX(created_at) FROM tickets WHERE tickets.customer_id = customers.customer_id) AS last_ticket FROM customers`.
-
-### References
-
-- Microsoft Learn — Use Scalar or Multi-Valued Subqueries - https://learn.microsoft.com/en-us/training/modules/write-subqueries/2-understand-subqueries
-- PostgreSQL Documentation — Scalar Subqueries - https://www.postgresql.org/docs/current/sql-expressions.html
-- Amazon Redshift — Scalar Subqueries - https://docs.aws.amazon.com/redshift/latest/dg/r_scalar_subqueries.html
-- Caltech — Subqueries in the SELECT Clause - https://courses.cms.caltech.edu/cs122/notes/notes6.pdf
+**Expected Output**: The employee(s) with the maximum salary.
 
 ---
 
-## 3. Single-Row Subqueries
+### 2.7 Multi-Row Subqueries
 
-### Definitions
+#### Definitions
 
-**Core Definition:** A single-row subquery is a subquery that returns zero or one row in its result set, typically used with comparison operators to compare a value from the outer query.
+**Core Definition**
+A multi-row subquery returns zero or more rows and is used with set-oriented operators (`IN`, `ANY`, `ALL`, `EXISTS`).
 
-**Technical Definition:** A single-row subquery returns at most one row. It is used with comparison operators (`=`, `>`, `<`, `>=`, `<=`, `<>`) that expect a single value on the right-hand side. If the subquery returns zero rows, the comparison evaluates to `UNKNOWN` (treated as `FALSE` in `WHERE`). If it returns more than one row, an error occurs. A single-row subquery may return multiple columns if used in a row comparison (e.g., `(col1, col2) = (SELECT ...)`).
+**Technical Definition**
+A multi-row subquery returns a set of rows (one or more columns). It is used with operators that accept sets: `IN` (equality against any row), `ANY`/`SOME` (comparison against any row), `ALL` (comparison against all rows), and `EXISTS`/`NOT EXISTS` (existence check).
 
-**Beginner-Friendly Explanation:** A single-row subquery gives you one row of data. You use it when you want to compare something against exactly one row from another query. For example, "Find the employee whose salary equals the maximum salary" — the subquery returns one value.
+**Beginner-Friendly Explanation**
+A multi-row subquery returns a list of values or rows. You use it with operators like `IN` ("is this value in the list?") or `EXISTS` ("does the list have any rows?").
 
-### Purposes
+#### Purposes
 
-- To compare a value against a single value returned by another query.
-- To filter rows based on a condition that yields exactly one row.
-- To use in row comparisons where multiple columns are compared simultaneously.
-- To retrieve a specific record's attributes for use in the outer query.
+- To filter rows based on membership in a set.
+- To compare against any or all values in a set.
+- To check for existence of related data.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
-
-```sql
-SELECT column1, column2
-FROM table1
-WHERE columnN operator (SELECT columnX FROM table2 WHERE condition);
+```
+WHERE column IN (multi-row subquery);
+WHERE column > ANY (multi-row subquery);
+WHERE column > ALL (multi-row subquery);
+WHERE EXISTS (multi-row subquery);
 ```
 
-**Row Comparison Syntax:**
+**Syntax Rules**
+
+1. `IN` returns `TRUE` if the value matches any row in the subquery result.
+2. `ANY`/`SOME` returns `TRUE` if the comparison is true for at least one row.
+3. `ALL` returns `TRUE` if the comparison is true for every row.
+4. `EXISTS` returns `TRUE` if the subquery returns at least one row.
+
+**Constraints and Limitations**
+
+- `NOT IN` with `NULL`s returns no rows; use `NOT EXISTS` instead.
+- `IN` with a subquery returning multiple columns is invalid (unless using row constructors).
+
+#### Annotated Code Examples
+
+**Example 1: `IN` Multi-Row Subquery**
 
 ```sql
-SELECT * FROM t1
-WHERE (col1, col2) = (SELECT col3, col4 FROM t2 WHERE id = 10);
+SELECT 'corba' IN (SELECT username FROM Players) AS result;
 ```
 
-**Component Breakdown:**
+**Expected Output (Google Cloud documentation)**
 
-| Component | Purpose |
-|-----------|---------|
-| `(SELECT ...)` | Single-row subquery returning one row |
-| `operator` | Comparison operator (`=`, `>`, `<`, etc.) |
-| `(col1, col2)` | Row constructor for multi-column comparison |
+| result |
+|--------|
+| TRUE   |
 
-**Syntax Rules:**
+**Why This Output Occurs**: The subquery returns the set of usernames; `IN` checks whether `'corba'` is in that set.
 
-- The subquery must return at most one row; zero rows yield `UNKNOWN`.
-- Comparison operators (`=`, `>`, `<`, etc.) expect a single value on the right.
-- Row constructors can be used for multi-column comparisons.
-- The number of columns in the row constructor must match the subquery's column count.
-- MySQL supports row subqueries with operators `=`, `>`, `<`, `>=`, `<=`, `<>`, `!=`, `<=>`.
+#### Real-World Cases
 
-**Constraints and Limitations:**
-
-- If the subquery returns more than one row, the database raises an error.
-- Single-row subqueries cannot be used with `IN`, `ANY`, or `ALL` (those are for multi-row subqueries).
-- Row comparisons with `NULL` values can yield `UNKNOWN`.
-
-### Annotated Complete Code Examples
-
-**Example 1: Single-Row Subquery with Comparison Operator**
-
-```sql
--- Query: Find the employee with the highest salary
-SELECT first_name, salary
-FROM employees
-WHERE salary = (
-    SELECT MAX(salary) 
-    FROM employees
-);
-
--- Expected Output:
---  first_name |  salary
--- ------------+----------
---  Carol      | 105000.00
-```
-
-**Why this output occurs:** The subquery `(SELECT MAX(salary) FROM employees)` returns exactly one row with one value (105,000). The outer query compares each employee's salary to this single value and returns Carol, whose salary matches.
-
-**Example 2: Row Subquery with Multi-Column Comparison**
-
-```sql
--- Setup: Create a table with product data
-CREATE TABLE products (
-    product_id   INTEGER,
-    product_name VARCHAR(50),
-    category_id  INTEGER,
-    price        NUMERIC(10, 2)
-);
-
-INSERT INTO products VALUES
-    (1, 'Laptop', 10, 1200.00),
-    (2, 'Phone',  10, 800.00),
-    (3, 'Tablet', 20, 600.00);
-
--- Query: Find products with the same category and price as product_id 2
-SELECT * FROM products
-WHERE (category_id, price) = (
-    SELECT category_id, price 
-    FROM products 
-    WHERE product_id = 2
-);
-
--- Expected Output:
---  product_id | product_name | category_id | price
--- ------------+--------------+-------------+--------
---           2 | Phone        |          10 | 800.00
-```
-
-**Why this output occurs:** The subquery `(SELECT category_id, price FROM products WHERE product_id = 2)` returns a single row with two columns: `(10, 800.00)`. The outer query uses a row constructor `(category_id, price)` to compare against this row. Only the row with matching category and price is returned.
-
-### Real-World Cases
-
-**Case 1: Highest-Paid Employee per Department**
-
-An HR system uses a single-row subquery to find the highest-paid employee in each department: `SELECT department_id, last_name, salary FROM employees x WHERE salary = (SELECT MAX(salary) FROM employees WHERE department_id = x.department_id)`.
-
-**Case 2: Most Recent Order**
-
-An e-commerce system uses a single-row subquery to find the most recent order for each customer: `SELECT customer_id, order_id, order_date FROM orders WHERE (customer_id, order_date) = (SELECT customer_id, MAX(order_date) FROM orders GROUP BY customer_id)`.
-
-### References
-
-- MySQL 8.0 Reference Manual — Row Subqueries - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/row-subqueries.html
-- SAP Help — Single-Row and Multiple-Row Subqueries - https://help.sap.com/
-- Microsoft Learn — Subqueries with Comparison Operators - https://learn.microsoft.com/en-us/previous-versions/sql/sql-server-2008-r2/ms189070(v=sql.105)
-- Educative — SQL Subquery: A Complete Guide - https://www.educative.io/blog/sql-subquery
+- **Set membership**: Customers in a list of target cities.
+- **Existence checks**: Products that have at least one order.
 
 ---
 
-## 4. Multi-Row Subqueries
+## 3. Subquery Placement
 
-### Definitions
+### 3.1 `SELECT` Clause
 
-**Core Definition:** A multi-row subquery is a subquery that returns multiple rows (and typically one column), used with set operators such as `IN`, `ANY`, `ALL`, or `EXISTS`.
+#### Definitions
 
-**Technical Definition:** A multi-row subquery returns a set of rows, much like a single-column table. It is used with operators that can handle multiple values: `IN` (equality to any value in the list), `ANY` (comparison with any value returned), `ALL` (comparison with all values returned), and `EXISTS`/`NOT EXISTS` (existence check). The subquery must return only one column when used with `IN`, `ANY`, or `ALL`.
+**Core Definition**
+A subquery in the `SELECT` clause appears as a column expression and must return a scalar value.
 
-**Beginner-Friendly Explanation:** A multi-row subquery gives you a list of values. You use it when you want to check if something is in that list (`IN`), compare against all of them (`ALL`), or compare against any of them (`ANY`).
+**Technical Definition**
+A scalar subquery in the `SELECT` list computes a single value for each output row. It is often correlated, computing a per-row value (e.g., a count of related rows or the maximum value in a related table).
 
-### Purposes
+**Beginner-Friendly Explanation**
+A subquery in the `SELECT` clause adds an extra column to your result—like "for each customer, show their total order count."
 
-- To filter rows based on membership in a set of values (`IN`).
-- To compare a value against all values returned by a subquery (`ALL`).
-- To compare a value against any value returned by a subquery (`ANY`).
-- To check for the existence of related rows (`EXISTS`).
-- To use a subquery result as a set for further filtering.
+#### Purposes
 
-### Syntax Rules and Structure
+- To add per-row computed values to the result set.
+- To avoid a separate join when only a single value per row is needed.
+- To compute running or contextual metrics.
 
-**Complete General Syntax:**
+#### Syntax Rules and Structure
 
-```sql
-SELECT column1, column2
-FROM table1
-WHERE columnN IN (SELECT columnX FROM table2 WHERE condition);
-
-WHERE columnN operator ANY (SELECT columnX FROM table2 WHERE condition);
-
-WHERE columnN operator ALL (SELECT columnX FROM table2 WHERE condition);
-
-WHERE EXISTS (SELECT 1 FROM table2 WHERE condition);
+```
+SELECT column1, (scalar_subquery) AS alias, column2 FROM table;
 ```
 
-**Component Breakdown:**
+**Syntax Rules**
 
-| Operator | Purpose |
-|----------|---------|
-| `IN` | True if the value matches any value in the subquery result |
-| `ANY` | True if the comparison is true for at least one value in the result |
-| `ALL` | True if the comparison is true for all values in the result |
-| `EXISTS` | True if the subquery returns at least one row |
+1. The subquery must be scalar (one row, one column).
+2. It is often correlated to the outer row.
+3. It must be enclosed in parentheses.
 
-**Syntax Rules:**
+**Constraints and Limitations**
 
-- The subquery used with `IN`, `ANY`, or `ALL` must return exactly one column.
-- `ANY` and `ALL` are used with comparison operators (`=`, `>`, `<`, etc.).
-- `EXISTS` returns `TRUE` if the subquery returns one or more rows, `FALSE` otherwise.
-- `NOT IN` is equivalent to `<> ALL`.
-- `IN` is equivalent to `= ANY`.
+- Correlated scalar subqueries in `SELECT` can be slow on large datasets.
+- If the subquery returns multiple rows, an error occurs.
 
-**Constraints and Limitations:**
+#### Annotated Code Examples
 
-- `NOT IN` with a subquery that returns `NULL` can produce unexpected results (returns no rows).
-- `ANY` and `ALL` cannot be used with `EXISTS`.
-- Subqueries with `IN` can be less efficient than `EXISTS` in some RDBMSs.
-- The subquery must return only one column when used with `IN`, `ANY`, or `ALL`.
-
-### Annotated Complete Code Examples
-
-**Example 1: Multi-Row Subquery with IN**
+**Example 1: Scalar Subquery in `SELECT`**
 
 ```sql
--- Setup: Create a departments table
-CREATE TABLE departments (
-    dept_id   INTEGER PRIMARY KEY,
-    dept_name VARCHAR(50),
-    location  VARCHAR(50)
-);
-
-INSERT INTO departments VALUES
-    (1, 'Engineering', 'Manila'),
-    (2, 'Marketing',   'Cebu'),
-    (3, 'Sales',       'Manila');
-
--- Query: Find employees in departments located in Manila
-SELECT first_name, department
-FROM employees
-WHERE department IN (
-    SELECT dept_name
-    FROM departments
-    WHERE location = 'Manila'
-);
-
--- Expected Output:
---  first_name | department
--- ------------+-------------
---  Alice      | Engineering
---  Carol      | Engineering
---  David      | Sales
+SELECT username, level,
+       (SELECT AVG(level) FROM Players) AS avg_level
+FROM Players;
 ```
 
-**Why this output occurs:** The subquery `(SELECT dept_name FROM departments WHERE location = 'Manila')` returns two rows: 'Engineering' and 'Sales'. The outer query uses `IN` to check if each employee's department is in that list. Alice, Carol (Engineering) and David (Sales) match; Bob (Marketing) does not.
+**Expected Output (Google Cloud documentation)**:
 
-**Example 2: Multi-Row Subquery with ALL**
+| username | level | avg_level |
+|----------|-------|-----------|
+| gorbie   | 29    | 24.66     |
+| junelyn  | 2     | 24.66     |
+| corba    | 43    | 24.66     |
+
+**Why This Output Occurs**: The subquery computes the average level once and attaches it to each row.
+
+---
+
+### 3.2 `FROM` Clause
+
+#### Definitions
+
+**Core Definition**
+A subquery in the `FROM` clause acts as a derived table—a temporary result set that can be joined, filtered, and aggregated.
+
+**Technical Definition**
+A table subquery in `FROM` produces a derived table. It must have an alias. MySQL documentation describes derived tables as subqueries in the `FROM` clause that act as temporary result sets.
+
+**Beginner-Friendly Explanation**
+A subquery in `FROM` is a query result that you treat as a table. You can join it to other tables.
+
+#### Purposes
+
+- To join pre-aggregated or pre-filtered results.
+- To isolate complex logic into a named derived table.
+- To enable condition pushdown optimisations.
+
+#### Syntax Rules and Structure
+
+```
+SELECT ...
+FROM (SELECT ...) AS derived_alias
+JOIN ...;
+```
+
+**Syntax Rules**
+
+1. The subquery must have an alias.
+2. It cannot reference columns from other tables in the same `FROM` clause (unless using `LATERAL`).
+3. It can be joined like a base table.
+
+**Constraints and Limitations**
+
+- Derived tables may prevent predicate pushdown if the optimiser cannot merge them.
+
+#### Annotated Code Examples
+
+**Example 1: Derived Table**
 
 ```sql
--- Query: Find products priced higher than all products in category 10
-SELECT product_name, price
+SELECT d.dept_name, avg_sal.avg_salary
+FROM departments d
+JOIN (
+  SELECT department_id, AVG(salary) AS avg_salary
+  FROM employees
+  GROUP BY department_id
+) AS avg_sal ON d.department_id = avg_sal.department_id;
+```
+
+**Expected Output (illustrative)**
+
+| dept_name   | avg_salary |
+|-------------|------------|
+| Engineering | 85000      |
+| Sales       | 62000      |
+
+---
+
+### 3.3 `WHERE` Clause
+
+#### Definitions
+
+**Core Definition**
+A subquery in the `WHERE` clause filters rows based on the result of another query.
+
+**Technical Definition**
+Subqueries in `WHERE` can be scalar (comparison against a single value), multi-row (`IN`, `ANY`, `ALL`), or existence-based (`EXISTS`, `NOT EXISTS`). They are the most common subquery placement.
+
+**Beginner-Friendly Explanation**
+A subquery in `WHERE` is the classic "filter by another query's result" pattern.
+
+#### Purposes
+
+- To filter rows based on a computed benchmark.
+- To check set membership.
+- To test for existence of related data.
+
+#### Syntax Rules and Structure
+
+```
+WHERE column operator (subquery);
+WHERE column IN (subquery);
+WHERE EXISTS (subquery);
+```
+
+**Syntax Rules**
+
+1. Scalar subqueries use `=`, `<`, `>`, etc.
+2. Multi-row subqueries use `IN`, `ANY`, `ALL`.
+3. `EXISTS` checks whether the subquery returns any rows.
+
+**Constraints and Limitations**
+
+- `NOT IN` with `NULL`s returns no rows; use `NOT EXISTS`.
+- Correlated subqueries in `WHERE` execute per outer row.
+
+#### Annotated Code Examples
+
+**Example 1: Subquery in `WHERE`**
+
+```sql
+SELECT order_id, total_amount
+FROM orders
+WHERE total_amount > (SELECT AVG(total_amount) FROM orders);
+```
+
+**Expected Output (illustrative)**:
+
+| order_id | total_amount |
+|----------|--------------|
+| 1001     | 250.00       |
+| 1003     | 300.00       |
+
+**Why This Output Occurs**: The subquery returns the average; the outer query filters rows above it.
+
+---
+
+### 3.4 `HAVING` Clause
+
+#### Definitions
+
+**Core Definition**
+A subquery in the `HAVING` clause filters groups based on an aggregate comparison involving a subquery result.
+
+**Technical Definition**
+Subqueries in `HAVING` are used when the filtering condition depends on an aggregate value and a subquery-computed benchmark. For example, `HAVING AVG(quantity) > 2 * (SELECT ...)`. Correlated subqueries in `HAVING` can reference grouped columns.
+
+**Beginner-Friendly Explanation**
+A subquery in `HAVING` lets you filter groups based on a comparison to another query's result—like "show product groups whose average quantity exceeds twice the in-stock quantity."
+
+#### Purposes
+
+- To filter aggregated groups against a subquery-computed threshold.
+- To compare group aggregates to external benchmarks.
+- To eliminate groups based on existence conditions.
+
+#### Syntax Rules and Structure
+
+```
+GROUP BY ...
+HAVING aggregate_function(...) operator (subquery);
+```
+
+**Syntax Rules**
+
+1. The subquery must produce a scalar value or a set compatible with the operator.
+2. Correlated subqueries can reference grouped columns.
+3. The subquery is evaluated after grouping.
+
+**Constraints and Limitations**
+
+- Complex `HAVING` subqueries can be difficult to optimise.
+- `NULL` handling requires care.
+
+#### Annotated Code Examples
+
+**Example 1: Subquery in `HAVING`**
+
+```sql
+SELECT name, AVG(quantity)
 FROM products
-WHERE price > ALL (
-    SELECT price
-    FROM products
-    WHERE category_id = 10
+GROUP BY name
+HAVING AVG(quantity) > 2 * (
+  SELECT AVG(quantity) FROM products
 );
-
--- Expected Output:
---  product_name | price
--- --------------+--------
--- (0 rows)
 ```
 
-**Why this output occurs:** The subquery returns all prices in category 10 (1200, 800). The outer query uses `> ALL` to find products priced higher than both 1200 and 800. No product in the table is priced higher than 1200, so the result is empty.
-
-### Real-World Cases
-
-**Case 1: Department Filtering**
-
-An HR system uses `IN` with a multi-row subquery to find employees in departments located in a specific city, as shown in the example above.
-
-**Case 2: Price Comparison**
-
-A retail analyst uses `> ALL` to find products priced higher than every product in a competitor's catalog, identifying premium items.
-
-**Case 3: Existence Check**
-
-An order system uses `EXISTS` to find customers who have placed at least one order: `SELECT customer_name FROM customers WHERE EXISTS (SELECT 1 FROM orders WHERE orders.customer_id = customers.customer_id)`.
-
-### References
-
-- MySQL 8.0 Reference Manual — Restrictions on Subqueries - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/subquery-restrictions.html
-- MySQL 8.0 Reference Manual — Subqueries with ALL - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/all-subqueries.html
-- SAP Help — Single-Row and Multiple-Row Subqueries - https://help.sap.com/
-- Huawei Cloud — Multi-Row Subqueries - https://support.huaweicloud.com/
-- Compile-N-Run — SQL Multiple-Row Subqueries - https://github.com/Compile-N-Run/Compile-N-Run
+**Explanation**: The subquery computes the overall average quantity; the `HAVING` clause keeps groups whose average is more than twice that benchmark.
 
 ---
 
-## 5. Correlated Subqueries
+### 3.5 `JOIN` Clause
 
-### Definitions
+#### Definitions
 
-**Core Definition:** A correlated subquery is a subquery that references one or more columns from the outer query, making it dependent on the outer query for its values.
+**Core Definition**
+A subquery in a `JOIN` clause is a derived table joined to other tables, functioning identically to a subquery in `FROM`.
 
-**Technical Definition:** A correlated subquery contains a reference to a table that also appears in the outer query. It cannot be run independently because it depends on the outer query for its values. The subquery is re-evaluated for each row processed by the outer query. Correlated subqueries are commonly used with `EXISTS`, `NOT EXISTS`, and comparison operators.
+**Technical Definition**
+A subquery can appear as the right-hand operand of any `JOIN` type (`INNER JOIN`, `LEFT JOIN`, etc.), provided it is aliased. It acts as a derived table for join purposes.
 
-**Beginner-Friendly Explanation:** A correlated subquery is a subquery that uses information from the outer query. For each row the outer query processes, the subquery runs again with that row's values. It's like asking a question that depends on the current row you're looking at.
+**Beginner-Friendly Explanation**
+You can join to a subquery just like you join to a table—useful when you want to join to an aggregated or filtered result.
 
-### Purposes
+#### Purposes
 
-- To compare each row's value against a value computed from a related subset of data.
-- To check for existence of related rows for each outer row.
-- To perform row-by-row conditional logic.
-- To find records that match a condition relative to their group.
+- To join pre-aggregated results to detail tables.
+- To combine multiple derived tables in a single query.
+- To support complex multi-step transformations.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
-
-```sql
-SELECT select_list
-FROM table1 t_alias1
-WHERE expr operator (
-    SELECT column_list
-    FROM table2 t_alias2
-    WHERE t_alias1.column operator t_alias2.column
-);
+```
+SELECT ...
+FROM table1
+JOIN (SELECT ...) AS subquery_alias ON ...;
 ```
 
-**Component Breakdown:**
+**Syntax Rules**
 
-| Component | Purpose |
-|-----------|---------|
-| `t_alias1` | Alias for the outer table |
-| `t_alias2` | Alias for the inner table |
-| `t_alias1.column operator t_alias2.column` | Correlation condition linking inner and outer queries |
+1. The subquery must have an alias.
+2. It can be joined using any join type.
+3. Join conditions reference the subquery alias.
 
-**Syntax Rules:**
+**Constraints and Limitations**
 
-- The subquery must reference at least one column from the outer query.
-- Table aliases are required to distinguish the outer and inner tables.
-- The subquery is evaluated once for each row of the outer query.
-- Correlated subqueries can be used with `EXISTS`, `NOT EXISTS`, `IN`, `ANY`, `ALL`, and comparison operators.
+- Same as derived tables; optimiser may or may not push predicates into the subquery.
 
-**Constraints and Limitations:**
+#### Annotated Code Examples
 
-- Correlated subqueries are generally slower than self-contained subqueries because they are re-evaluated per row.
-- They cannot be run independently from the outer query.
-- Performance can be improved by rewriting as joins or using window functions in some cases.
-
-### Annotated Complete Code Examples
-
-**Example 1: Correlated Subquery with Comparison Operator**
+**Example 1: Joining a Subquery**
 
 ```sql
--- Query: Find employees earning more than their department's average
-SELECT department_id, last_name, salary
-FROM employees x
-WHERE salary > (
-    SELECT AVG(salary)
-    FROM employees
-    WHERE x.department_id = department_id
-)
-ORDER BY department_id;
-
--- Expected Output (using a hypothetical department_id column):
---  department_id | last_name | salary
--- ---------------+-----------+--------
---  1             | Carol     | 105000
---  1             | Alice     | 95000
---  2             | Bob       | 72000
-```
-
-**Why this output occurs:** For each employee row, the correlated subquery computes the average salary for that employee's department. If the employee's salary exceeds their department's average, the row is returned. The subquery references `x.department_id` from the outer query, making it correlated.
-
-**Example 2: Correlated Subquery with EXISTS**
-
-```sql
--- Query: Find customers who have placed at least one order
-SELECT customer_name
+SELECT c.customer_name, totals.total_spent
 FROM customers c
-WHERE EXISTS (
-    SELECT 1
-    FROM orders o
-    WHERE o.customer_id = c.customer_id
-);
-
--- Expected Output:
---  customer_name
--- ---------------
---  Alice
---  Bob
---  Carol
+JOIN (
+  SELECT customer_id, SUM(amount) AS total_spent
+  FROM orders
+  GROUP BY customer_id
+) AS totals ON c.customer_id = totals.customer_id;
 ```
 
-**Why this output occurs:** For each customer row, the `EXISTS` subquery checks whether any order exists with that customer's ID. If at least one order exists, `EXISTS` returns `TRUE` and the customer is returned. David (no orders) is excluded.
+**Expected Output (illustrative)**:
 
-### Real-World Cases
-
-**Case 1: Department Average Comparison**
-
-An HR system uses a correlated subquery to find employees earning above their department's average salary, as shown in the example above.
-
-**Case 2: Most Recent Order per Customer**
-
-An e-commerce system uses a correlated subquery to find the most recent order for each customer: `SELECT SalesOrderID, CustomerID, OrderDate FROM SalesOrderHeader AS o1 WHERE SalesOrderID = (SELECT MAX(SalesOrderID) FROM SalesOrderHeader AS o2 WHERE o2.CustomerID = o1.CustomerID)`.
-
-**Case 3: Authors with 100% Royalty**
-
-A publishing database uses a correlated subquery to find authors who earn 100% royalty on a book: `SELECT au_lname FROM authors WHERE 100 IN (SELECT royaltyper FROM titleauthor WHERE titleauthor.au_id = authors.au_id)`.
-
-### References
-
-- Oracle Database SQL Language Reference — Correlated Subqueries - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/SELECT.html
-- MySQL 8.0 Reference Manual — Correlated Subqueries - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/correlated-subqueries.html
-- Microsoft Learn — Compare Rows with Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-subqueries/4-correlated-subqueries
-- Microsoft Learn — Use Self-Contained or Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-subqueries/3-self-contained-subqueries
-
----
-
-## Summary Table of Subquery Types
-
-| Type | Returns | Operators | Evaluated | Can Run Independently? |
-|------|---------|-----------|-----------|------------------------|
-| Scalar | One row, one column | `=`, `>`, `<`, etc. | Once (self-contained) or per row (correlated) | Yes (if self-contained) |
-| Single-Row | Zero or one row | `=`, `>`, `<`, etc. | Once (self-contained) | Yes |
-| Multi-Row | Multiple rows | `IN`, `ANY`, `ALL`, `EXISTS` | Once (self-contained) | Yes |
-| Correlated | Depends on outer row | `EXISTS`, `IN`, `=`, etc. | Per outer row | No |
-
----
-
-## Dialect Support for Subquery Features
-
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle | SQLite |
-|---------|-----------|-------|------------|--------|--------|
-| Scalar Subqueries | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Single-Row Subqueries | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Multi-Row Subqueries | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Correlated Subqueries | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Row Constructors | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `ANY` / `ALL` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `EXISTS` / `NOT EXISTS` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| customer_name | total_spent |
+|---------------|-------------|
+| Alice         | 550         |
+| Bob           | 150         |
 
 ---
 
 ## References
 
-- Microsoft Learn — Understand Subqueries - https://learn.microsoft.com/en-gb/training/modules/write-subqueries/2-understand-subqueries
-- Microsoft Learn — Use Scalar or Multi-Valued Subqueries - https://learn.microsoft.com/en-us/training/modules/write-subqueries/2-understand-subqueries
-- Microsoft Learn — Compare Rows with Correlated Subqueries - https://learn.microsoft.com/en-us/training/modules/write-subqueries/4-correlated-subqueries
-- MySQL 8.0 Reference Manual — Row Subqueries - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/row-subqueries.html
-- MySQL 8.0 Reference Manual — Correlated Subqueries - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/correlated-subqueries.html
-- MySQL 8.0 Reference Manual — Restrictions on Subqueries - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/subquery-restrictions.html
-- Oracle Database SQL Language Reference — SELECT (Correlated Subqueries) - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/SELECT.html
-- PostgreSQL Documentation — Subquery Expressions - https://www.postgresql.org/docs/current/functions-subquery.html
-- PostgreSQL Documentation — Scalar Subqueries - https://www.postgresql.org/docs/current/sql-expressions.html
-- Amazon Redshift — Scalar Subqueries - https://docs.aws.amazon.com/redshift/latest/dg/r_scalar_subqueries.html
-- SAP Help — Single-Row and Multiple-Row Subqueries - https://help.sap.com/
-- Educative — SQL Subquery: A Complete Guide - https://www.educative.io/blog/sql-subquery
-- Snowflake — Working with Subqueries - https://docs.snowflake.com/en/user-guide/queries-subqueries
-- Caltech — Subqueries in the SELECT Clause - https://courses.cms.caltech.edu/cs122/notes/notes6.pdf
-- Huawei Cloud — Multi-Row Subqueries - https://support.huaweicloud.com/
-- ISO/IEC 9075-2 — SQL Standard (Subqueries) - https://jtc1sc32.org/doc/N0251-0300/32N0254.pdf
+1. **PostgreSQL Subqueries (Google Cloud Documentation)** — https://docs.cloud.google.com/spanner/docs/reference/postgresql/subqueries
+2. **MySQL 8.0 Reference Manual — Subqueries** — https://dev.mysql.com/doc/refman/8.0/en/subqueries.html
+3. **Microsoft Learn — Use Self-Contained or Correlated Subqueries** — https://learn.microsoft.com/en-us/training/modules/write-subqueries/4-self-contained-correlated-subqueries
+4. **Airbyte — PostgreSQL Subquery: A Complete Guide** — https://airbyte.com/data-engineering-resources/postgresql-subquery
+5. **Red-Gate — MySQL Subqueries: Scalar, Correlated, Row, Column, and Derived Tables** — https://www.red-gate.com/simple-talk/databases/mysql/subqueries-in-mysql/
+6. **MySQL 8.0 Reference Manual — Row Subqueries** — https://dev.mysql.com/doc/refman/8.0/en/row-subqueries.html
+7. **MySQL 8.0 Reference Manual — Derived Tables** — https://dev.mysql.com/doc/refman/8.0/en/derived-tables.html
+8. **SAP Help — Subquery in HAVING Clause** — https://help.sap.com/doc/saphelp_ewm900/9.0/en-US/4c/fd8b6b1c6d3a4fe10000000a42189e/content.htm
+9. **Microsoft Learn — Subqueries (SQL Server)** — https://learn.microsoft.com/en-us/sql/relational-databases/performance/subqueries
+
+---
+
+This cheat sheet provides a comprehensive reference for SQL subquery fundamentals across PostgreSQL, MySQL, and SQL Server, covering scalar, row, table, correlated, non-correlated, single-row, and multi-row subqueries, and their placement in `SELECT`, `FROM`, `WHERE`, `HAVING`, and `JOIN` clauses. Always consult your specific RDBMS documentation for version-specific behaviour and optimiser features.

@@ -1,1815 +1,1660 @@
-# SQL INSERT Operations: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: SQL INSERT Operations
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** The SQL `INSERT` statement is the primary Data Manipulation Language (DML) command used to add new rows of data into a table, view, or other database object in a relational database management system (RDBMS).
+**Core Definition**
+INSERT operations are the Data Manipulation Language (DML) statements used to add new rows of data into a table, either by supplying explicit values, deriving them from a query, or relying on column defaults and generated expressions.
 
-**Technical Definition:** Per the ISO/IEC 9075 standard, an `<insert statement>` consists of `INSERT INTO <table name> [ <insert column list> ] <insert source>`, where the `<insert source>` is either a `<query expression>` (typically a `VALUES` clause or a `SELECT` statement) or `DEFAULT VALUES`. The statement adds one or more rows to the target table, with each row conforming to the table's column constraints and data types.
+**Technical Definition**
+`INSERT` adds one or more rows to a table, view, or—in some systems—an updatable CTE. The statement specifies the target table, an optional column list, and a source of row values: a `VALUES` clause (one or many rows), a `DEFAULT VALUES` clause, or a query (`INSERT ... SELECT`). All RDBMSs support the core `INSERT ... VALUES` and `INSERT ... SELECT` forms; extensions diverge significantly: PostgreSQL provides `ON CONFLICT` for upserts, `RETURNING` for returning inserted data, and `OVERRIDING` for identity columns; MySQL provides `ON DUPLICATE KEY UPDATE` for upserts, `INSERT IGNORE` for constraint violation suppression, and (since 8.0.19) a limited `RETURNING` clause; SQL Server provides `MERGE` for upserts, `OUTPUT` for returning inserted data, and `BULK INSERT`/`bcp` for high-volume loading.
 
-**Beginner-Friendly Explanation:** `INSERT` is the command you use to add new data to a database table. Think of a table as a spreadsheet; `INSERT` is how you add a new row to that spreadsheet. You tell the database which table to add to, which columns you're providing values for, and what those values are.
+**Beginner-Friendly Explanation**
+Inserting data is how you put new records into a table. You tell the database which table to add to, which columns you are supplying, and what the values are. You can insert one row at a time, many rows at once, or copy rows from another table. The database checks that the data follows the rules (constraints) and then stores it permanently.
 
 ### Key Characteristics
 
-- **Row-oriented:** Inserts one or more complete rows into a table.
-- **Non-destructive to existing data:** Existing rows are not modified by a standard `INSERT` (unless an upsert clause is used).
-- **Constraint-aware:** The database enforces all column constraints (NOT NULL, UNIQUE, CHECK, FOREIGN KEY) during insertion.
-- **Transactional:** A single `INSERT` statement is atomic — it either inserts all specified rows or none at all.
-- **Composable:** Can insert values from literals, expressions, or the result of a `SELECT` query.
-- **Support for defaults:** Columns can be omitted, in which case default values (or `NULL`) are used.
+- **Declarative value specification**: The `VALUES` clause supplies literal or computed values; `DEFAULT` can be used to explicitly request a column's default value, and `DEFAULT VALUES` inserts a row with all defaults.
+- **Set-based insertion**: `INSERT ... SELECT` inserts zero or more rows derived from a query, enabling server-side data transformation and bulk transfer without round-tripping data to the client.
+- **Vendor-specific upsert mechanisms**: PostgreSQL `ON CONFLICT`, MySQL `ON DUPLICATE KEY UPDATE`, and SQL Server `MERGE` all solve the "insert or update" problem but with different syntax, locking semantics, and edge cases.
+- **Returning inserted data**: PostgreSQL's `RETURNING` clause and SQL Server's `OUTPUT` clause return data from the inserted rows in the same statement, eliminating the need for a separate `SELECT`; MySQL's `RETURNING` is limited to certain versions and contexts.
+- **Performance is dominated by round-trips and WAL**: Single-row inserts are dominated by network round-trips and per-statement overhead; multi-row `VALUES`, `INSERT ... SELECT`, and dedicated bulk-loading tools (`COPY`, `LOAD DATA`, `bcp`) amortise this overhead and can be orders of magnitude faster.
 
 ### Prerequisites
 
-- **Database access:** A connection to an RDBMS with `INSERT` privilege on the target table.
-- **Table existence:** The target table must already exist with a defined schema.
-- **Data type awareness:** Understanding of the table's column data types to provide compatible values.
-- **Constraint knowledge:** Awareness of PRIMARY KEY, UNIQUE, FOREIGN KEY, CHECK, and NOT NULL constraints.
-- **Transaction concepts:** Basic understanding of transactions and ACID properties for multi-statement operations.
+- A running RDBMS instance (PostgreSQL, MySQL, or SQL Server) and a client connection.
+- `INSERT` privilege on the target table; `UPDATE` and `SELECT` privileges are additionally required for `ON CONFLICT DO UPDATE`, `ON DUPLICATE KEY UPDATE`, and `RETURNING`/`OUTPUT`.
+- The target table must exist with a compatible column structure (or the statement must supply a column list that matches a subset of columns).
+- For `INSERT ... SELECT`: `SELECT` privilege on the source tables.
 
 ### Related Programming Areas
 
-- **Application Development:** Backend services insert user data, orders, logs, and records.
-- **Data Engineering (ETL):** Extract-Transform-Load pipelines insert data into staging and warehouse tables.
-- **Database Administration:** DBAs insert seed data, configuration values, and audit records.
-- **Data Analysis:** Analysts insert computed results into summary tables.
-- **Testing:** Test suites insert fixture data to set up known states.
-
-### Core Concepts / Features
-
-1. `INSERT INTO` Basic Syntax
-2. Inserting a Single Row (`VALUES` Clause)
-3. Inserting Multiple Rows in a Single Statement (Bulk Insertion)
-4. Explicit Column Lists vs. Implicit Positional Inserts
-5. Value Specifications
-6. Inserting Default Values (`DEFAULT` Keyword or Omitting Columns)
-7. Inserting `NULL` Values Explicitly
-8. Copying Data from Another Table (`INSERT INTO ... SELECT`)
-9. Handling Generated Identifiers (Auto-increment, Identity, `SERIAL`, UUID)
-10. Retrieving Generated Keys (`RETURNING`, `OUTPUT`, `SCOPE_IDENTITY()`, `LAST_INSERT_ID()`)
-11. Handling Constraint Violations (Foreign Key, Unique, Check)
-12. Upsert Operations (`ON CONFLICT`, `ON DUPLICATE KEY UPDATE`, `MERGE`)
-13. Transaction Safety During Failures (All-or-Nothing Atomicity)
+- Data Manipulation Language (DML) – `UPDATE`, `DELETE`, `MERGE`.
+- Data Definition Language (DDL) – table and column definitions that determine the valid insert shape.
+- Transaction management – `COMMIT`, `ROLLBACK`, and statement-level atomicity.
+- Constraint enforcement – `NOT NULL`, `UNIQUE`, `PRIMARY KEY`, `FOREIGN KEY`, `CHECK`.
+- Bulk loading and ETL – `COPY`, `LOAD DATA`, `bcp`, `BULK INSERT`.
 
 ---
 
-## 1. INSERT INTO Basic Syntax
+## Core Concepts and Features
 
-### Definitions
+### 1. `INSERT INTO`
 
-**Core Definition:** The `INSERT INTO` statement is the SQL command that adds one or more new rows to a table, specifying the target table, the columns to populate, and the values to insert.
+#### Definitions
 
-**Technical Definition:** In standard SQL (ISO/IEC 9075-2), the `<insert statement>` is defined as `INSERT INTO <table name> [ ( <insert column list> ) ] <insert source>`, where `<insert source>` is either `<query expression>` or `DEFAULT VALUES`. The optional column list specifies which columns receive explicit values; columns not listed receive their default values or `NULL` if no default is defined.
+**Core Definition**
+`INSERT INTO` is the SQL statement that adds one or more new rows to a table.
 
-**Beginner-Friendly Explanation:** `INSERT INTO` is the starting phrase of every insert command. It tells the database: "I want to put new data into this table." You then specify which columns you're filling and what values to use.
+**Technical Definition**
+The `INSERT INTO` statement specifies a target table and a source of rows. The source can be a `VALUES` list, a `DEFAULT VALUES` clause, or a query. The optional column list determines which columns receive explicit values; columns not listed receive their default values (or `NULL` if no default exists). In PostgreSQL, the general synopsis is `INSERT INTO table_name [ AS alias ] [ ( column_name [, ...] ) ] { DEFAULT VALUES | VALUES ( ... ) | query } [ ON CONFLICT ... ] [ RETURNING ... ]`. SQL Server's synopsis includes `[ TOP ( expression ) [ PERCENT ] ]`, `OUTPUT`, and support for `derived_table`, `execute_statement`, and `DEFAULT VALUES`.
 
-### Purposes
+**Beginner-Friendly Explanation**
+`INSERT INTO` is the basic command for adding a row to a table. You name the table, optionally list the columns, and then provide the values.
 
-- To add new rows of data to an existing database table.
-- To populate a newly created table with initial data.
-- To store application-generated data (user registrations, orders, logs) in the database.
-- To load data from external sources into the database.
-- To create test fixtures and seed data for development and testing.
+#### Purposes
 
-### Syntax Rules and Structure
+- To add new records to a table as part of normal application operation.
+- To seed reference or lookup tables with initial data.
+- To transfer data between tables or from external sources.
 
-**Complete General Syntax (PostgreSQL):**
+#### Syntax Rules and Structure
+
+**General syntax (PostgreSQL):**
 
 ```sql
-[ WITH [ RECURSIVE ] with_query [, ...] ]
 INSERT INTO table_name [ AS alias ]
     [ ( column_name [, ...] ) ]
-    [ OVERRIDING { SYSTEM | USER } VALUE ]
-    { DEFAULT VALUES
-    | VALUES ( { expression | DEFAULT } [, ...] ) [, ...]
-    | query }
+    { DEFAULT VALUES | VALUES ( { expression | DEFAULT } [, ...] ) [, ...] | query }
     [ ON CONFLICT [ conflict_target ] conflict_action ]
-    [ RETURNING [ WITH ( { OLD | NEW } AS output_alias [, ...] ) ]
-                { * | output_expression [ [ AS ] output_name ] } [, ...] ]
+    [ RETURNING * | output_expression [ [ AS ] output_name ] [, ...] ];
 ```
 
-**Component Breakdown:**
 
-| Component | Purpose |
-|-----------|---------|
-| `INSERT INTO` | Initiates the insert operation; `INTO` is optional in some dialects |
-| `table_name` | The target table receiving the rows |
-| `( column_name, ... )` | Optional list of columns to populate |
-| `VALUES (...)` | Explicit values for a single or multiple rows |
-| `DEFAULT VALUES` | Inserts a row where every column uses its default |
-| `query` | A `SELECT` statement whose results are inserted |
-| `ON CONFLICT` | Alternative action when a constraint violation would occur |
-| `RETURNING` | Returns values from the inserted rows |
+**Component breakdown:**
 
-**Syntax Rules:**
+| Component | Description |
+|-----------|-------------|
+| `table_name` | The target table; can be schema-qualified. |
+| `(column_name, ...)` | Optional list of columns to populate; unlisted columns receive defaults. |
+| `DEFAULT VALUES` | Inserts a row with all columns set to their default values. |
+| `VALUES (...)` | One or more rows of explicit values. |
+| `query` | A `SELECT` (or `VALUES`) query that produces rows to insert. |
 
-- The `INTO` keyword is optional in MySQL, SQL Server, and SQLite but is required by PostgreSQL and Oracle.
-- If the column list is omitted, values must be provided for all columns in table-definition order, or the first N columns if fewer values are supplied (PostgreSQL extension).
-- The number of values in the `VALUES` clause must match the number of columns in the explicit or implicit column list.
-- The `DEFAULT VALUES` form cannot be combined with a column list.
-- `RETURNING` is supported by PostgreSQL, Oracle (as `RETURNING INTO`), and SQL Server (as `OUTPUT`).
+**Syntax rules:**
 
-**Constraints and Limitations:**
+- If the column list is omitted, values are matched to columns in their declared order.
+- If fewer values than columns are supplied without a column list, the first N columns receive values and the rest receive defaults.
+- Explicitly listing columns is considered better style because it is resilient to column reordering.
 
-- The target table must exist and the user must have `INSERT` privilege.
-- Values must be compatible with the column data types; implicit type conversion may occur but is not guaranteed.
-- `INSERT INTO ... SELECT` cannot be used to insert into a table that is also being selected from in some dialects (though PostgreSQL allows it).
-- `DEFAULT VALUES` inserts exactly one row; it cannot be used for bulk insertion.
-- The `OVERRIDING` clause is PostgreSQL-specific and controls identity column behaviour.
+**Constraints and limitations:**
 
-### Annotated Complete Code Examples
+- The number of values must match the number of listed columns (or the number of table columns if no list is given).
+- Data types must be compatible; implicit or assignment casts may be attempted, but incompatible values are rejected.
 
-**Example 1: Basic INSERT with VALUES (PostgreSQL)**
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Basic INSERT with explicit column list
 
 ```sql
--- Setup: Create a sample table
+-- Step 1: Create a table.
 CREATE TABLE products (
-    product_no  INTEGER PRIMARY KEY,
-    name        TEXT NOT NULL,
-    price       NUMERIC(10, 2) DEFAULT 0.00
+    product_no integer PRIMARY KEY,
+    name       text NOT NULL,
+    price      numeric(10,2)
 );
 
--- Insert a single row using positional values
-INSERT INTO products VALUES (1, 'Cheese', 9.99);
-
--- Expected Output:
--- INSERT 0 1
-```
-
-**Why this output occurs:** The `VALUES (1, 'Cheese', 9.99)` clause provides values for all three columns in the order they were defined in the `CREATE TABLE` statement. The database inserts one row and returns the command tag `INSERT 0 1`, indicating one row was inserted.
-
-**Example 2: INSERT with Explicit Column List**
-
-```sql
--- Insert using an explicit column list (recommended practice)
+-- Step 2: Insert a row with an explicit column list.
 INSERT INTO products (product_no, name, price)
-VALUES (2, 'Bread', 1.99);
+VALUES (1, 'Cheese', 9.99);
 
--- Verify the insert
+-- Step 3: Verify.
 SELECT * FROM products;
-
--- Expected Output:
---  product_no |  name  | price
--- ------------+--------+-------
---           1 | Cheese |  9.99
---           2 | Bread  |  1.99
 ```
 
-**Why this output occurs:** The column list `(product_no, name, price)` explicitly names the columns receiving values. This is equivalent to the positional insert but is more robust — if the table schema changes (e.g., a column is added), the query still works correctly because it does not rely on column order.
+**Expected output:**
 
-### Real-World Cases
+```text
+CREATE TABLE
+INSERT 0 1
+ product_no |  name  | price
+------------+--------+-------
+          1 | Cheese |  9.99
+(1 row)
+```
 
-**Case 1: User Registration**
+**Why this output appears**: The `INSERT` statement supplies a value for each of the three listed columns. The row is stored, and `SELECT` retrieves it.
 
-A web application inserts a new user record when someone signs up: `INSERT INTO users (email, password_hash, created_at) VALUES ('user@example.com', '$2b$12$...', NOW())`. The `INSERT` statement stores the registration data.
+#### Real-World Cases
 
-**Case 2: Order Processing**
-
-An e-commerce system inserts an order record and its line items into separate tables within a transaction. Each `INSERT` adds one row to the respective table.
-
-### References
-
-- PostgreSQL Documentation — INSERT - https://www.postgresql.org/docs/current/sql-insert.html
-- MySQL 8.4 Reference Manual — INSERT Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert.html
-- Microsoft SQL Server — INSERT (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/insert-transact-sql
-- Oracle Database SQL Language Reference — INSERT - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/INSERT.html
-- SQLite Documentation — INSERT - https://www2.sqlite.org/lang_insert.html
+- **User registration**: A new row is inserted into `users` when someone signs up.
+- **Order creation**: An `orders` row is inserted when a customer checks out.
+- **Reference data**: A `countries` table is seeded with a fixed set of rows during database setup.
 
 ---
 
-## 2. Inserting a Single Row (VALUES Clause)
+### 2. Single-Row Insert
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Inserting a single row using the `VALUES` clause adds exactly one new row to a table, specifying a value for each column in the column list.
+**Core Definition**
+A single-row insert adds exactly one row to a table using a `VALUES` clause with one row of values.
 
-**Technical Definition:** The `<insert statement>` form `INSERT INTO table ( columns ) VALUES ( values )` creates one row. The `VALUES` clause contains a parenthesised list of expressions, each corresponding to a column in the explicit or implicit column list. The number of expressions must equal the number of columns.
+**Technical Definition**
+`INSERT INTO table_name (columns) VALUES (values)` inserts one row. Each value is an expression, a literal, or the keyword `DEFAULT`. The statement is atomic: either the row is inserted or the statement fails. Single-row inserts are the most common form in OLTP applications, but they are also the least efficient for bulk loading because each statement incurs parsing, planning, and network round-trip overhead.
 
-**Beginner-Friendly Explanation:** This is the most basic way to add data: you write one set of values in parentheses, and the database adds one row.
+**Beginner-Friendly Explanation**
+A single-row insert adds one record at a time. It is simple and is what most applications use when a user submits a form.
 
-### Purposes
+#### Purposes
 
-- To add a single record to a table.
-- To test queries with known data during development.
-- To insert configuration or lookup values.
-- To store individual user actions or events.
+- To add one record in response to a user action (e.g., submitting a form).
+- To insert a row where the values are computed or parameterised individually.
+- To use `RETURNING` or `OUTPUT` to retrieve generated identifiers immediately.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
+**General syntax:**
 
 ```sql
-INSERT INTO table_name [ ( column1 [, column2, ...] ) ]
-VALUES ( value1 [, value2, ...] );
+INSERT INTO table_name ( column1, column2, ... )
+VALUES ( value1, value2, ... );
 ```
 
-**Component Breakdown:**
 
-| Component | Purpose |
-|-----------|---------|
-| `INSERT INTO table_name` | Target table |
-| `( column1, column2, ... )` | Optional column list |
-| `VALUES ( value1, value2, ... )` | Values for the corresponding columns |
+**Component breakdown:**
 
-**Syntax Rules:**
+| Component | Description |
+|-----------|-------------|
+| `( column1, column2, ... )` | The columns to populate. |
+| `VALUES ( value1, value2, ... )` | One row of values corresponding to the listed columns. |
 
-- Values are enclosed in parentheses and separated by commas.
-- String values must be enclosed in single quotes.
-- Numeric values are unquoted.
-- `NULL` is written as the keyword `NULL` (unquoted).
-- The `DEFAULT` keyword can be used to explicitly request a column's default value.
-- Date and time values are typically written as strings in ISO format (`'YYYY-MM-DD'`).
+**Syntax rules:**
 
-**Constraints and Limitations:**
+- The number of values must equal the number of listed columns.
+- `DEFAULT` can be used as a value to request the column's default.
 
-- The number of values must exactly match the number of columns in the column list (or all columns if the list is omitted).
-- Values must be type-compatible with their target columns.
-- Not all columns need to be specified; omitted columns receive defaults or `NULL`.
-- Some RDBMSs require `INTO` (PostgreSQL, Oracle); others make it optional (MySQL, SQL Server, SQLite).
+**Constraints and limitations:**
 
-### Annotated Complete Code Examples
+- Single-row inserts are inefficient for loading many rows; use multi-row `VALUES` or `INSERT ... SELECT` for bulk operations.
 
-**Example 1: Single Row Insert**
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Single-row INSERT with RETURNING
 
 ```sql
--- Setup
-CREATE TABLE employees (
-    id          SERIAL PRIMARY KEY,
-    first_name  VARCHAR(50) NOT NULL,
-    last_name   VARCHAR(50) NOT NULL,
-    department  VARCHAR(50) DEFAULT 'Unassigned',
-    salary      NUMERIC(10, 2)
+-- Step 1: Create a table with a serial primary key.
+CREATE TABLE users (
+    id   serial PRIMARY KEY,
+    name text NOT NULL
 );
 
--- Insert a single row
-INSERT INTO employees (first_name, last_name, department, salary)
-VALUES ('Alice', 'Johnson', 'Engineering', 95000.00);
-
--- Verify
-SELECT * FROM employees;
-
--- Expected Output:
---  id | first_name | last_name | department  |  salary
--- ----+------------+-----------+-------------+----------
---   1 | Alice      | Johnson   | Engineering | 95000.00
+-- Step 2: Insert one row and return the generated id.
+INSERT INTO users (name) VALUES ('Alice') RETURNING id;
 ```
 
-**Why this output occurs:** The `VALUES` clause provides four values corresponding to the four columns in the column list. The `id` column is not specified because it is a `SERIAL` column that auto-generates its value. The database assigns `id = 1` and inserts the row.
+**Expected output:**
 
-### Real-World Cases
+```text
+CREATE TABLE
+ id
+----
+  1
+(1 row)
+```
 
-**Case 1: Audit Logging**
+**Why this output appears**: The `RETURNING id` clause returns the value generated by the `serial` column in the same statement, avoiding a separate query.
 
-An application inserts a single audit record for each user action: `INSERT INTO audit_log (user_id, action, timestamp) VALUES (42, 'LOGIN', NOW())`.
+#### Real-World Cases
 
-**Case 2: Configuration Management**
-
-A deployment script inserts a configuration value: `INSERT INTO settings (key, value) VALUES ('max_connections', '100')`.
-
-### References
-
-- PostgreSQL Documentation — Inserting Data - https://www.postgresql.org/docs/current/dml-insert.html
-- MySQL 8.4 Reference Manual — INSERT ... VALUES - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert.html
+- **Form submission**: Each web form submission results in a single-row insert.
+- **Audit event**: An application logs a single event row per action.
 
 ---
 
-## 3. Inserting Multiple Rows in a Single Statement (Bulk Insertion)
+### 3. Multi-Row Insert
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Bulk insertion using a single `INSERT` statement adds multiple rows to a table by providing multiple parenthesised value lists in the `VALUES` clause, separated by commas.
+**Core Definition**
+A multi-row insert adds two or more rows in a single `INSERT` statement using a `VALUES` clause with multiple parenthesised row expressions.
 
-**Technical Definition:** The `VALUES` clause can contain multiple `<row constructor>` elements: `VALUES ( ... ), ( ... ), ( ... )`. Each parenthesised list represents one row. The database inserts all rows as part of a single statement, which is atomic — either all rows are inserted or none are.
+**Technical Definition**
+`INSERT INTO table_name (columns) VALUES (row1), (row2), ...` inserts multiple rows atomically. The rows are inserted in the order listed, and the entire statement either succeeds or fails as a unit. Multi-row `VALUES` amortises statement parsing and network overhead across all rows and is significantly faster than repeated single-row inserts for moderate row counts. SQL Server has a limit of 1,000 rows per `INSERT ... VALUES` statement and a 2,100-parameter limit; PostgreSQL has no hard row limit but a 65,535-parameter protocol limit.
 
-**Beginner-Friendly Explanation:** Instead of writing multiple `INSERT` statements, you can write one statement with multiple sets of values. This is faster and more efficient, especially when inserting many rows.
+**Beginner-Friendly Explanation**
+A multi-row insert adds several records at once. Instead of sending one `INSERT` per row, you send one statement with many rows, which is much faster.
 
-### Purposes
+#### Purposes
 
-- To insert many rows efficiently with a single statement.
-- To reduce network round-trips between the application and database.
-- To ensure atomicity when inserting a batch of related rows.
-- To load seed data or reference data in bulk.
-- To improve performance compared to multiple single-row inserts.
+- To load a moderate batch of rows efficiently in a single round-trip.
+- To insert related rows that should be atomic (all or nothing).
+- To reduce statement parsing and network overhead compared to repeated single-row inserts.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
+**General syntax:**
 
 ```sql
-INSERT INTO table_name [ ( column1 [, column2, ...] ) ]
+INSERT INTO table_name ( column1, column2, ... )
 VALUES
-    ( value1a [, value2a, ...] ),
-    ( value1b [, value2b, ...] ),
-    ( value1c [, value2c, ...] ),
+    ( value1a, value2a, ... ),
+    ( value1b, value2b, ... ),
     ...;
 ```
 
-**Component Breakdown:**
 
-| Component | Purpose |
-|-----------|---------|
-| `VALUES` | Introduces one or more row constructors |
-| `( ... ), ( ... )` | Each parenthesised group is one row |
-| Commas between groups | Separate individual rows |
+**Component breakdown:**
 
-**Syntax Rules:**
+| Component | Description |
+|-----------|-------------|
+| `(row1), (row2), ...` | Multiple parenthesised rows of values. |
 
-- Each row constructor must have the same number of values as the column list (or all columns if omitted).
-- All rows must have values of compatible types in the same positions.
-- The entire statement is a single transaction unit (atomic).
-- PostgreSQL, MySQL, SQL Server, Oracle, and SQLite all support multi-row `VALUES`.
+**Syntax rules:**
 
-**Constraints and Limitations:**
+- Each parenthesised group must have the same number of values as the column list.
+- The rows are inserted in the order specified.
 
-- There is an implementation-dependent limit on the number of rows per statement (e.g., 1,000 for SQL Server's `VALUES` clause, though this can be exceeded with `INSERT ... SELECT`).
-- Very large multi-row inserts consume memory and can lock the table for the duration.
-- For very large datasets, `COPY` (PostgreSQL) or `BULK INSERT` (SQL Server) are more efficient than multi-row `INSERT`.
-- MySQL's `max_allowed_packet` limits the total size of the statement.
+**Constraints and limitations:**
 
-### Annotated Complete Code Examples
+- SQL Server caps `INSERT ... VALUES` at 1,000 rows per statement.
+- Very large `VALUES` lists can hit parameter limits; batch into chunks of 500–1,000 rows.
 
-**Example 1: Multi-Row Insert**
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: MySQL – Multi-row INSERT
 
 ```sql
--- Create Table
-CREATE TABLE employees (
-    first_name VARCHAR(255),
-    last_name VARCHAR(255),
-    department VARCHAR(255),
-    salary DECIMAL(2)
-)
+-- Step 1: Create a table.
+CREATE TABLE contacts (
+    id        INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name  VARCHAR(50)
+);
 
-
--- Insert three rows in one statement
-INSERT INTO employees (first_name, last_name, department, salary)
+-- Step 2: Insert three rows in one statement.
+INSERT INTO contacts (id, first_name, last_name)
 VALUES
-    ('Bob',   'Smith',    'Marketing',   72000.00),
-    ('Carol', 'Williams', 'Engineering', 105000.00),
-    ('David', 'Brown',    'Sales',       68000.00);
-
--- Verify
-SELECT * FROM employees ORDER BY id;
-
--- Expected Output:
---  id | first_name | last_name | department  |  salary
--- ----+------------+-----------+-------------+----------
---   1 | Alice      | Johnson   | Engineering | 95000.00
---   2 | Bob        | Smith     | Marketing   | 72000.00
---   3 | Carol      | Williams  | Engineering |105000.00
---   4 | David      | Brown     | Sales       | 68000.00
+    (1, 'John', 'Doe'),
+    (2, 'Jane', 'Doe'),
+    (3, 'Jack', 'Doe');
 ```
 
-**Why this output occurs:** Three separate row constructors are provided in a single `VALUES` clause. The database inserts all three rows in one operation. Each row receives an auto-generated `id` (2, 3, 4) because the `SERIAL` column continues from its previous value.
+**Expected output:**
 
-### Real-World Cases
+```text
+Query OK, 0 rows affected (0.02 sec)
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+```
 
-**Case 1: Importing CSV Data**
+**Why this output appears**: All three rows are inserted atomically; `Records: 3` confirms the row count.
 
-A data import tool reads a CSV file and constructs a single `INSERT` statement with hundreds of `VALUES` rows, reducing the number of database round-trips from hundreds to one.
+#### Real-World Cases
 
-**Case 2: Creating Test Fixtures**
-
-A test suite inserts multiple rows of test data in a single statement to set up a known database state before running assertions.
-
-### References
-
-- PostgreSQL Documentation — Inserting Data (Multiple Rows) - https://www.postgresql.org/docs/current/dml-insert.html
-- MySQL 8.4 Reference Manual — INSERT ... VALUES - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert.html
-- Microsoft SQL Server — INSERT (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/insert-transact-sql
+- **Batch import**: A CSV file is parsed and inserted in batches of 1,000 rows.
+- **Seeding data**: A migration script inserts multiple reference rows in one statement.
 
 ---
 
-## 4. Explicit Column Lists vs. Implicit Positional Inserts
+### 4. Explicit Column Lists
 
-### Definitions
+#### Definitions
 
-**Core Definition:** An explicit column list names the columns receiving values in the `INSERT` statement, while an implicit positional insert omits the column list and relies on the table's column-definition order.
+**Core Definition**
+An explicit column list in an `INSERT` statement specifies the names of the columns being populated, rather than relying on the table's declared column order.
 
-**Technical Definition:** When the `<insert column list>` is omitted, the values in the `VALUES` clause are associated with the table's columns in their declared order (left-to-right). When the column list is provided, values are associated with the named columns regardless of their position in the table definition.
+**Technical Definition**
+The optional `( column_name [, ...] )` clause after the table name determines which columns receive the values supplied by `VALUES` or the query. Columns not listed are set to their default values (or `NULL` if no default exists). Explicit column lists are considered best practice because they decouple the `INSERT` statement from the physical column order and make the statement resilient to future column additions.
 
-**Beginner-Friendly Explanation:** You can either tell the database exactly which columns you're filling (explicit column list) or let it figure it out based on the order the columns were defined (implicit). The explicit approach is safer and more readable.
+**Beginner-Friendly Explanation**
+Instead of providing values for every column in the table's exact order, you list the columns you want to fill and provide values for just those columns. The database fills the rest with defaults.
 
-### Purposes
+#### Purposes
 
-- To make `INSERT` statements robust against schema changes (explicit).
-- To reduce typing for quick ad-hoc inserts (implicit).
-- To insert values for only some columns, leaving others to defaults (explicit).
-- To control which columns receive values and in what order (explicit).
+- To insert data into a subset of columns without supplying values for every column.
+- To make `INSERT` statements robust against column reordering or addition.
+- To explicitly control which columns receive defaults.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Explicit Column List:**
+**General syntax:**
 
 ```sql
-INSERT INTO table_name (column1, column2, column3)
-VALUES (value1, value2, value3);
+INSERT INTO table_name ( column1, column2, ... )
+VALUES ( value1, value2, ... );
 ```
 
-**Implicit Positional Insert:**
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `( column1, column2, ... )` | The columns to populate, in any order. |
+
+**Syntax rules:**
+
+- The order of values in `VALUES` corresponds to the order of columns in the list, not the table's declared order.
+- Columns not listed receive their default values or `NULL`.
+
+**Constraints and limitations:**
+
+- If a column not listed is `NOT NULL` and has no default, the `INSERT` fails.
+- Omitting the column list requires supplying values for all columns in declared order.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Explicit column list omitting a column
 
 ```sql
-INSERT INTO table_name
-VALUES (value1, value2, value3);
-```
-
-**Component Breakdown:**
-
-| Form | Columns Specified | Value-to-Column Mapping |
-|------|------------------|------------------------|
-| Explicit | User-provided list | By name, in listed order |
-| Implicit | All table columns | By position in table definition |
-
-**Syntax Rules:**
-
-- With an explicit column list, the order of columns in the list determines the mapping of values.
-- With an implicit insert, the number of values must equal the total number of columns in the table (unless using a PostgreSQL extension that defaults remaining columns).
-- The `DEFAULT` keyword can be used for any column in an explicit list to request the default value.
-- Omitting a column from an explicit list causes it to receive its default value or `NULL`.
-
-**Constraints and Limitations:**
-
-- Implicit inserts break when columns are added, removed, or reordered in the table.
-- Explicit column lists are strongly recommended for production code.
-- PostgreSQL allows omitting trailing columns in an implicit insert (the remaining columns are defaulted); this is a PostgreSQL extension and not standard SQL.
-- Oracle and SQL Server require all columns to be specified in an implicit insert (unless the omitted columns are nullable or have defaults, in which case the column list must be used).
-
-### Annotated Complete Code Examples
-
-**Example 1: Explicit Column List (Recommended)**
-
-```sql
--- Explicit column list — robust against schema changes
-INSERT INTO employees (first_name, last_name, salary)
-VALUES ('Eve', 'Davis', 88000.00);
-
--- Verify
-SELECT * FROM employees WHERE first_name = 'Eve';
-
--- Expected Output:
---  id | first_name | last_name | department  |  salary
--- ----+------------+-----------+-------------+----------
---   5 | Eve        | Davis     | Unassigned  | 88000.00
-```
-
-**Why this output occurs:** The column list explicitly names `first_name`, `last_name`, and `salary`. The `department` column is omitted, so it receives its default value `'Unassigned'`. The `id` column auto-generates its value. Even if the table's column order changes (e.g., `department` is moved before `salary`), this query still works correctly.
-
-**Example 2: Implicit Positional Insert**
-
-```sql
--- Implicit positional insert — must provide values for all columns
-INSERT INTO employees
-VALUES (6, 'Frank', 'Miller', 'HR', 75000.00);
-
--- Verify
-SELECT * FROM employees WHERE first_name = 'Frank';
-
--- Expected Output:
---  id | first_name | last_name | department |  salary
--- ----+------------+-----------+------------+----------
---   6 | Frank      | Miller    | HR         | 75000.00
-```
-
-**Why this output occurs:** No column list is provided, so the five values correspond positionally to the five columns in the table definition order: `id`, `first_name`, `last_name`, `department`, `salary`. The `id` is explicitly provided as 6 rather than allowing the `SERIAL` to auto-generate it. This works but is fragile — if a column is added or reordered, the query breaks.
-
-### Real-World Cases
-
-**Case 1: Production Application Code**
-
-A backend API always uses explicit column lists (`INSERT INTO orders (customer_id, total, status) VALUES (...)`) to remain resilient to schema migrations. When the `orders` table gains a new `discount` column, the existing code continues to work because it names only the columns it populates.
-
-**Case 2: Quick Ad-Hoc Queries**
-
-A developer testing a query in a SQL console uses `INSERT INTO logs VALUES (1, 'test', NOW())` for speed, knowing the table's exact column order.
-
-### References
-
-- PostgreSQL Documentation — Inserting Data (Column Lists) - https://www.postgresql.org/docs/current/dml-insert.html
-- MySQL 8.4 Reference Manual — INSERT Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert.html
-
----
-
-## 5. Value Specifications
-
-### Definitions
-
-**Core Definition:** Value specifications in an `INSERT` statement define the actual data values to be inserted into each column, which can be literals, expressions, function calls, or the `DEFAULT` keyword.
-
-**Technical Definition:** In the `<insert source>` of an `INSERT` statement, each column value is specified as an `<expression>`, which can be a literal constant, a scalar expression (arithmetic, string concatenation), a function call, or the keyword `DEFAULT`. The expression is evaluated in the context of the current statement before being stored in the target column.
-
-**Beginner-Friendly Explanation:** A value specification is simply the value you want to put into a column. It can be a number, a string, a date, a calculation, a function result, or the special word `DEFAULT` to let the database choose.
-
-### Purposes
-
-- To provide literal constant values for insertion.
-- To compute values at insert time using expressions.
-- To use database functions (e.g., `NOW()`, `UPPER()`, `gen_random_uuid()`) to generate values.
-- To explicitly request column default values with the `DEFAULT` keyword.
-- To insert `NULL` values where appropriate.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
-INSERT INTO table_name (column1, column2, column3)
-VALUES (
-    literal_or_expression,
-    expression,
-    DEFAULT
-);
-```
-
-**Value Types and Examples:**
-
-| Value Type | Syntax | Example |
-|-----------|--------|---------|
-| String literal | `'text'` | `'Alice'` |
-| Numeric literal | `123`, `3.14` | `95000.00` |
-| Boolean literal | `TRUE`, `FALSE` | `TRUE` |
-| NULL | `NULL` | `NULL` |
-| DEFAULT | `DEFAULT` | `DEFAULT` |
-| Expression | `expr op expr` | `100 * 1.1` |
-| Function call | `func(args)` | `NOW()`, `UPPER('abc')` |
-| Subquery | `(SELECT ...)` | `(SELECT MAX(id) FROM t)` |
-
-**Syntax Rules:**
-
-- String literals are enclosed in single quotes.
-- Single quotes within a string are escaped by doubling them: `'It''s'`.
-- Numeric literals are unquoted.
-- `NULL` and `DEFAULT` are keywords, not strings.
-- Expressions can reference the target table's columns (useful in `INSERT ... SELECT`).
-- Subqueries must return exactly one value (scalar subquery) when used as a value.
-
-**Constraints and Limitations:**
-
-- The `DEFAULT` keyword cannot be used in an implicit positional insert for a column that has no default defined.
-- Subqueries in `VALUES` cannot reference the target table of the `INSERT` (no correlated subqueries in `VALUES`).
-- Function calls may have side effects (e.g., sequence advancement); use with caution.
-- Type compatibility is enforced; implicit conversion may occur but can fail.
-
-### Annotated Complete Code Examples
-
-**Example 1: Literal, Expression, and Default Values**
-
-```sql
--- Setup
-CREATE TABLE orders (
-    order_id    SERIAL PRIMARY KEY,
-    customer    VARCHAR(50) NOT NULL,
-    quantity    INTEGER NOT NULL DEFAULT 1,
-    unit_price  NUMERIC(10, 2) NOT NULL,
-    total       NUMERIC(12, 2) GENERATED ALWAYS AS (quantity * unit_price) STORED,
-    order_date  DATE DEFAULT CURRENT_DATE
+-- Step 1: Create a table with three columns.
+CREATE TABLE weather (
+    city    varchar(80),
+    temp_lo int,
+    temp_hi int,
+    prcp    real,
+    date    date
 );
 
--- Insert using literals, expressions, and DEFAULT
-INSERT INTO orders (customer, quantity, unit_price)
-VALUES ('Alice', 3, 29.99);
+-- Step 2: Insert a row with an explicit column list, omitting prcp.
+INSERT INTO weather (city, temp_lo, temp_hi, date)
+VALUES ('San Francisco', 43, 57, '1994-11-29');
 
--- Verify
-SELECT * FROM orders;
-
--- Expected Output:
---  order_id | customer | quantity | unit_price | total  | order_date
--- ----------+----------+----------+------------+--------+------------
---         1 | Alice    |        3 |      29.99 |  89.97 | 2026-09-19
+-- Step 3: Verify; prcp is NULL because it was not supplied and has no default.
+SELECT * FROM weather;
 ```
 
-**Why this output occurs:** The `customer` column receives the literal `'Alice'`. The `quantity` column receives the literal `3`. The `unit_price` column receives the literal `29.99`. The `total` column is a generated column that automatically computes `3 * 29.99 = 89.97`. The `order_date` column uses its default `CURRENT_DATE`. The `order_id` auto-generates via `SERIAL`.
+**Expected output:**
 
-**Example 2: Using Functions in VALUES**
-
-```sql
--- Insert using function calls
-INSERT INTO employees (first_name, last_name, department, salary)
-VALUES (UPPER('grace'), UPPER('hopper'), 'Engineering', 110000.00);
-
--- Verify
-SELECT first_name, last_name FROM employees WHERE salary = 110000.00;
-
--- Expected Output:
---  first_name | last_name
--- ------------+-----------
---  GRACE      | HOPPER
+```text
+CREATE TABLE
+INSERT 0 1
+      city      | temp_lo | temp_hi | prcp |    date
+----------------+---------+---------+------+------------
+ San Francisco  |      43 |      57 |      | 1994-11-29
+(1 row)
 ```
 
-**Why this output occurs:** The `UPPER()` function converts the string literals to uppercase before insertion. The database stores `'GRACE'` and `'HOPPER'` in the respective columns.
+**Why this output appears**: The `prcp` column is omitted from the column list, so it receives its default value—`NULL`, because no default was declared.
 
-### Real-World Cases
+#### Real-World Cases
 
-**Case 1: Timestamp Generation**
-
-An application inserts a log entry with `NOW()` as the timestamp value: `INSERT INTO logs (message, created_at) VALUES ('User login', NOW())`. The database function generates the current timestamp.
-
-**Case 2: Computed Totals**
-
-An e-commerce system inserts an order line with `quantity * unit_price` as the total: `INSERT INTO order_lines (order_id, product_id, quantity, unit_price, total) VALUES (1, 42, 2, 19.99, 2 * 19.99)`.
-
-### References
-
-- PostgreSQL Documentation — Value Expressions - https://www.postgresql.org/docs/current/sql-expressions.html
-- MySQL 8.4 Reference Manual — INSERT ... VALUES - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert.html
-- Oracle Database SQL Language Reference — INSERT - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/INSERT.html
+- **Partial updates**: An application inserts a row with only the columns it knows about, letting the database fill audit timestamps and status defaults.
+- **Schema evolution**: A migration adds a new column with a default; existing `INSERT` statements that use explicit column lists continue to work unchanged.
 
 ---
 
-## 6. Inserting Default Values (DEFAULT Keyword or Omitting Columns)
+### 5. `INSERT ... VALUES`
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Default value insertion allows a column to receive its predefined default value — either by omitting the column from the `INSERT` statement's column list or by explicitly specifying the `DEFAULT` keyword in the `VALUES` clause.
+**Core Definition**
+`INSERT ... VALUES` is the form of `INSERT` that supplies explicit values for one or more rows using a `VALUES` clause.
 
-**Technical Definition:** When a column is not present in the `<insert column list>`, it is assigned its declared default value (from `CREATE TABLE ... DEFAULT`) or `NULL` if no default is defined. The `DEFAULT` keyword can be used in the `VALUES` clause for any column to explicitly request the default. The `DEFAULT VALUES` form inserts a row where every column receives its default.
+**Technical Definition**
+The `VALUES` clause specifies one or more rows of expressions, where each expression can be a literal, a parameter, a computed expression, or the `DEFAULT` keyword. The `VALUES` clause can also be used as a standalone query (e.g., `SELECT * FROM (VALUES (...), (...)) AS t(a,b)`), but in the context of `INSERT` it is the row source. PostgreSQL's synopsis places `DEFAULT VALUES` and `VALUES (...)` as alternatives; SQL Server's synopsis includes `VALUES ( { DEFAULT | NULL | expression } [ ,...n ] )`.
 
-**Beginner-Friendly Explanation:** If you don't have a value for a column, you can skip it or write `DEFAULT`, and the database will use the column's default value (like an automatic timestamp or a status of 'active').
+**Beginner-Friendly Explanation**
+`INSERT ... VALUES` is the standard way to insert explicit data. You write `VALUES` and then list the row(s) you want to insert.
 
-### Purposes
+#### Purposes
 
-- To insert rows without specifying values for every column.
-- To use database-defined defaults (e.g., timestamps, UUIDs, status flags).
-- To explicitly indicate that a column should receive its default value.
-- To insert a row where all columns use defaults with `DEFAULT VALUES`.
-- To separate schema-defined behaviour from application logic.
+- To insert explicit, known values into a table.
+- To use parameters or expressions to compute values at insert time.
+- To request default values for specific columns using the `DEFAULT` keyword.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
+**General syntax:**
 
 ```sql
--- Omit columns (they receive defaults)
-INSERT INTO table_name (col1, col2) VALUES (val1, val2);
+INSERT INTO table_name ( column1, column2, ... )
+VALUES ( expression1, expression2, ... );
+```
 
--- Explicit DEFAULT keyword
-INSERT INTO table_name (col1, col2, col3)
-VALUES (val1, DEFAULT, val2);
 
--- All columns default
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `VALUES` | The clause that introduces explicit row values. |
+| `expression` | A literal, parameter, computation, or `DEFAULT`. |
+
+**Syntax rules:**
+
+- `DEFAULT` can be used in place of any value to request the column's default.
+- The number of expressions must match the number of listed columns.
+
+**Constraints and limitations:**
+
+- `VALUES` cannot contain subqueries; use `INSERT ... SELECT` for query-derived rows.
+- SQL Server has a 1,000-row limit per `VALUES` clause.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – VALUES with DEFAULT for a specific column
+
+```sql
+-- Step 1: Create a table with a default.
+CREATE TABLE products (
+    product_no integer PRIMARY KEY,
+    name       text NOT NULL,
+    price      numeric(10,2) DEFAULT 9.99
+);
+
+-- Step 2: Insert a row, explicitly requesting the default for price.
+INSERT INTO products (product_no, name, price)
+VALUES (1, 'Cheese', DEFAULT);
+
+-- Step 3: Verify.
+SELECT * FROM products;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 1
+ product_no |  name  | price
+------------+--------+-------
+          1 | Cheese |  9.99
+(1 row)
+```
+
+**Why this output appears**: The `DEFAULT` keyword in the `VALUES` list instructs PostgreSQL to use the column's declared default (`9.99`) instead of supplying an explicit value.
+
+#### Real-World Cases
+
+- **Parameterised inserts**: An application uses a prepared statement with `VALUES ($1, $2, $3)` to insert user-supplied data safely.
+- **Conditional defaults**: A row is inserted with `DEFAULT` for a `created_at` column so the database sets the timestamp.
+
+---
+
+### 6. `INSERT ... SELECT`
+
+#### Definitions
+
+**Core Definition**
+`INSERT ... SELECT` inserts zero or more rows into a target table, where the rows are produced by a `SELECT` query rather than a `VALUES` list.
+
+**Technical Definition**
+`INSERT INTO target (columns) SELECT ... FROM source ...` executes the query and inserts each row it returns into the target table. The query can involve joins, aggregates, filters, and expressions. This is the standard set-based way to copy or transform data within the database, avoiding the round-trip of exporting and re-importing rows. In PostgreSQL, the query can be a `VALUES` list, a `SELECT`, or a `WITH` query. SQL Server supports `INSERT ... SELECT` as an alternative to `VALUES` in the same statement position.
+
+**Beginner-Friendly Explanation**
+`INSERT ... SELECT` copies rows from one place to another. Instead of writing out values by hand, you write a query that produces the rows, and those rows are inserted into the target table.
+
+#### Purposes
+
+- To copy rows from one table to another (e.g., archiving, staging, or migration).
+- To transform data during insertion (e.g., aggregating, joining, or computing new values).
+- To load a table from a query result without transferring data to the client.
+
+#### Syntax Rules and Structure
+
+**General syntax:**
+
+```sql
+INSERT INTO target_table ( column1, column2, ... )
+SELECT expression1, expression2, ...
+FROM source_table
+WHERE ...;
+```
+
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `target_table` | The table receiving the rows. |
+| `SELECT ...` | The query that produces the rows to insert. |
+
+**Syntax rules:**
+
+- The number and types of columns produced by the `SELECT` must match the target column list.
+- The `SELECT` can reference any tables, use joins, aggregates, and CTEs.
+
+**Constraints and limitations:**
+
+- The target table cannot appear in the `FROM` clause of the `SELECT` in some RDBMSs (or requires special handling).
+- Constraint violations in any row cause the entire statement to fail (unless `ON CONFLICT` or `IGNORE` is used).
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – INSERT ... SELECT from another table
+
+```sql
+-- Step 1: Create source and target tables.
+CREATE TABLE source_data (id int, value text);
+INSERT INTO source_data VALUES (1, 'a'), (2, 'b'), (3, 'c');
+
+CREATE TABLE target_data (id int, value text);
+
+-- Step 2: Copy all rows from source to target.
+INSERT INTO target_data (id, value)
+SELECT id, value FROM source_data;
+
+-- Step 3: Verify.
+SELECT * FROM target_data;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 3
+CREATE TABLE
+INSERT 0 3
+ id | value
+----+-------
+  1 | a
+  2 | b
+  3 | c
+(3 rows)
+```
+
+**Why this output appears**: The `SELECT` returns three rows, and `INSERT ... SELECT` inserts all three into `target_data` in a single statement.
+
+#### Real-World Cases
+
+- **Archiving**: Rows older than a threshold are moved from a live table to an archive table using `INSERT ... SELECT` followed by `DELETE`.
+- **Data warehouse loading**: A fact table is populated by aggregating and joining staging tables.
+
+---
+
+### 7. Inserting Default Values
+
+#### Definitions
+
+**Core Definition**
+Inserting default values means creating a row where every column receives its declared default value (or `NULL` if no default exists), without supplying any explicit values.
+
+**Technical Definition**
+PostgreSQL provides the `DEFAULT VALUES` clause: `INSERT INTO table_name DEFAULT VALUES` inserts a row with all columns set to their default values, as if `DEFAULT` were specified for each column. Individual columns can also receive defaults by omitting them from the column list or by using the `DEFAULT` keyword in the `VALUES` list. SQL Server supports `DEFAULT VALUES` as well. MySQL does not have a standalone `DEFAULT VALUES` clause in the same way, but `INSERT INTO t () VALUES ()` achieves a similar result.
+
+**Beginner-Friendly Explanation**
+Sometimes you want to insert a row without specifying any values—just let the database fill in every column with its default. `DEFAULT VALUES` does exactly that.
+
+#### Purposes
+
+- To create a row that is entirely composed of defaults (e.g., a placeholder row in a queue table).
+- To rely on the database to generate all values, including identity columns, timestamps, and status defaults.
+- To explicitly request defaults for specific columns using the `DEFAULT` keyword.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
+
+```sql
 INSERT INTO table_name DEFAULT VALUES;
 ```
 
-**Component Breakdown:**
 
-| Form | Behaviour |
-|------|-----------|
-| Omitted column | Receives declared default or NULL |
-| `DEFAULT` keyword | Explicitly requests the column's default value |
-| `DEFAULT VALUES` | Inserts one row with all columns defaulted |
-
-**Syntax Rules:**
-
-- Columns omitted from the column list receive their defaults.
-- The `DEFAULT` keyword can be used in any position in the `VALUES` clause.
-- `DEFAULT VALUES` cannot be combined with a column list or a `VALUES` clause.
-- If a column has no declared default and is omitted, it receives `NULL` (unless a `NOT NULL` constraint exists, in which case an error occurs).
-
-**Constraints and Limitations:**
-
-- `DEFAULT VALUES` inserts exactly one row; it cannot be used for multi-row insertion.
-- If a column has a `NOT NULL` constraint and no default, omitting it causes an error.
-- The `DEFAULT` keyword is not supported in all contexts in all dialects (e.g., older MySQL versions).
-- Default expressions are evaluated at insert time; they can reference functions like `NOW()` or `CURRENT_TIMESTAMP`.
-
-### Annotated Complete Code Examples
-
-**Example 1: Omitting Columns to Use Defaults**
+**SQL Server:**
 
 ```sql
--- Setup: Table with defaults
-CREATE TABLE tasks (
-    task_id     SERIAL PRIMARY KEY,
-    title       VARCHAR(100) NOT NULL,
-    status      VARCHAR(20) DEFAULT 'pending',
-    created_at  TIMESTAMP DEFAULT NOW(),
-    priority    INTEGER DEFAULT 3
+INSERT INTO table_name DEFAULT VALUES;
+```
+
+
+**MySQL (equivalent):**
+
+```sql
+INSERT INTO table_name () VALUES ();
+```
+
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `DEFAULT VALUES` | Inserts one row with all columns set to their defaults. |
+
+**Syntax rules:**
+
+- `DEFAULT VALUES` inserts exactly one row.
+- Every column must have a default or be nullable; otherwise, the statement fails.
+
+**Constraints and limitations:**
+
+- MySQL does not support `DEFAULT VALUES`; use `INSERT INTO t () VALUES ()` instead.
+- `DEFAULT VALUES` cannot be combined with a column list.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – DEFAULT VALUES with serial and default timestamp
+
+```sql
+-- Step 1: Create a table where every column has a default.
+CREATE TABLE event_log (
+    id         serial PRIMARY KEY,
+    message    text DEFAULT 'no message',
+    created_at timestamptz DEFAULT now()
 );
 
--- Insert omitting status, created_at, and priority
-INSERT INTO tasks (title) VALUES ('Review PR #42');
+-- Step 2: Insert a row using DEFAULT VALUES.
+INSERT INTO event_log DEFAULT VALUES;
 
--- Verify
-SELECT * FROM tasks;
-
--- Expected Output:
---  task_id |     title      | status  |        created_at         | priority
--- ---------+----------------+---------+---------------------------+----------
---        1 | Review PR #42  | pending | 2026-09-19 10:30:00.12345 |        3
+-- Step 3: Verify.
+SELECT * FROM event_log;
 ```
 
-**Why this output occurs:** Only the `title` column is specified. The `status` column receives its default `'pending'`. The `created_at` column receives the current timestamp from `NOW()`. The `priority` column receives its default `3`. The `task_id` auto-generates via `SERIAL`.
+**Expected output:**
 
-**Example 2: Explicit DEFAULT Keyword**
-
-```sql
--- Insert with explicit DEFAULT for a column
-INSERT INTO tasks (title, status, priority)
-VALUES ('Fix login bug', DEFAULT, 5);
-
--- Verify
-SELECT title, status, priority FROM tasks WHERE title = 'Fix login bug';
-
--- Expected Output:
---      title      | status  | priority
--- ----------------+---------+----------
---  Fix login bug  | pending |        5
+```text
+CREATE TABLE
+INSERT 0 1
+ id |  message   |          created_at
+----+------------+-------------------------------
+  1 | no message | 2026-11-13 10:00:00.123+00
+(1 row)
 ```
 
-**Why this output occurs:** The `status` column is explicitly set to `DEFAULT`, which evaluates to the column's default value `'pending'`. The `priority` column receives the explicit value `5`.
+**Why this output appears**: `DEFAULT VALUES` supplies no explicit values; the `serial` column generates `1`, `message` uses `'no message'`, and `created_at` uses the current timestamp.
 
-### Real-World Cases
+#### Real-World Cases
 
-**Case 1: Timestamp Auditing**
-
-Every table has `created_at TIMESTAMP DEFAULT NOW()`. Application code never specifies this column; the database automatically records the insertion time.
-
-**Case 2: Status Workflow**
-
-An order table has `status VARCHAR(20) DEFAULT 'draft'`. When an order is first created, the application omits the `status` column, and the database assigns `'draft'` automatically.
-
-### References
-
-- PostgreSQL Documentation — Default Values - https://www.postgresql.org/docs/current/ddl-default.html
-- MySQL 8.4 Reference Manual — Data Type Default Values - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/data-type-defaults.html
-- Microsoft SQL Server — Default Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/specify-default-values-for-columns
+- **Queue placeholder**: A job queue table inserts a row with all defaults to claim the next sequence number.
+- **Audit sentinel**: A row is inserted with only defaults to mark the start of a batch process.
 
 ---
 
-## 7. Inserting NULL Values Explicitly
+### 8. Handling Generated Identifiers
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Explicit `NULL` insertion places the `NULL` marker into a column, representing the absence of a value, rather than allowing the column to receive its default.
+**Core Definition**
+Handling generated identifiers is the process of retrieving the values that the database automatically generated for identity, serial, or auto-increment columns during an `INSERT`.
 
-**Technical Definition:** `NULL` is a special marker in SQL indicating that a value is unknown or missing. It is distinct from zero, an empty string, or any other value. Explicitly inserting `NULL` into a column requires the column to be nullable (not declared `NOT NULL`). If a column is omitted from the column list, it receives `NULL` only if no default is defined.
+**Technical Definition**
+Different RDBMSs provide different mechanisms for retrieving generated identifiers. **PostgreSQL** uses the `RETURNING` clause, which returns the inserted row's columns (including generated identifiers) as part of the `INSERT` statement. **SQL Server** uses the `OUTPUT` clause, which returns data from the inserted rows, including identity values, either to the client or into a table variable. **MySQL** provides `LAST_INSERT_ID()`, which returns the first auto-increment value generated by the most recent `INSERT`; for multi-row inserts, it returns the first generated ID, not all of them. MySQL 8.0.19+ also supports a limited `RETURNING` clause in some contexts.
 
-**Beginner-Friendly Explanation:** `NULL` means "no value" or "unknown." You can explicitly put `NULL` into a column to indicate that the data is missing or not applicable.
+**Beginner-Friendly Explanation**
+When you insert a row into a table with an automatic ID column, the database assigns an ID. Handling generated identifiers means getting that ID back so your application can use it—for example, to link a new order to its order items.
 
-### Purposes
+#### Purposes
 
-- To represent missing or unknown data explicitly.
-- To insert rows where certain fields are not applicable.
-- To distinguish "no value" from "default value."
-- To set columns to `NULL` in update-like scenarios (though `INSERT` only adds new rows).
+- To obtain the primary key of a newly inserted row for use in related inserts.
+- To avoid a separate `SELECT` query after `INSERT`, reducing round-trips.
+- To retrieve multiple generated identifiers when inserting multiple rows.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
-
-```sql
-INSERT INTO table_name (column1, column2, column3)
-VALUES (value1, NULL, value2);
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `NULL` | Keyword representing the absence of a value |
-| Column position | Must correspond to a nullable column |
-
-**Syntax Rules:**
-
-- `NULL` is written as an unquoted keyword, not as a string `'NULL'`.
-- The target column must allow `NULL` (i.e., not have a `NOT NULL` constraint).
-- `NULL` can be used in any position in the `VALUES` clause.
-- Omitting a column with no default is equivalent to inserting `NULL` (if the column is nullable).
-
-**Constraints and Limitations:**
-
-- Inserting `NULL` into a `NOT NULL` column causes a constraint violation error.
-- `NULL` is not equal to itself; `NULL = NULL` yields `UNKNOWN` in SQL's three-valued logic.
-- Aggregate functions generally ignore `NULL` values.
-- Primary key columns cannot contain `NULL`.
-
-### Annotated Complete Code Examples
-
-**Example 1: Explicit NULL Insertion**
+**PostgreSQL:**
 
 ```sql
--- Setup: Table with nullable column
-CREATE TABLE contacts (
-    contact_id  SERIAL PRIMARY KEY,
-    name        VARCHAR(50) NOT NULL,
-    email       VARCHAR(100),
-    phone       VARCHAR(20)
-);
-
--- Insert with explicit NULL for phone
-INSERT INTO contacts (name, email, phone)
-VALUES ('Alice', 'alice@example.com', NULL);
-
--- Verify
-SELECT * FROM contacts;
-
--- Expected Output:
---  contact_id | name  |       email        | phone
--- ------------+-------+--------------------+-------
---           1 | Alice | alice@example.com  | (null)
+INSERT INTO table_name (columns) VALUES (values) RETURNING id;
 ```
 
-**Why this output occurs:** The `phone` column is explicitly set to `NULL`, indicating that no phone number is available. The `email` column receives the string value `'alice@example.com'`. The `name` column receives `'Alice'`.
 
-**Example 2: NULL in a NOT NULL Column (Error)**
-
-```sql
--- Attempt to insert NULL into a NOT NULL column
-INSERT INTO contacts (name, email, phone)
-VALUES (NULL, 'bob@example.com', '555-1234');
-
--- Expected Error (PostgreSQL):
--- ERROR: null value in column "name" violates not-null constraint
--- DETAIL: Failing row contains (2, null, bob@example.com, 555-1234).
-```
-
-**Why this error occurs:** The `name` column is defined as `NOT NULL`, but `NULL` is explicitly provided. The database enforces the constraint and rejects the insertion, preventing the row from being added.
-
-### Real-World Cases
-
-**Case 1: Optional Form Fields**
-
-A user registration form has an optional "referral code" field. If the user does not provide a code, the application inserts `NULL`: `INSERT INTO users (username, email, referral_code) VALUES ('alice', 'alice@example.com', NULL)`.
-
-**Case 2: Missing Data in ETL**
-
-An ETL pipeline loading data from a legacy system encounters missing values. It explicitly inserts `NULL` into columns where the source data is absent, preserving the distinction between "no data" and "zero."
-
-### References
-
-- PostgreSQL Documentation — NULL Values - https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-NOT-NULL
-- Oracle Database SQL Language Reference — NULLs - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Nulls.html
-- Microsoft SQL Server — NULL and UNKNOWN - https://learn.microsoft.com/en-us/sql/t-sql/language-elements/null-and-unknown-transact-sql
-
----
-
-## 8. Copying Data from Another Table (INSERT INTO ... SELECT)
-
-### Definitions
-
-**Core Definition:** `INSERT INTO ... SELECT` copies rows from one or more source tables into a target table, using a `SELECT` query to determine the data to insert.
-
-**Technical Definition:** The `<insert source>` in an `INSERT` statement can be a `<query expression>` (i.e., a `SELECT` statement). The result set of the `SELECT` determines the rows and values inserted. The number and types of columns in the `SELECT` result must be compatible with the target table's column list. This form supports `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`, and `LIMIT` in the source query.
-
-**Beginner-Friendly Explanation:** Instead of typing out values manually, you can copy data from one table into another by writing a `SELECT` query that retrieves the rows you want. The database inserts all the rows returned by that query.
-
-### Purposes
-
-- To copy data between tables with compatible schemas.
-- To populate a new table from an existing one.
-- To insert aggregated or transformed data into a summary table.
-- To load data from one database into another (via linked servers or `dblink`).
-- To create archive or backup copies of data.
-- To insert data that requires complex filtering or joining.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
-INSERT INTO target_table [ ( column1, column2, ... ) ]
-SELECT expression1, expression2, ...
-FROM source_table
-[ WHERE condition ]
-[ GROUP BY ... ]
-[ HAVING ... ]
-[ ORDER BY ... ]
-[ LIMIT ... ];
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `INSERT INTO target_table` | Target table for insertion |
-| `( column1, column2, ... )` | Optional target column list |
-| `SELECT` | Source query determining what to insert |
-| `FROM source_table` | Source table(s) to read from |
-| `WHERE` | Filters source rows |
-
-**Syntax Rules:**
-
-- The number of columns in the `SELECT` result must match the number of columns in the target column list (or the target table's columns if no list is given).
-- The data types of corresponding columns must be compatible.
-- The target table cannot be the same table being selected from in some dialects (PostgreSQL allows it, but it can cause infinite loops if not carefully written).
-- `ORDER BY` in the `SELECT` does not guarantee insertion order; it only affects the order of rows returned by the `SELECT` (which may be used with `LIMIT`).
-
-**Constraints and Limitations:**
-
-- `INSERT INTO ... SELECT` is atomic: either all rows are inserted or none are.
-- Large `SELECT` queries can consume significant resources and lock the target table for the duration.
-- Some RDBMSs do not allow `INSERT INTO ... SELECT` on a table that is also referenced in the `SELECT` in certain join scenarios.
-- Oracle's `INSERT ... SELECT` with `ORDER BY` requires the `ORDER BY` to be in a subquery.
-
-### Annotated Complete Code Examples
-
-**Example 1: Copying Data Between Tables**
-
-```sql
--- Setup: Create source and target tables
-CREATE TABLE employees (
-    id          SERIAL PRIMARY KEY,
-    first_name  VARCHAR(50),
-    last_name   VARCHAR(50),
-    department  VARCHAR(50),
-    salary      NUMERIC(10, 2)
-);
-
-INSERT INTO employees (first_name, last_name, department, salary) VALUES
-    ('Alice', 'Johnson', 'Engineering', 95000.00),
-    ('Bob',   'Smith',   'Marketing',   72000.00),
-    ('Carol', 'Williams','Engineering', 105000.00),
-    ('David', 'Brown',   'Sales',       68000.00);
-
-CREATE TABLE engineering_archive (
-    id          INTEGER,
-    full_name   VARCHAR(100),
-    salary      NUMERIC(10, 2)
-);
-
--- Copy Engineering employees into archive
-INSERT INTO engineering_archive (id, full_name, salary)
-SELECT id,
-       first_name || ' ' || last_name,
-       salary
-FROM employees
-WHERE department = 'Engineering';
-
--- Verify
-SELECT * FROM engineering_archive;
-
--- Expected Output:
---  id |   full_name   |  salary
--- ----+---------------+----------
---   1 | Alice Johnson | 95000.00
---   3 | Carol Williams|105000.00
-```
-
-**Why this output occurs:** The `SELECT` query retrieves employees in the Engineering department and concatenates their first and last names into a `full_name` column. The target table `engineering_archive` has columns `id`, `full_name`, and `salary`. Two rows match the `WHERE` condition and are inserted.
-
-**Example 2: INSERT INTO ... SELECT with Aggregation**
-
-```sql
--- Setup: Create a summary table
-CREATE TABLE dept_summary (
-    department   VARCHAR(50),
-    headcount    INTEGER,
-    avg_salary   NUMERIC(10, 2)
-);
-
--- Insert aggregated data
-INSERT INTO dept_summary (department, headcount, avg_salary)
-SELECT department,
-       COUNT(*),
-       AVG(salary)
-FROM employees
-GROUP BY department;
-
--- Verify
-SELECT * FROM dept_summary;
-
--- Expected Output:
---  department  | headcount | avg_salary
--- -------------+-----------+------------
---  Engineering |         2 |  100000.00
---  Marketing   |         1 |   72000.00
---  Sales       |         1 |   68000.00
-```
-
-**Why this output occurs:** The `SELECT` query groups employees by department, counts the number of employees in each group, and computes the average salary. Each group becomes one row in the `dept_summary` table.
-
-### Real-World Cases
-
-**Case 1: Data Warehousing**
-
-A nightly ETL job copies data from a transactional `orders` table into a data warehouse's `fact_orders` table using `INSERT INTO ... SELECT`, applying transformations and filtering to load only the previous day's orders.
-
-**Case 2: Archiving Old Records**
-
-An archive process moves records older than one year from an `active_logs` table to an `archive_logs` table: `INSERT INTO archive_logs SELECT * FROM active_logs WHERE created_at < NOW() - INTERVAL '1 year'`. After insertion, the old rows are deleted from the active table.
-
-### References
-
-- PostgreSQL Documentation — INSERT INTO ... SELECT - https://www.postgresql.org/docs/current/sql-insert.html
-- MySQL 8.4 Reference Manual — INSERT ... SELECT Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert-select.html
-- Microsoft SQL Server — INSERT ... SELECT - https://learn.microsoft.com/en-us/sql/t-sql/statements/insert-transact-sql
-- Oracle Database SQL Language Reference — INSERT ... SELECT - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/INSERT.html
-
----
-
-## 9. Handling Generated Identifiers (Auto-increment, Identity, SERIAL, UUID)
-
-### Definitions
-
-**Core Definition:** Generated identifiers are column values automatically produced by the database when a new row is inserted, commonly used for primary keys to ensure uniqueness without application intervention.
-
-**Technical Definition:** Generated identifiers are implemented through mechanisms such as `SERIAL` (PostgreSQL), `IDENTITY` (SQL Server, Oracle), `AUTO_INCREMENT` (MySQL), and UUID functions (`gen_random_uuid()`). These mechanisms use sequences or algorithms to generate unique values, which are assigned to the column during insertion if no explicit value is provided.
-
-**Beginner-Friendly Explanation:** When you add a new row, you often need a unique ID number for it. Instead of making up a number yourself, you can let the database generate one automatically — like a ticket dispenser that always gives the next number.
-
-### Purposes
-
-- To automatically generate unique primary key values for new rows.
-- To eliminate the need for application-side ID management.
-- To ensure uniqueness across concurrent insertions.
-- To provide a consistent, database-enforced identity for every row.
-- To support referential integrity by providing stable identifiers for foreign keys.
-
-### Syntax Rules and Structure
-
-**PostgreSQL SERIAL:**
-
-```sql
-CREATE TABLE users (
-    id   SERIAL PRIMARY KEY,
-    name TEXT
-);
--- Equivalent to:
-CREATE SEQUENCE users_id_seq;
-CREATE TABLE users (
-    id   INTEGER PRIMARY KEY DEFAULT nextval('users_id_seq'),
-    name TEXT
-);
-ALTER SEQUENCE users_id_seq OWNED BY users.id;
-```
-
-**PostgreSQL UUID:**
-
-```sql
-CREATE TABLE users (
-    id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name TEXT
-);
-```
-
-**SQL Server IDENTITY:**
-
-```sql
-CREATE TABLE users (
-    id   INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(100)
-);
-```
-
-**MySQL AUTO_INCREMENT:**
-
-```sql
-CREATE TABLE users (
-    id   INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100)
-);
-```
-
-**Component Breakdown:**
-
-| Mechanism | Dialect | Type | Notes |
-|-----------|---------|------|-------|
-| `SERIAL` | PostgreSQL | Integer | Shorthand for sequence + default |
-| `IDENTITY` | SQL Server, Oracle | Integer | `IDENTITY(seed, increment)` |
-| `AUTO_INCREMENT` | MySQL | Integer | Column attribute |
-| `gen_random_uuid()` | PostgreSQL | UUID | Requires `pgcrypto` or built-in in PG 13+ |
-| `NEWID()` | SQL Server | UUID | Function |
-| `UUID()` | MySQL | UUID | Function |
-
-**Syntax Rules:**
-
-- `SERIAL` columns are integer types that auto-increment; they are not a true data type but a shorthand.
-- `IDENTITY` columns are automatically `NOT NULL`.
-- `AUTO_INCREMENT` columns must be indexed (usually primary key).
-- UUID columns require a generation function; they are not auto-incremented.
-- Generated identifier columns can be overridden with an explicit value (except `GENERATED ALWAYS AS IDENTITY` in PostgreSQL, which requires `OVERRIDING SYSTEM VALUE`).
-
-**Constraints and Limitations:**
-
-- Sequential IDs can be predictable, which may be a security concern for publicly exposed identifiers.
-- Sequence values may have gaps due to rollbacks, failed transactions, or caching.
-- `SERIAL` is not a true type; it is a macro that creates an integer column with a sequence default.
-- UUIDs are larger (16 bytes) and may have performance implications for indexing.
-- In PostgreSQL, `SERIAL` is discouraged in favour of `GENERATED ... AS IDENTITY` for SQL standard compliance.
-
-### Annotated Complete Code Examples
-
-**Example 1: PostgreSQL SERIAL**
-
-```sql
--- Create table with SERIAL primary key
-CREATE TABLE users (
-    id   SERIAL PRIMARY KEY,
-    name TEXT NOT NULL
-);
-
--- Insert without specifying id
-INSERT INTO users (name) VALUES ('Alice');
-INSERT INTO users (name) VALUES ('Bob');
-
--- Verify
-SELECT * FROM users;
-
--- Expected Output:
---  id | name
--- ----+-------
---   1 | Alice
---   2 | Bob
-```
-
-**Why this output occurs:** The `id` column is defined as `SERIAL`, which creates an implicit sequence. When `id` is omitted from the `INSERT`, the database calls `nextval()` on the sequence, assigning `1` to Alice and `2` to Bob.
-
-**Example 2: SQL Server IDENTITY**
-
-```sql
--- Create table with IDENTITY
-CREATE TABLE users (
-    id   INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(100) NOT NULL
-);
-
--- Insert without specifying id
-INSERT INTO users (name) VALUES ('Alice');
-INSERT INTO users (name) VALUES ('Bob');
-
--- Verify
-SELECT * FROM users;
-
--- Expected Output:
---  id | name
--- ----+-------
---   1 | Alice
---   2 | Bob
-```
-
-**Why this output occurs:** The `IDENTITY(1,1)` property tells SQL Server to start at 1 and increment by 1 for each new row. Omitting the `id` column triggers automatic generation.
-
-### Real-World Cases
-
-**Case 1: User Account Creation**
-
-Every new user account receives an auto-generated ID from a `SERIAL` or `IDENTITY` column, which is then used as a foreign key reference in other tables (e.g., orders, posts).
-
-**Case 2: Distributed Systems with UUIDs**
-
-A microservices architecture uses UUID primary keys to avoid collisions when multiple services insert records independently. Each service generates a UUID via `gen_random_uuid()` or `UUID()`.
-
-### References
-
-- PostgreSQL Documentation — Serial Types - https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-SERIAL
-- PostgreSQL Documentation — UUID Type - https://www.postgresql.org/docs/current/datatype-uuid.html
-- Microsoft SQL Server — IDENTITY Property - https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-transact-sql-identity-property
-- MySQL 8.4 Reference Manual — AUTO_INCREMENT - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/example-auto-increment.html
-
----
-
-## 10. Retrieving Generated Keys (RETURNING, OUTPUT, SCOPE_IDENTITY(), LAST_INSERT_ID())
-
-### Definitions
-
-**Core Definition:** Retrieving generated keys refers to obtaining the values automatically generated by the database (such as auto-increment IDs) immediately after an `INSERT` operation, without issuing a separate query.
-
-**Technical Definition:** Different RDBMSs provide different mechanisms for returning generated values: PostgreSQL's `RETURNING` clause, SQL Server's `OUTPUT` clause and `SCOPE_IDENTITY()` function, MySQL's `LAST_INSERT_ID()` function, and Oracle's `RETURNING INTO` clause. These mechanisms return the values from the rows actually inserted, including values computed by defaults, triggers, or sequences.
-
-**Beginner-Friendly Explanation:** When you insert a new row and the database generates an ID for it, you often need to know what that ID is (so you can use it in other tables). Instead of running a second query to find it, these features give you the generated value right away.
-
-### Purposes
-
-- To obtain the primary key value of a newly inserted row.
-- To use the generated ID as a foreign key in related insertions.
-- To avoid an additional `SELECT` query after `INSERT`.
-- To retrieve values computed by triggers or default expressions.
-- To support application logic that depends on the inserted row's identity.
-
-### Syntax Rules and Structure
-
-**PostgreSQL RETURNING:**
+**SQL Server:**
 
 ```sql
 INSERT INTO table_name (columns)
-VALUES (values)
-RETURNING id;
-```
-
-**SQL Server OUTPUT:**
-
-```sql
-INSERT INTO table_name (columns)
-OUTPUT inserted.id
+OUTPUT INSERTED.id
 VALUES (values);
 ```
 
-**SQL Server SCOPE_IDENTITY():**
 
-```sql
-INSERT INTO table_name (columns) VALUES (values);
-SELECT SCOPE_IDENTITY();
-```
-
-**MySQL LAST_INSERT_ID():**
+**MySQL:**
 
 ```sql
 INSERT INTO table_name (columns) VALUES (values);
 SELECT LAST_INSERT_ID();
 ```
 
-**Oracle RETURNING INTO:**
+
+**Component breakdown:**
+
+| RDBMS | Mechanism | Returns |
+|-------|-----------|---------|
+| PostgreSQL | `RETURNING` | The inserted row's columns |
+| SQL Server | `OUTPUT INSERTED.*` | The inserted row's columns |
+| MySQL | `LAST_INSERT_ID()` | The first generated ID |
+
+**Syntax rules:**
+
+- PostgreSQL's `RETURNING` can return any expression using the inserted row's columns.
+- SQL Server's `OUTPUT` can output to the client or into a table variable for further processing.
+- MySQL's `LAST_INSERT_ID()` is session-scoped and returns the first generated ID from the most recent insert.
+
+**Constraints and limitations:**
+
+- MySQL's `LAST_INSERT_ID()` returns only the first ID of a multi-row insert, not all of them.
+- MySQL's `RETURNING` support is version- and context-dependent; it is not available in all MySQL versions or for all statement forms.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – RETURNING generated ID
 
 ```sql
-INSERT INTO table_name (columns)
-VALUES (values)
-RETURNING id INTO :variable;
+-- Step 1: Create a table with a serial primary key.
+CREATE TABLE users (id serial PRIMARY KEY, name text);
+
+-- Step 2: Insert a row and return the generated id.
+INSERT INTO users (name) VALUES ('Alice') RETURNING id;
 ```
 
-**Component Breakdown:**
+**Expected output:**
 
-| Mechanism | Dialect | Returns | Scope |
-|-----------|---------|---------|-------|
-| `RETURNING` | PostgreSQL, Oracle | Any column/expression | Per-row |
-| `OUTPUT` | SQL Server | Any column/expression | Per-row |
-| `SCOPE_IDENTITY()` | SQL Server | Last identity in current scope | Session/scope |
-| `LAST_INSERT_ID()` | MySQL | Last auto-increment ID | Per-connection |
-| `RETURNING INTO` | Oracle | Into PL/SQL variables | PL/SQL context |
+```text
+CREATE TABLE
+ id
+----
+  1
+(1 row)
+```
 
-**Syntax Rules:**
+**Why this output appears**: The `RETURNING id` clause returns the value generated by the `serial` column in the same statement.
 
-- `RETURNING` and `OUTPUT` can return multiple columns and expressions.
-- `RETURNING` can use `*` to return all columns of the target table.
-- `SCOPE_IDENTITY()` returns the last identity value generated in the current scope (session and batch).
-- `LAST_INSERT_ID()` returns the first auto-generated value from the most recent `INSERT` statement on the current connection.
-- Oracle's `RETURNING INTO` requires a PL/SQL block or bind variables.
-
-**Constraints and Limitations:**
-
-- `LAST_INSERT_ID()` is connection-specific; it does not reflect inserts by other connections.
-- `SCOPE_IDENTITY()` is affected by triggers: if a trigger inserts into another table, `SCOPE_IDENTITY()` returns the identity from the trigger's insert, not the original one.
-- `OUTPUT` can be used with `INSERT`, `UPDATE`, `DELETE`, and `MERGE`.
-- `RETURNING` requires `SELECT` privilege on the columns referenced.
-- In SQL Server, `OUTPUT` cannot be used in a statement that also has a `RETURNING` clause (not applicable — SQL Server uses `OUTPUT` exclusively).
-
-### Annotated Complete Code Examples
-
-**Example 1: PostgreSQL RETURNING**
+##### Example 2: SQL Server – OUTPUT inserted identity
 
 ```sql
--- Insert and return the generated ID
+-- Step 1: Create a table with an identity column.
+CREATE TABLE users (id int IDENTITY(1,1) PRIMARY KEY, name nvarchar(100));
+
+-- Step 2: Insert a row and output the generated id.
 INSERT INTO users (name)
-VALUES ('Alice')
-RETURNING id;
-
--- Expected Output:
---  id
--- ----
---   1
+OUTPUT INSERTED.id
+VALUES (N'Alice');
 ```
 
-**Why this output occurs:** The `RETURNING id` clause tells PostgreSQL to return the value of the `id` column from the row that was just inserted. The database generates the ID via the `SERIAL` sequence and returns it directly.
+**Expected output:**
 
-**Example 2: SQL Server OUTPUT**
-
-```sql
--- Insert and output the generated ID and name
-INSERT INTO users (name)
-OUTPUT inserted.id, inserted.name
-VALUES ('Bob');
-
--- Expected Output:
---  id | name
--- ----+-------
---   2 | Bob
+```text
+Commands completed successfully.
+id
+-----------
+1
 ```
 
-**Why this output occurs:** The `OUTPUT inserted.id, inserted.name` clause returns the inserted row's `id` and `name` columns. The `inserted` pseudo-table references the new row.
+**Why this output appears**: The `OUTPUT INSERTED.id` clause returns the identity value generated for the inserted row.
 
-**Example 3: MySQL LAST_INSERT_ID()**
+#### Real-World Cases
 
-```sql
--- Insert and retrieve the auto-increment ID
-INSERT INTO users (name) VALUES ('Carol');
-SELECT LAST_INSERT_ID();
-
--- Expected Output:
---  LAST_INSERT_ID()
--- ------------------
---                 3
-```
-
-**Why this output occurs:** `LAST_INSERT_ID()` returns the first auto-generated value from the most recent `INSERT` on the current connection. Carol receives ID 3 (assuming Alice and Bob were 1 and 2).
-
-### Real-World Cases
-
-**Case 1: Order and Order Lines**
-
-An e-commerce application inserts an order and needs the generated `order_id` to insert order lines: `INSERT INTO orders (...) RETURNING order_id` (PostgreSQL) or `SCOPE_IDENTITY()` (SQL Server). The returned ID is used as a foreign key in the `order_lines` table.
-
-**Case 2: Audit Trail**
-
-A trigger inserts an audit record and uses `OUTPUT` to capture the audit ID for logging. The application receives the audit ID as part of the insert operation.
-
-### References
-
-- PostgreSQL Documentation — Returning Data from Modified Rows - https://www.postgresql.org/docs/current/dml-returning.html
-- Microsoft SQL Server — OUTPUT Clause - https://learn.microsoft.com/en-us/sql/t-sql/queries/output-clause-transact-sql
-- MySQL 8.4 Reference Manual — LAST_INSERT_ID() - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/information-functions.html#function_last-insert-id
-- Oracle Database SQL Language Reference — RETURNING INTO - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/INSERT.html
+- **Parent-child inserts**: An order is inserted, its generated `order_id` is retrieved, and that ID is used to insert the order's line items.
+- **API response**: A REST API returns the newly created resource's ID by using `RETURNING` or `OUTPUT`.
 
 ---
 
-## 11. Handling Constraint Violations (Foreign Key, Unique, Check)
+### 9. Handling Constraint Violations
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Constraint violations occur when an `INSERT` statement attempts to add data that violates a table's integrity constraints, such as UNIQUE, FOREIGN KEY, CHECK, or NOT NULL constraints.
+**Core Definition**
+Handling constraint violations is the practice of anticipating and managing the errors or alternative behaviours that occur when an `INSERT` would violate a table constraint such as `UNIQUE`, `PRIMARY KEY`, `FOREIGN KEY`, `CHECK`, or `NOT NULL`.
 
-**Technical Definition:** A constraint is a rule defined on a table that restricts the data that can be stored. During `INSERT`, the database evaluates each constraint. If any constraint is violated, the entire `INSERT` statement fails (unless the violation is handled by an `ON CONFLICT` or `IGNORE` clause), and no rows are inserted.
+**Technical Definition**
+By default, a constraint violation aborts the entire `INSERT` statement and raises an error. RDBMSs provide several mechanisms to handle violations gracefully: **PostgreSQL** offers `ON CONFLICT DO NOTHING` (skip conflicting rows) and `ON CONFLICT DO UPDATE` (upsert). **MySQL** offers `INSERT IGNORE` (convert errors to warnings and skip conflicting rows) and `ON DUPLICATE KEY UPDATE` (upsert). **SQL Server** offers `MERGE` for upserts and `TRY...CATCH` for procedural error handling; it does not have a direct `INSERT IGNORE` equivalent. Application-level pre-checks or `MERGE` are the typical approaches.
 
-**Beginner-Friendly Explanation:** Constraints are rules that keep your data clean and consistent. If you try to insert data that breaks a rule — like using a duplicate ID or referencing a non-existent foreign key — the database rejects the insert and tells you what went wrong.
+**Beginner-Friendly Explanation**
+When you try to insert data that breaks a rule—like a duplicate ID or a missing required field—the database normally stops and shows an error. Handling constraint violations means deciding what should happen instead: skip the bad row, update the existing row, or handle the error in your code.
 
-### Purposes
+#### Purposes
 
-- To maintain data integrity and consistency.
-- To prevent duplicate values in unique columns.
-- To ensure foreign key references point to existing rows.
-- To enforce business rules through CHECK constraints.
-- To prevent NULL values in required columns.
+- To insert data idempotently, so repeated runs do not fail on existing rows.
+- To implement upsert behaviour: insert new rows and update existing ones.
+- To skip individual bad rows during a bulk load without aborting the entire operation.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Common Constraints:**
+**PostgreSQL:**
 
 ```sql
-CREATE TABLE orders (
-    order_id     SERIAL PRIMARY KEY,                          -- Unique, not null
-    customer_id  INTEGER REFERENCES customers(customer_id),   -- Foreign key
-    email        VARCHAR(100) UNIQUE,                         -- Unique
-    quantity     INTEGER CHECK (quantity > 0),                -- Check
-    status       VARCHAR(20) NOT NULL                         -- Not null
-);
+INSERT INTO table_name (columns) VALUES (values)
+ON CONFLICT (conflict_target) DO NOTHING;
+
+INSERT INTO table_name (columns) VALUES (values)
+ON CONFLICT (conflict_target) DO UPDATE SET column = EXCLUDED.column;
 ```
 
-**Component Breakdown:**
 
-| Constraint | Violation | Error Message (PostgreSQL) |
-|-----------|-----------|---------------------------|
-| UNIQUE | Duplicate value | `duplicate key value violates unique constraint` |
-| FOREIGN KEY | Referenced row missing | `violates foreign key constraint` |
-| CHECK | Condition false | `violates check constraint` |
-| NOT NULL | NULL in non-nullable column | `null value in column violates not-null constraint` |
-| PRIMARY KEY | Duplicate or NULL | `duplicate key value violates unique constraint` |
-
-**Syntax Rules:**
-
-- Constraints are checked at the end of the statement (for `INSERT`), or at the end of the transaction for deferred constraints.
-- The `ON CONFLICT` clause can handle UNIQUE and EXCLUSION constraint violations.
-- The `IGNORE` keyword (MySQL) converts errors to warnings and skips problematic rows.
-- Foreign key violations occur when the inserted value does not exist in the referenced table.
-
-**Constraints and Limitations:**
-
-- Constraint violations abort the entire `INSERT` statement (except with `ON CONFLICT DO NOTHING`).
-- Deferred constraints are checked at transaction commit, allowing temporary violations within a transaction.
-- `ON CONFLICT` cannot handle CHECK or NOT NULL violations; it only handles unique/exclusion conflicts.
-- MySQL's `IGNORE` can silently skip rows, which may lead to data loss if not monitored.
-
-### Annotated Complete Code Examples
-
-**Example 1: UNIQUE Constraint Violation**
+**MySQL:**
 
 ```sql
--- Setup
-CREATE TABLE users (
-    id    SERIAL PRIMARY KEY,
-    email VARCHAR(100) UNIQUE NOT NULL
-);
+INSERT IGNORE INTO table_name (columns) VALUES (values);
 
-INSERT INTO users (email) VALUES ('alice@example.com');
-
--- Attempt duplicate email
-INSERT INTO users (email) VALUES ('alice@example.com');
-
--- Expected Error (PostgreSQL):
--- ERROR: duplicate key value violates unique constraint "users_email_key"
--- DETAIL: Key (email)=(alice@example.com) already exists.
-```
-
-**Why this error occurs:** The `email` column has a `UNIQUE` constraint. The second `INSERT` attempts to insert a duplicate email, violating the constraint. The database rejects the entire statement and no row is added.
-
-**Example 2: FOREIGN KEY Constraint Violation**
-
-```sql
--- Setup
-CREATE TABLE customers (
-    customer_id SERIAL PRIMARY KEY,
-    name        VARCHAR(50)
-);
-
-CREATE TABLE orders (
-    order_id    SERIAL PRIMARY KEY,
-    customer_id INTEGER REFERENCES customers(customer_id),
-    total       NUMERIC(10, 2)
-);
-
--- Attempt to insert an order with a non-existent customer
-INSERT INTO orders (customer_id, total) VALUES (999, 100.00);
-
--- Expected Error (PostgreSQL):
--- ERROR: insert or update on table "orders" violates foreign key constraint "orders_customer_id_fkey"
--- DETAIL: Key (customer_id)=(999) is not present in table "customers".
-```
-
-**Why this error occurs:** The `customer_id` column has a foreign key reference to `customers(customer_id)`. The value `999` does not exist in the `customers` table, violating the foreign key constraint. The `INSERT` is rejected.
-
-### Real-World Cases
-
-**Case 1: User Registration with Duplicate Email**
-
-An application attempts to register a new user with an email that already exists. The UNIQUE constraint on `email` prevents the duplicate, and the application catches the error and displays a message to the user.
-
-**Case 2: Order with Invalid Customer**
-
-A bug in an e-commerce application attempts to create an order for a customer that was deleted. The foreign key constraint rejects the insert, preventing orphaned orders.
-
-### References
-
-- PostgreSQL Documentation — Constraints - https://www.postgresql.org/docs/current/ddl-constraints.html
-- MySQL 8.4 Reference Manual — Constraints - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/create-table-foreign-keys.html
-- Microsoft SQL Server — Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/unique-constraints-and-check-constraints
-
----
-
-## 12. Upsert Operations (ON CONFLICT, ON DUPLICATE KEY UPDATE, MERGE)
-
-### Definitions
-
-**Core Definition:** An upsert (a portmanteau of "update" and "insert") is a database operation that inserts a new row if it does not exist, or updates an existing row if a conflict (typically a unique constraint violation) is detected.
-
-**Technical Definition:** PostgreSQL implements upsert via `INSERT ... ON CONFLICT DO NOTHING` or `ON CONFLICT DO UPDATE`. MySQL uses `INSERT ... ON DUPLICATE KEY UPDATE`. SQL Server and Oracle (and standard SQL) provide the `MERGE` statement, which performs insert, update, or delete operations based on a join between a source and target table. These operations guarantee atomic outcomes: either the insert or the update occurs, never both, and never a partial state.
-
-**Beginner-Friendly Explanation:** An upsert is like saying "add this row if it's new, or update it if it already exists." It saves you from having to check first with a `SELECT` and then decide whether to `INSERT` or `UPDATE`.
-
-### Purposes
-
-- To synchronise data between systems without duplicate rows.
-- To implement "insert or update" logic in a single statement.
-- To handle concurrent inserts gracefully without race conditions.
-- To merge data from staging tables into production tables.
-- To implement idempotent data loading in ETL pipelines.
-
-### Syntax Rules and Structure
-
-**PostgreSQL ON CONFLICT:**
-
-```sql
-INSERT INTO table_name (columns)
-VALUES (values)
-ON CONFLICT (conflict_column)
-DO UPDATE SET column = EXCLUDED.column;
-```
-
-**MySQL ON DUPLICATE KEY UPDATE:**
-
-```sql
-INSERT INTO table_name (columns)
-VALUES (values)
+INSERT INTO table_name (columns) VALUES (values)
 ON DUPLICATE KEY UPDATE column = VALUES(column);
 ```
 
-**SQL Server MERGE:**
+
+**SQL Server:**
 
 ```sql
-MERGE INTO target_table AS target
-USING source_table AS source
-ON target.key = source.key
-WHEN MATCHED THEN
-    UPDATE SET target.column = source.column
-WHEN NOT MATCHED THEN
-    INSERT (columns) VALUES (source.values);
+BEGIN TRY
+    INSERT INTO table_name (columns) VALUES (values);
+END TRY
+BEGIN CATCH
+    -- handle error
+END CATCH;
 ```
 
-**Component Breakdown:**
 
-| Clause | Dialect | Behaviour |
-|--------|---------|-----------|
-| `ON CONFLICT DO NOTHING` | PostgreSQL | Skips conflicting rows |
-| `ON CONFLICT DO UPDATE` | PostgreSQL | Updates conflicting rows |
-| `ON DUPLICATE KEY UPDATE` | MySQL | Updates conflicting rows |
-| `MERGE` | SQL Server, Oracle | Full upsert + delete |
+**Component breakdown:**
 
-**Syntax Rules:**
+| Mechanism | RDBMS | Behaviour |
+|-----------|-------|-----------|
+| `ON CONFLICT DO NOTHING` | PostgreSQL | Skips rows that conflict on the specified target |
+| `ON CONFLICT DO UPDATE` | PostgreSQL | Updates the existing row with new values |
+| `INSERT IGNORE` | MySQL | Converts errors to warnings and skips conflicting rows |
+| `ON DUPLICATE KEY UPDATE` | MySQL | Updates the existing row |
+| `MERGE` | SQL Server | Inserts, updates, or deletes based on a match condition |
+| `TRY...CATCH` | SQL Server | Catches and handles errors procedurally |
 
-- `ON CONFLICT` requires a conflict target (column or constraint name) or can use `DO NOTHING` without a target.
-- The `EXCLUDED` pseudo-table in PostgreSQL references the row proposed for insertion.
-- In MySQL, `VALUES(column)` references the value that would have been inserted.
-- `MERGE` requires a `USING` clause and an `ON` join condition.
-- `MERGE` in SQL Server requires a semicolon at the end of the statement.
+**Syntax rules:**
 
-**Constraints and Limitations:**
+- `ON CONFLICT` requires a conflict target (a unique index or constraint) for `DO UPDATE`; `DO NOTHING` can omit it.
+- `INSERT IGNORE` also ignores `NOT NULL` violations by inserting implicit defaults, which may mask data issues.
+- `ON DUPLICATE KEY UPDATE` uses the `VALUES()` function (or `new.` alias) to refer to the values that would have been inserted.
 
-- `ON CONFLICT` cannot handle CHECK or NOT NULL violations; it only handles unique/exclusion conflicts.
-- MySQL's `ON DUPLICATE KEY UPDATE` does not support a conflict target; it applies to any unique index.
-- SQL Server's `MERGE` is known to have concurrency issues and is discouraged by some experts; it may be deprecated in future.
-- Oracle's `MERGE` does not support `WHEN NOT MATCHED BY SOURCE` in all versions.
-- Upsert operations may lock rows and can cause contention under high concurrency.
+**Constraints and limitations:**
 
-### Annotated Complete Code Examples
+- `INSERT IGNORE` can suppress errors that you did not intend to suppress (e.g., data truncation, invalid dates).
+- MySQL's `ON DUPLICATE KEY UPDATE` with multiple unique indexes may update an arbitrary matching row, leading to non-deterministic behaviour.
+- SQL Server's `MERGE` has known concurrency and correctness caveats; test thoroughly and consider `HOLDLOCK`.
 
-**Example 1: PostgreSQL ON CONFLICT DO UPDATE**
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: MySQL – INSERT IGNORE skips duplicate rows
 
 ```sql
--- Setup
-CREATE TABLE inventory (
-    product_id  INTEGER PRIMARY KEY,
-    product_name VARCHAR(100),
-    quantity    INTEGER NOT NULL DEFAULT 0
-);
+-- Step 1: Create a table with a unique key.
+CREATE TABLE users (id INT PRIMARY KEY, email VARCHAR(255) UNIQUE);
 
-INSERT INTO inventory (product_id, product_name, quantity)
-VALUES (1, 'Cheese', 10);
+-- Step 2: Insert a row.
+INSERT INTO users VALUES (1, 'a@example.com');
 
--- Upsert: insert or update if product_id exists
-INSERT INTO inventory (product_id, product_name, quantity)
-VALUES (1, 'Cheese', 25)
-ON CONFLICT (product_id)
-DO UPDATE SET quantity = EXCLUDED.quantity;
-
--- Verify
-SELECT * FROM inventory;
-
--- Expected Output:
---  product_id | product_name | quantity
--- ------------+--------------+----------
---           1 | Cheese       |       25
+-- Step 3: Attempt to insert a duplicate using INSERT IGNORE.
+INSERT IGNORE INTO users VALUES (1, 'b@example.com');
 ```
 
-**Why this output occurs:** The initial insert creates a row with `quantity = 10`. The second statement attempts to insert `product_id = 1`, which conflicts with the existing primary key. The `ON CONFLICT (product_id) DO UPDATE` clause intercepts the conflict and updates the existing row, setting `quantity = 25` (the `EXCLUDED.quantity` value).
+**Expected output:**
 
-**Example 2: MySQL ON DUPLICATE KEY UPDATE**
-
-```sql
--- Setup
-CREATE TABLE inventory (
-    product_id  INT PRIMARY KEY,
-    product_name VARCHAR(100),
-    quantity    INT NOT NULL DEFAULT 0
-);
-
-INSERT INTO inventory (product_id, product_name, quantity)
-VALUES (1, 'Cheese', 10);
-
--- Upsert
-INSERT INTO inventory (product_id, product_name, quantity)
-VALUES (1, 'Cheese', 25)
-ON DUPLICATE KEY UPDATE quantity = VALUES(quantity);
-
--- Verify
-SELECT * FROM inventory;
-
--- Expected Output:
---  product_id | product_name | quantity
--- ------------+--------------+----------
---           1 | Cheese       |       25
+```text
+Query OK, 0 rows affected (0.02 sec)
+Query OK, 1 row affected (0.01 sec)
+Query OK, 0 rows affected, 1 warning (0.00 sec)
 ```
 
-**Why this output occurs:** The `ON DUPLICATE KEY UPDATE` clause detects the duplicate primary key and performs an update instead of an insert. `VALUES(quantity)` refers to the value that would have been inserted (`25`), which replaces the existing quantity.
+**Why this output appears**: `INSERT IGNORE` suppresses the duplicate-key error, converts it to a warning, and skips the row without aborting the statement.
 
-**Example 3: SQL Server MERGE**
+#### Real-World Cases
 
-```sql
--- Setup
-CREATE TABLE target_inventory (
-    product_id  INT PRIMARY KEY,
-    product_name NVARCHAR(100),
-    quantity    INT NOT NULL DEFAULT 0
-);
-
-CREATE TABLE source_inventory (
-    product_id  INT PRIMARY KEY,
-    product_name NVARCHAR(100),
-    quantity    INT NOT NULL DEFAULT 0
-);
-
-INSERT INTO target_inventory VALUES (1, 'Cheese', 10);
-INSERT INTO source_inventory VALUES (1, 'Cheese', 25), (2, 'Bread', 50);
-
--- MERGE
-MERGE INTO target_inventory AS target
-USING source_inventory AS source
-ON target.product_id = source.product_id
-WHEN MATCHED THEN
-    UPDATE SET target.quantity = source.quantity
-WHEN NOT MATCHED THEN
-    INSERT (product_id, product_name, quantity)
-    VALUES (source.product_id, source.product_name, source.quantity);
-
--- Verify
-SELECT * FROM target_inventory;
-
--- Expected Output:
---  product_id | product_name | quantity
--- ------------+--------------+----------
---           1 | Cheese       |       25
---           2 | Bread        |       50
-```
-
-**Why this output occurs:** The `MERGE` statement joins `target_inventory` with `source_inventory` on `product_id`. For product 1 (matched), the quantity is updated to 25. For product 2 (not matched), a new row is inserted with quantity 50.
-
-### Real-World Cases
-
-**Case 1: Daily Sales Sync**
-
-An ETL job uses `ON CONFLICT DO UPDATE` to merge daily sales data into a summary table. If a product's sales record already exists for the day, it is updated; otherwise, a new row is inserted.
-
-**Case 2: Inventory Management**
-
-A warehouse system uses `MERGE` to synchronise inventory levels from a source system. Existing products are updated, new products are inserted, and (with `WHEN NOT MATCHED BY SOURCE`) discontinued products are deleted.
-
-### References
-
-- PostgreSQL Documentation — INSERT ... ON CONFLICT - https://www.postgresql.org/docs/current/sql-insert.html
-- MySQL 8.4 Reference Manual — INSERT ... ON DUPLICATE KEY UPDATE - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert-on-duplicate.html
-- Microsoft SQL Server — MERGE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/merge-transact-sql
-- Oracle Database SQL Language Reference — MERGE - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/MERGE.html
+- **Idempotent migrations**: A seed script uses `INSERT ... ON CONFLICT DO NOTHING` so it can be run repeatedly without failing.
+- **Data ingestion**: A pipeline uses `INSERT IGNORE` to skip rows that violate uniqueness, logging warnings for later review.
 
 ---
 
-## 13. Transaction Safety During Failures (All-or-Nothing Atomicity)
+### 10. `DEFAULT` Values
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Transaction safety during failures refers to the guarantee that an `INSERT` operation (or a group of operations) is atomic — it either completes entirely or has no effect at all, even in the event of an error, system crash, or power failure.
+**Core Definition**
+`DEFAULT` values are the values that the database automatically assigns to a column when no explicit value is provided during an `INSERT`.
 
-**Technical Definition:** The ACID property of atomicity ensures that a transaction is treated as a single, indivisible unit of work. For a single `INSERT` statement, the database wraps the operation in an implicit transaction and ensures it is either fully committed or fully rolled back. For multi-statement transactions, explicit `BEGIN`/`COMMIT`/`ROLLBACK` blocks are used to group operations.
+**Technical Definition**
+A column's default is specified in its `CREATE TABLE` definition using the `DEFAULT` clause. During an `INSERT`, if the column is omitted from the column list, or if the `DEFAULT` keyword is supplied as its value, the database evaluates and uses the default expression. In PostgreSQL, the default is stored in `pg_attrdef` and evaluated at insert time. The `DEFAULT` keyword can also be used explicitly in a `VALUES` list to request the default for a specific column.
 
-**Beginner-Friendly Explanation:** Atomicity means "all or nothing." If you're inserting data and something goes wrong halfway through, the database undoes everything, so you never end up with half-finished data.
+**Beginner-Friendly Explanation**
+A `DEFAULT` value is the automatic fill-in for a column. If you do not provide a value, the database uses the default you defined.
 
-### Purposes
+#### Purposes
 
-- To guarantee that a failed `INSERT` leaves no partial data.
-- To ensure data consistency across related tables.
-- To recover gracefully from errors, constraint violations, and system crashes.
-- To group multiple `INSERT` statements into a single atomic unit.
-- To maintain database integrity in concurrent environments.
+- To supply sensible values for columns that are often left blank.
+- To automatically generate timestamps, identifiers, or status values.
+- To decouple the application from the details of default values.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Implicit Transaction (Single Statement):**
+**Default in table definition:**
 
 ```sql
--- Each statement is automatically wrapped in a transaction
-INSERT INTO users (name) VALUES ('Alice');
--- Committed automatically if successful; rolled back if it fails.
+CREATE TABLE table_name (
+    column_name data_type DEFAULT default_expression
+);
 ```
 
-**Explicit Transaction (Multiple Statements):**
+
+**Explicit DEFAULT in INSERT:**
 
 ```sql
-BEGIN;  -- or START TRANSACTION in MySQL
-INSERT INTO orders (customer_id, total) VALUES (1, 100.00);
-INSERT INTO order_lines (order_id, product_id, quantity)
-VALUES (LAST_INSERT_ID(), 42, 2);
-COMMIT;  -- or ROLLBACK on error
+INSERT INTO table_name (column_name) VALUES (DEFAULT);
 ```
 
-**Component Breakdown:**
 
-| Command | Purpose |
-|---------|---------|
-| `BEGIN` / `START TRANSACTION` | Starts an explicit transaction |
-| `COMMIT` | Permanently saves all changes in the transaction |
-| `ROLLBACK` | Undoes all changes in the transaction |
-| `SAVEPOINT` | Creates a point within a transaction to roll back to |
+**Component breakdown:**
 
-**Syntax Rules:**
+| Component | Description |
+|-----------|-------------|
+| `DEFAULT default_expression` | The default value or expression in the column definition. |
+| `DEFAULT` in `VALUES` | Explicitly requests the column's default. |
 
-- A single `INSERT` statement is automatically atomic; no explicit transaction is needed.
-- Multiple DML statements require an explicit transaction to ensure all-or-nothing behaviour.
-- `ROLLBACK` undoes all changes made since the last `BEGIN` or `SAVEPOINT`.
-- `SAVEPOINT` allows partial rollback within a transaction.
-- The `SET XACT_ABORT ON` option in SQL Server automatically rolls back the entire transaction on any error.
+**Syntax rules:**
 
-**Constraints and Limitations:**
+- The default expression must be compatible with the column's data type.
+- `DEFAULT` can be used in place of any value in a `VALUES` list.
 
-- Autocommit mode (the default in most RDBMSs) commits each statement immediately.
-- DDL statements (e.g., `CREATE TABLE`) may cause implicit commits in some dialects (Oracle, MySQL), breaking transaction boundaries.
-- Long-running transactions can hold locks and block other operations.
-- Rollback operations consume resources and may take time for large transactions.
-- Not all RDBMSs support transactional DDL (PostgreSQL does; Oracle and MySQL do not).
+**Constraints and limitations:**
 
-### Annotated Complete Code Examples
+- A `NOT NULL` column with no default will cause an `INSERT` to fail if no value is supplied.
+- Volatile default expressions (e.g., `now()`, `random()`) are evaluated once per row.
 
-**Example 1: Single INSERT Atomicity**
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Omitting a column to use its default
 
 ```sql
--- Setup
+-- Step 1: Create a table with a default.
 CREATE TABLE accounts (
-    id      SERIAL PRIMARY KEY,
-    name    VARCHAR(50),
-    balance NUMERIC(10, 2) CHECK (balance >= 0)
+    id      serial PRIMARY KEY,
+    balance numeric DEFAULT 0
 );
 
-INSERT INTO accounts (name, balance) VALUES ('Alice', 100.00);
+-- Step 2: Insert a row without specifying balance.
+INSERT INTO accounts (id) VALUES (DEFAULT);
 
--- Attempt to insert a negative balance (violates CHECK)
-INSERT INTO accounts (name, balance) VALUES ('Bob', -50.00);
-
--- Expected Error (PostgreSQL):
--- ERROR: new row for relation "accounts" violates check constraint "accounts_balance_check"
-
--- Verify: Bob's row was not inserted
+-- Step 3: Verify; balance is 0.
 SELECT * FROM accounts;
-
--- Expected Output:
---  id | name  | balance
--- ----+-------+---------
---   1 | Alice |  100.00
 ```
 
-**Why this output occurs:** The second `INSERT` violates the CHECK constraint on `balance`. Because the statement is automatically wrapped in an implicit transaction, the database rolls back the insertion. Bob's row is not added.
+**Expected output:**
 
-**Example 2: Multi-Statement Transaction with Rollback**
-
-```sql
--- Start an explicit transaction
-BEGIN;
-
--- Insert an order
-INSERT INTO orders (customer_id, total) VALUES (1, 100.00);
-
--- Insert order lines (this will fail if product_id 999 doesn't exist)
-INSERT INTO order_lines (order_id, product_id, quantity)
-VALUES (currval('orders_order_id_seq'), 999, 2);
-
--- If the second insert fails, roll back everything
--- (In practice, this would be handled by application error handling)
-
--- Rollback the transaction
-ROLLBACK;
-
--- Verify: no order was created
-SELECT * FROM orders;
-
--- Expected Output:
---  order_id | customer_id | total
--- ----------+-------------+-------
--- (0 rows)
+```text
+CREATE TABLE
+INSERT 0 1
+ id | balance
+----+---------
+  1 |       0
+(1 row)
 ```
 
-**Why this output occurs:** The transaction begins with `BEGIN`. The first `INSERT` adds an order, but the second `INSERT` references a non-existent product (or would fail for some reason). The `ROLLBACK` command undoes both insertions, leaving the database in its original state. No order or order line is created.
+**Why this output appears**: The `balance` column is omitted from the column list, so it receives its default value of `0`.
 
-### Real-World Cases
+#### Real-World Cases
 
-**Case 1: Financial Transfers**
-
-A bank transfer involves debiting one account and crediting another. Both operations are wrapped in a transaction. If the credit fails (e.g., due to a constraint violation), the debit is rolled back, ensuring no money is lost.
-
-**Case 2: Order Processing**
-
-An e-commerce checkout inserts an order, order lines, and a payment record. If any of these operations fails (e.g., payment declined), the entire transaction is rolled back, preventing orphaned orders.
-
-### References
-
-- PostgreSQL Documentation — Transactions - https://www.postgresql.org/docs/current/tutorial-transactions.html
-- MySQL 8.4 Reference Manual — Transactions - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/commit.html
-- Microsoft SQL Server — Transactions - https://learn.microsoft.com/en-us/sql/t-sql/language-elements/transactions-transact-sql
-- Oracle Database — Transaction Management - https://docs.oracle.com/en/database/oracle/oracle-database/19/cncpt/transactions.html
+- **Audit timestamps**: `created_at DEFAULT now()` automatically records row creation time.
+- **Status defaults**: A `status` column defaults to `'pending'` for new records.
 
 ---
 
-## Summary Table of Key Features
+### 11. `RETURNING` (PostgreSQL)
 
-| Feature | Purpose | Key Limitation |
-|---------|---------|----------------|
-| `INSERT INTO` | Add rows to a table | Requires INSERT privilege |
-| Single Row (`VALUES`) | Insert one row | Must match column count |
-| Multi-Row (`VALUES`) | Bulk insert efficiently | Statement size limits |
-| Explicit Column List | Robust against schema changes | More typing |
-| Implicit Positional | Concise for quick inserts | Breaks on schema changes |
-| Value Specifications | Literals, expressions, functions | Type compatibility |
-| Default Values | Use database-defined defaults | NOT NULL without default fails |
-| Explicit `NULL` | Represent missing data | Cannot insert into NOT NULL |
-| `INSERT INTO ... SELECT` | Copy data between tables | Column count and type match |
-| Generated IDs (`SERIAL`, `IDENTITY`, UUID) | Auto-generate unique keys | Predictability, gaps |
-| `RETURNING` / `OUTPUT` / `LAST_INSERT_ID()` | Retrieve generated keys | Dialect-specific |
-| Constraint Violations | Enforce data integrity | Aborts entire statement |
-| Upsert (`ON CONFLICT`, `MERGE`) | Insert or update atomically | Dialect-specific syntax |
-| Transaction Atomicity | All-or-nothing guarantee | Long transactions lock resources |
+#### Definitions
+
+**Core Definition**
+`RETURNING` is a PostgreSQL clause that returns data from the rows inserted, updated, or deleted by a DML statement.
+
+**Technical Definition**
+The `RETURNING` clause can appear on `INSERT`, `UPDATE`, `DELETE`, and `MERGE` statements. Its output list is identical to a `SELECT` output list: it can contain column names, expressions, and `*`. For `INSERT`, the default data available to `RETURNING` is the row as inserted; for `UPDATE`, it is the new content; for `DELETE`, it is the deleted row; and for `MERGE`, it is the source row plus the target row. `RETURNING` requires `SELECT` privilege on the columns mentioned.
+
+**Beginner-Friendly Explanation**
+`RETURNING` lets you get data back from the rows you just inserted, without running a separate query. It is especially useful for retrieving automatically generated IDs and default values.
+
+#### Purposes
+
+- To retrieve generated identifiers (e.g., serial or identity values) in the same statement.
+- To return default values or computed columns from inserted rows.
+- To avoid an extra `SELECT` round-trip after an `INSERT`.
+
+#### Syntax Rules and Structure
+
+**General syntax:**
+
+```sql
+INSERT INTO table_name (columns) VALUES (values)
+RETURNING * | output_expression [ [ AS ] output_name ] [, ...];
+```
+
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `RETURNING` | The clause keyword. |
+| `output_expression` | A column name or expression using the inserted row's columns. |
+| `output_name` | An optional alias for the output column. |
+
+**Syntax rules:**
+
+- The `RETURNING` list can include `*` to return all columns.
+- The data returned is the row as it exists after insertion (including defaults and trigger modifications).
+- `RETURNING` can be used with `ON CONFLICT DO UPDATE` to return the updated row.
+
+**Constraints and limitations:**
+
+- `RETURNING` is PostgreSQL-specific; MySQL and SQL Server have different mechanisms (`LAST_INSERT_ID()` and `OUTPUT`).
+- The user must have `SELECT` privilege on the returned columns.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – RETURNING multiple columns
+
+```sql
+-- Step 1: Create a table with a serial ID and a default timestamp.
+CREATE TABLE posts (
+    id         serial PRIMARY KEY,
+    title      text NOT NULL,
+    created_at timestamptz DEFAULT now()
+);
+
+-- Step 2: Insert and return the generated id and timestamp.
+INSERT INTO posts (title) VALUES ('Hello World')
+RETURNING id, created_at;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+ id |          created_at
+----+-------------------------------
+  1 | 2026-11-13 10:00:00.123+00
+(1 row)
+```
+
+**Why this output appears**: `RETURNING id, created_at` returns the generated serial value and the default timestamp for the inserted row.
+
+#### Real-World Cases
+
+- **API responses**: A POST endpoint inserts a row and returns the generated resource ID in the same database round-trip.
+- **Audit logging**: After inserting a row, `RETURNING` provides the values needed to write an audit entry.
+
+---
+
+### 12. `ON CONFLICT` (PostgreSQL)
+
+#### Definitions
+
+**Core Definition**
+`ON CONFLICT` is a PostgreSQL clause that specifies an alternative action when an `INSERT` would violate a unique or exclusion constraint: either do nothing or update the existing row.
+
+**Technical Definition**
+`ON CONFLICT` has two forms: `DO NOTHING` (skip the conflicting row) and `DO UPDATE SET ...` (update the existing row with new values). The conflict is identified by a conflict target: a column list with an associated unique index, or `ON CONSTRAINT constraint_name`. In the `DO UPDATE` clause, the `EXCLUDED` pseudo-table refers to the row that would have been inserted, allowing the update to reference the proposed new values. `ON CONFLICT DO UPDATE` is the standard PostgreSQL upsert mechanism.
+
+**Beginner-Friendly Explanation**
+`ON CONFLICT` tells PostgreSQL what to do when an insert would create a duplicate: either skip it (`DO NOTHING`) or update the existing row (`DO UPDATE`). It is how you do “insert or update” in PostgreSQL.
+
+#### Purposes
+
+- To implement idempotent inserts that do not fail on duplicate keys.
+- To perform upserts: insert new rows and update existing ones in a single statement.
+- To handle unique constraint violations gracefully during bulk loading.
+
+#### Syntax Rules and Structure
+
+**General syntax:**
+
+```sql
+INSERT INTO table_name (columns) VALUES (values)
+ON CONFLICT [ conflict_target ]
+    { DO NOTHING | DO UPDATE SET column = expression [, ...] [ WHERE condition ] };
+```
+
+
+**Conflict target:**
+
+```sql
+( { index_column_name | ( index_expression ) } [ COLLATE collation ] [ opclass ] [, ...] )
+    [ WHERE index_predicate ]
+| ON CONSTRAINT constraint_name
+```
+
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `conflict_target` | The unique index or constraint that triggers the conflict. |
+| `DO NOTHING` | Skips the conflicting row without raising an error. |
+| `DO UPDATE SET` | Updates the existing row with new values. |
+| `EXCLUDED` | Pseudo-table referencing the proposed new row. |
+
+**Syntax rules:**
+
+- `DO UPDATE` requires a conflict target; `DO NOTHING` can omit it.
+- `EXCLUDED.column` refers to the value that would have been inserted.
+- A `WHERE` clause can be added to `DO UPDATE` to conditionally update.
+
+**Constraints and limitations:**
+
+- `ON CONFLICT` only handles unique and exclusion constraint violations; other constraint violations still raise errors.
+- `ON CONFLICT DO UPDATE` requires `UPDATE` privilege on the table and `SELECT` privilege on any columns read in the update expressions.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Upsert with ON CONFLICT DO UPDATE
+
+```sql
+-- Step 1: Create a table with a unique constraint.
+CREATE TABLE counters (
+    key   text PRIMARY KEY,
+    value int NOT NULL DEFAULT 0
+);
+
+-- Step 2: Insert a row.
+INSERT INTO counters (key, value) VALUES ('hits', 1);
+
+-- Step 3: Upsert: increment the value if the key exists.
+INSERT INTO counters (key, value) VALUES ('hits', 1)
+ON CONFLICT (key) DO UPDATE
+SET value = counters.value + EXCLUDED.value;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 1
+INSERT 0 1
+```
+
+**Why this output appears**: The second `INSERT` conflicts on the primary key `key`. The `DO UPDATE` clause sets `value` to the existing value plus the `EXCLUDED.value` (the proposed new value), effectively incrementing the counter.
+
+#### Real-World Cases
+
+- **Counter increments**: A page-view counter uses `ON CONFLICT DO UPDATE` to atomically increment the count.
+- **Idempotent API**: A sync endpoint uses `ON CONFLICT DO NOTHING` to avoid duplicating records when the same payload is received twice.
+
+---
+
+### 13. `ON DUPLICATE KEY` (MySQL)
+
+#### Definitions
+
+**Core Definition**
+`ON DUPLICATE KEY UPDATE` is a MySQL clause that performs an `UPDATE` on an existing row when an `INSERT` would cause a duplicate value in a `UNIQUE` index or `PRIMARY KEY`.
+
+**Technical Definition**
+When an `INSERT ... ON DUPLICATE KEY UPDATE` encounters a duplicate key, MySQL updates the existing row with the specified assignments instead of inserting a new one. The `VALUES(column)` function (or the `new.` alias in newer versions) refers to the value that would have been inserted. If the row is inserted as new, the affected-rows value is 1; if an existing row is updated, it is 2; if the existing row is set to its current values, it is 0. The `LAST_INSERT_ID()` function returns the `AUTO_INCREMENT` value of the inserted or updated row.
+
+**Beginner-Friendly Explanation**
+`ON DUPLICATE KEY UPDATE` is MySQL's way of saying: “If this row already exists, update it instead of inserting a new one.” It is how you do “insert or update” in MySQL.
+
+#### Purposes
+
+- To implement upserts in MySQL.
+- To update a row's values when a duplicate key is encountered.
+- To atomically increment counters or update timestamps on conflict.
+
+#### Syntax Rules and Structure
+
+**General syntax:**
+
+```sql
+INSERT INTO table_name (columns) VALUES (values)
+ON DUPLICATE KEY UPDATE column = expression [, ...];
+```
+
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `ON DUPLICATE KEY UPDATE` | The clause that specifies the update action. |
+| `column = expression` | The assignment(s) to perform on the existing row. |
+| `VALUES(column)` | Refers to the value that would have been inserted. |
+
+**Syntax rules:**
+
+- `VALUES(column)` (or `new.column`) retrieves the proposed value.
+- Multiple assignments can be separated by commas.
+
+**Constraints and limitations:**
+
+- The statement is not standard SQL; it is MySQL-specific.
+- With multiple unique indexes, MySQL may update an arbitrary matching row, so avoid using this clause on tables with multiple unique indexes.
+- `INSERT IGNORE` can be combined with `ON DUPLICATE KEY UPDATE`, but the behaviour may be unexpected when multiple unique keys are involved.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: MySQL – Upsert with ON DUPLICATE KEY UPDATE
+
+```sql
+-- Step 1: Create a table with a unique key.
+CREATE TABLE counters (
+    id    INT PRIMARY KEY,
+    value INT NOT NULL DEFAULT 0
+);
+
+-- Step 2: Insert a row.
+INSERT INTO counters (id, value) VALUES (1, 1);
+
+-- Step 3: Upsert: increment the value if the id exists.
+INSERT INTO counters (id, value) VALUES (1, 1)
+ON DUPLICATE KEY UPDATE value = value + VALUES(value);
+```
+
+**Expected output:**
+
+```text
+Query OK, 0 rows affected (0.02 sec)
+Query OK, 1 row affected (0.01 sec)
+Query OK, 2 rows affected (0.00 sec)
+```
+
+**Why this output appears**: The second `INSERT` conflicts on the primary key `id = 1`. The `ON DUPLICATE KEY UPDATE` clause updates the existing row, adding `VALUES(value)` (which is `1`) to the existing `value`, resulting in `2`. The affected-rows value is `2`, indicating an update.
+
+#### Real-World Cases
+
+- **Page-view counters**: `INSERT ... ON DUPLICATE KEY UPDATE` increments a counter for a given page or entity.
+- **User settings**: A settings row is inserted if absent, or updated if the user already has settings.
+
+---
+
+### 14. `MERGE` (SQL Server)
+
+#### Definitions
+
+**Core Definition**
+`MERGE` is a SQL Server statement that performs `INSERT`, `UPDATE`, or `DELETE` operations on a target table based on the results of a join with a source table.
+
+**Technical Definition**
+`MERGE INTO target USING source ON join_condition` evaluates each source row against the target. Depending on whether a match is found, it executes the corresponding `WHEN MATCHED THEN UPDATE`, `WHEN NOT MATCHED THEN INSERT`, or `WHEN MATCHED THEN DELETE` action. `MERGE` is SQL Server's primary upsert mechanism, though it is also used for synchronisation tasks. Microsoft recommends specifying only the join columns in the `ON` clause and using `WHEN` clauses for additional filtering. For performance, ensure indexes exist on the join columns; the optimizer chooses among nested loops, merge join, and hash join based on table sizes and indexes.
+
+**Beginner-Friendly Explanation**
+`MERGE` compares two tables row by row and decides what to do for each row: if it matches, update it; if it doesn't match, insert it. It is SQL Server's way of doing “insert or update” (and sometimes delete) in one statement.
+
+#### Purposes
+
+- To implement upserts: insert new rows and update existing ones.
+- To synchronise a target table with a source table.
+- To perform conditional inserts, updates, and deletes in a single set-based statement.
+
+#### Syntax Rules and Structure
+
+**General syntax (SQL Server):**
+
+```sql
+MERGE [ TOP ( expression ) [ PERCENT ] ] [ INTO ] target_table
+USING source_table
+ON join_condition
+[ WHEN MATCHED [ AND condition ] THEN { UPDATE SET ... | DELETE } ]
+[ WHEN NOT MATCHED [ BY TARGET ] [ AND condition ] THEN INSERT ... ]
+[ WHEN NOT MATCHED BY SOURCE [ AND condition ] THEN { UPDATE SET ... | DELETE } ];
+```
+
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `target_table` | The table being modified. |
+| `source_table` | The table providing the rows. |
+| `ON join_condition` | The match condition between source and target. |
+| `WHEN MATCHED THEN UPDATE` | Updates existing rows. |
+| `WHEN NOT MATCHED THEN INSERT` | Inserts new rows. |
+| `WHEN MATCHED THEN DELETE` | Deletes matching rows (if specified). |
+
+**Syntax rules:**
+
+- Only the join columns should be in the `ON` clause; additional filtering should use `WHEN ... AND condition`.
+- `MERGE` must be terminated with a semicolon.
+
+**Constraints and limitations:**
+
+- `MERGE` is not parameterised automatically, so literal values can lead to recompilation and suboptimal plans; use parameters where possible.
+- `MERGE` has known concurrency caveats; use `HOLDLOCK` on the target to avoid race conditions.
+- Benchmark `MERGE` against separate `UPDATE` and `INSERT` statements; sometimes the separate statements perform better.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: SQL Server – MERGE for upsert
+
+```sql
+-- Step 1: Create target and source tables.
+CREATE TABLE target (id int PRIMARY KEY, value int);
+CREATE TABLE source (id int, value int);
+
+INSERT INTO target VALUES (1, 100);
+INSERT INTO source VALUES (1, 200), (2, 300);
+
+-- Step 2: MERGE source into target.
+MERGE INTO target AS t
+USING source AS s
+ON t.id = s.id
+WHEN MATCHED THEN
+    UPDATE SET value = s.value
+WHEN NOT MATCHED THEN
+    INSERT (id, value) VALUES (s.id, s.value);
+```
+
+**Expected output:**
+
+```text
+Commands completed successfully.
+```
+
+**Why this output appears**: For `id = 1`, a match is found, so the `value` is updated to `200`. For `id = 2`, no match is found, so a new row is inserted. The `MERGE` statement handles both cases in one pass.
+
+#### Real-World Cases
+
+- **Data synchronisation**: A nightly job merges a staging table into a production dimension table, updating existing rows and inserting new ones.
+- **Slowly changing dimensions**: `MERGE` is used to apply type-1 and type-2 changes to a dimension table.
+
+---
+
+### 15. Upsert Patterns
+
+#### Definitions
+
+**Core Definition**
+An upsert pattern is a technique that inserts a row if it does not exist and updates it if it does exist, in a single atomic operation or a controlled sequence.
+
+**Technical Definition**
+Upsert is a portmanteau of “update” and “insert.” Different RDBMSs implement it differently: **PostgreSQL** uses `INSERT ... ON CONFLICT DO UPDATE`; **MySQL** uses `INSERT ... ON DUPLICATE KEY UPDATE`; **SQL Server** uses `MERGE`. A portable fallback pattern—often called “update-then-insert” or “select-then-act”—involves first attempting an `UPDATE`, checking the row count, and then performing an `INSERT` if no rows were updated. This pattern is less efficient than native upserts but is portable across RDBMSs.
+
+**Beginner-Friendly Explanation**
+An upsert is a “save or update” operation. If the record is new, insert it; if it already exists, update it. Each database has its own way of doing this.
+
+#### Purposes
+
+- To implement “save” semantics where the caller does not know whether the record already exists.
+- To synchronise data from external sources without duplicating rows.
+- To atomically update counters, settings, or state.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
+
+```sql
+INSERT INTO table (id, value) VALUES ($1, $2)
+ON CONFLICT (id) DO UPDATE SET value = EXCLUDED.value;
+```
+
+
+**MySQL:**
+
+```sql
+INSERT INTO table (id, value) VALUES ($1, $2)
+ON DUPLICATE KEY UPDATE value = VALUES(value);
+```
+
+
+**SQL Server:**
+
+```sql
+MERGE INTO table AS t
+USING (VALUES ($1, $2)) AS s(id, value)
+ON t.id = s.id
+WHEN MATCHED THEN UPDATE SET value = s.value
+WHEN NOT MATCHED THEN INSERT (id, value) VALUES (s.id, s.value);
+```
+
+
+**Portable update-then-insert:**
+
+```sql
+UPDATE table SET value = $2 WHERE id = $1;
+-- if row_count = 0:
+INSERT INTO table (id, value) VALUES ($1, $2);
+```
+
+
+**Component breakdown:**
+
+| Pattern | RDBMS | Atomicity |
+|---------|-------|-----------|
+| `ON CONFLICT` | PostgreSQL | Single statement, atomic |
+| `ON DUPLICATE KEY UPDATE` | MySQL | Single statement, atomic |
+| `MERGE` | SQL Server | Single statement, atomic (with caveats) |
+| Update-then-insert | Portable | Not atomic without transaction/locking |
+
+**Syntax rules:**
+
+- Native upserts are atomic and do not require explicit transactions.
+- The portable pattern requires a transaction and careful locking to avoid race conditions.
+
+**Constraints and limitations:**
+
+- Native upsert syntax is not portable across RDBMSs.
+- `MERGE` has concurrency caveats; use `HOLDLOCK` when necessary.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – ON CONFLICT upsert
+
+```sql
+-- Step 1: Create a table.
+CREATE TABLE settings (
+    user_id int PRIMARY KEY,
+    theme   text NOT NULL
+);
+
+-- Step 2: Upsert a setting.
+INSERT INTO settings (user_id, theme) VALUES (1, 'dark')
+ON CONFLICT (user_id) DO UPDATE SET theme = EXCLUDED.theme;
+
+-- Step 3: Upsert again with a different theme.
+INSERT INTO settings (user_id, theme) VALUES (1, 'light')
+ON CONFLICT (user_id) DO UPDATE SET theme = EXCLUDED.theme;
+
+-- Step 4: Verify.
+SELECT * FROM settings;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 1
+INSERT 0 1
+ user_id | theme
+---------+-------
+       1 | light
+(1 row)
+```
+
+**Why this output appears**: The first insert creates the row. The second insert conflicts on `user_id` and updates the `theme` to `'light'` via `EXCLUDED.theme`.
+
+#### Real-World Cases
+
+- **User preferences**: A settings table uses upsert so that saving preferences works whether or not the user has existing settings.
+- **Inventory counts**: A stock table uses upsert to add received quantities to existing counts.
+
+---
+
+### 16. Bulk Inserts
+
+#### Definitions
+
+**Core Definition**
+Bulk inserts are techniques for loading large volumes of rows into a table efficiently, using multi-row statements, query-based inserts, or dedicated bulk-loading utilities.
+
+**Technical Definition**
+Bulk inserts amortise per-statement overhead (parsing, planning, network round-trips) across many rows. The primary SQL-level techniques are multi-row `VALUES` (batched to respect RDBMS limits) and `INSERT ... SELECT` from a staging table or query. For very large volumes, dedicated utilities are faster: **PostgreSQL** provides `COPY` (and the binary `COPY` protocol), which writes directly to heap pages and is significantly faster than repeated `INSERT` statements; **MySQL** provides `LOAD DATA INFILE`, which can be an order of magnitude faster than `INSERT`; **SQL Server** provides `BULK INSERT` (T-SQL) and `bcp` (command-line), as well as `SqlBulkCopy` from application code. Benchmarks show that bulk utilities can be 3–7× faster than multi-row inserts and 50–130× faster than single-row inserts, depending on the RDBMS and workload.
+
+**Beginner-Friendly Explanation**
+Bulk inserts are how you load a lot of data quickly. Instead of inserting one row at a time, you use a special tool or a multi-row statement that the database can process much more efficiently.
+
+#### Purposes
+
+- To load large datasets (e.g., ETL, data migration, initial seeding) efficiently.
+- To minimise the time and resource cost of inserting millions of rows.
+- To reduce network round-trips and statement overhead.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL COPY:**
+
+```sql
+COPY table_name (column1, column2, ...) FROM '/path/to/file.csv' WITH (FORMAT csv);
+```
+
+
+**MySQL LOAD DATA:**
+
+```sql
+LOAD DATA INFILE '/path/to/file.csv'
+INTO TABLE table_name
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n';
+```
+
+
+**SQL Server BULK INSERT:**
+
+```sql
+BULK INSERT table_name
+FROM 'C:\path\to\file.csv'
+WITH (FIELDTERMINATOR = ',', ROWTERMINATOR = '\n');
+```
+
+
+**Multi-row INSERT (batched):**
+
+```sql
+INSERT INTO table_name (column1, column2) VALUES
+    (1, 'a'), (2, 'b'), ..., (1000, 'z');
+-- Repeat in batches of 500–1,000.
+```
+
+
+**Component breakdown:**
+
+| Technique | RDBMS | Speed relative to single-row INSERT |
+|-----------|-------|-------------------------------------|
+| Multi-row `VALUES` | All | ~10–50× faster |
+| `INSERT ... SELECT` | All | Fast for server-side sources |
+| `COPY` | PostgreSQL | Fastest; writes directly to heap |
+| `LOAD DATA INFILE` | MySQL | Very fast; optimised for bulk loading |
+| `BULK INSERT` / `bcp` | SQL Server | Very fast; native bulk-copy API |
+| `SqlBulkCopy` | SQL Server | Fast from application code |
+
+**Syntax rules:**
+
+- Batch multi-row `VALUES` to 500–1,000 rows to avoid parameter limits and memory pressure.
+- `COPY` and `LOAD DATA` typically require file access on the server or a client-side streaming mechanism.
+
+**Constraints and limitations:**
+
+- `COPY` and `LOAD DATA` are not standard SQL and are RDBMS-specific.
+- Bulk utilities may bypass some constraint checks or trigger firing by default; configure options explicitly.
+- SQL Server's `INSERT ... VALUES` has a 1,000-row limit per statement.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – COPY from CSV
+
+```sql
+-- Step 1: Create a table.
+CREATE TABLE employees (id int, name text, salary numeric);
+
+-- Step 2: Load data from a CSV file on the server.
+COPY employees (id, name, salary)
+FROM '/tmp/employees.csv'
+WITH (FORMAT csv, HEADER true);
+
+-- Step 3: Verify the row count.
+SELECT count(*) FROM employees;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+COPY 100000
+ count
+--------
+ 100000
+(1 row)
+```
+
+**Why this output appears**: `COPY` reads the CSV file directly on the server and inserts all rows in a single operation, bypassing the per-row overhead of `INSERT`.
+
+#### Real-World Cases
+
+- **Data warehouse ETL**: Nightly jobs use `COPY` or `LOAD DATA` to load millions of fact rows into the warehouse.
+- **Initial migration**: A one-time migration uses `bcp` or `COPY` to move data from a legacy system.
+
+---
+
+### 17. Insert Performance
+
+#### Definitions
+
+**Core Definition**
+Insert performance is the measure of how quickly and efficiently an `INSERT` operation completes, influenced by round-trip overhead, statement complexity, indexing, constraints, and the chosen insertion technique.
+
+**Technical Definition**
+Insert performance is dominated by several factors: (1) **round-trip overhead**—each statement incurs network and parsing costs, so batching rows reduces this per-row; (2) **index maintenance**—every `INSERT` updates all indexes on the table, so tables with many indexes are slower to insert into; (3) **constraint checking**—`UNIQUE`, `PRIMARY KEY`, and `FOREIGN KEY` constraints require index lookups; (4) **WAL/redo logging**—durable databases write to a write-ahead log, so `synchronous_commit` and `fsync` settings affect throughput; and (5) **lock contention**—concurrent inserts into the same table or index can block. Benchmarks show single-row inserts are 50–130× slower than bulk inserts for 1,000 rows, and multi-row inserts are 1.3–57× slower than the fastest bulk utility depending on the RDBMS.
+
+**Beginner-Friendly Explanation**
+Insert performance is about how fast you can add data. Inserting one row at a time is slow because of all the overhead. Inserting many rows at once, or using a special bulk-loading tool, is much faster. Indexes and constraints also slow down inserts because the database has to do extra work to maintain them.
+
+#### Purposes
+
+- To choose the right insertion technique for the data volume and latency requirements.
+- To identify and remove bottlenecks in insert-heavy workloads.
+- To balance data integrity (constraints, indexes) against write throughput.
+
+#### Syntax Rules and Structure
+
+Performance is not controlled by a single syntax, but by technique selection and configuration:
+
+- **Batch multi-row `VALUES`** to 500–1,000 rows per statement.
+- **Use `INSERT ... SELECT`** when the source data is already in the database.
+- **Use `COPY` / `LOAD DATA` / `bcp`** for large external datasets.
+- **Minimise indexes** on insert-heavy tables; add indexes only when read performance requires them.
+- **Consider `UNLOGGED` tables** (PostgreSQL) or `TABLOCK` hints (SQL Server) for disposable data.
+- **Disable constraint checks** during bulk loads where appropriate (e.g., `SET FOREIGN_KEY_CHECKS = 0` in MySQL).
+
+**Constraints and limitations:**
+
+- Dropping indexes during bulk load and recreating them afterwards can be faster than maintaining them during the load, but it requires exclusive access to the table.
+- `synchronous_commit = off` (PostgreSQL) or `innodb_flush_log_at_trx_commit = 0` (MySQL) increases insert throughput at the cost of durability.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Comparing single-row vs. multi-row insert
+
+```sql
+-- Step 1: Create a table.
+CREATE TABLE bench (id serial PRIMARY KEY, data text);
+
+-- Step 2: Insert 10,000 rows one at a time (slow).
+\timing on
+INSERT INTO bench (data) SELECT md5(random()::text) FROM generate_series(1, 10000);
+-- (This is one INSERT ... SELECT, but the contrast is with 10,000 separate INSERTs.)
+
+-- Step 3: Insert 10,000 rows via COPY (fast).
+-- (Assume /tmp/bench.csv contains 10,000 lines.)
+COPY bench (data) FROM '/tmp/bench.csv';
+```
+
+**Expected output** (illustrative):
+
+```text
+CREATE TABLE
+Time: 120.456 ms
+COPY 10000
+Time: 35.123 ms
+```
+
+**Why this output appears**: The `COPY` operation bypasses per-row parsing, planning, and network overhead, making it significantly faster than row-by-row insertion.
+
+#### Real-World Cases
+
+- **High-throughput ingestion**: A logging pipeline uses `COPY` or `LOAD DATA` to sustain thousands of inserts per second.
+- **OLTP application**: An application uses parameterised single-row inserts for user-facing operations but batches background jobs for efficiency.
 
 ---
 
 ## References
 
-- PostgreSQL Documentation — INSERT - https://www.postgresql.org/docs/current/sql-insert.html
-- PostgreSQL Documentation — Inserting Data - https://www.postgresql.org/docs/current/dml-insert.html
-- PostgreSQL Documentation — Returning Data from Modified Rows - https://www.postgresql.org/docs/current/dml-returning.html
-- PostgreSQL Documentation — Constraints - https://www.postgresql.org/docs/current/ddl-constraints.html
-- PostgreSQL Documentation — Transactions - https://www.postgresql.org/docs/current/tutorial-transactions.html
-- MySQL 8.4 Reference Manual — INSERT Statement - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert.html
-- MySQL 8.4 Reference Manual — INSERT ... ON DUPLICATE KEY UPDATE - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert-on-duplicate.html
-- MySQL 8.4 Reference Manual — INSERT ... SELECT - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/insert-select.html
-- MySQL 8.4 Reference Manual — LAST_INSERT_ID() - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/information-functions.html#function_last-insert-id
-- MySQL 8.4 Reference Manual — AUTO_INCREMENT - https://docs.oracle.com/cd/E17952_01/mysql-8.4-en/example-auto-increment.html
-- Microsoft SQL Server — INSERT (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/insert-transact-sql
-- Microsoft SQL Server — MERGE (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/merge-transact-sql
-- Microsoft SQL Server — OUTPUT Clause - https://learn.microsoft.com/en-us/sql/t-sql/queries/output-clause-transact-sql
-- Microsoft SQL Server — IDENTITY Property - https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-transact-sql-identity-property
-- Microsoft SQL Server — Transactions - https://learn.microsoft.com/en-us/sql/t-sql/language-elements/transactions-transact-sql
-- Oracle Database SQL Language Reference — INSERT - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/INSERT.html
-- Oracle Database SQL Language Reference — MERGE - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/MERGE.html
-- Oracle Database — NULLs - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Nulls.html
-- SQLite Documentation — INSERT - https://www2.sqlite.org/lang_insert.html
-- ISO/IEC 9075-2:2003 — SQL Standard (INSERT Statement) - https://jtc1sc32.org/doc/N0251-0300/32N0254.pdf
+- PostgreSQL Documentation – INSERT – https://www.postgresql.org/docs/current/sql-insert.html
+- PostgreSQL Documentation – Populating a Table With Rows – https://www.postgresql.org/docs/current/tutorial-populate.html
+- PostgreSQL Documentation – Returning Data from Modified Rows – https://www.postgresql.org/docs/current/dml-returning.html
+- PostgreSQL Documentation – COPY – https://www.postgresql.org/docs/current/sql-copy.html
+- MySQL 8.0 Reference Manual – INSERT Statement – https://dev.mysql.com/doc/refman/8.0/en/insert.html
+- MySQL 8.0 Reference Manual – INSERT ... ON DUPLICATE KEY UPDATE – https://dev.mysql.com/doc/refman/8.0/en/insert-on-duplicate.html
+- MySQL 8.0 Reference Manual – LOAD DATA INFILE – https://dev.mysql.com/doc/refman/8.0/en/load-data.html
+- Microsoft Learn – INSERT (Transact-SQL) – https://learn.microsoft.com/en-us/sql/t-sql/statements/insert-transact-sql
+- Microsoft Learn – MERGE (Transact-SQL) – https://learn.microsoft.com/en-us/sql/t-sql/statements/merge-transact-sql
+- Microsoft Learn – BULK INSERT (Transact-SQL) – https://learn.microsoft.com/en-us/sql/t-sql/statements/bulk-insert-transact-sql
+- Microsoft Learn – OUTPUT Clause – https://learn.microsoft.com/en-us/sql/t-sql/queries/output-clause-transact-sql
+- ServiceStack – Bulk Inserts – https://docs.servicestack.net/ormlite/bulk-inserts
+- ServiceStack – Bulk Insert Performance Benchmarks – https://servicestack.net/posts/bulk-insert-performance
+- Bytebase – Upsert in SQL: INSERT ON DUPLICATE KEY vs ON CONFLICT Explained – https://www.bytebase.com/blog/upsert-in-sql/
+- SQLiz – SQL Bulk and Batch Insert by Database: Syntax, Limits & Performance – https://www.sqliz.com/bulk-insert/
+- MySQL 8.0 Reference Manual – PRIMARY KEY and UNIQUE Index Constraints (INSERT IGNORE) – https://dev.mysql.com/doc/refman/8.0/en/create-table.html

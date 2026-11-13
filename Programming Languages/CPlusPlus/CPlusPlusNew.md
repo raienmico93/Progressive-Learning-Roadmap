@@ -1944,7 +1944,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - RCU
   - Lock-free best practices
 
-- **115. Parallel Algorithms**
+- [**115. Parallel Algorithms**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/ParallelAlgorithms.md)
   - Parallel algorithms
   - Execution policies
     - `std::execution::seq`
@@ -1954,7 +1954,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Parallel STL
   - Parallel algorithms best practices
 
-- **116. Coroutines (C++20)**
+- [**116. Coroutines (C++20)**](/Programming%20Languages/CPlusPlus/Concurrency%20and%20Multithreading/Coroutines.md)
   - Coroutines
   - `co_await`
   - `co_yield`
@@ -1971,7 +1971,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # XIV. Input/Output
 
-- **117. I/O Fundamentals**
+- [**117. I/O Fundamentals**](/Programming%20Languages/CPlusPlus/Input%20or%20Output/IO.md)
   - I/O streams
   - `iostream`
   - Input streams
@@ -1981,7 +1981,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Stream manipulators
   - I/O best practices
 
-- **118. Standard I/O**
+- [**118. Standard I/O**](/Programming%20Languages/CPlusPlus/Input%20or%20Output/StandardIO.md)
   - `std::cin`
   - `std::cout`
   - `std::cerr`
@@ -2021,7 +2021,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
     - `std::internal`
   - I/O best practices
 
-- **119. File I/O**
+- [**119. File I/O**](/Programming%20Languages/CPlusPlus/Input%20or%20Output/File.md)
   - `<fstream>`
   - `std::ifstream`
   - `std::ofstream`
@@ -2034,7 +2034,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - File state
   - File I/O best practices
 
-- **120. String Streams**
+- [**120. String Streams**](/Programming%20Languages/CPlusPlus/Input%20or%20Output/StringStreams.md)
   - `<sstream>`
   - `std::istringstream`
   - `std::ostringstream`
@@ -2042,7 +2042,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - String stream operations
   - String stream best practices
 
-- **121. Filesystem (C++17)**
+- [**121. Filesystem (C++17)**](/Programming%20Languages/CPlusPlus/Input%20or%20Output/FileSystem.md)
   - `<filesystem>`
   - `std::filesystem::path`
   - Path operations
@@ -2053,7 +2053,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::filesystem::recursive_directory_iterator`
   - Filesystem best practices
 
-- **122. Formatting (C++20)**
+- [**122. Formatting (C++20)**](/Programming%20Languages/CPlusPlus/Input%20or%20Output/Formatting.md)
   - `<format>`
   - `std::format`
   - `std::format_to`
@@ -2065,7 +2065,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - `std::println` (C++23)
   - Formatting best practices
 
-- **123. Regular Expressions**
+- [**123. Regular Expressions**](/Programming%20Languages/CPlusPlus/Input%20or%20Output/RegEx.md)
   - `<regex>`
   - `std::regex`
   - `std::smatch`
@@ -2077,7 +2077,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Regex best practices
   - Regex performance
 
-- **124. Serialization**
+- [**124. Serialization**](/Programming%20Languages/CPlusPlus/Input%20or%20Output/Serialization.md)
   - Serialization
   - JSON libraries
     - nlohmann/json
@@ -2100,7 +2100,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
 
 # XV. Build Systems and Tooling
 
-- **125. Build Systems**
+- [**125. Build Systems**](/Programming%20Languages/CPlusPlus/Build%20Systems%20and%20Tooling/BuildSystems.md)
   - Build systems
   - Make
   - CMake
@@ -2112,7 +2112,7 @@ C++ is best learned as more than "C with classes." The progression should cover 
   - Build system comparison
   - Build system selection
 
-- **126. CMake**
+- [**126. CMake**](/Programming%20Languages/CPlusPlus/Build%20Systems%20and%20Tooling/Cmake.md)
   - CMake
   - `CMakeLists.txt`
   - CMake commands

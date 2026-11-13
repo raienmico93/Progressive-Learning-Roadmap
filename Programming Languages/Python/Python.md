@@ -164,7 +164,7 @@
 
 # III. Control Flow
 
-* [**9. Conditional Statements**](/Programming%20Languages/Python/ControlFlow/ConditionalStatements.md)
+* [**9. Conditional Statements**](/Programming%20Languages/Python/Control%20Flow/ConditionalStatements.md)
 
   * `if`
   * `elif`
@@ -175,7 +175,7 @@
   * Truthiness and falsiness
   * Short-circuit evaluation
 
-* [**10. Loops**](/Programming%20Languages/Python/ControlFlow/Loops.md)
+* [**10. Loops**](/Programming%20Languages/Python/Control%20Flow/Loops.md)
 
   * `for`
   * `while`
@@ -186,7 +186,7 @@
 
     * `range()`
 
-* [**11. Loop Control**](/Programming%20Languages/Python/ControlFlow/LoopControls.md)
+* [**11. Loop Control**](/Programming%20Languages/Python/Control%20Flow/LoopControls.md)
 
   * `break`
   * `continue`
@@ -195,7 +195,7 @@
   * Early termination
   * Sentinel-controlled loops
 
-* [**12. Structural Pattern Matching**](/Programming%20Languages/Python/ControlFlow/MatchStatement.md)
+* [**12. Structural Pattern Matching**](/Programming%20Languages/Python/Control%20Flow/MatchStatement.md)
 
   * `match`
   * `case`
@@ -462,7 +462,7 @@
   * `__exit__`
   * `contextlib`
 
-* [**34. File and Directory Management**](/Programming%20Languages/Python/File%20Handling/FileAndDirectoryManagement.md)
+* **34. File and Directory Management**
   * `os`
   * `pathlib`
   * Paths
@@ -474,7 +474,7 @@
   * File deletion
   * Temporary files
 
-* [**35. Data Serialization**](/Programming%20Languages/Python/File%20Handling/Serialization.md)
+* **35. Data Serialization**
 
   * JSON
   * CSV

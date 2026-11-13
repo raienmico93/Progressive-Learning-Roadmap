@@ -114,7 +114,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # II. Database and Schema Management
 
-* [**6. Database Management**](/Databases/SQL/DDL/Database.md)
+* **6. Database Management**
 
   * Creating databases (`CREATE DATABASE`)
   * Selecting databases (Vendor-specific database selection mechanisms)
@@ -125,7 +125,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Database configuration
   * Database-level permissions
 
-* [**7. Schema Management**](/Databases/SQL/DDL/Schema.md)
+* **7. Schema Management**
 
   * Schema definition
   * Creating schemas (`CREATE SCHEMA`)
@@ -136,7 +136,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Organizing objects by schema
   * Multi-schema application design
 
-* [**8. Table Fundamentals**](/Databases/SQL/DDL/Table.md)
+* **8. Table Fundamentals**
 
   * Creating tables (`CREATE TABLE`)
   * Viewing table definitions
@@ -149,7 +149,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Derived tables
   * Table metadata
 
-* [**9. SQL Data Types**](/Databases/SQL/DDL/DataTypes.md)
+* **9. SQL Data Types**
 
   * Numeric data types
     * Integer
@@ -253,7 +253,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Handling generated identifiers
   * Handling constraint violations
 
-* [**15. SELECT Operations**](/Databases/SQL/DML/Select.md)
+* **15. SELECT Operations**
 
   * `SELECT`
   * Selecting specific columns
@@ -434,7 +434,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # VIII. Aggregate Functions and Analytical Queries
 
-* [**29. Aggregate Functions**](/Databases/SQL/Functions/Aggregate.md)
+* **29. Aggregate Functions**
 
   * `COUNT`
   * `SUM`
@@ -442,7 +442,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * `MIN`
   * `MAX`
 
-* [**30. GROUP BY**](/Databases/SQL/DQL/GroupBy.md)
+* **30. GROUP BY**
 
   * Grouping records
   * Single-column grouping
@@ -450,14 +450,14 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Grouping expressions
   * Aggregate calculations
 
-* [**31. HAVING**](/Databases/SQL/DQL/Having.md)
+* **31. HAVING**
 
   * Difference between `WHERE` and `HAVING`
   * Filtering groups
   * Aggregate conditions
   * Multi-condition group filters
 
-* [**32. Advanced Aggregation**](/Databases/SQL/DQL/AdvancedAggregation.md)
+* **32. Advanced Aggregation**
 
   * Conditional aggregation
   * Multiple aggregates
@@ -550,7 +550,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Named derived tables
   * Multi-stage query construction
 
-* [**43. Common Table Expressions**](/Databases/SQL/Nested%20Queries/CTE.md)
+* [**43. Common Table Expressions**](/Databases/SQL/CTE/CTE.md)
 
   * `WITH`
   * Non-recursive CTEs

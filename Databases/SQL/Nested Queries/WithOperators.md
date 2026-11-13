@@ -6,548 +6,599 @@
 
 ### Definitions
 
-**Core Definition:** A subquery is a `SELECT` statement nested inside another SQL statement (typically inside a `WHERE`, `HAVING`, or `SELECT` clause), used to return data that the outer query uses for filtering, comparison, or computation.
+**Core Definition**
+Subqueries with operators are SQL expressions in which a subquery—a `SELECT` statement nested inside another statement—is combined with a comparison or set operator (`IN`, `EXISTS`, `ANY`, `ALL`, or comparison operators) to filter or evaluate data in the outer query.
 
-**Technical Definition:** Per the SQL standard (ISO/IEC 9075), a subquery (also called an inner query or nested query) is a `<query expression>` enclosed in parentheses that appears within another SQL statement. When combined with operators such as `IN`, `EXISTS`, `ANY`, `SOME`, `ALL`, or standard comparison operators (`=`, `<`, `>`, `!=`), the subquery provides a mechanism for multi-step data retrieval within a single statement.
+**Technical Definition**
+In SQL, a subquery used with an operator forms a predicate that compares a value or row from the outer query against the result set of the subquery. The SQL standard defines several such constructs: `IN` (membership test against a set), `EXISTS` (existence test for rows returned by a correlated subquery), `ANY`/`SOME` (comparison against at least one row), `ALL` (comparison against every row), and scalar comparison operators (`=`, `<`, `>`, `<=`, `>=`, `<>`) used with single-row subqueries. The choice of operator determines the cardinality requirements of the subquery, the `NULL` semantics of the predicate, and the optimiser's ability to transform the subquery into a join or semi-join. PostgreSQL documents `EXISTS`, `IN`, `NOT IN`, `ANY`, `SOME`, and `ALL` as subquery expressions; MySQL documents `IN`, `ANY`, `SOME`, `ALL`, and `EXISTS` with equivalent semantics; SQL Server supports `IN`, `EXISTS`, `ANY`, `SOME`, and `ALL` (though `ANY`/`SOME` are less commonly used).
 
-**Beginner-Friendly Explanation:** A subquery is a query inside a query. The inner query runs first and produces a result that the outer query then uses. Think of it like asking a question, getting an answer, and then using that answer to ask a follow-up question—all in one SQL statement.
-
-### Key Characteristics
-
-- **Nested execution:** The inner query executes before the outer query (logically, though optimizers may reorder).
-- **Operator-dependent behaviour:** The operator used with the subquery determines how the result is consumed (as a list, a truth value, or a scalar).
-- **Scalar vs. multi-row:** Some operators require the subquery to return exactly one value (scalar), while others accept multiple rows.
-- **Correlated vs. non-correlated:** A correlated subquery references columns from the outer query and is re-evaluated for each outer row.
-- **NULL-sensitive:** NULL values in subquery results can cause unexpected behaviour, especially with `NOT IN`.
-
-### Prerequisites
-
-- Basic SQL `SELECT` syntax
-- Understanding of `WHERE`, `HAVING`, and `JOIN` clauses
-- Familiarity with NULL handling in SQL
-- Basic knowledge of set theory concepts (membership, existence, quantification)
-
-### Related Programming Areas
-
-- **Query Optimization:** Subqueries can often be rewritten as joins, and the optimizer decides which form is more efficient.
-- **Data Analysis:** Subqueries enable complex filtering and aggregation logic in reporting.
-- **Application Development:** Subqueries are used in ORM-generated SQL and stored procedures.
-- **Database Design:** Understanding subquery behaviour informs indexing and schema decisions.
+**Beginner-Friendly Explanation**
+Operators are the words that connect a subquery to the outer query. They tell the database *how* to compare: "Is this value **in** the list?" (`IN`), "Does a matching row **exist**?" (`EXISTS`), "Is this value greater than **any** of these?" (`ANY`), or "Is this value greater than **all** of these?" (`ALL`). Choosing the right operator is essential for getting correct results and good performance.
 
 ---
 
-## 1. Membership Testing: IN and NOT IN
+### Key Characteristics
 
-### Core Definitions
+1. **Cardinality Requirements**: `IN`, `EXISTS`, `ANY`, and `ALL` accept multi-row subqueries; comparison operators (`=`, `<`, `>`) require single-row subqueries (scalar or row). `EXISTS` ignores the subquery's `SELECT` list, so the subquery can return any number of columns.
+2. **NULL Semantics Differ**: `IN` and `NOT IN` have well-known `NULL` pitfalls (`NOT IN` with `NULL`s returns no rows); `EXISTS`/`NOT EXISTS` are `NULL`-safe; `ANY`/`ALL` have operator-specific `NULL` behaviour.
+3. **Semi-Join and Anti-Join Equivalence**: `EXISTS` and `IN` are logically equivalent to semi-joins; `NOT EXISTS` and `NOT IN` are logically equivalent to anti-joins (with caveats for `NULL`s).
+4. **Optimiser Transformations**: Most RDBMS can rewrite `IN` and `EXISTS` subqueries into joins or semi-joins for efficiency. `ANY` and `ALL` are less commonly transformed and may force nested-loop execution.
+5. **Performance Varies by Operator**: `EXISTS` can short-circuit as soon as one row is found; `IN` may materialise the entire subquery result; `ANY`/`ALL` often require per-row evaluation. `NOT IN` with `NULL`s is a well-documented correctness trap.
 
-- **Core Definition:** The `IN` operator tests whether a value matches any value in a list or subquery result. `NOT IN` tests whether a value matches none of them.
-- **Technical Definition:** `expression IN (subquery)` is equivalent to `expression = ANY (subquery)`, returning TRUE if the expression equals any value returned by the subquery. `NOT IN` is equivalent to `<> ALL (subquery)`, returning TRUE only if the expression does not equal any value.
-- **Beginner-Friendly Explanation:** `IN` asks "is this value in the list?" `NOT IN` asks "is this value not in the list?" The list can come from a subquery.
+---
 
-### Purposes
+### Prerequisites
 
-- To filter rows based on membership in a dynamically generated set
-- To test whether a value belongs to a list produced by another query
-- To implement exclusion logic (find rows NOT in a set)
-- To simplify queries that would otherwise require multiple `OR` conditions
+- **Subquery fundamentals**: Scalar, row, table, correlated, and non-correlated subqueries.
+- **Comparison operators**: `=`, `<>`, `<`, `>`, `<=`, `>=`.
+- **`NULL` semantics**: Three-valued logic and how `NULL` propagates through predicates.
+- **Basic `SELECT` syntax**: `SELECT`, `FROM`, `WHERE`, `GROUP BY`.
+- **Execution plan basics**: To reason about semi-join and anti-join transformations.
 
-### Syntax Structures and Rules
+---
 
-**Complete General Syntax:**
+### Related Programming Areas
 
-```sql
--- IN with subquery
-expression IN (SELECT column FROM table WHERE condition)
+| Area | Connection |
+|------|------------|
+| **Data Filtering** | Operators determine how subquery results filter outer rows. |
+| **Existence Checks** | `EXISTS`/`NOT EXISTS` are the standard tools for existence and anti-join logic. |
+| **Query Optimisation** | `IN` and `EXISTS` can be rewritten as semi-joins; `NOT IN` with `NULL`s is a correctness and performance trap. |
+| **Data Quality** | `NOT IN` failures due to `NULL`s are a common source of incorrect reports. |
+| **Set Comparisons** | `ANY` and `ALL` implement set-wide comparisons. |
 
--- NOT IN with subquery
-expression NOT IN (SELECT column FROM table WHERE condition)
-```
+---
 
-**Component Breakdown:**
+### Core Concepts / Features
 
-- `expression`: The value or column being tested
-- `IN` / `NOT IN`: The membership operator
-- `(SELECT column FROM table WHERE condition)`: A subquery that must return exactly one column
+1. **`IN`**
+2. **`EXISTS`**
+3. **`ANY` / `SOME`**
+4. **`ALL`**
+5. **Comparison Operators with Subqueries**
 
-**Syntax Rules:**
+---
 
-- The subquery must return exactly one column; returning multiple columns raises an error.
-- `IN` is equivalent to `= ANY`; `NOT IN` is equivalent to `<> ALL`.
-- `NOT IN` evaluates to FALSE if any member of the set is NULL.
-- If the subquery returns no rows, `NOT IN` returns all rows (because the condition is vacuously true).
+## 1. `IN`
 
-**Constraints and Limitations:**
+### Definitions
 
-- **The NULL pitfall:** If the subquery returns any NULL value, `NOT IN` will return no rows (or UNKNOWN), because `x <> NULL` is UNKNOWN and `TRUE AND UNKNOWN` is not TRUE.
-- Oracle limits the expression list in `IN` to 1,000 expressions when using a literal list (not a subquery).
-- `IN` and `NOT IN` cannot be used with row constructors in all databases.
+**Core Definition**
+`IN` tests whether a value (or row) appears in the result set of a subquery.
 
-**Annotated Code Examples:**
+**Technical Definition**
+The `IN` operator compares a scalar or row expression against the rows of a subquery. `x IN (subquery)` returns `TRUE` if `x` equals any row in the subquery result, `FALSE` if no row matches and no `NULL`s are involved, and `UNKNOWN` if the subquery contains `NULL`s and no match is found. `NOT IN` is the negation, but its `NULL` behaviour is famously problematic: if the subquery returns any `NULL`, `NOT IN` returns no rows.
 
-```sql
--- Example 1: IN with subquery — find products that are in the Wheels subcategory
-SELECT Name
-FROM Production.Product
-WHERE ProductSubcategoryID IN (
-    SELECT ProductSubcategoryID
-    FROM Production.ProductSubcategory
-    WHERE Name = 'Wheels'
-);
-```
+**Beginner-Friendly Explanation**
+`IN` asks: "Is this value in that list?" It is the most intuitive subquery operator—like checking whether a name appears on a guest list.
 
-**Expected Output (sample):**
-
-| Name |
-|------|
-| LL Mountain Front Wheel |
-| ML Mountain Front Wheel |
-| HL Mountain Front Wheel |
-| LL Road Front Wheel |
-
-**Explanation:** The inner query returns the `ProductSubcategoryID` for the "Wheels" subcategory. The outer query then returns all products whose `ProductSubcategoryID` matches that value. This is a clean way to filter based on a dynamic list.
-
-```sql
--- Example 2: NOT IN with subquery — find products NOT in finished bicycle subcategories
-SELECT [Name]
-FROM Production.Product
-WHERE ProductSubcategoryID NOT IN (
-    SELECT ProductSubcategoryID
-    FROM Production.ProductSubcategory
-    WHERE [Name] = 'Mountain Bikes'
-       OR [Name] = 'Road Bikes'
-       OR [Name] = 'Touring Bikes'
-);
-```
-
-**Expected Output (sample):**
-
-| Name |
-|------|
-| Adjustable Race |
-| All-Purpose Bike Stand |
-| AWC Logo Cap |
-
-**Explanation:** The inner query returns the IDs of the three finished-bicycle subcategories. The outer query returns all products whose `ProductSubcategoryID` is not one of those three. Note that this query cannot be converted to a simple `<>` join because the not-equal join would have a different meaning.
-
-```sql
--- Example 3: The NOT IN NULL pitfall
--- This query returns NO rows if the subquery returns any NULL
-SELECT [Name]
-FROM Production.Product
-WHERE ProductSubcategoryID NOT IN (
-    SELECT ProductSubcategoryID
-    FROM Production.ProductSubcategory
-    WHERE [Name] = 'Mountain Bikes'
-    UNION ALL
-    SELECT NULL  -- Simulating a NULL in the subquery result
-);
-```
-
-**Expected Output:** (no rows returned)
-
-**Explanation:** Because the subquery returns a NULL, the `NOT IN` condition evaluates to `ProductSubcategoryID <> 'Mountain Bikes' AND ProductSubcategoryID <> NULL`. The second condition is UNKNOWN, so the entire expression is not TRUE for any row. To avoid this, add `WHERE ProductSubcategoryID IS NOT NULL` inside the subquery.
-
-**Real-World Cases:**
-
-- **E-commerce:** Finding all customers who purchased a specific product.
-- **HR:** Finding employees who are not in a particular department.
-- **Data cleanup:** Identifying records not referenced by any foreign key.
-
-**References:**
-
-- Microsoft Learn: Subqueries (SQL Server) — NOT IN - https://learn.microsoft.com/en-us/sql/relational-databases/performance/subqueries
-- Oracle: IN Condition - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/IN-Condition.html
-- PostgreSQL: Subquery Expressions — IN - https://www.postgresql.org/docs/current/functions-subquery.html
-
-
-## 2. Existence Checking: EXISTS and NOT EXISTS
-
-### Core Definitions
-
-- **Core Definition:** `EXISTS` tests whether a subquery returns any rows at all. `NOT EXISTS` tests whether a subquery returns no rows.
-- **Technical Definition:** `EXISTS (subquery)` returns TRUE if the subquery returns at least one row, and FALSE if it returns zero rows. The actual data returned by the subquery is ignored; only the existence of rows matters. `NOT EXISTS` is the logical negation.
-- **Beginner-Friendly Explanation:** `EXISTS` asks "does this subquery find anything?" If yes, it's true. `NOT EXISTS` asks "does this subquery find nothing?" If yes, it's true.
+---
 
 ### Purposes
 
-- To check for the existence of rows matching a condition without retrieving data
-- To implement anti-join logic (find rows with no matching counterpart)
-- To enable correlated subqueries that reference the outer query
-- To provide a safer alternative to `NOT IN` when NULLs are present
+- To filter rows based on membership in a set of values from another table.
+- To replace a series of `OR` conditions with a single readable predicate.
+- To express semi-join logic ("rows that have a match in the subquery result").
+- To filter against a dynamic list produced by a subquery.
 
-### Syntax Structures and Rules
+---
 
-**Complete General Syntax:**
+### Syntax Rules and Structure
 
-```sql
--- EXISTS
-WHERE EXISTS (SELECT * FROM table WHERE condition)
-
--- NOT EXISTS
-WHERE NOT EXISTS (SELECT * FROM table WHERE condition)
+**General Syntax**
+```
+value IN (subquery)
+value NOT IN (subquery)
 ```
 
-**Component Breakdown:**
+**Component Breakdown**
 
-- `EXISTS` / `NOT EXISTS`: The existence predicate
-- `(SELECT * FROM table WHERE condition)`: A subquery whose result set is tested for emptiness
+| Component | Description |
+|-----------|-------------|
+| `value` | A scalar expression or row constructor from the outer query. |
+| `IN` / `NOT IN` | Membership operator. |
+| `(subquery)` | A subquery returning one column (or matching row constructor columns). |
 
-**Syntax Rules:**
+**Syntax Rules**
 
-- `EXISTS` is not preceded by a column name, constant, or other expression; it stands alone before the subquery.
-- The select list of an `EXISTS` subquery conventionally uses `*`, but any expression (e.g., `SELECT 1`) works because the result is ignored.
-- The subquery can be correlated (referencing outer columns) or non-correlated.
-- `EXISTS` returns TRUE even if the subquery returns rows containing only NULLs, as long as rows exist.
+1. The subquery must return exactly one column (unless a row constructor is used on the left side).
+2. `IN` returns `TRUE` if the value matches any row in the subquery result.
+3. `NOT IN` returns `TRUE` if the value matches no row in the subquery result—but only if the subquery contains no `NULL`s.
+4. `IN` with a subquery containing `NULL`s may return `UNKNOWN` for non-matching values, which behaves like `FALSE` in a `WHERE` clause.
 
-**Constraints and Limitations:**
+**Constraints and Limitations**
 
-- `EXISTS` subqueries cannot use aggregate functions without a `GROUP BY` in some databases (implementation-dependent).
-- `NOT EXISTS` is generally preferred over `NOT IN` when NULLs may be present, because `NOT EXISTS` is not affected by NULL values in the subquery.
+- **The `NOT IN` `NULL` trap**: If the subquery returns any `NULL`, `NOT IN` evaluates to `UNKNOWN` for non-matching rows, and the query returns no rows. Use `NOT EXISTS` instead.
+- `IN` with a large subquery result can be memory-intensive; the optimiser may materialise the result set.
+- `IN` with a subquery returning multiple columns is invalid (unless using row constructors).
 
-**Annotated Code Examples:**
+---
+
+### Annotated Code Examples
+
+**Example 1: Basic `IN` Subquery**
 
 ```sql
--- Example 1: EXISTS — find product types that exist in at least one city
-SELECT DISTINCT store_type
-FROM stores
+SELECT CustomerID, SalesOrderID
+FROM Sales.SalesOrderHeader
+WHERE CustomerID IN (
+  SELECT CustomerID FROM Sales.Customer WHERE CountryRegion = 'Canada'
+);
+```
+
+**Step-by-Step Explanation**
+
+1. The subquery returns the set of `CustomerID` values for Canadian customers.
+2. The outer query returns orders whose `CustomerID` appears in that set.
+3. The result is all orders placed by Canadian customers.
+
+**Expected Output (illustrative, based on SQL Server documentation)**:
+
+| CustomerID | SalesOrderID |
+|------------|--------------|
+| 29485      | 71782        |
+| 29486      | 71783        |
+
+---
+
+**Example 2: `NOT IN` and the `NULL` Trap**
+
+```sql
+-- Assumes some rows in subquery have NULL CustomerID
+SELECT CustomerID, SalesOrderID
+FROM Sales.SalesOrderHeader
+WHERE CustomerID NOT IN (
+  SELECT CustomerID FROM Sales.Customer WHERE CountryRegion = 'Canada'
+);
+```
+
+**Expected Output (when subquery contains `NULL`)**: **Zero rows**, because `NOT IN` with `NULL`s evaluates to `UNKNOWN` for every non-matching row.
+
+**Safe Alternative**:
+```sql
+SELECT CustomerID, SalesOrderID
+FROM Sales.SalesOrderHeader
+WHERE NOT EXISTS (
+  SELECT 1 FROM Sales.Customer
+  WHERE CountryRegion = 'Canada'
+    AND Sales.Customer.CustomerID = SalesOrderHeader.CustomerID
+);
+```
+
+**Why the Alternative Works**: `NOT EXISTS` returns `TRUE` when the subquery returns no rows, unaffected by `NULL`s in the subquery result.
+
+---
+
+### Real-World Cases
+
+- **Customer segmentation**: Orders from customers in a target region.
+- **Product filtering**: Products in a specific category.
+- **Set membership**: Employees whose department ID is in a list of active departments.
+
+---
+
+## 2. `EXISTS`
+
+### Definitions
+
+**Core Definition**
+`EXISTS` tests whether a subquery returns any rows, returning `TRUE` if at least one row is returned and `FALSE` otherwise.
+
+**Technical Definition**
+`EXISTS (subquery)` returns `TRUE` if the subquery returns one or more rows, and `FALSE` if it returns zero rows. `EXISTS` ignores the subquery's `SELECT` list—only the presence or absence of rows matters. It is most commonly used with correlated subqueries, where the subquery references columns from the outer query. `NOT EXISTS` is the negation, and it is `NULL`-safe (unlike `NOT IN`). PostgreSQL documentation states that `EXISTS` is usually the best choice when testing for existence, and that `NOT EXISTS` is the most efficient and safest way to implement anti-join logic.
+
+**Beginner-Friendly Explanation**
+`EXISTS` asks: "Does a matching row exist?" It does not care what the row contains—only whether there is at least one. `EXISTS` can stop looking as soon as it finds one match, making it very efficient.
+
+---
+
+### Purposes
+
+- To check for the existence of related rows (e.g., "does this customer have any orders?").
+- To implement anti-join logic safely with `NOT EXISTS`.
+- To filter rows based on whether a correlated condition is satisfied.
+- To replace `NOT IN` where `NULL`s are a concern.
+
+---
+
+### Syntax Rules and Structure
+
+**General Syntax**
+```
+WHERE EXISTS (subquery)
+WHERE NOT EXISTS (subquery)
+```
+
+**Syntax Rules**
+
+1. The subquery may return any number of columns; the `SELECT` list is irrelevant.
+2. `EXISTS` returns `TRUE` if the subquery returns at least one row, `FALSE` otherwise.
+3. The subquery is typically correlated, referencing columns from the outer query.
+4. `NOT EXISTS` returns `TRUE` if the subquery returns zero rows.
+5. `EXISTS` can short-circuit evaluation as soon as one matching row is found.
+
+**Constraints and Limitations**
+
+- `EXISTS` is usually used with correlated subqueries; uncorrelated `EXISTS` is rarely useful (it returns the same `TRUE`/`FALSE` for every outer row).
+- `NOT EXISTS` is `NULL`-safe, unlike `NOT IN`.
+
+---
+
+### Annotated Code Examples
+
+**Example 1: `EXISTS` for Existence Check**
+
+```sql
+SELECT c.customer_name
+FROM customers c
 WHERE EXISTS (
-    SELECT *
-    FROM cities_stores
-    WHERE cities_stores.store_type = stores.store_type
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
 );
 ```
 
-**Expected Output (sample):**
+**Expected Output (illustrative)**:
 
-| store_type |
-|------------|
-| Supermarket |
-| Convenience |
-| Department |
+| customer_name |
+|---------------|
+| Alice         |
+| Bob           |
 
-**Explanation:** The outer query iterates over each `store_type`. The correlated subquery checks whether that store type appears in `cities_stores`. If at least one row is found, `EXISTS` is TRUE and the store type is returned.
+**Why This Output Occurs**: For each customer, `EXISTS` checks whether the subquery returns any order rows for that customer. Only customers with at least one order are returned; Carol is excluded.
+
+---
+
+**Example 2: `NOT EXISTS` as a Safe Anti-Join**
 
 ```sql
--- Example 2: NOT EXISTS — find product types that exist in NO city
-SELECT DISTINCT store_type
-FROM stores
+SELECT c.customer_name
+FROM customers c
 WHERE NOT EXISTS (
-    SELECT *
-    FROM cities_stores
-    WHERE cities_stores.store_type = stores.store_type
+  SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id
 );
 ```
 
-**Expected Output (sample):**
+**Expected Output (illustrative)**:
 
-| store_type |
-|------------|
-| Warehouse |
+| customer_name |
+|---------------|
+| Carol         |
 
-**Explanation:** The correlated subquery checks for each store type whether it appears in `cities_stores`. `NOT EXISTS` returns TRUE only when the subquery returns zero rows, meaning the store type exists in no city.
+**Why This Output Occurs**: `NOT EXISTS` returns `TRUE` when the subquery returns zero rows, correctly identifying customers without orders. Unlike `NOT IN`, it is not affected by `NULL`s in the subquery result.
 
-```sql
--- Example 3: Double NOT EXISTS — find store types present in ALL cities
-SELECT DISTINCT store_type
-FROM stores s1
-WHERE NOT EXISTS (
-    SELECT *
-    FROM cities
-    WHERE NOT EXISTS (
-        SELECT *
-        FROM cities_stores
-        WHERE cities_stores.city = cities.city
-          AND cities_stores.store_type = s1.store_type
-    )
-);
-```
+---
 
-**Expected Output (sample):**
+### Real-World Cases
 
-| store_type |
-|------------|
-| Supermarket |
+- **Existence checks**: Customers who have placed at least one order.
+- **Anti-joins**: Products that have never been sold.
+- **Conditional logic**: Filtering rows based on the presence of related data.
 
-**Explanation:** This is a classic relational division pattern. The inner `NOT EXISTS` finds cities where the store type is missing. The outer `NOT EXISTS` finds store types for which no such city exists—meaning the store type is present in every city.
+---
 
-**Real-World Cases:**
+## 3. `ANY` / `SOME`
 
-- **E-commerce:** Finding customers who have never placed an order.
-- **HR:** Finding employees who have no direct reports.
-- **Inventory:** Finding products that have never been sold.
+### Definitions
 
-**References:**
+**Core Definition**
+`ANY` (and its synonym `SOME`) compares a value to each row in a subquery and returns `TRUE` if the comparison is true for at least one row.
 
-- MySQL Reference Manual: Subqueries with EXISTS or NOT EXISTS - https://dev.mysql.com/doc/refman/8.0/en/exists-and-not-exists-subqueries.html
-- Microsoft Learn: Subqueries with EXISTS - https://learn.microsoft.com/en-us/sql/relational-databases/performance/subqueries
-- PostgreSQL: Subquery Expressions — EXISTS - https://www.postgresql.org/docs/current/functions-subquery.html
+**Technical Definition**
+`value operator ANY (subquery)` returns `TRUE` if `value operator row` is true for any row in the subquery result. `SOME` is a synonym for `ANY` in standard SQL and MySQL. The operator must be a comparison operator (`=`, `<>`, `<`, `>`, `<=`, `>=`). MySQL documentation describes `ANY` as a standard SQL keyword with the same semantics as `SOME`. In PostgreSQL, `ANY` is part of the subquery expression syntax and can also be used with arrays.
 
+**Beginner-Friendly Explanation**
+`ANY` asks: "Is this value greater than (or less than, or equal to) at least one of the values in the list?" It is a "any match" comparison.
 
-## 3. Quantified Comparisons: ANY, SOME, and ALL
-
-### Core Definitions
-
-- **Core Definition:** `ANY`, `SOME`, and `ALL` are quantifiers that modify a comparison operator to compare a value against a set of values returned by a subquery.
-- **Technical Definition:** `expression operator ANY (subquery)` returns TRUE if the comparison is TRUE for at least one row of the subquery. `expression operator ALL (subquery)` returns TRUE if the comparison is TRUE for every row of the subquery. `SOME` is a synonym for `ANY`.
-- **Beginner-Friendly Explanation:** `ANY` means "at least one." `ALL` means "every single one." `SOME` is just another word for `ANY`.
+---
 
 ### Purposes
 
-- To compare a value against a set of values with existential (`ANY`/`SOME`) or universal (`ALL`) quantification
-- To express conditions like "greater than at least one" or "greater than all"
-- To provide a more expressive alternative to `IN` and `NOT IN` when combined with operators other than `=`
-- To enable quantified comparisons that cannot be expressed with simple `IN`/`NOT IN`
+- To compare a value against any row in a subquery result.
+- To express "greater than the minimum" style comparisons without using aggregate functions.
+- To implement set-wide comparisons where at least one match suffices.
+- To replace `IN` when the comparison operator is not equality.
 
-### Syntax Structures and Rules
+---
 
-**Complete General Syntax:**
+### Syntax Rules and Structure
 
-```sql
-expression comparison_operator { ANY | SOME } (subquery)
-expression comparison_operator ALL (subquery)
+**General Syntax**
+```
+value operator ANY (subquery)
+value operator SOME (subquery)
 ```
 
-**Component Breakdown:**
+**Component Breakdown**
 
-- `expression`: The value being compared
-- `comparison_operator`: One of `=`, `>`, `<`, `>=`, `<=`, `<>`, `!=`
-- `ANY` / `SOME` / `ALL`: The quantifier
-- `(subquery)`: A subquery returning exactly one column
+| Component | Description |
+|-----------|-------------|
+| `value` | Scalar expression from the outer query. |
+| `operator` | `=`, `<>`, `<`, `>`, `<=`, `>=`. |
+| `ANY` / `SOME` | Quantifier. |
+| `(subquery)` | Subquery returning one column. |
 
-**Syntax Rules:**
+**Syntax Rules**
 
-- `ANY` and `SOME` are synonyms; `SOME` is the ISO-standard keyword.
-- `= ANY` is equivalent to `IN`; `<> ALL` is equivalent to `NOT IN`.
-- If the subquery returns no rows, `ANY` returns FALSE and `ALL` returns TRUE (vacuously true).
-- If the subquery contains NULLs, the result follows SQL three-valued logic: `ANY` returns NULL if no TRUE result is found and at least one NULL is present; `ALL` returns NULL if no FALSE result is found and at least one NULL is present.
+1. `ANY` and `SOME` are synonyms.
+2. `value = ANY (subquery)` is equivalent to `value IN (subquery)`.
+3. `value > ANY (subquery)` means "greater than at least one value" (i.e., greater than the minimum).
+4. `value < ANY (subquery)` means "less than at least one value" (i.e., less than the maximum).
+5. `ANY` must be used with a comparison operator.
 
-**Constraints and Limitations:**
+**Constraints and Limitations**
 
-- The subquery must return exactly one column.
-- `ANY`/`SOME` and `ALL` cannot be used with `LIKE` or `IS NULL` in most databases.
-- Negation rules: `NOT (x > ALL (subquery))` is equivalent to `x <= ANY (subquery)`; `NOT (x > ANY (subquery))` is equivalent to `x <= ALL (subquery)`.
+- `<> ANY` is always `TRUE` for non-empty sets (because any value differs from at least one row), which is often not the intended meaning.
+- `ANY` with `NULL`s in the subquery follows three-valued logic: `TRUE` if any comparison is `TRUE`; `UNKNOWN` if no comparison is `TRUE` but some are `UNKNOWN`.
 
-**Annotated Code Examples:**
+---
+
+### Annotated Code Examples
+
+**Example 1: `> ANY` (Greater Than the Minimum)**
 
 ```sql
--- Example 1: ANY — find products with list price >= ANY subcategory max
-SELECT Name
-FROM Production.Product
-WHERE ListPrice >= ANY (
-    SELECT MAX(ListPrice)
-    FROM Production.Product
-    GROUP BY ProductSubcategoryID
+SELECT product_name, price
+FROM products
+WHERE price > ANY (
+  SELECT price FROM products WHERE category = 'Electronics'
 );
 ```
 
-**Expected Output (sample):**
+**Explanation**: The subquery returns the prices of all electronics products. `price > ANY (...)` returns `TRUE` if the outer product's price is greater than at least one electronics price—i.e., greater than the minimum electronics price.
 
-| Name |
-|------|
-| Mountain-200 |
-| Road-150 |
-| Touring-3000 |
+---
 
-**Explanation:** The inner query returns the maximum list price for each product subcategory. The outer query returns products whose list price is greater than or equal to at least one of those maxima (i.e., greater than or equal to the minimum of the maxima). This is equivalent to `ListPrice >= MIN(subquery)`.
+**Example 2: `= ANY` Equivalent to `IN`**
 
 ```sql
--- Example 2: ALL — find employees whose salary exceeds ALL manager salaries
-SELECT emp
-FROM Employee emp
-WHERE emp.salary > ALL (
-    SELECT m.salary
-    FROM Manager m
-    WHERE m.department = emp.department
+SELECT CustomerID, SalesOrderID
+FROM Sales.SalesOrderHeader
+WHERE CustomerID = ANY (
+  SELECT CustomerID FROM Sales.Customer WHERE CountryRegion = 'Canada'
 );
 ```
 
-**Expected Output (sample):**
+**Explanation**: This is logically equivalent to `CustomerID IN (SELECT CustomerID FROM Sales.Customer WHERE CountryRegion = 'Canada')`. The `= ANY` form is rarely used because `IN` is more readable.
 
-| emp |
-|-----|
-| Smith |
-| Johnson |
+---
 
-**Explanation:** The correlated subquery returns the salaries of all managers in the employee's department. `> ALL` means the employee's salary must be greater than every manager's salary in that department—i.e., greater than the maximum manager salary.
+### Real-World Cases
 
-```sql
--- Example 3: SOME — equivalent to ANY
-SELECT s1
-FROM t1
-WHERE s1 > SOME (SELECT s1 FROM t2);
--- This is identical to:
-SELECT s1
-FROM t1
-WHERE s1 > ANY (SELECT s1 FROM t2);
-```
+- **Threshold comparisons**: Products priced above any competitor product.
+- **Set-wide comparisons**: Employees earning more than any manager in a department.
+- **Membership testing**: Using `= ANY` as a synonym for `IN`.
 
-**Expected Output:** Identical results from both queries.
+---
 
-**Explanation:** `SOME` is a synonym for `ANY`. The ISO SQL standard defines `SOME` as the preferred keyword, though `ANY` is more commonly used in practice.
+## 4. `ALL`
 
-**Real-World Cases:**
+### Definitions
 
-- **Sales:** Finding products priced above all competitor products.
-- **HR:** Finding employees earning more than any manager in their department.
-- **Finance:** Finding transactions exceeding any transaction in a reference period.
+**Core Definition**
+`ALL` compares a value to every row in a subquery and returns `TRUE` only if the comparison is true for all rows.
 
-**References:**
+**Technical Definition**
+`value operator ALL (subquery)` returns `TRUE` if `value operator row` is true for every row in the subquery result. `ALL` is the universal quantifier: it requires all rows to satisfy the comparison. SQL Server documentation describes `ALL` as returning `TRUE` if all comparisons are `TRUE`, `FALSE` if any comparison is `FALSE`, and `UNKNOWN` if some comparisons are `UNKNOWN` and no comparison is `FALSE`.
 
-- SAP Help Portal: Subquery That Follows ANY, ALL, or SOME - https://help.sap.com/docs/SAP_SQL_Anywhere/e38b2f6217f24bdb90a3ff8ae57b1dd5/819007fa6ce210148036e2d4518e0129.html
-- Microsoft Learn: Comparison Operators Modified by ANY, SOME, or ALL - https://learn.microsoft.com/en-us/sql/t-sql/language-elements/any-transact-sql
-- PostgreSQL: Subquery Expressions — ANY/SOME, ALL - https://www.postgresql.org/docs/current/functions-subquery.html
+**Beginner-Friendly Explanation**
+`ALL` asks: "Is this value greater than (or less than, or equal to) **every** value in the list?" It is a "all match" comparison.
 
-
-## 4. Standard Operators: Combining Subqueries with Comparison Operators
-
-### Core Definitions
-
-- **Core Definition:** Standard comparison operators (`=`, `<`, `>`, `!=`, `<=`, `>=`) can be used with subqueries when the subquery returns exactly one value (a scalar subquery).
-- **Technical Definition:** A subquery introduced with an unmodified comparison operator (i.e., not followed by `ANY` or `ALL`) must return a single value rather than a list of values. If the subquery returns more than one row, the database raises an error.
-- **Beginner-Friendly Explanation:** If you use `=`, `<`, or `>` with a subquery, the subquery must return exactly one value. If it returns more than one, you'll get an error.
+---
 
 ### Purposes
 
-- To compare a value against a single computed result from another query
-- To use aggregate functions (`MAX`, `MIN`, `SUM`, `AVG`, `COUNT`) as comparison targets
-- To implement scalar subquery logic where the result is a known single value
-- To express conditions that cannot be handled by `IN` or `EXISTS`
+- To compare a value against all rows in a subquery result.
+- To express "greater than the maximum" style comparisons without using aggregate functions.
+- To implement universal quantification ("for all").
+- To filter rows that satisfy a condition against every row of a related set.
 
-### Syntax Structures and Rules
+---
 
-**Complete General Syntax:**
+### Syntax Rules and Structure
 
-```sql
-non_subquery_operand comparison_operator (subquery)
+**General Syntax**
+```
+value operator ALL (subquery)
 ```
 
-**Component Breakdown:**
+**Component Breakdown**
 
-- `non_subquery_operand`: The value or expression being compared
-- `comparison_operator`: One of `=`, `>`, `<`, `>=`, `<=`, `<>`, `!=`
-- `(subquery)`: A subquery that must return exactly one value (one row, one column)
+| Component | Description |
+|-----------|-------------|
+| `value` | Scalar expression from the outer query. |
+| `operator` | `=`, `<>`, `<`, `>`, `<=`, `>=`. |
+| `ALL` | Universal quantifier. |
+| `(subquery)` | Subquery returning one column. |
 
-**Syntax Rules:**
+**Syntax Rules**
 
-- The subquery must return exactly one column.
-- The subquery must return at most one row. If it returns more than one row, an error occurs.
-- Scalar subqueries can be used in `SELECT`, `WHERE`, and `HAVING` clauses.
-- The subquery can be correlated (referencing outer columns) or non-correlated.
+1. `value > ALL (subquery)` means "greater than every value" (i.e., greater than the maximum).
+2. `value < ALL (subquery)` means "less than every value" (i.e., less than the minimum).
+3. `value = ALL (subquery)` is `TRUE` only if all rows in the subquery equal `value`; if the subquery is empty, `ALL` returns `TRUE` (vacuous truth).
+4. `ALL` with `NULL`s follows three-valued logic: `FALSE` if any comparison is `FALSE`; `UNKNOWN` if no `FALSE` but some `UNKNOWN`.
 
-**Constraints and Limitations:**
+**Constraints and Limitations**
 
-- **Single-value requirement:** An unmodified comparison operator requires a scalar subquery. If the subquery returns multiple rows, the query fails.
-- **NULL propagation:** If the subquery returns NULL, the comparison evaluates to UNKNOWN, which is treated as FALSE in a `WHERE` clause.
-- **Performance consideration:** Scalar subqueries in `SELECT` lists are executed per row, which can be inefficient for large result sets.
+- `<> ALL (subquery)` is equivalent to `NOT IN (subquery)` and inherits the same `NULL` pitfalls.
+- `ALL` with an empty subquery returns `TRUE` (vacuous truth), which may be surprising.
+- `ALL` is less commonly used than `ANY` and may not be optimised as efficiently.
 
-**Annotated Code Examples:**
+---
+
+### Annotated Code Examples
+
+**Example 1: `> ALL` (Greater Than the Maximum)**
 
 ```sql
--- Example 1: = with scalar subquery — find the customer in Linda Mitchell's territory
-SELECT CustomerID
-FROM Sales.Customer
-WHERE TerritoryID = (
-    SELECT TerritoryID
-    FROM Sales.SalesPerson
-    WHERE FirstName = 'Linda' AND LastName = 'Mitchell'
+SELECT product_name, price
+FROM products
+WHERE price > ALL (
+  SELECT price FROM products WHERE category = 'Electronics'
 );
 ```
 
-**Expected Output (sample):**
+**Explanation**: The subquery returns the prices of all electronics products. `price > ALL (...)` returns `TRUE` only if the outer product's price is greater than every electronics price—i.e., greater than the maximum electronics price.
 
-| CustomerID |
-|------------|
-| 11001 |
-| 11002 |
-| 11003 |
+---
 
-**Explanation:** The inner query returns the single `TerritoryID` assigned to Linda Mitchell. The outer query then finds all customers in that territory. Because each salesperson covers exactly one territory, the subquery returns exactly one value.
+**Example 2: `<> ALL` Equivalent to `NOT IN`**
 
 ```sql
--- Example 2: > with aggregate subquery — find products above average price
-SELECT ProductName, Price
-FROM Products
-WHERE Price > (
-    SELECT AVG(Price)
-    FROM Products
+SELECT CustomerID, SalesOrderID
+FROM Sales.SalesOrderHeader
+WHERE CustomerID <> ALL (
+  SELECT CustomerID FROM Sales.Customer WHERE CountryRegion = 'Canada'
 );
 ```
 
-**Expected Output (sample):**
+**Explanation**: This is logically equivalent to `CustomerID NOT IN (SELECT CustomerID FROM Sales.Customer WHERE CountryRegion = 'Canada')`. Both inherit the `NULL` pitfall: if the subquery returns any `NULL`, the result is no rows.
 
-| ProductName | Price |
-|-------------|-------|
-| Laptop Pro | 1299.99 |
-| Monitor 4K | 599.99 |
+---
 
-**Explanation:** The subquery returns the average price of all products (a single value). The outer query returns products priced above that average. This is a classic scalar subquery pattern.
+### Real-World Cases
 
-```sql
--- Example 3: Scalar subquery in SELECT list
-SELECT
-    ProductName,
-    Price,
-    (SELECT AVG(Price) FROM Products) AS AvgPrice,
-    Price - (SELECT AVG(Price) FROM Products) AS DiffFromAvg
-FROM Products;
+- **Universal quantification**: Employees earning more than all managers in their department.
+- **Threshold comparisons**: Products priced above all competitor products.
+- **Exclusion logic**: Customers not in any target region.
+
+---
+
+## 5. Comparison Operators with Subqueries
+
+### Definitions
+
+**Core Definition**
+Comparison operators (`=`, `<>`, `<`, `>`, `<=`, `>=`) used with subqueries compare a value from the outer query to a single-row subquery result.
+
+**Technical Definition**
+A scalar comparison operator with a subquery requires the subquery to return at most one row (and exactly one column). If the subquery returns more than one row, a runtime error occurs (SQL Server error 512, MySQL error 1242). If it returns zero rows, the comparison evaluates to `NULL` (which behaves like `FALSE` in a `WHERE` clause). These operators are the foundation of scalar subquery usage.
+
+**Beginner-Friendly Explanation**
+Comparison operators with subqueries let you say: "Is this value equal to (or greater than, or less than) the single value returned by this subquery?" The subquery must give exactly one answer.
+
+---
+
+### Purposes
+
+- To compare each row against a single computed benchmark (average, maximum, total).
+- To filter rows based on a scalar subquery result.
+- To implement single-row comparisons with `=`, `<`, `>`, etc.
+- To enforce cardinality expectations (error if more than one row).
+
+---
+
+### Syntax Rules and Structure
+
+**General Syntax**
+```
+value operator (scalar_subquery)
 ```
 
-**Expected Output (sample):**
+**Component Breakdown**
 
-| ProductName | Price | AvgPrice | DiffFromAvg |
-|-------------|-------|----------|-------------|
-| Laptop Pro | 1299.99 | 450.00 | 849.99 |
-| Basic Mouse | 19.99 | 450.00 | -430.01 |
+| Component | Description |
+|-----------|-------------|
+| `value` | Scalar expression from the outer query. |
+| `operator` | `=`, `<>`, `<`, `>`, `<=`, `>=`. |
+| `(scalar_subquery)` | Subquery returning one row and one column. |
 
-**Explanation:** The scalar subquery `(SELECT AVG(Price) FROM Products)` is executed once and its result is used in each row of the outer query. This allows you to compare each row's value against the overall average.
+**Syntax Rules**
 
-**Real-World Cases:**
+1. The subquery must return exactly one column.
+2. The subquery must return at most one row; more than one row is a runtime error.
+3. Zero rows → comparison is `NULL` (filtered out in `WHERE`).
+4. Aggregates without `GROUP BY` (e.g., `AVG`, `MAX`) guarantee a single row.
 
-- **Finance:** Finding transactions above the average transaction value.
-- **HR:** Finding employees earning more than the department average.
-- **E-commerce:** Finding products priced higher than the maximum price of a competitor.
+**Constraints and Limitations**
 
-**References:**
+- Multiple-row subqueries cause runtime errors.
+- `NULL` results require explicit handling (`COALESCE`, `IS NULL`).
+- Correlated scalar comparisons execute per outer row.
 
-- Microsoft Learn: Subqueries with Comparison Operators - https://learn.microsoft.com/en-us/sql/relational-databases/performance/subqueries
-- MySQL Reference Manual: Comparisons Using Subqueries - https://dev.mysql.com/doc/refman/8.0/en/subqueries.html
-- Oracle: Comparisons Using Subqueries - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Comparisons-Using-Subqueries.html
+---
 
+### Annotated Code Examples
 
-## Summary of Subquery Operators
+**Example 1: `=` with a Scalar Subquery**
 
-| Operator | Equivalent | Subquery Returns | NULL Behaviour | Best For |
-|----------|-----------|-----------------|----------------|----------|
-| `IN` | `= ANY` | One column, multiple rows | `NOT IN` fails if NULL present | Membership testing |
-| `NOT IN` | `<> ALL` | One column, multiple rows | Returns no rows if any NULL | Exclusion testing |
-| `EXISTS` | — | Any (result ignored) | Not affected by NULL | Existence checking |
-| `NOT EXISTS` | — | Any (result ignored) | Not affected by NULL | Anti-join |
-| `= ANY` | `IN` | One column, multiple rows | NULL-sensitive | Quantified equality |
-| `> ANY` | — | One column, multiple rows | NULL-sensitive | Greater than minimum |
-| `> ALL` | — | One column, multiple rows | NULL-sensitive | Greater than maximum |
-| `= (subquery)` | — | Exactly one value | Returns UNKNOWN if NULL | Scalar comparison |
-| `> (subquery)` | — | Exactly one value | Returns UNKNOWN if NULL | Scalar comparison |
+```sql
+SELECT employee_id, salary
+FROM employees
+WHERE salary = (SELECT MAX(salary) FROM employees);
+```
 
+**Expected Output (illustrative)**:
+
+| employee_id | salary |
+|-------------|--------|
+| 101         | 92000  |
+
+**Why This Output Occurs**: The subquery returns the single maximum salary value; the outer query returns the employee(s) with that salary.
+
+---
+
+**Example 2: `>` with a Scalar Subquery**
+
+```sql
+SELECT order_id, total_amount
+FROM orders
+WHERE total_amount > (SELECT AVG(total_amount) FROM orders);
+```
+
+**Expected Output (illustrative)**:
+
+| order_id | total_amount |
+|----------|--------------|
+| 1001     | 250.00       |
+| 1003     | 300.00       |
+
+**Why This Output Occurs**: The subquery returns the average order amount; the outer query filters orders above that threshold.
+
+---
+
+**Example 3: Multiple-Row Error and Fix**
+
+```sql
+-- Error: subquery returns multiple rows
+SELECT SalesOrderID, ProductID
+FROM Sales.SalesOrderDetail
+WHERE SalesOrderID = (SELECT SalesOrderID FROM Sales.SalesOrderHeader);
+```
+
+**Expected Error (SQL Server)**: Msg 512: Subquery returned more than 1 value.
+
+**Fix using an aggregate**:
+```sql
+SELECT SalesOrderID, ProductID
+FROM Sales.SalesOrderDetail
+WHERE SalesOrderID = (SELECT MAX(SalesOrderID) FROM Sales.SalesOrderHeader);
+```
+
+**Explanation**: `MAX` guarantees exactly one row, satisfying the scalar requirement.
+
+---
+
+### Real-World Cases
+
+- **Benchmark comparisons**: Employees earning more than the average salary.
+- **Maximum/minimum lookups**: Products priced equal to the maximum price.
+- **Dynamic thresholds**: Orders above the average order value.
+
+---
 
 ## References
 
-### Official Documentation
+1. **PostgreSQL Documentation — Subquery Expressions (IN, NOT IN, EXISTS, ANY, ALL)** — https://www.postgresql.org/docs/current/functions-subquery.html
+2. **PostgreSQL Documentation — Scalar Subqueries** — https://www.postgresql.org/docs/current/sql-expressions.html#SQL-SYNTAX-SCALAR-SUBQUERIES
+3. **MySQL 8.0 Reference Manual — Subqueries with ANY, IN, or SOME** — https://dev.mysql.com/doc/refman/8.0/en/any-in-some-subqueries.html
+4. **MySQL 8.0 Reference Manual — Subqueries with ALL** — https://dev.mysql.com/doc/refman/8.0/en/all-subqueries.html
+5. **MySQL 8.0 Reference Manual — Subqueries with EXISTS or NOT EXISTS** — https://dev.mysql.com/doc/refman/8.0/en/exists-and-not-exists-subqueries.html
+6. **Microsoft SQL Server — Subquery Fundamentals (IN, EXISTS, ANY, ALL)** — https://learn.microsoft.com/en-us/sql/relational-databases/performance/subqueries
+7. **Microsoft SQL Server — ANY (Transact-SQL)** — https://learn.microsoft.com/en-us/sql/t-sql/language-elements/any-transact-sql
+8. **Microsoft SQL Server — ALL (Transact-SQL)** — https://learn.microsoft.com/en-us/sql/t-sql/language-elements/all-transact-sql
+9. **Microsoft Learn — Use Scalar or Multi-Valued Subqueries** — https://learn.microsoft.com/en-us/training/modules/write-subqueries/3-scalar-multi-values-subqueries
+10. **Red-Gate — MySQL Subqueries: IN, EXISTS, ANY, ALL** — https://www.red-gate.com/simple-talk/databases/mysql/subqueries-in-mysql/
+11. **SQL:2016 Standard — ISO/IEC 9075-2:2016 (Foundation)** — https://www.iso.org/standard/63555.html
 
-- Microsoft Learn: Subqueries (SQL Server) - https://learn.microsoft.com/en-us/sql/relational-databases/performance/subqueries
-- Microsoft Learn: Subqueries with EXISTS - https://learn.microsoft.com/en-us/sql/relational-databases/performance/subqueries
-- Microsoft Learn: Comparison Operators Modified by ANY, SOME, or ALL - https://learn.microsoft.com/en-us/sql/t-sql/language-elements/any-transact-sql
-- Oracle: IN Condition - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/IN-Condition.html
-- Oracle: Comparisons Using Subqueries - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Comparisons-Using-Subqueries.html
-- MySQL Reference Manual: Subqueries with EXISTS or NOT EXISTS - https://dev.mysql.com/doc/refman/8.0/en/exists-and-not-exists-subqueries.html
-- MySQL Reference Manual: Comparisons Using Subqueries - https://dev.mysql.com/doc/refman/8.0/en/subqueries.html
-- MySQL Reference Manual: Subqueries with ANY, IN, or SOME - https://dev.mysql.com/doc/refman/8.0/en/subqueries.html
-- PostgreSQL: Subquery Expressions - https://www.postgresql.org/docs/current/functions-subquery.html
-- SAP Help Portal: Subquery That Follows ANY, ALL, or SOME - https://help.sap.com/docs/SAP_SQL_Anywhere/e38b2f6217f24bdb90a3ff8ae57b1dd5/819007fa6ce210148036e2d4518e0129.html
-- SAP Help Portal: Subquery That Follows EXISTS - https://help.sap.com/docs/SAP_SQL_Anywhere/e38b2f6217f24bdb90a3ff8ae57b1dd5/819007fa6ce210148036e2d4518e0129.html
+---
 
-### Academic and Technical Sources
-
-- ISO/IEC 9075-2:2016 (SQL Standard) - https://www.iso.org/standard/63555.html
-- ScienceDirect: Correlated Subqueries - https://www.sciencedirect.com/topics/computer-science/correlated-subquery
-- Ask TOM (Oracle): NOT IN operator with NULL data - https://asktom.oracle.com/pls/apex/asktom.search?tag=not-in-operator-with-null-data
-- PostgreSQL Mailing List: Strange query problem (NOT IN with NULL) - https://www.postgresql.org/message-id/200901281850.n0SIo1v07374@candle.pha.pa.us
+This cheat sheet provides a comprehensive reference for SQL subqueries with operators, covering `IN`, `EXISTS`, `ANY`/`SOME`, `ALL`, and scalar comparison operators, including their semantics, `NULL` behaviour, cardinality requirements, and the performance and correctness pitfalls—especially the `NOT IN` `NULL` trap and the safety of `NOT EXISTS`. Always consult your specific RDBMS documentation for version-specific behaviour and optimiser transformations.

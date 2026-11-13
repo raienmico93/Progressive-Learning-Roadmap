@@ -1,1535 +1,1424 @@
-# SQL Table Constraints: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: SQL Table Constraints
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** SQL table constraints are declarative rules enforced by the database engine that restrict the data that can be stored in a table, ensuring data integrity, accuracy, and reliability.
+**Core Definition**
+Table constraints are declarative rules attached to a table or its columns that restrict the values that can be stored, thereby enforcing data integrity at the database level.
 
-**Technical Definition:** Per the ANSI/ISO SQL Standard (ISO/IEC 9075), a constraint is an assertion about the data in a database that must always be true. When a constraint is enabled, the assertion is guaranteed to hold. Constraints are defined as part of the Data Definition Language (DDL) in `CREATE TABLE` or `ALTER TABLE` statements and are checked during Data Manipulation Language (DML) operations. The primary constraint types are NOT NULL, CHECK, UNIQUE, PRIMARY KEY, and FOREIGN KEY.
+**Technical Definition**
+A constraint is a rule enforced by the database engine that restricts the data that can be inserted, updated, or deleted from a table. Constraints are declared as part of the table definition (`CREATE TABLE`) or added later (`ALTER TABLE`), and they are stored in the system catalogs as first-class objects with names, dependencies, and enforcement semantics. The principal constraint types are `NOT NULL`, `UNIQUE`, `PRIMARY KEY`, `FOREIGN KEY`, `CHECK`, `DEFAULT`, and—in PostgreSQL—`EXCLUDE`. Constraints can be column-level (attached to a single column) or table-level (spanning multiple columns), and their enforcement can be immediate or deferred (for certain constraint types in PostgreSQL).
 
-**Beginner-Friendly Explanation:** Think of a database table as a form with rules written on it. "This field must be filled in" (NOT NULL). "No two people can have the same ID number" (UNIQUE/PRIMARY KEY). "The age must be between 0 and 150" (CHECK). "This department code must exist in the departments table" (FOREIGN KEY). These rules are constraints, and the database automatically enforces them every time you try to insert, update, or delete data.
+**Beginner-Friendly Explanation**
+Constraints are the rules of the game for your database. They stop bad data from getting in—like a missing name, a duplicate email address, or a salary that is less than zero. You declare these rules once, and the database enforces them automatically for every insert, update, and delete.
 
 ### Key Characteristics
 
-- **Declarative:** Constraints are defined once in the schema and automatically enforced by the database engine for all future operations.
-- **Standardized:** The core constraint types are defined by the ANSI/ISO SQL Standard, ensuring portability across database systems.
-- **Scoped:** Constraints apply at the column level (single column) or the table level (one or more columns, including composite keys).
-- **Named:** Constraints can be explicitly named for manageability, or the database assigns a system-generated name if omitted.
-- **Deferrable:** Some constraints can be deferred until the end of a transaction, allowing temporary violations during complex multi-statement operations.
-- **Enforcement-aware:** Constraints can be validated against existing data (`WITH CHECK`) or added without validation (`WITH NOCHECK`), affecting query optimization.
+- **Declarative integrity**: Constraints are declared as part of the schema, not enforced by application code, ensuring that all applications respect the same rules.
+- **Vendor divergence**: Core constraint types (`NOT NULL`, `UNIQUE`, `PRIMARY KEY`, `FOREIGN KEY`, `CHECK`, `DEFAULT`) are broadly standardised, but `EXCLUDE` is PostgreSQL-specific, and deferrability, validation options, and enforcement toggles vary by RDBMS.
+- **Performance cost**: Constraints—especially `UNIQUE`, `PRIMARY KEY`, and `FOREIGN KEY`—incur overhead on write operations because they require index lookups and updates. They generally do not penalise reads.
+- **Dependency-aware**: Constraints participate in the dependency graph; a `PRIMARY KEY` or `UNIQUE` constraint referenced by a `FOREIGN KEY` cannot be dropped without cascading or first removing the dependent foreign key.
+- **Timing flexibility (PostgreSQL)**: `UNIQUE`, `PRIMARY KEY`, `EXCLUDE`, and `FOREIGN KEY` constraints can be declared `DEFERRABLE`, allowing their checks to be postponed until transaction commit.
 
 ### Prerequisites
 
-- Basic SQL syntax (CREATE TABLE, ALTER TABLE, INSERT, UPDATE, DELETE)
-- Understanding of data types
-- Familiarity with NULL handling and three-valued logic
-- Basic knowledge of indexes (PRIMARY KEY and UNIQUE constraints automatically create indexes)
+- A running RDBMS instance (PostgreSQL, MySQL, or SQL Server) and a client connection.
+- `CREATE TABLE` or `ALTER TABLE` privilege on the target table.
+- For `FOREIGN KEY` constraints: the referenced table and columns must exist and be `PRIMARY KEY` or `UNIQUE`.
+- Understanding of the application's data integrity requirements and the performance implications of constraint enforcement.
 
 ### Related Programming Areas
 
-- **Database Design and Normalization:** Constraints are fundamental to implementing a correct logical data model.
-- **Data Integrity and Validation:** Constraints enforce domain, entity, and referential integrity at the database level.
-- **Application Development:** Constraints provide a safety net that catches invalid data before it corrupts the database.
-- **Database Migration:** Constraint names and behaviors are a key consideration when moving schemas between database systems.
-- **Performance Tuning:** Constraint definitions influence the query optimizer's ability to generate efficient execution plans.
+- Data Definition Language (DDL) – `CREATE TABLE`, `ALTER TABLE`.
+- Data Manipulation Language (DML) – constraints are enforced during `INSERT`, `UPDATE`, and `DELETE`.
+- Indexing and query performance – `UNIQUE`, `PRIMARY KEY`, and `EXCLUDE` constraints automatically create indexes.
+- Transaction management – deferrable constraints interact with transaction boundaries.
+- Database migration and schema versioning – constraints are added, modified, and dropped as part of schema evolution.
 
 ---
 
-## Core Concepts / Key Features
+## Core Concepts and Features
 
-### 1. Core Constraint Types
+### 1. `NOT NULL`
 
-#### 1.1 NOT NULL (Preventing Missing Values at the Column Level)
+#### Definitions
 
-**Core Definitions:**
+**Core Definition**
+The `NOT NULL` constraint requires that a column cannot contain `NULL` values.
 
-- **Core Definition:** The NOT NULL constraint specifies that a column does not accept NULL values.
-- **Technical Definition:** NOT NULL is a column-level constraint that enforces domain integrity by requiring every row to have a non-NULL value in the specified column. Unlike other constraints, NOT NULL cannot be deferred and cannot be defined at the table level.
-- **Beginner-Friendly Explanation:** NOT NULL is like a required field on a form. You must fill it in—you can't leave it blank.
+**Technical Definition**
+`NOT NULL` is a column-level constraint that rejects any `INSERT` or `UPDATE` that would set the column to `NULL`. In PostgreSQL, it is implemented as a column attribute (`attnotnull` in `pg_attribute`) and is always checked immediately; it cannot be deferred. In SQL Server, `NOT NULL` is a column property rather than a separately named constraint. In MySQL, `NOT NULL` is specified as part of the column definition.
 
-**Purposes:**
+**Beginner-Friendly Explanation**
+`NOT NULL` means “this field is required.” You cannot leave it blank; every row must have a value for this column.
 
-- To ensure critical columns always have a value
-- To prevent missing data in essential fields (names, IDs, dates)
-- To simplify application logic by guaranteeing a value is present
-- To support PRIMARY KEY columns, which implicitly require NOT NULL
+#### Purposes
 
-**Syntax Structures and Rules:**
+- To ensure that critical columns always have a value (e.g., a user's email address or an order's total).
+- To prevent `NULL` from propagating into calculations and comparisons, which can cause subtle bugs.
+- To enforce application-level requirements at the database level.
 
-**Complete General Syntax:**
+#### Syntax Rules and Structure
+
+**General syntax:**
 
 ```sql
--- Column-level definition
 column_name data_type NOT NULL
-
--- Add to existing table
-ALTER TABLE table_name ALTER COLUMN column_name data_type NOT NULL;
 ```
 
-**Component Breakdown:**
+**PostgreSQL:** `column_name data_type NOT NULL` (column constraint).
 
-- `column_name`: The column to which the constraint applies
-- `NOT NULL`: The keyword phrase indicating the constraint
-- Cannot be defined as a table-level constraint
+**MySQL:** `col_name data_type [NOT NULL | NULL]`.
 
-**Syntax Rules:**
+**SQL Server:** `column_name data_type NOT NULL`.
 
-- NOT NULL is the only constraint that cannot be defined at the table level.
-- NOT NULL constraints cannot be deferred.
-- A column with NOT NULL can still have a DEFAULT value, which is used when no value is supplied.
+**Component breakdown:**
 
-**Constraints and Limitations:**
+| Component | Description |
+|-----------|-------------|
+| `NOT NULL` | The constraint keyword; rejects `NULL` values. |
 
-- Adding NOT NULL to a column with existing NULLs will fail unless the NULLs are updated first.
-- NOT NULL is not named (it does not appear in the information schema as a named constraint in most databases).
+**Syntax rules:**
 
-**Annotated Code Examples:**
+- `NOT NULL` is a column constraint and cannot be declared at the table level.
+- A `PRIMARY KEY` implies `NOT NULL`; specifying both is redundant but allowed.
+- In PostgreSQL, `NOT NULL` is not deferrable.
 
-```sql
--- Setup: Create a table with NOT NULL
-CREATE TABLE customers (
-    customer_id INT PRIMARY KEY,
-    customer_name VARCHAR(100) NOT NULL,
-    email VARCHAR(200),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+**Constraints and limitations:**
 
--- Valid insert (email can be NULL, but name and created_at cannot)
-INSERT INTO customers (customer_id, customer_name, email)
-VALUES (1, 'Alice', 'alice@example.com');
+- Adding `NOT NULL` to a column that already contains `NULL` values requires first updating or deleting those rows.
+- `NOT NULL` does not prevent empty strings or zero values; it only rejects `NULL`.
 
--- Invalid insert (customer_name cannot be NULL)
-INSERT INTO customers (customer_id, customer_name)
-VALUES (2, NULL);
--- Error: null value in column "customer_name" violates not-null constraint
-```
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-**Expected Output (valid insert):**
-
-| customer_id | customer_name | email              | created_at          |
-|-------------|---------------|--------------------|---------------------|
-| 1           | Alice         | alice@example.com  | 2026-09-19 10:30:00 |
-
-**Explanation:** The NOT NULL constraint on `customer_name` prevents the second insert. The `created_at` column has a DEFAULT, so it is automatically populated.
-
-**Real-World Cases:**
-
-- **User registration:** Usernames and email addresses must be provided.
-- **Order processing:** Order dates and customer IDs are mandatory.
-- **Financial systems:** Transaction amounts cannot be NULL.
-
-**References:**
-
-- Microsoft Learn: Constraints (NOT NULL) - https://learn.microsoft.com/en-us/sql/relational-databases/tables/unique-constraints-and-check-constraints
-- PostgreSQL: Constraints - https://www.postgresql.org/docs/current/ddl-constraints.html
-
-
-#### 1.2 UNIQUE (Ensuring Distinct Values Across a Column or Column Group)
-
-**Core Definitions:**
-
-- **Core Definition:** The UNIQUE constraint ensures that all values in a column, or a group of columns, are distinct across all rows in the table.
-- **Technical Definition:** A UNIQUE constraint enforces entity integrity by preventing duplicate values. Unlike PRIMARY KEY, UNIQUE constraints allow NULL values (though the number of NULLs allowed depends on the database dialect). A table can have multiple UNIQUE constraints, and they can be defined at the column level or table level.
-- **Beginner-Friendly Explanation:** UNIQUE means "no duplicates allowed." For example, no two customers can have the same email address.
-
-**Purposes:**
-
-- To prevent duplicate values in a column or column group
-- To enforce natural keys (e.g., email addresses, social security numbers)
-- To support FOREIGN KEY references (the referenced columns must be UNIQUE or PRIMARY KEY)
-- To allow multiple NULLs while still preventing duplicate non-NULL values
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
+##### Example 1: PostgreSQL – NOT NULL on a column
 
 ```sql
--- Column-level
-column_name data_type UNIQUE
-
--- Table-level
-CONSTRAINT constraint_name UNIQUE (column_name1, column_name2, ...)
-
--- Add to existing table
-ALTER TABLE table_name ADD CONSTRAINT constraint_name UNIQUE (column_list);
-```
-
-**Component Breakdown:**
-
-- `column_list`: One or more columns that together must be unique
-- `CONSTRAINT constraint_name`: Optional explicit name for the constraint
-
-**Syntax Rules:**
-
-- A table can have multiple UNIQUE constraints.
-- UNIQUE constraints automatically create a unique index (in most databases).
-- UNIQUE constraints allow NULL values, but the handling of multiple NULLs varies:
-  - **PostgreSQL, MySQL, SQLite:** Multiple NULLs are allowed (NULLs are considered distinct).
-  - **SQL Server:** Only one NULL is allowed per column (treated as a value for uniqueness).
-  - **Oracle:** Multiple NULLs are allowed.
-- UNIQUE constraints can be deferred in PostgreSQL and Oracle.
-
-**Constraints and Limitations:**
-
-- Composite UNIQUE constraints enforce uniqueness across the combination of columns, not each column individually.
-- UNIQUE constraints on nullable columns may behave unexpectedly with NULLs (see Section 5.2).
-
-**Annotated Code Examples:**
-
-```sql
--- Setup: Create a table with UNIQUE constraints
+-- Step 1: Create a table with a NOT NULL column.
 CREATE TABLE users (
-    user_id INT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(200) CONSTRAINT uq_users_email UNIQUE,
-    phone VARCHAR(20)
+    user_id serial PRIMARY KEY,
+    email   text NOT NULL
 );
 
--- Valid inserts
-INSERT INTO users VALUES (1, 'alice', 'alice@example.com', '555-0100');
-INSERT INTO users VALUES (2, 'bob', NULL, '555-0200');
-INSERT INTO users VALUES (3, 'charlie', NULL, '555-0300');
--- Note: Multiple NULLs allowed in email (PostgreSQL behavior)
-
--- Invalid insert (duplicate username)
-INSERT INTO users VALUES (4, 'alice', 'alice2@example.com', '555-0400');
--- Error: duplicate key value violates unique constraint "users_username_key"
+-- Step 2: Attempt to insert a NULL email.
+INSERT INTO users (email) VALUES (NULL);
 ```
 
-**Expected Output (valid inserts):**
+**Expected output:**
 
-| user_id | username | email              | phone    |
-|---------|----------|--------------------|----------|
-| 1       | alice    | alice@example.com  | 555-0100 |
-| 2       | bob      | NULL               | 555-0200 |
-| 3       | charlie  | NULL               | 555-0300 |
+```text
+CREATE TABLE
+ERROR:  null value in column "email" of relation "users" violates not-null constraint
+DETAIL:  Failing row contains (1, null).
+```
 
-**Explanation:** The UNIQUE constraint on `username` prevents the fourth insert. The UNIQUE constraint on `email` allows multiple NULLs in PostgreSQL.
+**Why this output appears**: The `NOT NULL` constraint rejects the `NULL` value, and PostgreSQL raises an error with the constraint name and the failing row.
+
+#### Real-World Cases
+
+- **User registration**: An `email` column is `NOT NULL` because every account must have a contact address.
+- **Financial records**: An `amount` column in a transactions table is `NOT NULL` to prevent incomplete financial entries.
+
+---
+
+### 2. `UNIQUE`
+
+#### Definitions
+
+**Core Definition**
+The `UNIQUE` constraint ensures that all values in a column or combination of columns are distinct.
+
+**Technical Definition**
+`UNIQUE` can be a column constraint or a table constraint. It creates a unique B-tree index (in PostgreSQL) or a unique index (in MySQL and SQL Server) to enforce the rule. In PostgreSQL, null values are not considered equal for the purpose of a unique constraint, so multiple rows with `NULL` in a unique column are permitted. Each unique table constraint must name a set of columns different from any other unique or primary key constraint on the same table.
+
+**Beginner-Friendly Explanation**
+`UNIQUE` means “no duplicates allowed.” If a column is `UNIQUE`, you cannot have two rows with the same value in that column.
+
+#### Purposes
+
+- To enforce natural keys such as email addresses, usernames, or product SKUs.
+- To prevent duplicate records in a table.
+- To provide a target for foreign-key references (a `UNIQUE` constraint can be referenced by a `FOREIGN KEY`).
+
+#### Syntax Rules and Structure
+
+**Column-level:**
 
 ```sql
--- Composite UNIQUE constraint
-CREATE TABLE product_variants (
-    product_id INT,
-    variant_name VARCHAR(50),
-    color VARCHAR(30),
-    size VARCHAR(10),
-    CONSTRAINT uq_product_variant UNIQUE (product_id, color, size)
+column_name data_type UNIQUE
+```
+
+**Table-level:**
+
+```sql
+UNIQUE ( column_name [, ...] )
+```
+
+**PostgreSQL:** `UNIQUE [ NULLS [ NOT ] DISTINCT ]` (PostgreSQL 15+).
+
+**MySQL:** `[CONSTRAINT [symbol]] UNIQUE [INDEX | KEY] [index_name] (key_part,...)`.
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `UNIQUE` | The constraint keyword. |
+| `(column, ...)` | The column or columns that must be unique. |
+| `NULLS NOT DISTINCT` | Treats `NULL` values as equal (PostgreSQL 15+). |
+
+**Syntax rules:**
+
+- A `UNIQUE` constraint automatically creates a unique index.
+- In PostgreSQL, `NULL` values are distinct by default; multiple `NULL`s are allowed.
+- In MySQL and SQL Server, `NULL` handling varies (SQL Server allows only one `NULL` per unique column).
+
+**Constraints and limitations:**
+
+- `UNIQUE` constraints incur write overhead because the index must be updated on every insert, update, and delete.
+- Dropping a `UNIQUE` constraint referenced by a `FOREIGN KEY` requires `CASCADE` or dropping the foreign key first.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – UNIQUE constraint on email
+
+```sql
+-- Step 1: Create a table with a UNIQUE column.
+CREATE TABLE accounts (
+    account_id serial PRIMARY KEY,
+    email      text UNIQUE NOT NULL
 );
--- No two rows can have the same combination of product_id, color, and size
+
+-- Step 2: Insert two rows with the same email.
+INSERT INTO accounts (email) VALUES ('a@example.com');
+INSERT INTO accounts (email) VALUES ('a@example.com');
 ```
 
-**Real-World Cases:**
+**Expected output:**
 
-- **User management:** Unique usernames and email addresses.
-- **Inventory:** Unique product SKUs or barcodes.
-- **HR:** Unique employee IDs or social security numbers.
+```text
+CREATE TABLE
+INSERT 0 1
+ERROR:  duplicate key value violates unique constraint "accounts_email_key"
+DETAIL:  Key (email)=(a@example.com) already exists.
+```
 
-**References:**
+**Why this output appears**: The `UNIQUE` constraint creates a unique index on `email`; the second insert violates the uniqueness rule.
 
-- Microsoft Learn: UNIQUE Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/unique-constraints-and-check-constraints
-- PostgreSQL: UNIQUE Constraints - https://www.postgresql.org/docs/current/ddl-constraints.html
-- MySQL: UNIQUE Constraints - https://dev.mysql.com/doc/refman/8.0/en/create-table.html
+#### Real-World Cases
 
+- **Username uniqueness**: A `users` table has a `UNIQUE` constraint on `username` to prevent two accounts with the same name.
+- **Product SKUs**: A `products` table has a `UNIQUE` constraint on `sku` to ensure each product has a distinct identifier.
 
-#### 1.3 PRIMARY KEY (Uniquely Identifying Rows)
+---
 
-**Core Definitions:**
+### 3. `PRIMARY KEY`
 
-- **Core Definition:** The PRIMARY KEY constraint uniquely identifies each row in a table and is an implicit combination of NOT NULL and UNIQUE.
-- **Technical Definition:** A PRIMARY KEY is a column or set of columns that uniquely identifies each row. It enforces entity integrity by requiring uniqueness and disallowing NULL values. A table can have only one PRIMARY KEY. When defined, it automatically creates a unique index (in most databases).
-- **Beginner-Friendly Explanation:** The PRIMARY KEY is like a social security number for each row—it's unique, never missing, and identifies exactly one record.
+#### Definitions
 
-**Purposes:**
+**Core Definition**
+The `PRIMARY KEY` constraint uniquely identifies each row in a table and implies both `UNIQUE` and `NOT NULL`.
 
-- To provide a stable, unique identifier for each row
-- To enforce entity integrity (no duplicates, no NULLs)
-- To serve as the target for FOREIGN KEY references
-- To optimize query performance through the automatically created index
+**Technical Definition**
+`PRIMARY KEY` is a combination of `UNIQUE` and `NOT NULL` that serves as the table's primary row identifier. Only one primary key can be defined per table, whether as a column constraint or a table constraint. In PostgreSQL, it creates a unique B-tree index; in MySQL and SQL Server, it creates a unique clustered or nonclustered index. A primary key can be composite (spanning multiple columns).
 
-**Syntax Structures and Rules:**
+**Beginner-Friendly Explanation**
+`PRIMARY KEY` is the “official ID” for each row. It must be unique and cannot be blank, and every table can have only one.
 
-**Complete General Syntax:**
+#### Purposes
+
+- To provide a stable, unique identifier for each row.
+- To serve as the target for foreign-key references from other tables.
+- To enforce entity integrity by rejecting duplicate or `NULL` key values.
+
+#### Syntax Rules and Structure
+
+**Column-level:**
 
 ```sql
--- Column-level (single column)
 column_name data_type PRIMARY KEY
-
--- Table-level (single or composite)
-CONSTRAINT constraint_name PRIMARY KEY (column_name1, column_name2, ...)
-
--- Add to existing table
-ALTER TABLE table_name ADD CONSTRAINT constraint_name PRIMARY KEY (column_list);
 ```
 
-**Component Breakdown:**
-
-- `column_list`: One or more columns that form the primary key
-- A composite primary key is defined at the table level (cannot be defined at the column level)
-
-**Syntax Rules:**
-
-- A table can have only one PRIMARY KEY.
-- PRIMARY KEY columns cannot contain NULL values.
-- PRIMARY KEY automatically creates a unique index (clustered in SQL Server by default, non-clustered in PostgreSQL/MySQL).
-- Composite primary keys are always table-level constraints.
-
-**Constraints and Limitations:**
-
-- Cannot be defined on a nullable column.
-- Cannot be deferred (in most databases).
-- Changing a PRIMARY KEY requires dropping and recreating it.
-
-**Annotated Code Examples:**
+**Table-level:**
 
 ```sql
--- Single-column PRIMARY KEY
-CREATE TABLE departments (
-    dept_id INT PRIMARY KEY,
-    dept_name VARCHAR(100) NOT NULL
-);
+PRIMARY KEY ( column_name [, ...] )
+```
 
--- Composite PRIMARY KEY (table-level)
+**PostgreSQL:** `PRIMARY KEY (column_name [, ...])` (table constraint).
+
+**MySQL:** `[CONSTRAINT [symbol]] PRIMARY KEY [index_type] (key_part,...)`.
+
+**SQL Server:** `[CONSTRAINT constraint_name] PRIMARY KEY [CLUSTERED | NONCLUSTERED] (column [,...])`.
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `PRIMARY KEY` | The constraint keyword. |
+| `(column, ...)` | One or more columns that form the key. |
+
+**Syntax rules:**
+
+- A table can have only one primary key.
+- `PRIMARY KEY` implies `NOT NULL` and `UNIQUE`.
+- A composite primary key allows duplicate values in individual columns but requires the combination to be unique.
+
+**Constraints and limitations:**
+
+- Changing a primary key requires dropping and recreating it; this can be expensive on large tables.
+- A primary key referenced by a foreign key cannot be dropped without `CASCADE` or dropping the foreign key first.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Composite primary key
+
+```sql
+-- Step 1: Create a table with a composite primary key.
 CREATE TABLE order_items (
-    order_id INT,
-    product_id INT,
-    quantity INT NOT NULL,
-    PRIMARY KEY (order_id, product_id)
-);
--- No two rows can have the same order_id + product_id combination
-```
-
-**Expected Output (for composite PK):** Attempting to insert a duplicate combination fails.
-
-**Real-World Cases:**
-
-- **Order systems:** Order ID as PRIMARY KEY.
-- **Junction tables:** Composite PRIMARY KEY of two foreign keys.
-- **User management:** User ID as PRIMARY KEY.
-
-**References:**
-
-- Microsoft Learn: PRIMARY KEY Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/create-primary-keys
-- PostgreSQL: PRIMARY KEY - https://www.postgresql.org/docs/current/ddl-constraints.html
-- Oracle: PRIMARY KEY Constraint - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/constraint.html
-
-
-#### 1.4 FOREIGN KEY (Enforcing Referential Integrity Between Tables)
-
-**Core Definitions:**
-
-- **Core Definition:** A FOREIGN KEY constraint establishes a link between two tables, ensuring that values in the child table match values in the parent table's PRIMARY KEY or UNIQUE column.
-- **Technical Definition:** A FOREIGN KEY constraint enforces referential integrity by preventing actions that would destroy the link between related tables. It is defined on the child table and references a candidate key (PRIMARY KEY or UNIQUE) in the parent table. The constraint can specify actions for `ON DELETE` and `ON UPDATE` to handle changes in the parent table.
-- **Beginner-Friendly Explanation:** A FOREIGN KEY is like a reference in a book. If a chapter references page 42, page 42 must exist. Similarly, if an order references customer 5, customer 5 must exist in the customers table.
-
-**Purposes:**
-
-- To maintain referential integrity between related tables
-- To prevent orphaned child records
-- To enforce business relationships at the database level
-- To enable cascading actions that automatically handle related data
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
-
-```sql
--- Column-level
-column_name data_type REFERENCES parent_table(parent_column)
-    [ON DELETE action] [ON UPDATE action]
-
--- Table-level
-CONSTRAINT constraint_name FOREIGN KEY (column_list)
-    REFERENCES parent_table(parent_column_list)
-    [ON DELETE action] [ON UPDATE action]
-
--- Reference options:
---   RESTRICT | CASCADE | SET NULL | SET DEFAULT | NO ACTION
-```
-
-**Component Breakdown:**
-
-- `column_list`: The child table columns that reference the parent
-- `parent_table(parent_column_list)`: The parent table and referenced columns
-- `ON DELETE action`: What to do when a parent row is deleted
-- `ON UPDATE action`: What to do when a parent key value is updated
-
-**Syntax Rules:**
-
-- The referenced columns must be PRIMARY KEY or UNIQUE in the parent table.
-- The child and parent columns must have compatible data types.
-- `SET NULL` requires the foreign key columns to be nullable.
-- `SET DEFAULT` requires default values for the foreign key columns.
-
-**Constraints and Limitations:**
-
-- FOREIGN KEY constraints can cause performance overhead during DML operations.
-- Circular references can complicate schema design and require deferrable constraints.
-- Some databases do not support all reference options (e.g., Oracle does not support `ON UPDATE`).
-
-**Annotated Code Examples:**
-
-```sql
--- Setup: Parent and child tables with FOREIGN KEY
-CREATE TABLE departments (
-    dept_id INT PRIMARY KEY,
-    dept_name VARCHAR(100) NOT NULL
+    order_id   int,
+    line_no    int,
+    product_id int,
+    PRIMARY KEY (order_id, line_no)
 );
 
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100) NOT NULL,
-    dept_id INT,
-    CONSTRAINT fk_emp_dept FOREIGN KEY (dept_id)
-        REFERENCES departments(dept_id)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE
-);
-
-INSERT INTO departments VALUES (1, 'Engineering');
-INSERT INTO departments VALUES (2, 'Marketing');
-
-INSERT INTO employees VALUES (1, 'Alice', 1);
-INSERT INTO employees VALUES (2, 'Bob', 2);
-
--- Valid insert
-INSERT INTO employees VALUES (3, 'Charlie', 1);
-
--- Invalid insert (dept_id 99 does not exist)
-INSERT INTO employees VALUES (4, 'Diana', 99);
--- Error: insert or update on table "employees" violates foreign key constraint
+-- Step 2: Insert duplicate combinations.
+INSERT INTO order_items VALUES (1, 1, 100);
+INSERT INTO order_items VALUES (1, 1, 200);
 ```
 
-**Expected Output (valid inserts):**
+**Expected output:**
 
-| emp_id | emp_name | dept_id |
-|--------|----------|---------|
-| 1      | Alice    | 1       |
-| 2      | Bob      | 2       |
-| 3      | Charlie  | 1       |
-
-**Explanation:** The FOREIGN KEY prevents insertion of a row with a non-existent department ID.
-
-```sql
--- ON DELETE CASCADE demonstration
--- Deleting department 1 will delete all employees in that department
-DELETE FROM departments WHERE dept_id = 1;
--- Alice and Charlie are automatically deleted
+```text
+CREATE TABLE
+INSERT 0 1
+ERROR:  duplicate key value violates unique constraint "order_items_pkey"
+DETAIL:  Key (order_id, line_no)=(1, 1) already exists.
 ```
 
-**Real-World Cases:**
+**Why this output appears**: The composite primary key requires the combination of `order_id` and `line_no` to be unique.
 
-- **E-commerce:** Orders reference customers; order items reference products.
-- **HR systems:** Employees reference departments.
-- **Content management:** Comments reference articles.
+#### Real-World Cases
 
-**References:**
+- **Order line items**: A composite primary key of `(order_id, line_no)` ensures each line is unique within an order.
+- **Junction tables**: A many-to-many relationship table uses a composite primary key of the two foreign keys.
 
-- Microsoft Learn: FOREIGN KEY Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/create-foreign-key-relationships
-- MySQL: FOREIGN KEY Constraints - https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html
-- PostgreSQL: Foreign Keys - https://www.postgresql.org/docs/current/ddl-constraints.html
+---
 
+### 4. `FOREIGN KEY`
 
-#### 1.5 CHECK (Validating Custom Boolean Conditions)
+#### Definitions
 
-**Core Definitions:**
+**Core Definition**
+A `FOREIGN KEY` constraint ensures that values in a column (or set of columns) match values in a referenced table's primary key or unique key, enforcing referential integrity.
 
-- **Core Definition:** The CHECK constraint validates that column values satisfy a Boolean condition, enforcing domain integrity.
-- **Technical Definition:** A CHECK constraint specifies a Boolean search condition that must evaluate to TRUE or UNKNOWN for each row. Values that evaluate to FALSE are rejected. Multiple CHECK constraints can be defined per column. CHECK constraints can be defined at the column level or table level.
-- **Beginner-Friendly Explanation:** CHECK is like a validation rule on a form. For example, "age must be greater than 0" or "end date must be after start date."
+**Technical Definition**
+`FOREIGN KEY` is a constraint that creates a dependency between a child table and a parent table. The child table's foreign-key columns must contain values that exist in the parent table's referenced columns (or be `NULL`, if allowed). The constraint supports `ON DELETE` and `ON UPDATE` actions: `NO ACTION`, `RESTRICT`, `CASCADE`, `SET NULL`, and `SET DEFAULT`. In PostgreSQL, foreign-key constraints are implemented internally as triggers.
 
-**Purposes:**
+**Beginner-Friendly Explanation**
+A `FOREIGN KEY` is a link between two tables. It says: “The value in this column must exist in that other table.” For example, an order's `customer_id` must match a real customer in the `customers` table.
 
-- To enforce domain integrity (valid ranges, patterns, formats)
-- To validate cross-column relationships (e.g., start_date < end_date)
-- To implement business rules at the database level
-- To prevent invalid data from entering the database
+#### Purposes
 
-**Syntax Structures and Rules:**
+- To enforce referential integrity between related tables.
+- To prevent orphaned records (e.g., an order referencing a non-existent customer).
+- To define cascading actions that automatically propagate deletes or updates.
 
-**Complete General Syntax:**
+#### Syntax Rules and Structure
+
+**Column-level:**
 
 ```sql
--- Column-level
-column_name data_type CHECK (condition)
-
--- Table-level
-CONSTRAINT constraint_name CHECK (condition)
-
--- Add to existing table
-ALTER TABLE table_name ADD CONSTRAINT constraint_name CHECK (condition);
+column_name data_type REFERENCES reftable [(refcolumn)] [ON DELETE action] [ON UPDATE action]
 ```
 
-**Component Breakdown:**
-
-- `condition`: A Boolean expression that must not evaluate to FALSE
-
-**Syntax Rules:**
-
-- CHECK constraints cannot reference columns in other tables.
-- CHECK constraints cannot contain subqueries.
-- CHECK constraints are evaluated for every INSERT and UPDATE.
-- NULL values bypass CHECK constraints (because NULL comparisons evaluate to UNKNOWN, not FALSE).
-
-**Constraints and Limitations:**
-
-- CHECK constraints are not enforced for NULL values (UNKNOWN passes).
-- Some databases limit the complexity of CHECK conditions.
-- CHECK constraints cannot be deferred.
-
-**Annotated Code Examples:**
+**Table-level:**
 
 ```sql
--- Setup: Table with CHECK constraints
-CREATE TABLE products (
-    product_id INT PRIMARY KEY,
-    product_name VARCHAR(100) NOT NULL,
-    price DECIMAL(10,2) CHECK (price > 0),
-    discount DECIMAL(5,2) CHECK (discount >= 0 AND discount <= 100),
-    category VARCHAR(50),
-    CONSTRAINT chk_price_discount CHECK (price > discount)
-);
-
--- Valid insert
-INSERT INTO products VALUES (1, 'Widget', 19.99, 10.00, 'Hardware');
-
--- Invalid insert (price must be > 0)
-INSERT INTO products VALUES (2, 'Free Item', 0, 0, 'Misc');
--- Error: new row for relation "products" violates check constraint "products_price_check"
-
--- Invalid insert (price must be > discount)
-INSERT INTO products VALUES (3, 'Discounted', 5.00, 10.00, 'Hardware');
--- Error: new row for relation "products" violates check constraint "chk_price_discount"
+FOREIGN KEY (column [, ...]) REFERENCES reftable [(refcolumn [, ...])] [ON DELETE action] [ON UPDATE action]
 ```
 
-**Expected Output (valid insert):**
+**PostgreSQL:** Supports `MATCH FULL | MATCH PARTIAL | MATCH SIMPLE` and `DEFERRABLE`.
 
-| product_id | product_name | price | discount | category |
-|------------|--------------|-------|----------|----------|
-| 1          | Widget       | 19.99 | 10.00    | Hardware |
+**MySQL:** `[CONSTRAINT [symbol]] FOREIGN KEY [index_name] (col_name,...) reference_definition`.
 
-**Explanation:** The CHECK constraints enforce that price is positive and greater than the discount.
+**SQL Server:** `[FOREIGN KEY] REFERENCES [schema_name.] referenced_table_name [(ref_column)] [ON DELETE ...] [ON UPDATE ...]`.
 
-**Real-World Cases:**
+**Component breakdown:**
 
-- **HR:** Salary must be positive; hire date cannot be in the future.
-- **E-commerce:** Product price must be greater than cost.
-- **Finance:** Account balance must not go below zero for certain account types.
+| Component | Description |
+|-----------|-------------|
+| `FOREIGN KEY (columns)` | The child columns. |
+| `REFERENCES table (columns)` | The parent table and referenced columns. |
+| `ON DELETE action` | Action when a parent row is deleted. |
+| `ON UPDATE action` | Action when a parent key is updated. |
 
-**References:**
+**Syntax rules:**
 
-- Microsoft Learn: CHECK Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/unique-constraints-and-check-constraints
-- MySQL: CHECK Constraints - https://dev.mysql.com/doc/refman/8.0/en/create-table-check-constraints.html
-- PostgreSQL: CHECK Constraints - https://www.postgresql.org/docs/current/ddl-constraints.html
+- The referenced columns must be `PRIMARY KEY` or `UNIQUE` in the parent table.
+- A foreign key can reference a table in the same database only (cross-database foreign keys are not supported in MySQL/PostgreSQL; SQL Server supports cross-database with limitations).
+- `ON DELETE SET NULL` requires the child columns to be nullable.
 
+**Constraints and limitations:**
 
-### 2. Default Values & Data Generation
+- Foreign-key constraints incur overhead on inserts and updates because they require lookups against the parent table.
+- Dropping a parent table referenced by a foreign key requires `CASCADE` (PostgreSQL) or dropping the foreign key first.
+- MySQL allows disabling foreign-key checks with `SET FOREIGN_KEY_CHECKS = 0` (session-level).
 
-#### 2.1 DEFAULT Constraints (Assigning Fallback Values)
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-**Core Definitions:**
-
-- **Core Definition:** A DEFAULT constraint assigns a value to a column when no value is explicitly provided during an INSERT.
-- **Technical Definition:** DEFAULT is a column-level specification that provides a fallback value. It can be a literal, a function call (e.g., `CURRENT_TIMESTAMP`), or an expression. The DEFAULT is applied only when the column is omitted from the INSERT statement or when the DEFAULT keyword is explicitly used.
-- **Beginner-Friendly Explanation:** DEFAULT is like a pre-filled form field. If you don't write anything, the form already has a value filled in.
-
-**Purposes:**
-
-- To provide sensible default values for optional columns
-- To automatically populate audit columns (timestamps, user IDs)
-- To reduce the amount of data the application must supply
-- To ensure columns have a value even when the application omits them
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax:**
+##### Example 1: PostgreSQL – Foreign key with ON DELETE CASCADE
 
 ```sql
--- Column-level
-column_name data_type DEFAULT default_value
-
--- Named DEFAULT constraint
-column_name data_type CONSTRAINT constraint_name DEFAULT default_value
-```
-
-**Component Breakdown:**
-
-- `default_value`: A literal, function, or expression
-
-**Syntax Rules:**
-
-- DEFAULT is applied only when the column is not included in the INSERT column list.
-- DEFAULT can be used with `INSERT ... VALUES (DEFAULT, ...)`.
-- DEFAULT constraints can be named using the CONSTRAINT keyword.
-- DEFAULT does not apply to UPDATE statements (unless explicitly set to DEFAULT).
-
-**Annotated Code Examples:**
-
-```sql
--- Setup: Table with DEFAULT values
+-- Step 1: Create parent and child tables.
+CREATE TABLE customers (id int PRIMARY KEY, name text);
 CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'Pending',
-    priority INT DEFAULT 1
+    id int PRIMARY KEY,
+    customer_id int REFERENCES customers(id) ON DELETE CASCADE
 );
 
--- Insert without specifying defaults
-INSERT INTO orders (order_id) VALUES (1);
--- order_date, status, and priority get their defaults
+-- Step 2: Insert data.
+INSERT INTO customers VALUES (1, 'Acme');
+INSERT INTO orders VALUES (100, 1);
 
--- Insert with explicit values
-INSERT INTO orders (order_id, status) VALUES (2, 'Shipped');
--- order_date and priority get defaults, status is 'Shipped'
+-- Step 3: Delete the parent; the child is cascaded.
+DELETE FROM customers WHERE id = 1;
+SELECT * FROM orders;
 ```
 
-**Expected Output:**
+**Expected output:**
 
-| order_id | order_date          | status  | priority |
-|----------|---------------------|---------|----------|
-| 1        | 2026-09-19 10:30:00 | Pending | 1        |
-| 2        | 2026-09-19 10:30:00 | Shipped | 1        |
-
-**Real-World Cases:**
-
-- **Audit columns:** `created_at DEFAULT CURRENT_TIMESTAMP`.
-- **Status fields:** `status DEFAULT 'Active'`.
-- **Counters:** `priority DEFAULT 1`.
-
-**References:**
-
-- Microsoft Learn: DEFAULT Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/create-default-constraints
-- PostgreSQL: DEFAULT - https://www.postgresql.org/docs/current/ddl-default.html
-- MySQL: DEFAULT - https://dev.mysql.com/doc/refman/8.0/en/data-type-defaults.html
-
-
-#### 2.2 Auto-incrementing / Identity Constraints (SERIAL, GENERATED ALWAYS AS IDENTITY)
-
-**Core Definitions:**
-
-- **Core Definition:** Auto-incrementing constraints automatically generate sequential numeric values for a column, typically used for primary keys.
-- **Technical Definition:** Different databases implement auto-increment differently: PostgreSQL uses `SERIAL` (legacy) and `GENERATED ... AS IDENTITY` (standard), MySQL uses `AUTO_INCREMENT`, SQL Server uses `IDENTITY`, and Oracle uses `GENERATED ... AS IDENTITY`. The SQL standard identity column supports two modes: `GENERATED ALWAYS` (cannot insert explicit values) and `GENERATED BY DEFAULT` (allows explicit values, falling back to generation when omitted).
-- **Beginner-Friendly Explanation:** Auto-increment is like a numbered ticket dispenser. Each time you insert a row, the database automatically assigns the next number. You don't have to specify the ID.
-
-**Purposes:**
-
-- To automatically generate unique primary key values
-- To eliminate the need for application-managed sequences
-- To ensure unique identifiers without manual intervention
-- To support `GENERATED ALWAYS` for strict sequence management or `GENERATED BY DEFAULT` for flexibility
-
-**Syntax Structures and Rules:**
-
-**Complete General Syntax (ANSI SQL:2003 and later):**
-
-```sql
--- GENERATED ALWAYS (strict)
-column_name data_type GENERATED ALWAYS AS IDENTITY
-    (START WITH n INCREMENT BY m)
-
--- GENERATED BY DEFAULT (flexible)
-column_name data_type GENERATED BY DEFAULT AS IDENTITY
-    (START WITH n INCREMENT BY m)
+```text
+CREATE TABLE
+CREATE TABLE
+INSERT 0 1
+INSERT 0 1
+DELETE 1
+ id | customer_id
+----+-------------
+(0 rows)
 ```
 
-**Vendor-Specific Syntax:**
+**Why this output appears**: `ON DELETE CASCADE` automatically deletes the child row when the parent is deleted.
 
-| Database | Syntax |
-|----------|--------|
-| PostgreSQL | `SERIAL` (legacy) or `GENERATED ... AS IDENTITY` |
-| MySQL | `AUTO_INCREMENT` |
-| SQL Server | `IDENTITY(seed, increment)` |
-| Oracle | `GENERATED ... AS IDENTITY` |
+#### Real-World Cases
 
-**Syntax Rules:**
+- **E-commerce**: `order_items.product_id` references `products.id`; deleting a product with existing orders is restricted.
+- **Blog**: `comments.post_id` references `posts.id` with `ON DELETE CASCADE`, so deleting a post removes its comments.
 
-- `GENERATED ALWAYS` columns reject explicit values (must use DEFAULT or omit the column).
-- `GENERATED BY DEFAULT` columns accept explicit values; the sequence is used when no value is supplied.
-- Auto-increment columns are typically integers (INT, BIGINT).
-- The sequence does not check for duplicates in `GENERATED BY DEFAULT` mode.
+---
 
-**Annotated Code Examples:**
+### 5. `CHECK`
+
+#### Definitions
+
+**Core Definition**
+The `CHECK` constraint requires that a Boolean expression evaluates to `TRUE` or `UNKNOWN` (i.e., not `FALSE`) for every row.
+
+**Technical Definition**
+`CHECK` is a column or table constraint that specifies a Boolean expression. New or updated rows must satisfy the expression for the operation to succeed. A column-level `CHECK` should reference only that column's value; a table-level `CHECK` may reference multiple columns. `CHECK` expressions cannot contain subqueries or reference variables other than columns of the current row. In PostgreSQL, `CHECK` constraints can be added as `NOT VALID` to skip validation of existing rows.
+
+**Beginner-Friendly Explanation**
+`CHECK` is a custom rule you write for a column or table. For example, “salary must be greater than zero” or “end_date must be after start_date.”
+
+#### Purposes
+
+- To enforce domain-specific business rules that cannot be expressed with standard constraints.
+- To validate that values fall within a permitted range or pattern.
+- To enforce multi-column consistency rules (e.g., `end_date > start_date`).
+
+#### Syntax Rules and Structure
+
+**Column-level:**
 
 ```sql
--- PostgreSQL: GENERATED ALWAYS AS IDENTITY
+column_name data_type CHECK (expression)
+```
+
+**Table-level:**
+
+```sql
+CHECK (expression)
+```
+
+**PostgreSQL:** `CHECK (expression) [NO INHERIT]`; supports `NOT VALID`.
+
+**MySQL:** `[CONSTRAINT [symbol]] CHECK (expr) [[NOT] ENFORCED]`.
+
+**SQL Server:** `CHECK [NOT FOR REPLICATION] (logical_expression)`.
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `CHECK (expression)` | The Boolean expression that must not evaluate to `FALSE`. |
+| `NOT VALID` | Skips validation of existing rows (PostgreSQL). |
+| `NOT ENFORCED` | Creates the constraint but does not enforce it (MySQL). |
+
+**Syntax rules:**
+
+- `CHECK` expressions cannot contain subqueries.
+- A `CHECK` constraint is satisfied if the expression evaluates to `TRUE` or `UNKNOWN` (`NULL`).
+- In PostgreSQL, `NOT VALID` constraints are enforced for new rows but not retroactively for existing rows until `VALIDATE CONSTRAINT` is run.
+
+**Constraints and limitations:**
+
+- `CHECK` constraints are not deferrable in PostgreSQL.
+- In MySQL, `CHECK` constraints were ignored before version 8.0.16.
+- `CHECK` constraints incur a small per-row evaluation cost.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – CHECK constraint with NOT VALID and VALIDATE
+
+```sql
+-- Step 1: Create a table with a CHECK constraint as NOT VALID.
+CREATE TABLE accounts (id serial PRIMARY KEY, balance numeric);
+INSERT INTO accounts (balance) VALUES (100), (-50);
+
+ALTER TABLE accounts ADD CONSTRAINT chk_positive CHECK (balance >= 0) NOT VALID;
+
+-- Step 2: Validate the constraint.
+ALTER TABLE accounts VALIDATE CONSTRAINT chk_positive;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 2
+ALTER TABLE
+ERROR:  check constraint "chk_positive" of relation "accounts" is violated by some row
+```
+
+**Why this output appears**: The `NOT VALID` constraint is added without checking existing rows. `VALIDATE CONSTRAINT` then scans the table and finds the negative balance, causing the validation to fail.
+
+#### Real-World Cases
+
+- **Date ranges**: `CHECK (end_date > start_date)` ensures valid periods in a bookings table.
+- **Salary bounds**: `CHECK (salary > 0)` prevents negative salaries.
+- **Status values**: `CHECK (status IN ('active', 'closed', 'pending'))` restricts a status column to valid values.
+
+---
+
+### 6. `DEFAULT`
+
+#### Definitions
+
+**Core Definition**
+The `DEFAULT` constraint specifies a value that the database automatically assigns to a column when no value is provided during an `INSERT`.
+
+**Technical Definition**
+`DEFAULT` is a column attribute that provides a literal value, expression, or function call evaluated at insert time when the column is omitted or explicitly set to `DEFAULT`. In SQL Server, `DEFAULT` is implemented as a named constraint (`DEFAULT constant_expression FOR column`). In PostgreSQL and MySQL, it is a column attribute.
+
+**Beginner-Friendly Explanation**
+`DEFAULT` is the automatic fill-in value. If you don't provide a value for a column, the database uses the default you specified.
+
+#### Purposes
+
+- To supply sensible values for columns that are often left blank (e.g., a `status` column defaulting to `'pending'`).
+- To automatically record timestamps (`DEFAULT now()` or `DEFAULT CURRENT_TIMESTAMP`).
+- To ensure that columns always have a value even when the application omits them.
+
+#### Syntax Rules and Structure
+
+**General syntax:**
+
+```sql
+column_name data_type DEFAULT default_expression
+```
+
+**PostgreSQL:** `DEFAULT default_expr` (column constraint).
+
+**MySQL:** `DEFAULT {literal | (expr)}`.
+
+**SQL Server:** `DEFAULT constant_expression FOR column` (table-level) or as part of column definition.
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `DEFAULT expression` | The value or expression to use when no value is supplied. |
+
+**Syntax rules:**
+
+- The default expression must be compatible with the column's data type.
+- In PostgreSQL, `DEFAULT` can reference a sequence via `nextval()`.
+- In SQL Server, `DEFAULT` is a named constraint and can be dropped with `DROP CONSTRAINT`.
+
+**Constraints and limitations:**
+
+- Changing a default does not affect existing rows.
+- `DEFAULT` is not a true constraint in PostgreSQL and MySQL; it is a column attribute. In SQL Server, it is a constraint object.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – DEFAULT with now()
+
+```sql
+-- Step 1: Create a table with defaults.
+CREATE TABLE tasks (
+    task_id    serial PRIMARY KEY,
+    status     text NOT NULL DEFAULT 'pending',
+    created_at timestamptz DEFAULT now()
+);
+
+-- Step 2: Insert without specifying status or created_at.
+INSERT INTO tasks (task_id) VALUES (DEFAULT);
+SELECT * FROM tasks;
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 1
+ task_id | status  |          created_at
+---------+---------+-------------------------------
+       1 | pending | 2026-11-13 10:00:00.123+00
+(1 row)
+```
+
+**Why this output appears**: The `status` column defaults to `'pending'` and `created_at` defaults to `now()` when omitted.
+
+#### Real-World Cases
+
+- **Audit timestamps**: `created_at DEFAULT now()` automatically records when a row was inserted.
+- **Workflow status**: A `status` column defaults to `'pending'` for new records.
+
+---
+
+### 7. `EXCLUDE` (PostgreSQL)
+
+#### Definitions
+
+**Core Definition**
+The `EXCLUDE` constraint ensures that no two rows satisfy a specified operator-based comparison, typically to prevent overlapping ranges or values.
+
+**Technical Definition**
+`EXCLUDE` is a PostgreSQL-specific table constraint that generalises `UNIQUE`. It specifies one or more *exclusion elements*, each pairing a column or expression with a comparison operator (e.g., `=` for equality, `&&` for overlap). The constraint rejects any insert or update that would cause the specified comparison to be true for any pair of rows. `EXCLUDE` is often used with range types and GiST indexes to prevent overlapping bookings or time ranges.
+
+**Beginner-Friendly Explanation**
+`EXCLUDE` is like `UNIQUE`, but more powerful. Instead of just preventing exact duplicates, it can prevent overlaps—for example, ensuring that no two bookings for the same room overlap in time.
+
+#### Purposes
+
+- To prevent overlapping ranges (e.g., double-booked meeting rooms or hotel reservations).
+- To enforce complex uniqueness rules that cannot be expressed with `UNIQUE`.
+- To support temporal and spatial integrity constraints.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
+
+```sql
+EXCLUDE [ USING index_method ] ( exclude_element WITH operator [, ...] )
+    [ INCLUDE ( column [, ...] ) ]
+    [ WHERE ( predicate ) ]
+```
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `USING index_method` | The index method (typically `gist`). |
+| `exclude_element` | A column or expression. |
+| `WITH operator` | The comparison operator (e.g., `=`, `&&`). |
+| `WHERE predicate` | Optional partial constraint (PostgreSQL). |
+
+**Syntax rules:**
+
+- `EXCLUDE` requires an appropriate index method; `gist` is commonly used with range types.
+- The `btree_gist` extension is required for equality comparisons on scalar types in a GiST index.
+- `EXCLUDE` automatically creates an index to enforce the constraint.
+
+**Constraints and limitations:**
+
+- `EXCLUDE` is PostgreSQL-specific and not available in MySQL or SQL Server.
+- Performance depends on the index method and the complexity of the exclusion elements.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – EXCLUDE to prevent overlapping bookings
+
+```sql
+-- Step 1: Enable the btree_gist extension.
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+-- Step 2: Create a table with an EXCLUDE constraint.
+CREATE TABLE bookings (
+    room_id   int,
+    during    tsrange,
+    EXCLUDE USING gist (room_id WITH =, during WITH &&)
+);
+
+-- Step 3: Insert overlapping bookings.
+INSERT INTO bookings VALUES (1, '[2025-01-01 09:00, 2025-01-01 10:00)');
+INSERT INTO bookings VALUES (1, '[2025-01-01 09:30, 2025-01-01 10:30)');
+```
+
+**Expected output:**
+
+```text
+CREATE EXTENSION
+CREATE TABLE
+INSERT 0 1
+ERROR:  conflicting key value violates exclusion constraint "bookings_room_id_during_excl"
+DETAIL:  Key (room_id, during)=(1, ["2025-01-01 09:30:00","2025-01-01 10:30:00")) conflicts with existing key (room_id, during)=(1, ["2025-01-01 09:00:00","2025-01-01 10:00:00")).
+```
+
+**Why this output appears**: The `EXCLUDE` constraint uses `&&` (overlap) to reject a booking that overlaps with an existing booking for the same room.
+
+#### Real-World Cases
+
+- **Hotel reservations**: An `EXCLUDE` constraint on `(room_id, stay_period)` prevents double-booking of the same room.
+- **Conference scheduling**: An `EXCLUDE` constraint on `(speaker_id, time_slot)` prevents a speaker from being scheduled in two sessions at the same time.
+
+---
+
+### 8. Composite Constraints
+
+#### Definitions
+
+**Core Definition**
+A composite constraint is a constraint that spans multiple columns rather than a single column.
+
+**Technical Definition**
+Composite constraints are table-level constraints that reference two or more columns. They include composite `PRIMARY KEY`, composite `UNIQUE`, composite `FOREIGN KEY`, and multi-column `CHECK`. A composite primary key allows duplicate values in individual columns but requires the combination of all key columns to be unique. A composite foreign key must reference a composite primary key or unique key in the parent table.
+
+**Beginner-Friendly Explanation**
+A composite constraint is a rule that involves more than one column. For example, “the combination of `first_name` and `last_name` must be unique” is a composite constraint.
+
+#### Purposes
+
+- To enforce uniqueness across a combination of columns (e.g., a composite natural key).
+- To model many-to-many relationships with a junction table that has a composite primary key.
+- To enforce referential integrity for relationships that use composite keys.
+
+#### Syntax Rules and Structure
+
+**Composite PRIMARY KEY:**
+
+```sql
+PRIMARY KEY ( column1, column2 [, ...] )
+```
+
+**Composite UNIQUE:**
+
+```sql
+UNIQUE ( column1, column2 [, ...] )
+```
+
+**Composite FOREIGN KEY:**
+
+```sql
+FOREIGN KEY ( column1, column2 [, ...] )
+    REFERENCES parent_table ( parent_column1, parent_column2 [, ...] )
+```
+
+**Composite CHECK:**
+
+```sql
+CHECK ( column1 > column2 )
+```
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `(column1, column2, ...)` | The columns that form the composite constraint. |
+
+**Syntax rules:**
+
+- The column order in a composite constraint matters for index performance and uniqueness semantics.
+- A composite foreign key must reference the same number of columns in the same order as the parent key.
+
+**Constraints and limitations:**
+
+- Composite primary keys create composite indexes; the column order affects query performance.
+- A composite foreign key cannot reference a parent key with a different number of columns.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Composite unique constraint
+
+```sql
+-- Step 1: Create a table with a composite unique constraint.
+CREATE TABLE product_variants (
+    product_id int,
+    color      text,
+    size       text,
+    UNIQUE (product_id, color, size)
+);
+
+-- Step 2: Insert duplicate combinations.
+INSERT INTO product_variants VALUES (1, 'red', 'M');
+INSERT INTO product_variants VALUES (1, 'red', 'M');
+```
+
+**Expected output:**
+
+```text
+CREATE TABLE
+INSERT 0 1
+ERROR:  duplicate key value violates unique constraint "product_variants_product_id_color_size_key"
+DETAIL:  Key (product_id, color, size)=(1, red, M) already exists.
+```
+
+**Why this output appears**: The composite unique constraint ensures that no two rows have the same combination of `product_id`, `color`, and `size`.
+
+#### Real-World Cases
+
+- **Inventory**: A `product_variants` table uses a composite unique key of `(product_id, color, size)` to prevent duplicate variants.
+- **Junction tables**: A `post_tags` table uses a composite primary key of `(post_id, tag_id)` to prevent duplicate tag assignments.
+
+---
+
+### 9. Constraint Naming
+
+#### Definitions
+
+**Core Definition**
+Constraint naming is the practice of assigning explicit, meaningful names to constraints instead of relying on system-generated names.
+
+**Technical Definition**
+In PostgreSQL, MySQL, and SQL Server, constraints can be named using the `CONSTRAINT constraint_name` clause. If a name is not specified, the system generates one (e.g., `table_name_column_name_key` in PostgreSQL, or an auto-generated name in SQL Server). Named constraints appear in error messages, making debugging easier, and can be referenced in `ALTER TABLE ... DROP CONSTRAINT` statements.
+
+**Beginner-Friendly Explanation**
+Naming a constraint is like giving it a label so you can find it easily later. If you don't name it, the database makes up a name that may be hard to remember.
+
+#### Purposes
+
+- To make error messages more readable and informative for developers and DBAs.
+- To enable reliable `DROP CONSTRAINT` and `ALTER CONSTRAINT` operations by name.
+- To enforce naming conventions across a team or organisation.
+
+#### Syntax Rules and Structure
+
+**General syntax:**
+
+```sql
+CONSTRAINT constraint_name constraint_definition
+```
+
+**PostgreSQL:** `[ CONSTRAINT constraint_name ] { NOT NULL | UNIQUE | PRIMARY KEY | CHECK ... }`.
+
+**MySQL:** `[CONSTRAINT [symbol]] PRIMARY KEY | UNIQUE | FOREIGN KEY | CHECK`.
+
+**SQL Server:** `[CONSTRAINT constraint_name] PRIMARY KEY | UNIQUE | FOREIGN KEY | CHECK | DEFAULT`.
+
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `CONSTRAINT constraint_name` | The optional name for the constraint. |
+
+**Syntax rules:**
+
+- Constraint names must follow the RDBMS's identifier rules (length, allowed characters).
+- In SQL Server, constraint names must be unique within the schema; in PostgreSQL, within the table.
+- Named constraints appear in error messages, which is invaluable for debugging.
+
+**Constraints and limitations:**
+
+- System-generated names can vary across RDBMS versions and installations, making migrations less portable.
+- Renaming a constraint requires `ALTER TABLE ... RENAME CONSTRAINT` in PostgreSQL or `sp_rename` in SQL Server.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Named CHECK constraint
+
+```sql
+-- Step 1: Create a table with a named CHECK constraint.
 CREATE TABLE employees (
-    emp_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    emp_name VARCHAR(100) NOT NULL
+    id     serial PRIMARY KEY,
+    salary numeric CONSTRAINT chk_salary_positive CHECK (salary > 0)
 );
 
-INSERT INTO employees (emp_name) VALUES ('Alice');
--- emp_id is automatically 1
-
-INSERT INTO employees (emp_id, emp_name) VALUES (100, 'Bob');
--- Error: cannot insert into GENERATED ALWAYS identity column
-
--- PostgreSQL: GENERATED BY DEFAULT
-CREATE TABLE departments (
-    dept_id INT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    dept_name VARCHAR(100)
-);
-
-INSERT INTO departments (dept_name) VALUES ('Engineering');
--- dept_id is automatically 1
-
-INSERT INTO departments (dept_id, dept_name) VALUES (100, 'Special');
--- Explicit value 100 is accepted
+-- Step 2: Violate the constraint.
+INSERT INTO employees (salary) VALUES (-100);
 ```
 
-**Expected Output (GENERATED ALWAYS):**
+**Expected output:**
 
-| emp_id | emp_name |
-|--------|----------|
-| 1      | Alice    |
-
-**Expected Output (GENERATED BY DEFAULT):**
-
-| dept_id | dept_name   |
-|---------|-------------|
-| 1       | Engineering |
-| 100     | Special     |
-
-**Real-World Cases:**
-
-- **All tables:** Auto-incrementing primary keys are the standard for surrogate keys.
-- **Order numbers:** Sequential order IDs.
-
-**References:**
-
-- PostgreSQL: Identity Columns - https://www.postgresql.org/docs/current/ddl-identity-columns.html
-- Microsoft Learn: IDENTITY - https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-transact-sql
-
-
-### 3. Syntax & Structural Scoping
-
-#### 3.1 Column-Level vs. Table-Level Constraint Definitions
-
-**Core Definitions:**
-
-- **Core Definition:** Column-level constraints are defined as part of the column definition; table-level constraints are defined after all column definitions.
-- **Technical Definition:** Column-level constraints apply to a single column and are declared immediately after the column's data type. Table-level constraints can apply to one or more columns and are declared after all columns are defined. A key constraint involves comparing different rows within the same table and is therefore always a table-level constraint.
-- **Beginner-Friendly Explanation:** Column-level is like writing the rule next to the column it applies to. Table-level is like writing all the rules at the bottom of the form.
-
-**Purposes:**
-
-- To choose the appropriate syntax based on constraint scope
-- To define composite constraints that span multiple columns
-- To explicitly name constraints for manageability
-
-**Syntax Structures and Rules:**
-
-**Column-Level Syntax:**
-
-```sql
-CREATE TABLE table_name (
-    column1 data_type [CONSTRAINT name] constraint_type,
-    column2 data_type [CONSTRAINT name] constraint_type
-);
+```text
+CREATE TABLE
+ERROR:  new row for relation "employees" violates check constraint "chk_salary_positive"
+DETAIL:  Failing row contains (1, -100).
 ```
 
-**Table-Level Syntax:**
+**Why this output appears**: The explicit constraint name `chk_salary_positive` appears in the error message, making it clear which rule was violated.
+
+#### Real-World Cases
+
+- **Debugging**: A named constraint `chk_order_total_positive` immediately tells a developer what went wrong.
+- **Migrations**: A migration script drops a constraint by name, which is only possible if the name was explicitly assigned.
+
+---
+
+### 10. Constraint Enforcement
+
+#### Definitions
+
+**Core Definition**
+Constraint enforcement is the mechanism by which the database engine checks and applies constraints during data modification operations.
+
+**Technical Definition**
+Constraints are enforced by the database engine either declaratively (via built-in mechanisms such as unique indexes and foreign-key triggers) or procedurally (via user-defined triggers). Declarative constraints are preferred for standard integrity rules because they are optimised and less error-prone. Triggers are used for complex business rules that cannot be expressed declaratively. In PostgreSQL, foreign-key constraints are implemented internally as triggers; in MySQL and SQL Server, they are enforced by the storage engine or query processor. Constraint enforcement can be toggled in some systems: MySQL uses `SET FOREIGN_KEY_CHECKS = 0`; SQL Server uses `WITH NOCHECK`; PostgreSQL uses `NOT VALID` for `CHECK` and `FOREIGN KEY` constraints.
+
+**Beginner-Friendly Explanation**
+Constraint enforcement is how the database actually makes sure the rules are followed. Some rules are built into the database engine (like `UNIQUE` and `FOREIGN KEY`), while others require triggers—special programs that run automatically when data changes.
+
+#### Purposes
+
+- To ensure that all data modifications respect the declared integrity rules.
+- To choose between declarative enforcement (built-in, optimised) and procedural enforcement (triggers, for complex rules).
+- To temporarily disable enforcement during bulk loads or migrations (with caution).
+
+#### Syntax Rules and Structure
+
+**Disabling enforcement (examples):**
+
+**MySQL:**
 
 ```sql
-CREATE TABLE table_name (
-    column1 data_type,
-    column2 data_type,
-    [CONSTRAINT name] constraint_type (column1, column2, ...)
-);
+SET FOREIGN_KEY_CHECKS = 0;
+-- perform operations
+SET FOREIGN_KEY_CHECKS = 1;
 ```
 
-**Syntax Rules:**
 
-- NOT NULL can only be defined at the column level.
-- Composite PRIMARY KEY and UNIQUE constraints must be defined at the table level.
-- CHECK constraints can be defined at either level.
-- FOREIGN KEY constraints can be defined at either level.
-- DEFAULT can be defined at either level (though column-level is more common).
-
-**Annotated Code Examples:**
+**SQL Server:**
 
 ```sql
--- Column-level constraints
-CREATE TABLE employees (
-    emp_id INT CONSTRAINT pk_emp PRIMARY KEY,
-    emp_name VARCHAR(100) CONSTRAINT nn_emp_name NOT NULL,
-    email VARCHAR(200) CONSTRAINT uq_emp_email UNIQUE,
-    salary DECIMAL(10,2) CONSTRAINT ck_salary CHECK (salary > 0)
-);
-
--- Table-level constraints (equivalent)
-CREATE TABLE employees (
-    emp_id INT,
-    emp_name VARCHAR(100),
-    email VARCHAR(200),
-    salary DECIMAL(10,2),
-    CONSTRAINT pk_emp PRIMARY KEY (emp_id),
-    CONSTRAINT nn_emp_name NOT NULL (emp_name),  -- Not allowed! NOT NULL is column-level only
-    CONSTRAINT uq_emp_email UNIQUE (email),
-    CONSTRAINT ck_salary CHECK (salary > 0)
-);
-
--- Composite PRIMARY KEY (must be table-level)
-CREATE TABLE order_items (
-    order_id INT,
-    product_id INT,
-    quantity INT NOT NULL,
-    PRIMARY KEY (order_id, product_id)
-);
+ALTER TABLE table_name NOCHECK CONSTRAINT constraint_name;
+-- or
+ALTER TABLE table_name WITH NOCHECK ADD CONSTRAINT constraint_name ...;
 ```
 
-**Real-World Cases:**
 
-- **Junction tables:** Composite PRIMARY KEY or UNIQUE constraints.
-- **Single-column keys:** Column-level PRIMARY KEY for simplicity.
-- **Cross-column validation:** Table-level CHECK constraints.
-
-**References:**
-
-- Stack Overflow: Column level vs table level constraints - https://stackoverflow.com/questions/9494129/column-level-vs-table-level-constraints-in-sql-server
-- PostgreSQL: Table Constraints - https://www.postgresql.org/docs/current/ddl-constraints.html
-
-
-#### 3.2 Single-Column Constraints vs. Composite (Multi-column) Constraints
-
-**Core Definitions:**
-
-- **Core Definition:** A single-column constraint applies to one column; a composite constraint applies to a combination of two or more columns.
-- **Technical Definition:** Composite constraints (PRIMARY KEY, UNIQUE, FOREIGN KEY) enforce uniqueness or referential integrity across the combination of specified columns. For UNIQUE, the combination must be unique; individual columns may contain duplicates. For FOREIGN KEY, the combination of child columns must match a combination of parent columns.
-- **Beginner-Friendly Explanation:** A composite key is like a combination lock—you need all the parts to match. Two rows can have the same first name and the same last name, but not the same first name AND last name.
-
-**Purposes:**
-
-- To enforce uniqueness across a natural key composed of multiple attributes
-- To model many-to-many relationships with junction tables
-- To support complex referential integrity requirements
-
-**Syntax Structures and Rules:**
+**PostgreSQL:**
 
 ```sql
--- Composite PRIMARY KEY
-PRIMARY KEY (column1, column2)
-
--- Composite UNIQUE
-UNIQUE (column1, column2)
-
--- Composite FOREIGN KEY
-FOREIGN KEY (column1, column2) REFERENCES parent(col1, col2)
+ALTER TABLE table_name ADD CONSTRAINT constraint_name ... NOT VALID;
+-- later
+ALTER TABLE table_name VALIDATE CONSTRAINT constraint_name;
 ```
 
-**Syntax Rules:**
 
-- Composite constraints must be defined at the table level.
-- The order of columns in the constraint definition matters for FOREIGN KEY references.
-- For UNIQUE, the combination of columns must be unique, but each individual column can have duplicates.
+**Component breakdown:**
 
-**Annotated Code Examples:**
+| Component | Description |
+|-----------|-------------|
+| `FOREIGN_KEY_CHECKS` (MySQL) | Session variable that toggles foreign-key enforcement. |
+| `WITH NOCHECK` (SQL Server) | Adds or re-enables a constraint without validating existing data. |
+| `NOT VALID` (PostgreSQL) | Adds a constraint without validating existing rows. |
+
+**Syntax rules:**
+
+- Disabling enforcement is a session-level or table-level operation and should be used only for controlled scenarios (e.g., data import, migration).
+- `WITH NOCHECK` in SQL Server means the query optimizer may ignore the constraint, potentially leading to poor plans.
+- MySQL's `FOREIGN_KEY_CHECKS` does not affect `UNIQUE` or `CHECK` constraints; it only affects foreign keys.
+
+**Constraints and limitations:**
+
+- Disabling enforcement can allow invalid data to enter the database, which may cause errors when enforcement is re-enabled.
+- Re-enabling enforcement without validating existing data leaves the constraint in a `NOT VALID` or `NOCHECK` state, and the optimizer may not trust it.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: MySQL – Disabling foreign-key checks during import
 
 ```sql
--- Composite UNIQUE constraint
-CREATE TABLE course_enrollments (
-    student_id INT,
-    course_id INT,
-    enrollment_date DATE,
-    grade CHAR(2),
-    UNIQUE (student_id, course_id)
-);
--- A student can enroll in a course only once, but can enroll in multiple courses
--- and a course can have multiple students
+-- Step 1: Disable foreign-key checks.
+SET FOREIGN_KEY_CHECKS = 0;
 
--- Composite FOREIGN KEY
-CREATE TABLE order_items (
-    order_id INT,
-    product_id INT,
-    quantity INT,
-    PRIMARY KEY (order_id, product_id),
-    FOREIGN KEY (order_id) REFERENCES orders(order_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
-);
+-- Step 2: Insert data that would normally violate foreign keys.
+INSERT INTO child (parent_id) VALUES (999);
+
+-- Step 3: Re-enable checks.
+SET FOREIGN_KEY_CHECKS = 1;
 ```
 
-**Expected Output (Composite UNIQUE):** Attempting to enroll the same student in the same course twice fails.
+**Expected output:**
 
-**Real-World Cases:**
-
-- **Junction tables:** Composite PRIMARY KEY on (order_id, product_id).
-- **Enrollment systems:** UNIQUE on (student_id, course_id).
-- **Multi-tenant systems:** UNIQUE on (tenant_id, username).
-
-**References:**
-
-- Microsoft Learn: Composite Keys - https://learn.microsoft.com/en-us/sql/relational-databases/tables/create-primary-keys
-- PostgreSQL: Composite Constraints - https://www.postgresql.org/docs/current/ddl-constraints.html
-
-
-### 4. Naming & Metadata Management
-
-#### 4.1 Explicit Constraint Naming Conventions
-
-**Core Definitions:**
-
-- **Core Definition:** Explicit constraint naming assigns a user-defined name to a constraint using the `CONSTRAINT constraint_name` syntax.
-- **Technical Definition:** Constraint names must follow identifier rules and be unique within the schema. Explicit names make constraints easier to reference in DDL statements (e.g., `ALTER TABLE ... DROP CONSTRAINT name`) and appear in error messages and the information schema. Common naming conventions use prefixes: `PK_` for primary key, `FK_` for foreign key, `UQ_` for unique, `CK_` for check, `DF_` for default.
-- **Beginner-Friendly Explanation:** Naming your constraints is like labeling your folders. Instead of searching through system-generated names, you can find exactly what you need.
-
-**Purposes:**
-
-- To make constraint management easier (dropping, disabling, modifying)
-- To improve error message clarity
-- To enable consistent naming across development, staging, and production
-- To support migration scripts that reference constraints by name
-
-**Syntax Structures and Rules:**
-
-```sql
--- Named constraint in CREATE TABLE
-CREATE TABLE table_name (
-    column1 data_type CONSTRAINT constraint_name constraint_type,
-    ...
-    CONSTRAINT table_constraint_name constraint_type (column_list)
-);
-
--- Named constraint in ALTER TABLE
-ALTER TABLE table_name ADD CONSTRAINT constraint_name constraint_type (...);
+```text
+Query OK, 0 rows affected (0.00 sec)
+Query OK, 1 row affected (0.01 sec)
+Query OK, 0 rows affected (0.00 sec)
 ```
 
-**Naming Convention Examples:**
+**Why this output appears**: With `FOREIGN_KEY_CHECKS = 0`, MySQL does not validate the foreign-key relationship, allowing the insert to succeed. After re-enabling, future operations are checked, but the existing invalid row remains.
 
-| Constraint Type | Prefix | Example |
-|----------------|--------|---------|
-| PRIMARY KEY | `PK_` | `PK_Employees` |
-| FOREIGN KEY | `FK_` | `FK_Orders_Customers` |
-| UNIQUE | `UQ_` | `UQ_Users_Email` |
-| CHECK | `CK_` | `CK_Products_Price` |
-| DEFAULT | `DF_` | `DF_Orders_Status` |
+#### Real-World Cases
 
-**Annotated Code Examples:**
+- **Data migration**: A migration script disables foreign-key checks to load tables in an order that would otherwise violate dependencies, then re-enables checks after the load.
+- **Bulk import**: A data import tool uses `WITH NOCHECK` (SQL Server) or `NOT VALID` (PostgreSQL) to avoid scanning large tables during constraint creation, then validates separately.
+
+---
+
+### 11. Constraint Dependency
+
+#### Definitions
+
+**Core Definition**
+Constraint dependency refers to the relationships between constraints and other database objects, such that dropping or altering one object may be blocked or may cascade to dependent objects.
+
+**Technical Definition**
+In PostgreSQL, the system catalog `pg_depend` tracks dependencies between objects. A `FOREIGN KEY` constraint depends on the referenced `PRIMARY KEY` or `UNIQUE` constraint; a view depends on the tables it references. `DROP TABLE` or `DROP CONSTRAINT` fails if dependent objects exist, unless `CASCADE` is specified. In SQL Server and MySQL, foreign-key dependencies similarly prevent dropping a referenced key. When `CASCADE` is used in PostgreSQL to drop a table referenced by a foreign key, only the foreign-key constraint is removed—not the referencing table itself.
+
+**Beginner-Friendly Explanation**
+Constraint dependency means that constraints are connected to each other. If you try to delete a primary key that a foreign key depends on, the database stops you unless you say “CASCADE” to remove the dependent foreign key too.
+
+#### Purposes
+
+- To understand why a `DROP TABLE` or `DROP CONSTRAINT` might fail.
+- To safely resolve dependencies before performing schema changes.
+- To use `CASCADE` judiciously to remove dependent objects when appropriate.
+
+#### Syntax Rules and Structure
+
+**Dropping with CASCADE (PostgreSQL):**
 
 ```sql
--- System-generated name (avoid)
-CREATE TABLE SystemNamed (
-    column1 INT DEFAULT 42
-);
--- Constraint name might be: DF_SystemNam_colum_07020F21 (unfriendly)
-
--- Explicit name (recommended)
-CREATE TABLE ProgrammerNamed (
-    column1 INT CONSTRAINT DF_column1 DEFAULT 42
-);
--- Constraint name: DF_column1 (clear and manageable)
-
--- Named foreign key
-CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    customer_id INT,
-    CONSTRAINT FK_Orders_Customers
-        FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
-);
+ALTER TABLE table_name DROP CONSTRAINT constraint_name CASCADE;
+DROP TABLE table_name CASCADE;
 ```
 
-**Real-World Cases:**
 
-- **Migration scripts:** Referencing constraints by name in ALTER TABLE statements.
-- **Troubleshooting:** Identifying which constraint was violated from error messages.
-- **Code reviews:** Consistent naming makes schema definitions easier to review.
+**Component breakdown:**
 
-**References:**
+| Component | Description |
+|-----------|-------------|
+| `CASCADE` | Automatically drops dependent objects. |
+| `RESTRICT` | Refuses to drop if dependencies exist (default). |
 
-- Microsoft Learn: Best Practice: Naming Constraints - https://learn.microsoft.com/en-us/archive/blogs/dtjones/best-practice-naming-constraints
-- PostgreSQL: Constraint Naming - https://www.postgresql.org/docs/current/ddl-constraints.html
+**Syntax rules:**
 
+- In PostgreSQL, `CASCADE` on a `DROP TABLE` removes dependent foreign-key constraints but does not drop the referencing table itself.
+- `CASCADE` is recursive: it drops objects that depend on the dropped object, and objects that depend on those objects, and so on.
 
-#### 4.2 System-Generated (Implicit) Names and Migration Challenges
+**Constraints and limitations:**
 
-**Core Definitions:**
+- `CASCADE` can have far-reaching and unintended consequences; it should be used only after inspecting dependencies.
+- In MySQL and SQL Server, `CASCADE` is not available for `DROP TABLE`; dependencies must be resolved manually.
 
-- **Core Definition:** When a constraint is created without an explicit name, the database assigns a system-generated name.
-- **Technical Definition:** System-generated names vary by database: SQL Server uses formats like `DF_SystemNam_colum_07020F21`, PostgreSQL uses `tablename_columnname_key`, MySQL uses `tablename_ibfk_N`. These names are non-intuitive and can differ across environments, making migrations and schema comparisons difficult.
-- **Beginner-Friendly Explanation:** System-generated names are like automatically generated filenames—they work, but they're hard to remember and change from system to system.
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-**Purposes:**
-
-- To understand why explicit naming is a best practice
-- To troubleshoot migration failures caused by name mismatches
-- To write database-agnostic migration scripts
-
-**Annotated Code Examples:**
+##### Example 1: PostgreSQL – Dependency error and CASCADE resolution
 
 ```sql
--- System-generated names (example from SQL Server)
-CREATE TABLE dbo.Example (
-    column1 INT DEFAULT 42
-);
--- The constraint name might be: DF_Example_colum_07020F21
+-- Step 1: Create a parent table with a primary key and a child table with a foreign key.
+CREATE TABLE parent (id int PRIMARY KEY);
+CREATE TABLE child (id int PRIMARY KEY, parent_id int REFERENCES parent(id));
 
--- Querying system-generated names (SQL Server)
-SELECT name, type_desc
-FROM sys.objects
-WHERE parent_object_id = OBJECT_ID('dbo.Example');
+-- Step 2: Attempt to drop the parent table without CASCADE.
+DROP TABLE parent;
 ```
 
-**Real-World Cases:**
+**Expected output:**
 
-- **Schema comparison tools:** System-generated names cause false differences between environments.
-- **CI/CD pipelines:** Migration scripts fail when constraint names differ.
-
-**References:**
-
-- Devart: DF038: The constraint name is not explicitly specified - https://docs.devart.com
-- SQL Enlight: SA0075B: Avoid adding constraints with default system generated name - https://docs.sqlenlight.com
-
-
-#### 4.3 Querying Database Information Schemas to Inspect Constraints
-
-**Core Definitions:**
-
-- **Core Definition:** The INFORMATION_SCHEMA is a set of views (standardized in SQL:2003) that provide metadata about database objects, including constraints.
-- **Technical Definition:** The `INFORMATION_SCHEMA.TABLE_CONSTRAINTS` view lists all constraints, while `INFORMATION_SCHEMA.CHECK_CONSTRAINTS`, `INFORMATION_SCHEMA.KEY_COLUMN_USAGE`, and `INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS` provide additional details. Vendor-specific catalog views (e.g., `sys.objects` in SQL Server, `pg_constraint` in PostgreSQL) offer more detailed information.
-- **Beginner-Friendly Explanation:** The information schema is like a card catalog in a library—it tells you what constraints exist and where they are, without having to look at the tables themselves.
-
-**Syntax Structures and Rules:**
-
-```sql
--- List all constraints for a table (standard)
-SELECT constraint_name, constraint_type
-FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-WHERE table_name = 'employees';
-
--- List check constraints
-SELECT constraint_name, check_clause
-FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS
-WHERE constraint_schema = 'public';
-
--- List foreign key details
-SELECT
-    tc.constraint_name,
-    kcu.column_name,
-    ccu.table_name AS referenced_table,
-    ccu.column_name AS referenced_column
-FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
-JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
-    ON tc.constraint_name = kcu.constraint_name
-JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ccu
-    ON tc.constraint_name = ccu.constraint_name
-WHERE tc.constraint_type = 'FOREIGN KEY';
+```text
+CREATE TABLE
+CREATE TABLE
+ERROR:  cannot drop table parent because other objects depend on it
+DETAIL:  constraint child_parent_id_fkey on table child depends on table parent
+HINT:  Use DROP ... CASCADE to drop the dependent objects too.
 ```
 
-**Annotated Code Examples:**
-
 ```sql
--- PostgreSQL: List all constraints on a table
-SELECT conname, contype, pg_get_constraintdef(oid) AS definition
-FROM pg_constraint
-WHERE conrelid = 'employees'::regclass;
-
--- SQL Server: List all constraints on a table
-SELECT name, type_desc, OBJECT_DEFINITION(object_id) AS definition
-FROM sys.objects
-WHERE parent_object_id = OBJECT_ID('dbo.Employees')
-  AND type IN ('PK', 'FK', 'UQ', 'C', 'D');
+-- Step 3: Drop with CASCADE.
+DROP TABLE parent CASCADE;
 ```
 
-**Expected Output (PostgreSQL):**
+**Expected output:**
 
-| conname | contype | definition |
-|---------|---------|------------|
-| employees_pkey | p | PRIMARY KEY (emp_id) |
-| employees_email_key | u | UNIQUE (email) |
-| employees_salary_check | c | CHECK (salary > 0) |
+```text
+NOTICE:  drop cascades to constraint child_parent_id_fkey on table child
+DROP TABLE
+```
 
-**Real-World Cases:**
+**Why this output appears**: The foreign-key constraint depends on the parent table. `CASCADE` removes the constraint, but not the `child` table.
 
-- **Documentation:** Generating schema documentation automatically.
-- **Impact analysis:** Understanding what constraints exist before making schema changes.
-- **Auditing:** Verifying that constraints are correctly defined in production.
+#### Real-World Cases
 
-**References:**
+- **Schema refactoring**: Dropping a legacy primary key requires first dropping the foreign keys that reference it, or using `CASCADE`.
+- **Migration rollback**: A migration that adds a foreign key must be reversed by dropping the foreign key before dropping the referenced unique constraint.
 
-- Oracle: INFORMATION_SCHEMA TABLE_CONSTRAINTS - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/INFORMATION_SCHEMA-TABLE_CONSTRAINTS.html
-- Microsoft Learn: TABLE_CONSTRAINTS - https://learn.microsoft.com/en-us/sql/relational-databases/system-information-schema-views/table-constraints-transact-sql
+---
 
+### 12. Deferrable Constraints (PostgreSQL)
 
-### 5. Enforcement Mechanics & Lifecycle
+#### Definitions
 
-#### 5.1 Constraint Enforcement Timing (Immediate vs. Deferred)
+**Core Definition**
+A deferrable constraint is a constraint whose checking can be postponed until the end of the transaction rather than being checked immediately after each statement.
 
-**Core Definitions:**
+**Technical Definition**
+In PostgreSQL, `UNIQUE`, `PRIMARY KEY`, `EXCLUDE`, and `FOREIGN KEY` constraints can be declared `DEFERRABLE`. A `DEFERRABLE` constraint can be either `INITIALLY IMMEDIATE` (checked after each statement, the default) or `INITIALLY DEFERRED` (checked only at transaction commit). The `SET CONSTRAINTS` command can change the timing within a transaction. `NOT NULL` and `CHECK` constraints are **not** deferrable.
 
-- **Core Definition:** Constraint enforcement timing determines when constraints are checked: immediately after each statement (default) or deferred until the end of the transaction.
-- **Technical Definition:** Constraints can be `DEFERRABLE` or `NOT DEFERRABLE`. A `DEFERRABLE` constraint can be set to `INITIALLY IMMEDIATE` (checked after each statement, the default) or `INITIALLY DEFERRED` (checked only at transaction commit). The timing can be changed within a transaction using `SET CONSTRAINTS`. Only UNIQUE, PRIMARY KEY, EXCLUDE, and FOREIGN KEY constraints can be deferred; NOT NULL and CHECK constraints cannot.
-- **Beginner-Friendly Explanation:** Normally, the database checks the rules after every single change. With deferred constraints, you can temporarily break the rules as long as everything is correct by the time you save your work.
+**Beginner-Friendly Explanation**
+A deferrable constraint is like a homework assignment that can be checked at the end of the day instead of after every problem. This is useful when you need to temporarily violate a rule during a transaction and fix it before committing.
 
-**Purposes:**
+#### Purposes
 
-- To allow temporary constraint violations during complex multi-statement operations
-- To support circular foreign key references
-- To enable bulk data loading with temporary inconsistencies
-- To control when constraint checks occur for performance reasons
+- To allow temporary violations of a constraint during a multi-statement transaction, as long as the final state is valid.
+- To support circular foreign-key references that would otherwise be impossible to insert.
+- To reduce the overhead of immediate constraint checking during complex transactions.
 
-**Syntax Structures and Rules:**
+#### Syntax Rules and Structure
+
+**General syntax:**
 
 ```sql
--- In CREATE TABLE or ALTER TABLE
-CONSTRAINT constraint_name constraint_type
-    [DEFERRABLE | NOT DEFERRABLE]
-    [INITIALLY IMMEDIATE | INITIALLY DEFERRED]
+constraint_definition [ DEFERRABLE | NOT DEFERRABLE ] [ INITIALLY IMMEDIATE | INITIALLY DEFERRED ]
+```
 
--- Change timing within a transaction
+**PostgreSQL:** Supports `DEFERRABLE` for `UNIQUE`, `PRIMARY KEY`, `EXCLUDE`, and `REFERENCES` (foreign key).
+
+**SET CONSTRAINTS:**
+
+```sql
 SET CONSTRAINTS { ALL | constraint_name [, ...] } { DEFERRED | IMMEDIATE };
 ```
 
-**Syntax Rules:**
 
-- `NOT DEFERRABLE` is the default for all constraints.
-- `INITIALLY IMMEDIATE` is the default for deferrable constraints.
-- Deferred constraints are checked at transaction commit.
-- `SET CONSTRAINTS` can change the timing within a transaction.
-- Not all databases support deferrable constraints (e.g., MySQL does not support DEFERRABLE).
+**Component breakdown:**
 
-**Annotated Code Examples:**
+| Component | Description |
+|-----------|-------------|
+| `DEFERRABLE` | Allows the constraint to be deferred. |
+| `INITIALLY DEFERRED` | Checks the constraint only at transaction commit. |
+| `SET CONSTRAINTS` | Changes the timing within a transaction. |
 
-```sql
--- PostgreSQL: Deferrable FOREIGN KEY
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    dept_id INT,
-    CONSTRAINT fk_emp_dept FOREIGN KEY (dept_id)
-        REFERENCES departments(dept_id)
-        DEFERRABLE INITIALLY DEFERRED
-);
+**Syntax rules:**
 
-BEGIN;
--- Insert a department and an employee in any order
-INSERT INTO employees VALUES (1, 'Alice', 10);  -- dept 10 doesn't exist yet
-INSERT INTO departments VALUES (10, 'Engineering');  -- now it exists
-COMMIT;  -- constraint checked here, passes
+- `NOT DEFERRABLE` is the default; such constraints are checked immediately after every command.
+- `DEFERRABLE INITIALLY DEFERRED` constraints are checked only at transaction commit.
+- Deferrable constraints cannot be used as conflict arbitrators in `INSERT ... ON CONFLICT DO UPDATE`.
 
--- Change constraint timing within a transaction
-BEGIN;
-SET CONSTRAINTS fk_emp_dept IMMEDIATE;
--- Now the constraint is checked after each statement
-```
+**Constraints and limitations:**
 
-**Real-World Cases:**
+- Only `UNIQUE`, `PRIMARY KEY`, `EXCLUDE`, and `FOREIGN KEY` constraints can be deferrable in PostgreSQL.
+- Deferred constraint checks happen at commit, which can make debugging harder because the error appears late in the transaction.
+- MySQL and SQL Server do not support deferrable constraints in the same way.
 
-- **Circular references:** Two tables referencing each other.
-- **Bulk loading:** Loading data in a non-optimal order.
-- **Data migration:** Temporarily allowing inconsistencies during transformation.
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-**References:**
-
-- PostgreSQL: Deferrable Constraints - https://www.postgresql.org/docs/current/sql-createtable.html
-- Oracle: Deferrable Constraints - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/constraint.html
-
-
-#### 5.2 Handling Old Data When Adding New Constraints (WITH CHECK vs. WITH NOCHECK)
-
-**Core Definitions:**
-
-- **Core Definition:** When adding a constraint to an existing table with data, you can validate existing rows (`WITH CHECK`) or skip validation (`WITH NOCHECK`).
-- **Technical Definition:** `WITH CHECK` (the default for new constraints) validates that all existing rows satisfy the constraint before adding it. `WITH NOCHECK` adds the constraint without validating existing data. Constraints added with `WITH NOCHECK` are not considered by the query optimizer until re-enabled with `WITH CHECK CHECK CONSTRAINT`.
-- **Beginner-Friendly Explanation:** WITH CHECK means "make sure all the old data is also valid." WITH NOCHECK means "I promise the old data is fine, just add the rule for future data."
-
-**Purposes:**
-
-- To add constraints to tables with existing data
-- To control the performance impact of constraint validation
-- To temporarily add constraints without full validation
-- To document intended constraints even when data doesn't yet comply
-
-**Syntax Structures and Rules:**
+##### Example 1: PostgreSQL – Deferrable foreign key for circular references
 
 ```sql
--- SQL Server
-ALTER TABLE table_name
-WITH CHECK | WITH NOCHECK
-ADD CONSTRAINT constraint_name constraint_type (...);
-
--- Re-enable a constraint with validation
-ALTER TABLE table_name
-WITH CHECK CHECK CONSTRAINT constraint_name;
-
--- PostgreSQL
-ALTER TABLE table_name
-ADD CONSTRAINT constraint_name constraint_type (...)
-NOT VALID;
-
--- Validate later
-ALTER TABLE table_name
-VALIDATE CONSTRAINT constraint_name;
-```
-
-**Syntax Rules:**
-
-- `WITH CHECK` is the default for new constraints.
-- `WITH NOCHECK` is not recommended except in rare cases.
-- Constraints added with `WITH NOCHECK` are not used by the query optimizer.
-- Re-enabling with `WITH CHECK CHECK CONSTRAINT` validates existing data.
-
-**Annotated Code Examples:**
-
-```sql
--- SQL Server: Add constraint with validation
-ALTER TABLE employees
-WITH CHECK
-ADD CONSTRAINT ck_salary CHECK (salary > 0);
--- Fails if any existing row has salary <= 0
-
--- SQL Server: Add constraint without validation
-ALTER TABLE employees
-WITH NOCHECK
-ADD CONSTRAINT ck_salary CHECK (salary > 0);
--- Succeeds even if some rows violate the constraint
-
--- Validate the constraint later
-ALTER TABLE employees
-WITH CHECK CHECK CONSTRAINT ck_salary;
--- Now validates existing data; fails if violations exist
-```
-
-```sql
--- PostgreSQL: Add NOT VALID constraint
-ALTER TABLE employees
-ADD CONSTRAINT ck_salary CHECK (salary > 0) NOT VALID;
-
--- Validate later
-ALTER TABLE employees
-VALIDATE CONSTRAINT ck_salary;
-```
-
-**Real-World Cases:**
-
-- **Legacy data migration:** Adding constraints to tables with historical data.
-- **Performance:** Avoiding long validation scans on large tables.
-- **Incremental validation:** Validating constraints during maintenance windows.
-
-**References:**
-
-- Microsoft Learn: WITH CHECK / WITH NOCHECK - https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-table-transact-sql
-- PostgreSQL: NOT VALID - https://www.postgresql.org/docs/current/sql-altertable.html
-
-
-#### 5.3 Dropping, Disabling, or Enabling Constraints
-
-**Core Definitions:**
-
-- **Core Definition:** Constraints can be dropped (removed permanently), disabled (temporarily not enforced), or enabled (re-activated).
-- **Technical Definition:** `ALTER TABLE ... DROP CONSTRAINT` removes the constraint permanently. `ALTER TABLE ... DISABLE CONSTRAINT` (Oracle) or `ALTER TABLE ... NOCHECK CONSTRAINT` (SQL Server) disables enforcement. PostgreSQL uses `ALTER TABLE ... DROP CONSTRAINT` followed by re-adding. Disabling constraints can be useful for bulk operations.
-- **Beginner-Friendly Explanation:** Dropping a constraint is like removing a rule from the rulebook. Disabling it is like temporarily suspending the rule.
-
-**Purposes:**
-
-- To remove obsolete constraints
-- To temporarily disable constraints for bulk data loading
-- To re-enable constraints after maintenance
-- To modify constraint definitions (drop and recreate)
-
-**Syntax Structures and Rules:**
-
-```sql
--- Drop constraint
-ALTER TABLE table_name DROP CONSTRAINT constraint_name;
-
--- Disable constraint (Oracle)
-ALTER TABLE table_name DISABLE CONSTRAINT constraint_name;
-
--- Disable constraint (SQL Server)
-ALTER TABLE table_name NOCHECK CONSTRAINT constraint_name;
-
--- Enable constraint (Oracle)
-ALTER TABLE table_name ENABLE CONSTRAINT constraint_name;
-
--- Enable constraint (SQL Server)
-ALTER TABLE table_name CHECK CONSTRAINT constraint_name;
-```
-
-**Syntax Rules:**
-
-- Dropping a PRIMARY KEY constraint drops the associated index.
-- Dropping a FOREIGN KEY constraint removes the referential integrity enforcement.
-- Disabling a constraint does not remove it; it can be re-enabled.
-- In PostgreSQL, disabling a constraint requires dropping it (or using `ALTER TABLE ... DROP CONSTRAINT`).
-
-**Annotated Code Examples:**
-
-```sql
--- Drop a constraint
-ALTER TABLE employees DROP CONSTRAINT ck_salary;
-
--- SQL Server: Disable a constraint
-ALTER TABLE employees NOCHECK CONSTRAINT ck_salary;
-
--- SQL Server: Re-enable with validation
-ALTER TABLE employees CHECK CONSTRAINT ck_salary;
-
--- Oracle: Disable and enable
-ALTER TABLE employees DISABLE CONSTRAINT ck_salary;
-ALTER TABLE employees ENABLE CONSTRAINT ck_salary;
-
--- PostgreSQL: Drop and re-add (PostgreSQL doesn't support disabling)
-ALTER TABLE employees DROP CONSTRAINT ck_salary;
-ALTER TABLE employees ADD CONSTRAINT ck_salary CHECK (salary > 0);
-```
-
-**Real-World Cases:**
-
-- **Bulk loading:** Disabling constraints before a large load, then re-enabling.
-- **Schema evolution:** Dropping and recreating constraints with new definitions.
-- **Troubleshooting:** Temporarily disabling a constraint to isolate an issue.
-
-**References:**
-
-- Oracle: Modifying, Renaming, or Dropping Existing Integrity Constraints - https://docs.oracle.com/en/database/oracle/oracle-database/19/admin/managing-integrity-constraints.html
-- Microsoft Learn: Disable/Enable Constraints - https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-table-transact-sql
-
-
-### 6. Interactions & Dependencies
-
-#### 6.1 Referential Integrity Actions for Foreign Keys (ON DELETE / ON UPDATE)
-
-**Core Definitions:**
-
-- **Core Definition:** ON DELETE and ON UPDATE clauses specify what action the database takes when a parent row is deleted or its key is updated.
-- **Technical Definition:** The SQL standard defines five referential actions: `NO ACTION` (default), `RESTRICT`, `CASCADE`, `SET NULL`, and `SET DEFAULT`. `CASCADE` deletes or updates child rows; `SET NULL` sets foreign key columns to NULL; `SET DEFAULT` sets them to their default values; `RESTRICT` and `NO ACTION` prevent the operation.
-- **Beginner-Friendly Explanation:** These actions are like instructions for what to do with the children when the parent is deleted. "Delete them too" (CASCADE), "just unlink them" (SET NULL), or "don't let me delete the parent" (RESTRICT).
-
-**Purposes:**
-
-- To automate the handling of related records
-- To maintain referential integrity during parent modifications
-- To implement business rules for data cleanup
-- To prevent orphaned records
-
-**Syntax Structures and Rules:**
-
-```sql
-FOREIGN KEY (column_list)
-REFERENCES parent_table(parent_column_list)
-[ON DELETE { NO ACTION | RESTRICT | CASCADE | SET NULL | SET DEFAULT }]
-[ON UPDATE { NO ACTION | RESTRICT | CASCADE | SET NULL | SET DEFAULT }]
-```
-
-**Action Definitions:**
-
-| Action | ON DELETE Behavior | ON UPDATE Behavior |
-|--------|-------------------|-------------------|
-| NO ACTION | Error, rollback | Error, rollback |
-| RESTRICT | Error, rollback | Error, rollback |
-| CASCADE | Delete child rows | Update child FK values |
-| SET NULL | Set child FK to NULL | Set child FK to NULL |
-| SET DEFAULT | Set child FK to default | Set child FK to default |
-
-**Syntax Rules:**
-
-- `SET NULL` requires the FK columns to be nullable.
-- `SET DEFAULT` requires default values defined for the FK columns.
-- `RESTRICT` and `NO ACTION` are functionally similar (both prevent the operation).
-- If no action is specified, the default is `NO ACTION`.
-
-**Annotated Code Examples:**
-
-```sql
--- Setup: Parent and child tables with CASCADE
+-- Step 1: Create two tables with circular foreign keys.
 CREATE TABLE departments (
-    dept_id INT PRIMARY KEY,
-    dept_name VARCHAR(100)
+    dept_id int PRIMARY KEY,
+    manager_id int
 );
 
 CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    dept_id INT,
-    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+    emp_id int PRIMARY KEY,
+    dept_id int REFERENCES departments(dept_id) DEFERRABLE INITIALLY DEFERRED
 );
 
-INSERT INTO departments VALUES (1, 'Engineering');
-INSERT INTO employees VALUES (1, 'Alice', 1);
-INSERT INTO employees VALUES (2, 'Bob', 1);
+ALTER TABLE departments
+    ADD CONSTRAINT fk_manager
+    FOREIGN KEY (manager_id) REFERENCES employees(emp_id)
+    DEFERRABLE INITIALLY DEFERRED;
 
--- Deleting department 1 cascades to employees
-DELETE FROM departments WHERE dept_id = 1;
--- Alice and Bob are automatically deleted
+-- Step 2: Insert in a transaction; constraints are checked at commit.
+BEGIN;
+INSERT INTO departments (dept_id, manager_id) VALUES (1, 100);
+INSERT INTO employees (emp_id, dept_id) VALUES (100, 1);
+COMMIT;
 ```
 
-**Expected Output (after CASCADE delete):**
+**Expected output:**
 
-| emp_id  | emp_name |
-|---------|----------|
-| (empty) | (empty)  |
+```text
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+BEGIN
+INSERT 0 1
+INSERT 0 1
+COMMIT
+```
+
+**Why this output appears**: The circular foreign keys are declared `DEFERRABLE INITIALLY DEFERRED`, so the intermediate violation (departments references employees before the employee exists) is allowed until the transaction commits, at which point both rows exist and the constraint is satisfied.
+
+#### Real-World Cases
+
+- **Circular references**: A `departments` table and an `employees` table reference each other; deferrable constraints allow both to be inserted in a single transaction.
+- **Bulk data loading**: Deferring foreign-key checks until commit reduces the number of individual checks during a large transaction.
+
+---
+
+### 13. Constraint Timing
+
+#### Definitions
+
+**Core Definition**
+Constraint timing refers to when a constraint is checked: immediately after each statement or deferred until transaction commit.
+
+**Technical Definition**
+In PostgreSQL, each constraint has one of three timing characteristics: `NOT DEFERRABLE` (checked immediately after every command), `DEFERRABLE INITIALLY IMMEDIATE` (checked after each statement but can be deferred), or `DEFERRABLE INITIALLY DEFERRED` (checked only at transaction commit). The `SET CONSTRAINTS` command can switch a deferrable constraint between immediate and deferred mode within a transaction.
+
+**Beginner-Friendly Explanation**
+Constraint timing is about **when** the database checks the rule. Immediate means “check right now, after every statement.” Deferred means “check at the end of the transaction.”
+
+#### Purposes
+
+- To control the trade-off between early error detection (immediate) and flexibility for multi-statement transactions (deferred).
+- To allow temporary violations during a transaction that will be resolved before commit.
+- To optimise performance by reducing the number of constraint checks during bulk operations.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:** Timing is specified at constraint creation:
 
 ```sql
--- SET NULL example
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    dept_id INT,
-    FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
-        ON DELETE SET NULL
-);
-
-DELETE FROM departments WHERE dept_id = 1;
--- Employees in dept 1 now have dept_id = NULL
+[ DEFERRABLE | NOT DEFERRABLE ] [ INITIALLY IMMEDIATE | INITIALLY DEFERRED ]
 ```
 
-**Real-World Cases:**
-
-- **E-commerce:** Deleting a customer cascades to their orders (CASCADE) or sets order customer to NULL (SET NULL).
-- **HR:** Deleting a department cascades to employees (CASCADE) or sets their department to NULL (SET NULL).
-- **CMS:** Deleting a category prevents deletion if articles exist (RESTRICT).
-
-**References:**
-
-- MySQL: FOREIGN KEY Constraints (Reference Options) - https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html
-- Microsoft Learn: ON DELETE/ON UPDATE - https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-transact-sql
-
-
-#### 6.2 The NULL Behavior Trap: How NULL Values Bypass Constraints
-
-**Core Definitions:**
-
-- **Core Definition:** NULL values bypass CHECK constraints and have special behavior in UNIQUE constraints, because NULL comparisons evaluate to UNKNOWN, not FALSE.
-- **Technical Definition:** For CHECK constraints, a condition that evaluates to UNKNOWN passes the constraint. For UNIQUE constraints, the treatment of multiple NULLs varies: PostgreSQL, MySQL, and Oracle allow multiple NULLs, while SQL Server allows only one NULL per column. This is because the SQL standard generally treats NULLs as an "escape hatch" for constraints.
-- **Beginner-Friendly Explanation:** NULL means "unknown," so the database can't say whether the rule is violated or not. Therefore, it allows the value. This can be surprising—for example, a UNIQUE constraint on email might allow multiple rows with NULL email.
-
-**Purposes:**
-
-- To understand why NULL values may bypass constraints
-- To design constraints that handle NULLs correctly
-- To avoid unexpected behavior in data validation
-- To choose appropriate NULL handling strategies per database
-
-**CHECK Constraint NULL Behavior:**
+**SET CONSTRAINTS:**
 
 ```sql
--- A CHECK constraint passes if it evaluates to TRUE or UNKNOWN
-CREATE TABLE products (
-    price DECIMAL(10,2) CHECK (price > 0)
-);
-
-INSERT INTO products VALUES (10.00);  -- TRUE, passes
-INSERT INTO products VALUES (NULL);    -- UNKNOWN, passes (NULL allowed)
-INSERT INTO products VALUES (-5.00);   -- FALSE, rejected
+SET CONSTRAINTS { ALL | constraint_name [, ...] } { DEFERRED | IMMEDIATE };
 ```
 
-**UNIQUE Constraint NULL Behavior:**
 
-| Database | Multiple NULLs Allowed in UNIQUE Column? |
-|----------|------------------------------------------|
-| PostgreSQL | Yes (NULLs are distinct) |
-| MySQL | Yes |
-| SQLite | Yes |
-| SQL Server | No (only one NULL allowed) |
-| Oracle | Yes |
+**Component breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `INITIALLY IMMEDIATE` | Check after each statement (default for deferrable constraints). |
+| `INITIALLY DEFERRED` | Check only at transaction commit. |
+| `SET CONSTRAINTS ... DEFERRED` | Switch to deferred mode within a transaction. |
+
+**Syntax rules:**
+
+- `NOT DEFERRABLE` constraints are always immediate.
+- `SET CONSTRAINTS` affects only the current transaction.
+- `SET CONSTRAINTS ALL DEFERRED` defers all deferrable constraints in the transaction.
+
+**Constraints and limitations:**
+
+- Immediate constraints provide faster feedback and are easier to debug.
+- Deferred constraints can mask errors until commit, making debugging harder.
+- MySQL and SQL Server do not support `SET CONSTRAINTS`; their constraint timing is generally immediate.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – SET CONSTRAINTS to defer a unique constraint
 
 ```sql
--- PostgreSQL: Multiple NULLs allowed in UNIQUE column
-CREATE TABLE users (
-    user_id INT PRIMARY KEY,
-    email VARCHAR(200) UNIQUE
-);
+-- Step 1: Create a deferrable unique constraint.
+CREATE TABLE t (id int, UNIQUE (id) DEFERRABLE INITIALLY IMMEDIATE);
 
-INSERT INTO users VALUES (1, NULL);  -- Allowed
-INSERT INTO users VALUES (2, NULL);  -- Allowed (second NULL)
--- In SQL Server, the second insert would fail
+-- Step 2: Begin a transaction and defer the constraint.
+BEGIN;
+SET CONSTRAINTS ALL DEFERRED;
+
+-- Step 3: Insert duplicate values.
+INSERT INTO t VALUES (1);
+INSERT INTO t VALUES (1);
+
+-- Step 4: Commit; the constraint fails at commit.
+COMMIT;
 ```
 
-**Workarounds for SQL Server (only one NULL allowed):**
+**Expected output:**
+
+```text
+CREATE TABLE
+BEGIN
+SET CONSTRAINTS
+INSERT 0 1
+INSERT 0 1
+ERROR:  duplicate key value violates unique constraint "t_id_key"
+```
+
+**Why this output appears**: The constraint is deferred within the transaction, so the duplicate inserts are allowed. At `COMMIT`, the constraint is checked and the transaction fails.
+
+#### Real-World Cases
+
+- **Multi-step data fixes**: A data correction requires temporarily violating a unique constraint; the constraint is deferred until the end of the transaction.
+- **Bulk loading**: Deferring foreign-key checks during a large import reduces the number of individual lookups.
+
+---
+
+### 14. Constraint Validation
+
+#### Definitions
+
+**Core Definition**
+Constraint validation is the process of checking that existing data satisfies a newly added or re-enabled constraint.
+
+**Technical Definition**
+In PostgreSQL, `ALTER TABLE ... ADD CONSTRAINT ... NOT VALID` adds a `CHECK` or `FOREIGN KEY` constraint without scanning existing rows. The constraint is enforced for new rows immediately, but existing rows are not validated until `ALTER TABLE ... VALIDATE CONSTRAINT` is run. `VALIDATE CONSTRAINT` takes a `SHARE UPDATE EXCLUSIVE` lock, which does not block reads or writes. In SQL Server, `WITH CHECK` (the default for new constraints) validates existing data; `WITH NOCHECK` skips validation. Re-enabling a constraint with `WITH CHECK CHECK CONSTRAINT` validates existing data.
+
+**Beginner-Friendly Explanation**
+Constraint validation is how you check that the data already in the table follows a new rule. If you add a rule without validation (`NOT VALID` or `WITH NOCHECK`), the rule applies to new data only until you run validation.
+
+#### Purposes
+
+- To add constraints to large tables without holding a long lock that blocks reads and writes.
+- To validate existing data after a constraint has been added as `NOT VALID`.
+- To ensure that the query optimizer can trust the constraint for better execution plans.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL:**
 
 ```sql
--- Use a filtered unique index to allow multiple NULLs
-CREATE UNIQUE INDEX uq_users_email
-ON users(email)
-WHERE email IS NOT NULL;
+ALTER TABLE table_name ADD CONSTRAINT constraint_name ... NOT VALID;
+ALTER TABLE table_name VALIDATE CONSTRAINT constraint_name;
 ```
 
-**Annotated Code Examples:**
+
+**SQL Server:**
 
 ```sql
--- Demonstrate CHECK bypass with NULL
-CREATE TABLE employees (
-    emp_id INT PRIMARY KEY,
-    emp_name VARCHAR(100),
-    age INT CHECK (age >= 18)
-);
-
-INSERT INTO employees VALUES (1, 'Alice', 25);   -- TRUE, passes
-INSERT INTO employees VALUES (2, 'Bob', NULL);   -- UNKNOWN, passes
-INSERT INTO employees VALUES (3, 'Charlie', 16); -- FALSE, rejected
+ALTER TABLE table_name WITH CHECK ADD CONSTRAINT constraint_name ...;
+-- or
+ALTER TABLE table_name WITH NOCHECK ADD CONSTRAINT constraint_name ...;
+-- later
+ALTER TABLE table_name WITH CHECK CHECK CONSTRAINT constraint_name;
 ```
 
-**Expected Output:**
 
-| emp_id | emp_name | age |
-|--------|----------|-----|
-| 1      | Alice    | 25  |
-| 2      | Bob      | NULL |
+**Component breakdown:**
 
-**Explanation:** Bob's NULL age passes the CHECK constraint because `NULL >= 18` evaluates to UNKNOWN, not FALSE. Only Charlie's age (16) is rejected.
+| Component | Description |
+|-----------|-------------|
+| `NOT VALID` (PostgreSQL) | Skips validation of existing rows. |
+| `VALIDATE CONSTRAINT` (PostgreSQL) | Validates a `NOT VALID` constraint. |
+| `WITH CHECK` (SQL Server) | Validates existing data. |
+| `WITH NOCHECK` (SQL Server) | Skips validation of existing data. |
 
-**Real-World Cases:**
+**Syntax rules:**
 
-- **Validation:** CHECK constraints on optional columns may allow NULL even when the validation rule seems strict.
-- **Unique keys:** Multiple NULLs in a UNIQUE column can lead to unexpected duplicates.
-- **Data quality:** NULLs can mask constraint violations.
+- `NOT VALID` is allowed only for `CHECK` and `FOREIGN KEY` constraints in PostgreSQL.
+- `VALIDATE CONSTRAINT` should be run in a separate transaction from the `ADD CONSTRAINT ... NOT VALID` for maximum benefit.
+- The query optimizer does not assume a `NOT VALID` constraint holds for all rows, so it may miss optimisations until validation is complete.
 
-**References:**
+**Constraints and limitations:**
 
-- PostgreSQL: CHECK Constraints and NULL - https://www.postgresql.org/message-id/87r7kgpuq8.fsf%40stark.xeocode.com
-- Microsoft Learn: UNIQUE Constraints and NULL - https://learn.microsoft.com/en-us/sql/relational-databases/tables/unique-constraints-and-check-constraints
-- MySQL: UNIQUE Constraints and NULL - https://dev.mysql.com/doc/refman/8.0/en/create-table.html
+- Validation scans the entire table and can be slow on large tables, but it does not block reads or writes (PostgreSQL).
+- In SQL Server, `WITH NOCHECK` constraints are ignored by the query optimizer until re-enabled with `WITH CHECK CHECK CONSTRAINT`.
 
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-## Summary Tables
+##### Example 1: PostgreSQL – NOT VALID then VALIDATE
 
-### Constraint Types Comparison
+```sql
+-- Step 1: Add a CHECK constraint as NOT VALID.
+ALTER TABLE orders ADD CONSTRAINT chk_amount_positive CHECK (amount > 0) NOT VALID;
 
-| Constraint | Level | NULL Behavior | Deferrable | Multiple per Table |
-|------------|-------|--------------|------------|-------------------|
-| NOT NULL | Column only | Rejects NULL | No | Yes (per column) |
-| UNIQUE | Column or Table | Allows NULLs (varies) | Yes (PG, Oracle) | Yes |
-| PRIMARY KEY | Column or Table | Rejects NULL | Yes (PG, Oracle) | No (one per table) |
-| FOREIGN KEY | Column or Table | Allows NULL | Yes (PG, Oracle) | Yes |
-| CHECK | Column or Table | UNKNOWN passes | No | Yes |
-| DEFAULT | Column or Table | N/A | N/A | Yes (per column) |
+-- Step 2: Validate the constraint.
+ALTER TABLE orders VALIDATE CONSTRAINT chk_amount_positive;
+```
 
-### Referential Actions Summary
+**Expected output:**
 
-| Action | ON DELETE | ON UPDATE |
-|--------|-----------|-----------|
-| NO ACTION | Prevent, error | Prevent, error |
-| RESTRICT | Prevent, error | Prevent, error |
-| CASCADE | Delete child rows | Update child FK values |
-| SET NULL | Set child FK to NULL | Set child FK to NULL |
-| SET DEFAULT | Set child FK to default | Set child FK to default |
+```text
+ALTER TABLE
+ALTER TABLE
+```
 
-### Constraint Naming Prefixes (Convention)
+**Why this output appears**: The `NOT VALID` constraint is added without scanning existing rows. `VALIDATE CONSTRAINT` then scans the table to verify that all existing rows satisfy the constraint.
 
-| Constraint Type | Prefix | Example |
-|----------------|--------|---------|
-| PRIMARY KEY | PK_ | PK_Employees |
-| FOREIGN KEY | FK_ | FK_Orders_Customers |
-| UNIQUE | UQ_ | UQ_Users_Email |
-| CHECK | CK_ | CK_Products_Price |
-| DEFAULT | DF_ | DF_Orders_Status |
+#### Real-World Cases
+
+- **Production constraint addition**: A DBA adds a `CHECK` constraint as `NOT VALID` during business hours, then validates it during a low-traffic period.
+- **Data migration**: After importing data, foreign-key constraints are added as `NOT VALID` to avoid blocking the import, then validated separately.
+
+---
+
+### 15. Constraint Performance
+
+#### Definitions
+
+**Core Definition**
+Constraint performance refers to the overhead that constraints impose on database write operations and the impact they have on query optimisation.
+
+**Technical Definition**
+Constraints incur performance costs primarily on `INSERT`, `UPDATE`, and `DELETE` operations. `UNIQUE` and `PRIMARY KEY` constraints create unique B-tree indexes; every write must update these indexes and perform an index lookup to check for duplicates. `FOREIGN KEY` constraints require lookups against the parent table on insert and update of the child table, and may require cascading actions on delete or update. `CHECK` constraints evaluate a Boolean expression for every affected row. `NOT NULL` and `DEFAULT` constraints have minimal overhead. Constraints generally do not penalise read queries, and the query optimizer can use constraints to produce better execution plans (e.g., eliminating joins or scans).
+
+**Beginner-Friendly Explanation**
+Constraints make writes slower because the database has to do extra work to check the rules. `UNIQUE` and `PRIMARY KEY` are the most expensive because they maintain indexes; `FOREIGN KEY` also adds lookup costs. Reads are not slowed down by constraints, and constraints can actually help the optimizer choose faster plans.
+
+#### Purposes
+
+- To understand the trade-off between data integrity and write performance.
+- To choose which constraints are necessary and which can be omitted or deferred.
+- To design indexes and constraints that support both integrity and query performance.
+
+#### Syntax Rules and Structure
+
+Performance is not controlled by syntax but by design decisions:
+
+- **Minimise redundant indexes**: A `UNIQUE` constraint and a separate unique index on the same columns are redundant; use one or the other.
+- **Index foreign-key columns**: While PostgreSQL does not automatically index foreign-key columns, doing so speeds up cascading deletes and joins.
+- **Use `NOT VALID` for large tables**: Adding constraints as `NOT VALID` and validating separately avoids long locks and allows the operation to complete without blocking.
+- **Consider deferrable constraints for bulk operations**: Deferring checks until commit can reduce per-statement overhead during large transactions.
+
+**Constraints and limitations:**
+
+- Every index, including those created by `UNIQUE` and `PRIMARY KEY` constraints, incurs a write penalty.
+- `FOREIGN KEY` and `UNIQUE` constraints are the most expensive because they require reads against external state on every insert.
+- High-contention environments may see disproportionate overhead from unique constraint checks.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Measuring write overhead with and without a unique constraint
+
+```sql
+-- Step 1: Create two tables, one with a unique constraint and one without.
+CREATE TABLE with_unique (id int UNIQUE, data text);
+CREATE TABLE without_unique (id int, data text);
+
+-- Step 2: Insert 100,000 rows into each and compare timing.
+\timing on
+INSERT INTO with_unique SELECT g, md5(random()::text) FROM generate_series(1, 100000) AS g;
+INSERT INTO without_unique SELECT g, md5(random()::text) FROM generate_series(1, 100000) AS g;
+```
+
+**Expected output** (illustrative; actual timings vary):
+
+```text
+CREATE TABLE
+CREATE TABLE
+Timing is on.
+INSERT 0 100000
+Time: 245.123 ms
+INSERT 0 100000
+Time: 120.456 ms
+```
+
+**Why this output appears**: The table with the unique constraint performs an index lookup and index update for every row, roughly doubling the insert time compared to the table without the constraint.
+
+#### Real-World Cases
+
+- **High-throughput ingestion**: A logging table may omit foreign keys and unique constraints to maximise insert throughput, relying on application-level validation instead.
+- **OLTP systems**: Primary keys and foreign keys are essential for integrity and join performance, even though they add write overhead; the trade-off is almost always worth it for transactional systems.
 
 ---
 
 ## References
 
-- Microsoft Learn: Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/unique-constraints-and-check-constraints
-- Microsoft Learn: Best Practice: Naming Constraints - https://learn.microsoft.com/en-us/archive/blogs/dtjones/best-practice-naming-constraints
-- Microsoft Learn: FOREIGN KEY Constraints - https://learn.microsoft.com/en-us/sql/relational-databases/tables/create-foreign-key-relationships
-- Microsoft Learn: WITH CHECK / WITH NOCHECK - https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-table-transact-sql
-- PostgreSQL: Constraints - https://www.postgresql.org/docs/current/ddl-constraints.html
-- PostgreSQL: Deferrable Constraints - https://www.postgresql.org/docs/current/sql-createtable.html
-- PostgreSQL: Identity Columns - https://www.postgresql.org/docs/current/ddl-identity-columns.html
-- MySQL: FOREIGN KEY Constraints - https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html
-- MySQL: CHECK Constraints - https://dev.mysql.com/doc/refman/8.0/en/create-table-check-constraints.html
-- Oracle: Modifying, Renaming, or Dropping Existing Integrity Constraints - https://docs.oracle.com/en/database/oracle/oracle-database/19/admin/managing-integrity-constraints.html
-- Oracle: INFORMATION_SCHEMA TABLE_CONSTRAINTS - https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/INFORMATION_SCHEMA-TABLE_CONSTRAINTS.html
-- Stack Overflow: Column level vs table level constraints - https://stackoverflow.com/questions/9494129/column-level-vs-table-level-constraints-in-sql-server
-- PostgreSQL: CHECK Constraints and NULL - https://www.postgresql.org/message-id/87r7kgpuq8.fsf%40stark.xeocode.com
+- PostgreSQL Documentation – Constraints – https://www.postgresql.org/docs/current/ddl-constraints.html
+- PostgreSQL Documentation – `CREATE TABLE` – https://www.postgresql.org/docs/current/sql-createtable.html
+- PostgreSQL Documentation – Dependency Tracking – https://www.postgresql.org/docs/current/ddl-depend.html
+- PostgreSQL Documentation – `SET CONSTRAINTS` – https://www.postgresql.org/docs/current/sql-set-constraints.html
+- PostgreSQL Documentation – Deferrable Constraints (mailing list discussion) – https://www.postgresql.org/message-id/0317c0c5-a7e5-9073-01b9-80391491108b%40aklaver.com
+- MySQL 8.0 Reference Manual – `CREATE TABLE` – https://dev.mysql.com/doc/refman/8.0/en/create-table.html
+- MySQL 8.0 Reference Manual – Server SQL Modes (foreign_key_checks) – https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html
+- Microsoft Learn – `column_constraint` (Transact-SQL) – https://learn.microsoft.com/en-us/sql/t-sql/statements/column-constraint-transact-sql
+- Microsoft Learn – `table_constraint` (Transact-SQL) – https://learn.microsoft.com/en-us/sql/t-sql/statements/table-constraint-transact-sql
+- Microsoft Learn – `ALTER TABLE ... WITH CHECK | WITH NOCHECK` – https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-table-transact-sql
+- Microsoft Learn – Best Practice: Naming Constraints – https://learn.microsoft.com/en-us/archive/blogs/sqlserverfaq/best-practice-naming-constraints
+- Stack Overflow – How does unique constraint affect write performance in Postgres DB – https://stackoverflow.com/questions/13190682/how-does-unique-constraint-affect-write-performance-in-postgres-db
+- PostgreSQL Wiki – Constraints Are Slow! – https://wiki.postgresql.org/wiki/Constraints_Are_Slow
+- Tiger Data – The Hidden Cost of Postgres Constraints at Scale – https://www.tigerdata.com/blog/the-hidden-cost-of-postgres-constraints-at-scale
+- PostgreSQL Documentation – `NOT VALID` / `VALIDATE CONSTRAINT` – https://www.postgresql.org/docs/current/sql-altertable.html
+- Oracle Database SQL Language Reference – `DROP CONSTRAINT ... CASCADE` – https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/constraint.html
