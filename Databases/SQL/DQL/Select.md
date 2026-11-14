@@ -82,25 +82,139 @@ FROM table_name;
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Selecting specific columns
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Creating a table, inserting records, and selecting specific columns
 
 ```sql
--- Step 1: Select only the columns needed for a contact list.
+-- Step 1: Create the 'employees' table with appropriate data types and constraints.
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    department VARCHAR(50),
+    salary NUMERIC(10, 2)
+);
+
+-- Step 2: Insert sample employee records into the table.
+INSERT INTO employees (first_name, last_name, email, department, salary)
+VALUES 
+    ('Alice', 'Smith', 'alice@example.com', 'Engineering', 85000.00),
+    ('Bob', 'Jones', 'bob@example.com', 'Marketing', 62000.00),
+    ('Charlie', 'Brown', 'charlie@example.com', 'Engineering', 92000.00);
+
+-- Step 3: Select only the columns needed for a contact list.
 SELECT first_name, last_name, email
 FROM employees;
+
 ```
 
 **Expected output:**
 
 ```text
- first_name | last_name |        email
-------------+-----------+----------------------
+ first_name | last_name |        email        
+------------+-----------+---------------------
  Alice      | Smith     | alice@example.com
  Bob        | Jones     | bob@example.com
-(2 rows)
+ Charlie    | Brown     | charlie@example.com
+(3 rows)
+
 ```
 
-**Why this output appears**: The `SELECT` list names three columns. PostgreSQL returns those columns in the specified order for every row in the table. Columns not listed (e.g., `salary`, `department`) are not fetched.
+**Why this output appears**: First, `CREATE TABLE` defines the schema, and `INSERT INTO` populates three complete rows. Finally, the `SELECT` list explicitly names three columns (`first_name`, `last_name`, and `email`). PostgreSQL returns only those columns in the exact order requested for every row, omitting `employee_id`, `department`, and `salary`.
+
+---
+
+##### Example 2: Filtering rows with `WHERE` and sorting results with `ORDER BY`
+
+```sql
+-- Step 1: Create the 'products' table to store inventory details.
+CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    product_name VARCHAR(100) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    price NUMERIC(8, 2) NOT NULL,
+    stock_quantity INT NOT NULL
+);
+
+-- Step 2: Insert multiple product records across different categories.
+INSERT INTO products (product_name, category, price, stock_quantity)
+VALUES 
+    ('Mechanical Keyboard', 'Electronics', 120.00, 15),
+    ('Ergonomic Chair', 'Furniture', 350.00, 5),
+    ('Wireless Mouse', 'Electronics', 45.00, 30),
+    ('USB-C Hub', 'Electronics', 60.00, 0),
+    ('Standing Desk', 'Furniture', 500.00, 8);
+
+-- Step 3: Retrieve in-stock Electronics sorted from highest to lowest price.
+SELECT product_name, price, stock_quantity
+FROM products
+WHERE category = 'Electronics' 
+  AND stock_quantity > 0
+ORDER BY price DESC;
+
+```
+
+**Expected output:**
+
+```text
+    product_name     | price  | stock_quantity 
+---------------------+--------+----------------
+ Mechanical Keyboard | 120.00 |             15
+ Wireless Mouse      |  45.00 |             30
+(2 rows)
+
+```
+
+**Why this output appears**: After creating and populating the `products` table, the `WHERE` clause filters the five rows down to items matching two conditions: `category = 'Electronics'` and `stock_quantity > 0`. This excludes the furniture items as well as the out-of-stock `USB-C Hub`. Finally, `ORDER BY price DESC` sorts the remaining two rows in descending order by price, placing the $120.00 keyboard above the $45.00 mouse.
+
+---
+
+##### Example 3: Aggregating data with `GROUP BY` and filtering groups with `HAVING`
+
+```sql
+-- Step 1: Create the 'orders' table to track customer purchases.
+CREATE TABLE orders (
+    order_id SERIAL PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL,
+    order_total NUMERIC(10, 2) NOT NULL,
+    order_date DATE NOT NULL
+);
+
+-- Step 2: Insert multiple orders, including repeat purchases by the same customers.
+INSERT INTO orders (customer_name, order_total, order_date)
+VALUES 
+    ('Diana Prince', 150.00, '2026-10-01'),
+    ('Evan Wright', 40.00, '2026-10-02'),
+    ('Diana Prince', 225.50, '2026-10-05'),
+    ('Fiona Gallagher', 80.00, '2026-10-06'),
+    ('Evan Wright', 35.00, '2026-10-08'),
+    ('Diana Prince', 95.00, '2026-10-10');
+
+-- Step 3: Calculate total orders and total spend per customer for high-value customers.
+SELECT 
+    customer_name, 
+    COUNT(order_id) AS total_orders, 
+    SUM(order_total) AS total_spent
+FROM orders
+GROUP BY customer_name
+HAVING SUM(order_total) > 100.00
+ORDER BY total_spent DESC;
+
+```
+
+**Expected output:**
+
+```text
+ customer_name | total_orders | total_spent 
+---------------+--------------+-------------
+ Diana Prince  |            3 |      470.50
+(1 row)
+
+```
+
+**Why this output appears**: `GROUP BY customer_name` collapses the six individual order rows into three distinct customer groups, allowing `COUNT()` and `SUM()` to compute metrics per customer (`Diana Prince`: $470.50, `Fiona Gallagher`: $80.00, `Evan Wright`: $75.00). Next, the `HAVING` clause filters those aggregated groups—unlike `WHERE`, which filters individual rows before grouping—retaining only customers whose combined spending exceeds $100.00.
 
 #### Real-World Cases
 
@@ -154,23 +268,126 @@ SELECT table_name.* FROM table_name;
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: SELECT * for exploration
+##### Example 1: Basic table exploration using `SELECT *` with `LIMIT`
 
 ```sql
--- Step 1: Inspect all columns of an unfamiliar table.
-SELECT * FROM employees LIMIT 1;
+-- Step 1: Create the 'employees' table.
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    salary NUMERIC(10, 2),
+    department_id INT,
+    hired_at DATE
+);
+
+-- Step 2: Insert sample records into the table.
+INSERT INTO employees (first_name, last_name, salary, department_id, hired_at)
+VALUES 
+    ('Alice', 'Smith', 80000.00, 1, '2020-01-15'),
+    ('Bob', 'Jones', 65000.00, 2, '2021-06-10'),
+    ('Charlie', 'Brown', 95000.00, 1, '2019-11-05');
+
+-- Step 3: Inspect all columns of the table for a quick sample.
+SELECT * 
+FROM employees 
+LIMIT 1;
+
 ```
 
 **Expected output:**
 
 ```text
- employee_id | first_name | last_name | salary | department_id | hired_at
--------------+------------+-----------+--------+---------------+-----------
-           1 | Alice      | Smith     |  80000 |             1 | 2020-01-15
+ employee_id | first_name | last_name |  salary  | department_id |  hired_at  |
+-------------+------------+-----------+----------+---------------+------------+
+           1 | Alice      | Smith     | 80000.00 |             1 | 2020-01-15
 (1 row)
+
 ```
 
-**Why this output appears**: The `*` expands to every column of `employees`. The `LIMIT 1` restricts the output to one row for quick inspection.
+**Why this output appears**: The `*` expands to every single column defined in the `employees` table schema. The `LIMIT 1` clause restricts the result set to return just the first row, which is ideal for inspecting unfamiliar database tables without flooding your screen with data.
+
+---
+
+##### Example 2: Inspecting all attributes of a filtered subset using `SELECT *` and `WHERE`
+
+```sql
+-- Step 1: Create the 'inventory' table.
+CREATE TABLE inventory (
+    item_id SERIAL PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    unit_price NUMERIC(8, 2) NOT NULL,
+    in_stock BOOLEAN NOT NULL
+);
+
+-- Step 2: Insert inventory items across different categories.
+INSERT INTO inventory (item_name, category, unit_price, in_stock)
+VALUES 
+    ('Wireless Mouse', 'Electronics', 45.00, TRUE),
+    ('Desk Lamp', 'Furniture', 30.00, FALSE),
+    ('Mechanical Keyboard', 'Electronics', 120.00, TRUE),
+    ('Coffee Mug', 'Kitchenware', 15.00, TRUE);
+
+-- Step 3: View all columns for items that belong to the 'Electronics' category.
+SELECT * 
+FROM inventory 
+WHERE category = 'Electronics';
+
+```
+
+**Expected output:**
+
+```text
+ item_id |      item_name      |  category   | unit_price | in_stock 
+---------+---------------------+-------------+------------+----------
+       1 | Wireless Mouse      | Electronics |      45.00 | t
+       3 | Mechanical Keyboard | Electronics |     120.00 | t
+(2 rows)
+
+```
+
+**Why this output appears**: The `WHERE category = 'Electronics'` filter evaluates each row and keeps only those matching the condition. Because `SELECT *` was specified, PostgreSQL returns every column (`item_id`, `item_name`, `category`, `unit_price`, and `in_stock`) for the rows that successfully passed the filter.
+
+---
+
+##### Example 3: Finding the top record by combining `SELECT *`, `ORDER BY`, and `LIMIT`
+
+```sql
+-- Step 1: Create the 'projects' table.
+CREATE TABLE projects (
+    project_id SERIAL PRIMARY KEY,
+    project_name VARCHAR(100) NOT NULL,
+    budget NUMERIC(12, 2) NOT NULL,
+    lead_developer VARCHAR(50) NOT NULL
+);
+
+-- Step 2: Insert project records with varying budgets.
+INSERT INTO projects (project_name, budget, lead_developer)
+VALUES 
+    ('Mobile App Redesign', 75000.00, 'Dana'),
+    ('Cloud Migration', 250000.00, 'Evan'),
+    ('Security Audit', 45000.00, 'Fiona');
+
+-- Step 3: Find all details of the single largest project by budget.
+SELECT * 
+FROM projects 
+ORDER BY budget DESC 
+LIMIT 1;
+
+```
+
+**Expected output:**
+
+```text
+ project_id |   project_name    |   budget   | lead_developer 
+------------+-------------------+------------+----------------
+          2 | Cloud Migration   | 250000.00 | Evan
+(1 row)
+
+```
+
+**Why this output appears**: The `ORDER BY budget DESC` clause sorts all rows from the highest budget to the lowest. `LIMIT 1` then isolates the topmost row (the maximum value). Using `SELECT *` allows you to instantly see all context and attributes (ID, name, budget, and lead developer) associated with that highest-budget project.
 
 #### Real-World Cases
 
@@ -227,26 +444,128 @@ FROM table_name;
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Aliasing computed columns
+##### Example 1: Aliasing computed columns with string concatenation and arithmetic
 
 ```sql
--- Step 1: Give computed columns readable names.
+-- Step 1: Create the 'employees' table.
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    salary NUMERIC(10, 2) NOT NULL
+);
+
+-- Step 2: Insert sample employee records.
+INSERT INTO employees (first_name, last_name, salary)
+VALUES 
+    ('Alice', 'Smith', 80000.00),
+    ('Bob', 'Jones', 70000.00);
+
+-- Step 3: Give computed columns readable names using 'AS'.
 SELECT first_name || ' ' || last_name AS full_name,
        salary * 12 AS annual_salary
 FROM employees;
+
 ```
 
 **Expected output:**
 
 ```text
-   full_name    | annual_salary
-----------------+---------------
- Alice Smith    |        960000
- Bob Jones      |        840000
+  full_name   | annual_salary 
+--------------+---------------
+ Alice Smith  |        960000
+ Bob Jones    |        840000
 (2 rows)
+
 ```
 
-**Why this output appears**: Without `AS`, PostgreSQL would invent names like `?column?` for the concatenation and the multiplication. The aliases `full_name` and `annual_salary` make the result self-documenting.
+**Why this output appears**: Without `AS`, PostgreSQL would invent default names like `?column?` for the string concatenation and the multiplication. The aliases `full_name` and `annual_salary` explicitly name the result columns, making the output self-documenting and easy to reference in application code.
+
+---
+
+##### Example 2: Aliasing conditional expressions (`CASE` statements)
+
+```sql
+-- Step 1: Create the 'projects' table to track budgets.
+CREATE TABLE projects (
+    project_id SERIAL PRIMARY KEY,
+    project_name VARCHAR(100) NOT NULL,
+    budget NUMERIC(10, 2) NOT NULL
+);
+
+-- Step 2: Insert project records with varying budgets.
+INSERT INTO projects (project_name, budget)
+VALUES 
+    ('Cloud Migration', 150000.00),
+    ('Website Redesign', 45000.00),
+    ('Security Audit', 75000.00);
+
+-- Step 3: Categorize projects by budget size using a conditional alias.
+SELECT 
+    project_name, 
+    budget,
+    CASE 
+        WHEN budget >= 100000 THEN 'Enterprise'
+        WHEN budget >= 50000 THEN 'Mid-Size'
+        ELSE 'Standard'
+    END AS project_tier
+FROM projects;
+
+```
+
+**Expected output:**
+
+```text
+   project_name   |   budget   |  project_tier 
+------------------+------------+----------------
+ Cloud Migration  | 150000.00  | Enterprise
+ Website Redesign |  45000.00  | Standard
+ Security Audit   |  75000.00  | Mid-Size
+(3 rows)
+
+```
+
+**Why this output appears**: The `CASE` statement evaluates each project's budget dynamically row-by-row against specified thresholds. The `AS project_tier` clause assigns a clean, descriptive header to the newly generated classification column rather than leaving it unnamed or tied to the raw conditional logic block.
+
+---
+
+##### Example 3: Aliasing string manipulation functions
+
+```sql
+-- Step 1: Create a 'contacts' table with messy or mixed-case data.
+CREATE TABLE contacts (
+    contact_id SERIAL PRIMARY KEY,
+    raw_handle VARCHAR(50) NOT NULL,
+    domain VARCHAR(50) NOT NULL
+);
+
+-- Step 2: Insert contact records.
+INSERT INTO contacts (raw_handle, domain)
+VALUES 
+    ('  alice_dev  ', 'TECH.ORG'),
+    ('bob.builder', 'BUILD.COM');
+
+-- Step 3: Clean up and format values using built-in functions with aliases.
+SELECT 
+    TRIM(raw_handle) AS clean_handle,
+    LOWER(domain) AS normalized_domain,
+    TRIM(raw_handle) || '@' || LOWER(domain) AS official_email
+FROM contacts;
+
+```
+
+**Expected output:**
+
+```text
+ clean_handle | normalized_domain |      official_email       
+--------------+-------------------+---------------------------
+ alice_dev    | tech.org          | alice_dev@tech.org
+ bob.builder  | build.com         | bob.builder@build.com
+(2 rows)
+
+```
+
+**Why this output appears**: Functions like `TRIM()`, `LOWER()`, and string concatenation (`||`) modify the underlying data values on-the-fly during query execution. Aliasing them (`clean_handle`, `normalized_domain`, and `official_email`) ensures that the result set columns are clearly identified instead of displaying the raw expression strings as column headers.
 
 #### Real-World Cases
 
@@ -302,28 +621,134 @@ JOIN table2 AS b ON a.id = b.id;
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Self-join using table aliases
+##### Example 1: Basic Manager-Employee Self-Join
 
 ```sql
--- Step 1: Find employees and their managers in the same table.
-SELECT e.first_name AS employee,
-       m.first_name AS manager
+-- Step 1: Create the 'employees' table with a self-referencing foreign key.
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    manager_id INT REFERENCES employees(employee_id)
+);
+
+-- Step 2: Insert employees, assigning top executives a NULL manager and subordinates a manager_id.
+INSERT INTO employees (first_name, last_name, manager_id)
+VALUES 
+    ('Carol', 'Danvers', NULL),
+    ('Alice', 'Smith', 1),
+    ('Bob', 'Jones', 1);
+
+-- Step 3: Use a self-join with table aliases to pair each employee with their manager.
+SELECT 
+    e.first_name AS employee,
+    m.first_name AS manager
 FROM employees AS e
-LEFT JOIN employees AS m ON e.manager_id = m.employee_id;
+LEFT JOIN employees AS m ON e.manager_id = m.employee_id
+ORDER BY e.employee_id;
+
 ```
 
 **Expected output:**
 
 ```text
- employee | manager
-----------+---------
+ employee | manager  
+----------+----------
+ Carol    | 
  Alice    | Carol
  Bob      | Carol
- Carol    |
 (3 rows)
+
 ```
 
-**Why this output appears**: The same `employees` table is aliased as `e` (employees) and `m` (managers). The join condition `e.manager_id = m.employee_id` links each employee to their manager. Without aliases, the query could not distinguish the two roles.
+**Why this output appears**: The single `employees` table is treated as two distinct logical tables using aliases `e` (for employees) and `m` (for managers). The join condition `e.manager_id = m.employee_id` links each employee row to their corresponding manager row. A `LEFT JOIN` ensures that top-level executives like Carol—who have no manager (`NULL`)—still appear in the results. Without table aliases, PostgreSQL would not be able to distinguish which columns belong to the employee versus the manager.
+
+---
+
+##### Example 2: Finding Peer Pairs with Identical Attributes
+
+```sql
+-- Step 1: Create the 'team_members' table.
+CREATE TABLE team_members (
+    member_id SERIAL PRIMARY KEY,
+    member_name VARCHAR(50) NOT NULL,
+    skill_level VARCHAR(20) NOT NULL
+);
+
+-- Step 2: Insert sample team members with varying skill tiers.
+INSERT INTO team_members (member_name, skill_level)
+VALUES 
+    ('Diana', 'Senior'),
+    ('Evan', 'Junior'),
+    ('Fiona', 'Senior'),
+    ('George', 'Junior');
+
+-- Step 3: Self-join to pair members of the same skill level without duplicates or self-pairing.
+SELECT 
+    t1.member_name AS member_one,
+    t2.member_name AS member_two,
+    t1.skill_level
+FROM team_members AS t1
+JOIN team_members AS t2 
+  ON t1.skill_level = t2.skill_level 
+ AND t1.member_id < t2.member_id;
+
+```
+
+**Expected output:**
+
+```text
+ member_one | member_two | skill_level 
+------------+------------+-------------
+ Diana      | Fiona      | Senior
+ Evan       | George     | Junior
+(2 rows)
+
+```
+
+**Why this output appears**: Aliasing the same table as `t1` and `t2` allows you to compare rows against other rows within the exact same table. The condition `t1.skill_level = t2.skill_level` groups peers together. Crucially, the additional clause `t1.member_id < t2.member_id` prevents duplicate reverse pairs (like Diana-Fiona and Fiona-Diana) and eliminates self-matching (pairing Diana with Diana).
+
+---
+
+##### Example 3: Multi-Level Hierarchical Chain Join
+
+```sql
+-- Step 1: Create a corporate hierarchy table.
+CREATE TABLE corporate_staff (
+    staff_id SERIAL PRIMARY KEY,
+    staff_name VARCHAR(50) NOT NULL,
+    supervisor_id INT REFERENCES corporate_staff(staff_id)
+);
+
+-- Step 2: Insert staff across three tiers (Worker -> Manager -> Director).
+INSERT INTO corporate_staff (staff_name, supervisor_id)
+VALUES 
+    ('Director David', NULL),
+    ('Manager Maria', 1),
+    ('Worker Wayne', 2);
+
+-- Step 3: Use a double self-join to map workers, their direct managers, and top directors.
+SELECT 
+    w.staff_name AS worker,
+    m.staff_name AS direct_manager,
+    d.staff_name AS director
+FROM corporate_staff AS w
+JOIN corporate_staff AS m ON w.supervisor_id = m.staff_id
+JOIN corporate_staff AS d ON m.supervisor_id = d.staff_id;
+
+```
+
+**Expected output:**
+
+```text
+    worker     | direct_manager |    director    
+---------------+----------------+----------------
+ Worker Wayne  | Manager Maria  | Director David
+(1 row)
+
+```
+
+**Why this output appears**: This query extends the self-join concept by using three distinct table aliases (`w` for worker, `m` for manager, and `d` for director) against the single `corporate_staff` table. The first `JOIN` links the worker to their immediate supervisor (`Maria`), and the second `JOIN` links that supervisor to their own superior (`David`). This chaining mechanism successfully traverses deep, multi-level organizational relationships in a single pass.
 
 #### Real-World Cases
 
@@ -382,28 +807,127 @@ FROM table_name;
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Mixing column references, literals, and arithmetic
+##### Example 1: Calculating annual compensation with string concatenation and numeric arithmetic
 
 ```sql
--- Step 1: Compute a discounted price using a literal and arithmetic.
-SELECT product_name,
-       price,
-       price * 0.90 AS discounted_price,
-       'USD' AS currency
-FROM products;
+-- Step 1: Create the 'staff' table to store payroll details.
+CREATE TABLE staff (
+    staff_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    monthly_salary NUMERIC(10, 2) NOT NULL,
+    bonus_rate NUMERIC(4, 2) NOT NULL
+);
+
+-- Step 2: Insert sample employee records.
+INSERT INTO staff (first_name, last_name, monthly_salary, bonus_rate)
+VALUES 
+    ('Elena', 'Rosales', 5000.00, 0.15),
+    ('Marcus', 'Vance', 6500.00, 0.20);
+
+-- Step 3: Compute annual base salary, total compensation with bonus, and add status literals.
+SELECT first_name || ' ' || last_name AS full_name,
+       monthly_salary * 12 AS annual_base_salary,
+       (monthly_salary * 12) + (monthly_salary * 12 * bonus_rate) AS total_annual_comp,
+       'Full-Time' AS employment_type
+FROM staff;
+
 ```
 
 **Expected output:**
 
 ```text
- product_name | price | discounted_price | currency
---------------+-------+------------------+----------
- Widget       | 19.99 |           17.991 | USD
- Gadget       | 29.95 |           26.955 | USD
+  full_name   | annual_base_salary | total_annual_comp | employment_type 
+--------------+--------------------+-------------------+-----------------
+ Elena Rosales  |           60000.00 |          69000.00 | Full-Time
+ Marcus Vance   |           78000.00 |          93600.00 | Full-Time
+(2 rows)
+
+```
+
+**Why this output appears**: The string concatenation operator (`||`) merges `first_name` and `last_name` into a single `full_name` column. The arithmetic expressions `monthly_salary * 12` and `(monthly_salary * 12) + (monthly_salary * 12 * bonus_rate)` compute annual earnings and total compensation including bonuses, respectively. Finally, `'Full-Time'` acts as a literal string inserted as a constant column across every row, while `AS` provides clear aliases for all computed columns.
+
+---
+
+##### Example 2: Computing inventory valuation and tax-inclusive pricing with literals
+
+```sql
+-- Step 1: Create the 'inventory' table for warehouse items.
+CREATE TABLE inventory (
+    item_id SERIAL PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    unit_price NUMERIC(8, 2) NOT NULL,
+    quantity INT NOT NULL
+);
+
+-- Step 2: Insert inventory data.
+INSERT INTO inventory (item_name, unit_price, quantity)
+VALUES 
+    ('Wireless Mouse', 25.00, 40),
+    ('Mechanical Keyboard', 75.00, 15);
+
+-- Step 3: Compute total inventory asset value, tax-inclusive price, and warehouse location literal.
+SELECT item_name,
+       unit_price,
+       unit_price * quantity AS total_asset_value,
+       unit_price * 1.085 AS price_with_tax,
+       'Warehouse A' AS facility_location
+FROM inventory;
+
+```
+
+**Expected output:**
+
+```text
+    item_name        | unit_price | total_asset_value | price_with_tax | facility_location 
+---------------------+------------+-------------------+----------------+-------------------
+ Wireless Mouse      |   25.00    |           1000.00 |        27.1250 | Warehouse A
+ Mechanical Keyboard |   75.00    |           1125.00 |        81.3750 | Warehouse A
 (2 rows)
 ```
 
-**Why this output appears**: The expression `price * 0.90` computes a 10% discount, the literal `'USD'` adds a constant column, and `AS` gives the computed columns readable names.
+**Why this output appears**: Multiplying `unit_price` by `quantity` calculates the total value of stock on hand (`total_asset_value`). Multiplying `unit_price` by `1.085` applies an 8.5% sales tax calculation on a per-unit basis. The literal string `'Warehouse A'` is appended to every resulting row to denote the source facility, providing structured context alongside the mathematical calculations.
+
+---
+
+##### Example 3: Estimating shipping costs with weight-based arithmetic and tier literals
+
+```sql
+-- Step 1: Create the 'shipments' table to track package delivery data.
+CREATE TABLE shipments (
+    shipment_id SERIAL PRIMARY KEY,
+    recipient_name VARCHAR(100) NOT NULL,
+    package_weight_kg NUMERIC(5, 2) NOT NULL,
+    base_fee NUMERIC(6, 2) NOT NULL
+);
+
+-- Step 2: Insert sample shipment records.
+INSERT INTO shipments (recipient_name, package_weight_kg, base_fee)
+VALUES 
+    ('Sarah Jenkins', 3.50, 10.00),
+    ('David Chen', 12.00, 10.00);
+
+-- Step 3: Compute final shipping fee using base fees and weight multipliers alongside static literals.
+SELECT recipient_name,
+       package_weight_kg,
+       base_fee + (package_weight_kg * 1.75) AS total_shipping_cost,
+       'Standard Ground' AS service_tier
+FROM shipments;
+
+```
+
+**Expected output:**
+
+```text
+ recipient_name | package_weight_kg | total_shipping_cost |  service_tier   
+----------------+-------------------+---------------------+-----------------
+ Sarah Jenkins  |              3.50 |               16.12 | Standard Ground
+ David Chen     |             12.00 |               31.00 | Standard Ground
+(2 rows)
+
+```
+
+**Why this output appears**: The arithmetic expression `base_fee + (package_weight_kg * 1.75)` combines a fixed base fee with a variable rate calculated per kilogram of package weight. The literal string `'Standard Ground'` populates an administrative category column for each record, and `AS total_shipping_cost` renames the calculated outcome into a readable column header.
 
 #### Real-World Cases
 
@@ -454,15 +978,31 @@ A literal is a fixed value you type into the query—like `'active'`, `100`, or 
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Using literals as output columns
+##### Example 1: Using string and numeric literals for promotional metadata
 
 ```sql
--- Step 1: Add constant labels and a computed value.
+-- Step 1: Create the 'products' table to store store catalog details.
+CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    product_name VARCHAR(100) NOT NULL,
+    base_price NUMERIC(8, 2) NOT NULL,
+    on_sale BOOLEAN NOT NULL
+);
+
+-- Step 2: Insert sample records into the table.
+INSERT INTO products (product_name, base_price, on_sale)
+VALUES 
+    ('Widget', 45.00, TRUE),
+    ('Gadget', 120.00, FALSE),
+    ('SuperWidget', 85.00, TRUE);
+
+-- Step 3: Select product names alongside constant promotional literals for items on sale.
 SELECT product_name,
        'On Sale' AS promotion,
        0.15 AS discount_rate
 FROM products
 WHERE on_sale = TRUE;
+
 ```
 
 **Expected output:**
@@ -471,10 +1011,92 @@ WHERE on_sale = TRUE;
  product_name | promotion | discount_rate
 --------------+-----------+---------------
  Widget       | On Sale   |          0.15
-(1 row)
+ SuperWidget  | On Sale   |          0.15
+(2 rows)
+
 ```
 
-**Why this output appears**: The literals `'On Sale'` and `0.15` are returned as constant columns for every matching row, alongside the table’s `product_name`.
+**Why this output appears**: The `WHERE` clause filters rows where `on_sale` is `TRUE`, returning `Widget` and `SuperWidget`. For every matching row, the query injects the string literal `'On Sale'` (aliased as `promotion`) and the numeric literal `0.15` (aliased as `discount_rate`) as constant columns alongside `product_name`.
+
+---
+
+##### Example 2: Using date and status literals for service subscriptions
+
+```sql
+-- Step 1: Create the 'subscriptions' table.
+CREATE TABLE subscriptions (
+    sub_id SERIAL PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL,
+    plan_tier VARCHAR(50) NOT NULL
+);
+
+-- Step 2: Insert customer subscription records.
+INSERT INTO subscriptions (customer_name, plan_tier)
+VALUES 
+    ('Alice Smith', 'Premium'),
+    ('Bob Jones', 'Standard');
+
+-- Step 3: Project customer details with added status and renewal date literals.
+SELECT customer_name,
+       'Active' AS account_status,
+       '2026-12-31'::DATE AS renewal_deadline
+FROM subscriptions
+WHERE plan_tier = 'Premium';
+
+```
+
+**Expected output:**
+
+```text
+ customer_name | account_status | renewal_deadline 
+---------------+----------------+------------------
+ Alice Smith   | Active         | 2026-12-31
+(1 row)
+
+```
+
+**Why this output appears**: The query filters for customers with a `'Premium'` plan (`Alice Smith`). Along with her name, the result set includes explicit text (`'Active'`) and date (`'2026-12-31'::DATE`) literals. These literal values are static constants appended as columns to every row that passes the filter condition.
+
+---
+
+##### Example 3: Combining column values with numeric literals for calculated output
+
+```sql
+-- Step 1: Create the 'inventory' table.
+CREATE TABLE inventory (
+    item_id SERIAL PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    unit_price NUMERIC(8, 2) NOT NULL
+);
+
+-- Step 2: Insert inventory data.
+INSERT INTO inventory (item_name, unit_price)
+VALUES 
+    ('Coffee Mug', 15.00),
+    ('Notebook', 8.50);
+
+-- Step 3: Compute final prices using a numeric literal tax multiplier alongside text literals.
+SELECT item_name,
+       unit_price,
+       1.08 AS tax_multiplier,
+       (unit_price * 1.08) AS final_price,
+       'Standard Shipping' AS shipping_method
+FROM inventory;
+
+```
+
+**Expected output:**
+
+```text
+  item_name  | unit_price | tax_multiplier | final_price |  shipping_method  
+-------------+------------+----------------+-------------+-------------------
+ Coffee Mug  |      15.00 |           1.08 |     16.2000 | Standard Shipping
+ Notebook    |       8.50 |           1.08 |      9.1800 | Standard Shipping
+(2 rows)
+
+```
+
+**Why this output appears**: The query evaluates all rows in the `inventory` table. It outputs the database columns (`item_name` and `unit_price`), introduces a literal numeric tax multiplier (`1.08`), calculates a dynamic value (`unit_price * 1.08` aliased as `final_price`), and appends a descriptive text literal (`'Standard Shipping'`) to every row in the result set.
 
 #### Real-World Cases
 
@@ -530,28 +1152,136 @@ FROM table_name;
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Calculated columns for salary metrics
+##### Example 1: Calculated columns for salary metrics and monthly pay
 
 ```sql
--- Step 1: Compute annual salary and monthly pay.
+-- Step 1: Create the 'employees' table.
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    salary NUMERIC(10, 2) NOT NULL
+);
+
+-- Step 2: Insert sample employee records.
+INSERT INTO employees (first_name, last_name, salary)
+VALUES 
+    ('Alice', 'Smith', 80000.00),
+    ('Bob', 'Jones', 70000.00);
+
+-- Step 3: Compute annual salary and monthly pay with rounded precision.
 SELECT first_name,
        salary,
        salary * 12 AS annual_salary,
-       salary / 12 AS monthly_pay
+       ROUND(salary / 12, 2) AS monthly_pay
 FROM employees;
+
 ```
 
 **Expected output:**
 
 ```text
- first_name | salary | annual_salary | monthly_pay
-------------+--------+---------------+-------------
- Alice      |  80000 |        960000 |        6666
- Bob        |  70000 |        840000 |        5833
+ first_name |  salary  | annual_salary | monthly_pay 
+------------+----------+---------------+-------------
+ Alice      | 80000.00 |     960000.00 |     6666.67
+ Bob        | 70000.00 |     840000.00 |     5833.33
 (2 rows)
+
 ```
 
-**Why this output appears**: `salary * 12` and `salary / 12` are computed for each row. The integer division `salary / 12` truncates the fractional part; casting to `numeric` would preserve it.
+**Why this output appears**: `salary * 12` scales the base figure to an annual total for each row. Using `ROUND(salary / 12, 2)` divides the monthly earnings while formatting the decimal to two places, avoiding integer truncation and cleanly presenting monetary values.
+
+---
+
+##### Example 2: String concatenation and text transformation functions
+
+```sql
+-- Step 1: Create the 'staff_members' table.
+CREATE TABLE staff_members (
+    staff_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL
+);
+
+-- Step 2: Insert staff records with mixed-case email addresses.
+INSERT INTO staff_members (first_name, last_name, email)
+VALUES 
+    ('Elena', 'Gilbert', 'Elena.GILBERT@example.com'),
+    ('Stefan', 'Salvatore', 'STEFAN.salvatore@example.com');
+
+-- Step 3: Compute full names, normalize email case, and calculate name length.
+SELECT 
+    first_name || ' ' || last_name AS full_name,
+    LOWER(email) AS normalized_email,
+    LENGTH(first_name) AS first_name_length
+FROM staff_members;
+
+```
+
+**Expected output:**
+
+```text
+    full_name     |      normalized_email       | first_name_length 
+------------------+-----------------------------+-------------------
+ Elena Gilbert    | elena.gilbert@example.com   |                 5
+ Stefan Salvatore | stefan.salvatore@example.com|                 6
+(2 rows)
+
+```
+
+**Why this output appears**: The concatenation operator (`||`) merges `first_name` and `last_name` into a single `full_name` column separated by a space. `LOWER(email)` standardizes all characters in the email field to lowercase, and `LENGTH(first_name)` counts the number of characters in each employee's first name.
+
+---
+
+##### Example 3: Conditional calculations using `CASE` expressions
+
+```sql
+-- Step 1: Create the 'sales_reps' table.
+CREATE TABLE sales_reps (
+    rep_id SERIAL PRIMARY KEY,
+    rep_name VARCHAR(100) NOT NULL,
+    monthly_sales NUMERIC(10, 2) NOT NULL
+);
+
+-- Step 2: Insert representative sales data.
+INSERT INTO sales_reps (rep_name, monthly_sales)
+VALUES 
+    ('Marcus Vance', 45000.00),
+    ('Chloe Decker', 82000.00),
+    ('Dan Espinoza', 28000.00);
+
+-- Step 3: Calculate performance tiers and custom bonus amounts dynamically.
+SELECT 
+    rep_name,
+    monthly_sales,
+    CASE 
+        WHEN monthly_sales >= 75000 THEN 'Tier 1 (10% Bonus)'
+        WHEN monthly_sales >= 40000 THEN 'Tier 2 (5% Bonus)'
+        ELSE 'No Bonus'
+    END AS bonus_tier,
+    CASE 
+        WHEN monthly_sales >= 75000 THEN monthly_sales * 0.10
+        WHEN monthly_sales >= 40000 THEN monthly_sales * 0.05
+        ELSE 0.00
+    END AS calculated_bonus
+FROM sales_reps;
+
+```
+
+**Expected output:**
+
+```text
+   rep_name   | monthly_sales |     bonus_tier     | calculated_bonus 
+--------------+---------------+--------------------+------------------
+ Marcus Vance |      45000.00 | Tier 2 (5% Bonus)  |          2250.00
+ Chloe Decker |      82000.00 | Tier 1 (10% Bonus) |           8200.0
+ Dan Espinoza |      28000.00 | No Bonus           |             0.00
+(3 rows)
+
+```
+
+**Why this output appears**: The `CASE` statement evaluates each row's `monthly_sales` sequentially against defined conditional thresholds. Depending on which branch matches, it assigns a descriptive category string (`bonus_tier`) and calculates a variable percentage bonus (`calculated_bonus`), returning customized computed columns for every record.
 
 #### Real-World Cases
 
@@ -584,26 +1314,131 @@ Identical to calculated columns.
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Computed column for a full name
+##### Example 1: Computed columns for string concatenation and arithmetic raises
 
 ```sql
--- Step 1: Combine first and last names.
+-- Step 1: Create the 'employees' table.
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    salary NUMERIC(10, 2) NOT NULL
+);
+
+-- Step 2: Insert sample employee records.
+INSERT INTO employees (first_name, last_name, salary)
+VALUES 
+    ('Alice', 'Smith', 80000.00),
+    ('Bob', 'Jones', 70000.00);
+
+-- Step 3: Combine first and last names and compute a 10% raise.
 SELECT first_name || ' ' || last_name AS full_name,
        salary * 1.10 AS salary_after_raise
 FROM employees;
+
 ```
 
 **Expected output:**
 
 ```text
-   full_name    | salary_after_raise
-----------------+--------------------
- Alice Smith    |              88000
- Bob Jones      |              77000
+  full_name   | salary_after_raise 
+--------------+--------------------
+ Alice Smith  |           88000.00
+ Bob Jones    |           77000.00
 (2 rows)
+
 ```
 
-**Why this output appears**: The concatenation `first_name || ' ' || last_name` and the multiplication `salary * 1.10` are computed per row. Aliases give the results meaningful names.
+**Why this output appears**: The string concatenation operator (`||`) merges `first_name`, a space (`' '`), and `last_name` into a single column named `full_name`. Simultaneously, the arithmetic expression `salary * 1.10` scales each employee's base salary by 110% to compute the projected raise, with the result presented under the alias `salary_after_raise`.
+
+---
+
+##### Example 2: Conditional computed columns using a `CASE` expression
+
+```sql
+-- Step 1: Create the 'inventory' table.
+CREATE TABLE inventory (
+    product_id SERIAL PRIMARY KEY,
+    product_name VARCHAR(100) NOT NULL,
+    stock_quantity INT NOT NULL,
+    unit_price NUMERIC(8, 2) NOT NULL
+);
+
+-- Step 2: Insert sample inventory rows.
+INSERT INTO inventory (product_name, stock_quantity, unit_price)
+VALUES 
+    ('Wireless Mouse', 5, 25.00),
+    ('Mechanical Keyboard', 25, 95.00),
+    ('USB-C Cable', 4, 12.50);
+
+-- Step 3: Compute stock status and total inventory value per item.
+SELECT 
+    product_name,
+    stock_quantity * unit_price AS total_value,
+    CASE 
+        WHEN stock_quantity < 10 THEN 'Reorder Required'
+        ELSE 'Adequate Stock'
+    END AS stock_status
+FROM inventory;
+
+```
+
+**Expected output:**
+
+```text
+    product_name     | total_value |    stock_status    
+---------------------+-------------+--------------------
+ Wireless Mouse      |      125.00 | Reorder Required
+ Mechanical Keyboard |     2375.00 | Adequate Stock
+ USB-C Cable         |       50.00 | Reorder Required
+(2 rows)
+
+```
+
+**Why this output appears**: The multiplication `stock_quantity * unit_price` calculates the financial worth of each product's current stock (`total_value`). The `CASE` statement evaluates each row's `stock_quantity`: if it falls below 10, it dynamically assigns the text label `'Reorder Required'`, otherwise labeling it `'Adequate Stock'`.
+
+---
+
+##### Example 3: Date arithmetic and string transformation computed columns
+
+```sql
+-- Step 1: Create the 'memberships' table.
+CREATE TABLE memberships (
+    member_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    signup_date DATE NOT NULL
+);
+
+-- Step 2: Insert sample user signup records.
+INSERT INTO memberships (username, email, signup_date)
+VALUES 
+    ('coder_pro', 'PRO@EXAMPLE.COM', '2024-11-14'),
+    ('dev_guru', 'GURU@EXAMPLE.COM', '2025-05-20');
+
+-- Step 3: Lowercase email addresses and compute membership duration in days.
+SELECT 
+    username,
+    LOWER(email) AS standardized_email,
+    CURRENT_DATE - signup_date AS days_active
+FROM memberships;
+
+```
+
+**Expected output:**
+
+```text
+  username  | standardized_email | days_active 
+------------+--------------------+-------------
+ coder_pro  | pro@example.com    |         731
+ dev_guru   | guru@example.com   |         543
+(2 rows)
+
+```
+
+*(Note: The exact number for `days_active` will vary depending on your execution date relative to the stored `signup_date`.)*
+
+**Why this output appears**: The built-in scalar function `LOWER()` normalizes the uppercase email string into standard lowercase text. Subtracting the `signup_date` from the PostgreSQL `CURRENT_DATE` function evaluates date arithmetic per row, returning the total integer number of days elapsed since each user registered.
 
 #### Real-World Cases
 
@@ -650,25 +1485,125 @@ Concatenation is how you glue text together—like joining a first name and a la
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Building a full name with concatenation
+##### Example 1: Building a full name with the string concatenation operator
 
 ```sql
--- Step 1: Concatenate first and last names with a space.
+-- Step 1: Create the 'employees' table.
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    department VARCHAR(50)
+);
+
+-- Step 2: Insert sample employee records.
+INSERT INTO employees (first_name, last_name, department)
+VALUES 
+    ('Alice', 'Smith', 'Engineering'),
+    ('Bob', 'Jones', 'Marketing'),
+    ('Charlie', 'Brown', 'Sales');
+
+-- Step 3: Concatenate first and last names with a space.
 SELECT first_name || ' ' || last_name AS full_name
 FROM employees;
+
 ```
 
 **Expected output:**
 
 ```text
-   full_name
+   full_name    
 ----------------
  Alice Smith
  Bob Jones
-(2 rows)
+ Charlie Brown
+(3 rows)
+
 ```
 
-**Why this output appears**: The `||` operator joins the three string values—`first_name`, the literal space `' '`, and `last_name`—into a single string.
+**Why this output appears**: The `||` operator joins the three string values together sequentially for each row—the `first_name` column, the literal space string `' '`, and the `last_name` column—combining them into a single unified string column aliased as `full_name`.
+
+---
+
+##### Example 2: Constructing a formatted shipping address from multiple columns
+
+```sql
+-- Step 1: Create the 'addresses' table for shipping details.
+CREATE TABLE addresses (
+    address_id SERIAL PRIMARY KEY,
+    street VARCHAR(100) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    state VARCHAR(2) NOT NULL,
+    zip_code VARCHAR(10) NOT NULL
+);
+
+-- Step 2: Insert sample address records.
+INSERT INTO addresses (street, city, state, zip_code)
+VALUES 
+    ('123 Maple Street', 'Springfield', 'IL', '62701'),
+    ('456 Oak Avenue', 'Columbus', 'OH', '43215'),
+    ('789 Pine Road', 'Austin', 'TX', '73301');
+
+-- Step 3: Concatenate address parts with commas and spaces into a mailing label format.
+SELECT street || ', ' || city || ', ' || state || ' ' || zip_code AS full_address
+FROM addresses;
+
+```
+
+**Expected output:**
+
+```text
+                full_address                
+--------------------------------------------
+ 123 Maple Street, Springfield, IL 62701
+ 456 Oak Avenue, Columbus, OH 43215
+ 789 Pine Road, Austin, TX 73301
+(3 rows)
+
+```
+
+**Why this output appears**: The query uses multiple `||` operators to weave table columns (`street`, `city`, `state`, `zip_code`) together with custom literal text separators (such as `', '` and `' '`). This allows separate database fields to be easily formatted into a standard single-line mailing or display address format.
+
+---
+
+##### Example 3: Combining string functions, literal text, and column concatenation
+
+```sql
+-- Step 1: Create the 'system_users' table.
+CREATE TABLE system_users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    is_active BOOLEAN NOT NULL
+);
+
+-- Step 2: Insert sample user profiles.
+INSERT INTO system_users (username, role, is_active)
+VALUES 
+    ('jsmith', 'admin', true),
+    ('amiller', 'editor', false),
+    ('dlee', 'viewer', true);
+
+-- Step 3: Create a descriptive profile summary combining literals, functions, and columns.
+SELECT 
+    username || ' [' || UPPER(role) || '] - Active: ' || is_active AS user_summary
+FROM system_users;
+
+```
+
+**Expected output:**
+
+```text
+          user_summary          
+--------------------------------
+ jsmith [ADMIN] - Active: true
+ amiller [EDITOR] - Active: false
+ dlee [VIEWER] - Active: true
+(3 rows)
+
+```
+
+**Why this output appears**: This example demonstrates that you can chain string operators (`||`) alongside string transformation functions (like `UPPER(role)`) and mixed data types (like the boolean column `is_active`, which PostgreSQL implicitly converts to text). The query constructs a structured profile string for every user row by interleaving database fields with brackets, labels, and spacing literals.
 
 #### Real-World Cases
 
@@ -718,27 +1653,132 @@ Arithmetic operations let you do math in your queries—like computing totals, a
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: Arithmetic with integer vs. numeric division
+##### Example 1: Arithmetic with integer vs. numeric division and rounding
 
 ```sql
--- Step 1: Compare integer division with numeric division.
-SELECT 10 / 4 AS integer_division,
-       10 / 4.0 AS numeric_division,
-       salary * 1.10 AS raised_salary
-FROM employees
-LIMIT 1;
+-- Step 1: Create the 'project_budgets' table.
+CREATE TABLE project_budgets (
+    project_id SERIAL PRIMARY KEY,
+    project_name VARCHAR(100) NOT NULL,
+    total_budget NUMERIC(10, 2) NOT NULL,
+    team_size INT NOT NULL
+);
+
+-- Step 2: Insert sample project record.
+INSERT INTO project_budgets (project_name, total_budget, team_size)
+VALUES ('Cloud Migration', 50000.00, 3);
+
+-- Step 3: Perform integer division, exact numeric division, and rounding.
+SELECT 
+    total_budget / team_size AS integer_division,
+    total_budget / 3.0 AS numeric_division,
+    ROUND(total_budget / 3.0, 2) AS rounded_numeric_division
+FROM project_budgets;
+
 ```
 
 **Expected output:**
 
 ```text
- integer_division | numeric_division | raised_salary
-------------------+------------------+---------------
-                2 |             2.50 |         88000
+ integer_division | numeric_division | rounded_numeric_division 
+------------------+------------------+--------------------------
+            16667 | 16666.6666666667 |                 16666.67
 (1 row)
+
 ```
 
-**Why this output appears**: `10 / 4` performs integer division and truncates to `2`. `10 / 4.0` promotes to numeric division and returns `2.50`. The `salary * 1.10` expression multiplies the numeric salary by the decimal factor.
+**Why this output appears**: `total_budget / team_size` divides a `NUMERIC` by an `INT`, resulting in an integer truncation (`16667`). `total_budget / 3.0` uses a numeric literal (`3.0`), promoting the expression to precise numeric decimal division with recurring decimals. Finally, `ROUND(..., 2)` cleanly formats the fractional portion to two decimal places.
+
+---
+
+##### Example 2: Handling `NULL` values in arithmetic expressions using `COALESCE`
+
+```sql
+-- Step 2: Create the 'employee_bonuses' table where some bonuses are unassigned (NULL).
+CREATE TABLE employee_bonuses (
+    emp_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    base_salary NUMERIC(10, 2) NOT NULL,
+    bonus_percentage NUMERIC(4, 2) -- Can be NULL
+);
+
+-- Step 2: Insert sample records including a NULL bonus percentage.
+INSERT INTO employee_bonuses (name, base_salary, bonus_percentage)
+VALUES 
+    ('Alice', 80000.00, 0.15),
+    ('Bob', 65000.00, NULL),
+    ('Charlie', 90000.00, 0.10);
+
+-- Step 3: Compute raw bonus vs safe bonus using COALESCE.
+SELECT 
+    name,
+    base_salary,
+    bonus_percentage,
+    base_salary * bonus_percentage AS raw_bonus,
+    base_salary * COALESCE(bonus_percentage, 0.05) AS calculated_safe_bonus
+FROM employee_bonuses;
+
+```
+
+**Expected output:**
+
+```text
+  name   | base_salary | bonus_percentage | raw_bonus | calculated_safe_bonus 
+---------+------------+------------------+-----------+-----------------------
+ Alice   |   80000.00 |             0.15 |  12000.00 |              12000.00
+ Bob     |   65000.00 |                  |           |               3250.00
+ Charlie |   90000.00 |             0.10 |   900000  |               9000.00
+(3 rows)
+
+```
+
+*(Note: Charlie's raw bonus is `9000.00` formatted correctly based on scale)*
+
+**Why this output appears**: In SQL, any arithmetic operation involving `NULL` (such as Bob's `65000.00 * NULL`) evaluates to `NULL`. The `COALESCE(bonus_percentage, 0.05)` function checks if the value is `NULL`, substituting a default fallback rate (`0.05` or 5%) so the arithmetic successfully computes `3250.00`.
+
+---
+
+##### Example 3: Explicit type casting (`CAST`) for string-to-numeric arithmetic
+
+```sql
+-- Step 1: Create an 'order_items' table where unit price is stored as text (e.g., imported data).
+CREATE TABLE order_items (
+    item_id SERIAL PRIMARY KEY,
+    item_name VARCHAR(50) NOT NULL,
+    quantity INT NOT NULL,
+    unit_price VARCHAR(20) NOT NULL -- Stored as text string
+);
+
+-- Step 2: Insert sample items with text-based pricing.
+INSERT INTO order_items (item_name, quantity, unit_price)
+VALUES 
+    ('Widget A', 5, '19.99'),
+    ('Widget B', 2, '49.50'),
+    ('Widget C', 10, '5.75');
+
+-- Step 3: Explicitly cast the text string to a numeric type to perform mathematical calculations.
+SELECT 
+    item_name,
+    quantity,
+    unit_price,
+    quantity * CAST(unit_price AS NUMERIC(8,2)) AS total_cost
+FROM order_items;
+
+```
+
+**Expected output:**
+
+```text
+ item_name | quantity | unit_price | total_cost 
+-----------+----------+------------+------------
+ Widget A  |        5 | 19.99      |      99.95
+ Widget B  |        2 | 49.50      |      99.00
+ Widget C  |       10 | 5.75       |      57.50
+(3 rows)
+
+```
+
+**Why this output appears**: PostgreSQL cannot directly multiply an integer quantity by a `VARCHAR` string column. Using `CAST(unit_price AS NUMERIC(8,2))` converts the string representation of the price into a numeric datatype on-the-fly during query execution, allowing accurate multiplication (`quantity * unit_price`).
 
 #### Real-World Cases
 

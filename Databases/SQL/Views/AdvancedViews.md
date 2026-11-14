@@ -1,764 +1,860 @@
-# SQL Advanced Views: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: Advanced Views
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** Advanced views are database objects that encapsulate complex query logic, provide security boundaries, and offer performance benefits, extending beyond simple `SELECT` statements to include updatable, read-only, security-focused, nested, and materialized variants.
+**Core Definition**
+Advanced views are view objects that extend beyond simple read-only projections, encompassing views that support data modification (updatable), enforce security boundaries (security views), combine multiple tables or aggregations (complex views), reference other views (nested views), or physically store their results (materialized views).
 
-**Technical Definition:** A view is a stored query that acts as a virtual table. The SQL standard defines views as derived tables whose contents are defined by a query expression. Advanced view types include: updatable views (where DML operations on the view propagate to base tables under specific conditions), read-only views (explicitly restricted from modification), security views (used for access control and column/row-level security), complex views (involving joins, aggregates, or unions), nested views (views built upon other views), and materialized views (which physically store the result set and support refresh operations).
+**Technical Definition**
+Advanced views exploit the full range of view capabilities defined by SQL standards and vendor extensions. **Updatable views** allow `INSERT`, `UPDATE`, and `DELETE` operations that are propagated to underlying base tables, either automatically (when the view satisfies strict structural conditions) or through `INSTEAD OF` triggers. **Read-only views** are those that cannot be modified directly due to structural disqualifiers (joins, aggregates, `DISTINCT`, set operations). **Security views** enforce access control through definer/invoker privilege models and barrier mechanisms. **Complex views** involve multi-table joins, aggregations, window functions, or set operations. **Nested views** reference other views, creating dependency chains that the query rewriter expands. **Materialized views** (called indexed views in SQL Server) physically persist their result set and require explicit refresh policies, trading storage and refresh cost for query performance.
 
-**Beginner-Friendly Explanation:** A view is like a saved question you ask the database. Instead of writing the same complex query every time, you save it as a view and then just say "give me the answer to that question." Advanced views take this further: some let you change the data through the view, some are locked for reading only, some hide sensitive columns, some are built on top of other views, and some actually store the answer on disk for faster access.
+**Beginner-Friendly Explanation**
+Basic views are like saved searches: they show you data but you cannot change anything through them. Advanced views go further. Some let you insert or update data through the view (updatable views). Some are designed to hide sensitive rows or columns from certain users (security views). Some combine many tables or calculations (complex views). Some are built on top of other views (nested views). And some actually store their results on disk so queries run faster, at the cost of needing to be refreshed (materialized views).
 
 ### Key Characteristics
 
-- **Virtual vs. Physical:** Standard views are virtual (query executes on reference); materialized views are physical (data stored on disk) .
-- **Updatability:** Some views support DML operations; others are read-only depending on their definition .
-- **Security Layer:** Views can restrict access to specific columns or rows, acting as an API to the database .
-- **Nesting:** Views can reference other views, with nesting limits varying by RDBMS (e.g., SQL Server allows up to 32 levels) .
+- **Updatability is structural**: A view is automatically updatable only if it has exactly one `FROM` entry (a table or updatable view), no `DISTINCT`, `GROUP BY`, `HAVING`, `LIMIT`, `OFFSET`, set operations, aggregates, or window functions at the top level; columns must be simple references to base-table columns.
+- **`INSTEAD OF` triggers extend updatability**: Non-updatable views can be made writable by defining `INSTEAD OF` triggers that redirect changes to base tables.
+- **Security views rely on privilege models**: PostgreSQL uses the view owner's privileges by default; `security_invoker = true` (PG 15+) switches to the caller's privileges. `security_barrier` prevents predicate pushdown that could leak rows.
+- **Complex views sacrifice updatability for expressiveness**: Joins, aggregations, and set operations make views read-only unless triggers are added.
+- **Nested views are expanded at rewrite time**: The query rewriter substitutes view definitions into the outer query, so performance depends on whether the optimizer can flatten the expansion.
+- **Materialized views trade freshness for speed**: They store results physically and must be refreshed; PostgreSQL supports `REFRESH MATERIALIZED VIEW CONCURRENTLY` (requires a unique index), Oracle supports `ON COMMIT`, `ON DEMAND`, and `ON STATEMENT` refresh modes.
+- **Vendor divergence is significant**: PostgreSQL, MySQL, SQL Server, and Oracle differ in automatic updatability rules, security view options, and materialized view support.
 
 ### Prerequisites
 
-- **SQL Proficiency:** Solid understanding of `SELECT`, `JOIN`, `WHERE`, and DML statements.
-- **Permissions:** `CREATE VIEW` privilege, plus appropriate permissions on underlying tables.
-- **Database-Specific Knowledge:** Materialized view support varies significantly across RDBMSs.
+- Understanding of basic `CREATE VIEW`, `SELECT`, joins, and aggregation.
+- Familiarity with `INSERT`, `UPDATE`, `DELETE`, and transaction semantics.
+- Knowledge of database privileges and ownership models.
+- Awareness of query rewriting and execution plans.
+- For materialized views: understanding of refresh strategies and index requirements.
 
 ### Related Programming Areas
 
-- **Database Security:** Views are a fundamental tool for implementing column-level and row-level security.
-- **Application Development:** Views provide a stable interface between applications and evolving schemas.
-- **Performance Tuning:** Materialized views and indexed views are key optimization techniques.
-- **Data Warehousing:** Materialized views are extensively used for pre-computing aggregates and joins.
-
-### Core Concepts / Features
-
-1. Updatable Views
-2. Read-Only Views
-3. Security Views
-4. Complex Views
-5. Nested Views
-6. Materialized Views (Where Supported)
+- Database security and access control (row-level security, column masking).
+- Query performance tuning and materialized view selection.
+- Data warehousing and reporting layers.
+- ETL and data refresh orchestration.
+- Schema abstraction and API design.
 
 ---
 
-## 1. Updatable Views
+## Core Concepts and Features
 
-### Definitions
+### 1. Updatable Views
 
-**Core Definition:** An updatable view is a view through which `INSERT`, `UPDATE`, and `DELETE` statements can be executed, with changes propagating to the underlying base tables.
+#### Definitions
 
-**Technical Definition:** A view is updatable if there is a one-to-one relationship between the rows in the view and the rows in the underlying table. MySQL documentation specifies that a view is not updatable if it contains aggregate functions, `DISTINCT`, `GROUP BY`, `HAVING`, subqueries in the select list, certain joins, or references to non-updatable views . For insertability, the view must contain all base table columns that do not have default values, and view columns must be simple column references (not expressions) .
+**Core Definition**
+An updatable view is a view through which `INSERT`, `UPDATE`, and `DELETE` statements can be executed, with the database translating those operations into corresponding modifications on the underlying base table(s).
 
-**Beginner-Friendly Explanation:** An updatable view is like a window into a table that lets you not only look through it but also reach in and change things. If you update a row through the view, the underlying table is updated. But not every view allows this—only those that map directly to a single table's rows.
+**Technical Definition**
+In PostgreSQL, a view is automatically updatable if it has exactly one entry in its `FROM` list (a table or another updatable view) and its top-level definition contains no `WITH`, `DISTINCT`, `GROUP BY`, `HAVING`, `LIMIT`, `OFFSET`, set operations (`UNION`, `INTERSECT`, `EXCEPT`), aggregates, window functions, or set-returning functions. Columns are updatable only if they are simple references to updatable base-table columns; expression columns are read-only. When these conditions are met, the system converts `INSERT`, `UPDATE`, `DELETE`, and `MERGE` statements on the view into the corresponding statement on the base relation. In MySQL, views are updatable if there is a one-to-one relationship between view rows and underlying table rows; `ALGORITHM = TEMPTABLE` always makes a view non-updatable. In SQL Server, views involving aggregates or joins are not directly updatable, but `INSTEAD OF` triggers can make them updatable.
 
-### Purposes
+**Beginner-Friendly Explanation**
+An updatable view lets you treat the view like a real table for changes. You can `INSERT` a new row into it, `UPDATE` a value, or `DELETE` a row, and the database figures out how to apply that change to the real table behind the view. But this only works if the view is simple enough—if it joins multiple tables or uses `GROUP BY`, the database usually will not let you modify it directly.
 
-- To provide a simplified interface for data modification without exposing base table structure.
-- To enforce security constraints while allowing controlled updates.
-- To centralize DML logic when combined with `WITH CHECK OPTION`.
+#### Purposes
 
-### Syntax Rules and Structure
+- To provide a simplified modification interface that hides the underlying table structure.
+- To enforce row-level security by restricting which rows can be inserted or updated through the view.
+- To maintain a stable API when base table schemas change.
+- To allow applications to perform set-based modifications through a view without knowing the normalized schema.
 
-**Complete General Syntax (with Check Option):**
+#### Syntax Rules and Structure
+
+**PostgreSQL automatic updatability conditions**:
+
+| Condition | Required? |
+|-----------|-----------|
+| Exactly one `FROM` entry (table or updatable view) | Yes |
+| No top-level `WITH`, `DISTINCT`, `GROUP BY`, `HAVING`, `LIMIT`, `OFFSET` | Yes |
+| No top-level set operations (`UNION`, `INTERSECT`, `EXCEPT`) | Yes |
+| No aggregates, window functions, or set-returning functions in select list | Yes |
+| Columns must be simple references to updatable base-table columns | Yes (for updatable columns) |
+
+**`WITH CHECK OPTION`** :
 
 ```sql
-CREATE VIEW view_name AS
-SELECT column_list
-FROM table_name
-WHERE condition
+CREATE VIEW active_customers AS
+SELECT customer_id, name, status
+FROM customers
+WHERE status = 'active'
 WITH CHECK OPTION;
 ```
 
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `WITH CHECK OPTION` | Ensures that `INSERT`/`UPDATE` through the view cannot produce rows that would not be visible through the view |
-| `LOCAL` / `CASCADED` | Controls whether check applies to just this view (`LOCAL`) or all nested views (`CASCADED`, default)  |
-
-**Syntax Rules:**
-
-- A view is updatable if there is a one-to-one relationship between view rows and base table rows .
-- Views with `DISTINCT`, `GROUP BY`, aggregates, or `UNION` are generally not updatable .
-- `WITH CHECK OPTION` prevents inserting or updating rows that fall outside the view's `WHERE` condition .
-- Multi-table views may be updatable if using `MERGE` algorithm and inner joins, but only one base table can be modified per statement .
-
-**Constraints and Limitations:**
-
-- PostgreSQL views are read-only by default; triggers are needed for updatable behavior .
-- SQL Server views are updatable under certain conditions; `ORDER BY` is not permitted unless `TOP` or `OFFSET/FETCH` is used .
-
-### Annotated Complete Code Examples
-
-**Example 1: Updatable View with WITH CHECK OPTION**
+**`INSTEAD OF` trigger pattern (PostgreSQL)** :
 
 ```sql
--- Create a base table
-CREATE TABLE high_value_orders (
-    order_id     INT PRIMARY KEY,
-    customer_id  INT,
-    total_amount DECIMAL(10,2)
-);
-
--- Create an updatable view showing only high-value orders
-CREATE VIEW v_high_value_orders AS
-SELECT order_id, customer_id, total_amount
-FROM high_value_orders
-WHERE total_amount > 1000
-WITH CHECK OPTION;
-
--- This INSERT succeeds (total_amount > 1000)
-INSERT INTO v_high_value_orders (order_id, customer_id, total_amount)
-VALUES (1, 100, 1500.00);
-
--- This INSERT fails (total_amount <= 1000, violates CHECK OPTION)
-INSERT INTO v_high_value_orders (order_id, customer_id, total_amount)
-VALUES (2, 101, 500.00);
--- ERROR: new row violates check option for view "v_high_value_orders"
-```
-
-**Why this output occurs:** The `WITH CHECK OPTION` ensures that any row inserted through the view must satisfy the view's `WHERE` condition (`total_amount > 1000`). The first insert succeeds because 1500 > 1000. The second insert fails because 500 does not satisfy the condition. SQL Server documentation confirms this behavior: "With this option, you can't insert an order with TotalAmount of 500 through the HighValueOrders view" .
-
-**Example 2: PostgreSQL Updatable View via Trigger**
-
-```sql
--- PostgreSQL views are read-only by default
-CREATE VIEW employee_view AS
-SELECT emp_id, emp_name, department
-FROM employees;
-
--- To make it updatable, create an INSTEAD OF trigger
-CREATE OR REPLACE FUNCTION employee_view_insert()
-RETURNS TRIGGER AS $$
+CREATE FUNCTION view_insert_fn() RETURNS trigger AS $$
 BEGIN
-    INSERT INTO employees (emp_id, emp_name, department)
-    VALUES (NEW.emp_id, NEW.emp_name, NEW.department);
+    INSERT INTO base_table (col1, col2) VALUES (NEW.col1, NEW.col2);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER employee_view_insert_trigger
-INSTEAD OF INSERT ON employee_view
-FOR EACH ROW
-EXECUTE FUNCTION employee_view_insert();
-
--- Now INSERT through the view works
-INSERT INTO employee_view (emp_id, emp_name, department)
-VALUES (100, 'Alice', 'Engineering');
+CREATE TRIGGER view_insert_trg
+INSTEAD OF INSERT ON view_name
+FOR EACH ROW EXECUTE FUNCTION view_insert_fn();
 ```
 
-**Why this output occurs:** PostgreSQL documentation states: "Currently, views are read only: the system will not allow an insert, update, or delete on a view. You can get the effect of an updatable view by creating INSTEAD triggers on the view" . The trigger intercepts the `INSERT` on the view and redirects it to the base table.
+**Component breakdown**
 
-### Real-World Cases
+| Component | Description |
+|-----------|-------------|
+| `WITH CHECK OPTION` | Rejects modifications that would make rows invisible through the view (e.g., changing status from active to inactive). |
+| `INSTEAD OF` trigger | Intercepts DML on a non-updatable view and redirects it to base tables. |
+| `ALGORITHM = MERGE` | MySQL: inline the view into the outer query; often updatable. |
+| `ALGORITHM = TEMPTABLE` | MySQL: materialize the view; always non-updatable. |
 
-**Case 1: Application Data Entry**
+**Syntax rules**
 
-An application uses a view to insert customer records. The view filters out `deleted_at IS NULL` and includes `WITH CHECK OPTION`. This prevents accidental insertion of soft-deleted records and simplifies application code.
+- `WITH CHECK OPTION` is only supported on automatically updatable views without `INSTEAD OF` triggers or rules.
+- An automatically updatable view may contain a mix of updatable and non-updatable columns; assigning to a read-only column raises an error.
+- `INSERT` into an updatable view requires that all non-defaulted base-table columns are provided or have defaults.
+- `UPDATE` through a view can only affect rows visible through the view's `WHERE` condition.
 
-**Case 2: Multi-Table View Update**
+**Constraints and limitations**
 
-Oracle supports updatable join views where only one base table is modified per DML statement. A view joining `employees` and `departments` allows updating `employees` columns while `departments` columns remain read-only through the view .
+- Aggregates, `DISTINCT`, `GROUP BY`, `HAVING`, `UNION`/`INTERSECT`/`EXCEPT`, and window functions at the top level disqualify a view from automatic updatability.
+- MySQL views processed with `TEMPTABLE` are never updatable.
+- SQL Server views involving aggregates or joins require `INSTEAD OF` triggers for updates.
 
-### References
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- PostgreSQL Documentation — CREATE VIEW - https://www.postgresql.org/docs/9.1/sql-createview.html
-- MySQL 9.7 Reference Manual — Updatable and Insertable Views - https://dev.mysql.com/doc/refman/9.7/en/view-updatability.html
-- Microsoft Learn — Create Views - https://learn.microsoft.com/en-us/training/modules/implement-programmability-objects/2-create-views
-- Oracle Database — 更新可能な結合ビュー - https://docs.oracle.com/cd/E57425_01/121/CNCPT/schemaob.htm
+##### Example 1: PostgreSQL – Automatically updatable view with `WITH CHECK OPTION`
+
+```sql
+-- Step 1: Create a simple updatable view.
+CREATE VIEW active_customers AS
+SELECT customer_id, name, email, status
+FROM customers
+WHERE status = 'active'
+WITH CHECK OPTION;
+
+-- Step 2: Insert a new active customer through the view.
+INSERT INTO active_customers (customer_id, name, email, status)
+VALUES (105, 'Initech', 'initech@example.com', 'active');
+
+-- Step 3: This update is rejected because it would make the row invisible.
+UPDATE active_customers SET status = 'inactive' WHERE customer_id = 105;
+```
+
+**Expected output** (Step 3):
+
+```text
+ERROR: new row violates check option for view "active_customers"
+```
+
+**Why this output appears**: The view is automatically updatable (single table, no disqualifying clauses), so the `INSERT` is rewritten to insert into `customers`. The `WITH CHECK OPTION` enforces that modified rows must continue to satisfy `status = 'active'`; changing to `'inactive'` would make the row disappear from the view, so it is rejected.
+
+##### Example 2: PostgreSQL – `INSTEAD OF` trigger for a join view
+
+```sql
+-- Step 1: Create a non-updatable join view.
+CREATE VIEW customer_orders AS
+SELECT c.customer_id, c.name, o.order_id, o.total
+FROM customers c
+JOIN orders o ON o.customer_id = c.customer_id;
+
+-- Step 2: Create an INSTEAD OF INSERT trigger.
+CREATE FUNCTION insert_customer_order() RETURNS trigger AS $$
+BEGIN
+    INSERT INTO orders (order_id, customer_id, total)
+    VALUES (NEW.order_id, NEW.customer_id, NEW.total);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER customer_orders_insert
+INSTEAD OF INSERT ON customer_orders
+FOR EACH ROW EXECUTE FUNCTION insert_customer_order();
+
+-- Step 3: Insert through the view.
+INSERT INTO customer_orders (customer_id, name, order_id, total)
+VALUES (101, 'Acme Corp', 9003, 75.00);
+```
+
+**Expected output**:
+
+```text
+INSERT 0 1
+```
+
+**Why this output appears**: The join view is not automatically updatable. The `INSTEAD OF` trigger intercepts the insert and redirects it to the `orders` table, ignoring the `name` column from `customers`.
+
+#### Real-World Cases
+
+- **Row-level security**: A view filters rows by tenant, and updates through the view can only affect the tenant's rows.
+- **Application API stability**: Applications insert/update through a view while the underlying schema is normalized or refactored.
+- **Audit trails**: `INSTEAD OF` triggers log changes made through a view.
 
 ---
 
-## 2. Read-Only Views
+### 2. Read-Only Views
 
-### Definitions
+#### Definitions
 
-**Core Definition:** A read-only view is a view that explicitly prohibits `INSERT`, `UPDATE`, and `DELETE` operations, allowing only `SELECT` queries.
+**Core Definition**
+A read-only view is a view that cannot be used with `INSERT`, `UPDATE`, or `DELETE` statements, either because its structure disqualifies it from automatic updatability or because it was explicitly designed to be non-modifiable.
 
-**Technical Definition:** A view can be made read-only by definition (containing constructs that prevent updatability, such as aggregates or `UNION`) or explicitly using the `WITH READ ONLY` clause. Oracle documentation states that "the database does not allow changes to a read-only view" and that updatable join views are "not restricted by the WITH READ ONLY clause" .
+**Technical Definition**
+A view is read-only when it fails the automatic updatability conditions: multiple `FROM` entries (joins), `DISTINCT`, `GROUP BY`, `HAVING`, `LIMIT`, `OFFSET`, set operations, aggregates, window functions, or expression columns that cannot be mapped to base-table columns. Read-only views are still fully queryable and are commonly used for reporting, abstraction, and security. In MySQL, views processed with `ALGORITHM = TEMPTABLE` are read-only. In SQL Server, views with aggregates or joins are read-only unless `INSTEAD OF` triggers are added.
 
-**Beginner-Friendly Explanation:** A read-only view is like a window that only lets you look, not touch. You can see the data, but you cannot change it through the view. This is useful for reports and dashboards where you want to guarantee that no accidental modifications occur.
+**Beginner-Friendly Explanation**
+A read-only view is a view you can only `SELECT` from. You cannot insert, update, or delete through it because the view's structure is too complex for the database to figure out which base-table row to change. It is like a window you can look through but not reach through.
 
-### Purposes
+#### Purposes
 
-- To prevent accidental or unauthorized data modifications through the view.
-- To enforce read-only access for reporting and analytics users.
-- To provide a safe interface for sensitive data that should never be modified directly.
+- To provide a stable, queryable interface over complex logic without allowing modification.
+- To prevent accidental data changes through reporting views.
+- To expose aggregated or joined data for analysis while keeping base tables protected.
+- To serve as a security layer that hides writable base tables.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax (Oracle):**
+**Read-only disqualifiers** (any of the following at the top level):
 
-```sql
-CREATE VIEW view_name AS
-SELECT column_list
-FROM table_name
-WHERE condition
-WITH READ ONLY;
-```
+| Disqualifier | Reason |
+|--------------|--------|
+| Multiple `FROM` entries (joins) | Cannot unambiguously map a view row to one base-table row. |
+| `DISTINCT` | Rows may represent multiple base rows. |
+| `GROUP BY` / `HAVING` | Aggregated rows have no direct base-row mapping. |
+| `UNION` / `INTERSECT` / `EXCEPT` | Rows may come from different sources. |
+| Aggregates (`SUM`, `AVG`, etc.) | Computed values cannot be written back. |
+| Window functions | Computed values cannot be written back. |
+| Expression columns | Cannot map expression back to a single base column. |
+| `LIMIT` / `OFFSET` | Subset semantics are ambiguous for writes. |
 
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `WITH READ ONLY` | Explicitly disables all DML operations on the view |
-
-**Syntax Rules:**
-
-- `WITH READ ONLY` can be applied to any view, including those that might otherwise be updatable .
-- Implicitly read-only views result from constructs like `DISTINCT`, `GROUP BY`, aggregates, `UNION`, or subqueries .
-- In PostgreSQL, all views are read-only by default unless triggers are added .
-
-**Constraints and Limitations:**
-
-- `WITH READ ONLY` does not prevent modifications to the underlying base tables directly.
-- Read-only views may still be optimized by the query optimizer; they are not materialized unless explicitly defined as such.
-
-### Annotated Complete Code Examples
-
-**Example 1: Explicit Read-Only View (Oracle)**
+**Example of a read-only view**:
 
 ```sql
--- Create a read-only view of employee salary data
-CREATE VIEW v_employee_salaries AS
-SELECT employee_id, last_name, salary, department_id
-FROM employees
-WHERE department_id = 80
-WITH READ ONLY;
-
--- SELECT works
-SELECT * FROM v_employee_salaries;
-
--- DML fails
-UPDATE v_employee_salaries SET salary = 99999 WHERE employee_id = 100;
--- ERROR: ORA-01733: virtual column not allowed here
-```
-
-**Why this output occurs:** The `WITH READ ONLY` clause explicitly prevents any DML operations on the view. Oracle documentation confirms that "updatable join views are called modifiable join views" and are "not restricted by the WITH READ ONLY clause," implying that read-only views are restricted .
-
-### Real-World Cases
-
-**Case 1: Executive Dashboard**
-
-A dashboard displays company-wide financial metrics through a read-only view. This ensures that report consumers cannot accidentally modify the underlying transaction data.
-
-**Case 2: Compliance Reporting**
-
-A regulated industry requires that all financial reports use immutable views. Read-only views guarantee that reported figures cannot be altered through the reporting interface.
-
-### References
-
-- Oracle Database — 更新可能な結合ビュー - https://docs.oracle.com/cd/E57425_01/121/CNCPT/schemaob.htm
-- MySQL 9.7 Reference Manual — Updatable and Insertable Views - https://dev.mysql.com/doc/refman/9.7/en/view-updatability.html
-
----
-
-## 3. Security Views
-
-### Definitions
-
-**Core Definition:** A security view is a view used to implement access control, restricting users to specific columns or rows of a table without granting direct table access.
-
-**Technical Definition:** Security views leverage the view owner's permissions rather than the querying user's permissions. PostgreSQL documentation states: "Access to tables referenced in the view is determined by permissions of the view owner. In some cases, this can be used to provide secure but restricted access to the underlying tables" . SQL Server training materials note that views "provide a security layer" and allow granting "users access to specific columns through a view while restricting access to the underlying tables" .
-
-**Beginner-Friendly Explanation:** A security view is like giving someone a filtered copy of a document. They can see the parts you want them to see, but they cannot access the original document or the parts you've hidden. It's a way to share data without giving away the keys to the whole database.
-
-### Purposes
-
-- To restrict column-level access (hiding sensitive columns like salary or SSN).
-- To restrict row-level access (showing only rows relevant to a user's role or region).
-- To provide an abstraction layer that hides schema complexity.
-- To enforce least-privilege access without managing complex permission schemes on base tables.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
-CREATE VIEW view_name AS
-SELECT public_columns
-FROM table_name
-WHERE row_filter_condition;
-```
-
-**Syntax Rules:**
-
-- The view owner must have `SELECT` privilege on the base table .
-- Users granted `SELECT` on the view do not need direct table access.
-- Row-level security can be implemented using `WHERE` clauses with session variables or user functions.
-
-**Constraints and Limitations:**
-
-- PostgreSQL documentation warns that "not all views are secure against tampering" .
-- Functions called in the view are executed with the view owner's permissions; users must have permission to call those functions.
-- Complex security views with functions may have security implications if the functions are not carefully written.
-
-### Annotated Complete Code Examples
-
-**Example 1: Column-Level Security View**
-
-```sql
--- Base table with sensitive data
-CREATE TABLE employees (
-    emp_id       INT PRIMARY KEY,
-    emp_name     VARCHAR(100),
-    salary       DECIMAL(10,2),
-    ssn          VARCHAR(11),
-    department   VARCHAR(50)
-);
-
--- Security view exposing only non-sensitive columns
-CREATE VIEW v_employee_directory AS
-SELECT emp_id, emp_name, department
-FROM employees;
-
--- Grant access to the view, not the table
-GRANT SELECT ON v_employee_directory TO reporting_user;
-
--- reporting_user can query the view
-SELECT * FROM v_employee_directory;
--- But cannot access salary or ssn
-SELECT salary FROM employees;
--- ERROR: permission denied for table employees
-```
-
-**Why this output occurs:** The view exposes only `emp_id`, `emp_name`, and `department`. The `reporting_user` has `SELECT` on the view but not on the base table. PostgreSQL documentation confirms that "access to tables referenced in the view is determined by permissions of the view owner" .
-
-**Example 2: Row-Level Security View**
-
-```sql
--- View showing only active employees in a specific region
-CREATE VIEW v_active_regional_employees AS
-SELECT emp_id, emp_name, department, region
-FROM employees
-WHERE is_active = 1
-  AND region = current_setting('app.user_region');
-
--- Grant to regional managers
-GRANT SELECT ON v_active_regional_employees TO regional_manager;
-```
-
-**Why this output occurs:** The view uses `current_setting('app.user_region')` to dynamically filter rows based on the application's session context. A manager for the "North" region sees only North region employees. This implements row-level security without granting access to the full `employees` table.
-
-### Real-World Cases
-
-**Case 1: Healthcare Data Access**
-
-A hospital database has a `patients` table with sensitive medical information. A security view exposes only patient name, room number, and attending physician for nursing staff, while keeping diagnoses and medications hidden.
-
-**Case 2: Multi-Tenant SaaS**
-
-A SaaS application stores all customer data in shared tables. Each tenant is granted access to a view filtered by `WHERE tenant_id = current_tenant()`. This provides data isolation without complex permission schemas .
-
-### References
-
-- PostgreSQL Documentation — CREATE VIEW - https://www.postgresql.org/docs/9.1/sql-createview.html
-- Microsoft Learn — Create Views - https://learn.microsoft.com/en-us/training/modules/implement-programmability-objects/2-create-views
-- Microsoft Learn — Create and query views - https://learn.microsoft.com/en-ie/training/modules/create-tables-views-temporary-objects/3-create-query-views
-
----
-
-## 4. Complex Views
-
-### Definitions
-
-**Core Definition:** A complex view is a view that involves multiple tables (joins), aggregations, unions, subqueries, or calculated columns, presenting a transformed or consolidated view of data.
-
-**Technical Definition:** Complex views typically use `JOIN`, `GROUP BY`, `UNION`, `CASE` expressions, and scalar functions. They are often read-only because the transformation makes direct DML mapping ambiguous or impossible. Oracle documentation shows a view `EMP_LOCATIONS` joining four tables (`EMPLOYEES`, `DEPARTMENTS`, `LOCATIONS`, `COUNTRIES`) as an example of a complex view .
-
-**Beginner-Friendly Explanation:** A complex view is like a summary report. Instead of showing raw data from one table, it combines information from several tables, calculates totals, and presents it in a readable format. You cannot usually edit the summary and expect the raw data to change accordingly.
-
-### Purposes
-
-- To encapsulate complex multi-table joins behind a simple interface.
-- To provide pre-aggregated or pre-calculated data for reporting.
-- To simplify application code by hiding query complexity.
-- To present data in a format that matches business requirements.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
-CREATE VIEW view_name AS
-SELECT t1.col1, t2.col2, SUM(t3.col3) AS total
-FROM table1 t1
-JOIN table2 t2 ON t1.id = t2.id
-JOIN table3 t3 ON t2.id = t3.id
-WHERE t1.status = 'active'
-GROUP BY t1.col1, t2.col2;
-```
-
-**Syntax Rules:**
-
-- Complex views are generally read-only .
-- `ORDER BY` is not permitted in most RDBMS view definitions unless combined with `TOP` or `OFFSET/FETCH` .
-- Column aliases are required for calculated columns to give them meaningful names .
-
-**Constraints and Limitations:**
-
-- Complex views may perform poorly if the underlying joins are not optimized.
-- Nesting complex views can lead to performance degradation.
-- `GROUP BY` and aggregates make views non-updatable .
-
-### Annotated Complete Code Examples
-
-**Example 1: Multi-Table Join View (Oracle)**
-
-```sql
--- Complex view joining four tables (from Oracle documentation)
-CREATE VIEW emp_locations AS
-SELECT e.employee_id,
-       e.last_name || ', ' || e.first_name AS name,
-       d.department_name AS department,
-       l.city AS city,
-       c.country_name AS country
-FROM employees e
-JOIN departments d ON e.department_id = d.department_id
-JOIN locations l ON d.location_id = l.location_id
-JOIN countries c ON l.country_id = c.country_id
-ORDER BY e.last_name;
-
--- Query the view
-SELECT * FROM emp_locations WHERE department = 'Sales';
-```
-
-**Why this output occurs:** The view consolidates employee, department, location, and country data into a single virtual table. Oracle documentation provides this exact example as a demonstration of creating a view that joins four tables . The `ORDER BY` is accepted here (Oracle allows it in view definitions), but other RDBMSs may not.
-
-**Example 2: Aggregated View (SQL Server)**
-
-```sql
--- View with aggregation and CASE expression
-CREATE VIEW Sales.OrderSummary AS
-SELECT 
-    o.CustomerID,
-    YEAR(o.OrderDate) AS OrderYear,
-    MONTH(o.OrderDate) AS OrderMonth,
-    SUM(o.TotalAmount) AS MonthlyTotal,
-    CASE 
-        WHEN SUM(o.TotalAmount) < 1000 THEN 'Low'
-        WHEN SUM(o.TotalAmount) < 10000 THEN 'Medium'
-        ELSE 'High'
-    END AS RevenueCategory
-FROM Sales.Orders o
-GROUP BY o.CustomerID, YEAR(o.OrderDate), MONTH(o.OrderDate);
-
--- Query the view
-SELECT * FROM Sales.OrderSummary 
-WHERE OrderYear = 2026 AND RevenueCategory = 'High';
-```
-
-**Why this output occurs:** The view aggregates order totals by customer and month, then categorizes the revenue. SQL Server training materials show a similar example with `CASE` for order size categorization . This view is read-only because it contains `GROUP BY` and aggregates.
-
-### Real-World Cases
-
-**Case 1: Sales Dashboard**
-
-A complex view joins `orders`, `order_details`, `products`, and `customers` to produce a denormalized sales report. The dashboard queries this single view instead of managing four-table joins in application code.
-
-**Case 2: Financial Reporting**
-
-A view aggregates transactions by account and month, calculates running balances, and applies business rules for categorization. Finance teams query the view for reports without understanding the underlying schema complexity.
-
-### References
-
-- Oracle Database — Creating and Managing Views - https://docs.oracle.com/cd/E57425_01/121/CNCPT/schemaob.htm
-- Microsoft Learn — Create and query views - https://learn.microsoft.com/en-ie/training/modules/create-tables-views-temporary-objects/3-create-query-views
-- MySQL 9.7 Reference Manual — Updatable and Insertable Views - https://dev.mysql.com/doc/refman/9.7/en/view-updatability.html
-
----
-
-## 5. Nested Views
-
-### Definitions
-
-**Core Definition:** A nested view is a view whose definition references another view (or views) as its data source, creating a hierarchy of virtual tables.
-
-**Technical Definition:** Nested views are views built upon other views. PostgreSQL documentation states that "building views upon other views is not uncommon" . SQL Server allows views to be nested up to 32 levels, though the actual limit may be lower depending on complexity and available memory .
-
-**Beginner-Friendly Explanation:** A nested view is like a layered cake. The bottom layer might be a simple view of a table. The middle layer is a view that builds on the first view. The top layer is a view that builds on the middle view. Each layer adds or transforms data, creating a hierarchy.
-
-### Purposes
-
-- To build modular, reusable query components.
-- To create layered abstractions that simplify complex logic.
-- To separate concerns: base views for raw data, middle views for transformations, top views for presentation.
-- To enable incremental development of complex query logic.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
--- Layer 1: Base view
-CREATE VIEW v_base AS
-SELECT * FROM table_name WHERE condition;
-
--- Layer 2: Intermediate view referencing base view
-CREATE VIEW v_intermediate AS
-SELECT column_list, calculation
-FROM v_base
-WHERE condition;
-
--- Layer 3: Top-level view referencing intermediate view
-CREATE VIEW v_top AS
-SELECT * FROM v_intermediate;
-```
-
-**Syntax Rules:**
-
-- Nested views can reference any existing view.
-- Changes to base views (e.g., `DROP`) invalidate dependent views.
-- SQL Server allows up to 32 levels of nesting .
-- Performance may degrade with deep nesting because the optimizer must flatten the view hierarchy.
-
-**Constraints and Limitations:**
-
-- Deep nesting can make debugging difficult.
-- `ORDER BY` in nested views is generally ignored or disallowed .
-- Schema changes to base tables may break nested views.
-
-### Annotated Complete Code Examples
-
-**Example 1: Two-Level Nested View**
-
-```sql
--- Base table
-CREATE TABLE products (
-    product_id   INT PRIMARY KEY,
-    product_name VARCHAR(100),
-    category     VARCHAR(50),
-    price        DECIMAL(10,2),
-    stock        INT
-);
-
--- Layer 1: View for in-stock products
-CREATE VIEW v_in_stock AS
-SELECT product_id, product_name, category, price, stock
-FROM products
-WHERE stock > 0;
-
--- Layer 2: View for expensive in-stock products
-CREATE VIEW v_expensive_in_stock AS
-SELECT product_id, product_name, category, price
-FROM v_in_stock
-WHERE price > 100;
-
--- Query the nested view
-SELECT * FROM v_expensive_in_stock ORDER BY price DESC;
-```
-
-**Why this output occurs:** The top-level view `v_expensive_in_stock` references `v_in_stock`, which references `products`. PostgreSQL documentation confirms that "building views upon other views is not uncommon" . The query against the nested view ultimately executes the combined logic: filter in-stock products, then filter by price.
-
-**Example 2: Three-Level Nested View with Calculation**
-
-```sql
--- Layer 1: Raw data view
-CREATE VIEW v_raw_orders AS
-SELECT order_id, customer_id, order_date, total_amount
-FROM orders;
-
--- Layer 2: Add calculated column
-CREATE VIEW v_orders_with_year AS
-SELECT order_id, customer_id, order_date, total_amount,
-       YEAR(order_date) AS order_year
-FROM v_raw_orders;
-
--- Layer 3: Aggregate by year
-CREATE VIEW v_annual_sales AS
-SELECT order_year,
-       COUNT(*) AS order_count,
-       SUM(total_amount) AS annual_total
-FROM v_orders_with_year
-GROUP BY order_year;
-```
-
-**Why this output occurs:** Each layer adds a transformation. Layer 1 selects raw data. Layer 2 adds a calculated year column. Layer 3 aggregates by year. This modular approach allows different consumers to use the appropriate layer without duplicating logic.
-
-### Real-World Cases
-
-**Case 1: Data Warehouse Staging**
-
-A data warehouse uses nested views: `v_staging` loads raw data, `v_cleansed` applies data quality rules, `v_transformed` applies business logic, and `v_presentation` formats for BI tools. Each layer is a view referencing the previous one.
-
-**Case 2: Application API Layer**
-
-An application exposes different views for different user roles: `v_user_basic` (name, email), `v_user_extended` (adds phone, address), `v_user_admin` (adds role, permissions). These nested views share a common base view and add columns at each level.
-
-### References
-
-- PostgreSQL Documentation — Views - https://www.postgresql.org/docs/14/tutorial-views.html
-- PostgreSQL Documentation (9.4) — Views - https://www.postgresql.org/docs/9.4/tutorial-views.html
-- Microsoft Learn — Projektowanie i wdrażanie widoków - https://learn.microsoft.com/pl-pl/previous-versions/sql/sql-server-2008-r2/ms189918(v=sql.105)
-
----
-
-## 6. Materialized Views (Where Supported)
-
-### Definitions
-
-**Core Definition:** A materialized view is a database object that physically stores the result set of its defining query, unlike a standard view which recomputes the query each time it is referenced.
-
-**Technical Definition:** Oracle documentation states that "materialized views are similar to indexes" because "they contain actual data and consume storage space" and "can be refreshed when the data in their master tables changes" . PostgreSQL introduced materialized views in version 9.3 . MySQL does **not** have native materialized views .
-
-**Beginner-Friendly Explanation:** A materialized view is like a photocopy of a report. Instead of running the report every time you need it (which might take a long time), you make a copy and store it. When the underlying data changes, you refresh the copy. It's faster to read but may be slightly out of date.
-
-### Purposes
-
-- To pre-compute and store expensive query results (complex joins, aggregations).
-- To improve query performance for frequently accessed, read-heavy workloads.
-- To serve as a caching mechanism for remote or slow data sources.
-- To support data warehouse query rewrite optimization .
-
-### Syntax Rules and Structure
-
-**Complete General Syntax (PostgreSQL):**
-
-```sql
-CREATE MATERIALIZED VIEW view_name AS
-SELECT column_list
-FROM table_name
-WHERE condition
-[WITH [NO] DATA];
-
-REFRESH MATERIALIZED VIEW view_name;
-REFRESH MATERIALIZED VIEW CONCURRENTLY view_name;  -- Requires unique index
-```
-
-**Complete General Syntax (Oracle):**
-
-```sql
-CREATE MATERIALIZED VIEW view_name AS
-SELECT ...;
-
--- Refresh methods
-REFRESH MATERIALIZED VIEW view_name;
--- Or configured for ON COMMIT / ON DEMAND
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `WITH NO DATA` | Creates the view definition without populating it  |
-| `REFRESH` | Re-executes the defining query and updates stored data |
-| `CONCURRENTLY` | Allows reads during refresh (PostgreSQL 9.4+)  |
-
-**Syntax Rules:**
-
-- Materialized views must be explicitly refreshed; they do not auto-update .
-- PostgreSQL: `REFRESH MATERIALIZED VIEW` takes an exclusive lock, blocking reads .
-- PostgreSQL: `CONCURRENTLY` requires a unique index and allows reads during refresh .
-- Oracle supports fast refresh (incremental) using materialized view logs, and query rewrite .
-
-**Constraints and Limitations:**
-
-- **MySQL does not support materialized views natively** .
-- PostgreSQL: Cannot be temporary or unlogged .
-- Refresh can be expensive for large datasets.
-- Data may be stale between refreshes.
-- PostgreSQL: `pg_dump` dumps only the definition, not the data .
-
-### Annotated Complete Code Examples
-
-**Example 1: PostgreSQL Materialized View**
-
-```sql
--- Create a materialized view (no data initially)
-CREATE MATERIALIZED VIEW mv_sales_summary AS
-SELECT 
-    product_id,
-    DATE_TRUNC('month', sale_date) AS month,
-    SUM(amount) AS total_sales
+CREATE VIEW sales_summary AS
+SELECT region, product_category, SUM(amount) AS total_sales
 FROM sales
-GROUP BY product_id, DATE_TRUNC('month', sale_date)
-WITH NO DATA;
-
--- Refresh to populate
-REFRESH MATERIALIZED VIEW mv_sales_summary;
-
--- Query works
-SELECT * FROM mv_sales_summary WHERE month = '2026-01-01';
-
--- Create a unique index for CONCURRENTLY refresh
-CREATE UNIQUE INDEX idx_mv_sales_summary
-ON mv_sales_summary (product_id, month);
-
--- Concurrent refresh (allows reads during refresh)
-REFRESH MATERIALIZED VIEW CONCURRENTLY mv_sales_summary;
+GROUP BY region, product_category;
 ```
 
-**Why this output occurs:** The materialized view stores the aggregated sales data. PostgreSQL documentation confirms that `CREATE MATERIALIZED VIEW ... WITH NO DATA` creates the view without populating it, and `REFRESH MATERIALIZED VIEW` populates it . `CONCURRENTLY` requires a unique index and allows queries during refresh .
+**Component breakdown**
 
-**Example 2: Oracle Materialized View with Fast Refresh**
+| Component | Read-only? | Why |
+|-----------|------------|-----|
+| Single table, simple columns | No (updatable) | Maps directly to base table. |
+| Join of two tables | Yes | Cannot unambiguously map rows. |
+| `GROUP BY` with aggregates | Yes | Aggregated rows have no single base row. |
+| `UNION` of two queries | Yes | Rows may come from either source. |
+
+**Syntax rules**
+
+- Read-only views are still fully queryable with `SELECT`, joins, filters, and aggregations.
+- Attempting `INSERT`, `UPDATE`, or `DELETE` on a read-only view raises an error unless `INSTEAD OF` triggers are defined.
+- `WITH CHECK OPTION` is not applicable to read-only views.
+
+**Constraints and limitations**
+
+- Read-only views cannot be used as the target of DML unless triggers are added.
+- Some engines may still allow DML on certain complex views under specific conditions (e.g., MySQL merge algorithm for simple joins).
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Aggregated view is read-only
 
 ```sql
--- Create materialized view log on base table (for fast refresh)
-CREATE MATERIALIZED VIEW LOG ON sales
-WITH ROWID, PRIMARY KEY, SEQUENCE (sale_date, amount, product_id)
-INCLUDING NEW VALUES;
+CREATE VIEW department_totals AS
+SELECT department_id, SUM(salary) AS total_salary
+FROM employees
+GROUP BY department_id;
 
--- Create materialized view with fast refresh
-CREATE MATERIALIZED VIEW sales_mv
-REFRESH FAST ON COMMIT
+-- Attempt to update raises an error.
+UPDATE department_totals SET total_salary = 0 WHERE department_id = 10;
+```
+
+**Expected output**:
+
+```text
+ERROR: cannot update view "department_totals"
+DETAIL: Views that do not select from a single table or view are not automatically updatable.
+```
+
+**Why this output appears**: The view uses `GROUP BY` and `SUM`, which disqualify it from automatic updatability. The `UPDATE` is rejected because the database cannot map `total_salary` back to individual employee rows.
+
+##### Example 2: MySQL – `ALGORITHM = TEMPTABLE` forces read-only
+
+```sql
+CREATE ALGORITHM = TEMPTABLE VIEW recent_orders AS
+SELECT order_id, customer_id, total
+FROM orders
+WHERE order_date >= '2025-01-01';
+
+UPDATE recent_orders SET total = 0 WHERE order_id = 9001;
+```
+
+**Expected output**:
+
+```text
+ERROR 1288 (HY000): The target table recent_orders of the UPDATE is not updatable
+```
+
+**Why this output appears**: `ALGORITHM = TEMPTABLE` forces MySQL to materialize the view into a temporary table, which is always non-updatable. Even though the underlying query is simple, the explicit algorithm choice makes the view read-only.
+
+#### Real-World Cases
+
+- **Reporting views**: Aggregated sales summaries that should never be modified.
+- **Security views**: Views exposing only read access to sensitive data while base tables remain writable by privileged users.
+- **Cross-system integration**: Views over foreign tables or federated queries that are inherently read-only.
+
+---
+
+### 3. Security Views
+
+#### Definitions
+
+**Core Definition**
+A security view is a view designed to enforce access control by restricting which rows or columns a user can see or modify, leveraging privilege-checking models and barrier mechanisms to prevent information leakage.
+
+**Technical Definition**
+In PostgreSQL, views are executed with the privileges of the view owner by default: a user granted `SELECT` on a view can access underlying tables through the view even without direct table privileges. `security_barrier = true` prevents the optimizer from pushing user-supplied predicates below the view's own filters, which could otherwise leak rows through side-channel functions. `security_invoker = true` (PostgreSQL 15+) changes privilege checking to use the caller's privileges instead of the view owner's, enabling row-level security policies to apply to the invoking user. In MySQL, `SQL SECURITY { DEFINER | INVOKER }` controls whether the view executes with the definer's or invoker's privileges. SQL Server uses ownership chaining and `GRANT`/`DENY` permissions on views.
+
+**Beginner-Friendly Explanation**
+A security view is like a filtered window that only shows certain rows or columns to certain people. In PostgreSQL, by default the view runs with the creator's permissions, so you can give someone access to the view without giving them access to the underlying tables. The `security_barrier` option stops clever users from bypassing the filter, and `security_invoker` makes the view check the user's own permissions instead of the creator's.
+
+#### Purposes
+
+- To grant access to a subset of data without granting direct table privileges.
+- To enforce row-level and column-level security through view definitions.
+- To prevent predicate pushdown from leaking rows through malicious functions (`security_barrier`).
+- To apply the caller's row-level security policies (`security_invoker` in PostgreSQL 15+).
+- To implement multi-tenant data isolation.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL security view options**:
+
+```sql
+CREATE VIEW secure_view
+WITH (security_barrier = true, security_invoker = true)
 AS
-SELECT product_id, SUM(amount) AS total_sales
-FROM sales
-GROUP BY product_id;
-
--- Query the materialized view
-SELECT * FROM sales_mv WHERE product_id = 100;
+SELECT * FROM sensitive_table
+WHERE tenant_id = current_setting('app.tenant_id')::int;
 ```
 
-**Why this output occurs:** Oracle documentation describes materialized view logs as recording changes to base tables so the materialized view can be refreshed incrementally (fast refresh) . `ON COMMIT` refreshes automatically when the base table is modified. Oracle also supports query rewrite, where queries against base tables are transparently rewritten to use materialized views .
+**MySQL `SQL SECURITY`** :
 
-### Real-World Cases
+```sql
+CREATE SQL SECURITY INVOKER VIEW customer_view AS
+SELECT customer_id, name FROM customers;
+```
 
-**Case 1: Data Warehouse Aggregates**
+**Component breakdown**
 
-A data warehouse pre-computes daily sales totals by product and region using a materialized view. Dashboards query the materialized view instead of scanning billions of transaction rows. The view is refreshed nightly.
+| Component | Engine | Effect |
+|-----------|--------|--------|
+| `security_barrier = true` | PostgreSQL | Prevents predicate pushdown below the view's `WHERE` clause. |
+| `security_invoker = true` | PostgreSQL 15+ | Checks underlying object privileges and RLS policies as the calling user. |
+| `SQL SECURITY DEFINER` | MySQL | Executes with the view creator's privileges (default). |
+| `SQL SECURITY INVOKER` | MySQL | Executes with the calling user's privileges. |
+| Ownership chaining | SQL Server | Permissions on underlying objects are not checked if the view and tables share an owner. |
 
-**Case 2: Cross-Database Reporting**
+**Syntax rules**
 
-A reporting system needs data from a remote, slow database. A materialized view is created locally with the remote query. The view is refreshed periodically, providing fast local access to remote data .
+- `security_barrier` should be set whenever a view is used to restrict rows for security purposes.
+- `security_invoker` requires PostgreSQL 15 or later.
+- `SQL SECURITY INVOKER` in MySQL means the invoker must have privileges on the underlying tables.
+- Without `security_barrier`, the optimizer may push user predicates below the view's filter, potentially exposing rows through side-channel attacks.
 
-**Case 3: MySQL Workaround**
+**Constraints and limitations**
 
-Since MySQL lacks materialized views, developers simulate them using a regular table populated by a scheduled `INSERT ... SELECT` or `CREATE TABLE ... SELECT`, refreshed via cron or events. This is a common pattern documented in community resources.
+- `security_barrier` can degrade performance by preventing predicate pushdown.
+- `security_invoker` may require granting underlying table privileges to the invoking user, which may conflict with least-privilege goals.
+- SQL Server ownership chaining only works when the view and base tables have the same owner.
 
-### References
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- Oracle Database — Partitions, Views, and Other Schema Objects (Materialized Views) - https://docs.oracle.com/cd/E57425_01/121/CNCPT/schemaob.htm
-- PostgreSQL Wiki — Materialised Views in PostgreSQL - https://wiki.postgresql.org/images/8/85/Materialised_Views_-_FOSDEM.pdf
-- MySQL 9.7 FAQ — Does MySQL have materialized views? - https://docs.oracle.com/cd/E17952_01/mysql-9.7-en/faqs-views.html
+##### Example 1: PostgreSQL – `security_invoker` with row-level security
+
+```sql
+-- Step 1: Create a table with RLS enabled.
+CREATE TABLE documents (
+    doc_id SERIAL PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    content TEXT
+);
+ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
+CREATE POLICY tenant_policy ON documents
+    USING (tenant_id = current_setting('app.tenant_id')::int);
+
+-- Step 2: Create a security_invoker view.
+CREATE VIEW tenant_documents
+WITH (security_invoker = true)
+AS SELECT * FROM documents;
+
+-- Step 3: A user with app.tenant_id = 1 sees only their rows.
+SET app.tenant_id = '1';
+SELECT * FROM tenant_documents;
+```
+
+**Expected output**: Only rows where `tenant_id = 1` are returned, because `security_invoker` applies the caller's RLS policies to the underlying table.
+
+**Why this output appears**: Without `security_invoker`, the view would run with the owner's privileges and RLS policies, potentially showing all tenants' rows. `security_invoker` ensures that the invoking user's context and policies apply.
+
+##### Example 2: MySQL – `SQL SECURITY INVOKER`
+
+```sql
+CREATE SQL SECURITY INVOKER VIEW employee_view AS
+SELECT employee_id, name, department FROM employees;
+
+-- A user with SELECT on employee_view but not on employees gets an error.
+SELECT * FROM employee_view;
+```
+
+**Expected output**:
+
+```text
+ERROR 1142 (42000): SELECT command denied to user 'report_user'@'%' for table 'employees'
+```
+
+**Why this output appears**: With `SQL SECURITY INVOKER`, MySQL checks the calling user's privileges on the underlying `employees` table, not the view creator's. If the user lacks `SELECT` on `employees`, the view query fails.
+
+#### Real-World Cases
+
+- **Multi-tenant SaaS**: Views filter by tenant ID; `security_invoker` ensures each tenant's RLS policies apply.
+- **Column-level security**: Views expose only non-sensitive columns (e.g., hiding salary in an `employees` view).
+- **Reporting access**: Granting `SELECT` on a security view without granting direct table access.
 
 ---
 
-## Summary Table
+### 4. Complex Views
 
-| View Type | Updatable? | Stores Data? | Primary Use Case |
-|-----------|-----------|--------------|------------------|
-| **Updatable View** | Yes (with conditions) | No | Data entry through simplified interface |
-| **Read-Only View** | No (`WITH READ ONLY`) | No | Reporting, dashboards, compliance |
-| **Security View** | Usually No | No | Column/row access control |
-| **Complex View** | Usually No | No | Multi-table joins, aggregations |
-| **Nested View** | Depends on layers | No | Modular query design |
-| **Materialized View** | Limited | Yes | Performance caching, data warehousing |
+#### Definitions
+
+**Core Definition**
+A complex view is a view whose defining query involves multiple tables (joins), aggregations (`GROUP BY`, `HAVING`), set operations (`UNION`, `INTERSECT`, `EXCEPT`), window functions, or other constructs that make it structurally non-updatable and potentially expensive to execute.
+
+**Technical Definition**
+Complex views are read-only by default because they fail the automatic updatability conditions. They are used for abstraction, reporting, and data integration. Their performance depends on the optimizer's ability to flatten the view into the outer query (view merging) or, when flattening is not possible, on materializing the view's result into a temporary table (as in MySQL's `TEMPTABLE` algorithm). Complex views can be nested, creating multi-level abstraction layers that may obscure performance characteristics.
+
+**Beginner-Friendly Explanation**
+A complex view is a view that does a lot of work—joining several tables, grouping and summing data, or combining results from different queries. It is great for simplifying reporting, but because it is complex, you usually cannot write to it directly, and it may be slower to query than a simple view.
+
+#### Purposes
+
+- To encapsulate multi-table joins and aggregations under a single, simple name.
+- To provide a stable reporting interface while underlying schemas evolve.
+- To combine data from multiple sources into a unified view.
+- To simplify application queries by pre-joining and pre-aggregating data.
+
+#### Syntax Rules and Structure
+
+**Complex view pattern**:
+
+```sql
+CREATE VIEW sales_dashboard AS
+SELECT
+    c.region,
+    p.category,
+    DATE_TRUNC('month', o.order_date) AS month,
+    SUM(oi.quantity * oi.unit_price) AS revenue,
+    COUNT(DISTINCT o.order_id) AS order_count
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+JOIN products p ON p.product_id = oi.product_id
+GROUP BY c.region, p.category, DATE_TRUNC('month', o.order_date);
+```
+
+**Component breakdown**
+
+| Component | Complexity factor |
+|-----------|-------------------|
+| Multiple joins | Increases plan complexity and potential for row explosion. |
+| `GROUP BY` + aggregates | Prevents updatability; may require materialization. |
+| `DISTINCT` | Adds deduplication cost. |
+| Set operations | May require sorting or hashing. |
+| Window functions | Adds analytical computation cost. |
+
+**Syntax rules**
+
+- Complex views are read-only unless `INSTEAD OF` triggers are defined.
+- The optimizer may merge the view into the outer query (if possible) or materialize it.
+- MySQL's `ALGORITHM = MERGE` may still work for some joins; `TEMPTABLE` is used when merging is not possible.
+- Complex views can reference other views (nesting), compounding performance considerations.
+
+**Constraints and limitations**
+
+- Cannot be automatically updated.
+- May force materialization into unindexed temporary tables, causing performance degradation.
+- Predicate pushdown may be limited, especially with `security_barrier`.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Complex join and aggregate view
+
+```sql
+CREATE VIEW regional_product_revenue AS
+SELECT
+    c.region,
+    p.category,
+    SUM(oi.quantity * oi.unit_price) AS revenue
+FROM orders o
+JOIN customers c ON c.customer_id = o.customer_id
+JOIN order_items oi ON oi.order_id = o.order_id
+JOIN products p ON p.product_id = oi.product_id
+GROUP BY c.region, p.category;
+
+SELECT * FROM regional_product_revenue WHERE region = 'North';
+```
+
+**Expected output** (illustrative):
+
+```text
+ region | category    | revenue
+--------+-------------+----------
+ North  | Electronics | 125000.00
+ North  | Clothing    |  45000.00
+(2 rows)
+```
+
+**Why this output appears**: The view joins four tables and aggregates revenue by region and category. The outer `WHERE region = 'North'` may be pushed into the view's query for efficiency, depending on the optimizer.
+
+##### Example 2: MySQL – `EXPLAIN` reveals `TEMPTABLE` materialization
+
+```sql
+EXPLAIN SELECT * FROM regional_product_revenue WHERE region = 'North';
+```
+
+**Expected output** (excerpt):
+
+```text
++----+-------------+------------+------+...+-----------------+
+| id | select_type | table      | type |...| Extra           |
++----+-------------+------------+------+...+-----------------+
+|  1 | PRIMARY     | <derived2> | ALL  |...| Using where     |
+|  2 | DERIVED     | orders     | ALL  |...| Using temporary |
++----+-------------+------------+------+...+-----------------+
+```
+
+**Why this output appears**: The `Using temporary` in the `Extra` column indicates that MySQL materialized the complex view into a temporary table (`TEMPTABLE`) before applying the outer filter. This can be slower than merging, because the temp table has no indexes.
+
+#### Real-World Cases
+
+- **Business intelligence dashboards**: Complex views pre-join and pre-aggregate data for reporting tools.
+- **Data integration**: Views combine data from multiple source systems with different schemas.
+- **Application simplification**: A single complex view hides a normalized schema from application queries.
+
+---
+
+### 5. Nested Views
+
+#### Definitions
+
+**Core Definition**
+A nested view is a view whose defining query references another view, creating a dependency chain in which the outermost view's result is derived through multiple layers of view definitions.
+
+**Technical Definition**
+When a query references a nested view, the database's query rewriter expands the view definition, substituting the inner view's query into the outer view's query. This expansion may be repeated for multiple levels. The performance impact depends on whether the optimizer can flatten the nested expansion into a single query plan or whether it must materialize intermediate results. In MySQL, each layer that cannot be merged forces `TEMPTABLE` materialization into an unindexed temporary table, which can cause severe performance degradation in production. In PostgreSQL and SQL Server, views are expanded like macros, so there is generally no inherent performance penalty for nesting unless the layers introduce materialization barriers.
+
+**Beginner-Friendly Explanation**
+A nested view is a view built on top of another view. It is like a chain of summaries: the first view summarizes raw data, the second summarizes the first summary, and so on. Nesting can make queries easier to understand, but if you nest too many layers—especially layers that use `GROUP BY`—the database may have to create temporary tables at each level, which can slow things down dramatically.
+
+#### Purposes
+
+- To build layered abstractions where each view represents one logical transformation.
+- To reuse intermediate results across multiple downstream views.
+- To simplify complex reporting pipelines by naming each stage.
+- To isolate changes: modifying an inner view automatically affects dependent outer views.
+
+#### Syntax Rules and Structure
+
+**Nested view pattern**:
+
+```sql
+-- Inner view: daily sales.
+CREATE VIEW daily_sales AS
+SELECT sale_date, SUM(amount) AS daily_total
+FROM sales
+GROUP BY sale_date;
+
+-- Outer view: monthly rollup of daily sales.
+CREATE VIEW monthly_sales AS
+SELECT DATE_TRUNC('month', sale_date) AS month,
+       SUM(daily_total) AS monthly_total
+FROM daily_sales
+GROUP BY DATE_TRUNC('month', sale_date);
+```
+
+**Component breakdown**
+
+| Layer | Purpose | Materialization risk |
+|-------|---------|----------------------|
+| `daily_sales` | Aggregates raw sales by day. | `GROUP BY` may force materialization in MySQL. |
+| `monthly_sales` | Aggregates daily view by month. | Adds another aggregation layer; may compound `TEMPTABLE` cost. |
+
+**Syntax rules**
+
+- A view can reference any number of other views in its `FROM` clause.
+- Dependency order matters: inner views must be created before outer views.
+- Dropping an inner view with `RESTRICT` fails if outer views depend on it; use `CASCADE` to drop dependents.
+- The query rewriter expands nested views; the optimizer may or may not flatten the expansion.
+
+**Constraints and limitations**
+
+- Deep nesting of aggregating views can force multiple levels of `TEMPTABLE` materialization in MySQL, causing severe performance degradation.
+- SQL Server nested views can make execution plans complex and difficult to troubleshoot.
+- Changes to inner view definitions automatically propagate to outer views, which can be beneficial or risky.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: MySQL – Nested aggregating views cause `TEMPTABLE` layers
+
+```sql
+-- Inner view: aggregates by day.
+CREATE VIEW vw_daily AS
+SELECT DATE(sale_date) AS d, SUM(amount) AS daily_total
+FROM sales GROUP BY DATE(sale_date);
+
+-- Middle view: aggregates by month.
+CREATE VIEW vw_monthly AS
+SELECT DATE_FORMAT(d, '%Y-%m') AS m, SUM(daily_total) AS monthly_total
+FROM vw_daily GROUP BY DATE_FORMAT(d, '%Y-%m');
+
+-- Outer view: aggregates by year.
+CREATE VIEW vw_yearly AS
+SELECT LEFT(m, 4) AS y, SUM(monthly_total) AS yearly_total
+FROM vw_monthly GROUP BY LEFT(m, 4);
+
+EXPLAIN SELECT * FROM vw_yearly;
+```
+
+**Expected output** (plan excerpt):
+
+```text
++----+-------------+------------+------+...+-----------------+
+| id | select_type | table      | type |...| Extra           |
++----+-------------+------------+------+...+-----------------+
+|  1 | PRIMARY     | <derived3> | ALL  |...| Using temporary |
+|  3 | DERIVED     | <derived2> | ALL  |...| Using temporary |
+|  2 | DERIVED     | sales      | ALL  |...| Using temporary |
++----+-------------+------------+------+...+-----------------+
+```
+
+**Why this output appears**: Each aggregating layer forces MySQL to create an unindexed temporary table (`TEMPTABLE`). The outer query scans these temporary tables, and the lack of indexes causes full scans at each level, leading to severe performance degradation on large data sets.
+
+##### Example 2: PostgreSQL – Nested views without inherent penalty
+
+```sql
+CREATE VIEW base_view AS
+SELECT id, amount FROM transactions WHERE amount > 0;
+
+CREATE VIEW filtered_view AS
+SELECT id, amount * 1.1 AS amount_with_tax FROM base_view;
+
+EXPLAIN (COSTS OFF) SELECT * FROM filtered_view WHERE id = 100;
+```
+
+**Expected output** (plan excerpt):
+
+```text
+ Index Scan using transactions_pkey on transactions
+   Index Cond: (id = 100)
+   Filter: (amount > 0)
+```
+
+**Why this output appears**: PostgreSQL expands nested views as rewrite rules and the optimizer flattens the expansion, pushing the `id = 100` predicate directly into the base table's index scan. There is no intermediate materialization penalty.
+
+#### Real-World Cases
+
+- **Layered reporting**: Daily → monthly → yearly sales views.
+- **Data quality pipelines**: Raw → cleaned → enriched → aggregated views.
+- **Legacy abstraction**: New views layered over old views during schema migration.
+
+---
+
+### 6. Materialized Views (Where Supported)
+
+#### Definitions
+
+**Core Definition**
+A materialized view is a database object that stores the result of a query physically on disk, like a table, and must be refreshed to reflect changes in the underlying base tables.
+
+**Technical Definition**
+Materialized views persist their result set, trading storage and refresh overhead for query performance. Oracle supports `REFRESH ON COMMIT` (refresh when a transaction commits on a master table), `REFRESH ON DEMAND` (manual refresh via `DBMS_MVIEW` procedures), and `REFRESH ON STATEMENT` (refresh on every DML statement on base tables). PostgreSQL supports `CREATE MATERIALIZED VIEW` with `REFRESH MATERIALIZED VIEW`; `REFRESH MATERIALIZED VIEW CONCURRENTLY` (PostgreSQL 9.4+) allows reads during refresh but requires a unique index on the materialized view. SQL Server's indexed views are materialized views: they require `WITH SCHEMABINDING` and a unique clustered index, after which the optimizer can use them transparently.
+
+**Beginner-Friendly Explanation**
+A materialized view is like a photocopy of a query's result. Because the data is stored on disk, querying it is fast—like reading the photocopy instead of recalculating the result from scratch. But when the underlying data changes, the photocopy becomes stale, and you have to refresh it. Different databases offer different refresh strategies: some refresh automatically when data changes, others require you to run a refresh command.
+
+#### Purposes
+
+- To accelerate expensive queries by precomputing and storing results.
+- To support dashboards and reports that query aggregated data frequently.
+- To offload computation from base tables during peak query periods.
+- To provide a snapshot of data at a specific point in time.
+
+#### Syntax Rules and Structure
+
+**PostgreSQL**:
+
+```sql
+CREATE MATERIALIZED VIEW sales_summary AS
+SELECT region, SUM(amount) AS total
+FROM sales GROUP BY region
+WITH DATA;
+
+REFRESH MATERIALIZED VIEW sales_summary;
+
+-- Concurrent refresh requires a unique index.
+CREATE UNIQUE INDEX ON sales_summary (region);
+REFRESH MATERIALIZED VIEW CONCURRENTLY sales_summary;
+```
+
+**Oracle**:
+
+```sql
+CREATE MATERIALIZED VIEW sales_mv
+BUILD IMMEDIATE
+REFRESH FAST ON COMMIT
+AS SELECT region, SUM(amount) AS total
+FROM sales GROUP BY region;
+```
+
+**SQL Server**:
+
+```sql
+CREATE VIEW dbo.SalesSummary
+WITH SCHEMABINDING
+AS
+SELECT region, SUM(amount) AS total, COUNT_BIG(*) AS cnt
+FROM dbo.Sales
+GROUP BY region;
+GO
+CREATE UNIQUE CLUSTERED INDEX IX_SalesSummary
+ON dbo.SalesSummary (region);
+```
+
+**Component breakdown**
+
+| Component | Engine | Description |
+|-----------|--------|-------------|
+| `WITH DATA` / `WITH NO DATA` | PostgreSQL | Populate immediately or defer population. |
+| `REFRESH MATERIALIZED VIEW` | PostgreSQL | Full refresh (locks reads). |
+| `REFRESH MATERIALIZED VIEW CONCURRENTLY` | PostgreSQL 9.4+ | Non-blocking refresh; requires unique index. |
+| `REFRESH FAST ON COMMIT` | Oracle | Incremental refresh on transaction commit. |
+| `REFRESH COMPLETE ON DEMAND` | Oracle | Full refresh only when manually invoked. |
+| `WITH SCHEMABINDING` + unique clustered index | SQL Server | Required to create an indexed (materialized) view. |
+
+**Syntax rules**
+
+- PostgreSQL: `CONCURRENTLY` requires a unique index on the materialized view and cannot be used with `WITH NO DATA`.
+- Oracle: `ON COMMIT` cannot be combined with `ON DEMAND` or `START WITH`/`NEXT`; it increases commit time because refresh happens during commit.
+- SQL Server: the view must be created with `SCHEMABINDING`, and the first index must be a unique clustered index.
+- MySQL supports materialized views only on MySQL HeatWave; regular MySQL views are virtual.
+
+**Constraints and limitations**
+
+- Materialized views consume storage proportional to their result size.
+- Refreshing can be expensive; `ON COMMIT` refresh can increase transaction commit latency.
+- PostgreSQL's non-concurrent `REFRESH` locks the materialized view against reads; `CONCURRENTLY` avoids locking but requires a unique index and may be slower.
+- SQL Server indexed views can degrade DML performance on base tables because the view's indexes must be maintained on every modification.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Materialized view with concurrent refresh
+
+```sql
+-- Step 1: Create a materialized view.
+CREATE MATERIALIZED VIEW monthly_revenue AS
+SELECT DATE_TRUNC('month', sale_date) AS month,
+       SUM(amount) AS revenue
+FROM sales
+GROUP BY DATE_TRUNC('month', sale_date)
+WITH DATA;
+
+-- Step 2: Create a unique index for concurrent refresh.
+CREATE UNIQUE INDEX ON monthly_revenue (month);
+
+-- Step 3: Refresh without blocking reads.
+REFRESH MATERIALIZED VIEW CONCURRENTLY monthly_revenue;
+
+-- Step 4: Query the materialized view.
+SELECT * FROM monthly_revenue ORDER BY month;
+```
+
+**Expected output**:
+
+```text
+   month    | revenue
+------------+---------
+ 2025-01-01 | 125000.00
+ 2025-02-01 | 138000.00
+ 2025-03-01 | 142000.00
+(3 rows)
+```
+
+**Why this output appears**: The materialized view stores the aggregated monthly revenue. `CONCURRENTLY` refreshes it while allowing queries to continue reading the old data, and the unique index on `month` is required for this mode.
+
+##### Example 2: Oracle – Fast refresh on commit
+
+```sql
+CREATE MATERIALIZED VIEW sales_mv
+BUILD IMMEDIATE
+REFRESH FAST ON COMMIT
+AS SELECT region, SUM(amount) AS total
+FROM sales
+GROUP BY region;
+```
+
+**Expected output**:
+
+```text
+Materialized view created.
+```
+
+**Why this output appears**: Oracle creates the materialized view and populates it immediately (`BUILD IMMEDIATE`). `REFRESH FAST ON COMMIT` means that whenever a transaction commits a change to the `sales` table, Oracle incrementally refreshes the materialized view as part of the commit process.
+
+##### Example 3: SQL Server – Indexed view
+
+```sql
+CREATE VIEW dbo.ProductSales
+WITH SCHEMABINDING
+AS
+SELECT ProductID, SUM(LineTotal) AS TotalSales, COUNT_BIG(*) AS OrderCount
+FROM dbo.SalesOrderDetail
+GROUP BY ProductID;
+GO
+CREATE UNIQUE CLUSTERED INDEX IX_ProductSales
+ON dbo.ProductSales (ProductID);
+GO
+```
+
+**Expected output**:
+
+```text
+Command(s) completed successfully.
+```
+
+**Why this output appears**: The view is created with `SCHEMABINDING`, and the unique clustered index physically stores the view's result set. SQL Server's optimizer can use this indexed view to speed up queries even when the query does not reference the view directly.
+
+#### Real-World Cases
+
+- **Dashboards**: Materialized views precompute aggregations for fast dashboard loading.
+- **Data warehousing**: Materialized views store summarized data for OLAP queries.
+- **Reporting snapshots**: Materialized views capture data at a specific point in time for audit or comparison.
+- **Query acceleration**: Indexed views in SQL Server transparently speed up expensive aggregation queries.
 
 ---
 
 ## References
 
-- PostgreSQL Documentation — CREATE VIEW - https://www.postgresql.org/docs/9.1/sql-createview.html
-- MySQL 9.7 Reference Manual — Updatable and Insertable Views - https://dev.mysql.com/doc/refman/9.7/en/view-updatability.html
-- Microsoft Learn — Create Views - https://learn.microsoft.com/en-us/training/modules/implement-programmability-objects/2-create-views
-- Oracle Database — 更新可能な結合ビュー - https://docs.oracle.com/cd/E57425_01/121/CNCPT/schemaob.htm
-- Oracle Database — Partitions, Views, and Other Schema Objects (Materialized Views) - https://docs.oracle.com/cd/E57425_01/121/CNCPT/schemaob.htm
-- PostgreSQL Documentation — Views - https://www.postgresql.org/docs/14/tutorial-views.html
-- PostgreSQL Documentation (9.4) — Views - https://www.postgresql.org/docs/9.4/tutorial-views.html
-- PostgreSQL Wiki — Materialised Views in PostgreSQL - https://wiki.postgresql.org/images/8/85/Materialised_Views_-_FOSDEM.pdf
-- MySQL 9.7 FAQ — Does MySQL have materialized views? - https://docs.oracle.com/cd/E17952_01/mysql-9.7-en/faqs-views.html
-- Microsoft Learn — Create and query views - https://learn.microsoft.com/en-ie/training/modules/create-tables-views-temporary-objects/3-create-query-views
-- Microsoft Learn — Projektowanie i wdrażanie widoków - https://learn.microsoft.com/pl-pl/previous-versions/sql/sql-server-2008-r2/ms189918(v=sql.105)
-- Oracle Database — Creating and Managing Views - https://docs.oracle.com/en/database/oracle/oracle-database/19/tdddg/creating-and-managing-views.html
+- PostgreSQL Documentation – CREATE VIEW (Updatable Views) – https://www.postgresql.org/docs/current/sql-createview.html
+- PostgreSQL Documentation – Rules and Privileges (Security Barrier Views) – https://www.postgresql.org/docs/current/rules-privileges.html
+- PostgreSQL Documentation – CREATE MATERIALIZED VIEW – https://www.postgresql.org/docs/current/sql-creatematerializedview.html
+- PostgreSQL Documentation – REFRESH MATERIALIZED VIEW – https://www.postgresql.org/docs/current/sql-refreshmaterializedview.html
+- MySQL 8.0 Reference Manual – Restrictions on Views – https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/view-restrictions.html
+- MySQL 8.0 Reference Manual – Updatable and Insertable Views – https://dev.mysql.com/doc/refman/8.0/en/view-updatability.html
+- MySQL 8.0 Reference Manual – View Processing Algorithms – https://dev.mysql.com/doc/refman/8.0/en/view-algorithms.html
+- Microsoft Learn – View Design Patterns (INSTEAD OF Triggers) – https://learn.microsoft.com/en-us/previous-versions/dd129495(v=vs.85)
+- Microsoft Learn – Create Indexed Views – https://learn.microsoft.com/en-us/sql/relational-databases/views/create-indexed-views
+- Oracle Database SQL Language Reference – CREATE MATERIALIZED VIEW – https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/CREATE-MATERIALIZED-VIEW.html
+- Cybertec – View Permissions and Row-Level Security in PostgreSQL – https://www.cybertec-postgresql.com/en/view-permissions-and-row-level-security-in-postgresql/
+- SQL Engineering Handbook – View Performance (MySQL MERGE vs TEMPTABLE) – https://github.com/theammarngp-makes/SQL-Engineering-Handbook/blob/main/14_VIEWS/07_VIEW_PERFORMANCE.md

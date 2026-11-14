@@ -1,834 +1,590 @@
-# SQL Set-Based Thinking: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: Set-Based Thinking
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** SQL set-based thinking is the practice of approaching data manipulation problems by defining the desired result as a set of rows and allowing the database engine to determine the most efficient way to compute that result, rather than specifying row-by-row procedural steps.
+**Core Definition**
+Set-based thinking is the practice of designing SQL queries by defining the result set as a whole—using relational operations like selection, projection, join, and set union—rather than describing a step-by-step, row-by-row procedure.
 
-**Technical Definition:** Set-based thinking is a mental model grounded in relational algebra—the formal mathematical foundation of SQL—in which queries are expressed as compositions of set operations (selection, projection, join, union, difference, intersection) that transform one or more input relations into an output relation. Each SQL statement defines the result, and allows the database to determine the most efficient way to obtain it. In contrast, iterative algorithms use conditional logic to pull each row or group of rows from the database to the client application, process the data on the client, and then send the data back to the database.
+**Technical Definition**
+Set-based thinking is a declarative problem-solving approach rooted in relational algebra, in which a query specifies *what* result is required, and the database optimiser determines *how* to compute it. The relational model defines a set of fundamental operations—selection (σ), projection (π), Cartesian product (×), union (∪), set difference (−), and join (⨝)—that operate on entire relations (tables) at once. SQL is a declarative language loosely based on these operations; a set-based query composes these operations to transform input relations into an output relation, without prescribing iteration order or procedural control flow. In contrast, row-wise (procedural) logic uses cursors, `WHILE` loops, and per-row conditional statements to process data one row at a time, which conflicts with SQL's set-oriented execution engine.
 
-**Beginner-Friendly Explanation:** Set-based thinking is like ordering a pizza for the whole team instead of driving to the restaurant twelve times to pick up one slice each. You describe what you want ("one large pepperoni pizza") and the kitchen figures out the best way to make it. Procedural thinking is like writing a recipe that says "take one slice, drive to the office, come back, take another slice..."—it works, but it is painfully slow. In SQL, you say "update all products where ProductType = 1" and the database handles the iteration internally, in the most efficient way it can.
+**Beginner-Friendly Explanation**
+Set-based thinking means describing your problem as "what rows do I want in the final answer?" instead of "for each row, do this, then do that." Imagine sorting a deck of cards: you don't pick up each card individually and place it—you spread the whole deck out and rearrange the entire set at once. SQL is designed to work this way, and queries that think in sets are usually shorter, faster, and easier to maintain.
 
 ### Key Characteristics
 
-- **Declarative, not imperative:** You describe *what* result you want, not *how* to compute it step by step.
-- **Result-oriented:** The SQL statement defines the result, and allows the database to determine the most efficient way to obtain it.
-- **Set-at-a-time:** Operations apply to entire sets of rows in a single statement, not to individual rows in application loops.
-- **Relationally grounded:** Set-based thinking is built on relational algebra—selection, projection, join, union, difference, intersection, and Cartesian product.
-- **Performance-superior:** The performance on large data sets is orders of magnitude faster than iterative techniques; it is not unusual for the run time of a program to drop from several hours to several seconds.
-- **Code-concise:** The length of the code is significantly shorter, as short as two or three lines of code, because SQL defines the result and not the access method.
+- **Declarative, not procedural**: You state the desired result; the database engine chooses the execution strategy.
+- **Whole-relation operations**: Selection, projection, join, union, intersection, and difference operate on entire tables, not individual rows.
+- **Order independence**: Sets have no inherent order; row order is meaningful only when an outer `ORDER BY` is specified.
+- **Composability**: Relational operations can be nested and combined freely, enabling complex transformations from simple building blocks.
+- **Optimiser-friendly**: Set-based queries give the optimiser freedom to reorder joins, push predicates, and choose indexes; procedural loops do not.
+- **Performance at scale**: Set-based processing is typically orders of magnitude faster than row-by-row iteration on large data sets.
 
 ### Prerequisites
 
-- Basic understanding of SQL `SELECT`, `INSERT`, `UPDATE`, and `DELETE` statements.
-- Familiarity with relational concepts: tables, rows, columns, primary keys, foreign keys.
-- Awareness of `NULL` semantics and three-valued logic.
-- Knowledge of basic relational algebra operations (selection, projection, join).
-- Understanding of how a query optimizer works at a high level.
+- Understanding of `SELECT`, `WHERE`, `GROUP BY`, `HAVING`, and `ORDER BY`.
+- Familiarity with joins (`INNER`, `LEFT`, `FULL`) and set operators (`UNION`, `INTERSECT`, `EXCEPT`).
+- Knowledge of subqueries, CTEs (`WITH`), and derived tables.
+- Awareness of window functions for analytical calculations without self-joins.
+- Basic understanding of relational algebra terminology (selection, projection, join).
 
 ### Related Programming Areas
 
-- Database query optimization and performance tuning.
-- ETL/ELT pipeline design.
-- Data warehousing and analytics engineering.
-- Application data access layer design.
-- Stored procedure and function development.
+- Relational database theory and relational algebra.
+- Query optimisation and execution plans.
+- Data warehousing and ETL (extract, transform, load).
+- Declarative programming paradigms (functional programming, logic programming).
+- Database engine internals (join algorithms, predicate pushdown).
 
-### Core Concepts / Features
+---
 
-1. **Relational Operations** (selection, projection, join, union, difference, intersection, Cartesian product)
-2. **Difference Between Row-Wise and Set-Wise Logic** (procedural vs. declarative approaches)
-3. **Replacing Procedural Loops with Set Operations** (cursor elimination, two-pass approaches)
-4. **Query Composition** (CTEs, derived tables, subqueries, set operators)
+## Core Concepts and Features
 
+### 1. Relational Operations
 
-## Core Concept 1: Relational Operations
+#### Definitions
 
-### Definitions
+**Core Definition**
+Relational operations are the set of formal operations—selection, projection, Cartesian product, union, set difference, and join—that transform one or more relations (tables) into a new relation, forming the theoretical foundation of SQL.
 
-**Core Definition:** Relational operations are the fundamental set-theoretic transformations—selection, projection, join, union, difference, intersection, and Cartesian product—that operate on relations (tables) and produce new relations as output.
+**Technical Definition**
+Relational algebra, originally defined by E.F. Codd, consists of fundamental operations on relations: **selection** (σ) filters rows by a predicate; **projection** (π) selects a subset of columns; **Cartesian product** (×) combines every row of one relation with every row of another; **union** (∪) combines rows from two union-compatible relations; **set difference** (−) returns rows in one relation not in another; **intersection** (∩) returns rows in both; and **join** (⨝) combines related rows from two relations based on a condition. SQL implements these operations through `WHERE` (selection), `SELECT` column lists (projection), `FROM` with multiple tables (product/join), `UNION`/`INTERSECT`/`EXCEPT` (set operations), and `JOIN` syntax. A set-based query composes these operations to express complex transformations declaratively.
 
-**Technical Definition:** Relational algebra is a theory that uses algebraic structures for modeling data and defining queries on it with well-founded semantics. The main purpose of relational algebra is to define operators that transform one or more input relations to an output relation. Given that these operators accept relations as input and produce relations as output, they can be combined and used to express complex queries that transform multiple input relations into a single output relation (the query results). The five primitive operators of Codd's algebra are the selection, the projection, the Cartesian product (also called the cross product or cross join), the set union, and the set difference. Derived operators include intersection, joins (natural, equi-join, theta join, semi-join), division, and renaming.
+**Beginner-Friendly Explanation**
+Relational operations are the basic "moves" you can make on tables: pick some rows (`WHERE`), pick some columns (`SELECT`), combine tables (`JOIN`), stack tables (`UNION`), or find common/unique rows (`INTERSECT`/`EXCEPT`). Set-based thinking means composing these moves to describe the result you want, rather than writing a loop to walk through rows one by one.
 
-**Beginner-Friendly Explanation:** Relational operations are the basic "moves" you can make with tables. Selection filters rows (like a `WHERE` clause). Projection picks columns (like a `SELECT` list). Join combines tables (like a `JOIN`). Union stacks tables on top of each other. Difference finds rows in one table but not another. These operations are the building blocks of every SQL query you will ever write.
+#### Purposes
 
-### Purposes
+- To provide a formal, mathematical foundation for SQL query semantics.
+- To enable declarative query composition without procedural control flow.
+- To allow the database optimiser to reason about queries algebraically and choose efficient execution plans.
+- To express complex data transformations as combinations of simple, well-understood operations.
 
-- **To filter rows** that satisfy a condition using the selection operation (`σ`).
-- **To choose specific columns** from a relation using the projection operation (`π`).
-- **To combine related rows** from two or more tables using join operations (`⋈`).
-- **To combine result sets** from multiple queries using set operations (UNION, INTERSECT, EXCEPT).
-- **To express complex queries** as compositions of primitive relational operations.
+#### Syntax Rules and Structure
 
-### Syntax Rules and Structure
-
-#### Complete General Syntax (Selection)
+**General mapping of relational operations to SQL**:
 
 ```sql
--- Relational algebra: σ_condition(R)
--- SQL equivalent:
-SELECT * FROM table_name WHERE condition;
+-- Selection (σ): filter rows
+SELECT ... FROM table WHERE predicate;
+
+-- Projection (π): choose columns
+SELECT col1, col2 FROM table;
+
+-- Cartesian product (×) and Join (⨝)
+SELECT ... FROM t1 CROSS JOIN t2;
+SELECT ... FROM t1 JOIN t2 ON t1.key = t2.key;
+
+-- Union (∪)
+SELECT ... FROM t1 UNION SELECT ... FROM t2;
+
+-- Set difference (−)
+SELECT ... FROM t1 EXCEPT SELECT ... FROM t2;
+
+-- Intersection (∩)
+SELECT ... FROM t1 INTERSECT SELECT ... FROM t2;
 ```
 
-#### Complete General Syntax (Projection)
+**Component breakdown**
+
+| Relational operation | SQL construct | Description |
+|----------------------|---------------|-------------|
+| Selection (σ) | `WHERE` | Filters rows by a predicate. |
+| Projection (π) | `SELECT` column list | Chooses a subset of columns. |
+| Cartesian product (×) | `CROSS JOIN` | Combines every row with every row. |
+| Join (⨝) | `JOIN ... ON ...` | Combines related rows from two tables. |
+| Union (∪) | `UNION` / `UNION ALL` | Combines rows from two queries. |
+| Set difference (−) | `EXCEPT` / `MINUS` | Returns rows in one query not in another. |
+| Intersection (∩) | `INTERSECT` | Returns rows common to both queries. |
+
+**Syntax rules**
+
+- Set operations require union-compatible operands (same number of columns, compatible types).
+- Join conditions belong in the `ON` clause; filter conditions for individual tables belong in `WHERE`.
+- Selection and projection can be composed in any order; the optimiser may reorder them.
+- Set operations eliminate duplicates by default; use `ALL` to preserve them.
+
+**Constraints and limitations**
+
+- SQL is not a perfect implementation of relational algebra (e.g., it allows duplicate rows, nulls, and ordered results), but the set-based mindset still applies.
+- Not every relational operation has a direct SQL keyword (e.g., division requires composition of other operations).
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Selection, projection, and join as relational operations
 
 ```sql
--- Relational algebra: π_column1, column2(R)
--- SQL equivalent:
-SELECT column1, column2 FROM table_name;
+-- Step 1: Selection (filter active customers).
+-- Step 2: Projection (choose customer name and order total).
+-- Step 3: Join (combine customers with their orders).
+SELECT c.customer_name, o.order_total
+FROM customers c
+JOIN orders o ON o.customer_id = c.customer_id
+WHERE c.status = 'active'
+  AND o.order_total > 100;
 ```
 
-#### Complete General Syntax (Join)
+**Expected output** (illustrative):
+
+```text
+ customer_name | order_total
+---------------+-------------
+ Acme Corp     |      150.00
+ Globex        |      220.00
+(2 rows)
+```
+
+**Why this output appears**: The `WHERE` clause implements selection (only active customers with orders over 100); the `SELECT` list implements projection (only two columns); the `JOIN` implements the join operation (combining related rows). The optimiser is free to reorder these operations for efficiency.
+
+##### Example 2: MySQL – Set operations as relational union, intersection, and difference
 
 ```sql
--- Relational algebra: R ⋈_condition S
--- SQL equivalent:
-SELECT R.*, S.*
-FROM table_name R
-JOIN other_table S ON R.key = S.key;
-```
-
-#### Complete General Syntax (Set Operations)
-
-```sql
-query1 UNION [ALL] query2
-query1 INTERSECT [ALL] query2
-query1 EXCEPT [ALL] query2
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `UNION` | Appends the result of query2 to query1, eliminating duplicate rows unless `UNION ALL` is used. |
-| `INTERSECT` | Returns all rows that are both in the result of query1 and in the result of query2; duplicates eliminated unless `INTERSECT ALL` is used. |
-| `EXCEPT` | Returns all rows that are in the result of query1 but not in the result of query2 (set difference); duplicates eliminated unless `EXCEPT ALL` is used. |
-
-#### Syntax Rules
-
-- **Union compatibility:** In order to calculate the union, intersection, or difference of two queries, the two queries must be "union compatible"—they must return the same number of columns and the corresponding columns must have compatible data types.
-- **Operator precedence:** Without parentheses, `UNION` and `EXCEPT` associate left-to-right, but `INTERSECT` binds more tightly than those two operators. Thus `query1 UNION query2 INTERSECT query3` means `query1 UNION (query2 INTERSECT query3)`.
-- **ALL modifier:** Each set operator supports an `ALL` modifier. When the `ALL` keyword follows a set operator, this causes duplicates to be included in the result.
-- **DISTINCT modifier:** All three set operators also support a `DISTINCT` keyword, which suppresses duplicates. Since this is the default behavior, it is usually not necessary to specify `DISTINCT` explicitly.
-
-#### Constraints and Limitations
-
-- **Column count and types:** Set operations require the same number of columns and compatible data types across all query blocks.
-- **ORDER BY placement:** `ORDER BY` can only be applied to the final result of a set operation, not to individual query blocks.
-- **MySQL version dependency:** MySQL has long supported `UNION`; MySQL 8.0.31 and later adds support for `INTERSECT` and `EXCEPT`.
-- **Oracle `MINUS`:** Oracle uses `MINUS` instead of `EXCEPT` for set difference; this is not supported in MySQL.
-
-### Annotated Code Examples
-
-#### Example 1: PostgreSQL — Selection and Projection
-
-```sql
--- Create a sample table
-CREATE TABLE employees (
-    emp_id SERIAL PRIMARY KEY,
-    emp_name TEXT,
-    dept TEXT,
-    salary NUMERIC(10,2)
-);
-
-INSERT INTO employees (emp_name, dept, salary) VALUES
-('Alice', 'Engineering', 90000),
-('Bob',   'Engineering', 85000),
-('Carol', 'Sales',       75000),
-('Dave',  'Sales',       95000);
-```
-
-```sql
--- Selection (σ): filter rows where dept = 'Engineering'
-SELECT * FROM employees WHERE dept = 'Engineering';
-
--- Projection (π): select only emp_name and salary
-SELECT emp_name, salary FROM employees;
-```
-
-**Expected Output (Selection):**
-
-```
- emp_id | emp_name |    dept     | salary
---------+----------+-------------+--------
-      1 | Alice    | Engineering | 90000
-      2 | Bob      | Engineering | 85000
-```
-
-**Expected Output (Projection):**
-
-```
- emp_name | salary
-----------+--------
- Alice    | 90000
- Bob      | 85000
- Carol    | 75000
- Dave     | 95000
-```
-
-**Why This Works:** The `WHERE` clause implements the selection operation (σ), filtering rows that satisfy the condition. The `SELECT` list implements the projection operation (π), choosing which columns to return. These are the two most fundamental relational operations.
-
-#### Example 2: PostgreSQL — Set Operations
-
-```sql
--- Create two tables for set operation demonstration
-CREATE TABLE current_orders (order_id INT, customer TEXT);
-CREATE TABLE archived_orders (order_id INT, customer TEXT);
-
-INSERT INTO current_orders VALUES (1, 'Alice'), (2, 'Bob'), (3, 'Carol');
-INSERT INTO archived_orders VALUES (3, 'Carol'), (4, 'Dave'), (5, 'Eve');
-```
-\
-**UNION: all orders from both tables, no duplicates**
-```sql
-SELECT order_id, customer FROM current_orders
+-- Union: customers from either year.
+SELECT customer_id FROM customers_2024
 UNION
-SELECT order_id, customer FROM archived_orders
-ORDER BY order_id;
-```
-Expected Output (UNION):
-```
- order_id | customer
-----------+----------
-        1 | Alice
-        2 | Bob
-        3 | Carol
-        4 | Dave
-        5 | Eve
-```
-\
-**INTERSECT: orders that appear in both tables**
-```sql
-SELECT order_id, customer FROM current_orders
+SELECT customer_id FROM customers_2025;
+
+-- Intersection: customers in both years.
+SELECT customer_id FROM customers_2024
 INTERSECT
-SELECT order_id, customer FROM archived_orders;
-```
-Expected Output (INTERSECT):
-```
- order_id | customer
-----------+----------
-        3 | Carol
-```
-\
-**EXCEPT: orders in current but not in archived**
-```sql
-SELECT order_id, customer FROM current_orders
+SELECT customer_id FROM customers_2025;
+
+-- Difference: customers in 2024 but not 2025.
+SELECT customer_id FROM customers_2024
 EXCEPT
-SELECT order_id, customer FROM archived_orders;
-```
-Expected Output (EXCEPT):
-
-```
- order_id | customer
-----------+----------
-        1 | Alice
-        2 | Bob
+SELECT customer_id FROM customers_2025;
 ```
 
-**Why This Works:** `UNION` combines all rows from both queries, eliminating duplicates. `INTERSECT` returns only rows present in both result sets (Carol's order 3). `EXCEPT` returns rows in the first result set that are not in the second (Alice's and Bob's orders).
+**Expected output**: The union returns all distinct customer IDs; the intersection returns only those present in both years; the difference returns those only in 2024.
 
-### Real-World Cases
+**Why this output appears**: These queries directly implement the relational operations of union, intersection, and set difference, treating each `SELECT` as a relation.
 
-- **Data reconciliation:** Using `EXCEPT` to find records in one system that are missing from another.
-- **Deduplication:** Using `UNION` to combine data from multiple sources and eliminate duplicates.
-- **Common customer analysis:** Using `INTERSECT` to find customers who appear in multiple product categories.
-- **Reporting:** Using selection and projection to create focused reports from large tables.
+#### Real-World Cases
 
-### References
+- **Reporting**: Combining selection, projection, and join to produce a business report.
+- **Data reconciliation**: Using set difference (`EXCEPT`) to find records present in one system but missing from another.
+- **Data integration**: Using union (`UNION ALL`) to stack data from multiple source systems.
 
-- PostgreSQL: Combining Queries (UNION, INTERSECT, EXCEPT) — https://www.postgresql.org/docs/current/queries-union.html
-- MySQL: Set Operations with UNION, INTERSECT, and EXCEPT — https://dev.mysql.com/doc/refman/8.0/en/set-operations.html
-- Oracle Database: Set Operators — https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/Using-Set-Operators.html
-- Wikipedia: Relational Algebra — https://en.wikipedia.org/wiki/Relational_algebra
-- IBM: Relational Operations — https://www.ibm.com/docs/en/db2/11.5?topic=model-relational-operations
+---
 
+### 2. Difference Between Row-Wise and Set-Wise Logic
 
-## Core Concept 2: Difference Between Row-Wise and Set-Wise Logic
+#### Definitions
 
-### Definitions
+**Core Definition**
+Row-wise logic processes data one row at a time using procedural constructs (loops, cursors, per-row conditionals), while set-wise logic operates on entire sets of rows at once using declarative relational operations.
 
-**Core Definition:** Row-wise logic processes data one row at a time using procedural constructs (loops, cursors, conditional branches), while set-wise logic processes entire sets of rows in a single declarative statement, allowing the database engine to optimize execution.
+**Technical Definition**
+Row-wise (procedural) logic uses `CURSOR`, `WHILE`, `LOOP`, and per-row `IF` statements to iterate over a result set, fetch each row into variables, process it, and move to the next row. This approach is common among developers with a background in procedural languages, but it conflicts with SQL's set-oriented engine. Set-wise (declarative) logic expresses the transformation as a single SQL statement that defines the result set, allowing the optimiser to choose the most efficient execution strategy—often using hash joins, sorts, and parallel scans that process many rows at once. The performance difference is typically orders of magnitude: row-wise processing can take hours where set-based processing takes seconds.
 
-**Technical Definition:** Classical programming as taught in many universities leads to an atomic, row-oriented, and procedural style inspired by the structured models of programming. In short, many application developers write in the relational database exactly like in the user interface. The other style of programming is holistic, data set oriented, and coded mainly in SQL. This is the style of the database developer. A set-based solution performs an action over an entire result set, while a cursor is limited to processing one row at a time. The difference is that in the set-based way, all the iteration is done inside the database engine, in the most efficient way it can, rather than manually iterating outside of the database using a cursor.
+**Beginner-Friendly Explanation**
+Row-wise logic is like walking through a warehouse and picking up one box at a time, inspecting it, and putting it down. Set-wise logic is like using a forklift to move the entire pallet at once. SQL's engine is built for the forklift approach; using it one box at a time wastes its power.
 
-**Beginner-Friendly Explanation:** Row-wise logic is like a factory worker who picks up one item at a time from a conveyor belt, inspects it, stamps it, and puts it down. Set-wise logic is like a machine that stamps the entire batch at once. The machine is faster, uses fewer resources, and does not get tired. SQL is designed to be a machine—it works best when you give it a whole batch to process at once.
+#### Purposes
 
-### Purposes
+- To understand why procedural loops are often slow in SQL and when they might still be necessary.
+- To recognise row-wise patterns in existing code and rewrite them as set-based queries.
+- To choose the right approach based on data volume, complexity, and engine capabilities.
+- To align query design with the declarative nature of SQL and the optimiser's strengths.
 
-- **To choose the right approach** for a given data processing task based on performance requirements.
-- **To understand why cursor-based solutions are slow** and how set-based alternatives can be orders of magnitude faster.
-- **To recognize situations where row-wise processing is unavoidable** (e.g., calling an external API per row) and minimize its scope.
-- **To adopt a holistic, data set oriented mindset** that aligns with how relational database engines are designed.
+#### Syntax Rules and Structure
 
-### Syntax Rules and Structure
-
-#### Complete General Syntax (Row-Wise — Cursor)
+**Row-wise pattern (to be avoided)**:
 
 ```sql
-DECLARE @id INT, @value FLOAT;
-DECLARE cursor_name CURSOR FOR
-    SELECT id, value FROM source_table WHERE condition;
-OPEN cursor_name;
-FETCH NEXT FROM cursor_name INTO @id, @value;
+-- Procedural cursor loop (pseudo-code)
+DECLARE cursor c FOR SELECT id, amount FROM orders;
+OPEN c;
+LOOP
+    FETCH c INTO @id, @amount;
+    IF @amount > 100 THEN
+        UPDATE orders SET status = 'priority' WHERE id = @id;
+    END IF;
+END LOOP;
+CLOSE c;
+```
+
+**Set-wise equivalent**:
+
+```sql
+UPDATE orders
+SET status = 'priority'
+WHERE amount > 100;
+```
+
+**Component breakdown**
+
+| Aspect | Row-wise | Set-wise |
+|--------|----------|----------|
+| Processing unit | One row at a time | Entire set of rows |
+| Control flow | Explicit loops and conditionals | Declarative predicates and expressions |
+| Optimiser freedom | Limited (forced order) | Full (reorder, index, parallelise) |
+| Typical performance | Slow, scales linearly or worse | Fast, leverages set algorithms |
+| Code length | Longer, more error-prone | Shorter, easier to verify |
+
+**Syntax rules**
+
+- Avoid `CURSOR`, `WHILE`, and row-by-row `LOOP` constructs unless they are genuinely necessary (e.g., calling a stored procedure per row that cannot be set-based).
+- Express filters in `WHERE`, aggregations in `GROUP BY`, and transformations in `SELECT` expressions.
+- Use window functions for running totals and rankings instead of correlated subqueries or loops.
+
+**Constraints and limitations**
+
+- Some operations (e.g., calling an external API per row, complex procedural logic with side effects) may still require row-wise processing.
+- Rewriting procedural code requires careful validation to preserve business rules.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: SQL Server – Cursor vs set-based update
+
+```sql
+-- Row-wise: cursor loops through each row.
+DECLARE @OrderId INT, @Amount DECIMAL(10,2);
+DECLARE cur CURSOR FOR SELECT OrderId, Amount FROM OrderCharge WHERE Fee IS NULL;
+OPEN cur;
+FETCH NEXT FROM cur INTO @OrderId, @Amount;
 WHILE @@FETCH_STATUS = 0
 BEGIN
-    UPDATE target_table SET column = @value * 1.1 WHERE id = @id;
-    FETCH NEXT FROM cursor_name INTO @id, @value;
-END;
-CLOSE cursor_name;
-DEALLOCATE cursor_name;
+    UPDATE OrderCharge
+    SET Fee = ROUND(@Amount * (SELECT Rate FROM CustomerRate WHERE CustomerId = ...), 2)
+    WHERE OrderId = @OrderId;
+    FETCH NEXT FROM cur INTO @OrderId, @Amount;
+END
+CLOSE cur; DEALLOCATE cur;
+
+-- Set-based: single UPDATE with JOIN.
+UPDATE oc
+SET Fee = ROUND(oc.Amount * cr.Rate, 2)
+FROM dbo.OrderCharge AS oc
+JOIN dbo.CustomerRate AS cr
+  ON cr.CustomerId = oc.CustomerId AND cr.IsActive = 1
+WHERE oc.Fee IS NULL;
 ```
 
-#### Complete General Syntax (Set-Wise — Single UPDATE)
+**Expected output**: Both approaches update the same rows, but the set-based `UPDATE` performs a single join operation, while the cursor executes one `UPDATE` per row, resulting in dramatically slower performance on large tables.
+
+**Why this output appears**: The set-based `UPDATE` lets the database use a hash join or nested loop join to match orders to rates in one pass; the cursor forces row-by-row processing with repeated lookups.
+
+##### Example 2: Oracle – PL/SQL loop vs single `INSERT ... SELECT`
 
 ```sql
-UPDATE target_table
-SET column = value * 1.1
-WHERE condition;
+-- Row-wise: loop over external table and insert one row at a time.
+FOR rec IN (SELECT * FROM external_table) LOOP
+    IF rec.valid = 1 THEN
+        INSERT INTO production_table VALUES rec.*;
+    ELSE
+        INSERT INTO error_log VALUES rec.*;
+    END IF;
+END LOOP;
+
+-- Set-based: single INSERT with conditional logic.
+INSERT ALL
+    WHEN valid = 1 THEN INTO production_table VALUES (...)
+    ELSE INTO error_log VALUES (...)
+SELECT * FROM external_table;
 ```
 
-#### Syntax Rules
+**Expected output**: Both load the data, but the set-based `INSERT ALL` processes the entire external table in one operation, avoiding per-row PL/SQL context switches and leveraging direct-path load.
 
-- **Row-wise approach:** The cursor-based way (row-by-agonizing-row, or RBAR) sets up a scan based on the condition, then runs a separate UPDATE transaction for each row returned from the scan, incurring all the overhead of setting up the UPDATE query, starting the transaction, seeking to the correct row, updating it, and tearing down the transaction and query framework again each time.
-- **Set-wise approach:** The set-based way performs one scan based on the condition, which updates rows matching the condition, but the query, transaction, and scan are only set up once, and then all the rows are processed, one-at-a-time inside the database engine.
-- **Avoiding row-by-row processing:** A set-based program is not an all-or-nothing situation. There are some rules that call for row-by-row processing, but these rules are the exception. However, you can have a row-by-row component within a mostly set-based program.
+**Why this output appears**: The set-based version expresses the branching logic declaratively in the `WHEN` clauses, allowing the database to evaluate all rows together.
 
-#### Constraints and Limitations
+#### Real-World Cases
 
-- **Set-based approach performance:** The set-based approach is faster than any other approach for anything but the smallest amounts of data. The cursor approach gets a lot slower quickly (fairly proportionally, at least).
-- **Row-wise exceptions:** Some operations—such as calling an external web service per row, or processing rows in a strict sequence—genuinely require row-by-row processing.
-- **Cognitive shift required:** The techniques are unfamiliar to many database developers, so they may be more difficult. Because a set-based model is completely different from an iterative model, changing it requires completely rewriting the source code.
+- **ETL loading**: Replacing row-by-row inserts with `INSERT ... SELECT` or `MERGE`.
+- **Data cleanup**: Using `UPDATE` with `JOIN` instead of cursor loops.
+- **Reporting**: Using window functions and aggregations instead of procedural calculations.
 
-### Annotated Code Examples
+---
 
-#### Example 1: SQL Server — RBAR vs. Set-Based Update
+### 3. Replacing Procedural Loops with Set Operations
+
+#### Definitions
+
+**Core Definition**
+Replacing procedural loops with set operations means rewriting cursor- or loop-based code as declarative SQL that uses joins, aggregations, set operators, and window functions to achieve the same result in a single statement.
+
+**Technical Definition**
+Procedural loops (cursors, `WHILE` loops, `FOR` loops) process data row by row, which prevents the optimiser from using set-based algorithms and incurs per-row overhead (context switches, repeated lookups, network round-trips if the loop is in application code). Replacing them requires identifying the relational operation that each iteration performs—often a join, an aggregation, a window calculation, or a set operation—and expressing it in a single SQL statement. The set-based version allows the database to choose hash joins, sorts, parallel scans, and other optimisations that are orders of magnitude faster on large data sets.
+
+**Beginner-Friendly Explanation**
+If your code says "for each order, look up the customer's rate and update the fee," you can usually replace it with a single `UPDATE ... FROM ... JOIN` that does the lookup and update for all orders at once. The database is much better at doing things in bulk than one at a time.
+
+#### Purposes
+
+- To eliminate the performance bottleneck of row-by-row processing.
+- To reduce code volume and complexity, making queries easier to maintain.
+- To allow the database optimiser to choose efficient join and aggregation strategies.
+- To avoid network round-trips between application and database that occur when processing rows in application code.
+
+#### Syntax Rules and Structure
+
+**Common rewrites**:
+
+| Procedural pattern | Set-based equivalent |
+|--------------------|----------------------|
+| Cursor + per-row `UPDATE` | `UPDATE ... FROM ... JOIN ... WHERE ...` |
+| Cursor + per-row `INSERT` | `INSERT INTO ... SELECT ...` |
+| Loop with `IF` to choose destination | `INSERT ALL WHEN ...` or `UNION ALL` with discriminator |
+| Loop computing running totals | Window function (`SUM(...) OVER (ORDER BY ...)`) |
+| Loop finding missing records | `NOT EXISTS` or `LEFT JOIN ... IS NULL` |
+| Loop deduplicating rows | `ROW_NUMBER() OVER (PARTITION BY ...)` with `rn = 1` |
+
+**Component breakdown**
+
+| Rewrite step | Description |
+|--------------|-------------|
+| Identify per-row operation | What does each iteration do? (lookup, update, insert) |
+| Express as relational operation | Join, aggregate, window function, set operation |
+| Verify grain and semantics | Ensure the set-based result matches the loop's output |
+| Test with edge cases | NULLs, missing lookups, duplicates |
+
+**Syntax rules**
+
+- Use `UPDATE ... FROM` (PostgreSQL, SQL Server) or `UPDATE ... JOIN` (MySQL) for per-row updates.
+- Use `INSERT ... SELECT` for per-row inserts.
+- Use `MERGE` for combined insert/update/delete logic.
+- Use window functions for running totals and rankings instead of correlated subqueries or loops.
+- Use `NOT EXISTS` for anti-join logic instead of looping and checking existence.
+
+**Constraints and limitations**
+
+- Some procedural logic (calling an external API per row, complex sequential state) may not be expressible in a single set-based statement.
+- Rewrites must preserve business rules, especially around NULLs, ordering, and duplicate handling.
+- Always preview the join results before running a set-based `UPDATE` or `DELETE` to avoid unintended data changes.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: SQL Server – Replacing a nested cursor with a set-based update
 
 ```sql
--- Create a sample table
-CREATE TABLE Products (
-    ProductID INT PRIMARY KEY,
-    ProductType INT,
-    Price DECIMAL(10,2)
-);
-
-INSERT INTO Products VALUES
-(1, 1, 100.00),
-(2, 1, 200.00),
-(3, 2, 150.00),
-(4, 1, 300.00);
-
--- ROW-WISE: Cursor-based update (RBAR)
-DECLARE @ProductID INT;
-DECLARE @Price DECIMAL(10,2);
-
-DECLARE MyUpdate CURSOR FAST_FORWARD FOR
-    SELECT ProductID, Price FROM Products WHERE ProductType = 1;
-
-OPEN MyUpdate;
-FETCH NEXT FROM MyUpdate INTO @ProductID, @Price;
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
-    UPDATE Products SET Price = @Price * 1.1 WHERE ProductID = @ProductID;
-    FETCH NEXT FROM MyUpdate INTO @ProductID, @Price;
-END;
-
-CLOSE MyUpdate;
-DEALLOCATE MyUpdate;
-```
-
-**Expected Output (after cursor):**
-
-```
-ProductID | ProductType | Price
-----------+-------------+--------
-1         | 1           | 110.00
-2         | 1           | 220.00
-3         | 2           | 150.00
-4         | 1           | 330.00
-```
-
-```sql
--- SET-BASED: Single UPDATE statement
-UPDATE Products
-SET Price = Price * 1.1
-WHERE ProductType = 1;
-```
-
-**Expected Output (after set-based):**
-
-```
-ProductID | ProductType | Price
-----------+-------------+--------
-1         | 1           | 121.00
-2         | 1           | 242.00
-3         | 2           | 150.00
-4         | 1           | 363.00
-```
-
-**Why This Works:** The cursor approach sets up a scan, then runs a separate UPDATE for each row, incurring all the overhead of query setup, transaction start, row seek, update, and teardown each time. The set-based approach performs one scan and one UPDATE statement, processing all rows in a single transaction. The difference is that in the set-based way, all the iteration is done inside the database engine, in the most efficient way it can.
-
-#### Example 2: MySQL — Reselect vs. Set-Based
-
-```sql
--- ROW-WISE: Reselect approach (calling a function per row)
--- This is pseudo-code; in practice, this pattern appears in application code
--- or stored procedures that loop over order IDs and call a function.
-
--- SET-BASED: Single SELECT with JOIN
-SELECT o.order_id, o.order_date, c.customer_name, SUM(oi.quantity * oi.price) AS total
-FROM orders o
-JOIN customers c ON o.customer_id = c.customer_id
-JOIN order_items oi ON o.order_id = oi.order_id
-WHERE o.order_date >= '2026-01-01'
-GROUP BY o.order_id, o.order_date, c.customer_name
-HAVING SUM(oi.quantity * oi.price) > 1000;
-```
-
-**Why This Works:** The set-based query combines orders, customers, and order items in a single statement, filters by date, aggregates the total, and filters by the aggregate—all in one pass. The row-wise alternative would require fetching each order, then querying its items, then computing the total, then comparing—repeated for every order.
-
-### Real-World Cases
-
-- **Batch processing:** Updating thousands of rows in a single statement instead of looping.
-- **Reporting:** Generating aggregated reports with `GROUP BY` instead of application-level loops.
-- **Data migration:** Moving and transforming data in bulk using `INSERT ... SELECT` instead of row-by-row inserts.
-- **ETL pipelines:** Replacing row-by-row transformation logic with set-based SQL statements.
-
-### References
-
-- Microsoft Learn: Procedural versus Set-Based SQL — https://learn.microsoft.com/en-us/archive/blogs/simonince/procedural-versus-set-based-sql
-- SQLSkills: Reconciling Set-Based Operations with Row-by-Row Iterative Processing — https://www.sqlskills.com/blogs/paul/reconciling-set-based-operations-with-row-by-row-iterative-processing/
-- Oracle: Set Based Versus Row Based Operating Modes — https://docs.oracle.com/en/database/oracle/oracle-database/21/tdddg/building-effective-applications.html
-- Apress: Relational Database Programming: A Set-Oriented Approach — https://rd.springer.com/book/10.1007/978-1-4842-2080-1
-
-
-## Core Concept 3: Replacing Procedural Loops with Set Operations
-
-### Definitions
-
-**Core Definition:** Replacing procedural loops with set operations is the process of identifying cursor-based or loop-based row-by-row logic and rewriting it as a single declarative SQL statement (or a small number of statements) that operates on the entire set of affected rows at once.
-
-**Technical Definition:** Loops containing query execution statements are often found to be performance bottlenecks. Repeated execution of a query by a loop can often be avoided by rewriting the query into its set-oriented form and moving it outside the loop. This process consists of two key steps: (i) loop distribution (loop fission) to form a canonical query execution loop, and (ii) replacing the canonical query execution loop with the set-oriented form of the query. The rewrite typically involves replacing cursors with simple set join operations.
-
-**Beginner-Friendly Explanation:** Replacing loops with set operations is like replacing a hand-cranked assembly line with an automated conveyor belt. You identify the repetitive steps (the loop body), figure out what they accomplish collectively, and write a single SQL statement that does the same thing for all rows at once. The database engine then handles the iteration internally, far more efficiently than any application loop ever could.
-
-### Purposes
-
-- **To eliminate cursor overhead** and improve query performance by orders of magnitude.
-- **To reduce network round-trips** by keeping data inside the database engine.
-- **To simplify code** by replacing complex procedural logic with declarative statements.
-- **To leverage the query optimizer** to choose the best execution plan for the entire set of rows.
-- **To process exceptions row-by-row** only when set-based logic cannot handle them, using a two-pass approach.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax (Cursor-to-Join Rewrite)
-
-```sql
--- BEFORE (row-wise): Nested cursor
-DECLARE outer_cursor CURSOR FOR SELECT EntityId, BaseId FROM outerTable;
-OPEN outer_cursor;
-FETCH NEXT FROM outer_cursor INTO @EntityId, @BaseId;
-WHILE @@FETCH_STATUS = 0
-BEGIN
-    DECLARE inner_cursor CURSOR FOR
-        SELECT PerfId FROM innerTable WHERE EntityId = @BaseId;
-    OPEN inner_cursor;
-    FETCH NEXT FROM inner_cursor INTO @PerfId;
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        UPDATE largeTable SET EntityId = @EntityId WHERE PerfId = @PerfId;
-        FETCH NEXT FROM inner_cursor INTO @PerfId;
-    END;
-    CLOSE inner_cursor;
-    DEALLOCATE inner_cursor;
-    FETCH NEXT FROM outer_cursor INTO @EntityId, @BaseId;
-END;
-CLOSE outer_cursor;
-DEALLOCATE outer_cursor;
-
--- AFTER (set-wise): Single JOIN and UPDATE
-SELECT i.PerfId, o.EntityId
-INTO #tempTable
-FROM innerTable i
-JOIN outerTable o ON i.EntityId = o.BaseId;
-
-UPDATE largeTable
-SET EntityId = t.EntityId
-FROM largeTable lt
-JOIN #tempTable t ON lt.PerfId = t.PerfId;
-```
-
-#### Complete General Syntax (Two-Pass Approach)
-
-```sql
--- PASS 1: Apply the rule to all rows (set-based)
-UPDATE target_table
-SET status = 'PROCESSED'
-WHERE condition;
-
--- PASS 2: Handle exceptions individually (row-wise, minimal scope)
--- Only the rows that failed the rule in pass 1 are processed row by row
-SELECT id, error_detail
-FROM target_table
-WHERE status = 'EXCEPTION';
--- Process each exception row individually (e.g., via application logic or a focused cursor)
-```
-
-#### Syntax Rules
-
-- **Filter early:** Use the `WHERE` clause to minimize the number of rows to reflect only the set of affected rows.
-- **Two-pass approach:** Use a two-pass approach, wherein the first pass runs a rule on all of the rows, and the second pass resolves any rows that are exceptions to the rule.
-- **Parallel processes:** Divide sets into distinct groups, and then run the appropriate rules or logic against each set in parallel processes.
-- **Flat temporary tables:** Flatten your temporary tables. The best temporary tables are denormalized and follow a flat file model for improved transaction processing.
-
-#### Constraints and Limitations
-
-- **Not all logic is set-able:** Some operations—such as calling an external API per row, or processing rows in strict sequential order—genuinely require row-by-row processing.
-- **Code rewrite effort:** Because a set-based model is completely different from an iterative model, changing it requires completely rewriting the source code.
-- **Debugging complexity:** Set-based code can be harder to debug because the iteration is invisible; use of temporary staging tables and intermediate result sets can help.
-
-### Annotated Code Examples
-
-#### Example 1: SQL Server — Nested Cursor to Set-Based Join
-
-```sql
--- BEFORE: Nested cursor (RBAR) — simplified from a real-world 200-million-row table
--- This cursor had been running for over 30 hours with only 0.5% progress.
-DECLARE @EntityId VARCHAR(16), @BaseId VARCHAR(16), @PerfId VARCHAR(16);
+-- Original nested cursor (simplified):
 DECLARE outerCursor CURSOR FOR SELECT EntityId, BaseId FROM outerTable;
 OPEN outerCursor;
 FETCH NEXT FROM outerCursor INTO @EntityId, @BaseId;
 WHILE @@FETCH_STATUS = 0
 BEGIN
-    DECLARE innerCursor CURSOR FOR
-        SELECT PerfId FROM innerTable WHERE EntityId = @BaseId;
+    DECLARE innerCursor CURSOR FOR SELECT PRFMR_ID FROM innerTable WHERE ENTY_ID = @BaseId;
     OPEN innerCursor;
     FETCH NEXT FROM innerCursor INTO @PerfId;
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        UPDATE largeTable SET EntityId = @EntityId WHERE PerfId = @PerfId;
+        UPDATE 200MilRowTable SET ENTY_ID = @EntityId WHERE PRFMR_ID = @PerfId;
         FETCH NEXT FROM innerCursor INTO @PerfId;
-    END;
+    END
     CLOSE innerCursor; DEALLOCATE innerCursor;
     FETCH NEXT FROM outerCursor INTO @EntityId, @BaseId;
-END;
+END
 CLOSE outerCursor; DEALLOCATE outerCursor;
+
+-- Set-based rewrite:
+UPDATE t
+SET ENTY_ID = o.EntityId
+FROM 200MilRowTable t
+JOIN innerTable i ON t.PRFMR_ID = i.PRFMR_ID
+JOIN outerTable o ON i.ENTY_ID = o.BaseId;
 ```
+
+**Expected output**: Both update the same 200-million-row table, but the set-based version completes in seconds or minutes, while the nested cursor had been running for over 30 hours and processed only 0.5% of the outer rows.
+
+**Why this output appears**: The nested cursor performs one `UPDATE` per inner-table match, resulting in millions of individual statements. The set-based `UPDATE ... FROM` performs a single join across all three tables, leveraging the optimiser's choice of join algorithm.
+
+##### Example 2: PostgreSQL – Replacing a loop with `INSERT ... SELECT`
 
 ```sql
--- AFTER: Set-based join — the rewrite is as simple as this
-SELECT i.PerfId, o.EntityId
-INTO #tempTable
-FROM innerTable i
-JOIN outerTable o ON i.EntityId = o.BaseId;
+-- Procedural loop (PL/pgSQL):
+FOR rec IN SELECT * FROM staging_orders WHERE status = 'new' LOOP
+    INSERT INTO orders (order_id, customer_id, amount)
+    VALUES (rec.order_id, rec.customer_id, rec.amount);
+END LOOP;
 
-UPDATE largeTable
-SET EntityId = t.EntityId
-FROM largeTable lt
-JOIN #tempTable t ON lt.PerfId = t.PerfId;
+-- Set-based equivalent:
+INSERT INTO orders (order_id, customer_id, amount)
+SELECT order_id, customer_id, amount
+FROM staging_orders
+WHERE status = 'new';
 ```
 
-**Expected Output (set-based):**
+**Expected output**: Both insert the same rows, but the set-based `INSERT ... SELECT` performs a single bulk insert, which is significantly faster and reduces transaction overhead.
 
-```
-(204000 rows affected)
--- Completed in seconds instead of months
-```
+**Why this output appears**: The loop executes one `INSERT` per row, incurring per-statement overhead; the set-based version processes all qualifying rows in one operation.
 
-**Why This Works:** The nested cursor iterates 204,000 times in the outer loop and many more times in the inner loop, issuing a separate UPDATE for each row. The set-based rewrite joins the two source tables once, materializes the mapping in a temporary table, and then performs a single UPDATE statement that processes all 200 million rows in one pass. The performance improvement is orders of magnitude.
+#### Real-World Cases
 
-#### Example 2: SAP HANA — Cursor to Table Assignment
+- **Order processing**: Replacing cursor-based order status updates with a single `UPDATE ... JOIN`.
+- **Data migration**: Replacing row-by-row inserts with `INSERT ... SELECT` or `MERGE`.
+- **Sessionization**: Replacing procedural grouping with window functions (`LAG`, `SUM ... OVER`).
+
+---
+
+### 4. Query Composition
+
+#### Definitions
+
+**Core Definition**
+Query composition is the practice of building complex SQL queries by combining smaller, well-defined query blocks—subqueries, CTEs, derived tables, and set operations—rather than writing one monolithic, deeply nested statement.
+
+**Technical Definition**
+Query composition uses the structural elements of SQL to express multi-step logic declaratively: **subqueries** in `FROM` (derived tables) or `WHERE` (scalar/`IN`/`EXISTS` subqueries), **Common Table Expressions** (`WITH` clauses) that define named temporary result sets reusable within the query, and **set operators** (`UNION`, `INTERSECT`, `EXCEPT`) that combine result sets. Each composed block can be reasoned about independently, tested in isolation, and optimised by the database as part of the whole query. CTEs are particularly useful for separating logic into named stages, making the query read like a pipeline of transformations.
+
+**Beginner-Friendly Explanation**
+Query composition is like building with LEGO blocks: instead of one giant, tangled piece, you build small, named pieces (CTEs) and snap them together. Each piece is easy to understand and test on its own, and the final result is the combination of all the pieces.
+
+#### Purposes
+
+- To break complex logic into readable, testable, named stages.
+- To avoid deeply nested subqueries that are hard to read and maintain.
+- To reuse intermediate results multiple times without recomputation (via CTEs).
+- To allow the optimiser to see the whole query and choose efficient execution strategies.
+
+#### Syntax Rules and Structure
+
+**CTE pipeline pattern**:
 
 ```sql
--- BEFORE: Cursor with scalar function (row-by-row)
-CREATE FUNCTION sfunc2(...) RETURNS v_result NVARCHAR(2) AS
-    CURSOR c1 FOR SELECT ...;
-BEGIN
-    FOR rec AS c1 DO
-        IF (rec.C = 1 OR rec.C = 3) THEN
-            ex_result := rec.C;
-            RETURN;
-        END IF;
-    END FOR;
-    ex_result := NULL;
-END;
-
--- AFTER: Set-based table assignment and aggregation
-CREATE PROCEDURE proc2(..., OUT v_result NVARCHAR(2)) READS SQL DATA AS
-BEGIN
-    TAB_B = SELECT ip.B, ip.*, view1.esi, view1.esti, view1.au
-    FROM (...) view1
-    RIGHT OUTER JOIN (...) ip ON view1.B = ip.B;
-
-    CALL PROC_3(:A, :TAB_B, ..., TAB_C);
-
-    TAB_RES = SELECT MAX(C) FROM :TAB_C WHERE C IN (1, 3);
-    IF (NOT IS_EMPTY(:TAB_RES)) THEN
-        ex_result = :TAB_C.C[1];
-        RETURN;
-    END IF;
-    ex_result := NULL;
-END;
+WITH
+  stage1 AS (
+      SELECT ... FROM source WHERE ...
+  ),
+  stage2 AS (
+      SELECT ... FROM stage1 JOIN other ...
+  ),
+  stage3 AS (
+      SELECT ... FROM stage2 GROUP BY ...
+  )
+SELECT ... FROM stage3;
 ```
 
-**Expected Output (from SAP benchmark):**
-
-```
--- Performance improved by a factor of 85 through rewriting
-```
-
-**Why This Works:** The original scenario uses cursors with scalar functions called for each row. The scalar functions are rewritten as procedures, and all values are contained in tables. The operation now operates on a set of values rather than a single row at a time. Performance was improved by a factor of 85 through rewriting.
-
-### Real-World Cases
-
-- **ETL performance:** Rewriting a row-by-row ETL that was looping over a temp table with a CTE-based set operation.
-- **Batch updates:** Converting a cursor-based update of a 200-million-row table into a single set-based `UPDATE ... FROM` statement.
-- **Data transformation:** Replacing nested loops with a single `SELECT ... JOIN` that produces the same result.
-- **Exception handling:** Using a two-pass approach: set-based for the majority of rows, row-by-row only for exceptions.
-
-### References
-
-- Microsoft Learn: Increase Your SQL Server Performance by Replacing Cursors with Set Operations — https://learn.microsoft.com/en-us/archive/blogs/mssqlisv/increase-your-sql-server-performance-by-replacing-cursors-with-set-operations
-- SAP Help: Replacing Row-Based Calculations with Set-Based Calculations — https://help.sap.com/docs/SAP_HANA_PLATFORM/9de0171a6027400bb3b9bee385222eff/2b12462ffa2040569aaccb1ae3fa6119.html
-- Oracle: Avoiding Row-by-Row Processing — https://docs.oracle.com/cd/B31274_01/psft/acrobat/pt848ape-b0606.pdf
-- Oracle: Automatic Conversion of Cursor For Loop into Set-Based Operation — https://asktom.oracle.com/pls/apex/f?p=100:11:0::::P11_QUESTION_ID:9528428000346700647
-
-
-## Core Concept 4: Query Composition
-
-### Definitions
-
-**Core Definition:** Query composition is the practice of building complex queries by combining smaller, reusable query blocks—using Common Table Expressions (CTEs), derived tables, subqueries, and set operators—to express multi-step logic in a readable, maintainable way.
-
-**Technical Definition:** Common Table Expressions (CTEs) provide a mechanism for you to define a subquery that may then be used elsewhere in a query. Unlike a derived table, a CTE is defined at the beginning of a query and may be referenced multiple times in the outer query. CTEs are named expressions defined in a query. Like subqueries and derived tables, CTEs provide a means to break down query problems into smaller, more modular units. CTEs are limited in scope to the execution of the outer query. When the outer query ends, so does the CTE's lifetime. Multiple CTEs may also be defined in the same `WITH` clause. CTEs support recursion, in which the expression is defined with a reference to itself.
-
-**Beginner-Friendly Explanation:** Query composition is like building with LEGO bricks. Instead of writing one giant, tangled query, you break the problem into smaller pieces—each CTE or subquery is a brick. You assemble the bricks with `WITH` clauses and joins, and the result is a clear, readable structure that is easy to debug and modify.
-
-### Purposes
-
-- **To break complex problems into smaller, more modular units** using CTEs and subqueries.
-- **To reference the same subquery multiple times** without repeating its definition, using CTEs.
-- **To build layered transformations** where each CTE adds a step of logic.
-- **To improve query readability** by naming intermediate result sets.
-- **To support recursive logic** (e.g., organizational hierarchies, bill-of-materials) using recursive CTEs.
-
-### Syntax Rules and Structure
-
-#### Complete General Syntax (CTE)
+**Derived table pattern**:
 
 ```sql
-WITH cte_name_1 AS (
-    SELECT ... FROM source_table WHERE ...
-),
-cte_name_2 AS (
-    SELECT ... FROM cte_name_1 JOIN other_table ON ...
-),
-cte_name_3 AS (
-    SELECT ..., CASE WHEN ... THEN ... END AS derived_column
-    FROM cte_name_2
-)
-SELECT * FROM cte_name_3;
-```
-
-**Component Breakdown:**
-
-| Component | Description |
-|-----------|-------------|
-| `WITH` | Introduces one or more CTEs. |
-| `cte_name AS (query)` | A named temporary result set. |
-| `,` | Separates multiple CTEs; later CTEs can reference earlier ones. |
-| `SELECT * FROM cte_name_3` | Final query consuming the last CTE. |
-
-#### Complete General Syntax (Derived Table)
-
-```sql
-SELECT outer_columns
+SELECT ...
 FROM (
-    SELECT inner_columns
-    FROM source_table
-    WHERE inner_conditions
-    GROUP BY grouping_columns
-) AS derived_alias
-WHERE outer_conditions;
+    SELECT ... FROM source WHERE ...
+) AS sub
+JOIN other ON ...;
 ```
 
-#### Complete General Syntax (Set Operators in Composition)
+**Set operation composition**:
 
 ```sql
-WITH cte_a AS (...), cte_b AS (...)
-SELECT * FROM cte_a
-UNION
-SELECT * FROM cte_b;
+SELECT ... FROM t1
+UNION ALL
+SELECT ... FROM t2
+WHERE ...;
 ```
 
-#### Syntax Rules
+**Component breakdown**
 
-- **CTE naming:** CTEs require a name for the table expression. Column names in the CTE result set must be unique—either because the underlying `SELECT` columns already have distinct names, or by supplying column aliases.
-- **Multiple CTEs:** Multiple CTEs may be defined in the same `WITH` clause, separated by commas. Later CTEs may reference earlier CTEs, but not those defined later. This constraint rules out mutually recursive CTEs.
-- **CTE referencing:** Unlike a derived table, a CTE may be referenced multiple times in the same query with one definition.
-- **Batch separator:** When a CTE follows another statement in the same batch, the preceding statement must end with a semicolon (;).
-- **Recursive CTEs:** A self-referencing CTE is recursive. A recursive CTE is a `UNION ALL` subquery with two parts: a base case and a recursive case.
+| Composition tool | Use case | Reusability |
+|------------------|----------|-------------|
+| CTE (`WITH`) | Multi-step pipelines, named stages | Can be referenced multiple times |
+| Derived table | Single-use inline subquery | Single reference |
+| Subquery in `WHERE` | Filtering with `IN`/`EXISTS` | Single reference |
+| Set operator | Combining result sets | Combines entire queries |
 
-#### Constraints and Limitations
+**Syntax rules**
 
-- **CTE scope:** CTEs are limited in scope to the execution of the outer query. When the outer query ends, so does the CTE's lifetime.
-- **CTE materialization:** Some databases materialize CTEs into temporary tables, which can be slower than inline subqueries for simple cases. PostgreSQL 12+ can inline CTEs when they are not recursive and are referenced only once.
-- **Derived table alias:** Every derived table must have its own alias. Omitting the alias causes a syntax error in most databases.
-- **Mutual recursion:** A CTE can refer to CTEs defined earlier in the same `WITH` clause, but not those defined later. This constraint rules out mutually recursive CTEs, where cte1 references cte2 and cte2 references cte1.
+- CTEs are defined at the beginning of the query and can reference earlier CTEs.
+- Derived tables require an alias.
+- Set operators require union-compatible operands.
+- The final query can reference any CTE defined earlier.
 
-### Annotated Code Examples
+**Constraints and limitations**
 
-#### Example 1: PostgreSQL — Multi-Step CTE Pipeline
+- Overusing CTEs can obscure performance characteristics; some engines materialise CTEs, others inline them.
+- Deeply nested derived tables reduce readability; prefer CTEs for multi-step logic.
+- Not all engines support all set operators (e.g., MySQL supports `INTERSECT`/`EXCEPT` only from 8.0.31 onward).
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – CTE pipeline for multi-step transformation
 
 ```sql
--- Create source tables
-CREATE TABLE raw_sales (
-    id SERIAL PRIMARY KEY,
-    product_name TEXT,
-    quantity INT,
-    unit_price NUMERIC(10,2),
-    sale_date DATE
-);
-
-INSERT INTO raw_sales (product_name, quantity, unit_price, sale_date) VALUES
-('Widget', 10, 19.99, '2026-01-15'),
-('Gadget', 5, 29.99, '2026-01-16'),
-('Widget', 8, 19.99, '2026-02-10'),
-('Gadget', 3, 29.99, '2026-02-15'),
-('Doohickey', 20, 9.99, '2026-03-01');
-
--- Multi-step CTE pipeline
-WITH monthly_sales AS (
-    -- Step 1: Calculate revenue per product per month
-    SELECT
-        product_name,
-        DATE_TRUNC('month', sale_date) AS sale_month,
-        SUM(quantity * unit_price) AS revenue,
-        SUM(quantity) AS total_quantity
-    FROM raw_sales
-    GROUP BY product_name, DATE_TRUNC('month', sale_date)
-),
-ranked_products AS (
-    -- Step 2: Rank products by revenue within each month
-    SELECT
-        product_name,
-        sale_month,
-        revenue,
-        total_quantity,
-        RANK() OVER (PARTITION BY sale_month ORDER BY revenue DESC) AS revenue_rank
-    FROM monthly_sales
-),
-flagged_products AS (
-    -- Step 3: Flag top performers
-    SELECT
-        product_name,
-        sale_month,
-        revenue,
-        total_quantity,
-        revenue_rank,
-        CASE
-            WHEN revenue_rank = 1 THEN 'Top Seller'
-            WHEN revenue_rank <= 3 THEN 'Strong Performer'
-            ELSE 'Standard'
-        END AS performance_category
-    FROM ranked_products
-)
--- Final output
-SELECT * FROM flagged_products
-ORDER BY sale_month, revenue_rank;
-```
-
-**Expected Output:**
-
-```
-product_name | sale_month | revenue | total_quantity | revenue_rank | performance_category
--------------+------------+---------+----------------+--------------+---------------------
-Widget       | 2026-01-01 |  199.90 |             10 |            1 | Top Seller
-Gadget       | 2026-01-01 |  149.95 |              5 |            2 | Strong Performer
-Widget       | 2026-02-01 |  159.92 |              8 |            1 | Top Seller
-Gadget       | 2026-02-01 |   89.97 |              3 |            2 | Strong Performer
-Doohickey    | 2026-03-01 |  199.80 |             20 |            1 | Top Seller
-```
-
-**Why This Works:** The first CTE aggregates raw sales into monthly revenue per product. The second CTE ranks products by revenue within each month using `RANK()`. The third CTE applies conditional branching with `CASE` to classify performance. The final query consumes the last CTE. Each step is independently readable and testable. CTEs provide a means to break down query problems into smaller, more modular units.
-
-#### Example 2: PostgreSQL — CTE with Multiple References and Set Operators
-
-```sql
--- Use a CTE multiple times in the same query
-WITH order_summary AS (
-    SELECT customer_id, COUNT(*) AS order_count, SUM(total) AS lifetime_value
+WITH active_orders AS (
+    SELECT id, customer_id, total
     FROM orders
+    WHERE status = 'active'
+),
+with_discounts AS (
+    SELECT ao.id, ao.customer_id,
+           ao.total * (1 - COALESCE(d.pct, 0)) AS discounted_total
+    FROM active_orders ao
+    LEFT JOIN discounts d USING (customer_id)
+),
+aggregated AS (
+    SELECT customer_id, SUM(discounted_total) AS revenue
+    FROM with_discounts
     GROUP BY customer_id
-),
-high_value AS (
-    SELECT customer_id FROM order_summary WHERE lifetime_value > 1000
-),
-frequent AS (
-    SELECT customer_id FROM order_summary WHERE order_count > 5
 )
--- Find customers who are both high-value AND frequent
-SELECT c.customer_id, c.customer_name
-FROM customers c
-JOIN high_value hv ON c.customer_id = hv.customer_id
-INTERSECT
-SELECT c.customer_id, c.customer_name
-FROM customers c
-JOIN frequent f ON c.customer_id = f.customer_id;
+SELECT * FROM aggregated ORDER BY revenue DESC;
 ```
 
-**Expected Output:**
+**Expected output** (illustrative):
 
+```text
+ customer_id | revenue
+-------------+---------
+         104 | 12500.00
+         112 |  8900.00
+          98 |  4500.00
+(3 rows)
 ```
-customer_id | customer_name
-------------+---------------
-        101 | Alice
-        103 | Carol
+
+**Why this output appears**: Each CTE performs one logical transformation: `active_orders` filters, `with_discounts` applies discounts, and `aggregated` sums per customer. The final query reads from the last stage, and the optimiser can inline or materialise stages as appropriate.
+
+##### Example 2: SQL Server – Replacing nested subqueries with CTEs
+
+```sql
+-- Deeply nested derived tables (hard to read):
+SELECT ...
+FROM (
+    SELECT ...
+    FROM (
+        SELECT ... FROM source WHERE ...
+    ) AS inner1
+    WHERE ...
+) AS inner2
+WHERE ...;
+
+-- CTE pipeline (readable, composable):
+WITH base AS (
+    SELECT ... FROM source WHERE ...
+),
+filtered AS (
+    SELECT ... FROM base WHERE ...
+),
+final AS (
+    SELECT ... FROM filtered WHERE ...
+)
+SELECT ... FROM final;
 ```
 
-**Why This Works:** The CTE `order_summary` is defined once and referenced twice (in `high_value` and `frequent`). The `INTERSECT` operator combines the two result sets, returning only customers who appear in both. Unlike a derived table, a CTE may be referenced multiple times in the same query with one definition.
+**Expected output**: Same result, but the CTE version names each stage and makes the logic easy to follow.
 
-### Real-World Cases
+**Why this output appears**: CTEs flatten the nesting into a linear sequence of named stages, improving readability and allowing independent testing of each stage.
 
-- **ETL pipelines:** Building layered transformations with CTEs for staging, cleansing, and aggregating data.
-- **Reporting:** Composing complex reports from reusable query blocks.
-- **Recursive hierarchies:** Using recursive CTEs to traverse organizational charts or bill-of-materials structures.
-- **Data quality:** Using `EXCEPT` to find records in one system that are missing from another.
-- **Multi-tenant analytics:** Composing per-tenant queries with shared CTEs for common transformations.
+#### Real-World Cases
 
-### References
+- **ETL pipelines**: Building transformations as a chain of CTEs.
+- **Reporting queries**: Separating filtering, aggregation, and formatting into stages.
+- **Complex analytics**: Using CTEs to compute multiple metrics and join them in a final query.
 
-- Microsoft Learn: Use Common Table Expressions — https://learn.microsoft.com/en-us/training/modules/create-tables-views-temporary-objects/5-use-common-table-expressions
-- PostgreSQL: WITH Queries (Common Table Expressions) — https://www.postgresql.org/docs/current/queries-with.html
-- MySQL: WITH (Common Table Expressions) — https://dev.mysql.com/doc/refman/8.0/en/with.html
-- SQL Server: WITH common_table_expression — https://learn.microsoft.com/en-us/sql/t-sql/queries/with-common-table-expression-transact-sql
-- PostgreSQL: Combining Queries (UNION, INTERSECT, EXCEPT) — https://www.postgresql.org/docs/current/queries-union.html
+---
 
+## References
 
-## Summary Table: Set-Based Thinking at a Glance
-
-| Concept | Row-Wise (Procedural) | Set-Wise (Declarative) |
-|---------|----------------------|------------------------|
-| **Approach** | Loop over rows, process one at a time | Define the result, let the database compute it |
-| **Constructs** | Cursors, `WHILE` loops, `FETCH NEXT` | `SELECT`, `UPDATE`, `JOIN`, `GROUP BY`, CTEs |
-| **Performance** | Slow, degrades proportionally with row count | Orders of magnitude faster on large datasets |
-| **Code Length** | Long, verbose, repetitive | Short, concise, declarative |
-| **Network Round-Trips** | One per row (or per batch) | One per statement |
-| **Optimizer Leverage** | None (execution plan is fixed by the loop) | Full (optimizer chooses the best plan) |
-| **Exception Handling** | Every row is an exception case | Two-pass: set-based for the rule, row-wise for exceptions |
-| **When to Use** | External API calls per row, strict sequential processing | Nearly everything else |
-
-
-## Final Notes on Deprecated and Unsafe Features
-
-- **Cursors:** Cursors are not deprecated, but they are a last resort. The cursor approach gets a lot slower quickly (fairly proportionally, at least) as data volume grows. Use cursors only when row-by-row processing is genuinely unavoidable.
-- **`WHILE` loops in T-SQL:** Azure Synapse Analytics documentation notes that a `WHILE` loop is a good replacement for a cursor, but you should still ask: "Could this cursor be rewritten to use set-based operations?" In many cases, the answer is yes and is frequently the best approach.
-- **Implicit cursor conversion:** Oracle will not transform looped code into a set-based operation. But what it will do is optimize fetches in cursor for loops in PL/SQL. From 10g onwards, Oracle automatically uses an array fetch size of 100 for these.
-- **CTE materialization:** In PostgreSQL versions before 12, CTEs are always materialized; use `NOT MATERIALIZED` (PostgreSQL 12+) to allow inlining. In SQL Server, CTEs are not materialized and can lead to repeated re-execution of the underlying syntax.
-- **Mutually recursive CTEs:** A CTE can refer to CTEs defined earlier in the same `WITH` clause, but not those defined later. This constraint rules out mutually recursive CTEs.
-- **`EXCEPT` vs. `MINUS`:** Oracle uses `MINUS` instead of `EXCEPT` for set difference; this is not supported in MySQL. Use `EXCEPT` for portability across PostgreSQL, SQL Server, and MySQL 8.0.31+.
-- **Version-specific:** MySQL `INTERSECT` and `EXCEPT` require MySQL 8.0.31+; PostgreSQL `NOT MATERIALIZED` requires PostgreSQL 12+; recursive CTEs are supported in PostgreSQL 8.4+, SQL Server 2005+, MySQL 8.0+, and Oracle 11gR2+.
+- Joe Celko's Thinking in Sets: Auxiliary, Temporal, and Virtual Tables in SQL – https://www.google.com/books/edition/Thinking_in_Sets
+- Oracle 2 Day Developer's Guide: Set-Based Processing – https://docs.oracle.com/en/database/oracle/oracle-database/21/tdddg/building-effective-applications.html
+- SQL Authority: Solving SQL Puzzles With Set-Based Thinking – https://blog.sqlauthority.com/2008/03/20/solving-sql-puzzles-with-set-based-thinking/
+- SQL Authority: Replacing a Cursor With a Set-Based Query – https://blog.sqlauthority.com/2007/07/25/replacing-a-cursor-with-a-set-based-query/
+- SAP HANA Performance Guide: Replacing Row-Based Calculations with Set-Based Calculations – https://help.sap.com/docs/SAP_HANA_PLATFORM/9de0171a6027400bb3b9bee385222eff/2b12462ffa2040569aaccb1ae3fa6119.html
+- Microsoft Learn: Increase Your SQL Server Performance by Replacing Cursors with Set Operations – https://learn.microsoft.com/en-us/archive/blogs/mssqlisv/increase-your-sql-server-performance-by-replacing-cursors-with-set-operations
+- Ask TOM: Think in Sets – https://asktom.oracle.com/ords/asktom.search?tag=think-in-sets
+- Itzik Ben-Gan, T-SQL Best Practices, Part 1: Think in Sets – https://prod.itprotoday.com/sql-server/t-sql-best-practices-part-1
+- PostgreSQL Documentation: WITH Queries (Common Table Expressions) – https://www.postgresql.org/docs/current/queries-with.html
+- Microsoft Learn: Use Common Table Expressions – https://learn.microsoft.com/en-us/training/modules/implement-subqueries/3-use-common-table-expressions
+- PostgreSQL — FP Patterns: CTEs as Named Pipeline Stages, Set-Based Operations Over Row-by-Row Cursors – https://cdn.jsdelivr.net/npm/pi-rnd@0.4.7/skills/fp-practices/postgresql.md
+- Relational Algebra Operations – https://www.sciencedirect.com/topics/computer-science/relational-algebra-operation
+- CS 317/387: Relational Algebra and SQL – https://www.cse.iitb.ac.in/~sudarsha/db-book/slide-dir/ch5.pdf

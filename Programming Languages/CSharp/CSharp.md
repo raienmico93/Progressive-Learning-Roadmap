@@ -1617,7 +1617,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # XVI. Testing
 
-- **112. Testing Fundamentals**
+- [**112. Testing Fundamentals**](/Programming%20Languages/CSharp/Testing/Testing.md)
   - Testing
   - Test types
     - Unit tests
@@ -1636,7 +1636,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
     - Fakes
   - Testing best practices
 
-- **113. Unit Testing**
+- [**113. Unit Testing**](/Programming%20Languages/CSharp/Testing/UnitTesting.md)
   - Unit testing
   - xUnit
   - NUnit
@@ -1651,7 +1651,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Test organization
   - Unit testing best practices
 
-- **114. xUnit**
+- [**114. xUnit**](/Programming%20Languages/CSharp/Testing/xUnit.md)
   - xUnit
   - `[Fact]`
   - `[Theory]`
@@ -1663,7 +1663,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `ICollectionFixture<T>`
   - xUnit best practices
 
-- **115. Mocking**
+- [**115. Mocking**](/Programming%20Languages/CSharp/Testing/Mocking.md)
   - Moq
   - NSubstitute
   - FakeItEasy
@@ -1673,7 +1673,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Mock expectations
   - Mocking best practices
 
-- **116. Integration Testing**
+- [**116. Integration Testing**](/Programming%20Languages/CSharp/Testing/IntegrationTesting.md)
   - Integration testing
   - `WebApplicationFactory<T>`
   - TestServer
@@ -1681,7 +1681,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - API testing
   - Integration testing best practices
 
-- **117. Test Automation**
+- [**117. Test Automation**](/Programming%20Languages/CSharp/Testing/TestAutomation.md)
   - CI integration
   - Test pipelines
   - Parallel testing
@@ -1693,7 +1693,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # XVII. Performance Optimization
 
-- **118. Performance Fundamentals**
+- [**118. Performance Fundamentals**](/Programming%20Languages/CSharp/Performance%20Optimization/Performance.md)
   - Performance
   - Latency
   - Throughput
@@ -1702,7 +1702,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Performance budgets
   - Performance best practices
 
-- **119. Profiling**
+- [**119. Profiling**](/Programming%20Languages/CSharp/Performance%20Optimization/Profiling.md)
   - Profiling
   - Visual Studio Profiler
   - dotTrace
@@ -1710,12 +1710,12 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - BenchmarkDotNet
   - Profiling best practices
 
-- **120. Benchmarking**
+- [**120. Benchmarking**](/Programming%20Languages/CSharp/Performance%20Optimization/Benchmarking.md)
   - BenchmarkDotNet
   - Microbenchmarking
   - Benchmarking best practices
 
-- **121. Memory Optimization**
+- [**121. Memory Optimization**](/Programming%20Languages/CSharp/Performance%20Optimization/MemoryOptimization.md)
   - Memory allocation
   - Object pooling
   - `ArrayPool<T>`
@@ -1724,21 +1724,21 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - `Memory<T>`
   - Memory optimization best practices
 
-- **122. Async Optimization**
+- [**122. Async Optimization**](/Programming%20Languages/CSharp/Performance%20Optimization/Async.md)
   - Async best practices
   - `ConfigureAwait(false)`
   - ValueTask
   - Async performance
   - Async optimization best practices
 
-- **123. LINQ Optimization**
+- [**123. LINQ Optimization**](/Programming%20Languages/CSharp/Performance%20Optimization/LINQ.md)
   - LINQ performance
   - Deferred execution
   - Multiple enumeration
   - `IQueryable` vs `IEnumerable`
   - LINQ optimization best practices
 
-- **124. Caching**
+- [**124. Caching**](/Programming%20Languages/CSharp/Performance%20Optimization/Caching.md)
   - Caching
   - `IMemoryCache`
   - `IDistributedCache`
@@ -1746,7 +1746,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Cache invalidation
   - Cache best practices
 
-- **125. AOT Compilation**
+- [**125. AOT Compilation**](/Programming%20Languages/CSharp/Performance%20Optimization/AOTCompilation.md)
   - Native AOT
   - ReadyToRun
   - AOT benefits
@@ -1757,7 +1757,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
 
 # XVIII. Security
 
-- **126. Security Fundamentals**
+- [**126. Security Fundamentals**](/Programming%20Languages/CSharp/Security/Security.md)
   - Security
   - Threat modeling
   - Attack surface
@@ -1766,7 +1766,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Secure defaults
   - Security best practices
 
-- **127. Authentication Security**
+- [**127. Authentication Security**](/Programming%20Languages/CSharp/Security/Authentication.md)
   - Password hashing
   - `BCrypt`
   - `PasswordHasher<T>`
@@ -1774,19 +1774,19 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Token security
   - Authentication security best practices
 
-- **128. Authorization Security**
+- [**128. Authorization Security**](/Programming%20Languages/CSharp/Security/Authorization.md)
   - Role-based access control
   - Claims-based authorization
   - Policy-based authorization
   - Authorization security best practices
 
-- **129. Input Validation**
+- [**129. Input Validation**](/Programming%20Languages/CSharp/Security/InputValidation.md)
   - Input validation
   - FluentValidation
   - Data annotations
   - Validation best practices
 
-- **130. Common Vulnerabilities**
+- [**130. Common Vulnerabilities**](/Programming%20Languages/CSharp/Security/CommonVulnerabilities.md)
   - SQL injection
   - XSS
   - CSRF
@@ -1798,7 +1798,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - OWASP Top 10
   - Security best practices
 
-- **131. Secure Coding**
+- [**131. Secure Coding**](/Programming%20Languages/CSharp/Security/SecureCoding.md)
   - Input validation
   - Output encoding
   - Parameterized queries
@@ -1809,7 +1809,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Secret management
   - Secure coding best practices
 
-- **132. Cryptography**
+- [**132. Cryptography**](/Programming%20Languages/CSharp/Security/Cryptography.md)
   - Cryptography
   - `System.Security.Cryptography`
   - Hashing
@@ -1818,7 +1818,7 @@ C# is best learned as more than "Java for Windows." The progression should cover
   - Key management
   - Cryptography best practices
 
-- **133. Dependency Security**
+- [**133. Dependency Security**](/Programming%20Languages/CSharp/Security/DependencySecurity.md)
   - NuGet package security
   - `dotnet list package --vulnerable`
   - Dependabot

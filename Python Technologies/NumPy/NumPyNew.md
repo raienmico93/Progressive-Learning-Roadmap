@@ -4,6 +4,8 @@
 
 NumPy is best learned as more than "a library for arrays." The progression should cover **ndarray fundamentals → dtypes → indexing → slicing → broadcasting → universal functions → aggregation → reshaping → stacking → linear algebra → random → I/O → performance → memory → advanced topics → ecosystem integration → production scientific computing**.
 
+**Recommended Overall Progression:** Python numerical basics → ndarray → array creation → indexing/slicing → reshaping → vectorization → broadcasting → ufuncs → aggregation → random numbers → statistics → linear algebra → numerical algorithms → memory model → performance optimization → scientific computing → machine learning → advanced NumPy internals → expert numerical engineering.
+
 ---
 
 # I. NumPy Foundations
@@ -20,6 +22,14 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - NumPy 2.1
   - NumPy 2.2
   - NumPy 2.3 (current)
+  - Python numerical-computing library
+  - Core array-processing library of the scientific Python ecosystem
+  - Why NumPy exists
+    - Efficient numerical computation
+    - Vectorized operations
+    - Multidimensional arrays
+    - Mathematical functions
+    - Linear algebra
   - NumPy philosophy
     - N-dimensional arrays
     - Vectorization
@@ -28,6 +38,10 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
     - Memory efficiency
     - Foundation for scientific computing
   - NumPy vs Python lists
+    - Homogeneous numerical storage
+    - Memory efficiency
+    - Vectorized computation
+    - Broadcasting
   - NumPy vs Pandas
   - NumPy vs PyTorch
   - NumPy vs TensorFlow
@@ -49,6 +63,14 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
     - Computer vision
   - NumPy in modern data science
   - NumPy as foundation for Pandas, SciPy, scikit-learn, Matplotlib, TensorFlow, PyTorch
+  - NumPy ecosystem
+    - Pandas
+    - SciPy
+    - Matplotlib
+    - Scikit-learn
+    - JAX
+    - PyTorch
+    - TensorFlow
 
 - **2. NumPy Architecture**
   - NumPy architecture
@@ -75,7 +97,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - LAPACK
   - Architecture best practices
 
-- **3. Installing NumPy**
+- **3. Installation and Environment**
   - Installation
     - pip
     - conda
@@ -84,27 +106,31 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
     - Poetry
   - `pip install numpy`
   - `conda install numpy`
-  - Version checking
-  - `np.__version__`
-  - `np.show_config()`
+  - Importing NumPy
+    - `import numpy as np`
+    - Aliases
+    - `from numpy import ...`
+  - Checking the installed version
+    - `np.__version__`
+    - `np.show_config()`
+  - Interactive environments
+    - Jupyter Notebook
+    - JupyterLab
+    - Python REPL
+  - Documentation lookup
+  - Working with NumPy in IDEs
   - Dependencies
   - Optional dependencies
   - Build from source
   - Pre-built wheels
   - Platform-specific installation
   - Installation best practices
-
-- **4. Importing NumPy**
-  - `import numpy as np`
-  - Aliases
-  - `from numpy import ...`
   - Import best practices
   - Namespace conventions
-  - Version checking
   - Feature detection
   - Import performance
 
-- **5. First Steps**
+- **4. First Steps**
   - Array creation
   - Basic operations
   - Quick inspection
@@ -117,7 +143,24 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 # II. ndarray Fundamentals
 
-- **6. Array Creation**
+- **5. The NumPy ndarray**
+  - What an `ndarray` is
+  - Array dimensions
+    - 0-D arrays
+    - 1-D arrays
+    - 2-D arrays
+    - 3-D arrays
+    - N-D arrays
+  - Axes
+  - Shape
+  - Size
+  - Number of dimensions
+  - Data type
+  - Memory layout
+  - Dimension operations
+  - Dimension best practices
+
+- **6. Creating Arrays**
   - From Python lists
     - `np.array()`
     - `np.asarray()`
@@ -125,10 +168,11 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
     - `np.ascontiguousarray()`
     - `np.asfortranarray()`
   - From tuples
+  - From nested sequences
   - From other arrays
   - From buffers
   - From iterables
-  - Factory functions
+  - Using constructors
     - `np.zeros()`
     - `np.zeros_like()`
     - `np.ones()`
@@ -137,15 +181,23 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
     - `np.empty_like()`
     - `np.full()`
     - `np.full_like()`
-    - `np.eye()`
-    - `np.identity()`
+  - Numeric sequences
     - `np.arange()`
     - `np.linspace()`
     - `np.logspace()`
     - `np.geomspace()`
+  - Identity matrices
+    - `np.eye()`
+    - `np.identity()`
+  - Diagonal arrays
+  - Repeating arrays
+    - `np.repeat()`
+    - `np.tile()`
+  - Grid generation
     - `np.meshgrid()`
     - `np.mgrid()`
     - `np.ogrid()`
+  - Special construction
     - `np.fromfunction()`
     - `np.fromiter()`
     - `np.fromstring()`
@@ -154,10 +206,10 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Array creation best practices
 
 - **7. Array Attributes**
-  - `shape`
-  - `dtype`
   - `ndim`
+  - `shape`
   - `size`
+  - `dtype`
   - `itemsize`
   - `nbytes`
   - `strides`
@@ -168,73 +220,103 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `imag`
   - `flat`
   - `T`
+  - Array flags
+  - Memory layout
   - Attribute best practices
 
-- **8. Data Types**
-  - Numeric types
-    - `int8`
-    - `int16`
-    - `int32`
-    - `int64`
-    - `uint8`
-    - `uint16`
-    - `uint32`
-    - `uint64`
+---
+
+# III. NumPy Data Types
+
+- **8. NumPy dtypes**
+  - Data types
+  - Type categories
+  - Integer types
+    - Signed integers
+      - `int8`
+      - `int16`
+      - `int32`
+      - `int64`
+    - Unsigned integers
+      - `uint8`
+      - `uint16`
+      - `uint32`
+      - `uint64`
+  - Floating-point types
     - `float16`
     - `float32`
     - `float64`
     - `float128`
+  - Complex types
     - `complex64`
     - `complex128`
     - `complex256`
-  - Boolean type
+  - Boolean
     - `bool_`
-  - String types
+  - String and Unicode
     - `str_`
     - `bytes_`
     - `unicode_`
-  - Object type
+  - Object dtype
     - `object_`
   - Datetime types
     - `datetime64`
     - `timedelta64`
   - Structured types
   - Type aliases
-  - Type conversion
-    - `astype()`
-    - `np.asarray()`
-  - Type promotion
   - Type inference
   - Type best practices
 
-- **9. Array Dimensions**
-  - 0-D arrays
-  - 1-D arrays
-  - 2-D arrays
-  - 3-D arrays
-  - N-D arrays
-  - Dimension operations
-  - Dimension best practices
+- **9. Type Conversion**
+  - `astype()`
+  - `np.asarray()`
+  - Converting integer to float
+  - Converting float to integer
+  - Boolean conversion
+  - Precision implications
+  - Overflow
+  - Underflow
+  - Loss of information
+  - Type promotion
+  - Type inference
+  - Type conversion best practices
+
+- **10. Choosing Appropriate dtypes**
+  - Memory considerations
+  - Numerical precision
+  - Computational efficiency
+  - Integer range
+  - Floating-point limitations
+  - Appropriate dtype best practices
 
 ---
 
-# III. Indexing and Slicing
+# IV. Array Indexing and Slicing
 
-- **10. Basic Indexing**
+- **11. Basic Indexing**
+  - Single-element indexing
+  - Positive indices
+  - Negative indices
   - Integer indexing
-  - Negative indexing
   - `arr[0]`
   - `arr[-1]`
-  - Multi-dimensional indexing
+  - Multidimensional indexing
   - `arr[0, 1]`
   - `arr[0][1]`
+  - Row selection
+  - Column selection
   - Indexing best practices
 
-- **11. Slicing**
+- **12. Slicing**
   - Slicing syntax
+  - `start`
+  - `stop`
+  - `step`
   - `arr[start:stop]`
   - `arr[start:stop:step]`
-  - Multi-dimensional slicing
+  - Negative steps
+  - Omitting slice parameters
+  - Multidimensional slices
   - `arr[start:stop, start:stop]`
   - Ellipsis
   - `...`
@@ -244,30 +326,27 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Slicing best practices
   - Views vs copies
 
-- **12. Boolean Indexing**
-  - Boolean masks
-  - Comparison operators
-  - Logical operators
-  - `&`, `|`, `~`
-  - `np.logical_and()`
-  - `np.logical_or()`
-  - `np.logical_not()`
-  - `np.logical_xor()`
-  - Boolean indexing with multiple conditions
-  - Boolean indexing best practices
-
-- **13. Fancy Indexing**
-  - Integer array indexing
+- **13. Advanced Indexing**
+  - Integer-array indexing
   - `arr[[0, 2, 4]]`
   - Multi-dimensional fancy indexing
   - `arr[[0, 2], [1, 3]]`
+  - Boolean indexing
+    - Boolean masks
+    - Comparison operators
+    - Logical operators
+      - `&`
+      - `|`
+      - `~`
+    - `np.logical_and()`
+    - `np.logical_or()`
+    - `np.logical_not()`
+    - `np.logical_xor()`
+    - Boolean indexing with multiple conditions
+  - Fancy indexing
   - `np.take()`
   - `np.put()`
   - `np.choose()`
-  - Fancy indexing best practices
-  - Fancy indexing vs slicing
-
-- **14. Advanced Indexing**
   - `np.ix_()`
   - `np.compress()`
   - `np.extract()`
@@ -276,44 +355,66 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `np.flatnonzero()`
   - `np.argwhere()`
   - `np.select()`
+  - Combining indexing techniques
+  - Conditional selection
   - Advanced indexing best practices
+  - Fancy indexing vs slicing
 
-- **15. Assignment**
-  - Item assignment
-  - Slice assignment
-  - Boolean assignment
-  - Fancy assignment
-  - `np.put()`
-  - `np.putmask()`
-  - `np.place()`
+- **14. Views versus Copies**
+  - Array views
+  - Array copies
+  - Slice views
+  - `copy()`
+  - Memory sharing
+  - Side effects from modifying views
+  - Assignment
+    - Item assignment
+    - Slice assignment
+    - Boolean assignment
+    - Fancy assignment
+    - `np.put()`
+    - `np.putmask()`
+    - `np.place()`
   - Assignment best practices
   - Views vs copies in assignment
 
 ---
 
-# IV. Array Manipulation
+# V. Array Manipulation
 
-- **16. Reshaping**
+- **15. Reshaping**
   - `reshape()`
-  - `ravel()`
-  - `flatten()`
+  - Shape compatibility
+  - Flattening
+    - `flatten()`
+    - `ravel()`
   - `squeeze()`
   - `expand_dims()`
   - `atleast_1d()`
   - `atleast_2d()`
   - `atleast_3d()`
+  - Reshaping without copying where possible
+  - Automatic dimension inference
   - Reshaping best practices
   - Views vs copies in reshaping
 
-- **17. Transposing**
-  - `T`
+- **16. Transposing**
+  - `.T`
   - `transpose()`
   - `swapaxes()`
   - `moveaxis()`
   - `rollaxis()` (deprecated)
+  - Axis permutation
+  - Transposing higher-dimensional arrays
   - Transposing best practices
 
-- **18. Concatenation and Stacking**
+- **17. Adding and Removing Dimensions**
+  - `expand_dims()`
+  - `squeeze()`
+  - `newaxis`
+  - Singleton dimensions
+
+- **18. Combining Arrays**
   - `concatenate()`
   - `stack()`
   - `hstack()`
@@ -325,7 +426,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Concatenation best practices
   - Stacking best practices
 
-- **19. Splitting**
+- **19. Splitting Arrays**
   - `split()`
   - `array_split()`
   - `hsplit()`
@@ -375,55 +476,51 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ---
 
-# V. Broadcasting
+# VI. Core Array Operations
 
-- **24. Broadcasting Fundamentals**
-  - Broadcasting
-  - Broadcasting rules
-  - Shape compatibility
-  - Dimension alignment
-  - Broadcasting in operations
-  - Broadcasting best practices
-  - Broadcasting pitfalls
+- **24. Element-Wise Arithmetic**
+  - Addition
+  - Subtraction
+  - Multiplication
+  - Division
+  - Exponentiation
+  - Modulo
+  - Arithmetic operations best practices
 
-- **25. Broadcasting Rules**
-  - Rule 1: Dimensions equal
-  - Rule 2: Dimension 1 stretches
-  - Rule 3: Missing dimensions prepended
-  - Broadcasting examples
-  - Broadcasting best practices
+- **25. Comparison Operations**
+  - Equality
+  - Inequality
+  - Greater than
+  - Less than
+  - Greater than or equal
+  - Less than or equal
+  - Comparison operations best practices
 
-- **26. Broadcasting Applications**
-  - Scalar operations
-  - Vector operations
-  - Matrix operations
-  - Outer operations
-  - Broadcasting best practices
+- **26. Boolean Operations**
+  - `logical_and`
+  - `logical_or`
+  - `logical_not`
+  - `logical_xor`
+  - Combining boolean masks
+  - Boolean operations best practices
 
-- **27. Broadcasting Performance**
-  - Broadcasting performance
-  - Memory efficiency
-  - Broadcasting vs explicit loops
-  - Broadcasting best practices
-
----
-
-# VI. Universal Functions (ufuncs)
-
-- **28. ufunc Fundamentals**
+- **27. Universal Functions (ufuncs)**
+  - Concept of ufuncs
   - Universal functions
-  - ufuncs
-  - Element-wise operations
+  - Element-wise execution
   - Vectorization
+  - Unary ufuncs
+  - Binary ufuncs
   - ufunc methods
     - `reduce()`
     - `accumulate()`
     - `reduceat()`
     - `outer()`
     - `at()`
+  - Common mathematical ufuncs
   - ufunc best practices
 
-- **29. Arithmetic ufuncs**
+- **28. Arithmetic ufuncs**
   - `add()`
   - `subtract()`
   - `multiply()`
@@ -457,7 +554,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `reciprocal()`
   - Arithmetic ufunc best practices
 
-- **30. Trigonometric ufuncs**
+- **29. Trigonometric ufuncs**
   - `sin()`
   - `cos()`
   - `tan()`
@@ -478,7 +575,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `rad2deg()`
   - Trigonometric ufunc best practices
 
-- **31. Comparison ufuncs**
+- **30. Comparison ufuncs**
   - `greater()`
   - `greater_equal()`
   - `less()`
@@ -495,7 +592,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `fmin()`
   - Comparison ufunc best practices
 
-- **32. Bitwise ufuncs**
+- **31. Bitwise ufuncs**
   - `bitwise_and()`
   - `bitwise_or()`
   - `bitwise_xor()`
@@ -504,7 +601,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `right_shift()`
   - Bitwise ufunc best practices
 
-- **33. Floating ufuncs**
+- **32. Floating ufuncs**
   - `isfinite()`
   - `isinf()`
   - `isnan()`
@@ -515,7 +612,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `spacing()`
   - Floating ufunc best practices
 
-- **34. Custom ufuncs**
+- **33. Custom ufuncs**
   - `np.frompyfunc()`
   - `np.vectorize()`
   - `numba.vectorize()`
@@ -524,9 +621,116 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ---
 
-# VII. Aggregation and Statistics
+# VII. Vectorization
 
-- **35. Aggregation Fundamentals**
+- **34. Vectorized Computation**
+  - Vectorization concepts
+  - Replacing explicit Python loops
+  - Element-wise operations
+  - Vectorized conditional operations
+  - Vectorization examples
+
+- **35. Why Vectorization Matters**
+  - Reduced Python overhead
+  - Efficient low-level implementation
+  - Cleaner numerical code
+  - Better scalability
+  - Vectorization best practices
+
+- **36. Vectorized Conditional Logic**
+  - `np.where()`
+  - Nested conditions
+  - Boolean masks
+  - Conditional transformations
+
+- **37. Vectorization versus Python Loops**
+  - Performance benchmarking
+  - Python overhead
+  - Vectorized execution
+  - Vectorization vs loops best practices
+
+---
+
+# VIII. Broadcasting
+
+- **38. Broadcasting Fundamentals**
+  - Broadcasting
+  - Broadcasting concept
+  - Broadcasting rules
+  - Shape compatibility
+  - Compatible dimensions
+  - Singleton dimensions
+  - Dimension alignment
+  - Broadcasting in operations
+  - Broadcasting best practices
+  - Broadcasting pitfalls
+
+- **39. Broadcasting Rules**
+  - Rule 1: Dimensions equal
+  - Rule 2: Dimension 1 stretches
+  - Rule 3: Missing dimensions prepended
+  - Incompatible dimensions
+  - Broadcasting examples
+  - Broadcasting best practices
+
+- **40. Broadcasting Applications**
+  - Scalar operations
+  - Vector operations
+  - Matrix operations
+  - Outer operations
+  - Row-wise operations
+  - Column-wise operations
+  - Normalization
+  - Scaling
+  - Distance calculations
+  - Matrix operations
+  - Broadcasting best practices
+
+- **41. Broadcasting Debugging and Performance**
+  - Shape inspection
+  - Identifying incompatible dimensions
+  - Using `reshape()` strategically
+  - Using `newaxis`
+  - Broadcasting performance
+  - Memory efficiency
+  - Broadcasting vs explicit loops
+  - Broadcasting performance best practices
+
+---
+
+# IX. Universal Mathematical Functions
+
+- **42. Mathematical Functions**
+  - Absolute values
+  - Square roots
+  - Powers
+  - Exponentials
+  - Logarithms
+  - Trigonometric functions
+  - Inverse trigonometric functions
+  - Hyperbolic functions
+  - Math function best practices
+
+- **43. Rounding Functions**
+  - `round`
+  - `floor`
+  - `ceil`
+  - `trunc`
+  - Rounding function best practices
+
+- **44. Special Numerical Functions**
+  - Sign functions
+  - Clipping
+  - Modulo
+  - Remainders
+  - Floating-point utilities
+  - Special numerical function best practices
+
+---
+
+# X. Aggregation and Reduction
+
+- **45. Aggregation Fundamentals**
   - Aggregation
   - Reduction
   - Axis parameter
@@ -534,9 +738,23 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `axis=1`
   - `axis=None`
   - `keepdims`
+  - Understanding `axis`
+  - Reducing along rows
+  - Reducing along columns
+  - Reducing across multiple axes
   - Aggregation best practices
 
-- **36. Sum and Product**
+- **46. Basic Reductions**
+  - `sum()`
+  - `prod()`
+  - `mean()`
+  - `min()`
+  - `max()`
+  - `std()`
+  - `var()`
+  - Basic reduction best practices
+
+- **47. Sum and Product**
   - `sum()`
   - `prod()`
   - `cumsum()`
@@ -547,7 +765,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `nancumprod()`
   - Sum and product best practices
 
-- **37. Min and Max**
+- **48. Min and Max**
   - `min()`
   - `max()`
   - `amin()`
@@ -561,7 +779,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `ptp()`
   - Min and max best practices
 
-- **38. Mean and Median**
+- **49. Mean and Median**
   - `mean()`
   - `median()`
   - `nanmean()`
@@ -569,14 +787,14 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `average()`
   - Mean and median best practices
 
-- **39. Variance and Standard Deviation**
+- **50. Variance and Standard Deviation**
   - `var()`
   - `std()`
   - `nanvar()`
   - `nanstd()`
   - Variance and standard deviation best practices
 
-- **40. Percentiles and Quantiles**
+- **51. Percentiles and Quantiles**
   - `percentile()`
   - `quantile()`
   - `nanpercentile()`
@@ -584,14 +802,14 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `median()`
   - Percentiles best practices
 
-- **41. Correlation and Covariance**
+- **52. Correlation and Covariance**
   - `corrcoef()`
   - `cov()`
   - `correlate()`
   - `convolve()`
   - Correlation best practices
 
-- **42. Histograms**
+- **53. Histograms**
   - `histogram()`
   - `histogram2d()`
   - `histogramdd()`
@@ -599,7 +817,20 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `digitize()`
   - Histogram best practices
 
-- **43. NaN-aware Functions**
+- **54. Conditional Aggregation**
+  - `any()`
+  - `all()`
+  - Boolean masks
+  - Conditional sums
+  - Conditional counts
+
+- **55. Cumulative Operations**
+  - `cumsum()`
+  - `cumprod()`
+  - Cumulative minimum
+  - Cumulative maximum
+
+- **56. NaN-aware Functions**
   - `nansum()`
   - `nanprod()`
   - `nanmean()`
@@ -618,85 +849,107 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ---
 
-# VIII. Linear Algebra
+# XI. Searching, Sorting, and Selection
 
-- **44. Linear Algebra Fundamentals**
-  - Linear algebra
-  - `np.linalg`
-  - Matrix operations
-  - Vector operations
-  - Linear algebra best practices
+- **57. Searching**
+  - `argmax()`
+  - `argmin()`
+  - `where()`
+  - `nonzero()`
+  - `flatnonzero()`
+  - `argwhere()`
+  - `extract()`
+  - `searchsorted()`
+  - Finding matching elements
+  - Searching best practices
 
-- **45. Matrix Multiplication**
-  - `dot()`
-  - `matmul()`
-  - `@` operator
-  - `inner()`
-  - `outer()`
-  - `tensordot()`
-  - `einsum()`
-  - Matrix multiplication best practices
+- **58. Sorting**
+  - `sort()`
+  - `argsort()`
+  - `lexsort()`
+  - `msort()` (deprecated)
+  - `partition()`
+  - `argpartition()`
+  - Sorting along an axis
+  - Stable sorting
+  - Sorting structured arrays
+  - Sorting best practices
 
-- **46. Matrix Decompositions**
-  - `cholesky()`
-  - `qr()`
-  - `svd()`
-  - `eig()`
-  - `eigh()`
-  - `eigvals()`
-  - `eigvalsh()`
-  - `slogdet()`
-  - Decomposition best practices
+- **59. Selection**
+  - `select()`
+  - `choose()`
+  - Boolean filtering
+  - Top-k selection concepts
+  - Selection best practices
 
-- **47. Matrix Operations**
-  - `inv()`
-  - `pinv()`
-  - `det()`
-  - `matrix_rank()`
-  - `trace()`
-  - `norm()`
-  - `cond()`
-  - Matrix operations best practices
+- **60. Counting**
+  - `count_nonzero()`
+  - `bincount()`
+  - `histogram()`
+  - Counting best practices
 
-- **48. Solving Linear Systems**
-  - `solve()`
-  - `lstsq()`
-  - `tensorsolve()`
-  - `tensorinv()`
-  - Solving best practices
-
-- **49. Eigenvalues and Eigenvectors**
-  - `eig()`
-  - `eigh()`
-  - `eigvals()`
-  - `eigvalsh()`
-  - Eigenvalue best practices
-
-- **50. Advanced Linear Algebra**
-  - `einsum()`
-  - `kron()`
-  - `multi_dot()`
-  - `vdot()`
-  - `vecdot()`
-  - `matvec()`
-  - `vecmat()`
-  - Advanced linear algebra best practices
+- **61. Uniqueness and Set Operations**
+  - `unique()`
+  - `in1d()`
+  - `isin()`
+  - `intersect1d()`
+  - `union1d()`
+  - `setdiff1d()`
+  - `setxor1d()`
+  - Set intersection
+  - Set difference
+  - Set union
+  - Membership testing
+  - Set operations best practices
 
 ---
 
-# IX. Random Number Generation
+# XII. Missing and Special Numerical Values
 
-- **51. Random Fundamentals**
+- **62. NaN**
+  - Meaning of `NaN`
+  - Detecting NaN
+    - `np.isnan()`
+  - Ignoring NaN during aggregation
+    - `np.nanmean()`
+    - `np.nansum()`
+    - `np.nanmin()`
+
+- **63. Infinity**
+  - Positive infinity
+  - Negative infinity
+  - Detecting infinity
+    - `np.isinf()`
+    - `np.isfinite()`
+    - `np.isposinf()`
+    - `np.isneginf()`
+
+- **64. Numerical Validity**
+  - Detecting invalid values
+  - Replacing invalid values
+  - Clipping extreme values
+  - Handling missing numerical data
+  - Numerical validity best practices
+
+---
+
+# XIII. Random Number Generation
+
+- **65. Random Number Fundamentals**
   - Random number generation
-  - `np.random`
+  - Random sampling
+  - Pseudo-random number generation
+  - Seeds
+  - Reproducibility
   - Legacy random
   - New random API
+  - `np.random`
   - `np.random.default_rng()`
-  - `Generator`
-  - Reproducibility
+  - `Generator` objects
+  - Independent random streams
   - Random best practices
 
-- **52. Random Distributions**
+- **66. Random Distributions**
   - `random()`
   - `uniform()`
   - `normal()`
@@ -716,12 +969,21 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `lognormal()`
   - `multivariate_normal()`
   - `dirichlet()`
+  - Distribution best practices
+
+- **67. Random Sampling**
   - `choice()`
   - `shuffle()`
   - `permutation()`
-  - Distribution best practices
+  - Random integers
+  - Random choices
+  - Sampling without replacement
+  - Sampling with replacement
+  - Shuffling
+  - Permutations
+  - Random sampling best practices
 
-- **53. Random Seeds**
+- **68. Random Seeds and Reproducibility**
   - `seed()`
   - `default_rng()`
   - `SeedSequence`
@@ -729,7 +991,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `Generator`
   - Reproducibility best practices
 
-- **54. Advanced Random**
+- **69. Advanced Random**
   - `Philox`
   - `PCG64`
   - `SFC64`
@@ -739,56 +1001,179 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ---
 
-# X. I/O
+# XIV. Linear Algebra
 
-- **55. Binary I/O**
-  - `save()`
-  - `load()`
-  - `savez()`
-  - `savez_compressed()`
-  - `.npy` format
-  - `.npz` format
-  - Binary I/O best practices
+- **70. Linear Algebra Fundamentals**
+  - Linear algebra
+  - `np.linalg`
+  - Matrix operations
+  - Vector operations
+  - Linear algebra best practices
 
-- **56. Text I/O**
-  - `savetxt()`
-  - `loadtxt()`
-  - `genfromtxt()`
-  - `fromstring()`
-  - Text I/O best practices
+- **71. Vector Operations**
+  - Dot product
+  - Inner product
+  - Vector norms
+  - Vector projections
+  - `vdot()`
+  - `vecdot()`
+  - Vector operation best practices
 
-- **57. Memory Mapping**
-  - `memmap()`
-  - `open_memmap()`
-  - Memory mapping best practices
-  - Large file handling
+- **72. Matrix Multiplication**
+  - `dot()`
+  - `matmul()`
+  - `@` operator
+  - `inner()`
+  - `outer()`
+  - `tensordot()`
+  - `einsum()`
+  - `matvec()`
+  - `vecmat()`
+  - Matrix multiplication best practices
 
-- **58. Buffer I/O**
-  - `frombuffer()`
-  - `tobytes()`
-  - `tofile()`
-  - `fromfile()`
-  - Buffer I/O best practices
+- **73. Matrix Operations**
+  - Matrix multiplication
+  - Transpose
+  - Inverse
+  - Determinant
+  - Trace
+  - Diagonal extraction
+  - `inv()`
+  - `pinv()`
+  - `det()`
+  - `matrix_rank()`
+  - `trace()`
+  - `norm()`
+  - `cond()`
+  - `slogdet()`
+  - Matrix operations best practices
 
-- **59. String I/O**
-  - `array2string()`
-  - `array_repr()`
-  - `array_str()`
-  - String I/O best practices
+- **74. Matrix Decompositions**
+  - `cholesky()`
+  - `qr()`
+  - `svd()`
+  - `eig()`
+  - `eigh()`
+  - `eigvals()`
+  - `eigvalsh()`
+  - Decomposition best practices
 
-- **60. Interoperability**
-  - NumPy to Pandas
-  - NumPy to PyTorch
-  - NumPy to TensorFlow
-  - NumPy to JAX
-  - NumPy to Arrow
-  - Interoperability best practices
+- **75. Solving Linear Systems**
+  - Matrix representation
+  - Solving linear systems
+  - `solve()`
+  - `lstsq()`
+  - `tensorsolve()`
+  - `tensorinv()`
+  - Numerical stability
+  - Singular matrices
+  - Least-squares solutions
+  - Solving best practices
+
+- **76. Eigenvalues and Eigenvectors**
+  - Eigenvalue concept
+  - Eigenvectors
+  - `eig()`
+  - `eigh()`
+  - `eigvals()`
+  - `eigvalsh()`
+  - Matrix decomposition
+  - Applications
+  - Eigenvalue best practices
+
+- **77. Singular Value Decomposition**
+  - SVD concept
+  - `svd()`
+  - Low-rank approximation
+  - Dimensionality reduction
+  - Image compression concepts
+  - SVD best practices
+
+- **78. Advanced Linear Algebra**
+  - `einsum()`
+  - `kron()`
+  - `multi_dot()`
+  - `vdot()`
+  - `vecdot()`
+  - `matvec()`
+  - `vecmat()`
+  - Advanced linear algebra best practices
 
 ---
 
-# XI. Performance Optimization
+# XV. Statistics with NumPy
 
-- **61. Performance Fundamentals**
+- **79. Descriptive Statistics**
+  - Mean
+  - Median
+  - Variance
+  - Standard deviation
+  - Minimum
+  - Maximum
+  - Percentiles
+  - Descriptive statistics best practices
+
+- **80. Statistical Aggregation**
+  - Quantiles
+  - Percentiles
+  - Weighted averages
+  - Correlation
+  - Covariance
+  - Statistical aggregation best practices
+
+- **81. Distribution Analysis**
+  - Frequency analysis
+  - Histograms
+  - Quantiles
+  - Outlier identification
+  - Distribution summaries
+  - Distribution analysis best practices
+
+---
+
+# XVI. Memory and Array Internals
+
+- **82. NumPy Memory Model**
+  - Contiguous memory
+  - Strides
+  - Shape
+  - Data buffer
+  - dtype interpretation
+  - Memory model best practices
+
+- **83. C-Order and Fortran-Order**
+  - Row-major layout
+  - Column-major layout
+  - Memory access patterns
+  - Performance implications
+  - Order best practices
+
+- **84. Views and Memory Sharing**
+  - View creation
+  - Stride manipulation
+  - Shared memory
+  - `np.shares_memory()`
+  - `np.may_share_memory()`
+  - Memory ownership
+  - Base arrays
+  - Ownership flags
+  - Copy semantics
+  - Mutation behavior
+  - Memory sharing best practices
+
+- **85. Memory Optimization**
+  - Appropriate dtypes
+  - Avoiding unnecessary copies
+  - In-place operations
+  - Chunked processing
+  - Memory-aware transformations
+  - Memory optimization best practices
+
+---
+
+# XVII. Performance Optimization
+
+- **86. Performance Fundamentals**
   - Performance
   - Memory usage
   - CPU usage
@@ -797,38 +1182,46 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Performance metrics
   - Performance best practices
 
-- **62. Vectorization**
-  - Vectorization
-  - Avoid Python loops
-  - Use ufuncs
-  - Use broadcasting
-  - Vectorization best practices
-  - Vectorization examples
+- **87. Benchmarking**
+  - Benchmarking
+  - `timeit`
+  - `%timeit`
+  - `perfplot`
+  - Profiling concepts
+  - Measuring realistic workloads
+  - Benchmarking best practices
 
-- **63. Memory Optimization**
-  - Memory layout
-  - C order vs Fortran order
-  - Contiguity
-  - Views vs copies
-  - In-place operations
-  - Data type optimization
-  - Memory optimization best practices
+- **88. Efficient Array Operations**
+  - Avoid temporary arrays
+  - Reuse allocated memory
+  - Use appropriate dtypes
+  - Minimize copying
+  - Favor vectorized operations
+  - Efficient array operation best practices
 
-- **64. In-Place Operations**
+- **89. In-Place Operations**
   - In-place operations
   - `+=`, `-=`, `*=`, `/=`
   - `np.add(..., out=...)`
   - `np.multiply(..., out=...)`
   - In-place best practices
 
-- **65. Cache Optimization**
+- **90. Cache Optimization**
   - Cache hierarchy
   - Cache lines
   - Cache locality
   - Cache-friendly operations
   - Cache optimization best practices
 
-- **66. BLAS and LAPACK**
+- **91. Advanced Performance**
+  - Broadcasting efficiency
+  - Memory bandwidth
+  - Cache behavior
+  - Strides
+  - Contiguous versus non-contiguous arrays
+  - Advanced performance best practices
+
+- **92. BLAS and LAPACK**
   - BLAS
   - LAPACK
   - OpenBLAS
@@ -838,7 +1231,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - BLAS best practices
   - LAPACK best practices
 
-- **67. SIMD**
+- **93. SIMD**
   - SIMD
   - SSE
   - AVX
@@ -847,7 +1240,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - NEON
   - SIMD best practices
 
-- **68. Profiling**
+- **94. Profiling**
   - `timeit`
   - `%timeit`
   - `cProfile`
@@ -857,13 +1250,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `perfplot`
   - Profiling best practices
 
-- **69. Benchmarking**
-  - Benchmarking
-  - `timeit`
-  - `perfplot`
-  - Benchmarking best practices
-
-- **70. Parallel Processing**
+- **95. Parallel Processing**
   - `multiprocessing`
   - `joblib`
   - `numexpr`
@@ -873,43 +1260,150 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ---
 
-# XII. Advanced Topics
+# XVIII. File and Data I/O
 
-- **71. Structured Arrays**
+- **96. Binary Formats**
+  - NumPy Binary Formats
+    - `.npy`
+    - `.npz`
+  - `save()`
+  - `load()`
+  - `savez()`
+  - `savez_compressed()`
+  - Uncompressed vs compressed storage trade-offs
+  - Cross-platform endianness and byte-ordering
+  - Binary I/O best practices
+
+- **97. Text-Based Data**
+  - Text I/O
+  - CSV-like files
+  - `loadtxt()`
+  - `savetxt()`
+  - `genfromtxt()`
+  - `fromstring()`
+  - Structural performance limitations of text parsing
+  - Handling missing data, converters, and custom delimiters
+  - Text I/O best practices
+
+- **98. Memory-Mapped Arrays**
+  - `memmap()`
+  - `open_memmap()`
+  - Large datasets
+  - Disk-backed arrays
+  - Partial access
+  - Write modes and disk flushing
+  - Shared-memory concurrency
+  - Memory mapping best practices
+  - Large file handling
+
+- **99. Buffer I/O**
+  - `frombuffer()`
+  - `tobytes()`
+  - `tofile()`
+  - `fromfile()`
+  - Buffer I/O best practices
+
+- **100. String I/O**
+  - `array2string()`
+  - `array_repr()`
+  - `array_str()`
+  - String I/O best practices
+
+- **101. Interoperability**
+  - NumPy to Pandas
+  - NumPy to PyTorch
+  - NumPy to TensorFlow
+  - NumPy to JAX
+  - NumPy to Arrow
+  - Interoperability best practices
+
+---
+
+# XIX. Structured and Specialized Arrays
+
+- **102. Structured Arrays**
   - Structured arrays
   - `dtype` with fields
   - Field access
+  - Structured dtypes
+  - Record-like storage
   - Structured array operations
   - Structured array best practices
 
-- **72. Record Arrays**
+- **103. Record Arrays**
   - Record arrays
   - `recarray`
   - Field access
   - Record array best practices
 
-- **73. Masked Arrays**
+- **104. Masked Arrays**
   - Masked arrays
-  - `np.ma`
+  - `numpy.ma`
   - `MaskedArray`
+  - Mask creation
   - Mask operations
+  - Masked calculations
+  - Missing-data handling
   - Masked array best practices
 
-- **74. Matrix Library**
+- **105. Datetime Arrays**
+  - `datetime64`
+  - `timedelta64`
+  - Date arithmetic
+  - Time intervals
+  - Datetime operations
+  - Datetime best practices
+
+- **106. Matrix Library**
   - `np.matrix`
   - Matrix operations
   - Matrix best practices
   - Matrix deprecation
   - Use `ndarray` instead
 
-- **75. Polynomials**
+---
+
+# XX. Advanced Indexing and Array Programming
+
+- **107. Advanced Boolean Masking**
+  - Multiple conditions
+  - Complex filters
+  - Conditional assignment
+  - Advanced boolean masking best practices
+
+- **108. Integer Array Indexing**
+  - Index arrays
+  - Multi-axis indexing
+  - Reordering data
+  - Gathering values
+  - Integer array indexing best practices
+
+- **109. Axis Manipulation**
+  - `moveaxis()`
+  - `swapaxes()`
+  - `rollaxis()`
+  - Axis-aware programming
+  - Axis manipulation best practices
+
+- **110. Broadcasting Tricks**
+  - Explicit singleton dimensions
+  - Pairwise calculations
+  - Coordinate-grid generation
+  - Batch operations
+  - Broadcasting trick best practices
+
+---
+
+# XXI. Advanced Math and Numerical Algorithms
+
+- **111. Polynomials**
   - `np.polynomial`
   - Polynomial operations
   - Polynomial fitting
   - Polynomial evaluation
   - Polynomial best practices
 
-- **76. Fourier Transforms**
+- **112. Fourier Transforms**
   - `np.fft`
   - `fft()`
   - `ifft()`
@@ -924,7 +1418,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `ifftshift()`
   - Fourier best practices
 
-- **77. Window Functions**
+- **113. Window Functions**
   - `np.bartlett()`
   - `np.blackman()`
   - `np.hamming()`
@@ -932,65 +1426,179 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `np.kaiser()`
   - Window best practices
 
-- **78. Convolution and Correlation**
+- **114. Convolution and Correlation**
   - `convolve()`
   - `correlate()`
   - `fftconvolve()`
   - `convolve2d()`
   - Convolution best practices
 
-- **79. Interpolation**
+- **115. Interpolation**
   - `np.interp()`
   - `np.polyfit()`
   - `np.polyval()`
+  - Linear interpolation
+  - Multi-dimensional interpolation concepts
+  - Numerical approximation
   - Interpolation best practices
 
-- **80. Set Operations**
-  - `unique()`
-  - `in1d()`
-  - `isin()`
-  - `intersect1d()`
-  - `union1d()`
-  - `setdiff1d()`
-  - `setxor1d()`
-  - Set operations best practices
+- **116. Numerical Differentiation**
+  - Finite differences
+  - Gradient approximations
+  - `gradient()`
+  - Numerical differentiation best practices
 
-- **81. Sorting**
-  - `sort()`
-  - `argsort()`
-  - `lexsort()`
-  - `msort()` (deprecated)
-  - `partition()`
-  - `argpartition()`
-  - Sorting best practices
+- **117. Numerical Integration Concepts**
+  - Array-based numerical integration
+  - Cumulative integration concepts
+  - Relationship with SciPy
+  - Numerical integration best practices
 
-- **82. Searching**
-  - `searchsorted()`
-  - `where()`
-  - `nonzero()`
-  - `flatnonzero()`
-  - `argwhere()`
-  - `extract()`
-  - Searching best practices
+- **118. Signal-Oriented Array Operations**
+  - Convolution concepts
+  - Correlation
+  - Frequency-domain concepts
+  - Relationship with SciPy
+  - Signal-oriented operation best practices
 
-- **83. Counting**
-  - `count_nonzero()`
-  - `bincount()`
-  - `histogram()`
-  - Counting best practices
+---
 
-- **84. Datetime**
-  - `datetime64`
-  - `timedelta64`
-  - Datetime operations
-  - Datetime best practices
+# XXII. NumPy and Data Science
 
-- **85. String Operations**
-  - `np.char`
-  - String operations
-  - String best practices
+- **119. NumPy + Pandas**
+  - NumPy arrays in Pandas
+  - Converting arrays to Series
+  - Converting arrays to DataFrames
+  - Pandas to NumPy
+  - NumPy to Pandas
+  - Numerical preprocessing
+  - Vectorized transformations
+  - Pandas integration best practices
 
-- **86. Type Checking**
+- **120. NumPy + Matplotlib**
+  - NumPy arrays in Matplotlib
+  - Plotting NumPy arrays
+  - Generating plotting data
+  - Numerical simulation
+  - Plot-ready arrays
+  - Statistical visualization
+  - Matplotlib integration best practices
+
+- **121. NumPy + SciPy**
+  - SciPy
+  - SciPy built on NumPy
+  - Optimization
+  - Statistics
+  - Integration
+  - Interpolation
+  - Signal processing
+  - SciPy integration best practices
+
+- **122. NumPy + Scikit-learn**
+  - scikit-learn
+  - Feature arrays
+  - Machine-learning matrices
+  - Model input/output
+  - Normalization
+  - Train/test datasets
+  - Feature engineering
+  - scikit-learn integration best practices
+
+---
+
+# XXIII. NumPy for Machine Learning
+
+- **123. Data Representation**
+  - Samples
+  - Features
+  - Labels
+  - Feature matrices
+  - Target vectors
+  - Data representation best practices
+
+- **124. Numerical Preprocessing**
+  - Scaling
+  - Centering
+  - Normalization
+  - Clipping
+  - Missing-value strategies
+  - Numerical preprocessing best practices
+
+- **125. ML Mathematics**
+  - Dot products
+  - Matrix multiplication
+  - Vector norms
+  - Distances
+  - Similarity calculations
+  - ML mathematics best practices
+
+- **126. Implementing Algorithms from Scratch**
+  - Linear regression
+  - Logistic regression concepts
+  - Gradient descent
+  - k-nearest neighbors
+  - Principal component analysis
+  - Algorithm implementation best practices
+
+---
+
+# XXIV. NumPy for Scientific Computing
+
+- **127. Numerical Simulation**
+  - Random simulations
+  - Monte Carlo methods
+  - Physical-system modeling
+  - Population models
+  - Stochastic processes
+  - Numerical simulation best practices
+
+- **128. Matrix-Based Scientific Computing**
+  - Linear systems
+  - Eigenvalue problems
+  - Transformations
+  - Numerical approximation
+  - Matrix-based computing best practices
+
+- **129. Scientific Data Processing**
+  - Large numerical arrays
+  - Multidimensional measurements
+  - Coordinate systems
+  - Scientific datasets
+  - Scientific data processing best practices
+
+---
+
+# XXV. Advanced NumPy Internals
+
+- **130. Universal Function Internals**
+  - Ufunc execution
+  - Broadcasting behavior
+  - Type resolution
+  - Reduction operations
+  - Ufunc internals best practices
+
+- **131. Strides**
+  - Understanding strides
+  - Stride-based views
+  - Efficient data access
+  - Stride manipulation
+  - Strides best practices
+
+- **132. Memory Ownership**
+  - Base arrays
+  - Ownership flags
+  - Copy semantics
+  - Mutation behavior
+  - Memory ownership best practices
+
+- **133. Array Protocols**
+  - Array interoperability
+  - `__array__`
+  - Array-like objects
+  - Interoperation with numerical libraries
+  - Array protocol best practices
+
+- **134. Type Checking and Casting**
   - `np.isscalar()`
   - `np.isreal()`
   - `np.iscomplex()`
@@ -1001,86 +1609,175 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - `np.isfinite()`
   - `np.isinf()`
   - `np.isnan()`
-  - Type checking best practices
-
-- **87. Type Casting**
-  - `astype()`
   - `np.can_cast()`
   - `np.promote_types()`
   - `np.result_type()`
   - `np.common_type()`
   - `np.min_scalar_type()`
-  - Type casting best practices
+  - Type checking and casting best practices
+
+- **135. String Operations**
+  - `np.char`
+  - String operations
+  - String best practices
 
 ---
 
-# XIII. NumPy Ecosystem
+# XXVI. Advanced Numerical Precision
 
-- **88. NumPy and Pandas**
+- **136. Floating-Point Arithmetic**
+  - Floating-point representation
+  - Rounding errors
+  - Machine epsilon
+  - Numerical precision
+  - Floating-point best practices
+
+- **137. Numerical Stability**
+  - Cancellation
+  - Overflow
+  - Underflow
+  - Stable formulations
+  - Conditioning
+  - Numerical stability best practices
+
+- **138. Reproducibility**
+  - Random seeds
+  - Deterministic computation
+  - Floating-point differences
+  - Platform considerations
+  - Reproducibility best practices
+
+---
+
+# XXVII. Debugging and Error Handling
+
+- **139. Shape Errors**
+  - Dimension mismatch
+  - Broadcasting errors
+  - Matrix multiplication errors
+  - Shape error best practices
+
+- **140. dtype Errors**
+  - Unexpected conversions
+  - Integer overflow
+  - Precision problems
+  - dtype error best practices
+
+- **141. Indexing Errors**
+  - Out-of-bounds indexing
+  - Incorrect boolean masks
+  - Unexpected advanced-indexing behavior
+  - Indexing error best practices
+
+- **142. Numerical Errors**
+  - NaN propagation
+  - Infinite values
+  - Invalid operations
+  - Division by zero
+  - Numerical error best practices
+
+---
+
+# XXVIII. NumPy Development Practices
+
+- **143. Clean Numerical Code**
+  - Meaningful variable names
+  - Explicit shapes
+  - Clear axis semantics
+  - Avoiding unnecessary mutation
+  - Clean code best practices
+
+- **144. Reproducible Computation**
+  - Controlled random states
+  - Version management
+  - Deterministic workflows
+  - Reproducibility best practices
+
+- **145. Testing**
+  - Unit tests
+  - Numerical tolerances
+  - Approximate equality
+  - Edge cases
+  - Shape tests
+  - dtype tests
+  - Testing best practices
+
+- **146. Documentation**
+  - Shape documentation
+  - dtype documentation
+  - Mathematical assumptions
+  - Numerical limitations
+  - Documentation best practices
+
+---
+
+# XXIX. NumPy Ecosystem
+
+- **147. NumPy and Pandas**
   - NumPy arrays in Pandas
   - Pandas to NumPy
   - NumPy to Pandas
   - Pandas integration best practices
 
-- **89. NumPy and Matplotlib**
+- **148. NumPy and Matplotlib**
   - NumPy arrays in Matplotlib
   - Plotting NumPy arrays
   - Matplotlib integration best practices
 
-- **90. NumPy and SciPy**
+- **149. NumPy and SciPy**
   - SciPy
   - SciPy built on NumPy
   - SciPy integration best practices
 
-- **91. NumPy and scikit-learn**
+- **150. NumPy and scikit-learn**
   - scikit-learn
   - Feature arrays
   - Model input/output
   - scikit-learn integration best practices
 
-- **92. NumPy and PyTorch**
+- **151. NumPy and PyTorch**
   - PyTorch
   - `torch.from_numpy()`
   - `.numpy()`
   - PyTorch integration best practices
 
-- **93. NumPy and TensorFlow**
+- **152. NumPy and TensorFlow**
   - TensorFlow
   - `tf.convert_to_tensor()`
   - `.numpy()`
   - TensorFlow integration best practices
 
-- **94. NumPy and JAX**
+- **153. NumPy and JAX**
   - JAX
   - `jnp.array()`
   - JAX integration best practices
 
-- **95. NumPy and CuPy**
+- **154. NumPy and CuPy**
   - CuPy
   - GPU arrays
   - CuPy integration best practices
 
-- **96. NumPy and Dask**
+- **155. NumPy and Dask**
   - Dask
   - Dask arrays
   - Dask integration best practices
 
-- **97. NumPy and Arrow**
+- **156. NumPy and Arrow**
   - Apache Arrow
   - PyArrow
   - Arrow integration best practices
 
-- **98. NumPy and Numba**
+- **157. NumPy and Numba**
   - Numba
   - JIT compilation
   - Numba integration best practices
 
-- **99. NumPy and Cython**
+- **158. NumPy and Cython**
   - Cython
   - C extensions
   - Cython integration best practices
 
-- **100. NumPy and C/C++**
+- **159. NumPy and C/C++**
   - C API
   - C extensions
   - C++ integration
@@ -1088,33 +1785,33 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ---
 
-# XIV. NumPy Projects by Difficulty
+# XXX. NumPy Projects by Difficulty
 
 ## Beginner Projects
 
-- **1. Array Operations**
+- **1. Numerical Statistics Calculator**
+  - Mean
+  - Median
+  - Standard deviation
+  - Percentiles
+  - Min/max
+
+- **2. Matrix Calculator**
+  - Matrix addition
+  - Matrix multiplication
+  - Transposition
+  - Determinants
+
+- **3. Random Data Simulator**
+  - Generate distributions
+  - Calculate statistics
+  - Compare theoretical and observed values
+
+- **4. Array Operations**
   - Array creation
   - Arithmetic operations
   - Indexing
   - Slicing
-
-- **2. Statistics Calculator**
-  - Mean, median, mode
-  - Variance, standard deviation
-  - Percentiles
-  - Histograms
-
-- **3. Matrix Operations**
-  - Matrix creation
-  - Matrix multiplication
-  - Matrix inverse
-  - Determinant
-
-- **4. Random Number Generator**
-  - Random distributions
-  - Seeds
-  - Reproducibility
-  - Visualization
 
 - **5. Image Manipulation**
   - Image loading
@@ -1126,31 +1823,45 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ## Intermediate Projects
 
-- **6. Linear Algebra Library**
+- **6. Image Array Processor**
+  - Represent an image as an array
+  - Crop images
+  - Resize concepts
+  - Normalize pixel values
+  - Apply masks
+  - Perform transformations
+
+- **7. Monte Carlo Simulation**
+  - Random sampling
+  - Estimate mathematical quantities
+  - Analyze convergence
+  - Visualize results with Matplotlib
+
+- **8. Numerical Data Cleaning Tool**
+  - Missing-value detection
+  - Outlier detection
+  - Normalization
+  - Vectorized transformations
+
+- **9. Linear Algebra Library**
   - Matrix operations
   - Decompositions
   - Solving systems
   - Eigenvalues
 
-- **7. Signal Processing**
+- **10. Signal Processing**
   - Fourier transforms
   - Convolution
   - Filtering
   - Visualization
 
-- **8. Numerical Simulation**
+- **11. Numerical Simulation**
   - Differential equations
   - Numerical integration
   - Visualization
   - Performance
 
-- **9. Data Analysis Pipeline**
-  - Data loading
-  - Data cleaning
-  - Statistical analysis
-  - Visualization
-
-- **10. Machine Learning Preprocessing**
+- **12. Machine Learning Preprocessing**
   - Feature scaling
   - One-hot encoding
   - Train/test split
@@ -1160,31 +1871,50 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ## Advanced Projects
 
-- **11. Custom ufunc**
+- **13. Linear Regression from Scratch**
+  - Matrix formulation
+  - Least-squares solution
+  - Prediction
+  - Error calculation
+
+- **14. Principal Component Analysis**
+  - Center data
+  - Compute covariance
+  - Eigen decomposition
+  - Project observations
+
+- **15. Neural-Network Layer from Scratch**
+  - Matrix multiplication
+  - Bias vectors
+  - Activation functions
+  - Forward propagation
+  - Gradient concepts
+
+- **16. Custom ufunc**
   - `np.frompyfunc()`
   - `np.vectorize()`
   - Numba vectorize
   - Performance comparison
 
-- **12. Structured Arrays**
+- **17. Structured Arrays**
   - Structured dtypes
   - Field access
   - Data manipulation
   - I/O
 
-- **13. Memory-Mapped Arrays**
+- **18. Memory-Mapped Arrays**
   - `memmap()`
   - Large file handling
   - Performance
   - Visualization
 
-- **14. Parallel Processing**
+- **19. Parallel Processing**
   - `multiprocessing`
   - `joblib`
   - `numba`
   - Performance
 
-- **15. NumPy Extension**
+- **20. NumPy Extension**
   - C extension
   - Cython
   - Numba
@@ -1194,31 +1924,51 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ## Expert Projects
 
-- **16. Scientific Computing Library**
+- **21. Numerical Simulation Engine**
+  - Multidimensional state arrays
+  - Time-stepping
+  - Vectorized simulation
+  - Memory optimization
+
+- **22. High-Performance Data Processing Pipeline**
+  - Large arrays
+  - Memory mapping
+  - Efficient dtype selection
+  - Chunked processing
+  - Benchmarking
+
+- **23. Mini Scientific-Computing Library**
+  - Array utilities
+  - Numerical algorithms
+  - Linear algebra helpers
+  - Statistical functions
+  - Testing infrastructure
+
+- **24. Scientific Computing Library**
   - Linear algebra
   - Optimization
   - Statistics
   - Visualization
 
-- **17. GPU-Accelerated Computing**
+- **25. GPU-Accelerated Computing**
   - CuPy
   - GPU arrays
   - Performance
   - Visualization
 
-- **18. Distributed Computing**
+- **26. Distributed Computing**
   - Dask
   - Distributed arrays
   - Performance
   - Visualization
 
-- **19. High-Performance Simulation**
+- **27. High-Performance Simulation**
   - Numerical methods
   - Performance optimization
   - Parallel processing
   - Visualization
 
-- **20. NumPy-Compatible Library**
+- **28. NumPy-Compatible Library**
   - Array implementation
   - Broadcasting
   - ufuncs
@@ -1226,17 +1976,25 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ---
 
-# XV. Progressive NumPy Learning Sequence
+# XXXI. Progressive NumPy Learning Sequence
 
 ## Level 1 — NumPy Fundamentals
 
 - Master:
+  - `ndarray`
+  - Shape
+  - Dimensions
+  - dtype
   - Installation
   - Import
   - Array creation
   - Array attributes
-  - Data types
   - Basic operations
+  - `np.array`
+  - `np.zeros`
+  - `np.ones`
+  - `np.arange`
+  - `np.linspace`
 
 ## Level 2 — Indexing and Slicing
 
@@ -1259,18 +2017,29 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Tiling
   - Rearranging
   - Padding
+  - `reshape`
+  - `transpose`
+  - `concatenate`
 
-## Level 4 — Broadcasting
+## Level 4 — Vectorized Computing
+
+- Master:
+  - Vectorization
+  - Element-wise operations
+  - Ufuncs
+  - Broadcasting
+  - Reductions
+  - Vectorized transformations
+  - Axis-based aggregation
+  - Boolean masks
+
+## Level 5 — Broadcasting and Universal Functions
 
 - Master:
   - Broadcasting fundamentals
   - Broadcasting rules
   - Broadcasting applications
   - Broadcasting performance
-
-## Level 5 — Universal Functions
-
-- Master:
   - ufunc fundamentals
   - Arithmetic ufuncs
   - Trigonometric ufuncs
@@ -1292,9 +2061,13 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Histograms
   - NaN-aware functions
 
-## Level 7 — Linear Algebra
+## Level 7 — Numerical Analysis
 
 - Master:
+  - Statistics
+  - Random generation
+  - Linear algebra
+  - Numerical precision
   - Linear algebra fundamentals
   - Matrix multiplication
   - Matrix decompositions
@@ -1302,29 +2075,31 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Solving linear systems
   - Eigenvalues and eigenvectors
   - Advanced linear algebra
-
-## Level 8 — Random
-
-- Master:
   - Random fundamentals
   - Random distributions
   - Random seeds
   - Advanced random
 
-## Level 9 — I/O
+## Level 8 — I/O
 
 - Master:
   - Binary I/O
   - Text I/O
   - Memory mapping
   - Buffer I/O
+  - String I/O
   - Interoperability
 
-## Level 10 — Performance
+## Level 9 — Performance and Memory
 
 - Master:
   - Performance fundamentals
   - Vectorization
+  - Memory layout
+  - Views versus copies
+  - Strides
+  - Benchmarking
+  - dtype optimization
   - Memory optimization
   - In-place operations
   - Cache optimization
@@ -1334,12 +2109,13 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Benchmarking
   - Parallel processing
 
-## Level 11 — Advanced Topics
+## Level 10 — Advanced Topics
 
 - Master:
   - Structured arrays
   - Record arrays
   - Masked arrays
+  - Datetime
   - Polynomials
   - Fourier transforms
   - Window functions
@@ -1349,29 +2125,47 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Sorting
   - Searching
   - Counting
-  - Datetime
   - String operations
   - Type checking
   - Type casting
 
-## Level 12 — Ecosystem
+## Level 11 — Advanced Indexing and Internals
 
 - Master:
-  - NumPy and Pandas
-  - NumPy and Matplotlib
-  - NumPy and SciPy
-  - NumPy and scikit-learn
-  - NumPy and PyTorch
-  - NumPy and TensorFlow
-  - NumPy and JAX
-  - NumPy and CuPy
-  - NumPy and Dask
-  - NumPy and Arrow
-  - NumPy and Numba
-  - NumPy and Cython
-  - NumPy and C/C++
+  - Advanced boolean masking
+  - Integer array indexing
+  - Axis manipulation
+  - Broadcasting tricks
+  - Universal function internals
+  - Strides
+  - Memory ownership
+  - Array protocols
+  - Numerical stability
+  - Advanced broadcasting
+  - Internal memory mechanics
 
-## Level 13 — Production Engineering
+## Level 12 — Scientific Python and ML
+
+- Master:
+  - NumPy + Pandas
+  - NumPy + Matplotlib
+  - NumPy + SciPy
+  - NumPy + scikit-learn
+  - NumPy + PyTorch
+  - NumPy + TensorFlow
+  - NumPy + JAX
+  - NumPy + CuPy
+  - NumPy + Dask
+  - NumPy + Arrow
+  - NumPy + Numba
+  - NumPy + Cython
+  - NumPy + C/C++
+  - Numerical preprocessing
+  - Scientific calculations
+  - ML data preparation
+  - Implementing algorithms from scratch
+
+## Level 13 — Expert / Production Engineering
 
 - Master:
   - Scientific computing
@@ -1380,11 +2174,19 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Memory management
   - Distributed computing
   - GPU computing
+  - Numerical stability
+  - Memory efficiency
+  - Advanced indexing
+  - Array interoperability
+  - Performance optimization
+  - Designing efficient numerical algorithms
+  - Implementing algorithms from scratch
+  - Diagnosing performance and numerical problems
   - Production best practices
 
 ---
 
-# XVI. Final NumPy Competency Map
+# XXXII. Final NumPy Competency Map
 
 - **Foundations**
 
@@ -1394,6 +2196,15 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Array attributes
   - Data types
   - Array dimensions
+
+- **Core NumPy**
+
+  - Arrays
+  - Shapes
+  - Dimensions
+  - dtypes
+  - Indexing
+  - Slicing
 
 - **Indexing**
 
@@ -1415,6 +2226,14 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Repeating
   - Rearranging
   - Padding
+
+- **Array Programming**
+
+  - Vectorization
+  - Broadcasting
+  - Ufuncs
+  - Reductions
+  - Masking
 
 - **Broadcasting**
 
@@ -1443,6 +2262,13 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Histograms
   - NaN-aware functions
 
+- **Numerical Computing**
+
+  - Statistics
+  - Random numbers
+  - Mathematical functions
+  - Numerical transformations
+
 - **Linear Algebra**
 
   - Matrix multiplication
@@ -1450,6 +2276,8 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Matrix operations
   - Solving linear systems
   - Eigenvalues
+  - SVD
+  - Norms
   - Advanced linear algebra
 
 - **Random**
@@ -1457,6 +2285,15 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Random distributions
   - Random seeds
   - Advanced random
+
+- **Data Processing**
+
+  - Reshaping
+  - Combining
+  - Splitting
+  - Sorting
+  - Searching
+  - Missing-value handling
 
 - **I/O**
 
@@ -1468,8 +2305,12 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 - **Performance**
 
+  - Views
+  - Copies
+  - Strides
+  - Memory layout
+  - dtype optimization
   - Vectorization
-  - Memory optimization
   - In-place operations
   - Cache optimization
   - BLAS and LAPACK
@@ -1496,6 +2337,20 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Type checking
   - Type casting
 
+- **Scientific Computing**
+
+  - Simulation
+  - Numerical algorithms
+  - Array-based modeling
+  - Scientific data processing
+
+- **Machine Learning**
+
+  - Feature matrices
+  - Preprocessing
+  - Linear algebra
+  - Algorithm implementation
+
 - **Ecosystem**
 
   - Pandas
@@ -1512,6 +2367,14 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
   - Cython
   - C/C++
 
+- **Expert Engineering**
+
+  - Numerical stability
+  - Memory efficiency
+  - Advanced indexing
+  - Array interoperability
+  - Performance optimization
+
 - **Production**
 
   - Scientific computing
@@ -1525,7 +2388,7 @@ NumPy is best learned as more than "a library for arrays." The progression shoul
 
 ## Recommended Overall Progression
 
-**NumPy Fundamentals → Indexing and Slicing → Array Manipulation → Broadcasting → Universal Functions → Aggregation → Linear Algebra → Random → I/O → Performance Optimization → Advanced Topics → Ecosystem → Production Engineering**
+**Python numerical basics → NumPy Fundamentals → ndarray → Array Creation → Indexing/Slicing → Reshaping → Vectorization → Broadcasting → Universal Functions → Aggregation → Random Numbers → Statistics → Linear Algebra → Numerical Algorithms → Memory Model → Performance Optimization → Scientific Computing → Machine Learning → Advanced NumPy Internals → Expert Numerical Engineering → Production Scientific Computing**
 
 For maximum practical mastery, combine this NumPy roadmap with the Python, Pandas, Matplotlib, R Language, Jupyter, SQL, DSA, Discrete Mathematics, JavaScript, Node.js, REST API, React, Laravel, jQuery, Java, C#, C++, C Language, Dart, Flutter, Kotlin, Git, and GitHub roadmaps above so the progression becomes:
 

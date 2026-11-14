@@ -918,21 +918,21 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
 
 # XIX. Advanced SQL Querying
 
-* [**76. Window Functions**](/Databases/SQL/Advanced/WindowFunctions.md)
+* [**76. Window Functions**](/Databases/SQL/Window%20Function/WindowFunctions.md)
 
   * Window-function fundamentals
   * `OVER`
   * `PARTITION BY`
   * `ORDER BY`
 
-* [**77. Ranking Functions**](/Databases/SQL/Advanced/RankingFunctions.md)
+* **77. Ranking Functions**
 
   * `ROW_NUMBER`
   * `RANK`
   * `DENSE_RANK`
   * `NTILE`
 
-* [**78. Analytic Functions**](/Databases/SQL/Advanced/AnalyticFunctions.md)
+* **78. Analytic Functions**
 
   * `LAG`
   * `LEAD`
@@ -942,7 +942,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Moving averages
   * Cumulative calculations
 
-* [**79. Advanced Window Frames**](/Databases/SQL/Advanced/AdvancedWindowFrames.md)
+* **79. Advanced Window Frames**
 
   * `ROWS`
   * `RANGE`
@@ -950,7 +950,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Current row
   * Preceding and following rows
 
-* [**80. Advanced Analytical Queries**](/Databases/SQL/Advanced/AdvancedAnalyticalQueries.md)
+* **80. Advanced Analytical Queries**
 
   * Top-N-per-group
   * Sequential event analysis
@@ -961,7 +961,7 @@ This roadmap is organized as a **progressive SQL curriculum**, moving from funda
   * Retention calculations
   * Running aggregates
 
-  [**Window Function Optimization**](/Databases/SQL/Advanced/WindowFunctionOpt.md)
+  **Window Function Optimization**
 
 ---
 

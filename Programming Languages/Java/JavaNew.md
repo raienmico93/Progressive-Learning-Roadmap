@@ -204,32 +204,32 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
   - Variable best practices
 
 - **7. Primitive Data Types**
-  - `byte`
-  - `short`
-  - `int`
-  - `long`
-  - `float`
-  - `double`
-  - `char`
-  - `boolean`
-  - Primitive sizes
-  - Primitive ranges
-  - Primitive defaults
-  - Primitive literals
-  - Integer literals
-  - Floating-point literals
-  - Character literals
-  - Boolean literals
-  - Underscore separators
-  - Binary literals
-  - Octal literals
-  - Hexadecimal literals
-  - Type casting
-  - Widening conversion
-  - Narrowing conversion
-  - Autoboxing
-  - Unboxing
-  - Wrapper classes
+  - Primitive Data Types
+    - `byte`
+    - `short`
+    - `int`
+    - `long`
+    - `float`
+    - `double`
+    - `char`
+    - `boolean`
+  - Primitive Properties
+    - Primitive sizes
+    - Primitive ranges
+    - Primitive defaults
+  - Primitive Literals
+    - Integer literals
+    - Floating-point literals
+    - Character literals
+    - Boolean literals
+    - Underscore separators
+  - Type Conversion & Casting
+    - Type casting
+      - Widening conversion
+      - Narrowing conversion
+    - Autoboxing
+    - Unboxing
+  - Wrapper Classes
     - `Byte`
     - `Short`
     - `Integer`
@@ -238,9 +238,9 @@ Java is best learned as more than "a verbose language for enterprise apps." The 
     - `Double`
     - `Character`
     - `Boolean`
-  - Wrapper class methods
-  - Wrapper class caching
-  - Wrapper class best practices
+    - Wrapper class methods
+    - Wrapper class caching
+    - Wrapper class best practices
 
 - **8. Reference Data Types**
   - Objects

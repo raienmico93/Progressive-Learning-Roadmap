@@ -1,4 +1,4 @@
-# React Validation: A Comprehensive Programming Cheat Sheet
+# React Form Validation — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,251 +6,1107 @@
 
 ### Definitions
 
-**Core Definition:** React validation is the practice of evaluating user input against defined rules—required fields, format constraints, cross-field dependencies, and server-side checks—and presenting the results as accessible, timely feedback within a React form.
+**Core Definition:** Form validation is the process of checking that user input meets required rules — format, length, range, requiredness, and cross-field consistency — before the data is accepted, submitted, or persisted.
 
-**Technical Definition:** React validation encompasses the strategies, APIs, and patterns used to verify that form input conforms to expected constraints before it is submitted to a server. It operates at multiple layers: **client-side validation** (using HTML5 constraint validation attributes and/or custom React logic) and **server-side validation** (using API checks for uniqueness, business rules, and data integrity). The browser's Constraint Validation API provides native validation through attributes such as `required`, `pattern`, `min`, `max`, `minlength`, and `maxlength`, along with methods like `checkValidity()`, `reportValidity()`, and `setCustomValidity()` for programmatic control. React validation logic can be **synchronous** (evaluated during render or in event handlers) or **asynchronous** (requiring server round trips with debouncing and request cancellation). Validation state includes errors (blocking), warnings (non-blocking), and pending states (async checks in progress). Libraries like React Hook Form and TanStack Form provide structured validation APIs with configurable modes (`onChange`, `onBlur`, `onSubmit`, `onTouched`, `all`), schema resolvers (Zod, Yup), and built-in accessibility support. The Web Content Accessibility Guidelines (WCAG) require that error messages be programmatically associated with their inputs via `aria-describedby`, that invalid inputs be marked with `aria-invalid`, and that focus be managed to the first error on submission failure.
+**Technical Definition:** Validation in React operates across multiple layers. **Client-side validation** runs in the browser using HTML constraint attributes or JavaScript checks, providing immediate feedback. **Server-side validation** runs on the server and is the authoritative check; it must never be skipped because client-side validation can be bypassed. **Synchronous validation** returns a result immediately (e.g., "required" or "email format"), while **asynchronous validation** waits for an external result (e.g., "username available") and must handle race conditions and debouncing. **Field-level validation** checks a single field in isolation; **form-level validation** checks the whole form, including cross-field rules like password confirmation. **Schema validation** centralizes rules in a declarative schema (Zod, Yup, Joi) that can be shared between client and server, eliminating validation drift. The React ecosystem has converged on React Hook Form + Zod as the dominant stack in 2026, with Yup remaining relevant for Formik-based codebases and Joi remaining a server-first validator .
 
-**Beginner-Friendly Explanation:** Validation is like a spell-checker for your form. Some checks are instant—"this field is required," "this email doesn't have an @ symbol." Others take time—"is this username already taken?" For instant checks, you can show errors as the user types or when they leave a field. For slow checks, you need to wait for the server and show a "checking..." message. You also need to make sure screen readers announce the errors and that the user's focus is moved to the first problem so they can fix it quickly.
+**Beginner-Friendly Explanation:** Form validation is how your app checks that what the user typed is acceptable before you use it. There are two big ideas: **where** the check happens (in the browser for instant feedback, or on the server for real security), and **how** the check is written (one-off JavaScript `if` statements, or a reusable schema that describes all the rules). Validation is not just about stopping bad data — it is about helping the user fix mistakes. A good form tells you what went wrong, where, and how to fix it, without nagging you before you have even finished typing.
 
 ### Key Characteristics
 
-- **Layered Defence:** Client-side validation provides immediate feedback; server-side validation provides security and business-rule enforcement. Both are necessary.
-- **Trigger Flexibility:** Validation can run on change, on blur, on submit, or on a combination, configurable per form or per field.
-- **Constraint API Integration:** Native HTML5 validation attributes work alongside custom React logic, with `setCustomValidity()` bridging the two.
-- **Asynchronous Awareness:** Server-side checks require debouncing, request cancellation, and stale-result guards to prevent race conditions.
-- **Cross-Field Dependency:** Rules like password confirmation and date-range validation require access to other field values.
-- **Accessibility by Default:** `aria-invalid`, `aria-describedby`, `role="alert"`, and focus management are essential for screen-reader users.
-- **Progressive Enhancement:** Native HTML validation works without JavaScript; React validation enhances it when JavaScript is available.
+- **Defence in depth:** Client-side validation improves UX; server-side validation guarantees integrity. Always do both .
+- **Schema-first convergence:** A single Zod schema can validate on the client (via `zodResolver`) and on the server (via `safeParse`), eliminating logic drift .
+- **Timing matters:** Validate on blur or submit by default; avoid validating before the user has interacted .
+- **Error display is an accessibility problem:** `aria-invalid`, `aria-describedby`, and `role="alert"` are not optional extras .
+- **Async validation requires debouncing:** Checking username availability on every keystroke floods the server and causes race conditions .
+- **Field-level vs form-level is a design choice:** Field-level validation is reusable and independent; form-level validation handles cross-field cohesion .
+- **React Hook Form + Zod is the 2026 default stack:** ~12M weekly downloads for RHF, ~24M for Zod; the resolver integration is first-class .
 
 ### Prerequisites
 
-- Solid understanding of React function components, JSX, and props.
-- Familiarity with the `useState`, `useEffect`, and `useRef` Hooks.
-- Working knowledge of HTML form elements and their attributes.
-- Basic understanding of asynchronous JavaScript (promises, `async`/`await`).
-- Awareness of the browser's Constraint Validation API and `FormData`.
+- React function components, state, and event handling.
+- Controlled and uncontrolled components.
+- Basic HTML form elements and constraint attributes.
+- Familiarity with TypeScript (for schema-inferred types).
+- Understanding of Promises and async JavaScript (for async validation).
 
 ### Related Programming Areas
 
-- **Form Architecture:** Controlled vs. uncontrolled inputs, `FormData`, submission lifecycle.
-- **State Management:** Form state, validation state, and submission state.
-- **Accessibility (a11y):** ARIA attributes, focus management, live regions.
-- **Server Integration:** Async validation, API error mapping, server actions.
-- **Schema Validation:** Zod, Yup, and other validation libraries.
-
-### Core Concepts / Features
-
-1. Inline Validation vs. On-Submit Validation Triggers
-2. Built-in HTML5 Constraint Validation vs. Custom React Validation Logic
-3. Basic Constraints (Required, Type, Range, Pattern/Regex)
-4. Dependent and Cross-Field Validation (Password Confirmation, Date Ranges)
-5. Async and Server-Side Validation Integration
-6. Accessibility (a11y) in Validation
+- **Form Libraries** — React Hook Form, Formik, TanStack Form.
+- **Schema Validation** — Zod, Yup, Joi.
+- **Accessibility** — ARIA error association and focus management.
+- **Server Actions (React 19)** — server-side re-validation with `safeParse`.
+- **Data Fetching** — async availability checks and race-condition handling.
 
 ---
 
-## Core Concept 1: Inline Validation vs. On-Submit Validation Triggers
+## 1. Client-Side Validation
 
 ### Definitions
 
-**Core Definition:** Inline validation evaluates input as the user interacts with a field (on change or blur), while on-submit validation evaluates all fields when the user attempts to submit the form.
+**Core Definition:** Client-side validation is validation performed in the browser before data is sent to the server, providing immediate feedback to the user.
 
-**Technical Definition:** Validation triggers determine when validation rules are evaluated. The **`onChange`** mode validates on every keystroke, providing the most immediate feedback but causing the most re-renders. The **`onBlur`** mode validates when the user leaves a field, balancing responsiveness with performance. The **`onSubmit`** mode (the default in React Hook Form) validates all fields only when the user attempts to submit, minimising re-renders but providing no feedback until submission. The **`onTouched`** mode validates on the first blur and then on every change thereafter. The **`all`** mode validates on both blur and change. The **`reValidateMode`** option controls validation behaviour after the first submission attempt (default: `onChange`). A common UX pattern is to combine `onBlur` for initial validation with `onChange` for re-validation once an error has been shown, so the error clears as the user corrects it.
+**Technical Definition:** Client-side validation runs in the user's browser, either through native HTML constraint attributes (`required`, `type="email"`, `pattern`, `min`, `max`, `minLength`, `maxLength`) or through JavaScript validation integrated with a form library. It improves user experience by catching errors early, reducing server round trips, and guiding the user to correct input. It is **not** a security mechanism — it can be bypassed by disabling JavaScript or manipulating requests — so server-side validation remains mandatory .
 
-**Beginner-Friendly Explanation:** Think of validation triggers like when a teacher checks your homework. **On-submit** is like checking everything at the end—you get all the feedback at once, but you might have made the same mistake ten times. **On-blur** is like checking each answer as you finish it—you get feedback after each question but not while you're still writing. **On-change** is like the teacher looking over your shoulder every time you write a letter—very immediate, but potentially annoying and distracting. The best approach is usually a combination: check on blur (when you finish a field) and then re-check on change (as you fix the error).
+**Beginner-Friendly Explanation:** Client-side validation is the check that happens right in the browser. It gives the user instant feedback, like "this field is required" or "that is not a valid email." It makes forms feel responsive and helpful, but it cannot be trusted for security because a determined user can bypass it.
 
 ### Purposes
 
-- **On-submit:** To minimise re-renders and validate only when necessary (default for short forms).
-- **On-blur:** To provide feedback after the user finishes a field without distracting them while typing.
-- **On-change:** To provide immediate feedback for fields where real-time validation is critical (e.g., password strength, character limits).
-- **On-touched:** To validate on first blur and then on subsequent changes, balancing initial and ongoing feedback.
-- **Re-validation:** To clear errors as the user corrects them, rather than waiting for the next submission.
+- To provide immediate, helpful feedback as the user interacts with the form.
+- To reduce unnecessary server round trips for obviously invalid data.
+- To guide the user to correct mistakes before submission.
+- To enforce UX constraints like character limits and input formats.
+- To support accessible error display with ARIA attributes.
 
 ### Syntax Rules and Structure
 
-**React Hook Form `mode` and `reValidateMode`:**
-```jsx
-const {
-  register,
-  handleSubmit,
-  formState: { errors },
-} = useForm({
-  mode: 'onBlur',           // Validate on blur before submission
-  reValidateMode: 'onChange', // Re-validate on change after submission
-  defaultValues: { email: '', password: '' },
-});
-```
+**Native Constraint Attributes:**
 
-**Component Breakdown:**
-- `mode: 'onBlur'`: Validation runs when the user leaves a field.
-- `reValidateMode: 'onChange'`: After the first submission attempt, validation runs on every change.
-- `mode` options: `'onSubmit'` (default), `'onBlur'`, `'onChange'`, `'onTouched'`, `'all'`.
-
-**Per-Field Validation Trigger (TanStack Form):**
-```jsx
-<form.Field
-  name="age"
-  validators={{
-    onChange: ({ value }) =>
-      value < 13 ? 'You must be 13 to make an account' : undefined,
-    onBlur: ({ value }) =>
-      value < 0 ? 'Invalid value' : undefined,
-  }}
->
-  {(field) => (
-    <>
-      <label htmlFor={field.name}>Age:</label>
-      <input
-        id={field.name}
-        name={field.name}
-        type="number"
-        value={field.state.value}
-        onChange={(e) => field.handleChange(e.target.valueAsNumber)}
-        onBlur={field.handleBlur}
-      />
-      {!field.state.meta.isValid && (
-        <em role="alert">{field.state.meta.errors.join(', ')}</em>
-      )}
-    </>
-  )}
-</form.Field>
-```
-
-**Component Breakdown:**
-- `validators.onChange`: Runs on every keystroke; useful for immediate feedback.
-- `validators.onBlur`: Runs when the field loses focus; useful for less urgent checks.
-- Different rules can run at different times on the same field.
+| Attribute | Applies to | Effect |
+|-----------|------------|--------|
+| `required` | Text, select, checkbox, radio | Field must have a value |
+| `type="email"` / `type="url"` | Text inputs | Format validation |
+| `pattern` | Text inputs | Regex validation |
+| `min` / `max` | Number, date, range | Numeric/date range |
+| `minLength` / `maxLength` | Text inputs, textarea | Length constraints |
+| `step` | Number, range | Numeric increments |
 
 **Syntax Rules:**
-- Use `onSubmit` (default) for short forms where re-renders are costly.
-- Use `onBlur` for most fields; it provides feedback without distracting the user while typing.
-- Use `onChange` only for fields where real-time feedback is essential (password strength, character counters).
-- Set `reValidateMode: 'onChange'` so errors clear as the user corrects them.
-- In TanStack Form, validation is configured per-field via the `validators` prop.
-- Avoid validating on change for all fields in large forms; it causes excessive re-renders.
+
+1. Use native attributes as the first line of defence; they work without JavaScript.
+2. Integrate JavaScript validation with the form library's resolver or validation functions.
+3. Never rely on client-side validation alone; always re-validate on the server .
+4. Display errors with `aria-invalid` and `aria-describedby` .
 
 **Constraints and Limitations:**
-- `onChange` validation causes a re-render on every keystroke, which can be slow for large forms.
-- `onBlur` validation does not provide feedback while the user is still typing, which can be frustrating if the error is obvious.
-- `onSubmit` validation can produce a wall of errors at once, overwhelming the user.
-- The `all` mode validates on both blur and change, which can cause duplicate validations.
-- Per-field triggers in TanStack Form require explicit configuration for each field.
 
-### Annotated Code Examples
+- Client-side validation can be bypassed; it is not a security control.
+- Native validation UI is inconsistent across browsers.
+- Validating too early (before interaction) frustrates users .
 
-**Example 1: On-Blur with Re-validation on Change (React Hook Form)**
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Native Constraint Validation
 
 ```jsx
-import { useForm } from 'react-hook-form';
-
-function LoginForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, touchedFields },
-  } = useForm({
-    mode: 'onBlur',           // Validate when the user leaves a field
-    reValidateMode: 'onChange', // Re-validate on change after first submission
-    defaultValues: { email: '', password: '' },
-  });
-
-  async function onSubmit(data) {
-    await login(data);
+function SignupForm() {
+  function handleSubmit(e) {
+    e.preventDefault();
+    // Native validation runs before this handler fires
+    const form = e.currentTarget;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    // Submit valid data
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? 'email-error' : undefined}
-          {...register('email', {
-            required: 'Email is required',
-            pattern: { value: /^\S+@\S+$/, message: 'Invalid email' },
-          })}
-        />
-        
-        {touchedFields.email && errors.email && (
-          <span id="email-error" role="alert" style={{ color: 'red' }}>
-            {errors.email.message}
-          </span>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          aria-invalid={!!errors.password}
-          aria-describedby={errors.password ? 'password-error' : undefined}
-          {...register('password', {
-            required: 'Password is required',
-            minLength: { value: 8, message: 'At least 8 characters' },
-          })}
-        />
-
-        {touchedFields.password && errors.password && (
-          <span id="password-error" role="alert" style={{ color: 'red' }}>
-            {errors.password.message}
-          </span>
-        )}
-      </div>
-
-      <button type="submit">Log In</button>
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="email">Email</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        required
+        minLength={5}
+      />
+      <button type="submit">Sign up</button>
     </form>
   );
 }
 ```
 
-**Expected Output:** Errors appear when the user leaves a field with invalid input. After the first submission attempt, errors clear as the user types a correction. No error is shown before the user has interacted with a field.
+**Expected Output:** Submitting with an empty or invalid email triggers the browser's native validation UI and prevents submission.
 
-**Why This Output Occurs:** `mode: 'onBlur'` delays validation until the user leaves the field, preventing premature error messages. `touchedFields.email` and `touchedFields.password` are `true` only after the field has been blurred, so errors are shown only for fields the user has interacted with. `reValidateMode: 'onChange'` ensures that once the user has attempted submission, errors clear as they type.
+**Why this output:** `required` and `type="email"` are native constraints. The browser blocks submission and shows its built-in message. `checkValidity()` and `reportValidity()` provide programmatic control.
 
-**Example 2: On-Change with Debounce (Manual)**
+#### Example 2: Schema-Based Client Validation with Zod
 
-```jsx
-import { useState, useEffect } from 'react';
+```tsx
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
-function UsernameField() {
-  const [username, setUsername] = useState('');
-  const [error, setError] = useState(null);
-  const [checking, setChecking] = useState(false);
+const schema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
 
-  useEffect(() => {
-    if (!username) {
-      setError(null);
-      return;
-    }
+type FormData = z.infer<typeof schema>;
 
-    setChecking(true);
-    const timer = setTimeout(async () => {
-      const res = await fetch(`/api/check-username?u=${username}`);
-      const { available } = await res.json();
-      setError(available ? null : 'Username is taken');
-      setChecking(false);
-    }, 500); // Debounce 500ms
-
-    return () => clearTimeout(timer);
-  }, [username]);
+function SignupForm() {
+  const { register, handleSubmit, formState: { errors } } =
+    useForm<FormData>({ resolver: zodResolver(schema) });
 
   return (
+    <form onSubmit={handleSubmit((data) => console.log(data))}>
+      <label htmlFor="email">Email</label>
+      <input id="email" type="email" {...register('email')} />
+      {errors.email && <span role="alert">{errors.email.message}</span>}
+
+      <label htmlFor="password">Password</label>
+      <input id="password" type="password" {...register('password')} />
+      {errors.password && <span role="alert">{errors.password.message}</span>}
+
+      <button type="submit">Sign up</button>
+    </form>
+  );
+}
+```
+
+**Expected Output:** Validation runs on submit by default. Errors appear under each field with the schema-defined messages. The form does not submit until both fields are valid.
+
+**Why this output:** `zodResolver(schema)` connects Zod to React Hook Form. `register` wires the inputs. `errors` contains the Zod issues keyed by field name .
+
+### Real-World Cases
+
+- **Signup forms:** Email format, password strength, required fields.
+- **Checkout:** Address completeness, postal code format.
+- **Search filters:** Numeric ranges and date constraints.
+- **Settings:** Profile field length and format limits.
+
+### References
+
+- SitePoint — React Form Validation Using Shared Zod Schemas and Server Actions — https://www.sitepoint.com/react-form-validation-hook-form-zod/
+- React Hook Form + Zod Skill — https://raw.githubusercontent.com/NeverSight/skills_feed/refs/heads/main/data/skills-md/fellipeutaka/leon/react-hook-form-zod/SKILL.md
+- MDN — Constraint validation — https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
+
+---
+
+## 2. Server-Side Validation
+
+### Definitions
+
+**Core Definition:** Server-side validation is the authoritative validation performed on the server after data is submitted, ensuring integrity regardless of what the client sent.
+
+**Technical Definition:** Server-side validation runs on the backend (Node.js, serverless function, Server Action) and cannot be bypassed by the client. It re-validates all data using the same rules as the client (ideally the same schema), returns field-level errors that can be mapped back to the form, and rejects invalid submissions. In modern React stacks, the same Zod schema used for `zodResolver` on the client is used with `safeParse` on the server, eliminating validation drift . Server errors are surfaced to the form using `setError` (React Hook Form) or returned from a Server Action .
+
+**Beginner-Friendly Explanation:** Server-side validation is the real check. It happens on the server after the user submits, and it cannot be skipped or faked. It is the lock on the door — client-side validation is just a helpful sign.
+
+### Purposes
+
+- To guarantee data integrity and security, regardless of client behaviour.
+- To enforce business rules that cannot be trusted to the client.
+- To return field-level errors that the form can display inline.
+- To prevent malformed or malicious data from reaching the database.
+- To share the same schema between client and server, eliminating drift.
+
+### Syntax Rules and Structure
+
+**Server Action with Shared Schema:**
+
+```ts
+'use server';
+import { schema } from '@/lib/schemas/contact';
+
+export async function submitContact(formData: FormData) {
+  const raw = Object.fromEntries(formData);
+  const result = schema.safeParse(raw);
+
+  if (!result.success) {
+    return { errors: result.error.flatten().fieldErrors };
+  }
+
+  await saveContact(result.data);
+  return { success: true };
+}
+```
+
+**Mapping Server Errors to React Hook Form:**
+
+```tsx
+const onSubmit = async (data) => {
+  const response = await submitContact(data);
+  if (response.errors) {
+    Object.entries(response.errors).forEach(([field, messages]) => {
+      setError(field, { message: messages[0] });
+    });
+  }
+};
+```
+
+**Syntax Rules:**
+
+1. Use `safeParse` (not `parse`) on the server so validation errors return instead of throwing .
+2. Return field-level errors keyed by field name so the client can map them with `setError`.
+3. Validate on every submission, even if client validation passed .
+4. Never expose stack traces or internal error details to the client.
+
+**Constraints and Limitations:**
+
+- Server round trips are slower than client-side checks; do not use server validation for every keystroke.
+- Server errors must be mapped back to the correct fields; generic toasts hide the problem .
+
+### Annotated Code Examples
+
+```ts
+// lib/schemas/contact.ts — shared between client and server
+import { z } from 'zod';
+
+export const contactSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
+});
+```
+
+```ts
+// app/actions/contact.ts — Server Action
+'use server';
+import { contactSchema } from '@/lib/schemas/contact';
+
+export async function submitContact(formData: FormData) {
+  const raw = Object.fromEntries(formData);
+  const result = contactSchema.safeParse(raw);
+
+  if (!result.success) {
+    return { errors: result.error.flatten().fieldErrors };
+  }
+
+  await saveContact(result.data);
+  return { success: true };
+}
+```
+
+```tsx
+// ContactForm.tsx — client component
+const { register, handleSubmit, setError, formState: { errors } } =
+  useForm({ resolver: zodResolver(contactSchema) });
+
+async function onSubmit(data) {
+  const response = await submitContact(data);
+  if (response.errors) {
+    Object.entries(response.errors).forEach(([field, messages]) => {
+      setError(field, { message: messages[0] });
+    });
+  }
+}
+```
+
+**Expected Output:** The client validates with `zodResolver`. If the server rejects the submission, the returned field errors are mapped back to the form and displayed inline.
+
+**Why this output:** The same schema is used on both sides. `safeParse` returns errors instead of throwing. `setError` places server errors on the correct fields .
+
+### Real-World Cases
+
+- **Authentication:** Server-side credential validation and rate limiting.
+- **Checkout:** Payment and address validation on the server.
+- **User registration:** Unique email/username checks.
+- **Content submission:** Server-side sanitisation and length validation.
+
+### References
+
+- SitePoint — React Form Validation Using Shared Zod Schemas and Server Actions — https://www.sitepoint.com/react-form-validation-hook-form-zod/
+- AbstractAPI — Type-Safe Form Validation in Next.js 15 — https://www.abstractapi.com
+- GitHub — Shared Zod schemas client and server — https://github.com/NeverSight/skills_feed
+
+---
+
+## 3. Synchronous Validation
+
+### Definitions
+
+**Core Definition:** Synchronous validation returns its result immediately, without waiting for an external resource.
+
+**Technical Definition:** Synchronous validation checks rules that can be evaluated from the input value alone — requiredness, format (regex), length, numeric range, equality with another field. It runs instantly and can be performed on every keystroke, on blur, or on submit. In schema libraries, synchronous rules are the default; asynchronous rules are opt-in and must be explicitly awaited.
+
+**Beginner-Friendly Explanation:** Synchronous validation is the fast check. It looks at what the user typed and immediately says "good" or "bad" — no waiting for the internet.
+
+### Purposes
+
+- To provide instant feedback for basic rules (required, format, length).
+- To avoid unnecessary network requests.
+- To handle the majority of validation cases without async complexity.
+- To serve as the first layer before async or server checks.
+
+### Syntax Rules and Structure
+
+```ts
+// Zod synchronous rules
+const schema = z.object({
+  email: z.string().email('Invalid email'),
+  age: z.number().min(18, 'Must be 18 or older'),
+  password: z.string().min(8, 'Too short'),
+});
+```
+
+**Syntax Rules:**
+
+1. Synchronous rules are evaluated immediately; no `await` is needed.
+2. Use synchronous validation for format, length, range, and equality checks.
+3. Use async validation only for checks that require an external resource .
+
+### Annotated Code Examples
+
+```tsx
+function validateEmail(email: string): string | null {
+  if (!email) return 'Email is required';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Invalid email';
+  return null;
+}
+```
+
+**Expected Output:** The function returns an error message or `null` immediately.
+
+**Why this output:** The regex check runs synchronously on the input string; no external call is needed.
+
+### Real-World Cases
+
+- **Format checks:** Email, URL, phone number patterns.
+- **Length checks:** Password minimum, bio maximum.
+- **Range checks:** Age, quantity, date ranges.
+
+### References
+
+- Zod — Schema validation — https://zod.dev
+- React Hook Form — Validation modes — https://react-hook-form.com
+
+---
+
+## 4. Asynchronous Validation
+
+### Definitions
+
+**Core Definition:** Asynchronous validation waits for an external result (usually a server response) before deciding whether the input is valid.
+
+**Technical Definition:** Asynchronous validation is used when the validity of a value depends on data not available locally — for example, checking whether a username is already taken, validating a coupon code, or verifying an address. It returns a Promise. Because it is slower than synchronous validation, it must be **debounced** (typically 300–500ms) to avoid flooding the server on every keystroke, and it must handle **race conditions** (a later check resolving before an earlier one) using an abort mechanism or a request counter .
+
+**Beginner-Friendly Explanation:** Asynchronous validation is the slow check. It has to ask the server, "Is this username available?" and wait for the answer. Because it is slow, you do not want to ask on every single keystroke — you wait until the user pauses, and you make sure the last answer wins.
+
+### Purposes
+
+- To validate values against server-side state (uniqueness, availability, eligibility).
+- To check external resources (coupon codes, addresses, tax IDs).
+- To provide accurate feedback without blocking the UI.
+- To prevent duplicate or conflicting data from being submitted.
+
+### Syntax Rules and Structure
+
+**Debounced Async Validation (Conceptual):**
+
+```tsx
+import { useState, useEffect, useRef } from 'react';
+
+function useUsernameAvailability(username: string) {
+  const [status, setStatus] = useState<'idle' | 'checking' | 'ok' | 'taken'>('idle');
+  const timer = useRef<NodeJS.Timeout>();
+  const requestId = useRef(0);
+
+  useEffect(() => {
+    if (username.length < 3) { setStatus('idle'); return; }
+
+    clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
+      const id = ++requestId.current;
+      setStatus('checking');
+      const res = await fetch(`/api/username?u=${encodeURIComponent(username)}`);
+      const data = await res.json();
+      if (id === requestId.current) {
+        setStatus(data.available ? 'ok' : 'taken');
+      }
+    }, 500); // Debounce 500ms
+
+    return () => clearTimeout(timer.current);
+  }, [username]);
+
+  return status;
+}
+```
+
+**Syntax Rules:**
+
+1. Debounce async checks (300–500ms) to avoid excessive requests .
+2. Track the latest request ID or use `AbortController` to discard stale responses.
+3. Show a "checking" state so the user knows a validation is in progress.
+4. Do not block submission while an async check is pending if the check is non-critical; disable submit only for critical checks.
+
+**Constraints and Limitations:**
+
+- Async validation adds latency; do not use it for rules that can be checked synchronously.
+- Race conditions are the primary bug source; always guard against stale responses.
+- Server load increases with every async check; debounce and cache results where possible.
+
+### Annotated Code Examples
+
+```tsx
+// React Hook Form async validation
+const schema = z.object({
+  username: z.string().min(3).refine(async (val) => {
+    const res = await fetch(`/api/username?u=${val}`);
+    const { available } = await res.json();
+    return available;
+  }, 'Username is already taken'),
+});
+```
+
+**Expected Output:** The username is checked against the server after the user pauses typing. The error appears if the username is taken.
+
+**Why this output:** Zod's `refine` supports async functions. The resolver awaits the result. The debouncing must be handled by the form library or a wrapper to avoid per-keystroke requests .
+
+### Real-World Cases
+
+- **Username/email uniqueness:** Registration forms.
+- **Coupon codes:** E-commerce checkout.
+- **Address validation:** Shipping forms.
+- **Tax ID/VAT validation:** Billing forms.
+
+### References
+
+- KendoReact — Async validation with debouncing — https://www.telerik.com
+- GitHub — Async validation with debouncing example — https://github.com/ancoleman/ai-design-components
+- Zod — Async refinements — https://zod.dev
+
+---
+
+## 5. Field-Level Validation
+
+### Definitions
+
+**Core Definition:** Field-level validation checks a single field's value in isolation, independent of other fields in the form.
+
+**Technical Definition:** Field-level validation applies rules that depend only on the field's own value — requiredness, format, length, range. It is defined per field, either as a validation function on the field or as a per-field rule in a schema. Field-level validation is reusable and independent, making it suitable for shared form components and large forms where each field can validate itself without waiting for the whole form .
+
+**Beginner-Friendly Explanation:** Field-level validation checks one field at a time. "Is this email valid?" does not need to look at any other field. It is the most common kind of validation.
+
+### Purposes
+
+- To validate a field immediately on blur or change without waiting for the whole form.
+- To reuse validation rules across multiple forms.
+- To isolate validation logic to the field component.
+- To support independent field state and error display.
+
+### Syntax Rules and Structure
+
+```ts
+// Zod per-field rules
+const schema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'At least 8 characters'),
+});
+```
+
+```tsx
+// React Hook Form per-field registration
+<input {...register('email', {
+  required: 'Email is required',
+  pattern: { value: /^\S+@\S+$/, message: 'Invalid email' },
+})} />
+```
+
+**Syntax Rules:**
+
+1. Define rules that depend only on the field's own value.
+2. Use `onBlur` or the form library's `mode: 'onBlur'` to validate when the user leaves the field .
+3. Field-level rules can be extracted into reusable validators.
+
+### Annotated Code Examples
+
+```tsx
+const emailValidator = (value: string) =>
+  !value ? 'Email is required'
+  : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 'Invalid email'
+  : null;
+
+// Reused across forms
+<input {...register('email', { validate: emailValidator })} />
+```
+
+**Expected Output:** The email field validates independently. The same validator can be reused in any form.
+
+**Why this output:** The validator only reads `value`. It has no dependency on other fields, making it reusable and field-level .
+
+### Real-World Cases
+
+- **Shared form components:** Reusable `EmailField`, `PasswordField`.
+- **Large forms:** Each field validates itself without a full-form pass.
+- **Multi-step wizards:** Each step's fields validate independently.
+
+### References
+
+- TanStack Form — Field-level vs form-level validation — https://tanstack.com/form
+- GitHub — Considering Form Cohesion — https://github.com
+- React Hook Form — register validation — https://react-hook-form.com
+
+---
+
+## 6. Form-Level Validation
+
+### Definitions
+
+**Core Definition:** Form-level validation checks the entire form, including cross-field dependencies and rules that cannot be evaluated by looking at a single field.
+
+**Technical Definition:** Form-level validation applies rules that involve multiple fields — password confirmation, date ranges (start before end), conditional required fields, and overall form consistency. It runs after field-level validation passes and is typically triggered on submit. In React Hook Form, form-level validation is provided by the `resolver` (schema validation) or a custom `validate` function on `handleSubmit`. In TanStack Form, form-level validators are passed to `useForm` and can route errors to specific field paths .
+
+**Beginner-Friendly Explanation:** Form-level validation checks the whole form together. "Do the two passwords match?" cannot be answered by looking at one field — you need both.
+
+### Purposes
+
+- To enforce cross-field rules (password confirmation, date order).
+- To validate conditional required fields.
+- To check overall form completeness before submission.
+- To provide a final gate before the data is sent.
+
+### Syntax Rules and Structure
+
+```ts
+// Zod form-level refine
+const schema = z.object({
+  password: z.string().min(8),
+  confirm: z.string(),
+}).refine((data) => data.password === data.confirm, {
+  message: "Passwords don't match",
+  path: ['confirm'], // Attach the error to the confirm field
+});
+```
+
+**Syntax Rules:**
+
+1. Use `.refine()` or `.superRefine()` in Zod for cross-field rules.
+2. Set `path` so the error appears on the correct field .
+3. Form-level validation runs after field-level validation passes.
+4. Use `validate` on `handleSubmit` for custom form-level logic outside a schema.
+
+### Annotated Code Examples
+
+```tsx
+const schema = z.object({
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+}).refine((data) => data.endDate > data.startDate, {
+  message: 'End date must be after start date',
+  path: ['endDate'],
+});
+```
+
+**Expected Output:** The form validates each date individually, then checks that the end date is after the start date. The error appears on the end date field.
+
+**Why this output:** `.refine()` runs after field-level parsing. The `path` routes the error to the correct field, so the user sees it in context .
+
+### Real-World Cases
+
+- **Password confirmation:** Signup and password-reset forms.
+- **Date ranges:** Booking and reporting forms.
+- **Conditional required fields:** "If country is US, state is required."
+- **Total validation:** Line-item sums and discounts.
+
+### References
+
+- Zod — Refinements — https://zod.dev
+- TanStack Form — Form-level validation — https://tanstack.com/form
+- GitHub — Considering Form Cohesion — https://github.com
+
+---
+
+## 7. Schema Validation
+
+### Definitions
+
+**Core Definition:** Schema validation is the practice of declaring all validation rules in a single, reusable schema object that can be executed on both client and server.
+
+**Technical Definition:** A schema is a declarative description of the expected shape and constraints of data. Schema validation libraries parse a value against the schema and return either the parsed data or a structured list of issues. Because the schema is code, it can be imported by both the client (via a resolver) and the server (via `safeParse`), eliminating the drift that occurs when validation rules are duplicated in two places . Zod, Yup, and Joi are the dominant schema libraries in the React ecosystem .
+
+**Beginner-Friendly Explanation:** Schema validation means writing your rules once in a single place. The same rules run in the browser and on the server, so they cannot disagree.
+
+### Purposes
+
+- To eliminate duplicated validation logic between client and server.
+- To provide a single source of truth for data shape and constraints.
+- To enable TypeScript type inference from the schema.
+- To produce structured, field-level error objects.
+- To support reusable validation across forms and APIs.
+
+### Syntax Rules and Structure
+
+```ts
+import { z } from 'zod';
+
+const schema = z.object({
+  email: z.string().email(),
+  age: z.number().min(18),
+});
+
+type FormData = z.infer<typeof schema>; // TypeScript type from schema
+```
+
+**Syntax Rules:**
+
+1. Define the schema in a shared module that both client and server can import.
+2. Use `z.infer` (Zod) or `InferType` (Yup) to derive TypeScript types.
+3. Validate on the client with a resolver (`zodResolver`, `yupResolver`).
+4. Validate on the server with `safeParse` and return field-level errors .
+
+### Annotated Code Examples
+
+```ts
+// shared/schema.ts
+export const signupSchema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'At least 8 characters'),
+});
+```
+
+```tsx
+// Client
+const form = useForm({ resolver: zodResolver(signupSchema) });
+```
+
+```ts
+// Server
+const result = signupSchema.safeParse(input);
+if (!result.success) return { errors: result.error.flatten().fieldErrors };
+```
+
+**Expected Output:** The same rules validate on both sides. The TypeScript type is inferred from the schema.
+
+**Why this output:** The schema is the single source of truth. The resolver runs it on the client; `safeParse` runs it on the server. Type inference keeps the form data and the schema in sync .
+
+### Real-World Cases
+
+- **Full-stack TypeScript applications:** Shared schemas between React and Node.
+- **tRPC:** Zod schemas define procedure inputs and outputs.
+- **API validation:** Server-side request body validation.
+- **Form libraries:** Resolver-based validation in React Hook Form.
+
+### References
+
+- SitePoint — React Form Validation Using Shared Zod Schemas — https://www.sitepoint.com/react-form-validation-hook-form-zod/
+- Zod — Type inference — https://zod.dev
+- APIscout — Zod vs Yup vs Joi 2026 — https://apiscout.dev/guides/zod-vs-yup-vs-joi-2026
+
+---
+
+## 8. Yup
+
+### Definitions
+
+**Core Definition:** Yup is a JavaScript schema validation library that has been the default validator for Formik and is supported natively by React Hook Form.
+
+**Technical Definition:** Yup is a schema builder for runtime value parsing and validation. It has been the default validator in Formik for years and is supported by React Hook Form via `yupResolver`. Yup predates TypeScript's rise and has less automatic type inference than Zod, but it remains widely used in existing Formik codebases and React form setups . Its bundle size is larger than Zod's (~17–39KB minified depending on version) .
+
+**Beginner-Friendly Explanation:** Yup is the classic schema validator that works great with Formik. If you have an older React codebase that already uses Yup, there is no need to switch. For new TypeScript projects, Zod is usually the better choice.
+
+### Purposes
+
+- To validate schemas in Formik-based forms.
+- To provide a familiar API for teams already using Yup.
+- To integrate with React Hook Form via `yupResolver`.
+- To support complex validation rules and custom messages.
+
+### Syntax Rules and Structure
+
+```ts
+import * as yup from 'yup';
+
+const schema = yup.object({
+  email: yup.string().email('Invalid email').required('Required'),
+  password: yup.string().min(8, 'Too short').required('Required'),
+});
+
+type FormData = yup.InferType<typeof schema>;
+```
+
+**Syntax Rules:**
+
+1. Use `yup.object({...})` to define the schema.
+2. Chain methods like `.required()`, `.min()`, `.email()`.
+3. Use `yupResolver(schema)` with React Hook Form .
+4. Use `yup.InferType` for basic TypeScript inference; complex enums may require manual typing .
+
+**Constraints and Limitations:**
+
+- Type inference is less powerful than Zod's; enum narrowing and discriminated unions are limited.
+- Bundle size is larger than Zod.
+- Formik is in maintenance mode; new projects may prefer Zod + React Hook Form.
+
+### Annotated Code Examples
+
+```tsx
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+
+const schema = yup.object({
+  email: yup.string().email('Invalid email').required('Required'),
+});
+
+const { register, handleSubmit } = useForm({
+  resolver: yupResolver(schema),
+});
+```
+
+**Expected Output:** The form validates using the Yup schema via `yupResolver`.
+
+**Why this output:** `yupResolver` adapts Yup to React Hook Form's resolver interface .
+
+### Real-World Cases
+
+- **Formik migrations:** Existing codebases that already use Yup.
+- **Teams familiar with Yup:** No learning curve.
+- **React Hook Form with Yup:** Supported via resolver.
+
+### References
+
+- APIscout — Zod vs Yup vs Joi 2026 — https://apiscout.dev/guides/zod-vs-yup-vs-joi-2026
+- PkgPulse — Zod vs Yup vs Joi 2026 — https://www.pkgpulse.com/guides/zod-vs-yup-vs-joi-schema-validation-2026
+- React Hook Form — yupResolver — https://react-hook-form.com
+
+---
+
+## 9. Zod
+
+### Definitions
+
+**Core Definition:** Zod is a TypeScript-first schema validation library with automatic type inference and zero dependencies, and it is the dominant schema validator in the React ecosystem in 2026.
+
+**Technical Definition:** Zod is a TypeScript-first schema declaration and validation library. Its defining feature is **automatic type inference**: `z.infer<typeof schema>` derives the TypeScript type directly from the schema, eliminating type drift. It has zero dependencies, a bundle size of ~13–14KB minified, and first-class integrations with React Hook Form (`zodResolver`), tRPC, and modern TypeScript stacks . Zod v4 adds features like `exactOptional`, `xor`, and JSON Schema import .
+
+**Beginner-Friendly Explanation:** Zod is the modern favourite. You write your rules once, and TypeScript types are created automatically. It is fast, small, and works everywhere — client and server.
+
+### Purposes
+
+- To provide TypeScript-first schema validation with automatic type inference.
+- To share a single schema between client and server.
+- To integrate with React Hook Form via `zodResolver`.
+- To support async validation, transforms, and cross-field refinements.
+- To serve as the validation layer in tRPC and modern TypeScript stacks.
+
+### Syntax Rules and Structure
+
+```ts
+import { z } from 'zod';
+
+const schema = z.object({
+  email: z.string().email('Invalid email'),
+  age: z.number().min(18, 'Must be 18 or older'),
+  role: z.enum(['admin', 'user']),
+});
+
+type FormData = z.infer<typeof schema>;
+```
+
+**Syntax Rules:**
+
+1. Use `z.object({...})` for object schemas.
+2. Chain validators: `.min()`, `.max()`, `.email()`, `.regex()`.
+3. Use `.refine()` or `.superRefine()` for cross-field rules .
+4. Use `z.infer<typeof schema>` for the TypeScript type .
+5. Use `safeParse` on the server to return errors instead of throwing .
+6. Use `zodResolver(schema)` with React Hook Form .
+
+**Constraints and Limitations:**
+
+- Async validation works but can be less ergonomic than Joi for very complex async cross-field dependencies .
+- Zod is fast but not the fastest validator; extreme-performance cases may use typia .
+
+### Annotated Code Examples
+
+```tsx
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'At least 8 characters'),
+  confirm: z.string(),
+}).refine((data) => data.password === data.confirm, {
+  message: "Passwords don't match",
+  path: ['confirm'],
+});
+
+type FormData = z.infer<typeof schema>;
+
+function SignupForm() {
+  const { register, handleSubmit, formState: { errors } } =
+    useForm<FormData>({ resolver: zodResolver(schema) });
+
+  return (
+    <form onSubmit={handleSubmit((data) => console.log(data))}>
+      <input {...register('email')} />
+      {errors.email && <span role="alert">{errors.email.message}</span>}
+
+      <input {...register('password')} type="password" />
+      {errors.password && <span role="alert">{errors.password.message}</span>}
+
+      <input {...register('confirm')} type="password" />
+      {errors.confirm && <span role="alert">{errors.confirm.message}</span>}
+
+      <button type="submit">Sign up</button>
+    </form>
+  );
+}
+```
+
+**Expected Output:** All rules — including the cross-field password confirmation — are validated by Zod. Errors appear on the correct fields with the schema messages.
+
+**Why this output:** `zodResolver` runs the Zod schema. `.refine()` checks password equality and routes the error to `confirm`. The form data type is inferred from the schema .
+
+### Real-World Cases
+
+- **New TypeScript projects:** The default choice for schema validation.
+- **Full-stack TypeScript:** Shared schemas between React and Node.
+- **tRPC applications:** Zod is the native input/output validator.
+- **React Hook Form forms:** The standard resolver pairing in 2026.
+
+### References
+
+- Zod — Official site — https://zod.dev
+- APIscout — Zod vs Yup vs Joi 2026 — https://apiscout.dev/guides/zod-vs-yup-vs-joi-2026
+- PkgPulse — Zod vs Yup vs Joi 2026 — https://www.pkgpulse.com/guides/zod-vs-yup-vs-joi-schema-validation-2026
+- SitePoint — React Form Validation Using Shared Zod Schemas — https://www.sitepoint.com/react-form-validation-hook-form-zod/
+
+---
+
+## 10. Joi
+
+### Definitions
+
+**Core Definition:** Joi is a powerful, battle-tested schema validation library from the Hapi ecosystem, primarily used for server-side validation.
+
+**Technical Definition:** Joi is a mature schema validation library that originated in the Hapi ecosystem. It offers the most expressive API of the three major validators, with detailed error messages and rich rule composition. However, it has **no TypeScript inference**, a browser-hostile bundle size (~149KB minified), and is primarily designed for Node.js server-side validation . React Hook Form supports Joi via `joiResolver` .
+
+**Beginner-Friendly Explanation:** Joi is the veteran validator built for servers. It is incredibly powerful and expressive, but it is heavy for the browser and does not give you TypeScript types automatically. Use it on the server, especially if you are in the Hapi ecosystem.
+
+### Purposes
+
+- To provide rich, expressive server-side validation.
+- To validate Express/Hapi request bodies.
+- To support complex custom validation rules.
+- To integrate with React Hook Form via `joiResolver` when needed.
+
+### Syntax Rules and Structure
+
+```ts
+import Joi from 'joi';
+
+const schema = Joi.object({
+  email: Joi.string().email().required(),
+  age: Joi.number().min(18).required(),
+});
+```
+
+**Syntax Rules:**
+
+1. Use `Joi.object({...})` to define the schema.
+2. Chain methods: `.required()`, `.min()`, `.email()`, `.pattern()`.
+3. Use `joiResolver(schema)` with React Hook Form .
+4. Prefer Joi on the server; avoid it in the browser due to bundle size.
+
+**Constraints and Limitations:**
+
+- No TypeScript inference; types must be written manually .
+- Large bundle size makes it unsuitable for browser use .
+- Less common in modern React form stacks.
+
+### Annotated Code Examples
+
+```ts
+import Joi from 'joi';
+
+const schema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+});
+
+const { error, value } = schema.validate(req.body, { abortEarly: false });
+if (error) {
+  return res.status(400).json({ errors: error.details });
+}
+```
+
+**Expected Output:** The server validates the request body with Joi and returns detailed error details if invalid.
+
+**Why this output:** `schema.validate` runs synchronously and returns an error object with detailed issues. `abortEarly: false` collects all errors, not just the first .
+
+### Real-World Cases
+
+- **Express/Hapi APIs:** Server-side request validation.
+- **Complex custom rules:** Joi's expressive API handles intricate conditions.
+- **Teams without TypeScript:** Joi's JavaScript-first design is familiar.
+
+### References
+
+- APIscout — Zod vs Yup vs Joi 2026 — https://apiscout.dev/guides/zod-vs-yup-vs-joi-2026
+- PkgPulse — Zod vs Yup vs Joi 2026 — https://www.pkgpulse.com/guides/zod-vs-yup-vs-joi-schema-validation-2026
+- React Hook Form — joiResolver — https://react-hook-form.com
+
+---
+
+## 11. Validation Libraries
+
+### Comparison Table
+
+| Feature | Zod | Yup | Joi |
+|---------|-----|-----|-----|
+| **TypeScript inference** | Full (native)  | Partial  | None  |
+| **Bundle size (min)** | ~13–14KB  | ~17–39KB  | ~149KB  |
+| **Dependencies** | 0  | 6  | 5  |
+| **Browser support** | Yes  | Yes  | Partial  |
+| **React Hook Form** | `zodResolver`  | `yupResolver`  | `joiResolver`  |
+| **Formik** | Custom integration | Native | Custom integration |
+| **Async validation** | Yes  | Yes (built-in)  | Yes  |
+| **Best for** | TypeScript projects  | Formik/legacy  | Server-side/Hapi  |
+
+**Choosing a Library:**
+
+- **New TypeScript projects → Zod.** It is the default in 2026, with the best inference and ecosystem fit .
+- **Formik codebases → Yup.** It is the native Formik validator and requires no migration .
+- **Server-side Express/Hapi → Joi.** Its expressiveness and detailed errors are valuable on the server .
+- **React Hook Form → Zod or Yup.** Both have first-class resolvers; Zod is preferred for new code .
+
+### Annotated Code Examples
+
+**Zod + React Hook Form (recommended):**
+
+```tsx
+const schema = z.object({ email: z.string().email() });
+const form = useForm({ resolver: zodResolver(schema) });
+```
+
+**Yup + Formik (legacy):**
+
+```tsx
+const schema = yup.object({ email: yup.string().email() });
+<Formik validationSchema={schema} ... />
+```
+
+**Expected Output:** Both validate email format. Zod provides automatic TypeScript inference; Yup integrates natively with Formik.
+
+**Why this output:** The resolver bridges the schema library to the form library. Zod's inference gives type safety; Yup's native Formik integration requires less setup in legacy codebases.
+
+### Real-World Cases
+
+- **Modern React + TypeScript:** Zod.
+- **Legacy Formik:** Yup.
+- **Node API:** Joi.
+- **Full-stack TypeScript monorepo:** Zod shared between client and server.
+
+### References
+
+- APIscout — Zod vs Yup vs Joi 2026 — https://apiscout.dev/guides/zod-vs-yup-vs-joi-2026
+- PkgPulse — Zod vs Yup vs Joi 2026 — https://www.pkgpulse.com/guides/zod-vs-yup-vs-joi-schema-validation-2026
+- React Hook Form — Resolvers — https://react-hook-form.com
+
+---
+
+## 12. Error Messages
+
+### Definitions
+
+**Core Definition:** Error messages are the human-readable explanations that tell the user what is wrong with their input and how to fix it.
+
+**Technical Definition:** Error messages are produced by the validation layer and rendered by the form. A good error message is **specific** (it names the field and the rule), **actionable** (it tells the user what to do), and **accessible** (it is programmatically associated with the field and announced to assistive technology). Error messages should not be vague ("Invalid input") or premature (shown before the user has interacted) .
+
+**Beginner-Friendly Explanation:** An error message is what tells the user, "This is wrong, and here is how to fix it." "Invalid input" is a bad error message. "Password must be at least 8 characters" is a good one.
+
+### Purposes
+
+- To explain exactly why the input is invalid.
+- To guide the user to the correct value.
+- To be announced to screen readers and perceivable by all users.
+- To reduce frustration and support completion.
+
+### Syntax Rules and Structure
+
+**Good vs Bad Messages:**
+
+| Bad | Good |
+|-----|------|
+| "Invalid input" | "Email must include an @" |
+| "Error" | "Password must be at least 8 characters" |
+| "Required" | "Please enter your email address" |
+| "Wrong" | "End date must be after the start date" |
+
+**Syntax Rules:**
+
+1. Be specific: name the field and the rule.
+2. Be actionable: tell the user what to do.
+3. Do not validate before interaction; show field errors after blur or submit .
+4. Use the schema library's message customization to define clear messages.
+
+### Annotated Code Examples
+
+```ts
+const schema = z.object({
+  email: z.string()
+    .min(1, 'Please enter your email address')
+    .email('Email must include an @ and a domain'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters'),
+});
+```
+
+**Expected Output:** The error messages are specific and actionable.
+
+**Why this output:** Each rule has a custom message that explains the requirement and how to satisfy it.
+
+### Real-World Cases
+
+- **All forms:** Error messages are the primary feedback mechanism.
+- **Accessibility audits:** Vague messages are a common finding.
+- **Conversion optimisation:** Clear messages reduce abandonment.
+
+### References
+
+- KendoReact — React Form Guidelines: Error Messages — https://www.telerik.com
+- ualiyou/frontend-engineering — Error Messaging — https://raw.githubusercontent.com/ualiyou/frontend-engineering
+
+---
+
+## 13. Error Display
+
+### Definitions
+
+**Core Definition:** Error display is the practice of rendering validation errors in a way that is visible, associated with the correct field, and announced to assistive technology.
+
+**Technical Definition:** Accessible error display requires four channels: **visual** (the message is rendered near the field), **state** (`aria-invalid="true"` on the input), **association** (`aria-describedby` pointing to the message's `id`), and **announcement** (`role="alert"` or a live region). On submit failure, focus should move to the first invalid field. A red border alone is not an error message .
+
+**Beginner-Friendly Explanation:** Showing an error means more than turning the border red. You need to write the message, connect it to the field for screen readers, announce it when it appears, and move the user's focus to the problem.
+
+### Purposes
+
+- To make errors perceivable by all users, including screen-reader users.
+- To associate each error with the field it belongs to.
+- To announce dynamic errors when they appear.
+- To guide keyboard users to the first error on submit failure.
+
+### Syntax Rules and Structure
+
+**Required ARIA Wiring:**
+
+| Channel | Implementation |
+|---------|----------------|
+| Visual | Render the message near the field |
+| State | `aria-invalid="true"` on the input |
+| Association | `aria-describedby={messageId}` |
+| Announcement | `role="alert"` on the message |
+| Focus | Focus the first invalid field on submit  |
+
+**Syntax Rules:**
+
+1. Give the error message a stable `id`.
+2. Point the input's `aria-describedby` at the message ID when an error exists .
+3. Set `aria-invalid` on the input.
+4. Use `role="alert"` on the message so screen readers announce it when it appears .
+5. Focus the first invalid field on submit failure .
+
+### Annotated Code Examples
+
+```tsx
+function Field({ id, label, error, ...props }) {
+  const errorId = `${id}-error`;
+  return (
     <div>
-      <label htmlFor="username">Username</label>
+      <label htmlFor={id}>{label}</label>
       <input
-        id="username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        aria-invalid={!!error}
-        aria-describedby={error ? 'username-error' : undefined}
+        id={id}
+        aria-invalid={error ? 'true' : undefined}
+        aria-describedby={error ? errorId : undefined}
+        {...props}
       />
-      {checking && <span>Checking...</span>}
       {error && (
-        <span id="username-error" role="alert" style={{ color: 'red' }}>
+        <span id={errorId} role="alert">
           {error}
         </span>
       )}
@@ -259,1086 +1115,124 @@ function UsernameField() {
 }
 ```
 
-**Expected Output:** As the user types, "Checking..." appears after a brief pause, then either the error "Username is taken" or no error. The check is debounced by 500ms.
+**Expected Output:** Screen readers announce the error when it appears, and the input is marked invalid. Sighted users see the message near the field.
 
-**Why This Output Occurs:** The `useEffect` runs on every change to `username`, but the `setTimeout` delays the actual request by 500ms. If the user types another character within that window, the cleanup function clears the previous timer and starts a new one. This prevents a request per keystroke.
-
-### Real-World Cases
-
-- **Login forms:** `onBlur` validation for email and password; `onSubmit` for final validation.
-- **Signup forms:** `onChange` for password strength; `onBlur` for email format.
-- **Search inputs:** `onChange` with debouncing for live suggestions.
-- **Multi-step wizards:** `onBlur` per field, `onSubmit` to advance to the next step.
-- **Checkout forms:** `onBlur` for address and payment fields; `onSubmit` for final confirmation.
-
-### References
-
-- React Hook Form – useForm (`mode`, `reValidateMode`): https://react-hook-form.com/docs/useform#mode
-- TanStack Form – Form and Field Validation: https://tanstack.com/form/latest/docs/framework/react/guides/validation
-- Stack Overflow – How to submit with React Hook Form when having mode onBlur: https://stackoverflow.com/questions/75672987
-
----
-
-## Core Concept 2: Built-in HTML5 Constraint Validation vs. Custom React Validation Logic
-
-### Definitions
-
-**Core Definition:** HTML5 constraint validation uses native browser attributes and the Constraint Validation API to validate form inputs, while custom React validation logic uses JavaScript functions, state, and libraries to evaluate input against arbitrary rules.
-
-**Technical Definition:** The **Constraint Validation API** is a browser API that provides native validation for form controls. It defines validity states (e.g., `valueMissing`, `typeMismatch`, `patternMismatch`, `tooLong`, `tooShort`, `rangeUnderflow`, `rangeOverflow`, `stepMismatch`, `badInput`, `customError`) and methods (`checkValidity()`, `reportValidity()`, `setCustomValidity()`). HTML5 attributes (`required`, `type="email"`, `pattern`, `min`, `max`, `minlength`, `maxlength`, `step`) declare constraints declaratively. Custom React validation logic uses JavaScript to evaluate input against rules that are not expressible via HTML attributes—cross-field dependencies, business rules, or server-side checks. The `setCustomValidity()` method bridges the two: it allows custom React logic to set a native error message that the browser displays. React Hook Form's `shouldUseNativeValidation` option enables browser-native validation, and the `progressive` option forwards validation attributes to the DOM for progressive enhancement.
-
-**Beginner-Friendly Explanation:** HTML5 validation is like a pre-printed form with checkboxes and format rules built in—the browser checks them automatically. Custom React validation is like having a personal assistant who reads your form and applies rules the browser doesn't know about—like "this password must match the one above it" or "this username must not already exist." The two work together: the browser handles the basics, and React handles the rest.
-
-### Purposes
-
-- **HTML5:** To provide zero-JavaScript validation for basic constraints (required, format, range).
-- **HTML5:** To leverage the browser's built-in error UI (popovers) for immediate feedback.
-- **HTML5:** To enable progressive enhancement—validation works before JavaScript loads.
-- **Custom React:** To implement validation rules that HTML5 cannot express (cross-field, business logic).
-- **Custom React:** To control error message content, placement, and styling.
-- **Custom React:** To integrate async validation (server checks) and complex validation libraries.
-
-### Syntax Rules and Structure
-
-**HTML5 Constraint Validation Attributes:**
-```html
-<input type="email" required />                          <!-- Required + email format -->
-<input type="number" min="18" max="120" />               <!-- Range validation -->
-<input type="text" pattern="[A-Za-z]{3,}" />            <!-- Pattern validation -->
-<input type="password" minlength="8" maxlength="64" />   <!-- Length validation -->
-<input type="url" />                                     <!-- URL format -->
-```
-
-**Constraint Validation API (Programmatic):**
-```jsx
-const inputRef = useRef(null);
-
-// Check validity
-const isValid = inputRef.current.checkValidity();
-
-// Show the browser's validation message
-inputRef.current.reportValidity();
-
-// Set a custom error message
-inputRef.current.setCustomValidity('This username is already taken');
-
-// Clear the custom error
-inputRef.current.setCustomValidity('');
-```
-
-**Custom React Validation with React Hook Form:**
-```jsx
-const { register, formState: { errors } } = useForm();
-
-<input
-  {...register('email', {
-    required: 'Email is required',
-    pattern: { value: /^\S+@\S+$/, message: 'Invalid email format' },
-    validate: {
-      notCommon: (v) =>
-        !['test@test.com', 'admin@admin.com'].includes(v) ||
-        'This email is not allowed',
-    },
-  })}
-/>
-```
-
-**Component Breakdown:**
-- `required`, `pattern`: Built-in rules with custom messages.
-- `validate.notCommon`: A custom synchronous validation function.
-- The function returns `true` (valid) or a string (error message).
-
-**Bridging Custom Logic to Native Validation:**
-```jsx
-function useNativeCustomValidation(inputRef, errorMessage) {
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.setCustomValidity(errorMessage || '');
-    }
-  }, [errorMessage, inputRef]);
-}
-```
-
-**Component Breakdown:**
-- `setCustomValidity('')`: Clears the custom error.
-- `setCustomValidity(message)`: Sets a native error message that the browser displays.
-
-**Syntax Rules:**
-- Use HTML5 attributes for basic constraints (required, type, min, max, minlength, maxlength, pattern).
-- Use custom `validate` functions for rules HTML5 cannot express.
-- Use `setCustomValidity()` to integrate custom errors with the browser's native validation UI.
-- Set `noValidate` on the `<form>` to disable native validation when using a library.
-- Use `shouldUseNativeValidation` in React Hook Form to enable browser-native validation.
-
-**Constraints and Limitations:**
-- HTML5 validation messages are browser-controlled and inconsistent across browsers.
-- HTML5 validation does not support cross-field rules or async checks.
-- Native validation popovers can be difficult to style or position.
-- `setCustomValidity()` requires manual clearing; if not cleared, the field remains invalid.
-- HTML5 validation does not work in older browsers; always validate on the server as a fallback.
-
-### Annotated Code Example: Combining HTML5 and Custom Validation
-
-```jsx
-import { useForm } from 'react-hook-form';
-
-function RegistrationForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({ mode: 'onBlur' });
-
-  return (
-    <form onSubmit={handleSubmit(data => alert(JSON.stringify(data)))}>
-      {/* HTML5: required + email type */}
-      <div>
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          required
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? 'email-error' : undefined}
-          {...register('email', {
-            required: 'Email is required',
-            pattern: { value: /^\S+@\S+$/, message: 'Invalid email' },
-          })}
-        />
-        {errors.email && (
-          <span id="email-error" role="alert" style={{ color: 'red' }}>
-            {errors.email.message}
-          </span>
-        )}
-      </div>
-
-      {/* Custom: business rule not expressible in HTML5 */}
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          aria-invalid={!!errors.username}
-          aria-describedby={errors.username ? 'username-error' : undefined}
-          {...register('username', {
-            required: 'Username is required',
-            minLength: { value: 3, message: 'At least 3 characters' },
-            validate: {
-              notReserved: (v) =>
-                !['admin', 'root', 'system'].includes(v.toLowerCase()) ||
-                'This username is reserved',
-            },
-          })}
-        />
-        {errors.username && (
-          <span id="username-error" role="alert" style={{ color: 'red' }}>
-            {errors.username.message}
-          </span>
-        )}
-      </div>
-
-      <button type="submit">Register</button>
-    </form>
-  );
-}
-```
-
-**Expected Output:** The email field uses both HTML5 `type="email"` and `required` attributes (which React Hook Form respects) plus a custom pattern message. The username field uses a custom `validate.notReserved` function to reject reserved names. Errors appear on blur with custom messages.
-
-**Why This Output Occurs:** The `type="email"` and `required` attributes provide native browser validation, but React Hook Form overrides the native messages with its own. The `validate.notReserved` function is pure custom logic that HTML5 cannot express. Both validation layers run, and the first error (in order of registration) is displayed.
+**Why this output:** `aria-invalid` marks the state; `aria-describedby` associates the message; `role="alert"` announces it dynamically .
 
 ### Real-World Cases
 
-- **HTML5:** Simple contact forms, search inputs, and any form where basic constraints are sufficient.
-- **Custom React:** Signup forms with reserved usernames, checkout forms with coupon validation, and any form with business rules.
-- **Combined:** Login forms (HTML5 for email format, custom for password strength), registration forms (HTML5 for required, custom for uniqueness).
+- **All forms with validation:** Accessible error display is a baseline requirement.
+- **WCAG compliance:** Error identification (3.3.1) and error suggestion (3.3.3).
+- **Screen-reader testing:** A common source of inaccessible forms.
 
 ### References
 
-- MDN Web Docs – Constraint Validation: https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
-- MDN Web Docs – Constraint Validation API: https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation
-- GitNation – Replacing Form Libraries With Native Web APIs: https://gitnation.com/contents/replacing-form-libraries-with-native-web-apis
-- React Hook Form – shouldUseNativeValidation: https://react-hook-form.com/docs/useform#shouldUseNativeValidation
+- ualiyou/frontend-engineering — Error Messaging — https://raw.githubusercontent.com/ualiyou/frontend-engineering
+- GitHub — Associate and Announce Form Errors — https://github.com/mblode/agent-skills
+- W3C WAI — Error Identification (WCAG 3.3.1) — https://www.w3.org/WAI/WCAG21/Understanding/error-identification.html
 
 ---
 
-## Core Concept 3: Basic Constraints (Required, Type, Range, Pattern/Regex)
+## 14. Validation Best Practices
 
-### Definitions
+### Best Practices Table
 
-**Core Definition:** Basic constraints are the fundamental validation rules applied to individual form fields—required fields, type validation (email, number, URL), range validation (min/max for numbers and dates), and pattern/regex validation for custom formats.
+| Practice | Description |
+|----------|-------------|
+| **Validate on both client and server** | Client for UX; server for integrity. Never trust the client . |
+| **Share one schema** | Use the same Zod/Yup schema on both sides to eliminate drift . |
+| **Validate on blur or submit** | Avoid premature errors; "reward early, punish late" . |
+| **Debounce async validation** | 300–500ms; guard against race conditions . |
+| **Use field-level for isolation, form-level for cohesion** | Field-level rules are reusable; form-level handles cross-field dependencies . |
+| **Write specific, actionable error messages** | Name the rule and tell the user how to fix it. |
+| **Wire errors accessibly** | `aria-invalid`, `aria-describedby`, `role="alert"`, focus management . |
+| **Map server errors back to fields** | Use `setError` instead of generic toasts . |
+| **Validate server-side with `safeParse`** | Return errors instead of throwing . |
+| **Do not validate before interaction** | Wait for blur or submit; do not nag on mount . |
 
-**Technical Definition:** Basic constraints are the most common validation rules and are expressible in both HTML5 and React Hook Form. **Required** ensures a field is not empty (`required` attribute; `required: 'message'` in RHF). **Type validation** uses the `type` attribute (`email`, `number`, `url`, `tel`, `date`) to enforce format expectations. **Range validation** uses `min` and `max` attributes for numbers, dates, and other types with a range (`min: 18, max: 120`). **Length validation** uses `minlength` and `maxlength` for strings. **Pattern validation** uses the `pattern` attribute or RHF's `pattern` option with a regular expression. React Hook Form maps these attributes to its own validation rules, allowing custom error messages for each. The rules can be combined on a single field, and RHF evaluates them in order.
+### Annotated Code Examples
 
-**Beginner-Friendly Explanation:** Basic constraints are like the rules on a paper form: "This field is required," "Enter a valid email address," "Age must be between 18 and 120," "Phone number must be 10 digits." They are the everyday checks that catch most mistakes before the form is submitted.
+**✅ Good Practices:**
 
-### Purposes
-
-- **Required:** To ensure critical fields (email, password, name) are not left empty.
-- **Type:** To ensure the input format matches the expected data type (email, URL, number).
-- **Range:** To enforce minimum and maximum values for numbers, dates, and lengths.
-- **Pattern/Regex:** To enforce custom formats (phone numbers, postal codes, credit card numbers).
-- **Combined:** To apply multiple rules to a single field, each with its own error message.
-
-### Syntax Rules and Structure
-
-**HTML5 Attributes:**
-```html
-<input type="email" required />
-<input type="number" min="18" max="120" />
-<input type="text" minlength="3" maxlength="20" />
-<input type="text" pattern="[A-Za-z]{3,}" />
-<input type="url" />
-```
-
-**React Hook Form Registration:**
-```jsx
-<input
-  {...register('email', {
-    required: 'Email is required',
-    pattern: { value: /^\S+@\S+$/, message: 'Invalid email format' },
-  })}
-/>
-
-<input
-  type="number"
-  {...register('age', {
-    required: 'Age is required',
-    min: { value: 18, message: 'Must be at least 18' },
-    max: { value: 120, message: 'Must be at most 120' },
-    valueAsNumber: true,
-  })}
-/>
-
-<input
-  {...register('password', {
-    required: 'Password is required',
-    minLength: { value: 8, message: 'At least 8 characters' },
-    maxLength: { value: 64, message: 'At most 64 characters' },
-  })}
-/>
-
-<input
-  {...register('phone', {
-    required: 'Phone is required',
-    pattern: {
-      value: /^\+?[1-9]\d{1,14}$/,
-      message: 'Invalid phone number',
-    },
-  })}
-/>
-```
-
-**Component Breakdown:**
-- `required`: The field must not be empty.
-- `pattern`: The value must match the regular expression.
-- `min` / `max`: The value must be within the range.
-- `minLength` / `maxLength`: The string length must be within the range.
-- `valueAsNumber`: Converts the string value to a number for numeric validation.
-
-**Syntax Rules:**
-- Use `required` for essential fields.
-- Use `type="email"` and `type="url"` for format validation, or a `pattern` for custom formats.
-- Use `min` and `max` for numeric ranges; use `minLength` and `maxLength` for string lengths.
-- Use `valueAsNumber: true` for numeric fields so RHF validates numbers, not strings.
-- Provide custom error messages for every rule to give users specific feedback.
-- Combine rules on a single field; RHF evaluates them in order and shows the first error by default.
-
-**Constraints and Limitations:**
-- `pattern` is anchored automatically (the entire value must match), so `^` and `$` are not needed.
-- `min`/`max` work on strings for numeric types only if `valueAsNumber` is used; otherwise, string comparison is used.
-- `required` does not work with `type="checkbox"` in the same way; use `validate` for checkbox groups.
-- HTML5 `pattern` does not support lookaheads or other advanced regex features in all browsers.
-- Overly strict patterns can reject valid input (e.g., international phone numbers); test thoroughly.
-
-### Annotated Code Example: Multi-Rule Field
-
-```jsx
-import { useForm } from 'react-hook-form';
-
-function ProfileForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({ mode: 'onBlur' });
-
-  return (
-    <form onSubmit={handleSubmit(data => alert(JSON.stringify(data)))}>
-      {/* Required + pattern */}
-      <div>
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? 'email-error' : undefined}
-          {...register('email', {
-            required: 'Email is required',
-            pattern: { value: /^\S+@\S+$/, message: 'Invalid email format' },
-          })}
-        />
-        {errors.email && (
-          <span id="email-error" role="alert" style={{ color: 'red' }}>
-            {errors.email.message}
-          </span>
-        )}
-      </div>
-
-      {/* Range validation */}
-      <div>
-        <label htmlFor="age">Age</label>
-        <input
-          id="age"
-          type="number"
-          aria-invalid={!!errors.age}
-          aria-describedby={errors.age ? 'age-error' : undefined}
-          {...register('age', {
-            required: 'Age is required',
-            min: { value: 18, message: 'You must be at least 18' },
-            max: { value: 120, message: 'Please enter a realistic age' },
-            valueAsNumber: true,
-          })}
-        />
-        {errors.age && (
-          <span id="age-error" role="alert" style={{ color: 'red' }}>
-            {errors.age.message}
-          </span>
-        )}
-      </div>
-
-      {/* Length validation */}
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          aria-invalid={!!errors.username}
-          aria-describedby={errors.username ? 'username-error' : undefined}
-          {...register('username', {
-            required: 'Username is required',
-            minLength: { value: 3, message: 'At least 3 characters' },
-            maxLength: { value: 20, message: 'At most 20 characters' },
-          })}
-        />
-        {errors.username && (
-          <span id="username-error" role="alert" style={{ color: 'red' }}>
-            {errors.username.message}
-          </span>
-        )}
-      </div>
-
-      <button type="submit">Save Profile</button>
-    </form>
-  );
-}
-```
-
-**Expected Output:** Submitting with an empty email shows "Email is required". Entering an invalid email shows "Invalid email format". Entering an age below 18 shows "You must be at least 18". Entering a username shorter than 3 characters shows "At least 3 characters". All errors appear on blur.
-
-**Why This Output Occurs:** Each field is registered with multiple validation rules. React Hook Form evaluates them in order and displays the first error message. `valueAsNumber: true` ensures the age field is validated as a number, not a string. The `aria-invalid` and `aria-describedby` attributes make the errors accessible.
-
-### Real-World Cases
-
-- **Signup forms:** Email (type + required), password (minLength + pattern), age (min/max).
-- **Checkout forms:** Postal code (pattern), phone (pattern), credit card (pattern + length).
-- **Profile forms:** Username (required + minLength), bio (maxLength).
-- **Admin forms:** ID fields (pattern), date fields (min/max), numeric fields (range).
-- **Surveys:** Rating scales (min/max), text responses (required + maxLength).
-
-### References
-
-- React Hook Form – register (validation rules): https://react-hook-form.com/docs/useform/register
-- MDN Web Docs – Client-side form validation: https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation
-- AbstractAPI – How to Validate Forms in React: https://www.abstractapi.com/guides/email-validation/react-form-validation
-
----
-
-## Core Concept 4: Dependent and Cross-Field Validation (Password Confirmation, Date Ranges)
-
-### Definitions
-
-**Core Definition:** Dependent and cross-field validation evaluates a field's validity based on the value of one or more other fields, such as confirming that a password and its confirmation match, or that an end date is after a start date.
-
-**Technical Definition:** Cross-field validation rules depend on multiple fields' values. In React Hook Form, custom `validate` functions receive the field's value as the first argument and the entire form values object as the second argument, enabling rules like `validate: (value, formValues) => value === formValues.password || 'Passwords do not match'`. In schema validation (Zod, Yup), cross-field rules are expressed using `.refine()` (Zod) or `.ref()` (Yup), which have access to the entire schema. For date ranges, the rule checks that the end date is after the start date. React Hook Form's `trigger` method can manually trigger validation on dependent fields when one field changes. The pattern is essential for password confirmation, date-range validation, conditional required fields ("required if another field is enabled"), and dynamic limits.
-
-**Beginner-Friendly Explanation:** Cross-field validation is like checking that two puzzle pieces fit together. The "confirm password" field is only valid if it matches the "password" field. The "end date" is only valid if it comes after the "start date." These rules cannot be checked by looking at one field alone—they need to compare multiple fields.
-
-### Purposes
-
-- **Password confirmation:** To ensure the user typed the same password twice.
-- **Date ranges:** To ensure the end date is after the start date.
-- **Conditional required:** To make a field required only if another field has a specific value.
-- **Dynamic limits:** To enforce a maximum based on another field's value.
-- **Dependent selects:** To validate that a selected option is valid for the chosen category.
-
-### Syntax Rules and Structure
-
-**React Hook Form with `validate` Function:**
-```jsx
-<input
-  {...register('confirmPassword', {
-    validate: (value, formValues) =>
-      value === formValues.password || 'Passwords do not match',
-  })}
-/>
-```
-
-**Component Breakdown:**
-- `value`: The current value of `confirmPassword`.
-- `formValues`: The entire form values object.
-- The function returns `true` (valid) or a string (error message).
-
-**Date Range Validation:**
-```jsx
-<input
-  type="date"
-  {...register('startDate', { required: 'Start date is required' })}
-/>
-
-<input
-  type="date"
-  {...register('endDate', {
-    required: 'End date is required',
-    validate: (value, formValues) =>
-      !formValues.startDate ||
-      new Date(value) > new Date(formValues.startDate) ||
-      'End date must be after start date',
-  })}
-/>
-```
-
-**Zod Schema with `.refine()`:**
-```jsx
+```tsx
+// Shared schema
 const schema = z.object({
-  password: z.string().min(8, 'At least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'], // Attach error to confirmPassword field
-});
-```
-
-**Component Breakdown:**
-- `.refine()`: Adds a custom validation rule to the schema.
-- `path: ['confirmPassword']`: Attaches the error message to the `confirmPassword` field, not the form root.
-
-**Manual Trigger for Dependent Fields:**
-```jsx
-const { register, trigger, formState: { errors } } = useForm();
-
-<input
-  {...register('password', {
-    onChange: () => trigger('confirmPassword'), // Re-validate confirmPassword when password changes
-  })}
-/>
-
-<input
-  {...register('confirmPassword', {
-    validate: (value, formValues) =>
-      value === formValues.password || 'Passwords do not match',
-  })}
-/>
-```
-
-**Syntax Rules:**
-- Use `validate` with the second `formValues` argument for cross-field rules in React Hook Form.
-- Use `.refine()` in Zod or `.ref()` in Yup for schema-level cross-field validation.
-- Use `path` in Zod's `.refine()` to attach the error to the correct field.
-- Use `trigger('fieldName')` to manually re-validate dependent fields when the source field changes.
-- Provide clear error messages that identify which field caused the error.
-
-**Constraints and Limitations:**
-- Cross-field validation cannot be expressed with HTML5 attributes alone.
-- Validation order matters: if the source field is invalid, the dependent field's validation may also fail.
-- In React Hook Form, `validate` functions run on every validation cycle for the field; keep them fast.
-- Zod's `.refine()` runs after all field-level rules pass; if a field is invalid, `.refine()` may not run.
-- Date comparisons require careful handling of time zones and invalid date objects.
-
-### Annotated Code Example: Password Confirmation with Zod
-
-```jsx
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-
-const schema = z.object({
-  password: z.string().min(8, 'At least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
+  email: z.string().email('Email must include an @ and a domain'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+}).refine((d) => d.password === d.confirm, {
+  message: "Passwords don't match",
+  path: ['confirm'],
 });
 
-function PasswordForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(schema),
-    mode: 'onBlur',
-  });
-
-  return (
-    <form onSubmit={handleSubmit(data => alert('Passwords match!'))}>
-      <div>
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          aria-invalid={!!errors.password}
-          aria-describedby={errors.password ? 'password-error' : undefined}
-          {...register('password')}
-        />
-        {errors.password && (
-          <span id="password-error" role="alert" style={{ color: 'red' }}>
-            {errors.password.message}
-          </span>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="confirmPassword">Confirm Password</label>
-        <input
-          id="confirmPassword"
-          type="password"
-          aria-invalid={!!errors.confirmPassword}
-          aria-describedby={errors.confirmPassword ? 'confirm-error' : undefined}
-          {...register('confirmPassword')}
-        />
-        {errors.confirmPassword && (
-          <span id="confirm-error" role="alert" style={{ color: 'red' }}>
-            {errors.confirmPassword.message}
-          </span>
-        )}
-      </div>
-
-      <button type="submit">Submit</button>
-    </form>
-  );
-}
-```
-
-**Expected Output:** Submitting with a password shorter than 8 characters shows "At least 8 characters". Submitting with mismatched passwords shows "Passwords do not match" on the confirm field. Submitting with matching passwords shows an alert.
-
-**Why This Output Occurs:** The Zod schema validates `password` with `min(8)` and then uses `.refine()` to check that `password` equals `confirmPassword`. The `path: ['confirmPassword']` attaches the refinement error to the `confirmPassword` field, so it appears below that input. The `zodResolver` integrates the schema with React Hook Form.
-
-### Real-World Cases
-
-- **Signup forms:** Password confirmation, email confirmation.
-- **Booking forms:** Check-out date after check-in date.
-- **Financial forms:** Transfer amount not exceeding account balance.
-- **Admin forms:** End date after start date for campaigns or promotions.
-- **Surveys:** Conditional questions based on previous answers.
-
-### References
-
-- React Hook Form – Custom Validation Functions: https://deepwiki.com/react-hook-form/react-hook-form/4.3-custom-validation-functions
-- React Hook Form – trigger: https://react-hook-form.com/docs/useform/trigger
-- Zod – Refinements: https://zod.dev/?id=refine
-- AirLib – Cross-Field Matching: https://airlib.dev/posts/building-forms-with-air-form
-
----
-
-## Core Concept 5: Async and Server-Side Validation Integration (Database Checks and API Error Mapping)
-
-### Definitions
-
-**Core Definition:** Async and server-side validation integration is the practice of validating form input against remote resources (database uniqueness, API business rules) and mapping server-returned errors back to the appropriate form fields.
-
-**Technical Definition:** Asynchronous validation requires a network round trip to a server. Common use cases include checking username or email availability, validating coupon codes, and verifying account balances. The implementation must handle **debouncing** (delaying the request until the user pauses typing), **request cancellation** (aborting in-flight requests when the input changes), and **race condition guards** (ignoring stale responses that arrive after a newer response). React Hook Form supports async validation via `validate` functions that return a `Promise<true | string>`. Server-side validation occurs after the form is submitted; the server validates the data and returns a structured error response (e.g., `{ errors: { email: 'Email already exists' } }`), which the client maps back to the form fields. React Hook Form's `setError` method programmatically sets field errors, and the `errors` prop can be used to inject server errors. Zod and Yup schemas can be shared between client and server for consistent validation.
-
-**Beginner-Friendly Explanation:** Async validation is like calling a librarian to check if a book is available. You don't want to call on every keystroke—that would be annoying and slow. So you wait until the user pauses typing (debounce), and if they start typing again, you hang up and call again (cancel the previous request). Once the server responds, you show the result. Server-side validation is like the librarian checking the shelf after you submit your request—if the book is already checked out, they tell you, and you show that error next to the book title.
-
-### Purposes
-
-- **Username/email availability:** To check if a username or email is already taken.
-- **Coupon validation:** To verify a coupon code is valid and applicable.
-- **Account checks:** To verify an account number or routing number.
-- **Server-side business rules:** To enforce rules that cannot be checked on the client (inventory, permissions).
-- **Error mapping:** To display server-returned errors next to the correct form fields.
-
-### Syntax Rules and Structure
-
-**Async Validation with React Hook Form (Debounce + AbortController):**
-```jsx
-import { useForm } from 'react-hook-form';
-import { useMemo, useId } from 'react';
-
-function createUsernameValidator(delayMs = 400) {
-  let timer = null;
-  let controller = null;
-
-  return (value) => new Promise((resolve) => {
-    if (value.length < 3) return resolve('At least 3 characters');
-
-    if (timer) clearTimeout(timer);
-    controller?.abort();
-    controller = new AbortController();
-
-    timer = setTimeout(async () => {
-      try {
-        const res = await fetch(
-          `/api/username-available?u=${encodeURIComponent(value)}`,
-          { signal: controller.signal }
-        );
-        const { available } = await res.json();
-        resolve(available ? true : 'That username is taken');
-      } catch (err) {
-        if (err.name === 'AbortError') return; // Newer keystroke cancelled us
-        resolve('Could not check availability — try again');
-      }
-    }, delayMs);
-  });
-}
-
-function UsernameForm() {
-  const validateUsername = useMemo(() => createUsernameValidator(), []);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isValidating, isSubmitting },
-  } = useForm({ mode: 'onChange', defaultValues: { username: '' } });
-
-  const err = errors.username;
-
-  return (
-    <form onSubmit={handleSubmit(data => alert(`Welcome, ${data.username}!`))}>
-      <div>
-        <label htmlFor="username">Username</label>
-        <input
-          id="username"
-          aria-invalid={err ? 'true' : undefined}
-          aria-describedby={err ? 'username-error' : undefined}
-          {...register('username', { validate: validateUsername })}
-        />
-        <p id="username-error" role="alert" aria-live="polite">
-          {isValidating ? 'Checking availability…' : err?.message}
-        </p>
-      </div>
-
-      <button type="submit" disabled={isSubmitting || isValidating}>
-        Sign Up
-      </button>
-    </form>
-  );
-}
-```
-
-**Component Breakdown:**
-- `createUsernameValidator`: A factory that owns the debounce timer and `AbortController`.
-- `controller?.abort()`: Cancels the previous in-flight request.
-- `err.name === 'AbortError'`: Ignores the error from an aborted request.
-- `isValidating`: `true` while the async validation is running.
-- `aria-live="polite"`: Announces the "Checking availability…" message to screen readers.
-
-**Server-Side Error Mapping with `setError`:**
-```jsx
-const { setError, handleSubmit } = useForm();
-
-async function onSubmit(data) {
-  const response = await fetch('/api/register', {
-    method: 'POST',
-    body: JSON.stringify(data),
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!response.ok) {
-    const { errors } = await response.json();
-    // Map server errors to form fields
-    Object.entries(errors).forEach(([field, message]) => {
-      setError(field, { type: 'server', message });
-    });
-    return;
-  }
-
-  // Success
-}
-```
-
-**Component Breakdown:**
-- `setError(field, { type, message })`: Programmatically sets an error on a field.
-- `errors`: The server's error object, keyed by field name.
-- The client maps server errors to the correct fields.
-
-**Syntax Rules:**
-- Debounce async validation by 300–500ms to avoid a request per keystroke.
-- Use `AbortController` to cancel in-flight requests when the input changes.
-- Use an `ignore` flag or check `err.name === 'AbortError'` to ignore stale results.
-- Show a pending indicator (`isValidating`) while the async check is running.
-- Use `setError` to map server-returned errors to form fields.
-- Share Zod/Yup schemas between client and server for consistent validation.
-- Always validate on the server; client-side validation is for UX, not security.
-
-**Constraints and Limitations:**
-- Async validation adds latency; the user must wait for the server response.
-- Without debouncing, a request fires on every keystroke, overwhelming the server.
-- Without cancellation, stale responses can overwrite newer results (race condition).
-- Server error formats vary; the client must know the expected shape.
-- `setError` does not clear automatically; call `clearErrors` or re-validate after correction.
-
-### Annotated Code Example: Async Email Availability with Race Condition Guard
-
-```jsx
-import { useState, useEffect, useRef } from 'react';
-
-function EmailField() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | checking | available | taken
-  const [error, setError] = useState(null);
-  const abortRef = useRef(null);
-
-  useEffect(() => {
-    if (!email || !email.includes('@')) {
-      setStatus('idle');
-      setError(null);
-      return;
-    }
-
-    setStatus('checking');
-    setError(null);
-
-    const timer = setTimeout(async () => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      try {
-        const res = await fetch(`/api/check-email?e=${encodeURIComponent(email)}`, {
-          signal: controller.signal,
-        });
-        const { available } = await res.json();
-        setStatus(available ? 'available' : 'taken');
-        setError(available ? null : 'This email is already registered');
-      } catch (err) {
-        if (err.name === 'AbortError') return;
-        setStatus('idle');
-        setError('Could not check email — try again');
-      }
-    }, 500); // Debounce 500ms
-
-    return () => {
-      clearTimeout(timer);
-      abortRef.current?.abort();
-    };
-  }, [email]);
-
-  return (
-    <div>
-      <label htmlFor="email">Email</label>
-      <input
-        id="email"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        aria-invalid={!!error}
-        aria-describedby={error ? 'email-error' : 'email-status'}
-      />
-      {status === 'checking' && <span id="email-status">Checking availability…</span>}
-      {status === 'available' && <span id="email-status" style={{ color: 'green' }}>Available</span>}
-      {error && <span id="email-error" role="alert" style={{ color: 'red' }}>{error}</span>}
-    </div>
-  );
-}
-```
-
-**Expected Output:** As the user types a valid email, after a 500ms pause, "Checking availability…" appears, then either "Available" or "This email is already registered". If the user types again during the check, the previous request is cancelled.
-
-**Why This Output Occurs:** The `useEffect` runs on every change to `email`. The `setTimeout` debounces the request by 500ms. The cleanup function clears the timer and aborts any in-flight request. The `AbortController` ensures that stale responses are ignored. The status state drives the UI feedback.
-
-### Real-World Cases
-
-- **Signup forms:** Username and email availability checks.
-- **E-commerce:** Coupon code validation and gift card balance checks.
-- **Banking:** Account number and routing number validation.
-- **Booking systems:** Availability checks for dates and rooms.
-- **Multi-tenant apps:** Subdomain availability checks.
-
-### References
-
-- React Hook Form – Async Field Validation: https://js-form-validation.com/framework-integration-patterns/react-hook-form-validation/react-hook-form-async-field-validation/
-- React Hook Form – setError: https://react-hook-form.com/docs/useform/seterror
-- MDN Web Docs – AbortController: https://developer.mozilla.org/en-US/docs/Web/API/AbortController
-- TanStack Form – Server Error Mapping: https://github.com/TanStack/form/discussions/1708
-
----
-
-## Core Concept 6: Accessibility (a11y) in Validation
-
-### Definitions
-
-**Core Definition:** Accessibility in validation is the practice of ensuring that validation errors are perceivable, understandable, and operable by all users, including those using screen readers, keyboards, and other assistive technologies.
-
-**Technical Definition:** Accessible validation requires four key elements. First, every input must have a programmatically associated label (`<label htmlFor="id">` or `aria-label`). Second, error messages must be associated with their inputs via `aria-describedby`, which points to the error message's `id`. Third, invalid inputs must be marked with `aria-invalid="true"` (or `"false"` when valid), which screen readers announce. Fourth, focus must be managed so that on submission failure, focus moves to the first invalid field, and error messages should be announced via `role="alert"` or a live region (`aria-live="assertive"`). Required fields should be marked with `aria-required="true"` or the native `required` attribute. Fieldsets and legends group related fields. The WCAG 2.2 AA guidelines require error identification (3.3.1), labels or instructions (3.3.2), and error suggestion (3.3.3).
-
-**Beginner-Friendly Explanation:** Imagine you cannot see the screen and are filling out a form using a screen reader. When you make a mistake, you need to hear that there is an error and what the error is. `aria-invalid` tells the screen reader "this field has a problem." `aria-describedby` tells it "read the error message associated with this field." `role="alert"` makes the error message announce itself immediately. And moving focus to the first error means you don't have to hunt through the form to find what went wrong.
-
-### Purposes
-
-- To ensure screen-reader users can perceive and understand validation errors.
-- To ensure keyboard users can navigate to and correct invalid fields.
-- To comply with WCAG 2.2 AA accessibility guidelines.
-- To provide a consistent, predictable error experience for all users.
-- To announce errors dynamically without requiring the user to re-read the entire form.
-
-### Syntax Rules and Structure
-
-**Accessible Error Pattern (React Hook Form):**
-```jsx
-import { useForm } from 'react-hook-form';
-import { useId } from 'react';
-
-function AccessibleField() {
-  const {
-    register,
-    formState: { errors },
-  } = useForm({ mode: 'onBlur' });
-
-  const id = useId();
-  const errorId = `${id}-error`;
-
-  return (
-    <div>
-      <label htmlFor={id}>Email</label>
-      <input
-        id={id}
-        type="email"
-        aria-required="true"
-        aria-invalid={errors.email ? 'true' : 'false'}
-        aria-describedby={errors.email ? errorId : undefined}
-        {...register('email', {
-          required: 'Email is required',
-          pattern: { value: /^\S+@\S+$/, message: 'Invalid email' },
-        })}
-      />
-      {errors.email && (
-        <span id={errorId} role="alert" style={{ color: 'red' }}>
-          {errors.email.message}
-        </span>
-      )}
-    </div>
-  );
-}
-```
-
-**Component Breakdown:**
-- `aria-required="true"`: Indicates the field is required.
-- `aria-invalid="true" | "false"`: Indicates whether the field is currently invalid.
-- `aria-describedby={errorId}`: Associates the input with its error message.
-- `role="alert"`: Announces the error message when it appears.
-- `id` and `htmlFor`: Associates the label with the input.
-
-**Focus Management on Submit Failure:**
-```jsx
-import { useEffect, useRef } from 'react';
-
-const firstErrorRef = useRef(null);
-
-useEffect(() => {
-  if (Object.keys(errors).length > 0) {
-    firstErrorRef.current?.focus();
-  }
-}, [errors]);
-
-// In JSX: attach ref to the first field that has an error
+// Client
+const form = useForm({
+  resolver: zodResolver(schema),
+  mode: 'onBlur', // Validate on blur, not on every keystroke
+});
+
+// Accessible error
+{errors.email && (
+  <span id="email-error" role="alert">{errors.email.message}</span>
+)}
 <input
-  ref={Object.keys(errors)[0] === 'email' ? firstErrorRef : undefined}
+  aria-invalid={!!errors.email}
+  aria-describedby={errors.email ? 'email-error' : undefined}
   {...register('email')}
 />
 ```
 
-**Component Breakdown:**
-- `firstErrorRef`: A ref attached to the first field with an error.
-- `useEffect`: Runs when `errors` changes; focuses the first error field.
+**❌ Bad Practices:**
 
-**Live Region for Form-Level Errors:**
-```jsx
-{Object.keys(errors).length > 0 && (
-  <div role="alert" aria-live="assertive" aria-atomic="true">
-    Form has {Object.keys(errors).length} errors. Please review.
-  </div>
-)}
+```tsx
+// ❌ Client-only validation
+if (email.includes('@')) submit(); // No server check
+
+// ❌ Validating on every keystroke with an async call
+onChange={(e) => checkUsername(e.target.value)} // Floods the server
+
+// ❌ Generic error message
+{error && <span>Error</span>}
+
+// ❌ No accessibility wiring
+<input {...register('email')} />
+{errors.email && <span>{errors.email.message}</span>}
 ```
 
-**Component Breakdown:**
-- `role="alert"`: Announces the message immediately.
-- `aria-live="assertive"`: Interrupts the screen reader to announce.
-- `aria-atomic="true"`: Announces the entire message, not just the change.
+**Expected Output:** The good practices produce accessible, server-backed validation with specific messages and appropriate timing. The bad practices cause security gaps, server floods, and inaccessible errors.
 
-**Syntax Rules:**
-- Every input must have a label (`<label htmlFor>`, `aria-label`, or `aria-labelledby`).
-- Use `aria-invalid="true"` (and `"false"` when valid) on invalid inputs.
-- Use `aria-describedby` to link inputs to their error messages.
-- Use `role="alert"` or `aria-live="assertive"` for error messages that appear dynamically.
-- Move focus to the first invalid field on submission failure.
-- Use `aria-required="true"` or the native `required` attribute for required fields.
-- Group related fields with `<fieldset>` and `<legend>`.
-- Do not rely on colour alone to indicate errors; include text and icons.
-
-**Constraints and Limitations:**
-- `role="alert"` can be disruptive if used excessively; reserve it for important errors.
-- `aria-live` regions must be present in the DOM before content is inserted; dynamically created live regions may not announce.
-- Focus management can be jarring if not handled carefully; focus should only move when the user submits.
-- Screen readers handle `aria-describedby` differently; test with multiple screen readers.
-- Some accessibility attributes (`aria-invalid`) are not supported by all older browsers.
-
-### Annotated Code Example: Fully Accessible Login Form
-
-```jsx
-import { useForm } from 'react-hook-form';
-import { useId, useEffect, useRef } from 'react';
-
-function AccessibleLoginForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({ mode: 'onBlur' });
-
-  const emailId = useId();
-  const passwordId = useId();
-  const emailErrorId = `${emailId}-error`;
-  const passwordErrorId = `${passwordId}-error`;
-  const firstErrorRef = useRef(null);
-
-  // Focus the first error field on submission failure
-  useEffect(() => {
-    if (Object.keys(errors).length > 0 && firstErrorRef.current) {
-      firstErrorRef.current.focus();
-    }
-  }, [errors]);
-
-  const firstErrorField = Object.keys(errors)[0];
-
-  return (
-    <form onSubmit={handleSubmit(data => alert('Logged in!'))} noValidate>
-      {/* Form-level error summary */}
-      {Object.keys(errors).length > 0 && (
-        <div role="alert" aria-live="assertive" aria-atomic="true"
-             style={{ color: 'red', marginBottom: 16 }}>
-          Form has {Object.keys(errors).length} error(s). Please review.
-        </div>
-      )}
-
-      {/* Email field */}
-      <div style={{ marginBottom: 16 }}>
-        <label htmlFor={emailId}>
-          Email <span aria-hidden="true">*</span>
-        </label>
-        <input
-          id={emailId}
-          type="email"
-          ref={firstErrorField === 'email' ? firstErrorRef : undefined}
-          aria-required="true"
-          aria-invalid={errors.email ? 'true' : 'false'}
-          aria-describedby={errors.email ? emailErrorId : undefined}
-          {...register('email', {
-            required: 'Email is required',
-            pattern: { value: /^\S+@\S+$/, message: 'Invalid email format' },
-          })}
-        />
-        {errors.email && (
-          <span id={emailErrorId} role="alert" style={{ color: 'red' }}>
-            {errors.email.message}
-          </span>
-        )}
-      </div>
-
-      {/* Password field */}
-      <div style={{ marginBottom: 16 }}>
-        <label htmlFor={passwordId}>
-          Password <span aria-hidden="true">*</span>
-        </label>
-        <input
-          id={passwordId}
-          type="password"
-          ref={firstErrorField === 'password' ? firstErrorRef : undefined}
-          aria-required="true"
-          aria-invalid={errors.password ? 'true' : 'false'}
-          aria-describedby={errors.password ? passwordErrorId : undefined}
-          {...register('password', {
-            required: 'Password is required',
-            minLength: { value: 8, message: 'At least 8 characters' },
-          })}
-        />
-        {errors.password && (
-          <span id={passwordErrorId} role="alert" style={{ color: 'red' }}>
-            {errors.password.message}
-          </span>
-        )}
-      </div>
-
-      <button type="submit">Log In</button>
-    </form>
-  );
-}
-```
-
-**Expected Output:** Submitting with empty fields shows a form-level error summary, an error message below each invalid field, and moves focus to the first invalid field. Screen readers announce the error summary and the field-specific errors.
-
-**Why This Output Occurs:** `aria-invalid` tells the screen reader the field is invalid. `aria-describedby` links the input to its error message. `role="alert"` on the error message announces it. The `useEffect` focuses the first error field. The `noValidate` attribute disables native browser validation so the custom accessible messages are used. `aria-required` indicates required fields.
+**Why this output:** Client-only validation is bypassable. Async checks on every keystroke overload the server. Generic messages are unhelpful. Missing ARIA attributes make errors invisible to screen readers.
 
 ### Real-World Cases
 
-- **Login forms:** Accessible email and password validation with focus management.
-- **Signup forms:** Accessible password confirmation and username availability.
-- **Checkout forms:** Accessible payment and address validation.
-- **Surveys:** Accessible error summaries for long forms.
-- **Admin panels:** Accessible CRUD forms with server-side error mapping.
+- **All production forms:** These practices apply universally.
+- **Accessibility audits:** ARIA wiring and focus management are common findings.
+- **Performance-sensitive forms:** Debouncing and validation timing prevent jank.
 
 ### References
 
-- React Hook Form + Zod – Accessibility Best Practices: https://github.com/secondsky/claude-skills/blob/main/plugins/react-hook-form-zod/skills/react-hook-form-zod/references/accessibility.md
-- WCAG 2.2 – Error Identification (3.3.1): https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html
-- WCAG 2.2 – Labels or Instructions (3.3.2): https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html
-- WCAG 2.2 – Error Suggestion (3.3.3): https://www.w3.org/WAI/WCAG22/Understanding/error-suggestion.html
-- WAI-ARIA – Alert Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/alert/
-
----
-
-## Comparison and Decision Guidance
-
-| Validation Approach | Trigger | Best For | Performance | Accessibility |
-|---|---|---|---|---|
-| **HTML5 Constraint Validation** | On submit (browser-controlled) | Simple forms, progressive enhancement | Excellent (native) | Native browser UI |
-| **React Hook Form `onSubmit`** | On submit | Short forms, wizards | Excellent (minimal re-renders) | Requires manual ARIA |
-| **React Hook Form `onBlur`** | On blur | Most forms (balanced) | Good | Requires manual ARIA |
-| **React Hook Form `onChange`** | On change | Password strength, character counters | Poor (re-renders per keystroke) | Requires manual ARIA |
-| **Async Validation** | Debounced on change | Username/email availability | Depends on debounce | Requires `aria-live` |
-| **Server-Side Validation** | On submit | Business rules, security | N/A (server-side) | Requires `setError` mapping |
-| **Cross-Field Validation** | On blur or submit | Password confirmation, date ranges | Good | Requires manual ARIA |
-
-**Decision Guidance:**
-- **Start with HTML5 constraints** for basic rules (required, email, min/max); they work without JavaScript.
-- **Use React Hook Form** for all forms beyond trivial cases; it provides structured validation, error state, and performance.
-- **Use `onBlur` as the default trigger** — it balances feedback with performance.
-- **Use `onChange` only for fields where real-time feedback is critical** (password strength, character counters).
-- **Use `validate` functions** for rules HTML5 cannot express (cross-field, business logic).
-- **Use Zod or Yup** for schema validation when rules are complex or need to be shared between client and server.
-- **Debounce and cancel async validation** to avoid race conditions and server overload.
-- **Map server errors with `setError`** so they appear next to the correct fields.
-- **Always implement accessibility** — `aria-invalid`, `aria-describedby`, `role="alert"`, and focus management are not optional.
-- **Never rely on client-side validation alone** — always validate on the server for security.
+- SitePoint — React Form Validation Using Shared Zod Schemas — https://www.sitepoint.com/react-form-validation-hook-form-zod/
+- ualiyou/frontend-engineering — Error Messaging — https://raw.githubusercontent.com/ualiyou/frontend-engineering
+- KendoReact — React Form Guidelines — https://www.telerik.com
+- APIscout — Zod vs Yup vs Joi 2026 — https://apiscout.dev/guides/zod-vs-yup-vs-joi-2026
 
 ---
 
 ## References
 
-- React Hook Form – useForm (`mode`, `reValidateMode`): https://react-hook-form.com/docs/useform#mode
-- React Hook Form – register (validation rules): https://react-hook-form.com/docs/useform/register
-- React Hook Form – setError: https://react-hook-form.com/docs/useform/seterror
-- React Hook Form – trigger: https://react-hook-form.com/docs/useform/trigger
-- React Hook Form – Custom Validation Functions: https://deepwiki.com/react-hook-form/react-hook-form/4.3-custom-validation-functions
-- React Hook Form – Async Field Validation: https://js-form-validation.com/framework-integration-patterns/react-hook-form-validation/react-hook-form-async-field-validation/
-- React Hook Form + Zod – Accessibility Best Practices: https://github.com/secondsky/claude-skills/blob/main/plugins/react-hook-form-zod/skills/react-hook-form-zod/references/accessibility.md
-- TanStack Form – Form and Field Validation: https://tanstack.com/form/latest/docs/framework/react/guides/validation
-- TanStack Form – Server Error Mapping: https://github.com/TanStack/form/discussions/1708
-- MDN Web Docs – Constraint Validation: https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
-- MDN Web Docs – Client-side form validation: https://developer.mozilla.org/en-US/docs/Learn/Forms/Form_validation
-- MDN Web Docs – AbortController: https://developer.mozilla.org/en-US/docs/Web/API/AbortController
-- GitNation – Replacing Form Libraries With Native Web APIs: https://gitnation.com/contents/replacing-form-libraries-with-native-web-apis
-- AbstractAPI – How to Validate Forms in React: https://www.abstractapi.com/guides/email-validation/react-form-validation
-- Zod – Refinements: https://zod.dev/?id=refine
-- WCAG 2.2 – Error Identification (3.3.1): https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html
-- WCAG 2.2 – Labels or Instructions (3.3.2): https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html
-- WCAG 2.2 – Error Suggestion (3.3.3): https://www.w3.org/WAI/WCAG22/Understanding/error-suggestion.html
-- WAI-ARIA – Alert Pattern: https://www.w3.org/WAI/ARIA/apg/patterns/alert/
+- SitePoint — React Form Validation Using Shared Zod Schemas and Server Actions — https://www.sitepoint.com/react-form-validation-hook-form-zod/
+- React Hook Form + Zod Skill (NeverSight) — https://raw.githubusercontent.com/NeverSight/skills_feed/refs/heads/main/data/skills-md/fellipeutaka/leon/react-hook-form-zod/SKILL.md
+- React Hook Form + Zod Skill (droid-tings) — https://raw.githubusercontent.com/NeverSight/skills_feed/refs/heads/main/data/skills-md/ovachiever/droid-tings/react-hook-form-zod/SKILL.md
+- APIscout — Zod vs Yup vs Joi 2026 — https://apiscout.dev/guides/zod-vs-yup-vs-joi-2026
+- PkgPulse — Zod vs Yup vs Joi 2026 — https://www.pkgpulse.com/guides/zod-vs-yup-vs-joi-schema-validation-2026
+- Steve Kinney — Input Validation with Zod — https://stevekinney.com/courses/full-stack-typescript/input-validation-with-zod
+- ualiyou/frontend-engineering — Error Messaging — https://raw.githubusercontent.com/ualiyou/frontend-engineering/168b9ad173db90a9029bed8606a9285aeb326624/docs/03-application-architecture/forms-validation/error-messaging.md
+- GitHub — Associate and Announce Form Errors — https://github.com/mblode/agent-skills/blob/402a666823ddf9b8cd9be76c3314b1119078ff01/skills/ui-design/rules/forms-error-association.md
+- KendoReact — React Form Validation — https://www.telerik.com
+- AbstractAPI — Type-Safe Form Validation in Next.js 15 — https://www.abstractapi.com
+- GitHub — Shared Zod schemas client and server — https://github.com/NeverSight/skills_feed
+- TanStack Form — Form and Field Validation — https://tanstack.com/form
+- GitHub — Considering Form Cohesion — https://github.com
+- React Hook Form — Resolvers — https://react-hook-form.com
+- Zod — Official site — https://zod.dev
+- MDN — Constraint validation — https://developer.mozilla.org/en-US/docs/Web/HTML/Constraint_validation
+- W3C WAI — Error Identification (WCAG 3.3.1) — https://www.w3.org/WAI/WCAG21/Understanding/error-identification.html

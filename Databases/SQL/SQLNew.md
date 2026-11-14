@@ -593,13 +593,13 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
     - WHERE clause
     - Boolean expressions
   - Comparison Operators
-    - =
-    - <>
-    - !=
-    - <
-    - >
-    - <=
-    - >=
+    - `=`
+    - `<>`
+    - `!=`
+    - `<`
+    - `>`
+    - `<=`
+    - `>=`
   - Logical Operators & Precedence
     - AND
     - OR
@@ -1054,7 +1054,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
 
 # XII. Window Functions
 
-- **77. Window Function Fundamentals**
+- [**77. Window Function Fundamentals**](/Databases/SQL/Window%20Function/WindowFunctions.md)
   - What window functions are
   - Window vs aggregate functions
   - `OVER` clause
@@ -1064,21 +1064,21 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Window function execution
   - Window function performance
 
-- **78. Window Partitioning**
+- [**78. Window Partitioning**](/Databases/SQL/Window%20Function/WindowPartitioning.md)
   - `PARTITION BY`
   - Multiple partition columns
   - Partition vs GROUP BY
   - Partition ordering
   - Partition scope
 
-- **79. Window Ordering**
+- [**79. Window Ordering**](/Databases/SQL/Window%20Function/WindowOrdering.md)
   - `ORDER BY` in window
   - Ascending and descending
   - Multiple sort keys
   - NULL ordering
   - Ordering vs partitioning
 
-- **80. Window Frames**
+- [**80. Window Frames**](/Databases/SQL/Window%20Function/WindowFrames.md)
   - `ROWS`
   - `RANGE`
   - `GROUPS`
@@ -1091,7 +1091,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Default frames
   - Frame exclusion
 
-- **81. Ranking Functions**
+- [**81. Ranking Functions**](/Databases/SQL/Window%20Function/RankingFunctions.md)
   - `ROW_NUMBER`
   - `RANK`
   - `DENSE_RANK`
@@ -1102,7 +1102,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Top-N per group
   - Deduplication
 
-- **82. Offset Functions**
+- [**82. Offset Functions**](/Databases/SQL/Window%20Function/OffsetFunctions.md)
   - `LAG`
   - `LEAD`
   - `FIRST_VALUE`
@@ -1112,7 +1112,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Use cases
   - Time-series analysis
 
-- **83. Aggregate Window Functions**
+- [**83. Aggregate Window Functions**](/Databases/SQL/Window%20Function/AggregateWindowFunctions.md)
   - `SUM` over window
   - `AVG` over window
   - `COUNT` over window
@@ -1123,7 +1123,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Cumulative sums
   - Sliding windows
 
-- **84. Advanced Window Patterns**
+- [**84. Advanced Window Patterns**](/Databases/SQL/Window%20Function/AdvancedWindowPatterns.md)
   - Named windows
   - Window inheritance
   - Window function chaining
@@ -1139,7 +1139,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
 
 # XIII. Set Operations
 
-- **85. Combining Result Sets**
+- [**85. Combining Result Sets**](/Databases/SQL/Joins%20and%20Sets/Sets.md)
   - `UNION`
   - `UNION ALL`
   - `INTERSECT`
@@ -1154,7 +1154,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Performance
   - Duplicate handling
 
-- **86. Set-Based Thinking**
+- [**86. Set-Based Thinking**](/Databases/SQL/Joins%20and%20Sets/SetBasedThinking.md)
   - Relational operations
   - Difference between row-wise and set-wise logic
   - Replacing procedural loops with set operations
@@ -1302,7 +1302,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
 
 # XVI. Views and Abstraction
 
-- **99. Views**
+- [**99. Views**](/Databases/SQL/Views/Views.md)
   - Creating views (`CREATE VIEW`)
   - Querying views
   - Updating views
@@ -1310,7 +1310,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Renaming views
   - View dependencies
 
-- **100. Advanced Views**
+- [**100. Advanced Views**](/Databases/SQL/Views/AdvancedViews.md)
   - Updatable views
   - Read-only views
   - Security views
@@ -1318,7 +1318,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Nested views
   - Materialized views where supported
 
-- **101. Materialized Views**
+- [**101. Materialized Views**](/Databases/SQL/Views/MaterializedViews.md)
   - Physical result storage
   - Refresh strategies
   - Manual refresh
@@ -1330,7 +1330,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
 
 # XVII. Indexing and Query Performance
 
-- **102. Index Fundamentals**
+- [**102. Index Fundamentals**](/Databases/SQL/IndexingAndQueryPerformance/Index.md)
   - Purpose of indexes
   - Index lookup
   - Index scan
@@ -1338,7 +1338,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Index selectivity
   - Index maintenance cost
 
-- **103. Common Index Structures**
+- [**103. Common Index Structures**](/Databases/SQL/IndexingAndQueryPerformance/CommonIndex.md)
   - B-tree indexes
   - Hash indexes
   - Bitmap indexes where supported
@@ -1348,7 +1348,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
     - JSON
     - Expression-based indexes
 
-- **104. Index Design**
+- [**104. Index Design**](/Databases/SQL/IndexingAndQueryPerformance/IndexDesign.md)
   - Single-column indexes
   - Composite indexes
   - Column order
@@ -1357,7 +1357,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Partial or filtered indexes
   - Functional indexes
 
-- **105. Query Execution**
+- [**105. Query Execution**](/Databases/SQL/IndexingAndQueryPerformance/QueryExtension.md)
   - Query parsing
   - Query planning
   - Query optimization
@@ -1369,7 +1369,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
     - Hash join
     - Merge join
 
-- **106. Execution Plan Analysis**
+- [**106. Execution Plan Analysis**](/Databases/SQL/IndexingAndQueryPerformance/ExecutionPlan.md)
   - `EXPLAIN`
   - `EXPLAIN ANALYZE`
   - Query-plan operators
@@ -1382,7 +1382,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Buffers
   - Loops
 
-- **107. Statistics**
+- [**107. Statistics**](/Databases/SQL/IndexingAndQueryPerformance/Statistics.md)
   - Table statistics
   - Column statistics
   - Histograms
@@ -1395,7 +1395,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Statistics staleness
   - Statistics impact on plans
 
-- **108. Query Rewriting**
+- [**108. Query Rewriting**](/Databases/SQL/IndexingAndQueryPerformance/QueryRewriting.md)
   - Rewriting subqueries
   - Rewriting joins
   - Rewriting aggregates
@@ -1406,7 +1406,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Common subexpression elimination
   - Query simplification
 
-- **109. Join Optimization**
+- [**109. Join Optimization**](/Databases/SQL/IndexingAndQueryPerformance/JoinOpt.md)
   - Join order
   - Join algorithms
   - Join hints
@@ -1417,7 +1417,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Join memory
   - Join spill
 
-- **110. SQL Performance Optimization**
+- [**110. SQL Performance Optimization**](/Databases/SQL/IndexingAndQueryPerformance/PerformanceOpt.md)
   - Avoiding unnecessary columns
   - Reducing unnecessary rows
   - Predicate optimization
@@ -1429,7 +1429,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Avoiding unnecessary subqueries
   - Statistics management
 
-- **111. Query Performance Tuning**
+- [**111. Query Performance Tuning**](/Databases/SQL/IndexingAndQueryPerformance/QueryPerformanceTuning.md)
   - Identifying slow queries
   - Slow query logs
   - Query profiling
@@ -1443,7 +1443,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Query cancellation
   - Query timeouts
 
-- **112. Query Anti-Patterns**
+- [**112. Query Anti-Patterns**](/Databases/SQL/IndexingAndQueryPerformance/QueryAntiPatterns.md)
   - `SELECT *`
   - N+1 queries
   - Functions on indexed columns
@@ -1464,7 +1464,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
 
 # XVIII. Transactions and Concurrency Control
 
-- **113. Transaction Fundamentals**
+- [**113. Transaction Fundamentals**](/Databases/SQL/TCL/Transaction.md)
   - What transactions are
   - Atomic unit of work
   - ACID properties
@@ -1483,7 +1483,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Autocommit
   - Nested transactions
 
-- **114. Transaction Isolation**
+- [**114. Transaction Isolation**](/Databases/SQL/TCL/Isolation.md)
   - Read uncommitted
   - Read committed
   - Repeatable read
@@ -1498,7 +1498,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Isolation level selection
   - Performance implications
 
-- **115. Locking**
+- [**115. Locking**](/Databases/SQL/TCL/Locking.md)
   - Lock types
     - Shared locks
     - Exclusive locks
@@ -1521,7 +1521,7 @@ Progression: **Relational Theory → SQL Syntax → CRUD → Querying → Joins 
   - Lock contention
   - Lock monitoring
 
-- **116. MVCC**
+- [**116. MVCC**](/Databases/SQL/TCL/MVCC.md)
   - Multi-version concurrency control
   - Snapshots
   - Visibility rules

@@ -382,7 +382,7 @@ React is best learned as more than "a library for building UIs." The progression
   - `useCallback` pitfalls
   - `useCallback` best practices
 
-- **21. `useTransition` Hook**
+- [**21. `useTransition` Hook**](/Web%20Development/React/Hooks/useTransition.md)
   - `useTransition`
   - Transitions
   - Pending state
@@ -392,7 +392,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Urgent vs non-urgent updates
   - `useTransition` best practices
 
-- **22. `useDeferredValue` Hook**
+- [**22. `useDeferredValue` Hook**](/Web%20Development/React/Hooks/useDefferedValue.md)
   - `useDeferredValue`
   - Deferred values
   - Concurrent rendering
@@ -400,7 +400,7 @@ React is best learned as more than "a library for building UIs." The progression
   - `useDeferredValue` use cases
   - `useDeferredValue` best practices
 
-- **23. `useId` Hook**
+- [**23. `useId` Hook**](/Web%20Development/React/Hooks/useId.md)
   - `useId`
   - Unique IDs
   - Server-side rendering
@@ -408,7 +408,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Accessibility
   - `useId` best practices
 
-- **24. `useSyncExternalStore` Hook**
+- [**24. `useSyncExternalStore` Hook**](/Web%20Development/React/Hooks/useSyncExternalStore.md)
   - `useSyncExternalStore`
   - External stores
   - Subscribe function
@@ -510,7 +510,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Rendering triggers
   - Rendering optimization
 
-- **29. Reconciliation**
+- [**29. Reconciliation**](/Web%20Development/React/Rendering/Reconciliation.md)
   - Reconciliation
   - Diffing algorithm
   - Key prop
@@ -527,7 +527,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Reconciliation performance
   - Reconciliation best practices
 
-- **30. React Fiber**
+- [**30. React Fiber**](/Web%20Development/React/Rendering/ReactFiber.md)
   - React Fiber
   - Fiber nodes
   - Fiber tree
@@ -544,7 +544,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Fiber vs stack reconciler
   - Fiber best practices
 
-- **31. Concurrent Rendering**
+- [**31. Concurrent Rendering**](/Web%20Development/React/Rendering/Concurrent.md)
   - Concurrent rendering
   - Concurrent mode
   - Concurrent features
@@ -559,7 +559,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Interruptible rendering
   - Concurrent rendering best practices
 
-- **32. Suspense**
+- [**32. Suspense**](/Web%20Development/React/Rendering/Suspense.md)
   - Suspense
   - `Suspense` component
   - Fallback UI
@@ -572,7 +572,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Suspense best practices
   - Suspense pitfalls
 
-- **33. Portals**
+- [**33. Portals**](/Web%20Development/React/Rendering/Portals.md)
   - Portals
   - `ReactDOM.createPortal`
   - Portal containers
@@ -583,7 +583,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Portal use cases
   - Portal best practices
 
-- **34. Error Boundaries**
+- [**34. Error Boundaries**](/Web%20Development/React/Rendering/ErrorBoundaries.md)
   - Error boundaries
   - `componentDidCatch`
   - `getDerivedStateFromError`
@@ -593,7 +593,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Error boundary alternatives
   - Error boundary best practices
 
-- **35. Strict Mode**
+- [**35. Strict Mode**](/Web%20Development/React/Rendering/StrictMode.md)
   - StrictMode
   - Double rendering
   - Double effect invocation
@@ -608,7 +608,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # VI. Forms
 
-- **36. Form Fundamentals**
+- [**36. Form Fundamentals**](/Web%20Development/React/Forms%20and%20Validation/Form.md)
   - Forms
   - Form elements
   - Form submission
@@ -625,7 +625,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Form accessibility
   - Form best practices
 
-- **37. Controlled Components**
+- [**37. Controlled Components**](/Web%20Development/React/Forms%20and%20Validation/ControlledComponents.md)
   - Controlled components
   - Value prop
   - onChange handler
@@ -640,7 +640,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Controlled components pitfalls
   - Controlled components performance
 
-- **38. Uncontrolled Components**
+- [**38. Uncontrolled Components**](/Web%20Development/React/Forms%20and%20Validation/UncontrolledComponents.md)
   - Uncontrolled components
   - DefaultValue prop
   - DefaultChecked prop
@@ -651,7 +651,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Controlled vs uncontrolled
   - When to use each
 
-- **39. Form Libraries**
+- [**39. Form Libraries**](/Web%20Development/React/Forms%20and%20Validation/FormLibraries.md)
   - Formik
   - React Hook Form
   - Redux Form
@@ -662,7 +662,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Form library performance
   - Form library best practices
 
-- **40. Form Validation**
+- [**40. Form Validation**](/Web%20Development/React/Forms%20and%20Validation/Validation.md)
   - Client-side validation
   - Server-side validation
   - Synchronous validation
@@ -678,7 +678,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Error display
   - Validation best practices
 
-- **41. Form Patterns**
+- [**41. Form Patterns**](/Web%20Development/React/Forms%20and%20Validation/Patterns.md)
   - Form state management
   - Form submission
   - Form reset
@@ -693,12 +693,20 @@ React is best learned as more than "a library for building UIs." The progression
   - Form accessibility
   - Form best practices
 
+- [**Advanced Form Features**](/Web%20Development/React/Forms%20and%20Validation/AdvancedFormFeatures.md)
+  - Dynamic fields
+  - Multi-step forms
+  - File uploads
+  - Async validation
+  - Draft persistence
+  - Error summaries
+
 ---
 
 # VII. Routing
 
-- **42. Routing Fundamentals**
-  - Client-side routing
+- [**42. Routing Fundamentals**](/Web%20Development/React/Routing/Routing.md)
+  - [Client-side routing](/Web%20Development/React/Routing/ClientSideRouting.md)
   - Server-side routing
   - Single-page applications
   - Multi-page applications
@@ -714,7 +722,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Route performance
   - Route best practices
 
-- **43. React Router**
+- [**43. React Router**](/Web%20Development/React/Routing/ReactRouter.md)
   - React Router
   - `BrowserRouter`
   - `HashRouter`
@@ -744,7 +752,7 @@ React is best learned as more than "a library for building UIs." The progression
   - React Router versions
   - React Router best practices
 
-- **44. TanStack Router**
+- [**44. TanStack Router**](/Web%20Development/React/Routing/TanStack.md)
   - TanStack Router
   - Type-safe routing
   - Route trees
@@ -757,7 +765,7 @@ React is best learned as more than "a library for building UIs." The progression
   - TanStack Router vs React Router
   - TanStack Router best practices
 
-- **45. Next.js Routing**
+- [**45. Next.js Routing**](/Web%20Development/React/Routing/NextJSRouting.md)
   - Next.js App Router
   - Next.js Pages Router
   - File-based routing
@@ -775,7 +783,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Route templates
   - Next.js routing best practices
 
-- **46. Routing Patterns**
+- [**46. Routing Patterns**](/Web%20Development/React/Routing/RoutingPatterns.md)
   - Protected routes
   - Public routes
   - Private routes
@@ -791,6 +799,15 @@ React is best learned as more than "a library for building UIs." The progression
   - Route code splitting
   - Route error handling
   - Route best practices
+
+- [**Advanced Routing**](/Web%20Development/React/Routing/AdvancedRouting.md)
+  - Protected routes
+  - Authentication-aware navigation
+  - Error routes
+  - Lazy-loaded routes
+  - Route-level data loading
+  - Nested layouts
+  - URL state management
 
 ---
 

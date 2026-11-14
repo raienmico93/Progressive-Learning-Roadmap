@@ -1,755 +1,1206 @@
-# SQL Combining Result Sets: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: Combining Result Sets
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** SQL set operators (UNION, UNION ALL, INTERSECT, EXCEPT/MINUS) combine the results of two or more SELECT statements into a single result set, treating each query's output as a mathematical set of rows.
+**Core Definition**  
+Combining result sets is the use of SQL set operators—`UNION`, `UNION ALL`, `INTERSECT`, `INTERSECT ALL`, `EXCEPT`, `EXCEPT ALL`, and `MINUS`—to vertically stack, intersect, or subtract the row sets produced by two or more `SELECT` statements into a single result.
 
-**Technical Definition:** In the SQL standard (ISO/IEC 9075-2), a `<query expression>` can combine multiple `<query primary>` elements using the set operators `UNION`, `INTERSECT`, and `EXCEPT`. Each operator takes two query results and produces a combined result based on set-theoretic semantics: UNION for union, INTERSECT for intersection, and EXCEPT for set difference. The operators require the participating queries to be "union compatible" — that is, they must return the same number of columns with compatible data types. By default, all set operators eliminate duplicate rows; the `ALL` modifier preserves them.
+**Technical Definition**  
+Set operators are binary or n-ary query operators defined by the SQL standard (SQL:1992 and later refinements) that combine the results of two query expressions. The operands must be *union-compatible*: they must return the same number of columns, and corresponding columns must have compatible data types. `UNION` returns rows appearing in either operand; `INTERSECT` returns rows appearing in both; `EXCEPT` (called `MINUS` in Oracle) returns rows appearing in the first operand but not the second. The `ALL` variants preserve duplicate multiplicity; the default (implicit `DISTINCT`) eliminates duplicates. Precedence varies by engine: in PostgreSQL and MySQL, `INTERSECT` binds more tightly than `UNION` and `EXCEPT`; in Oracle, all set operators have equal precedence and are evaluated left to right unless parenthesized.
 
-**Beginner-Friendly Explanation:** Think of two separate queries as two lists of rows. A set operator is like a combination rule: UNION puts both lists together (removing duplicates), UNION ALL puts both lists together (keeping duplicates), INTERSECT finds rows that appear in both lists, and EXCEPT finds rows that appear in the first list but not the second. It's like comparing two shopping lists: what's on both, what's only on one, or what's on both combined.
+**Beginner-Friendly Explanation**  
+Set operators let you stack or compare lists of rows. `UNION` is like combining two guest lists into one (with duplicates removed unless you say `ALL`); `INTERSECT` gives you only the people on both lists; `EXCEPT`/`MINUS` gives you the people on the first list but not the second. All the `SELECT` statements involved must return the same number of columns with matching types, in the same order.
 
 ### Key Characteristics
 
-- **Set-theoretic semantics:** Operations follow mathematical set theory (union, intersection, difference).
-- **Duplicate handling by default:** All operators except `UNION ALL` eliminate duplicate rows unless the `ALL` modifier is used.
-- **Union compatibility requirement:** Queries must return the same number of columns with compatible data types.
-- **Column names from first query:** The result set's column names are taken from the first SELECT statement.
-- **Precedence rules:** `INTERSECT` binds more tightly than `UNION` and `EXCEPT`, which have equal precedence and associate left-to-right.
-- **Dialect variations:** Oracle uses `MINUS` as a synonym for `EXCEPT`; MySQL added `INTERSECT` and `EXCEPT` only in version 8.0.31; SQLite does not support `ALL` modifiers for `INTERSECT` or `EXCEPT`.
+- **Vertical combination**: Set operators combine rows from separate queries; they do not join columns horizontally (that is what `JOIN` does).
+- **Union-compatible requirement**: Every operand must project the same number of columns, in the same ordinal positions, with compatible data types.
+- **Column names come from the first query**: The final result’s column names are taken from the first `SELECT`; subsequent `SELECT` aliases are irrelevant to the output header.
+- **Duplicate handling is explicit**: Default behavior eliminates duplicates; `ALL` preserves them.
+- **`ORDER BY` applies to the final result**: A single `ORDER BY` may appear at the end, after all set operations, to sort the combined output.
+- **Precedence is engine-specific**: `INTERSECT` generally binds tighter than `UNION`/`EXCEPT` in PostgreSQL and MySQL; Oracle evaluates all set operators left to right at equal precedence.
+- **`MINUS` is Oracle’s name for `EXCEPT`**: They are synonyms; MySQL does not support `MINUS` and uses `EXCEPT` (8.0.31+).
 
 ### Prerequisites
 
-- **Basic SQL knowledge:** Familiarity with `SELECT`, `FROM`, and `WHERE`.
-- **Set theory concepts:** Understanding of union, intersection, and difference.
-- **Data type awareness:** Knowledge of compatible data types (numeric, character, date/time).
-- **NULL awareness:** Recognition of how `NULL` values interact with duplicate elimination.
+- Solid understanding of `SELECT`, `WHERE`, `ORDER BY`, and column aliasing.
+- Familiarity with data types and implicit type conversion rules.
+- Awareness of duplicate semantics (`DISTINCT` vs `ALL`).
+- Knowledge of the target engine’s precedence rules for set operators.
 
 ### Related Programming Areas
 
-- **Data Analysis and Business Intelligence:** Set operators combine results from different queries for comparative analysis.
-- **Data Engineering (ETL):** Set operators are used to merge data from multiple sources and identify differences.
-- **Application Development:** Backend services use set operations for tasks like combining search results from different sources.
-- **Database Administration:** DBAs use set operators to compare schemas and find data discrepancies.
-
-### Core Concepts / Features
-
-1. `UNION`
-2. `UNION ALL`
-3. `INTERSECT`
-4. `EXCEPT` / `MINUS`
-5. Column Compatibility
-6. Data-Type Compatibility
-7. Duplicate Handling
+- Data integration and ETL (combining sources).
+- Reconciliation and auditing (difference detection).
+- Reporting and dashboards (stacking fact tables).
+- Query optimisation (join vs. set-operator rewrites).
+- Data quality (finding common or missing records).
 
 ---
 
-## 1. UNION
+## Core Concepts and Features
 
-### Definitions
+### 1. `UNION`
 
-**Core Definition:** `UNION` combines the results of two queries into a single result set, eliminating duplicate rows.
+#### Definitions
 
-**Technical Definition:** `query1 UNION query2` effectively appends the result of `query2` to the result of `query1` and then removes duplicate rows, behaving like a `DISTINCT` operation on the combined result. The result set contains all rows that appear in either or both input queries, with each distinct row appearing exactly once. Rows are compared for duplicates based on all columns in the result set.
+**Core Definition**  
+`UNION` combines the rows of two query results into a single result set, eliminating duplicate rows.
 
-**Beginner-Friendly Explanation:** `UNION` combines two query results and removes any duplicate rows. If a row appears in both queries, it appears only once in the final result.
+**Technical Definition**  
+`query1 UNION query2` returns the set union of the rows from `query1` and `query2`. The result contains every row that appears in at least one operand; duplicate rows are removed (equivalent to `UNION DISTINCT`). The operands must be union-compatible. `UNION` is commutative: `A UNION B` and `B UNION A` produce the same set of rows, though row order is unspecified unless an outer `ORDER BY` is added.
 
-### Purposes
+**Beginner-Friendly Explanation**  
+`UNION` stacks two lists and removes duplicates, giving you a clean combined list.
 
-- To combine results from multiple queries into a single result set.
-- To eliminate duplicate rows from the combined result.
-- To merge data from similar tables or different conditions.
-- To create a unified view of data from multiple sources.
+#### Purposes
 
-### Syntax Rules and Structure
+- To combine rows from multiple tables or queries into one deduplicated list.
+- To stack results from different time periods or categories without repeating rows.
+- To produce a distinct set of values across heterogeneous sources.
+- To merge lookup or reference data from multiple systems.
 
-**Complete General Syntax:**
+#### Syntax Rules and Structure
+
+**General syntax**:
+
+```sql
+query1
+UNION [DISTINCT]
+query2
+[ORDER BY ...];
+```
+
+**PostgreSQL** (official) :
+
+```sql
+query1 UNION [ALL] query2
+```
+
+**Component breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `query1` | First `SELECT` (or parenthesized query). |
+| `UNION` | Set operator keyword. |
+| `query2` | Second `SELECT`. |
+| `ORDER BY` | Optional; sorts the final combined result. |
+
+**Syntax rules**
+
+- Operands must have the same number of columns.
+- Corresponding columns must be of compatible types.
+- Column names in the result come from `query1` only.
+- Duplicates are removed unless `ALL` is specified.
+- `ORDER BY` can appear only once, at the end, and may reference output column names or ordinal positions.
+
+**Constraints and limitations**
+
+- Duplicate elimination adds a sort or hash step, which can be expensive at scale.
+- `UNION` cannot be used to combine columns; it only stacks rows.
+- Parentheses are required around individual queries that contain `ORDER BY`, `LIMIT`, or `FOR UPDATE` in PostgreSQL.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Combining two customer lists
+
+```sql
+SELECT customer_id, name FROM customers_2024
+UNION
+SELECT customer_id, name FROM customers_2025
+ORDER BY customer_id;
+```
+
+**Expected output** (illustrative):
+
+```text
+ customer_id | name
+-------------+---------
+         101 | Alice
+         102 | Bob
+         103 | Carol
+(3 rows)
+```
+
+**Why this output appears**: Rows from both years are stacked; duplicates (customers appearing in both tables) are removed. The final `ORDER BY` sorts the combined result.
+
+##### Example 2: MySQL – UNION with compatible types
+
+```sql
+SELECT product_id, price FROM products
+UNION
+SELECT item_id, cost FROM archived_products;
+```
+
+**Expected output**: A single list of product IDs and prices, with duplicates removed.
+
+**Why this output appears**: The columns are union-compatible (`INT`, `DECIMAL`); MySQL aligns the column names from the first query and eliminates duplicate rows.
+
+#### Real-World Cases
+
+- **Customer deduplication**: Merging customer lists from acquisitions.
+- **Inventory consolidation**: Combining stock from multiple warehouses.
+- **Event streams**: Stacking logs from multiple services into a distinct event list.
+
+---
+
+### 2. `UNION ALL`
+
+#### Definitions
+
+**Core Definition**  
+`UNION ALL` combines the rows of two query results and preserves all rows, including duplicates.
+
+**Technical Definition**  
+`query1 UNION ALL query2` returns the concatenation of the rows from both operands without duplicate elimination. Every row from `query1` appears, followed by every row from `query2` (order unspecified unless an outer `ORDER BY` is added). This is the fastest set operator because it requires no deduplication step.
+
+**Beginner-Friendly Explanation**  
+`UNION ALL` stacks two lists exactly as they are, without removing anything.
+
+#### Purposes
+
+- To combine results when duplicates are known to be impossible or are acceptable.
+- To achieve maximum performance by avoiding deduplication.
+- To stack fact-table partitions or append-only logs.
+- To preserve multiplicity for counting or auditing.
+
+#### Syntax Rules and Structure
+
+**Syntax**:
+
+```sql
+query1
+UNION ALL
+query2
+[ORDER BY ...];
+```
+
+**Component breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `UNION ALL` | Set operator with duplicate preservation. |
+| `query1`, `query2` | Union-compatible queries. |
+| `ORDER BY` | Optional final sort. |
+
+**Syntax rules**
+
+- Same union-compatibility rules as `UNION`.
+- Duplicates are not removed.
+- `UNION ALL` is generally faster than `UNION` because it avoids sort/hash deduplication.
+
+**Constraints and limitations**
+
+- If duplicates are not acceptable, `UNION ALL` produces incorrect results; verify that the operands are disjoint or that duplicates are harmless.
+- Row order is unspecified without a final `ORDER BY`.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Stacking sales partitions
+
+```sql
+SELECT sale_id, amount FROM sales_2024
+UNION ALL
+SELECT sale_id, amount FROM sales_2025
+ORDER BY sale_id;
+```
+
+**Expected output**:
+
+```text
+ sale_id | amount
+---------+--------
+       1 | 100.00
+       2 | 150.00
+       3 | 200.00
+       4 | 120.00
+(4 rows)
+```
+
+**Why this output appears**: All rows from both partitions are preserved; the final `ORDER BY` sorts them. If the same `sale_id` existed in both tables, both rows would appear.
+
+##### Example 2: SQL Server – UNION ALL for performance
+
+```sql
+SELECT CustomerID, TotalDue FROM Sales.SalesOrderHeader
+UNION ALL
+SELECT CustomerID, TotalDue FROM Sales.SalesOrderDetail;
+```
+
+**Expected output**: Every row from both tables, with no deduplication.
+
+**Why this output appears**: `UNION ALL` avoids the sort/hash step that `UNION` requires, making it the preferred choice when duplicates are not a concern.
+
+#### Real-World Cases
+
+- **Log aggregation**: Appending daily log partitions.
+- **ETL staging**: Stacking source extracts without deduplication.
+- **Audit trails**: Preserving every event, including repeats.
+
+---
+
+### 3. `INTERSECT`
+
+#### Definitions
+
+**Core Definition**  
+`INTERSECT` returns only the rows that appear in both query results, eliminating duplicates.
+
+**Technical Definition**  
+`query1 INTERSECT query2` returns the set intersection: rows that are present in both operands. Duplicate rows are removed unless `INTERSECT ALL` is used. `INTERSECT` is commutative (`A INTERSECT B` = `B INTERSECT A`) and typically binds more tightly than `UNION` and `EXCEPT` in PostgreSQL and MySQL.
+
+**Beginner-Friendly Explanation**  
+`INTERSECT` gives you the rows that the two lists have in common.
+
+#### Purposes
+
+- To find records present in both datasets (common customers, overlapping products).
+- To validate referential integrity between two tables.
+- To implement set-based membership tests.
+- To compare two result sets for overlap.
+
+#### Syntax Rules and Structure
+
+**Syntax**:
+
+```sql
+query1
+INTERSECT
+query2
+[ORDER BY ...];
+```
+
+**Component breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `INTERSECT` | Set intersection operator. |
+| `query1`, `query2` | Union-compatible queries. |
+
+**Syntax rules**
+
+- Union-compatible operands required.
+- Duplicates are eliminated by default; `INTERSECT ALL` preserves multiplicity.
+- `INTERSECT` binds more tightly than `UNION` and `EXCEPT` in PostgreSQL and MySQL; Oracle evaluates all set operators left to right at equal precedence.
+
+**Constraints and limitations**
+
+- `INTERSECT` can often be rewritten as an `EXISTS` or `JOIN` for better performance on large tables.
+- MySQL only supports `INTERSECT` from version 8.0.31 onward.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Common products
+
+```sql
+SELECT product_id FROM inventory
+INTERSECT
+SELECT product_id FROM orders
+ORDER BY product_id;
+```
+
+**Expected output**:
+
+```text
+ product_id
+------------
+        101
+        103
+(2 rows)
+```
+
+**Why this output appears**: Only product IDs present in both `inventory` and `orders` are returned; duplicates are removed.
+
+##### Example 2: MySQL 8.0.31+ – INTERSECT with precedence
+
+```sql
+TABLE x UNION TABLE y INTERSECT TABLE z;
+```
+
+**Expected output**: Evaluated as `x UNION (y INTERSECT z)` because `INTERSECT` binds more tightly.
+
+**Why this output appears**: MySQL gives `INTERSECT` higher precedence than `UNION`, so the intersection of `y` and `z` is computed first.
+
+#### Real-World Cases
+
+- **Customer overlap**: Customers who bought both product A and product B.
+- **Inventory reconciliation**: Items present in both physical and system counts.
+- **Fraud detection**: Transactions appearing in both suspicious and high-value lists.
+
+---
+
+### 4. `INTERSECT ALL`
+
+#### Definitions
+
+**Core Definition**  
+`INTERSECT ALL` returns rows that appear in both query results, preserving duplicate multiplicity.
+
+**Technical Definition**  
+`query1 INTERSECT ALL query2` returns a row as many times as it appears in both operands, up to the minimum of its counts in the two inputs. If a row appears `m` times in `query1` and `n` times in `query2`, it appears `MIN(m, n)` times in the result. This is the multiset intersection.
+
+**Beginner-Friendly Explanation**  
+`INTERSECT ALL` keeps duplicates: if a value appears three times in the first list and two times in the second, it appears twice in the result.
+
+#### Purposes
+
+- To compute multiset intersection where multiplicity matters.
+- To reconcile counts between two datasets.
+- To preserve duplicate semantics in auditing.
+
+#### Syntax Rules and Structure
+
+**Syntax**:
+
+```sql
+query1
+INTERSECT ALL
+query2
+[ORDER BY ...];
+```
+
+**Component breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `INTERSECT ALL` | Multiset intersection operator. |
+| `query1`, `query2` | Union-compatible queries. |
+
+**Syntax rules**
+
+- Multiplicity is preserved using the minimum count per value.
+- Supported by PostgreSQL and Oracle; MySQL 8.0 supports `INTERSECT` but not `INTERSECT ALL`; SQL Server does not support `INTERSECT ALL`.
+
+**Constraints and limitations**
+
+- Not universally supported; check engine compatibility.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Multiset intersection
+
+```sql
+SELECT * FROM (VALUES (1), (1), (2)) AS a(x)
+INTERSECT ALL
+SELECT * FROM (VALUES (1), (2), (2)) AS b(x);
+```
+
+**Expected output**:
+
+```text
+ x
+---
+ 1
+ 2
+(2 rows)
+```
+
+**Why this output appears**: The value `1` appears twice in `a` and once in `b`, so it appears once (the minimum). The value `2` appears once in `a` and twice in `b`, so it appears once.
+
+#### Real-World Cases
+
+- **Inventory count reconciliation**: Comparing multiset counts of items.
+- **Duplicate-aware matching**: Finding overlapping records while respecting multiplicity.
+
+---
+
+### 5. `EXCEPT`
+
+#### Definitions
+
+**Core Definition**  
+`EXCEPT` returns the distinct rows that appear in the first query result but not in the second.
+
+**Technical Definition**  
+`query1 EXCEPT query2` returns the set difference: rows present in `query1` that are not present in `query2`. Duplicates are eliminated unless `EXCEPT ALL` is used. `EXCEPT` is not commutative: `A EXCEPT B` is generally different from `B EXCEPT A`. In Oracle, `EXCEPT` is a synonym for `MINUS`.
+
+**Beginner-Friendly Explanation**  
+`EXCEPT` gives you the rows from the first list that are not in the second list.
+
+#### Purposes
+
+- To find missing records (rows in one table but not another).
+- To reconcile datasets and detect differences.
+- To implement anti-join semantics.
+- To subtract one set of values from another.
+
+#### Syntax Rules and Structure
+
+**Syntax**:
+
+```sql
+query1
+EXCEPT
+query2
+[ORDER BY ...];
+```
+
+**Component breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `EXCEPT` | Set difference operator. |
+| `query1` | Left operand (rows to keep). |
+| `query2` | Right operand (rows to subtract). |
+
+**Syntax rules**
+
+- Union-compatible operands required.
+- Duplicates eliminated by default; `EXCEPT ALL` preserves multiplicity.
+- `EXCEPT` binds at the same level as `UNION` in PostgreSQL; `INTERSECT` binds more tightly.
+- Oracle evaluates set operators left to right at equal precedence unless parenthesized.
+
+**Constraints and limitations**
+
+- `EXCEPT` can often be rewritten as `NOT EXISTS` or `LEFT JOIN ... IS NULL` for better performance on large tables.
+- MySQL supports `EXCEPT` only from version 8.0.31 onward.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Products not ordered
+
+```sql
+SELECT product_id FROM inventory
+EXCEPT
+SELECT product_id FROM orders
+ORDER BY product_id;
+```
+
+**Expected output**:
+
+```text
+ product_id
+------------
+        102
+        104
+(2 rows)
+```
+
+**Why this output appears**: Product IDs present in `inventory` but not in `orders` are returned; duplicates are removed.
+
+##### Example 2: Oracle – MINUS as a synonym for EXCEPT
+
+```sql
+SELECT product_id FROM order_items
+MINUS
+SELECT product_id FROM inventories
+ORDER BY product_id;
+```
+
+**Expected output**: Distinct product IDs in `order_items` that are not in `inventories`.
+
+**Why this output appears**: Oracle’s `MINUS` is semantically identical to `EXCEPT`; duplicates are eliminated.
+
+#### Real-World Cases
+
+- **Data reconciliation**: Records in the source but missing from the target.
+- **Churn analysis**: Customers in the prior period but not the current period.
+- **Inventory shrink**: Items expected but not found in stock counts.
+
+---
+
+### 6. `EXCEPT ALL`
+
+#### Definitions
+
+**Core Definition**  
+`EXCEPT ALL` returns rows from the first query result that are not in the second, preserving duplicate multiplicity.
+
+**Technical Definition**  
+`query1 EXCEPT ALL query2` returns rows from `query1` after subtracting the multiset of `query2`. If a value appears `m` times in `query1` and `n` times in `query2`, it appears `MAX(0, m − n)` times in the result. This is the multiset difference.
+
+**Beginner-Friendly Explanation**  
+`EXCEPT ALL` subtracts duplicates: if a value appears three times in the first list and two times in the second, it appears once in the result.
+
+#### Purposes
+
+- To compute multiset difference where multiplicity matters.
+- To reconcile counts and inventory levels.
+- To preserve duplicate semantics in audit comparisons.
+
+#### Syntax Rules and Structure
+
+**Syntax**:
+
+```sql
+query1
+EXCEPT ALL
+query2
+[ORDER BY ...];
+```
+
+**Component breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `EXCEPT ALL` | Multiset difference operator. |
+| `query1`, `query2` | Union-compatible queries. |
+
+**Syntax rules**
+
+- Multiplicity is preserved using `MAX(0, count_in_query1 − count_in_query2)`.
+- Supported by PostgreSQL and Oracle (`MINUS ALL`); MySQL 8.0 supports `EXCEPT` but not `EXCEPT ALL`; SQL Server does not support `EXCEPT ALL`.
+
+**Constraints and limitations**
+
+- Not universally supported.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Multiset difference
+
+```sql
+SELECT * FROM (VALUES (1), (1), (2), (3)) AS a(x)
+EXCEPT ALL
+SELECT * FROM (VALUES (1), (2), (2)) AS b(x);
+```
+
+**Expected output**:
+
+```text
+ x
+---
+ 1
+ 3
+(2 rows)
+```
+
+**Why this output appears**: Value `1` appears twice in `a` and once in `b`, so one `1` remains. Value `2` appears once in `a` and twice in `b`, so zero `2`s remain. Value `3` appears once in `a` and not in `b`, so one `3` remains.
+
+#### Real-World Cases
+
+- **Inventory surplus**: Items where physical count exceeds system count.
+- **Multiset reconciliation**: Comparing event counts with multiplicity.
+
+---
+
+### 7. `MINUS` in Some Systems
+
+#### Definitions
+
+**Core Definition**  
+`MINUS` is Oracle’s name for the set difference operator; it is semantically identical to `EXCEPT`.
+
+**Technical Definition**  
+Oracle supports `MINUS` and `MINUS ALL` with the same semantics as `EXCEPT` and `EXCEPT ALL`. `MINUS` returns distinct rows from the first query not present in the second; `MINUS ALL` preserves multiplicity. Oracle also treats `EXCEPT` as a synonym for `MINUS`. MySQL does not support `MINUS`; it uses `EXCEPT` from 8.0.31 onward.
+
+**Beginner-Friendly Explanation**  
+`MINUS` is just Oracle’s word for `EXCEPT`—it subtracts the second list from the first.
+
+#### Purposes
+
+- To write portable SQL for Oracle environments.
+- To use the traditional Oracle terminology for set difference.
+- To leverage `MINUS ALL` for multiset subtraction.
+
+#### Syntax Rules and Structure
+
+**Syntax**:
+
+```sql
+query1
+MINUS [ALL]
+query2
+[ORDER BY ...];
+```
+
+**Component breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `MINUS` | Oracle’s set difference operator. |
+| `MINUS ALL` | Multiset difference in Oracle. |
+
+**Syntax rules**
+
+- Same union-compatibility rules as `EXCEPT`.
+- Oracle evaluates all set operators left to right at equal precedence unless parentheses specify otherwise.
+- `EXCEPT` is accepted as a synonym in Oracle.
+
+**Constraints and limitations**
+
+- Not portable to PostgreSQL, SQL Server, or MySQL (which use `EXCEPT`).
+- MySQL does not support `MINUS` at all.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Oracle – MINUS for missing records
+
+```sql
+SELECT customer_id FROM customers_2024
+MINUS
+SELECT customer_id FROM customers_2025;
+```
+
+**Expected output**: Customer IDs present in 2024 but not in 2025 (distinct).
+
+**Why this output appears**: `MINUS` subtracts the 2025 customer set from the 2024 set, returning only those who did not appear in 2025.
+
+#### Real-World Cases
+
+- **Oracle-centric enterprises**: Standardizing on `MINUS` for set difference.
+- **Churn reporting**: Customers lost between periods.
+
+---
+
+### 8. Set Operation Rules
+
+#### Definitions
+
+**Core Definition**  
+Set operation rules are the syntactic and semantic constraints that govern how set operators can be combined, parenthesized, and ordered.
+
+**Technical Definition**  
+Set operators combine query expressions. Without parentheses, precedence determines evaluation order: in PostgreSQL and MySQL, `INTERSECT` binds more tightly than `UNION` and `EXCEPT`; in Oracle, all set operators have equal precedence and evaluate left to right. Parentheses override precedence. `ORDER BY` applies only to the final result of the entire set operation and must appear last. Individual operands cannot contain `ORDER BY`, `LIMIT`, or locking clauses without being parenthesized (in PostgreSQL).
+
+**Beginner-Friendly Explanation**  
+When you mix `UNION`, `INTERSECT`, and `EXCEPT`, the database follows precedence rules: `INTERSECT` usually happens first. You can use parentheses to force a different order. The final `ORDER BY` sorts the whole result, not individual pieces.
+
+#### Purposes
+
+- To correctly compose multi-operator set expressions.
+- To override default precedence with parentheses.
+- To apply ordering to the combined result.
+- To avoid syntax errors when operands contain `LIMIT` or `ORDER BY`.
+
+#### Syntax Rules and Structure
+
+**Precedence patterns**:
+
+```sql
+-- PostgreSQL/MySQL: INTERSECT binds tighter
+query1 UNION query2 INTERSECT query3
+-- Equivalent to:
+query1 UNION (query2 INTERSECT query3)
+
+-- Parentheses override:
+(query1 UNION query2) INTERSECT query3
+
+-- Oracle: equal precedence, left to right
+query1 UNION query2 INTERSECT query3
+-- Evaluated as:
+(query1 UNION query2) INTERSECT query3
+```
+
+**Component breakdown**
+
+| Rule | Description |
+|------|-------------|
+| Precedence | `INTERSECT` > `UNION`/`EXCEPT` in PostgreSQL/MySQL; equal in Oracle. |
+| Parentheses | Override precedence and group operands. |
+| `ORDER BY` | Applies to the entire set operation; must be last. |
+| Operand restrictions | Individual operands with `ORDER BY`/`LIMIT` need parentheses. |
+
+**Syntax rules**
+
+- Use parentheses to make evaluation order explicit.
+- `ORDER BY` at the end sorts the combined result.
+- In PostgreSQL, `LIMIT` without parentheses applies to the entire union, not the last `SELECT`.
+
+**Constraints and limitations**
+
+- Precedence differences across engines can cause portability bugs.
+- Parenthesizing every operand is the safest approach for complex expressions.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Precedence and parentheses
+
+```sql
+-- INTERSECT binds tighter than UNION.
+SELECT 1 UNION SELECT 2 INTERSECT SELECT 2;
+-- Result: 1, 2 (because 2 INTERSECT 2 = 2, then UNION with 1)
+
+-- Force different order.
+(SELECT 1 UNION SELECT 2) INTERSECT SELECT 2;
+-- Result: 2
+```
+
+**Expected output**: First query returns `{1, 2}`; second returns `{2}`.
+
+**Why this output appears**: In the first query, `INTERSECT` is evaluated first, yielding `{2}`, then `UNION` with `{1}` yields `{1, 2}`. Parentheses change the grouping.
+
+##### Example 2: PostgreSQL – LIMIT scope
+
+```sql
+SELECT a FROM b UNION SELECT x FROM y LIMIT 10;
+```
+
+**Expected output**: The `LIMIT 10` applies to the entire union, not to the second `SELECT`.
+
+**Why this output appears**: Without parentheses, `LIMIT` is understood as applying to the set operation’s output, not to the individual `SELECT`.
+
+#### Real-World Cases
+
+- **Complex reconciliation queries**: Combining multiple `EXCEPT` and `UNION` operations with explicit parentheses.
+- **Cross-engine portability**: Writing parenthesized expressions to avoid precedence differences.
+
+---
+
+### 9. Column Compatibility
+
+#### Definitions
+
+**Core Definition**  
+Column compatibility (union compatibility) requires that all queries combined by a set operator return the same number of columns in the same order.
+
+**Technical Definition**  
+For a set operation to be valid, each operand must project the same number of columns. Column names need not match; the final result’s column names are taken from the first query. Columns are matched by ordinal position, not by name. For example, `SELECT a, b FROM t1 UNION SELECT x, y FROM t2` is valid if both queries return two columns, even if the names differ.
+
+**Beginner-Friendly Explanation**  
+The lists you stack must have the same number of columns, in the same order. The names of the columns do not need to match; the first query’s names become the result’s names.
+
+#### Purposes
+
+- To ensure valid set operations.
+- To align heterogeneous queries by position.
+- To understand why mismatched column counts cause errors.
+
+#### Syntax Rules and Structure
+
+**Valid pattern**:
+
+```sql
+SELECT id, name FROM employees
+UNION
+SELECT dept_id, dept_name FROM departments;
+```
+
+**Invalid pattern**:
+
+```sql
+SELECT id, name, salary FROM employees
+UNION
+SELECT dept_id, dept_name FROM departments;  -- ERROR: different column counts
+```
+
+**Component breakdown**
+
+| Requirement | Description |
+|-------------|-------------|
+| Same column count | Each `SELECT` must return the same number of columns. |
+| Ordinal matching | Columns are matched by position, not name. |
+| Names from first query | Final column names come from the first `SELECT`. |
+
+**Syntax rules**
+
+- Use `NULL` or typed placeholders to pad missing columns if necessary.
+- Use column aliases in the first query to name the output columns.
+- Verify column order carefully; a swapped column can silently produce wrong results.
+
+**Constraints and limitations**
+
+- Column count mismatches cause syntax/semantic errors.
+- Positional matching can be fragile when queries evolve; document the mapping.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Matching column counts
+
+```sql
+SELECT 1 AS id, 'A' AS name
+UNION
+SELECT 2, 'B';
+```
+
+**Expected output**:
+
+```text
+ id | name
+----+------
+  1 | A
+  2 | B
+(2 rows)
+```
+
+**Why this output appears**: Both queries return two columns; the second query’s columns are unnamed but aligned by position with the first query’s `id` and `name`.
+
+#### Real-World Cases
+
+- **Cross-system integration**: Aligning columns from different schemas by position.
+- **Padding with NULLs**: Adding `NULL` columns to satisfy column-count requirements.
+
+---
+
+### 10. Data-Type Compatibility
+
+#### Definitions
+
+**Core Definition**  
+Data-type compatibility means that corresponding columns in set-operation operands must have types that can be compared or implicitly converted by the engine.
+
+**Technical Definition**  
+The SQL standard requires corresponding columns to be of compatible types. Engines apply type resolution rules to determine the result type. In PostgreSQL, the result type is chosen using type resolution rules; in Oracle, the type is determined by data-type group and numeric precedence (e.g., `BINARY_DOUBLE` > `BINARY_FLOAT` > `NUMBER`; `VARCHAR2` over `CHAR`); in SQLite, implicit comparisons are performed without affinity conversion. Oracle does not perform implicit conversion across data-type groups (e.g., character vs. numeric), and raises an error if types are incompatible. MySQL and SQL Server generally perform implicit conversion but may raise errors for incompatible types.
+
+**Beginner-Friendly Explanation**  
+The columns you match up must have types that the database can reconcile—like two numbers, or two strings. You cannot safely mix a number and a string without an explicit conversion.
+
+#### Purposes
+
+- To ensure set operations do not fail due to type mismatches.
+- To understand result types when operands have different but compatible types.
+- To add explicit casts where implicit conversion is unsafe.
+
+#### Syntax Rules and Structure
+
+**Explicit casting pattern**:
+
+```sql
+SELECT CAST(id AS VARCHAR) FROM t1
+UNION
+SELECT code FROM t2;
+```
+
+**Component breakdown**
+
+| Engine | Type resolution rule |
+|--------|----------------------|
+| PostgreSQL | Type resolution rules choose the "preferred" type. |
+| Oracle | Numeric precedence (`BINARY_DOUBLE` > `BINARY_FLOAT` > `NUMBER`); character types resolved to `VARCHAR2` if lengths differ. |
+| SQLite | Implicit comparison without affinity; types compared as stored. |
+| MySQL/SQL Server | Implicit conversion when possible; errors for incompatible types. |
+
+**Syntax rules**
+
+- Use `CAST` or `CONVERT` to make types explicit.
+- Oracle does not implicitly convert across data-type groups (e.g., `'3'` and `3`).
+- SQLite compares values as-is without affinity conversion for set operations.
+
+**Constraints and limitations**
+
+- Implicit conversion can cause unexpected sorting or comparison behavior.
+- Some engines (Oracle) are stricter than others.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: Oracle – Valid and invalid type combinations
+
+```sql
+-- Valid: numeric types with precedence.
+SELECT 3 FROM DUAL
+INTERSECT
+SELECT 3f FROM DUAL;
+-- Result: BINARY_FLOAT 3
+
+-- Invalid: character vs. numeric across data-type groups.
+SELECT '3' FROM DUAL
+INTERSECT
+SELECT 3f FROM DUAL;
+-- ERROR
+```
+
+**Expected output**: The first query succeeds; the second raises an error.
+
+**Why this output appears**: Oracle implicitly converts `3` to `BINARY_FLOAT` for the numeric case, but does not convert `'3'` to a numeric type because they are in different data-type groups.
+
+#### Real-World Cases
+
+- **Cross-database integration**: Casting IDs to strings when combining sources.
+- **Numeric precision**: Understanding which type wins when combining `NUMBER` and `BINARY_DOUBLE`.
+
+---
+
+### 11. Ordering
+
+#### Definitions
+
+**Core Definition**  
+Ordering in set operations is controlled by a single `ORDER BY` clause that applies to the final combined result, not to individual operands.
+
+**Technical Definition**  
+`ORDER BY` may appear only at the end of the entire set operation. It can reference output column names (from the first query) or ordinal positions. Individual `SELECT` statements within a set operation cannot contain their own `ORDER BY` unless they are parenthesized and the `ORDER BY` is scoped to that operand (which is generally not allowed in PostgreSQL without a subquery). The final `ORDER BY` sorts the combined set.
+
+**Beginner-Friendly Explanation**  
+You put one `ORDER BY` at the very end to sort the whole combined list; you cannot sort the individual pieces separately.
+
+#### Purposes
+
+- To present the combined result in a deterministic order.
+- To use column aliases from the first query for sorting.
+- To avoid syntax errors from misplaced `ORDER BY` clauses.
+
+#### Syntax Rules and Structure
+
+**Syntax**:
+
+```sql
+query1
+UNION
+query2
+ORDER BY column_name_or_position;
+```
+
+**Component breakdown**
+
+| Component | Description |
+|-----------|-------------|
+| `ORDER BY` | Final sort clause. |
+| `column_name` | Output column name (from first query). |
+| `position` | Ordinal position (1-based). |
+
+**Syntax rules**
+
+- `ORDER BY` must appear after all set operations.
+- It cannot appear inside an operand without parentheses (and even then, some engines disallow it).
+- Column names refer to the first query’s output.
+
+**Constraints and limitations**
+
+- Sorting the final result can be expensive for large unions.
+- Without `ORDER BY`, row order is unspecified.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Final ORDER BY
+
+```sql
+SELECT id, name FROM t1
+UNION
+SELECT id, name FROM t2
+ORDER BY name, id;
+```
+
+**Expected output**: The combined rows sorted by `name`, then `id`.
+
+**Why this output appears**: The single `ORDER BY` at the end sorts the entire union result.
+
+##### Example 2: SQL Server – ORDER BY with ordinal
+
+```sql
+SELECT CustomerID, TotalDue FROM Table1
+UNION ALL
+SELECT CustomerID, TotalDue FROM Table2
+ORDER BY 2 DESC;
+```
+
+**Expected output**: Combined rows sorted by `TotalDue` descending (column 2).
+
+**Why this output appears**: `ORDER BY 2` refers to the second output column of the combined result.
+
+#### Real-World Cases
+
+- **Reporting**: Sorting a merged dataset for presentation.
+- **Pagination**: Applying `ORDER BY` with `OFFSET/FETCH` to a union.
+
+---
+
+### 12. Performance
+
+#### Definitions
+
+**Core Definition**  
+Performance of set operations is determined primarily by whether duplicate elimination is required and by the algorithms used for deduplication (sort or hash).
+
+**Technical Definition**  
+`UNION ALL` is generally the fastest set operator because it concatenates results without deduplication. `UNION`, `INTERSECT`, and `EXCEPT` (and their `ALL` variants where duplicates are preserved) must answer the question “have I seen this row before?” This requires either sorting the combined result (`O(n log n)`) or building a hash table (`O(n)` expected). Sort-based deduplication can spill to disk for large datasets, causing dramatic slowdowns. Hash-based deduplication is faster when memory suffices. On large tables, native `EXCEPT` can often be rewritten as `NOT EXISTS` or `LEFT JOIN ... IS NULL`; `INTERSECT` can be rewritten as `EXISTS` or `JOIN` for better performance.
+
+**Beginner-Friendly Explanation**  
+`UNION ALL` is fast because it just stacks rows. `UNION` is slower because it has to check for and remove duplicates, which means sorting or hashing the data. On big tables, that deduplication step can become the bottleneck.
+
+#### Purposes
+
+- To choose `UNION ALL` when duplicates are acceptable or impossible.
+- To understand when rewriting `EXCEPT` or `INTERSECT` as joins improves performance.
+- To diagnose slow set operations caused by disk-spilling sorts.
+
+#### Syntax Rules and Structure
+
+**Performance decision**:
+
+```sql
+-- Fast: no deduplication.
+SELECT ... UNION ALL SELECT ...;
+
+-- Slower: deduplication required.
+SELECT ... UNION SELECT ...;
+
+-- Alternative to EXCEPT:
+SELECT ... FROM t1
+WHERE NOT EXISTS (SELECT 1 FROM t2 WHERE t2.key = t1.key);
+
+-- Alternative to INTERSECT:
+SELECT ... FROM t1
+WHERE EXISTS (SELECT 1 FROM t2 WHERE t2.key = t1.key);
+```
+
+**Component breakdown**
+
+| Operation | Cost driver |
+|-----------|-------------|
+| `UNION ALL` | Concatenation only. |
+| `UNION` | Sort or hash deduplication. |
+| `INTERSECT` | Hash or sort build + probe. |
+| `EXCEPT` | Hash or sort build + probe (anti-join). |
+
+**Syntax rules**
+
+- Use `UNION ALL` when duplicates are acceptable.
+- Consider `NOT EXISTS`/`EXISTS` rewrites for large datasets.
+- Ensure appropriate indexes on join keys for rewrite patterns.
+
+**Constraints and limitations**
+
+- Rewrites may change semantics if not carefully constructed (e.g., `NULL` handling).
+- Sort-based deduplication can spill to disk; monitor temp space.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – UNION ALL vs UNION performance
+
+```sql
+EXPLAIN (ANALYZE, COSTS OFF)
+SELECT * FROM large_table_1
+UNION ALL
+SELECT * FROM large_table_2;
+
+EXPLAIN (ANALYZE, COSTS OFF)
+SELECT * FROM large_table_1
+UNION
+SELECT * FROM large_table_2;
+```
+
+**Expected output** (plans, illustrative):
+
+```text
+-- UNION ALL: Append only
+ Append (actual time=0.010..0.020 rows=100000 loops=1)
+   ->  Seq Scan on large_table_1
+   ->  Seq Scan on large_table_2
+
+-- UNION: Append + HashAggregate or Sort/Unique
+ HashAggregate (actual time=50.000..60.000 rows=80000 loops=1)
+   ->  Append
+         ->  Seq Scan on large_table_1
+         ->  Seq Scan on large_table_2
+```
+
+**Why this output appears**: `UNION ALL` only appends; `UNION` adds a `HashAggregate` (or `Sort`/`Unique`) node to remove duplicates, increasing runtime and memory/disk usage.
+
+##### Example 2: SQL Server – EXCEPT vs NOT EXISTS
+
+```sql
+-- Native EXCEPT.
+SELECT CustomerID FROM Customers
+EXCEPT
+SELECT CustomerID FROM Orders;
+
+-- Anti-join rewrite.
+SELECT c.CustomerID
+FROM Customers c
+WHERE NOT EXISTS (SELECT 1 FROM Orders o WHERE o.CustomerID = c.CustomerID);
+```
+
+**Expected output**: The same set of customer IDs, but the `NOT EXISTS` plan can use an index on `Orders.CustomerID` and avoid a full sort/hash of both inputs.
+
+**Why this output appears**: The anti-join rewrite can leverage indexes and avoid materializing the entire difference set.
+
+#### Real-World Cases
+
+- **ETL reconciliation**: Replacing `EXCEPT` with `NOT EXISTS` on 50-million-row tables to meet SLAs.
+- **Dashboard queries**: Using `UNION ALL` instead of `UNION` when source partitions are disjoint.
+- **Data integration**: Materializing frequent `UNION ALL` views into tables to avoid recomputation.
+
+---
+
+### 13. Duplicate Handling
+
+#### Definitions
+
+**Core Definition**  
+Duplicate handling determines whether duplicate rows are eliminated (default) or preserved (`ALL` variant) in a set operation.
+
+**Technical Definition**  
+The SQL standard defines two modes for each set operator: `DISTINCT` (default) eliminates duplicate rows, and `ALL` preserves them. `UNION DISTINCT` removes duplicates; `UNION ALL` keeps all rows. `INTERSECT` returns distinct common rows; `INTERSECT ALL` returns rows with multiplicity equal to the minimum count in both inputs. `EXCEPT` returns distinct rows from the first input not in the second; `EXCEPT ALL` returns rows with multiplicity equal to the positive difference in counts. MySQL supports explicit `DISTINCT` or `ALL` modifiers; PostgreSQL and SQL Server use `UNION`/`UNION ALL` without a separate `DISTINCT` keyword.
+
+**Beginner-Friendly Explanation**  
+By default, set operations remove duplicates; adding `ALL` keeps them. `UNION` is like “combine and deduplicate”; `UNION ALL` is like “just stack everything.”
+
+#### Purposes
+
+- To choose the correct semantics for the business problem.
+- To avoid unnecessary deduplication cost when duplicates are acceptable.
+- To preserve multiplicity for counting and auditing.
+- To understand why `UNION` and `UNION ALL` give different row counts.
+
+#### Syntax Rules and Structure
+
+**Duplicate modes**:
 
 ```sql
 query1 UNION [ALL | DISTINCT] query2
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `query1`, `query2` | Two SELECT statements producing compatible result sets |
-| `UNION` | Combines results and eliminates duplicates |
-| `ALL` | Preserves duplicates |
-| `DISTINCT` | Explicitly specifies duplicate elimination (default) |
-
-**Syntax Rules:**
-
-- Both queries must return the same number of columns.
-- Corresponding columns must have compatible data types.
-- The `ORDER BY` clause can appear only at the end of the entire compound query and applies to the final result.
-- `LIMIT` can appear only on the final query or in the entire compound query.
-- Column names in the result are taken from the first query.
-
-**Constraints and Limitations:**
-
-- `UNION` performs a duplicate-elimination step, which requires sorting or hashing and can be slower than `UNION ALL`.
-- `UNION` cannot be used with `FOR UPDATE`, `FOR SHARE`, or similar locking clauses on the inputs.
-- In Oracle, set operators are not valid on `LONG` columns.
-
-### Annotated Complete Code Examples
-
-**Example 1: UNION of Two Tables**
-
-```sql
--- Setup: Create two tables with overlapping data
-CREATE TABLE employees (
-    name VARCHAR(50),
-    department VARCHAR(50)
-);
-
-CREATE TABLE contractors (
-    name VARCHAR(50),
-    department VARCHAR(50)
-);
-
-INSERT INTO employees VALUES
-    ('Alice', 'Engineering'), ('Bob', 'Marketing'), ('Carol', 'Engineering');
-INSERT INTO contractors VALUES
-    ('Bob', 'Marketing'), ('David', 'Sales'), ('Eve', 'Engineering');
-
--- Query: Combine all people, removing duplicates
-SELECT name, department FROM employees
-UNION
-SELECT name, department FROM contractors
-ORDER BY name;
-
--- Expected Output:
---  name  | department
--- -------+-------------
---  Alice | Engineering
---  Bob   | Marketing
---  Carol | Engineering
---  David | Sales
---  Eve   | Engineering
-```
-
-**Why this output occurs:** The `UNION` combines the five rows from `employees` and three rows from `contractors`, then removes duplicate rows. Bob appears in both tables with the same department, so he appears only once. The result contains five distinct rows.
-
-### Real-World Cases
-
-**Case 1: Unified Contact List**
-
-A CRM system uses `UNION` to combine contacts from different source tables (e.g., `leads` and `customers`) into a single deduplicated list for marketing campaigns.
-
-**Case 2: Cross-Database Reporting**
-
-A reporting tool uses `UNION` to combine sales data from multiple regional databases into a single result set for global analysis.
-
-### References
-
-- PostgreSQL Documentation — Combining Queries (UNION) - https://www.postgresql.org/docs/current/queries-union.html
-- MySQL Reference Manual — Set Operations with UNION - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/set-operations.html
-- Microsoft Learn — Set Operators — UNION - https://learn.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-union-transact-sql
-- Oracle Database SQL Language Reference — The UNION [ALL], INTERSECT, MINUS Operators - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html
-- SQLite Documentation — SELECT (compound_op) - http://svn.code.sf.net/p/dolserver/code/DOLSharp/branch/dol%20database%20v2/SQLiteDBProvider/source/Doc/Extra/lang_select.html
-
----
-
-## 2. UNION ALL
-
-### Definitions
-
-**Core Definition:** `UNION ALL` combines the results of two queries into a single result set, preserving all rows including duplicates.
-
-**Technical Definition:** `query1 UNION ALL query2` appends the result of `query2` to the result of `query1` without any duplicate-elimination step. Every row from both queries appears in the result set, even if identical rows exist within or across the queries. This makes `UNION ALL` significantly faster than `UNION` because it avoids the sorting or hashing required for deduplication.
-
-**Beginner-Friendly Explanation:** `UNION ALL` combines two query results and keeps everything, including duplicates. If a row appears in both queries, it appears twice in the final result.
-
-### Purposes
-
-- To combine results from multiple queries while preserving all rows.
-- To improve performance by skipping duplicate elimination.
-- To concatenate data where duplicates are meaningful or acceptable.
-- To append data from one table to another without deduplication.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
-query1 UNION ALL query2
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `query1`, `query2` | Two SELECT statements producing compatible result sets |
-| `UNION ALL` | Combines results without removing duplicates |
-
-**Syntax Rules:**
-
-- Same union-compatibility requirements as `UNION` (same number of columns, compatible types).
-- The `ALL` keyword immediately follows `UNION`.
-- No duplicate elimination occurs; all rows from both queries are returned.
-- Performance is generally better than `UNION` because no deduplication is performed.
-
-**Constraints and Limitations:**
-
-- The result set may be larger than `UNION` because duplicates are retained.
-- If duplicates are not desired, a subsequent `DISTINCT` or `GROUP BY` must be applied.
-
-### Annotated Complete Code Examples
-
-**Example 1: UNION ALL of Two Tables**
-
-```sql
--- Using the same employees and contractors tables
-SELECT name, department FROM employees
-UNION ALL
-SELECT name, department FROM contractors
-ORDER BY name;
-
--- Expected Output:
---  name  | department
--- -------+-------------
---  Alice | Engineering
---  Bob   | Marketing
---  Bob   | Marketing
---  Carol | Engineering
---  David | Sales
---  Eve   | Engineering
-```
-
-**Why this output occurs:** `UNION ALL` combines the five employee rows and three contractor rows without removing duplicates. Bob appears twice because he exists in both tables. The result contains eight rows total.
-
-### Real-World Cases
-
-**Case 1: Log Aggregation**
-
-A logging system uses `UNION ALL` to combine application logs from multiple servers, preserving all entries including any duplicates that may indicate repeated events.
-
-**Case 2: ETL Data Loading**
-
-An ETL pipeline uses `UNION ALL` to append incremental data to a staging table, accepting that some rows may be duplicates to be resolved later in the pipeline.
-
-### References
-
-- PostgreSQL Documentation — Combining Queries (UNION ALL) - https://www.postgresql.org/docs/current/queries-union.html
-- MySQL Reference Manual — UNION ALL - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/set-operations.html
-
----
-
-## 3. INTERSECT
-
-### Definitions
-
-**Core Definition:** `INTERSECT` returns only the rows that appear in both query results, eliminating duplicates.
-
-**Technical Definition:** `query1 INTERSECT query2` returns all rows that are both in the result of `query1` and in the result of `query2`. Duplicate rows are eliminated unless `INTERSECT ALL` is used. With `INTERSECT ALL`, a row that appears `m` times in the left table and `n` times in the right table appears `min(m, n)` times in the result set.
-
-**Beginner-Friendly Explanation:** `INTERSECT` finds the common rows between two query results. It shows only rows that appear in both.
-
-### Purposes
-
-- To find rows common to two or more queries.
-- To identify overlapping data between tables.
-- To filter results based on presence in another result set.
-- To compute set intersections in data analysis.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
 query1 INTERSECT [ALL | DISTINCT] query2
-```
-
-**Component Breakdown:**
-
-| Component | Purpose |
-|-----------|---------|
-| `query1`, `query2` | Two SELECT statements producing compatible result sets |
-| `INTERSECT` | Returns rows present in both queries |
-| `ALL` | Preserves duplicates using min(m, n) semantics |
-| `DISTINCT` | Explicitly specifies duplicate elimination (default) |
-
-**Syntax Rules:**
-
-- Same union-compatibility requirements as `UNION`.
-- `INTERSECT` binds more tightly than `UNION` and `EXCEPT`. For example, `A UNION B INTERSECT C` is parsed as `A UNION (B INTERSECT C)`.
-- `INTERSECT` is left-associative when multiple `INTERSECT` operators appear.
-- `NULL` values are treated as equal for the purpose of intersection (i.e., `NULL` intersects with `NULL`).
-
-**Constraints and Limitations:**
-
-- MySQL supports `INTERSECT` only from version 8.0.31 onward.
-- SQLite does not support `INTERSECT ALL`.
-- Oracle supports `INTERSECT ALL`.
-
-### Annotated Complete Code Examples
-
-**Example 1: INTERSECT of Two Tables**
-
-```sql
--- Using the same employees and contractors tables
-SELECT name, department FROM employees
-INTERSECT
-SELECT name, department FROM contractors
-ORDER BY name;
-
--- Expected Output:
---  name | department
--- ------+-------------
---  Bob  | Marketing
-```
-
-**Why this output occurs:** The `INTERSECT` returns only rows that appear in both the `employees` and `contractors` tables. Bob is the only person who appears in both tables with the same department. The result contains one row.
-
-### Real-World Cases
-
-**Case 1: Common Customers**
-
-A marketing team uses `INTERSECT` to find customers who purchased from both the online store and the physical store: `SELECT customer_id FROM online_orders INTERSECT SELECT customer_id FROM store_orders`.
-
-**Case 2: Overlapping Skills**
-
-An HR system uses `INTERSECT` to find employees who possess both of two required skills: `SELECT employee_id FROM skills WHERE skill = 'Python' INTERSECT SELECT employee_id FROM skills WHERE skill = 'SQL'`.
-
-### References
-
-- PostgreSQL Documentation — INTERSECT - https://www.postgresql.org/docs/current/queries-union.html
-- MySQL Reference Manual — INTERSECT - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/set-operations.html
-- Oracle Database SQL Language Reference — INTERSECT - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html
-- SQLite Documentation — INTERSECT - http://svn.code.sf.net/p/dolserver/code/DOLSharp/branch/dol%20database%20v2/SQLiteDBProvider/source/Doc/Extra/lang_select.html
-
----
-
-## 4. EXCEPT / MINUS
-
-### Definitions
-
-**Core Definition:** `EXCEPT` (called `MINUS` in Oracle) returns all rows from the first query that do not appear in the second query, eliminating duplicates.
-
-**Technical Definition:** `query1 EXCEPT query2` returns all rows that are in the result of `query1` but not in the result of `query2`. This is the set difference operation. Duplicates are eliminated unless `EXCEPT ALL` is used. With `EXCEPT ALL`, a row that has `m` duplicates in the left table and `n` duplicates in the right table appears `max(m - n, 0)` times in the result set.
-
-**Beginner-Friendly Explanation:** `EXCEPT` (or `MINUS`) finds rows that are in the first query but not in the second. It's like subtracting one list from another.
-
-### Purposes
-
-- To find rows in one query that are not present in another.
-- To identify data discrepancies between tables.
-- To perform set difference operations.
-- To filter out rows that appear in a second result set.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-
-```sql
 query1 EXCEPT [ALL | DISTINCT] query2
-query1 MINUS [ALL | DISTINCT] query2   -- Oracle synonym
 ```
 
-**Component Breakdown:**
+**Component breakdown**
 
-| Component | Purpose |
-|-----------|---------|
-| `query1`, `query2` | Two SELECT statements producing compatible result sets |
-| `EXCEPT` / `MINUS` | Returns rows in query1 not in query2 |
-| `ALL` | Preserves duplicates using max(m - n, 0) semantics |
-| `DISTINCT` | Explicitly specifies duplicate elimination (default) |
+| Mode | Behavior |
+|------|----------|
+| `DISTINCT` (default) | Remove duplicates. |
+| `ALL` | Preserve duplicates. |
+| `INTERSECT ALL` | Multiplicity = MIN(count in A, count in B). |
+| `EXCEPT ALL` | Multiplicity = MAX(0, count in A − count in B). |
 
-**Syntax Rules:**
+**Syntax rules**
 
-- Same union-compatibility requirements as `UNION`.
-- `EXCEPT` binds at the same level as `UNION` (left-to-right associativity).
-- Oracle uses `MINUS` as a synonym for `EXCEPT` with identical semantics.
-- SQLite does not support `EXCEPT ALL`.
-- `NULL` values are treated as equal for difference purposes.
+- `DISTINCT` is the default and may be omitted.
+- `ALL` is supported for `UNION` in all engines; `INTERSECT ALL` and `EXCEPT ALL` are not universally supported (PostgreSQL and Oracle support them; MySQL 8.0 and SQL Server do not support `INTERSECT ALL`/`EXCEPT ALL`).
+- MySQL allows explicit `DISTINCT` or `ALL` with `UNION`, `INTERSECT`, and `EXCEPT`.
 
-**Constraints and Limitations:**
+**Constraints and limitations**
 
-- MySQL supports `EXCEPT` only from version 8.0.31 onward.
-- The order of queries matters: `A EXCEPT B` is not the same as `B EXCEPT A`.
+- Duplicate elimination adds cost; use `ALL` when safe.
+- `NULL` values are treated as equal for duplicate elimination in most engines (all `NULL`s collapse to one).
 
-### Annotated Complete Code Examples
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-**Example 1: EXCEPT of Two Tables**
+##### Example 1: MySQL – UNION DISTINCT vs UNION ALL
 
 ```sql
--- Using the same employees and contractors tables
-SELECT name, department FROM employees
-EXCEPT
-SELECT name, department FROM contractors
-ORDER BY name;
-
--- Expected Output:
---  name  | department
--- -------+-------------
---  Alice | Engineering
---  Carol | Engineering
+SELECT 1 UNION SELECT 1;        -- Result: 1
+SELECT 1 UNION ALL SELECT 1;    -- Result: 1, 1
+SELECT 1 UNION DISTINCT SELECT 1; -- Result: 1
 ```
 
-**Why this output occurs:** The `EXCEPT` returns rows from `employees` that do not appear in `contractors`. Bob is excluded because he appears in both tables. Alice and Carol appear only in `employees`, so they are returned. The result contains two rows.
+**Expected output**: First and third return one row; second returns two rows.
 
-### Real-World Cases
+**Why this output appears**: `UNION` defaults to `DISTINCT` (duplicates removed); `UNION ALL` preserves duplicates; `UNION DISTINCT` is explicit but equivalent to the default.
 
-**Case 1: Discontinued Products**
-
-An inventory system uses `EXCEPT` to find products that were in last year's catalog but not in this year's: `SELECT product_id FROM last_year_catalog EXCEPT SELECT product_id FROM this_year_catalog`.
-
-**Case 2: Missing Data Audit**
-
-A data engineer uses `EXCEPT` to find records in a source table that are missing from a target table after an ETL load: `SELECT id FROM source EXCEPT SELECT id FROM target`.
-
-### References
-
-- PostgreSQL Documentation — EXCEPT - https://www.postgresql.org/docs/current/queries-union.html
-- MySQL Reference Manual — EXCEPT - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/set-operations.html
-- Oracle Database SQL Language Reference — MINUS - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html
-- SQLite Documentation — EXCEPT - http://svn.code.sf.net/p/dolserver/code/DOLSharp/branch/dol%20database%20v2/SQLiteDBProvider/source/Doc/Extra/lang_select.html
-
----
-
-## 5. Column Compatibility
-
-### Definitions
-
-**Core Definition:** Column compatibility (also called union compatibility) is the requirement that all queries combined by a set operator return the same number of columns, with corresponding columns having compatible data types.
-
-**Technical Definition:** For a set operation to be valid, the participating queries must be "union compatible," meaning they return the same number of columns and the corresponding columns in each query must have data types that are either identical or implicitly convertible to a common type. Column names need not match; the result set's column names are taken from the first query. The order of columns is significant: the first column of query1 is compared with the first column of query2, the second with the second, and so on.
-
-**Beginner-Friendly Explanation:** When you combine two query results, both must have the same "shape" — the same number of columns, and each column must hold similar types of data. For example, you can't combine a query that returns two columns with one that returns three.
-
-### Purposes
-
-- To ensure set operations are mathematically valid.
-- To prevent type mismatches and runtime errors.
-- To define the structure of the combined result set.
-- To enable predictable column naming in the output.
-
-### Syntax Rules and Structure
-
-**Rules for Column Compatibility:**
-
-| Rule | Requirement |
-|------|-------------|
-| Number of columns | All queries must return the same number of columns |
-| Column order | Corresponding expressions must be in the same order |
-| Column names | Not required to match; result uses names from the first query |
-| Data types | Corresponding columns must have compatible data types |
-
-**Syntax Rules:**
-
-- If the column counts differ, the database raises an error.
-- If the data types are incompatible and no implicit conversion exists, an error is raised.
-- Column aliases from the first query define the output column names.
-- `ORDER BY` in the compound query must reference output column names or ordinal positions.
-
-**Constraints and Limitations:**
-
-- Oracle does not perform implicit conversion across data type groups (e.g., character to numeric) without an explicit conversion.
-- In SQL Server, `text`, `ntext`, and `image` data types cannot be used with set operators.
-- Column compatibility is checked at query compile time, not at runtime.
-
-### Annotated Complete Code Examples
-
-**Example 1: Valid Column Compatibility**
+##### Example 2: PostgreSQL – INTERSECT ALL vs INTERSECT
 
 ```sql
--- Valid: Both queries return two columns with compatible types
-SELECT first_name, salary FROM employees
-UNION
-SELECT name, amount FROM contractors;
-
--- Expected Output:
---  first_name | salary
--- ------------+--------
---  Alice      | 95000
---  Bob        | 72000
---  Carol      | 105000
---  David      | 68000
---  Eve        | 88000
-```
-
-**Why this output occurs:** Both queries return two columns. The first column of each is a character type (`first_name` and `name`); the second is numeric (`salary` and `amount`). The column names in the result come from the first query (`first_name`, `salary`).
-
-**Example 2: Invalid Column Compatibility (Error)**
-
-```sql
--- Invalid: Different number of columns
-SELECT first_name, last_name, salary FROM employees
-UNION
-SELECT name, amount FROM contractors;
-
--- Expected Error (PostgreSQL):
--- ERROR: each UNION query must have the same number of columns
-```
-
-**Why this error occurs:** The first query returns three columns, but the second returns two. Set operations require the same number of columns in all participating queries.
-
-### Real-World Cases
-
-**Case 1: Cross-System Data Merging**
-
-An integration platform combines user data from two systems. It ensures both queries select the same columns in the same order (e.g., `user_id`, `email`, `created_at`) so the `UNION` produces a consistent result set.
-
-**Case 2: Schema Evolution**
-
-When a table schema changes (e.g., a column is added), queries using set operations must be updated to maintain column compatibility across all branches.
-
-### References
-
-- SAP Help — Rules for Set Operations (Same number of items) - https://help.sap.com/docs/SAP_SQL_Anywhere/e38b2f6217f24bdb90a3ff8ae57b1dd5/8191e8826ce210149b9df45b17ca78f3.html
-- PostgreSQL Documentation — Union Compatibility - https://www.postgresql.org/docs/current/queries-union.html
-- Oracle Database SQL Language Reference — Set Operator Restrictions - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html
-
----
-
-## 6. Data-Type Compatibility
-
-### Definitions
-
-**Core Definition:** Data-type compatibility is the requirement that corresponding columns in set-operation queries have data types that are either identical or can be implicitly converted to a common type.
-
-**Technical Definition:** For each pair of corresponding columns in the participating queries, the database must be able to determine a common data type for the result. If the types are identical, that type is used. If they differ but an implicit conversion exists (e.g., `INT` to `BIGINT`, `CHAR` to `VARCHAR`), the database applies the conversion and uses the wider or more general type. If no implicit conversion exists (e.g., `CHAR` to `INT`), the query fails with a type mismatch error.
-
-**Beginner-Friendly Explanation:** When combining columns from different queries, the data types must be "compatible" — meaning they can be treated as the same kind of data. Numbers can combine with numbers, text with text, dates with dates. You can't combine a number column with a text column unless you explicitly convert one of them.
-
-### Purposes
-
-- To ensure that values from different sources can be meaningfully combined.
-- To determine the result set's column data types.
-- To prevent type errors and data corruption.
-- To enable implicit type promotion for numeric and string types.
-
-### Syntax Rules and Structure
-
-**Data-Type Compatibility Rules:**
-
-| Type Category | Compatible With | Notes |
-|--------------|----------------|-------|
-| Numeric | Numeric | Implicit promotion to wider type |
-| Character | Character | `CHAR` → `VARCHAR` promotion |
-| Date/Time | Date/Time | Compatible within category |
-| Numeric vs. Character | **Incompatible** | Requires explicit cast |
-| `NULL` | Any | `NULL` is compatible with all types |
-
-**Syntax Rules:**
-
-- If both columns are the same type, that type is used.
-- If one is `CHAR` and the other `VARCHAR`, the result is `VARCHAR`.
-- If numeric types differ, the result follows numeric precedence (e.g., `BINARY_DOUBLE` > `BINARY_FLOAT` > `NUMBER` in Oracle).
-- Oracle does not perform implicit conversion across data type groups.
-- SQL Server does not allow `text`, `ntext`, or `image` with set operators.
-
-**Constraints and Limitations:**
-
-- Implicit conversion rules vary by RDBMS; what works in PostgreSQL may not work in Oracle.
-- Explicit `CAST` or `CONVERT` may be required for cross-type operations.
-- `NULL` values are compatible with any data type but can affect type inference.
-
-### Annotated Complete Code Examples
-
-**Example 1: Compatible Numeric Types**
-
-```sql
--- Setup
-CREATE TABLE table_a (amount INTEGER);
-CREATE TABLE table_b (amount BIGINT);
-INSERT INTO table_a VALUES (100), (200);
-INSERT INTO table_b VALUES (300), (400);
-
--- Query: INTEGER and BIGINT are compatible
-SELECT amount FROM table_a
-UNION ALL
-SELECT amount FROM table_b
-ORDER BY amount;
-
--- Expected Output:
---  amount
--- --------
---     100
---     200
---     300
---     400
-```
-
-**Why this output occurs:** `INTEGER` and `BIGINT` are both numeric types with an implicit conversion from `INTEGER` to `BIGINT`. The result column has type `BIGINT` (the wider type), and all values are returned without error.
-
-**Example 2: Incompatible Data Types (Error)**
-
-```sql
--- Setup
-CREATE TABLE table_c (id INTEGER);
-CREATE TABLE table_d (id VARCHAR(10));
-INSERT INTO table_c VALUES (1), (2);
-INSERT INTO table_d VALUES ('a'), ('b');
-
--- Query: INTEGER and VARCHAR are incompatible in Oracle
-SELECT id FROM table_c
-UNION
-SELECT id FROM table_d;
-
--- Expected Error (Oracle):
--- ORA-01790: expression must have same datatype as corresponding expression
-```
-
-**Why this error occurs:** Oracle does not implicitly convert between numeric and character data type groups. The `INTEGER` and `VARCHAR` types are incompatible without an explicit conversion.
-
-### Real-World Cases
-
-**Case 1: Combining Integer and Decimal Columns**
-
-A financial system combines `amount` columns from two tables where one stores integers and the other stores decimals. The implicit conversion to `DECIMAL` allows the `UNION` to succeed.
-
-**Case 2: Cross-Database Type Mismatch**
-
-An ETL process combines data from PostgreSQL (which may use `TEXT`) and Oracle (which uses `VARCHAR2`). The developer must ensure data type compatibility or apply explicit casts.
-
-### References
-
-- SAP Help — Rules for Set Operations (Data types must match) - https://help.sap.com/docs/SAP_SQL_Anywhere/e38b2f6217f24bdb90a3ff8ae57b1dd5/8191e8826ce210149b9df45b17ca78f3.html
-- Oracle Database SQL Language Reference — Data Type Determination in Set Operations - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html
-- IBM Netezza — Set Operation Data Type Compatibility - https://www.ibm.com/docs/en/netezza
-
----
-
-## 7. Duplicate Handling
-
-### Definitions
-
-**Core Definition:** Duplicate handling refers to how set operators treat duplicate rows — either eliminating them (the default for `UNION`, `INTERSECT`, and `EXCEPT`) or preserving them (when the `ALL` modifier is used).
-
-**Technical Definition:** The SQL standard defines two modes for set operators: `DISTINCT` (the default) and `ALL`. In `DISTINCT` mode, duplicate rows are eliminated from the result, and each distinct row appears once. In `ALL` mode, duplicates are preserved according to specific multiplicity rules: for `UNION ALL`, all rows from both queries are included; for `INTERSECT ALL`, a row with `m` duplicates in the left and `n` duplicates in the right appears `min(m, n)` times; for `EXCEPT ALL`, a row with `m` duplicates in the left and `n` duplicates in the right appears `max(m - n, 0)` times.
-
-**Beginner-Friendly Explanation:** By default, set operators remove duplicate rows. If you want to keep duplicates, you add the word `ALL` after the operator. The rules for how many duplicates appear with `ALL` depend on the operator: `UNION ALL` keeps everything, `INTERSECT ALL` keeps the smaller count, and `EXCEPT ALL` subtracts counts.
-
-### Purposes
-
-- To control whether duplicate rows appear in the combined result.
-- To optimise performance by skipping deduplication when duplicates are acceptable.
-- To implement multiset (bag) semantics for data analysis.
-- To produce accurate results when duplicates carry meaning.
-
-### Syntax Rules and Structure
-
-**Duplicate Handling Modes:**
-
-| Operator | Default (DISTINCT) | With ALL |
-|----------|-------------------|----------|
-| `UNION` | Removes duplicates | Preserves all rows |
-| `INTERSECT` | Removes duplicates | Appears `min(m, n)` times |
-| `EXCEPT` | Removes duplicates | Appears `max(m - n, 0)` times |
-
-**Syntax Rules:**
-
-- `DISTINCT` can be written explicitly but is the default.
-- `ALL` immediately follows the set operator keyword.
-- Duplicate elimination treats `NULL` values as equal to each other for comparison purposes.
-- `UNION ALL` is generally faster than `UNION` because it skips the deduplication step.
-
-**Constraints and Limitations:**
-
-- MySQL supports `ALL` modifiers for all three operators from version 8.0.31.
-- SQLite does not support `INTERSECT ALL` or `EXCEPT ALL`.
-- The `ALL` modifier cannot be combined with `DISTINCT` in the same operation.
-
-### Annotated Complete Code Examples
-
-**Example 1: Duplicate Counts with INTERSECT ALL and EXCEPT ALL**
-
-```sql
--- Setup: Tables with duplicate values
-CREATE TABLE left_table  (val INTEGER);
-CREATE TABLE right_table (val INTEGER);
-
-INSERT INTO left_table  VALUES (1), (1), (1), (2), (3);
-INSERT INTO right_table VALUES (1), (1), (2), (4);
-
--- INTERSECT ALL: min(m, n) duplicates
-SELECT val FROM left_table
+SELECT * FROM (VALUES (1),(1),(2)) a(x)
+INTERSECT
+SELECT * FROM (VALUES (1),(2),(2)) b(x);
+-- Result: 1, 2 (distinct)
+
+SELECT * FROM (VALUES (1),(1),(2)) a(x)
 INTERSECT ALL
-SELECT val FROM right_table
-ORDER BY val;
-
--- Expected Output:
---  val
--- -----
---    1
---    1
---    2
-
--- EXCEPT ALL: max(m - n, 0) duplicates
-SELECT val FROM left_table
-EXCEPT ALL
-SELECT val FROM right_table
-ORDER BY val;
-
--- Expected Output:
---  val
--- -----
---    1
---    3
+SELECT * FROM (VALUES (1),(2),(2)) b(x);
+-- Result: 1, 2 (multiset: min counts)
 ```
 
-**Why this output occurs:** For `INTERSECT ALL`, value `1` appears 3 times in the left table and 2 times in the right, so it appears `min(3, 2) = 2` times. Value `2` appears 1 time in each, so it appears once. For `EXCEPT ALL`, value `1` appears 3 times in the left and 2 times in the right, so it appears `max(3 - 2, 0) = 1` time. Value `3` appears 1 time in the left and 0 times in the right, so it appears once. Value `2` appears 1 time in the left and 1 time in the right, so it appears 0 times.
+**Expected output**: `INTERSECT` returns `{1, 2}`; `INTERSECT ALL` returns `{1, 2}` here because the minimum counts are one each.
 
-### Real-World Cases
+**Why this output appears**: `INTERSECT` deduplicates; `INTERSECT ALL` preserves the minimum multiplicity, which is one for both values in this example.
 
-**Case 1: Inventory Reconciliation**
+#### Real-World Cases
 
-A warehouse system uses `EXCEPT ALL` to find items that appear more times in the physical count than in the system count, revealing discrepancies.
-
-**Case 2: Log Analysis**
-
-A security analyst uses `UNION ALL` to combine authentication logs from multiple servers, preserving all entries to detect patterns of repeated failed login attempts.
-
-### References
-
-- PostgreSQL Documentation — Duplicate Handling in Set Operations - https://www.postgresql.org/docs/current/queries-union.html
-- Ubuntu Manpage — SELECT (INTERSECT ALL, EXCEPT ALL) - https://manpages.ubuntu.com/manpages/focal/man7/SELECT.7.html
-- Oracle Database SQL Language Reference — ALL Modifiers - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html
-
----
-
-## Summary Table of Set Operators
-
-| Operator | Returns | Duplicate Handling (Default) | ALL Modifier Behaviour | Oracle Synonym |
-|----------|---------|------------------------------|------------------------|----------------|
-| `UNION` | All rows from both queries | Eliminates duplicates | Preserves all rows | — |
-| `UNION ALL` | All rows from both queries | N/A | Preserves all rows | — |
-| `INTERSECT` | Rows in both queries | Eliminates duplicates | `min(m, n)` copies | — |
-| `INTERSECT ALL` | Rows in both queries | N/A | `min(m, n)` copies | — |
-| `EXCEPT` | Rows in first but not second | Eliminates duplicates | `max(m - n, 0)` copies | `MINUS` |
-| `EXCEPT ALL` | Rows in first but not second | N/A | `max(m - n, 0)` copies | `MINUS ALL` |
-
----
-
-## Dialect Support for Set Operators
-
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle | SQLite |
-|---------|-----------|-------|------------|--------|--------|
-| `UNION` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `UNION ALL` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `INTERSECT` | ✅ | ✅ (8.0.31+) | ✅ | ✅ | ✅ |
-| `INTERSECT ALL` | ✅ | ✅ (8.0.31+) | ❌ | ✅ | ❌ |
-| `EXCEPT` | ✅ | ✅ (8.0.31+) | ✅ | ✅ (synonym) | ✅ |
-| `EXCEPT ALL` | ✅ | ✅ (8.0.31+) | ❌ | ✅ | ❌ |
-| `MINUS` | ❌ | ❌ | ❌ | ✅ | ❌ |
-| `MINUS ALL` | ❌ | ❌ | ❌ | ✅ | ❌ |
+- **Counting distinct customers**: `UNION` across channels to get unique customers.
+- **Event counting**: `UNION ALL` to preserve every event occurrence.
+- **Inventory reconciliation**: `EXCEPT ALL` to compute surplus counts.
 
 ---
 
 ## References
 
-- PostgreSQL Documentation — Combining Queries (UNION, INTERSECT, EXCEPT) - https://www.postgresql.org/docs/current/queries-union.html
-- MySQL Reference Manual — Set Operations with UNION, INTERSECT, and EXCEPT - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/set-operations.html
-- Microsoft Learn — Set Operators — UNION - https://learn.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-union-transact-sql
-- Microsoft Learn — Set Operators — EXCEPT and INTERSECT - https://learn.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-except-and-intersect-transact-sql
-- Oracle Database SQL Language Reference — The UNION [ALL], INTERSECT, MINUS Operators - https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html
-- SQLite Documentation — SELECT (compound_op) - http://svn.code.sf.net/p/dolserver/code/DOLSharp/branch/dol%20database%20v2/SQLiteDBProvider/source/Doc/Extra/lang_select.html
-- SAP Help — Rules for Set Operations - https://help.sap.com/docs/SAP_SQL_Anywhere/e38b2f6217f24bdb90a3ff8ae57b1dd5/8191e8826ce210149b9df45b17ca78f3.html
-- IBM Netezza — Set Operations - https://www.ibm.com/docs/en/netezza
-- Ubuntu Manpage — SELECT (INTERSECT, EXCEPT) - https://manpages.ubuntu.com/manpages/focal/man7/SELECT.7.html
-- ISO/IEC 9075-2 — SQL Standard (Query Expression, Set Operators) - https://jtc1sc32.org/doc/N0251-0300/32N0254.pdf
+- PostgreSQL Documentation – Combining Queries (`UNION`, `INTERSECT`, `EXCEPT`) – https://www.postgresql.org/docs/current/queries-union.html 
+- MySQL 8.0 Reference Manual – Set Operations with UNION, INTERSECT, and EXCEPT – https://dev.mysql.com/doc/refman/8.0/en/set-operations.html 
+- Microsoft Learn – SELECT (Transact-SQL) – https://learn.microsoft.com/en-us/sql/t-sql/queries/select-transact-sql 
+- Oracle Database SQL Language Reference – The Set Operators – https://docs.oracle.com/en/database/oracle/oracle-database/26/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html 
+- SQLite Documentation – Compound SELECT Statements – https://sqlite.org/lang_select.html#compound 
+- SQL Engineering Handbook – Set Operator Performance and Optimization – https://github.com/theammarngp-makes/SQL-Engineering-Handbook/blob/main/13_SET_OPERATORS/06_PERFORMANCE_AND_OPTIMIZATION.md 
+- SQL Authority – Union vs. Union All Performance – https://blog.sqlauthority.com/2007/03/10/sql-server-union-vs-union-all-which-is-better-for-performance/ 
+- SQL:1992 Standard – Set Operations (ISO/IEC 9075:1992)

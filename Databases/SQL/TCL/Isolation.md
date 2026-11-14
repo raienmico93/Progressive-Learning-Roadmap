@@ -1,734 +1,751 @@
-# SQL Transaction Isolation Levels: A Comprehensive Programming Cheat Sheet
-
----
+# Comprehensive Programming Cheat Sheet: Transaction Isolation
 
 ## Topic Overview
 
 ### Definitions
 
-**Core Definition:** Transaction isolation levels define the degree to which one transaction is isolated from the effects of other concurrent transactions, controlling which concurrency anomalies (dirty reads, non-repeatable reads, phantom reads) are permitted or prevented.
+**Core Definition**  
+Transaction isolation is the "I" in ACID—the property that determines how and when the changes made by one transaction become visible to other concurrent transactions, and what anomalies (dirty reads, non-repeatable reads, phantoms, lost updates, write skew) are permitted or prevented.
 
-**Technical Definition:** Per the SQL standard (ISO/IEC 9075-2), four isolation levels are defined: `READ UNCOMMITTED`, `READ COMMITTED`, `REPEATABLE READ`, and `SERIALIZABLE`. The SQL standard defines these levels in terms of phenomena — interactions between concurrent transactions — that must not occur at each level. The most strict is `SERIALIZABLE`, defined by the standard as guaranteeing that any concurrent execution of a set of transactions produces the same effect as running them one at a time in some order. The other three levels are defined in terms of prohibited phenomena.
+**Technical Definition**  
+Transaction isolation is a concurrency-control setting defined by the SQL standard (SQL:1992) in terms of **phenomena** that must not occur at each level. The standard defines four levels: READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ, and SERIALIZABLE. Engines implement these levels using locking, multiversion concurrency control (MVCC), or Serializable Snapshot Isolation (SSI). PostgreSQL maps READ UNCOMMITTED to READ COMMITTED and implements REPEATABLE READ as Snapshot Isolation (which prevents phantom reads, exceeding the standard's minimum). MySQL InnoDB supports all four levels with REPEATABLE READ as the default. SQL Server adds SNAPSHOT and READ_COMMITTED_SNAPSHOT as row-versioning-based levels. Oracle offers READ COMMITTED (default), SERIALIZABLE, and a READ-ONLY mode not in SQL92. Isolation level is set per transaction (`SET TRANSACTION ISOLATION LEVEL`) or per session, and must be chosen before the transaction begins.
 
-**Beginner-Friendly Explanation:** Isolation levels are like privacy settings for database transactions. When multiple transactions run at the same time, isolation levels control how much one transaction can "see" the other's unfinished work. Higher isolation means more consistency but less concurrency. Lower isolation means more speed but a higher risk of reading inconsistent data.
+**Beginner-Friendly Explanation**  
+Isolation is about how much one transaction can "see" of another transaction's incomplete work. At the lowest level, you might see uncommitted changes (dirty reads). At the highest level, the database makes concurrent transactions behave as if they ran one after another. The trade-off is always the same: stronger isolation means more correctness guarantees but less concurrency and more retries. Choosing the right level is about matching the level of protection to what your application actually needs.
 
 ### Key Characteristics
 
-- **Concurrency vs. consistency trade-off:** Higher isolation provides stronger consistency guarantees but reduces concurrency and increases locking overhead.
-- **Phenomena-based definition:** The SQL standard defines levels in terms of which anomalies (dirty reads, non-repeatable reads, phantom reads) are possible at each level.
-- **Implementation-dependent:** Actual behaviour varies significantly across RDBMSs; PostgreSQL's `READ UNCOMMITTED` behaves like `READ COMMITTED`, and its `REPEATABLE READ` prevents phantom reads.
-- **Default level varies:** PostgreSQL and Oracle default to `READ COMMITTED`; MySQL InnoDB defaults to `REPEATABLE READ`; SQL Server defaults to `READ COMMITTED`.
-- **Snapshot-based isolation:** Some databases (SQL Server, PostgreSQL at `REPEATABLE READ`/`SERIALIZABLE`, Babelfish) use MVCC to provide snapshot consistency without read locks.
-- **Serialization anomaly:** The SQL standard also defines "serialization anomaly" as a phenomenon possible at levels below `SERIALIZABLE`.
+- **Phenomenon-driven**: Each level is defined by which anomalies it prevents. The standard specifies minimum guarantees; engines may provide stronger ones.
+- **Vendor-divergent**: The same level name can behave differently across engines (e.g., PostgreSQL's REPEATABLE READ prevents phantoms; MySQL's REPEATABLE READ uses next-key locks; SQL Server's READ COMMITTED uses locks unless `READ_COMMITTED_SNAPSHOT` is ON).
+- **Performance-sensitive**: Higher isolation increases lock contention, abort rates, and retry overhead, reducing throughput under contention.
+- **MVCC vs. locking**: PostgreSQL and Oracle use MVCC (readers don't block writers); MySQL InnoDB uses MVCC plus next-key locks; SQL Server defaults to locking-based READ COMMITTED unless row versioning is enabled.
+- **Application responsibility**: SERIALIZABLE and REPEATABLE READ may abort transactions with serialization failures; the application must be prepared to retry.
+- **Snapshot isolation is not serializable**: Snapshot isolation prevents dirty reads, non-repeatable reads, and phantoms, but permits **write skew**, which only SERIALIZABLE prevents.
 
 ### Prerequisites
 
-- **Basic SQL knowledge:** Familiarity with `SELECT`, `INSERT`, `UPDATE`, and `DELETE`.
-- **Transaction fundamentals:** Understanding of `BEGIN`, `COMMIT`, `ROLLBACK`, and ACID properties.
-- **Concurrency concepts:** Awareness of how multiple sessions can access the same data simultaneously.
-- **NULL and data type awareness:** Understanding of how data types affect comparison and locking behaviour.
+- Understanding of `BEGIN`, `COMMIT`, `ROLLBACK`, and transaction boundaries.
+- Familiarity with `SELECT`, `UPDATE`, `DELETE`, and locking reads (`SELECT ... FOR UPDATE`).
+- Awareness of MVCC and how row versions are stored (e.g., PostgreSQL dead tuples, MySQL undo logs, SQL Server `tempdb` row versions).
+- Knowledge of the application's consistency requirements and retry capabilities.
 
 ### Related Programming Areas
 
-- **Database Administration:** DBAs monitor and tune isolation levels to balance performance and consistency.
-- **Application Development:** Backend services choose isolation levels based on business requirements.
-- **Financial Systems:** Banking and payment systems typically require high isolation (SERIALIZABLE or REPEATABLE READ).
-- **Data Warehousing and BI:** Reporting systems often use lower isolation (READ COMMITTED) for concurrency.
-- **Distributed Systems:** Isolation levels interact with distributed transaction protocols and consistency models.
-
-### Core Concepts / Features
-
-1. READ UNCOMMITTED
-2. READ COMMITTED
-3. REPEATABLE READ
-4. SERIALIZABLE
-5. Snapshot-Based Isolation
-6. Anomalies vs. Levels Mapping
+- Concurrency control and locking (row locks, gap locks, predicate locks).
+- MVCC implementation and vacuum/cleanup (PostgreSQL `VACUUM`, MySQL purge).
+- Serializable Snapshot Isolation (SSI) and serialization failure handling.
+- Application transaction retry design.
+- Distributed transactions and two-phase commit isolation.
 
 ---
 
-## 1. READ UNCOMMITTED
+## Core Concepts and Features
 
-### Definitions
+### 1. Read Uncommitted
 
-**Core Definition:** `READ UNCOMMITTED` is the lowest isolation level, allowing transactions to read data that has been modified by other transactions but not yet committed, thereby permitting dirty reads.
+#### Definitions
 
-**Technical Definition:** At this level, transactions are isolated only enough to ensure that physically corrupt data is not read. In PostgreSQL, `READ UNCOMMITTED` is accepted syntactically but internally behaves like `READ COMMITTED` because MVCC cannot expose uncommitted data. In SQL Server, `READ UNCOMMITTED` does not issue shared locks, so transactions can read uncommitted modifications. Oracle provides this level only as a non-standard extension.
+**Core Definition**  
+READ UNCOMMITTED is the lowest isolation level: a transaction may see data written by other uncommitted transactions (dirty reads).
 
-**Beginner-Friendly Explanation:** `READ UNCOMMITTED` is the "fastest but dirtiest" isolation level. It lets you see changes that other transactions haven't finished making yet. This is like reading someone's draft notes before they've finalised them — you might see things they later change or delete.
+**Technical Definition**  
+At READ UNCOMMITTED, the engine does not acquire shared locks for reads and does not enforce snapshot consistency. A `SELECT` can read rows that another transaction has modified but not yet committed. If the writer rolls back, the reader has seen data that never existed in a committed state. PostgreSQL does not implement true READ UNCOMMITTED; it silently promotes the request to READ COMMITTED because its MVCC architecture cannot produce dirty reads. MySQL InnoDB and SQL Server support it with locking hints or isolation-level settings.
 
-### Purposes
+**Beginner-Friendly Explanation**  
+READ UNCOMMITTED means "show me everything, even work in progress that might be undone." It is fast because readers never wait, but you can see data that ultimately gets rolled back—like reading a draft that gets deleted.
 
-- To maximise concurrency by avoiding read locks entirely.
-- To allow reading data that is in the process of being modified without waiting.
-- To support approximate analytics where exact consistency is not required.
-- To provide the highest possible read throughput for non-critical queries.
+#### Purposes
 
-### Syntax Rules and Structure
+- To allow non-blocking reads in reporting or monitoring queries where approximate results are acceptable.
+- To avoid reader-writer blocking when the application can tolerate dirty reads.
+- To provide a baseline for understanding why higher levels are necessary.
 
-**Complete General Syntax:**
+#### Syntax Rules and Structure
+
+**Setting the level**:
 
 ```sql
+-- Standard / MySQL / SQL Server
 SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+
+-- SQL Server table hint
+SELECT * FROM t WITH (NOLOCK);
 ```
 
-**Dialect-Specific Syntax:**
+**Component breakdown**:
 
-| Dialect | Syntax | Default? |
-|---------|--------|----------|
-| PostgreSQL | `SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;` | No (behaves as READ COMMITTED) |
-| MySQL | `SET SESSION TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;` | No |
-| SQL Server | `SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;` | No |
-| Oracle | `SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;` | No (non-standard) |
+| Component | Description |
+|-----------|-------------|
+| `SET TRANSACTION ISOLATION LEVEL` | Sets the level for the next transaction. |
+| `READ UNCOMMITTED` | The level keyword. |
+| `WITH (NOLOCK)` (SQL Server) | Table hint equivalent to READ UNCOMMITTED for that table. |
 
-**Component Breakdown:**
+**Syntax rules**:
 
-| Component | Purpose |
-|-----------|---------|
-| `SET TRANSACTION` | Initiates the isolation level setting |
-| `ISOLATION LEVEL` | Specifies the type of isolation |
-| `READ UNCOMMITTED` | The specific level name |
+- PostgreSQL accepts the syntax but behaves as READ COMMITTED.
+- MySQL supports it; InnoDB reads the latest row version without locking.
+- SQL Server supports it; `NOLOCK` is a common but risky alternative.
 
-**Syntax Rules:**
+**Constraints and limitations**:
 
-- Must be issued before any DML statements in the transaction.
-- In SQL Server, can also be applied per-query using the `NOLOCK` table hint (though this is not recommended).
-- In PostgreSQL, `READ UNCOMMITTED` is treated as `READ COMMITTED`.
-- In MySQL, `READ UNCOMMITTED` uses the lowest locking strategy.
+- Dirty reads can produce results that were never committed, leading to incorrect application decisions.
+- `NOLOCK` can also produce missing or duplicate rows due to page splits and allocation scans.
 
-**Constraints and Limitations:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- Permits dirty reads, non-repeatable reads, phantom reads, and serialization anomalies.
-- Not available as a true isolation level in Oracle (only as a non-standard extension).
-- Results are non-deterministic and unsuitable for financial or critical data operations.
-- Dirty reads can expose data that is later rolled back, leading to incorrect business decisions.
-
-### Annotated Complete Code Examples
-
-**Example 1: READ UNCOMMITTED in SQL Server**
+##### Example 1: SQL Server – Dirty read with `NOLOCK`
 
 ```sql
--- Session 1: Begin a transaction and modify data without committing
+-- Session A
 BEGIN TRANSACTION;
-UPDATE accounts SET balance = balance - 500 WHERE account_id = 1;
--- No COMMIT yet
+UPDATE accounts SET balance = 0 WHERE id = 1;
+-- Not yet committed.
 
--- Session 2: Set READ UNCOMMITTED and read the uncommitted data
-SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
-SELECT * FROM accounts WHERE account_id = 1;
+-- Session B
+SELECT balance FROM accounts WITH (NOLOCK) WHERE id = 1;
+-- Returns 0 (dirty read).
 
--- Expected Output (Session 2 sees the uncommitted change):
---  account_id | balance
--- ------------+---------
---           1 |  500.00   -- (was 1000.00, now shows the uncommitted -500)
-
--- Session 1: Now ROLLBACK
+-- Session A
 ROLLBACK;
-
--- The change is undone, but Session 2 already read a "dirty" value
 ```
 
-**Why this output occurs:** Session 2 uses `READ UNCOMMITTED` and reads the modified but uncommitted balance from Session 1. If Session 1 then rolls back, Session 2's read was based on data that never officially existed — a dirty read.
+**Expected output** (Session B):
 
-### Real-World Cases
+```text
+balance
+-------
+      0
+```
 
-**Case 1: Approximate Analytics**
+**Why this output appears**: Session B reads the uncommitted value `0`. When Session A rolls back, the true balance is restored, but Session B already saw a value that never existed permanently.
 
-A data analyst runs a quick count of rows in a large table using `READ UNCOMMITTED` to avoid blocking write operations, accepting that the count may be slightly off due to in-flight transactions.
+#### Real-World Cases
 
-**Case 2: Monitoring and Diagnostics**
-
-A DBA uses `READ UNCOMMITTED` to inspect current activity without being blocked by long-running write transactions.
-
-### References
-
-- Microsoft Learn — SQL Server Transaction Locking and Row Versioning Guide (READ UNCOMMITTED) - https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
-- PostgreSQL Documentation — Transaction Isolation (Table 13.1) - https://www.postgresql.org/docs/16/transaction-iso.html
-- MySQL 8.0 Reference Manual — Transaction Isolation Levels - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/innodb-transaction-isolation-levels.html
-- Oracle Database Concepts — Oracle Transaction Isolation Levels - https://docs.oracle.com/cd/F19136_01/cncpt.pdf
+- **Monitoring dashboards**: Approximate counts where a few dirty rows are harmless.
+- **Legacy reports**: Performance-critical queries that cannot tolerate reader blocking.
 
 ---
 
-## 2. READ COMMITTED
+### 2. Read Committed
 
-### Definitions
+#### Definitions
 
-**Core Definition:** `READ COMMITTED` prevents dirty reads by ensuring that a transaction only sees data committed before the query began, but it permits non-repeatable reads and phantom reads because successive queries can see different snapshots.
+**Core Definition**  
+READ COMMITTED guarantees that a transaction sees only data committed before the **statement** (or, in Oracle, the **query**) began; it never sees uncommitted data, but different statements in the same transaction can see different committed snapshots.
 
-**Technical Definition:** At this level, a `SELECT` query sees only data committed before the query began; it never sees uncommitted data or changes committed by concurrent transactions during the query's execution. In effect, a `SELECT` sees a snapshot of the database as of the instant the query begins. However, two successive `SELECT` commands can see different data if other transactions commit changes between them. In SQL Server, the Database Engine keeps write locks until the end of the transaction but releases read locks as soon as the read operation completes.
+**Technical Definition**  
+READ COMMITTED is the default in PostgreSQL, Oracle, and SQL Server (locking-based unless `READ_COMMITTED_SNAPSHOT` is ON). In PostgreSQL, each `SELECT` sees a snapshot as of the instant the query begins; `UPDATE`/`DELETE` re-evaluate the `WHERE` clause against the latest committed version of the row if a concurrent update occurred. In Oracle, each query sees data committed before the query began, and readers never block writers. In MySQL, READ COMMITTED uses MVCC without gap locks, allowing phantoms. Non-repeatable reads and phantoms are possible at this level.
 
-**Beginner-Friendly Explanation:** `READ COMMITTED` is like reading a newspaper that gets updated between editions. You only read stories that have been finalised (committed), but if you pick up a new edition later, the stories may have changed. You won't read half-finished drafts (no dirty reads), but you might see different numbers if you read the same report twice.
+**Beginner-Friendly Explanation**  
+READ COMMITTED means "you only see committed data, but if you look twice, you might see different things because someone committed a change between your two looks." It is the pragmatic default: safe enough for most OLTP work, but not stable enough for multi-query reports.
 
-### Purposes
+#### Purposes
 
-- To prevent dirty reads while maintaining reasonable concurrency.
-- To provide a balanced default isolation level suitable for most applications.
-- To allow read operations to proceed without waiting for concurrent writers.
-- To serve as the default isolation level in PostgreSQL, SQL Server, and Oracle.
+- To provide a safe default that prevents dirty reads without the overhead of stronger isolation.
+- To allow readers to see the latest committed data at statement start, which is often what OLTP operations want.
+- To balance correctness and concurrency for high-throughput workloads.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
+**Setting the level**:
 
 ```sql
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+-- or simply BEGIN; (default in PostgreSQL, Oracle, SQL Server)
 ```
 
-**Dialect-Specific Syntax:**
+**Component breakdown**:
 
-| Dialect | Syntax | Default? |
-|---------|--------|----------|
-| PostgreSQL | `SET TRANSACTION ISOLATION LEVEL READ COMMITTED;` | ✅ Yes |
-| MySQL | `SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;` | No (default is REPEATABLE READ) |
-| SQL Server | `SET TRANSACTION ISOLATION LEVEL READ COMMITTED;` | ✅ Yes |
-| Oracle | `SET TRANSACTION ISOLATION LEVEL READ COMMITTED;` | ✅ Yes |
+| Engine | Default? | Read behavior |
+|--------|----------|---------------|
+| PostgreSQL | Yes | Snapshot per statement |
+| Oracle | Yes | Snapshot per query |
+| SQL Server | Yes | Shared locks per statement (unless RCSI) |
+| MySQL InnoDB | No (default RR) | Snapshot per statement |
 
-**Component Breakdown:**
+**Syntax rules**:
 
-| Component | Purpose |
-|-----------|---------|
-| `SET TRANSACTION` | Initiates the isolation level setting |
-| `ISOLATION LEVEL` | Specifies the type of isolation |
-| `READ COMMITTED` | The specific level name |
+- Must be set before the transaction begins (or as part of `BEGIN`).
+- In PostgreSQL, a concurrent update causes the statement to re-evaluate the `WHERE` clause against the updated row, sometimes producing surprising results in complex predicates.
+- In SQL Server, `READ_COMMITTED_SNAPSHOT ON` changes READ COMMITTED to use row versions instead of shared locks, eliminating reader-writer blocking but still allowing non-repeatable reads and phantoms.
 
-**Syntax Rules:**
+**Constraints and limitations**:
 
-- Must be issued before any DML statements in the transaction.
-- In SQL Server, `READ_COMMITTED_SNAPSHOT` database option (when ON) makes `READ COMMITTED` use row versioning instead of shared locks.
-- In PostgreSQL, `READ COMMITTED` is the default level and uses MVCC snapshot isolation per statement.
+- Non-repeatable reads and phantoms are permitted; the same query can return different results within one transaction.
+- Complex search conditions may see inconsistent snapshots in PostgreSQL because updated rows are re-evaluated against the latest version.
 
-**Constraints and Limitations:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- Permits non-repeatable reads: reading the same row twice can yield different values.
-- Permits phantom reads: re-executing a query can return different sets of rows.
-- Permits serialization anomalies.
-- Does not prevent write skew (a serialization anomaly).
-
-### Annotated Complete Code Examples
-
-**Example 1: READ COMMITTED in PostgreSQL**
+##### Example 1: PostgreSQL – Non-repeatable read at READ COMMITTED
 
 ```sql
--- Session 1: Begin a transaction
-BEGIN;
-SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+-- Session A
+BEGIN ISOLATION LEVEL READ COMMITTED;
+SELECT balance FROM accounts WHERE id = 1;  -- returns 1000
 
-SELECT balance FROM accounts WHERE account_id = 1;
--- Output: 1000.00
-
--- Session 2: Update and commit
-UPDATE accounts SET balance = 900 WHERE account_id = 1;
+-- Session B
+UPDATE accounts SET balance = 900 WHERE id = 1;
 COMMIT;
 
--- Session 1: Read again (same transaction)
-SELECT balance FROM accounts WHERE account_id = 1;
--- Output: 900.00  -- Non-repeatable read!
-
+-- Session A re-reads:
+SELECT balance FROM accounts WHERE id = 1;  -- returns 900
 COMMIT;
 ```
 
-**Why this output occurs:** Session 1's second `SELECT` sees the committed change from Session 2 because `READ COMMITTED` takes a fresh snapshot for each statement. The value changed within the same transaction — a non-repeatable read.
+**Expected output** (Session A):
 
-### Real-World Cases
+```text
+ balance
+---------
+    1000
+(1 row)
 
-**Case 1: Web Application Default**
+ balance
+---------
+     900
+(1 row)
+COMMIT
+```
 
-A web application uses `READ COMMITTED` as its default isolation level, allowing high concurrency for read-heavy workloads while preventing dirty reads.
+**Why this output appears**: At READ COMMITTED, each statement sees a fresh snapshot. The second `SELECT` sees Session B's committed update, producing a non-repeatable read.
 
-**Case 2: Reporting with Acceptable Variability**
+#### Real-World Cases
 
-A reporting system uses `READ COMMITTED` for dashboards where minor variations between refreshes are acceptable.
-
-### References
-
-- PostgreSQL Documentation — Transaction Isolation (READ COMMITTED) - https://www.postgresql.org/docs/16/transaction-iso.html
-- Microsoft Learn — SQL Server Transaction Locking and Row Versioning Guide (READ COMMITTED) - https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
-- MySQL 8.0 Reference Manual — Transaction Isolation Levels - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/innodb-transaction-isolation-levels.html
-- Oracle Database Concepts — Oracle Transaction Isolation Levels - https://docs.oracle.com/cd/F19136_01/cncpt.pdf
+- **OLTP operations**: Individual row lookups and updates where each statement is independent.
+- **Read-committed snapshot (SQL Server)**: Reporting queries that cannot tolerate blocking but can tolerate non-repeatable reads.
+- **Default application workloads**: The pragmatic choice for most web applications.
 
 ---
 
-## 3. REPEATABLE READ
+### 3. Repeatable Read
 
-### Definitions
+#### Definitions
 
-**Core Definition:** `REPEATABLE READ` prevents dirty reads and non-repeatable reads by ensuring that any row read during a transaction can be read again with the same values, but it may still permit phantom reads (new rows matching a query condition).
+**Core Definition**  
+REPEATABLE READ guarantees that all reads within a transaction see a stable snapshot taken at the start of the transaction (or the first non-transaction-control statement), preventing non-repeatable reads; phantom behavior depends on the engine.
 
-**Technical Definition:** At this level, a transaction's `SELECT` queries see a consistent snapshot of the data as of the first read operation in the transaction. In PostgreSQL, `REPEATABLE READ` only sees data committed before the transaction began. In MySQL InnoDB (the default level), `REPEATABLE READ` uses consistent reads based on a snapshot established by the first read. In SQL Server, the Database Engine keeps shared locks on selected data until the end of the transaction, preventing other transactions from modifying the data, but phantom reads can still occur because range locks are not managed.
+**Technical Definition**  
+In PostgreSQL, REPEATABLE READ is implemented as **Snapshot Isolation**: the transaction sees a snapshot as of the start of the first non-transaction-control statement, and concurrent updates to rows read by the transaction cause a serialization failure (`40001`) if the transaction attempts to modify them. PostgreSQL's REPEATABLE READ also prevents phantom reads (stronger than the SQL standard requires). In MySQL InnoDB, REPEATABLE READ is the default; consistent reads use the snapshot established by the first read, and locking reads use next-key locks to prevent phantoms in many cases. SQL Server's REPEATABLE READ uses shared locks held until transaction end, preventing non-repeatable reads but allowing phantoms.
 
-**Beginner-Friendly Explanation:** `REPEATABLE READ` is like taking a photograph of your data at the start of the transaction. Every time you look at the photo, it shows the same thing — you won't see any changes made by other transactions during your transaction. However, if you look at a different part of the photo (a range query), you might see new items that weren't there before (phantom reads).
+**Beginner-Friendly Explanation**  
+REPEATABLE READ means "once I look at something, it stays the same for the rest of my transaction." If someone else changes it, I either don't see the change or my transaction fails and retries. It is like taking a frozen snapshot of the data you read.
 
-### Purposes
+#### Purposes
 
-- To prevent non-repeatable reads within a transaction.
-- To provide a stable, consistent view of data across multiple queries in a transaction.
-- To serve as the default isolation level in MySQL InnoDB.
-- To balance consistency with concurrency better than `SERIALIZABLE`.
+- To provide a stable view for multi-statement reads (reports, analytics).
+- To prevent non-repeatable reads without requiring full SERIALIZABLE locking.
+- To allow long-running read-only transactions to see a consistent snapshot without blocking writers (in MVCC engines).
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
+**Setting the level**:
 
 ```sql
 SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 ```
 
-**Dialect-Specific Syntax:**
+**Component breakdown**:
 
-| Dialect | Syntax | Default? |
-|---------|--------|----------|
-| PostgreSQL | `SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;` | No (default is READ COMMITTED) |
-| MySQL | `SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;` | ✅ Yes (InnoDB default) |
-| SQL Server | `SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;` | No |
-| Oracle | Not supported as a separate level | N/A |
+| Engine | Implementation | Phantom prevention? |
+|--------|----------------|---------------------|
+| PostgreSQL | Snapshot Isolation | Yes (stronger than standard) |
+| MySQL InnoDB | MVCC + next-key locks | Yes (for indexed range scans) |
+| SQL Server | Shared locks held to end | No (phantoms allowed) |
+| Oracle | Not a separate level (uses SERIALIZABLE) | N/A |
 
-**Component Breakdown:**
+**Syntax rules**:
 
-| Component | Purpose |
-|-----------|---------|
-| `SET TRANSACTION` | Initiates the isolation level setting |
-| `ISOLATION LEVEL` | Specifies the type of isolation |
-| `REPEATABLE READ` | The specific level name |
+- Must be set before the transaction begins.
+- In PostgreSQL and MySQL, the snapshot is taken at the first read, not at `BEGIN`.
+- Applications must be prepared to retry on serialization failures (PostgreSQL `40001`, MySQL deadlock/lock wait timeout).
 
-**Syntax Rules:**
+**Constraints and limitations**:
 
-- Must be issued before any DML statements in the transaction.
-- In PostgreSQL, `REPEATABLE READ` uses MVCC to provide a transaction-level snapshot.
-- In MySQL InnoDB, `REPEATABLE READ` uses consistent reads and gap locks to prevent phantom reads in many cases.
-- In SQL Server, `REPEATABLE READ` acquires shared locks on read data until the transaction ends, but does not use range locks.
+- Write skew is possible at this level (it is not serializable).
+- SQL Server's REPEATABLE READ holds shared locks for the transaction duration, blocking writers.
+- PostgreSQL's REPEATABLE READ can abort update transactions that conflict with concurrent commits.
 
-**Constraints and Limitations:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- Permits phantom reads (in most implementations; PostgreSQL's implementation prevents them).
-- In SQL Server, `REPEATABLE READ` can cause blocking because shared locks are held.
-- Permits serialization anomalies (write skew).
-- Oracle does not provide this level as a separate option; `SERIALIZABLE` provides stronger guarantees.
-
-### Annotated Complete Code Examples
-
-**Example 1: REPEATABLE READ in MySQL InnoDB**
+##### Example 1: PostgreSQL – Repeatable read prevents non-repeatable reads
 
 ```sql
--- Session 1: Set REPEATABLE READ and begin
-SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ;
-BEGIN;
+-- Session A
+BEGIN ISOLATION LEVEL REPEATABLE READ;
+SELECT balance FROM accounts WHERE id = 1;  -- returns 1000
 
-SELECT balance FROM accounts WHERE account_id = 1;
--- Output: 1000.00
-
--- Session 2: Update and commit
-UPDATE accounts SET balance = 900 WHERE account_id = 1;
+-- Session B
+UPDATE accounts SET balance = 900 WHERE id = 1;
 COMMIT;
 
--- Session 1: Read again
-SELECT balance FROM accounts WHERE account_id = 1;
--- Output: 1000.00  -- Same value! (No non-repeatable read)
-
+-- Session A re-reads:
+SELECT balance FROM accounts WHERE id = 1;  -- still returns 1000
 COMMIT;
 ```
 
-**Why this output occurs:** Session 1's snapshot was established at the first `SELECT`. The committed change by Session 2 is not visible because `REPEATABLE READ` provides a consistent snapshot for the entire transaction.
+**Expected output** (Session A):
 
-### Real-World Cases
+```text
+ balance
+---------
+    1000
+(1 row)
 
-**Case 1: Financial Applications**
+ balance
+---------
+    1000
+(1 row)
+COMMIT
+```
 
-A banking application uses `REPEATABLE READ` to ensure that account balances read at the start of a transaction remain consistent throughout, preventing non-repeatable reads.
+**Why this output appears**: Session A's snapshot is fixed at transaction start. Session B's update is not visible, so the second read returns the same value.
 
-**Case 2: Data Validation Pipelines**
+#### Real-World Cases
 
-An ETL process uses `REPEATABLE READ` to read a consistent set of source data for transformation, ensuring that the data doesn't change mid-process.
-
-### References
-
-- MySQL 8.0 Reference Manual — Transaction Isolation Levels - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/innodb-transaction-isolation-levels.html
-- PostgreSQL Documentation — Transaction Isolation (REPEATABLE READ) - https://www.postgresql.org/docs/16/transaction-iso.html
-- Microsoft Learn — SQL Server Transaction Locking and Row Versioning Guide (REPEATABLE READ) - https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
-- Oracle Database Concepts — Oracle Transaction Isolation Levels - https://docs.oracle.com/cd/F19136_01/cncpt.pdf
+- **Report generation**: Multiple queries that must see a consistent snapshot of the data.
+- **Analytics**: Long-running read-only transactions that cannot tolerate changing data.
+- **MySQL default**: Most InnoDB workloads run at REPEATABLE READ by default.
 
 ---
 
-## 4. SERIALIZABLE
+### 4. Serializable
 
-### Definitions
+#### Definitions
 
-**Core Definition:** `SERIALIZABLE` is the highest isolation level, guaranteeing that concurrent transactions produce the same effect as if they had been executed one after another in some sequential order.
+**Core Definition**  
+SERIALIZABLE guarantees that concurrent transactions produce the same effect as if they had executed one at a time in some order, preventing all anomalies including write skew.
 
-**Technical Definition:** The SQL standard defines `SERIALIZABLE` by stating that any concurrent execution of a set of Serializable transactions is guaranteed to produce the same effect as running them one at a time in some order. At this level, none of the phenomena (dirty reads, non-repeatable reads, phantom reads, serialization anomalies) are possible. In SQL Server, `SERIALIZABLE` acquires range locks when a `SELECT` uses a `WHERE` clause range to prevent phantom reads. In PostgreSQL, `SERIALIZABLE` uses predicate locking or serializable snapshot isolation (SSI) to detect and prevent serialization anomalies.
+**Technical Definition**  
+PostgreSQL implements SERIALIZABLE using **Serializable Snapshot Isolation (SSI)** : it builds on Snapshot Isolation by tracking read-write dependencies and aborting transactions that would create a serialization anomaly. MySQL implements SERIALIZABLE by implicitly converting plain `SELECT` to `SELECT ... LOCK IN SHARE MODE` and using next-key locks, effectively locking reads. SQL Server uses locking-based serializable with range locks. Oracle's SERIALIZABLE uses snapshot-based isolation with rollback on serialization conflict; reads never block writes. Applications must be prepared to retry aborted transactions.
 
-**Beginner-Friendly Explanation:** `SERIALIZABLE` is the strictest isolation level. It makes concurrent transactions behave as if they were running one after another in a single file. No transaction can see another's unfinished work, and no two transactions can interfere with each other's data. This is the safest level but the slowest because transactions must wait for each other.
+**Beginner-Friendly Explanation**  
+SERIALIZABLE means "the database makes it look like transactions ran one after another, even if they actually overlapped." It is the strongest guarantee and the hardest to implement efficiently. If the database detects that two transactions would produce an inconsistent result, it aborts one and expects the application to retry.
 
-### Purposes
+#### Purposes
 
-- To provide the strongest possible consistency guarantees.
-- To prevent all concurrency anomalies: dirty reads, non-repeatable reads, phantom reads, and serialization anomalies.
-- To satisfy the most stringent ACID requirements.
-- To support critical financial, healthcare, and regulatory applications.
-- To enable correct reasoning about concurrent behaviour.
+- To guarantee correctness for business rules that span multiple rows or tables (write skew prevention).
+- To prevent all isolation anomalies without application-level locking.
+- To support critical financial or inventory operations where any anomaly is unacceptable.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax:**
+**Setting the level**:
 
 ```sql
 SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 ```
 
-**Dialect-Specific Syntax:**
+**Component breakdown**:
 
-| Dialect | Syntax | Default? |
-|---------|--------|----------|
-| PostgreSQL | `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;` | No |
-| MySQL | `SET SESSION TRANSACTION ISOLATION LEVEL SERIALIZABLE;` | No |
-| SQL Server | `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;` | No |
-| Oracle | `SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;` | No |
+| Engine | Implementation | Read blocking? | Retry on conflict? |
+|--------|----------------|----------------|---------------------|
+| PostgreSQL (SSI) | Predicate locks / SIREAD | No | Yes (`40001`) |
+| MySQL InnoDB | Shared next-key locks | Yes | Deadlock/lock timeout |
+| SQL Server | Range locks | Yes | Deadlock victim |
+| Oracle | Snapshot + conflict detection | No | Yes ("Cannot serialize access") |
 
-**Component Breakdown:**
+**Syntax rules**:
 
-| Component | Purpose |
-|-----------|---------|
-| `SET TRANSACTION` | Initiates the isolation level setting |
-| `ISOLATION LEVEL` | Specifies the type of isolation |
-| `SERIALIZABLE` | The specific level name |
+- Must be set before the transaction begins.
+- PostgreSQL SSI may abort transactions even when they touch different rows, due to page-level predicate locks.
+- Retry logic must wrap the entire transaction, not just the failed statement.
 
-**Syntax Rules:**
+**Constraints and limitations**:
 
-- Must be issued before any DML statements in the transaction.
-- In SQL Server, `SERIALIZABLE` acquires range locks for `SELECT` statements with range `WHERE` clauses.
-- In PostgreSQL, `SERIALIZABLE` may raise a serialization failure error if a serialization anomaly is detected; applications must retry the transaction.
-- In Oracle, `SERIALIZABLE` is implemented as a form of snapshot isolation with additional checks.
+- Higher abort rates under contention; retries consume resources.
+- Locking implementations (MySQL, SQL Server) block readers and writers, reducing concurrency.
+- PostgreSQL SSI is not truly "no blocking" for writes; it detects conflicts at commit time.
 
-**Constraints and Limitations:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- Lowest concurrency: transactions may block each other extensively.
-- Highest risk of deadlocks and serialization failures.
-- Requires application-level retry logic in PostgreSQL and other MVCC-based systems.
-- Can significantly reduce throughput for write-heavy workloads.
-- In SQL Server, `SERIALIZABLE` can cause DDL and replication operations to fail.
-
-### Annotated Complete Code Examples
-
-**Example 1: SERIALIZABLE in PostgreSQL with Retry Logic**
+##### Example 1: PostgreSQL – Serializable prevents write skew
 
 ```sql
--- Application-level retry pattern
--- BEGIN;
--- SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
--- ... perform operations ...
--- COMMIT;
--- If a serialization failure occurs, ROLLBACK and retry the entire transaction.
+-- Setup: two doctors, each on call. Rule: at least one must remain on call.
+-- Session 1
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+SELECT COUNT(*) FROM doctors WHERE on_call = true;  -- returns 2
+UPDATE doctors SET on_call = false WHERE name = 'Alice';
+-- Not yet committed.
 
--- PostgreSQL automatically detects serialization anomalies
-BEGIN;
-SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+-- Session 2
+BEGIN ISOLATION LEVEL SERIALIZABLE;
+SELECT COUNT(*) FROM doctors WHERE on_call = true;  -- returns 2
+UPDATE doctors SET on_call = false WHERE name = 'Bob';
+COMMIT;  -- succeeds
 
-UPDATE accounts SET balance = balance - 100 WHERE account_id = 1;
-UPDATE accounts SET balance = balance + 100 WHERE account_id = 2;
-
-COMMIT;
--- If another transaction conflicts, PostgreSQL raises:
--- ERROR: could not serialize access due to read/write dependencies among transactions
--- DETAIL: Reason code: Canceled on identification as a pivot, during commit attempt.
--- HINT: The transaction might succeed if retried.
+-- Session 1
+COMMIT;  -- fails with serialization error
 ```
 
-**Why this works:** PostgreSQL's `SERIALIZABLE` uses Serializable Snapshot Isolation (SSI) to detect when concurrent transactions would produce a non-serializable outcome. It aborts one of the transactions with a serialization failure, and the application must retry.
+**Expected output** (Session 1):
 
-### Real-World Cases
+```text
+ERROR:  could not serialize access due to read/write dependencies among transactions
+DETAIL:  Reason code: Canceled on identification as a pivot, during commit attempt.
+HINT:  The transaction might succeed if retried.
+```
 
-**Case 1: Banking Transfers**
+**Why this output appears**: Both transactions read `COUNT(*) = 2` and each updates a different row, so neither write conflicts. Snapshot Isolation would allow both to commit, leaving zero doctors on call (write skew). PostgreSQL's SSI detects the dangerous read-write dependency and aborts one transaction at commit time.
 
-A bank uses `SERIALIZABLE` for account transfers to ensure that the sum of balances is always consistent, even under concurrent transfers.
+#### Real-World Cases
 
-**Case 2: Inventory Management**
-
-An e-commerce system uses `SERIALIZABLE` for inventory reservation to prevent overselling when multiple customers purchase the same item simultaneously.
-
-### References
-
-- PostgreSQL Documentation — Transaction Isolation (SERIALIZABLE) - https://www.postgresql.org/docs/16/transaction-iso.html
-- Microsoft Learn — SQL Server Transaction Locking and Row Versioning Guide (SERIALIZABLE) - https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
-- MySQL 8.0 Reference Manual — Transaction Isolation Levels - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/innodb-transaction-isolation-levels.html
-- Oracle Database Concepts — Oracle Transaction Isolation Levels - https://docs.oracle.com/cd/F19136_01/cncpt.pdf
+- **Financial ledgers**: Debits and credits that must balance across rows.
+- **Inventory reservations**: Preventing overselling when multiple transactions check stock.
+- **On-call scheduling**: Ensuring constraints that span multiple rows.
 
 ---
 
-## 5. Snapshot-Based Isolation
+### 5. Snapshot Isolation
 
-### Definitions
+#### Definitions
 
-**Core Definition:** Snapshot isolation is a concurrency control mechanism that provides each transaction with a consistent snapshot of the database as of a specific point in time, without acquiring read locks, using Multi-Version Concurrency Control (MVCC).
+**Core Definition**  
+Snapshot Isolation (SI) is a concurrency-control model in which each transaction reads from a consistent snapshot of the database taken at the start of the transaction; writes are checked for conflicts at commit using a **first-committer-wins** rule.
 
-**Technical Definition:** Snapshot isolation provides time-travel snapshot consistency without reading locks. Each transaction sees a snapshot of the database as of the time the transaction (or statement) begins. In SQL Server, `READ_COMMITTED_SNAPSHOT` (RCSI) uses row versioning to provide statement-level snapshot consistency for `READ COMMITTED`, while `ALLOW_SNAPSHOT_ISOLATION` enables the `SNAPSHOT` isolation level for transaction-level snapshot consistency. In PostgreSQL, `REPEATABLE READ` and `SERIALIZABLE` use MVCC to provide transaction-level snapshot isolation. In MySQL InnoDB, `REPEATABLE READ` uses consistent reads based on a snapshot established by the first read. Snapshot isolation prevents dirty reads, non-repeatable reads, and read skew, but permits write skew (a serialization anomaly) unless combined with serializable checks.
+**Technical Definition**  
+SI is not one of the four SQL standard levels but is the implementation technique behind PostgreSQL's REPEATABLE READ and SQL Server's SNAPSHOT isolation. Each transaction reads the latest committed version of each row as of its snapshot timestamp. At commit, if another transaction has modified any row the current transaction also modified (write-write conflict), the current transaction aborts (first-committer-wins). SI prevents dirty reads, non-repeatable reads, lost updates, and phantoms, but permits **write skew** because it does not detect read-write conflicts. PostgreSQL's SERIALIZABLE extends SI with SSI to detect and abort write-skew scenarios.
 
-**Beginner-Friendly Explanation:** Snapshot isolation is like having a time machine for your database. When you start a transaction, you get a frozen picture of the data as it was at that moment. You can read the same data repeatedly and always see the same values, even if other transactions are making changes. You don't have to wait for anyone, and nobody has to wait for you. The catch is that two transactions might make conflicting changes based on the same snapshot, and neither might notice (write skew).
+**Beginner-Friendly Explanation**  
+Snapshot Isolation is like giving each transaction its own private photocopy of the database at the moment it starts. Reads never block, and writes only fail if two transactions try to change the same row. But if two transactions each read one row and write a different row, both can succeed—even if the combined result violates a rule. That is write skew, and it is why SI alone is not serializable.
 
-### Purposes
+#### Purposes
 
-- To provide consistent reads without blocking writers or readers.
-- To enable high concurrency for read-heavy workloads.
-- To offer a middle ground between `READ COMMITTED` and `SERIALIZABLE`.
-- To serve as the foundation for MVCC-based isolation levels.
-- To support time-travel queries and historical reporting.
+- To provide non-blocking reads with a stable snapshot (no reader-writer blocking).
+- To prevent lost updates via first-committer-wins.
+- To serve as the foundation for Serializable Snapshot Isolation (SSI).
+- To enable high-concurrency read-heavy workloads without locking overhead.
 
-### Syntax Rules and Structure
+#### Syntax Rules and Structure
 
-**Complete General Syntax (SQL Server):**
+**Enabling SI**:
 
 ```sql
--- Enable snapshot isolation at the database level
-ALTER DATABASE database_name SET ALLOW_SNAPSHOT_ISOLATION ON;
+-- PostgreSQL: REPEATABLE READ is SI.
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
 
--- Enable RCSI for READ COMMITTED
-ALTER DATABASE database_name SET READ_COMMITTED_SNAPSHOT ON;
-
--- Use SNAPSHOT isolation
+-- SQL Server: enable and use SNAPSHOT.
+ALTER DATABASE db SET ALLOW_SNAPSHOT_ISOLATION ON;
 SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
 ```
 
-**Dialect-Specific Syntax:**
+**Component breakdown**:
 
-| Dialect | Snapshot Mechanism | Level Name |
-|---------|-------------------|------------|
-| SQL Server | Row versioning | `SNAPSHOT` (transaction-level), RCSI (`READ COMMITTED` statement-level) |
-| PostgreSQL | MVCC | `REPEATABLE READ` (transaction-level snapshot) |
-| MySQL InnoDB | MVCC | `REPEATABLE READ` (consistent reads) |
-| Oracle | MVCC | `READ COMMITTED` (statement-level snapshot) |
-| SAP ASE | MVCC | Mapped from ANSI levels to statement or transaction snapshot |
+| Feature | SI behavior |
+|---------|-------------|
+| Read consistency | Snapshot at transaction start |
+| Write conflict | First-committer-wins abort |
+| Read-write conflict | Not detected (write skew possible) |
+| Phantom prevention | Yes (snapshot-based) |
 
-**Component Breakdown:**
+**Syntax rules**:
 
-| Component | Purpose |
-|-----------|---------|
-| `ALLOW_SNAPSHOT_ISOLATION` | Enables transaction-level snapshot isolation (SQL Server) |
-| `READ_COMMITTED_SNAPSHOT` | Enables statement-level snapshot for READ COMMITTED (SQL Server) |
-| `SET TRANSACTION ISOLATION LEVEL SNAPSHOT` | Activates snapshot isolation for the transaction |
+- SI requires row versioning (PostgreSQL MVCC, SQL Server `tempdb` row versions, Oracle undo).
+- `SELECT ... FOR UPDATE` acquires locks and can block, even under SI.
+- Long-running SI transactions can prevent cleanup of old row versions (PostgreSQL `VACUUM`, Oracle undo retention).
 
-**Syntax Rules:**
+**Constraints and limitations**:
 
-- In SQL Server, snapshot isolation must be enabled at the database level before use.
-- RCSI changes the behaviour of `READ COMMITTED` to use row versioning instead of shared locks.
-- In PostgreSQL, `REPEATABLE READ` automatically provides snapshot isolation without special configuration.
-- In MySQL InnoDB, `REPEATABLE READ` provides snapshot isolation for consistent reads.
+- Write skew is permitted; applications must use SERIALIZABLE or explicit locks if write skew is unacceptable.
+- First-committer-wins can cause aborts under write contention.
+- SQL Server SNAPSHOT isolation requires `ALLOW_SNAPSHOT_ISOLATION ON` and adds `tempdb` overhead.
 
-**Constraints and Limitations:**
+#### Multiple Annotated Complete Step-by-Step Code Examples
 
-- Snapshot isolation permits write skew (a serialization anomaly).
-- Requires additional storage for row versions (tempdb in SQL Server, undo logs in MySQL).
-- Long-running transactions can cause version store growth.
-- Not all databases support explicit `SNAPSHOT` isolation (PostgreSQL uses `REPEATABLE READ` instead).
-
-### Annotated Complete Code Examples
-
-**Example 1: SQL Server SNAPSHOT Isolation**
+##### Example 1: SQL Server – Snapshot Isolation allows write skew
 
 ```sql
--- Enable snapshot isolation on the database
-ALTER DATABASE mydb SET ALLOW_SNAPSHOT_ISOLATION ON;
+-- Enable SI
+ALTER DATABASE TestDB SET ALLOW_SNAPSHOT_ISOLATION ON;
 
--- Session 1: Begin SNAPSHOT transaction
+-- Session 1
 SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
 BEGIN TRANSACTION;
+SELECT COUNT(*) FROM doctors WHERE on_call = 1;  -- returns 2
+UPDATE doctors SET on_call = 0 WHERE name = 'Alice';
 
-SELECT balance FROM accounts WHERE account_id = 1;
--- Output: 1000.00
+-- Session 2
+SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
+BEGIN TRANSACTION;
+SELECT COUNT(*) FROM doctors WHERE on_call = 1;  -- returns 2
+UPDATE doctors SET on_call = 0 WHERE name = 'Bob';
+COMMIT;  -- succeeds
 
--- Session 2: Update and commit (not blocked by Session 1)
-UPDATE accounts SET balance = 900 WHERE account_id = 1;
-COMMIT;
-
--- Session 1: Read again
-SELECT balance FROM accounts WHERE account_id = 1;
--- Output: 1000.00  -- Snapshot consistency preserved
-
-COMMIT;
+-- Session 1
+COMMIT;  -- also succeeds (write skew)
 ```
 
-**Why this output occurs:** Session 1 sees a transaction-level snapshot from the moment the transaction began. Session 2's committed change is not visible because the snapshot was taken before the update.
+**Expected output**: Both transactions commit; the final state has zero doctors on call, violating the business rule.
 
-**Example 2: Write Skew Under Snapshot Isolation**
+**Why this output appears**: SI checks only write-write conflicts. The two transactions wrote different rows, so neither aborts. The read-write dependency (each read the other's row) is not detected, producing write skew.
+
+#### Real-World Cases
+
+- **Read-heavy reporting**: Non-blocking reads with a consistent snapshot.
+- **High-concurrency OLTP**: Avoiding reader-writer blocking while preventing lost updates.
+- **Foundation for SSI**: PostgreSQL SERIALIZABLE builds on SI to detect write skew.
+
+---
+
+### 6. Isolation Anomalies
+
+#### 6.1 Dirty Reads
+
+**Core Definition**: A transaction reads data written by another transaction that has not yet committed.
+
+**Technical Definition**: Dirty reads occur at READ UNCOMMITTED when the engine does not enforce snapshot consistency or locking for reads. The reader can see uncommitted values that may later be rolled back. PostgreSQL does not permit dirty reads at any level because its MVCC architecture only exposes committed row versions.
+
+**Beginner-Friendly Explanation**: Reading someone else's unsaved work.
+
+**Syntax Rules**: Allowed only at READ UNCOMMITTED (and not in PostgreSQL). Prevented at READ COMMITTED and above.
+
+**Code Example** (SQL Server):
 
 ```sql
--- Classic write skew example: two transactions check a constraint and update disjoint rows
--- Constraint: sum of balances must be >= 0
-
--- Snapshot isolation allows both transactions to commit, violating the constraint
-
--- Session 1: Read balances and update one account
-BEGIN ISOLATION LEVEL REPEATABLE READ; -- PostgreSQL snapshot isolation
-SELECT SUM(balance) FROM accounts; -- Output: 1000.00
-UPDATE accounts SET balance = balance - 600 WHERE account_id = 1;
-COMMIT;
-
--- Session 2: Read balances and update another account
-BEGIN ISOLATION LEVEL REPEATABLE READ;
-SELECT SUM(balance) FROM accounts; -- Output: 1000.00 (sees the same snapshot)
-UPDATE accounts SET balance = balance - 600 WHERE account_id = 2;
-COMMIT;
-
--- Result: Both transactions commit, but the sum is now -200.00 (constraint violated)
+-- Session A: UPDATE t SET x = 0 WHERE id = 1; (not committed)
+-- Session B: SELECT x FROM t WITH (NOLOCK) WHERE id = 1; -- returns 0
+-- Session A: ROLLBACK;
 ```
 
-**Why this happens:** Both transactions read the same snapshot (sum = 1000) and each believed the sum would remain non-negative after their update. Since they updated disjoint rows, there was no write-write conflict, and snapshot isolation allowed both to commit — a write skew anomaly.
+**Expected Output**: Session B reads `0` even though the final committed value is different.
 
-### Real-World Cases
+**Why This Output Appears**: `NOLOCK` bypasses shared locks, allowing the read of an uncommitted row version.
 
-**Case 1: High-Concurrency Web Applications**
-
-A web application uses SQL Server's RCSI to enable `READ COMMITTED` with snapshot consistency, allowing readers and writers to proceed without blocking each other.
-
-**Case 2: Reporting and Analytics**
-
-A BI system uses snapshot isolation to run long-running analytical queries without blocking operational transactions, while still seeing a consistent view of the data.
-
-### References
-
-- Microsoft Learn — Row Versioning and Snapshot Isolation - https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
-- PostgreSQL Documentation — Transaction Isolation (MVCC) - https://www.postgresql.org/docs/16/transaction-iso.html
-- SAP Help — Connection Support in Multiversion Concurrency Control - https://help.sap.com/docs/SAP_ASE_SDK
-- ACM Digital Library — Reasoning about Weak Isolation Levels in Separation Logic - https://dl.acm.org/
+**Real-World Cases**: Monitoring queries that tolerate approximate data.
 
 ---
 
-## 6. Anomalies vs. Levels Mapping
+#### 6.2 Non-Repeatable Reads
 
-### Definitions
+**Core Definition**: A transaction re-reads a row it previously read and finds that another transaction has modified or deleted it and committed.
 
-**Core Definition:** The anomalies-to-isolation-levels mapping shows which concurrency anomalies are physically blocked or permitted at each isolation level, providing a precise reference for choosing the appropriate level.
+**Technical Definition**: Non-repeatable reads are possible at READ COMMITTED because each statement sees a fresh snapshot. They are prevented at REPEATABLE READ and above, where the transaction sees a stable snapshot.
 
-**Technical Definition:** The SQL standard defines isolation levels in terms of phenomena that must not occur at each level. The standard phenomena are: dirty read, non-repeatable read, phantom read, and serialization anomaly. Additional anomalies such as dirty write, lost update, read skew, and write skew are also relevant and are addressed by specific implementations.
+**Beginner-Friendly Explanation**: You look at a row, someone changes it and commits, and when you look again, it has changed.
 
-**Beginner-Friendly Explanation:** This mapping is a quick-reference table that tells you exactly what can go wrong at each isolation level. If you know your application cannot tolerate a specific anomaly, you can look up which isolation level prevents it.
+**Syntax Rules**: Possible at READ COMMITTED; prevented at REPEATABLE READ, SNAPSHOT, and SERIALIZABLE.
 
-### Purposes
+**Code Example** (PostgreSQL – as shown in READ COMMITTED example).
 
-- To provide a precise reference for selecting the appropriate isolation level.
-- To understand the trade-offs between consistency and concurrency.
-- To diagnose concurrency-related bugs by identifying which anomaly is occurring.
-- To document isolation requirements for compliance and auditing.
+**Expected Output**: The second `SELECT` returns a different value from the first.
 
-### Anomalies Defined
+**Why This Output Appears**: The second statement sees a newer snapshot that includes the concurrent commit.
 
-| Anomaly | Description | Code |
-|---------|-------------|------|
-| **Dirty Write** | A transaction overwrites uncommitted data from another transaction | A1 |
-| **Dirty Read** | A transaction reads uncommitted data from another transaction that later rolls back | A2 |
-| **Lost Update** | Two transactions update the same data; one update overwrites the other | A3 |
-| **Fuzzy Read (Non-Repeatable Read)** | A transaction reads the same row twice and gets different values | A4 |
-| **Phantom Read** | A transaction re-executes a query and sees a different set of rows | A5 |
-| **Read Skew** | A transaction reads related data at different times and sees inconsistent states | A6 |
-| **Write Skew** | Two transactions read overlapping data, make disjoint updates, and both commit | A7 |
-| **Serialization Anomaly** | Any anomaly that violates serializability (a superset of the above) | — |
+**Real-World Cases**: Multi-step reports that need stable reads; use REPEATABLE READ.
 
-### Complete Anomaly-to-Isolation Mapping
+---
 
-| Anomaly | READ UNCOMMITTED | READ COMMITTED | REPEATABLE READ | SNAPSHOT | SERIALIZABLE |
-|---------|:----------------:|:--------------:|:---------------:|:--------:|:------------:|
-| Dirty Write | Prevented | Prevented | Prevented | Prevented | Prevented |
-| Dirty Read | **Allowed** | Prevented | Prevented | Prevented | Prevented |
-| Lost Update | **Allowed** | **Allowed** | Prevented¹ | Prevented¹ | Prevented |
-| Fuzzy Read (Non-Repeatable Read) | **Allowed** | **Allowed** | Prevented | Prevented | Prevented |
-| Phantom Read | **Allowed** | **Allowed** | Possible² | Possible² | Prevented |
-| Read Skew | **Allowed** | **Allowed** | Prevented | Prevented | Prevented |
-| Write Skew | **Allowed** | **Allowed** | **Allowed** | **Allowed** | Prevented |
-| Serialization Anomaly | **Allowed** | **Allowed** | **Allowed** | **Allowed** | Prevented |
+#### 6.3 Phantom Reads
 
-**Notes:**
+**Core Definition**: A transaction re-executes a query returning a set of rows that satisfy a search condition and finds that another transaction has inserted or deleted rows that satisfy the condition, changing the set.
 
-¹ Lost update is prevented in REPEATABLE READ and SNAPSHOT in most implementations (PostgreSQL, MySQL InnoDB, SQL Server with row versioning) because write-write conflicts are detected. However, the SQL standard's REPEATABLE READ does not explicitly prevent lost updates.
+**Technical Definition**: Phantom reads are possible at READ COMMITTED and (in SQL Server) at REPEATABLE READ. PostgreSQL's REPEATABLE READ (SI) prevents phantoms because the snapshot is fixed. MySQL InnoDB's REPEATABLE READ uses next-key locks for locking reads and a consistent snapshot for plain reads, preventing phantoms in many cases.
 
-² Phantom reads are possible under the SQL standard's REPEATABLE READ, but PostgreSQL's implementation (which uses snapshot isolation) prevents them. MySQL InnoDB's REPEATABLE READ uses gap locks to prevent phantom reads in many cases.
+**Beginner-Friendly Explanation**: You count the rows matching a condition, someone inserts a new matching row and commits, and your next count is different.
 
-### Annotated Complete Code Examples
+**Syntax Rules**: Possible at READ COMMITTED; prevented at SNAPSHOT, PostgreSQL REPEATABLE READ, and SERIALIZABLE. SQL Server REPEATABLE READ allows phantoms.
 
-**Example 1: Demonstrating the Mapping**
+**Code Example** (SQL Server – REPEATABLE READ allows phantoms):
 
 ```sql
--- The following table summarises the anomalies permitted at each level
--- based on the SQL standard and major RDBMS implementations.
-
--- At READ UNCOMMITTED, all three standard anomalies are possible:
--- - Dirty Read: Allowed
--- - Non-Repeatable Read: Allowed
--- - Phantom Read: Allowed
-
--- At READ COMMITTED:
--- - Dirty Read: Prevented
--- - Non-Repeatable Read: Possible
--- - Phantom Read: Possible
-
--- At REPEATABLE READ (SQL standard):
--- - Dirty Read: Prevented
--- - Non-Repeatable Read: Prevented
--- - Phantom Read: Possible
-
--- At SERIALIZABLE:
--- - Dirty Read: Prevented
--- - Non-Repeatable Read: Prevented
--- - Phantom Read: Prevented
--- - Serialization Anomaly: Prevented
+-- Session A: SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+-- SELECT COUNT(*) FROM orders WHERE total > 100; -- returns 10
+-- Session B: INSERT INTO orders (total) VALUES (200); COMMIT;
+-- Session A: SELECT COUNT(*) FROM orders WHERE total > 100; -- returns 11
 ```
 
-### Real-World Cases
+**Expected Output**: The count changes from 10 to 11.
 
-**Case 1: Choosing the Right Level**
+**Why This Output Appears**: Shared locks prevent updates to existing rows but do not prevent inserts of new rows that satisfy the predicate.
 
-A financial application cannot tolerate non-repeatable reads or phantom reads. The mapping shows that `REPEATABLE READ` prevents non-repeatable reads but not phantom reads, while `SERIALIZABLE` prevents both. The application chooses `SERIALIZABLE` for critical operations.
-
-**Case 2: Performance vs. Consistency**
-
-A high-traffic social media application can tolerate non-repeatable reads and phantom reads but not dirty reads. The mapping shows that `READ COMMITTED` prevents dirty reads while allowing higher concurrency.
-
-### References
-
-- PostgreSQL Documentation — Transaction Isolation (Table 13.1) - https://www.postgresql.org/docs/16/transaction-iso.html
-- TU Delft Repository — Phenomena Possible in Different Isolation Levels - https://repository.tudelft.nl/
-- GitHub — Anomaly-to-Isolation Mapping Matrix - https://github.com/bookforge-ai/bookforge-skills
-- ACM Digital Library — A Critique of ANSI SQL Isolation Levels - https://dlnext.acm.org/
+**Real-World Cases**: Reports that must see a stable set of rows; use SNAPSHOT or SERIALIZABLE.
 
 ---
 
-## Summary Table: Isolation Levels at a Glance
+#### 6.4 Lost Updates
 
-| Level | Dirty Read | Non-Repeatable Read | Phantom Read | Serialization Anomaly | Default In |
-|-------|:----------:|:-------------------:|:------------:|:---------------------:|------------|
-| READ UNCOMMITTED | Allowed | Allowed | Allowed | Allowed | — |
-| READ COMMITTED | Prevented | Allowed | Allowed | Allowed | PostgreSQL, SQL Server, Oracle |
-| REPEATABLE READ | Prevented | Prevented | Possible¹ | Allowed | MySQL InnoDB |
-| SNAPSHOT | Prevented | Prevented | Possible | Allowed | SQL Server (opt-in) |
-| SERIALIZABLE | Prevented | Prevented | Prevented | Prevented | — |
+**Core Definition**: Two transactions read the same row, both modify it based on the read value, and one transaction's update overwrites the other's, causing the first update to be lost.
 
-¹ PostgreSQL's `REPEATABLE READ` also prevents phantom reads due to its MVCC implementation.
+**Technical Definition**: Lost updates occur when a transaction reads a value, another transaction reads the same value, and both write back modifications without detecting the conflict. At READ COMMITTED and above, row-level locking for `UPDATE` prevents lost updates in most engines because the second `UPDATE` waits for the first to commit and then re-evaluates. Snapshot Isolation's first-committer-wins rule also prevents lost updates (if both write the same row, one aborts).
+
+**Beginner-Friendly Explanation**: Two people read the same bank balance, both add a deposit, and one deposit overwrites the other—money disappears.
+
+**Syntax Rules**: Prevented at READ COMMITTED and above for simple `UPDATE` statements (locking or first-committer-wins). Application-level read-modify-write without locking can still lose updates under SI if it reads outside the transaction or uses stale data.
+
+**Code Example** (application-level lost update prevented by `UPDATE ... SET x = x + 1`):
+
+```sql
+-- Anti-pattern: read then write
+SELECT balance FROM accounts WHERE id = 1; -- 1000
+-- application computes 1000 + 100
+UPDATE accounts SET balance = 1100 WHERE id = 1;
+
+-- Preferred: atomic increment
+UPDATE accounts SET balance = balance + 100 WHERE id = 1;
+```
+
+**Expected Output**: The atomic increment applies both updates correctly; the read-then-write pattern can lose one.
+
+**Why This Output Appears**: `UPDATE ... SET balance = balance + 100` reads the current committed value under lock, while the application-level pattern uses a stale read.
+
+**Real-World Cases**: Counter increments, inventory decrements.
 
 ---
 
-## Dialect Comparison: Isolation Level Support
+#### 6.5 Write Skew
 
-| Feature | PostgreSQL | MySQL | SQL Server | Oracle |
-|---------|-----------|-------|------------|--------|
-| READ UNCOMMITTED | Behaves as READ COMMITTED | ✅ | ✅ | Non-standard extension |
-| READ COMMITTED | ✅ (default) | ✅ | ✅ (default) | ✅ (default) |
-| REPEATABLE READ | ✅ (prevents phantom reads) | ✅ (default) | ✅ | ❌ (not separate) |
-| SNAPSHOT | ❌ (use REPEATABLE READ) | ❌ | ✅ (opt-in) | ❌ |
-| SERIALIZABLE | ✅ | ✅ | ✅ | ✅ |
-| RCSI (READ COMMITTED SNAPSHOT) | ❌ | ❌ | ✅ | ❌ |
-| MVCC | ✅ | ✅ | ✅ (row versioning) | ✅ |
+**Core Definition**: Write skew occurs when two transactions each read a set of rows, make disjoint writes (write to different rows), and both commit, producing a result that violates a constraint that would have been preserved by serial execution.
+
+**Technical Definition**: Write skew is permitted under Snapshot Isolation because SI checks only write-write conflicts, not read-write dependencies. Each transaction reads data that the other writes, but they write different rows, so first-committer-wins does not fire. Only SERIALIZABLE (via SSI or locking) detects and prevents write skew.
+
+**Beginner-Friendly Explanation**: Two doctors are on call. Each checks that the other is still on call, then goes off call. Both commit because they updated different rows—and now nobody is on call. The individual transactions were "correct" in isolation, but together they break the rule.
+
+**Syntax Rules**: Allowed under Snapshot Isolation (PostgreSQL REPEATABLE READ, SQL Server SNAPSHOT). Prevented under SERIALIZABLE. `SELECT ... FOR UPDATE` can prevent it manually by locking the rows read.
+
+**Code Example** (PostgreSQL – as shown in SERIALIZABLE example; under REPEATABLE READ both commits succeed, violating the rule).
+
+**Expected Output**: Under REPEATABLE READ, both transactions commit; under SERIALIZABLE, one aborts with `40001`.
+
+**Why This Output Appears**: SI does not track read-write dependencies; SSI does.
+
+**Real-World Cases**: On-call scheduling, inventory reservation, financial constraints spanning rows.
+
+---
+
+### 7. Isolation Level Selection
+
+#### Definitions
+
+**Core Definition**: Isolation level selection is the process of choosing the weakest isolation level that still satisfies the application's consistency requirements, balancing correctness against concurrency and retry overhead.
+
+**Technical Definition**: The selection depends on the anomalies the application can tolerate, the engine's implementation of each level, and the workload's contention profile. READ COMMITTED is the pragmatic default for OLTP; REPEATABLE READ/SNAPSHOT for multi-query stability; SERIALIZABLE for write-skew-sensitive business rules. Oracle's SERIALIZABLE is non-blocking for reads and may offer higher throughput under read/write contention than locking implementations. SQL Server's READ_COMMITTED_SNAPSHOT provides non-blocking reads at READ COMMITTED semantics.
+
+**Beginner-Friendly Explanation**: Pick the weakest level that still prevents the anomalies that would break your application. If you can tolerate non-repeatable reads, use READ COMMITTED. If you need stable multi-query reads, use REPEATABLE READ or SNAPSHOT. If you have multi-row business rules, use SERIALIZABLE—and build retry logic.
+
+#### Purposes
+
+- To match isolation guarantees to actual application requirements.
+- To avoid unnecessary locking and retry overhead from stronger levels.
+- To ensure that critical invariants are protected by SERIALIZABLE while routine operations use weaker levels.
+- To account for vendor-specific behavior (e.g., PostgreSQL's REPEATABLE READ prevents phantoms; SQL Server's does not).
+
+#### Syntax Rules and Structure
+
+**Decision matrix**:
+
+| Requirement | Recommended level |
+|-------------|-------------------|
+| Single-row OLTP, can tolerate non-repeatable reads | READ COMMITTED |
+| Stable multi-query snapshot, no phantoms | REPEATABLE READ / SNAPSHOT |
+| Non-blocking reads, can tolerate write skew | SNAPSHOT |
+| Multi-row business rules, no anomalies | SERIALIZABLE |
+
+**Syntax rules**:
+
+- Set the level before the transaction begins.
+- Use the weakest level that meets requirements.
+- For SERIALIZABLE, always implement retry logic for `40001` / deadlock errors.
+
+**Constraints and limitations**:
+
+- Vendor differences mean the same level name does not guarantee identical behavior.
+- READ UNCOMMITTED is rarely appropriate for application logic; use only for monitoring.
+
+---
+
+### 8. Performance Implications
+
+#### Definitions
+
+**Core Definition**: Performance implications of isolation are the concurrency, latency, and resource costs associated with each level, including lock contention, abort/retry rates, row-version storage, and cleanup overhead.
+
+**Technical Definition**: Stronger isolation increases the chance of conflicts, leading to blocking (locking implementations) or serialization aborts (MVCC/SSI implementations). Oracle notes that SERIALIZABLE requires rolling back and retrying aborted transactions, which can consume significant resources in high-contention environments. PostgreSQL applications using REPEATABLE READ or SERIALIZABLE must be prepared to retry on serialization failures. SI requires storing old row versions, increasing storage and cleanup load (PostgreSQL dead tuples, SQL Server `tempdb` row versions, Oracle undo). Locking-based levels (MySQL SERIALIZABLE, SQL Server REPEATABLE READ) block readers and writers, reducing concurrency.
+
+**Beginner-Friendly Explanation**: Stronger isolation is safer but slower under contention. Transactions may wait for locks or be aborted and retried, and the database must store extra row versions for snapshot-based levels. The performance cost is not fixed—it depends on how much contention your workload has.
+
+#### Purposes
+
+- To understand the throughput/latency trade-off of isolation levels.
+- To design retry logic that handles serialization failures gracefully.
+- To choose between locking-based and MVCC-based implementations for a workload.
+- To tune row-version cleanup and avoid bloat.
+
+#### Syntax Rules and Structure
+
+**Performance factors**:
+
+| Factor | Lower isolation | Higher isolation |
+|--------|-----------------|------------------|
+| Lock contention | Low | High (locking) |
+| Abort/retry rate | Low | High (SSI/serializable) |
+| Row-version storage | Minimal | Significant (SI) |
+| Read blocking | None (MVCC) | Possible (locking) |
+
+**Syntax rules**:
+
+- Retry loops should use exponential backoff with jitter.
+- Keep transactions short to reduce conflict windows.
+- Monitor abort rates and lock waits; adjust isolation or application logic.
+
+**Constraints and limitations**:
+
+- The cost of retries can exceed the cost of stronger isolation if retries are frequent.
+- Row-version cleanup (vacuum/purge) must keep up with transaction rate.
+
+#### Multiple Annotated Complete Step-by-Step Code Examples
+
+##### Example 1: PostgreSQL – Retry on serialization failure
+
+```sql
+-- Application retry loop (pseudo-code)
+for attempt in 1..3:
+    BEGIN;
+    try:
+        -- business logic at SERIALIZABLE
+        COMMIT;
+        break;
+    except serialization_failure (40001):
+        ROLLBACK;
+        sleep(backoff with jitter);
+        continue;
+```
+
+**Expected output**: The transaction succeeds on retry with a fresh snapshot, avoiding the conflict.
+
+**Why this output appears**: PostgreSQL's SSI aborts one transaction with `40001`; the retry sees the committed change and can proceed without conflict.
+
+#### Real-World Cases
+
+- **High-contention OLTP**: READ COMMITTED with retry only on deadlocks.
+- **Financial batch jobs**: SERIALIZABLE with robust retry and short transactions.
+- **Reporting**: SNAPSHOT or REPEATABLE READ for stable reads without blocking writers.
+
+---
+
+## Summary: Isolation Level Matrix
+
+| Level | Dirty Read | Non-Repeatable Read | Phantom Read | Write Skew | Lost Update |
+|-------|------------|---------------------|--------------|------------|-------------|
+| READ UNCOMMITTED | Possible | Possible | Possible | Possible | Possible |
+| READ COMMITTED | No | Possible | Possible | Possible | No (locking) |
+| REPEATABLE READ (SQL Server) | No | No | Possible | Possible | No |
+| REPEATABLE READ (PostgreSQL/MySQL) | No | No | No (PG) / No (InnoDB) | Possible | No |
+| SNAPSHOT | No | No | No | Possible | No |
+| SERIALIZABLE | No | No | No | No | No |
 
 ---
 
 ## References
 
-- PostgreSQL Documentation — Transaction Isolation - https://www.postgresql.org/docs/16/transaction-iso.html
-- MySQL 8.0 Reference Manual — Transaction Isolation Levels - https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/innodb-transaction-isolation-levels.html
-- MySQL 8.4 Reference Manual — Transaction Isolation Levels - https://dev.mysql.com.tw/doc/refman/8.4/en/innodb-transaction-isolation-levels.html
-- Microsoft Learn — SQL Server Transaction Locking and Row Versioning Guide - https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
-- Microsoft Learn — Isolation Levels in the Database Engine - https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
-- Microsoft Learn — SET TRANSACTION ISOLATION LEVEL (Transact-SQL) - https://learn.microsoft.com/en-us/sql/t-sql/statements/set-transaction-isolation-level-transact-sql
-- Oracle Database Concepts — Oracle Transaction Isolation Levels - https://docs.oracle.com/cd/F19136_01/cncpt.pdf
-- Oracle Database — ANSI/ISO SQL Transaction Isolation Levels - https://docs.oracle.com/en/database/oracle/oracle-database/
-- SAP Help — Connection Support in Multiversion Concurrency Control - https://help.sap.com/docs/SAP_ASE_SDK
-- TU Delft Repository — Phenomena Possible in Different Isolation Levels - https://repository.tudelft.nl/
-- ACM Digital Library — A Critique of ANSI SQL Isolation Levels - https://dlnext.acm.org/
-- ACM Digital Library — Reasoning about Weak Isolation Levels in Separation Logic - https://dl.acm.org/
-- GitHub — Anomaly-to-Isolation Mapping Matrix - https://github.com/bookforge-ai/bookforge-skills
-- ISO/IEC 9075-2 — SQL Standard (Transaction Isolation Levels) - https://jtc1sc32.org/doc/N0251-0300/32N0254.pdf
+- PostgreSQL Documentation – Transaction Isolation – https://www.postgresql.org/docs/current/transaction-iso.html 
+- PostgreSQL Documentation – `SET TRANSACTION` – https://www.postgresql.org/docs/current/sql-set-transaction.html
+- PostgreSQL Wiki – Serializable Snapshot Isolation (SSI) – https://wiki.postgresql.org/wiki/SSI 
+- MySQL 8.0 Reference Manual – Transaction Isolation Levels – https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html 
+- Microsoft Learn – Understanding Transaction Isolation Levels – https://learn.microsoft.com/en-us/previous-versions/tn-archive/cc546518(v=technet.10) 
+- Microsoft Learn – Snapshot Isolation – https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
+- Oracle Database Concepts – Data Concurrency and Consistency – https://docs.oracle.com/en/database/oracle/oracle-database/23/cncpt/data-concurrency-and-consistency.html 
+- Oracle Database – Serializable Isolation and Retry – https://docs.oracle.com/cd/A87862_01/NT817CLI/server.817/a76965/c23cnsis.htm 
+- Martin Kleppmann, Designing Data-Intensive Applications – Chapter 7: Transactions – https://dataintensive.net/
+- Berenson et al., "A Critique of ANSI SQL Isolation Levels" – https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-95-51.pdf
+- Cahill, Röhm, Fekete – "Serializable Snapshot Isolation" – https://arxiv.org/abs/cs/0703110
+- PostgreSQL Wiki – Write Skew and SSI – https://wiki.postgresql.org/wiki/SSI#Write_Skew

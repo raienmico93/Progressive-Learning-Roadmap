@@ -876,36 +876,42 @@ Python is best learned as more than "a scripting language." The progression shou
 
 # VI. Object-Oriented Programming
 
-- **36. Classes and Objects**
-  - Classes
-  - Objects
-  - Instances
-  - `class` keyword
-  - Class definition
-  - Class attributes
-  - Instance attributes
-  - Class methods
-  - Instance methods
-  - Static methods
-  - `self` parameter
-  - `cls` parameter
-  - Constructors
-  - `__init__`
-  - `__new__`
-  - Destructors
-  - `__del__`
-  - Object creation
-  - Object initialization
-  - Object identity
-  - Object equality
-  - Object representation
-  - `__str__`
-  - `__repr__`
-  - Object comparison
-  - Object copying
-  - Object serialization
+- [**36. Classes and Objects**](/Programming%20Languages/Python/OOP/Classes.md)
+  - Core Concepts
+    - Classes
+    - Objects
+    - Instances
+  - Class Definition
+    - `class` keyword
+    - Class definition
+  - Attributes & Methods
+    - Class attributes
+    - Instance attributes
+    - Class methods
+    - Instance methods
+    - Static methods
+    - `self` parameter
+    - `cls` parameter
+  - Object Lifecycle (Creation & Destruction)
+    - Object creation
+    - Object initialization
+    - Constructors
+      - `__new__`
+      - `__init__`
+    - Destructors
+      - `__del__`
+  - Object Behavior & Representation
+    - Object identity
+    - Object equality
+    - Object comparison
+    - Object representation
+      - `__str__`
+      - `__repr__`
+  - Object Operations
+    - Object copying
+    - Object serialization
 
-- **37. Inheritance**
+- [**37. Inheritance**](/Programming%20Languages/Python/OOP/Inheritance.md)
   - Inheritance
   - Base classes
   - Derived classes
@@ -924,7 +930,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Inheritance best practices
   - Composition vs inheritance
 
-- **38. Encapsulation**
+- [**38. Encapsulation**](/Programming%20Languages/Python/OOP/Encapsulation.md)
   - Encapsulation
   - Public attributes
   - Protected attributes
@@ -942,7 +948,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Computed properties
   - Encapsulation best practices
 
-- **39. Polymorphism**
+- [**39. Polymorphism**](/Programming%20Languages/Python/OOP/Polymorphism.md)
   - Polymorphism
   - Method overriding
   - Method overloading
@@ -951,7 +957,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Magic methods
   - Polymorphism best practices
 
-- **40. Magic Methods**
+- [**40. Magic Methods**](/Programming%20Languages/Python/OOP/SpecialMethods.md)
   - Magic methods
   - Dunder methods
   - Object lifecycle
@@ -1016,7 +1022,7 @@ Python is best learned as more than "a scripting language." The progression shou
     - `__getstate__`
     - `__setstate__`
 
-- **41. Data Classes**
+- [**41. Data Classes**](/Programming%20Languages/Python/OOP/DataClasses.md)
   - Data classes
   - `@dataclass`
   - Field definitions
@@ -1032,7 +1038,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Data class performance
   - Data class best practices
 
-- **42. Metaclasses**
+- [**42. Metaclasses**](/Programming%20Languages/Python/OOP/Metaclasses.md)
   - Metaclasses
   - `type`
   - Metaclass creation
@@ -1049,7 +1055,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - When to use metaclasses
   - When to avoid metaclasses
 
-- **43. Descriptors**
+- [**43. Descriptors**](/Programming%20Languages/Python/OOP/Descriptors.md)
   - Descriptors
   - `__get__`
   - `__set__`
@@ -1062,7 +1068,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Methods as descriptors
   - Descriptor best practices
 
-- **44. Enumerations**
+- [**44. Enumerations**](/Programming%20Languages/Python/OOP/Enums.md)
   - Enumerations
   - `enum` module
   - `Enum`
@@ -1118,140 +1124,158 @@ Python is best learned as more than "a scripting language." The progression shou
 
 - **47. Standard Library**
   - Standard library overview
-  - `os`
-  - `sys`
-  - `pathlib`
-  - `io`
-  - `re`
-  - `json`
-  - `csv`
-  - `xml`
-  - `html`
-  - `urllib`
-  - `http`
-  - `socket`
-  - `ssl`
-  - `email`
-  - `smtplib`
-  - `datetime`
-  - `time`
-  - `calendar`
-  - `zoneinfo`
-  - `random`
-  - `secrets`
-  - `hashlib`
-  - `hmac`
-  - `base64`
-  - `binascii`
-  - `struct`
-  - `pickle`
-  - `shelve`
-  - `sqlite3`
-  - `dbm`
-  - `collections`
-  - `heapq`
-  - `bisect`
-  - `array`
-  - `weakref`
-  - `copy`
-  - `pprint`
-  - `reprlib`
-  - `enum`
-  - `abc`
-  - `atexit`
-  - `gc`
-  - `inspect`
-  - `ast`
-  - `dis`
-  - `code`
-  - `codeop`
-  - `compileall`
-  - `py_compile`
-  - `zipfile`
-  - `tarfile`
-  - `gzip`
-  - `bz2`
-  - `lzma`
-  - `shutil`
-  - `tempfile`
-  - `glob`
-  - `fnmatch`
-  - `stat`
-  - `filecmp`
-  - `fileinput`
-  - `linecache`
-  - `statistics`
-  - `math`
-  - `cmath`
-  - `decimal`
-  - `fractions`
-  - `numbers`
-  - `operator`
-  - `functools`
-  - `itertools`
-  - `contextlib`
-  - `traceback`
-  - `warnings`
-  - `logging`
-  - `unittest`
-  - `doctest`
-  - `argparse`
-  - `getopt`
-  - `configparser`
-  - `netrc`
-  - `xdrlib`
-  - `plistlib`
-  - `subprocess`
-  - `threading`
-  - `multiprocessing`
-  - `concurrent.futures`
-  - `asyncio`
-  - `select`
-  - `selectors`
-  - `signal`
-  - `mmap`
-  - `ctypes`
-  - `cffi`
-  - `platform`
-  - `sysconfig`
-  - `site`
-  - `venv`
-  - `ensurepip`
-  - `zipapp`
-  - `pkgutil`
-  - `modulefinder`
-  - `runpy`
-  - `importlib`
-  - `pydoc`
-  - `doctest`
-  - `unittest`
-  - `test`
-  - `turtle`
-  - `tkinter`
-  - `idlelib`
-  - `curses`
-  - `readline`
-  - `rlcompleter`
-  - `locale`
-  - `gettext`
-  - `argparse`
-  - `optparse`
-  - `getpass`
-  - `crypt`
-  - `termios`
-  - `tty`
-  - `pty`
-  - `fcntl`
-  - `resource`
-  - `syslog`
-  - `posix`
-  - `pwd`
-  - `grp`
-  - `spwd`
-  - `sysconfig`
-  - `distutils` (deprecated)
+  - Operating System & File System
+    - `os`
+    - `sys`
+    - `pathlib`
+    - `io`
+    - `shutil`
+    - `tempfile`
+    - `glob`
+    - `fnmatch`
+    - `stat`
+    - `filecmp`
+    - `fileinput`
+    - `linecache`
+    - `mmap`
+    - `platform`
+  - Data Formats, Markup & Serialization
+    - `re`
+    - `json`
+    - `csv`
+    - `xml`
+    - `html`
+    - `base64`
+    - `binascii`
+    - `struct`
+    - `pickle`
+    - `shelve`
+    - `plistlib`
+    - `xdrlib`
+  - Data Compression & Archiving
+    - `zipfile`
+    - `tarfile`
+    - `gzip`
+    - `bz2`
+    - `lzma`
+  - Databases & Persistence
+    - `sqlite3`
+    - `dbm`
+  - Networking & Internet Protocols
+    - `urllib`
+    - `http`
+    - `socket`
+    - `ssl`
+    - `email`
+    - `smtplib`
+    - `netrc`
+  - Date & Time
+    - `datetime`
+    - `time`
+    - `calendar`
+    - `zoneinfo`
+  - Mathematics, Numbers & Randomness
+    - `random`
+    - `statistics`
+    - `math`
+    - `cmath`
+    - `decimal`
+    - `fractions`
+    - `numbers`
+  - Cryptography & Security
+    - `secrets`
+    - `hashlib`
+    - `hmac`
+    - `crypt`
+    - `getpass`
+  - Data Structures & Types
+    - `collections`
+    - `heapq`
+    - `bisect`
+    - `array`
+    - `weakref`
+    - `copy`
+    - `pprint`
+    - `reprlib`
+    - `enum`
+    - `abc`
+  - Functional Programming & Iteration
+    - `operator`
+    - `functools`
+    - `itertools`
+    - `contextlib`
+  - Concurrency & Execution
+    - `subprocess`
+    - `threading`
+    - `multiprocessing`
+    - `concurrent.futures`
+    - `asyncio`
+    - `select`
+    - `selectors`
+    - `signal`
+  - Command-Line Interfaces & Configuration
+    - `argparse`
+    - `getopt`
+    - `optparse`
+    - `configparser`
+    - `argparse` (duplicate from source)
+  - Debugging, Testing & Logging
+    - `traceback`
+    - `warnings`
+    - `logging`
+    - `unittest`
+    - `doctest`
+    - `test`
+    - `doctest` (duplicate from source)
+    - `unittest` (duplicate from source)
+  - Runtime, Inspection & Code Compilation
+    - `atexit`
+    - `gc`
+    - `inspect`
+    - `ast`
+    - `dis`
+    - `code`
+    - `codeop`
+    - `compileall`
+    - `py_compile`
+    - `ctypes`
+    - `cffi`
+  - Packaging, Importing & Environment
+    - `sysconfig`
+    - `site`
+    - `venv`
+    - `ensurepip`
+    - `zipapp`
+    - `pkgutil`
+    - `modulefinder`
+    - `runpy`
+    - `importlib`
+    - `pydoc`
+    - `sysconfig` (duplicate from source)
+    - `distutils` (deprecated) 
+  - User Interfaces & Terminal Control
+    - `turtle`
+    - `tkinter`
+    - `idlelib`
+    - `curses`
+    - `readline`
+    - `rlcompleter` 
+  - Internationalization & Localization
+    - `locale`
+    - `gettext`
+  - Unix-Specific Services
+    - `termios`
+    - `tty`
+    - `pty`
+    - `fcntl`
+    - `resource`
+    - `syslog`
+    - `posix`
+    - `pwd`
+    - `grp`
+    - `spwd`
 
-- **48. Third-Party Libraries**
+- [**48. Third-Party Libraries**](/Programming%20Languages/Python/Modules/ThirdPartyLibraries.md)
   - PyPI
   - Package discovery
   - Package installation
@@ -1261,7 +1285,7 @@ Python is best learned as more than "a scripting language." The progression shou
   - Package evaluation
   - Package best practices
 
-- **49. Virtual Environments**
+- [**49. Virtual Environments**](/Programming%20Languages/Python/Modules/Venv.md)
   - Virtual environments
   - Why virtual environments
   - `venv`
@@ -1332,65 +1356,65 @@ Python is best learned as more than "a scripting language." The progression shou
   - Exception hierarchy
   - Built-in exceptions
     - `BaseException`
-    - `Exception`
-    - `ArithmeticError`
-    - `AssertionError`
-    - `AttributeError`
-    - `BufferError`
-    - `EOFError`
-    - `ImportError`
-    - `ModuleNotFoundError`
-    - `LookupError`
-    - `IndexError`
-    - `KeyError`
-    - `MemoryError`
-    - `NameError`
-    - `OSError`
-    - `FileNotFoundError`
-    - `PermissionError`
-    - `FileExistsError`
-    - `IsADirectoryError`
-    - `NotADirectoryError`
-    - `InterruptedError`
-    - `BlockingIOError`
-    - `ChildProcessError`
-    - `ConnectionError`
-    - `BrokenPipeError`
-    - `ConnectionAbortedError`
-    - `ConnectionRefusedError`
-    - `ConnectionResetError`
-    - `ReferenceError`
-    - `RuntimeError`
-    - `NotImplementedError`
-    - `RecursionError`
-    - `StopIteration`
-    - `StopAsyncIteration`
-    - `SyntaxError`
-    - `IndentationError`
-    - `TabError`
-    - `SystemError`
-    - `SystemExit`
-    - `TypeError`
-    - `ValueError`
-    - `UnicodeError`
-    - `UnicodeDecodeError`
-    - `UnicodeEncodeError`
-    - `UnicodeTranslateError`
-    - `Warning`
-    - `DeprecationWarning`
-    - `PendingDeprecationWarning`
-    - `UserWarning`
-    - `SyntaxWarning`
-    - `RuntimeWarning`
-    - `FutureWarning`
-    - `ImportWarning`
-    - `UnicodeWarning`
-    - `BytesWarning`
-    - `ResourceWarning`
-    - `KeyboardInterrupt`
-    - `GeneratorExit`
-    - `ExceptionGroup`
-    - `BaseExceptionGroup`
+      - `BaseExceptionGroup`
+      - `GeneratorExit`
+      - `KeyboardInterrupt`
+      - `SystemExit`
+      - `Exception`
+        - `ArithmeticError`
+        - `AssertionError`
+        - `AttributeError`
+        - `BufferError`
+        - `EOFError`
+        - `ExceptionGroup`
+        - `ImportError`
+          - `ModuleNotFoundError`
+        - `LookupError`
+          - `IndexError`
+          - `KeyError`
+        - `MemoryError`
+        - `NameError`
+        - `OSError`
+          - `BlockingIOError`
+          - `ChildProcessError`
+          - `ConnectionError`
+            - `BrokenPipeError`
+            - `ConnectionAbortedError`
+            - `ConnectionRefusedError`
+            - `ConnectionResetError`
+          - `FileExistsError`
+          - `FileNotFoundError`
+          - `InterruptedError`
+          - `IsADirectoryError`
+          - `NotADirectoryError`
+          - `PermissionError`
+        - `ReferenceError`
+        - `RuntimeError`
+          - `NotImplementedError`
+          - `RecursionError`
+        - `StopAsyncIteration`
+        - `StopIteration`
+        - `SyntaxError`
+          - `IndentationError`
+            - `TabError`
+        - `SystemError`
+        - `TypeError`
+        - `ValueError`
+          - `UnicodeError`
+            - `UnicodeDecodeError`
+            - `UnicodeEncodeError`
+            - `UnicodeTranslateError`
+        - `Warning`
+          - `BytesWarning`
+          - `DeprecationWarning`
+          - `FutureWarning`
+          - `ImportWarning`
+          - `PendingDeprecationWarning`
+          - `ResourceWarning`
+          - `RuntimeWarning`
+          - `SyntaxWarning`
+          - `UnicodeWarning`
+          - `UserWarning`
 
 - **53. Exception Handling**
   - `try`
@@ -1456,7 +1480,7 @@ Python is best learned as more than "a scripting language." The progression shou
 
 # IX. File I/O and Serialization
 
-- **57. File I/O**
+- [**57. File I/O**](/Programming%20Languages/Python/File%20Handling/FileIO.md)
   - File operations
   - `open()`
   - File modes
