@@ -394,7 +394,7 @@
 
 # IX. State Management
 
-* [**32. State Architecture**](/Web%20Development/React/State%20Management/StateArch.md)
+* **32. State Architecture**
 
   * Local state
   * Shared state
@@ -404,7 +404,7 @@
   * Derived state
   * Persistent state
 
-* [**33. State Lifting**](/Web%20Development/React/State%20Management/StateLift.md)
+* **33. State Lifting**
 
   * Identifying common state
   * Moving state upward

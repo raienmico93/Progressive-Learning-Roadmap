@@ -1,4 +1,4 @@
-# jQuery Event Delegation: A Comprehensive Programming Cheat Sheet
+# jQuery Event Delegation — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -7,889 +7,924 @@
 ### Definitions
 
 **Core Definition**
-Event delegation is a technique in which a single event listener is attached to a parent element to handle events triggered by its descendants — both current and future — by leveraging the DOM's event bubbling mechanism.
+jQuery event delegation is a technique in which a single event listener is attached to a parent element (or ancestor) rather than to each individual descendant, and that listener uses event bubbling to detect and respond to events originating from matching descendants — including elements that do not yet exist at the time of binding.
 
 **Technical Definition**
-Event delegation in jQuery is implemented through the `.on(events, selector, handler)` syntax. When a selector is provided as the second argument, jQuery attaches a **single generic handler** to the parent element(s) in the matched set. When an event bubbles up to this parent, jQuery evaluates the event's `target` against the supplied selector. If the target (or an ancestor of the target up to the delegation point) matches, the handler executes with `this` bound to the matching element. This approach replaces the deprecated `.live()` and `.delegate()` methods and is built on the native DOM's event bubbling (propagation) mechanism.
+Event delegation in jQuery is implemented through the `selector` parameter of `.on(events, selector, handler)`. When the specified event bubbles up to the bound ancestor, jQuery compares the event's target (and its ancestors up to the bound element) against the supplied selector. If a match is found, the handler is invoked with `this` bound to the matching descendant and `event.delegateTarget` set to the ancestor on which the listener was attached. This mechanism relies on W3C DOM event bubbling: `click`, `keydown`, `mousedown`, and most user‑interaction events propagate upward through the DOM tree unless explicitly stopped.
 
-**Beginner-Friendly Explanation**
-Imagine you have a list on a web page, and you want something to happen when any list item is clicked. The naive approach is to attach a click listener to **each** list item individually. The problem: if you add new items later, they do not get the listener. Event delegation solves this by attaching **one** listener to the list itself. When you click a list item, the click "bubbles up" to the list, and the list's handler figures out which item was clicked. This way, even items added after the page loaded are automatically handled, because the listener is on the parent that never changes.
-
-### Key Characteristics
-
-- **Single Listener, Many Elements**: One handler on a parent manages events for all descendants, reducing memory overhead.
-- **Dynamic Element Support**: Works automatically for elements added to the DOM after the handler is bound.
-- **Bubbling-Dependent**: Relies on event propagation; events that do not bubble (e.g., `focus`, `blur`, `mouseenter`, `mouseleave` in some browsers) cannot be delegated directly.
-- **Selector Filtering**: The second argument to `.on()` filters which descendants trigger the handler.
-- **Context Binding**: Inside the handler, `this` refers to the element matching the selector, not the parent.
-- **Performance Trade-off**: Setup is faster (one binding vs. many), but dispatch is slower (selector matching on each bubbled event).
-
-### Prerequisites
-
-- Basic understanding of DOM events and event flow (capturing, targeting, bubbling).
-- Familiarity with jQuery selectors and the `.on()` method.
-- Knowledge of the deprecated `.live()` and `.delegate()` methods for legacy codebases.
-- jQuery library included in the page via a `<script>` tag or CDN.
-
-### Related Programming Areas
-
-- **Dynamic Content**: SPAs, AJAX-driven interfaces, and any page that adds elements after load.
-- **List and Table Interactions**: Clicking rows, list items, or cells in dynamically generated content.
-- **Performance Optimisation**: Reducing the number of event listeners bound to the DOM.
-- **Plugin Development**: Plugins that create and manage their own DOM subtrees.
-- **Framework Interoperability**: Understanding delegation is essential when mixing jQuery with React, Vue, or Angular.
-
-### Core Concepts / Features
-
-1. Delegated Event Binding: The `.on(events, selector, handler)` Syntax
-2. Leveraging Event Bubbling via Parent-Level Handlers
-3. Managing Events on Dynamically Added Elements
-4. When to Choose Delegation Over Direct Binding
-5. Performance Considerations: Heavy DOM Trees and High-Frequency Parents
+**Beginner‑Friendly Explanation**
+Imagine you are a teacher responsible for a large classroom of students. Instead of giving each student a personal phone to call you when they need help, you stand at the front of the room and tell them: "If you need me, raise your hand and I will see you." Event delegation works the same way. You attach one listener to a parent element (the teacher), and when any child element (a student) is clicked, the event "bubbles up" to the parent, where your listener checks whether the clicked element matches what you are looking for. This means you can handle clicks on buttons that do not even exist yet — they will still raise their hand and be seen.
 
 ---
 
-## Core Concept 1: Delegated Event Binding — The `.on(events, selector, handler)` Syntax
+### Key Characteristics
+
+| Characteristic | Description |
+|---|---|
+| **Single listener, many targets** | One handler on an ancestor serves an arbitrary number of descendants, present and future. |
+| **Survives DOM changes** | Delegated handlers remain functional when matching elements are added, removed, or replaced dynamically. |
+| **Lower memory footprint** | Fewer event listener registrations reduce memory consumption compared with binding to every element. |
+| **Depends on event bubbling** | Only bubbling events can be delegated natively; non‑bubbling events (`focus`, `blur`, `load`, `scroll`, `error`) require special handling or alternatives. |
+| **Selector evaluated at event time** | The selector is checked each time the event fires, not at binding time, which enables dynamic matching but adds per‑event overhead. |
+| **Sensitive to delegation point and selector complexity** | Delegating from `document` or `body` with broad or positional selectors can degrade performance. |
+
+---
+
+### Prerequisites
+
+- Working knowledge of jQuery selection and the `.on()` method.
+- Understanding of the DOM tree and the concept of event bubbling (event propagation).
+- Familiarity with CSS selector syntax (class, element, attribute, and pseudo‑class selectors).
+- Awareness of which native events bubble and which do not.
+
+---
+
+### Related Programming Areas
+
+- **Dynamic UI components** — lists, tables, and feeds where items are added or removed at runtime.
+- **Single‑Page Applications (SPAs)** — views are swapped without full page reloads, requiring handlers that survive DOM replacement.
+- **Performance optimisation** — reducing the number of event listeners on large DOM trees.
+- **Memory‑leak prevention** — avoiding orphaned handlers on removed elements.
+- **Framework migration** — understanding delegation helps when porting jQuery code to modern frameworks that use their own event systems.
+
+---
+
+### Core Concepts / Features (Index)
+
+1. Event Delegation
+2. Delegated Events
+3. `.on()` with Selector
+4. Event Delegation Benefits
+5. Event Delegation Performance
+6. Event Delegation Pitfalls
+7. Dynamic Elements
+8. Event Delegation Best Practices
+
+
+## Core Concept 1: Event Delegation
 
 ### Definitions
 
 **Core Definition**
-Delegated event binding is the use of the three-argument form of `.on()` — `$(parent).on(events, selector, handler)` — to attach a handler that fires when events bubble up from descendants matching the selector.
+Event delegation is the practice of using event propagation (bubbling) to handle events at a higher level in the DOM than the element on which the event originated.
 
 **Technical Definition**
-When `.on()` is called with a `selector` argument, jQuery attaches a **delegated event handler** to the parent element(s). Unlike a directly bound handler, the handler is not attached to the descendant elements themselves. Instead, jQuery installs a generic handler on the parent. When an event bubbles to the parent, jQuery examines the event's `target` and walks up the DOM tree from the target to the delegation point, testing each element against the selector. The first matching element becomes the context for the handler (`this`). If no element matches, the handler does not fire. This mechanism is functionally equivalent to the deprecated `.delegate()` method and is the recommended approach for dynamic content.
+In the DOM event model, an event dispatched on a target element propagates through three phases: capture (from `window` down to the target), target, and bubble (from the target back up to `document`). Event delegation leverages the bubble phase: a listener attached to an ancestor receives events whose targets are descendants. jQuery's delegation implementation inspects the `event.target` and walks up the ancestor chain (stopping at the bound element) to find the first node that matches the supplied selector. If found, the handler executes with `this` set to that matching node.
 
-**Beginner-Friendly Explanation**
-Think of a security guard stationed at the entrance of a building (the parent element). The guard does not follow every person around; instead, when someone wants to enter (an event bubbles up), the guard checks if they have the right badge (matches the selector). If they do, the guard lets them in (runs the handler). The guard stays at one post, but can handle anyone who comes through — even people who were not in the building when the guard started their shift.
+**Beginner‑Friendly Explanation**
+When you click a button inside a box, the click does not just happen on the button — it also "bubbles up" to the box, then to the page body, and finally to the document. Event delegation takes advantage of this bubbling: instead of putting a click listener on every button, you put one listener on the box and check whether the thing that was clicked is a button you care about.
+
+---
 
 ### Purposes
 
-- To attach a single event handler to a parent element that manages events for all matching descendants.
-- To handle events on elements that do not exist at the time the handler is bound.
-- To reduce the number of event listeners in the DOM, improving memory usage and setup performance.
-- To centralise event handling logic for a group of related elements.
-- To replace the deprecated `.live()` and `.delegate()` methods with a modern, unified API.
+- **To handle events on elements that do not exist yet** at the time the script runs.
+- **To reduce the number of event listeners** and therefore memory usage.
+- **To automatically support dynamically added or replaced elements** without re‑binding.
+- **To centralise event logic** in a single location for easier maintenance and debugging.
+- **To avoid memory leaks** caused by handlers attached to elements that are later removed from the DOM.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
+#### General Syntax
 
-```javascript
-$(parentSelector).on(events, selector, handler);
-$(parentSelector).on(events, selector, data, handler);
-$(parentSelector).on(events, selector, data, handler);
+```
+$( ancestorSelector ).on( eventType, descendantSelector, handler )
 ```
 
 **Component Breakdown**
 
-- `$(parentSelector)` : The parent element(s) to which the delegated handler is attached. This element must exist at the time of binding. It should be the **closest static ancestor** of the dynamic elements.
-- `events` (String): One or more space-separated event types, optionally namespaced (e.g., `"click"`, `"keydown.myPlugin"`).
-- `selector` (String): A selector string to filter descendants that trigger the event. Only events bubbling from elements matching this selector will invoke the handler. This is the **key differentiator** from direct binding.
-- `data` (Any, Optional): Data passed to the handler in `event.data`.
-- `handler` (Function): The function to execute when the event fires on a matching descendant. The value `false` is also allowed as a shorthand for `return false`.
-- Returns: A jQuery object (for chaining).
+| Component | Description |
+|---|---|
+| `ancestorSelector` | A stable ancestor element (present at binding time) that will receive the bubbled events. |
+| `eventType` | A string naming one or more event types (e.g., `"click"`, `"click keydown"`). |
+| `descendantSelector` | A selector string that filters which descendants trigger the handler. |
+| `handler` | A function invoked when a matching descendant fires the event; `this` refers to the matching element. |
 
-**Syntax Rules**
+**Example**: `$("#list").on("click", "a", function(){ … })` — listens for clicks on any `<a>` that bubbles up to `#list`.
 
-1. The `selector` argument is what makes the binding **delegated** rather than direct.
-2. The selector is tested against the event target and its ancestors up to the delegation point.
-3. The handler's `this` is bound to the element matching the selector, not the parent.
-4. `event.currentTarget` is the element matching the selector; `event.delegateTarget` is the parent element to which the handler is attached.
-5. Delegated handlers can be removed with `.off(events, selector, handler)` or `.off(events, selector)`.
+---
 
-**Constraints and Limitations**
+### Syntax Rules
 
-- Only events that **bubble** can be reliably delegated. Some events (e.g., `focus`, `blur`, `mouseenter`, `mouseleave`) do not bubble natively; jQuery maps some of these to bubbling equivalents, but not all.
-- If the parent element is removed from the DOM, the delegated handler is lost.
-- Delegation does not work for events on the `document` or `window` in the same way; those require direct binding.
+1. **The ancestor must exist at binding time**; it does not need to be the direct parent — any ancestor will work.
+2. **The descendant selector is evaluated at event time**, not at binding time, which is what enables dynamic matching.
+3. **Only bubbling events can be delegated** in the native bubbling phase; non‑bubbling events require jQuery's normalisation or alternative events (`focusin`/`focusout` for `focus`/`blur`).
+4. **`event.delegateTarget`** refers to the ancestor on which the handler was bound, while `this` (and `event.currentTarget`) refers to the matching descendant.
 
-### Multiple Annotated Complete Code Examples
+---
 
-**Example 1: Basic Delegated Click Handling**
+### Constraints and Limitations
+
+- **Non‑bubbling events cannot be delegated natively**: `focus`, `blur`, `load`, `scroll`, and `error` do not bubble; jQuery maps `blur` to `focusout` for delegation, but `load` and `scroll` cannot be delegated in the same way.
+- **Delegation does not make code universally faster**: per‑event selector matching adds overhead; for very small numbers of static elements, direct binding may be faster.
+- **Delegating too high in the DOM** (especially `document` or `body`) can cause every event to be tested against the selector, degrading performance on large pages.
+
+---
+
+### Annotated Code Examples
+
+#### Example 1: Basic Delegation with Dynamic Elements
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Event Delegation — Basic Click</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <ul id="list">
+    <li><a href="#">Item #1</a></li>
+    <li><a href="#">Item #2</a></li>
+  </ul>
+
+  <script>
+    // Step 1: Attach a delegated listener to the <ul>
+    // The "a" selector filters which descendants trigger the handler
+    $("#list").on("click", "a", function (event) {
+      event.preventDefault();
+      console.log("Clicked:", $(this).text());
+    });
+
+    // Step 2: Add a new <li><a> AFTER the listener is bound
+    $("#list").append("<li><a href='#'>Item #3 (dynamic)</a></li>");
+  </script>
+</body>
+</html>
+```
+
+**Expected Output (after clicking each link)**
+```
+Clicked: Item #1
+Clicked: Item #2
+Clicked: Item #3 (dynamic)
+```
+
+**Why this output occurs**: The delegated listener on `#list` catches click events that bubble up from any `<a>` descendant. Because the selector `"a"` is evaluated at event time, the dynamically appended third link is matched and its handler fires even though it did not exist when `.on()` was called.
+
+---
+
+#### Example 2: Direct Binding Fails for Dynamic Elements
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <ul id="list">
+    <li><a href="#">Item #1</a></li>
+  </ul>
+
+  <script>
+    // Step 1: Directly bind to existing anchors (NOT delegation)
+    $("#list a").on("click", function (event) {
+      event.preventDefault();
+      console.log("Direct handler:", $(this).text());
+    });
+
+    // Step 2: Add a new anchor after binding
+    $("#list").append("<li><a href='#'>Item #2 (dynamic)</a></li>");
+  </script>
+</body>
+</html>
+```
+
+**Expected Output (after clicking both links)**
+```
+Direct handler: Item #1
+(no output for Item #2)
+```
+
+**Why this output occurs**: Direct binding attaches the handler only to the anchors that exist at the moment `.on()` is called. The dynamically added second anchor never receives the handler, so clicking it produces no output.
+
+---
+
+### Real‑World Cases
+
+- **Live search results**: Delegating `click` to a results container so that newly rendered result cards are clickable without re‑binding.
+- **Todo lists**: Adding and removing list items while a single delegated `click` handler on the `<ul>` manages all item interactions.
+- **Tab systems**: Delegating `click` to the tab bar so that dynamically created tabs respond to activation.
+- **Data tables**: Delegating row‑level actions (edit, delete) to the table body as rows are paginated or filtered.
+
+---
+
+## Core Concept 2: Delegated Events
+
+### Definitions
+
+**Core Definition**
+A delegated event is an event bound using the `selector` parameter of `.on()`, where the handler is not called when the event occurs directly on the bound element, but only for descendants that match the selector.
+
+**Technical Definition**
+In jQuery's event system, `.on(events, selector, handler)` creates a delegated handler. Internally, jQuery stores the selector alongside the handler. When the event bubbles to the bound element, jQuery iterates over the event's propagation path (from `event.target` up to the bound element), testing each node against the selector. The handler runs for the first matching node, with `this` bound to that node and `event.delegateTarget` set to the bound element. This is distinct from a directly bound handler, where the selector argument is omitted and the handler runs only when the event target is the bound element itself.
+
+**Beginner‑Friendly Explanation**
+A delegated event is simply an event that has been set up using the "delegation" style. Instead of saying "listen on this button", you say "listen on this container, and when a click bubbles up from a button inside it, run my code". The event is "delegated" to the container, which then figures out whether the original target was something you care about.
+
+---
+
+### Purposes
+
+- **To distinguish delegation from direct binding** in documentation and code reviews.
+- **To ensure handlers work with elements added after binding**.
+- **To use `event.delegateTarget`** to identify the ancestor on which the delegated handler was bound.
+- **To avoid the deprecated `.delegate()` method**, which was superseded by `.on()` in jQuery 1.7.
+
+---
+
+### Syntax Rules and Structure
+
+#### Delegated Event Syntax
+
+```
+$( ancestor ).on( eventType, selector, handler )
+```
+
+#### Direct (Non‑Delegated) Syntax for Comparison
+
+```
+$( element ).on( eventType, handler )
+```
+
+**Component Breakdown**
+
+| Component | Delegated | Direct |
+|---|---|---|
+| Selector argument | Required (`selector`) | Omitted |
+| Handler `this` | The matching descendant | The bound element |
+| `event.delegateTarget` | The ancestor | The bound element |
+| Works for future elements | ✅ Yes | ❌ No |
+
+---
+
+### Constraints and Limitations
+
+- **`event.delegateTarget` is `undefined` for direct handlers** (or equal to `event.currentTarget` in modern jQuery).
+- **Delegated handlers fire for descendants only**, never for the bound element itself, even if the bound element matches the selector.
+- **`.delegate()` is deprecated**; `.on()` with a selector is the supported equivalent.
+
+---
+
+### Annotated Code Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
   <div id="container">
-    <ul id="list">
-      <li><a href="http://domain1.com">Item #1</a></li>
-      <li><a href="/local/path/1">Item #2</a></li>
-      <li><a href="/local/path/2">Item #3</a></li>
-    </ul>
+    <button class="action">Save</button>
+    <button class="action">Cancel</button>
   </div>
 
   <script>
-    $(function () {
-      // Step 1: Attach a delegated click handler to the <ul>
-      // The "a" selector filters which descendants trigger the handler
-      $("#list").on("click", "a", function (event) {
-        event.preventDefault();
-        // 'this' is the <a> element that was clicked
-        console.log("Clicked link text:", $(this).text());
-      });
-
-      // Step 2: Verify the delegation works for existing elements
-      $("#list a").first().trigger("click"); // Logs "Item #1"
+    // Step 1: Delegated handler — selector "button.action" filters descendants
+    $("#container").on("click", "button.action", function (event) {
+      console.log("this:", $(this).text());                     // matching button
+      console.log("delegateTarget:", $(event.delegateTarget).attr("id")); // "container"
+      console.log("currentTarget:", $(event.currentTarget).text());       // same as this
     });
   </script>
 </body>
 </html>
 ```
 
-**Expected Output (Console)**
+**Expected Output (after clicking "Save")**
 ```
-Clicked link text: Item #1
+this: Save
+delegateTarget: container
+currentTarget: Save
 ```
 
-**Why This Output Occurs**
-The handler is bound to the `<ul>`, not to the individual `<a>` elements. When a link is clicked (or programmatically triggered), the click event bubbles up to the `<ul>`. jQuery checks whether the event target (or an ancestor of the target) matches the `"a"` selector. Since it does, the handler executes with `this` bound to the anchor element.
+**Why this output occurs**: The handler is delegated to `#container`. When a click bubbles from a `button.action`, `this` and `event.currentTarget` refer to the matching button, while `event.delegateTarget` refers to `#container`, the element on which the delegated listener was bound.
 
 ---
 
-**Example 2: Delegation with Multiple Events and Data**
+### Real‑World Cases
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Event Delegation — Multiple Events and Data</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="panel">
-    <button class="action" data-action="save">Save</button>
-    <button class="action" data-action="delete">Delete</button>
-  </div>
-
-  <script>
-    $(function () {
-      // Delegate multiple events with a data map
-      $("#panel").on("click mouseenter", ".action", { app: "demo" }, function (event) {
-        var action = $(this).data("action");
-        console.log("Event:", event.type, "| Action:", action,
-          "| App:", event.data.app);
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output (Console)**
-- Clicking “Save” logs: `Event: click | Action: save | App: demo`
-- Hovering over “Delete” logs: `Event: mouseenter | Action: delete | App: demo`
-
-**Why This Output Occurs**
-The delegated handler is bound to `#panel` with the selector `.action`. Both `click` and `mouseenter` events bubble from the buttons to the panel and are filtered by the `.action` selector. The `data` map is accessible via `event.data`, and `$(this).data("action")` reads the button's own data attribute.
-
-### Real-World Cases
-
-- **Dynamic Todo Lists**: `$("#todo-list").on("click", ".delete-btn", removeItem)` — new items automatically get the delete handler.
-- **Data Tables with Pagination**: `$("#table-body").on("click", "tr", selectRow)` — rows loaded via AJAX are handled without rebinding.
-- **Navigation Menus**: `$("nav").on("click", "a", handleNav)` — nested menu items work even if the menu is rebuilt.
-- **Chat Applications**: `$("#chat-log").on("click", ".message", replyToMessage)` — messages added in real time are clickable.
-
-### References
-
-- .on() – https://api.jquery.com/on/
-- Understanding Event Delegation – https://learn.jquery.com/events/event-delegation/
-- event.delegateTarget – https://api.jquery.com/event.delegateTarget/
+- **Plugin architecture**: A plugin binds delegated events to its root element and uses `event.delegateTarget` to access the root without relying on `this`.
+- **Nested components**: Distinguishing which ancestor a delegated handler belongs to when multiple delegated handlers are active on nested containers.
+- **Legacy migration**: Replacing deprecated `.delegate()` calls with equivalent `.on(selector, …)` syntax.
 
 ---
 
-## Core Concept 2: Leveraging Event Bubbling via Parent-Level Handlers
+## Core Concept 3: `.on()` with Selector
 
 ### Definitions
 
 **Core Definition**
-Event bubbling is the DOM's default behaviour of propagating an event upward from the target element through its ancestors; delegation exploits this by placing the handler on an ancestor instead of the target.
+`.on(events, selector, handler)` is the canonical jQuery method for creating delegated event handlers. The `selector` argument restricts the handler to descendants of the bound element that match the selector.
 
 **Technical Definition**
-When an event is dispatched on a DOM element, it goes through three phases: **capturing** (from the window down to the target's parent), **targeting** (at the target itself), and **bubbling** (from the target's parent back up to the window). Most events bubble. jQuery's delegated event system relies on the bubbling phase: the handler is attached to an ancestor, and when the event bubbles to that ancestor, jQuery evaluates the event's `target` and the elements between the target and the ancestor against the selector. The `event.delegateTarget` property identifies the ancestor to which the handler is attached, while `event.currentTarget` identifies the element matching the selector.
+The `.on()` method is overloaded. When a `selector` argument is provided, jQuery enters its delegated‑event code path: the handler is stored with the selector string, and on each bubbling event, jQuery uses its internal `jQuery.find.matchesSelector` (or `Element.matches`) machinery to test whether the event target or its ancestors match. If a match is found before reaching the bound element, the handler executes. As of jQuery 1.7, `.on()` unified the functionality of `.bind()`, `.live()`, and `.delegate()`, making it the single supported API for both direct and delegated binding.
 
-**Beginner-Friendly Explanation**
-Imagine you drop a ball on the floor. The ball hits the floor (the target), but the vibration also travels through the floor to the walls and the ceiling. Event bubbling is like that vibration — it travels upward from the element you interacted with to all its parents. Event delegation is like putting a vibration sensor on the wall instead of on the floor. The sensor can detect when the floor is hit because the vibration travels to it. The wall is the parent, and the sensor is the delegated handler.
+**Beginner‑Friendly Explanation**
+`.on()` is the method you call to set up an event listener. When you give it three arguments — the event name, a selector, and a function — you are telling jQuery: "When this event bubbles up to my element, check if it came from a child matching this selector, and if so, run my function." The selector is what makes it a delegated event rather than a direct one.
+
+---
 
 ### Purposes
 
-- To understand why delegation works and which events can be delegated.
-- To correctly choose the parent element for delegation (the "delegation root").
-- To predict handler execution order when mixing direct and delegated handlers.
-- To use `event.stopPropagation()` effectively in delegation scenarios.
-- To avoid the pitfalls of non-bubbling events.
+- **To bind delegated events** using the modern, supported API.
+- **To support multiple event types** in a single call (`"click keydown"`).
+- **To pass custom data** to the handler via the `data` argument (between `selector` and `handler`).
+- **To namespace delegated events** (`"click.myPlugin"`) for targeted unbinding.
+- **To replace deprecated methods** (`.delegate()`, `.live()`, `.bind()`) with a unified syntax.
+
+---
 
 ### Syntax Rules and Structure
 
-**Event Propagation Phases**
+#### Full Signature
 
 ```
-Capturing phase (window → ... → target's parent)
-    ↓
-Target phase (the element itself)
-    ↓
-Bubbling phase (target's parent → ... → window)
-    ↓
-Delegated handlers on ancestors fire here
+$( elements ).on( events [, selector ] [, data ], handler )
 ```
 
 **Component Breakdown**
 
-- `event.target` : The element that initiated the event (the innermost element).
-- `event.currentTarget` : The element whose handler is currently executing (the element matching the selector).
-- `event.delegateTarget` : The element to which the delegated handler is attached (the parent).
-- `event.stopPropagation()` : Stops the event from bubbling further.
+| Component | Description |
+|---|---|
+| `elements` | The ancestor(s) to which the listener is attached. |
+| `events` | One or more space‑separated event types, optionally namespaced (e.g., `"click.myPlugin"`). |
+| `selector` | **Optional.** When present, creates a delegated handler; when omitted, creates a direct handler. |
+| `data` | **Optional.** Data passed to the handler as `event.data`. |
+| `handler` | Function invoked when the event fires; receives `jQuery.Event`. |
 
-**Syntax Rules**
+**Example**: `$("#list").on("click.myPlugin", "a", function(e){ … });`
 
-1. Delegated handlers fire during the **bubbling** phase, after direct handlers on the target and its ancestors.
-2. If `event.stopPropagation()` is called by a direct handler on the target or an intermediate ancestor, the delegated handler will **not** fire.
-3. `event.delegateTarget` is always the element on which `.on()` was called (for delegated handlers).
-4. For non-delegated handlers, `event.delegateTarget` equals `event.currentTarget`.
-5. Events that do not bubble cannot be delegated in the traditional sense, though jQuery maps some (e.g., `blur` → `focusout`).
+---
 
-**Constraints and Limitations**
+### Syntax Rules
 
-- `focus`, `blur`, `mouseenter`, and `mouseleave` do not bubble natively. jQuery maps `blur` to `focusout` and `focus` to `focusin` for delegation, but `mouseenter` and `mouseleave` are mapped to `mouseover` and `mouseout` only in some contexts.
-- `load`, `unload`, and `error` events do not bubble.
-- `stopPropagation()` in a direct handler prevents delegation handlers from firing.
+1. **The presence of `selector` determines delegation**: with a selector, the handler is delegated; without it, the handler is direct.
+2. **The bound element should be a stable ancestor** that will not be removed or replaced.
+3. **The selector is evaluated at event time**, so elements added later are matched.
+4. **Multiple event types** can be delegated in one call: `.on("click keydown", "a", handler)`.
+5. **Namespacing** works with delegated events: `.on("click.myPlugin", "a", handler)` and `.off(".myPlugin")`.
 
-### Multiple Annotated Complete Code Examples
+---
 
-**Example 1: Observing Event Flow with `delegateTarget`**
+### Constraints and Limitations
+
+- **`selector` must be a string**, not a DOM element or jQuery object.
+- **Delegated `.on()` cannot handle non‑bubbling events** without jQuery's normalisation (`focus` → `focusin`, `blur` → `focusout`).
+- **Passing `null` or `undefined` as `selector`** results in direct binding, not delegation.
+- **Very broad or positional selectors** (`:first`, `:last`, `:eq()`) are inefficient in delegation and should be avoided.
+
+---
+
+### Annotated Code Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Event Bubbling — delegateTarget</title>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <div id="outer">
-    <div id="middle">
-      <button id="inner">Click Me</button>
-    </div>
+  <div id="toolbar">
+    <button class="btn" data-action="save">Save</button>
+    <button class="btn" data-action="delete">Delete</button>
   </div>
 
   <script>
-    $(function () {
-      // Delegated handler on #outer
-      $("#outer").on("click", "#inner", function (event) {
-        console.log("target ID:", event.target.id);             // "inner"
-        console.log("currentTarget ID:", event.currentTarget.id); // "inner"
-        console.log("delegateTarget ID:", event.delegateTarget.id); // "outer"
-      });
-
-      // Direct handler on #middle
-      $("#middle").on("click", function (event) {
-        console.log("Middle handler fired");
-      });
-
-      // Direct handler on #inner
-      $("#inner").on("click", function (event) {
-        console.log("Inner direct handler fired");
-      });
+    // Step 1: Delegated .on() with a selector and custom data
+    $("#toolbar").on("click.myToolbar", "button.btn", { source: "toolbar" }, function (event) {
+      var action = $(this).data("action");
+      console.log("Action:", action);
+      console.log("Custom data:", event.data.source); // "toolbar"
     });
+
+    // Step 2: The handler also works for a button added later
+    $("#toolbar").append("<button class='btn' data-action='edit'>Edit</button>");
   </script>
 </body>
 </html>
 ```
 
-**Expected Output (Console)**
-- Clicking the button logs in this order:
+**Expected Output (after clicking Save, Delete, and Edit)**
 ```
-Inner direct handler fired
-Middle handler fired
-target ID: inner
-currentTarget ID: inner
-delegateTarget ID: outer
+Action: save
+Custom data: toolbar
+Action: delete
+Custom data: toolbar
+Action: edit
+Custom data: toolbar
 ```
 
-**Why This Output Occurs**
-The click event starts at `#inner`, fires its direct handler, then bubbles to `#middle` (direct handler), then to `#outer` (delegated handler). The delegated handler sees `event.target` as `#inner`, `event.currentTarget` as `#inner` (the matching element), and `event.delegateTarget` as `#outer` (the binding site).
+**Why this output occurs**: The delegated `.on()` call attaches a listener to `#toolbar` with the selector `"button.btn"`. Each button click bubbles to `#toolbar`, where the selector is evaluated at event time. The dynamically added "Edit" button is matched because the selector is checked when the event fires, not when `.on()` was called.
 
 ---
 
-**Example 2: `stopPropagation` Blocking Delegation**
+### Real‑World Cases
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Event Bubbling — stopPropagation Blocks Delegation</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="parent">
-    <button id="child">Click Me</button>
-  </div>
-
-  <script>
-    $(function () {
-      // Delegated handler on #parent
-      $("#parent").on("click", "#child", function () {
-        console.log("Delegated handler fired");
-      });
-
-      // Direct handler on #child that stops propagation
-      $("#child").on("click", function (event) {
-        console.log("Direct handler fired — stopping propagation");
-        event.stopPropagation();
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output (Console)**
-- Clicking the button logs only:
-```
-Direct handler fired — stopping propagation
-```
-- The delegated handler does **not** fire.
-
-**Why This Output Occurs**
-`event.stopPropagation()` in the direct handler on `#child` prevents the event from bubbling to `#parent`. Since the delegated handler relies on bubbling, it never executes.
-
-### Real-World Cases
-
-- **Modal Windows**: A delegated handler on the modal backdrop closes the modal, but clicks inside the modal call `stopPropagation()` to prevent closure.
-- **Dropdown Menus**: A delegated handler on the document closes dropdowns when clicking outside, but clicks inside the dropdown call `stopPropagation()`.
-- **Nested Clickable Elements**: A button inside a card — the button's handler stops propagation so the card's delegated handler does not also fire.
-
-### References
-
-- Understanding Event Delegation – https://learn.jquery.com/events/event-delegation/
-- event.delegateTarget – https://api.jquery.com/event.delegateTarget/
-- event.stopPropagation() – https://api.jquery.com/event.stopPropagation/
+- **Toolbar systems**: A single delegated `.on()` handles all toolbar buttons, including those rendered by plugins.
+- **Data‑driven lists**: Delegating `click` to a table body with the selector `"tr[data-id]"` and reading the ID from the matched row.
+- **Namespace‑based cleanup**: Using `.on("click.myWidget", ".item", handler)` and later `.off(".myWidget")` to remove only that widget's handlers.
 
 ---
 
-## Core Concept 3: Managing Events on Dynamically Added Elements
+## Core Concept 4: Event Delegation Benefits
 
 ### Definitions
 
 **Core Definition**
-Managing events on dynamically added elements means ensuring that elements injected into the DOM after the initial page load — via AJAX, user interaction, or script execution — can still trigger event handlers without requiring manual re-binding.
+Event delegation benefits are the practical advantages — memory efficiency, dynamic compatibility, simplified maintenance, and leak prevention — that arise from attaching a single listener to an ancestor instead of binding to every target element.
 
 **Technical Definition**
-Directly bound event handlers (`.on(events, handler)`) are attached to the specific elements that exist at the time of binding. When new elements are added to the DOM later, they do not have these handlers. Delegated event handlers solve this problem by attaching the listener to a **static ancestor** that exists at page load. Because events from newly added descendants bubble up to this ancestor, the delegated handler fires for them without any re-binding. This is the primary practical advantage of event delegation and the reason the deprecated `.live()` method existed before `.on()` unified the API.
+Benefits include: (1) a **reduction in the number of registered event listeners**, lowering memory consumption and registration overhead; (2) **automatic support for dynamic content**, because the selector is evaluated at event time; (3) **elimination of handler orphaning** when elements are removed, since handlers live on the ancestor, not on the removed elements; and (4) **centralised event logic**, which simplifies debugging and maintenance.
 
-**Beginner-Friendly Explanation**
-Imagine you are a teacher and you want to give a test to every student who walks into your classroom. If you hand out tests only to the students who are already in the room, any student who arrives late will not get one. But if you put a stack of tests at the door and tell every student who enters to take one, it does not matter when they arrive — they all get a test. Direct binding is handing out tests to the students present. Delegation is the stack at the door.
+**Beginner‑Friendly Explanation**
+Delegation saves memory because you create one listener instead of hundreds. It saves work because you do not have to re‑bind handlers every time you add a new item. It prevents bugs because removed elements do not leave behind dangling listeners. And it makes your code easier to understand because all the event logic for a group of elements lives in one place.
+
+---
 
 ### Purposes
 
-- To handle events on elements created after the initial page load without re-binding handlers.
-- To eliminate the need for callback-based re-binding after AJAX calls or dynamic DOM insertion.
-- To simplify code in single-page applications where the DOM changes frequently.
-- To ensure consistent event behaviour across static and dynamic content.
-- To replace the deprecated `.live()` method with the modern `.on()` delegation syntax.
+- **To reduce memory usage** by consolidating many listeners into one.
+- **To avoid re‑binding** when DOM content changes.
+- **To prevent memory leaks** from handlers attached to removed elements.
+- **To simplify code maintenance** by centralising event logic.
+- **To improve initialisation performance** when binding to a large number of elements.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax**
+The syntax is identical to delegated `.on()`:
 
-```javascript
-// Bind once to a static ancestor
-$(staticAncestor).on(events, dynamicSelector, handler);
+```
+$( stableAncestor ).on( eventType, targetSelector, handler )
 ```
 
-**Component Breakdown**
+The benefits are realised by choosing a **stable ancestor** (one that persists across DOM changes) and a **selector that precisely matches the target elements**.
 
-- `staticAncestor` : An element that exists at the time the handler is bound and will not be replaced. This is the "delegation root."
-- `dynamicSelector` : A selector that matches the dynamic elements (which may not exist yet).
-- `handler` : The function to execute when an event bubbles from a matching descendant.
-- Returns: A jQuery object.
+---
 
-**Syntax Rules**
+### Constraints and Limitations
 
-1. The delegation root must be **static** — it must exist at bind time and remain in the DOM.
-2. The selector should match the **dynamic elements** directly, not their static ancestors.
-3. If the delegation root is removed and re-added, the handler is lost.
-4. For dynamically added elements, avoid binding directly to them; use delegation from a static parent.
+- **Delegation is not universally faster**: for a small, static set of elements, direct binding may have lower per‑event overhead because there is no selector matching.
+- **Memory savings are proportional to the number of replaced listeners**; delegating a single element offers little benefit.
+- **Over‑delegation** (binding too many different selectors to the same ancestor) can negate the simplicity benefit.
 
-**Constraints and Limitations**
+---
 
-- If the dynamic elements are added **outside** the delegation root's subtree, delegation will not work.
-- Replacing the delegation root (e.g., via `.html()`) destroys the handler.
-- Delegation does not work for elements added to a different part of the DOM tree than the delegation root.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: The Problem — Direct Binding Fails for Dynamic Elements**
+### Annotated Code Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Dynamic Elements — Direct Binding Failure</title>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <ul id="list">
-    <li><a href="#">Item 1</a></li>
-    <li><a href="#">Item 2</a></li>
-  </ul>
-  <button id="addBtn">Add Item</button>
+  <ul id="feed"></ul>
 
   <script>
-    $(function () {
-      // Direct binding: only existing <a> elements get the handler
-      $("#list a").on("click", function (event) {
-        event.preventDefault();
-        console.log("Clicked:", $(this).text());
-      });
-
-      // Add a new item dynamically
-      $("#addBtn").on("click", function () {
-        $("#list").append('<li><a href="#">Item 3 (new)</a></li>');
-      });
+    // Step 1: One delegated listener for an unlimited number of items
+    $("#feed").on("click", ".feed-item", function () {
+      console.log("Item clicked:", $(this).text());
     });
+
+    // Step 2: Add 100 items dynamically — no re‑binding needed
+    for (var i = 1; i <= 100; i++) {
+      $("#feed").append("<li class='feed-item'>Item " + i + "</li>");
+    }
   </script>
 </body>
 </html>
 ```
 
-**Expected Output (Console)**
-- Clicking “Item 1” or “Item 2” logs their text.
-- Clicking “Item 3 (new)” after adding it logs **nothing** — the direct handler does not apply to it.
-
-**Why This Output Occurs**
-`$("#list a").on("click", ...)` binds directly to the two existing anchors. When Item 3 is added later, it has no handler. Direct events are only attached to elements at the time `.on()` is called.
-
----
-
-**Example 2: The Solution — Delegated Binding Handles Dynamic Elements**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Dynamic Elements — Delegation Solution</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <ul id="list">
-    <li><a href="#">Item 1</a></li>
-    <li><a href="#">Item 2</a></li>
-  </ul>
-  <button id="addBtn">Add Item</button>
-
-  <script>
-    $(function () {
-      // Delegated binding: the handler is on the static <ul>
-      // It fires for ALL current and future <a> descendants
-      $("#list").on("click", "a", function (event) {
-        event.preventDefault();
-        console.log("Clicked:", $(this).text());
-      });
-
-      // Add a new item dynamically
-      $("#addBtn").on("click", function () {
-        $("#list").append('<li><a href="#">Item 3 (new)</a></li>');
-      });
-    });
-  </script>
-</body>
-</html>
+**Expected Output (after clicking Item 1 and Item 100)**
+```
+Item clicked: Item 1
+Item clicked: Item 100
 ```
 
-**Expected Output (Console)**
-- Clicking “Item 1” or “Item 2” logs their text.
-- Clicking “Item 3 (new)” **also** logs “Clicked: Item 3 (new)”.
-
-**Why This Output Occurs**
-The handler is bound to `#list`, which is static. When Item 3 is added, its clicks bubble up to `#list`, where the delegated handler evaluates the target against the `"a"` selector. Because the target matches, the handler fires. No re-binding is needed.
-
-### Real-World Cases
-
-- **AJAX-Loaded Content**: Comments, posts, or products loaded via AJAX are immediately interactive.
-- **Infinite Scroll**: New items added as the user scrolls down work without rebinding.
-- **Single-Page Applications**: Views rendered dynamically after navigation use delegation from a persistent container.
-- **Real-Time Feeds**: Messages or notifications added in real time are clickable or actionable immediately.
-
-### References
-
-- Understanding Event Delegation – https://learn.jquery.com/events/event-delegation/
-- .on() – https://api.jquery.com/on/
-- .live() (Deprecated) – https://api.jquery.com/live/
+**Why this output occurs**: Only one listener is registered on `#feed`. All 100 dynamically created `.feed-item` elements are handled by that single listener because the selector `".feed-item"` is evaluated when each click bubbles to the parent. No per‑item binding occurs, demonstrating both the memory benefit and the dynamic‑content benefit.
 
 ---
 
-## Core Concept 4: When to Choose Delegation Over Direct Binding
+### Real‑World Cases
+
+- **Social media feeds**: A single delegated listener on the feed container handles likes, comments, and shares on any post, including posts loaded via infinite scroll.
+- **E‑commerce carts**: Delegating quantity‑change and remove‑item events to the cart table so that rows added by AJAX are automatically handled.
+- **Notification panels**: One delegated `click` handler on the panel root manages dismiss buttons for every notification, present and future.
+
+---
+
+## Core Concept 5: Event Delegation Performance
 
 ### Definitions
 
 **Core Definition**
-Choosing delegation over direct binding is a strategic decision based on whether the elements being handled are dynamic, how many elements are involved, and whether runtime dispatch performance or setup performance is more critical.
+Event delegation performance refers to the runtime cost of evaluating a delegated selector each time an event bubbles to the bound ancestor, and the factors — delegation point, selector complexity, and event frequency — that influence that cost.
 
 **Technical Definition**
-Direct binding (`.on(events, handler)` without a selector) attaches a separate event listener to each matched element. Setup cost grows linearly with the number of elements. Delegation (`.on(events, selector, handler)`) attaches a single listener to a parent. Setup cost is constant, but runtime dispatch requires selector matching for each bubbled event. The optimal choice depends on: (1) whether elements are added or removed after binding, (2) the number of elements that need the handler, (3) the frequency of events, and (4) the depth of the DOM tree between the target and the delegation root. Delegation is **required** for dynamic elements; it is **advantageous** for large numbers of similar elements; it is **disadvantageous** for high-frequency events on few elements or when immediate interception (e.g., blocking invalid key input) is needed.
+When a delegated event fires, jQuery must walk the ancestor chain from `event.target` up to the bound element, testing each node against the stored selector. The cost is therefore proportional to the **depth of the target** and, for certain selector types (especially positional and pseudo‑class selectors), to the **size and complexity of the DOM**. Binding delegated handlers near the top of the document (e.g., `document`) with broad selectors forces jQuery to test many nodes and can degrade performance on large pages. Conversely, limiting delegation to a **nearby, stable ancestor** reduces the number of nodes checked.
 
-**Beginner-Friendly Explanation**
-Think of it like hiring staff for a store. If you have a few employees and they do not change, you can give each one a specific job (direct binding). If you have hundreds of employees or they change constantly, it is better to have one manager who directs anyone who walks in (delegation). But if a customer runs in and out thousands of times per second, having a manager check every person might slow things down compared to each employee handling their own tasks. The right choice depends on your specific situation.
-
-### Purposes
-
-- To make an informed decision about whether to use delegation or direct binding.
-- To avoid the performance pitfalls of over-delegation or under-delegation.
-- To understand the trade-off between setup performance and runtime dispatch performance.
-- To identify scenarios where delegation is **required** versus merely **beneficial**.
-- To align event-binding strategy with the application's dynamic behaviour.
-
-### Syntax Rules and Structure
-
-**Decision Matrix**
-
-| Scenario | Recommended Approach | Reason |
-|---|---|---|
-| Elements are added/removed dynamically | **Delegation** | Direct binding misses future elements |
-| Hundreds/thousands of similar elements | **Delegation** | One listener vs. hundreds; lower memory |
-| Few elements, static DOM | **Direct binding** | Faster dispatch; no selector matching |
-| High-frequency events (mousemove, scroll) on few elements | **Direct binding** | Delegation adds selector-matching overhead per event |
-| Need to intercept and modify event before default action | **Direct binding** | Delegation fires too late (after default action) |
-| Delegation root is far from targets (deep DOM) | Reconsider / use closer parent | Deep bubbling + selector matching = slow |
-| Event does not bubble (focus, blur) | Direct binding or mapped events | Delegation requires bubbling |
-
-**Syntax Rules**
-
-1. **Use delegation** when elements are dynamic or when there are many similar elements.
-2. **Use direct binding** when elements are static and few, or when dispatch performance is critical.
-3. **Choose the delegation root** as close to the targets as possible to minimise bubbling distance.
-4. **Avoid delegating to `document` or `document.body`** for large applications; use the nearest static parent.
-5. **Do not delegate non-bubbling events** without verifying jQuery's mapping behaviour.
-
-**Constraints and Limitations**
-
-- Delegation is always slower at **dispatch time** than direct binding due to selector matching.
-- Delegation setup is faster but may not be worth it for few elements.
-- Delegation cannot intercept events before the default action (e.g., blocking invalid key input).
-- `.stopPropagation()` in a direct handler can prevent delegation handlers from firing.
-
-### Multiple Annotated Complete Code Examples
-
-**Example 1: When Delegation is Required — Dynamic Elements**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Strategy — Dynamic Elements Require Delegation</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <div id="notification-area"></div>
-  <button id="addNotification">Add Notification</button>
-
-  <script>
-    $(function () {
-      // Delegation is REQUIRED here because notifications are added dynamically
-      $("#notification-area").on("click", ".notification", function () {
-        console.log("Dismissed:", $(this).text());
-        $(this).remove();
-      });
-
-      var count = 0;
-      $("#addNotification").on("click", function () {
-        count++;
-        $("#notification-area").append(
-          '<div class="notification">Notification ' + count + ' (click to dismiss)</div>'
-        );
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output**
-- Clicking “Add Notification” adds a dismissible notification.
-- Clicking any notification (even newly added ones) dismisses it.
-
-**Why This Output Occurs**
-Delegation is the only correct approach here because notifications do not exist at page load. Direct binding would fail for every notification added after the initial bind.
+**Beginner‑Friendly Explanation**
+Delegation is like a security guard at a building entrance. If the guard is at the front door of a small office, checking visitors is fast. If the guard is at the entrance of a huge stadium and has to check every single person walking through a long corridor, it takes much longer. In jQuery, putting the listener on `document` is like putting the guard at the stadium entrance — every event has to travel a long way and be checked against many possible matches. Putting the listener on a nearby container is like stationing the guard at the office door — much faster.
 
 ---
 
-**Example 2: When Direct Binding is Preferred — Static, Few Elements**
+### Purposes
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Strategy — Direct Binding for Static, Few Elements</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <button id="save">Save</button>
-  <button id="cancel">Cancel</button>
-
-  <script>
-    $(function () {
-      // Direct binding is preferred here: static elements, few in number,
-      // and we want the fastest dispatch performance
-      $("#save").on("click", function () {
-        console.log("Save clicked");
-      });
-
-      $("#cancel").on("click", function () {
-        console.log("Cancel clicked");
-      });
-
-      // Delegation would also work, but direct binding is simpler and faster
-      // for this case because there is no dynamic content and no need to
-      // filter descendants
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output (Console)**
-```
-Save clicked
-Cancel clicked
-```
-
-**Why This Output Occurs**
-Direct binding attaches a handler directly to each button. There is no bubbling overhead and no selector matching at dispatch time. For a small number of static elements, this is the most efficient approach.
-
-### Real-World Cases
-
-- **Todo Apps**: Delegate to the list container for dynamically added items.
-- **Data Tables**: Delegate to the table body for rows loaded via AJAX.
-- **Static Navigation**: Direct-bind to the few nav links for fastest response.
-- **Form Submit Buttons**: Direct-bind to the single submit button for immediate validation and interception.
-
-### References
-
-- Understanding Event Delegation – https://learn.jquery.com/events/event-delegation/
-- .on() – https://api.jquery.com/on/
-- Stack Overflow — When to use event delegation – https://stackoverflow.com/questions/9719918/
+- **To minimise per‑event selector‑matching cost** by choosing an appropriate delegation point.
+- **To avoid performance degradation** caused by delegating from `document` or `body` on large DOM trees.
+- **To select the right balance** between delegation breadth and direct‑binding overhead.
+- **To use specific selectors** that reduce the number of candidate nodes jQuery must evaluate.
 
 ---
 
-## Core Concept 5: Performance Considerations — Heavy DOM Trees and High-Frequency Parents
-
-### Definitions
-
-**Core Definition**
-Performance considerations in event delegation involve understanding the trade-off between setup efficiency (fewer listeners) and dispatch efficiency (selector matching on each bubbled event), especially in large or deeply nested DOM trees.
-
-**Technical Definition**
-Delegated event handling has two distinct performance profiles. **Setup performance**: binding one delegated handler is O(1), while binding N direct handlers is O(N). **Dispatch performance**: each bubbled event must be evaluated against every delegated handler attached to the ancestors it passes through. jQuery must compare the event target and its ancestors against the selector of each delegated handler. In a heavy DOM tree (many elements) or with many delegated handlers attached high in the tree (e.g., on `document`), this comparison becomes a significant cost. The official jQuery documentation warns that "attaching many delegated event handlers near the top of the document tree can degrade performance." The solution is to bind delegated handlers to the **closest static parent** of the dynamic elements, minimising the number of events that bubble through each handler and the number of selector comparisons.
-
-**Beginner-Friendly Explanation**
-Imagine a busy office building with a single receptionist on the ground floor (a delegated handler on `document`). Every visitor must pass the receptionist, who checks their badge against a huge list of allowed visitors. If there are hundreds of visitor types, the queue gets long. Now imagine each floor has its own receptionist (delegation on a closer parent). Visitors only need to pass one receptionist, who has a much shorter list. The ground-floor receptionist only handles visitors for the ground floor. This is why binding delegated handlers close to the targets is faster.
-
-### Purposes
-
-- To understand why delegating to `document` is an anti-pattern for large applications.
-- To choose the optimal delegation root to minimise dispatch cost.
-- To balance setup performance against dispatch performance.
-- To avoid performance degradation in high-frequency event scenarios.
-- To apply the "closest static parent" rule for delegation roots.
-
 ### Syntax Rules and Structure
 
-**Performance Comparison**
+#### Recommended Pattern
 
-| Factor | Direct Binding | Delegation (near target) | Delegation (document) |
-|---|---|---|---|
-| Setup cost | O(N) — one per element | O(1) — one handler | O(1) — one handler |
-| Memory | High (N listeners) | Low | Low |
-| Dispatch cost | Minimal | Moderate (selector matching) | High (selector matching across many events) |
-| Dynamic elements | Fails | Works | Works |
-| Best for | Few static elements | Many dynamic elements | Almost never (anti-pattern) |
+```
+$( nearbyStableAncestor ).on( eventType, specificSelector, handler )
+```
 
-**Syntax Rules**
+#### Performance‑Degrading Pattern (Avoid)
 
-1. **Bind delegated handlers to the closest static parent** of the dynamic elements.
-2. **Avoid delegating to `document` or `document.body`** for large applications; use the nearest stable ancestor.
-3. **Limit the number of delegated handlers** on any single parent; each handler adds a selector comparison per event.
-4. **Prefer simple selectors** (e.g., `.item`, `li`) over complex ones (e.g., `div > ul > li.item:first-child`) for delegated handlers.
-5. **For high-frequency events** (e.g., `mousemove`, `scroll`), consider direct binding even on dynamic elements if the element count is low, or throttle the handler.
+```
+$( document ).on( eventType, broadOrPositionalSelector, handler )
+```
 
-**Constraints and Limitations**
+---
 
-- Delegation to `document` is the worst-case scenario for dispatch performance.
-- Each additional delegated handler on the same parent increases the cost of every bubbled event.
-- Deep DOM trees increase the number of elements that must be traversed during selector matching.
-- jQuery's selector matching is not free; even simple selectors add overhead per event.
+### Constraints and Limitations
 
-### Multiple Annotated Complete Code Examples
+- **Delegation is not a performance panacea**: the jQuery documentation notes that attaching many delegated handlers near the top of the document can degrade performance because jQuery must compare all selectors of all attached events of that type against every element in the propagation path.
+- **Positional selectors** (`:first`, `:last`, `:eq()`) are particularly inefficient in delegation and have ambiguous semantics; they are recommended against.
+- **Hierarchical selectors** (e.g., `"div > ul li a"`) in delegated handlers can be several times slower than simpler selectors, though still fast enough for most applications.
 
-**Example 1: Anti-Pattern — Delegating to `document`**
+---
+
+### Annotated Code Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Performance — Anti-Pattern: Delegation to document</title>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
   <div id="app">
     <div id="sidebar">
-      <ul id="menu">
-        <li><a href="#" class="menu-link">Home</a></li>
-        <li><a href="#" class="menu-link">About</a></li>
-      </ul>
+      <button class="nav-btn">Home</button>
+      <button class="nav-btn">Profile</button>
     </div>
-    <div id="content">
-      <button class="btn">Action</button>
-    </div>
+    <div id="main"></div>
   </div>
 
   <script>
-    $(function () {
-      // --- ANTI-PATTERN: Delegating to document ---
-      // Every click anywhere in the document must bubble to document
-      // and be compared against this selector
-      $(document).on("click", ".menu-link", function () {
-        console.log("Menu link clicked");
-      });
+    // ✅ PERFORMANT: delegate to the nearest stable ancestor (#sidebar)
+    $("#sidebar").on("click", "button.nav-btn", function () {
+      console.log("Sidebar button:", $(this).text());
+    });
 
-      $(document).on("click", ".btn", function () {
-        console.log("Button clicked");
-      });
-
-      // --- BETTER: Delegate to the nearest static parent ---
-      $("#menu").on("click", ".menu-link", function () {
-        console.log("Menu link clicked (scoped)");
-      });
-
-      $("#content").on("click", ".btn", function () {
-        console.log("Button clicked (scoped)");
-      });
+    // ⚠️ LESS PERFORMANT on large pages: delegate to document
+    $(document).on("click", "button.nav-btn", function () {
+      console.log("Document-level delegation");
     });
   </script>
 </body>
 </html>
 ```
 
-**Expected Output**
-- Clicking a menu link logs both the anti-pattern message and the scoped message.
-- Clicking the button logs both messages.
+**Expected Output (after clicking "Home")**
+```
+Sidebar button: Home
+Document-level delegation
+```
 
-**Why This Output Occurs**
-The `document`-level handlers fire for **every** click in the entire document, even clicks on elements that do not match the selector. They must compare the event target against `.menu-link` and `.btn` for every click. The scoped handlers only receive events that bubble to their respective containers, dramatically reducing the number of comparisons.
+**Why this output occurs**: Both handlers fire, but the `#sidebar` delegation checks only the short ancestor chain from the button up to `#sidebar`. The `document` delegation must walk the full chain from the button to `document`, testing the selector at every step. On a large DOM, the document‑level handler imposes greater per‑event cost.
 
 ---
 
-**Example 2: Measuring the Impact of Delegation Depth**
+### Real‑World Cases
+
+- **Large data grids**: Delegating row actions to the table body (`<tbody>`) rather than to `document` keeps selector matching local and fast.
+- **Modal dialogs**: Delegating close‑button clicks to the modal container instead of the document avoids global event processing.
+- **Performance audits**: Identifying `$(document).on(...)` calls with broad selectors as candidates for refactoring to nearer ancestors.
+
+---
+
+## Core Concept 6: Event Delegation Pitfalls
+
+### Definitions
+
+**Core Definition**
+Event delegation pitfalls are the common mistakes and unexpected behaviours that arise when delegation is applied incorrectly — including delegating non‑bubbling events, using inefficient selectors, binding to ancestors that are themselves replaced, and misunderstanding the scope of the delegated selector.
+
+**Technical Definition**
+Pitfalls include: (1) **delegating non‑bubbling events** (`focus`, `blur`, `load`, `scroll`, `error`) without jQuery's normalisation, leading to handlers that never fire; (2) **delegating to an ancestor that is later removed**, which silently disables the handler; (3) **using positional or pseudo‑class selectors** (`:first`, `:last`, `:eq()`) in delegated handlers, which are inefficient and semantically ambiguous; (4) **assuming the delegated selector implies ownership** — a selector like `$(document).on('click', '.tab', …)` does not mean the handler is scoped to a particular component; and (5) **cloning elements with delegated events**, which can duplicate IDs and cause unexpected matching.
+
+**Beginner‑Friendly Explanation**
+Delegation is powerful, but it has traps. If you try to delegate an event that does not bubble — like `focus` or `scroll` — your handler will never run. If you attach the listener to a parent that later gets removed from the page, all the children lose their delegated behaviour. If you use vague selectors like `:first`, jQuery has to work much harder and may match the wrong element. And if you clone an element that has a delegated handler, you can end up with duplicate IDs and confusing results. Knowing these traps helps you avoid them.
+
+---
+
+### Purposes
+
+- **To recognise events that cannot be delegated** and use appropriate alternatives (`focusin`/`focusout`).
+- **To avoid binding delegated handlers to ancestors that may be destroyed**.
+- **To choose selectors that are efficient and unambiguous** in delegation.
+- **To prevent silent failures** caused by cloning or ID duplication.
+
+---
+
+### Syntax Rules and Structure
+
+| Pitfall | Problematic Pattern | Safer Alternative |
+|---|---|---|
+| Non‑bubbling event | `$(parent).on("focus", "input", fn)` | `$(parent).on("focusin", "input", fn)` |
+| Non‑bubbling event | `$(parent).on("scroll", ".box", fn)` | Bind directly to the scrollable element, or use capture |
+| Unstable ancestor | `$("#tempContainer").on("click", ".item", fn)` | Use a stable ancestor that persists across DOM changes |
+| Positional selector | `$(parent).on("click", "li:first", fn)` | Use `.first()` inside the handler, or a class |
+| Over‑broad selector | `$(document).on("click", "div", fn)` | Delegate to a nearer container with a specific selector |
+| Clone with delegation | `$(".item").clone(true)` | Clone structure, then re‑delegate events |
+
+---
+
+### Constraints and Limitations
+
+- **`load` and `scroll` cannot be delegated** in the bubbling phase; they require direct binding or capture‑phase listeners.
+- **`focus` and `blur` are mapped by jQuery** to `focusin`/`focusout` for delegation, but the mapping may not cover every edge case.
+- **Cloning with `.clone(true)`** copies event handlers and data, which can cause duplicated delegated behaviour and ID collisions.
+
+---
+
+### Annotated Code Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Performance — Delegation Depth</title>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <div id="root">
-    <div class="level-1">
-      <div class="level-2">
-        <div class="level-3">
-          <button class="deep-btn">Deep Button</button>
-        </div>
-      </div>
-    </div>
+  <div id="formArea">
+    <input type="text" class="field" placeholder="Focus me">
   </div>
 
   <script>
-    $(function () {
-      // --- Deep delegation (root is far from target) ---
-      $("#root").on("click", ".deep-btn", function () {
-        console.log("Deep delegation handler");
-      });
+    // ⚠️ PITFALL: "focus" does not bubble — this delegation may not fire as expected
+    $("#formArea").on("focus", ".field", function () {
+      console.log("focus handler fired");
+    });
 
-      // --- Shallow delegation (closest static parent) ---
-      // Find the closest static parent of .deep-btn
-      $(".deep-btn").closest(".level-3").on("click", ".deep-btn", function () {
-        console.log("Shallow delegation handler");
-      });
-
-      // Both work, but shallow delegation requires fewer bubbling steps
-      // and fewer elements to traverse during selector matching
+    // ✅ SAFE: use "focusin", which bubbles and can be delegated
+    $("#formArea").on("focusin", ".field", function () {
+      console.log("focusin handler fired");
     });
   </script>
 </body>
 </html>
 ```
 
-**Expected Output (Console)**
-- Clicking the button logs both messages.
-- The shallow delegation handler executes after fewer traversal steps.
+**Expected Output (when the input gains focus)**
+```
+focusin handler fired
+```
 
-**Why This Output Occurs**
-`#root` is several levels above `.deep-btn`. When the button is clicked, the event bubbles through `.level-3`, `.level-2`, `.level-1`, and finally `#root`. The `#root` handler must traverse all those elements during selector matching. The `.level-3` handler only needs to check the button and its immediate parent, resulting in faster dispatch.
-
-### Real-World Cases
-
-- **Large Data Tables**: Delegate to the `<tbody>` rather than `document` for row clicks.
-- **Nested Menus**: Delegate to each `<ul>` rather than the `<nav>` container for menu item clicks.
-- **Modal Systems**: Delegate to the modal container rather than `document` for close button clicks.
-- **Form Widgets**: Delegate to the form element rather than `document` for field change events.
-
-### References
-
-- .on() (Event Performance notes) – https://api.jquery.com/on/
-- Understanding Event Delegation – https://learn.jquery.com/events/event-delegation/
-- Stack Overflow — Attaching many delegated event handlers near the top of the document tree can degrade performance – https://stackoverflow.com/questions/9719918/
-- Stack Overflow — No, you should NOT bind all delegated event handlers to the document object – https://stackoverflow.com/questions/12824549/
+**Why this output occurs**: The `focus` event does not bubble natively, so the delegated `"focus"` handler on `#formArea` does not fire (unless jQuery's normalisation maps it in the specific version). The `focusin` event **does** bubble, so the delegated `"focusin"` handler fires correctly.
 
 ---
 
-## Summary Table: jQuery Event Delegation at a Glance
+### Real‑World Cases
 
-| Aspect | Direct Binding | Delegated Binding |
-|---|---|---|
-| Syntax | `$(el).on("click", handler)` | `$(parent).on("click", "selector", handler)` |
-| Attached to | Each matched element | Parent element (single listener) |
-| Works for dynamic elements | No | **Yes** |
-| Setup cost | O(N) | O(1) |
-| Dispatch cost | Minimal | Moderate (selector matching) |
-| `this` inside handler | The bound element | The element matching the selector |
-| `event.target` | The clicked element | The clicked element |
-| `event.currentTarget` | The bound element | The element matching the selector |
-| `event.delegateTarget` | Same as `currentTarget` | The parent element |
-| Best for | Few static elements | Many dynamic elements |
-| Worst for | Many elements or dynamic content | Deep DOM trees, many handlers on `document` |
+- **Form validation**: Using `focusin`/`focusout` instead of `focus`/`blur` for delegated validation on dynamically added form fields.
+- **Scroll‑based UI**: Recognising that `scroll` cannot be delegated and binding directly to the scroll container.
+- **Component teardown**: Ensuring delegated handlers are removed with `.off()` before removing the ancestor from the DOM.
 
 ---
 
-## General References
+## Core Concept 7: Dynamic Elements
 
-- .on() – https://api.jquery.com/on/
-- Understanding Event Delegation – https://learn.jquery.com/events/event-delegation/
-- event.delegateTarget – https://api.jquery.com/event.delegateTarget/
-- event.stopPropagation() – https://api.jquery.com/event.stopPropagation/
-- .off() – https://api.jquery.com/off/
-- .live() (Deprecated) – https://api.jquery.com/live/
-- .delegate() (Deprecated) – https://api.jquery.com/delegate/
-- jQuery Learning Center — Handling Events – https://learn.jquery.com/events/handling-events/
-- jQuery Learning Center — jQuery Event Basics – https://learn.jquery.com/events/event-basics/
-- Stack Overflow — When to use event delegation – https://stackoverflow.com/questions/9719918/
-- Stack Overflow — No, you should NOT bind all delegated event handlers to the document object – https://stackoverflow.com/questions/12824549/
-- Stack Overflow — Attaching many delegated event handlers near the top of the document tree can degrade performance – https://stackoverflow.com/questions/9719918/
-- Simon Willison — Event Delegation – https://simonwillison.net/2004/Jun/18/eventDelegation/
-- MDN Web Docs — Event bubbling – https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#event_bubbling
-- W3Schools — jQuery Event Delegation – https://www.w3schools.com/jquery/event_delegation.asp
+### Definitions
+
+**Core Definition**
+Dynamic elements are DOM nodes that are added, removed, or replaced after the initial page load, typically via JavaScript, AJAX, or client‑side rendering. Event delegation is the primary jQuery technique for ensuring that such elements respond to events without requiring re‑binding.
+
+**Technical Definition**
+Because delegated handlers evaluate their selector at **event time** rather than at **binding time**, any element that matches the selector when the event fires will trigger the handler, regardless of whether it existed when `.on()` was called. This property makes delegation the recommended pattern for content that changes dynamically. Direct binding, by contrast, attaches handlers only to the elements present at binding time and leaves future elements unhandled.
+
+**Beginner‑Friendly Explanation**
+Dynamic elements are things that appear on the page after it has already loaded — like new messages in a chat, new rows in a table, or new items in a todo list. If you use direct binding, you have to remember to attach a new handler every time you add an element. With delegation, you set up the handler once on a parent, and every new child is automatically covered. It is like having a rule that applies to everyone who enters a room, rather than greeting each person individually as they arrive.
+
+---
+
+### Purposes
+
+- **To handle events on elements added after initial binding**.
+- **To avoid the "re‑bind on every append" pattern** that inflates code and risks missed bindings.
+- **To support infinite scroll, live search, and real‑time feeds** where content is constantly replaced.
+- **To simplify AJAX success callbacks** by removing the need to re‑bind handlers after inserting HTML.
+
+---
+
+### Syntax Rules and Structure
+
+```
+$( stableAncestor ).on( eventType, dynamicElementSelector, handler )
+```
+
+**Critical requirement**: The **ancestor must be present at binding time and must not be replaced**. The dynamic elements may be added, removed, or replaced freely as long as the ancestor persists.
+
+---
+
+### Constraints and Limitations
+
+- **If the ancestor is replaced**, the delegated handler is lost; choose an ancestor that is guaranteed to persist.
+- **Elements matching the selector but outside the ancestor** are not covered; delegation is scoped to descendants of the bound element.
+- **`clone(true)` on dynamic elements** can duplicate delegated behaviour and IDs; clone structure and re‑delegate instead.
+
+---
+
+### Annotated Code Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <div id="chat"></div>
+  <button id="addMsg">Add Message</button>
+
+  <script>
+    // Step 1: Delegate click on .message to the stable #chat container
+    $("#chat").on("click", ".message", function () {
+      console.log("Message clicked:", $(this).text());
+    });
+
+    // Step 2: Dynamically add messages
+    $("#addMsg").on("click", function () {
+      var count = $("#chat .message").length + 1;
+      $("#chat").append("<div class='message'>Message " + count + "</div>");
+    });
+  </script>
+</body>
+</html>
+```
+
+**Expected Output (after adding and clicking a message)**
+```
+Message clicked: Message 1
+```
+
+**Why this output occurs**: The delegated handler on `#chat` is bound once. Every dynamically appended `.message` element is automatically covered because the selector `".message"` is evaluated when the click bubbles to `#chat`.
+
+---
+
+### Real‑World Cases
+
+- **Chat applications**: Messages are appended in real time; a single delegated handler on the chat container manages clicks, reactions, and replies.
+- **Infinite scroll feeds**: New posts are loaded and inserted; delegation ensures that like and share buttons work immediately.
+- **AJAX‑driven tables**: Rows are replaced after sorting or filtering; delegation on `<tbody>` keeps row actions functional.
+- **Wizard forms**: Steps are rendered dynamically; delegated `click` on the wizard container handles next/previous buttons.
+
+---
+
+## Core Concept 8: Event Delegation Best Practices
+
+### Definitions
+
+**Core Definition**
+Event delegation best practices are the recommended conventions for choosing delegation points, selecting selectors, managing handler lifecycle, and avoiding known pitfalls to ensure delegation remains efficient, maintainable, and correct.
+
+**Technical Definition**
+Best practices encompass: (1) **delegating to the nearest stable ancestor** rather than `document` or `body`; (2) **using specific, efficient selectors** and avoiding positional or pseudo‑class selectors in delegation; (3) **delegating only bubbling events**, or using `focusin`/`focusout` for focus‑related delegation; (4) **namespacing delegated events** for safe unbinding; (5) **removing delegated handlers** with `.off()` when the ancestor is no longer needed; and (6) **understanding that `.on()` with a selector is the supported API** (not `.delegate()` or `.live()`).
+
+**Beginner‑Friendly Explanation**
+Best practices are the habits that make delegation work well. Put the listener on a parent that is close to the action, not way up at the document level. Use clear, specific selectors instead of vague ones like `:first`. Do not try to delegate events that do not bubble — use `focusin` if you need focus delegation. Give your delegated events a name (namespace) so you can remove them cleanly later. And always use `.on()` with a selector, because that is the modern jQuery way.
+
+---
+
+### Purposes
+
+- **To choose an optimal delegation point** that balances coverage and performance.
+- **To write selectors that are efficient and unambiguous** in delegated handlers.
+- **To avoid silent failures** from non‑bubbling events or removed ancestors.
+- **To manage handler lifecycle** with namespaces and `.off()`.
+- **To use the supported API** (`.on()`) instead of deprecated delegation methods.
+
+---
+
+### Syntax Rules and Structure
+
+#### Recommended Delegation Pattern
+
+```
+$( nearestStableAncestor ).on( "eventType.namespace", "specificSelector", handler )
+```
+
+#### Removing Delegated Handlers
+
+```
+$( ancestor ).off( "eventType.namespace", "specificSelector" )
+```
+
+---
+
+### Syntax Rules
+
+1. **Delegate to the nearest common ancestor** of the target elements, not to `document` or `body`, unless no closer ancestor exists.
+2. **Use specific selectors**: prefer `"button.action"` over `"button"` or `"*"`.
+3. **Avoid positional selectors** (`:first`, `:last`, `:eq()`) in delegated handlers; their semantics are ambiguous and performance is poor.
+4. **Use `focusin`/`focusout` for focus delegation**, never `focus`/`blur` directly.
+5. **Namespace every delegated event** (`"click.myFeature"`) to enable targeted cleanup.
+6. **Call `.off()` before removing the ancestor** from the DOM to release handler references.
+7. **Do not use `.delegate()` or `.live()`** in new code; they are deprecated in favour of `.on()`.
+
+---
+
+### Constraints and Limitations
+
+- **Over‑delegation** (many delegated handlers on the same ancestor) can degrade performance because every event must be tested against multiple selectors.
+- **Delegation cannot fix non‑bubbling events**; `load` and `scroll` require direct binding or capture‑phase listeners.
+- **Namespacing does not scope the selector**; it only provides a handle for unbinding.
+
+---
+
+### Annotated Code Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <div id="widget">
+    <ul id="items">
+      <li><button class="item-btn">One</button></li>
+      <li><button class="item-btn">Two</button></li>
+    </ul>
+  </div>
+
+  <script>
+    // ✅ BEST PRACTICE: delegate to the nearest stable ancestor (#items),
+    // use a specific selector ("button.item-btn"), and namespace the event
+    $("#items").on("click.widgetItems", "button.item-btn", function () {
+      console.log("Button clicked:", $(this).text());
+    });
+
+    // ✅ Add a dynamic button — automatically handled
+    $("#items").append("<li><button class='item-btn'>Three</button></li>");
+
+    // ✅ Clean up with the namespace before removing the widget
+    // $("#items").off(".widgetItems");
+    // $("#widget").remove();
+  </script>
+</body>
+</html>
+```
+
+**Expected Output (after clicking "Three")**
+```
+Button clicked: Three
+```
+
+**Why this output occurs**: The delegated handler is attached to `#items` (the nearest stable ancestor), uses the specific selector `"button.item-btn"`, and is namespaced with `.widgetItems`. The dynamically added button matches the selector at event time, and the handler fires correctly. The namespace allows the handler to be removed cleanly with `.off(".widgetItems")` before the widget is destroyed.
+
+---
+
+### Real‑World Cases
+
+- **Component libraries**: Each component delegates events to its own root element with a component‑specific namespace, enabling clean teardown.
+- **Large‑scale applications**: Performance audits check for `$(document).on(...)` with broad selectors and refactor them to nearer ancestors with specific selectors.
+- **Long‑lived SPAs**: Namespaced delegated handlers are removed on route changes to prevent handler accumulation and memory leaks.
+
+---
+
+## References
+
+- Understanding Event Delegation | Learn jQuery — https://learn.jquery.com/events/event-delegation/
+- `.on()` | jQuery API Documentation — https://api.jquery.com/on/
+- `event.delegateTarget` | jQuery API Documentation — https://api.jquery.com/event.delegateTarget/
+- History of jQuery Events | Learn jQuery — https://learn.jquery.com/events/history-of-events/
+- jQuery Event Basics | Learn jQuery — https://learn.jquery.com/events/event-basics/
+- Handling Events | Learn jQuery — https://learn.jquery.com/events/handling-events/
+- `.off()` | jQuery API Documentation — https://api.jquery.com/off/
+- `blur` event | jQuery API Documentation — https://api.jquery.com/blur/
+- `focus` event | jQuery API Documentation — https://api.jquery.com/focus/
+- `load` event | jQuery API Documentation — https://api.jquery.com/load/
+- `scroll` event | jQuery API Documentation — https://api.jquery.com/scroll/
+- Performance degradation with delegate events and pseudo‑classes (jQuery bug #12436) — https://bugs.jquery.com/ticket/12436/
+- Stack Overflow: Delegated events, dynamic elements, and body vs. document — https://stackoverflow.com/revisions/a62f5e77-cec1-4d40-a561-de0c3b7e953a/view-source
+- Stack Overflow: Performance of delegated events near the top of the document — https://stackoverflow.com/questions/9713627/jquery-on-performance/9713654
+- Edureka: Fixing performance issues caused by event delegation in a large DOM tree — https://cdn.edureka.co/community/291015/performance-issues-caused-event-delegation-large-using-jquery
+- MDN: Event bubbling — https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#event_bubbling_and_capture
+- MDN: `Element.matches()` — https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
+- jQuery Core 3.0 Upgrade Guide — https://jquery.com/upgrade-guide/3.0/

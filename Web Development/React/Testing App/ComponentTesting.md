@@ -1,4 +1,4 @@
-# Component & Integration Testing (React Testing Library): A Comprehensive Programming Cheat Sheet
+# Component Testing — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1003 +6,1301 @@
 
 ### Definitions
 
-**Core Definition:** Component and integration testing with React Testing Library (RTL) is the practice of verifying React component behaviour by rendering components into a simulated DOM, querying elements the way users perceive them, and asserting on observable outcomes rather than internal implementation details.
+**Core Definition:** Component testing is the practice of rendering an individual UI component in isolation, simulating user interactions, and asserting on its observable output to verify that it behaves correctly.
 
-**Technical Definition:** React Testing Library is a lightweight testing utility built on top of `@testing-library/dom` that provides a `render` function, a suite of DOM queries (`getByRole`, `findByText`, `queryByLabelText`, etc.), and user interaction simulation via `@testing-library/user-event`. RTL operates on the accessibility tree rather than the internal component tree, meaning queries reflect how assistive technologies and users perceive the rendered output. The library exports `renderHook` for testing custom hooks in isolation, `waitFor` for asynchronous assertions, and integrates with test runners like Vitest and Jest. RTL v16 supports React 19 and requires `@testing-library/dom` as a peer dependency.
+**Technical Definition:** Component testing (also called "unit testing components" in a Testing Library context) mounts a single React component — or a small, tightly-scoped tree — using a DOM testing environment (typically jsdom or happy-dom). The test supplies props and context, queries the rendered DOM using user-centric, accessibility-first selectors, simulates realistic interactions with `user-event`, and asserts on the resulting UI state. It verifies behavior — what the user sees and does — rather than internal state, lifecycle methods, or component instances. Component tests sit between pure unit tests and integration tests: they exercise the component's full render cycle without touching the network or a real browser.
 
-**Beginner-Friendly Explanation:** React Testing Library is a tool that lets you test your React components the way a real user would use them. Instead of looking at the internal state of a component or its CSS classes, you render the component, find elements the way a person would (by their label, their role, or their visible text), interact with them (type, click, submit), and check what appears on screen. This makes your tests more reliable because they don't break when you rename a variable or change a `<div>` to a `<section>` — they only break when the actual user-facing behaviour changes.
+**Beginner-Friendly Explanation:** A component test puts one piece of your UI on a fake screen, clicks and types on it like a real user would, and checks that the screen updates correctly. It doesn't need a browser or a server — just the component and its inputs.
 
 ### Key Characteristics
 
-- **User-Centric Queries:** The primary query method is `getByRole`, which matches elements by their ARIA role and accessible name — the same signals used by screen readers. This enforces semantic HTML and accessibility by default. 
-- **Accessibility as a Testing Signal:** If you cannot query an element by its role or label, it likely lacks proper accessibility semantics. RTL's query priority (role > label > text > test ID) makes accessibility a first-class testing concern. 
-- **Realistic User Interactions:** `@testing-library/user-event` simulates full browser interaction lifecycles — pointer events, focus, keyboard events, and change events — rather than dispatching a single synthetic event like `fireEvent`. 
-- **Asynchronous Awareness:** `findBy*` queries and `waitFor` handle dynamic DOM mutations, delays, and async data loading without manual polling. 
-- **Hook Isolation:** `renderHook` allows custom hooks to be tested independently of any UI component, with support for provider wrappers. 
-- **Implementation Agnostic:** Tests assert on what the user sees and does, not on component state, internal methods, or lifecycle hooks. 
+- **User-centric:** Queries reflect how users find elements (roles, labels, text), not CSS classes or `data-testid`.
+- **Behavior-focused:** Asserts on rendered output and interaction outcomes, not implementation details.
+- **Realistic interactions:** Uses `user-event` to simulate full browser interaction sequences, not single `dispatchEvent` calls.
+- **Isolated but integrated:** Renders the component fully (no shallow rendering) while replacing external boundaries (network, time) with test doubles.
+- **Accessibility-first:** If a query is hard to write, the UI is likely hard to use — component tests double as a11y smoke tests.
 
 ### Prerequisites
 
-- Solid understanding of React components, props, state, and Hooks.
-- Familiarity with JavaScript Promises and `async`/`await` syntax.
-- Basic knowledge of DOM structure and accessibility semantics (roles, labels, accessible names).
-- A configured test runner (Vitest or Jest) with a DOM environment (jsdom or happy-dom).
-- Installation of `@testing-library/react`, `@testing-library/user-event`, and `@testing-library/jest-dom`.
+- A React project with a test runner (Vitest recommended for new projects in 2026; Jest for existing projects). 
+- `@testing-library/react` for rendering and querying.
+- `@testing-library/user-event` for realistic interactions.
+- `@testing-library/jest-dom` for DOM-specific matchers (`toBeInTheDocument`, `toHaveTextContent`).
+- A DOM environment (jsdom or happy-dom) configured in the test runner.
 
 ### Related Programming Areas
 
-- **Accessibility (a11y):** Testing that the UI is usable by assistive technologies.
-- **Behaviour-Driven Development (BDD):** Describing behaviour in user-facing terms.
-- **Integration Testing:** Testing multiple units working together.
-- **Test-Driven Development (TDD):** Writing tests before implementation to drive design.
-- **Mock Service Worker (MSW):** Mocking API calls at the network level while keeping the rest of the application real.
+- **Unit testing hooks** — testing custom Hooks with `renderHook` (the complement to component testing).
+- **Integration testing** — testing multiple components together with real context and routing.
+- **End-to-end testing** — Playwright/Cypress tests that drive a real browser.
+- **Accessibility testing** — using `getByRole` and `jest-axe` to catch a11y issues.
+- **Network mocking** — Mock Service Worker (MSW) for component tests that make API calls.
 
 ### Core Concepts / Features
 
-1. DOM Query Strategies
-2. Simulating Real User Interactions
-3. Asynchronous Assertions
-4. State, Context, & Hook Testing
-
 ---
 
-## Core Concept 1: DOM Query Strategies
+## 1. Component Testing
 
 ### Definitions
 
-**Core Definition:** DOM Query Strategies in RTL are the methods used to locate elements in the rendered output, prioritised by their accessibility to users and assistive technologies.
+**Core Definition:** Component testing is the level of testing that verifies a single UI component's rendering, props handling, state transitions, and user interactions in isolation.
 
-**Technical Definition:** React Testing Library exposes three query families — `getBy*` (throws if not found), `queryBy*` (returns `null` if not found), and `findBy*` (returns a Promise that resolves when the element appears) — each available in single-element (`getBy`) and multi-element (`getAllBy`) variants. The queries are prioritised by accessibility: `getByRole` matches elements exposed in the accessibility tree by their ARIA role and accessible name; `getByLabelText` matches form controls by their associated label; `getByPlaceholderText` matches inputs by placeholder text; `getByText` matches non-interactive elements by visible text; `getByDisplayValue` matches form elements by their current value; `getByAltText` matches images by their alt text; `getByTitle` matches elements by their title attribute; and `getByTestId` matches elements by a `data-testid` attribute as a last resort. 
+**Technical Definition:** A component test mounts the component under test using `render()` from React Testing Library, which creates a DOM container (typically appended to `document.body`) and invokes React's `createRoot` to render the component tree. The test then queries the resulting DOM with `screen`, interacts via `userEvent`, and asserts with Jest/Vitest matchers. React Testing Library's guiding principle is that "the more your tests resemble the way your software is used, the more confidence they can give you". 
 
-**Beginner-Friendly Explanation:** When you test a component, you need to find the elements you want to interact with. RTL gives you many different ways to find things. The best way is to find them the same way a user would: by their role (like "button" or "textbox"), by their label (like "Email"), or by their visible text. If you can't find something that way, you can fall back to test IDs, but that should be rare — if an element can't be found by its role or label, it probably isn't accessible to screen reader users either.
-
-### Purposes
-
-- To enforce semantic HTML and accessibility by requiring elements to be queryable by their accessible role or label.
-- To make tests resilient to implementation changes (CSS classes, DOM structure) by coupling to user-visible semantics.
-- To provide a consistent query API across all test files and projects.
-- To catch accessibility regressions: if an element loses its accessible name, `getByRole` fails.
-- To distinguish between elements that must exist (`getBy`), may not exist (`queryBy`), and appear asynchronously (`findBy`).
-- To align testing with the accessibility tree — the same representation used by screen readers and assistive technologies.
-
-### Syntax Rules and Structure
-
-**Query Priority (Best to Worst):**
-
-| Priority | Query | Use For |
-|----------|-------|---------|
-| 1 | `getByRole` | Buttons, links, headings, inputs, dialogs |
-| 2 | `getByLabelText` | Form inputs with associated labels |
-| 3 | `getByPlaceholderText` | Inputs without visible labels |
-| 4 | `getByText` | Non-interactive text content |
-| 5 | `getByDisplayValue` | Form elements by current value |
-| 6 | `getByAltText` | Images by alt text |
-| 7 | `getByTitle` | Elements by title attribute (low accessibility) |
-| 8 | `getByTestId` | Last resort only |
-
-**Query Variant Behaviour:**
-
-| Variant | No Match | 1 Match | >1 Match | Async |
-|---------|----------|---------|----------|-------|
-| `getBy*` | throw | return | throw | No |
-| `queryBy*` | null | return | throw | No |
-| `findBy*` | throw | return | throw | Yes |
-| `getAllBy*` | throw | array | array | No |
-| `queryAllBy*` | [] | array | array | No |
-| `findAllBy*` | throw | array | array | Yes |
-
-**General Syntax:**
-
-```jsx
-import { render, screen } from '@testing-library/react';
-
-test('query examples', () => {
-  render(<LoginForm />);
-
-  // ✅ BEST: Query by accessible role and name
-  const submitButton = screen.getByRole('button', { name: /log in/i });
-  const emailInput = screen.getByRole('textbox', { name: /email/i });
-
-  // ✅ GOOD: Query form fields by label
-  const passwordInput = screen.getByLabelText(/password/i);
-
-  // ✅ OK: Query non-interactive text
-  const heading = screen.getByText(/welcome back/i);
-
-  // ✅ Check element doesn't exist
-  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-
-  // ✅ Wait for async element
-  const modal = await screen.findByRole('dialog');
-
-  // ⚠️ LAST RESORT: Query by test ID
-  const customWidget = screen.getByTestId('custom-widget');
-});
-```
-
-**Component Breakdown:**
-- `screen.getByRole('button', { name: /log in/i })`: Finds the button by its ARIA role and accessible name.
-- `screen.getByLabelText(/password/i)`: Finds the input by its associated `<label>`.
-- `screen.queryByRole('dialog')`: Returns `null` if no dialog exists (for negative assertions).
-- `screen.findByRole('dialog')`: Returns a Promise that resolves when the dialog appears.
-
-**Syntax Rules:**
-- Always start with `getByRole`. It is the primary recommended query because it matches how assistive technologies perceive the component. 
-- Use `getByLabelText` for form fields. Every form control should have an associated label.
-- Use `queryBy*` for negative assertions (`expect(...).not.toBeInTheDocument()`). `getBy*` throws when the element is not found, making it unsuitable for absence checks. 
-- Use `findBy*` for elements that appear asynchronously. It combines `waitFor` with `getBy` in a single, readable call. 
-- Use `getByTestId` only when no accessible query is feasible, and document why.
-- The `name` option in `getByRole` refers to the accessible name, not the HTML `name` attribute. 
-- Use `getAllBy*` when multiple elements are expected; `getBy*` throws if more than one match is found.
-
-**Constraints and Limitations:**
-- Some elements may not have implicit ARIA roles; explicit `role` attributes may be required.
-- `getByText` may match multiple elements if the text appears in multiple places; use `getAllByText` or scope the query.
-- `getByRole` with `hidden: true` includes elements normally excluded from the accessibility tree. 
-- `getByTestId` is an escape hatch and should not become the default query strategy.
-- Querying by CSS class or DOM structure is not supported by RTL's primary API and is an anti-pattern.
-
-### Annotated Code Examples
-
-**Example 1: Query Priority in a Login Form**
-
-```jsx
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-
-function LoginForm({ onSubmit }) {
-  return (
-    <form onSubmit={onSubmit}>
-      <h1>Log In</h1>
-
-      <label htmlFor="email">Email</label>
-      <input id="email" type="email" placeholder="you@example.com" />
-
-      <label htmlFor="password">Password</label>
-      <input id="password" type="password" />
-
-      <button type="submit">Log In</button>
-
-      <a href="/forgot-password">Forgot password?</a>
-    </form>
-  );
-}
-
-test('finds elements using accessible queries', () => {
-  render(<LoginForm onSubmit={vi.fn()} />);
-
-  // ✅ Query by role and accessible name
-  const heading = screen.getByRole('heading', { level: 1, name: /log in/i });
-  const emailInput = screen.getByRole('textbox', { name: /email/i });
-  const passwordInput = screen.getByLabelText(/password/i);
-  const submitButton = screen.getByRole('button', { name: /log in/i });
-  const forgotLink = screen.getByRole('link', { name: /forgot password/i });
-
-  expect(heading).toBeInTheDocument();
-  expect(emailInput).toHaveAttribute('type', 'email');
-  expect(passwordInput).toHaveAttribute('type', 'password');
-  expect(submitButton).toBeInTheDocument();
-  expect(forgotLink).toHaveAttribute('href', '/forgot-password');
-});
-```
-
-**Expected Output:** All assertions pass. The heading is found by its role (`heading`) and level (`1`). The email input is found by its role (`textbox`) and accessible name (`/email/i`). The password input is found by its label. The submit button is found by its role and accessible name. The link is found by its role (`link`) and accessible name.
-
-**Why This Output Occurs:** Each element has proper semantic HTML: `<h1>` has an implicit `heading` role, `<input type="email">` has an implicit `textbox` role, `<label>` provides the accessible name, `<button>` has a `button` role, and `<a>` has a `link` role. The test queries reflect how a user (and a screen reader) would perceive these elements, making the test resilient to CSS or DOM structure changes. 
-
-**Example 2: Query Variants for Different Scenarios**
-
-```jsx
-import React, { useState } from 'react';
-import { render, screen } from '@testing-library/react';
-
-function TogglePanel() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div>
-      <button onClick={() => setIsOpen((prev) => !prev)}>
-        {isOpen ? 'Close' : 'Open'}
-      </button>
-      {isOpen && <div role="dialog">Panel content</div>}
-    </div>
-  );
-}
-
-test('query variants in action', async () => {
-  render(<TogglePanel />);
-
-  // ✅ queryBy — element does not exist initially
-  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-
-  // ✅ getBy — button exists now
-  const toggleButton = screen.getByRole('button', { name: /open/i });
-  expect(toggleButton).toBeInTheDocument();
-
-  // Act: click the button
-  await userEvent.click(toggleButton);
-
-  // ✅ findBy — dialog appears asynchronously
-  const dialog = await screen.findByRole('dialog');
-  expect(dialog).toHaveTextContent('Panel content');
-
-  // ✅ getAllBy — multiple elements
-  const buttons = screen.getAllByRole('button');
-  expect(buttons).toHaveLength(1);
-});
-```
-
-**Expected Output:** The test passes. `queryByRole` returns `null` initially (no dialog). `getByRole` finds the toggle button. After clicking, `findByRole` waits for the dialog to appear. `getAllByRole` returns an array of buttons.
-
-**Why This Output Occurs:** Each query variant serves a distinct purpose: `queryBy*` is used for negative assertions (element should not exist), `getBy*` is used for elements that exist synchronously, `findBy*` is used for elements that appear asynchronously, and `getAllBy*` is used when multiple elements are expected. Mixing these up is the most common source of both flakes and misleading failure messages. 
-
-### Real-World Cases
-
-- **Login forms:** Querying email and password inputs by their labels, the submit button by its role and name, and error messages by their role (`alert`).
-- **Navigation menus:** Querying links by their role (`link`) and accessible name, ensuring keyboard navigability.
-- **Data tables:** Querying rows by their role (`row`) and cells by their role (`cell`), enforcing semantic table structure.
-- **Modals and dialogs:** Querying dialogs by their role (`dialog`) and close buttons by their accessible name.
-- **Form validation:** Querying error messages by their role (`alert`) and asserting on their text content.
-- **Accessibility audits:** Using `getByRole` as a proxy for accessibility — if an element cannot be found by role, it likely lacks proper semantics.
-
----
-
-## Core Concept 2: Simulating Real User Interactions
-
-### Definitions
-
-**Core Definition:** Simulating real user interactions in RTL is the practice of using `@testing-library/user-event` to trigger the full lifecycle of browser events — pointer events, focus, keyboard, and change events — that occur when a real user interacts with the UI.
-
-**Technical Definition:** `@testing-library/user-event` is a companion library to RTL that simulates user interactions at a higher level of fidelity than `fireEvent`. Where `fireEvent` dispatches a single synthetic DOM event (e.g., `fireEvent.click` dispatches only a `click` event), `user-event` simulates the complete sequence of events a browser fires during a real interaction: for a click, this includes `pointerover`, `pointerenter`, `pointerdown`, `mousedown`, `focus`, `pointerup`, `mouseup`, and `click`. Similarly, `user.type` simulates `keydown`, `keypress`, `keyup`, and `change` events for each character. Since v14, all `user-event` methods are asynchronous and must be awaited, and `userEvent.setup()` must be called before rendering to create a session that tracks state across interactions. 
-
-**Beginner-Friendly Explanation:** When a real user clicks a button, the browser doesn't just fire one "click" event — it fires a whole sequence of events: the mouse moves over the button, the button gets focus, the mouse button goes down, the mouse button comes up, and finally the click event fires. The old `fireEvent` method only fires the final click, which can miss bugs. `user-event` simulates the whole sequence, so your tests behave much more like a real browser. This means you need to `await` every interaction, because the events happen over time.
+**Beginner-Friendly Explanation:** Component testing means testing one component at a time — giving it some props, checking what it renders, clicking its buttons, and confirming the right things happen. It's the sweet spot between tiny unit tests and slow end-to-end tests.
 
 ### Purposes
 
-- To simulate interactions with the same fidelity as a real browser, catching bugs that `fireEvent` misses.
-- To test complete event lifecycles (pointer, focus, keyboard, change) rather than isolated synthetic events.
-- To ensure that interactions requiring focus, keyboard modifiers, or pointer state work correctly.
-- To reduce test flakiness caused by incomplete event simulation.
-- To test keyboard accessibility (Tab, Shift+Tab, Escape, Enter) realistically.
-- To provide a single, consistent API for all user interactions (`click`, `type`, `keyboard`, `hover`, `paste`, `upload`).
+- To verify that a component renders the correct output for given props and state.
+- To confirm that user interactions (clicks, typing, focus) produce the expected UI changes.
+- To catch regressions in component behavior before they reach integration or E2E tests.
+- To serve as accessible, executable documentation of the component's public contract.
+- To provide fast feedback (milliseconds per test) during development and in CI.
 
 ### Syntax Rules and Structure
-
-**General Syntax:**
 
 ```jsx
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { expect, test } from 'vitest';
 
-test('user can log in', async () => {
-  // ✅ ALWAYS call setup() before render
+test('component behavior description', async () => {
   const user = userEvent.setup();
 
-  render(<LoginForm />);
+  // Arrange: render with props
+  render(<Component prop="value" />);
 
-  // ✅ Await every interaction
-  await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-  await user.type(screen.getByLabelText(/password/i), 'password123');
-  await user.click(screen.getByRole('button', { name: /log in/i }));
+  // Act: interact as a user
+  await user.click(screen.getByRole('button', { name: /submit/i }));
 
-  // Assert on the outcome
-  expect(await screen.findByText(/welcome/i)).toBeInTheDocument();
+  // Assert: verify observable output
+  expect(screen.getByText('Success')).toBeInTheDocument();
 });
 ```
 
 **Component Breakdown:**
-- `userEvent.setup()`: Creates a user session that tracks state (keyboard state, pointer state) across interactions. Must be called before `render`. 
-- `user.type(element, text)`: Simulates typing each character, firing keyboard and change events.
-- `user.click(element)`: Simulates a full pointer and mouse event sequence.
-- `await`: Every `user-event` method returns a Promise and must be awaited.
 
-**Keyboard Modifiers:**
-
-```jsx
-const user = userEvent.setup();
-
-// Press and hold Shift, then click
-await user.keyboard('[<ShiftLeft>]'); // Press Shift (without releasing)
-await user.click(element); // Click with shiftKey: true
-await user.keyboard('[/<ShiftLeft>]'); // Release Shift
-
-// Press Enter
-await user.keyboard('{Enter}');
-
-// Tab to next element
-await user.tab();
-
-// Select text
-await user.tripleClick(element);
-```
-
-**Component Breakdown:**
-- `user.keyboard('[<ShiftLeft>]')`: Presses and holds the left Shift key.
-- `user.keyboard('[/<ShiftLeft>]')`: Releases the left Shift key.
-- `user.tab()`: Simulates pressing Tab to move focus.
-- `user.tripleClick(element)`: Selects the element's text content.
+| Component | Description |
+|-----------|-------------|
+| `render(<Component />)` | Mounts the component into a jsdom/happy-dom container. |
+| `screen` | Queries the entire document — preferred over destructuring from `render`, because it keeps working when the component portals outside its container. |
+| `getByRole`, `getByLabelText`, `getByText` | User-centric queries, in priority order. |
+| `userEvent.setup()` | Creates a user session that dispatches realistic event sequences. |
+| `await user.click(...)` | Simulates a full click (focus, pointer events, click). |
+| `expect(...).toBeInTheDocument()` | Asserts on the observable DOM state. |
 
 **Syntax Rules:**
-- Always call `userEvent.setup()` before `render()`. 
-- Always `await` every `user-event` method; they are asynchronous. 
-- Prefer `user-event` over `fireEvent` for almost all interactions. `fireEvent` is a low-level escape hatch for edge cases (e.g., simulating a specific event that `user-event` does not support). 
-- Use `user.keyboard()` for keyboard interactions, `user.pointer()` for low-level pointer control, and `user.type()` for text input.
-- `user-event` respects `pointer-events: none` and will throw if you try to click an unclickable element. Use `skipPointerEventsCheck` only when necessary. 
-- Tests using `user-event` may require overriding the test framework's default timeout (5 seconds) for long interaction sequences.
+
+1. Import `render` and `screen` from `@testing-library/react`; use `screen` for all queries.
+2. Call `userEvent.setup()` **before** `render()` and always `await` user-event calls. 
+3. Follow query priority: `getByRole` → `getByLabelText` → `getByPlaceholderText` → `getByText` → `getByTestId` (last resort). 
+4. Use `findBy*` for elements that appear asynchronously; use `queryBy*` to assert absence.
+5. Do not test internal state, lifecycle methods, or component instances. 
 
 **Constraints and Limitations:**
-- `user-event` is slower than `fireEvent` because it simulates more events.
-- Some third-party components (e.g., Radix UI Tabs) may rely on specific events (`onMouseDown`) that require `fireEvent` as a fallback. 
-- `user-event` does not simulate browser-native behaviours like drag-and-drop file uploads perfectly; `user.upload()` handles file inputs. 
-- The `pointerEventsCheck` can cause failures for components with complex CSS; use `skipPointerEventsCheck` sparingly. 
-- `user-event` v14 changed many APIs from synchronous to asynchronous; older tutorials may show outdated patterns.
 
-### Annotated Code Examples
+- Component tests do not verify cross-component integration or real network behavior — that is the job of integration and E2E tests.
+- Snapshot tests should be avoided unless there is a clear, justified reason. 
+- Shallow rendering (Enzyme-style) is an anti-pattern in the Testing Library philosophy — render the full component. 
 
-**Example 1: Complete Login Interaction with user-event**
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Testing a Button Component
 
 ```jsx
-import React, { useState } from 'react';
+// Button.jsx
+export function Button({ label, onClick, disabled = false }) {
+  return (
+    <button onClick={onClick} disabled={disabled}>
+      {label}
+    </button>
+  );
+}
+
+// Button.test.jsx
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi, test, expect } from 'vitest';
+import { Button } from './Button.jsx';
 
-function LoginForm({ onLogin }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+test('calls onClick when clicked', async () => {
+  const user = userEvent.setup();
+  const handleClick = vi.fn();
+
+  render(<Button label="Submit" onClick={handleClick} />);
+
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  expect(handleClick).toHaveBeenCalledTimes(1);
+});
+
+test('does not call onClick when disabled', async () => {
+  const user = userEvent.setup();
+  const handleClick = vi.fn();
+
+  render(<Button label="Submit" onClick={handleClick} disabled />);
+
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+
+  expect(handleClick).not.toHaveBeenCalled();
+});
+```
+
+**Expected Output:** Both tests pass. The first confirms the click handler fires; the second confirms it does not fire when the button is disabled.
+
+**Why this output:** `user.click` dispatches a full user interaction sequence (focus, pointerdown, mousedown, pointerup, mouseup, click). The native `disabled` attribute prevents the click from reaching the handler, and `user-event` respects this browser behavior. 
+
+#### Example 2: Testing a Form with Async Submission
+
+```jsx
+// LoginForm.jsx
+export function LoginForm({ onSubmit }) {
+  const [status, setStatus] = useState('idle');
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
-
-    if (!email.includes('@')) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    try {
-      await onLogin({ email, password });
-    } catch {
-      setError('Invalid email or password');
-    }
+    setStatus('submitting');
+    await onSubmit(new FormData(e.target));
+    setStatus('success');
   }
 
   return (
     <form onSubmit={handleSubmit}>
       <label htmlFor="email">Email</label>
-      <input
-        id="email"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <label htmlFor="password">Password</label>
-      <input
-        id="password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-
-      {error && <p role="alert">{error}</p>}
-
-      <button type="submit">Log In</button>
+      <input id="email" name="email" type="email" />
+      <button type="submit" disabled={status === 'submitting'}>
+        {status === 'submitting' ? 'Submitting...' : 'Log In'}
+      </button>
+      {status === 'success' && <p>Welcome!</p>}
     </form>
   );
 }
 
-test('should show validation error for invalid email', async () => {
-  const user = userEvent.setup();
-  render(<LoginForm onLogin={vi.fn()} />);
-
-  // Act: type an invalid email and submit
-  await user.type(screen.getByLabelText(/email/i), 'invalid-email');
-  await user.click(screen.getByRole('button', { name: /log in/i }));
-
-  // Assert: error message appears
-  const errorMessage = screen.getByRole('alert');
-  expect(errorMessage).toHaveTextContent(/please enter a valid email/i);
-});
-
-test('should call onLogin with valid credentials', async () => {
-  const user = userEvent.setup();
-  const handleLogin = vi.fn().mockResolvedValue(undefined);
-
-  render(<LoginForm onLogin={handleLogin} />);
-
-  await user.type(screen.getByLabelText(/email/i), 'user@example.com');
-  await user.type(screen.getByLabelText(/password/i), 'password123');
-  await user.click(screen.getByRole('button', { name: /log in/i }));
-
-  expect(handleLogin).toHaveBeenCalledWith({
-    email: 'user@example.com',
-    password: 'password123',
-  });
-});
-```
-
-**Expected Output:** Both tests pass. In the first test, the invalid email triggers the validation error, which is found by `getByRole('alert')`. In the second test, valid credentials cause `onLogin` to be called with the correct payload.
-
-**Why This Output Occurs:** `user.type()` simulates the full keyboard and change event lifecycle for each character, so the input's `onChange` handler fires correctly. `user.click()` simulates the full pointer and mouse event sequence, so the form's `onSubmit` handler fires. The tests await every interaction, ensuring the UI has settled before assertions run. 
-
-**Example 2: fireEvent vs user-event Comparison**
-
-```jsx
-import { render, screen, fireEvent } from '@testing-library/react';
+// LoginForm.test.jsx
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi, test, expect } from 'vitest';
+import { LoginForm } from './LoginForm.jsx';
 
-function Counter() {
-  const [count, setCount] = React.useState(0);
-  return (
-    <div>
-      <button onClick={() => setCount((c) => c + 1)}>Increment</button>
-      <p>Count: {count}</p>
-    </div>
-  );
-}
-
-// ❌ fireEvent: dispatches only the click event
-test('fireEvent increments the counter', () => {
-  render(<Counter />);
-  fireEvent.click(screen.getByRole('button', { name: /increment/i }));
-  expect(screen.getByText(/count: 1/i)).toBeInTheDocument();
-});
-
-// ✅ user-event: simulates the full pointer + mouse + click sequence
-test('user-event increments the counter', async () => {
+test('submits the form and shows success', async () => {
   const user = userEvent.setup();
-  render(<Counter />);
+  const handleSubmit = vi.fn().mockResolvedValue(undefined);
 
-  await user.click(screen.getByRole('button', { name: /increment/i }));
+  render(<LoginForm onSubmit={handleSubmit} />);
 
-  expect(screen.getByText(/count: 1/i)).toBeInTheDocument();
+  await user.type(screen.getByLabelText(/email/i), 'alice@example.com');
+  await user.click(screen.getByRole('button', { name: /log in/i }));
+
+  expect(await screen.findByText('Welcome!')).toBeInTheDocument();
+  expect(handleSubmit).toHaveBeenCalledTimes(1);
 });
 ```
 
-**Expected Output:** Both tests pass for this simple counter. However, for components that rely on focus, pointer state, or keyboard modifiers, the `fireEvent` test would fail while the `user-event` test would pass.
-
-**Why This Output Occurs:** `fireEvent.click` dispatches a single synthetic `click` event. `user.click` simulates `pointerover`, `pointerenter`, `pointerdown`, `mousedown`, `focus`, `pointerup`, `mouseup`, and `click` in sequence. For a simple button, the outcome is the same. For a component that checks `event.shiftKey` or relies on focus being set, `fireEvent` would miss the context. 
+**Expected Output:** The test passes. It types into the email field, clicks submit, waits for the success message with `findByText`, and verifies the submit handler was called.
 
 ### Real-World Cases
 
-- **Form submission:** Simulating typing into inputs, clicking submit, and asserting on the result.
-- **Keyboard navigation:** Testing Tab order, Escape to close modals, and Enter to submit forms.
-- **Dropdown menus:** Simulating hover, click, and keyboard selection of menu items.
-- **File uploads:** Using `user.upload()` to simulate selecting a file.
-- **Text selection:** Using `user.tripleClick()` and `user.pointer()` to simulate text selection.
-- **Clipboard operations:** Using `user.copy()`, `user.paste()`, and `user.cut()` for clipboard interactions.
+- **Design systems:** Every component in a design system has component tests verifying rendering, props, and interactions.
+- **Form components:** Testing validation, submission, and error states without a backend.
+- **Conditional UI:** Verifying that loading spinners, error messages, and empty states render correctly.
+
+### References
+
+- React Testing Library — Introduction — https://testing-library.com/docs/react-testing-library/intro
+- Testing Library — Query Priority — https://testing-library.com/docs/queries/about/#priority
+- Component Testing (tartinerlabs/skills) — https://github.com/tartinerlabs/skills/blob/3a2b1ba97c4f599f5b5ab76c5a2d7914ce9b24b1/plugins/tooling/skills/testing/rules/component-testing.md
 
 ---
 
-## Core Concept 3: Asynchronous Assertions
+## 2. Rendering Components
 
 ### Definitions
 
-**Core Definition:** Asynchronous assertions in RTL are the mechanisms — `findBy*` queries, `waitFor`, and `waitForElementToBeRemoved` — used to wait for dynamic DOM mutations, data loading, or delayed state updates before asserting on the result.
+**Core Definition:** Rendering a component in a test means mounting it into a simulated DOM environment so it can be queried and interacted with.
 
-**Technical Definition:** `findBy*` queries return a Promise that resolves with the found element(s) or rejects if the element is not found within a default timeout of 1000ms. They are the async equivalent of `getBy*`, combining `waitFor` with a `getBy` query in a single readable call. `waitFor` accepts a callback and retries it until it stops throwing or the timeout expires (default 1000ms). It is intended for non-element assertions, such as waiting for a state value to change or for a function to be called. `waitForElementToBeRemoved` waits for an element to be removed from the DOM. The key principle is: use `findBy*` to wait for an element to appear, use `waitFor` for assertions that are not about element presence, and never put side effects or multiple assertions inside `waitFor`. 
+**Technical Definition:** `render(ui, options?)` from React Testing Library creates a container element, appends it to `document.body`, and uses React's `createRoot` to render the provided React element. It returns an object containing `container`, `baseElement`, `debug()`, `rerender()`, `unmount()`, and `asFragment()`. Automatic cleanup runs after each test (when the test framework's `afterEach` global is available), removing the rendered tree from the DOM.
 
-**Beginner-Friendly Explanation:** Sometimes your app takes time to load data or update the screen. You can't just check immediately — the data might not be there yet. `findBy*` queries wait for an element to appear (up to 1 second by default) and then return it. `waitFor` waits for any assertion to become true, like "the loading spinner is gone" or "the count is now 3." The rule of thumb is: if you're waiting for an element, use `findBy*`; if you're waiting for something else, use `waitFor`. Never put multiple assertions inside `waitFor` — if the first one fails, you won't know which one caused the problem. 
+**Beginner-Friendly Explanation:** Rendering a component in a test means putting it on a simulated screen so you can look at it and interact with it. The `render()` function does this for you.
 
 ### Purposes
 
-- To handle dynamic DOM mutations caused by asynchronous data fetching, timers, or state updates.
-- To provide readable, intention-revealing waiting mechanisms (`findBy*` vs `waitFor`).
-- To avoid manual polling loops or arbitrary `setTimeout` delays in tests.
-- To produce clear failure messages when expected elements never appear.
-- To distinguish between element queries (use `findBy*`) and non-element assertions (use `waitFor`).
-- To manage timeouts for slow paths without polluting the test body with delay logic.
+- To mount the component under test into a DOM environment for querying and interaction.
+- To provide a fresh, isolated container for each test.
+- To enable re-rendering with new props via `rerender()`.
+- To enable unmount testing via `unmount()`.
 
 ### Syntax Rules and Structure
-
-**General Syntax for `findBy*`:**
 
 ```jsx
 import { render, screen } from '@testing-library/react';
 
-test('waits for async content to appear', async () => {
-  render(<UserList />);
-
-  // ✅ findByRole returns a Promise that resolves when the element appears
-  const heading = await screen.findByRole('heading', { name: /users/i });
-  expect(heading).toBeInTheDocument();
-
-  // ✅ findAllBy returns an array
-  const items = await screen.findAllByRole('listitem');
-  expect(items).toHaveLength(3);
-});
-```
-
-**General Syntax for `waitFor`:**
-
-```jsx
-import { render, screen, waitFor } from '@testing-library/react';
-
-test('waits for a non-element assertion', async () => {
-  render(<Counter />);
-
-  await user.click(screen.getByRole('button', { name: /increment/i }));
-
-  // ✅ waitFor for assertions that are not about element presence
-  await waitFor(() => {
-    expect(screen.getByText(/count: 1/i)).toBeInTheDocument();
-  });
-});
-
-test('waits for multiple conditions', async () => {
-  render(<RegistrationForm />);
-
-  await user.click(screen.getByRole('button', { name: /submit/i }));
-
-  // ✅ One assertion per waitFor
-  await waitFor(() => {
-    expect(screen.getByText(/email is required/i)).toBeInTheDocument();
-  });
-  await waitFor(() => {
-    expect(screen.getByText(/password is required/i)).toBeInTheDocument();
-  });
-});
+const { container, rerender, unmount } = render(<Component prop="initial" />);
 ```
 
 **Component Breakdown:**
-- `screen.findByRole(...)`: Returns a Promise that resolves with the element or rejects after the timeout.
-- `await waitFor(() => { expect(...) })`: Retries the callback until it stops throwing or the timeout expires.
-- `waitFor` with one assertion per call: Ensures the first failure reports immediately without ambiguity.
 
-**General Syntax for `waitForElementToBeRemoved`:**
-
-```jsx
-import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
-
-test('waits for loading spinner to disappear', async () => {
-  render(<DataView />);
-
-  // Assert loading state is present
-  expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-  // ✅ Wait for the loading indicator to be removed
-  await waitForElementToBeRemoved(() => screen.queryByText(/loading/i));
-
-  // Assert data is now visible
-  expect(screen.getByText(/data loaded/i)).toBeInTheDocument();
-});
-```
-
-**Component Breakdown:**
-- `waitForElementToBeRemoved(() => screen.queryByText(/loading/i))`: Waits for the element to be removed from the DOM.
-- The callback must return the element or `null`; when it returns `null`, the element has been removed.
+| Return Value | Description |
+|--------------|-------------|
+| `container` | The DOM node containing the rendered component. |
+| `baseElement` | The document body (default); useful for portals. |
+| `rerender(ui)` | Re-renders the component with new props/elements. |
+| `unmount()` | Unmounts the component to test cleanup. |
+| `debug()` | Pretty-prints the DOM for debugging. |
+| `asFragment()` | Returns the rendered output as a `DocumentFragment`. |
 
 **Syntax Rules:**
-- Use `findBy*` to wait for an element to appear; it is `getBy*` plus `waitFor` under the hood. 
-- Use `waitFor` only for non-element assertions (state changes, function calls, etc.). 
-- Never put multiple assertions inside a single `waitFor`; use separate `waitFor` calls. 
-- Never perform side effects inside `waitFor`; it may run the callback multiple times. 
-- Use `findBy*` with a timeout option for slow paths: `await screen.findByText(/slow/i, {}, { timeout: 3000 })`. 
-- `findBy*` automatically retries until the element appears or the timeout expires (default 1000ms).
-- Prefer `findBy*` over `waitFor` + `getBy*` because it produces better error messages and is more concise. 
+
+1. Prefer `screen` over destructuring queries from `render` — it queries the whole document and survives portals. 
+2. React Testing Library automatically cleans up after each test — do not call manual `cleanup()`. 
+3. Use `rerender()` to test prop changes without unmounting.
+4. Use `unmount()` to verify that cleanup functions (timers, listeners) run correctly. 
 
 **Constraints and Limitations:**
-- `findBy*` has a default timeout of 1000ms; slow API calls may require a longer timeout.
-- `waitFor` retries the callback on a timer (default 50ms interval); for very fast updates, this may add latency.
-- `waitFor` does not work with fake timers unless configured (use `vi.useFakeTimers()` with `advanceTimers` option). 
-- `findBy*` queries are not suitable for asserting absence — use `queryBy*` with `waitFor` for that.
-- Multiple `findBy*` calls in sequence can be slower than a single `waitFor` with a combined assertion, but they produce clearer failure messages.
 
-### Annotated Code Examples
+- `container` queries are scoped to the component's container and will not see portal content — use `baseElement` or `screen` instead. 
+- Do not assert on `container.innerHTML` — query the DOM with accessible queries.
 
-**Example 1: Search Results with Async Loading**
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Rendering and Re-rendering with Props
 
 ```jsx
-import React, { useState } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { test, expect } from 'vitest';
+import { Greeting } from './Greeting.jsx';
+
+test('updates greeting when name prop changes', () => {
+  const { rerender } = render(<Greeting name="Alice" />);
+  expect(screen.getByText('Hello, Alice!')).toBeInTheDocument();
+
+  rerender(<Greeting name="Bob" />);
+  expect(screen.getByText('Hello, Bob!')).toBeInTheDocument();
+});
+```
+
+**Expected Output:** Both assertions pass. The component initially renders "Hello, Alice!", then "Hello, Bob!" after re-rendering with a new prop.
+
+### Real-World Cases
+
+- **Prop-change testing:** Verifying that a component correctly re-renders when its props change.
+- **Unmount cleanup:** Testing that timers and event listeners are removed when a component unmounts.
+
+### References
+
+- React Testing Library — render — https://testing-library.com/docs/react-testing-library/api#render
+- React Testing Library — Setup (automatic cleanup) — https://testing-library.com/docs/react-testing-library/setup
+
+---
+
+## 3. Querying Elements
+
+### Definitions
+
+**Core Definition:** Querying elements means locating DOM nodes in the rendered output using Testing Library's query functions, prioritizing user-visible attributes.
+
+**Technical Definition:** Testing Library provides three query families — `getBy*` (throws if not found or found multiple times), `queryBy*` (returns `null` if not found, throws if multiple), and `findBy*` (returns a Promise, retrying until the element appears or times out). Each family has singular and plural (`getAllBy*`, `queryAllBy*`, `findAllBy*`) variants. Queries are prioritized by accessibility: `getByRole` first, then `getByLabelText`, `getByPlaceholderText`, `getByText`, and `getByTestId` only as a last resort. 
+
+**Beginner-Friendly Explanation:** Querying is how you find the element you want to interact with or check. You should find elements the same way a user would — by their role (button, heading) or label, not by CSS class.
+
+### Purposes
+
+- To locate elements in the rendered output for interaction or assertion.
+- To encourage accessible markup by prioritizing role and label queries.
+- To distinguish between "element must exist" (`getBy`), "element may not exist" (`queryBy`), and "element will appear" (`findBy`) scenarios.
+- To write tests that survive refactoring of CSS classes and internal markup.
+
+### Syntax Rules and Structure
+
+**Query families:**
+
+| Family | Not found | Found multiple | Async? |
+|--------|-----------|----------------|--------|
+| `getBy*` | Throws | Throws | No |
+| `queryBy*` | Returns `null` | Throws | No |
+| `findBy*` | Rejects (after timeout) | Rejects | Yes (returns Promise) |
+
+**Query priority (highest to lowest):**
+
+1. `getByRole` — accessible roles (button, heading, textbox, link)
+2. `getByLabelText` — form fields with labels
+3. `getByPlaceholderText` — inputs without labels
+4. `getByText` — non-interactive text content
+5. `getByTestId` — last resort only
+
+**Component Breakdown:**
+
+| Query | Use case |
+|-------|----------|
+| `getByRole('button', { name: /submit/i })` | Find a button by its accessible name. |
+| `getByLabelText(/email/i)` | Find an input by its associated label. |
+| `queryByText('Error')` | Assert that an error message is absent. |
+| `findByText('Loaded')` | Wait for async content to appear. |
+| `within(element).getByRole(...)` | Scope a query to a subtree. |
+
+**Syntax Rules:**
+
+1. Always prefer `getByRole` — it is the most accessible and robust query. 
+2. Use `queryBy*` only to assert absence (`expect(...).not.toBeInTheDocument()`).
+3. Use `findBy*` for async content; always `await` it. 
+4. Use `within()` to scope queries to a specific container when multiple similar elements exist.
+
+**Constraints and Limitations:**
+
+- `getByTestId` should be rare — if you need it frequently, the UI may lack accessible roles or labels. 
+- `container.querySelector()` is an anti-pattern in Testing Library — it couples tests to markup structure.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Query Priority in Practice
+
+```jsx
+// ❌ BAD: CSS selector query
+const { container } = render(<LoginForm />);
+const input = container.querySelector('input[name="email"]');
+
+// ✅ GOOD: accessible queries
+render(<LoginForm />);
+const input = screen.getByRole('textbox', { name: /email/i });
+const button = screen.getByRole('button', { name: /sign in/i });
+```
+
+**Why this matters:** The CSS selector breaks if the input is wrapped in a custom component that changes its tag. `getByRole` finds the element by its accessible semantics, which remain stable as long as the UI remains usable.
+
+#### Example 2: Using `within` and `queryBy`
+
+```jsx
+import { render, screen, within } from '@testing-library/react';
+
+test('shows an error and no success message on failure', () => {
+  render(<Form status="error" />);
+
+  const alert = screen.getByRole('alert');
+  expect(within(alert).getByText('Invalid email')).toBeInTheDocument();
+  expect(screen.queryByText('Success')).not.toBeInTheDocument();
+});
+```
+
+**Expected Output:** The test passes. It finds the alert element, scopes a text query inside it with `within`, and asserts that the success message is absent with `queryBy`.
+
+### Real-World Cases
+
+- **Accessibility auditing:** `getByRole` queries double as a11y checks — if you cannot find an element by its role, screen reader users may not find it either.
+- **Form testing:** `getByLabelText` ensures every input has a properly associated label.
+- **Conditional rendering:** `queryBy` for absence, `findBy` for async appearance.
+
+### References
+
+- Testing Library — Query Priority — https://testing-library.com/docs/queries/about/#priority
+- Testing Library — getBy, queryBy, findBy — https://testing-library.com/docs/queries/about
+
+---
+
+## 4. Firing Events
+
+### Definitions
+
+**Core Definition:** Firing events means simulating user interactions — clicks, typing, keyboard presses, focus — on rendered elements.
+
+**Technical Definition:** Testing Library offers two interaction APIs: `fireEvent` (a lightweight wrapper around `dispatchEvent` that fires a single DOM event) and `user-event` (a higher-fidelity simulator that dispatches the full sequence of events a real browser produces for an interaction, including focus, pointer events, and value manipulation). For example, `fireEvent.click` fires only a `click` event, while `userEvent.click` fires focus, pointerdown, mousedown, pointerup, mouseup, and click, and refuses to click hidden or disabled elements. `userEvent.setup()` must be called before rendering, and all interactions must be awaited. 
+
+**Beginner-Friendly Explanation:** Firing events is how you simulate a user clicking or typing. Use `user-event` — it behaves like a real browser, so it catches bugs that a single synthetic click would miss.
+
+### Purposes
+
+- To simulate realistic user interactions that exercise the component's event handlers.
+- To catch bugs that only appear with full event sequences (e.g., keyboard handlers, focus management).
+- To verify that disabled or hidden elements cannot be interacted with.
+- To test form input, submission, and validation flows.
+
+### Syntax Rules and Structure
+
+```jsx
 import userEvent from '@testing-library/user-event';
 
-function SearchResults() {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+const user = userEvent.setup();
+render(<Component />);
 
-  async function handleSearch() {
-    setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    setResults(['React Testing', 'React Hooks', 'React Suspense']);
-    setLoading(false);
-  }
+await user.click(screen.getByRole('button', { name: /submit/i }));
+await user.type(screen.getByRole('textbox', { name: /email/i }), 'alice@example.com');
+await user.keyboard('{Enter}');
+```
 
-  return (
-    <div>
-      <input
-        role="searchbox"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      <button onClick={handleSearch}>Search</button>
+**Component Breakdown:**
 
-      {loading && <p>Searching...</p>}
+| API | Description |
+|-----|-------------|
+| `userEvent.setup()` | Creates a user session; call before render. |
+| `user.click(element)` | Full click sequence. |
+| `user.type(element, text)` | Types text character by character, firing keyboard and input events. |
+| `user.keyboard(keys)` | Fires keyboard events (e.g., `'{Enter}'`, `'{Shift>}a{/Shift}'`). |
+| `user.tab()` | Moves focus to the next focusable element. |
+| `user.hover(element)` | Simulates hover. |
 
-      <ul>
-        {results.map((result) => (
-          <li key={result}>{result}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+**Syntax Rules:**
 
-test('displays search results asynchronously', async () => {
+1. Always `await` user-event calls. 
+2. Call `userEvent.setup()` before `render()`. 
+3. Prefer `user-event` over `fireEvent` in almost all cases. Use `fireEvent` only for low-level events that `user-event` does not model (e.g., a raw `scroll` event). 
+4. Do not wrap `user-event` calls in manual `act()` — React Testing Library handles it automatically. 
+
+**Constraints and Limitations:**
+
+- `fireEvent` is still needed for events `user-event` does not support (e.g., `scroll`, `load`). 
+- `user-event` adds visibility and interactability checks — a test may fail if the element is not actually user-accessible, which is usually the correct behavior.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: `fireEvent` vs. `userEvent` — The Fidelity Difference
+
+```jsx
+// fireEvent.click fires ONLY a click event
+fireEvent.click(button);
+
+// userEvent.click fires focus, pointerdown, mousedown, pointerup, mouseup, click
+await user.click(button);
+```
+
+**Why `userEvent` is better:** If the component relies on `onMouseDown` or focus events, `fireEvent.click` will miss those handlers. `userEvent.click` exercises the full interaction, catching real bugs. 
+
+#### Example 2: Typing and Keyboard Interaction
+
+```jsx
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { SearchBox } from './SearchBox.jsx';
+
+test('searches on Enter key', async () => {
   const user = userEvent.setup();
-  render(<SearchResults />);
+  const onSearch = vi.fn();
 
-  // Act: type and search
+  render(<SearchBox onSearch={onSearch} />);
+
   await user.type(screen.getByRole('searchbox'), 'react');
-  await user.click(screen.getByRole('button', { name: /search/i }));
+  await user.keyboard('{Enter}');
 
-  // Assert: loading indicator is present synchronously
-  expect(screen.getByText(/searching/i)).toBeInTheDocument();
-
-  // ✅ findBy waits for results to appear
-  const results = await screen.findAllByRole('listitem');
-  expect(results).toHaveLength(3);
-  expect(screen.queryByText(/searching/i)).not.toBeInTheDocument();
-});
-
-test('raises the timeout for a slow path', async () => {
-  const user = userEvent.setup();
-  render(<SearchResults />);
-
-  await user.type(screen.getByRole('searchbox'), 'slow-query');
-  await user.click(screen.getByRole('button', { name: /search/i }));
-
-  // ✅ Third argument is the waitFor options, not the query options
-  const result = await screen.findByText(
-    /react suspense/i,
-    {},
-    { timeout: 3000 }
-  );
-  expect(result).toBeInTheDocument();
+  expect(onSearch).toHaveBeenCalledWith('react');
 });
 ```
 
-**Expected Output:** The first test passes: "Searching..." appears synchronously, then `findAllByRole('listitem')` waits for the results to appear (after 300ms) and returns three items. The second test passes with an extended timeout of 3000ms.
-
-**Why This Output Occurs:** `getByText(/searching/i)` finds the loading indicator synchronously because it is rendered immediately after the click. `findAllByRole('listitem')` returns a Promise that resolves when the list items appear after the simulated API delay. `queryByText(/searching/i)` returns `null` because the loading indicator is removed when results arrive. The third argument to `findByText` is the `waitFor` options object, not the query options. 
-
-**Example 2: waitFor for Non-Element Assertions**
-
-```jsx
-import React, { useState } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-
-function DebouncedCounter() {
-  const [count, setCount] = useState(0);
-  const [debouncedCount, setDebouncedCount] = useState(0);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => setDebouncedCount(count), 500);
-    return () => clearTimeout(timer);
-  }, [count]);
-
-  return (
-    <div>
-      <button onClick={() => setCount((c) => c + 1)}>Increment</button>
-      <p>Count: {count}</p>
-      <p>Debounced: {debouncedCount}</p>
-    </div>
-  );
-}
-
-test('counter settles after debounce', async () => {
-  const user = userEvent.setup();
-  render(<DebouncedCounter />);
-
-  // Act: click three times rapidly
-  await user.click(screen.getByRole('button', { name: /increment/i }));
-  await user.click(screen.getByRole('button', { name: /increment/i }));
-  await user.click(screen.getByRole('button', { name: /increment/i }));
-
-  // ✅ waitFor for the debounced value to settle
-  await waitFor(() => {
-    expect(screen.getByText(/debounced: 3/i)).toBeInTheDocument();
-  });
-});
-```
-
-**Expected Output:** The test passes. The immediate count shows 3, and after the 500ms debounce, the debounced count also shows 3.
-
-**Why This Output Occurs:** `waitFor` retries the callback until the assertion passes or the timeout expires. It is used here because the assertion is about the debounced count reaching a specific value, which is not an element query but a state-derived text assertion. `findBy*` would not be appropriate because the element (`<p>Debounced: 3</p>`) exists from the start — its text content changes. 
+**Expected Output:** The test passes. `user.type` fires character-by-character keyboard and input events, and `user.keyboard('{Enter}')` triggers the Enter handler.
 
 ### Real-World Cases
 
-- **Data fetching:** Waiting for API responses to populate lists, tables, or detail views.
-- **Form submission:** Waiting for success messages or error alerts after submitting a form.
-- **Debounced search:** Waiting for debounced results to settle after rapid typing.
-- **Modal transitions:** Waiting for a modal to appear after clicking a trigger, or disappear after clicking close.
-- **Loading states:** Waiting for a loading spinner to be removed and content to appear.
-- **Optimistic updates:** Waiting for the server response to confirm an optimistic UI change.
+- **Form submission:** Testing that clicking submit or pressing Enter calls the submit handler.
+- **Keyboard navigation:** Testing tab order, Escape-to-close, and arrow-key navigation.
+- **Disabled states:** Verifying that `user-event` refuses to interact with disabled or hidden elements (which is the correct browser behavior).
+
+### References
+
+- Testing Library — user-event Introduction — https://testing-library.com/docs/user-event/intro
+- Testing Library — fireEvent vs user-event — https://testing-library.com/docs/user-event/intro#differences-from-fireevent
+- React Testing Library Best Practices (gohypergiant) — https://github.com/gohypergiant/standard-toolkit/blob/88ef844bf587a9fd43f75ee0503dc471569a2cd1/.agents/skills/accelint-react-testing/README.md
 
 ---
 
-## Core Concept 4: State, Context, & Hook Testing
+## 5. Asserting Output
 
 ### Definitions
 
-**Core Definition:** State, Context, and Hook testing in RTL is the practice of validating custom hook behaviour, context provider integration, and state management logic either in isolation using `renderHook` or through component integration tests.
+**Core Definition:** Asserting output means using matchers to verify that the rendered DOM matches the expected state after rendering or interaction.
 
-**Technical Definition:** `renderHook` is a utility exported by `@testing-library/react` (since v13.1.0) that renders a test component which calls the provided hook callback and returns an object containing `result` (the current return value of the hook) and utilities like `rerender` and `unmount`. It supports a `wrapper` option for wrapping the hook in providers (e.g., `QueryClientProvider`, `AuthProvider`, `MemoryRouter`). The `act` function from RTL (re-exported from `react-dom/test-utils`) is used to wrap state updates that occur outside of `render` or `renderHook`. For context testing, the recommended approach is to render a consumer component within the real provider and assert on the rendered output, rather than mocking the context. 
+**Technical Definition:** Assertions combine Jest/Vitest `expect` with `@testing-library/jest-dom` matchers (e.g., `toBeInTheDocument`, `toHaveTextContent`, `toBeDisabled`, `toHaveValue`, `toHaveAttribute`) or with query-based assertions (`expect(screen.getByText(...)).toBeInTheDocument()`). Assertions should be **user-visible** — text content, roles, accessible names, ARIA states — not implementation details like internal state or CSS classes. Async assertions use `waitFor` or `findBy*` with `await`. 
 
-**Beginner-Friendly Explanation:** Custom hooks are functions that contain state and logic, but they can't be rendered on their own — they need to be called inside a component. `renderHook` lets you test a hook without creating a full component for it. You call `renderHook(() => useCounter())`, and it returns an object with `result.current` that gives you the hook's current return value. You can call functions from the hook inside `act()` to trigger state updates, and you can wrap the hook in providers using the `wrapper` option. For context, instead of mocking the context, you render a component that consumes the context inside the real provider and assert on what the component renders.
+**Beginner-Friendly Explanation:** Asserting output means checking that what the user sees is correct — the right text, the right button state, the right error message. You check the screen, not the component's private variables.
 
 ### Purposes
 
-- To test custom hook logic (state updates, effects, return values) independently of any UI component.
-- To validate context providers by rendering consumer components within them.
-- To test hooks that depend on providers (e.g., `useQuery` requiring `QueryClientProvider`) by supplying a `wrapper`.
-- To isolate hook behaviour from component rendering logic, making tests faster and more focused.
-- To verify that state updates propagate correctly through context to consuming components.
-- To test hook error handling and edge cases without the overhead of a full component tree.
+- To verify that the rendered output matches the expected UI after rendering or interaction.
+- To assert on accessibility attributes (roles, labels, `aria-*`).
+- To confirm that conditional UI (errors, loading states, empty states) appears correctly.
+- To provide a readable, executable specification of the component's behavior.
 
 ### Syntax Rules and Structure
 
-**General Syntax for `renderHook`:**
-
 ```jsx
-import { renderHook, act } from '@testing-library/react';
+// DOM presence
+expect(screen.getByText('Hello')).toBeInTheDocument();
 
-function useCounter(initialValue = 0) {
-  const [count, setCount] = React.useState(initialValue);
-  const increment = () => setCount((c) => c + 1);
-  const decrement = () => setCount((c) => c - 1);
-  return { count, increment, decrement };
-}
+// Absence
+expect(screen.queryByText('Error')).not.toBeInTheDocument();
 
-test('useCounter increments and decrements', () => {
-  const { result } = renderHook(() => useCounter(10));
+// Async appearance
+expect(await screen.findByText('Loaded')).toBeInTheDocument();
 
-  // Initial value
-  expect(result.current.count).toBe(10);
-
-  // ✅ Wrap state updates in act()
-  act(() => {
-    result.current.increment();
-  });
-  expect(result.current.count).toBe(11);
-
-  act(() => {
-    result.current.decrement();
-  });
-  expect(result.current.count).toBe(10);
-});
+// Attribute / state
+expect(screen.getByRole('button', { name: /submit/i })).toBeDisabled();
+expect(screen.getByRole('textbox')).toHaveValue('alice');
+expect(screen.getByRole('checkbox')).toBeChecked();
 ```
 
 **Component Breakdown:**
-- `renderHook(() => useCounter(10))`: Renders the hook in a test component and returns `{ result, rerender, unmount }`.
-- `result.current`: The current return value of the hook.
-- `act(() => { result.current.increment() })`: Wraps the state update so React flushes it before assertions.
 
-**General Syntax for `renderHook` with Provider Wrapper:**
-
-```jsx
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-test('useFetchUser returns user data', async () => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
-  // ✅ Wrapper provides the necessary context
-  const wrapper = ({ children }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-
-  const { result } = renderHook(() => useFetchUser('123'), { wrapper });
-
-  await waitFor(() => {
-    expect(result.current.data).toEqual({ name: 'John' });
-  });
-});
-```
-
-**Component Breakdown:**
-- `wrapper`: A component that wraps the hook in the required providers.
-- `renderHook(() => useFetchUser('123'), { wrapper })`: Passes the wrapper as an option.
-- `waitFor`: Waits for the async hook to resolve.
-
-**General Syntax for Context Testing Through Components:**
-
-```jsx
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { AuthProvider, useAuth } from './AuthContext';
-
-function Consumer() {
-  const { user, login } = useAuth();
-  return (
-    <div>
-      <p>{user ? `Welcome, ${user.name}` : 'Not logged in'}</p>
-      <button onClick={() => login({ name: 'Alice' })}>Log in</button>
-    </div>
-  );
-}
-
-test('context provides user and login function', async () => {
-  const user = userEvent.setup();
-
-  // ✅ Render the consumer inside the real provider
-  render(
-    <AuthProvider>
-      <Consumer />
-    </AuthProvider>
-  );
-
-  expect(screen.getByText(/not logged in/i)).toBeInTheDocument();
-
-  await user.click(screen.getByRole('button', { name: /log in/i }));
-
-  expect(screen.getByText(/welcome, alice/i)).toBeInTheDocument();
-});
-```
-
-**Component Breakdown:**
-- `<AuthProvider>`: The real provider component.
-- `<Consumer>`: A component that consumes the context.
-- `screen.getByText(...)`: Asserts on the rendered output of the consumer.
+| Matcher | Assertion |
+|---------|-----------|
+| `toBeInTheDocument()` | Element is present in the DOM. |
+| `toHaveTextContent(text)` | Element contains the given text. |
+| `toBeDisabled()` / `toBeEnabled()` | Form control state. |
+| `toHaveValue(value)` | Input/textarea value. |
+| `toBeChecked()` | Checkbox/radio state. |
+| `toHaveAttribute(name, value)` | Attribute value. |
+| `toHaveAccessibleName(name)` | Computed accessible name. |
 
 **Syntax Rules:**
-- Use `renderHook` for custom hooks that are not tightly coupled to a specific UI component. 
-- Use component testing when the hook's behaviour is best observed through the UI it renders. 
-- Always wrap state updates in `act()` when calling hook methods outside of `render` or `renderHook`. 
-- Use the `wrapper` option to supply providers required by the hook. 
-- For context testing, render a consumer component inside the real provider rather than mocking the context. 
-- Create a fresh provider instance (e.g., `QueryClient`) for each test to ensure isolation. 
-- `renderHook` returns `result`, `rerender`, and `unmount`; use `rerender` to test changes in hook arguments.
+
+1. Use `@testing-library/jest-dom` matchers for DOM assertions. 
+2. Assert on user-visible output (text, roles, ARIA states), not CSS classes or internal variables. 
+3. Use `await expect(...).resolves` or `findBy*` for async assertions.
+4. Use `queryBy*` for absence assertions — `getBy*` throws when the element is missing. 
 
 **Constraints and Limitations:**
-- `renderHook` should not be used when the hook is tightly coupled to a specific UI component; test through the component instead. 
-- `act()` is required for state updates but does not work with asynchronous state updates in all cases; use `waitFor` for async.
-- The `wrapper` option applies the same providers to all renders; if different tests need different providers, create separate `renderHook` calls.
-- `renderHook` does not support Server Components; use E2E tests for those.
-- Context testing through components requires more boilerplate than mocking, but provides higher confidence.
 
-### Annotated Code Examples
+- `toHaveTextContent` is substring-based — use exact matching when necessary.
+- Do not assert on `container.innerHTML` or `container.firstChild` — these are implementation details.
 
-**Example 1: Custom Hook Testing with `renderHook`**
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Asserting Conditional Rendering
 
 ```jsx
-import { renderHook, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { Alert } from './Alert.jsx';
 
-function useCounter(initialValue = 0) {
-  const [count, setCount] = React.useState(initialValue);
+test('shows the error message when variant is error', () => {
+  render(<Alert variant="error" message="Invalid email" />);
 
-  const increment = () => setCount((c) => c + 1);
-  const decrement = () => setCount((c) => c - 1);
-  const reset = () => setCount(initialValue);
-
-  return { count, increment, decrement, reset };
-}
-
-test('useCounter manages count state', () => {
-  const { result } = renderHook(() => useCounter(5));
-
-  expect(result.current.count).toBe(5);
-
-  act(() => result.current.increment());
-  expect(result.current.count).toBe(6);
-
-  act(() => result.current.decrement());
-  expect(result.current.count).toBe(5);
-
-  act(() => result.current.reset());
-  expect(result.current.count).toBe(5);
+  const alert = screen.getByRole('alert');
+  expect(alert).toHaveTextContent('Invalid email');
+  expect(alert).toHaveClass('alert-error'); // Only if the class is part of the public API
 });
 
-test('useCounter rerenders with new initial value', () => {
-  const { result, rerender } = renderHook(
-    ({ initial }) => useCounter(initial),
-    { initialProps: { initial: 0 } }
-  );
-
-  expect(result.current.count).toBe(0);
-
-  rerender({ initial: 10 });
-  expect(result.current.count).toBe(10);
+test('does not render an alert for the info variant', () => {
+  render(<Alert variant="info" message="Saved" />);
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
 ```
 
-**Expected Output:** Both tests pass. The first test verifies increment, decrement, and reset. The second test verifies that the hook responds to changes in its initial value via `rerender`.
+**Expected Output:** Both tests pass. The error variant renders an alert with the message; the info variant does not render an alert role.
 
-**Why This Output Occurs:** `renderHook` renders a test component that calls the hook. `result.current` always reflects the latest return value. `act()` ensures that state updates are flushed before assertions. `rerender` re-renders the hook with new props, allowing testing of hooks that depend on external inputs. 
-
-**Example 2: Context Testing Through a Consumer Component**
+#### Example 2: Async Assertion with `findBy`
 
 ```jsx
-import React, { createContext, useContext, useState } from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 
-const ThemeContext = createContext(null);
+test('displays the loaded user name', async () => {
+  render(<UserProfile userId="1" />);
 
-function ThemeProvider({ children, initialTheme = 'light' }) {
-  const [theme, setTheme] = useState(initialTheme);
-  const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+  expect(screen.getByText('Loading...')).toBeInTheDocument();
+  expect(await screen.findByText('Alice')).toBeInTheDocument();
+});
+```
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+**Expected Output:** The test passes. The loading state is visible immediately, and `findByText` waits for the async update to render "Alice".
+
+### Real-World Cases
+
+- **Error states:** Asserting that error messages appear in an alert role.
+- **Loading states:** Asserting that a spinner or skeleton is visible during loading.
+- **Form validation:** Asserting that inputs are marked invalid or that error text is present.
+- **Disabled states:** Asserting that a submit button is disabled while submitting.
+
+### References
+
+- Testing Library — Jest DOM matchers — https://github.com/testing-library/jest-dom
+- React Testing Library Best Practices (gohypergiant) — https://github.com/gohypergiant/standard-toolkit/blob/88ef844bf587a9fd43f75ee0503dc471569a2cd1/.agents/skills/accelint-react-testing/README.md
+
+---
+
+## 6. Testing Props
+
+### Definitions
+
+**Core Definition:** Testing props means rendering a component with different prop values and asserting that the rendered output correctly reflects each set of props.
+
+**Technical Definition:** Because React components are functions of props, testing props is equivalent to testing the function's input-to-output mapping: `render(<Component prop={value} />)` followed by assertions on the rendered DOM. Prop testing covers required props, optional props with defaults, conditional rendering based on prop values, and callback props (verified with `vi.fn()`/`jest.fn()`). It does not test internal state or implementation.
+
+**Beginner-Friendly Explanation:** Testing props means checking that when you give a component different inputs, it shows the right output. For example, if you pass `variant="error"`, does it render a red error box?
+
+### Purposes
+
+- To verify that a component renders correctly for each meaningful combination of props.
+- To confirm that optional props use the correct defaults.
+- To verify that callback props are called with the correct arguments.
+- To document the component's public API contract.
+
+### Syntax Rules and Structure
+
+```jsx
+render(<Component requiredProp="value" optionalProp={true} />);
+expect(screen.getByText('Expected output')).toBeInTheDocument();
+```
+
+**Component Breakdown:**
+
+| Prop type | Test approach |
+|-----------|---------------|
+| Required string/number | Render with the value; assert on rendered text. |
+| Optional with default | Render without the prop; assert that the default output appears. |
+| Conditional (variant, size) | Render with each variant; assert on the corresponding output. |
+| Callback (`onClick`, `onChange`) | Pass a `vi.fn()`; interact; assert the call count and arguments. |
+
+**Constraints and Limitations:**
+
+- Do not test TypeScript prop types at runtime — that is TypeScript's job.
+- Do not assert on prop values directly (e.g., `component.props.variant`) — assert on the rendered output.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Testing Variants and Defaults
+
+```jsx
+// Badge.jsx
+export function Badge({ label, variant = 'default' }) {
+  return <span className={`badge badge-${variant}`}>{label}</span>;
 }
 
-function useTheme() {
-  return useContext(ThemeContext);
-}
+// Badge.test.jsx
+import { render, screen } from '@testing-library/react';
+import { test, expect } from 'vitest';
+import { Badge } from './Badge.jsx';
 
-function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+test('renders the label', () => {
+  render(<Badge label="New" />);
+  expect(screen.getByText('New')).toBeInTheDocument();
+});
+
+test('uses the default variant when none is provided', () => {
+  render(<Badge label="New" />);
+  expect(screen.getByText('New')).toHaveClass('badge-default');
+});
+
+test('renders the specified variant', () => {
+  render(<Badge label="Sale" variant="success" />);
+  expect(screen.getByText('Sale')).toHaveClass('badge-success');
+});
+```
+
+**Expected Output:** All three tests pass. The label renders, the default variant applies when omitted, and the specified variant applies when provided.
+
+### Real-World Cases
+
+- **Design system variants:** Testing that `variant`, `size`, and `color` props produce the correct classes and styles.
+- **Conditional rendering:** Testing that a `loading` prop shows a spinner and a `data` prop shows content.
+- **Callback props:** Testing that `onChange`, `onSubmit`, and `onClose` are called with the expected arguments.
+
+### References
+
+- React Testing Library — Component Testing Patterns — https://github.com/mintuz/skills/blob/main/data/skills-md/mintuz/claude-plugins/react-testing/SKILL.md
+- Steve Kinney — Testing React Components with TypeScript — https://stevekinney.com/courses/react-typescript/testing-react-typescript
+
+---
+
+## 7. Testing State
+
+### Definitions
+
+**Core Definition:** Testing state means verifying that a component's internal state changes produce the correct UI updates, without directly inspecting the state variable itself.
+
+**Technical Definition:** In React Testing Library, state is tested **indirectly** — by interacting with the component (via `user-event`) and asserting on the resulting DOM. For example, clicking an "increment" button should update the displayed count. The internal `useState` value is never accessed directly; doing so would couple the test to implementation details. For complex state logic extracted into reducers or custom Hooks, those units are tested separately (reducer tests, `renderHook` tests).
+
+**Beginner-Friendly Explanation:** You do not test state directly — you test what state produces. Click the button, then check that the screen shows the new count. That is how you verify state works.
+
+### Purposes
+
+- To verify that user interactions trigger the correct state transitions and UI updates.
+- To ensure that state updates are reflected in the rendered output.
+- To catch bugs where state changes but the UI does not re-render correctly.
+- To avoid brittle tests that break when internal state variable names change.
+
+### Syntax Rules and Structure
+
+```jsx
+const user = userEvent.setup();
+render(<Counter />);
+
+await user.click(screen.getByRole('button', { name: /increment/i }));
+expect(screen.getByText('Count: 1')).toBeInTheDocument();
+```
+
+**Component Breakdown:**
+
+| Step | Description |
+|------|-------------|
+| Render | Mount the component in its initial state. |
+| Interact | Use `user-event` to trigger the state change. |
+| Assert | Verify the UI reflects the new state. |
+
+**Constraints and Limitations:**
+
+- Never access `component.state`, `result.current`, or internal variables in a component test. 
+- State updates that cause async effects require `findBy*` or `waitFor`.
+- State logic that is complex should be extracted into a reducer or custom Hook and tested separately.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Testing a Counter Component's State via UI
+
+```jsx
+// Counter.jsx
+export function Counter() {
+  const [count, setCount] = useState(0);
   return (
     <div>
-      <p>Current theme: {theme}</p>
-      <button onClick={toggleTheme}>Toggle theme</button>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount((c) => c + 1)}>Increment</button>
     </div>
   );
 }
 
-test('theme toggles between light and dark', async () => {
-  const user = userEvent.setup();
+// Counter.test.jsx
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { test, expect } from 'vitest';
+import { Counter } from './Counter.jsx';
 
+test('increments the displayed count when clicked', async () => {
+  const user = userEvent.setup();
+  render(<Counter />);
+
+  expect(screen.getByText('Count: 0')).toBeInTheDocument();
+
+  await user.click(screen.getByRole('button', { name: /increment/i }));
+
+  expect(screen.getByText('Count: 1')).toBeInTheDocument();
+});
+```
+
+**Expected Output:** The test passes. The initial count is 0; after clicking, the displayed count is 1.
+
+**Why this output:** The test interacts with the component as a user would and asserts on the visible output — never on the internal `count` variable.
+
+### Real-World Cases
+
+- **Toggle buttons:** Verifying that clicking a dark-mode toggle changes the displayed theme.
+- **Accordions:** Verifying that clicking a header expands the panel.
+- **Multi-step forms:** Verifying that clicking "Next" advances to the next step.
+
+### References
+
+- React Testing Library — Core Principles: Test behavior, not implementation — https://github.com/mintuz/skills/blob/main/data/skills-md/mintuz/claude-plugins/react-testing/SKILL.md
+- Component Testing (ledgerhq/lumen) — https://github.com/ledgerhq/lumen/blob/1d4929f3eb762cce283c87eea0f3ebc1f74dc8ba/.claude/skills/component-testing/SKILL.md
+
+---
+
+## 8. Testing Context
+
+### Definitions
+
+**Core Definition:** Testing context means providing a component with the Context values it consumes — via a wrapper component — and asserting that it renders correctly for different context states.
+
+**Technical Definition:** A component that calls `useContext` requires a matching Provider ancestor. In tests, you wrap the component with the Provider using either the `wrapper` option of `render()` or a custom render function that includes all global providers. For each test, you supply the specific context value you want to exercise — e.g., an authenticated user, a theme, or a feature flag. Do not mock `useContext` directly; provide the real provider with controlled values. 
+
+**Beginner-Friendly Explanation:** If your component needs data from a Context (like the current user or theme), you have to wrap it in the corresponding Provider when you test it. You give the Provider a fake value and check that the component uses it correctly.
+
+### Purposes
+
+- To test components that depend on React Context without needing the real app's provider tree.
+- To verify that the component renders correctly for different context values (e.g., admin vs. viewer, dark vs. light theme).
+- To keep tests focused by providing only the context values the component actually needs.
+- To enable reusable, composable test wrappers for context-heavy components.
+
+### Syntax Rules and Structure
+
+**Option 1: `wrapper` option:**
+
+```jsx
+render(<Component />, {
+  wrapper: ({ children }) => (
+    <ThemeContext.Provider value="dark">{children}</ThemeContext.Provider>
+  ),
+});
+```
+
+**Option 2: Custom render function:**
+
+```jsx
+// test-utils.jsx
+import { render } from '@testing-library/react';
+import { ThemeProvider } from './ThemeContext';
+
+function AllProviders({ children }) {
+  return <ThemeProvider value="light">{children}</ThemeProvider>;
+}
+
+export function renderWithProviders(ui, options) {
+  return render(ui, { wrapper: AllProviders, ...options });
+}
+```
+
+**Component Breakdown:**
+
+| Approach | Description |
+|----------|-------------|
+| `wrapper` option | Pass a wrapper component to `render()`; it wraps the UI. |
+| Custom render | A `test-utils` file that re-exports everything from RTL and overrides `render` with the providers baked in. |
+| Composable wrappers | Build small wrapper helpers (e.g., `withTheme`, `withAuth`) and compose them per test. |
+
+**Syntax Rules:**
+
+1. Wrap the component in the real Provider — do not mock `useContext`. 
+2. Provide only the context values the component needs for the specific test.
+3. Use a custom `render` from `test-utils` to avoid repeating provider setup in every test. 
+4. For multiple providers, nest them in the wrapper — order matters if providers depend on each other.
+
+**Constraints and Limitations:**
+
+- The `wrapper` option only wraps the rendered UI — it does not apply to `renderHook` unless passed explicitly.
+- A single "mega-wrapper" can become unwieldy — prefer composable per-context wrappers. 
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Testing a Context-Consuming Component
+
+```jsx
+// UserBadge.jsx
+import { useContext } from 'react';
+import { UserContext } from './UserContext';
+
+export function UserBadge() {
+  const user = useContext(UserContext);
+  return <span>{user ? user.name : 'Guest'}</span>;
+}
+
+// UserBadge.test.jsx
+import { render, screen } from '@testing-library/react';
+import { UserContext } from './UserContext';
+import { UserBadge } from './UserBadge.jsx';
+
+function renderWithUser(user) {
+  return render(
+    <UserContext.Provider value={user}>
+      <UserBadge />
+    </UserContext.Provider>
+  );
+}
+
+test('shows the user name when authenticated', () => {
+  renderWithUser({ name: 'Alice' });
+  expect(screen.getByText('Alice')).toBeInTheDocument();
+});
+
+test('shows "Guest" when no user is provided', () => {
+  renderWithUser(null);
+  expect(screen.getByText('Guest')).toBeInTheDocument();
+});
+```
+
+**Expected Output:** Both tests pass. The component reads the context value and renders the correct name or fallback.
+
+### Real-World Cases
+
+- **Authentication context:** Testing that protected UI renders only for authenticated users.
+- **Theme context:** Testing that components render with the correct theme tokens.
+- **Feature flags:** Testing that feature-gated UI appears only when the flag context value is enabled.
+
+### References
+
+- Testing Library — Setup: Custom Render with providers — https://testing-library.com/docs/react-testing-library/setup
+- Souvlaki — Composable React test wrappers for context-heavy components — https://www.npmjs.com/package/souvlaki
+- React Testing Library: Advanced Patterns for Complex UIs — https://codeloomdevv.co.in/blog/react/react-testing-library-advanced-patterns
+
+---
+
+## 9. Testing Portals
+
+### Definitions
+
+**Core Definition:** Testing portals means rendering a component that uses `ReactDOM.createPortal` and asserting on the content that is rendered outside the component's normal DOM hierarchy.
+
+**Technical Definition:** `createPortal` renders children into a different DOM node (typically a sibling of the app root, like `document.body` or a dedicated `#modal-root`). By default, React Testing Library renders into a container inside `document.body`, so portal content may end up outside the `container`. The solution is to use `screen` (which queries the entire `document.body`) or the `baseElement` returned by `render()`, rather than `container.querySelector()`. The portal's target DOM node must exist in the test environment — create it in a `beforeEach` or in the test setup file. 
+
+**Beginner-Friendly Explanation:** A portal renders content somewhere else in the DOM — like a modal that is attached to `<body>` instead of inside its parent component. To test it, you have to look at the whole page, not just the component's container.
+
+### Purposes
+
+- To verify that portal-rendered content (modals, tooltips, dropdowns) appears correctly.
+- To test the interaction and focus behavior of portal-based UI.
+- To ensure that portal content is accessible and queryable in tests.
+
+### Syntax Rules and Structure
+
+```jsx
+// Ensure the portal target exists
+beforeEach(() => {
+  const portalRoot = document.createElement('div');
+  portalRoot.setAttribute('id', 'portal-root');
+  document.body.appendChild(portalRoot);
+});
+
+afterEach(() => {
+  document.getElementById('portal-root')?.remove();
+});
+
+// Render the component
+render(<Modal isOpen={true} />);
+
+// Query with screen (queries the whole document, including portals)
+expect(screen.getByRole('dialog')).toBeInTheDocument();
+```
+
+**Component Breakdown:**
+
+| Concern | Solution |
+|---------|----------|
+| Portal target missing | Create the target node in `beforeEach` or test setup. |
+| Content outside `container` | Use `screen` or `baseElement` instead of `container`. |
+| Cleanup | Remove the portal target in `afterEach`. |
+| Focus management | Use `user.tab()` and assert on `document.activeElement`. |
+
+**Constraints and Limitations:**
+
+- `container.querySelector()` will not find portal content — this is the most common portal testing mistake. 
+- If the portal target is not created before render, the portal will fail silently or throw. 
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Testing a Modal Rendered Through a Portal
+
+```jsx
+// Modal.jsx
+import { createPortal } from 'react-dom';
+
+export function Modal({ isOpen, children }) {
+  if (!isOpen) return null;
+  return createPortal(
+    <div role="dialog" aria-modal="true">{children}</div>,
+    document.getElementById('modal-root')
+  );
+}
+
+// Modal.test.jsx
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, afterEach, test, expect } from 'vitest';
+import { Modal } from './Modal.jsx';
+
+beforeEach(() => {
+  const root = document.createElement('div');
+  root.id = 'modal-root';
+  document.body.appendChild(root);
+});
+
+afterEach(() => {
+  document.getElementById('modal-root')?.remove();
+});
+
+test('renders modal content in a portal and closes on Escape', async () => {
+  const user = userEvent.setup();
+  const onClose = vi.fn();
+
+  render(<Modal isOpen={true} onClose={onClose}><p>Confirm?</p></Modal>);
+
+  const dialog = screen.getByRole('dialog');
+  expect(dialog).toHaveTextContent('Confirm?');
+
+  await user.keyboard('{Escape}');
+  // If the modal listens for Escape, assert onClose was called
+});
+```
+
+**Expected Output:** The test passes. The modal content is found via `screen.getByRole('dialog')` even though it is rendered into `#modal-root` outside the component's container.
+
+### Real-World Cases
+
+- **Modals and dialogs:** Testing that modal content renders, traps focus, and closes on Escape.
+- **Dropdown menus:** Testing that menu items rendered in a portal are clickable.
+- **Tooltips and popovers:** Testing that tooltip content appears on hover.
+
+### References
+
+- Mantine — Testing portals with React Testing Library — https://github.com/mantinedev/mantine/blob/3646de9f/apps/help.mantine.dev/src/pages/q/portals-testing.mdx
+- React Testing Library — Advanced Patterns: Portals — https://codeloomdevv.co.in/blog/react/react-testing-library-advanced-patterns
+
+---
+
+## 10. Testing Error Boundaries
+
+### Definitions
+
+**Core Definition:** Testing an error boundary means rendering a component that throws an error inside an Error Boundary and asserting that the boundary's fallback UI appears instead of the crashed component.
+
+**Technical Definition:** React Error Boundaries are class components that implement `componentDidCatch` and/or `getDerivedStateFromError`. To test them, render a child component that throws (either unconditionally or conditionally) inside the boundary, and assert that the fallback UI is rendered. React logs the caught error to `console.error` — silence this in the test with `vi.spyOn(console, 'error').mockImplementation(() => {})` to keep test output clean. Error boundaries do not catch errors in event handlers, async code, or server-side rendering — those require separate handling. 
+
+**Beginner-Friendly Explanation:** An Error Boundary catches crashes in its child components and shows a fallback UI instead of a broken page. To test it, you deliberately make a child component throw, then check that the fallback appears.
+
+### Purposes
+
+- To verify that the Error Boundary catches render errors and displays the correct fallback.
+- To test the fallback UI (error message, retry button) renders and behaves correctly.
+- To ensure that children render normally when no error occurs.
+- To verify that errors in event handlers or async code are not caught by the boundary (they require different handling).
+
+### Syntax Rules and Structure
+
+```jsx
+// Suppress console.error noise from React
+beforeEach(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+// A component that throws
+function Bomb() {
+  throw new Error('kaboom');
+}
+
+// Render inside the boundary
+render(
+  <ErrorBoundary fallback={<p>Something went wrong</p>}>
+    <Bomb />
+  </ErrorBoundary>
+);
+
+expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+```
+
+**Component Breakdown:**
+
+| Concern | Solution |
+|---------|----------|
+| Error noise | Spy on `console.error` and mock it. |
+| Triggering an error | Render a child that throws during render. |
+| Fallback assertion | Query for the fallback text. |
+| Retry behavior | Reset the throwing condition and click "Try again". |
+
+**Constraints and Limitations:**
+
+- Error boundaries only catch errors during rendering, in lifecycle methods, and in constructors — not in event handlers, async code, or the boundary itself. 
+- React 19 may log additional error information — suppress `console.error` in the test.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Testing Error Boundary Fallback and Recovery
+
+```jsx
+// ErrorBoundary.test.jsx
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, afterEach, test, expect, vi } from 'vitest';
+import { ErrorBoundary } from './ErrorBoundary';
+
+let shouldThrow = true;
+
+function Bomb() {
+  if (shouldThrow) throw new Error('kaboom in render');
+  return <div>recovered content</div>;
+}
+
+beforeEach(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+test('renders children when nothing throws', () => {
   render(
-    <ThemeProvider initialTheme="light">
-      <ThemeToggle />
+    <ErrorBoundary>
+      <div>all good</div>
+    </ErrorBoundary>
+  );
+  expect(screen.getByText('all good')).toBeInTheDocument();
+});
+
+test('catches a render error and shows the message', () => {
+  shouldThrow = true;
+  render(
+    <ErrorBoundary>
+      <Bomb />
+    </ErrorBoundary>
+  );
+  expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+  expect(screen.getByText('kaboom in render')).toBeInTheDocument();
+  expect(console.error).toHaveBeenCalled();
+});
+
+test('re-renders children after "Try again"', async () => {
+  const user = userEvent.setup();
+  shouldThrow = true;
+  render(
+    <ErrorBoundary>
+      <Bomb />
+    </ErrorBoundary>
+  );
+  expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
+
+  shouldThrow = false;
+  await user.click(screen.getByRole('button', { name: /try again/i }));
+
+  expect(screen.getByText('recovered content')).toBeInTheDocument();
+  expect(screen.queryByText(/something went wrong/i)).not.toBeInTheDocument();
+});
+```
+
+**Expected Output:** All three tests pass. The boundary renders children normally, catches the render error and shows the fallback, and recovers after the retry button is clicked.
+
+### Real-World Cases
+
+- **Route-level error boundaries:** Testing that a failed route displays a friendly error page.
+- **Widget-level boundaries:** Testing that one broken widget does not crash the entire dashboard.
+- **Retry flows:** Testing that the fallback's retry button re-renders the children successfully.
+
+### References
+
+- Error Boundary Testing Example (HuggingFace) — https://huggingface.co/spaces/Ma-Ri-Ba-Ku/alto-llm-corrector/blob/a94837f5c02ea105429f5c9a7d7e5f6e821113f6/frontend/src/components/ErrorBoundary.test.tsx
+- React Testing Library: Advanced Patterns — Error Boundaries — https://codeloomdevv.co.in/blog/react/react-testing-library-advanced-patterns
+
+---
+
+## 11. Component Testing Best Practices
+
+### Definitions
+
+**Core Definition:** Component testing best practices are the guidelines that make component tests fast, reliable, maintainable, and aligned with the Testing Library philosophy of user-centric testing.
+
+**Technical Definition:** Best practices encompass query priority (accessibility first), realistic interaction simulation (`user-event` over `fireEvent`), explicit async handling (`await` + `findBy*`/`waitFor`), custom render functions for context providers, avoidance of implementation-detail assertions (no state inspection, no shallow rendering, no snapshot tests without justification), and automatic cleanup reliance (no manual `act()` or `cleanup()`). They aim to maximize test confidence while minimizing brittleness and false positives. 
+
+**Beginner-Friendly Explanation:** Best practices are the habits that keep component tests useful — test what users see, interact realistically, wait for async things properly, and don't peek at the component's private parts.
+
+### Purposes
+
+- To ensure tests fail for the right reason and pass for the right reason.
+- To minimize brittleness so tests survive refactoring of styles and internal structure.
+- To maximize accessibility coverage by testing through accessible roles and labels.
+- To keep tests fast and deterministic with proper async handling and no manual cleanup.
+
+### Syntax Rules and Structure
+
+**Best practices checklist:**
+
+| Practice | Why |
+|----------|-----|
+| **Query by role first** | Most accessible and robust; catches a11y issues. |
+| **Use `screen` for all queries** | Queries the whole document; works with portals. |
+| **Prefer `userEvent` over `fireEvent`** | Simulates real browser interaction sequences. |
+| **Always `await` user-event and async queries** | Prevents false greens. |
+| **Use `findBy*` for async content** | Retries until the element appears. |
+| **Use `queryBy*` to assert absence** | `getBy*` throws when absent. |
+| **Create a custom `render` with providers** | Avoids repeating context setup. |
+| **Do not test internal state** | Test the UI, not the implementation. |
+| **Do not use shallow rendering** | Render the full component. |
+| **No manual `act()` or `cleanup()`** | React Testing Library handles it automatically. |
+| **No snapshot tests without justification** | Snapshots are brittle and hide regressions. |
+| **Structure with `describe`/`it`** | Group by concern (Rendering, Interactions, States). |
+
+**Constraints and Limitations:**
+
+- Over-mocking context values produces tests that pass even when the provider is broken — prefer real providers with controlled values. 
+- Accessibility queries can reveal real a11y problems — do not bypass them with `getByTestId` just to make the test pass. 
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: A Fully Best-Practice-Compliant Test
+
+```jsx
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi } from 'vitest';
+import { ContactForm } from './ContactForm.jsx';
+
+describe('ContactForm', () => {
+  it('submits the form with user input', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+
+    render(<ContactForm onSubmit={onSubmit} />);
+
+    // Query by accessible labels
+    await user.type(screen.getByLabelText(/email/i), 'user@example.com');
+    await user.type(screen.getByLabelText(/message/i), 'Hello world');
+
+    // Interact realistically
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    // Assert on user-visible outcomes
+    expect(await screen.findByText(/thank you/i)).toBeInTheDocument();
+    expect(onSubmit).toHaveBeenCalledWith({
+      email: 'user@example.com',
+      message: 'Hello world',
+    });
+  });
+});
+```
+
+**Why this follows best practices:**
+
+- Uses `userEvent.setup()` and `await` for all interactions.
+- Queries by accessible labels and roles — no `data-testid` or CSS selectors.
+- Uses `findByText` for the async success message.
+- Asserts on user-visible output and callback arguments, not internal state.
+- No manual `act()` or `cleanup()` — React Testing Library handles them. 
+
+#### Example 2: Custom Render with Providers (test-utils pattern)
+
+```jsx
+// test-utils.jsx
+import { render } from '@testing-library/react';
+import { ThemeProvider } from './ThemeContext';
+import { AuthProvider } from './AuthContext';
+
+function AllProviders({ children }) {
+  return (
+    <ThemeProvider value="light">
+      <AuthProvider initialUser={null}>{children}</AuthProvider>
     </ThemeProvider>
   );
+}
 
-  expect(screen.getByText(/current theme: light/i)).toBeInTheDocument();
+export function renderWithProviders(ui, options) {
+  return render(ui, { wrapper: AllProviders, ...options });
+}
 
-  await user.click(screen.getByRole('button', { name: /toggle theme/i }));
+export * from '@testing-library/react';
 
-  expect(screen.getByText(/current theme: dark/i)).toBeInTheDocument();
+// Component.test.jsx
+import { renderWithProviders, screen } from './test-utils';
+import { Dashboard } from './Dashboard';
+
+test('shows the login prompt for unauthenticated users', () => {
+  renderWithProviders(<Dashboard />);
+  expect(screen.getByText(/please log in/i)).toBeInTheDocument();
 });
 ```
 
-**Expected Output:** The test passes. The initial theme is "light", and after clicking the toggle button, the theme changes to "dark".
-
-**Why This Output Occurs:** The `ThemeToggle` component consumes the `ThemeContext` and renders the current theme. The test renders the component inside the real `ThemeProvider`, so the context provides the actual state and toggle function. This tests the integration between the provider, the context, and the consumer, which is more valuable than mocking the context. 
+**Why this follows best practices:** The custom `render` centralizes provider setup, so individual tests stay focused on behavior. Tests import from `test-utils` instead of `@testing-library/react` directly.
 
 ### Real-World Cases
 
-- **Form state hooks:** Testing `useForm`, `useField`, or custom form hooks with `renderHook` and `act`.
-- **Authentication hooks:** Testing `useAuth` with a wrapper that provides the `AuthProvider`.
-- **Data fetching hooks:** Testing `useQuery`, `useMutation`, or custom fetch hooks with a `QueryClientProvider` wrapper.
-- **Theme hooks:** Testing `useTheme` through a component that consumes the theme context.
-- **Router hooks:** Testing `useNavigate` or `useParams` by wrapping the hook in a `MemoryRouter`.
-- **Local storage hooks:** Testing `useLocalStorage` by verifying read, write, and sync behaviour.
+- **Design systems:** Enforce query priority and `userEvent` usage via ESLint rules and code review checklists.
+- **CI pipelines:** Best-practice-compliant tests run fast and reliably, catching regressions without flaking.
+- **Legacy migrations:** Moving from Enzyme/shallow rendering to React Testing Library requires adopting these practices wholesale.
+
+### References
+
+- React Testing Library Best Practices (gohypergiant) — https://github.com/gohypergiant/standard-toolkit/blob/88ef844bf587a9fd43f75ee0503dc471569a2cd1/.agents/skills/accelint-react-testing/README.md
+- Component Testing (ledgerhq/lumen) — https://github.com/ledgerhq/lumen/blob/1d4929f3eb762cce283c87eea0f3ebc1f74dc8ba/.claude/skills/component-testing/SKILL.md
+- React Testing Library — Core Principles — https://github.com/mintuz/skills/blob/main/data/skills-md/mintuz/claude-plugins/react-testing/SKILL.md
+- Testing Library — Setup: Custom Render — https://testing-library.com/docs/react-testing-library/setup
 
 ---
 
 ## References
 
-- React Testing Library – Official Documentation: https://testing-library.com/docs/react-testing-library/intro
-- React Testing Library – Query Priority: https://testing-library.com/docs/queries/about/#priority
-- React Testing Library – About Queries: https://testing-library.com/docs/queries/about
-- Testing Library – Guiding Principles: https://testing-library.com/docs/guiding-principles
-- user-event – Official Documentation: https://testing-library.com/docs/user-event/intro
-- user-event – Setup: https://testing-library.com/docs/user-event/setup
-- user-event – Pointer API: https://testing-library.com/docs/user-event/pointer
-- React Testing Library – Async Utilities: https://testing-library.com/docs/dom-testing-library/api-async
-- React Testing Library – renderHook API: https://testing-library.com/docs/react-testing-library/api#renderhook
-- React Testing Library – act: https://testing-library.com/docs/react-testing-library/api#act
-- Kent C. Dodds – The Testing Trophy and Testing Classifications: https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications
-- Kent C. Dodds – Write Tests. Not Too Many. Mostly Integration.: https://kentcdodds.com/blog/write-tests
-- Steve Kinney – FireEvent vs UserEvent in Testing: https://stevekinney.com/courses/testing/user-event
-- Steve Kinney – TypeScript Patterns for React Testing: https://stevekinney.com/courses/react-typescript/typescript-react-testing
-- Testing Library – Accessibility: https://testing-library.com/docs/queries/byrole
-- MDN Web Docs – ARIA Roles: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles
-- WAI-ARIA Authoring Practices: https://www.w3.org/WAI/ARIA/apg/
-- Vitest – Environment Configuration: https://vitest.dev/config/environment
-- Vitest – Test Environment Guide: https://vitest.dev/guide/environment
-- TanStack Query – Testing: https://tanstack.com/query/latest/docs/framework/react/guides/testing
+- React Testing Library — Introduction — https://testing-library.com/docs/react-testing-library/intro
+- React Testing Library — render API — https://testing-library.com/docs/react-testing-library/api#render
+- React Testing Library — Setup (Custom Render, automatic cleanup) — https://testing-library.com/docs/react-testing-library/setup
+- Testing Library — Query Priority — https://testing-library.com/docs/queries/about/#priority
+- Testing Library — user-event Introduction — https://testing-library.com/docs/user-event/intro
+- Testing Library — Jest DOM matchers — https://github.com/testing-library/jest-dom
+- Component Testing (tartinerlabs/skills) — https://github.com/tartinerlabs/skills/blob/3a2b1ba97c4f599f5b5ab76c5a2d7914ce9b24b1/plugins/tooling/skills/testing/rules/component-testing.md
+- React Testing Library Best Practices (gohypergiant) — https://github.com/gohypergiant/standard-toolkit/blob/88ef844bf587a9fd43f75ee0503dc471569a2cd1/.agents/skills/accelint-react-testing/README.md
+- React Testing Library Skill (mintuz) — https://github.com/mintuz/skills/blob/main/data/skills-md/mintuz/claude-plugins/react-testing/SKILL.md
+- Component Testing (ledgerhq/lumen) — https://github.com/ledgerhq/lumen/blob/1d4929f3eb762cce283c87eea0f3ebc1f74dc8ba/.claude/skills/component-testing/SKILL.md
+- React Testing Library: Advanced Patterns for Complex UIs (Codeloom) — https://codeloomdevv.co.in/blog/react/react-testing-library-advanced-patterns
+- Souvlaki — Composable test wrappers for context-heavy components — https://www.npmjs.com/package/souvlaki
+- ErrorBoundary.test.tsx (HuggingFace example) — https://huggingface.co/spaces/Ma-Ri-Ba-Ku/alto-llm-corrector/blob/a94837f5c02ea105429f5c9a7d7e5f6e821113f6/frontend/src/components/ErrorBoundary.test.tsx
+- Mantine — Testing portals with React Testing Library — https://github.com/mantinedev/mantine/blob/3646de9f/apps/help.mantine.dev/src/pages/q/portals-testing.mdx
+- Steve Kinney — Testing React Components with TypeScript — https://stevekinney.com/courses/react-typescript/testing-react-typescript
+- Scrimba — How to Test React Apps [2026]: A Practical Guide — https://scrimba.com/articles/how-to-test-react-apps-2026/

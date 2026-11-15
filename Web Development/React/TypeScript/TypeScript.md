@@ -1,4 +1,4 @@
-# TypeScript Fundamentals for React: A Comprehensive Programming Cheat Sheet
+# React TypeScript Fundamentals — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1268 +6,1133 @@
 
 ### Definitions
 
-**Core Definition:** TypeScript is a statically typed superset of JavaScript that compiles to plain JavaScript, adding optional type annotations, interfaces, generics, and compile-time type checking that catch errors before runtime—making React components, props, and state safer and more self-documenting.
+**Core Definition:** React TypeScript fundamentals are the core language features and configuration practices of TypeScript that enable type-safe React application development — from basic type annotations and interfaces to generics, type narrowing, and compiler configuration.
 
-**Technical Definition:** TypeScript extends ECMAScript with a structural type system that performs static analysis at compile time. It supports primitive types (`string`, `number`, `boolean`, `null`, `undefined`, `symbol`, `bigint`), composite types (arrays, tuples, objects), and advanced constructs (unions, intersections, generics, conditional types, mapped types). In React, TypeScript is used to type component props, state, event handlers, refs, context values, and custom hooks. The `tsconfig.json` file controls strictness (`strict`, `noImplicitAny`, `strictNullChecks`), module resolution, and JSX handling. TypeScript's type system is **structural** (based on shape, not name) and **erased** at runtime (types do not exist in the compiled output). This means type assertions (`as`) and non-null assertions (`!`) are compile-time-only constructs that do not perform runtime checks.
+**Technical Definition:** TypeScript is a statically typed superset of JavaScript that adds optional type annotations, interfaces, generics, and advanced type operators to the language. In a React context, TypeScript validates component props, state, event handlers, and hook return values at compile time, catching errors before runtime. The fundamentals include the structural type system (types, interfaces, unions, intersections), generic programming (parameterized types for reusable functions and components), type inference and narrowing (control-flow-based type refinement), utility types (built-in type transformations like `Partial`, `Pick`, `Omit`, `Record`), and strict compiler configuration (`strict: true`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`) that maximizes type safety.
 
-**Beginner-Friendly Explanation:** TypeScript is JavaScript with labels. You tell TypeScript what kind of data each variable, function parameter, and component prop should hold, and TypeScript warns you when you use them incorrectly—before you run the code. In React, this means if you pass a number to a prop that expects a string, TypeScript catches it in your editor. It does not change how your code runs; it just helps you catch mistakes earlier and makes your code easier to understand.
+**Beginner-Friendly Explanation:** TypeScript adds "types" to JavaScript — labels that describe what kind of data each variable, function parameter, and component prop should hold. React TypeScript fundamentals are the building blocks: how to describe objects (`interface`), create flexible types (`unions`, `generics`), let TypeScript figure out types automatically (`inference`), and configure the compiler to catch mistakes (`tsconfig`).
 
 ### Key Characteristics
 
-- **Static Typing:** Types are checked at compile time, not runtime; type errors appear in the editor and CI, not in the browser.
-- **Structural Typing:** Types are compared by shape, not by name—two types with the same structure are compatible.
-- **Type Erasure:** All type annotations are removed during compilation; the emitted JavaScript contains no type information.
-- **Gradual Adoption:** TypeScript is a superset of JavaScript; you can add types incrementally.
-- **Strictness is Configurable:** `strict: true` enables all strict checks; individual flags (`noImplicitAny`, `strictNullChecks`) can be toggled.
-- **React-Specific Patterns:** Props, state, refs, events, context, and generics each have idiomatic TypeScript patterns.
-- **Editor Integration:** TypeScript powers autocomplete, inline documentation, and refactoring in VS Code and other editors.
+- **Structural typing:** TypeScript compares types by their shape, not their name — if it looks like a `User`, it is a `User`.
+- **Compile-time safety:** Errors are caught during development and build, not at runtime in production.
+- **Inference-first:** TypeScript infers types wherever possible; explicit annotations are reserved for cases where inference is insufficient.
+- **Strict mode by default:** Modern React TypeScript projects enable `strict: true` plus additional safety flags like `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`.
+- **Ecosystem integration:** TypeScript integrates with React's JSX (`jsx: "react-jsx"`), Vite (`moduleResolution: "bundler"`), and modern tooling.
 
 ### Prerequisites
 
-- Solid understanding of JavaScript (variables, functions, objects, arrays, closures, modules).
-- Familiarity with React function components, JSX, props, and Hooks.
-- Working knowledge of ES modules (`import`/`export`).
-- Basic understanding of the command line and npm.
-- A code editor with TypeScript support (VS Code recommended).
+- A React project configured with TypeScript (Vite, Next.js, or Create React App with TypeScript template).
+- A `tsconfig.json` with `strict: true` enabled.
+- Basic familiarity with JavaScript types (string, number, boolean, arrays, objects, functions).
+- An editor with TypeScript support (VS Code is the standard).
 
 ### Related Programming Areas
 
-- **React Development:** Component props, state, refs, context, and hooks.
-- **Type Systems:** Structural typing, generics, and type inference.
-- **Build Tooling:** `tsc`, Babel, Vite, Webpack, and `tsconfig.json`.
-- **API Contracts:** Typed API clients, runtime validation (Zod), and code generation.
-- **Testing:** Typed test utilities and mocking.
+- **React component typing** — props, state, event handlers, children, refs.
+- **React Hooks typing** — `useState`, `useRef`, `useReducer`, `useContext`, custom hooks.
+- **API and data modeling** — discriminated unions for loading states, utility types for DTOs.
+- **Build tooling** — Vite, SWC, esbuild, and `tsc` for type checking.
+- **Linting and formatting** — Biome or ESLint with TypeScript rules.
 
 ### Core Concepts / Features
 
-1. Basic Types (Primitives, Arrays, Objects, `unknown` vs `any`)
-2. Interfaces vs. Type Aliases
-3. Union Types & Literal Types
-4. Generics
-5. Type Narrowing & Type Guards
-6. Type Assertions & Type Casting
-
 ---
 
-## Core Concept 1: Basic Types (Primitives, Arrays, Objects, `unknown` vs `any`)
+## 1. TypeScript
 
 ### Definitions
 
-**Core Definition:** Basic types are the primitive and composite type annotations TypeScript provides for strings, numbers, booleans, null, undefined, arrays, tuples, and objects, along with the special `unknown` and `any` types that represent values of uncertain type.
+**Core Definition:** TypeScript is a statically typed programming language that builds on JavaScript by adding optional type syntax and a compile-time type checker.
 
-**Technical Definition:** TypeScript's primitive types are `string`, `number`, `boolean`, `null`, `undefined`, `symbol`, and `bigint`. Arrays are typed as `T[]` or `Array<T>`. Tuples are fixed-length arrays with per-position types (`[string, number]`). Object types are written inline (`{ name: string; age: number }`) or via interfaces/type aliases. The `any` type disables type checking entirely—values of type `any` can be assigned to and from anything. The `unknown` type is the type-safe counterpart of `any`: values of type `unknown` can hold any value, but you must narrow them before use. TypeScript's `strict` mode enables `noImplicitAny`, which errors on unannotated parameters and variables that would otherwise be `any`.
+**Technical Definition:** TypeScript is an open-source language developed by Microsoft that extends JavaScript with a **structural type system**. TypeScript code (`.ts`, `.tsx`) is compiled to plain JavaScript by `tsc` or a bundler (Vite, SWC, esbuild). The compiler performs type checking, catches errors, and emits JavaScript with types stripped. In React, TypeScript validates JSX props, state, hooks, and event handlers at compile time.
 
-**Beginner-Friendly Explanation:** Basic types are labels you put on your data. `string` means text, `number` means a number, `boolean` means true/false. Arrays are lists of one type; objects are collections of named properties. The two special types are `any` (which says "I don't know and I don't care"—turn off checking) and `unknown` (which says "I don't know yet, so you must check before using"). Always prefer `unknown` over `any`; it is safer.
+**Beginner-Friendly Explanation:** TypeScript is JavaScript with types. You write the same code, but you add labels that say "this is a string" or "this is a number." The TypeScript compiler checks those labels before your code runs, so you catch mistakes early.
 
 ### Purposes
 
-- To declare what kind of data a variable, parameter, or property holds.
-- To catch type mismatches at compile time rather than runtime.
-- To enable editor autocomplete and inline documentation.
-- To document intent for other developers.
-- To prevent `null`/`undefined` errors with `strictNullChecks`.
-- To use `unknown` instead of `any` for type-safe handling of uncertain values.
+- To catch type-related errors at compile time rather than at runtime.
+- To provide rich editor support (autocomplete, inline documentation, refactoring).
+- To serve as executable documentation for component props and function signatures.
+- To enable safe refactoring across large codebases.
+- To improve collaboration by making contracts between modules explicit.
 
 ### Syntax Rules and Structure
 
-**Primitives:**
 ```typescript
-let name: string = 'Alice';
-let age: number = 30;
-let isActive: boolean = true;
-let nothing: null = null;
-let notDefined: undefined = undefined;
-let id: symbol = Symbol('id');
-let big: bigint = 9007199254740991n;
-```
+// Basic type annotations
+const name: string = 'Alice';
+const age: number = 30;
+const active: boolean = true;
 
-**Arrays and Tuples:**
-```typescript
-let names: string[] = ['Alice', 'Bob'];
-let scores: Array<number> = [95, 87, 78];
-let pair: [string, number] = ['Alice', 30];       // Tuple
-let coordinates: [number, number, number] = [1, 2, 3];
-```
-
-**Objects:**
-```typescript
-let user: { name: string; age: number; email?: string } = {
-  name: 'Alice',
-  age: 30,
-};
-// `email` is optional (email?: string)
-```
-
-**`any` vs. `unknown`:**
-❌ any — disables type checking
-```ts
-let valueAny: any = 'hello';
-valueAny.toFixed(2); // No error, but crashes at runtime
-```
-\
-✅ unknown — requires narrowing before use
-```ts
-let valueUnknown: unknown = 'hello';
-// valueUnknown.toFixed(2); // Error: Object is of type 'unknown'
-if (typeof valueUnknown === 'string') {
-  valueUnknown.toUpperCase(); // OK — narrowed to string
+// Function annotations
+function greet(name: string): string {
+  return `Hello, ${name}!`;
 }
 ```
 
-**React Component with Typed Props:**
-```tsx
-type ButtonProps = {
-  label: string;
-  count?: number;
-  disabled?: boolean;
-  onClick: () => void;
-};
+**Component Breakdown:**
 
-function Button({ label, count = 0, disabled = false, onClick }: ButtonProps) {
-  return (
-    <button onClick={onClick} disabled={disabled}>
-      {label} ({count})
-    </button>
-  );
-}
-```
-
-**Syntax Rules:**
-- Use lowercase primitive type names (`string`, `number`, `boolean`), not `String`, `Number`, `Boolean`.
-- Use `T[]` for arrays; use `Array<T>` for generic contexts.
-- Use tuples (`[string, number]`) for fixed-length, position-typed arrays.
-- Mark optional object properties with `?` (`email?: string`).
-- Use `unknown` instead of `any` when the type is genuinely unknown.
-- Never use `any` unless you have no alternative; prefer `unknown`, generics, or narrowing.
-- Enable `strict: true` in `tsconfig.json` to enforce `noImplicitAny` and `strictNullChecks`.
+| Component | Description |
+|-----------|-------------|
+| `: string` | Type annotation for a variable or parameter. |
+| `: number` | Numeric type. |
+| `: boolean` | Boolean type. |
+| `(param: type): returnType` | Function signature. |
 
 **Constraints and Limitations:**
-- TypeScript types are erased at runtime; they do not validate data from APIs or user input.
-- `any` propagates: once a value is `any`, everything it touches becomes `any`.
-- `strictNullChecks` makes `null` and `undefined` distinct types; code that assumes they are assignable to everything will error.
-- Empty arrays are inferred as `any[]` unless annotated or initialised with values.
-- Object types are structural; excess property checks apply only to object literals.
 
-### Annotated Code Examples
+- TypeScript types are erased at runtime — they do not exist in the emitted JavaScript.
+- TypeScript cannot catch all runtime errors — it validates types, not logic.
+- `any` disables type checking and should be avoided; use `unknown` instead.
 
-**Example 1: Typed User Object with Optional Fields**
+### Multiple Annotated Complete Step by Step Code Examples
 
-```tsx
-type User = {
-  id: number;
-  name: string;
-  email?: string;           // Optional
-  readonly createdAt: Date; // Cannot be reassigned
-};
+#### Example 1: Basic Type Annotations
 
-function UserCard({ user }: { user: User }) {
-  return (
-    <div>
-      <h2>{user.name}</h2>
-      <p>{user.email ?? 'No email provided'}</p>
-      <small>Joined: {user.createdAt.toLocaleDateString()}</small>
-    </div>
-  );
+```typescript
+// Explicit annotations
+const username: string = 'alice';
+const score: number = 100;
+const isActive: boolean = true;
+
+// Function with typed parameters and return
+function formatUser(name: string, age: number): string {
+  return `${name} is ${age} years old.`;
 }
-```
-```tsx
-// Usage
-const user: User = { id: 1, name: 'Alice', createdAt: new Date() };
 
-<UserCard user={user} />;
+// Expected output: "alice is 30 years old."
+console.log(formatUser(username, 30));
 ```
 
-**Expected Output:** A card with "Alice", "No email provided", and the join date. TypeScript enforces that `user` has `id`, `name`, and `createdAt`; `email` is optional. `readonly createdAt` prevents reassignment.
-
-**Why This Output Occurs:** The `User` type defines the shape. `email?` makes `email` optional; `??` provides a fallback. `readonly` prevents mutation. TypeScript errors if a required field is missing or a field has the wrong type.
-
-**Example 2: `unknown` vs `any` in a Safe API Response Handler**
-
-```tsx
-// ❌ any — no safety
-function handleAny(data: any) {
-  return data.user.name.toUpperCase(); // Crashes if data.user is undefined
-}
-```
-```tsx
-// ✅ unknown — requires narrowing
-function handleUnknown(data: unknown) {
-  if (
-    typeof data === 'object' &&
-    data !== null &&
-    'user' in data &&
-    typeof (data as { user: unknown }).user === 'object'
-  ) {
-    const user = (data as { user: { name: unknown } }).user;
-    if (typeof user.name === 'string') {
-      return user.name.toUpperCase();
-    }
-  }
-  throw new Error('Invalid data shape');
-}
-```
-
-**Expected Output:** `handleUnknown` safely narrows the `unknown` value through a series of `typeof`, `in`, and property checks before accessing `name`. `handleAny` accesses properties without checking, which will crash at runtime if the shape is unexpected.
-
-**Why This Output Occurs:** `unknown` forces the developer to narrow before use, preventing runtime errors. `any` disables all checks, so the crash is not caught at compile time.
+**Expected Output:** The function returns a formatted string. TypeScript validates that `name` is a string and `age` is a number at compile time.
 
 ### Real-World Cases
 
-- **Component props:** Every prop is typed to document its expected shape.
-- **API responses:** Response types describe the shape returned by the server.
-- **Event handlers:** Event types (`React.MouseEvent`, `React.ChangeEvent`) provide correct target types.
-- **State:** `useState<User | null>(null)` ensures the state is either a `User` or `null`.
-- **Refs:** `useRef<HTMLInputElement>(null)` types the ref's `current` property.
+- **Every React project:** TypeScript validates props and state across the entire component tree.
+- **API clients:** Typing request and response shapes catches contract mismatches early.
+- **Large codebases:** Types make refactoring safe — the compiler finds every usage that needs updating.
 
 ### References
 
-- TypeScript Handbook – Everyday Types - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html
-- TypeScript Handbook – The Basics - https://www.typescriptlang.org/docs/handbook/2/basic-types.html
-- React TypeScript Cheatsheet – Basic Types - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example
-- TypeScript – `strict` - https://www.typescriptlang.org/tsconfig#strict
-- TypeScript – `noImplicitAny` - https://www.typescriptlang.org/tsconfig#noImplicitAny
-- TypeScript – `strictNullChecks` - https://www.typescriptlang.org/tsconfig#strictNullChecks
-- MDN Web Docs – JavaScript Data Types - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures
+- TypeScript — Official Documentation — https://www.typescriptlang.org/docs/
+- TypeScript Handbook — The Basics — https://www.typescriptlang.org/docs/handbook/2/basic-types.html
 
 ---
 
-## Core Concept 2: Interfaces vs. Type Aliases
+## 2. Types
 
 ### Definitions
 
-**Core Definition:** Interfaces and type aliases are two TypeScript constructs for naming object shapes; interfaces are open to declaration merging and are traditionally used for object-oriented APIs, while type aliases can name any type (unions, primitives, tuples, intersections) and are the modern preference for component props.
+**Core Definition:** A type is a description of what a value can be — its shape, its allowed values, or its behavior.
 
-**Technical Definition:** An **interface** declares a named object type that can be extended (`extends`) and merged (multiple declarations with the same name are combined). A **type alias** (`type Name = ...`) creates a new name for any type expression, including unions, intersections, tuples, primitives, and functions. Both are structurally typed and erased at compile time. Interfaces support `implements` for classes; type aliases do not. Type aliases can express unions and conditional types, which interfaces cannot. In React, the community has largely converged on `type` for component props because it is more flexible and consistent, while `interface` remains common for public library APIs and objects that benefit from declaration merging.
+**Technical Definition:** In TypeScript, a **type** is a compile-time construct that describes a set of values. Types include primitives (`string`, `number`, `boolean`, `null`, `undefined`, `symbol`, `bigint`), object types (interfaces, type aliases), arrays (`T[]` or `Array<T>`), tuples (`[string, number]`), function types (`(a: T) => U`), literal types (`'north' | 'south'`), and special types (`any`, `unknown`, `never`, `void`). Types are structural — a value is assignable to a type if it has the required shape.
 
-**Beginner-Friendly Explanation:** An interface is like a contract for the shape of an object—other objects can "implement" it, and you can add to it later. A type alias is like a nickname for any type—it can describe objects, but also unions, tuples, and other types that interfaces cannot. For React props, most developers use `type` because it handles all the cases (including unions and intersections) with a single syntax.
+**Beginner-Friendly Explanation:** A type is a label that tells TypeScript what kind of value something is — like "this is a string" or "this is an object with a name and age." The compiler uses these labels to check your code.
 
 ### Purposes
 
-- To name and document the shape of props, state, and API responses.
-- To enable editor autocomplete and error checking for object properties.
-- To share types across components, modules, and packages.
-- To compose complex types from simpler ones (intersections, unions).
-- To support `implements` for class-based APIs (interfaces only).
-- To allow declaration merging for library augmentation (interfaces only).
+- To describe the shape of data flowing through the application.
+- To enable compile-time validation of values against expectations.
+- To serve as documentation for functions, components, and APIs.
+- To enable safe autocompletion and refactoring in the editor.
 
 ### Syntax Rules and Structure
 
-**Interface:**
+**Primitive types:**
+
 ```typescript
-interface User {
-  id: number;
-  name: string;
-  email?: string;
-}
-
-interface Admin extends User {
-  role: 'admin' | 'superadmin';
-}
-
-// Declaration merging
-interface Window {
-  __APP_VERSION__: string;
-}
+const name: string = 'Alice';
+const age: number = 30;
+const active: boolean = true;
+const nothing: null = null;
+const missing: undefined = undefined;
 ```
 
-**Type Alias:**
+**Array and tuple types:**
+
 ```typescript
-type User = {
-  id: number;
-  name: string;
-  email?: string;
+const numbers: number[] = [1, 2, 3];
+const pair: [string, number] = ['age', 30];
+```
+
+**Object types:**
+
+```typescript
+const user: { name: string; age: number } = { name: 'Alice', age: 30 };
+```
+
+**Function types:**
+
+```typescript
+type Comparator<T> = (a: T, b: T) => number;
+```
+
+**Constraints and Limitations:**
+
+- `any` disables type checking — avoid it; use `unknown` for values that need narrowing.
+- TypeScript does not perform runtime type checking — types are erased during compilation.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Primitive and Object Types
+
+```typescript
+// Primitives
+const title: string = 'React TypeScript';
+const version: number = 19;
+const isStable: boolean = true;
+
+// Object type
+const config: { theme: 'light' | 'dark'; fontSize: number } = {
+  theme: 'dark',
+  fontSize: 14,
 };
 
-type Admin = User & { role: 'admin' | 'superadmin' };
-
-// Unions (interfaces cannot express this)
-type Status = 'idle' | 'loading' | 'success' | 'error';
-
-// Tuples
-type Coordinate = [number, number];
+// Tuple
+const coordinate: [number, number] = [40.7128, -74.0060];
 ```
-\
-**React Component Props — Both Work:**
 
-Using interface
-```tsx
+**Expected Output:** TypeScript validates that each value matches its annotated type. Assigning `'blue'` to `theme` would produce a compile error because the type only allows `'light'` or `'dark'`.
+
+### Real-World Cases
+
+- **Component props:** Every prop has a type describing its expected value.
+- **API responses:** Response shapes are typed to match the backend contract.
+- **Configuration objects:** Settings and options are typed for safety.
+
+### References
+
+- TypeScript Handbook — Everyday Types — https://www.typescriptlang.org/docs/handbook/2/everyday-types.html
+- TypeScript — Type System Reference — https://cdn.jsdelivr.net/npm/memory-journal-mcp@8.0.1/skills/typescript/references/type-system.md
+
+---
+
+## 3. Interfaces
+
+### Definitions
+
+**Core Definition:** An interface is a named declaration of the shape of an object — its property names, types, optionality, and methods.
+
+**Technical Definition:** An `interface` in TypeScript declares the structure of an object type. It supports **optional properties** (`?`), **readonly properties** (`readonly`), **index signatures** (`[key: string]: T`), **extends** (inheritance from other interfaces), **implements** (class contracts), and **declaration merging** (multiple declarations with the same name are automatically merged). Interfaces are ideal for object shapes, class contracts, and public APIs because they produce clearer error messages and support extensibility.
+
+**Beginner-Friendly Explanation:** An interface is a blueprint for an object. It says "any object of this type must have a name (string) and an age (number)." It is the most common way to type React component props.
+
+### Purposes
+
+- To define the shape of objects, especially component props and API models.
+- To enable declaration merging for extensible type definitions.
+- To serve as contracts for class implementations.
+- To provide clear, readable type errors.
+
+### Syntax Rules and Structure
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email?: string;       // Optional
+  readonly createdAt: Date; // Cannot be reassigned
+}
+```
+
+**Component Breakdown:**
+
+| Feature | Syntax | Description |
+|---------|--------|-------------|
+| Property | `name: string` | Required property. |
+| Optional property | `email?: string` | May be omitted. |
+| Readonly property | `readonly createdAt: Date` | Cannot be modified after creation. |
+| Extends | `interface Admin extends User { ... }` | Inherits all properties from `User`. |
+| Implements | `class Manager implements User { ... }` | Class must conform to the interface. |
+| Declaration merging | Two `interface Config` declarations merge. | Combines both sets of properties. |
+
+**Constraints and Limitations:**
+
+- Interfaces cannot express unions, tuples, mapped types, or conditional types — use type aliases for those.
+- Interfaces are open — declaration merging can add properties unexpectedly in large codebases.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Interface for React Props
+
+```typescript
 interface ButtonProps {
   label: string;
   variant?: 'primary' | 'secondary';
+  disabled?: boolean;
   onClick: () => void;
 }
 
-function Button({ label, variant = 'primary', onClick }: ButtonProps) {
-  return <button className={`btn-${variant}`} onClick={onClick}>{label}</button>;
-}
-```
-\
-Using type
-```tsx
-type ButtonProps = {
-  label: string;
-  variant?: 'primary' | 'secondary';
-  onClick: () => void;
-};
-```
-\
-**Extending and Intersecting:**
-
-Interface extends
-```ts
-interface BaseProps { 
-    id: string; 
-}
-
-interface ButtonProps extends BaseProps { 
-    label: string; 
-}
-```
-\
-Type intersection
-```ts
-type BaseProps = { 
-    id: string 
-};
-
-type ButtonProps = BaseProps & { 
-    label: string 
-};
-```
-\
-Type union (interface cannot do this)
-```ts
-type InputProps = 
-  | { type: 'text'; value: string }
-  | { type: 'number'; value: number };
-```
-
-**Syntax Rules:**
-- Use `interface` for public APIs, object-oriented contracts, and types that benefit from declaration merging.
-- Use `type` for component props, unions, intersections, tuples, and anything that is not a plain object shape.
-- Prefer consistency: choose one style for component props within a codebase (the React community leans toward `type`).
-- Interfaces can only describe object shapes (and functions); type aliases can describe any type.
-- Interfaces cannot be used in unions directly (`type A = Interface1 | Interface2` is valid, but `interface A = ... | ...` is not).
-- Type aliases cannot be re-opened for declaration merging.
-- Both are erased at runtime; there is no performance difference.
-
-**Constraints and Limitations:**
-- Declaration merging can cause surprising type augmentation; use it deliberately.
-- Interfaces cannot express unions, tuples, or conditional types.
-- Type aliases cannot be implemented by classes (`class Foo implements Bar` requires `Bar` to be an interface or object type).
-- Excess property checks apply to object literals assigned to either interfaces or type aliases.
-- Some third-party libraries require `interface` for module augmentation.
-
-### Annotated Code Examples
-
-**Example 1: Composing Props with Intersection**
-
-```tsx
-type BaseButtonProps = {
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
-};
-
-type ButtonProps = BaseButtonProps & {
-  label: string;
-  onClick: () => void;
-  icon?: React.ReactNode;
-};
-
-function Button({ variant = 'primary', size = 'md', label, onClick, icon }: ButtonProps) {
+function Button({ label, variant = 'primary', disabled = false, onClick }: ButtonProps) {
   return (
-    <button 
-      className={`btn btn-${variant} btn-${size}`} 
-      onClick={onClick}
-    >
-      {icon}{label}
+    <button className={`btn-${variant}`} disabled={disabled} onClick={onClick}>
+      {label}
     </button>
   );
 }
 ```
 
-**Expected Output:** A button component whose props are the intersection of `BaseButtonProps` and the additional button-specific props. TypeScript merges both sets; passing `label` without `variant` uses the default.
-
-**Why This Output Occurs:** The `&` operator creates an intersection type that combines both shapes. `variant` and `size` are optional; `label` and `onClick` are required.
-
-**Example 2: Discriminated Union of Props**
-
-```tsx
-type InputProps =
-  | { type: 'text'; value: string; onChange: (v: string) => void }
-  | { type: 'number'; value: number; onChange: (v: number) => void }
-  | { type: 'checkbox'; checked: boolean; onChange: (v: boolean) => void };
-
-function Input(props: InputProps) {
-  if (props.type === 'text') {
-    return <input type="text" value={props.value} onChange={(e) => props.onChange(e.target.value)} />;
-  }
-  if (props.type === 'number') {
-    return <input type="number" value={props.value} onChange={(e) => props.onChange(Number(e.target.value))} />;
-  }
-  return <input type="checkbox" checked={props.checked} onChange={(e) => props.onChange(e.target.checked)} />;
-}
-```
-
-**Expected Output:** The `Input` component accepts three different prop shapes discriminated by `type`. TypeScript narrows the prop type inside each branch, so `props.value` is `string` in the `text` branch and `number` in the `number` branch.
-
-**Why This Output Occurs:** The discriminated union uses the `type` literal as the discriminant. TypeScript narrows the union based on the `type` check, ensuring that each branch accesses only the valid properties.
+**Expected Output:** TypeScript validates that `label` and `onClick` are always provided, while `variant` and `disabled` are optional. Passing an invalid `variant` value produces a compile error.
 
 ### Real-World Cases
 
-- **Design systems:** `type` for props, `interface` for public component APIs.
-- **API clients:** `interface` for module augmentation and `type` for response shapes.
-- **State machines:** `type` for discriminated unions of state shapes.
-- **Library authoring:** `interface` for extensible public APIs.
-- **Component libraries:** `type` for props, `interface` for refs and imperative handles.
+- **Component props:** The standard way to type React component props.
+- **API models:** User, Product, Order, and other domain entities.
+- **Class contracts:** Services and repositories implement interfaces.
 
 ### References
 
-- TypeScript Handbook – Interfaces - https://www.typescriptlang.org/docs/handbook/2/objects.html
-- TypeScript Handbook – Type Aliases - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases
-- TypeScript Handbook – Differences Between Type Aliases and Interfaces - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces
-- React TypeScript Cheatsheet – Types vs Interfaces - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example#types-or-interfaces
-- Matt Pocock – Type vs Interface: Which Should You Use? - https://www.totaltypescript.com/type-vs-interface-which-should-you-use
+- TypeScript Handbook — Interfaces — https://www.typescriptlang.org/docs/handbook/2/objects.html
+- TypeScript Type System Reference — Interfaces vs Type Aliases — https://cdn.jsdelivr.net/npm/memory-journal-mcp@8.0.1/skills/typescript/references/type-system.md
 
 ---
 
-## Core Concept 3: Union Types & Literal Types
+## 4. Type Aliases
 
 ### Definitions
 
-**Core Definition:** Union types describe a value that can be one of several types (`A | B`); literal types describe a value that must be exactly one specific literal (`'primary'`, `42`, `true`). Together, they enable precise, self-documenting component configuration options.
+**Core Definition:** A type alias creates a new name for any type — primitives, unions, intersections, tuples, function types, mapped types, or conditional types.
 
-**Technical Definition:** A union type (`string | number`) means the value is either a `string` or a `number`. A literal type is a type whose only possible value is a specific literal (`'primary'` is a string literal type; `42` is a numeric literal type). When a union contains only literal types, it is a **literal union** (`'sm' | 'md' | 'lg'`), which is the idiomatic way to type component variants, sizes, and statuses. TypeScript infers literal types when you use `const` and when you annotate with `as const`. Discriminated unions combine literal types with object shapes to model variants, and the discriminant property enables exhaustive type narrowing in `switch` statements.
+**Technical Definition:** A `type` alias (`type Name = TypeExpression`) assigns a name to any type expression. Unlike interfaces, type aliases can represent **unions** (`'a' | 'b'`), **intersections** (`A & B`), **tuples** (`[string, number]`), **mapped types**, **conditional types**, and **primitive aliases** (`type ID = string | number`). They cannot be declaration-merged, but they are more expressive for complex type transformations.
 
-**Beginner-Friendly Explanation:** A union type says "this value can be one of these types"—like `string | number` for a value that could be either. A literal type says "this value must be exactly this"—like `'primary'`, `'secondary'`, or `'danger'` for a button variant. Together, they let you say "this prop must be one of these exact strings," which gives you autocomplete and catches typos at compile time.
+**Beginner-Friendly Explanation:** A type alias is a nickname for a type. Instead of writing `string | number` everywhere, you write `type ID = string | number` and use `ID`. It is especially useful for unions and complex types.
 
 ### Purposes
 
-- To restrict a prop to a specific set of values (variants, sizes, statuses).
-- To model values that can be one of several types.
-- To enable exhaustive type checking via discriminated unions.
-- To provide autocomplete for valid values in the editor.
-- To prevent invalid values from being passed to components.
-- To document the valid options for a component's configuration.
+- To give descriptive names to complex or repetitive types.
+- To define unions and intersections that interfaces cannot express.
+- To create aliases for primitives that carry semantic meaning (`type UserId = string`).
+- To define function types and tuple types.
 
 ### Syntax Rules and Structure
 
-**Union Types:**
 ```typescript
-let id: string | number;
-id = 'abc';   // OK
-id = 123;     // OK
-// id = true; // Error: boolean is not assignable
+// Union alias
+type Status = 'pending' | 'approved' | 'rejected';
+
+// Primitive alias
+type UserId = string;
+
+// Intersection alias
+type AdminUser = User & { role: 'admin'; permissions: string[] };
+
+// Tuple alias
+type Point = [x: number, y: number];
+
+// Function alias
+type Handler = (event: Event) => void;
 ```
 
-**Literal Types:**
+**Constraints and Limitations:**
+
+- Type aliases cannot be declaration-merged — two `type Config` declarations produce an error.
+- Interfaces are generally preferred for object shapes because they produce better error messages and support `extends`/`implements`.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Union and Intersection Aliases
+
 ```typescript
-let status: 'idle';
-status = 'idle';  // OK
-// status = 'loading'; // Error
-
-// Literal union
-let status: 'idle' | 'loading' | 'success' | 'error';
-status = 'loading'; // OK
-```
-
-**Component Variants (Literal Union):**
-```tsx
-type ButtonProps = {
-  variant: 'primary' | 'secondary' | 'danger' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  children: React.ReactNode;
-  onClick?: () => void;
-};
-
-function Button({ variant, size = 'md', children, onClick }: ButtonProps) {
-  return <button className={`btn btn-${variant} btn-${size}`} onClick={onClick}>{children}</button>;
+interface User {
+  id: string;
+  name: string;
 }
 
-// Usage
-<Button variant="primary" size="lg">Click</Button>
-// <Button variant="purple">Click</Button> // Error: not a valid variant
-```
+type AdminUser = User & { role: 'admin'; permissions: string[] };
+type UserOrAdmin = User | AdminUser;
+type Status = 'idle' | 'loading' | 'success' | 'error';
 
-**Discriminated Union:**
-```tsx
-type Notification =
-  | { type: 'success'; message: string }
-  | { type: 'error'; message: string; code: number }
-  | { type: 'info'; message: string; dismissible?: boolean };
-
-function NotificationBanner({ notification }: { notification: Notification }) {
-  switch (notification.type) {
-    case 'success':
-      return <div role="status">{notification.message}</div>;
-    case 'error':
-      return <div role="alert">{notification.message} (Code: {notification.code})</div>;
-    case 'info':
-      return (
-        <div role="status">
-          {notification.message}
-          {notification.dismissible && <button>Dismiss</button>}
-        </div>
-      );
+// Expected: TypeScript narrows based on discriminant
+function getStatusLabel(status: Status): string {
+  switch (status) {
+    case 'idle': return 'Ready';
+    case 'loading': return 'Loading...';
+    case 'success': return 'Done';
+    case 'error': return 'Failed';
   }
 }
 ```
 
-**`as const` for Tuple and Object Literals:**
-```typescript
-const SIZES = ['sm', 'md', 'lg'] as const;
-type Size = typeof SIZES[number]; // 'sm' | 'md' | 'lg'
+**Expected Output:** `Status` only allows the four literal values. Passing `'pending'` produces a compile error.
 
-const CONFIG = {
-  variant: 'primary',
-  size: 'md',
-} as const;
-// typeof CONFIG.variant = 'primary' (literal, not string)
+### Real-World Cases
+
+- **API status types:** `'idle' | 'loading' | 'success' | 'error'`.
+- **Branded types:** `type UserId = string & { __brand: 'UserId' }`.
+- **Function contracts:** `type Comparator<T> = (a: T, b: T) => number`.
+
+### References
+
+- TypeScript Handbook — Type Aliases — https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases
+- TypeScript Type System Reference — When to Use Type Aliases — https://cdn.jsdelivr.net/npm/memory-journal-mcp@8.0.1/skills/typescript/references/type-system.md
+
+---
+
+## 5. Unions
+
+### Definitions
+
+**Core Definition:** A union type describes a value that can be one of several types — the value must match at least one member of the union.
+
+**Technical Definition:** A union type (`A | B`) represents a value that can be either `A` or `B`. TypeScript requires narrowing before accessing properties specific to one member. Unions are the foundation of **discriminated unions** (tagged unions), where a shared literal property (the discriminator) enables automatic type narrowing in `switch` and `if` statements.
+
+**Beginner-Friendly Explanation:** A union type says "this value can be one of these things." For example, a status can be `'idle'`, `'loading'`, `'success'`, or `'error'`. You use a check on a shared property to figure out which one it is.
+
+### Purposes
+
+- To model values that can take multiple forms (e.g., API responses, UI states).
+- To enable discriminated unions for exhaustive state handling.
+- To allow functions to accept multiple input types.
+- To represent nullable values (`string | null`).
+
+### Syntax Rules and Structure
+
+```typescript
+type Status = 'idle' | 'loading' | 'success' | 'error';
+type StringOrNumber = string | number;
+type NullableUser = User | null;
 ```
 
-**Syntax Rules:**
-- Use `|` to combine types into a union.
-- Use literal unions for variants, sizes, statuses, and other fixed sets.
-- Use a discriminant property (`type`, `kind`, `status`) to model variants.
-- Use `switch` on the discriminant for exhaustive checking; add a `default` that assigns to `never` to catch missing cases.
-- Use `as const` to preserve literal types in arrays and objects.
-- Derive union types from `as const` arrays with `typeof ARR[number]`.
-- Prefer literal unions over enums for component props (more flexible, no runtime overhead).
+**Discriminated union:**
+
+```typescript
+type LoadingState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: User[] }
+  | { status: 'error'; error: Error; message: string };
+```
 
 **Constraints and Limitations:**
-- Union types do not automatically narrow; you must use type guards (`typeof`, `in`, discriminant checks).
-- `as const` makes the entire object deeply readonly.
-- Enums produce runtime objects; literal unions do not.
-- Union types can become unwieldy if they have many members; consider discriminated unions.
-- Excess property checks apply to union object literals, which can be surprising.
 
-### Annotated Code Examples
+- You must narrow a union before accessing member-specific properties — TypeScript will not allow `state.data` on a union where only the `success` member has `data`.
+- Unions can become complex — discriminated unions with a literal tag are the recommended pattern for state modeling.
 
-**Example 1: Button Variants with Literal Union**
+### Multiple Annotated Complete Step by Step Code Examples
 
-```tsx
-const BUTTON_VARIANTS = ['primary', 'secondary', 'danger', 'ghost'] as const;
-type ButtonVariant = typeof BUTTON_VARIANTS[number];
+#### Example 1: Discriminated Union for Fetch State
 
-type ButtonProps = {
-  variant?: ButtonVariant;
-  children: React.ReactNode;
-  onClick?: () => void;
-};
+```typescript
+type FetchState<T> =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: Error };
 
-function Button({ variant = 'primary', children, onClick }: ButtonProps) {
-  return <button className={`btn btn-${variant}`} onClick={onClick}>{children}</button>;
-}
-
-// Usage
-<Button variant="primary">Save</Button>
-<Button variant="danger" onClick={() => {}}>Delete</Button>
-// <Button variant="purple">Save</Button> // Error: Type '"purple"' is not assignable
-```
-
-**Expected Output:** The button renders with the correct variant class. TypeScript autocompletes the four valid variants and errors on invalid ones. The `BUTTON_VARIANTS` array is the single source of truth.
-
-**Why This Output Occurs:** `as const` makes the array readonly with literal types. `typeof BUTTON_VARIANTS[number]` extracts the union of its values. `ButtonVariant` is the union `'primary' | 'secondary' | 'danger' | 'ghost'`. TypeScript rejects any other string.
-
-**Example 2: Exhaustive Discriminated Union**
-
-```tsx
-type Shape =
-  | { kind: 'circle'; radius: number }
-  | { kind: 'square'; side: number }
-  | { kind: 'rectangle'; width: number; height: number };
-
-function area(shape: Shape): number {
-  switch (shape.kind) {
-    case 'circle':
-      return Math.PI * shape.radius ** 2;
-    case 'square':
-      return shape.side ** 2;
-    case 'rectangle':
-      return shape.width * shape.height;
+function renderState<T>(state: FetchState<T>): string {
+  switch (state.status) {
+    case 'idle': return 'Ready to load';
+    case 'loading': return 'Loading...';
+    case 'success': return `Loaded ${state.data}`;
+    case 'error': return `Error: ${state.error.message}`;
     default: {
-      const _exhaustive: never = shape;
-      throw new Error(`Unhandled shape: ${_exhaustive}`);
+      const _exhaustive: never = state; // Compile error if a case is missing
+      return _exhaustive;
     }
   }
 }
 ```
 
-**Expected Output:** `area` computes the area for each shape. If a new shape is added to the union and not handled in the `switch`, TypeScript errors on the `never` assignment in the `default` case, catching the missing case at compile time.
-
-**Why This Output Occurs:** The `never` type is assignable only to `never`. If all cases are handled, `shape` is narrowed to `never` in the `default` branch, and the assignment is valid. If a case is missing, `shape` retains that type, and the assignment errors.
+**Expected Output:** TypeScript narrows `state` to the correct member in each `case`. The `never` check ensures all cases are handled — adding a new status without handling it produces a compile error.
 
 ### Real-World Cases
 
-- **Design system variants:** `variant`, `size`, `tone`, `state` props.
-- **Status indicators:** `'idle' | 'loading' | 'success' | 'error'`.
-- **API state machines:** Discriminated unions for request lifecycles.
-- **Form field types:** `'text' | 'number' | 'email' | 'password'`.
-- **Layout options:** `'row' | 'column'`, `'start' | 'center' | 'end'`.
+- **UI state machines:** `'idle' | 'loading' | 'success' | 'error'`.
+- **API responses:** Success and error shapes modeled as a discriminated union.
+- **Redux actions:** Each action has a `type` discriminator with different payloads.
 
 ### References
 
-- TypeScript Handbook – Unions and Intersections - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types
-- TypeScript Handbook – Literal Types - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types
-- TypeScript Handbook – Discriminated Unions - https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions
-- TypeScript Handbook – `as const` - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions
-- React TypeScript Cheatsheet – Union Types - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example
-- Matt Pocock – Literal Types - https://www.totaltypescript.com/books/total-typescript-essentials/literal-types
+- TypeScript Handbook — Narrowing / Discriminated Unions — https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions
+- Steve Kinney — Discriminated Unions — https://stevekinney.com/courses/react-typescript/typescript-discriminated-unions
 
 ---
 
-## Core Concept 4: Generics
+## 6. Intersections
 
 ### Definitions
 
-**Core Definition:** Generics are type parameters that let you write functions, components, and types that work with any type while preserving type safety—the type is specified or inferred at the call site.
+**Core Definition:** An intersection type combines multiple types into one — a value must satisfy **all** members of the intersection.
 
-**Technical Definition:** A generic is declared with angle brackets (`<T>`) and can be used anywhere a type is expected. `function identity<T>(value: T): T { return value; }` works for any `T`, and TypeScript infers `T` from the argument. Generics can be constrained (`<T extends object>`), defaulted (`<T = string>`), and combined (`<T, U>`). In React, generics are used for reusable components that work with any data type (lists, tables, selects), custom hooks that return typed values, and context providers. Generic components are written as `function Component<T>(props: Props<T>)` or with arrow functions using a trailing comma (`const Component = <T,>(props: Props<T>) => ...`). TypeScript infers `T` from the props, so consumers rarely need to specify it explicitly.
+**Technical Definition:** An intersection type (`A & B`) creates a new type that has all properties of `A` and `B`. It is commonly used to **extend** object types (especially with type aliases) and to combine interfaces. If the intersected types have conflicting properties, the resulting type may be `never` for that property, which TypeScript catches at compile time.
 
-**Beginner-Friendly Explanation:** A generic is a placeholder for a type. Instead of writing one function for strings and another for numbers, you write `function identity<T>(value: T): T` and TypeScript figures out `T` from what you pass in. In React, a generic list component can render a list of users, products, or anything else, and TypeScript still knows the exact type of each item. Generics make components reusable without sacrificing type safety.
+**Beginner-Friendly Explanation:** An intersection means "this value must have everything from type A AND everything from type B." It is like combining two blueprints into one.
 
 ### Purposes
 
-- To write reusable functions, components, and hooks that work with any type.
-- To preserve type information through transformations (map, filter, etc.).
-- To avoid duplicating code for each type.
-- To provide type-safe APIs for data-driven components (lists, tables, selects).
-- To constrain types while remaining flexible.
-- To enable type inference at the call site.
+- To extend an existing type with additional properties (type-alias equivalent of `interface extends`).
+- To combine multiple interfaces into a single type.
+- To model objects that satisfy multiple contracts simultaneously.
 
 ### Syntax Rules and Structure
 
-**Generic Function:**
 ```typescript
+interface User {
+  id: string;
+  name: string;
+}
+
+type AdminUser = User & { role: 'admin'; permissions: string[] };
+// AdminUser requires id, name, role, and permissions
+```
+
+**Constraints and Limitations:**
+
+- Conflicting property types produce `never` for that property — the intersection becomes uninhabitable for that key.
+- For object extension, `interface extends` is often clearer than intersection aliases.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Extending with Intersection
+
+```typescript
+interface BaseProps {
+  id: string;
+  className?: string;
+}
+
+type ButtonProps = BaseProps & {
+  label: string;
+  onClick: () => void;
+};
+
+// ButtonProps requires: id, className (optional), label, onClick
+```
+
+**Expected Output:** `ButtonProps` includes all properties from both `BaseProps` and the inline object type.
+
+### Real-World Cases
+
+- **Extending component props:** Combining base props with component-specific props.
+- **Mixins:** Combining multiple behavioral interfaces.
+- **Domain modeling:** An `AdminUser` is a `User` **and** has admin properties.
+
+### References
+
+- TypeScript Handbook — Intersection Types — https://www.typescriptlang.org/docs/handbook/2/objects.html#intersection-types
+- TypeScript Type System Reference — Union and Intersection Types — https://cdn.jsdelivr.net/npm/memory-journal-mcp@8.0.1/skills/typescript/references/type-system.md
+
+---
+
+## 7. Generics
+
+### Definitions
+
+**Core Definition:** Generics allow types to be **parameterized** — a function, interface, or component can work with a variety of types while preserving type safety.
+
+**Technical Definition:** Generics use type parameters (`<T>`) to create reusable, type-safe abstractions. A generic function declares `<T>` and uses `T` as a placeholder for the actual type, which is supplied at the call site. Generics can be constrained (`<T extends object>`), defaulted (`<T = string>`), and used in functions, interfaces, type aliases, and classes. In React, generics enable reusable components and hooks that preserve the caller's type (`useState<T>`, `useFetch<T>`).
+
+**Beginner-Friendly Explanation:** A generic is a type that is filled in later. Instead of writing a separate `Box` for strings and another for numbers, you write `Box<T>` and say "Box of string" or "Box of number" when you use it.
+
+### Purposes
+
+- To write reusable functions, components, and hooks that work with any type while preserving type safety.
+- To avoid duplicating code for each type.
+- To constrain type parameters to ensure they have the required shape.
+- To enable type-safe collections, APIs, and utilities.
+
+### Syntax Rules and Structure
+
+```typescript
+// Generic function
 function identity<T>(value: T): T {
   return value;
 }
 
-const str = identity('hello');   // T = string
-const num = identity(42);        // T = number
-```
-
-**Generic with Constraint:**
-```typescript
-function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
-  return obj[key];
+// Generic interface
+interface Box<T> {
+  value: T;
 }
 
-const user = { name: 'Alice', age: 30 };
-const name = getProperty(user, 'name'); // string
-const age = getProperty(user, 'age');   // number
-// getProperty(user, 'email'); // Error: 'email' is not a key of user
-```
+// Constrained generic
+function getLength<T extends { length: number }>(item: T): number {
+  return item.length;
+}
 
-**Generic Component:**
-```tsx
-type ListProps<T> = {
+// Default type parameter
+interface Paginated<T = unknown> {
   items: T[];
-  renderItem: (item: T) => React.ReactNode;
-  keyExtractor: (item: T) => string | number;
-};
-
-function List<T>({ items, renderItem, keyExtractor }: ListProps<T>) {
-  return (
-    <ul>
-      {items.map((item) => (
-        <li key={keyExtractor(item)}>{renderItem(item)}</li>
-      ))}
-    </ul>
-  );
+  total: number;
 }
-
-// Usage — T inferred as { id: number; name: string }
-<List
-  items={[{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }]}
-  renderItem={(user) => <span>{user.name}</span>}
-  keyExtractor={(user) => user.id}
-/>
 ```
-
-**Generic Arrow Component (with trailing comma):**
-```tsx
-const List = <T,>({ items, renderItem }: ListProps<T>) => {
-  return <ul>{items.map(renderItem)}</ul>;
-};
-// The trailing comma disambiguates from JSX
-```
-
-**Generic Custom Hook:**
-```typescript
-function useLocalStorage<T>(key: string, initialValue: T) {
-  const [value, setValue] = useState<T>(() => {
-    const stored = localStorage.getItem(key);
-    return stored ? (JSON.parse(stored) as T) : initialValue;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(value));
-  }, [key, value]);
-
-  return [value, setValue] as const;
-}
-
-// Usage
-const [user, setUser] = useLocalStorage<User | null>('user', null);
-```
-
-**Generic with Default:**
-```typescript
-type ApiResponse<T = unknown> = {
-  data: T;
-  status: number;
-  message?: string;
-};
-
-const response: ApiResponse<User> = { data: user, status: 200 };
-const generic: ApiResponse = { data: anything, status: 200 }; // T = unknown
-```
-
-**Syntax Rules:**
-- Declare generics with `<T>` (or `<T, U>`, `<T extends Constraint>`).
-- Use `extends` to constrain what types are allowed.
-- Use `keyof T` for keys of an object type.
-- Use `T[K]` for indexed access types.
-- In `.tsx` files, use `<T,>` for arrow function generics to avoid JSX ambiguity.
-- Let TypeScript infer generic arguments from usage; only specify explicitly when inference fails.
-- Use generics for components, hooks, and utility functions that operate on "any type."
-- Use `as const` on the returned tuple to preserve the tuple type (`return [value, setValue] as const`).
 
 **Constraints and Limitations:**
-- Generic components cannot be memoised with `React.memo` directly while preserving generics; use a workaround (type cast or `memo` with a generic wrapper).
-- Generics do not exist at runtime; they are erased like all TypeScript types.
-- Overly complex generics reduce readability; use constraints and defaults to keep them manageable.
-- TypeScript's inference may need explicit help in some cases (`<List<User> ... />`).
-- Generic arrow functions in `.tsx` need a trailing comma (`<T,>`) to distinguish from JSX.
 
-### Annotated Code Examples
+- Generics add complexity — use them when type safety or reuse genuinely requires them.
+- Constraint errors can be cryptic — provide clear constraints and defaults.
 
-**Example 1: Generic List Component**
+### Multiple Annotated Complete Step by Step Code Examples
 
-```tsx
-type ListProps<T> = {
-  items: T[];
-  renderItem: (item: T, index: number) => React.ReactNode;
-  emptyMessage?: string;
-};
+#### Example 1: Generic Hook for Data Fetching
 
-function List<T>({ items, renderItem, emptyMessage = 'No items' }: ListProps<T>) {
-  if (items.length === 0) return <p>{emptyMessage}</p>;
-  return <ul>{items.map((item, index) => <li key={index}>{renderItem(item, index)}</li>)}</ul>;
+```typescript
+type FetchState<T> =
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: Error };
+
+function useFetch<T>(url: string): FetchState<T> {
+  const [state, setState] = useState<FetchState<T>>({ status: 'loading' });
+
+  useEffect(() => {
+    fetch(url)
+      .then((res) => res.json())
+      .then((data: T) => setState({ status: 'success', data }))
+      .catch((error: Error) => setState({ status: 'error', error }));
+  }, [url]);
+
+  return state;
 }
 
-// Usage with different types
-<List items={['a', 'b', 'c']} renderItem={(s) => <strong>{s}</strong>} />
-<List items={[{ id: 1, name: 'Alice' }]} renderItem={(u) => <span>{u.name}</span>} />
+// Usage — T is inferred as User[]
+const state = useFetch<User[]>('/api/users');
 ```
 
-**Expected Output:** The same `List` component renders a list of strings and a list of objects. TypeScript infers `T = string` for the first and `T = { id: number; name: string }` for the second, so `renderItem`'s parameter is correctly typed in each case.
-
-**Why This Output Occurs:** `<T>` declares a type parameter. `items: T[]` makes the component generic. TypeScript infers `T` from the `items` prop and applies it to `renderItem`, so `s` is a `string` and `u` is the user object.
-
-**Example 2: Generic Select Component**
-
-```tsx
-type SelectProps<T> = {
-  options: T[];
-  value: T | null;
-  onChange: (value: T) => void;
-  getLabel: (option: T) => string;
-  getValue: (option: T) => string | number;
-};
-
-function Select<T>({ options, value, onChange, getLabel, getValue }: SelectProps<T>) {
-  return (
-    <select
-      value={value ? String(getValue(value)) : ''}
-      onChange={(e) => {
-        const selected = options.find((o) => String(getValue(o)) === e.target.value);
-        if (selected) onChange(selected);
-      }}
-    >
-      <option value="">Select...</option>
-      {options.map((option) => (
-        <option key={getValue(option)} value={String(getValue(option))}>
-          {getLabel(option)}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-// Usage
-type User = { id: number; name: string };
-<Select<User>
-  options={users}
-  value={selectedUser}
-  onChange={setSelectedUser}
-  getLabel={(u) => u.name}
-  getValue={(u) => u.id}
-/>
-```
-
-**Expected Output:** A type-safe select component. TypeScript ensures that `value`, `onChange`, `getLabel`, and `getValue` all work with the same `T`. Passing a `User` option with a string `id` would error if `getValue` expected a number.
-
-**Why This Output Occurs:** The generic `T` is inferred from `options`. All other props are typed in terms of `T`, so `onChange` receives a `User`, and `getValue` returns the user's ID type.
+**Expected Output:** `state.data` is typed as `User[]` when `status === 'success'`. The generic `T` preserves the caller's type through the hook.
 
 ### Real-World Cases
 
-- **Data tables:** Generic table components with typed column definitions.
-- **Select and combobox components:** Generic options with typed values.
-- **Lists and grids:** Generic rendering with type-safe item props.
-- **Custom hooks:** `useLocalStorage<T>`, `useFetch<T>`, `useForm<T>`.
-- **API clients:** Generic request/response typing.
-- **Context providers:** Generic context values.
+- **`useState<T>` and `useRef<T>`:** React's built-in hooks are generic.
+- **API helpers:** `fetchJson<T>(url): Promise<T>`.
+- **Reusable components:** `<List<T> items={items} renderItem={...} />`.
+- **Utility functions:** `groupBy<T, K extends keyof T>(items: T[], key: K)`.
 
 ### References
 
-- TypeScript Handbook – Generics - https://www.typescriptlang.org/docs/handbook/2/generics.html
-- TypeScript Handbook – Generic Constraints - https://www.typescriptlang.org/docs/handbook/2/generics.html#generic-constraints
-- TypeScript Handbook – `keyof` Type Operator - https://www.typescriptlang.org/docs/handbook/2/keyof-types.html
-- TypeScript Handbook – Indexed Access Types - https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html
-- React TypeScript Cheatsheet – Generic Components - https://react-typescript-cheatsheet.netlify.app/docs/advanced/patterns_by_usecase/#generic-components
-- Matt Pocock – Generics - https://www.totaltypescript.com/books/total-typescript-essentials/generics
+- TypeScript Handbook — Generics — https://www.typescriptlang.org/docs/handbook/2/generics.html
+- CoreUI — How to use TypeScript with React hooks — https://coreui.io/blog/how-to-use-typescript-with-react-hooks/
 
 ---
 
-## Core Concept 5: Type Narrowing & Type Guards
+## 8. Type Inference
 
 ### Definitions
 
-**Core Definition:** Type narrowing is TypeScript's process of refining a broad type (e.g., `string | number`) to a more specific type within a conditional block; type guards are the expressions (`typeof`, `instanceof`, `in`, custom predicates) that trigger narrowing.
+**Core Definition:** Type inference is TypeScript's ability to automatically determine the type of a value based on its usage and context, without explicit annotations.
 
-**Technical Definition:** TypeScript's control-flow analysis tracks the type of a value through branches. When a condition proves that a value is of a specific type, TypeScript narrows the type within that branch. Built-in type guards include `typeof` (for primitives), `instanceof` (for classes), `in` (for property existence), truthiness checks, equality checks, and discriminated union checks. Custom type guards use a type predicate (`value is Type`) as the return type of a function, telling TypeScript that if the function returns `true`, the value is of the specified type. The `asserts value is Type` form is an assertion function, which narrows the value for the rest of the enclosing scope.
+**Technical Definition:** TypeScript infers types from initializers (`const x = 5` → `number`), function return values, contextual typing (the expected type from the surrounding context), and best common types. In React, `useState` infers the state type from the initial value, but **fails when the initial value is `null` or `undefined`** — explicit generics (`useState<User | null>(null)`) are required in those cases.
 
-**Beginner-Friendly Explanation:** Type narrowing is TypeScript figuring out "if this check passes, then the value must be this type." For example, if you check `typeof value === 'string'`, TypeScript knows that inside the `if` block, `value` is a `string`. Type guards are the tools you use to make those checks—`typeof` for primitives, `instanceof` for classes, `in` for objects, and custom functions that return `value is Type`.
+**Beginner-Friendly Explanation:** TypeScript is smart — it can often figure out the type without you telling it. `const name = 'Alice'` automatically gets the type `string`. But when you initialize with `null`, you have to tell TypeScript what the type will become later.
 
 ### Purposes
 
-- To safely access properties that exist only on specific types in a union.
-- To handle API responses and user input that may be of uncertain type.
-- To enable exhaustive handling of discriminated unions.
-- To encapsulate complex narrowing logic in reusable functions.
-- To satisfy TypeScript's strict null checks.
-- To narrow `unknown` values to specific types.
+- To reduce boilerplate — you only annotate when inference is insufficient.
+- To keep code readable and focused on intent.
+- To automatically propagate types through functions and expressions.
+- To catch errors without requiring explicit type declarations everywhere.
 
 ### Syntax Rules and Structure
 
-**`typeof` (Primitives):**
 ```typescript
-function format(value: string | number): string {
-  if (typeof value === 'string') {
-    return value.toUpperCase(); // value: string
-  }
-  return value.toFixed(2);      // value: number
+// Inference from initializer
+const name = 'Alice';        // inferred: string
+const age = 30;             // inferred: number
+const active = true;        // inferred: boolean
+
+// Inference from function return
+function add(a: number, b: number) {
+  return a + b;             // inferred return: number
+}
+
+// Contextual typing
+const handler: (e: Event) => void = (e) => { /* e: Event */ };
+```
+
+**Constraints and Limitations:**
+
+- `useState(null)` infers `null` — later assignments fail. Use `useState<User | null>(null)`.
+- `useRef()` without an initial value is an error in React 19 — use `useRef<T>(null)`.
+- Complex expressions may infer wider types than intended — explicit annotations or `as const` fix this.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Inference in `useState`
+
+```typescript
+// ✅ Inferred as number
+const [count, setCount] = useState(0);
+
+// ❌ Inferred as null — setUser('Alice') fails
+// const [user, setUser] = useState(null);
+
+// ✅ Explicit generic — User | null
+const [user, setUser] = useState<User | null>(null);
+
+// ✅ Inferred from initial object
+const [form, setForm] = useState({ name: '', email: '' });
+```
+
+**Expected Output:** `count` is `number`, `user` is `User | null`, and `form` is `{ name: string; email: string }` — all inferred without explicit annotations where possible.
+
+### Real-World Cases
+
+- **`useState`:** Inference works for primitives and concrete objects; explicit generics are needed for null/undefined starts.
+- **Event handlers:** Contextual typing infers the event type from the JSX attribute.
+- **Generic functions:** TypeScript infers type arguments from the arguments passed.
+
+### References
+
+- TypeScript Handbook — Type Inference — https://www.typescriptlang.org/docs/handbook/type-inference.html
+- Hook TypeScript Patterns — https://github.com/dot-skills/skills/blob/main/skills/.experimental/typescript-refactor/references/tsx-hook-typing.md
+
+---
+
+## 9. Type Guards
+
+### Definitions
+
+**Core Definition:** A type guard is an expression or function that performs a runtime check and tells TypeScript to narrow the type within a conditional block.
+
+**Technical Definition:** Type guards include `typeof` checks (`typeof x === 'string'`), `instanceof` checks (`x instanceof Date`), `in` checks (`'name' in x`), equality checks, and **user-defined type predicates** (`function isUser(x: unknown): x is User`). TypeScript uses these checks to narrow the type of a value in the guarded block. Type predicates are the foundation of runtime validation functions that TypeScript can trust.
+
+**Beginner-Friendly Explanation:** A type guard is a check you write to tell TypeScript "if this check passes, you can trust that the value is this type." It connects runtime logic to compile-time narrowing.
+
+### Purposes
+
+- To narrow `unknown` or union types to specific types safely.
+- To validate API responses and external data at runtime.
+- To enable type-safe handling of discriminated unions.
+- To replace unsafe `as` assertions with checked operations.
+
+### Syntax Rules and Structure
+
+**Built-in guards:**
+
+```typescript
+if (typeof value === 'string') { /* value: string */ }
+if (value instanceof Date) { /* value: Date */ }
+if ('name' in obj) { /* obj has name */ }
+```
+
+**User-defined type predicate:**
+
+```typescript
+function isUser(value: unknown): value is User {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'name' in value &&
+    typeof (value as User).name === 'string'
+  );
 }
 ```
 
-**`instanceof` (Classes):**
+**Constraints and Limitations:**
+
+- Type predicates are assertions — if the runtime check is wrong, TypeScript will trust the narrow incorrectly.
+- `typeof null` returns `'object'` — always check for `null` explicitly.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Type Predicate for API Response
+
 ```typescript
-function logError(error: Error | string) {
-  if (error instanceof Error) {
-    console.log(error.message); // error: Error
-  } else {
-    console.log(error);         // error: string
-  }
+interface User {
+  id: string;
+  name: string;
 }
-```
-
-**`in` (Property Existence):**
-```typescript
-type Admin = { role: 'admin'; permissions: string[] };
-type User = { role: 'user'; email: string };
-
-function describe(account: Admin | User) {
-  if ('permissions' in account) {
-    return `Admin with ${account.permissions.length} permissions`;
-  }
-  return `User with email ${account.email}`;
-}
-```
-
-**Discriminated Union:**
-```typescript
-type Result =
-  | { status: 'success'; data: string }
-  | { status: 'error'; error: Error };
-
-function handle(result: Result) {
-  if (result.status === 'success') {
-    console.log(result.data);  // result: success variant
-  } else {
-    console.log(result.error); // result: error variant
-  }
-}
-```
-
-**Custom Type Guard (Predicate):**
-```typescript
-type Fish = { swim: () => void };
-type Bird = { fly: () => void };
-
-function isFish(pet: Fish | Bird): pet is Fish {
-  return (pet as Fish).swim !== undefined;
-}
-
-function move(pet: Fish | Bird) {
-  if (isFish(pet)) {
-    pet.swim(); // pet: Fish
-  } else {
-    pet.fly();  // pet: Bird
-  }
-}
-```
-
-**Assertion Function:**
-```typescript
-function assertIsString(value: unknown): asserts value is string {
-  if (typeof value !== 'string') {
-    throw new TypeError('Expected a string');
-  }
-}
-
-function process(value: unknown) {
-  assertIsString(value);
-  console.log(value.toUpperCase()); // value: string
-}
-```
-
-**React Example — Narrowing `unknown` API Data:**
-```tsx
-type User = { id: number; name: string };
 
 function isUser(value: unknown): value is User {
   return (
     typeof value === 'object' &&
     value !== null &&
     'id' in value &&
-    typeof (value as User).id === 'number' &&
     'name' in value &&
+    typeof (value as User).id === 'string' &&
     typeof (value as User).name === 'string'
   );
 }
 
-function UserProfile({ data }: { data: unknown }) {
-  if (!isUser(data)) {
-    return <p>Invalid user data</p>;
+function processResponse(data: unknown) {
+  if (isUser(data)) {
+    console.log(data.name); // data is User
+  } else {
+    console.log('Invalid user data');
   }
-  return <h1>{data.name}</h1>; // data: User
 }
 ```
 
-**Syntax Rules:**
-- Use `typeof` for `string`, `number`, `boolean`, `symbol`, `bigint`, `undefined`, `function`, and `object`.
-- Use `instanceof` for class instances (including `Error`, `Date`, `Array`, etc.).
-- Use `in` to narrow by property existence.
-- Use discriminated unions with a literal discriminant property for the cleanest narrowing.
-- Use custom type predicates (`value is Type`) for reusable narrowing logic.
-- Use assertion functions (`asserts value is Type`) for narrowing that should throw.
-- Add a `default` case with `never` to ensure exhaustive handling.
-- Always narrow `unknown` before use; never cast it with `as` without validation.
-
-**Constraints and Limitations:**
-- `typeof null === 'object'`; always check `value !== null` explicitly.
-- `instanceof` does not work across realms (iframes, workers).
-- Custom type predicates are not validated by TypeScript; an incorrect predicate lies to the type system.
-- Assertion functions require an explicit type annotation on the function signature.
-- Narrowing does not persist across closures unless the value is captured in a `const`.
-- Excess property checks apply to object literals assigned to union types.
-
-### Annotated Code Examples
-
-**Example 1: Safe API Response Handler**
-
-```tsx
-type ApiResponse =
-  | { status: 'success'; data: { users: string[] } }
-  | { status: 'error'; error: { message: string; code: number } };
-
-function isSuccess(response: ApiResponse): response is Extract<ApiResponse, { status: 'success' }> {
-  return response.status === 'success';
-}
-
-function UserList({ response }: { response: ApiResponse }) {
-  if (isSuccess(response)) {
-    return <ul>{response.data.users.map((u) => <li key={u}>{u}</li>)}</ul>;
-  }
-  return <p role="alert">{response.error.message} (Code: {response.error.code})</p>;
-}
-```
-
-**Expected Output:** If `response.status === 'success'`, the component renders the user list and TypeScript narrows `response.data.users` to `string[]`. Otherwise, the error branch narrows to the error variant.
-
-**Why This Output Occurs:** The `Extract<ApiResponse, { status: 'success' }>` utility extracts the success variant. The type predicate `response is ...` tells TypeScript that a `true` return narrows the value. The `status` discriminant drives the narrowing.
-
-**Example 2: Narrowing `unknown` with Multiple Guards**
-
-```tsx
-function processInput(input: unknown): string {
-  if (typeof input === 'string') return input.trim();
-  if (typeof input === 'number') return input.toFixed(2);
-  if (Array.isArray(input)) return input.join(', ');
-  if (input instanceof Date) return input.toISOString();
-  if (typeof input === 'object' && input !== null && 'toString' in input) {
-    return String(input);
-  }
-  return 'Unknown input';
-}
-```
-
-**Expected Output:** `processInput` handles strings, numbers, arrays, dates, and objects with `toString`. Each branch narrows the `unknown` to a specific type, and TypeScript allows the corresponding operations.
-
-**Why This Output Occurs:** Each `typeof`, `Array.isArray`, `instanceof`, and `in` check narrows the `unknown` type. TypeScript's control-flow analysis tracks the narrowing through each branch.
+**Expected Output:** Inside the `if` block, `data` is narrowed to `User`, so `data.name` is accessible. Outside, it remains `unknown`.
 
 ### Real-World Cases
 
-- **API response parsing:** Validating that a response matches an expected shape.
-- **Event handlers:** Narrowing `Event` to `MouseEvent`, `KeyboardEvent`, or `ChangeEvent`.
-- **Form validation:** Narrowing form values from `string | number | undefined` to specific types.
-- **Feature flags:** Narrowing `unknown` config values.
-- **Error handling:** Distinguishing between different error types.
+- **API validation:** Checking that response data matches the expected shape.
+- **Discriminated unions:** `if (state.status === 'success')` narrows `state` to the success member.
+- **Form validation:** Narrowing `unknown` form values before processing.
 
 ### References
 
-- TypeScript Handbook – Narrowing - https://www.typescriptlang.org/docs/handbook/2/narrowing.html
-- TypeScript Handbook – Type Guards - https://www.typescriptlang.org/docs/handbook/2/narrowing.html#typeof-type-guards
-- TypeScript Handbook – Custom Type Guards - https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates
-- TypeScript Handbook – Assertion Functions - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#assertion-functions
-- TypeScript Handbook – Exhaustiveness Checking - https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
-- React TypeScript Cheatsheet – Type Guards - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example
+- TypeScript Handbook — Narrowing — https://www.typescriptlang.org/docs/handbook/2/narrowing.html
+- Type Guards and Narrowing Reference — https://github.com/dot-skills/skills/blob/main/skills/.experimental/typescript-refactor/references/tsx-hook-typing.md
 
 ---
 
-## Core Concept 6: Type Assertions & Type Casting
+## 10. Type Narrowing
 
 ### Definitions
 
-**Core Definition:** Type assertions (`as Type`) and non-null assertions (`!`) tell TypeScript to treat a value as a different type than it inferred, overriding the compiler's analysis without performing any runtime check.
+**Core Definition:** Type narrowing is the process by which TypeScript refines a broad type (like a union or `unknown`) to a more specific type within a guarded code block.
 
-**Technical Definition:** The `as` syntax (`value as Type`) asserts that `value` is of type `Type`. TypeScript allows assertions between types that have some overlap (or via `as unknown as Type` for unrelated types, which is a code smell). The non-null assertion operator (`value!`) asserts that `value` is neither `null` nor `undefined`, removing those types from the union. Both are compile-time-only constructs: they do not validate anything at runtime, and if the assertion is wrong, the error will surface at runtime (often as a crash). Because they bypass type safety, they should be used sparingly—prefer type guards and narrowing. Common legitimate uses include DOM refs (`inputRef.current!`), event targets, and third-party library types with incomplete definitions.
+**Technical Definition:** Narrowing occurs through **control flow analysis** — TypeScript tracks the conditions that must be true at each point in the code. Guards (`typeof`, `instanceof`, `in`, equality), discriminant checks on discriminated unions, truthiness checks, and user-defined type predicates all trigger narrowing. In `switch` statements on a discriminant property, each `case` narrows to the corresponding union member, and a `never` check at the end ensures exhaustiveness.
 
-**Beginner-Friendly Explanation:** A type assertion is you telling TypeScript "trust me, I know what this type is." TypeScript will not check—it just believes you. If you are right, everything is fine. If you are wrong, you get a runtime crash. The non-null assertion (`!`) is the same idea: "trust me, this is not null." Use assertions only when you have information TypeScript does not (e.g., a DOM ref that is guaranteed to exist), and prefer type guards when you can prove the type at runtime.
+**Beginner-Friendly Explanation:** Type narrowing is TypeScript following your `if` and `switch` statements to figure out exactly which type you are working with at each line of code. If you check `status === 'success'`, TypeScript knows the data is there.
 
 ### Purposes
 
-- To narrow a type when TypeScript cannot infer it from context.
-- To access DOM elements via refs (`ref.current!`).
-- To work with third-party libraries whose types are incomplete.
-- To override an incorrect inferred type (rare; prefer fixing the inference).
-- To convert between related types (e.g., `string` to a literal union).
-- To handle `null`/`undefined` when you have external guarantees.
+- To safely access properties that exist only on specific union members.
+- To eliminate runtime errors from accessing properties on the wrong type.
+- To enable exhaustive handling of all possible states.
+- To replace unsafe casts with checked operations.
 
 ### Syntax Rules and Structure
 
-**`as` Assertion:**
-```typescript
-const value: unknown = 'hello';
-const str = value as string;
-console.log(str.toUpperCase()); // OK at compile time
-```
+**Narrowing techniques:**
 
-**`as const` (Different from `as Type`):**
-```typescript
-const config = { theme: 'dark' } as const;
-// typeof config.theme = 'dark' (literal)
-```
-
-**Non-Null Assertion (`!`):**
-```typescript
-const inputRef = useRef<HTMLInputElement>(null);
-
-function focusInput() {
-  inputRef.current!.focus(); // Asserts current is not null
-}
-```
-
-**DOM Refs in React:**
-```tsx
-function AutoFocusInput() {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    inputRef.current?.focus();      // Optional chaining (safe)
-    // inputRef.current!.focus();   // Non-null assertion (crashes if null)
-  }, []);
-
-  return <input ref={inputRef} />;
-}
-```
-
-**Event Target Narrowing:**
-```tsx
-function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-  const value = e.target.value; // Already typed correctly
-}
-
-// ❌ Avoid: asserting the event target
-function handleClick(e: React.MouseEvent) {
-  const target = e.target as HTMLButtonElement; // Unsafe
-}
-```
-
-**`as unknown as Type` (Double Assertion):**
-```typescript
-// ❌ Rarely justified
-const value = 'hello' as unknown as number;
-
-// ✅ Better: narrow with a type guard or fix the type
-```
-
-**Type Assertion vs. Type Annotation:**
-```typescript
-// Annotation: declares the type
-const a: string = 'hello';
-
-// Assertion: overrides the inferred type
-const b = 'hello' as string;
-```
-
-**Syntax Rules:**
-- Use `as Type` to assert a value's type; prefer narrowing via type guards when possible.
-- Use `value!` only when you are certain the value is not `null` or `undefined`.
-- Use `as const` to preserve literal types (different from `as Type`).
-- Use optional chaining (`?.`) instead of `!` when the value might genuinely be null.
-- Avoid `as unknown as Type`; it usually indicates a design problem.
-- Assertions are erased at runtime; they do not perform validation.
-- Prefer `unknown` + type guards over `as Type` for API data.
-- In React, prefer conditional rendering (`{ref.current && ...}`) over `!` where possible.
+| Technique | Example |
+|-----------|---------|
+| `typeof` | `if (typeof x === 'string')` |
+| `instanceof` | `if (x instanceof Date)` |
+| `in` | `if ('name' in obj)` |
+| Equality | `if (status === 'success')` |
+| Truthiness | `if (value)` |
+| Discriminant | `switch (state.status)` |
+| Type predicate | `if (isUser(data))` |
 
 **Constraints and Limitations:**
-- Assertions do not perform runtime checks; wrong assertions cause runtime errors.
-- `as` only works between types with some overlap; `as unknown as Type` bypasses this but is unsafe.
-- Non-null assertions can hide bugs; if the value is actually `null`, the app crashes.
-- TypeScript may warn about unnecessary assertions when the type is already correct.
-- Assertions do not narrow; they replace the type entirely.
-- In React 19, `ref` is passed as a regular prop, and `useRef` requires an initial value; the `!` operator is still needed for DOM refs in some cases.
 
-### Annotated Code Examples
+- Narrowing is flow-sensitive — reassigning a narrowed variable may widen it again.
+- Narrowing does not work across function boundaries unless the function is a type predicate.
 
-**Example 1: DOM Ref with Non-Null Assertion vs. Optional Chaining**
+### Multiple Annotated Complete Step by Step Code Examples
 
-```tsx
-import { useRef, useEffect } from 'react';
+#### Example 1: Exhaustive Switch with `never`
 
-function SearchInput() {
-  const inputRef = useRef<HTMLInputElement>(null);
+```typescript
+type Status = 'idle' | 'loading' | 'success' | 'error';
 
-  useEffect(() => {
-    inputRef.current?.focus();     // ✅ Safe: optional chaining
-  }, []);
-
-  function handleClick() {
-    inputRef.current!.focus();     // ⚠️ Unsafe if ref is not attached yet
+function getMessage(status: Status): string {
+  switch (status) {
+    case 'idle': return 'Ready';
+    case 'loading': return 'Loading...';
+    case 'success': return 'Done';
+    case 'error': return 'Failed';
+    default: {
+      const _exhaustive: never = status;
+      // If a new status is added and not handled,
+      // _exhaustive will not be never → compile error
+      return _exhaustive;
+    }
   }
+}
+```
 
+**Expected Output:** All four cases are handled. Adding `'cancelled'` to `Status` without adding a case produces a compile error at the `never` assignment.
+
+### Real-World Cases
+
+- **Reducer actions:** Narrowing on `action.type` to access the correct payload.
+- **API responses:** Narrowing `unknown` response data with type predicates.
+- **UI state:** Narrowing on `state.status` to render the correct view.
+
+### References
+
+- TypeScript Handbook — Narrowing — https://www.typescriptlang.org/docs/handbook/2/narrowing.html
+- Steve Kinney — Discriminated Unions — https://stevekinney.com/courses/react-typescript/typescript-discriminated-unions
+
+---
+
+## 11. Utility Types
+
+### Definitions
+
+**Core Definition:** Utility types are built-in generic type transformations provided by TypeScript that create new types from existing ones.
+
+**Technical Definition:** TypeScript includes a standard library of utility types that transform existing types: `Partial<T>` (all properties optional), `Required<T>` (all properties required), `Readonly<T>` (all properties readonly), `Pick<T, K>` (select properties), `Omit<T, K>` (exclude properties), `Record<K, V>` (object with keys `K` and values `V`), `Exclude<T, U>` (remove from union), `Extract<T, U>` (keep from union), `NonNullable<T>` (remove `null` and `undefined`), `ReturnType<F>` (function return type), and `Parameters<F>` (function parameter tuple).
+
+**Beginner-Friendly Explanation:** Utility types are TypeScript's built-in "type transformers." `Partial<User>` makes all user fields optional. `Pick<User, 'id' | 'name'>` creates a type with only `id` and `name`. They save you from writing duplicate type definitions.
+
+### Purposes
+
+- To derive types from a single source of truth instead of duplicating definitions.
+- To create flexible prop APIs (`Partial<Config>`, `Pick<User, 'id'>`).
+- To model update payloads (`Partial<Omit<User, 'id'>>`).
+- To extract function signatures and transform unions.
+
+### Syntax Rules and Structure
+
+**Essential utility types for React:**
+
+| Utility | Purpose | Example |
+|---------|---------|---------|
+| `Partial<T>` | All properties optional | `Partial<User>` |
+| `Pick<T, K>` | Select specific properties | `Pick<User, 'id' \| 'name'>` |
+| `Omit<T, K>` | Exclude specific properties | `Omit<User, 'password'>` |
+| `Record<K, V>` | Object with typed keys and values | `Record<string, User>` |
+| `Required<T>` | All properties required | `Required<Config>` |
+| `Readonly<T>` | All properties readonly | `Readonly<User>` |
+| `NonNullable<T>` | Remove `null` and `undefined` | `NonNullable<string \| null>` |
+
+**Constraints and Limitations:**
+
+- Utility types create new types — they do not modify the original.
+- Deep transformations require custom mapped types or libraries (e.g., `type-fest`).
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Deriving Update Types with `Partial` and `Omit`
+
+```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
+}
+
+// Update payload: all fields optional except id, createdAt excluded
+type UserUpdate = Partial<Omit<User, 'id' | 'createdAt'>>;
+
+function updateUser(id: string, updates: UserUpdate) {
+  // updates: { name?: string; email?: string }
+}
+
+updateUser('u1', { name: 'Alice' });      // ✅
+updateUser('u1', { email: 'a@b.com' });   // ✅
+// updateUser('u1', { createdAt: new Date() }); // ❌ createdAt is not allowed
+```
+
+**Expected Output:** `UserUpdate` allows any subset of `name` and `email`, but rejects `id` and `createdAt`. The type stays in sync with `User` automatically.
+
+#### Example 2: `Pick` for a Preview Component
+
+```typescript
+type UserPreview = Pick<User, 'id' | 'name'>;
+// { id: string; name: string }
+```
+
+**Expected Output:** `UserPreview` contains only `id` and `name`, suitable for list-item components that do not need the full user object.
+
+### Real-World Cases
+
+- **API update payloads:** `Partial<Omit<User, 'id'>>` for PATCH requests.
+- **Component prop subsets:** `Pick<User, 'id' | 'name'>` for lightweight list items.
+- **Configuration merging:** `Partial<Config>` for optional overrides.
+- **Record for maps:** `Record<string, User>` for indexed collections.
+
+### References
+
+- TypeScript Handbook — Utility Types — https://www.typescriptlang.org/docs/handbook/utility-types.html
+- Steve Kinney — Utility Types That Unlock Clean React APIs — https://stevekinney.com/courses/react-typescript/utility-types-in-practice
+
+---
+
+## 12. TypeScript Configuration
+
+### Definitions
+
+**Core Definition:** TypeScript configuration is the `tsconfig.json` file that controls how the TypeScript compiler checks, transforms, and emits code.
+
+**Technical Definition:** `tsconfig.json` specifies `compilerOptions` (target, module system, strictness flags, JSX mode, module resolution), `include`/`exclude` file patterns, and project references. For React projects, the critical settings are `jsx: "react-jsx"` (automatic JSX runtime), `moduleResolution: "bundler"` (Vite-optimized), and `strict: true` plus additional safety flags: `noUncheckedIndexedAccess` (array access returns `T | undefined`) and `exactOptionalPropertyTypes` (distinguishes absent from `undefined`).
+
+**Beginner-Friendly Explanation:** `tsconfig.json` is the settings file for TypeScript. It tells the compiler how strict to be, what JavaScript version to target, and how to handle React's JSX syntax. Turning on `strict` makes TypeScript catch many more mistakes.
+
+### Purposes
+
+- To enable maximum type safety through strict compiler flags.
+- To configure JSX handling for React (`react-jsx`).
+- To optimize module resolution for the build tool (Vite/Next.js).
+- To enforce consistent code quality across the project.
+
+### Syntax Rules and Structure
+
+**Recommended React `tsconfig.json`:**
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}
+```
+
+**Key flags breakdown:**
+
+| Flag | Purpose |
+|------|---------|
+| `strict: true` | Enables all core strict checks. |
+| `noUncheckedIndexedAccess` | Array/object access returns `T \| undefined` — catches empty array bugs. |
+| `exactOptionalPropertyTypes` | Distinguishes `{ x?: string }` from `{ x: string \| undefined }`. |
+| `jsx: "react-jsx"` | Uses the automatic JSX runtime (no React import needed). |
+| `moduleResolution: "bundler"` | Optimized for Vite/Next.js. |
+| `noFallthroughCasesInSwitch` | Prevents accidental fallthrough in `switch` statements. |
+
+**Constraints and Limitations:**
+
+- `noUncheckedIndexedAccess` can be noisy in code that already validates array bounds — but it surfaces real bugs.
+- `exactOptionalPropertyTypes` requires careful handling of optional props in React components.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Strict Configuration in Practice
+
+```typescript
+// With noUncheckedIndexedAccess: true
+const users: User[] = [];
+const first = users[0]; // type: User | undefined
+if (first) {
+  console.log(first.name); // ✅ safe — narrowed
+}
+
+// Without the flag: users[0] is User, and first.name crashes at runtime
+```
+
+**Expected Output:** TypeScript forces a null check on `users[0]`, preventing a runtime crash on empty arrays.
+
+### Real-World Cases
+
+- **New React projects:** Vite and Next.js templates ship with strict TypeScript configurations.
+- **Monorepos:** Shared base `tsconfig.json` with project references.
+- **CI type checking:** `tsc --noEmit` verifies types without emitting files.
+
+### References
+
+- TypeScript — tsconfig.json Reference — https://www.typescriptlang.org/tsconfig/
+- Tooling Setup for React 19 — https://raw.githubusercontent.com/MadAppGang/claude-code/main/plugins/frontend/skills/tooling-setup/SKILL.md
+
+---
+
+## 13. TypeScript Best Practices
+
+### Definitions
+
+**Core Definition:** TypeScript best practices are the guidelines that maximize type safety, readability, and maintainability in a TypeScript codebase.
+
+**Technical Definition:** Best practices include: preferring `interface` for object shapes and `type` for unions/intersections/tuples; using `unknown` over `any` and narrowing with type guards; modeling state with discriminated unions and exhaustive `never` checks; enabling `strict: true` with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`; preferring type inference over redundant annotations; avoiding `React.FC` in favor of explicit props types; and typing event handlers with React's generic event types (`React.ChangeEvent<HTMLInputElement>`).
+
+**Beginner-Friendly Explanation:** Best practices are the habits that keep TypeScript code safe and clean — use the right tool for each job, never use `any`, turn on strict mode, and let TypeScript infer types when it can.
+
+### Purposes
+
+- To maximize type safety and minimize runtime errors.
+- To keep code readable and maintainable.
+- To leverage TypeScript's strengths (inference, narrowing, discriminated unions).
+- To avoid common anti-patterns (`any`, `React.FC`, unsafe casts).
+
+### Best Practices Checklist
+
+| Practice | Description |
+|----------|-------------|
+| **`interface` for objects, `type` for unions** | Interfaces extend and merge; type aliases handle unions, tuples, and mapped types. |
+| **`unknown` over `any`** | `unknown` forces narrowing; `any` disables type checking entirely. |
+| **Discriminated unions for state** | Model loading/success/error states with a literal discriminant and exhaustive `never` checks. |
+| **Strict tsconfig** | Enable `strict`, `noUncheckedIndexedAccess`, and `exactOptionalPropertyTypes`. |
+| **Prefer inference** | Annotate only when inference is insufficient (`useState(null)` needs a generic). |
+| **Avoid `React.FC`** | Use explicit props interfaces — `React.FC` implicitly adds `children` and has other quirks. |
+| **Type event handlers correctly** | Use `React.ChangeEvent<HTMLInputElement>`, `React.MouseEvent<HTMLButtonElement>`, etc.. |
+| **Use `PropsWithChildren`** | For components that accept children, use `PropsWithChildren<T>` or `children: React.ReactNode`. |
+
+**Constraints and Limitations:**
+
+- Best practices are contextual — there are legitimate uses for `any` (migration, third-party types), but they should be rare and documented.
+- Strict flags can be noisy initially — the long-term benefit outweighs the short-term friction.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Best-Practice Component
+
+```typescript
+interface ButtonProps {
+  label: string;
+  variant?: 'primary' | 'secondary';
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  children?: React.ReactNode;
+}
+
+function Button({ label, variant = 'primary', onClick, children }: ButtonProps) {
   return (
-    <div>
-      <input ref={inputRef} type="search" />
-      <button onClick={handleClick}>Focus</button>
-    </div>
+    <button className={`btn-${variant}`} onClick={onClick}>
+      {children ?? label}
+    </button>
   );
 }
 ```
 
-**Expected Output:** On mount, the input is focused via `inputRef.current?.focus()` (safe). Clicking the button calls `inputRef.current!.focus()`; since the input is always rendered, the ref is non-null and this works. If the input were conditionally rendered and not present, the `!` assertion would crash.
+**Why this follows best practices:**
 
-**Why This Output Occurs:** The `!` operator tells TypeScript to remove `null` from the type of `inputRef.current`. It does not check at runtime. The `?.` operator is a runtime check that short-circuits if `current` is `null`.
+- `interface` for object props (extensible, clear errors).
+- `variant` is an optional literal union.
+- `onClick` is typed with React's generic `MouseEvent`.
+- `children` is typed as `React.ReactNode`.
+- No `React.FC` — explicit props interface.
 
-**Example 2: Asserting a Literal Union from a String**
+#### Example 2: Discriminated Union for API State
 
-```tsx
-type Theme = 'light' | 'dark';
+```typescript
+type ApiState<T> =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: Error };
 
-function isTheme(value: string): value is Theme {
-  return value === 'light' || value === 'dark';
-}
-
-function applyTheme(value: string) {
-  // ❌ Unsafe assertion
-  const theme = value as Theme;
-  document.body.dataset.theme = theme;
-
-  // ✅ Safe: type guard
-  if (isTheme(value)) {
-    document.body.dataset.theme = value;
+function render<T>(state: ApiState<T>) {
+  switch (state.status) {
+    case 'idle': return 'Ready';
+    case 'loading': return 'Loading...';
+    case 'success': return `Data: ${state.data}`;
+    case 'error': return `Error: ${state.error.message}`;
+    default: {
+      const _exhaustive: never = state;
+      return _exhaustive;
+    }
   }
 }
 ```
 
-**Expected Output:** The assertion version applies any string as the theme, which could set `data-theme="purple"` if the caller passes an invalid value. The type guard version only applies valid themes, silently ignoring invalid values.
-
-**Why This Output Occurs:** `value as Theme` tells TypeScript to trust the caller. `isTheme(value)` performs a runtime check and narrows the type only if the check passes.
+**Why this follows best practices:** The discriminated union makes invalid states impossible to represent, and the `never` check guarantees exhaustive handling.
 
 ### Real-World Cases
 
-- **DOM refs:** `inputRef.current!.focus()` in event handlers.
-- **Event targets:** `(e.target as HTMLInputElement).value` in change handlers.
-- **Third-party libraries:** Asserting types for libraries with incomplete definitions.
-- **API responses:** Asserting types after runtime validation (with Zod, io-ts).
-- **Feature flags:** Asserting `unknown` config values after checking.
+- **Production React applications:** Strict TypeScript catches bugs before deployment.
+- **Design systems:** Typed props ensure components are used correctly across teams.
+- **API layers:** Discriminated unions and type predicates validate external data safely.
 
 ### References
 
-- TypeScript Handbook – Type Assertions - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions
-- TypeScript Handbook – Non-null Assertion Operator - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#non-null-assertion-operator-postfix-
-- TypeScript Handbook – `as const` - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions
-- React TypeScript Cheatsheet – Type Assertions - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example
-- React TypeScript Cheatsheet – Refs - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/hooks#useref
-- Matt Pocock – Type Assertions - https://www.totaltypescript.com/books/total-typescript-essentials/type-assertions
-
----
-
-## Comparison and Decision Guidance
-
-| Concept | When to Use | When to Avoid | Key Risk |
-|---|---|---|---|
-| **Basic types** | Everywhere; annotate all public APIs | Over-annotating local variables (inference is fine) | Using `any` instead of `unknown` |
-| **`interface`** | Public APIs, declaration merging, `implements` | Unions, tuples, complex type expressions | Overusing merging |
-| **`type` alias** | Component props, unions, tuples, intersections | When `interface` merging is needed | Inconsistent style |
-| **Union types** | Values that can be one of several types | Overly broad unions | Missing narrowing |
-| **Literal types** | Variants, sizes, statuses, fixed sets | Large sets (use enums or constants) | Typos in strings |
-| **Generics** | Reusable components, hooks, utilities | Simple components with fixed types | Over-abstraction |
-| **Type guards** | Narrowing `unknown`, union types, API data | When assertion is justified by external knowledge | Incorrect predicates |
-| **Type assertions** | DOM refs, third-party types, after validation | API data, user input, complex types | Runtime crashes if wrong |
-| **Non-null assertion** | DOM refs in event handlers | Values that might genuinely be null | Hiding null bugs |
-
-**Decision Guidance:**
-- **Start with inference:** Let TypeScript infer types for local variables; annotate public APIs.
-- **Prefer `unknown` over `any`:** Force narrowing; catch errors at compile time.
-- **Use `type` for component props:** More flexible than `interface` for unions and intersections.
-- **Use literal unions for variants:** Get autocomplete and catch typos.
-- **Use generics for reusable components:** Preserve type safety across data types.
-- **Use type guards for `unknown`:** Never cast `unknown` with `as` without validation.
-- **Use assertions sparingly:** Prefer optional chaining and conditional rendering over `!`.
-- **Enable `strict: true`:** Catch null/undefined bugs and implicit `any`.
-- **Add a `default: never` case:** Ensure exhaustive handling of discriminated unions.
+- TypeScript Patterns Skill — https://github.com/marvinrichter/clarc/blob/a8355b036a977300dfce1758af1c0d7e3371a26b/skills/typescript-patterns/SKILL.md
+- React + TypeScript Cheatsheet — https://github.com/typescript-cheatsheets/react
+- CoreUI — How to type events in React with TypeScript — https://coreui.io/blog/how-to-type-events-in-react-with-typescript/
 
 ---
 
 ## References
 
-- TypeScript Handbook - https://www.typescriptlang.org/docs/handbook/intro.html
-- TypeScript Handbook – Everyday Types - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html
-- TypeScript Handbook – Narrowing - https://www.typescriptlang.org/docs/handbook/2/narrowing.html
-- TypeScript Handbook – Generics - https://www.typescriptlang.org/docs/handbook/2/generics.html
-- TypeScript Handbook – Interfaces - https://www.typescriptlang.org/docs/handbook/2/objects.html
-- TypeScript Handbook – Type Aliases - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-aliases
-- TypeScript Handbook – Union Types - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types
-- TypeScript Handbook – Literal Types - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types
-- TypeScript Handbook – Discriminated Unions - https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions
-- TypeScript Handbook – Type Assertions - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions
-- TypeScript Handbook – Non-null Assertion Operator - https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#non-null-assertion-operator-postfix-
-- TypeScript Handbook – `as const` - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions
-- TypeScript Handbook – Exhaustiveness Checking - https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
-- TypeScript Handbook – Assertion Functions - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#assertion-functions
-- React TypeScript Cheatsheet - https://react-typescript-cheatsheet.netlify.app/
-- React TypeScript Cheatsheet – Basic Types - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example
-- React TypeScript Cheatsheet – Types vs Interfaces - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/basic_type_example#types-or-interfaces
-- React TypeScript Cheatsheet – Generic Components - https://react-typescript-cheatsheet.netlify.app/docs/advanced/patterns_by_usecase/#generic-components
-- React TypeScript Cheatsheet – Refs - https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/hooks#useref
-- React Official Documentation – TypeScript - https://react.dev/learn/typescript
-- Matt Pocock – Total TypeScript - https://www.totaltypescript.com/
-- Matt Pocock – Type vs Interface - https://www.totaltypescript.com/type-vs-interface-which-should-you-use
-- Matt Pocock – Literal Types - https://www.totaltypescript.com/books/total-typescript-essentials/literal-types
-- Matt Pocock – Generics - https://www.totaltypescript.com/books/total-typescript-essentials/generics
-- Matt Pocock – Type Assertions - https://www.totaltypescript.com/books/total-typescript-essentials/type-assertions
-- MDN Web Docs – JavaScript Data Types - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures
+- TypeScript — Official Documentation — https://www.typescriptlang.org/docs/
+- TypeScript Handbook — Everyday Types — https://www.typescriptlang.org/docs/handbook/2/everyday-types.html
+- TypeScript Handbook — Narrowing — https://www.typescriptlang.org/docs/handbook/2/narrowing.html
+- TypeScript Handbook — Generics — https://www.typescriptlang.org/docs/handbook/2/generics.html
+- TypeScript Handbook — Utility Types — https://www.typescriptlang.org/docs/handbook/utility-types.html
+- TypeScript Handbook — Type Inference — https://www.typescriptlang.org/docs/handbook/type-inference.html
+- TypeScript — tsconfig.json Reference — https://www.typescriptlang.org/tsconfig/
+- TypeScript Type System Reference — https://cdn.jsdelivr.net/npm/memory-journal-mcp@8.0.1/skills/typescript/references/type-system.md
+- TypeScript Patterns Skill (clarc) — https://github.com/marvinrichter/clarc/blob/a8355b036a977300dfce1758af1c0d7e3371a26b/skills/typescript-patterns/SKILL.md
+- React + TypeScript Cheatsheet — https://github.com/typescript-cheatsheets/react
+- Steve Kinney — Discriminated Unions — https://stevekinney.com/courses/react-typescript/typescript-discriminated-unions
+- Steve Kinney — Utility Types That Unlock Clean React APIs — https://stevekinney.com/courses/react-typescript/utility-types-in-practice
+- CoreUI — How to type events in React with TypeScript — https://coreui.io/blog/how-to-type-events-in-react-with-typescript/
+- CoreUI — How to use TypeScript with React hooks — https://coreui.io/blog/how-to-use-typescript-with-react-hooks/
+- Tooling Setup for React 19 (strict tsconfig) — https://raw.githubusercontent.com/MadAppGang/claude-code/main/plugins/frontend/skills/tooling-setup/SKILL.md
+- Hook TypeScript Patterns — https://github.com/dot-skills/skills/blob/main/skills/.experimental/typescript-refactor/references/tsx-hook-typing.md
+- Type Guards and Narrowing Reference — https://github.com/dot-skills/skills/blob/main/skills/.experimental/typescript-refactor/references/tsx-hook-typing.md

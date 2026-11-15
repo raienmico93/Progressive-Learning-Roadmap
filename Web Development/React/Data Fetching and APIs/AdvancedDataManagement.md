@@ -1,4 +1,4 @@
-# React Advanced Data Management & State Synchronizers: A Comprehensive Programming Cheat Sheet
+# Advanced Data Management & Real-Time — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1583 +6,1190 @@
 
 ### Definitions
 
-**Core Definition:** React advanced data management and state synchronizers are the libraries, patterns, and lifecycle configurations that keep a React application's view of server data synchronised with the server itself—handling caching, deduplication, pagination, prefetching, mutations, and real-time updates without manual state management.
+**Core Definition:** Advanced data management and real-time patterns are the architectural techniques for keeping a React application's server-derived data fresh, consistent, performant, and synchronized with live events — going far beyond the basic `useEffect` + `fetch` model.
 
-**Technical Definition:** Advanced server-state management treats remote data as a first-class, cached resource with its own lifecycle: staleness windows, garbage collection, background revalidation, and mutation-driven invalidation. TanStack Query (formerly React Query) and SWR are the dominant declarative caching engines. They provide a `QueryClient`/cache store keyed by deterministic query keys, deduplicate concurrent identical requests, persist cache entries according to `staleTime` and `gcTime` (TanStack Query) or `dedupingInterval` and `refreshInterval` (SWR), and expose hooks (`useQuery`, `useMutation`, `useInfiniteQuery`, `usePrefetchQuery`) that integrate with React's render cycle. Advanced patterns include offset/limit and cursor-based pagination, infinite scrolling via `useInfiniteQuery`, prefetching and hydration for SSR/SSG, optimistic updates with rollback, and real-time synchronisation via polling, WebSockets, or Server-Sent Events with cache write-through.
+**Technical Definition:** This domain sits at the intersection of **server-state management** (caching, deduplication, pagination, prefetching, optimistic updates, background synchronization) and **real-time transport** (polling, long polling, Server-Sent Events, WebSockets, streaming). The central insight is that **server state is not client state**: it is remote, shared, cached, refetched, invalidated, and sometimes intentionally stale. Libraries like TanStack Query and SWR treat server state as a first-class citizen with a lifecycle (fresh → stale → inactive → garbage-collected), while real-time transports determine *how* updates arrive — pull (polling), push (SSE, WebSockets), or progressive delivery (streaming). TanStack Query’s defaults encode the industry consensus: `staleTime` of `0` (data is immediately stale) and `gcTime` of 5 minutes. Choosing the right transport is three questions: direction of data flow, frequency of change, and infrastructure constraints — one-way → SSE, two-way → WebSockets, rare changes → polling.
 
-**Beginner-Friendly Explanation:** Your React app needs data from a server, but fetching it on every render is wasteful, slow, and buggy. Advanced data management libraries act like a smart assistant: they remember what they've already fetched (caching), don't fetch the same thing twice at the same time (deduplication), quietly check for updates in the background (revalidation), and know when to throw away old data (garbage collection). They also handle tricky cases: loading pages of data, showing old data while new data loads, updating the UI before the server confirms (optimistic updates), and keeping everything in sync when the server pushes changes (WebSockets, polling).
+**Beginner-Friendly Explanation:** Once your app grows beyond a few screens, fetching data becomes complicated. You need to avoid fetching the same thing twice, keep data fresh without annoying the user, load more items as they scroll, make button clicks feel instant, recover when the network drops, and receive live updates (chat messages, notifications, prices). This cheat sheet covers the tools and patterns for each of those problems — from caching and pagination to WebSockets and streaming.
 
 ### Key Characteristics
 
-- **Server State ≠ Client State:** Server state is asynchronous, remotely owned, potentially stale, and shared; it must not be stored in Redux or Context as if it were client state.
-- **Query Keys as Cache Identity:** Every cache entry is identified by a deterministic, serialisable query key (e.g., `['todos', { status: 'done', page: 1 }]`).
-- **Stale-While-Revalidate:** Cached data is served immediately, and a background revalidation updates the cache when stale.
-- **Deduplication by Default:** Concurrent identical requests share a single in-flight promise.
-- **Lifecycle Separation:** `staleTime` controls freshness; `gcTime` controls memory retention.
-- **Mutation-Driven Invalidation:** Mutations trigger targeted invalidation of related queries via prefix matching or predicates.
-- **Pagination as a First-Class API:** `useInfiniteQuery`, `placeholderData: keepPreviousData`, and cursor-based keys are built-in.
-- **Optimistic Updates with Rollback:** `onMutate` snapshots the cache, updates it optimistically, and `onError` rolls back.
-- **Real-Time Integration:** Polling, WebSockets, and SSE write through to the same cache used by queries.
+- **Server state has a lifecycle:** Fresh → stale → refetching → inactive → garbage-collected. Libraries automate this lifecycle; manual code does not.
+- **Deduplication is automatic in libraries, manual in raw fetch:** Multiple components requesting the same key share one in-flight request and one cache entry.
+- **Pagination and infinite scrolling are query-key problems:** The page cursor must be part of the key so each page is cached independently.
+- **Prefetching is intent-driven:** Hover, focus, and viewport visibility are signals to load data or code before the user commits to navigation.
+- **Optimistic updates trade correctness for latency:** Apply the change immediately, snapshot the previous state, and roll back on failure.
+- **Real-time transport is a trade-off:** Polling is simple but wasteful; SSE is one-way and HTTP-native; WebSockets are bidirectional and stateful.
+- **Streaming is progressive delivery:** React’s server renderer emits HTML in chunks aligned with `<Suspense>` boundaries, so slow sections do not block fast ones.
 
 ### Prerequisites
 
-- Solid understanding of React function components, Hooks, and the render cycle.
-- Working knowledge of HTTP methods, status codes, headers, and CORS.
-- Familiarity with `fetch`/Axios, promises, and `async`/`await`.
-- Basic understanding of caching concepts (staleness, invalidation, garbage collection).
-- Awareness of React Suspense and Error Boundaries (for advanced patterns).
+- React function components, `useState`, `useEffect`, and event handlers.
+- Promises, `async`/`await`, and `AbortController`.
+- HTTP fundamentals: methods, status codes, headers, JSON.
+- TanStack Query or SWR basics (for the library-based patterns).
+- Browser APIs: `EventSource`, `WebSocket`, `IntersectionObserver`, `ReadableStream`.
 
 ### Related Programming Areas
 
-- **HTTP Fundamentals:** Methods, status codes, headers, caching directives.
-- **Authentication:** Token lifecycle, interceptors, 401 handling.
-- **Performance:** Prefetching, hydration, deduplication, code splitting.
-- **Real-Time Systems:** WebSockets, SSE, polling, background sync.
-- **Observability:** Query devtools, error tracking, and performance monitoring.
-
-### Core Concepts / Features
-
-1. Declarative Server-State Caching Engines (TanStack Query vs. SWR)
-2. Caching Lifecycle Configuration (staleTime, gcTime, Automatic Invalidation)
-3. Request Deduplication and Network Bottleneck Elimination
-4. Data Stream Pagination Models (Offset/Limit, Cursor, Infinite Scrolling)
-5. Performance Tuning: Prefetching, Hydration, and Placeholder Data
-6. Mutating Server State: Optimistic Updates, Rollback, and Cache Triggers
-7. Real-Time Sync Paradigms: Smart Polling, WebSockets, Background Sync
+- **Data Fetching Fundamentals** — the request lifecycle and caching basics.
+- **API Integration** — REST, GraphQL, and request topology.
+- **State Management** — server state vs. client state vs. URL state.
+- **Performance** — waterfalls, prefetching, and streaming.
+- **Real-Time Systems** — WebSockets, SSE, and pub/sub architectures.
 
 ---
 
-## Core Concept 1: Declarative Server-State Caching Engines (TanStack Query vs. SWR)
+## 1. Caching
 
 ### Definitions
 
-**Core Definition:** Declarative server-state caching engines are libraries that manage the fetch-cache-revalidate lifecycle of remote data through hooks, eliminating manual `useEffect` + `useState` fetching.
+**Core Definition:** Caching is the practice of storing fetched data so subsequent requests can reuse it instead of re-fetching, trading memory and potential staleness for speed and reduced network load.
 
-**Technical Definition:** TanStack Query (formerly React Query) and SWR are the two dominant server-state caching engines. TanStack Query provides a `QueryClient` that owns a `QueryCache` and `MutationCache`, keyed by deterministic query keys. It exposes `useQuery`, `useMutation`, `useInfiniteQuery`, `useQueries`, `useSuspenseQuery`, and a rich `QueryClient` API for prefetching, hydration, invalidation, and cache manipulation. SWR ("stale-while-revalidate") is a lighter library focused on the stale-while-revalidate pattern with a simpler API (`useSWR(key, fetcher)`) and built-in features like `mutate`, `useSWRInfinite`, and optimistic updates. Both libraries deduplicate requests, cache responses, revalidate on focus/reconnect, and integrate with React's render cycle.
+**Technical Definition:** In TanStack Query (v5), caching has two orthogonal dimensions. **`staleTime`** (default `0`) controls how long data is considered *fresh*: within the window, the cache is served immediately with no network request; after it, cached data is still served immediately but a background refetch is triggered. **`gcTime`** (formerly `cacheTime`, default 5 minutes) controls how long *inactive* queries remain in memory before garbage collection. Active queries (those with mounted observers) are never garbage-collected. **Structural sharing** compares refetched data with cached data and preserves the previous reference when the values are deeply equal, preventing unnecessary re-renders.
 
-**Beginner-Friendly Explanation:** These libraries are the "memory" of your data-fetching layer. Instead of writing the same fetch-load-cache-revalidate code in every component, you declare what data you need (the query key) and how to fetch it (the query function), and the library handles the rest. TanStack Query is the full-featured option; SWR is the minimalist option.
+**Beginner-Friendly Explanation:** Caching means remembering data you already fetched. Fresh data is served from memory without asking the server. Stale data is still shown immediately, but the app quietly checks for updates in the background.
 
 ### Purposes
 
-- To declare data requirements declaratively instead of imperatively.
-- To cache server responses and serve them instantly on remount or navigation.
-- To revalidate stale data in the background without blocking the UI.
-- To deduplicate concurrent identical requests.
-- To integrate mutations with cache invalidation automatically.
-- To provide devtools for inspecting cache state.
+- To eliminate redundant network requests for the same data.
+- To make repeat visits and back-navigation instant.
+- To enable stale-while-revalidate UX.
+- To reduce server load and bandwidth.
+- To control memory usage with garbage collection.
+- To prevent unnecessary re-renders with structural sharing.
 
 ### Syntax Rules and Structure
 
-**TanStack Query (Setup):**
-```tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+**General syntax (TanStack Query):**
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60_000,   // 1 minute
-      gcTime: 5 * 60_000,  // 5 minutes
-      retry: 2,
-      refetchOnWindowFocus: true,
-    },
-  },
+```tsx
+useQuery({
+  queryKey: ['user', userId],
+  queryFn: ({ signal }) => fetchUser(userId, { signal }),
+  staleTime: 5 * 60 * 1000, // Fresh for 5 minutes
+  gcTime: 30 * 60 * 1000,   // Keep inactive for 30 minutes
 });
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <MyApp />
-    </QueryClientProvider>
-  );
-}
 ```
 
-**TanStack Query (`useQuery`):**
-```tsx
-import { useQuery } from '@tanstack/react-query';
+**Cache configuration matrix:**
 
-function Todos() {
-  const { data, isPending, isError, error, isFetching } = useQuery({
-    queryKey: ['todos'],
-    queryFn: () => fetch('/api/todos').then(r => r.json()),
-  });
-
-  if (isPending) return <p>Loading…</p>;
-  if (isError) return <p>Error: {error.message}</p>;
-
-  return (
-    <>
-      {isFetching && <span>Updating…</span>}
-      <ul>{data.map(t => <li key={t.id}>{t.title}</li>)}</ul>
-    </>
-  );
-}
-```
-
-**SWR (`useSWR`):**
-```tsx
-import useSWR from 'swr';
-
-const fetcher = (url: string) => fetch(url).then(r => r.json());
-
-function Todos() {
-  const { data, error, isLoading, isValidating, mutate } = useSWR('/api/todos', fetcher, {
-    revalidateOnFocus: true,
-    revalidateOnReconnect: true,
-    dedupingInterval: 2000,
-  });
-
-  if (isLoading) return <p>Loading…</p>;
-  if (error) return <p>Error: {error.message}</p>;
-
-  return (
-    <>
-      {isValidating && <span>Updating…</span>}
-      <ul>{data.map(t => <li key={t.id}>{t.title}</li>)}</ul>
-    </>
-  );
-}
-```
-
-**Comparison Table:**
-
-| Feature | TanStack Query | SWR |
-|---|---|---|
-| **API surface** | Rich (`useQuery`, `useMutation`, `useInfiniteQuery`, `useQueries`) | Minimal (`useSWR`, `useSWRInfinite`, `mutate`) |
-| **Cache control** | `QueryClient` with `staleTime`, `gcTime`, `invalidateQueries` | `dedupingInterval`, `refreshInterval`, `mutate` |
-| **Mutations** | First-class `useMutation` with `onMutate`, `onError`, `onSettled` | `mutate` function (optimistic via `mutate(data, { optimisticData })`) |
-| **Devtools** | Official, feature-rich | Community devtools |
-| **Suspense** | `useSuspenseQuery`, `useSuspenseInfiniteQuery` | Via `suspense: true` option |
-| **Infinite queries** | `useInfiniteQuery` with `getNextPageParam` | `useSWRInfinite` with `getKey` |
-| **Bundle size** | ~12–15 KB gzipped | ~5 KB gzipped |
-| **Best for** | Complex apps with mutations, pagination, and devtools needs | Simple apps with read-heavy data and minimal mutation logic |
+| Scenario | `staleTime` | `gcTime` | Rationale |
+|----------|-------------|----------|-----------|
+| Lookup data (countries) | 1 hour | 24 hours | Rarely changes |
+| User profile | 5 minutes | 30 minutes | Changes occasionally |
+| Dashboard stats | 30 seconds | 5 minutes | Near-real-time |
+| Live prices | 5 seconds | 1 minute | High volatility |
 
 **Syntax Rules:**
-- Wrap the app in `<QueryClientProvider>` (TanStack Query); SWR requires no provider.
-- Always use deterministic query keys that include all variables affecting the response.
-- Define `queryFn` as a stable function (outside the component or memoised).
-- Set `staleTime` deliberately; the default is `0` (data is instantly stale).
-- Use `gcTime` >= `staleTime` to avoid garbage-collecting fresh data.
-- Use `isPending` (no data yet) vs. `isFetching` (background refetch) to differentiate UI states.
-- Use the `mutate` function (SWR) or `useMutation` + `invalidateQueries` (TanStack Query) for mutations.
+
+1. `staleTime` defaults to `0`; data is immediately stale and refetches on mount/focus.
+2. `gcTime` defaults to 5 minutes; set to `Infinity` to disable garbage collection.
+3. Query keys define cache identity; every parameter affecting the result must be in the key.
+4. Use `structuralSharing: false` for very large, frequently changing datasets to skip expensive deep diffs.
+5. When using `select`, structural sharing runs twice; disable it for large datasets with frequent updates.
 
 **Constraints and Limitations:**
-- Neither library replaces client-state management (Redux, Zustand); they manage *server* state only.
-- TanStack Query's bundle size is larger than SWR's.
-- SWR's mutation story is simpler but less powerful than TanStack Query's `useMutation` lifecycle.
-- Both require careful `staleTime`/`dedupingInterval` tuning to avoid over-fetching.
-- Query keys must be JSON-serialisable; functions, `Symbol`s, and circular references break hashing.
 
-### Annotated Code Example: Same Feature in Both Libraries
+- Cached data can be stale; invalidation is required after mutations.
+- Over-caching sensitive data is a security risk.
+- Structural sharing adds O(n) overhead per refetch.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Configuring Cache Freshness
 
 ```tsx
-// --- TanStack Query ---
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-function TodoAppTQ() {
-  const queryClient = useQueryClient();
-
-  const { data: todos, isPending } = useQuery({
-    queryKey: ['todos'],
-    queryFn: () => fetch('/api/todos').then(r => r.json()),
+function CountryList() {
+  const { data, isPending } = useQuery({
+    queryKey: ['countries'],
+    queryFn: fetchCountries,
+    staleTime: 60 * 60 * 1000, // Fresh for 1 hour
+    gcTime: 24 * 60 * 60 * 1000,
   });
 
-  const addMutation = useMutation({
-    mutationFn: (title: string) =>
-      fetch('/api/todos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title }),
-      }).then(r => r.json()),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['todos'] }),
-  });
-
-  if (isPending) return <p>Loading…</p>;
-
-  return (
-    <div>
-      <ul>{todos.map(t => <li key={t.id}>{t.title}</li>)}</ul>
-      <button onClick={() => addMutation.mutate('New Todo')}>Add</button>
-    </div>
-  );
+  if (isPending) return <Skeleton />;
+  return <ul>{data.map((c) => <li key={c.code}>{c.name}</li>)}</ul>;
 }
 ```
 
+**Expected Output:** The country list is fetched once, served from cache for an hour without network requests, and garbage-collected after a day of inactivity.
+
+**Why this output:** `staleTime` prevents refetches within the hour; `gcTime` keeps the entry long enough for repeat visits.
+
+#### Example 2: Disabling Structural Sharing for Large Data
+
 ```tsx
-// --- SWR ---
-import useSWR, { useSWRConfig } from 'swr';
-
-function TodoAppSWR() {
-  const { data: todos, isLoading } = useSWR('/api/todos', url => fetch(url).then(r => r.json()));
-  const { mutate } = useSWRConfig();
-
-  async function addTodo(title: string) {
-    await fetch('/api/todos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title }),
-    });
-    mutate('/api/todos');
-  }
-
-  if (isLoading) return <p>Loading…</p>;
-
-  return (
-    <div>
-      <ul>{todos.map(t => <li key={t.id}>{t.title}</li>)}</ul>
-      <button onClick={() => addTodo('New Todo')}>Add</button>
-    </div>
-  );
+function RadarContacts() {
+  const { data } = useQuery({
+    queryKey: ['radar-contacts'],
+    queryFn: fetchRadarContacts,
+    staleTime: 2_000,
+    structuralSharing: false, // Large, frequently changing dataset
+  });
+  return <Radar contacts={data} />;
 }
 ```
 
-**Expected Output:** Both components render a list of todos and an "Add" button. Clicking "Add" creates a todo and refetches the list.
+**Expected Output:** The component re-renders with new data even if it is deeply equal, avoiding the O(n) diff cost on thousands of contacts.
 
-**Why This Output Occurs:** Both libraries cache the `todos` query, serve it from cache on remount, and revalidate after the mutation. TanStack Query uses `useMutation` with `onSettled` + `invalidateQueries`; SWR uses the global `mutate` function to revalidate the key.
+**Why this output:** Structural sharing is beneficial for small datasets but adds overhead for large, fast-changing ones.
 
 ### Real-World Cases
 
-- **Dashboards:** Multiple independent widgets fetched with `useQueries` (TanStack Query) or `useSWR` with separate keys.
-- **E-commerce:** Product listings, cart state, and order history cached with different `staleTime` values.
-- **Social apps:** Feed, notifications, and profile data cached and revalidated on focus.
-- **Admin panels:** Data tables with pagination and mutations, requiring the full TanStack Query API.
+- **Lookup tables:** Countries, currencies, and categories cached for hours.
+- **User profiles:** Cached for minutes across navigations.
+- **Dashboards:** Short staleness for near-real-time stats.
 
 ### References
 
-- TanStack Query – Overview: https://tanstack.com/query/latest/docs/framework/react/overview
-- TanStack Query – Quick Start: https://tanstack.com/query/latest/docs/framework/react/quick-start
-- SWR – Documentation: https://swr.vercel.app/
-- SWR – Getting Started: https://swr.vercel.app/docs/getting-started
+- TanStack Query — Caching — https://tanstack.com/query/latest/docs/framework/react/guides/caching
+- TanStack Query — Important Defaults — https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults
+- Core Concepts and Performance (TanStack Query Best Practices) — https://github.com/gohypergiant/standard-toolkit
 
 ---
 
-## Core Concept 2: Caching Lifecycle Configuration (staleTime, gcTime, Automatic Invalidation)
+## 2. Deduplication
 
 ### Definitions
 
-**Core Definition:** Caching lifecycle configuration is the set of timing parameters—`staleTime`, `gcTime` (TanStack Query), `dedupingInterval`, `refreshInterval` (SWR)—that control when cached data is considered fresh, when it is revalidated, and when it is removed from memory.
+**Core Definition:** Deduplication is the practice of ensuring that multiple simultaneous requests for the same data result in a single network request, with all callers sharing the result.
 
-**Technical Definition:** In TanStack Query, two fundamental timing parameters govern the cache. **`staleTime`** (default `0`) determines how long data is considered fresh; while fresh, queries are served from cache without refetching on mount, focus, or reconnect. Setting `staleTime: Infinity` means data is never automatically considered stale. **`gcTime`** (formerly `cacheTime`, default `5 * 60_000` ms) determines how long inactive query data remains in memory after all observers unmount; when this time elapses, the data is garbage collected. `gcTime` should always be greater than or equal to `staleTime`. **Automatic invalidation** occurs via `queryClient.invalidateQueries({ queryKey })`, which marks queries as stale and refetches active ones in the background. Prefix matching is the default; `exact: true` limits to a specific key, and a `predicate` function allows arbitrary matching. In SWR, `dedupingInterval` (default 2000ms) controls how long identical requests are deduplicated, `refreshInterval` controls polling, and `mutate(key)` triggers revalidation.
+**Technical Definition:** TanStack Query deduplicates requests by **query key**: if multiple components mount and request the same key while a fetch is in flight, only one network request is made, and all observers receive the result. The cache key becomes the contract for reads, writes, invalidation, prefetching, and devtools. Deduplication also applies to `prefetchQuery` and `ensureQueryData`, which reuse existing cache entries and in-flight promises.
 
-**Beginner-Friendly Explanation:** Think of cached data as milk in a fridge. `staleTime` is the "best before" date—while the milk is fresh, you use it without checking the store. `gcTime` is how long you keep the milk in the fridge after you stop using it, before throwing it away. "Invalidation" is when you deliberately decide the milk is expired and go buy fresh. Setting `staleTime: 0` means the milk is always considered old, so you check the store every time—aggressive but fresh. Setting `staleTime: Infinity` means you never check the store—fast but potentially stale.
+**Beginner-Friendly Explanation:** Deduplication means “if ten components ask for the same data at the same time, only one request goes out.” Everyone shares the answer.
 
 ### Purposes
 
-- **`staleTime`:** To control how long data is considered fresh before background revalidation is triggered.
-- **`gcTime`:** To control how long inactive query data is retained in memory before garbage collection.
-- **Invalidation:** To mark cached data as stale after mutations and trigger refetches.
-- **Prefix invalidation:** To invalidate all queries under a namespace (e.g., `['todos']` matches `['todos', 1]`).
-- **Predicate invalidation:** To invalidate queries matching a custom condition.
-- **`dedupingInterval` (SWR):** To prevent duplicate requests within a time window.
+- To prevent duplicate network requests from multiple components.
+- To reduce server load and bandwidth.
+- To ensure all components see the same data simultaneously.
+- To simplify component code (no manual request coordination).
+- To support prefetching without causing duplicate fetches.
 
 ### Syntax Rules and Structure
 
-**TanStack Query — `staleTime` and `gcTime`:**
-```tsx
-useQuery({
-  queryKey: ['posts'],
-  queryFn: fetchPosts,
-  staleTime: 5 * 60 * 1000,   // 5 minutes fresh
-  gcTime: 10 * 60 * 1000,     // 10 minutes in memory after unmount
-});
-```
+**Query key as the deduplication contract:**
 
-**Global Defaults:**
 ```tsx
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60_000,        // 1 minute
-      gcTime: 5 * 60_000,       // 5 minutes
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      refetchOnMount: true,
-      retry: 3,
-    },
-  },
-});
-```
+// Component A
+useQuery({ queryKey: ['user', 42], queryFn: () => fetchUser(42) });
 
-**Invalidation by Prefix:**
-```tsx
-// Invalidate all queries whose key starts with ['todos']
-queryClient.invalidateQueries({ queryKey: ['todos'] });
-// Matches: ['todos'], ['todos', 1], ['todos', { page: 2 }]
-```
-
-**Invalidation by Exact Key:**
-```tsx
-queryClient.invalidateQueries({ queryKey: ['todos'], exact: true });
-// Matches only ['todos']
-```
-
-**Invalidation by Predicate:**
-```tsx
-queryClient.invalidateQueries({
-  predicate: (query) =>
-    query.queryKey[0] === 'todos' &&
-    (query.queryKey[1] as any)?.version >= 2,
-});
-```
-
-**SWR — `dedupingInterval` and `refreshInterval`:**
-```tsx
-useSWR('/api/todos', fetcher, {
-  dedupingInterval: 2000,    // 2s — dedupe identical requests within this window
-  refreshInterval: 30_000,   // 30s — poll every 30s
-  revalidateOnFocus: true,
-  revalidateOnReconnect: true,
-  keepPreviousData: true,
-});
+// Component B — same key, same in-flight request, same cache entry
+useQuery({ queryKey: ['user', 42], queryFn: () => fetchUser(42) });
 ```
 
 **Syntax Rules:**
-- Set `staleTime` based on how frequently the data changes. Static data: `Infinity`; real-time data: `0`.
-- Set `gcTime` >= `staleTime` to prevent fresh data from being garbage collected.
-- Use `staleTime: 'static'` (TanStack Query v5) for data that never needs automatic refetching.
-- Invalidate by prefix for related queries; use `exact: true` for precision.
-- Use `predicate` for complex invalidation logic.
-- Always invalidate in `onSettled` (not just `onSuccess`) to handle error cases.
-- SWR's `dedupingInterval` defaults to 2000ms; lower it for more real-time behaviour, raise it to reduce requests.
-- SWR's `keepPreviousData: true` prevents loading flashes during pagination.
+
+1. Query keys must be serialisable and uniquely identify the request.
+2. Include every parameter that affects the result in the key.
+3. Use `queryClient.ensureQueryData` in prefetch/loader scenarios to reuse cache and in-flight promises.
+4. Use `queryClient.cancelQueries` before optimistic updates to prevent refetches from overwriting optimistic state.
 
 **Constraints and Limitations:**
-- `staleTime: 0` (default) causes aggressive refetching; raise it for data that does not change frequently.
-- Garbage collection only removes inactive queries; active queries (rendered in components) are never collected.
-- Invalidation triggers a refetch only if the query is active; inactive queries are marked stale and refetch on next mount.
-- Prefix invalidation can invalidate more queries than intended; use `exact: true` or predicates for precision.
-- Persisted caches require `gcTime` to be overridden to a longer duration (e.g., 24 hours).
 
-### Annotated Code Example: Tunable Cache Lifecycle
+- Deduplication only works when keys match exactly.
+- Different keys for the “same” resource cause duplicate fetches.
+- Without a query library, deduplication must be implemented manually with a promise cache.
+
+### Annotated Code Examples
 
 ```tsx
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-
-// Post list: moderate freshness
-function PostList() {
-  const { data } = useQuery({
-    queryKey: ['posts'],
-    queryFn: fetchPosts,
-    staleTime: 2 * 60 * 1000,   // Fresh for 2 minutes
-    gcTime: 10 * 60 * 1000,      // Kept in memory for 10 minutes
-  });
-
-  return <ul>{data?.map(p => <li key={p.id}>{p.title}</li>)}</ul>;
-}
-
-// User profile: rarely changes
-function UserProfile({ userId }) {
-  const { data } = useQuery({
-    queryKey: ['user', userId],
-    queryFn: () => fetchUser(userId),
-    staleTime: 30 * 60 * 1000,   // Fresh for 30 minutes
-    gcTime: 60 * 60 * 1000,      // Kept for 1 hour
-  });
-
+function UserHeader({ userId }) {
+  const { data } = useQuery({ queryKey: ['user', userId], queryFn: () => fetchUser(userId) });
   return <h1>{data?.name}</h1>;
 }
 
-// Create post: invalidates the post list
-function CreatePost() {
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: createPost,
-    onSettled: () => {
-      // Invalidate all post queries (list + details)
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    },
-  });
-
-  return <button onClick={() => mutation.mutate({ title: 'New' })}>Create</button>;
-}
-```
-
-**Expected Output:** The post list serves cached data instantly on remount within 2 minutes; after 2 minutes, it refetches in the background. The user profile is cached for 30 minutes. Creating a post invalidates all `posts` queries (prefix match), causing the list to refetch and display the new post.
-
-**Why This Output Occurs:** `staleTime` controls freshness; `gcTime` controls retention. Different queries have different staleness profiles—posts change more frequently than user profiles. `invalidateQueries({ queryKey: ['posts'] })` uses prefix matching to invalidate `['posts']` and any sub-key.
-
-### Real-World Cases
-
-- **E-commerce product pages:** `staleTime: 5 * 60 * 1000` for product listings; `staleTime: 30 * 60 * 1000` for categories.
-- **User dashboards:** `staleTime: 0` for real-time metrics; `staleTime: 10 * 60 * 1000` for user settings.
-- **News feeds:** `staleTime: 60_000` with `refetchOnWindowFocus: true` to keep content fresh.
-- **Static content:** `staleTime: Infinity` for documentation and legal pages.
-
-### References
-
-- TanStack Query – Caching: https://tanstack.com/query/latest/docs/framework/react/guides/caching
-- TanStack Query – Important Defaults: https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults
-- TanStack Query – Query Invalidation: https://tanstack.com/query/latest/docs/framework/react/guides/query-invalidation
-- TanStack Query – Query Filters: https://tanstack.com/query/latest/docs/framework/react/guides/filters
-- SWR – Options: https://swr.vercel.app/docs/options
-
----
-
-## Core Concept 3: Request Deduplication and Network Bottleneck Elimination
-
-### Definitions
-
-**Core Definition:** Request deduplication is the practice of ensuring that identical concurrent requests share a single in-flight promise, so multiple components requesting the same data trigger only one network call.
-
-**Technical Definition:** TanStack Query's `QueryCache` maintains a record of every query key. When multiple components call `useQuery` with the same key while a request is in flight, they all subscribe to the same underlying promise; only one network request is made. This is automatic and requires no configuration. TanStack Query v5 further improves this with optimised sharing between components and queries, eliminating redundant network calls and improving performance. SWR deduplicates identical requests within the `dedupingInterval` window (default 2000ms). Beyond deduplication, network bottleneck elimination includes: avoiding request waterfalls (using `Promise.all` or parallel queries), prefetching critical data, using `useQueries` for parallel independent queries, and leveraging HTTP/2 multiplexing (which allows many requests over one connection). The `fetch` API does not deduplicate by default; Axios also does not deduplicate. Libraries like `dedupe-promise` and TanStack Query's cache handle this.
-
-**Beginner-Friendly Explanation:** Imagine five components on the same page all need the current user's profile. Without deduplication, five identical requests hit the server—wasteful and slow. With deduplication, the first request goes out, and the other four components "join" it—they all receive the same response when it arrives. One request, five subscribers. This is automatic in TanStack Query and SWR.
-
-### Purposes
-
-- To eliminate duplicate network requests when multiple components request the same data.
-- To reduce server load and bandwidth consumption.
-- To improve perceived performance by avoiding redundant loading states.
-- To prevent request waterfalls by parallelising independent queries.
-- To consolidate loading states across components that share data.
-
-### Syntax Rules and Structure
-
-**Automatic Deduplication (TanStack Query):**
-```tsx
-// Three components, same query key — only ONE request is made
-function ComponentA() {
-  const { data } = useQuery({ queryKey: ['user', 1], queryFn: () => fetchUser(1) });
-  return <p>{data?.name}</p>;
-}
-
-function ComponentB() {
-  const { data } = useQuery({ queryKey: ['user', 1], queryFn: () => fetchUser(1) });
+function UserSidebar({ userId }) {
+  const { data } = useQuery({ queryKey: ['user', userId], queryFn: () => fetchUser(userId) });
   return <p>{data?.email}</p>;
 }
-
-function ComponentC() {
-  const { data } = useQuery({ queryKey: ['user', 1], queryFn: () => fetchUser(1) });
-  return <p>{data?.phone}</p>;
-}
-
-// All three share the same cache entry and in-flight promise.
 ```
 
-**Parallel Queries with `useQueries`:**
-```tsx
-import { useQueries } from '@tanstack/react-query';
+**Expected Output:** Mounting both components results in a single network request; both render from the shared cache entry.
 
-function Dashboard({ userIds }: { userIds: number[] }) {
-  const results = useQueries({
-    queries: userIds.map(id => ({
-      queryKey: ['user', id],
-      queryFn: () => fetchUser(id),
-    })),
-  });
-
-  return (
-    <ul>
-      {results.map((r, i) => (
-        <li key={i}>{r.isPending ? 'Loading…' : r.data?.name}</li>
-      ))}
-    </ul>
-  );
-}
-```
-
-**Component Breakdown:**
-- `useQueries`: Runs multiple queries in parallel (not sequentially).
-- Each query has its own cache entry and state.
-- No waterfall: all requests start simultaneously.
-
-**SWR Deduplication:**
-```tsx
-// Within the dedupingInterval (default 2s), identical requests are deduped
-useSWR('/api/user/1', fetcher, { dedupingInterval: 2000 });
-```
-
-**Manual Deduplication with `dedupe-promise`:**
-```tsx
-import dedupe from 'dedupe-promise';
-
-const fetchUserDeduped = dedupe(fetchUser);
-
-// Multiple calls in the same tick share one promise
-const [a, b, c] = await Promise.all([
-  fetchUserDeduped(1),
-  fetchUserDeduped(1),
-  fetchUserDeduped(1),
-]);
-```
-
-**Syntax Rules:**
-- Use a single query key for shared data; all components with that key subscribe to the same cache entry.
-- Use `useQueries` for parallel independent queries, not a loop with `await`.
-- Avoid `queryKey` values that change on every render (e.g., objects created inline); use stable references.
-- For dependent queries, use `enabled: !!dependency` to gate execution.
-- Prefetch critical data on route transition to avoid waterfalls.
-- Deduplication applies to *concurrent* requests; sequential requests with different keys are separate.
-
-**Constraints and Limitations:**
-- Deduplication does not apply to different query keys, even if they resolve to the same data.
-- `fetch` and Axios do not deduplicate by default; only caching engines do.
-- Deduplication is per-cache-instance; multiple `QueryClient` instances do not share.
-- Prefetching can cause over-fetching if not scoped carefully.
-- The `dedupingInterval` (SWR) can delay fresh data if set too high.
-
-### Annotated Code Example: Eliminating a Waterfall
-
-```tsx
-// ❌ Waterfall: sequential fetches
-function SlowDashboard({ userId }) {
-  const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState([]);
-
-  useEffect(() => {
-    fetchUser(userId).then(u => {
-      setUser(u);
-      return fetchPosts(u.id); // Waits for user before fetching posts
-    }).then(setPosts);
-  }, [userId]);
-  // Total time: t(user) + t(posts)
-}
-
-// ✅ Parallel: independent fetches with useQueries
-import { useQueries } from '@tanstack/react-query';
-
-function FastDashboard({ userId }) {
-  const results = useQueries({
-    queries: [
-      { queryKey: ['user', userId], queryFn: () => fetchUser(userId) },
-      { queryKey: ['posts', userId], queryFn: () => fetchPosts(userId) },
-      { queryKey: ['notifications', userId], queryFn: () => fetchNotifications(userId) },
-    ],
-  });
-
-  const [user, posts, notifications] = results;
-  // Total time: max(t(user), t(posts), t(notifications))
-}
-
-// ✅ Mixed: sequential dependency, parallel after
-function MixedDashboard({ email }) {
-  const { data: user } = useQuery({
-    queryKey: ['user', email],
-    queryFn: () => fetchUserByEmail(email),
-  });
-
-  const userId = user?.id;
-
-  const results = useQueries({
-    queries: [
-      { queryKey: ['posts', userId], queryFn: () => fetchPosts(userId), enabled: !!userId },
-      { queryKey: ['notifications', userId], queryFn: () => fetchNotifications(userId), enabled: !!userId },
-    ],
-  });
-  // Total time: t(user) + max(t(posts), t(notifications))
-}
-```
-
-**Expected Output:** `SlowDashboard` takes the sum of all request times. `FastDashboard` takes the maximum. `MixedDashboard` takes one sequential step plus the maximum of the parallel step.
-
-**Why This Output Occurs:** `useQueries` starts all queries in parallel. The `enabled: !!userId` option gates the dependent queries until `userId` is available, then they run in parallel. This eliminates the sequential waterfall.
+**Why this output:** Both `useQuery` calls use the identical key `['user', userId]`. TanStack Query deduplicates the in-flight request and shares the result.
 
 ### Real-World Cases
 
-- **Dashboards:** Multiple widgets fetching independent data with `useQueries`.
-- **E-commerce product pages:** Prefetching related products on hover.
-- **Social feeds:** Deduplicating profile data requested by multiple feed items.
-- **Admin tables:** Parallel loading of table data and filter options.
+- **Layouts:** Header, sidebar, and content requesting the same user.
+- **Prefetching:** A loader and a component requesting the same data.
+- **Nested routes:** Parent and child routes depending on the same resource.
 
 ### References
 
-- TanStack Query – Parallel Queries: https://tanstack.com/query/latest/docs/framework/react/guides/parallel-queries
-- TanStack Query – Dependent Queries: https://tanstack.com/query/latest/docs/framework/react/guides/dependent-queries
-- TanStack Query – v5 Release Notes (Deduplication Improvements): https://tanstack.com/query/latest/docs/framework/react/guides/migrating-to-v5
-- SWR – Deduplication: https://swr.vercel.app/docs/options#dedupinginterval
+- TanStack Query — Query Keys — https://tanstack.com/query/latest/docs/framework/react/guides/query-keys
+- TanStack Query — Important Defaults — https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults
+- TanStack Query Overview (dedupe) — https://tanstack.com/query/v3
 
 ---
 
-## Core Concept 4: Data Stream Pagination Models (Offset/Limit, Cursor, Infinite Scrolling)
+## 3. Pagination
 
 ### Definitions
 
-**Core Definition:** Pagination models are strategies for loading large datasets in chunks—offset/limit uses numeric offsets, cursor-based uses opaque pointers, and infinite scrolling appends pages as the user scrolls.
+**Core Definition:** Pagination is the technique of splitting a large dataset into discrete pages that are fetched and displayed one at a time.
 
-**Technical Definition:** **Offset/limit pagination** requests pages by numeric offset: `GET /items?offset=20&limit=10`. It is simple but suffers from drift when items are inserted or deleted between requests, and degrades in performance for deep pages (large offsets). **Cursor-based pagination** uses an opaque pointer to the last item: `GET /items?cursor=eyJpZCI6MjB9&limit=10`. It is stable under concurrent writes and efficient for deep pagination, but cannot jump to arbitrary pages. **Infinite scrolling** is a UI pattern that appends pages as the user scrolls, typically using an Intersection Observer to detect when the sentinel enters the viewport. TanStack Query's `useInfiniteQuery` models infinite scrolling with `getNextPageParam`, `getPreviousPageParam`, `fetchNextPage`, and `hasNextPage`. The `data.pages` array contains each page's response, and `data.pageParams` contains the parameters used for each page. `placeholderData: keepPreviousData` avoids loading flashes during pagination.
+**Technical Definition:** In TanStack Query, **offset-based pagination** uses `useQuery` with the page number in the query key and `keepPreviousData` (v5: `placeholderData: keepPreviousData`) to avoid a loading flash when changing pages. **Cursor-based pagination** uses `useInfiniteQuery` with `initialPageParam` and `getNextPageParam`; each page is cached as a separate query and can be prefetched individually. Cursor-based pagination is generally preferred for large or changing datasets because it avoids the skip/limit instability of offset pagination.
 
-**Beginner-Friendly Explanation:** Pagination is like reading a book in chapters. **Offset/limit** is "give me pages 20–29"—simple, but if someone inserts a page in the middle, your numbers shift. **Cursor-based** is "give me the next 10 pages after this bookmark"—stable even if the book changes, but you can't jump to page 50 directly. **Infinite scrolling** is the "load more as you scroll" pattern, like social media feeds.
+**Beginner-Friendly Explanation:** Pagination means showing data in pages instead of all at once. Cursor-based pagination uses a “next page” token instead of a page number, which is more reliable when items are added or removed.
 
 ### Purposes
 
-- **Offset/limit:** To support page-number navigation and "jump to page N" UI.
-- **Cursor-based:** To support stable, efficient deep pagination for feeds and timelines.
-- **Infinite scrolling:** To provide a continuous browsing experience without explicit pagination controls.
-- **`useInfiniteQuery`:** To manage the pages array, fetch the next page, and track `hasNextPage`.
-- **`keepPreviousData`:** To show the previous page's data while the next page loads, avoiding flashes.
+- To display large datasets without rendering everything.
+- To reduce initial load time and payload size.
+- To support “Previous” and “Next” navigation.
+- To cache each page independently for instant back-navigation.
+- To prefetch the next page for a smoother experience.
 
 ### Syntax Rules and Structure
 
-**Offset/Limit with `useQuery` and `placeholderData`:**
+**Offset pagination:**
+
 ```tsx
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+const [page, setPage] = useState(1);
 
-function PaginatedList() {
-  const [page, setPage] = useState(1);
-
-  const { data, isPlaceholderData } = useQuery({
-    queryKey: ['items', page],
-    queryFn: () => fetchItems({ offset: (page - 1) * 10, limit: 10 }),
-    placeholderData: keepPreviousData, // Show previous page while loading next
-  });
-
-  return (
-    <div>
-      <ul>{data?.items.map(i => <li key={i.id}>{i.name}</li>)}</ul>
-      <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
-      <span>Page {page}</span>
-      <button
-        onClick={() => setPage(p => p + 1)}
-        disabled={isPlaceholderData || !data?.hasMore}
-      >
-        Next
-      </button>
-    </div>
-  );
-}
+const { data, isPlaceholderData } = useQuery({
+  queryKey: ['projects', page],
+  queryFn: () => fetchProjects(page),
+  placeholderData: keepPreviousData, // Keep previous page while fetching
+});
 ```
 
-**Cursor-Based with `useInfiniteQuery`:**
+**Cursor pagination with `useInfiniteQuery`:**
+
 ```tsx
-import { useInfiniteQuery } from '@tanstack/react-query';
-
-function InfiniteFeed() {
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isPending,
-  } = useInfiniteQuery({
-    queryKey: ['feed'],
-    queryFn: ({ pageParam }) => fetchFeed({ cursor: pageParam, limit: 10 }),
-    initialPageParam: null, // Start with no cursor
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-  });
-
-  if (isPending) return <p>Loading…</p>;
-
-  return (
-    <div>
-      {data.pages.map((page, i) => (
-        <ul key={i}>
-          {page.items.map(item => <li key={item.id}>{item.title}</li>)}
-        </ul>
-      ))}
-      <button onClick={() => fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage}>
-        {isFetchingNextPage ? 'Loading more…' : hasNextPage ? 'Load More' : 'No more'}
-      </button>
-    </div>
-  );
-}
+const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+  queryKey: ['projects'],
+  queryFn: ({ pageParam }) => fetchProjects({ cursor: pageParam }),
+  initialPageParam: null,
+  getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+  maxPages: 10, // Optional: limit stored pages
+});
 ```
-
-**Component Breakdown:**
-- `initialPageParam: null`: The starting cursor.
-- `getNextPageParam(lastPage)`: Returns the cursor for the next page, or `undefined` if there is none.
-- `fetchNextPage()`: Loads the next page and appends it to `data.pages`.
-- `hasNextPage`: `true` if `getNextPageParam` returned a non-undefined value.
-
-**Infinite Scrolling with Intersection Observer:**
-```tsx
-import { useEffect, useRef } from 'react';
-
-function InfiniteScrollList() {
-  const sentinelRef = useRef(null);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-    queryKey: ['feed'],
-    queryFn: ({ pageParam }) => fetchFeed(pageParam),
-    initialPageParam: null,
-    getNextPageParam: (last) => last.nextCursor,
-  });
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: '200px' } // Load before reaching the bottom
-    );
-
-    if (sentinelRef.current) observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  return (
-    <div>
-      {data?.pages.map((page, i) => (
-        <ul key={i}>{page.items.map(item => <li key={item.id}>{item.title}</li>)}</ul>
-      ))}
-      <div ref={sentinelRef} style={{ height: 1 }} />
-      {isFetchingNextPage && <p>Loading more…</p>}
-    </div>
-  );
-}
-```
-
-**Component Breakdown:**
-- `sentinelRef`: Attached to a div at the bottom of the list.
-- `IntersectionObserver`: Fires when the sentinel enters the viewport.
-- `rootMargin: '200px'`: Triggers the fetch 200px before the sentinel is visible.
-- `fetchNextPage()`: Appends the next page to the cache.
 
 **Syntax Rules:**
-- Use `useInfiniteQuery` for cursor-based and infinite scrolling; use `useQuery` + `keepPreviousData` for offset/limit with page numbers.
-- Always provide `initialPageParam` (v5 requirement).
-- `getNextPageParam` must return `undefined` (or `null`) when there are no more pages.
-- Use `placeholderData: keepPreviousData` to avoid loading flashes during page transitions.
-- Use Intersection Observer with `rootMargin` for smooth infinite scrolling.
-- Cancel the observer on unmount (`observer.disconnect()`).
-- Use `maxPages` to limit the number of pages kept in memory for infinite queries.
+
+1. Include the page cursor in the query key for offset pagination.
+2. Use `keepPreviousData` / `placeholderData` to avoid loading flashes.
+3. For infinite queries, `initialPageParam` and `getNextPageParam` are required in v5.
+4. Use `maxPages` to bound memory for very long lists.
+5. Each page is cached as a normal query, so back-navigation is instant.
 
 **Constraints and Limitations:**
-- Offset/limit pagination drifts when items are inserted or deleted between requests.
-- Cursor-based pagination cannot jump to arbitrary pages.
-- Infinite scrolling can cause memory growth; use `maxPages` to cap retained pages.
-- Intersection Observer requires a sentinel element and cleanup.
-- `keepPreviousData` shows stale data during transitions; communicate this to the user (e.g., via a subtle "updating" indicator).
-- Bidirectional infinite queries (`getPreviousPageParam`) require careful handling of scroll position.
 
-### Annotated Code Example: Cursor-Based Infinite Feed
+- Offset pagination is unstable when items are inserted or deleted.
+- `useInfiniteQuery` requires a cursor or offset-based page parameter.
+- `maxPages` removes pages from the cache when exceeded, which can cause refetching when navigating back.
+
+### Annotated Code Examples
 
 ```tsx
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useRef, useEffect } from 'react';
+function ProjectList() {
+  const [page, setPage] = useState(1);
+  const { data, isPending, isPlaceholderData } = useQuery({
+    queryKey: ['projects', page],
+    queryFn: () => fetchProjects(page),
+    placeholderData: keepPreviousData,
+  });
 
-async function fetchFeed({ cursor, limit = 10 }: { cursor: string | null; limit?: number }) {
-  const params = new URLSearchParams({ limit: String(limit) });
-  if (cursor) params.set('cursor', cursor);
-
-  const res = await fetch(`/api/feed?${params}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json(); // { items: [...], nextCursor: string | null }
+  if (isPending) return <Skeleton />;
+  return (
+    <>
+      <ProjectGrid projects={data.projects} dimmed={isPlaceholderData} />
+      <button onClick={() => setPage((p) => p + 1)} disabled={!data.hasNext}>
+        Next
+      </button>
+    </>
+  );
 }
+```
 
-export default function InfiniteFeed() {
-  const sentinelRef = useRef<HTMLDivElement>(null);
+**Expected Output:** Clicking “Next” fetches the next page while keeping the previous page visible (dimmed) until the new data arrives.
 
+**Why this output:** `placeholderData: keepPreviousData` prevents the UI from flashing a skeleton during page changes.
+
+### Real-World Cases
+
+- **Data tables:** Offset pagination with page controls.
+- **Search results:** Cursor-based pagination for stable results.
+- **Admin panels:** Paginated lists with prefetched next pages.
+
+### References
+
+- TanStack Query — Pagination — https://tanstack.com/query/latest/docs/framework/react/guides/pagination
+- TanStack Query — useInfiniteQuery — https://mintlify.wiki/TanStack/query/api/react/use-infinite-query
+- TanStack Query — Infinite Queries — https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries
+
+---
+
+## 4. Infinite Scrolling
+
+### Definitions
+
+**Core Definition:** Infinite scrolling is the pattern of automatically loading more data as the user approaches the end of a list, rather than requiring an explicit “Next” click.
+
+**Technical Definition:** Infinite scrolling combines `useInfiniteQuery` with the **Intersection Observer API**: a sentinel element at the end of the list triggers `fetchNextPage` when it enters the viewport. The query aggregates all pages into `data.pages`, and `getNextPageParam` determines whether more data exists. TanStack Query’s `useInfiniteQuery` extends `useQuery` with `fetchNextPage`, `hasNextPage`, `isFetchingNextPage`, and `maxPages`.
+
+**Beginner-Friendly Explanation:** Infinite scrolling means “load more when the user scrolls to the bottom.” An invisible sentinel element watches for the user reaching the end and triggers the next page fetch.
+
+### Purposes
+
+- To provide a seamless browsing experience for long feeds.
+- To avoid explicit pagination controls.
+- To load data incrementally as the user consumes it.
+- To cache each page for instant back-navigation.
+- To bound memory with `maxPages`.
+
+### Syntax Rules and Structure
+
+```tsx
+const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+  queryKey: ['feed'],
+  queryFn: ({ pageParam }) => fetchFeed({ cursor: pageParam }),
+  initialPageParam: null,
+  getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+});
+
+const sentinelRef = useRef(null);
+
+useEffect(() => {
+  const observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  });
+  if (sentinelRef.current) observer.observe(sentinelRef.current);
+  return () => observer.disconnect();
+}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+const items = data?.pages.flatMap((page) => page.items) ?? [];
+```
+
+**Syntax Rules:**
+
+1. Use `IntersectionObserver` rather than scroll event listeners for performance.
+2. Guard with `hasNextPage` and `isFetchingNextPage` to prevent duplicate fetches.
+3. Flatten `data.pages` into a single list for rendering.
+4. Use stable keys (`item.id`) for list items.
+5. Provide a “Load more” fallback button for accessibility and users who prefer explicit control.
+
+**Constraints and Limitations:**
+
+- Infinite scrolling can harm accessibility and “find on page” behaviour; provide a “Load more” alternative.
+- Very long lists can accumulate memory; use `maxPages` or virtualization.
+- Cursor-based pagination is preferred; offset-based infinite scroll is unstable.
+
+### Annotated Code Examples
+
+```tsx
+function InfiniteFeed() {
   const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isPending,
-    isError,
-    error,
+    data, fetchNextPage, hasNextPage, isFetchingNextPage, isPending,
   } = useInfiniteQuery({
     queryKey: ['feed'],
     queryFn: ({ pageParam }) => fetchFeed({ cursor: pageParam }),
-    initialPageParam: null as string | null,
+    initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    maxPages: 5, // Keep at most 5 pages in memory
+    maxPages: 20,
   });
+
+  const sentinelRef = useRef(null);
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: '200px' }
-    );
-
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    });
     observer.observe(el);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (isPending) return <p>Loading feed…</p>;
-  if (isError) return <p role="alert">Error: {error.message}</p>;
+  if (isPending) return <FeedSkeleton />;
 
   return (
     <div>
-      {data.pages.map((page, pageIndex) => (
-        <ul key={pageIndex}>
-          {page.items.map((item: any) => (
-            <li key={item.id}>{item.title}</li>
-          ))}
-        </ul>
-      ))}
-
-      <div ref={sentinelRef} style={{ height: 1 }} aria-hidden="true" />
-
-      {isFetchingNextPage && <p>Loading more…</p>}
-      {!hasNextPage && <p>You've reached the end.</p>}
+      {data.pages.flatMap((page) =>
+        page.items.map((item) => <FeedCard key={item.id} item={item} />)
+      )}
+      <div ref={sentinelRef} />
+      {isFetchingNextPage && <Spinner />}
+      {!hasNextPage && <p>You're all caught up.</p>}
     </div>
   );
 }
 ```
 
-**Expected Output:** The feed loads the first 10 items, then automatically fetches more as the user scrolls near the bottom. Each page is appended to the list. When `nextCursor` is `null`, "You've reached the end." is displayed.
+**Expected Output:** The feed loads the first page, and scrolling near the bottom automatically fetches the next page until there are no more pages.
 
-**Why This Output Occurs:** `useInfiniteQuery` calls `fetchFeed` with the current `pageParam` (initially `null`). `getNextPageParam` extracts `nextCursor` from the response. The Intersection Observer triggers `fetchNextPage` when the sentinel is within 200px of the viewport. `maxPages: 5` limits memory usage by discarding pages beyond the 5 most recent.
+**Why this output:** The observer triggers `fetchNextPage` when the sentinel is visible. Guards prevent duplicate requests. `maxPages` bounds memory.
 
 ### Real-World Cases
 
-- **Social media feeds:** Infinite scrolling with cursor-based pagination.
-- **E-commerce product grids:** Offset/limit pagination with page-number navigation.
-- **Search results:** Cursor-based pagination for stable results under concurrent indexing.
-- **Admin tables:** Offset/limit with `keepPreviousData` for smooth page transitions.
-- **Chat history:** Bidirectional infinite queries (load older/newer messages).
+- **Social feeds:** Infinite scroll with cursor pagination.
+- **Chat history:** Loading older messages on scroll.
+- **Product listings:** Infinite scroll with skeleton cards.
 
 ### References
 
-- TanStack Query – Infinite Queries: https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries
-- TanStack Query – Paginated Queries: https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries
-- TanStack Query – `useInfiniteQuery`: https://tanstack.com/query/latest/docs/framework/react/reference/useInfiniteQuery
-- SWR – Pagination: https://swr.vercel.app/docs/pagination
-- MDN Web Docs – Intersection Observer API: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+- TanStack Query — Infinite Queries — https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries
+- TanStack Query — useInfiniteQuery — https://mintlify.wiki/TanStack/query/api/react/use-infinite-query
+- MDN — Intersection Observer API — https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
 
 ---
 
-## Core Concept 5: Performance Tuning — Prefetching, Hydration, and Placeholder Data
+## 5. Prefetching
 
 ### Definitions
 
-**Core Definition:** Performance tuning in server-state management is the practice of prefetching data before it is needed, hydrating the cache from server-rendered data, and using placeholder data to avoid loading flashes.
+**Core Definition:** Prefetching is loading data or code before the user explicitly requests it, based on predicted intent, so the eventual navigation or render feels instant.
 
-**Technical Definition:** **Prefetching** (`queryClient.prefetchQuery`) starts a fetch before the component that needs the data renders, populating the cache so the component renders instantly from cache. Prefetching is commonly triggered on hover, route transition, or after a mutation. **Hydration** (`HydrationBoundary` in Next.js App Router, `dehydrate`/`hydrate` in TanStack Query) serialises the server-side cache and transfers it to the client, so the client does not refetch data already fetched on the server. **Placeholder data** (`placeholderData` in TanStack Query v5, `keepPreviousData` for pagination) provides temporary data to display while the real data loads, avoiding empty or loading states. `initialData` is different: it is treated as real data and persisted in the cache, while `placeholderData` is ephemeral. TanStack Query v5 renamed `keepPreviousData` (a boolean) to `placeholderData: keepPreviousData` (a function) and added `isPlaceholderData` to distinguish placeholder from real data.
+**Technical Definition:** TanStack Query provides `queryClient.prefetchQuery` and `queryClient.ensureQueryData` to populate the cache. Prefetching is most effective when triggered by **user intent signals**: hovering a link, focusing a button, or a card entering the viewport. In frameworks, Server Components can prefetch queries and dehydrate the cache for client hydration. Prefetching differs from `staleTime` tuning: it proactively fills the cache rather than waiting for a component to mount.
 
-**Beginner-Friendly Explanation:** Prefetching is like ordering your coffee before you reach the counter—when you arrive, it's ready. Hydration is like carrying your notes from home to school—you don't have to re-derive everything on the client. Placeholder data is like a "loading" placeholder that shows the shape of the content before it arrives, so the page doesn't jump around.
+**Beginner-Friendly Explanation:** Prefetching means “guess what the user will need next and load it early.” Hovering a link, for example, is a strong signal that the user is about to click.
 
 ### Purposes
 
-- **Prefetching:** To start fetches before components render, eliminating loading states on navigation.
-- **Hydration:** To transfer server-fetched data to the client cache, avoiding duplicate fetches.
-- **Placeholder data:** To show temporary data while real data loads, reducing perceived latency.
-- **`initialData`:** To seed the cache with real data (e.g., from a server component or a parent query).
-- **`keepPreviousData`:** To keep the previous page's data visible during pagination.
+- To make navigations feel instant.
+- To use idle time and intent signals productively.
+- To avoid loading flashes on detail pages.
+- To improve perceived performance without blocking the current page.
+- To hydrate the client cache from server-rendered data.
 
 ### Syntax Rules and Structure
 
-**Prefetching on Hover:**
-```tsx
-import { useQueryClient } from '@tanstack/react-query';
+**Hover prefetch:**
 
-function ProductLink({ productId }) {
+```tsx
+function ProjectLink({ projectId }) {
   const queryClient = useQueryClient();
 
-  function handleMouseEnter() {
+  function prefetch() {
     queryClient.prefetchQuery({
-      queryKey: ['product', productId],
-      queryFn: () => fetchProduct(productId),
+      queryKey: ['project', projectId],
+      queryFn: () => fetchProject(projectId),
       staleTime: 60_000,
     });
   }
 
-  return <a href={`/products/${productId}`} onMouseEnter={handleMouseEnter}>View</a>;
-}
-```
-
-**Prefetching on Route Transition:**
-```tsx
-function usePrefetchOnRoute() {
-  const queryClient = useQueryClient();
-
-  return useCallback((nextRoute: string) => {
-    if (nextRoute === '/dashboard') {
-      queryClient.prefetchQuery({
-        queryKey: ['dashboard'],
-        queryFn: fetchDashboard,
-      });
-    }
-  }, [queryClient]);
-}
-```
-
-**Hydration (Next.js App Router):**
-```tsx
-// app/providers.tsx
-'use client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
-
-export function Providers({ children }) {
-  const [client] = useState(() => new QueryClient());
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
-}
-```
-
-```tsx
-// app/page.tsx (Server Component)
-import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
-
-export default async function Page() {
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: ['todos'],
-    queryFn: fetchTodos,
-  });
-
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <TodoList />
-    </HydrationBoundary>
+    <Link to={`/projects/${projectId}`} onMouseEnter={prefetch}>
+      View project
+    </Link>
   );
 }
 ```
 
-**Placeholder Data:**
+**Loader prefetch (React Router / TanStack Router):**
+
 ```tsx
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
-
-// keepPreviousData for pagination
-const { data, isPlaceholderData } = useQuery({
-  queryKey: ['items', page],
-  queryFn: () => fetchItems(page),
-  placeholderData: keepPreviousData,
-});
-
-// Static placeholder
-const { data } = useQuery({
-  queryKey: ['user', userId],
-  queryFn: () => fetchUser(userId),
-  placeholderData: { name: 'Loading…', email: '' },
-});
-```
-
-**`initialData` (Real Data):**
-```tsx
-function UserProfile({ initialUser }) {
-  const { data } = useQuery({
-    queryKey: ['user', initialUser.id],
-    queryFn: () => fetchUser(initialUser.id),
-    initialData: initialUser, // Treated as real data
-    staleTime: 60_000,
-  });
-  return <h1>{data.name}</h1>;
+export async function loader({ params }) {
+  await queryClient.ensureQueryData(projectQueryOptions(params.id));
+  return null;
 }
 ```
 
 **Syntax Rules:**
-- Use `prefetchQuery` for data that will be needed soon (hover, route transition, after mutation).
-- Use `HydrationBoundary` + `dehydrate` for SSR/SSG to transfer the server cache to the client.
-- Use `placeholderData: keepPreviousData` for pagination to avoid loading flashes.
-- Use `initialData` when you have real data to seed the cache (e.g., from a parent query or server component).
-- Use `isPlaceholderData` to show a subtle "updating" indicator when displaying placeholder data.
-- Set `staleTime` on prefetched queries to prevent immediate refetch on mount.
-- Prefetch only critical data; over-prefetching wastes bandwidth.
+
+1. Prefetch on intent (hover, focus, viewport) rather than on mount for all links.
+2. Use `prefetchQuery` for fire-and-forget; use `ensureQueryData` when you need the data or error to propagate.
+3. Prefetched data respects `staleTime`; set `preloadStaleTime` in TanStack Router if applicable.
+4. Do not prefetch routes the user is unlikely to visit.
+5. In SSR, prefetch on the server and dehydrate the cache for client hydration.
 
 **Constraints and Limitations:**
-- Prefetching on hover can cause unnecessary fetches if the user does not navigate.
-- `initialData` is persisted in the cache; it must be real, valid data.
-- `placeholderData` is ephemeral and not persisted; it does not trigger a refetch on mount.
-- Hydration requires the same query keys on server and client; mismatches cause refetches.
-- `keepPreviousData` shows stale data; `isPlaceholderData` should be used to indicate this.
-- Over-prefetching can compete with critical requests for bandwidth.
 
-### Annotated Code Example: Prefetch on Hover + Placeholder
+- Aggressive prefetching wastes bandwidth and server resources.
+- Prefetched data can become stale; it is still subject to `staleTime`.
+- Prefetching does not help if the user navigates before the prefetch completes.
+
+### Annotated Code Examples
 
 ```tsx
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-
-function ProductList() {
+function ProductCard({ product }) {
   const queryClient = useQueryClient();
 
-  const { data: products } = useQuery({
-    queryKey: ['products'],
-    queryFn: fetchProducts,
-    staleTime: 5 * 60_000,
-  });
-
-  function prefetchProduct(id: number) {
+  function handleMouseEnter() {
     queryClient.prefetchQuery({
-      queryKey: ['product', id],
-      queryFn: () => fetchProduct(id),
-      staleTime: 5 * 60_000,
+      queryKey: ['product', product.id],
+      queryFn: () => fetchProduct(product.id),
+      staleTime: 30_000,
     });
   }
 
   return (
-    <ul>
-      {products?.map(p => (
-        <li key={p.id} onMouseEnter={() => prefetchProduct(p.id)}>
-          <a href={`/products/${p.id}`}>{p.name}</a>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function ProductDetail({ productId }) {
-  const { data, isPlaceholderData } = useQuery({
-    queryKey: ['product', productId],
-    queryFn: () => fetchProduct(productId),
-    placeholderData: keepPreviousData,
-    staleTime: 5 * 60_000,
-  });
-
-  return (
-    <div>
-      {isPlaceholderData && <span>Updating…</span>}
-      <h1>{data?.name}</h1>
-      <p>{data?.description}</p>
-    </div>
+    <Link to={`/products/${product.id}`} onMouseEnter={handleMouseEnter}>
+      {product.name}
+    </Link>
   );
 }
 ```
 
-**Expected Output:** Hovering over a product link prefetches its detail data. Clicking the link navigates to the detail page, which renders instantly from the prefetched cache. If the data is stale and refetching, "Updating…" appears without blanking the content.
+**Expected Output:** Hovering the product card prefetches the product detail; clicking navigates without a loading state if the prefetch completed.
 
-**Why This Output Occurs:** `prefetchQuery` populates the cache with the product data before navigation. When `ProductDetail` mounts, `useQuery` finds the cached data and renders it immediately. `isPlaceholderData` is `false` because the data is real (prefetched), not a placeholder. If the user navigates to a product that was not prefetched, `keepPreviousData` shows the previous product's data while the new data loads.
+**Why this output:** `prefetchQuery` fills the cache on hover. The detail page’s `useQuery` finds the cached entry and renders instantly.
 
 ### Real-World Cases
 
-- **E-commerce:** Prefetching product details on hover; hydrating product listings from SSR.
-- **Dashboards:** Prefetching dashboard data on login; hydrating from server-rendered HTML.
-- **Social apps:** Prefetching profile data on avatar hover.
-- **Documentation sites:** Hydrating static content from SSG.
-- **Admin panels:** Placeholder data for tables during pagination.
+- **E-commerce:** Prefetching product details from listing cards.
+- **Dashboards:** Prefetching the next page of data.
+- **Documentation:** Prefetching article content on link hover.
 
 ### References
 
-- TanStack Query – Prefetching: https://tanstack.com/query/latest/docs/framework/react/guides/prefetching
-- TanStack Query – SSR & Hydration: https://tanstack.com/query/latest/docs/framework/react/guides/ssr
-- TanStack Query – Placeholder Query Data: https://tanstack.com/query/latest/docs/framework/react/guides/placeholder-query-data
-- TanStack Query – Initial Query Data: https://tanstack.com/query/latest/docs/framework/react/guides/initial-query-data
-- TanStack Query – Paginated Queries (`keepPreviousData`): https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries
-- Next.js – HydrationBoundary: https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr
+- TanStack Query — Prefetching & Router Integration — https://tanstack.com/query/latest/docs/framework/react/guides/prefetching
+- TanStack Query — SSR — https://tanstack.com/query/latest/docs/framework/react/guides/ssr
+- TanStack Query — Pagination (prefetching next page) — https://tanstack.com/query/latest/docs/framework/react/guides/pagination
 
 ---
 
-## Core Concept 6: Mutating Server State — Optimistic Updates, Rollback, and Cache Triggers
+## 6. Optimistic Updates
 
 ### Definitions
 
-**Core Definition:** Mutating server state is the practice of performing create, update, or delete operations via `useMutation`, updating the cache optimistically before the server confirms, and rolling back on failure.
+**Core Definition:** An optimistic update is a UI change applied immediately, before the server confirms the mutation, with automatic rollback if the mutation fails.
 
-**Technical Definition:** `useMutation` manages the lifecycle of a write operation: `mutate`/`mutateAsync` triggers it, `onMutate` runs before the request (for optimistic updates), `onError` runs on failure (for rollback), `onSuccess` runs on success, and `onSettled` runs after either. The standard optimistic update pattern is: cancel outgoing refetches, snapshot the previous cache value, write the optimistic value, return the snapshot as context, roll back in `onError` using the snapshot, and always invalidate in `onSettled` to reconcile with the server. TanStack Query provides `useMutationState` for cross-component optimistic updates, using `mutationKey` and `submittedAt` for identity. React 19's `useOptimistic` provides a similar pattern for form Actions. The key rules are: optimistic updates are optional and add complexity; always roll back on error; always invalidate in `onSettled`; and never mutate the cache directly outside `onMutate`/`setQueryData`.
+**Technical Definition:** In TanStack Query, optimistic updates use `useMutation` with three callbacks: **`onMutate`** cancels outgoing refetches, snapshots the previous cache value, applies the optimistic change with `queryClient.setQueryData`, and returns the snapshot as context; **`onError`** rolls back to the snapshot; **`onSettled`** invalidates the query to reconcile with the server. The critical rule is to cancel in-flight refetches before applying the optimistic value, so a settling refetch cannot overwrite it.
 
-**Beginner-Friendly Explanation:** When you click "like" on a post, you expect the heart to fill instantly—not after a server round trip. An optimistic update shows the change immediately, assuming the server will succeed. If the server fails, the app silently rolls back to the previous state and shows an error. This makes the app feel instant while keeping data consistent.
+**Beginner-Friendly Explanation:** Optimistic updates make the UI feel instant. You change the screen immediately, assume the server will succeed, and undo the change if it fails.
 
 ### Purposes
 
-- To update the UI immediately after a mutation, without waiting for the server.
-- To roll back to the previous state if the mutation fails.
-- To reconcile the cache with the server after the mutation settles.
-- To prevent race conditions by cancelling outgoing refetches before optimistic updates.
-- To support concurrent optimistic updates with `useMutationState` and `submittedAt`.
+- To provide instant feedback for mutations.
+- To reduce perceived latency.
+- To improve UX for likes, follows, toggles, and simple edits.
+- To maintain correctness with rollback on failure.
 
 ### Syntax Rules and Structure
 
-**Optimistic Update Pattern (TanStack Query):**
 ```tsx
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-function useToggleTodo() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, completed }) =>
-      fetch(`/api/todos/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ completed }),
-      }).then(r => r.json()),
-
-    onMutate: async ({ id, completed }) => {
-      // 1. Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['todos'] });
-
-      // 2. Snapshot the previous value
-      const previous = queryClient.getQueryData(['todos']);
-
-      // 3. Optimistically update the cache
-      queryClient.setQueryData(['todos'], (old: any[]) =>
-        old?.map(t => (t.id === id ? { ...t, completed } : t))
-      );
-
-      // 4. Return context for rollback
-      return { previous };
-    },
-
-    onError: (_err, _vars, context) => {
-      // 5. Roll back on error
-      if (context?.previous) {
-        queryClient.setQueryData(['todos'], context.previous);
-      }
-    },
-
-    onSettled: () => {
-      // 6. Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ['todos'] });
-    },
-  });
-}
-```
-
-**Component Breakdown:**
-- `onMutate`: Runs before the mutation; cancels refetches, snapshots, and optimistically updates.
-- `return { previous }`: Context passed to `onError` and `onSettled`.
-- `onError`: Rolls back to the snapshot.
-- `onSettled`: Invalidates the query to reconcile with the server.
-
-**Concurrent Optimistic Updates (`useMutationState`):**
-```tsx
-import { useMutationState } from '@tanstack/react-query';
-
-function TodoList() {
-  const { data: todos } = useQuery({ queryKey: ['todos'], queryFn: fetchTodos });
-
-  const pendingTodos = useMutationState({
-    filters: { mutationKey: ['addTodo'], status: 'pending' },
-    select: (mutation) => mutation.state.variables,
-  });
-
-  return (
-    <ul>
-      {todos?.map(t => <li key={t.id}>{t.title}</li>)}
-      {pendingTodos.map((t: any, i) => (
-        <li key={`pending-${i}`} style={{ opacity: 0.5 }}>{t.title} (saving…)</li>
-      ))}
-    </ul>
-  );
-}
-```
-
-**Component Breakdown:**
-- `useMutationState`: Reads the state of all mutations matching the filter.
-- `filters: { mutationKey, status: 'pending' }`: Selects pending `addTodo` mutations.
-- `select: (m) => m.state.variables`: Extracts the variables (the new todo).
-
-**Optimistic Update via UI (Simpler Variant):**
-```tsx
-const mutation = useMutation({
-  mutationFn: addTodo,
-  onSettled: () => queryClient.invalidateQueries({ queryKey: ['todos'] }),
+useMutation({
+  mutationFn: updateTodo,
+  onMutate: async (newTodo) => {
+    await queryClient.cancelQueries({ queryKey: ['todos'] });
+    const previous = queryClient.getQueryData(['todos']);
+    queryClient.setQueryData(['todos'], (old) => [...old, newTodo]);
+    return { previous };
+  },
+  onError: (_err, _newTodo, context) => {
+    queryClient.setQueryData(['todos'], context.previous);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ['todos'] });
+  },
 });
-
-return (
-  <ul>
-    {todos?.map(t => <li key={t.id}>{t.title}</li>)}
-    {mutation.isPending && (
-      <li style={{ opacity: 0.5 }}>{mutation.variables.title}</li>
-    )}
-  </ul>
-);
 ```
 
 **Syntax Rules:**
-- Always cancel outgoing refetches in `onMutate` before writing to the cache.
-- Always snapshot the previous value and return it as context.
-- Always roll back in `onError` using the context.
-- Always invalidate in `onSettled` (not just `onSuccess`) to handle both outcomes.
-- Use `submittedAt` as a unique key for concurrent optimistic updates.
-- Use the UI variant for simple cases; use the cache variant for complex cache manipulations.
-- Never mutate the cache outside `onMutate` or `setQueryData`.
-- Handle the case where `context` is `undefined` (e.g., if `onMutate` failed).
+
+1. Always `cancelQueries` before applying the optimistic update.
+2. Always snapshot the previous value and return it as context.
+3. Always roll back in `onError` using the context.
+4. Always invalidate in `onSettled` to reconcile with the server.
+5. Use immutable updates (`[...old, newItem]`) — never mutate the cached array.
+6. Use optimistic updates only for operations that usually succeed; for critical mutations, wait for the server.
 
 **Constraints and Limitations:**
-- Optimistic updates add complexity; only use them when the UX benefit is significant.
-- Rolling back can cause visual flicker if the mutation fails quickly.
-- Concurrent optimistic updates require careful key management.
-- Invalidation after optimistic updates can cause a brief "double render" (optimistic + server data).
-- React 19's `useOptimistic` is an alternative for form Actions; it does not replace `useMutation`.
 
-### Annotated Code Example: Optimistic Like Button
+- Optimistic updates are a correctness trade-off: the UI can show data the server has not accepted.
+- Rollback must handle concurrent mutations carefully.
+- Not suitable for operations where failure is common (payments, destructive actions).
+
+### Annotated Code Examples
 
 ```tsx
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-function LikeButton({ postId }) {
+function TodoList() {
   const queryClient = useQueryClient();
-
-  const { data: post } = useQuery({
-    queryKey: ['post', postId],
-    queryFn: () => fetchPost(postId),
-  });
+  const { data: todos } = useQuery({ queryKey: ['todos'], queryFn: fetchTodos });
 
   const mutation = useMutation({
-    mutationFn: (liked: boolean) =>
-      fetch(`/api/posts/${postId}/like`, {
-        method: liked ? 'DELETE' : 'POST',
-      }).then(r => r.json()),
-
-    onMutate: async (liked) => {
-      await queryClient.cancelQueries({ queryKey: ['post', postId] });
-      const previous = queryClient.getQueryData(['post', postId]);
-
-      queryClient.setQueryData(['post', postId], (old: any) => ({
-        ...old,
-        likes: liked ? old.likes - 1 : old.likes + 1,
-        liked: !liked,
-      }));
-
+    mutationFn: addTodo,
+    onMutate: async (newTodo) => {
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const previous = queryClient.getQueryData(['todos']);
+      queryClient.setQueryData(['todos'], (old) => [...old, newTodo]);
       return { previous };
     },
-
-    onError: (_err, _liked, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(['post', postId], context.previous);
-      }
+    onError: (_err, _newTodo, context) => {
+      queryClient.setQueryData(['todos'], context.previous);
     },
-
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['post', postId] });
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
   });
 
   return (
-    <button onClick={() => mutation.mutate(post?.liked ?? false)}>
-      {post?.liked ? '❤️' : '🤍'} {post?.likes}
+    <button onClick={() => mutation.mutate({ id: crypto.randomUUID(), title: 'New' })}>
+      Add todo
     </button>
   );
 }
 ```
 
-**Expected Output:** Clicking the heart instantly toggles the like state and updates the count. If the server succeeds, the state remains. If it fails, the heart and count revert, and the cache is invalidated to refetch the true state.
+**Expected Output:** The new todo appears instantly. If the request fails, it disappears and the list reverts. After success or failure, the list refetches from the server.
 
-**Why This Output Occurs:** `onMutate` cancels refetches, snapshots the post, and optimistically updates the like state. `onError` rolls back using the snapshot. `onSettled` invalidates the post query, triggering a refetch to confirm the final state.
+**Why this output:** `onMutate` applies the optimistic change; `onError` restores the snapshot; `onSettled` reconciles with the server.
 
 ### Real-World Cases
 
-- **Social media:** Liking, following, bookmarking with optimistic updates.
-- **E-commerce:** Adding to cart, updating quantities.
-- **Task management:** Toggling todo completion, reordering items.
-- **Chat:** Sending messages with optimistic rendering.
-- **Settings:** Toggling preferences with instant feedback.
+- **Likes and reactions:** Toggling instantly.
+- **Todo lists:** Adding items before the server responds.
+- **Follow buttons:** Updating follower counts immediately.
 
 ### References
 
-- TanStack Query – Optimistic Updates: https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates
-- TanStack Query – `useMutation`: https://tanstack.com/query/latest/docs/framework/react/reference/useMutation
-- TanStack Query – `useMutationState`: https://tanstack.com/query/latest/docs/framework/react/reference/useMutationState
-- TanStack Query – Invalidations from Mutations: https://tanstack.com/query/latest/docs/framework/react/guides/invalidations-from-mutations
-- React – `useOptimistic`: https://react.dev/reference/react/useOptimistic
+- TanStack Query — Optimistic Updates — https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates
+- TanStack Query — Mutations — https://tanstack.com/query/latest/docs/framework/react/guides/mutations
+- Optimistic Updates (v4) — https://tanstack.com/query/v4/docs/framework/react/guides/optimistic-updates
 
 ---
 
-## Core Concept 7: Real-Time Sync Paradigms — Smart Polling, WebSockets, Background Sync
+## 7. Background Synchronization / Fetching
 
 ### Definitions
 
-**Core Definition:** Real-time sync paradigms are strategies for keeping the client cache synchronised with server changes as they happen—through polling, WebSocket push, or background synchronisation.
+**Core Definition:** Background synchronization is the practice of refreshing cached data without blocking the current UI, so users see stale data immediately while updates arrive quietly.
 
-**Technical Definition:** **Smart polling** uses `refetchInterval` (TanStack Query) or `refreshInterval` (SWR) to periodically refetch data. By default, polling pauses when the browser tab is hidden; `refetchIntervalInBackground: true` continues polling. Polling is simple but wasteful and inherently laggy. **WebSocket integration** opens a persistent, full-duplex connection; on each server message, the client writes through to the cache using `queryClient.setQueryData` (for known updates) or invalidates queries (for unknown updates). WebSockets provide instant updates with minimal overhead but require connection management, reconnection logic, and authentication. **Background synchronisation** uses the Background Sync API (service workers) or a queue of failed mutations that are retried when connectivity is restored. TanStack Query supports offline-first patterns with `networkMode: 'offlineFirst'` and mutation persistence via `persistQueryClient`. The `useSyncExternalStore` API allows integrating custom real-time sources (WebSocket, SSE) with React's rendering.
+**Technical Definition:** TanStack Query performs background refetches on several triggers: **window focus** (default), **reconnect** (default), **mount** (when data is stale), and **polling intervals** (`refetchInterval`). The query remains in `success` state while `isFetching` is `true`, allowing the UI to keep rendering existing data. **Stale-while-revalidate** is the resulting pattern: serve stale data immediately, revalidate in the background, and swap in fresh data when it arrives. `invalidateQueries` marks data stale and triggers refetches for active queries.
 
-**Beginner-Friendly Explanation:** Real-time sync is about keeping your app's data fresh as the server changes. **Polling** is like refreshing your email every 30 seconds—simple but wasteful. **WebSockets** are like a phone call—the server can push updates instantly. **Background sync** is like a mail carrier who keeps trying to deliver a package until it succeeds, even if you go offline temporarily.
+**Beginner-Friendly Explanation:** Background synchronization means the app keeps showing the data it has while quietly checking for updates. When new data arrives, the screen updates without a loading spinner.
 
 ### Purposes
 
-- **Polling:** To keep data fresh for dashboards and feeds without WebSocket infrastructure.
-- **WebSockets:** To push real-time updates (chat, notifications, collaborative editing) with minimal latency.
-- **SSE:** To stream one-way updates (stock tickers, live scores) over HTTP.
-- **Cache write-through:** To update the cache directly when a known change arrives.
-- **Cache invalidation:** To refetch when an unknown change arrives.
-- **Background sync:** To queue mutations when offline and retry when connectivity returns.
-- **Offline-first:** To serve cached data when offline and reconcile when online.
+- To keep data fresh without blocking the user.
+- To recover from offline periods when the connection returns.
+- To update data when the user returns to the tab.
+- To avoid loading spinners for routine refreshes.
+- To reconcile optimistic updates with server truth.
 
 ### Syntax Rules and Structure
 
-**Smart Polling (TanStack Query):**
 ```tsx
 useQuery({
-  queryKey: ['metrics'],
-  queryFn: fetchMetrics,
-  refetchInterval: 30_000,               // Poll every 30s
-  refetchIntervalInBackground: false,    // Pause when tab is hidden
-  staleTime: 10_000,                     // Consider fresh for 10s
+  queryKey: ['notifications'],
+  queryFn: fetchNotifications,
+  staleTime: 30_000,
+  refetchOnWindowFocus: true, // default
+  refetchOnReconnect: true,   // default
+  refetchInterval: 60_000,    // optional polling
 });
 ```
-
-**Smart Polling (SWR):**
-```tsx
-useSWR('/api/metrics', fetcher, {
-  refreshInterval: 30_000,
-  refreshWhenHidden: false,
-  refreshWhenOffline: false,
-});
-```
-
-**WebSocket Integration — Cache Write-Through:**
-```tsx
-import { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-
-function useTodoSocket() {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const socket = new WebSocket('wss://api.example.com/todos');
-
-    socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-
-      switch (message.type) {
-        case 'todo:created':
-          // Write-through: append to the cached list
-          queryClient.setQueryData(['todos'], (old: any[] = []) => [
-            ...old,
-            message.todo,
-          ]);
-          break;
-
-        case 'todo:updated':
-          queryClient.setQueryData(['todos'], (old: any[] = []) =>
-            old.map(t => (t.id === message.todo.id ? message.todo : t))
-          );
-          break;
-
-        case 'todo:deleted':
-          queryClient.setQueryData(['todos'], (old: any[] = []) =>
-            old.filter(t => t.id !== message.todoId)
-          );
-          break;
-
-        default:
-          // Unknown change: invalidate to refetch
-          queryClient.invalidateQueries({ queryKey: ['todos'] });
-      }
-    };
-
-    return () => socket.close();
-  }, [queryClient]);
-}
-```
-
-**Component Breakdown:**
-- `new WebSocket('wss://…')`: Opens the connection.
-- `socket.onmessage`: Handles incoming messages.
-- `setQueryData`: Writes through to the cache for known changes.
-- `invalidateQueries`: Refetches for unknown changes.
-- `socket.close()`: Cleanup on unmount.
-
-**WebSocket with Reconnection and Backoff:**
-```tsx
-function useReconnectingSocket(url: string, onMessage: (data: any) => void) {
-  useEffect(() => {
-    let socket: WebSocket | null = null;
-    let retries = 0;
-    let reconnectTimer: ReturnType<typeof setTimeout>;
-    let closed = false;
-
-    function connect() {
-      socket = new WebSocket(url);
-
-      socket.onopen = () => { retries = 0; };
-      socket.onmessage = (event) => onMessage(JSON.parse(event.data));
-      socket.onclose = () => {
-        if (closed) return;
-        const delay = Math.min(1000 * 2 ** retries, 30_000);
-        const jitter = Math.random() * 1000;
-        reconnectTimer = setTimeout(connect, delay + jitter);
-        retries++;
-      };
-      socket.onerror = () => socket?.close();
-    }
-
-    connect();
-
-    return () => {
-      closed = true;
-      clearTimeout(reconnectTimer);
-      socket?.close();
-    };
-  }, [url, onMessage]);
-}
-```
-
-**Component Breakdown:**
-- `retries`: Counts reconnection attempts.
-- `Math.min(1000 * 2 ** retries, 30_000)`: Exponential backoff capped at 30s.
-- `Math.random() * 1000`: Jitter to prevent thundering herd.
-- `closed`: Prevents reconnection after unmount.
-
-**Background Sync with Mutations (TanStack Query Persist):**
-```tsx
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
-
-const persister = createSyncStoragePersister({
-  storage: window.localStorage,
-});
-
-<PersistQueryClientProvider
-  client={queryClient}
-  persistOptions={{ persister, maxAge: 24 * 60 * 60 * 1000 }}
->
-  <App />
-</PersistQueryClientProvider>
-```
-
-**Component Breakdown:**
-- `persister`: Persists the query cache to `localStorage`.
-- `maxAge`: Discards persisted data older than 24 hours.
-- Mutations can also be persisted with `persistQueryClient` + `defaultOptions.mutations`.
 
 **Syntax Rules:**
-- Use `refetchInterval` for polling; set `refetchIntervalInBackground: false` (default) to save bandwidth.
-- Use WebSockets for real-time push; write through to the cache for known changes and invalidate for unknown ones.
-- Always handle WebSocket reconnection with exponential backoff and jitter.
-- Always clean up the WebSocket on unmount (`socket.close()`).
-- Use `networkMode: 'offlineFirst'` to serve cached data when offline.
-- Persist the query cache with `persistQueryClient` for offline-first apps.
-- Use `useSyncExternalStore` to integrate custom real-time sources with React.
-- Prefer SSE over WebSockets for one-way server-to-client streaming.
+
+1. Use `isFetching` (not `isPending`) to indicate background activity.
+2. Keep existing data visible during background refetches.
+3. Use `refetchOnWindowFocus` and `refetchOnReconnect` for freshness.
+4. Use `invalidateQueries` after mutations to trigger background reconciliation.
+5. Avoid full-page spinners for background fetches; use subtle indicators.
 
 **Constraints and Limitations:**
-- Polling is wasteful and inherently laggy; use it only when WebSockets are not feasible.
-- WebSockets require server infrastructure, authentication, and reconnection logic.
-- WebSocket messages can arrive out of order; use timestamps or sequence numbers to reconcile.
-- Background sync requires service workers; browser support varies.
-- Persisted caches can grow large; limit `maxAge` and the number of persisted queries.
-- `networkMode: 'offlineFirst'` disables some retry behaviours; understand the trade-offs.
 
-### Annotated Code Example: WebSocket + TanStack Query Cache Write-Through
+- Background refetches consume bandwidth and server resources.
+- Aggressive focus refetching can be annoying on some screens.
+- Background updates can overwrite local edits if not coordinated.
+
+### Annotated Code Examples
 
 ```tsx
-import { useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-
-async function fetchMessages(roomId: string) {
-  const res = await fetch(`/api/rooms/${roomId}/messages`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
-
-function useRoomSocket(roomId: string) {
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const socket = new WebSocket(`wss://api.example.com/rooms/${roomId}`);
-
-    socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-
-      // Write-through: append the new message to the cached list
-      queryClient.setQueryData(['messages', roomId], (old: any[] = []) => [
-        ...old,
-        message,
-      ]);
-    };
-
-    socket.onerror = () => {
-      // On error, invalidate to refetch the full list
-      queryClient.invalidateQueries({ queryKey: ['messages', roomId] });
-    };
-
-    return () => socket.close();
-  }, [roomId, queryClient]);
-}
-
-export default function ChatRoom({ roomId }: { roomId: string }) {
-  const { data: messages, isPending } = useQuery({
-    queryKey: ['messages', roomId],
-    queryFn: () => fetchMessages(roomId),
-    staleTime: Infinity, // WebSocket keeps the cache fresh
+function NotificationBell() {
+  const { data, isFetching } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: fetchNotifications,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
 
-  useRoomSocket(roomId);
-
-  if (isPending) return <p>Loading messages…</p>;
-
   return (
-    <ul>
-      {messages.map((m: any) => (
-        <li key={m.id}>
-          <strong>{m.author}:</strong> {m.text}
-        </li>
-      ))}
-    </ul>
+    <button disabled={isFetching}>
+      {data?.length ?? 0} notifications {isFetching && '· refreshing…'}
+    </button>
   );
 }
 ```
 
-**Expected Output:** The chat room loads the initial message history via `useQuery`. New messages arrive via WebSocket and are appended to the cache via `setQueryData`, causing the component to re-render with the new message. The `staleTime: Infinity` prevents TanStack Query from refetching, since the WebSocket keeps the cache fresh.
+**Expected Output:** The count is shown immediately. When the window regains focus and data is stale, a background refetch runs; the button shows a subtle “refreshing…” indicator without hiding the count.
 
-**Why This Output Occurs:** `useQuery` fetches the initial messages and caches them under `['messages', roomId]`. `useRoomSocket` opens a WebSocket and, on each incoming message, calls `setQueryData` to append it to the cached list. React re-renders with the updated list. The `staleTime: Infinity` tells TanStack Query not to refetch, because the WebSocket is the source of truth for updates.
+**Why this output:** The query remains in `success` state during the refetch. `isFetching` drives the subtle indicator, not a full loading state.
 
 ### Real-World Cases
 
-- **Chat applications:** WebSocket push with cache write-through for instant message rendering.
-- **Collaborative editing:** WebSocket or WebRTC for real-time document updates.
-- **Stock tickers:** SSE or WebSocket for streaming price updates.
-- **Notifications:** WebSocket push for real-time notification badges.
-- **Offline-first apps:** Persisted query cache + background sync for offline access and reconciliation.
-- **Live dashboards:** Smart polling with `refetchInterval` for metrics that must stay current.
+- **Notifications:** Focus-based refetch.
+- **Dashboards:** Periodic background refresh.
+- **Offline recovery:** Reconnect refetch.
 
 ### References
 
-- TanStack Query – Polling: https://tanstack.com/query/latest/docs/framework/react/guides/polling
-- TanStack Query – Network Mode: https://tanstack.com/query/latest/docs/framework/react/guides/network-mode
-- TanStack Query – Persist Query Client: https://tanstack.com/query/latest/docs/framework/react/plugins/persistQueryClient
-- TanStack Query – `useSyncExternalStore` Integration: https://react.dev/reference/react/useSyncExternalStore
-- MDN Web Docs – WebSocket API: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
-- MDN Web Docs – Server-Sent Events: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events
-- MDN Web Docs – Background Synchronization API: https://developer.mozilla.org/en-US/docs/Web/API/Background_Synchronization_API
-- SWR – Real-Time: https://swr.vercel.app/docs/revalidation
+- TanStack Query — Window Focus Refetching — https://tanstack.com/query/latest/docs/framework/react/guides/window-focus-refetching
+- TanStack Query — Query Invalidation — https://tanstack.com/query/latest/docs/framework/react/guides/query-invalidation
+- TanStack Query Overview (background refetching) — https://tanstack.com/query/v3
 
 ---
 
-## Comparison and Decision Guidance
+## 8. Polling & Long Polling
 
-| Concern | Tool/Pattern | When to Use | Key Risk |
-|---|---|---|---|
-| **Caching engine** | TanStack Query | Complex apps with mutations, pagination, devtools | Bundle size (~12–15 KB) |
-| **Caching engine** | SWR | Simple read-heavy apps | Less powerful mutations |
-| **Freshness** | `staleTime` (TanStack) / `dedupingInterval` (SWR) | All queries | `staleTime: 0` causes over-fetching |
-| **Retention** | `gcTime` | All queries | `gcTime < staleTime` collects fresh data |
-| **Deduplication** | Automatic in both libraries | All concurrent identical requests | Does not apply across different keys |
-| **Pagination** | `useInfiniteQuery` (TanStack) / `useSWRInfinite` (SWR) | Feeds, lists, tables | Memory growth without `maxPages` |
-| **Prefetching** | `prefetchQuery` | Hover, route transition | Over-prefetching wastes bandwidth |
-| **Hydration** | `dehydrate` + `HydrationBoundary` | SSR/SSG | Key mismatches cause refetches |
-| **Placeholder data** | `placeholderData: keepPreviousData` | Pagination | Shows stale data (use `isPlaceholderData`) |
-| **Optimistic updates** | `onMutate` + `onError` + `onSettled` | Likes, toggles, cart | Complexity; rollback flicker |
-| **Real-time** | WebSocket + `setQueryData` | Chat, notifications | Reconnection, ordering |
-| **Polling** | `refetchInterval` | Dashboards without WebSockets | Wasteful, laggy |
-| **Offline-first** | `persistQueryClient` + `networkMode: 'offlineFirst'` | PWAs, mobile | Storage limits, stale data |
+### Definitions
 
-**Decision Guidance:**
-- **Start with TanStack Query** for any app with mutations, pagination, or complex cache needs.
-- **Use SWR** for read-heavy apps with minimal mutation logic and a smaller bundle target.
-- **Set `staleTime` deliberately:** `Infinity` for static data, `0` for real-time data, and 1–30 minutes for most data.
-- **Set `gcTime` >= `staleTime`** to prevent fresh data from being garbage collected.
-- **Use `useInfiniteQuery`** for cursor-based pagination and infinite scrolling; use `useQuery` + `keepPreviousData` for offset/limit with page numbers.
-- **Prefetch on hover and route transition** for a snappy navigation experience.
-- **Hydrate from the server** in Next.js App Router or Remix to avoid duplicate fetches.
-- **Use optimistic updates** for user actions where instant feedback matters (likes, toggles, cart).
-- **Integrate WebSockets** for real-time chat, notifications, and collaborative editing; write through to the cache.
-- **Persist the query cache** for offline-first PWAs; cap `maxAge` to avoid unbounded growth.
+**Core Definition:** Polling is repeatedly asking the server for updates at fixed intervals; long polling is a variant where the server holds the request open until data is available or a timeout occurs.
+
+**Technical Definition:** **Short polling** uses `setInterval` or TanStack Query’s `refetchInterval` to fetch on a schedule. Every cycle pays a full HTTP request/response, usually to hear “nothing yet,” and average delivery delay is half the interval plus a round trip. **Long polling** holds the request open on the server until an event occurs or a timeout fires, then responds and the client immediately re-requests. It simulates push over plain HTTP and is useful when WebSocket upgrades are blocked, but it ties up server resources per client. The 2026 consensus: use polling for rare changes, SSE for one-way push, and WebSockets for two-way communication.
+
+**Beginner-Friendly Explanation:** Polling means asking “any updates?” every few seconds. Long polling means asking once and having the server wait to answer until something happens.
+
+### Purposes
+
+- To refresh data at a predictable interval (short polling).
+- To simulate server push when SSE/WebSockets are unavailable (long polling).
+- To keep dashboards and status indicators current.
+- To provide a fallback transport behind an abstraction.
+
+### Syntax Rules and Structure
+
+**Short polling (TanStack Query):**
+
+```tsx
+useQuery({
+  queryKey: ['status'],
+  queryFn: fetchStatus,
+  refetchInterval: 5_000, // Poll every 5 seconds
+  refetchIntervalInBackground: false,
+});
+```
+
+**Long polling (conceptual):**
+
+```js
+async function longPoll() {
+  while (true) {
+    const res = await fetch('/api/events?since=' + lastId);
+    if (res.status === 200) {
+      const event = await res.json();
+      handleEvent(event);
+      lastId = event.id;
+    }
+    // On timeout (204), immediately re-request
+  }
+}
+```
+
+**Syntax Rules:**
+
+1. Use `refetchInterval` for short polling; stop it when the data is not needed.
+2. Use `refetchIntervalInBackground: false` to pause polling when the tab is hidden.
+3. For long polling, the server must hold the connection and respond on event or timeout.
+4. Long polling must handle reconnection and backoff.
+5. Prefer SSE or WebSockets when available; use long polling as a fallback behind an abstraction.
+
+**Constraints and Limitations:**
+
+- Short polling wastes requests and battery.
+- Long polling ties up server connections per client.
+- Both are inferior to SSE/WebSockets for real-time push in 2026.
+
+### Annotated Code Examples
+
+```tsx
+function LiveStatus() {
+  const { data, isFetching } = useQuery({
+    queryKey: ['live-status'],
+    queryFn: fetchStatus,
+    refetchInterval: 10_000,
+    refetchIntervalInBackground: false,
+  });
+
+  return <StatusBadge status={data?.status} refreshing={isFetching} />;
+}
+```
+
+**Expected Output:** The status refreshes every 10 seconds while the tab is visible; polling pauses when the tab is hidden.
+
+**Why this output:** `refetchInterval` drives short polling. `refetchIntervalInBackground: false` avoids wasted requests when the user is not looking.
+
+### Real-World Cases
+
+- **Dashboards:** Polling for stats every few seconds.
+- **Job status:** Polling a build or export status.
+- **Fallback real-time:** Long polling when WebSockets are blocked.
+
+### References
+
+- TanStack Query — Polling — https://tanstack.com/query/latest/docs/framework/react/guides/polling
+- MDN — HTTP long polling (conceptual) — https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events
+- Back4App — SSE vs. WebSockets vs. Polling (2026) — https://www.back4app.com/glossary/sse-vs-websockets-vs-polling/
+
+---
+
+## 9. Server-Sent Events (SSE)
+
+### Definitions
+
+**Core Definition:** Server-Sent Events (SSE) is a standard for unidirectional, server-to-client event streaming over a single HTTP connection.
+
+**Technical Definition:** SSE uses the `EventSource` interface. The client creates `new EventSource(url)`, and the server responds with `Content-Type: text/event-stream`, sending text events in a simple wire format (`data:`, `event:`, `id:`, `retry:`). The browser automatically reconnects on connection loss, and the `Last-Event-ID` header supports resumption. SSE is **one-way** (server → client) and works over standard HTTP, so it benefits from HTTP/2 multiplexing and avoids the connection limits that affect HTTP/1.1 (six connections per domain). It is ideal for notifications, live feeds, and status updates.
+
+**Beginner-Friendly Explanation:** SSE is a one-way stream from the server to the browser. The browser opens a connection, and the server keeps pushing text events. If the connection drops, the browser reconnects automatically.
+
+### Purposes
+
+- To push one-way real-time updates from server to client.
+- To avoid polling overhead for notifications and feeds.
+- To leverage automatic reconnection built into `EventSource`.
+- To work over standard HTTP without WebSocket upgrade.
+- To stream text-based events (JSON, logs, progress).
+
+### Syntax Rules and Structure
+
+**Client:**
+
+```js
+const events = new EventSource('/api/stream');
+
+events.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  handleEvent(data);
+};
+
+events.addEventListener('ping', (event) => {
+  console.log('Ping:', JSON.parse(event.data));
+});
+
+// Close when done
+events.close();
+```
+
+**Server response format:**
+
+```text
+Content-Type: text/event-stream
+Cache-Control: no-cache
+Connection: keep-alive
+
+data: {"type":"message","text":"Hello"}
+
+id: 42
+event: ping
+data: {"time":"2026-01-01T00:00:00Z"}
+
+```
+
+**Syntax Rules:**
+
+1. The server must send `Content-Type: text/event-stream`.
+2. Events are separated by a blank line; `data:` lines form the payload.
+3. Use named events (`event:`) and `addEventListener` for typed events.
+4. Include `id:` to support `Last-Event-ID` resumption.
+5. Close the `EventSource` when the component unmounts or the stream is no longer needed.
+6. Pass credentials if required: `new EventSource(url, { withCredentials: true })`.
+
+**Constraints and Limitations:**
+
+- SSE is one-way; the client cannot send messages over the same connection.
+- Over HTTP/1.1, browsers limit six SSE connections per domain; HTTP/2 raises this to negotiated stream limits (default ~100).
+- SSE only carries text; binary data must be encoded.
+- Some proxies buffer SSE; configure buffering off.
+
+### Annotated Code Examples
+
+```tsx
+function LiveFeed() {
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    const source = new EventSource('/api/feed');
+
+    source.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setEvents((prev) => [...prev, data]);
+    };
+
+    source.onerror = () => {
+      // EventSource reconnects automatically
+      console.warn('SSE connection lost, reconnecting…');
+    };
+
+    return () => source.close();
+  }, []);
+
+  return <FeedList items={events} />;
+}
+```
+
+**Expected Output:** New events are appended to the feed as the server pushes them. If the connection drops, the browser reconnects automatically; unmounting closes the stream.
+
+**Why this output:** `EventSource` opens a persistent HTTP stream. `onmessage` handles default events. The cleanup closes the connection.
+
+### Real-World Cases
+
+- **Notifications:** Pushing new alerts to the client.
+- **Live scores:** Streaming score updates.
+- **Logs and progress:** Streaming build logs or upload progress.
+
+### References
+
+- MDN — Using server-sent events — https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
+- MDN — EventSource — https://developer.mozilla.org/en-US/docs/Web/API/EventSource
+- WHATWG — HTML: Server-sent events — https://html.spec.whatwg.org/multipage/server-sent-events.html
+
+---
+
+## 10. WebSockets
+
+### Definitions
+
+**Core Definition:** WebSockets is a protocol for full-duplex, bidirectional communication between the browser and a server over a single persistent connection.
+
+**Technical Definition:** The `WebSocket` API opens a connection via an HTTP upgrade handshake (`Sec-WebSocket-Key`), after which both client and server can send messages at any time. The API provides `send()`, `onmessage`, `onopen`, `onclose`, and `onerror`, with `MessageEvent` and `CloseEvent` for payloads and closure metadata. WebSockets are **bidirectional** and binary-capable, making them suitable for chat, collaboration, multiplayer games, and trading. Unlike SSE, WebSockets do **not** support backpressure in the classic `WebSocket` interface; when messages arrive faster than the application can process them, memory or CPU issues can occur. For backpressure-sensitive use cases, the `WebTransport` API is recommended. Open WebSocket connections may also prevent the page from entering the bfcache, so closing connections when done is good practice.
+
+**Beginner-Friendly Explanation:** WebSockets are a two-way pipe between the browser and the server. Both sides can send messages whenever they want, without polling.
+
+### Purposes
+
+- To enable real-time bidirectional communication (chat, collaboration).
+- To push server updates and receive client actions over one connection.
+- To support binary data (files, media, game state).
+- To reduce per-message overhead compared with HTTP polling.
+- To power multiplayer and live-editing experiences.
+
+### Syntax Rules and Structure
+
+**Client:**
+
+```js
+const ws = new WebSocket('wss://api.example.com/live');
+
+ws.onopen = () => {
+  ws.send(JSON.stringify({ type: 'subscribe', room: 'general' }));
+};
+
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  handleMessage(message);
+};
+
+ws.onclose = (event) => {
+  if (event.code !== 1000) {
+    // Unexpected close; reconnect with backoff
+  }
+};
+
+ws.onerror = (error) => {
+  console.error('WebSocket error', error);
+};
+
+// Close when done
+ws.close(1000, 'Component unmounted');
+```
+
+**Syntax Rules:**
+
+1. Use `wss://` in production (TLS).
+2. Handle `onopen`, `onmessage`, `onerror`, and `onclose`.
+3. Use `close(1000)` for normal closure; `1000` is the normal-closure code.
+4. Implement reconnection with exponential backoff for unexpected closes.
+5. Send a subscription or authentication message after `onopen`.
+6. Close the connection when the component unmounts to avoid leaks and bfcache issues.
+
+**Constraints and Limitations:**
+
+- No built-in backpressure; use `WebTransport` or application-level flow control for high-throughput streams.
+- Stateful connections require server-side connection management and scaling (sticky sessions, pub/sub).
+- Proxies and firewalls may block WebSocket upgrades.
+- Open connections can prevent bfcache; close when not needed.
+
+### Annotated Code Examples
+
+```tsx
+function LiveChat({ room }) {
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    const ws = new WebSocket(`wss://api.example.com/chat?room=${room}`);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'join', room }));
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      setMessages((prev) => [...prev, message]);
+    };
+
+    ws.onerror = () => console.error('Chat connection error');
+
+    return () => ws.close(1000, 'Unmounted');
+  }, [room]);
+
+  function sendMessage(text) {
+    // The WebSocket instance must be accessible; use a ref in practice
+  }
+
+  return <ChatUI messages={messages} onSend={sendMessage} />;
+}
+```
+
+**Expected Output:** Messages appear in the chat as the server pushes them. Changing `room` closes the old connection and opens a new one.
+
+**Why this output:** The effect owns the connection lifecycle. `onmessage` appends messages. Cleanup closes the connection when the room changes or the component unmounts.
+
+### Real-World Cases
+
+- **Chat applications:** Real-time messaging.
+- **Collaborative editing:** Shared document state.
+- **Multiplayer games:** Low-latency state sync.
+- **Trading platforms:** Live price and order updates.
+
+### References
+
+- MDN — WebSocket API — https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
+- MDN — Writing WebSocket client applications — https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
+- MDN — WebTransport API — https://developer.mozilla.org/en-US/docs/Web/API/WebTransport_API
+
+---
+
+## 11. Streaming
+
+### Definitions
+
+**Core Definition:** Streaming is the progressive delivery of data or HTML in chunks, allowing the client to render content as it arrives rather than waiting for the complete response.
+
+**Technical Definition:** Streaming operates at two levels. **HTTP response streaming** uses `fetch` with `response.body` (a `ReadableStream`) or `EventSource`/SSE to process chunks incrementally. **React streaming SSR** uses `renderToPipeableStream` (Node) or `renderToReadableStream` (Web/Edge) to emit HTML in chunks aligned with `<Suspense>` boundaries: the static shell (layouts, navigation, fallbacks) is sent immediately, and each boundary’s HTML is streamed when its data resolves, along with inline scripts that swap the fallback DOM node. React 19 stabilises native streaming SSR; the browser can paint and hydrate progressively without waiting for the entire document.
+
+**Beginner-Friendly Explanation:** Streaming means sending the page or data in pieces. The browser shows the header and layout immediately, and slower sections (comments, recommendations) arrive later without blocking the rest.
+
+### Purposes
+
+- To improve Time to First Byte (TTFB) and first paint.
+- To let users see and interact with fast content while slow content loads.
+- To avoid blocking the entire page on a single slow query.
+- To enable progressive hydration of interactive components.
+- To process large or infinite data streams incrementally.
+
+### Syntax Rules and Structure
+
+**React streaming SSR (Node):**
+
+```js
+import { renderToPipeableStream } from 'react-dom/server';
+
+const { pipe } = renderToPipeableStream(<App />, {
+  bootstrapScripts: ['/client.js'],
+  onShellReady() {
+    res.setHeader('Content-Type', 'text/html');
+    pipe(res);
+  },
+});
+```
+
+**React streaming SSR (Edge/Web):**
+
+```js
+import { renderToReadableStream } from 'react-dom/server';
+
+const stream = await renderToReadableStream(<App />, {
+  bootstrapScripts: ['/client.js'],
+});
+
+return new Response(stream, { headers: { 'Content-Type': 'text/html' } });
+```
+
+**Client-side `fetch` stream:**
+
+```js
+const response = await fetch('/api/stream');
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  processChunk(decoder.decode(value, { stream: true }));
+}
+```
+
+**Syntax Rules:**
+
+1. Wrap slow sections in `<Suspense>` boundaries; each boundary is a streamable chunk.
+2. Start piping in `onShellReady` so the shell reaches the browser immediately.
+3. Use `renderToReadableStream` for edge/Web runtimes and `renderToPipeableStream` for Node.
+4. For client-side streaming, read `response.body` with a `ReadableStreamDefaultReader`.
+5. Handle backpressure in client-side streams (pause reading when the consumer is slow).
+6. Hydrate the shell with `hydrateRoot` for progressive interactivity.
+
+**Constraints and Limitations:**
+
+- Streaming SSR requires a server runtime that supports chunked transfer.
+- Errors after the shell is sent cannot change the HTTP status code.
+- Client-side `fetch` streaming does not work with CORS unless the server exposes the stream.
+- SSE is the higher-level abstraction for text event streams; raw `ReadableStream` is lower-level.
+
+### Annotated Code Examples
+
+```tsx
+export default function ProductPage({ product }) {
+  return (
+    <main>
+      <ProductInfo product={product} />
+      <Suspense fallback={<ReviewsSkeleton />}>
+        <Reviews productId={product.id} />
+      </Suspense>
+      <Suspense fallback={<RecommendationsSkeleton />}>
+        <Recommendations productId={product.id} />
+      </Suspense>
+    </main>
+  );
+}
+```
+
+**Expected Output:** The product info renders immediately. Reviews and recommendations stream in as their data resolves, each with its own skeleton.
+
+**Why this output:** Each `<Suspense>` boundary is a streamable chunk. React sends the shell first, then streams each boundary’s HTML when ready.
+
+### Real-World Cases
+
+- **E-commerce:** Streaming recommendations and reviews after product info.
+- **Content sites:** Streaming comments after the article.
+- **AI chat:** Streaming token-by-token responses.
+- **Dashboards:** Streaming widgets as data loads.
+
+### References
+
+- Next.js — Streaming — https://nextjs.org/docs/app/guides/streaming
+- React — renderToPipeableStream — https://react.dev/reference/react-dom/server/renderToPipeableStream
+- React — renderToReadableStream — https://react.dev/reference/react-dom/server/renderToReadableStream
+- MDN — ReadableStream — https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
 
 ---
 
 ## References
 
-- TanStack Query – Overview: https://tanstack.com/query/latest/docs/framework/react/overview
-- TanStack Query – Caching: https://tanstack.com/query/latest/docs/framework/react/guides/caching
-- TanStack Query – Important Defaults: https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults
-- TanStack Query – Query Invalidation: https://tanstack.com/query/latest/docs/framework/react/guides/query-invalidation
-- TanStack Query – Query Filters: https://tanstack.com/query/latest/docs/framework/react/guides/filters
-- TanStack Query – Parallel Queries: https://tanstack.com/query/latest/docs/framework/react/guides/parallel-queries
-- TanStack Query – Dependent Queries: https://tanstack.com/query/latest/docs/framework/react/guides/dependent-queries
-- TanStack Query – Infinite Queries: https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries
-- TanStack Query – Paginated Queries: https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries
-- TanStack Query – Prefetching: https://tanstack.com/query/latest/docs/framework/react/guides/prefetching
-- TanStack Query – SSR & Hydration: https://tanstack.com/query/latest/docs/framework/react/guides/ssr
-- TanStack Query – Placeholder Query Data: https://tanstack.com/query/latest/docs/framework/react/guides/placeholder-query-data
-- TanStack Query – Initial Query Data: https://tanstack.com/query/latest/docs/framework/react/guides/initial-query-data
-- TanStack Query – Optimistic Updates: https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates
-- TanStack Query – Invalidations from Mutations: https://tanstack.com/query/latest/docs/framework/react/guides/invalidations-from-mutations
-- TanStack Query – Polling: https://tanstack.com/query/latest/docs/framework/react/guides/polling
-- TanStack Query – Network Mode: https://tanstack.com/query/latest/docs/framework/react/guides/network-mode
-- TanStack Query – Persist Query Client: https://tanstack.com/query/latest/docs/framework/react/plugins/persistQueryClient
-- TanStack Query – `useMutation`: https://tanstack.com/query/latest/docs/framework/react/reference/useMutation
-- TanStack Query – `useMutationState`: https://tanstack.com/query/latest/docs/framework/react/reference/useMutationState
-- TanStack Query – `useInfiniteQuery`: https://tanstack.com/query/latest/docs/framework/react/reference/useInfiniteQuery
-- SWR – Documentation: https://swr.vercel.app/
-- SWR – Options: https://swr.vercel.app/docs/options
-- SWR – Pagination: https://swr.vercel.app/docs/pagination
-- SWR – Revalidation: https://swr.vercel.app/docs/revalidation
-- React – `useOptimistic`: https://react.dev/reference/react/useOptimistic
-- React – `useSyncExternalStore`: https://react.dev/reference/react/useSyncExternalStore
-- MDN Web Docs – WebSocket API: https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
-- MDN Web Docs – Server-Sent Events: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events
-- MDN Web Docs – Background Synchronization API: https://developer.mozilla.org/en-US/docs/Web/API/Background_Synchronization_API
-- MDN Web Docs – Intersection Observer API: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+- TanStack Query — Caching — https://tanstack.com/query/latest/docs/framework/react/guides/caching
+- TanStack Query — Important Defaults — https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults
+- TanStack Query — Query Keys — https://tanstack.com/query/latest/docs/framework/react/guides/query-keys
+- TanStack Query — Pagination — https://tanstack.com/query/latest/docs/framework/react/guides/pagination
+- TanStack Query — Infinite Queries — https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries
+- TanStack Query — useInfiniteQuery — https://mintlify.wiki/TanStack/query/api/react/use-infinite-query
+- TanStack Query — Optimistic Updates — https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates
+- TanStack Query — Mutations — https://tanstack.com/query/latest/docs/framework/react/guides/mutations
+- TanStack Query — Prefetching — https://tanstack.com/query/latest/docs/framework/react/guides/prefetching
+- TanStack Query — SSR — https://tanstack.com/query/latest/docs/framework/react/guides/ssr
+- TanStack Query — Window Focus Refetching — https://tanstack.com/query/latest/docs/framework/react/guides/window-focus-refetching
+- TanStack Query — Query Invalidation — https://tanstack.com/query/latest/docs/framework/react/guides/query-invalidation
+- TanStack Query — Polling — https://tanstack.com/query/latest/docs/framework/react/guides/polling
+- TanStack Query Overview — https://tanstack.com/query/v3
+- Core Concepts and Performance (TanStack Query Best Practices) — https://github.com/gohypergiant/standard-toolkit
+- MDN — Using server-sent events — https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events
+- MDN — EventSource — https://developer.mozilla.org/en-US/docs/Web/API/EventSource
+- WHATWG — HTML: Server-sent events — https://html.spec.whatwg.org/multipage/server-sent-events.html
+- MDN — WebSocket API — https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
+- MDN — Writing WebSocket client applications — https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
+- MDN — WebTransport API — https://developer.mozilla.org/en-US/docs/Web/API/WebTransport_API
+- Back4App — SSE vs. WebSockets vs. Polling (2026) — https://www.back4app.com/glossary/sse-vs-websockets-vs-polling/
+- Next.js — Streaming — https://nextjs.org/docs/app/guides/streaming
+- React — renderToPipeableStream — https://react.dev/reference/react-dom/server/renderToPipeableStream
+- React — renderToReadableStream — https://react.dev/reference/react-dom/server/renderToReadableStream
+- MDN — ReadableStream — https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream
+- MDN — Intersection Observer API — https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+- MDN — AbortController — https://developer.mozilla.org/en-US/docs/Web/API/AbortController

@@ -620,8 +620,10 @@ $(selector).val(newValue);              // replaces ALL matched elements
       // READING — retrieve content without changing it
       var htmlRead = $("#content").html();
       var textRead = $("#content").text();
+
       console.log("Read HTML:", htmlRead);
       // "<p>Original <b>bold</b> text</p>"
+      
       console.log("Read text:", textRead);
       // "Original bold text"
 
@@ -631,7 +633,7 @@ $(selector).val(newValue);              // replaces ALL matched elements
       // "<p>New <i>italic</i> content</p>"
 
       // The original <p> and <b> elements are destroyed
-      console.log("Bold count:", $("#content b").length); // 0
+      console.log("Bold count:", $("#content b").length);   // 0
       console.log("Italic count:", $("#content i").length); // 1
     });
   </script>

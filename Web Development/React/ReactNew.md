@@ -418,7 +418,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Tearing prevention
   - `useSyncExternalStore` use cases
 
-- **25. `use` Hook (React 19)**
+- [**25. `use` Hook (React 19)**](/Web%20Development/React/Hooks/use.md)
   - `use` hook
   - Reading promises
   - Reading context
@@ -427,13 +427,13 @@ React is best learned as more than "a library for building UIs." The progression
   - Suspense integration
   - `use` best practices
 
-- **26. Custom Hooks**
+- [**26. Custom Hooks**](/Web%20Development/React/Hooks/CustomHooks.md)
   - Custom hooks
   - Hook naming
   - Hook composition
   - Hook reuse
   - Hook testing
-  - Common custom hooks
+  - [Common custom hooks](/Web%20Development/React/Hooks/CommonCustomHooks.md)
     - `useFetch`
     - `useLocalStorage`
     - `useSessionStorage`
@@ -469,7 +469,7 @@ React is best learned as more than "a library for building UIs." The progression
     - `useEventSource`
   - Custom hook best practices
 
-- **27. Hook Pitfalls**
+- [**27. Hook Pitfalls**](/Web%20Development/React/Hooks/Pitfalls.md)
   - Hook rules violations
   - Conditional hooks
   - Hooks in loops
@@ -693,7 +693,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Form accessibility
   - Form best practices
 
-- [**Advanced Form Features**](/Web%20Development/React/Forms%20and%20Validation/AdvancedFormFeatures.md)
+- [**42. Advanced Form Features**](/Web%20Development/React/Forms%20and%20Validation/AdvancedFormFeatures.md)
   - Dynamic fields
   - Multi-step forms
   - File uploads
@@ -705,7 +705,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # VII. Routing
 
-- [**42. Routing Fundamentals**](/Web%20Development/React/Routing/Routing.md)
+- [**43. Routing Fundamentals**](/Web%20Development/React/Routing/Routing.md)
   - [Client-side routing](/Web%20Development/React/Routing/ClientSideRouting.md)
   - Server-side routing
   - Single-page applications
@@ -722,7 +722,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Route performance
   - Route best practices
 
-- [**43. React Router**](/Web%20Development/React/Routing/ReactRouter.md)
+- [**44. React Router**](/Web%20Development/React/Routing/ReactRouter.md)
   - React Router
   - `BrowserRouter`
   - `HashRouter`
@@ -752,7 +752,7 @@ React is best learned as more than "a library for building UIs." The progression
   - React Router versions
   - React Router best practices
 
-- [**44. TanStack Router**](/Web%20Development/React/Routing/TanStack.md)
+- [**45. TanStack Router**](/Web%20Development/React/Routing/TanStack.md)
   - TanStack Router
   - Type-safe routing
   - Route trees
@@ -765,7 +765,7 @@ React is best learned as more than "a library for building UIs." The progression
   - TanStack Router vs React Router
   - TanStack Router best practices
 
-- [**45. Next.js Routing**](/Web%20Development/React/Routing/NextJSRouting.md)
+- [**46. Next.js Routing**](/Web%20Development/React/Routing/NextJSRouting.md)
   - Next.js App Router
   - Next.js Pages Router
   - File-based routing
@@ -783,7 +783,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Route templates
   - Next.js routing best practices
 
-- [**46. Routing Patterns**](/Web%20Development/React/Routing/RoutingPatterns.md)
+- [**47. Routing Patterns**](/Web%20Development/React/Routing/RoutingPatterns.md)
   - Protected routes
   - Public routes
   - Private routes
@@ -800,7 +800,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Route error handling
   - Route best practices
 
-- [**Advanced Routing**](/Web%20Development/React/Routing/AdvancedRouting.md)
+- [**48. Advanced Routing**](/Web%20Development/React/Routing/AdvancedRouting.md)
   - Protected routes
   - Authentication-aware navigation
   - Error routes
@@ -811,28 +811,40 @@ React is best learned as more than "a library for building UIs." The progression
 
 ---
 
-# VIII. Data Fetching
+# XII. Data Fetching and APIs
 
-- **47. Data Fetching Fundamentals**
-  - Data fetching
+* [**49. HTTP Fundamentals for React**](/Web%20Development/React/Data%20Fetching%20and%20APIs/HTTP.md)
+  - GET
+  - POST
+  - PUT
+  - PATCH
+  - DELETE
+  - HTTP status codes
+  - Headers
+  - JSON
+  - CORS
+  - Credentials
+
+* [**50. Data Fetching Fundamentals**](/Web%20Development/React/Data%20Fetching%20and%20APIs/FetchingData.md)
+  - Data fetching lifecycle
+  - Async functions
+  - Request state
+  - Loading states
+  - Error states
+  - Empty states
+  - Success states
   - Client-side fetching
   - Server-side fetching
   - Static generation
   - Incremental static regeneration
   - Server-side rendering
   - Streaming
-  - Data fetching patterns
-  - Data fetching lifecycle
-  - Loading states
-  - Error states
-  - Empty states
-  - Success states
   - Data caching
   - Data invalidation
   - Data refetching
   - Data fetching best practices
 
-- **48. Fetch API**
+* [**51. Fetch API**](/Web%20Development/React/Data%20Fetching%20and%20APIs/FetchAPI.md)
   - `fetch`
   - Request options
   - Response handling
@@ -840,77 +852,27 @@ React is best learned as more than "a library for building UIs." The progression
   - Error handling
   - AbortController
   - Timeouts
-  - Credentials
-  - CORS
   - Fetch in effects
   - Fetch pitfalls
   - Fetch best practices
 
-- **49. Axios**
+* [**52. Axios**](/Web%20Development/React/Data%20Fetching%20and%20APIs/Axios.md)
   - Axios
   - Axios instance
   - Axios configuration
   - Axios interceptors
   - Axios error handling
   - Axios cancellation
-  - Axios vs fetch
+  - Axios vs `fetch`
   - Axios best practices
 
-- **50. TanStack Query**
-  - TanStack Query
-  - React Query
-  - `useQuery`
-  - `useMutation`
-  - `useInfiniteQuery`
-  - `useQueries`
-  - Query keys
-  - Query functions
-  - Query caching
-  - Query invalidation
-  - Query refetching
-  - Query prefetching
-  - Query pagination
-  - Query infinite scrolling
-  - Query optimistic updates
-  - Query devtools
-  - Query best practices
-
-- **51. SWR**
-  - SWR
-  - `useSWR`
-  - SWR configuration
-  - SWR caching
-  - SWR revalidation
-  - SWR mutations
-  - SWR pagination
-  - SWR infinite loading
-  - SWR optimistic updates
-  - SWR vs TanStack Query
-  - SWR best practices
-
-- **52. Apollo Client**
-  - Apollo Client
-  - GraphQL queries
-  - GraphQL mutations
-  - GraphQL subscriptions
-  - Apollo cache
-  - Apollo links
-  - Apollo local state
-  - Apollo optimistic UI
-  - Apollo pagination
-  - Apollo best practices
-
-- **53. Relay**
-  - Relay
-  - Relay compiler
-  - Relay fragments
-  - Relay queries
-  - Relay mutations
-  - Relay pagination
-  - Relay store
-  - Relay best practices
-
-- **54. Data Fetching Patterns**
+* [**53. API Integration & Patterns**](/Web%20Development/React/Data%20Fetching%20and%20APIs/APIIntegration.md)
+  - REST APIs
+  - GraphQL
+  - Authentication headers
+  - Request interceptors
+  - Response transformation
+  - Error normalization
   - Fetch on mount
   - Fetch on event
   - Fetch on route change
@@ -918,33 +880,81 @@ React is best learned as more than "a library for building UIs." The progression
   - Parallel fetching
   - Sequential fetching
   - Waterfall fetching
+
+* [**54. Advanced Data Management & Real-Time**](/Web%20Development/React/Data%20Fetching%20and%20APIs/AdvancedDataManagement.md)
+  - Caching
+  - Deduplication
+  - Pagination
+  - Infinite scrolling
   - Prefetching
-  - Background fetching
-  - Polling
-  - Long polling
-  - Server-Sent Events
+  - Optimistic updates
+  - Background synchronization / fetching
+  - Polling & Long polling
+  - Server-Sent Events (SSE)
   - WebSockets
   - Streaming
-  - Data fetching best practices
+
+* [**55. TanStack Query (React Query)**](/Web%20Development/React/Data%20Fetching%20and%20APIs/TanStackQuery.md)
+  - TanStack Query / React Query
+  - `useQuery`
+  - `useMutation`
+  - `useInfiniteQuery`
+  - `useQueries`
+  - Query keys & Query functions
+  - Query caching, invalidation, & refetching
+  - Query prefetching
+  - Query pagination & infinite scrolling
+  - Query optimistic updates
+  - Query devtools
+  - Query best practices
+
+* [**56. SWR**](/Web%20Development/React/Data%20Fetching%20and%20APIs/SWR.md)
+  - SWR & `useSWR`
+  - SWR configuration
+  - SWR caching & revalidation
+  - SWR mutations
+  - SWR pagination & infinite loading
+  - SWR optimistic updates
+  - SWR vs TanStack Query
+  - SWR best practices
+
+* [**57. Apollo Client**](/Web%20Development/React/Data%20Fetching%20and%20APIs/ApolloClient.md)
+  - Apollo Client
+  - GraphQL queries, mutations, & subscriptions
+  - Apollo cache & local state
+  - Apollo links
+  - Apollo optimistic UI
+  - Apollo pagination
+  - Apollo best practices
+
+* [**58. Relay**](/Web%20Development/React/Data%20Fetching%20and%20APIs/Relay.md)
+  - Relay & Relay compiler
+  - Relay fragments, queries, & mutations
+  - Relay pagination
+  - Relay store
+  - Relay best practices
 
 ---
 
 # IX. State Management
 
-- **55. State Management Fundamentals**
-  - State management
+- [**59. State Management Fundamentals**](/Web%20Development/React/State%20Management/State.md)
+  - State management fundamentals & categories
   - Local state
+  - UI state
+  - Shared state
   - Global state
   - Server state
   - URL state
   - Form state
-  - UI state
+  - Derived state
+  - Persistent state
   - State categories
   - State management approaches
   - State management selection
   - State management best practices
 
-- **56. Context API**
+- [**60. Context API**](/Web%20Development/React/State%20Management/ContextBasedState.md)
   - Context API
   - `React.createContext`
   - Context provider
@@ -960,7 +970,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Context best practices
   - Context pitfalls
 
-- **57. Redux**
+- [**61. Redux**](/Web%20Development/React/State%20Management/Redux.md)
   - Redux
   - Redux principles
     - Single source of truth
@@ -989,7 +999,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Redux best practices
   - Redux pitfalls
 
-- **58. Redux Toolkit**
+- [**62. Redux Toolkit**](/Web%20Development/React/State%20Management/ReduxToolkit.md)
   - Redux Toolkit
   - `configureStore`
   - `createSlice`
@@ -1002,7 +1012,7 @@ React is best learned as more than "a library for building UIs." The progression
   - RTK Query
   - Redux Toolkit best practices
 
-- **59. Zustand**
+- [**63. Zustand**](/Web%20Development/React/State%20Management/Zustand.md)
   - Zustand
   - Store creation
   - State selectors
@@ -1014,7 +1024,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Zustand vs Redux
   - Zustand best practices
 
-- **60. Jotai**
+- [**64. Jotai**](/Web%20Development/React/State%20Management/Jotai.md)
   - Jotai
   - Atoms
   - Derived atoms
@@ -1023,7 +1033,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Jotai vs Recoil
   - Jotai best practices
 
-- **61. Recoil**
+- [**65. Recoil**](/Web%20Development/React/State%20Management/Recoil.md)
   - Recoil
   - Atoms
   - Selectors
@@ -1031,7 +1041,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Async selectors
   - Recoil best practices
 
-- **62. MobX**
+- [**66. MobX**](/Web%20Development/React/State%20Management/MobX.md)
   - MobX
   - Observables
   - Actions
@@ -1040,13 +1050,13 @@ React is best learned as more than "a library for building UIs." The progression
   - MobX React
   - MobX best practices
 
-- **63. Valtio**
+- [**67. Valtio**](/Web%20Development/React/State%20Management/Valtio.md)
   - Valtio
   - Proxy state
   - `useSnapshot`
   - Valtio best practices
 
-- **64. XState**
+- [**68. XState**](/Web%20Development/React/State%20Management/XState.md)
   - XState
   - State machines
   - State charts
@@ -1060,7 +1070,17 @@ React is best learned as more than "a library for building UIs." The progression
   - XState React
   - XState best practices
 
-- **65. State Management Patterns**
+- [**69. Server State**](/Web%20Development/React/State%20Management/ServerState.md)
+  - Query state
+  - Cache state
+  - Synchronization with APIs
+  - React Query / TanStack Query concepts
+  - Mutations
+  - Cache invalidation
+  - Optimistic updates
+  - Background refetching
+
+- [**70. State Management Patterns**](/Web%20Development/React/State%20Management/StateLift.md)
   - Lifting state
   - Colocating state
   - State machines
@@ -1080,7 +1100,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # X. Styling
 
-- [**66. Styling Fundamentals**](/Web%20Development/React/Styling/Styling.md)
+- [**71. Styling Fundamentals**](/Web%20Development/React/Styling/Styling.md)
   - Styling
   - Inline styles
   - CSS stylesheets
@@ -1095,7 +1115,7 @@ React is best learned as more than "a library for building UIs." The progression
   - CSS container queries
   - CSS best practices
 
-- [**67. Inline Styles**](/Web%20Development/React/Styling/InlineStyles.md)
+- [**72. Inline Styles**](/Web%20Development/React/Styling/InlineStyles.md)
   - Inline styles
   - `style` prop
   - Style objects
@@ -1106,7 +1126,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Inline style limitations
   - Inline style best practices
 
-- [**68. CSS Stylesheets**](/Web%20Development/React/Styling/CSS.md)
+- [**73. CSS Stylesheets**](/Web%20Development/React/Styling/CSS.md)
   - CSS stylesheets
   - Importing CSS
   - Global CSS
@@ -1119,7 +1139,7 @@ React is best learned as more than "a library for building UIs." The progression
   - OOCSS
   - CSS best practices
 
-- [**69. CSS Modules**](/Web%20Development/React/Styling/CSSModules.md)
+- [**74. CSS Modules**](/Web%20Development/React/Styling/CSSModules.md)
   - CSS Modules
   - Module scoping
   - Local class names
@@ -1128,7 +1148,7 @@ React is best learned as more than "a library for building UIs." The progression
   - CSS Modules with TypeScript
   - CSS Modules best practices
 
-- [**70. CSS-in-JS**](/Web%20Development/React/Styling/CSSinJS.md)
+- [**75. CSS-in-JS**](/Web%20Development/React/Styling/CSSinJS.md)
   - CSS-in-JS
   - Styled Components
   - Emotion
@@ -1139,7 +1159,7 @@ React is best learned as more than "a library for building UIs." The progression
   - CSS-in-JS trade-offs
   - CSS-in-JS best practices
 
-- [**71. Tailwind CSS**](/Web%20Development/React/Styling/TailwindCSS.md)
+- [**76. Tailwind CSS**](/Web%20Development/React/Styling/TailwindCSS.md)
   - Tailwind CSS
   - Utility classes
   - Responsive design
@@ -1150,7 +1170,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Tailwind best practices
   - Tailwind pitfalls
 
-- [**72. Component Libraries**](/Web%20Development/React/Styling/ComponentLibraries.md)
+- [**77. Component Libraries**](/Web%20Development/React/Styling/ComponentLibraries.md)
   - Material UI
   - Ant Design
   - Chakra UI
@@ -1165,7 +1185,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Component library selection
   - Component library best practices
 
-- [**73. Styling Patterns**](/Web%20Development/React/Styling/StylingPatterns.md)
+- [**78. Styling Patterns**](/Web%20Development/React/Styling/StylingPatterns.md)
   - Theming
   - Dark mode
   - Responsive design
@@ -1183,7 +1203,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # XI. Performance
 
-- [**74. Performance Fundamentals**](/Web%20Development/React/PerformanceOpt/Performance.md)
+- [**79. Performance Fundamentals**](/Web%20Development/React/PerformanceOpt/Performance.md)
   - Performance
   - Rendering performance
   - Runtime performance
@@ -1199,7 +1219,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Performance profiling
   - Performance monitoring
 
-- [**75. Rendering Performance**](/Web%20Development/React/PerformanceOpt/RenderingPerformance.md)
+- [**80. Rendering Performance**](/Web%20Development/React/PerformanceOpt/RenderingPerformance.md)
   - Unnecessary re-renders
   - Re-render causes
   - Re-render optimization
@@ -1220,7 +1240,7 @@ React is best learned as more than "a library for building UIs." The progression
   - TanStack Virtual
   - Rendering best practices
 
-- [**76. Code Splitting**](/Web%20Development/React/PerformanceOpt/CodeSpitting.md)
+- [**81. Code Splitting**](/Web%20Development/React/PerformanceOpt/CodeSpitting.md)
   - Code splitting
   - Dynamic imports
   - `React.lazy`
@@ -1233,7 +1253,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Prefetching
   - Code splitting best practices
 
-- [**77. Bundle Optimization**](/Web%20Development/React/PerformanceOpt/Bundle.md)
+- [**82. Bundle Optimization**](/Web%20Development/React/PerformanceOpt/Bundle.md)
   - Bundle size
   - Tree shaking
   - Dead code elimination
@@ -1245,7 +1265,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Vite Bundle Analyzer
   - Bundle optimization best practices
 
-- [**78. Loading Performance**](/Web%20Development/React/PerformanceOpt/Loading.md)
+- [**83. Loading Performance**](/Web%20Development/React/PerformanceOpt/Loading.md)
   - Initial load
   - Above-the-fold content
   - Critical CSS
@@ -1258,7 +1278,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Service workers
   - Loading performance best practices
 
-- [**79. Runtime Performance**](/Web%20Development/React/PerformanceOpt/Runtime.md)
+- [**84. Runtime Performance**](/Web%20Development/React/PerformanceOpt/Runtime.md)
   - JavaScript execution
   - Memory usage
   - Memory leaks
@@ -1271,7 +1291,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Offloading work
   - Runtime performance best practices
 
-- [**80. Concurrent Features**](/Web%20Development/React/PerformanceOpt/ConcurrentFeatures.md)
+- [**85. Concurrent Features**](/Web%20Development/React/PerformanceOpt/ConcurrentFeatures.md)
   - Concurrent rendering
   - Transitions
   - `useTransition`
@@ -1281,7 +1301,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Selective hydration
   - Concurrent features best practices
 
-- [**81. Performance Profiling**](/Web%20Development/React/PerformanceOpt/Profiling.md)
+- [**86. Performance Profiling**](/Web%20Development/React/PerformanceOpt/Profiling.md)
   - React DevTools Profiler
   - Chrome DevTools Performance
   - Flame charts
@@ -1290,7 +1310,7 @@ React is best learned as more than "a library for building UIs." The progression
   - React Scan
   - Profiling best practices
 
-- [**82. Performance Patterns**](/Web%20Development/React/PerformanceOpt/Patterns.md)
+- [**87. Performance Patterns**](/Web%20Development/React/PerformanceOpt/Patterns.md)
   - [Memoization](/Web%20Development/React/PerformanceOpt/Memoization.md)
   - Virtualization
   - Windowing
@@ -1307,7 +1327,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # XII. Testing
 
-- **83. Testing Fundamentals**
+- [**88. Testing Fundamentals**](/Web%20Development/React/Testing%20App/Testing.md)
   - Testing
   - Test types
     - Unit tests
@@ -1327,7 +1347,7 @@ React is best learned as more than "a library for building UIs." The progression
     - Fakes
   - Testing best practices
 
-- **84. Unit Testing**
+- [**89. Unit Testing**](/Web%20Development/React/Testing%20App/UnitTesting.md)
   - Unit testing components
   - Unit testing hooks
   - Unit testing utilities
@@ -1338,7 +1358,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Testing async code
   - Testing best practices
 
-- **85. Component Testing**
+- [**90. Component Testing**](/Web%20Development/React/Testing%20App/ComponentTesting.md)
   - Component testing
   - Rendering components
   - Querying elements
@@ -1351,7 +1371,15 @@ React is best learned as more than "a library for building UIs." The progression
   - Testing error boundaries
   - Component testing best practices
 
-- **86. Integration Testing**
+- [**91. Interaction Testing**](/Web%20Development/React/Testing%20App/InteractionTesting.md)
+  - Forms
+  - Buttons
+  - Navigation
+  - Async behavior
+  - Loading states
+  - Error states
+
+- [**92. Integration Testing**](/Web%20Development/React/Testing%20App/IntegrationTesting.md)
   - Integration testing
   - Testing component interactions
   - Testing form submissions
@@ -1361,7 +1389,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Testing with real dependencies
   - Integration testing best practices
 
-- **87. End-to-End Testing**
+- [**93. End-to-End Testing**](/Web%20Development/React/Testing%20App/EndToEndTesting.md)
   - E2E testing
   - Cypress
   - Playwright
@@ -1374,7 +1402,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Test environments
   - E2E testing best practices
 
-- **88. Testing Libraries**
+- [**94. Testing Libraries**](/Web%20Development/React/Testing%20App/TestingLibraries.md)
   - Jest
   - Vitest
   - React Testing Library
@@ -1393,7 +1421,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Testing library comparison
   - Testing library selection
 
-- **89. Testing Patterns**
+- [**95. Testing Patterns**](/Web%20Development/React/Testing%20App/TestingPatterns.md)
   - Arrange-Act-Assert
   - Given-When-Then
   - Testing hooks
@@ -1412,7 +1440,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Accessibility testing
   - Testing best practices
 
-- **90. Test Automation**
+- [**96. Test Automation**](/Web%20Development/React/Testing%20App/TestAutomation.md)
   - CI integration
   - Test pipelines
   - Parallel testing
@@ -1424,11 +1452,19 @@ React is best learned as more than "a library for building UIs." The progression
   - Visual regression testing
   - Testing best practices
 
+-  [**97. Advanced Testing**](/Web%20Development/React/Testing%20App/AdvancedTesting.md)
+  - Mock service workers
+  - API mocking
+  - Accessibility testing
+  - Snapshot testing
+  - Visual regression testing
+  - Test coverage analysis
+
 ---
 
 # XIII. Accessibility
 
-- **91. Accessibility Fundamentals**
+- [**98. Accessibility Fundamentals**](/Web%20Development/React/Accessibility/Accessibility.md)
   - Accessibility
   - A11y
   - WCAG
@@ -1439,9 +1475,10 @@ React is best learned as more than "a library for building UIs." The progression
   - Focus management
   - Color contrast
   - Text alternatives
+  - Accessible React ([`AccessibilityReact.md`](/Web%20Development/React/Accessibility/AccessibilityReact.md))
   - Accessibility best practices
 
-- **92. Semantic HTML**
+- [**99. Semantic HTML**](/Web%20Development/React/Accessibility/SemanticHTML.md)
   - Semantic HTML
   - Semantic elements
     - `header`
@@ -1469,7 +1506,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Semantic HTML pitfalls
   - Semantic HTML best practices
 
-- **93. ARIA**
+- [**100. ARIA**](/Web%20Development/React/Accessibility/ARIA.md)
   - ARIA
   - ARIA roles
   - ARIA states
@@ -1483,7 +1520,7 @@ React is best learned as more than "a library for building UIs." The progression
   - When to use ARIA
   - When not to use ARIA
 
-- **94. Keyboard Navigation**
+- [**101. Keyboard Navigation**](/Web%20Development/React/Accessibility/KeyboardNav.md)
   - Keyboard navigation
   - Focus management
   - Focus trap
@@ -1494,7 +1531,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Keyboard events
   - Keyboard navigation best practices
 
-- **95. Screen Readers**
+- [**102. Screen Readers**](/Web%20Development/React/Accessibility/ScreenReaders.md)
   - Screen readers
   - NVDA
   - JAWS
@@ -1503,17 +1540,21 @@ React is best learned as more than "a library for building UIs." The progression
   - Screen reader testing
   - Screen reader best practices
 
-- **96. Accessibility Testing**
+- [**103. Accessibility Testing**](/Web%20Development/React/Accessibility/Testing.md)
   - Accessibility testing
   - Automated testing
   - Manual testing
+  - Keyboard testing
+  - Screen-reader testing
+  - Focus-order validation
+  - Color-contrast verification
   - Lighthouse
   - axe
   - jest-axe
   - eslint-plugin-jsx-a11y
   - Accessibility testing best practices
 
-- **97. Accessibility Patterns**
+- [**104. Accessibility Patterns**](/Web%20Development/React/Accessibility/Patterns.md)
   - Accessible forms
   - Accessible buttons
   - Accessible links
@@ -1532,7 +1573,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # XIV. TypeScript with React
 
-- **98. TypeScript Fundamentals**
+- [**105. TypeScript Fundamentals**](/Web%20Development/React/TypeScript/TypeScript.md)
   - TypeScript
   - Types
   - Interfaces
@@ -1547,7 +1588,7 @@ React is best learned as more than "a library for building UIs." The progression
   - TypeScript configuration
   - TypeScript best practices
 
-- **99. Typing Components**
+- [**106. Typing Components**](/Web%20Development/React/TypeScript/TypingComponents.md)
   - Typing function components
   - Typing props
   - Typing children
@@ -1563,7 +1604,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Typing polymorphic components
   - Typing best practices
 
-- **100. Advanced TypeScript**
+- [**107. Advanced TypeScript**](/Web%20Development/React/TypeScript/Advanced.md)
   - Generic components
   - Conditional types
   - Mapped types
@@ -1578,11 +1619,18 @@ React is best learned as more than "a library for building UIs." The progression
   - Type testing
   - Advanced TypeScript best practices
 
+- [**108. Type-Safe Application Architecture**](/Web%20Development/React/TypeScript/TypeSafe.md)
+  - Shared types
+  - Domain models
+  - Form types
+  - API contracts
+  - Validation schemas
+
 ---
 
 # XV. React Server Components
 
-- **101. Server Components Fundamentals**
+- **108. Server Components Fundamentals**
   - React Server Components
   - Server components
   - Client components
@@ -1594,7 +1642,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Server component serialization
   - Server component best practices
 
-- **102. Server Components vs Client Components**
+- **109. Server Components vs Client Components**
   - Server components
   - Client components
   - `'use client'` directive
@@ -1608,7 +1656,7 @@ React is best learned as more than "a library for building UIs." The progression
   - When to use each
   - Component composition
 
-- **103. Server Actions**
+- **110. Server Actions**
   - Server actions
   - `'use server'`
   - Form actions
@@ -1618,7 +1666,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Server action error handling
   - Server action best practices
 
-- **104. Streaming and Suspense**
+- **111. Streaming and Suspense**
   - Streaming SSR
   - Suspense boundaries
   - Progressive rendering
@@ -1629,7 +1677,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # XVI. React Frameworks
 
-- **105. Next.js**
+- **112. Next.js**
   - Next.js
   - App Router
   - Pages Router
@@ -1655,7 +1703,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Deployment
   - Next.js best practices
 
-- **106. Remix**
+- **113. Remix**
   - Remix
   - Remix routing
   - Loaders
@@ -1668,7 +1716,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Progressive enhancement
   - Remix best practices
 
-- **107. Gatsby**
+- **114. Gatsby**
   - Gatsby
   - GraphQL data layer
   - Static site generation
@@ -1677,7 +1725,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Themes
   - Gatsby best practices
 
-- **108. Astro**
+- **115. Astro**
   - Astro
   - Islands architecture
   - Astro components
@@ -1686,14 +1734,14 @@ React is best learned as more than "a library for building UIs." The progression
   - Static site generation
   - Astro best practices
 
-- **109. TanStack Start**
+- **116. TanStack Start**
   - TanStack Start
   - Type-safe routing
   - Server functions
   - Data loading
   - TanStack Start best practices
 
-- **110. Framework Selection**
+- **117. Framework Selection**
   - Framework comparison
   - Use case selection
   - Performance comparison
@@ -1705,7 +1753,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # XVII. React Native
 
-- **111. React Native Fundamentals**
+- **118. React Native Fundamentals**
   - React Native
   - React Native vs React DOM
   - Native components
@@ -1728,7 +1776,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Platform-specific code
   - React Native best practices
 
-- **112. React Native Navigation**
+- **119. React Native Navigation**
   - React Navigation
   - Stack navigator
   - Tab navigator
@@ -1737,7 +1785,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Navigation options
   - Navigation best practices
 
-- **113. React Native APIs**
+- **120. React Native APIs**
   - AsyncStorage
   - Alert
   - Animated
@@ -1751,7 +1799,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Geolocation
   - React Native APIs best practices
 
-- **114. React Native Ecosystem**
+- **121. React Native Ecosystem**
   - Expo
   - Expo Router
   - Expo modules
@@ -1765,7 +1813,7 @@ React is best learned as more than "a library for building UIs." The progression
 
 # XVIII. React Patterns and Architecture
 
-- **115. Design Patterns**
+- **122. Design Patterns**
   - Container/Presentational
   - Higher-Order Components
   - Render Props
@@ -1792,7 +1840,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Factory Pattern
   - Builder Pattern
 
-- **116. Architecture Patterns**
+- **123. Architecture Patterns**
   - Component architecture
   - Feature-based architecture
   - Layer-based architecture
@@ -1806,7 +1854,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Shared component libraries
   - Architecture best practices
 
-- **117. State Architecture**
+- **124. State Architecture**
   - State colocation
   - State lifting
   - State normalization
@@ -1819,7 +1867,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Cache state
   - State architecture best practices
 
-- **118. Data Architecture**
+- **125. Data Architecture**
   - Data fetching architecture
   - Data caching architecture
   - Data invalidation
@@ -1829,7 +1877,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Pessimistic updates
   - Data architecture best practices
 
-- **119. Code Organization**
+- **126. Code Organization**
   - File structure
   - Folder structure
   - Feature folders
@@ -1842,7 +1890,7 @@ React is best learned as more than "a library for building UIs." The progression
   - Index files
   - Code organization best practices
 
-- **120. React Anti-Patterns**
+- **127. React Anti-Patterns**
   - Prop drilling
   - Overuse of context
   - Overuse of `useEffect`

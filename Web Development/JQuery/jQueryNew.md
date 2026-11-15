@@ -508,7 +508,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - `.die()` (removed)
   - Event binding best practices
 
-- **26. Event Types**
+- [**26. Event Types**](/Web%20Development/JQuery/Event%20Handling/EventTypes.md)
   - Mouse events
     - `click`
     - `dblclick`
@@ -577,7 +577,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
     - `$.Event()`
   - Event types best practices
 
-- **27. Event Delegation**
+- [**27. Event Delegation**](/Web%20Development/JQuery/Event%20Handling/EventDelegation.md)
   - Event delegation
   - Delegated events
   - `.on()` with selector
@@ -757,7 +757,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - AJAX method selection
   - AJAX method best practices
 
-- **42. `$.ajax()` Configuration**
+- [**42. `$.ajax()` Configuration**](/Web%20Development/JQuery/AJAX/AJAXMethod.md)
   - `url`
   - `method`
   - `type`
@@ -1186,7 +1186,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # XII. Performance
 
-- **66. Performance Fundamentals**
+- [**66. Performance Fundamentals**](/Web%20Development/JQuery/Performance%20Optimization/Performance.md)
   - Performance
   - DOM performance
   - Selector performance
@@ -1197,7 +1197,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Performance metrics
   - Performance best practices
 
-- **67. Selector Performance**
+- [**67. Selector Performance**](/Web%20Development/JQuery/Performance%20Optimization/Selector.md)
   - Selector caching
   - Selector context
   - Selector specificity
@@ -1209,7 +1209,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Pseudo-class selectors
   - Selector best practices
 
-- **68. DOM Performance**
+- [**68. DOM Performance**](/Web%20Development/JQuery/Performance%20Optimization/DOM.md)
   - DOM manipulation
   - DOM traversal
   - DOM insertion
@@ -1220,7 +1220,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - DOM caching
   - DOM best practices
 
-- **69. Event Performance**
+- [**69. Event Performance**](/Web%20Development/JQuery/Performance%20Optimization/Event.md)
   - Event delegation
   - Event namespacing
   - Event throttling
@@ -1228,7 +1228,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Event unbinding
   - Event best practices
 
-- **70. Animation Performance**
+- [**70. Animation Performance**](/Web%20Development/JQuery/Performance%20Optimization/Animation.md)
   - CSS animations
   - CSS transitions
   - jQuery animations

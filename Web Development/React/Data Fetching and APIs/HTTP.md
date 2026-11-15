@@ -1,4 +1,4 @@
-# HTTP Fundamentals for React: A Comprehensive Programming Cheat Sheet
+# HTTP Fundamentals for React — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1060 +6,982 @@
 
 ### Definitions
 
-**Core Definition:** HTTP (Hypertext Transfer Protocol) is the application-layer protocol that governs how React applications communicate with servers, defining the methods, status codes, headers, and payload formats used in every network request.
+**Core Definition:** HTTP (HyperText Transfer Protocol) is the request–response protocol that React applications use to communicate with servers — fetching data, submitting forms, and mutating resources.
 
-**Technical Definition:** HTTP is a stateless, request-response protocol operating over TCP (or QUIC in HTTP/3). A client (the React application running in the browser) sends an HTTP request consisting of a method, a URL, headers, and an optional body. The server responds with a status code, headers, and an optional body. HTTP/1.1 (RFC 7230–7235), HTTP/2 (RFC 7540), and HTTP/3 (RFC 9114) define the protocol's evolution, with HTTP/2 introducing multiplexing and header compression, and HTTP/3 using QUIC for reduced latency. In React applications, HTTP requests are typically made via the `fetch` API or Axios, with responses managed by server-state libraries such as TanStack Query. Understanding HTTP semantics—method safety and idempotency, status code families, content negotiation, and cross-origin constraints—is essential for building correct, performant, and secure data-fetching layers.
+**Technical Definition:** HTTP is a stateless, application-layer protocol defined by the IETF (RFC 9110–9114). A client (the browser running React) sends a **request** consisting of a method, a target URI, headers, and an optional body; the server returns a **response** consisting of a status code, headers, and an optional body. React itself has no HTTP client — it relies on the browser's `fetch` API (or libraries such as Axios) inside effects, event handlers, route loaders, or Server Components. Correct use of HTTP methods, status codes, headers, CORS, and credentials determines whether data flows securely and whether caches, proxies, and browsers behave predictably.
 
-**Beginner-Friendly Explanation:** Every time your React app talks to a server—loading a list of products, saving a form, deleting an item—it sends an HTTP message. That message has a verb (what you want to do), a status code (what happened), headers (extra information), and a body (the data). HTTP is the language both sides agree on. This cheat sheet explains the vocabulary of that language so you can debug network issues, design APIs, and write data-fetching code that behaves predictably.
+**Beginner-Friendly Explanation:** HTTP is the language your React app speaks to the server. Every time you load data, submit a form, or delete an item, your app sends a message (a request) and gets a reply (a response). The message has a verb (GET, POST, etc.), a destination (URL), some metadata (headers), and sometimes a package of data (body). The reply has a number (status code) that says what happened — 200 means “here you go,” 404 means “not found,” 500 means “the server broke.” Getting these details right is what separates an app that works reliably and securely from one that mysteriously fails in production.
 
 ### Key Characteristics
 
-- **Stateless:** Each request is independent; the server does not remember previous requests unless state is carried in cookies, tokens, or headers.
-- **Request-Response:** The client always initiates; the server always responds. No server push exists in HTTP/1.1 (HTTP/2 server push was deprecated in Chrome).
-- **Method Semantics:** Methods have defined properties—safety (no side effects) and idempotency (repeating produces the same result)—that clients, caches, and proxies rely on.
-- **Status Code Families:** The first digit of a status code categorises the outcome (1xx informational, 2xx success, 3xx redirect, 4xx client error, 5xx server error).
-- **Content Negotiation:** Clients declare what they accept (`Accept`) and servers declare what they send (`Content-Type`).
-- **Caching:** `Cache-Control`, `ETag`, `Last-Modified`, and `Vary` headers govern how responses are cached and revalidated.
-- **Cross-Origin Security:** The Same-Origin Policy restricts cross-origin reads; CORS relaxes it via explicit server headers and preflight requests.
-- **Serialisation:** JSON (RFC 8259) is the dominant payload format for REST APIs, serialised with `JSON.stringify` and deserialised with `JSON.parse`.
+- **Stateless:** Each request is independent; state must be carried by tokens, cookies, or identifiers.
+- **Method semantics matter:** GET is safe and idempotent; POST is neither; PUT and DELETE are idempotent; PATCH is usually not.
+- **Status codes are a contract:** Clients (and React error handling) branch on status codes, not on response text.
+- **Headers carry metadata:** Content negotiation, authentication, caching, and CORS all live in headers.
+- **CORS is a browser security feature:** The server must explicitly opt in to cross-origin requests.
+- **Credentials are opt-in:** Cookies and auth headers are not sent cross-origin unless explicitly configured.
+- **JSON is the default payload format:** It is human-readable, universally supported, and maps naturally to JavaScript objects.
 
 ### Prerequisites
 
-- Solid understanding of JavaScript, including `fetch`, promises, and `async`/`await`.
-- Familiarity with React function components and the `useEffect`/`useState` Hooks.
-- Working knowledge of TanStack Query or similar server-state libraries.
-- Basic understanding of URLs, DNS, and the browser's security model.
+- React function components, `useState`, and `useEffect`.
+- JavaScript Promises and `async`/`await`.
+- Basic understanding of URLs, domains, and origins.
+- Familiarity with `fetch` or an HTTP client library.
+- Basic knowledge of browser developer tools (Network tab).
 
 ### Related Programming Areas
 
-- **REST API Design:** Resource-oriented architecture using HTTP methods and status codes.
-- **Server-State Management:** Caching, invalidation, and synchronisation (TanStack Query, SWR).
-- **Authentication and Authorization:** Bearer tokens, cookies, and session management.
-- **Security:** CORS, CSRF, XSS, and content security policy.
-- **Performance:** Caching, compression, HTTP/2 multiplexing, and connection reuse.
-
-### Core Concepts / Features
-
-1. HTTP Methods in a CRUD Paradigm (GET, POST, PUT, PATCH, DELETE)
-2. HTTP Status Codes and Semantic Error Handling (2xx, 3xx, 4xx, 5xx)
-3. Headers Management (Content-Type, Cache-Control, Accept)
-4. JSON Serialisation, Deserialisation, and Payload Structure
-5. Browser Network Constraints, CORS, and Preflight Requests
+- **Data Fetching** — the React-side lifecycle that consumes HTTP.
+- **Authentication** — cookies, tokens, and credential handling.
+- **Caching** — HTTP cache headers and conditional requests.
+- **Security** — CORS, CSRF, and content security.
+- **API Design** — REST semantics and resource modelling.
 
 ---
 
-## Core Concept 1: HTTP Methods in a CRUD Paradigm (GET, POST, PUT, PATCH, DELETE)
+## 1. GET
 
 ### Definitions
 
-**Core Definition:** HTTP methods are the verbs of the protocol that indicate the desired action on a resource, mapping naturally to the CRUD operations of Create (POST), Read (GET), Update (PUT/PATCH), and Delete (DELETE).
+**Core Definition:** GET is the HTTP method used to retrieve a representation of a resource without modifying it.
 
-**Technical Definition:** RFC 9110 (HTTP Semantics) defines method properties. A method is **safe** if it does not alter server state (GET, HEAD, OPTIONS, TRACE). A method is **idempotent** if multiple identical requests have the same effect as a single request (GET, HEAD, PUT, DELETE, OPTIONS, TRACE). POST is neither safe nor idempotent. GET retrieves a representation of a resource; POST creates a subordinate resource or triggers processing; PUT replaces the target resource entirely; PATCH applies partial modifications; DELETE removes the target resource. These semantics are not merely conventions—caches, proxies, and browsers rely on them to make correct decisions about retrying, caching, and prefetching.
+**Technical Definition:** GET requests a representation of the target resource. It is defined as **safe** (no side effects on the server) and **idempotent** (multiple identical requests have the same effect as one). GET requests should not carry a request body; parameters are sent in the query string. Responses to GET are cacheable by default and may be stored by browsers, proxies, and CDNs according to `Cache-Control`, `ETag`, and related headers.
 
-**Beginner-Friendly Explanation:** HTTP methods are like verbs in a sentence. GET means "give me something." POST means "create something new." PUT means "replace this with that." PATCH means "change part of this." DELETE means "remove this." The CRUD acronym (Create, Read, Update, Delete) maps directly: POST creates, GET reads, PUT/PATCH update, DELETE deletes.
+**Beginner-Friendly Explanation:** GET is how you ask the server for something — “give me the list of products,” “give me user 42.” It never changes anything on the server, which is why browsers and caches are allowed to store the answer.
 
 ### Purposes
 
-- **GET:** To retrieve a resource representation without side effects.
-- **POST:** To create a new resource or submit data for processing.
-- **PUT:** To replace an existing resource entirely with the provided representation.
-- **PATCH:** To apply a partial modification to an existing resource.
-- **DELETE:** To remove a resource from the server.
-- **HEAD:** To retrieve response headers without a body (useful for checking existence or freshness).
-- **OPTIONS:** To discover communication options for a resource (used in CORS preflight).
+- To retrieve a resource or collection from the server.
+- To read data without causing side effects.
+- To leverage browser and CDN caching for repeated reads.
+- To support shareable, bookmarkable URLs via query parameters.
+- To perform conditional requests using `ETag`/`If-None-Match` to save bandwidth.
 
 ### Syntax Rules and Structure
 
-**Method Semantics Table:**
+**General Syntax:**
 
-| Method | Safe | Idempotent | Has Body | Typical CRUD | Success Codes |
-|---|---|---|---|---|---|
-| **GET** | ✅ | ✅ | No | Read | 200, 304 |
-| **POST** | ❌ | ❌ | Yes | Create | 201, 200, 204 |
-| **PUT** | ❌ | ✅ | Yes | Replace | 200, 204 |
-| **PATCH** | ❌ | ❌* | Yes | Update | 200, 204 |
-| **DELETE** | ❌ | ✅ | Optional | Delete | 200, 204 |
-| **HEAD** | ✅ | ✅ | No | Read metadata | 200, 304 |
-| **OPTIONS** | ✅ | ✅ | No | Discover | 200, 204 |
-
-*PATCH is not required to be idempotent by the specification, but can be implemented as idempotent.
-
-**General Syntax (`fetch`):**
-```javascript
-// GET: retrieve a list of todos
-const todos = await fetch('/api/todos').then(r => r.json());
-
-// POST: create a new todo
-const created = await fetch('/api/todos', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ title: 'New Todo', completed: false }),
-}).then(r => r.json());
-
-// PUT: replace a todo entirely
-await fetch('/api/todos/1', {
-  method: 'PUT',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ title: 'Updated', completed: true }),
+```js
+fetch(url, {
+  method: 'GET', // default; can be omitted
+  headers: { Accept: 'application/json' },
 });
-
-// PATCH: partially update a todo
-await fetch('/api/todos/1', {
-  method: 'PATCH',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ completed: true }),
-});
-
-// DELETE: remove a todo
-await fetch('/api/todos/1', { method: 'DELETE' });
 ```
 
 **Component Breakdown:**
-- `method`: The HTTP verb; defaults to `GET` if omitted.
-- `headers`: Metadata about the request (e.g., `Content-Type`).
-- `body`: The payload; must be a string (or `FormData`, `Blob`, etc.).
-- `JSON.stringify`: Serialises the JavaScript object to a JSON string.
+
+| Component | Description |
+|-----------|-------------|
+| `url` | Target resource including query string parameters |
+| `method: 'GET'` | The default method; explicit for clarity |
+| `headers` | Metadata such as `Accept` and `Authorization` |
+| `body` | Must not be present for GET |
 
 **Syntax Rules:**
-- Use `GET` for reads; never include a request body.
-- Use `POST` for creates; the server assigns the resource ID and returns it (often in the `Location` header).
-- Use `PUT` when the client sends the complete resource representation.
-- Use `PATCH` when the client sends only the changed fields.
-- Use `DELETE` for removals; the response body is often empty (204).
-- Always set `Content-Type: application/json` when sending JSON.
-- Do not use `GET` for operations with side effects; browsers, caches, and proxies may prefetch or retry GET requests.
+
+1. Parameters go in the query string (`?page=2&sort=asc`), not the body.
+2. Use `Accept` to request a specific representation (`application/json`).
+3. Cacheable by default; control with `Cache-Control` and `ETag`.
+4. Conditional GETs use `If-None-Match` or `If-Modified-Since` and may return `304 Not Modified`.
 
 **Constraints and Limitations:**
-- `GET` requests have length limits imposed by browsers and servers (typically 2,000–8,000 characters for the URL).
-- `PATCH` is not universally supported by all proxies and older servers; verify compatibility.
-- `PUT` requires the client to know the complete resource representation; if a field is omitted, it may be deleted.
-- `POST` is not idempotent; retrying a POST can create duplicate resources. Use idempotency keys for safe retries.
-- `DELETE` is idempotent—deleting an already-deleted resource returns 404 or 204, but the state is the same.
 
-### Annotated Code Example: Full CRUD with React and TanStack Query
+- URLs are logged, stored in history, and visible in the address bar — never put secrets in query strings.
+- URL length limits vary by browser and server (practically a few thousand characters).
+- GET requests cannot carry a request body reliably (semantics forbid it).
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Fetching a List in React
 
 ```jsx
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
-const API = '/api/todos';
+function ProductList() {
+  const [products, setProducts] = useState([]);
+  const [isPending, setIsPending] = useState(true);
+  const [error, setError] = useState(null);
 
-// GET — read
-async function fetchTodos() {
-  const res = await fetch(API);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+  useEffect(() => {
+    const controller = new AbortController();
 
-// POST — create
-async function createTodo(newTodo) {
-  const res = await fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newTodo),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
+    fetch('/api/products?page=1&sort=price', {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(setProducts)
+      .catch((err) => {
+        if (err.name !== 'AbortError') setError(err);
+      })
+      .finally(() => setIsPending(false));
 
-// PUT — replace
-async function replaceTodo({ id, ...todo }) {
-  const res = await fetch(`${API}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(todo),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
-
-// PATCH — partial update
-async function toggleTodo({ id, completed }) {
-  const res = await fetch(`${API}/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ completed }),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
-}
-
-// DELETE — remove
-async function deleteTodo(id) {
-  const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-}
-
-function TodoApp() {
-  const queryClient = useQueryClient();
-
-  const { data: todos, isPending, isError, error } = useQuery({
-    queryKey: ['todos'],
-    queryFn: fetchTodos,
-  });
-
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['todos'] });
-
-  const createMutation  = useMutation({ mutationFn: createTodo,  onSettled: invalidate });
-  const replaceMutation = useMutation({ mutationFn: replaceTodo, onSettled: invalidate });
-  const toggleMutation  = useMutation({ mutationFn: toggleTodo,  onSettled: invalidate });
-  const deleteMutation  = useMutation({ mutationFn: deleteTodo,  onSettled: invalidate });
+    return () => controller.abort();
+  }, []);
 
   if (isPending) return <p>Loading…</p>;
-  if (isError) return <p>Error: {error.message}</p>;
-
-  return (
-    <div>
-      <button onClick={() => createMutation.mutate({ title: 'New', completed: false })}>
-        Add
-      </button>
-      <ul>
-        {todos.map(todo => (
-          <li key={todo.id}>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleMutation.mutate({ id: todo.id, completed: !todo.completed })}
-            />
-            {todo.title}
-            <button onClick={() => deleteMutation.mutate(todo.id)}>✕</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  if (error) return <p role="alert">Failed to load products.</p>;
+  return <ul>{products.map((p) => <li key={p.id}>{p.name}</li>)}</ul>;
 }
 ```
 
-**Expected Output:** A todo list with an "Add" button and per-item toggle/delete controls. Clicking "Add" sends a POST and refetches the list. Toggling a checkbox sends a PATCH with only `completed`. Deleting sends a DELETE and refetches.
+**Expected Output:** The list renders after the GET completes. Query parameters `page=1&sort=price` are sent to the server. Navigating away aborts the request.
 
-**Why This Output Occurs:** Each mutation uses the semantically correct HTTP method for its CRUD operation. `onSettled` invalidates the `['todos']` query after every mutation, so the list stays in sync with the server. GET is used for reads only; POST for creates; PATCH for partial updates (only the changed field); DELETE for removals.
+**Why this output:** GET is the default method; parameters are in the query string. `res.ok` distinguishes HTTP success from errors. `AbortController` cancels the request on unmount.
 
-### Real-World Cases
-
-- **REST APIs:** Most REST APIs map CRUD to the five methods, with resource-oriented URLs (`/users/123`).
-- **GraphQL:** Typically uses POST for all operations, with the query/mutation distinction in the body.
-- **Form submissions:** HTML forms only support GET and POST; JavaScript `fetch` unlocks the full method set.
-- **Bulk operations:** `PATCH /users` with an array body for batch updates; `DELETE /users?ids=1,2,3` for batch deletes.
-- **Idempotent retries:** `PUT` and `DELETE` can be safely retried; `POST` requires idempotency keys.
-
-### References
-
-- RFC 9110 – HTTP Semantics (Methods): https://www.rfc-editor.org/rfc/rfc9110.html#name-methods
-- MDN Web Docs – HTTP request methods: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
-- MDN Web Docs – Idempotent: https://developer.mozilla.org/en-US/docs/Glossary/Idempotent
-- RFC 5789 – PATCH Method for HTTP: https://www.rfc-editor.org/rfc/rfc5789.html
-
----
-
-## Core Concept 2: HTTP Status Codes and Semantic Error Handling (2xx, 3xx, 4xx, 5xx)
-
-### Definitions
-
-**Core Definition:** HTTP status codes are three-digit integers in the response that indicate the outcome of a request, grouped into five families by their first digit—each family communicating a distinct category of result.
-
-**Technical Definition:** RFC 9110 defines status code classes. **1xx (Informational):** The request was received and processing continues (e.g., 100 Continue, 101 Switching Protocols). **2xx (Success):** The request was successfully received, understood, and accepted (200 OK, 201 Created, 202 Accepted, 204 No Content, 206 Partial Content). **3xx (Redirection):** Further action is needed to complete the request (301 Moved Permanently, 302 Found, 304 Not Modified, 307 Temporary Redirect, 308 Permanent Redirect). **4xx (Client Error):** The request contains bad syntax or cannot be fulfilled (400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 405 Method Not Allowed, 409 Conflict, 422 Unprocessable Entity, 429 Too Many Requests). **5xx (Server Error):** The server failed to fulfil a valid request (500 Internal Server Error, 502 Bad Gateway, 503 Service Unavailable, 504 Gateway Timeout).
-
-**Beginner-Friendly Explanation:** Status codes are the server's way of saying what happened. **2xx** means "all good"—here's your data. **3xx** means "go somewhere else"—the resource moved. **4xx** means "you did something wrong"—the request was bad. **5xx** means "I did something wrong"—the server has a problem. The first digit tells you the category; the other two tell you the specifics.
-
-### Purposes
-
-- **2xx:** To confirm that the request succeeded and, for creates, to return the new resource's URL.
-- **3xx:** To redirect clients to a new location or to indicate that a cached response is still fresh.
-- **4xx:** To inform the client that the request was invalid, unauthorised, forbidden, or not found.
-- **5xx:** To inform the client that the server encountered an error and the request may be retried.
-- **Semantic Error Handling:** To enable clients to distinguish retryable errors (5xx, 429, 408) from non-retryable ones (4xx) and to map errors to user-facing messages.
-
-### Syntax Rules and Structure
-
-**Common Status Codes Table:**
-
-| Code | Name | Meaning | React Handling |
-|---|---|---|---|
-| **200** | OK | Success with body | Parse JSON, render data |
-| **201** | Created | Resource created | Read `Location` header; invalidate queries |
-| **204** | No Content | Success, no body | Do not call `.json()`; invalidate queries |
-| **301** | Moved Permanently | Resource moved permanently | Update bookmarks; follow redirect |
-| **304** | Not Modified | Cached copy is fresh | Use cache; no body |
-| **400** | Bad Request | Malformed request | Show validation errors |
-| **401** | Unauthorized | Authentication required | Redirect to login |
-| **403** | Forbidden | Authenticated but not allowed | Show "access denied" |
-| **404** | Not Found | Resource does not exist | Show "not found" |
-| **409** | Conflict | State conflict (e.g., duplicate) | Show conflict message |
-| **422** | Unprocessable Entity | Validation failed | Map errors to fields |
-| **429** | Too Many Requests | Rate limited | Back off; respect `Retry-After` |
-| **500** | Internal Server Error | Server bug | Show generic error; report |
-| **502** | Bad Gateway | Upstream failure | Retry with backoff |
-| **503** | Service Unavailable | Server overloaded/maintenance | Retry with backoff; respect `Retry-After` |
-| **504** | Gateway Timeout | Upstream timeout | Retry with backoff |
-
-**Semantic Error Handling Pattern (`fetch`):**
-```javascript
-async function fetchJSON(url, options = {}) {
-  const res = await fetch(url, options);
-
-  if (res.status === 204) return null; // No content — do not parse
-
-  const body = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    const error = new Error(body?.message ?? `HTTP ${res.status}`);
-    error.status = res.status;
-    error.body = body;
-    error.retryable =
-      res.status >= 500 || res.status === 429 || res.status === 408;
-    throw error;
-  }
-
-  return body;
-}
-```
-
-**Component Breakdown:**
-- `res.status === 204`: Returns `null` for no-content responses (do not call `.json()`).
-- `res.ok`: `true` for 2xx statuses; `false` otherwise.
-- `error.status`: Preserves the status code for downstream logic.
-- `error.retryable`: Marks 5xx, 429, and 408 as retryable.
-
-**TanStack Query Retry Configuration:**
-```javascript
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        // Do not retry 4xx errors (except 408 and 429)
-        if (error.status >= 400 && error.status < 500) {
-          return error.status === 408 || error.status === 429
-            ? failureCount < 3
-            : false;
-        }
-        return failureCount < 3; // Retry 5xx up to 3 times
-      },
-    },
-  },
-});
-```
-
-**Component Breakdown:**
-- `retry`: A function receiving `failureCount` and `error`.
-- 4xx errors are not retried (except 408 Request Timeout and 429 Too Many Requests).
-- 5xx errors are retried up to 3 times with exponential backoff.
-
-**Syntax Rules:**
-- Always check `res.ok` before parsing JSON.
-- Handle 204 explicitly—it has no body.
-- Distinguish retryable (5xx, 429, 408) from non-retryable (4xx) errors.
-- Respect the `Retry-After` header for 429 and 503 responses.
-- Map status codes to user-facing messages: 401 → "Please log in", 403 → "Access denied", 404 → "Not found", 5xx → "Something went wrong".
-- Throw errors with the status code attached so callers can branch on it.
-
-**Constraints and Limitations:**
-- `fetch` does not reject on HTTP error statuses; it only rejects on network failure. Always check `res.ok`.
-- Some APIs return 200 with an error body; check the body structure, not just the status.
-- 3xx redirects are followed automatically by `fetch` in `follow` mode (the default); use `redirect: 'manual'` to handle them yourself.
-- 401 vs. 403 is often confused: 401 means "not authenticated"; 403 means "authenticated but not authorised".
-- 422 is not universally used; some APIs use 400 for all validation errors.
-
-### Annotated Code Example: Semantic Error Handling in TanStack Query
+#### Example 2: Conditional GET with ETag
 
 ```jsx
-import { useQuery } from '@tanstack/react-query';
-
-class ApiError extends Error {
-  constructor(status, body) {
-    super(body?.message ?? `HTTP ${status}`);
-    this.status = status;
-    this.body = body;
-    this.retryable = status >= 500 || status === 429 || status === 408;
-  }
-}
-
-async function fetchJSON(url) {
-  const res = await fetch(url);
-
-  if (res.status === 204) return null;
-
-  const body = await res.json().catch(() => null);
-
-  if (!res.ok) throw new ApiError(res.status, body);
-
-  return body;
-}
-
-function UserProfile({ userId }) {
-  const { data, isPending, isError, error } = useQuery({
-    queryKey: ['user', userId],
-    queryFn: () => fetchJSON(`/api/users/${userId}`),
-    retry: (count, err) => err.retryable && count < 3,
+async function fetchWithEtag(url, etag) {
+  const res = await fetch(url, {
+    headers: etag ? { 'If-None-Match': etag } : {},
   });
 
-  if (isPending) return <p>Loading…</p>;
-
-  if (isError) {
-    if (error.status === 404) return <p>User not found.</p>;
-    if (error.status === 401) return <p>Please log in.</p>;
-    if (error.status === 403) return <p>Access denied.</p>;
-    if (error.status >= 500) return <p>Server error. Please try again.</p>;
-    return <p>Error: {error.message}</p>;
+  if (res.status === 304) {
+    return { notModified: true };
   }
 
-  return <h1>{data.name}</h1>;
+  return {
+    data: await res.json(),
+    etag: res.headers.get('ETag'),
+  };
 }
 ```
 
-**Expected Output:** Loading a valid user shows their name. A 404 shows "User not found." A 401 shows "Please log in." A 5xx shows "Server error. Please try again." and retries up to 3 times.
+**Expected Output:** If the resource has not changed, the server returns `304 Not Modified` with no body, saving bandwidth. Otherwise, the new data and ETag are returned.
 
-**Why This Output Occurs:** The `ApiError` class preserves the status code and marks retryable errors. The `retry` function only retries when `error.retryable` is true. The component branches on `error.status` to render the appropriate message. This separates the concerns of error detection (in the fetch layer) and error presentation (in the component).
+**Why this output:** `If-None-Match` sends the cached ETag. A `304` tells the client to reuse its cached copy. `res.headers.get('ETag')` captures the new validator for the next request.
 
 ### Real-World Cases
 
-- **Authentication:** 401 triggers a redirect to login; 403 shows an access-denied page.
-- **Resource not found:** 404 renders a "not found" page with a link back to the list.
-- **Rate limiting:** 429 triggers exponential backoff with `Retry-After` respect.
-- **Server outages:** 503 shows a maintenance banner and retries in the background.
-- **Validation:** 422 responses map `{ errors: { field: message } }` to form fields via `setError`.
-- **Optimistic updates:** 409 conflicts trigger rollback of optimistic UI.
+- **Product listings:** `/api/products?category=shoes&page=2`.
+- **User profiles:** `/api/users/42`.
+- **Search:** `/api/search?q=react&limit=20`.
+- **Conditional polling:** ETag-based refresh to avoid re-downloading unchanged data.
 
 ### References
 
-- RFC 9110 – HTTP Semantics (Status Codes): https://www.rfc-editor.org/rfc/rfc9110.html#name-status-codes
-- MDN Web Docs – HTTP response status codes: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-- RFC 6585 – Additional HTTP Status Codes (429): https://www.rfc-editor.org/rfc/rfc6585.html
-- TanStack Query – Query Retries: https://tanstack.com/query/latest/docs/framework/react/guides/query-retries
+- MDN — HTTP request methods: GET — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/GET
+- RFC 9110 — HTTP Semantics — https://www.rfc-editor.org/rfc/rfc9110
+- MDN — Conditional requests — https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Conditional_requests
 
 ---
 
-## Core Concept 3: Headers Management (Content-Type, Cache-Control, Accept)
+## 2. POST
 
 ### Definitions
 
-**Core Definition:** HTTP headers are key-value pairs sent with requests and responses that carry metadata—such as the format of the body, caching directives, and content negotiation preferences—separate from the payload itself.
+**Core Definition:** POST is the HTTP method used to submit data to the server, typically to create a new resource or trigger processing.
 
-**Technical Definition:** RFC 9110 defines header fields as case-insensitive names followed by values. **Representation headers** describe the body: `Content-Type` (media type, e.g., `application/json`), `Content-Length` (byte length), `Content-Encoding` (e.g., `gzip`, `br`). **Content negotiation headers** let the client declare preferences: `Accept` (media types), `Accept-Language`, `Accept-Encoding`. **Caching headers** control cache behaviour: `Cache-Control` (directives like `max-age`, `no-store`, `no-cache`, `stale-while-revalidate`), `ETag` (validator), `Last-Modified`, `Vary` (which request headers affect the response), `Expires`. **Authentication headers:** `Authorization` (e.g., `Bearer <token>`), `WWW-Authenticate`. **CORS headers:** `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, `Access-Control-Max-Age`. In `fetch`, headers are set via the `headers` option and read via `res.headers.get(name)`.
+**Technical Definition:** POST sends a representation to the target resource, asking the server to process it. POST is neither **safe** nor **idempotent**: repeating a POST can create duplicate resources or trigger duplicate side effects. The request body carries the payload (commonly JSON or `multipart/form-data`). A successful POST commonly returns `201 Created` with a `Location` header pointing to the new resource.
 
-**Beginner-Friendly Explanation:** Headers are like the labels on a package. `Content-Type` says "this box contains JSON." `Accept` says "I can only accept JSON." `Cache-Control` says "keep this in the warehouse for 5 minutes." `Authorization` says "here's my ID badge." Without headers, the server and client would have to guess what's inside the package and how to handle it.
+**Beginner-Friendly Explanation:** POST is how you send new data to the server — “here is a new order, please create it.” Unlike GET, POST changes things, and repeating it can create duplicates.
 
 ### Purposes
 
-- **Content-Type:** To declare the media type of the request or response body.
-- **Accept:** To declare which media types the client can handle.
-- **Cache-Control:** To control how responses are cached, revalidated, and served.
-- **Authorization:** To carry authentication credentials (e.g., bearer tokens).
-- **ETag / If-None-Match:** To enable conditional requests and 304 responses.
-- **Vary:** To tell caches which request headers affect the response.
-- **CORS headers:** To permit or deny cross-origin requests.
+- To create new resources (users, orders, posts).
+- To submit form data and trigger server-side processing.
+- To send complex payloads (JSON, files) that do not fit in a URL.
+- To trigger non-idempotent operations where duplication must be prevented.
+- To authenticate (login endpoints typically use POST).
 
 ### Syntax Rules and Structure
 
-**Setting Request Headers (`fetch`):**
-```javascript
-const res = await fetch('/api/todos', {
+**General Syntax:**
+
+```js
+fetch('/api/products', {
   method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Authorization': `Bearer ${token}`,
-    'X-Request-Id': crypto.randomUUID(),
-  },
-  body: JSON.stringify({ title: 'New' }),
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name: 'Shoes', price: 99 }),
 });
 ```
 
 **Component Breakdown:**
-- `Content-Type`: The format of the request body.
-- `Accept`: The formats the client can handle.
-- `Authorization`: The bearer token for authentication.
-- `X-Request-Id`: A custom header for tracing.
 
-**Reading Response Headers:**
-```javascript
-const res = await fetch('/api/todos');
-
-const contentType = res.headers.get('Content-Type'); // "application/json; charset=utf-8"
-const cacheControl = res.headers.get('Cache-Control'); // "max-age=300, stale-while-revalidate=60"
-const etag = res.headers.get('ETag'); // "\"abc123\""
-const location = res.headers.get('Location'); // "/api/todos/42" (on 201)
-```
-
-**Caching with `Cache-Control`:**
-```
-Cache-Control: max-age=300, stale-while-revalidate=60
-```
-- `max-age=300`: The response is fresh for 300 seconds.
-- `stale-while-revalidate=60`: After 300 seconds, the stale response can be served for up to 60 seconds while a revalidation happens in the background.
-- `no-store`: Never cache.
-- `no-cache`: Cache but revalidate before every use.
-- `private`: Only the browser may cache, not shared caches.
-- `public`: Shared caches may cache.
-
-**Conditional Requests with `ETag`:**
-```javascript
-// First request: server returns ETag
-const first = await fetch('/api/user');
-const etag = first.headers.get('ETag');
-
-// Subsequent request: client sends If-None-Match
-const second = await fetch('/api/user', {
-  headers: { 'If-None-Match': etag },
-});
-
-if (second.status === 304) {
-  // Cached copy is still fresh; use it
-}
-```
-
-**CORS Headers (Server Response):**
-```
-Access-Control-Allow-Origin: https://app.example.com
-Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
-Access-Control-Allow-Headers: Content-Type, Authorization
-Access-Control-Allow-Credentials: true
-Access-Control-Max-Age: 86400
-```
+| Component | Description |
+|-----------|-------------|
+| `method: 'POST'` | The request method |
+| `Content-Type` | Declares the body format (`application/json`) |
+| `body` | The serialized payload |
+| `Location` (response) | Points to the created resource |
 
 **Syntax Rules:**
-- Always set `Content-Type: application/json` when sending JSON.
-- Always set `Accept: application/json` to signal the expected response format.
-- Use `Authorization: Bearer <token>` for token-based authentication.
-- Use `Cache-Control: no-store` for sensitive data (tokens, personal info).
-- Use `ETag` + `If-None-Match` for efficient revalidation of large resources.
-- Use `Vary: Accept-Encoding` when the response varies by encoding.
-- Header names are case-insensitive, but convention is kebab-case (`Content-Type`).
-- Do not set `Content-Type` manually when sending `FormData`; the browser sets it with the correct multipart boundary.
+
+1. Always set `Content-Type` to match the body format.
+2. Serialize objects with `JSON.stringify` when sending JSON.
+3. Expect `201 Created` and a `Location` header for resource creation.
+4. Use `Idempotency-Key` headers for payment or order endpoints where duplicates are dangerous.
 
 **Constraints and Limitations:**
-- Some headers are **forbidden** in `fetch` and cannot be set by JavaScript (`Host`, `Connection`, `Content-Length`, `Cookie`, `Set-Cookie`).
-- Custom headers (e.g., `X-Request-Id`) trigger a CORS preflight request.
-- `Cache-Control` is a hint; caches may ignore it under certain conditions.
-- `ETag` values must be quoted strings.
-- `Authorization` headers are not sent on cross-origin redirects by default for security reasons.
-- Browsers cap the size of headers (typically 8–16 KB total).
 
-### Annotated Code Example: Authenticated Fetch Wrapper with Caching
+- Not idempotent: retries can create duplicates.
+- Not cacheable by default.
+- CSRF protection is required when using cookie-based auth.
 
-```javascript
-class HttpClient {
-  constructor(baseURL, getToken) {
-    this.baseURL = baseURL;
-    this.getToken = getToken;
-  }
+### Annotated Code Examples
 
-  async request(path, { method = 'GET', body, headers = {}, ...rest } = {}) {
-    const token = this.getToken();
-
-    const res = await fetch(`${this.baseURL}${path}`, {
-      method,
-      headers: {
-        'Accept': 'application/json',
-        ...(body ? { 'Content-Type': 'application/json' } : {}),
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        ...headers,
-      },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-      ...rest,
-    });
-
-    if (res.status === 204) return null;
-
-    const data = await res.json().catch(() => null);
-
-    if (!res.ok) {
-      const error = new Error(data?.message ?? `HTTP ${res.status}`);
-      error.status = res.status;
-      error.data = data;
-      throw error;
-    }
-
-    return data;
-  }
-
-  get(path, options) { return this.request(path, { ...options, method: 'GET' }); }
-  post(path, body, options) { return this.request(path, { ...options, method: 'POST', body }); }
-  put(path, body, options) { return this.request(path, { ...options, method: 'PUT', body }); }
-  patch(path, body, options) { return this.request(path, { ...options, method: 'PATCH', body }); }
-  delete(path, options) { return this.request(path, { ...options, method: 'DELETE' }); }
-}
-
-// Usage
-const api = new HttpClient('/api', () => localStorage.getItem('token'));
-
-const todos = await api.get('/todos');
-const created = await api.post('/todos', { title: 'New', completed: false });
-```
-
-**Expected Output:** A reusable HTTP client that automatically sets `Accept`, `Content-Type` (when a body is present), and `Authorization` headers. It handles 204 responses, parses JSON, and throws structured errors with status codes.
-
-**Why This Output Occurs:** The `HttpClient` class centralises header management. The `Accept` header is always set; `Content-Type` is only set when a body exists (avoiding the error of setting it on GET requests); `Authorization` is set when a token exists. The error object carries the status code and parsed body for downstream handling.
-
-### Real-World Cases
-
-- **Authentication:** Sending `Authorization: Bearer <token>` on every authenticated request.
-- **API versioning:** Using `Accept: application/vnd.api+json; version=2` for versioned APIs.
-- **Caching:** Setting `Cache-Control: max-age=3600` on static assets; `no-store` on sensitive endpoints.
-- **Tracing:** Sending `X-Request-Id` for distributed tracing; servers log it and return it.
-- **Content negotiation:** Using `Accept-Language` to return localised content.
-- **Idempotency:** Sending `Idempotency-Key` on POST requests to enable safe retries.
-
-### References
-
-- RFC 9110 – HTTP Semantics (Fields): https://www.rfc-editor.org/rfc/rfc9110.html#name-header-fields
-- MDN Web Docs – HTTP headers: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
-- MDN Web Docs – Cache-Control: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-- MDN Web Docs – Content-Type: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type
-- MDN Web Docs – Accept: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept
-- RFC 9111 – HTTP Caching: https://www.rfc-editor.org/rfc/rfc9111.html
-
----
-
-## Core Concept 4: JSON Serialisation, Deserialisation, and Payload Structure
-
-### Definitions
-
-**Core Definition:** JSON (JavaScript Object Notation) is the text-based data-interchange format used by most REST APIs, serialised in React with `JSON.stringify` and deserialised with `JSON.parse`, with payload structure determining how clients and servers interpret the data.
-
-**Technical Definition:** JSON is defined by RFC 8259 (STD 90) and ECMA-404. It supports six value types: object, array, string, number, boolean, and null. Strings must be double-quoted; numbers cannot be `NaN` or `Infinity`; objects cannot have trailing commas or comments. `JSON.stringify(value, replacer, space)` converts a JavaScript value to a JSON string; `JSON.parse(text, reviver)` converts a JSON string to a JavaScript value. In React, `fetch` does not automatically serialise or parse JSON—the developer must call `JSON.stringify` before sending and `res.json()` after receiving. Common payload structures for REST APIs include single resources (`{ id, ...fields }`), collections (`[ { ... }, { ... } ]` or `{ data: [...], meta: { ... } }`), and error envelopes (`{ error: { code, message, details } }`).
-
-**Beginner-Friendly Explanation:** JSON is a way to write data as text so both the browser and the server can read it. JavaScript objects are converted to JSON strings with `JSON.stringify` before sending, and JSON strings are converted back to objects with `JSON.parse` after receiving. The shape of the JSON—whether it's a single object, an array, or a wrapper with `data` and `meta`—is called the payload structure. A consistent payload structure makes the client code predictable.
-
-### Purposes
-
-- **Serialisation:** To convert a JavaScript object into a JSON string for transmission.
-- **Deserialisation:** To convert a JSON string from the server into a JavaScript object.
-- **Payload Structure:** To define a consistent shape for resources, collections, and errors.
-- **Error Envelopes:** To standardise how errors are returned so clients can handle them uniformly.
-- **Pagination Metadata:** To include `total`, `page`, `pageSize`, and `nextCursor` alongside collection data.
-- **Versioning:** To include API version information in the payload or headers.
-
-### Syntax Rules and Structure
-
-**Serialisation:**
-```javascript
-const todo = { id: 1, title: 'Buy milk', completed: false, dueDate: new Date('2024-12-31') };
-
-// Basic
-const json = JSON.stringify(todo);
-// '{"id":1,"title":"Buy milk","completed":false,"dueDate":"2024-12-31T00:00:00.000Z"}'
-
-// With replacer (omit sensitive fields)
-const safe = JSON.stringify(todo, (key, value) =>
-  key === 'password' ? undefined : value
-);
-
-// With indentation (for debugging)
-const pretty = JSON.stringify(todo, null, 2);
-```
-
-**Deserialisation:**
-```javascript
-const json = '{"id":1,"title":"Buy milk","completed":false}';
-
-const todo = JSON.parse(json);
-// { id: 1, title: 'Buy milk', completed: false }
-
-// With reviver (convert date strings to Date objects)
-const withDates = JSON.parse(json, (key, value) =>
-  key === 'dueDate' ? new Date(value) : value
-);
-```
-
-**Standard Payload Structures:**
-
-**Single Resource:**
-```json
-{
-  "id": 1,
-  "title": "Buy milk",
-  "completed": false,
-  "createdAt": "2024-12-01T10:00:00Z",
-  "updatedAt": "2024-12-02T14:30:00Z"
-}
-```
-
-**Collection (Array):**
-```json
-[
-  { "id": 1, "title": "Buy milk", "completed": false },
-  { "id": 2, "title": "Walk dog", "completed": true }
-]
-```
-
-**Collection with Metadata (JSON:API style):**
-```json
-{
-  "data": [
-    { "id": 1, "title": "Buy milk", "completed": false },
-    { "id": 2, "title": "Walk dog", "completed": true }
-  ],
-  "meta": {
-    "total": 42,
-    "page": 1,
-    "pageSize": 10,
-    "nextCursor": "eyJpZCI6MTB9"
-  }
-}
-```
-
-**Error Envelope (RFC 9457 Problem Details):**
-```json
-{
-  "type": "https://example.com/errors/validation",
-  "title": "Validation failed",
-  "status": 422,
-  "detail": "One or more fields are invalid.",
-  "errors": {
-    "email": ["Email is required"],
-    "password": ["Password must be at least 8 characters"]
-  }
-}
-```
-
-**Syntax Rules:**
-- Always `JSON.stringify` the body before sending; `fetch` does not serialise automatically.
-- Always set `Content-Type: application/json` when sending JSON.
-- Always `await res.json()` to parse the response; `fetch` does not deserialise automatically.
-- Handle `204 No Content` before calling `res.json()`.
-- Use a consistent payload structure across all endpoints.
-- Include `createdAt` and `updatedAt` timestamps on resources.
-- Use a consistent error envelope with `status`, `message`, and `errors` fields.
-- Never include sensitive data (passwords, tokens) in serialised payloads.
-
-**Constraints and Limitations:**
-- JSON does not support `undefined`, `NaN`, `Infinity`, `Date`, `Map`, `Set`, or `BigInt` natively; convert them to supported types first.
-- `JSON.stringify` throws on circular references.
-- `JSON.parse` throws on malformed JSON; always wrap in `try/catch` or use `.catch(() => null)`.
-- `fetch`'s `res.json()` consumes the response body; calling it twice throws.
-- Large payloads should be paginated; avoid returning unbounded arrays.
-- JSON is more verbose than binary formats (Protobuf, MessagePack); use compression (`gzip`, `br`) for large payloads.
-
-### Annotated Code Example: Typed API Client with Payload Validation
-
-```typescript
-import { z } from 'zod';
-
-// Define the payload schema
-const TodoSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  completed: z.boolean(),
-  createdAt: z.string().datetime(),
-});
-
-const TodoListSchema = z.object({
-  data: z.array(TodoSchema),
-  meta: z.object({
-    total: z.number(),
-    page: z.number(),
-    pageSize: z.number(),
-  }),
-});
-
-type Todo = z.infer<typeof TodoSchema>;
-type TodoList = z.infer<typeof TodoListSchema>;
-
-// API client that validates payloads
-async function fetchTodos(page = 1): Promise<TodoList> {
-  const res = await fetch(`/api/todos?page=${page}`, {
-    headers: { 'Accept': 'application/json' },
-  });
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(body?.message ?? `HTTP ${res.status}`);
-  }
-
-  const json = await res.json();
-  const parsed = TodoListSchema.safeParse(json);
-
-  if (!parsed.success) {
-    console.error('Invalid payload:', parsed.error.flatten());
-    throw new Error('Server returned an invalid payload');
-  }
-
-  return parsed.data;
-}
-
-async function createTodo(input: { title: string }): Promise<Todo> {
-  const res = await fetch('/api/todos', {
+```tsx
+async function createProduct(input) {
+  const res = await fetch('/api/products', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => null);
-    throw new Error(body?.message ?? `HTTP ${res.status}`);
+    const problem = await res.json().catch(() => ({}));
+    throw new Error(problem.message ?? `HTTP ${res.status}`);
   }
 
-  const json = await res.json();
-  return TodoSchema.parse(json); // Throws if invalid
+  return res.json();
 }
 ```
 
-**Expected Output:** `fetchTodos` returns a validated `TodoList` object with typed `data` and `meta`. If the server returns an unexpected shape, the function throws "Server returned an invalid payload" and logs the Zod error. `createTodo` returns a validated `Todo`.
+**Expected Output:** A successful creation returns `201 Created` with the new resource JSON. Validation failures return `400` or `422` with an error body.
 
-**Why This Output Occurs:** The Zod schema defines the expected payload structure. `safeParse` returns a result object rather than throwing, allowing graceful error handling. `parse` throws on invalid data, which is appropriate when the caller expects a valid response and wants to fail fast. The `Accept` and `Content-Type` headers ensure the server returns and accepts JSON.
+**Why this output:** POST with `Content-Type: application/json` and a JSON body creates the resource. `res.ok` checks for success; the error path parses the server's error message.
 
 ### Real-World Cases
 
-- **REST APIs:** Single resources, collections, and error envelopes following JSON:API or custom conventions.
-- **GraphQL:** Always POST with `{ query, variables, operationName }` and receive `{ data, errors }`.
-- **Pagination:** `{ data, meta: { total, page, pageSize, nextCursor } }` for cursor-based or offset-based pagination.
-- **Validation errors:** `{ status: 422, errors: { field: [messages] } }` mapped to form fields.
-- **Bulk operations:** `{ data: [ ... ], meta: { succeeded, failed, errors } }` for batch results.
-- **File metadata:** `{ id, filename, size, mimeType, url }` returned after upload.
+- **Checkout:** Submitting an order with line items and payment details.
+- **Signup/login:** Sending credentials for authentication.
+- **File uploads:** Sending `multipart/form-data` to an upload endpoint.
+- **Webhooks:** Third-party services POSTing events to your server.
 
 ### References
 
-- RFC 8259 – The JavaScript Object Notation (JSON) Data Interchange Format: https://www.rfc-editor.org/rfc/rfc8259.html
-- ECMA-404 – The JSON Data Interchange Syntax: https://www.ecma-international.org/publications-and-standards/standards/ecma-404/
-- MDN Web Docs – JSON.stringify(): https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
-- MDN Web Docs – JSON.parse(): https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
-- RFC 9457 – Problem Details for HTTP APIs: https://www.rfc-editor.org/rfc/rfc9457.html
-- Zod – Documentation: https://zod.dev/
+- MDN — HTTP request methods: POST — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST
+- RFC 9110 — HTTP Semantics — https://www.rfc-editor.org/rfc/rfc9110
+- MDN — POST — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/POST
 
 ---
 
-## Core Concept 5: Browser Network Constraints, CORS, and Preflight Requests
+## 3. PUT
 
 ### Definitions
 
-**Core Definition:** CORS (Cross-Origin Resource Sharing) is a browser security mechanism that uses HTTP headers to permit or deny cross-origin requests, with preflight requests (OPTIONS) checking permissions before the actual request is sent.
+**Core Definition:** PUT is the HTTP method used to replace an existing resource entirely with the provided representation.
 
-**Technical Definition:** The **Same-Origin Policy (SOP)** restricts how a document or script loaded from one origin can interact with resources from another origin. An origin is defined by the triple `(scheme, host, port)`. CORS is the W3C (now WHATWG) mechanism that relaxes SOP for controlled cross-origin access. A **simple request** (GET, HEAD, POST with `Content-Type` of `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`, and no custom headers) is sent directly. A **preflighted request** (any other method or content type, or with custom headers) is preceded by an OPTIONS request that asks the server for permission. The server responds with `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, and optionally `Access-Control-Allow-Credentials` and `Access-Control-Max-Age`. The browser then decides whether to send the actual request. If the response lacks the required headers, the browser blocks the response from reaching the JavaScript—even though the server may have processed the request.
+**Technical Definition:** PUT sends a complete representation of the target resource. If the resource exists, it is replaced; if it does not exist, the server may create it at the given URI. PUT is **idempotent**: repeating the same request produces the same result. Unlike PATCH, PUT replaces the entire resource — omitted fields are typically removed or reset, not preserved.
 
-**Beginner-Friendly Explanation:** Browsers have a security rule: a page from `app.example.com` cannot read responses from `api.other.com` unless `api.other.com` explicitly says "I allow `app.example.com`." That's CORS. Before sending certain requests (like PUT or POST with JSON), the browser sends a small "preflight" request (OPTIONS) to ask the server: "Will you allow this?" If the server says yes, the browser sends the real request. If the server doesn't answer correctly, the browser blocks the response.
+**Beginner-Friendly Explanation:** PUT means “replace this whole thing with what I am sending.” If you leave a field out, it may be erased. Repeating the same PUT has the same effect as sending it once.
 
 ### Purposes
 
-- To enable controlled cross-origin API access from browsers.
-- To prevent malicious sites from reading sensitive data from other origins.
-- To allow servers to whitelist specific origins, methods, and headers.
-- To reduce preflight overhead with `Access-Control-Max-Age`.
-- To support credentialed requests (cookies, `Authorization` headers) with `Access-Control-Allow-Credentials`.
+- To replace an entire resource with a known complete representation.
+- To perform idempotent updates that are safe to retry.
+- To create a resource at a client-specified URI when supported.
+- To support offline-first sync where the full object is known.
+- To simplify conflict handling with `ETag`/`If-Match` preconditions.
 
 ### Syntax Rules and Structure
 
-**Simple Request (No Preflight):**
-```javascript
-// GET with no custom headers — simple, no preflight
-fetch('https://api.other.com/data');
-```
-
-**Preflighted Request:**
-```javascript
-// PUT with JSON and custom headers — triggers preflight
-fetch('https://api.other.com/data/1', {
+```js
+fetch('/api/users/42', {
   method: 'PUT',
   headers: {
     'Content-Type': 'application/json',
-    'X-Request-Id': 'abc-123',
+    'If-Match': etag,
   },
-  body: JSON.stringify({ name: 'Updated' }),
+  body: JSON.stringify({ id: 42, name: 'Ada', email: 'ada@example.com' }),
 });
 ```
 
-The browser sends:
-```
-OPTIONS /data/1 HTTP/1.1
-Origin: https://app.example.com
-Access-Control-Request-Method: PUT
-Access-Control-Request-Headers: content-type, x-request-id
-```
+**Component Breakdown:**
 
-The server must respond:
-```
-HTTP/1.1 204 No Content
-Access-Control-Allow-Origin: https://app.example.com
-Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
-Access-Control-Allow-Headers: Content-Type, X-Request-Id
-Access-Control-Max-Age: 86400
-```
-
-Then the browser sends the actual PUT request.
-
-**Credentialed Request:**
-```javascript
-fetch('https://api.other.com/me', {
-  credentials: 'include', // Send cookies
-  headers: { 'Authorization': `Bearer ${token}` },
-});
-```
-
-Server must respond with:
-```
-Access-Control-Allow-Origin: https://app.example.com  // NOT *
-Access-Control-Allow-Credentials: true
-```
+| Component | Description |
+|-----------|-------------|
+| `method: 'PUT'` | Replace semantics |
+| `If-Match` | Optional precondition to prevent lost updates |
+| `body` | The complete replacement representation |
 
 **Syntax Rules:**
-- `Access-Control-Allow-Origin` must be a specific origin (not `*`) when `Access-Control-Allow-Credentials: true`.
-- Preflight responses should return 204 No Content (or 200 with a body).
-- `Access-Control-Max-Age` caches the preflight result (in seconds) to reduce OPTIONS requests.
-- `Access-Control-Allow-Methods` must include the requested method.
-- `Access-Control-Allow-Headers` must include all custom headers.
-- `credentials: 'include'` is required on the client for cookies to be sent cross-origin.
-- `Vary: Origin` should be set when the response depends on the `Origin` header (for shared caches).
+
+1. Send the complete resource, not a partial patch.
+2. Use `If-Match` with an ETag for optimistic concurrency.
+3. PUT is idempotent; retries are safe.
+4. Return `200` or `204` on success; `201` if a resource was created.
 
 **Constraints and Limitations:**
-- CORS is enforced by the browser, not the server. The server may process the request even if the browser blocks the response.
-- Preflight requests add latency (an extra round trip); use `Access-Control-Max-Age` to cache them.
-- `Access-Control-Allow-Origin: *` cannot be used with credentials.
-- Custom headers (e.g., `Authorization`, `X-Request-Id`) always trigger a preflight.
-- Some simple requests become preflighted if they use `Content-Type: application/json` (which is not a "simple" content type).
-- CORS does not protect against CSRF; use CSRF tokens or `SameSite` cookies.
-- Browser DevTools may show "CORS error" even when the server responded correctly; the error means the browser blocked the response, not that the server failed.
 
-### Annotated Code Example: Diagnosing and Fixing a CORS Error
+- Partial fields may be erased if omitted; use PATCH for partial updates.
+- Not all APIs support client-specified URIs for creation.
 
-```javascript
-// ❌ Frontend: request that triggers a CORS error
-fetch('https://api.other.com/data', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json', // Not a "simple" content type
-    'Authorization': 'Bearer token123', // Custom header
-  },
-  body: JSON.stringify({ name: 'Test' }),
-});
+### Annotated Code Examples
 
-// Error in console:
-// Access to fetch at 'https://api.other.com/data' from origin
-// 'https://app.example.com' has been blocked by CORS policy:
-// Response to preflight request doesn't pass access control check:
-// No 'Access-Control-Allow-Origin' header is present on the requested resource.
+```tsx
+async function replaceUser(user) {
+  const res = await fetch(`/api/users/${user.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(user),
+  });
+
+  if (res.status === 409) throw new Error('Conflict: resource changed');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.status === 204 ? null : res.json();
+}
 ```
 
-**The Fix (Server-Side — Express):**
-```javascript
-import cors from 'cors';
-import express from 'express';
+**Expected Output:** The full user object is replaced. A `409 Conflict` signals that the resource changed on the server since the client read it.
 
-const app = express();
-
-app.use(cors({
-  origin: 'https://app.example.com', // Specific origin, not '*'
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
-  credentials: true, // Allow cookies and Authorization headers
-  maxAge: 86400,      // Cache preflight for 24 hours
-}));
-
-app.use(express.json());
-
-app.post('/data', (req, res) => {
-  res.json({ received: req.body });
-});
-
-app.listen(3000);
-```
-
-**The Fix (Server-Side — Manual Headers):**
-```javascript
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  const allowed = ['https://app.example.com', 'https://staging.example.com'];
-
-  if (allowed.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-  }
-
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-Id');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '86400');
-
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204); // Preflight response
-  }
-
-  next();
-});
-```
-
-**Expected Output:** The preflight OPTIONS request receives a 204 response with the correct CORS headers. The browser then sends the actual POST request. The server responds with `Access-Control-Allow-Origin: https://app.example.com`, and the browser allows the JavaScript to read the response.
-
-**Why This Output Occurs:** The `cors` middleware (or manual headers) adds the required `Access-Control-Allow-*` headers to the response. The browser checks these headers against the request's `Origin`, `Access-Control-Request-Method`, and `Access-Control-Request-Headers`. If all match, the browser sends the actual request. The `Vary: Origin` header ensures that shared caches do not serve the wrong `Access-Control-Allow-Origin` to different origins.
+**Why this output:** PUT replaces the whole resource. The `409` branch handles optimistic concurrency conflicts.
 
 ### Real-World Cases
 
-- **Frontend/backend separation:** A React app on `app.example.com` calling an API on `api.example.com`.
-- **Third-party APIs:** Calling Stripe, Auth0, or GitHub APIs from the browser.
-- **CDN assets:** Loading fonts or images from a CDN with `Access-Control-Allow-Origin`.
-- **Local development:** A React dev server on `localhost:3000` calling an API on `localhost:4000`; configure CORS on the API or use a proxy.
-- **Microservices:** Multiple services on different subdomains calling each other from the browser.
-- **GraphQL:** Usually POST with `Content-Type: application/json`, triggering preflight.
+- **Profile replacement:** Saving a complete profile form.
+- **Settings sync:** Replacing a configuration object.
+- **Offline sync:** Pushing a fully known object after reconnect.
 
 ### References
 
-- MDN Web Docs – Cross-Origin Resource Sharing (CORS): https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-- MDN Web Docs – Same-origin policy: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
-- Fetch Living Standard – CORS protocol: https://fetch.spec.whatwg.org/#http-cors-protocol
-- MDN Web Docs – Access-Control-Allow-Origin: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin
-- MDN Web Docs – Preflight request: https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request
-- Express cors middleware: https://expressjs.com/en/resources/middleware/cors.html
+- MDN — HTTP request methods: PUT — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PUT
+- RFC 9110 — HTTP Semantics — https://www.rfc-editor.org/rfc/rfc9110
+- MDN — Conditional requests — https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Conditional_requests
 
 ---
 
-## Comparison and Decision Guidance
+## 4. PATCH
 
-| Concern | Tool/Header | When to Use | Common Pitfall |
-|---|---|---|---|
-| **Read data** | `GET` | Retrieving resources | Including a body; using for side effects |
-| **Create resource** | `POST` | Creating new resources | Retrying without idempotency keys |
-| **Replace resource** | `PUT` | Full replacement | Omitting fields (they get deleted) |
-| **Partial update** | `PATCH` | Updating specific fields | Assuming idempotency |
-| **Delete resource** | `DELETE` | Removing resources | Not handling 404 gracefully |
-| **Success** | 2xx | Confirming outcomes | Not checking `res.ok` |
-| **Redirect** | 3xx | Moving resources | Not handling `Location` |
-| **Client error** | 4xx | Invalid requests | Retrying non-retryable errors |
-| **Server error** | 5xx | Server failures | Not retrying or backing off |
-| **Body format** | `Content-Type` | Declaring media type | Setting manually for FormData |
-| **Response format** | `Accept` | Content negotiation | Forgetting it; server returns wrong type |
-| **Caching** | `Cache-Control` | Controlling caches | Caching sensitive data |
-| **Revalidation** | `ETag` + `If-None-Match` | Efficient freshness checks | Not quoting ETag values |
-| **JSON send** | `JSON.stringify` | Serialising payloads | Forgetting `Content-Type` |
-| **JSON receive** | `res.json()` | Deserialising payloads | Calling `.json()` on 204 |
-| **Cross-origin** | CORS headers | Browser API calls | `*` with credentials |
-| **Preflight** | OPTIONS | Non-simple requests | No `Access-Control-Max-Age` |
+### Definitions
 
-**Decision Guidance:**
-- **Map CRUD to methods:** GET reads, POST creates, PUT replaces, PATCH updates, DELETE removes.
-- **Always check `res.ok`:** `fetch` only rejects on network failure, not HTTP errors.
-- **Handle 204 explicitly:** Do not call `.json()` on a 204 response.
-- **Distinguish retryable errors:** Retry 5xx, 429, and 408; do not retry 4xx.
-- **Set `Content-Type` and `Accept`:** Both are required for JSON APIs.
-- **Use `Cache-Control` deliberately:** `no-store` for sensitive data; `max-age` for static assets.
-- **Validate payloads with Zod:** Catch shape mismatches at the boundary.
-- **Configure CORS on the server:** Use specific origins, not `*`, when credentials are involved.
-- **Cache preflights with `Access-Control-Max-Age`:** Reduces OPTIONS overhead.
-- **Never trust client-side validation alone:** Always validate on the server.
+**Core Definition:** PATCH is the HTTP method used to apply partial modifications to a resource.
+
+**Technical Definition:** PATCH sends a set of changes rather than a complete replacement. The request body format is defined by the server and indicated by the `Content-Type`. Common formats are **JSON Merge Patch** (`application/merge-patch+json`, RFC 7396) and **JSON Patch** (`application/json-patch+json`, RFC 6902). PATCH is not guaranteed to be idempotent: applying the same patch twice may produce a different result depending on the operation (e.g., incrementing a counter).
+
+**Beginner-Friendly Explanation:** PATCH means “change just these fields.” You send only the parts that changed, not the whole object. Whether repeating it is safe depends on what the patch does.
+
+### Purposes
+
+- To update individual fields without sending the whole resource.
+- To reduce payload size for large resources.
+- To support fine-grained, atomic modifications (JSON Patch).
+- To express explicit operations (add, remove, replace) in JSON Patch.
+- To support merge semantics where `null` deletes a field (JSON Merge Patch).
+
+### Syntax Rules and Structure
+
+**JSON Merge Patch (RFC 7396):**
+
+```js
+fetch('/api/users/42', {
+  method: 'PATCH',
+  headers: { 'Content-Type': 'application/merge-patch+json' },
+  body: JSON.stringify({ name: 'Ada Lovelace' }), // only changed fields
+});
+```
+
+**JSON Patch (RFC 6902):**
+
+```js
+fetch('/api/users/42', {
+  method: 'PATCH',
+  headers: { 'Content-Type': 'application/json-patch+json' },
+  body: JSON.stringify([
+    { op: 'replace', path: '/name', value: 'Ada Lovelace' },
+  ]),
+});
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `method: 'PATCH'` | Partial update semantics |
+| `Content-Type` | `merge-patch+json` or `json-patch+json` |
+| `body` | Changed fields or operation list |
+
+**Syntax Rules:**
+
+1. Use `application/merge-patch+json` for simple field merges.
+2. Use `application/json-patch+json` for explicit operations.
+3. Do not assume idempotency; design patches carefully for retries.
+4. Use `If-Match` for optimistic concurrency when needed.
+
+**Constraints and Limitations:**
+
+- Not guaranteed idempotent.
+- Semantics depend on the server's chosen patch format.
+- Some proxies and clients historically mishandled PATCH; verify support.
+
+### Annotated Code Examples
+
+```tsx
+async function renameUser(id, name) {
+  const res = await fetch(`/api/users/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/merge-patch+json' },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+```
+
+**Expected Output:** Only the `name` field is updated; other fields remain unchanged.
+
+**Why this output:** JSON Merge Patch applies the provided fields to the existing resource. Omitted fields are left untouched.
+
+### Real-World Cases
+
+- **Inline editing:** Updating a single field in a table row.
+- **Preference toggles:** Changing one setting without sending the whole settings object.
+- **Order status updates:** Patching `status` without resending the full order.
+
+### References
+
+- MDN — HTTP request methods: PATCH — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/PATCH
+- RFC 7396 — JSON Merge Patch — https://www.rfc-editor.org/rfc/rfc7396
+- RFC 6902 — JSON Patch — https://www.rfc-editor.org/rfc/rfc6902
+
+---
+
+## 5. DELETE
+
+### Definitions
+
+**Core Definition:** DELETE is the HTTP method used to remove a resource from the server.
+
+**Technical Definition:** DELETE requests the removal of the target resource. It is **idempotent**: deleting a resource twice leaves the server in the same state (the resource is gone). A successful DELETE commonly returns `204 No Content` or `200 OK` with a body describing the result. After deletion, the resource's URI should no longer resolve.
+
+**Beginner-Friendly Explanation:** DELETE is how you remove something — “delete this comment.” Deleting it twice has the same end result: it is gone.
+
+### Purposes
+
+- To remove a resource permanently.
+- To perform idempotent deletions that are safe to retry.
+- To support soft-delete APIs that mark resources as removed.
+- To clean up dependent data through cascading server logic.
+- To return a confirmation body when the client needs details.
+
+### Syntax Rules and Structure
+
+```js
+fetch('/api/posts/42', {
+  method: 'DELETE',
+  headers: { Authorization: 'Bearer ' + token },
+});
+```
+
+**Component Breakdown:**
+
+| Component | Description |
+|-----------|-------------|
+| `method: 'DELETE'` | Removal semantics |
+| `Authorization` | Auth header if required |
+| Body | Usually absent; some APIs allow a body for batch deletes |
+
+**Syntax Rules:**
+
+1. DELETE should be idempotent; a second DELETE of the same URI typically returns `404` or `204`.
+2. Return `204 No Content` when there is nothing to return.
+3. Use `Authorization` to protect delete endpoints.
+4. Confirm destructive actions in the UI before sending the request.
+
+**Constraints and Limitations:**
+
+- Destructive and irreversible unless the server implements soft delete.
+- Some servers reject DELETE with a body; avoid it unless documented.
+- Caches must invalidate the deleted resource.
+
+### Annotated Code Examples
+
+```tsx
+async function deletePost(id) {
+  const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+
+  if (res.status === 204 || res.status === 200) return;
+  if (res.status === 404) return; // Already gone
+  throw new Error(`HTTP ${res.status}`);
+}
+```
+
+**Expected Output:** The post is removed; the server responds with `204`. A repeat delete returns `404`, which the client treats as success (already gone).
+
+**Why this output:** DELETE is idempotent. Treating `404` as success reflects the desired end state: the resource no longer exists.
+
+### Real-World Cases
+
+- **Comment deletion:** Removing a user's comment.
+- **Account deletion:** Removing a user account and related data.
+- **Cart item removal:** Deleting a line item from a cart.
+
+### References
+
+- MDN — HTTP request methods: DELETE — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/DELETE
+- RFC 9110 — HTTP Semantics — https://www.rfc-editor.org/rfc/rfc9110
+
+---
+
+## 6. HTTP Status Codes
+
+### Definitions
+
+**Core Definition:** HTTP status codes are three-digit numbers in the response that indicate the outcome of the request.
+
+**Technical Definition:** Status codes are grouped into five classes: **1xx Informational**, **2xx Success**, **3xx Redirection**, **4xx Client Error**, and **5xx Server Error**. The first digit defines the class; the remaining digits identify the specific outcome. React applications branch on status codes to decide whether to render data, show an error, redirect, or retry. Status codes are semantic contracts, not decoration — using the right code lets browsers, caches, and clients behave correctly.
+
+**Beginner-Friendly Explanation:** Status codes are the server's way of saying what happened. `200` means “OK,” `404` means “not found,” `500` means “the server broke.” Your React code checks the number and decides what to show.
+
+### Purposes
+
+- To communicate the outcome of a request unambiguously.
+- To let clients branch between success, redirect, and failure paths.
+- To enable correct caching behaviour (`304`, `200`).
+- To drive retry logic (e.g., retry `5xx`, not `4xx`).
+- To support accessibility by rendering appropriate error messages.
+
+### Syntax Rules and Structure
+
+**Common Status Codes:**
+
+| Code | Meaning | React Handling |
+|------|---------|----------------|
+| `200 OK` | Success with body | Parse and render |
+| `201 Created` | Resource created | Use `Location` header |
+| `204 No Content` | Success without body | Do not parse |
+| `301/308` | Permanent redirect | Usually handled by the browser |
+| `304 Not Modified` | Cached copy valid | Use cached data |
+| `400 Bad Request` | Malformed request | Show validation error |
+| `401 Unauthorized` | Not authenticated | Redirect to login |
+| `403 Forbidden` | Authenticated but not allowed | Show forbidden message |
+| `404 Not Found` | Resource missing | Show not-found UI |
+| `409 Conflict` | State conflict | Show conflict resolution UI |
+| `422 Unprocessable` | Validation failure | Map errors to fields |
+| `429 Too Many Requests` | Rate limited | Back off and retry |
+| `500 Internal Server Error` | Server failure | Show generic error + log |
+| `503 Service Unavailable` | Temporarily unavailable | Retry with backoff |
+
+**Syntax Rules:**
+
+1. Check `res.status` or `res.ok` before parsing.
+2. Handle `204` and `304` without parsing a body.
+3. Distinguish `401` (authenticate) from `403` (authorise).
+4. Retry `5xx` and `429`; do not retry `4xx` validation errors.
+5. Surface server-provided error messages for `400`, `409`, and `422`.
+
+**Constraints and Limitations:**
+
+- Status codes alone do not describe the error; read the body when available.
+- Some APIs return `200` with an error payload; validate the body shape.
+- Proxies and CDNs may rewrite or cache status codes unexpectedly.
+
+### Annotated Code Examples
+
+```tsx
+async function request(url, options) {
+  const res = await fetch(url, options);
+
+  if (res.status === 204 || res.status === 304) return { data: null, res };
+
+  const body = await res.json().catch(() => null);
+
+  if (res.ok) return { data: body, res };
+
+  switch (res.status) {
+    case 401:
+      throw new AuthError('Please log in again');
+    case 403:
+      throw new ForbiddenError('You do not have permission');
+    case 404:
+      throw new NotFoundError('Resource not found');
+    case 422:
+      throw new ValidationError(body?.errors ?? {});
+    default:
+      throw new HttpError(res.status, body?.message);
+  }
+}
+```
+
+**Expected Output:** The function returns data on `2xx`, returns `null` for `204`/`304`, and throws typed errors for `401`, `403`, `404`, `422`, and other failures.
+
+**Why this output:** Checking status before parsing prevents crashes on empty bodies. Typed errors let React render specific UI for each failure class.
+
+### Real-World Cases
+
+- **Auth flows:** `401` triggers a login redirect.
+- **Form validation:** `422` maps errors to fields.
+- **Rate limiting:** `429` triggers backoff.
+- **Caching:** `304` reuses cached data.
+
+### References
+
+- MDN — HTTP response status codes — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+- RFC 9110 — HTTP Semantics — https://www.rfc-editor.org/rfc/rfc9110
+- IANA — HTTP Status Code Registry — https://www.iana.org/assignments/http-status-codes/
+
+---
+
+## 7. Headers
+
+### Definitions
+
+**Core Definition:** HTTP headers are key-value metadata sent with requests and responses that describe the message, control caching, negotiate content, and carry authentication.
+
+**Technical Definition:** Headers are case-insensitive field names paired with values. They are grouped into **request headers** (sent by the client), **response headers** (sent by the server), **representation headers** (describe the body), and **general headers**. Key categories include content negotiation (`Accept`, `Content-Type`), authentication (`Authorization`, `WWW-Authenticate`), caching (`Cache-Control`, `ETag`, `If-None-Match`), CORS (`Access-Control-Allow-Origin`), and custom headers. Headers are the primary mechanism for controlling how a request and response are processed by intermediaries.
+
+**Beginner-Friendly Explanation:** Headers are the labels on the envelope. They say what is inside (`Content-Type`), who is allowed to open it (`Authorization`), and whether it can be reused (`Cache-Control`).
+
+### Purposes
+
+- To declare the format of request and response bodies.
+- To authenticate and authorise requests.
+- To control caching and conditional requests.
+- To enable CORS for cross-origin access.
+- To pass custom application metadata (e.g., request IDs, feature flags).
+- To negotiate content types and languages.
+
+### Syntax Rules and Structure
+
+**Common Headers:**
+
+| Header | Direction | Purpose |
+|--------|-----------|---------|
+| `Accept` | Request | Preferred response format |
+| `Content-Type` | Both | Body format |
+| `Authorization` | Request | Credentials (Bearer token, Basic) |
+| `Cache-Control` | Both | Caching directives |
+| `ETag` | Response | Cache validator |
+| `If-None-Match` | Request | Conditional GET |
+| `If-Match` | Request | Optimistic concurrency |
+| `Access-Control-Allow-Origin` | Response | CORS allowlist |
+| `X-Request-Id` | Both | Tracing |
+
+**Syntax Rules:**
+
+1. Header names are case-insensitive; values are case-sensitive.
+2. Multiple values for the same header can be comma-separated or repeated.
+3. `Content-Type` must match the body format (`application/json`, `multipart/form-data`).
+4. `Authorization` is not sent cross-origin unless the request is configured to include credentials.
+5. Custom headers often require CORS preflight approval.
+
+**Constraints and Limitations:**
+
+- Browsers restrict which headers JavaScript can read (`Set-Cookie`, etc.).
+- Some headers are forbidden in `fetch` (`Host`, `Content-Length`).
+- Header size limits vary by server and proxy.
+
+### Annotated Code Examples
+
+```tsx
+async function fetchWithHeaders(url) {
+  const res = await fetch(url, {
+    headers: {
+      Accept: 'application/json',
+      'X-Request-Id': crypto.randomUUID(),
+    },
+  });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+  const requestId = res.headers.get('X-Request-Id');
+  console.log('Request ID:', requestId);
+  return res.json();
+}
+```
+
+**Expected Output:** The request includes `Accept` and a tracing ID. The response's `X-Request-Id` is read and logged.
+
+**Why this output:** Request headers declare expectations; response headers expose server metadata that JavaScript is allowed to read.
+
+### Real-World Cases
+
+- **API clients:** Sending `Accept` and `Authorization` on every request.
+- **Tracing:** Correlating requests with `X-Request-Id`.
+- **Caching:** Using `ETag` and `If-None-Match` to avoid re-downloading.
+
+### References
+
+- MDN — HTTP headers — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers
+- RFC 9110 — HTTP Semantics — https://www.rfc-editor.org/rfc/rfc9110
+
+---
+
+## 8. JSON
+
+### Definitions
+
+**Core Definition:** JSON (JavaScript Object Notation) is a text-based data-interchange format that represents objects, arrays, strings, numbers, booleans, and null.
+
+**Technical Definition:** JSON is defined by RFC 8259. It supports six value types: object, array, string, number, boolean, and `null`. It does not support `undefined`, functions, `Date` objects, `Map`, `Set`, or comments. In HTTP, JSON is identified by `Content-Type: application/json` and is serialized with `JSON.stringify` and parsed with `JSON.parse`. Dates become ISO strings; `undefined` properties are omitted; circular references throw.
+
+**Beginner-Friendly Explanation:** JSON is a text format for data that looks like JavaScript objects. When you send data to a server, you convert it to a JSON string; when you receive data, you parse it back into objects.
+
+### Purposes
+
+- To serialize structured data for transport over HTTP.
+- To provide a human-readable, language-agnostic payload format.
+- To map naturally to JavaScript objects and arrays.
+- To integrate with APIs, databases, and configuration files.
+- To validate payload shape with schemas (Zod, JSON Schema).
+
+### Syntax Rules and Structure
+
+```js
+const payload = { name: 'Ada', age: 36, active: true, tags: ['math'] };
+
+const json = JSON.stringify(payload);
+// '{"name":"Ada","age":36,"active":true,"tags":["math"]}'
+
+const parsed = JSON.parse(json);
+```
+
+**Syntax Rules:**
+
+1. Keys must be double-quoted strings.
+2. Values must be object, array, string, number, boolean, or `null`.
+3. No trailing commas, comments, or `undefined`.
+4. Dates must be serialized explicitly (ISO strings) and parsed back into `Date` objects.
+5. Use `JSON.stringify(value, replacer, space)` for custom serialization and formatting.
+
+**Constraints and Limitations:**
+
+- No native support for `Date`, `Map`, `Set`, `BigInt` (throws), or `undefined`.
+- `NaN` and `Infinity` become `null`.
+- Deeply nested or very large JSON can be slow to parse.
+- JSON is not safe to inject into HTML without escaping (XSS risk).
+
+### Annotated Code Examples
+
+```tsx
+async function saveSettings(settings) {
+  const res = await fetch('/api/settings', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(settings),
+  });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+```
+
+**Expected Output:** The settings object is serialized to JSON and sent. The response is parsed back into an object.
+
+**Why this output:** `JSON.stringify` converts the object to a JSON string. `Content-Type: application/json` tells the server how to parse it. `res.json()` parses the response.
+
+### Real-World Cases
+
+- **API requests:** Sending and receiving JSON payloads.
+- **Configuration:** Storing app config as JSON.
+- **Local storage:** Persisting state with `JSON.stringify`/`JSON.parse`.
+
+### References
+
+- MDN — JSON — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON
+- RFC 8259 — The JavaScript Object Notation (JSON) Data Interchange Format — https://www.rfc-editor.org/rfc/rfc8259
+- MDN — JSON.stringify — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+
+---
+
+## 9. CORS
+
+### Definitions
+
+**Core Definition:** CORS (Cross-Origin Resource Sharing) is a browser security mechanism that controls whether a web page at one origin can access resources from a different origin.
+
+**Technical Definition:** An **origin** is the combination of scheme, host, and port. By default, browsers block cross-origin reads of responses (the **same-origin policy**). CORS allows the server to relax this by sending `Access-Control-Allow-Origin` and related headers. For requests that are not "simple" (e.g., using `PUT`, `DELETE`, custom headers, or `Content-Type: application/json`), the browser first sends an **`OPTIONS` preflight** request to ask the server whether the actual request is permitted. The server responds with `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, and optionally `Access-Control-Max-Age`.
+
+**Beginner-Friendly Explanation:** CORS is the browser's rule that a page from `app.example.com` cannot silently read data from `api.other.com` unless the API explicitly says it is allowed. If the API does not say so, the browser blocks the response — even though the request may have reached the server.
+
+### Purposes
+
+- To allow controlled cross-origin access to APIs.
+- To protect users from malicious cross-origin reads.
+- To enable preflight negotiation for non-simple requests.
+- To support credentials safely across origins.
+- To allow CDNs and third-party services to serve assets to your app.
+
+### Syntax Rules and Structure
+
+**Preflight flow:**
+
+```text
+OPTIONS /api/data HTTP/1.1
+Origin: https://app.example.com
+Access-Control-Request-Method: PUT
+Access-Control-Request-Headers: content-type
+
+HTTP/1.1 204 No Content
+Access-Control-Allow-Origin: https://app.example.com
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Max-Age: 86400
+```
+
+**Simple vs. preflighted requests:**
+
+| Condition | Simple request | Preflight required |
+|-----------|----------------|--------------------|
+| Method GET/HEAD/POST | Yes | No |
+| `Content-Type` text/plain, form-urlencoded, multipart | Yes | No |
+| `Content-Type: application/json` | No | Yes |
+| Custom headers | No | Yes |
+| PUT/DELETE/PATCH | No | Yes |
+
+**Syntax Rules:**
+
+1. The server must return `Access-Control-Allow-Origin` matching the request origin or `*`.
+2. Preflight responses must include `Access-Control-Allow-Methods` and `Access-Control-Allow-Headers`.
+3. `Access-Control-Allow-Credentials: true` is required for credentialed requests and cannot be combined with `*` origin.
+4. `Access-Control-Max-Age` caches the preflight result to reduce requests.
+5. CORS is enforced by the browser, not the server — non-browser clients ignore it.
+
+**Constraints and Limitations:**
+
+- `*` origin cannot be used with credentials.
+- Preflight requests add latency; cache them with `Access-Control-Max-Age`.
+- CORS does not protect the server; it protects users' browsers.
+- Misconfigured `Access-Control-Allow-Origin: *` on credentialed endpoints is a security flaw.
+
+### Annotated Code Examples
+
+```tsx
+async function callApi() {
+  const res = await fetch('https://api.example.com/data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hello: 'world' }),
+    credentials: 'include',
+  });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+```
+
+**Expected Output:** Because the request uses `application/json` and credentials, the browser sends an `OPTIONS` preflight first. The server must allow the origin, the `content-type` header, and credentials. If not, the browser blocks the request with a CORS error.
+
+**Why this output:** `application/json` and `credentials: 'include'` make this a non-simple, credentialed request. The server must respond to preflight with matching CORS headers and `Access-Control-Allow-Credentials: true`.
+
+### Real-World Cases
+
+- **SPA → API:** A React app on `app.example.com` calling `api.example.com`.
+- **Third-party services:** Calling Stripe, Auth0, or analytics APIs.
+- **CDN assets:** Loading fonts and images cross-origin.
+
+### References
+
+- MDN — CORS — https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS
+- Fetch Standard — CORS protocol — https://fetch.spec.whatwg.org/#http-cors-protocol
+- MDN — Access-Control-Allow-Origin — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Access-Control-Allow-Origin
+
+---
+
+## 10. Credentials
+
+### Definitions
+
+**Core Definition:** Credentials are the authentication data — cookies, HTTP authentication, or client certificates — that identify the user making a request.
+
+**Technical Definition:** In `fetch`, the `credentials` option controls whether credentials are sent and whether `Set-Cookie` response headers are respected: `'omit'` (never), `'same-origin'` (default; only same-origin), and `'include'` (always, including cross-origin). Cookie-based credentials are subject to `SameSite`, `Secure`, and `HttpOnly` attributes. For cross-origin credentialed requests, the server must return `Access-Control-Allow-Credentials: true` and an explicit origin (not `*`). Bearer tokens in the `Authorization` header are not "credentials" in the CORS sense — they are just headers, and they require `Access-Control-Allow-Headers: Authorization` in preflight.
+
+**Beginner-Friendly Explanation:** Credentials are how the server knows who you are. Cookies are sent automatically to the same origin, but for cross-origin requests you must explicitly ask to include them, and the server must explicitly allow it.
+
+### Purposes
+
+- To authenticate requests using cookies or tokens.
+- To control whether cookies are sent cross-origin.
+- To protect sessions from CSRF and XSS.
+- To configure secure cookie attributes (`HttpOnly`, `Secure`, `SameSite`).
+- To enable single sign-on across subdomains.
+
+### Syntax Rules and Structure
+
+```js
+// Same-origin cookies (default)
+fetch('/api/me', { credentials: 'same-origin' });
+
+// Cross-origin cookies (requires server CORS support)
+fetch('https://api.example.com/me', { credentials: 'include' });
+
+// No credentials
+fetch('/api/public', { credentials: 'omit' });
+```
+
+**Cookie attributes:**
+
+| Attribute | Purpose |
+|-----------|---------|
+| `HttpOnly` | Not accessible to JavaScript (XSS mitigation) |
+| `Secure` | Sent only over HTTPS |
+| `SameSite=Strict/Lax/None` | Controls cross-site sending |
+| `Domain` | Which hosts receive the cookie |
+| `Path` | Which paths receive the cookie |
+
+**Syntax Rules:**
+
+1. `credentials: 'include'` is required for cross-origin cookies.
+2. The server must respond with `Access-Control-Allow-Credentials: true` and a specific origin.
+3. `SameSite=None` requires `Secure`.
+4. Never store session tokens in `localStorage` if an `HttpOnly` cookie is available.
+5. Use `Authorization: Bearer <token>` for token-based auth; include `Authorization` in `Access-Control-Allow-Headers`.
+
+**Constraints and Limitations:**
+
+- `Access-Control-Allow-Origin: *` cannot be used with credentials.
+- Cookies are sent automatically on same-origin requests, which creates CSRF risk; use `SameSite` and CSRF tokens.
+- Third-party cookie blocking in browsers affects cross-site credential flows.
+
+### Annotated Code Examples
+
+```tsx
+async function fetchProfile() {
+  const res = await fetch('https://api.example.com/me', {
+    credentials: 'include',
+    headers: { Accept: 'application/json' },
+  });
+
+  if (res.status === 401) throw new Error('Not authenticated');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+```
+
+**Expected Output:** The browser sends the session cookie to the API. If the session is valid, the profile is returned. If not, `401` triggers a login flow.
+
+**Why this output:** `credentials: 'include'` sends cookies cross-origin. The server must allow the origin and credentials via CORS. `401` distinguishes authentication failure from other errors.
+
+### Real-World Cases
+
+- **Session-based auth:** Cookies with `HttpOnly`, `Secure`, `SameSite=Lax`.
+- **SSO across subdomains:** Cookies scoped to `.example.com`.
+- **Token-based APIs:** `Authorization: Bearer` headers.
+- **Third-party APIs:** OAuth tokens in headers.
+
+### References
+
+- MDN — Request.credentials — https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials
+- MDN — Set-Cookie — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie
+- MDN — SameSite cookies — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie/SameSite
+- Fetch Standard — credentials — https://fetch.spec.whatwg.org/#concept-request-credentials-mode
 
 ---
 
 ## References
 
-- RFC 9110 – HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110.html
-- RFC 9111 – HTTP Caching: https://www.rfc-editor.org/rfc/rfc9111.html
-- RFC 9114 – HTTP/3: https://www.rfc-editor.org/rfc/rfc9114.html
-- RFC 8259 – JSON Data Interchange Format: https://www.rfc-editor.org/rfc/rfc8259.html
-- RFC 9457 – Problem Details for HTTP APIs: https://www.rfc-editor.org/rfc/rfc9457.html
-- RFC 5789 – PATCH Method for HTTP: https://www.rfc-editor.org/rfc/rfc5789.html
-- RFC 6585 – Additional HTTP Status Codes: https://www.rfc-editor.org/rfc/rfc6585.html
-- ECMA-404 – JSON Data Interchange Syntax: https://www.ecma-international.org/publications-and-standards/standards/ecma-404/
-- MDN Web Docs – HTTP request methods: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
-- MDN Web Docs – HTTP response status codes: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-- MDN Web Docs – HTTP headers: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers
-- MDN Web Docs – Cache-Control: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-- MDN Web Docs – Content-Type: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type
-- MDN Web Docs – Accept: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept
-- MDN Web Docs – Cross-Origin Resource Sharing (CORS): https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-- MDN Web Docs – Same-origin policy: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
-- MDN Web Docs – JSON.stringify(): https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
-- MDN Web Docs – JSON.parse(): https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
-- Fetch Living Standard – CORS protocol: https://fetch.spec.whatwg.org/#http-cors-protocol
-- TanStack Query – Query Retries: https://tanstack.com/query/latest/docs/framework/react/guides/query-retries
-- Express cors middleware: https://expressjs.com/en/resources/middleware/cors.html
-- Zod – Documentation: https://zod.dev/
+- MDN — HTTP — https://developer.mozilla.org/en-US/docs/Web/HTTP
+- MDN — HTTP request methods — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods
+- MDN — HTTP response status codes — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+- MDN — HTTP headers — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers
+- MDN — CORS — https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS
+- MDN — Conditional requests — https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Conditional_requests
+- MDN — Fetch API — https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+- MDN — Request.credentials — https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials
+- MDN — Set-Cookie — https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie
+- MDN — JSON — https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON
+- MDN — AbortController — https://developer.mozilla.org/en-US/docs/Web/API/AbortController
+- RFC 9110 — HTTP Semantics — https://www.rfc-editor.org/rfc/rfc9110
+- RFC 9111 — HTTP Caching — https://www.rfc-editor.org/rfc/rfc9111
+- RFC 8259 — JSON Data Interchange Format — https://www.rfc-editor.org/rfc/rfc8259
+- RFC 7396 — JSON Merge Patch — https://www.rfc-editor.org/rfc/rfc7396
+- RFC 6902 — JSON Patch — https://www.rfc-editor.org/rfc/rfc6902
+- Fetch Standard — https://fetch.spec.whatwg.org/
+- IANA — HTTP Status Code Registry — https://www.iana.org/assignments/http-status-codes/

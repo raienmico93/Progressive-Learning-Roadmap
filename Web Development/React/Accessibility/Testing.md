@@ -1,4 +1,4 @@
-# Accessibility Testing: A Comprehensive Programming Cheat Sheet
+# Accessibility Testing — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,1159 +6,855 @@
 
 ### Definitions
 
-**Core Definition:** Accessibility testing is the systematic process of verifying that a web application can be perceived, operated, and understood by people with disabilities, using a combination of automated tools, manual keyboard audits, screen reader testing, contrast verification, zoom evaluation, and preference-based checks.
+**Core Definition:** Accessibility testing is the process of verifying that a website or application can be used by people with disabilities — including those who rely on keyboards, screen readers, screen magnification, voice control, or other assistive technologies.
 
-**Technical Definition:** Accessibility testing is the practice of evaluating a web application against the Web Content Accessibility Guidelines (WCAG) 2.2 success criteria and the WAI-ARIA Authoring Practices using a multi-layered approach: (1) **automated static analysis** via `eslint-plugin-jsx-a11y` to catch JSX-level issues during development; (2) **automated runtime audits** via `axe-core` integrated into unit tests (`jest-axe`) and CI pipelines; (3) **manual keyboard audits** to verify tab order, focus visibility, and keyboard traps; (4) **assistive technology testing** with screen readers (NVDA, JAWS, VoiceOver) to validate real-world announcements; (5) **visual and contrast verification** against WCAG AA/AAA ratios (4.5:1 for normal text, 3:1 for large text and non-text); (6) **zoom and reflow testing** at up to 400% magnification (WCAG 1.4.10); and (7) **user-preference testing** for `prefers-reduced-motion`, `prefers-color-scheme`, and `prefers-contrast`.
+**Technical Definition:** Accessibility testing is the systematic evaluation of a digital product against accessibility standards (primarily WCAG 2.2) through two complementary layers: **automated scanning**, which runs rule-based tools (axe-core, Lighthouse) over the DOM to detect machine-checkable violations, and **manual testing**, which exercises the interface with a keyboard, screen reader, and visual inspection to evaluate the human experience that rules cannot reach. No single method is sufficient: automated tools detect roughly 30–40% of WCAG issues, while approximately 42% of WCAG 2.2 AA criteria cannot be automated at all. A complete accessibility testing strategy combines both layers, tests each state of the interface (not just the initial page load), and validates across real browsers and assistive technology combinations.
 
-**Beginner-Friendly Explanation:** You cannot just "add accessibility" and assume it works. You have to test it—the same way you test any other feature. Automated tools catch some problems (like missing alt text), but they only catch about 30–50% of issues. The rest requires a human: tabbing through the app with a keyboard, listening to it with a screen reader, checking colour contrast, zooming in to 400%, and respecting the user's motion and colour preferences. Accessibility testing is the difference between "we wrote accessible code" and "we know it works for real users."
+**Beginner-Friendly Explanation:** Accessibility testing means checking that everyone can use your app — including people who cannot see, cannot use a mouse, or need larger text. You run automated tools to catch obvious problems fast, then you put your mouse away, turn on a screen reader, and actually try to use the app yourself. If you can complete the task without sight or a mouse, you are on the right track.
 
 ### Key Characteristics
 
-- **Multi-Layered Defence:** No single tool catches all issues; automated, manual, and assistive-technology testing are complementary.
-- **Automated Tools Catch 30–50%:** `axe-core` and `eslint-plugin-jsx-a11y` are valuable but insufficient on their own.
-- **Shift-Left Testing:** Linting catches issues in the editor; unit tests catch them in CI; manual testing catches them before release.
-- **Real Assistive Technology Required:** Testing with actual screen readers (NVDA, JAWS, VoiceOver) is non-negotiable for critical flows.
-- **WCAG 2.2 AA is the Baseline:** Most organisations target AA; AAA is aspirational for high-stakes content.
-- **Keyboard-First Mindset:** Unplug your mouse and try to complete every workflow.
-- **Zoom and Reflow Matter:** 400% zoom is a WCAG requirement, not a nice-to-have.
-- **User Preferences Are Mandatory:** `prefers-reduced-motion` must be respected to prevent vestibular harm.
+- **Two-layer approach:** Automated scanning catches mechanical failures in seconds; manual testing catches meaning, order, and real-world usability issues that tools cannot see.
+- **State-aware:** Automated scanners see one state of one page — you must scan dialogs, error states, and dynamic content explicitly.
+- **Keyboard-first manual testing:** The keyboard pass finds more genuine defects than any other manual technique, with no software or training required.
+- **Screen reader validation:** Testing with NVDA, JAWS, or VoiceOver confirms that the accessibility tree is exposed correctly and that dynamic updates are announced.
+- **Continuous integration:** Automated checks should run in CI/CD to prevent regressions on every release.
 
 ### Prerequisites
 
-- Solid understanding of HTML semantics and WAI-ARIA.
-- Working knowledge of React function components and Hooks.
-- Familiarity with a testing framework (Jest, Vitest) and Testing Library.
-- Access to a screen reader (NVDA on Windows, VoiceOver on macOS/iOS, JAWS on Windows).
-- Awareness of WCAG 2.2 success criteria and the WAI-ARIA Authoring Practices.
+- A basic understanding of semantic HTML and the accessibility tree.
+- A keyboard and a screen reader (NVDA or VoiceOver are free; JAWS has a demo mode).
+- Automated tooling: axe-core, Lighthouse, `eslint-plugin-jsx-a11y`, and `jest-axe`.
+- A color contrast checker (Vispero CCA or a browser extension).
 
 ### Related Programming Areas
 
-- **Web Accessibility (a11y):** WCAG, ARIA, and assistive technology.
-- **Testing:** Unit, integration, and end-to-end testing.
-- **CI/CD:** Automated quality gates and regression prevention.
-- **Design Systems:** Contrast, typography, and motion tokens.
-- **Performance:** Zoom, reflow, and layout stability.
+- **Semantic HTML** — the foundation of accessible markup.
+- **ARIA** — supplements native semantics for custom widgets.
+- **Keyboard navigation** — the primary manual testing interface.
+- **Screen readers** — the primary assistive technology for blind and low-vision users.
+- **CI/CD pipelines** — where automated accessibility checks live.
 
 ### Core Concepts / Features
 
-1. Automated Audit Pipelines
-2. Keyboard Navigation Audits
-3. Assistive Technology Screen Readers
-4. Visual & Contrast Verification
-5. Zoom & Reflow Evaluation
-6. User-Driven Preferences
-
 ---
 
-## Core Concept 1: Automated Audit Pipelines
+## 1. Accessibility Testing
 
 ### Definitions
 
-**Core Definition:** Automated audit pipelines are the integration of accessibility linters (`eslint-plugin-jsx-a11y`), unit testing utilities (`axe-core`, `@testing-library/jest-dom`), and continuous integration scanners to catch accessibility violations automatically before they reach production.
+**Core Definition:** Accessibility testing is the practice of verifying that a digital product can be used by people with disabilities.
 
-**Technical Definition:** Automated accessibility testing operates at three layers. **Static analysis** (`eslint-plugin-jsx-a11y`) runs in the editor and CI, flagging JSX-level issues such as missing `alt` attributes, invalid ARIA roles, and click handlers on non-interactive elements. **Runtime unit testing** (`jest-axe` + `@testing-library/react`) renders components in JSDOM and runs `axe-core` against the rendered output, catching contrast, ARIA, and structural violations. **CI scanners** (Lighthouse CI, Pa11y CI, axe DevTools) run against a deployed preview or production build, catching regressions across the full application. Together, these layers form a "shift-left" strategy that prevents most accessibility bugs from reaching users.
+**Technical Definition:** Accessibility testing evaluates conformance with WCAG 2.2 success criteria and the real-world usability of the interface with assistive technologies. It is performed through automated scans (axe-core, Lighthouse) that detect machine-checkable violations, and manual passes (keyboard, screen reader, visual, focus) that evaluate meaning, reading order, alternative text quality, and navigation consistency. The QA accessibility test pass follows a defined sequence: automated sweep → keyboard → screen reader → visual checks → defect filing.
 
-**Beginner-Friendly Explanation:** Automated testing is like spell-check for accessibility. It catches the obvious mistakes—missing labels, broken ARIA, low contrast—before anyone reviews the code. It is fast, runs on every commit, and never gets tired. But like spell-check, it does not catch everything: it cannot tell you whether a screen reader announces something correctly or whether keyboard navigation feels logical. That is why it is the first layer, not the only one.
+**Beginner-Friendly Explanation:** Accessibility testing is how you find out whether your app works for people with disabilities — before they do. You run tools, then you test it yourself with a keyboard and a screen reader.
 
 ### Purposes
 
-- To catch accessibility violations at the earliest possible stage (editor, commit, CI).
-- To prevent regressions when components are refactored.
-- To enforce consistent standards across a codebase.
-- To free human reviewers to focus on issues that automated tools cannot detect.
-- To provide documentation of known accessibility patterns in the codebase.
+- To identify barriers that prevent people with disabilities from using the product.
+- To comply with legal requirements (ADA, EAA, Section 508) and WCAG 2.2 AA.
+- To catch regressions before they reach production through CI-integrated checks.
+- To improve the experience for all users — accessible design benefits everyone.
 
 ### Syntax Rules and Structure
 
-**1. ESLint Plugin (`eslint-plugin-jsx-a11y`):**
-```bash
-npm install -D eslint eslint-plugin-jsx-a11y
+**The five-pass QA sequence:**
+
+| Pass | What it catches | Time |
+|------|----------------|------|
+| **1. Automated sweep** | Missing labels, contrast failures, ARIA errors, heading hierarchy | Seconds per state |
+| **2. Keyboard** | Focus traps, invisible focus, broken tab order, non-operable controls | Minutes |
+| **3. Screen reader** | Incorrect announcements, missing names, unannounced dynamic content | Minutes |
+| **4. Visual checks** | Contrast over images, zoom/reflow, motion | Minutes |
+| **5. Defect filing** | Reproduction steps and expected vs. actual behavior | — |
+
+**Constraints and Limitations:**
+
+- A clean automated scan is not a pass — 10 of 356 W3C techniques are fully machine-checkable, and meaning, reading order, and alt-text quality are invisible to automation.
+- Contrast over images produces false positives — the tool guesses at a variable background.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: A Complete QA Test Pass
+
+```markdown
+## QA Accessibility Test Pass (critical journey)
+### 1. Automated sweep
+- Run axe-core on the page.
+- Open every dialog, submit the form incorrectly, and scan the error state.
+
+### 2. Keyboard pass (unplug the mouse)
+- Tab from the top. Note where focus goes and whether it is visible.
+- Test Shift+Tab, Enter, Space, Escape, and Arrow keys on every component.
+- Check: Can you get out of every dialog? Does focus return?
+
+### 3. Screen reader pass
+- Start NVDA (Ctrl+Alt+N) or VoiceOver (Cmd+F5).
+- Navigate by headings (H / Insert+F7). Are they in logical order?
+- Tab through forms. Are labels announced? Are errors announced?
+
+### 4. Visual checks
+- Zoom to 200% and 400%. Does content reflow?
+- Check contrast on text over images.
 ```
+
+**Expected Output:** A structured, repeatable verification of the critical user journey that catches both mechanical and human-experience barriers.
+
+### Real-World Cases
+
+- **Release gates:** The QA test pass runs on every critical journey before release.
+- **Design systems:** Every component is tested with automated scans and keyboard interaction before publication.
+- **Legal compliance:** Documented test passes provide evidence of WCAG conformance.
+
+### References
+
+- WCAGrules — The QA Accessibility Test Pass — https://wcagrules.com/checklists/qa-accessibility-testing
+- BrowserStack — Accessibility Testing Techniques — https://www.browserstack.com/accessibility-testing/techniques
+
+---
+
+## 2. Automated Testing
+
+### Definitions
+
+**Core Definition:** Automated accessibility testing uses software tools to scan the rendered DOM against accessibility rules and report violations without manual intervention.
+
+**Technical Definition:** Automated scanners (axe-core, Lighthouse, Pa11y, WAVE) parse the DOM, apply rule sets mapped to WCAG success criteria, and flag elements that fail machine-checkable conditions — missing `alt` attributes, insufficient contrast, invalid ARIA, duplicate IDs, missing form labels, and empty links or buttons. These tools run in CI/CD pipelines and browser extensions, catching mechanical failures in seconds and freeing manual testing time for issues that require human judgment.
+
+**Beginner-Friendly Explanation:** Automated testing is a robot that checks your code for common accessibility mistakes — like images without alt text or buttons without names. It is fast and catches a lot, but it cannot tell whether your alt text is actually meaningful.
+
+### Purposes
+
+- To catch mechanical, rule-based violations quickly and consistently.
+- To prevent accessibility regressions by running on every commit or PR.
+- To free manual testing time for issues that require human judgment.
+- To provide a baseline scan of every page state before deeper manual testing.
+
+### Syntax Rules and Structure
+
+**What automation can and cannot check:**
+
+| Fully automatable | Cannot be fully automated |
+|-------------------|---------------------------|
+| HTML structure and semantics | Cognitive accessibility (readability) |
+| ARIA attributes, roles, states | Contextual appropriateness of alt text |
+| Form labels and error messages | Real keyboard workflows |
+| Focus capability and accessible names | Screen reader UX |
+| Color contrast (WCAG AA/AAA) | Content quality and clarity |
+| Image alt text presence | Meaningful link text |
+| Table structure and headers | — |
+
+**Constraints and Limitations:**
+
+- Automated tools detect roughly **30–40% of WCAG issues** — a clean scan is not a pass.
+- Scanners see one state of one page — dialogs, error states, and dynamic content must be scanned explicitly.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: axe-core Scan in CI
+
+```javascript
+// accessibility.spec.ts — Playwright + axe-core
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+test('page has no accessibility violations', async ({ page }) => {
+  await page.goto('/');
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
+```
+
+**Expected Output:** The test fails if axe-core detects any WCAG 2.1 AA violations on the page.
+
+### Real-World Cases
+
+- **CI gates:** axe-core runs on every pull request and blocks merges on new violations.
+- **Storybook:** Component stories are scanned automatically before publication.
+- **Large applications:** Scoped scans (`include('#element')`) target specific components for faster feedback.
+
+### References
+
+- GitHub — Automated Accessibility Scan Testing Guidelines — https://github.com/mattermost/mattermost/blob/b350edef791c93725ebb5b854867ac12469ce07d/e2e-tests/playwright/docs/accessibility/automated_scan_testing.md
+- WCAGrules — The QA Accessibility Test Pass — https://wcagrules.com/checklists/qa-accessibility-testing
+
+---
+
+## 3. Manual Testing
+
+### Definitions
+
+**Core Definition:** Manual accessibility testing is the process of a human tester operating the interface with assistive technologies and keyboard input to evaluate usability and catch issues that automated tools cannot detect.
+
+**Technical Definition:** Manual testing covers content review, keyboard testing, and screen reader verification — the three areas where automated tools are blind. It evaluates whether focus order is logical, whether focus indicators are visible, whether alt text and link text are meaningful, whether dynamic content is announced, and whether the interface is operable without a mouse. Approximately 42% of WCAG 2.2 AA criteria cannot be automated, with focus order and alt-text quality as canonical examples.
+
+**Beginner-Friendly Explanation:** Manual testing is you, using the app like a real person with a disability would — keyboard only, screen reader on, no mouse. It catches the things a robot cannot judge: whether the order makes sense, whether the labels are clear, whether you can actually finish the task.
+
+### Purposes
+
+- To evaluate meaning, reading order, and content quality that automation cannot judge.
+- To verify that keyboard and screen reader users can complete real tasks.
+- To catch focus traps, invisible indicators, and confusing navigation.
+- To validate that dynamic content and error states are announced correctly.
+
+### Syntax Rules and Structure
+
+**Manual testing protocol:**
+
+| Step | Action | What to check |
+|------|--------|---------------|
+| 1 | Unplug the mouse | Can you complete the journey with Tab, Enter, Space, Escape, and Arrow keys? |
+| 2 | Tab from the top | Does focus follow logical reading order? Is it always visible? |
+| 3 | Test every key | Arrow keys in menus, Enter on buttons, Space on checkboxes, Escape on dialogs. |
+| 4 | Screen reader pass | Are headings, labels, and errors announced? Are dynamic updates announced? |
+| 5 | Document defects | Exact keys pressed, what happened, what should have happened. |
+
+**Constraints and Limitations:**
+
+- Manual testing is time-consuming — it complements, not replaces, automated scanning.
+- Different screen readers and browsers behave differently — test the combinations your users actually use.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Keyboard-Only Testing Protocol
+
+```markdown
+## Keyboard-Only Test
+1. Close all other tabs. Navigate to the homepage.
+2. Press Tab repeatedly from the top of the page.
+   - Focus must be visible at every stop.
+   - Focus must follow left-to-right, top-to-bottom visual order.
+   - No interactive element should be skipped.
+3. Press Shift+Tab to move backward. The order must reverse predictably.
+4. Open a modal. Check: Does focus move into it? Can you Tab out? Does Escape close it?
+5. After closing the modal, check: Does focus return to the trigger?
+```
+
+**Expected Output:** Every interactive element is reachable, focus is always visible, and no component traps the user.
+
+### Real-World Cases
+
+- **Critical journey validation:** QA testers manually verify login, checkout, and core workflows.
+- **Design system QA:** Every component is keyboard-tested before release.
+- **Defect reproduction:** Manual testing produces the reproduction steps that make defects actionable.
+
+### References
+
+- Siteimprove — The Keyboard-Only User: Navigating Without a Mouse — https://www.siteimprove.com/blog/keyboard-navigation-accessibility-testing/
+- BrowserStack — Accessibility Testing Techniques — https://www.browserstack.com/accessibility-testing/techniques
+
+---
+
+## 4. Keyboard Testing
+
+### Definitions
+
+**Core Definition:** Keyboard testing verifies that every interactive element and function can be operated using only a keyboard, without a mouse.
+
+**Technical Definition:** Keyboard testing validates WCAG SC 2.1.1 (Keyboard) and SC 2.1.2 (No Keyboard Trap). It exercises Tab/Shift+Tab for sequential focus navigation, Enter/Space for activation, Arrow keys for composite widgets, Escape for dismissing dialogs, and checks that focus is always visible (SC 2.4.7). Any point where the tester gets stuck is a defect with a clear reproduction.
+
+**Beginner-Friendly Explanation:** Keyboard testing means putting your mouse away and trying to use the entire app with just Tab, Enter, Space, and the arrow keys. If you cannot reach something, activate it, or get stuck in a dialog, that is a bug.
+
+### Purposes
+
+- To ensure people with motor disabilities who cannot use a mouse can operate the interface.
+- To catch focus traps, invisible focus indicators, and broken tab order.
+- To verify that custom widgets respond to the keys users expect.
+- To satisfy WCAG SC 2.1.1 and SC 2.1.2.
+
+### Syntax Rules and Structure
+
+**Keyboard test matrix:**
+
+| Key | What to test |
+|-----|-------------|
+| `Tab` | Focus moves forward in logical order. |
+| `Shift + Tab` | Focus moves backward predictably. |
+| `Enter` | Activates links and buttons. |
+| `Space` | Toggles checkboxes and activates buttons. |
+| `Arrow keys` | Navigate within dropdowns, radio groups, menus, and tabs. |
+| `Escape` | Closes modals, menus, and tooltips. |
+
+**Constraints and Limitations:**
+
+- Tabbing once and looking for a skip link is not a valid test — landmarks and a heading on main content satisfy SC 2.4.1 without a skip link.
+- Focus indicators must be visible in both normal mode and Windows High Contrast mode.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Keyboard Test for a Modal
+
+```markdown
+1. Tab to the "Open settings" button. Press Enter.
+2. Check: Does focus move into the dialog?
+3. Press Tab repeatedly. Check: Does focus stay inside the dialog (focus trap)?
+4. Press Escape. Check: Does the dialog close?
+5. Check: Does focus return to the "Open settings" button?
+```
+
+**Expected Output:** The dialog traps focus while open, closes on Escape, and restores focus to the trigger.
+
+### Real-World Cases
+
+- **Forms:** Tab through fields, Space to toggle checkboxes, Enter to submit.
+- **Menus and dropdowns:** Arrow keys navigate options, Escape closes.
+- **Data grids:** Arrow keys navigate cells, Enter activates editing.
+
+### References
+
+- Siteimprove — The Keyboard-Only User — https://www.siteimprove.com/blog/keyboard-navigation-accessibility-testing/
+- Microsoft Learn — Test keyboard accessibility — https://learn.microsoft.com/en-us/training/modules/develop-keyboard-accessible-products/7-test-keyboard-accessibility
+
+---
+
+## 5. Screen-Reader Testing
+
+### Definitions
+
+**Core Definition:** Screen-reader testing is the manual process of operating the interface with a screen reader to verify that content, controls, and dynamic updates are announced correctly.
+
+**Technical Definition:** Screen-reader testing validates the **accessibility tree** as rendered by a specific screen reader and browser combination. It verifies accessible names, roles, states, document structure (headings, landmarks), form labels and error announcements, and dynamic content via live regions. The minimum recommended coverage is NVDA + Firefox (Windows), VoiceOver + Safari (macOS), and VoiceOver + Safari (iOS); comprehensive coverage adds JAWS + Chrome and TalkBack + Chrome.
+
+**Beginner-Friendly Explanation:** Screen-reader testing means turning on NVDA or VoiceOver and listening to your app. You check that every button, heading, form field, and error message is announced clearly and in a logical order.
+
+### Purposes
+
+- To verify that blind and low-vision users can perceive and operate all functionality.
+- To catch missing accessible names, incorrect roles, and unannounced dynamic content.
+- To validate heading hierarchy and landmark navigation.
+- To satisfy WCAG SC 4.1.2 (Name, Role, Value).
+
+### Syntax Rules and Structure
+
+**Minimum screen reader test:**
+
+| Step | NVDA (Windows) | VoiceOver (macOS) |
+|------|----------------|-------------------|
+| Start | Ctrl+Alt+N | Cmd+F5 |
+| Stop speech | Ctrl | Ctrl |
+| Next item | Down Arrow | Ctrl+Option+Right |
+| List headings | Insert+F7 → Headings | Ctrl+Option+U → Headings |
+| Next heading | H | Ctrl+Option+Cmd+H |
+| List links | Insert+F7 → Links | Ctrl+Option+U → Links |
+
+**Constraints and Limitations:**
+
+- A screen reader does not read your HTML directly — it reads what the browser hands to the OS accessibility layer, and mismatched pairings produce odd behavior that is not your site's fault.
+- You can learn enough in twenty minutes to find real problems, but this is not the same as a daily user's experience.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: NVDA Test Script
+
+```markdown
+## NVDA Test Script
+1. Start NVDA (Ctrl+Alt+N). Navigate to the page.
+2. Press Insert+Down to read from the top. Note the page title and main landmark.
+3. Press H repeatedly. Are headings in logical order (H1 → H2 → H3)?
+4. Press D to navigate landmarks. Are header, nav, main, and footer reachable?
+5. Tab to the first form field. Is its label announced? Is the required state announced?
+6. Submit the form with invalid data. Is the error announced? Does focus move to the error?
+7. Trigger a dynamic update. Is it announced?
+```
+
+**Expected Output:** All content is announced correctly, headings and landmarks are navigable, and dynamic updates are communicated.
+
+### Real-World Cases
+
+- **Form validation:** Error messages announced via `role="alert"` and focus moved to the first error.
+- **Single-page applications:** Route changes move focus to the new page heading and announce the change.
+- **Modals:** Focus trapped inside, Escape closes, and focus returns to the trigger.
+
+### References
+
+- WCAGrules — How to Test With a Screen Reader — https://wcagrules.com/guides/screen-reader-testing
+- GitHub — Screen Reader Testing Implementation Playbook — https://github.com/aiskillstore/marketplace/blob/main/skills/sickn33/screen-reader-testing/resources/implementation-playbook.md
+
+---
+
+## 6. Focus-Order Validation
+
+### Definitions
+
+**Core Definition:** Focus-order validation verifies that keyboard focus moves through interactive elements in a sequence that is logical, meaningful, and preserves operability.
+
+**Technical Definition:** Focus order validation implements WCAG SC 2.4.3 (Focus Order). The tester determines the logical order of interactive elements, tabs through the content from the first focusable element, and checks that the focus order matches the logical order. The default focus order is DOM source order; positive `tabindex` values that override it are strongly discouraged. Common keyboard navigation techniques (Tab, Shift+Tab, Arrow keys) are considered logical by default.
+
+**Beginner-Friendly Explanation:** Focus-order validation means checking that when you press Tab, you move through the page in a sensible order — left to right, top to bottom, following the visual layout. If focus jumps around unpredictably, the order needs fixing.
+
+### Purposes
+
+- To ensure keyboard users encounter content in a predictable, meaningful sequence.
+- To prevent disorientation caused by focus jumping between unrelated regions.
+- To satisfy WCAG SC 2.4.3 (Focus Order).
+- To catch positive `tabindex` abuse and DOM-order mismatches.
+
+### Syntax Rules and Structure
+
+**Focus-order test procedure:**
+
+| Step | Action |
+|------|--------|
+| 1 | Determine the logical order of interactive elements (visual reading order). |
+| 2 | Tab from the first focusable element through the content. |
+| 3 | Check that the focus order matches the logical order. |
+| 4 | Press Shift+Tab to verify the reverse order is predictable. |
+| 5 | Check that focus never lands on hidden or off-screen elements. |
+
+**Constraints and Limitations:**
+
+- A strictly linear order is not required — non-linear techniques are acceptable if they are common and predictable.
+- Positive `tabindex` values override natural order and should be removed.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Validating Focus Order
+
+```markdown
+1. On the checkout page, the visual order is: Email → Password → Remember me → Sign in.
+2. Press Tab from the top.
+3. Expected focus sequence: Email → Password → Remember me checkbox → Sign in button.
+4. If focus jumps to the footer before the form, the DOM order is wrong — fix the source order, not `tabindex`.
+```
+
+**Expected Output:** The focus sequence matches the visual reading order, and no interactive element is skipped.
+
+### Real-World Cases
+
+- **Checkout flows:** Focus must move through shipping, payment, and confirmation in order.
+- **Single-page applications:** Route changes must reset focus to the main heading, not the top of the page.
+- **Modals:** Focus must move into the dialog and stay trapped until closed.
+
+### References
+
+- W3C — Focus Order Meaningful (WCAG 3 Draft) — https://w3c.github.io/wcag3/informative/interactive-components/navigating-content/focus-order-meaningful/
+- Chrome for Developers — Manually test tab order — https://developer.chrome.com/docs/lighthouse/accessibility/tabindex
+
+---
+
+## 7. Color-Contrast Verification
+
+### Definitions
+
+**Core Definition:** Color-contrast verification checks that text and UI components have sufficient luminance difference from their backgrounds to be legible for users with low vision or color blindness.
+
+**Technical Definition:** WCAG defines minimum contrast ratios under SC 1.4.3 (Contrast, Level AA): **4.5:1 for normal text** and **3:1 for large text**. SC 1.4.11 (Non-text Contrast, Level AA) requires **3:1 for UI components and graphical objects**. Level AAA requires 7:1 for normal text and 4.5:1 for large text. Tools like Vispero's Colour Contrast Analyser calculate ratios from hex, RGB, HSV, or HSL values and display pass/fail results for WCAG 2.0, 2.1, and 2.2.
+
+**Beginner-Friendly Explanation:** Color contrast is about whether text is easy to read against its background. Dark gray on white is fine; light gray on white is not. WCAG sets minimum ratios — 4.5:1 for normal text, 3:1 for large text and UI components.
+
+### Purposes
+
+- To ensure text is readable by people with low vision, color blindness, or in poor lighting.
+- To make UI components and focus indicators distinguishable.
+- To comply with WCAG SC 1.4.3 and SC 1.4.11.
+- To catch contrast failures that automated scanners may miss over images or gradients.
+
+### Syntax Rules and Structure
+
+**Contrast requirements:**
+
+| Content | Minimum ratio | WCAG SC |
+|---------|--------------|---------|
+| Normal text | 4.5:1 | 1.4.3 AA |
+| Large text (≥18pt, or ≥14pt bold) | 3:1 | 1.4.3 AA |
+| UI components and graphics | 3:1 | 1.4.11 AA |
+| Normal text (AAA) | 7:1 | 1.4.6 AAA |
+
+**Constraints and Limitations:**
+
+- Contrast over images produces false positives in automated tools — the tool guesses at a variable background.
+- Focus indicators must also meet contrast requirements (3:1 against adjacent colors).
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Checking Contrast with Vispero CCA
+
+```markdown
+1. Open the Colour Contrast Analyser.
+2. Use the eyedropper to pick the foreground text color from the page.
+3. Pick the background color behind the text.
+4. Read the ratio: if it is ≥ 4.5:1 for normal text, it passes AA.
+5. For a button border, check that the ratio is ≥ 3:1 against the adjacent background.
+```
+
+**Expected Output:** A pass/fail result for WCAG 2.0, 2.1, and 2.2 AA and AAA.
+
+### Real-World Cases
+
+- **Form error messages:** Red text must meet 4.5:1 against the background and must not rely on color alone.
+- **Buttons:** Text and borders must meet 4.5:1 (text) and 3:1 (border/background).
+- **Focus indicators:** The focus ring must meet 3:1 against adjacent colors.
+
+### References
+
+- Vispero — Colour Contrast Analyser (CCA) — https://vispero.com/lp/color-contrast-checker/
+- W3C — Understanding SC 1.4.3 Contrast (Minimum) — https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+
+---
+
+## 8. Lighthouse
+
+### Definitions
+
+**Core Definition:** Lighthouse is an open-source, automated tool from Google that audits web pages for performance, accessibility, best practices, SEO, and PWA compliance, producing a weighted score and actionable diagnostics.
+
+**Technical Definition:** Lighthouse's accessibility score is a weighted average of all accessibility audits, with weights based on axe-core's user-impact analysis. Unlike performance audits, accessibility audits are binary — a page receives full credit or zero for each audit, with no partial credit. Lighthouse runs in Chrome DevTools, from the command line, or in CI, and covers WCAG A and AA rules.
+
+**Beginner-Friendly Explanation:** Lighthouse is a free audit tool built into Chrome. You click a button and it gives you a score out of 100 for accessibility, along with a list of what is wrong and how to fix it.
+
+### Purposes
+
+- To provide a fast, free baseline accessibility score for any page.
+- To surface actionable diagnostics for common failures (missing names, contrast, ARIA errors).
+- To track accessibility trends over time in CI.
+- To identify high-impact issues through weighted scoring.
+
+### Syntax Rules and Structure
+
+**Running Lighthouse:**
+
+| Method | Command / Action |
+|--------|-----------------|
+| Chrome DevTools | Lighthouse tab → select "Accessibility" → Analyze |
+| CLI | `lighthouse https://example.com --only-categories=accessibility` |
+| CI | `lighthouse-ci` with assertions on score thresholds |
+
+**Scoring:** The accessibility score is a weighted average. Heavy-weight audits include `aria-allowed-attr` (4.1%), `aria-hidden-body` (4.1%), and `button-name` (7%).
+
+**Constraints and Limitations:**
+
+- Lighthouse only scans the initial page state — dialogs, error states, and dynamic content are not covered.
+- A high Lighthouse score does not guarantee accessibility — it covers only machine-checkable rules.
+- Manual audits are not included in the score.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Lighthouse CI Assertion
+
+```yaml
+# .lighthouserc.yml
+ci:
+  assert:
+    assertions:
+      categories:accessibility: ['error', { minScore: 0.95 }]
+```
+
+**Expected Output:** The CI job fails if the accessibility score drops below 95%.
+
+### Real-World Cases
+
+- **Pre-deploy checks:** Lighthouse runs on staging before release.
+- **Performance monitoring:** Accessibility score trends are tracked alongside performance.
+- **Developer education:** Diagnostic details explain why each audit failed.
+
+### References
+
+- Chrome for Developers — Lighthouse Accessibility Scoring — https://developer.chrome.com/docs/lighthouse/accessibility/scoring
+- Chrome for Developers — Lighthouse Accessibility Audits — https://developer.chrome.com/docs/lighthouse/accessibility/
+
+---
+
+## 9. axe (axe-core)
+
+### Definitions
+
+**Core Definition:** axe-core is an open-source accessibility engine that runs rule-based tests against the DOM to detect WCAG violations and best-practice issues.
+
+**Technical Definition:** axe-core is the accessibility testing library behind Lighthouse, jest-axe, Cypress Accessibility, and many other tools. It provides a comprehensive default rule set covering WCAG 2.0, 2.1, and 2.2 at levels A, AA, and AAA, plus best-practice rules. Each rule is tagged with the WCAG success criteria it maps to. axe-core detects roughly **30–40% of WCAG issues** automatically.
+
+**Beginner-Friendly Explanation:** axe-core is the engine that powers most automated accessibility checkers. It runs a set of rules against your page and tells you exactly which elements fail and why.
+
+### Purposes
+
+- To provide a comprehensive, standards-mapped rule set for automated scanning.
+- To integrate into browser testing frameworks (Playwright, Cypress, Jest).
+- To scope scans to specific components or states.
+- To produce detailed violation reports with selectors and fix guidance.
+
+### Syntax Rules and Structure
+
+```typescript
+// Playwright + axe-core
+import AxeBuilder from '@axe-core/playwright';
+
+const results = await new AxeBuilder({ page })
+  .include('#component')          // Scope to element
+  .disableRules(['color-contrast']) // Only with documented justification
+  .analyze();
+
+expect(results.violations).toEqual([]);
+```
+
+**Constraints and Limitations:**
+
+- Use axe-core's default rule set — maintaining custom rule lists adds maintenance overhead.
+- Disable rules only with documented justification (e.g., known framework limitation).
+- axe-core cannot evaluate meaning, reading order, or alt-text quality.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Scoped Scan of a Modal
+
+```typescript
+await page.getByRole('button', { name: 'Open modal' }).click();
+const results = await new AxeBuilder({ page })
+  .include('[role="dialog"]')
+  .analyze();
+expect(results.violations).toHaveLength(0);
+```
+
+**Expected Output:** The modal is scanned in its open state for accessibility violations.
+
+### Real-World Cases
+
+- **Playwright E2E:** axe-core runs after navigation to catch rendered DOM issues.
+- **Cypress:** Cypress Accessibility runs axe-core against every snapshot.
+- **Component libraries:** Each component story is scanned in isolation.
+
+### References
+
+- GitHub — Automated Accessibility Scan Testing Guidelines — https://github.com/mattermost/mattermost/blob/b350edef791c93725ebb5b854867ac12469ce07d/e2e-tests/playwright/docs/accessibility/automated_scan_testing.md
+- axe-core — Rule Descriptions — https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md
+
+---
+
+## 10. jest-axe
+
+### Definitions
+
+**Core Definition:** jest-axe is a Jest matcher library that runs axe-core against rendered DOM containers and asserts that no accessibility violations are found.
+
+**Technical Definition:** jest-axe provides the `axe(container)` function and the `toHaveNoViolations()` matcher. It is used with React Testing Library to scan a component's rendered output for axe-core violations. Because it runs at the unit/component test level, it catches regressions before they reach integration or E2E tests.
+
+**Beginner-Friendly Explanation:** jest-axe brings axe-core into your Jest unit tests. You render a component, run `axe(container)`, and assert that it has no violations — so accessibility is checked every time you run your tests.
+
+### Purposes
+
+- To catch accessibility violations at the component level during unit testing.
+- To prevent regressions in component accessibility.
+- To integrate accessibility into the existing Jest test workflow.
+- To provide fast feedback without requiring a full browser.
+
+### Syntax Rules and Structure
+
+```javascript
+import { render } from '@testing-library/react';
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
+
+test('component has no accessibility violations', async () => {
+  const { container } = render(<Button>Click me</Button>);
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+```
+
+**Constraints and Limitations:**
+
+- jest-axe runs in jsdom, which does not render CSS — contrast checks are limited.
+- It scans the component's container only — page-level context (landmarks, heading hierarchy) is not evaluated.
+- Use it alongside `eslint-plugin-jsx-a11y` for static checks and browser-based axe for full-page scans.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Testing Multiple Component States
+
+```javascript
+describe('Button Accessibility', () => {
+  test('default button has no violations', async () => {
+    const { container } = render(<Button>Click me</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('icon button with aria-label has no violations', async () => {
+    const { container } = render(
+      <Button aria-label="Close"><CloseIcon /></Button>
+    );
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  test('disabled button is still accessible', async () => {
+    const { container } = render(<Button disabled>Disabled</Button>);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
+```
+
+**Expected Output:** All three states pass the axe-core scan.
+
+### Real-World Cases
+
+- **Component libraries:** Every component test includes a jest-axe scan.
+- **Design system CI:** PRs fail if a component introduces a new violation.
+- **Form components:** Tests verify that labels, errors, and hints are correctly associated.
+
+### References
+
+- GitHub — Jest with jest-axe — https://github.com/aj-geddes/useful-ai-prompts/blob/3f5182cfd739fc113f4af5244a1cf342ad7f7911/skills/accessibility-testing/references/jest-with-jest-axe.md
+- jest-axe — npm — https://www.npmjs.com/package/jest-axe
+
+---
+
+## 11. eslint-plugin-jsx-a11y
+
+### Definitions
+
+**Core Definition:** `eslint-plugin-jsx-a11y` is an ESLint plugin that performs static analysis on JSX elements to catch accessibility issues before runtime.
+
+**Technical Definition:** The plugin evaluates JSX abstract syntax trees (ASTs) against a set of accessibility rules — `alt-text`, `anchor-is-valid`, `label-has-associated-control`, `click-events-have-key-events`, `no-autofocus`, and others. It catches issues in static code during development, and must be combined with runtime tools like `@axe-core/react` or jest-axe to test the rendered DOM.
+
+**Beginner-Friendly Explanation:** This ESLint plugin warns you about accessibility mistakes while you are writing React code — like putting a click handler on a div without a keyboard handler, or an image without alt text. It catches the problem before you even run the app.
+
+### Purposes
+
+- To catch accessibility issues at authoring time, before the code runs.
+- To enforce consistent accessible patterns across the codebase.
+- To complement runtime tools by catching static-code issues they cannot see.
+- To educate developers about accessibility rules through immediate feedback.
+
+### Syntax Rules and Structure
+
+**Installation and configuration:**
 
 ```json
 // .eslintrc.json
 {
-  "extends": [
-    "plugin:jsx-a11y/recommended"
-  ],
   "plugins": ["jsx-a11y"],
-  "rules": {
-    "jsx-a11y/alt-text": "error",
-    "jsx-a11y/aria-props": "error",
-    "jsx-a11y/aria-role": "error",
-    "jsx-a11y/click-events-have-key-events": "error",
-    "jsx-a11y/no-noninteractive-element-interactions": "warn"
-  }
+  "extends": ["plugin:jsx-a11y/recommended"]
 }
 ```
 
-**Component Breakdown:**
-- `plugin:jsx-a11y/recommended`: Enables the recommended rule set.
-- `alt-text`: Requires `alt` on `<img>`, `<area>`, `<input type="image">`.
-- `aria-props`: Validates ARIA attributes against known names.
-- `aria-role`: Validates ARIA roles against known values.
-- `click-events-have-key-events`: Requires keyboard handlers alongside click handlers.
-- `no-noninteractive-element-interactions`: Prevents event handlers on non-interactive elements.
+**Key rules:**
 
-**2. Unit Testing with `jest-axe`:**
-```bash
-npm install -D jest-axe @testing-library/react @testing-library/jest-dom
-```
-
-```jsx
-// Button.test.jsx
-import { render } from '@testing-library/react';
-import { axe, toHaveNoViolations } from 'jest-axe';
-import { Button } from './Button';
-
-expect.extend(toHaveNoViolations);
-
-describe('Button', () => {
-  it('has no accessibility violations', async () => {
-    const { container } = render(<Button>Click me</Button>);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-  });
-
-  it('has an accessible name', () => {
-    const { getByRole } = render(<Button>Click me</Button>);
-    expect(getByRole('button', { name: /click me/i })).toBeInTheDocument();
-  });
-
-  it('is keyboard focusable', () => {
-    const { getByRole } = render(<Button>Click me</Button>);
-    const button = getByRole('button');
-    button.focus();
-    expect(button).toHaveFocus();
-  });
-});
-```
-
-**Component Breakdown:**
-- `expect.extend(toHaveNoViolations)`: Adds the `toHaveNoViolations` matcher.
-- `axe(container)`: Runs axe-core against the rendered output.
-- `getByRole('button', { name })`: Queries by accessible role and name.
-- `toHaveFocus()`: Asserts keyboard focus.
-
-**3. CI Scanner (`Lighthouse CI`):**
-```yaml
-# .github/workflows/accessibility.yml
-name: Accessibility Audit
-on: [push, pull_request]
-
-jobs:
-  lighthouse:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run build
-      - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v12
-        with:
-          urls: |
-            https://preview.example.com/
-            https://preview.example.com/checkout
-          budgetPath: ./lighthouse-budget.json
-          uploadArtifacts: true
-```
-
-```json
-// lighthouse-budget.json
-[
-  {
-    "path": "/*",
-    "audits": [
-      { "id": "accessibility", "weight": 1 }
-    ],
-    "assertions": {
-      "categories:accessibility": ["error", { "minScore": 0.95 }]
-    }
-  }
-]
-```
-
-**Component Breakdown:**
-- `treosh/lighthouse-ci-action`: Runs Lighthouse against preview URLs.
-- `budgetPath`: Defines accessibility score thresholds.
-- `categories:accessibility`: Asserts a minimum score (0.95 = 95%).
-
-**Syntax Rules:**
-- Install `eslint-plugin-jsx-a11y` and extend the recommended configuration.
-- Add `jest-axe` to unit tests for every component and critical workflow.
-- Use `@testing-library/jest-dom` matchers (`toHaveFocus`, `toHaveAccessibleName`, `toBeInTheDocument`).
-- Run Lighthouse CI (or Pa11y CI, axe DevTools CI) against preview deployments.
-- Set accessibility score thresholds as CI gates (fail the build below the threshold).
-- Test both individual components and composed pages.
+| Rule | What it enforces |
+|------|------------------|
+| `alt-text` | Images must have alternative text. |
+| `anchor-is-valid` | Anchors must point to real destinations. |
+| `label-has-associated-control` | Form inputs must have labels. |
+| `click-events-have-key-events` | Click handlers require keyboard handlers. |
+| `no-autofocus` | Avoid autofocus on page load. |
+| `no-static-element-interactions` | Static elements should not have interaction handlers. |
 
 **Constraints and Limitations:**
-- Automated tools catch only 30–50% of accessibility issues.
-- `axe-core` in JSDOM cannot test colour contrast reliably (no layout engine).
-- Lighthouse CI requires a deployed preview URL; it does not work on local-only builds.
-- False positives and false negatives exist; investigate every report.
-- Automated tests cannot verify that a screen reader announces something correctly.
 
-### Annotated Code Example: Complete Automated Pipeline
+- Static analysis only — it cannot see rendered DOM, dynamic content, or CSS-based issues.
+- Must be combined with runtime tools (axe-core, jest-axe) for full coverage.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Catching a Missing Keyboard Handler
 
 ```jsx
-// TextField.test.jsx
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { axe, toHaveNoViolations } from 'jest-axe';
-import { TextField } from './TextField';
+// ❌ ESLint error: click-events-have-key-events
+<div onClick={handleClick}>Submit</div>
 
-expect.extend(toHaveNoViolations);
-
-describe('TextField', () => {
-  it('renders with a label and no axe violations', async () => {
-    const { container } = render(<TextField label="Email" />);
-
-    // 1. Automated axe audit
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
-
-    // 2. Accessible name check
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
-  });
-
-  it('associates error messages with the input', async () => {
-    render(<TextField label="Email" error="Email is required" />);
-
-    const input = screen.getByLabelText('Email');
-    expect(input).toHaveAttribute('aria-invalid', 'true');
-    expect(input).toHaveAccessibleDescription('Email is required');
-  });
-
-  it('is operable with the keyboard', async () => {
-    const user = userEvent.setup();
-    render(<TextField label="Email" />);
-
-    await user.tab();
-    expect(screen.getByLabelText('Email')).toHaveFocus();
-  });
-});
+// ✅ No error: native button provides keyboard support
+<button type="button" onClick={handleClick}>Submit</button>
 ```
 
-**Expected Output:** All tests pass if the component is accessible. If the label is missing, the axe audit fails. If `aria-invalid` is missing, the second test fails. If the input cannot receive keyboard focus, the third test fails.
-
-**Why This Output Occurs:** `axe(container)` runs the full axe-core rule set against the rendered DOM. `getByLabelText` verifies the label is associated. `toHaveAttribute('aria-invalid', 'true')` verifies the error state. `toHaveAccessibleDescription` verifies the description is linked. `userEvent.tab()` simulates keyboard navigation, and `toHaveFocus()` verifies the input received focus.
+**Expected Output:** ESLint flags the `<div>` click handler because it lacks a keyboard event handler, guiding the developer to use a `<button>`.
 
 ### Real-World Cases
 
-- **Component libraries:** Every component has a `.test.tsx` with `jest-axe` and role-based queries.
-- **CI/CD pipelines:** Lighthouse CI runs on every pull request and fails if the accessibility score drops below 95%.
-- **Design systems:** ESLint rules are shared across all packages to enforce consistent patterns.
-- **Marketing sites:** Pa11y CI runs against all key pages to catch regressions.
-- **Enterprise apps:** axe DevTools CI runs against a full user journey.
+- **React codebases:** The plugin is included in Airbnb's ESLint config and is standard in React projects.
+- **CI linting:** Accessibility lint rules run on every commit alongside other ESLint rules.
+- **Developer education:** Immediate feedback teaches accessible patterns as developers write code.
 
 ### References
 
-- eslint-plugin-jsx-a11y - https://github.com/jsx-eslint/eslint-plugin-jsx-a11y
-- jest-axe - https://github.com/nickcolley/jest-axe
-- Testing Library - https://testing-library.com/docs/
-- Testing Library Jest DOM - https://github.com/testing-library/jest-dom
-- axe-core - https://github.com/dequelabs/axe-core
-- Lighthouse CI - https://github.com/GoogleChrome/lighthouse-ci
-- Pa11y CI - https://github.com/pa11y/pa11y-ci
-- Deque axe DevTools - https://www.deque.com/axe/devtools/
+- GitHub — jsx-eslint/eslint-plugin-jsx-a11y — https://github.com/jsx-eslint/eslint-plugin-jsx-a11y
+- npm — eslint-plugin-jsx-a11y — https://www.npmjs.com/package/eslint-plugin-jsx-a11y
 
 ---
 
-## Core Concept 2: Keyboard Navigation Audits
+## 12. Accessibility Testing Best Practices
 
 ### Definitions
 
-**Core Definition:** Keyboard navigation audits are the manual process of navigating an application using only the keyboard (Tab, Shift+Tab, Enter, Space, Arrow keys, Escape) to detect keyboard traps, verify logical tab order, and check visible focus indicators.
+**Core Definition:** Accessibility testing best practices are the guidelines that make testing thorough, efficient, and integrated into the development lifecycle.
 
-**Technical Definition:** Keyboard navigation testing verifies compliance with WCAG 2.2 SC 2.1.1 (Keyboard), SC 2.1.2 (No Keyboard Trap), SC 2.4.3 (Focus Order), SC 2.4.7 (Focus Visible), and SC 2.4.11 (Focus Not Obscured). The audit process involves: (1) unplugging the mouse; (2) tabbing through every interactive element on the page; (3) verifying that the tab order matches the visual order; (4) confirming that focus is always visible; (5) checking that focus is not trapped in any component (except intentionally in modals); (6) testing all keyboard interactions defined by the WAI-ARIA Authoring Practices (arrow keys for tabs, Enter/Space for buttons, Escape for overlays); and (7) verifying that focus is restored after overlays close.
+**Technical Definition:** Best practices combine automated scans with manual keyboard and screen reader passes, run on every state (not just the initial page load), test across real browsers and assistive technology combinations, and integrate checks into CI/CD. They emphasize that a clean automated scan is not a pass, and that defects must be reported with exact reproduction steps.
 
-**Beginner-Friendly Explanation:** Keyboard navigation is the most fundamental accessibility test. If you cannot use your app with just a keyboard, you cannot use it with a screen reader, voice control, or switch device. The test is simple: put your mouse away, close your eyes if you can, and try to complete every task using only Tab, Shift+Tab, Enter, Space, and the arrow keys. Can you see where focus is? Does the order make sense? Do you ever get stuck? These are the questions the audit answers.
-
-### Purposes
-
-- To verify that every interactive element is reachable and operable via keyboard.
-- To detect keyboard traps where focus cannot escape.
-- To confirm that tab order matches the visual order.
-- To ensure focus indicators are visible on every focused element.
-- To verify that focus is restored after overlays close.
-- To test keyboard interactions defined by the WAI-ARIA Authoring Practices.
-
-### Syntax Rules and Structure
-
-**Keyboard Audit Checklist:**
-```
-1. Unplug the mouse (or hide it).
-2. Tab through every page from top to bottom.
-3. Verify the tab order matches the visual order.
-4. Verify every interactive element receives visible focus.
-5. Verify no element traps focus (except modals).
-6. Test Enter/Space on buttons and links.
-7. Test Arrow keys on tabs, menus, and radio groups.
-8. Test Escape on modals, dropdowns, and popovers.
-9. Test Home/End on long lists.
-10. Verify focus returns to the trigger after overlays close.
-```
-
-**Visible Focus Indicator (CSS):**
-```css
-/* ✅ Good: visible focus ring for keyboard users only */
-:focus-visible {
-  outline: 2px solid #005fcc;
-  outline-offset: 2px;
-}
-
-/* ❌ Bad: removes focus indicator entirely */
-/* *:focus { outline: none; } */
-
-/* ⚠️ Acceptable: custom focus styles that are clearly visible */
-:focus-visible {
-  outline: 2px solid #005fcc;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(0, 95, 204, 0.3);
-}
-```
-
-**Component Breakdown:**
-- `:focus-visible`: Applies the focus ring only for keyboard navigation.
-- `outline: 2px solid #005fcc`: High-contrast visible outline.
-- `outline-offset: 2px`: Separates the outline from the element.
-- Never use `outline: none` without a replacement.
-
-**Testing Focus Trap in a Modal:**
-```jsx
-// The modal should trap focus, so Tab cycles within it.
-// Test manually: open the modal, press Tab repeatedly,
-// verify focus never leaves the modal. Press Escape,
-// verify focus returns to the trigger.
-```
-
-**Syntax Rules:**
-- Test every page and every interactive workflow with the keyboard.
-- Use `:focus-visible` for focus rings; do not remove them without a replacement.
-- Ensure tab order matches visual order; avoid positive `tabIndex` values.
-- Trap focus only in modals; everywhere else, focus must flow naturally.
-- Restore focus to the trigger when modals and dropdowns close.
-- Test the keyboard interactions specified by the WAI-ARIA APG for each widget type.
-- Use browser DevTools to inspect `document.activeElement` if focus is unclear.
-
-**Constraints and Limitations:**
-- Manual testing is time-consuming and requires discipline.
-- Different browsers have different focus behaviours; test in at least Chrome and Firefox.
-- Testing on macOS Safari requires enabling "Press Tab to highlight each item on a webpage" in Safari preferences.
-- Keyboard traps can be subtle (e.g., a component that swallows Tab but does not handle Shift+Tab).
-- Focus visibility can be obscured by sticky headers or overlapping content (WCAG 2.4.11).
-
-### Annotated Code Example: Keyboard Trap Detection
-
-```jsx
-// A component that accidentally traps focus
-function BadDropdown({ items }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  function handleKeyDown(e) {
-    if (e.key === 'Tab') {
-      e.preventDefault(); // ❌ Traps focus — Tab does nothing
-    }
-  }
-
-  return (
-    <div onKeyDown={handleKeyDown}>
-      <button onClick={() => setIsOpen((o) => !o)}>Open</button>
-      {isOpen && <ul>{items.map((i) => <li key={i.id}>{i.label}</li>)}</ul>}
-    </div>
-  );
-}
-
-// ✅ Fixed: let Tab close the menu and move on
-function GoodDropdown({ items }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const buttonRef = useRef(null);
-
-  function handleKeyDown(e) {
-    if (e.key === 'Escape') {
-      setIsOpen(false);
-      buttonRef.current?.focus();
-    } else if (e.key === 'Tab') {
-      setIsOpen(false); // Let Tab move naturally, but close the menu
-    }
-  }
-
-  return (
-    <div onKeyDown={handleKeyDown}>
-      <button ref={buttonRef} onClick={() => setIsOpen((o) => !o)}>Open</button>
-      {isOpen && <ul>{items.map((i) => <li key={i.id}>{i.label}</li>)}</ul>}
-    </div>
-  );
-}
-```
-
-**Expected Output:** The bad dropdown traps focus—pressing Tab does nothing. The good dropdown closes on Tab and allows focus to move naturally. Pressing Escape closes the menu and returns focus to the button.
-
-**Why This Output Occurs:** The bad dropdown calls `e.preventDefault()` on Tab, which prevents the browser from moving focus. The good dropdown does not prevent Tab; it closes the menu and lets the browser move focus naturally. Escape closes the menu and restores focus to the trigger.
-
-### Real-World Cases
-
-- **E-commerce checkout:** Tabbing through the entire checkout flow without a mouse.
-- **Dashboard navigation:** Navigating between widgets and actions.
-- **Modal dialogs:** Verifying focus trap and restoration.
-- **Tabs and accordions:** Verifying arrow-key navigation.
-- **Form wizards:** Verifying that Back/Next are keyboard accessible.
-
-### References
-
-- WCAG 2.2 - Keyboard (2.1.1) - https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html
-- WCAG 2.2 - No Keyboard Trap (2.1.2) - https://www.w3.org/WAI/WCAG22/Understanding/no-keyboard-trap.html
-- WCAG 2.2 - Focus Order (2.4.3) - https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html
-- WCAG 2.2 - Focus Visible (2.4.7) - https://www.w3.org/WAI/WCAG22/Understanding/focus-visible.html
-- WCAG 2.2 - Focus Not Obscured (2.4.11) - https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html
-- W3C WAI-ARIA APG - Keyboard Interface - https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/
-- WebAIM - Keyboard Accessibility - https://webaim.org/techniques/keyboard/
-
----
-
-## Core Concept 3: Assistive Technology Screen Readers
-
-### Definitions
-
-**Core Definition:** Assistive technology screen reader testing is the process of using a real screen reader (NVDA, JAWS, VoiceOver) on a real browser to verify that content is announced correctly, in the right order, and with the right semantics.
-
-**Technical Definition:** Screen readers convert the DOM's accessibility tree into speech and braille output. They announce element roles, names, states, and descriptions as the user navigates. Testing requires pairing a screen reader with a specific browser (NVDA/Firefox on Windows, JAWS/Chrome on Windows, VoiceOver/Safari on macOS and iOS, TalkBack/Chrome on Android) because each combination interprets the accessibility tree differently. The audit verifies: (1) page structure (landmarks and headings), (2) interactive element names and roles, (3) state changes (expanded, selected, checked), (4) dynamic content announcements (`aria-live`), (5) focus order and announcements, and (6) form labels, errors, and help text.
-
-**Beginner-Friendly Explanation:** A screen reader is software that reads the screen aloud for blind and low-vision users. Testing with a screen reader is like testing your app with a user who cannot see it—you hear what they hear. You navigate with keyboard shortcuts (H for headings, K for links, F for form fields), and you listen for the announcements. If the screen reader says "button" with no label, or reads content in a confusing order, or misses an error message, you have found a real bug that automated tools cannot detect.
+**Beginner-Friendly Explanation:** Best practices are the habits that make accessibility testing actually work — automate what you can, test by hand what you must, check every state, and never trust a clean scan as proof of accessibility.
 
 ### Purposes
 
-- To verify that content is announced correctly and in a logical order.
-- To test that interactive elements have correct roles, names, and states.
-- To verify that dynamic content changes are announced via live regions.
-- To test form labels, error messages, and help text.
-- To verify that landmarks and headings provide useful navigation.
-- To catch issues that automated tools miss (context, order, announcements).
+- To catch both mechanical and human-experience barriers.
+- To prevent regressions through CI integration.
+- To make defect reports actionable and reproducible.
+- To build accessibility into the development process rather than bolting it on at the end.
 
-### Syntax Rules and Structure
+### Best Practices Checklist
 
-**Screen Reader and Browser Pairings:**
-
-| Screen Reader | Browser | Platform |
-|---|---|---|
-| NVDA | Firefox | Windows |
-| NVDA | Chrome | Windows |
-| JAWS | Chrome | Windows |
-| VoiceOver | Safari | macOS |
-| VoiceOver | Safari | iOS |
-| TalkBack | Chrome | Android |
-
-**Essential Screen Reader Shortcuts:**
-
-| Shortcut | NVDA (Windows) | VoiceOver (macOS) |
-|---|---|---|
-| Next heading | H | VO + Cmd + H |
-| Next landmark | D | VO + U, then arrow |
-| Next link | K | VO + Cmd + L |
-| Next form field | F | VO + Cmd + J |
-| Next button | B | VO + Cmd + B |
-| Read from cursor | NVDA + Down | VO + A |
-| Stop reading | Ctrl | Ctrl |
-
-**Testing Dynamic Announcements (`aria-live`):**
-```jsx
-function SaveStatus({ status }) {
-  return (
-    <div role="status" aria-live="polite" aria-atomic="true">
-      {status === 'saving' && 'Saving changes...'}
-      {status === 'saved' && 'Changes saved successfully.'}
-      {status === 'error' && 'Failed to save. Please try again.'}
-    </div>
-  );
-}
-```
-
-**Component Breakdown:**
-- `role="status"`: Equivalent to `aria-live="polite"`.
-- `aria-atomic="true"`: Announces the entire message, not just the changed node.
-- Screen reader announces the message when `status` changes.
-
-**Testing Form Errors:**
-```jsx
-function EmailField({ error }) {
-  const id = useId();
-  const errorId = `${id}-error`;
-
-  return (
-    <div>
-      <label htmlFor={id}>Email</label>
-      <input
-        id={id}
-        type="email"
-        aria-invalid={!!error}
-        aria-describedby={error ? errorId : undefined}
-      />
-      {error && (
-        <p id={errorId} role="alert">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-```
-
-**Component Breakdown:**
-- `aria-invalid="true"`: Screen reader announces "invalid entry."
-- `aria-describedby`: Links the input to its error message.
-- `role="alert"`: Announces the error immediately when it appears.
-
-**Syntax Rules:**
-- Test with at least one screen reader and browser combination per platform.
-- Navigate using headings, landmarks, links, and form fields—not just arrow keys.
-- Verify that every interactive element has a name (not just "button" or "link").
-- Verify that state changes (expanded, selected, checked) are announced.
-- Verify that dynamic content is announced via `aria-live` regions.
-- Verify that form errors are announced and linked to their inputs.
-- Test with the screen reader's speech at a comfortable rate; do not rush.
-- Record findings with the exact announcement and the expected announcement.
+| Practice | Description |
+|----------|-------------|
+| **Automate first** | Run axe-core or Lighthouse to clear mechanical failures quickly. |
+| **Test every state** | Open dialogs, submit forms wrong, scan error states — scanners see one state at a time. |
+| **Keyboard pass** | Unplug the mouse and complete the journey with Tab, Enter, Space, Escape, and Arrow keys. |
+| **Screen reader pass** | Test with NVDA or VoiceOver — listen for correct announcements and logical order. |
+| **Check focus order** | Tab order must match logical reading order; no positive `tabindex`. |
+| **Verify contrast** | 4.5:1 normal text, 3:1 large text and UI components. |
+| **Integrate in CI** | Run automated checks on every PR to catch regressions. |
+| **Report defects precisely** | Exact keys pressed, what happened, what should have happened. |
+| **Never equate a clean scan with compliance** | Automated tools catch only 30–40% of issues. |
 
 **Constraints and Limitations:**
-- Each screen reader/browser pairing behaves differently; test the pairings your users use.
-- Screen readers do not announce visual-only information (colour, position, size).
-- Testing requires practice; screen reader navigation is a skill.
-- Automated tools cannot replace screen reader testing.
-- Some screen readers have bugs or quirks that are not your app's fault; document them.
 
-### Annotated Code Example: Screen Reader Test Plan
+- Accessibility testing is not a one-time audit — it must run on every release.
+- Manual testing requires practice — learn six screen reader commands and start listening.
 
-```jsx
-// A component with multiple accessibility features to verify
-function ProductCard({ product, onAddToCart }) {
-  return (
-    <article aria-labelledby={`product-${product.id}-title`}>
-      <img src={product.image} alt={product.imageAlt} />
-      <h3 id={`product-${product.id}-title`}>{product.name}</h3>
-      <p>{product.description}</p>
-      <p aria-label={`Price: ${product.price} dollars`}>
-        ${product.price}
-      </p>
-      <button
-        onClick={onAddToCart}
-        aria-label={`Add ${product.name} to cart`}
-      >
-        Add to Cart
-      </button>
-    </article>
-  );
-}
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Integrated Accessibility Testing Workflow
+
+```markdown
+## Per-PR (automated)
+- ESLint jsx-a11y runs on commit.
+- jest-axe scans every component test.
+
+## Per-release (manual)
+1. Run axe-core on every critical journey state.
+2. Keyboard pass: unplug the mouse, complete the journey.
+3. Screen reader pass: NVDA or VoiceOver, check headings, labels, errors, dynamic updates.
+4. Contrast check: CCA on text over images and custom UI.
+
+## Defect filing
+- "On the checkout page, pressing Tab from the email field skips the password field and jumps to the footer. Expected: focus moves to the password field."
 ```
 
-**Expected Screen Reader Announcements:**
-- Navigating by headings: "Product Name, heading level 3."
-- Navigating to the image: "Product Name, image."
-- Navigating to the price: "Price: 29.99 dollars."
-- Navigating to the button: "Add Product Name to cart, button."
-
-**Why This Output Occurs:** The `<article>` with `aria-labelledby` creates a labelled region. The `<h3>` provides a heading. The image has descriptive alt text. The price has an `aria-label` for clearer pronunciation. The button has an `aria-label` that includes the product name for context.
+**Expected Output:** A repeatable process that catches mechanical issues early and human-experience issues before release.
 
 ### Real-World Cases
 
-- **E-commerce:** Testing the full purchase flow with NVDA + Firefox.
-- **SaaS dashboards:** Testing navigation and data tables with VoiceOver + Safari.
-- **Government services:** Testing forms and multi-step processes with JAWS + Chrome.
-- **Mobile apps:** Testing touch navigation with VoiceOver + Safari on iOS.
-- **Documentation:** Testing code examples and navigation with NVDA.
+- **Release gates:** Automated checks block merges on new violations; manual passes block releases on critical journey failures.
+- **Design systems:** Components are tested with jest-axe and keyboard interaction before publication.
+- **Legal compliance:** Documented test passes and defect fixes provide evidence of WCAG conformance.
 
 ### References
 
-- NVDA Screen Reader - https://www.nvaccess.org/
-- JAWS Screen Reader - https://www.freedomscientific.com/products/software/jaws/
-- VoiceOver (macOS) - https://www.apple.com/accessibility/vision/
-- VoiceOver (iOS) - https://www.apple.com/accessibility/vision/
-- TalkBack (Android) - https://support.google.com/accessibility/android/answer/6283677
-- WebAIM - Screen Reader User Survey - https://webaim.org/projects/screenreadersurvey/
-- W3C WAI - Testing with Screen Readers - https://www.w3.org/WAI/test-evaluate/tools/
-
----
-
-## Core Concept 4: Visual & Contrast Verification
-
-### Definitions
-
-**Core Definition:** Visual and contrast verification is the process of auditing text and non-text contrast ratios against WCAG AA and AAA requirements, using contrast checkers and colour-blindness simulators.
-
-**Technical Definition:** WCAG 2.2 defines minimum contrast ratios for text and non-text content. **SC 1.4.3 (Contrast Minimum, AA)** requires a contrast ratio of at least 4.5:1 for normal text and 3:1 for large text (18pt or 14pt bold). **SC 1.4.6 (Contrast Enhanced, AAA)** requires 7:1 for normal text and 4.5:1 for large text. **SC 1.4.11 (Non-text Contrast, AA)** requires 3:1 for UI components (borders, icons, form controls) and graphical objects (charts, diagrams). Contrast is calculated using the relative luminance formula defined in WCAG. Colour-blindness simulators (deuteranopia, protanopia, tritanopia) verify that information is not conveyed by colour alone (SC 1.4.1).
-
-**Beginner-Friendly Explanation:** Imagine reading light grey text on a white background—it is hard, and for some people, impossible. Contrast verification checks that text and UI elements have enough contrast to be readable. The WCAG ratio is a number between 1:1 (no contrast) and 21:1 (black on white). Normal text needs 4.5:1; large text needs 3:1. Non-text elements like icons and borders also need 3:1. Colour-blindness simulators check that you are not relying on colour alone (e.g., a red border for errors without a text message).
-
-### Purposes
-
-- To verify that text is readable by users with low vision.
-- To verify that UI components and graphical objects have sufficient contrast.
-- To confirm that information is not conveyed by colour alone.
-- To test against WCAG AA and AAA requirements.
-- To catch contrast issues that automated tools may miss (e.g., contrast on hover states).
-
-### Syntax Rules and Structure
-
-**WCAG Contrast Requirements:**
-
-| Content Type | AA Minimum | AAA Minimum |
-|---|---|---|
-| Normal text (< 18pt) | 4.5:1 | 7:1 |
-| Large text (≥ 18pt or 14pt bold) | 3:1 | 4.5:1 |
-| UI components (borders, icons) | 3:1 | 3:1 |
-| Graphical objects (charts) | 3:1 | 3:1 |
-
-**Contrast Checker Tools:**
-- WebAIM Contrast Checker: https://webaim.org/resources/contrastchecker/
-- Deque Color Contrast Analyzer: https://www.deque.com/axe/devtools/
-- Polypane Contrast Checker: https://polypane.app/color-contrast-checker/
-- Chrome DevTools: Inspect element → Styles → colour swatch shows contrast ratio.
-
-**Testing Colour-Blindness:**
-- Chrome DevTools → Rendering → Emulate vision deficiencies (Deuteranopia, Protanopia, Tritanopia, Achromatopsia).
-- Sim Daltonism (macOS).
-- Coblis Color Blindness Simulator: https://www.color-blindness.com/coblis-color-blindness-simulator/
-
-**CSS with Sufficient Contrast:**
-```css
-/* ✅ Good: dark text on light background */
-.text-primary {
-  color: #1a1a1a; /* Contrast with #ffffff: 17.4:1 (AAA) */
-  background: #ffffff;
-}
-
-/* ❌ Bad: low contrast */
-.text-muted-bad {
-  color: #aaaaaa; /* Contrast with #ffffff: 2.3:1 (fails AA) */
-  background: #ffffff;
-}
-
-/* ✅ Good: error state with icon and text, not just colour */
-.error-message {
-  color: #b00020; /* Contrast with #ffffff: 8.3:1 (AAA) */
-}
-.error-message::before {
-  content: '⚠️ ';
-}
-```
-
-**Component Breakdown:**
-- `#1a1a1a` on `#ffffff`: 17.4:1 — passes AAA for all text sizes.
-- `#aaaaaa` on `#ffffff`: 2.3:1 — fails AA for normal text.
-- `#b00020` on `#ffffff`: 8.3:1 — passes AAA.
-- The `::before` icon ensures the error is not conveyed by colour alone.
-
-**Syntax Rules:**
-- Check text contrast against its actual background (including gradients and images).
-- Check hover, focus, active, and disabled states.
-- Check UI component contrast (borders, icons, form controls) against adjacent colours.
-- Check graphical object contrast (chart lines, data points) against their background.
-- Use colour-blindness simulators to verify that information is not colour-dependent.
-- Provide text labels or icons alongside colour indicators (errors, status, required fields).
-- Test in both light and dark modes.
-
-**Constraints and Limitations:**
-- Automated contrast checkers cannot evaluate text over images or gradients reliably.
-- Contrast ratios assume sRGB; wide-gamut colours (P3) may need manual verification.
-- The 4.5:1 ratio is a minimum, not a target; higher contrast is better.
-- Colour-blindness simulators approximate; real users' experiences vary.
-- Disabled states are exempt from WCAG contrast requirements, but should still be distinguishable.
-
-### Annotated Code Example: Accessible Status Indicator
-
-```jsx
-function StatusBadge({ status }) {
-  const config = {
-    success: { label: 'Success', color: '#0f5132', bg: '#d1e7dd', icon: '✓' },
-    warning: { label: 'Warning', color: '#664d03', bg: '#fff3cd', icon: '⚠' },
-    error: { label: 'Error', color: '#842029', bg: '#f8d7da', icon: '✕' },
-  };
-
-  const { label, color, bg, icon } = config[status];
-
-  return (
-    <span
-      style={{
-        color,
-        background: bg,
-        padding: '4px 8px',
-        borderRadius: 4,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-      }}
-    >
-      <span aria-hidden="true">{icon}</span>
-      {label}
-    </span>
-  );
-}
-```
-
-**Expected Output:** A status badge with an icon, a text label, and sufficient contrast. The icon is hidden from screen readers (`aria-hidden="true"`) because the text label already communicates the status. Colour-blind users can rely on the icon and text, not just the colour.
-
-**Why This Output Occurs:** Each status has a distinct icon and text label in addition to colour. The colour combinations are chosen for sufficient contrast (dark text on light background). `aria-hidden="true"` on the icon prevents redundant announcements. The badge is understandable without colour perception.
-
-### Real-World Cases
-
-- **E-commerce:** Product prices, sale badges, and availability indicators.
-- **Dashboards:** Chart colours, status indicators, and data labels.
-- **Forms:** Error states, required field markers, and validation messages.
-- **Navigation:** Active link indicators, breadcrumbs, and focus rings.
-- **Dark mode:** Verifying contrast in both light and dark themes.
-
-### References
-
-- WCAG 2.2 - Contrast Minimum (1.4.3) - https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
-- WCAG 2.2 - Contrast Enhanced (1.4.6) - https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html
-- WCAG 2.2 - Non-text Contrast (1.4.11) - https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
-- WCAG 2.2 - Use of Color (1.4.1) - https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html
-- WebAIM Contrast Checker - https://webaim.org/resources/contrastchecker/
-- Coblis Color Blindness Simulator - https://www.color-blindness.com/coblis-color-blindness-simulator/
-- Chrome DevTools - Emulate Vision Deficiencies - https://developer.chrome.com/docs/devtools/accessibility/reference/#emulate-vision-deficiencies
-
----
-
-## Core Concept 5: Zoom & Reflow Evaluation
-
-### Definitions
-
-**Core Definition:** Zoom and reflow evaluation is the process of testing an application's layout and functionality at up to 400% browser magnification, verifying that content does not overlap, is not cut off, and remains readable and operable.
-
-**Technical Definition:** WCAG 2.2 SC 1.4.4 (Resize Text, AA) requires that text can be resized up to 200% without loss of content or functionality. SC 1.4.10 (Reflow, AA) requires that content can be presented without loss of information or functionality, and without requiring scrolling in two dimensions, at a viewport width of 320 CSS pixels (equivalent to 400% zoom on a 1280px viewport). This means: (1) no horizontal scrolling for content that is not a data table, map, or diagram; (2) text wraps rather than being cut off; (3) interactive elements remain operable; (4) content does not overlap; and (5) no content is clipped or hidden. Testing is done by zooming the browser to 400% (or setting the viewport to 320px) and navigating all key workflows.
-
-**Beginner-Friendly Explanation:** Imagine you have low vision and need to zoom in to 400% to read anything. If your app breaks—text overlaps, buttons disappear, you have to scroll horizontally to read a paragraph—you cannot use it. Zoom and reflow testing checks that your app still works when someone zooms in a lot. The rule is simple: at 400% zoom (or 320px wide), content should stack vertically, text should wrap, and nothing should be cut off or overlapping.
-
-### Purposes
-
-- To verify that text can be enlarged to 200% without loss of content.
-- To verify that content reflows at 400% zoom (320px viewport) without horizontal scrolling.
-- To ensure that interactive elements remain operable at high zoom.
-- To detect content overlap, clipping, and truncation.
-- To verify that sticky headers and footers do not obscure focused content.
-- To comply with WCAG 2.2 SC 1.4.4 and SC 1.4.10.
-
-### Syntax Rules and Structure
-
-**Testing Procedure:**
-```
-1. Open the page in a desktop browser (Chrome, Firefox).
-2. Set zoom to 400% (Ctrl/Cmd + '+' repeatedly, or use the zoom menu).
-   - Alternative: set the viewport to 320px wide in DevTools.
-3. Navigate through every key workflow.
-4. Verify:
-   - No horizontal scrolling (except for data tables, maps, diagrams).
-   - Text wraps and remains readable.
-   - No content is cut off, clipped, or overlapped.
-   - Buttons and links remain clickable.
-   - Focus indicators remain visible.
-   - Sticky headers/footers do not obscure focused content.
-5. Test in both portrait and landscape orientations.
-```
-
-**CSS That Reflows Well:**
-```css
-/* ✅ Good: fluid layout with max-width and wrapping */
-.container {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-/* ✅ Good: text wraps naturally */
-.text {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* ❌ Bad: fixed width causes horizontal scroll at high zoom */
-.fixed-width {
-  width: 1200px;
-}
-
-/* ❌ Bad: fixed height causes content clipping */
-.fixed-height {
-  height: 200px;
-  overflow: hidden;
-}
-```
-
-**Component Breakdown:**
-- `max-width: 1200px; width: 100%`: Fluid container that shrinks at high zoom.
-- `auto-fit` + `minmax(280px, 1fr)`: Grid columns collapse to one column when space is tight.
-- `word-wrap: break-word`: Long words break rather than overflowing.
-- `width: 1200px`: Fixed width forces horizontal scrolling at 400% zoom.
-- `height: 200px; overflow: hidden`: Fixed height clips content.
-
-**Sticky Header That Respects Zoom:**
-```css
-.sticky-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-/* Ensure focused elements scroll into view below the sticky header */
-:target,
-:focus {
-  scroll-margin-top: 80px; /* Height of the sticky header */
-}
-```
-
-**Component Breakdown:**
-- `scroll-margin-top`: Adds space above the target element when scrolled into view.
-- Prevents the sticky header from obscuring focused or targeted content (WCAG 2.4.11).
-
-**Syntax Rules:**
-- Use relative units (`rem`, `em`, `%`, `vw`) instead of fixed `px` where possible.
-- Use `max-width` and `min-width` instead of fixed `width`.
-- Avoid fixed `height` on content containers; let content determine height.
-- Use `flex-wrap: wrap` and `grid-template-columns: repeat(auto-fit, minmax(...))`.
-- Use `overflow-wrap: break-word` for long words and URLs.
-- Use `scroll-margin-top` to prevent sticky headers from obscuring focused content.
-- Test at 400% zoom on a 1280px viewport (equivalent to 320px) and at 200% text-only zoom.
-
-**Constraints and Limitations:**
-- Data tables, maps, and diagrams are exempt from the reflow requirement (they may scroll horizontally).
-- Text-only zoom (browser setting) differs from full-page zoom; test both.
-- High zoom can trigger different CSS media queries; verify the layout at each breakpoint.
-- Mobile browsers handle zoom differently; test on real devices.
-- Content that relies on hover (tooltips, dropdowns) may be inaccessible at high zoom.
-
-### Annotated Code Example: Reflow-Friendly Layout
-
-```jsx
-function ProductPage({ product }) {
-  return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 16px' }}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: 24,
-        }}
-      >
-        <img
-          src={product.image}
-          alt={product.imageAlt}
-          style={{ width: '100%', height: 'auto', borderRadius: 8 }}
-        />
-        <div>
-          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)' }}>
-            {product.name}
-          </h1>
-          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.125rem)' }}>
-            {product.description}
-          </p>
-          <p style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-            ${product.price}
-          </p>
-          <button style={{ padding: '12px 24px', fontSize: '1rem' }}>
-            Add to Cart
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-**Expected Output:** At normal zoom, the image and text appear side by side. At 400% zoom (320px viewport), the grid collapses to a single column: image on top, text below. The heading uses `clamp()` to scale fluidly. The button remains fully visible and clickable. No horizontal scrolling is required.
-
-**Why This Output Occurs:** `repeat(auto-fit, minmax(280px, 1fr))` creates a responsive grid that collapses to one column when the container is narrower than 280px. `maxWidth: 1200` with `width: 100%` (implied by the block element) keeps the container fluid. `clamp()` scales font sizes between a minimum and maximum. `height: 'auto'` on the image preserves its aspect ratio. No fixed widths or heights cause overflow.
-
-### Real-World Cases
-
-- **E-commerce:** Product pages, checkout flows, and cart views at 400% zoom.
-- **Dashboards:** Data tables (which may scroll horizontally, but controls must remain usable).
-- **Documentation:** Long-form articles and code examples at high zoom.
-- **Forms:** Multi-field forms that must stack vertically at high zoom.
-- **Navigation:** Menus and sidebars that collapse gracefully at high zoom.
-
-### References
-
-- WCAG 2.2 - Resize Text (1.4.4) - https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html
-- WCAG 2.2 - Reflow (1.4.10) - https://www.w3.org/WAI/WCAG22/Understanding/reflow.html
-- WCAG 2.2 - Focus Not Obscured (2.4.11) - https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html
-- WebAIM - Zoom and Reflow - https://webaim.org/articles/zoom/
-- W3C WAI - Text Resizing and Zoom - https://www.w3.org/WAI/perspective-videos/resize/
-
----
-
-## Core Concept 6: User-Driven Preferences
-
-### Definitions
-
-**Core Definition:** User-driven preferences are the operating-system-level settings that users choose—reduced motion, dark mode, high contrast, reduced transparency—that web applications should respect via CSS media queries (`prefers-reduced-motion`, `prefers-color-scheme`, `prefers-contrast`).
-
-**Technical Definition:** CSS media queries expose user preferences from the operating system. `prefers-reduced-motion` (WCAG 2.3.3) indicates that the user wants minimal animation; it can be `no-preference` or `reduce`. `prefers-color-scheme` indicates light or dark mode preference. `prefers-contrast` indicates increased or reduced contrast preference. `forced-colors` indicates Windows High Contrast Mode. `prefers-reduced-transparency` indicates reduced transparency. Applications must respect these preferences to avoid harming users with vestibular disorders (motion), low vision (contrast), or photosensitivity. Testing verifies that the application adapts correctly and that disabling motion does not break functionality.
-
-**Beginner-Friendly Explanation:** Your phone or computer has settings for motion, colour, and contrast. If you get motion sickness from animations, you can turn on "Reduce Motion." If you prefer dark mode, you set that. If you need high contrast, you set that too. Your website should respect these settings—not force animations, not force light mode, not ignore high contrast. Testing means changing those settings and verifying that your app adapts correctly.
-
-### Purposes
-
-- To respect the user's motion preferences and prevent vestibular harm.
-- To respect light/dark mode preferences.
-- To respect high-contrast and forced-colors preferences.
-- To verify that disabling motion does not break functionality.
-- To verify that the app is usable in Windows High Contrast Mode.
-- To comply with WCAG 2.2 SC 1.4.12, SC 1.4.13, and SC 2.3.3.
-
-### Syntax Rules and Structure
-
-**Reduced Motion (`prefers-reduced-motion`):**
-```css
-/* Default: animations enabled */
-.fade-in {
-  animation: fadeIn 300ms ease-in-out;
-}
-
-/* Respect user preference: no animations */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-```
-
-**Component Breakdown:**
-- `@media (prefers-reduced-motion: reduce)`: Applies when the user has enabled reduced motion.
-- `animation-duration: 0.01ms`: Effectively disables animations without removing them (preserving `animationend` events).
-- `scroll-behavior: auto`: Disables smooth scrolling.
-- The universal selector ensures all animations and transitions are covered.
-
-**React Hook for Reduced Motion:**
-```jsx
-function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-
-  useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const handleChange = (e) => setPrefersReducedMotion(e.matches);
-    query.addEventListener('change', handleChange);
-    return () => query.removeEventListener('change', handleChange);
-  }, []);
-
-  return prefersReducedMotion;
-}
-
-function AnimatedComponent() {
-  const prefersReducedMotion = usePrefersReducedMotion();
-
-  return (
-    <div
-      style={{
-        transition: prefersReducedMotion ? 'none' : 'transform 300ms ease',
-        transform: 'scale(1.1)',
-      }}
-    >
-      Content
-    </div>
-  );
-}
-```
-
-**Component Breakdown:**
-- `window.matchMedia('(prefers-reduced-motion: reduce)')`: Reads the preference.
-- `query.addEventListener('change', ...)`: Listens for changes.
-- `prefersReducedMotion ? 'none' : 'transform 300ms ease'`: Conditionally applies the transition.
-
-**Dark Mode (`prefers-color-scheme`):**
-```css
-:root {
-  --bg: #ffffff;
-  --text: #1a1a1a;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1a1a1a;
-    --text: #f5f5f5;
-  }
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-}
-```
-
-**High Contrast (`prefers-contrast`):**
-```css
-@media (prefers-contrast: more) {
-  :root {
-    --border-color: #000000;
-    --text-secondary: #333333; /* Darker than usual */
-  }
-}
-```
-
-**Forced Colors (`forced-colors`):**
-```css
-@media (forced-colors: active) {
-  .custom-button {
-    border: 1px solid ButtonText;
-    color: ButtonText;
-    background: ButtonFace;
-  }
-}
-```
-
-**Syntax Rules:**
-- Always respect `prefers-reduced-motion: reduce`; disable or reduce animations.
-- Use `prefers-color-scheme` for light/dark mode; support both.
-- Use `prefers-contrast: more` to enhance contrast when requested.
-- Use `forced-colors: active` to support Windows High Contrast Mode.
-- Test with the OS setting enabled, not just the browser DevTools emulation.
-- Ensure that disabling motion does not hide content or break functionality.
-- Provide a manual toggle for users who want to override the OS setting.
-
-**Constraints and Limitations:**
-- `prefers-reduced-motion` applies to CSS animations and transitions, but not to JavaScript-driven animations (e.g., `requestAnimationFrame`, GSAP). These must be handled separately.
-- `prefers-color-scheme` does not indicate the user's preference for your app specifically; provide a manual toggle.
-- `forced-colors` overrides author colours; test with Windows High Contrast Mode.
-- DevTools emulation is convenient but may not match the real OS behaviour.
-- Some users enable reduced motion but still expect some feedback (e.g., a subtle fade); test with real users.
-
-### Annotated Code Example: Preference-Aware Modal
-
-```jsx
-function AccessibleModal({ isOpen, onClose, children }) {
-  const prefersReducedMotion = usePrefersReducedMotion();
-
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleKey(e) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        animation: prefersReducedMotion ? 'none' : 'fadeIn 200ms ease',
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-        style={{
-          background: 'var(--surface)',
-          padding: 24,
-          borderRadius: 12,
-          maxWidth: 400,
-          animation: prefersReducedMotion ? 'none' : 'slideUp 200ms ease',
-        }}
-      >
-        <h2 id="modal-title">Modal Title</h2>
-        {children}
-        <button onClick={onClose}>Close</button>
-      </div>
-    </div>
-  );
-}
-```
-
-**Expected Output:** The modal fades in and slides up when opened. If the user has enabled "Reduce Motion" in their OS, the animations are disabled and the modal appears instantly. All functionality (Escape to close, focus management) remains intact.
-
-**Why This Output Occurs:** The `usePrefersReducedMotion` hook reads the OS preference and updates when it changes. The `animation: prefersReducedMotion ? 'none' : 'fadeIn 200ms ease'` conditionally applies the animation. The modal's functionality does not depend on the animation, so disabling it does not break anything.
-
-### Real-World Cases
-
-- **Marketing sites:** Respect reduced motion for hero animations and scroll effects.
-- **Dashboards:** Respect dark mode for chart colours and backgrounds.
-- **E-commerce:** Respect reduced motion for product carousels and image zooms.
-- **SaaS applications:** Respect high contrast for users with low vision.
-- **Any application:** Support Windows High Contrast Mode for government and enterprise users.
-
-### References
-
-- WCAG 2.2 - Animation from Interactions (2.3.3) - https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html
-- WCAG 2.2 - Content on Hover or Focus (1.4.13) - https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html
-- MDN Web Docs - prefers-reduced-motion - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
-- MDN Web Docs - prefers-color-scheme - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
-- MDN Web Docs - prefers-contrast - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-contrast
-- MDN Web Docs - forced-colors - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/forced-colors
-- WebAIM - Reduced Motion - https://webaim.org/articles/motion/
-- Microsoft Edge - Forced Colors Mode - https://learn.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/accessibility/emulate-forced-colors
-
----
-
-## Comparison and Decision Guidance
-
-| Testing Layer | Tool | Catches | Misses | When to Run |
-|---|---|---|---|---|
-| **Static analysis** | `eslint-plugin-jsx-a11y` | Missing alts, invalid ARIA, non-interactive handlers | Runtime issues, contrast | Editor + CI |
-| **Unit testing** | `jest-axe`, Testing Library | ARIA, roles, names, focus | Contrast in JSDOM, screen reader output | CI |
-| **CI scanner** | Lighthouse CI, Pa11y CI | Full-page issues, regressions | Dynamic content, complex interactions | Every PR |
-| **Keyboard audit** | Manual | Traps, tab order, focus visibility | Screen reader announcements | Before release |
-| **Screen reader** | NVDA, JAWS, VoiceOver | Announcements, order, context | Visual issues, contrast | Before release |
-| **Contrast** | WebAIM, DevTools | Text/UI contrast ratios | Colour-blindness context | Design + review |
-| **Zoom/reflow** | Browser zoom, DevTools | Layout breaks, overflow, overlap | Screen reader behaviour | Before release |
-| **Preferences** | OS settings, DevTools | Motion, dark mode, high contrast | JavaScript animations | Before release |
-
-**Decision Guidance:**
-- **Automate what you can:** ESLint, `jest-axe`, and Lighthouse CI catch the majority of common issues.
-- **Manual keyboard audit is mandatory** before release; it catches traps and order issues that tools miss.
-- **Screen reader testing is mandatory** for critical flows; no tool replaces it.
-- **Contrast checking is mandatory** for all text and UI components; automated tools help but manual review catches gradients and images.
-- **Zoom and reflow testing is mandatory** for WCAG 2.2 AA compliance.
-- **Respect user preferences** in CSS and JavaScript; test with real OS settings.
-- **Combine layers:** No single tool or technique is sufficient; accessibility requires a multi-layered approach.
+- WCAGrules — The QA Accessibility Test Pass — https://wcagrules.com/checklists/qa-accessibility-testing
+- BrowserStack — Accessibility Testing Techniques — https://www.browserstack.com/accessibility-testing/techniques
+- Siteimprove — The Keyboard-Only User — https://www.siteimprove.com/blog/keyboard-navigation-accessibility-testing/
 
 ---
 
 ## References
 
-- W3C WAI-ARIA Authoring Practices Guide - https://www.w3.org/WAI/ARIA/apg/
-- WCAG 2.2 Quick Reference - https://www.w3.org/WAI/WCAG22/quickref/
-- W3C WAI - Easy Checks - https://www.w3.org/WAI/test-evaluate/easy-checks/
-- W3C WAI - Testing with Screen Readers - https://www.w3.org/WAI/test-evaluate/tools/
-- eslint-plugin-jsx-a11y - https://github.com/jsx-eslint/eslint-plugin-jsx-a11y
-- jest-axe - https://github.com/nickcolley/jest-axe
-- axe-core - https://github.com/dequelabs/axe-core
-- Testing Library - https://testing-library.com/docs/
-- Testing Library Jest DOM - https://github.com/testing-library/jest-dom
-- Lighthouse CI - https://github.com/GoogleChrome/lighthouse-ci
-- Pa11y CI - https://github.com/pa11y/pa11y-ci
-- WebAIM Contrast Checker - https://webaim.org/resources/contrastchecker/
-- Coblis Color Blindness Simulator - https://www.color-blindness.com/coblis-color-blindness-simulator/
-- NVDA Screen Reader - https://www.nvaccess.org/
-- JAWS Screen Reader - https://www.freedomscientific.com/products/software/jaws/
-- VoiceOver (macOS) - https://www.apple.com/accessibility/vision/
-- TalkBack (Android) - https://support.google.com/accessibility/android/answer/6283677
-- MDN Web Docs - prefers-reduced-motion - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
-- MDN Web Docs - prefers-color-scheme - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
-- MDN Web Docs - prefers-contrast - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-contrast
-- MDN Web Docs - forced-colors - https://developer.mozilla.org/en-US/docs/Web/CSS/@media/forced-colors
-- WebAIM - Keyboard Accessibility - https://webaim.org/techniques/keyboard/
-- WebAIM - Zoom and Reflow - https://webaim.org/articles/zoom/
-- WebAIM - Reduced Motion - https://webaim.org/articles/motion/
-- Deque axe DevTools - https://www.deque.com/axe/devtools/
-- Microsoft Edge - Forced Colors Mode - https://learn.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/accessibility/emulate-forced-colors
+- WCAGrules — The QA Accessibility Test Pass — https://wcagrules.com/checklists/qa-accessibility-testing
+- WCAGrules — How to Test With a Screen Reader — https://wcagrules.com/guides/screen-reader-testing
+- BrowserStack — Accessibility Testing Techniques — https://www.browserstack.com/accessibility-testing/techniques
+- Siteimprove — The Keyboard-Only User: Navigating Without a Mouse — https://www.siteimprove.com/blog/keyboard-navigation-accessibility-testing/
+- W3C — Focus Order Meaningful (WCAG 3 Draft) — https://w3c.github.io/wcag3/informative/interactive-components/navigating-content/focus-order-meaningful/
+- W3C — Understanding SC 1.4.3 Contrast (Minimum) — https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+- Vispero — Colour Contrast Analyser (CCA) — https://vispero.com/lp/color-contrast-checker/
+- Chrome for Developers — Lighthouse Accessibility Scoring — https://developer.chrome.com/docs/lighthouse/accessibility/scoring
+- Chrome for Developers — Lighthouse Accessibility Audits — https://developer.chrome.com/docs/lighthouse/accessibility/
+- axe-core — Rule Descriptions — https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md
+- GitHub — Automated Accessibility Scan Testing Guidelines — https://github.com/mattermost/mattermost/blob/b350edef791c93725ebb5b854867ac12469ce07d/e2e-tests/playwright/docs/accessibility/automated_scan_testing.md
+- GitHub — jest-axe Examples — https://github.com/aj-geddes/useful-ai-prompts/blob/3f5182cfd739fc113f4af5244a1cf342ad7f7911/skills/accessibility-testing/references/jest-with-jest-axe.md
+- GitHub — jsx-eslint/eslint-plugin-jsx-a11y — https://github.com/jsx-eslint/eslint-plugin-jsx-a11y
+- npm — eslint-plugin-jsx-a11y — https://www.npmjs.com/package/eslint-plugin-jsx-a11y
+- Microsoft Learn — Test keyboard accessibility — https://learn.microsoft.com/en-us/training/modules/develop-keyboard-accessible-products/7-test-keyboard-accessibility
+- Chrome for Developers — Manually test tab order — https://developer.chrome.com/docs/lighthouse/accessibility/tabindex
+- GitHub — Screen Reader Testing Implementation Playbook — https://github.com/aiskillstore/marketplace/blob/main/skills/sickn33/screen-reader-testing/resources/implementation-playbook.md

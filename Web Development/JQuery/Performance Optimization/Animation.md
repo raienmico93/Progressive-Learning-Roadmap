@@ -6,794 +6,716 @@
 
 ### Definitions
 
-**Core Definition:** jQuery Animation Performance is the discipline of creating smooth, efficient animations using jQuery's `.animate()`, `.fadeIn()`, `.slideUp()`, and related methods while minimizing the browser's computational work — specifically the reflow (layout recalculation), repaint (visual redraw), and composite operations triggered by CSS property changes.
+**Core Definition**
+jQuery animation performance is the measure of how smoothly and efficiently animations execute in a jQuery‑based application, determined by the rendering engine used (CSS‑based vs. JavaScript‑based), the properties being animated, and the mechanisms (timers vs. `requestAnimationFrame`) that drive the animation loop.
 
-**Technical Definition:** jQuery Animation Performance encompasses the techniques and architectural patterns that reduce the browser's rendering pipeline overhead during animations. Every jQuery animation works by repeatedly changing CSS properties on a timer (originally `setInterval`, now `requestAnimationFrame` in modern jQuery). Each property change may trigger one or more of the browser's rendering stages: style recalculation, layout (reflow), paint, and composite. Animating properties like `width`, `height`, `top`, or `left` triggers layout on every frame, which is expensive because changing one element's geometry can affect the position of many others. Animating `transform` and `opacity` only triggers composite, which can be offloaded to the GPU, resulting in smooth 60 FPS performance.
+**Technical Definition**
+Animation performance is governed by the browser's **rendering pipeline**: style recalculation, layout (reflow), paint, and composite. Animations that trigger only the **composite** step (using `transform` and `opacity`) can be offloaded to the GPU and are significantly cheaper than animations that trigger layout or paint (using `width`, `height`, `top`, `left`, etc.). jQuery's `.animate()` method drives animations with `setTimeout`/`setInterval` on the CPU, does not natively use `requestAnimationFrame` (until jQuery 3.0), and cannot animate `transform` properties without plugins. CSS transitions and animations, by contrast, are handled natively by the browser, can leverage GPU acceleration, and are synchronised with the display's refresh cycle. The performance gap between jQuery animations and CSS animations widens with the number of simultaneous animations and the complexity of the properties being animated.
 
-**Beginner-Friendly Explanation:** Every time jQuery changes something on a web page — moving a box, fading an image, resizing a panel — the browser has to stop, recalculate the positions of everything, and redraw the screen. If you animate the wrong properties (like width or top), the browser has to do a lot of work on every single frame, and the animation becomes choppy. If you animate the right properties (like `transform` and `opacity`), the browser can hand the work off to the graphics card, and everything stays smooth. This cheat sheet is about making animations run at 60 frames per second without slowing down the page.
+**Beginner‑Friendly Explanation**
+Animations make a page feel alive — things sliding, fading, or bouncing. But not all animations are created equal. jQuery's `.animate()` is like drawing each frame by hand on a CPU: it works, but it is slow and choppy, especially on phones. CSS animations and transitions are like playing a video on a GPU: the browser handles the hard work, and the result is smooth. `requestAnimationFrame` is a newer JavaScript tool that lets your code run in sync with the screen's refresh rate, making JavaScript‑driven animations much smoother than the old `setInterval` approach. Animation performance is about choosing the right tool for the job and avoiding animations that force the browser to do expensive layout work on every frame.
+
+---
 
 ### Key Characteristics
 
-- **60 FPS target:** Smooth animations require 60 frames per second (approximately 16.67ms per frame); anything less causes visible stutter.
-- **Property cost hierarchy:** `transform` and `opacity` are the cheapest properties to animate (composite only); `width`, `height`, `top`, and `left` are the most expensive (layout + paint + composite).
-- **Layout thrashing risk:** Interleaving layout reads (`.height()`, `.offset()`) with layout writes inside animation loops forces synchronous reflows and causes severe jank.
-- **GPU acceleration:** Modern browsers provide GPU acceleration for `transform` and `opacity`; other properties must be rendered on the CPU.
-- **Queue management:** jQuery animations are queued; unmanaged queues can accumulate and slow down the browser.
-- **jQuery limitations:** jQuery's animation engine cannot avoid layout thrashing because its codebase serves many purposes beyond animation, and its memory consumption can trigger garbage collection that causes frame drops.
+| Characteristic | Description |
+|---|---|
+| **CSS vs. JS animation engine** | CSS transitions/animations are handled natively by the browser and can be GPU‑accelerated; jQuery `.animate()` runs on the CPU via timers. |
+| **Property cost hierarchy** | `transform` and `opacity` trigger only composite (cheap, GPU); `width`, `height`, `top`, `left` trigger layout (expensive). |
+| **Timer precision** | `setTimeout`/`setInterval` are imprecise and can miss frames; `requestAnimationFrame` is synchronised with the display. |
+| **jQuery's legacy engine** | jQuery `.animate()` historically used `setInterval` at ~13 ms intervals; jQuery 3.0+ uses `requestAnimationFrame` when available. |
+| **Hardware acceleration** | 3D transforms (`translate3d`, `translateZ`) and `will-change` promote elements to GPU layers, reducing CPU load. |
+| **Animation count** | jQuery performance degrades rapidly as the number of concurrent animations increases. |
+
+---
 
 ### Prerequisites
 
-- Proficiency in jQuery fundamentals: `.animate()`, `.css()`, `.fadeIn()`, `.slideUp()`, and chaining.
-- Understanding of the browser rendering pipeline: style, layout, paint, and composite.
-- Familiarity with CSS `transform` and `opacity` properties.
-- Awareness of `requestAnimationFrame()` and the browser's animation frame cycle.
+- Working knowledge of jQuery selection and effects (`.animate()`, `.fadeIn()`, `.slideDown()`).
+- Familiarity with CSS transitions and animations (`transition`, `@keyframes`).
+- Understanding of the browser rendering pipeline (layout, paint, composite).
+- Awareness of JavaScript timers and `requestAnimationFrame`.
+
+---
 
 ### Related Programming Areas
 
-- **Browser Rendering Engine:** The pipeline that converts DOM/CSS changes into pixels.
-- **CSS Transitions and Animations:** GPU-accelerated alternatives to JavaScript-driven animation.
-- **DOM Performance:** Layout thrashing, reflow, and repaint are shared concerns.
-- **Event Performance:** Animation loops are often driven by scroll or resize events.
-
-### Core Concepts / Features
-
-This cheat sheet covers four core concepts and two enhanced topics: minimizing expensive properties, avoiding layout thrashing, preferring CSS animations, avoiding excessive simultaneous animations, `requestAnimationFrame` scheduling, and animation queue management.
+- **Browser rendering** — reflow, repaint, compositing, and the critical rendering path.
+- **DOM performance** — animation often involves DOM property changes.
+- **Event performance** — animations are often triggered by events; handler efficiency affects frame rates.
+- **Hardware acceleration** — GPU layer promotion and compositing.
+- **User experience** — smooth animations improve perceived performance.
 
 ---
 
-## Core Concept 1: Minimize Expensive Properties — Avoiding `width`, `height`, `top`, and `left`
+### Core Concepts / Features (Index)
+
+1. CSS Animations
+2. CSS Transitions
+3. jQuery Animations
+4. requestAnimationFrame
+5. Hardware Acceleration
+6. Animation Best Practices
+
+
+## Core Concept 1: CSS Animations
 
 ### Definitions
 
-**Core Definition:** Minimizing expensive properties is the practice of avoiding animations that alter an element's layout geometry — specifically `width`, `height`, `top`, `left`, `right`, `bottom`, `margin`, `padding`, and `border` — because these properties force the browser to recalculate the positions and dimensions of the animated element and potentially many other elements on the page.
+**Core Definition**
+CSS animations are browser‑native animations defined in stylesheets using `@keyframes` rules, which specify a sequence of style states that the browser interpolates over time, without requiring JavaScript to drive each frame.
 
-**Technical Definition:** The browser's rendering pipeline consists of four stages: style calculation, layout (reflow), paint, and composite. Animating geometric properties (e.g., `width`, `top`) triggers **all four stages** on every frame: the browser must recalculate the element's size and position, determine how this affects other elements, repaint the affected areas, and composite the layers. Animating `transform` and `opacity` triggers **only the composite stage**, which can be performed on the GPU without involving the main thread's layout and paint engines. jQuery's `.animate()` method can animate any numeric CSS property, including the expensive geometric ones, but doing so is the primary cause of choppy jQuery animations.
+**Technical Definition**
+A CSS animation is declared with the `animation` property (or its longhands: `animation-name`, `animation-duration`, `animation-timing-function`, `animation-delay`, `animation-iteration-count`, `animation-direction`, `animation-fill-mode`, `animation-play-state`). The `@keyframes` rule defines the intermediate states. Because the animation is managed by the browser's style system, it can be composited on the GPU when animating `transform` and `opacity`, and it is synchronised with the display's refresh rate. CSS animations are **declarative**: the browser handles interpolation, timing, and frame scheduling. Performance is essentially identical to CSS transitions for comparable animations; the choice between them is about expressiveness (multi‑step sequences vs. two‑state changes), not performance.
 
-**Beginner-Friendly Explanation:** Imagine you are rearranging furniture in a room. Moving a chair (transform) is easy — you just slide it. But resizing the room (width) or moving the walls (top/left) forces you to remeasure everything and check if the furniture still fits. Animating width, height, top, or left is like resizing the room on every frame — it is a lot of work. Animating transform and opacity is like sliding a chair — much easier.
-
-### Purposes
-
-- To reduce the browser's per-frame rendering work from four stages (style, layout, paint, composite) to one (composite).
-- To keep animations running at 60 FPS without dropping frames.
-- To avoid the "jank" caused by frequent layout recalculations during animation.
-- To offload animation work to the GPU, freeing the main thread for other tasks.
-- To improve the battery life and CPU usage of mobile devices.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax (Expensive — Avoid):**
-```javascript
-$("#box").animate({
-    width: "500px",
-    height: "300px",
-    top: "100px",
-    left: "200px"
-}, 1000);
-```
-
-**Complete General Syntax (Cheap — Preferred):**
-```javascript
-$("#box").css({
-    transform: "translate(200px, 100px) scale(1.5)",
-    transition: "transform 1s ease"
-});
-```
-
-| Property | Reflow | Repaint | GPU Accelerated | Cost |
-|----------|--------|---------|-----------------|------|
-| `width` / `height` | Yes | Yes | No | Very High |
-| `top` / `left` | Yes | Yes | No | Very High |
-| `transform` | No | No | Yes | Low |
-| `opacity` | No | No | Yes | Low |
-
-**Syntax Rules:**
-
-- Use `transform: translate(x, y)` instead of `top`/`left` for positional animations.
-- Use `transform: scale(sx, sy)` instead of `width`/`height` for size animations.
-- Use `opacity` for fade animations instead of `visibility` or `display` (which trigger layout).
-- Apply `transform` and `opacity` to **absolutely positioned** elements to ensure the animation does not affect the layout of sibling elements.
-- Use `will-change: transform` or `translate3d(0,0,0)` to promote the element to its own compositing layer.
-
-**Constraints and Limitations:**
-
-- `transform` and `opacity` do not affect document flow; if the layout must change (e.g., a panel pushing content down), a geometric property may be necessary, and the performance cost must be accepted.
-- `transform: scale()` visually enlarges the element but does not change its layout dimensions, which can cause overflow or overlap issues.
-- Not all browsers support GPU acceleration for all `transform` functions; `translate3d()` is the most reliable trigger for hardware acceleration.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Expensive vs. Cheap Property Animation**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Expensive vs Cheap Animation Demo</title>
-  <style>
-    .box {
-      width: 100px; height: 100px;
-      background: #007bff; position: absolute;
-      top: 50px; left: 50px;
-      will-change: transform, opacity;
-    }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div class="box" id="expensiveBox"></div>
-  <div class="box" id="cheapBox" style="top: 200px;"></div>
-  <p id="log"></p>
-
-  <script>
-    $(function() {
-      // Step 1: Expensive — animating top/left/width/height
-      var t0 = performance.now();
-      $("#expensiveBox").animate({
-        left: "400px", top: "300px",
-        width: "200px", height: "200px"
-      }, 1000, function() {
-        var t1 = performance.now();
-        $("#log").append("Expensive animation: " + (t1 - t0).toFixed(0) + "ms<br>");
-
-        // Step 2: Cheap — animating transform and opacity
-        var t2 = performance.now();
-        $("#cheapBox").css("transition", "transform 1s ease, opacity 1s ease")
-          .css("transform", "translate(350px, 250px) scale(2)")
-          .css("opacity", "0.5");
-        setTimeout(function() {
-          var t3 = performance.now();
-          $("#log").append("Cheap animation: " + (t3 - t2).toFixed(0) + "ms");
-        }, 1000);
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:** Both animations complete in approximately 1000ms. However, the expensive animation causes visible stutter on pages with many elements because it triggers layout on every frame. The cheap animation runs smoothly because it only triggers compositing.
-
-**Why this output:** The expensive animation changes `left`, `top`, `width`, and `height`, forcing the browser to recalculate layout on every frame. The cheap animation changes `transform` and `opacity`, which are handled by the GPU compositor without triggering layout or paint.
-
-### Real-World Cases
-
-- **Sliding panels:** Using `transform: translateX()` instead of animating `left` or `margin-left`.
-- **Fade effects:** Using `opacity` instead of `visibility` or `display`.
-- **Scaling effects:** Using `transform: scale()` instead of `width`/`height`.
-- **Parallax backgrounds:** Using `transform: translateY()` instead of `background-position` or `top`.
+**Beginner‑Friendly Explanation**
+CSS animations are like writing a script for a play and letting the browser perform it. You define what happens at the beginning, middle, and end using `@keyframes`, and the browser handles everything else — timing, smoothness, and running on the GPU. Because the browser is in charge, the animation is usually very smooth, even on mobile devices. You can animate many properties, but the smoothest results come from `transform` and `opacity`.
 
 ---
 
-## Core Concept 2: Avoid Layout Thrashing — Mitigating Interleaved Read/Write Operations
-
-### Definitions
-
-**Core Definition:** Layout thrashing is the performance bottleneck caused by interleaving layout-reading operations (which force the browser to perform a synchronous reflow to return accurate values) with layout-writing operations (which invalidate the layout) in a repeating cycle, typically inside an animation loop or step function.
-
-**Technical Definition:** The browser schedules layout recalculations asynchronously, batching multiple DOM writes into a single reflow for efficiency. However, when JavaScript reads a layout property (e.g., `.offsetHeight`, `.offset()`, `.width()`, `.scrollTop()`) after a write has invalidated the layout, the browser must perform a **synchronous reflow** to return the correct value. If reads and writes are interleaved in a loop — read, write, read, write — each read forces a synchronous reflow, resulting in severe performance degradation. jQuery's `.animate()` method historically suffers from this problem because its internal code performs reads and writes in the same tick, and because it uses `setInterval` rather than `requestAnimationFrame` in older versions, causing frame rate drops.
-
-**Beginner-Friendly Explanation:** Imagine you are painting a room. You paint one wall (write), then measure it (read), then paint another wall (write), then measure it again (read). The measuring is slow because you have to wait for the paint to dry before measuring. That is layout thrashing — measuring (reading) and changing (writing) over and over. The efficient approach is to measure everything first, then paint everything at once.
-
 ### Purposes
 
-- To eliminate the synchronous reflow bottleneck that causes frame drops during animation.
-- To keep the browser's rendering pipeline operating at 60 FPS.
-- To reduce the time the main thread spends on layout calculations, freeing it for other tasks.
-- To improve the performance of scroll-driven and resize-driven animations.
-- To comply with browser performance best practices for animation and DOM manipulation.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax (Layout Thrashing — Avoid):**
-```javascript
-$(".item").each(function() {
-    var height = $(this).height();       // READ (forces synchronous reflow)
-    $(this).css("height", height * 2);    // WRITE (invalidates layout)
-});
-```
-
-**Complete General Syntax (Batch Read, Then Write — Preferred):**
-```javascript
-var heights = [];
-$(".item").each(function() {
-    heights.push($(this).height());       // READ only
-});
-$(".item").each(function(i) {
-    $(this).css("height", heights[i] * 2); // WRITE only
-});
-```
-
-| Pattern | Reflows | Performance |
-|---------|---------|-------------|
-| Read-write interleaved | One per iteration | Poor |
-| Read-then-write | Two total | Good |
-| Write-only | One total | Best |
-
-**Syntax Rules:**
-
-- Perform all layout reads in a separate loop (or separate phase) before performing any layout writes.
-- Use `requestAnimationFrame()` to schedule writes for the next frame, separating them from reads.
-- Cache read values in variables instead of re-reading them.
-- Avoid calling `.offset()`, `.width()`, `.height()`, `.scrollTop()`, or `.position()` inside animation step functions or loops that modify the DOM.
-
-**Constraints and Limitations:**
-
-- Some calculations genuinely require reading layout after writing; in these cases, batch as much as possible and accept the reflow.
-- jQuery's `.animate()` method cannot avoid layout thrashing internally because its codebase serves many purposes beyond animation.
-- CSS transitions and animations do not suffer from layout thrashing because they are handled by the browser's compositor, not JavaScript.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Layout Thrashing in an Animation Step Function**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Layout Thrashing Demo</title>
-  <style>
-    .item { width: 100px; height: 50px; background: #eee; margin: 5px; }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div class="item">1</div>
-  <div class="item">2</div>
-  <div class="item">3</div>
-  <div class="item">4</div>
-  <div class="item">5</div>
-  <p id="log"></p>
-
-  <script>
-    $(function() {
-      // Step 1: Layout thrashing — read-write in same loop
-      var t0 = performance.now();
-      $(".item").each(function() {
-        var h = $(this).height();          // READ — forces reflow
-        $(this).css("height", h * 2);      // WRITE — invalidates layout
-      });
-      var t1 = performance.now();
-
-      // Reset
-      $(".item").css("height", "50px");
-
-      // Step 2: Batch read, then batch write
-      var t2 = performance.now();
-      var heights = [];
-      $(".item").each(function() {
-        heights.push($(this).height());    // READ only
-      });
-      $(".item").each(function(i) {
-        $(this).css("height", heights[i] * 2); // WRITE only
-      });
-      var t3 = performance.now();
-
-      $("#log").html(
-        "Thrashing: " + (t1 - t0).toFixed(2) + "ms<br>" +
-        "Batch read-write: " + (t3 - t2).toFixed(2) + "ms"
-      );
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:** The batch read-write approach is significantly faster because it forces only two reflows total, while the thrashing approach forces one reflow per item (five in this example).
-
-**Why this output:** In the thrashing approach, each `.height()` read forces the browser to recalculate layout synchronously because the previous `.css()` write invalidated it. In the batch approach, all reads happen first (one reflow), then all writes happen (one reflow).
-
-### Real-World Cases
-
-- **Scroll-driven animations:** Reading `scrollTop()` and writing positions in the same handler; batch the reads and writes.
-- **Resize handlers:** Reading container dimensions and resizing children; separate the phases.
-- **Sortable lists:** Reading element positions and reordering them; batch the reads before reordering.
-- **Parallax effects:** Reading scroll position and updating transforms; use `requestAnimationFrame` to separate read and write phases.
+- **To create multi‑step animation sequences** that go through several keyframes.
+- **To offload animation work to the browser and GPU** for smooth, efficient rendering.
+- **To declare animations in CSS** without JavaScript overhead.
+- **To run animations that loop, alternate, or have complex timing**.
+- **To ensure animations pause or throttle automatically** when the tab is in the background.
 
 ---
 
-## Core Concept 3: Prefer CSS Animation When Appropriate — Offloading to GPU-Accelerated Properties
-
-### Definitions
-
-**Core Definition:** Preferring CSS animation is the practice of using CSS `transition` and `animation` properties — or jQuery's CSS-based animation methods like `.fadeIn()`, `.slideUp()`, and `.animate()` with `transform` and `opacity` — instead of JavaScript-driven animation, because CSS animations can be optimized by the browser's compositor and offloaded to the GPU.
-
-**Technical Definition:** CSS transitions and animations are declared in CSS and handled by the browser's rendering engine, not by JavaScript. When a CSS transition is triggered (e.g., by adding a class that changes `transform` or `opacity`), the browser can promote the element to its own compositing layer and animate it on the GPU, independent of the main thread. This means the animation continues smoothly even if JavaScript is busy executing other tasks. In contrast, jQuery's `.animate()` method drives animation by repeatedly setting inline styles via JavaScript on a timer, which involves the main thread and is subject to jank from garbage collection and layout thrashing. jQuery's `.fadeIn()` and `.fadeOut()` methods animate `opacity`, which is GPU-accelerated, but they also set `display` at the end, which triggers layout. For the smoothest results, CSS transitions with `transform` and `opacity` are recommended.
-
-**Beginner-Friendly Explanation:** CSS animations are handled by the browser's "graphics department" (the compositor and GPU), while JavaScript animations are handled by the "thinking department" (the main thread). The graphics department can work on its own without interrupting the thinking department, so CSS animations stay smooth even when JavaScript is busy.
-
-### Purposes
-
-- To offload animation work from the main thread to the GPU, improving smoothness.
-- To avoid the overhead of JavaScript timers and inline style updates on every frame.
-- To allow animations to continue smoothly even when the main thread is busy.
-- To reduce garbage collection pressure caused by jQuery's internal animation objects.
-- To leverage `will-change` and layer promotion for further GPU optimization.
-
 ### Syntax Rules and Structure
 
-**Complete General Syntax (CSS Transition):**
+#### Definition of `@keyframes`
+
 ```css
-.box {
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    will-change: transform, opacity;
-}
-.box.moved {
-    transform: translateX(200px);
-    opacity: 0.5;
+@keyframes animationName {
+  0%   { transform: translateX(0); opacity: 1; }
+  50%  { transform: translateX(50px); opacity: 0.5; }
+  100% { transform: translateX(100px); opacity: 0; }
 }
 ```
 
-```javascript
-$(".box").addClass("moved");
+#### Applying the Animation
+
+```css
+.element {
+  animation-name: animationName;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
 ```
 
-**Complete General Syntax (jQuery with CSS Transform):**
-```javascript
-$("#element").css({
-    transition: "transform 0.5s ease",
-    transform: "translateX(200px)"
-});
-```
+**Component Breakdown**
 
-| Approach | Thread | GPU | Best For |
-|----------|--------|-----|----------|
-| CSS transition | Compositor | Yes | Simple state changes |
-| CSS animation | Compositor | Yes | Complex, looping animations |
-| jQuery `.animate()` | Main thread | No (unless transform) | Legacy code, complex sequencing |
-| jQuery `.fadeIn()` | Main thread | Yes (opacity) | Fade effects |
+| Property | Description |
+|---|---|
+| `animation-name` | References the `@keyframes` rule. |
+| `animation-duration` | Length of one cycle (e.g., `1s`, `500ms`). |
+| `animation-timing-function` | Easing curve (`ease`, `linear`, `cubic-bezier()`). |
+| `animation-iteration-count` | Number of cycles (`infinite` for looping). |
+| `animation-fill-mode` | How styles apply before/after (`forwards`, `backwards`, `both`). |
 
-**Syntax Rules:**
+---
 
-- Use CSS `transition` for simple state changes (hover, click toggles).
-- Use CSS `@keyframes` for complex, multi-step animations.
-- Use `will-change: transform, opacity` to hint to the browser that the element will animate.
-- Apply `transform: translate3d(0, 0, 0)` to force GPU layer promotion in older browsers.
-- Reserve jQuery `.animate()` for animating properties that CSS cannot handle or for complex sequencing logic.
+### Syntax Rules
 
-**Constraints and Limitations:**
+1. **Animate `transform` and `opacity`** for GPU‑accelerated, composite‑only animation.
+2. **Avoid animating layout properties** (`width`, `height`, `top`, `left`) — these trigger reflow.
+3. **Use `will-change: transform` (sparingly)** to hint the browser to promote the element to a GPU layer.
+4. **CSS animations and transitions have essentially identical performance** for comparable effects.
 
-- CSS transitions cannot be easily paused, reversed, or sequenced with the same flexibility as JavaScript animations.
-- CSS animations cannot dynamically compute values based on JavaScript state (e.g., animating to a position calculated at runtime).
-- `will-change` consumes memory by promoting the element to a separate layer; use it sparingly and remove it when the animation completes.
+---
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
+### Constraints and Limitations
 
-**Example 1: CSS Transition vs. jQuery Animate**
+- **CSS animations cannot animate `auto` values** (e.g., `height: auto`).
+- **Dynamic property values** (e.g., calculated in JavaScript) must be injected via custom properties or inline styles.
+- **`will-change` should not be applied to too many elements**, as each promoted layer consumes GPU memory.
+
+---
+
+### Annotated Code Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>CSS vs jQuery Animation Demo</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <style>
     .box {
       width: 100px; height: 100px;
-      background: #007bff;
-      position: absolute; top: 50px; left: 50px;
+      background: steelblue;
+      position: absolute;
+      top: 50px; left: 0;
     }
-    .box.css-animated {
-      transition: transform 1s ease, opacity 1s ease;
-      will-change: transform, opacity;
+    @keyframes slideRight {
+      0%   { transform: translateX(0);   opacity: 1; }
+      100% { transform: translateX(200px); opacity: 0.3; }
     }
-    .box.css-animated.moved {
-      transform: translateX(300px);
-      opacity: 0.3;
+    .animate {
+      animation: slideRight 0.6s ease-out forwards;
     }
   </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
 </head>
 <body>
-  <div class="box" id="jqueryBox"></div>
-  <div class="box" id="cssBox" style="top: 200px;"></div>
+  <div class="box"></div>
 
   <script>
-    $(function() {
-      // Step 1: jQuery animation (main thread)
-      var t0 = performance.now();
-      $("#jqueryBox").animate({
-        left: "400px",
-        opacity: 0.3
-      }, 1000, function() {
-        var t1 = performance.now();
-        $("#jqueryBox").after("<p>jQuery: " + (t1 - t0).toFixed(0) + "ms</p>");
-      });
-
-      // Step 2: CSS transition (compositor thread)
-      var t2 = performance.now();
-      $("#cssBox").addClass("css-animated").addClass("moved");
-      setTimeout(function() {
-        var t3 = performance.now();
-        $("#cssBox").after("<p>CSS: " + (t3 - t2).toFixed(0) + "ms</p>");
-      }, 1000);
+    // Step 1: Trigger the CSS animation by adding a class
+    $(".box").on("click", function () {
+      $(this).addClass("animate");
     });
   </script>
 </body>
 </html>
 ```
 
-**Expected Output:** Both animations complete in approximately 1000ms. The CSS transition runs on the compositor thread and remains smooth even if the main thread is busy. The jQuery animation runs on the main thread and may stutter if the main thread is blocked.
+**Expected Output**
+Clicking the box slides it 200px to the right and fades it to 30% opacity over 0.6 seconds. The animation is smooth because it uses `transform` and `opacity`, which are composited on the GPU.
 
-**Why this output:** The CSS transition is handled by the browser's compositor, which operates independently of JavaScript. The jQuery animation uses `setInterval` (or `requestAnimationFrame`) and inline style updates on the main thread, which can be interrupted by garbage collection or other JavaScript execution.
-
-### Real-World Cases
-
-- **Hover effects:** CSS transitions for button hover states, card lifts, and link underlines.
-- **Page transitions:** CSS animations for sliding panels and fading content.
-- **Loading spinners:** CSS `@keyframes` for infinite rotation animations.
-- **Modal dialogs:** CSS transitions for fade-in and slide-up effects.
+**Why this output occurs**: The `@keyframes` rule defines the start and end states. The browser interpolates the values and composites the changes on the GPU, without triggering layout or paint.
 
 ---
 
-## Core Concept 4: Avoid Excessive Simultaneous Animations — Preventing Visual Stutter
+### Real‑World Cases
 
-### Definitions
-
-**Core Definition:** Avoiding excessive simultaneous animations is the practice of limiting the number of animations running concurrently on a single page view, because each active animation consumes main thread and compositor resources, and running dozens of animations simultaneously can cause visual stutter, dropped frames, and degraded performance.
-
-**Technical Definition:** Each jQuery animation creates an internal timer and a tween object that updates styles on every frame. When many animations run concurrently, the browser must process all of their style updates in the same frame, increasing the time spent in the style and layout stages. If the total frame time exceeds 16.67ms, the browser drops frames, causing visible stutter. Additionally, jQuery's animation queue can accumulate if animations are triggered faster than they complete, leading to a backlog that slows down the browser and can eventually cause it to crash. The solution is to limit the number of concurrent animations, reuse elements, and use CSS animations (which run on the compositor) for decorative effects.
-
-**Beginner-Friendly Explanation:** Imagine a classroom where every student is talking at the same time. The teacher (the browser) cannot understand anyone. Running dozens of animations at once is like that — the browser cannot keep up, and everything becomes choppy. It is better to animate a few things at a time, or let the graphics card handle the animations with CSS.
-
-### Purposes
-
-- To prevent the browser from dropping frames due to excessive per-frame work.
-- To avoid the animation queue backlog that slows down the browser.
-- To ensure that critical animations (e.g., a modal opening) run smoothly.
-- To reduce memory consumption from many active animation objects.
-- To improve the overall responsiveness of the page during animated sequences.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax (Excessive — Avoid):**
-```javascript
-// Animating 50 elements simultaneously
-$(".item").each(function() {
-    $(this).animate({ opacity: 0 }, 1000);
-});
-```
-
-**Complete General Syntax (Staggered — Preferred):**
-```javascript
-$(".item").each(function(i) {
-    $(this).delay(i * 50).animate({ opacity: 0 }, 1000);
-});
-```
-
-| Approach | Concurrent Animations | Performance |
-|----------|----------------------|-------------|
-| All at once | 50 | Poor (frame drops) |
-| Staggered | 1–5 at a time | Good |
-| CSS-based | 0 (compositor handles) | Best |
-
-**Syntax Rules:**
-
-- Stagger animations using `.delay()` to limit the number of concurrent animations.
-- Use CSS transitions for simple, repetitive animations (e.g., list item fade-in).
-- Reuse a small number of elements instead of creating many new ones.
-- Consider using `will-change` on animated elements to promote them to their own layers.
-
-**Constraints and Limitations:**
-
-- Staggering increases the total duration of the animation sequence.
-- CSS animations cannot be easily staggered with the same precision as jQuery's `.delay()`.
-- Some use cases genuinely require many simultaneous animations; in those cases, use `requestAnimationFrame` and batch updates.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Staggered Animation vs. Simultaneous Animation**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Concurrent Animation Demo</title>
-  <style>
-    .item { width: 50px; height: 50px; background: #007bff; margin: 5px; float: left; }
-  </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <div id="container"></div>
-  <p id="log"></p>
-
-  <script>
-    $(function() {
-      // Build 20 items
-      var html = "";
-      for (var i = 0; i < 20; i++) {
-        html += "<div class='item'></div>";
-      }
-      $("#container").html(html);
-
-      // Step 1: Simultaneous animation (all at once)
-      var t0 = performance.now();
-      $(".item").animate({ opacity: 0 }, 1000, function() {
-        var t1 = performance.now();
-        $("#log").append("Simultaneous: " + (t1 - t0).toFixed(0) + "ms<br>");
-        $(".item").css("opacity", 1);
-
-        // Step 2: Staggered animation
-        var t2 = performance.now();
-        $(".item").each(function(i) {
-          $(this).delay(i * 50).animate({ opacity: 0 }, 1000);
-        });
-        setTimeout(function() {
-          var t3 = performance.now();
-          $("#log").append("Staggered: " + (t3 - t2).toFixed(0) + "ms");
-        }, 2000);
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:** The simultaneous animation completes in ~1000ms but may stutter on slower devices. The staggered animation takes longer overall (~2000ms) but runs smoothly because fewer animations run concurrently.
-
-**Why this output:** In the simultaneous approach, all 20 items animate at once, requiring the browser to process 20 style updates per frame. In the staggered approach, only a few items animate at any given time, reducing per-frame work.
-
-### Real-World Cases
-
-- **List item animations:** Staggering the fade-in of search results.
-- **Card grids:** Animating cards in sequence rather than all at once.
-- **Notification stacks:** Animating notifications one at a time.
-- **Loading sequences:** Animating a sequence of steps rather than all steps simultaneously.
+- **Loading spinners**: `@keyframes rotate` on a `transform` property.
+- **Attention indicators**: A pulsing `box-shadow` or `opacity` animation.
+- **Page transitions**: Sliding views in and out with `translateX`.
 
 ---
 
-## Enhanced Topic: `requestAnimationFrame` Scheduling — Replacing Timer Loops for 60 FPS
+## Core Concept 2: CSS Transitions
 
 ### Definitions
 
-**Core Definition:** `requestAnimationFrame()` is a browser API that schedules a callback function to run before the next repaint, syncing JavaScript animation updates with the browser's natural frame rate (typically 60 FPS). It replaces `setInterval` and `setTimeout` for animation loops, providing smoother, more efficient animation.
+**Core Definition**
+CSS transitions are a browser‑native mechanism that smoothly interpolates between two states of an element when a property changes, allowing developers to create simple animations by toggling a class or changing a style.
 
-**Technical Definition:** `window.requestAnimationFrame(callback)` accepts a callback function that is invoked before the next repaint. The callback receives a high-resolution timestamp (the current time in milliseconds), which can be used to compute the elapsed time since the last frame and update the animation accordingly. Unlike `setInterval`, which runs at a fixed interval regardless of whether the browser is ready, `requestAnimationFrame` runs at the browser's refresh rate and automatically pauses when the tab is in the background. jQuery uses `setInterval` internally for its animation timer (historically), which is one reason jQuery animations can be less smooth than CSS animations. The `jquery-requestAnimationFrame` plugin replaces jQuery's standard timer loop with `requestAnimationFrame` where supported.
+**Technical Definition**
+A transition is declared with the `transition` shorthand (or longhands: `transition-property`, `transition-duration`, `transition-timing-function`, `transition-delay`). When the specified property changes (e.g., from `opacity: 1` to `opacity: 0.5`), the browser interpolates the value over the given duration. Transitions are **two‑state**: they animate from the current value to the new value. Like CSS animations, transitions can be GPU‑accelerated when animating `transform` and `opacity`. Performance is essentially identical to CSS animations for comparable two‑state changes. Transitions are simpler to set up and are the recommended choice for hover effects, toggles, and simple state changes.
 
-**Beginner-Friendly Explanation:** `setInterval` is like setting an alarm clock to go off every 16 milliseconds, whether you are ready or not. `requestAnimationFrame` is like waiting for the browser to say "I am about to draw the next frame — now is the time to update." It is more efficient because it syncs with the browser's natural rhythm.
+**Beginner‑Friendly Explanation**
+CSS transitions are the simplest way to add smoothness to state changes. If you want a button to change color or fade when you hover over it, you add a `transition` property and let the browser handle the in‑between frames. It is like telling the browser: “when this property changes, do not jump — glide to the new value over half a second.” Transitions are perfect for simple two‑state effects and are usually very smooth because the browser can use the GPU.
+
+---
 
 ### Purposes
 
-- To sync JavaScript animation updates with the browser's repaint cycle for smoother results.
-- To automatically pause animations when the tab is in the background, saving CPU and battery.
-- To receive high-resolution timestamps for precise, time-based animation calculations.
-- To avoid the frame rate mismatches and jank caused by fixed-interval timers.
-- To replace jQuery's internal timer loop with a more efficient scheduling mechanism.
+- **To smoothly animate simple state changes** (hover, focus, active, class toggles).
+- **To add polish to UI interactions** with minimal code.
+- **To leverage GPU acceleration** by transitioning `transform` and `opacity`.
+- **To avoid JavaScript animation overhead** for simple effects.
+- **To combine with jQuery class toggling** for interactive transitions.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax:**
-```javascript
-function animate(timestamp) {
-    // Compute elapsed time
-    var elapsed = timestamp - startTime;
-    // Update element position
-    element.style.transform = "translateX(" + (elapsed * 0.1) + "px)";
-    // Continue the loop
-    if (elapsed < 1000) {
-        requestAnimationFrame(animate);
-    }
+```css
+.element {
+  transition-property: opacity, transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+  transition-delay: 0s;
 }
-var startTime = performance.now();
-requestAnimationFrame(animate);
+
+/* Shorthand */
+.element {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* State change */
+.element.active {
+  opacity: 0.5;
+  transform: translateX(50px);
+}
 ```
 
-| Component | Description |
-|-----------|-------------|
-| `requestAnimationFrame(callback)` | Schedules the callback before the next repaint. |
-| `timestamp` | High-resolution time in milliseconds. |
-| `startTime` | The time when the animation began. |
-| `elapsed` | Time since the animation started. |
+**Component Breakdown**
 
-**Syntax Rules:**
+| Property | Description |
+|---|---|
+| `transition-property` | The CSS properties to animate. |
+| `transition-duration` | Time for the transition. |
+| `transition-timing-function` | Easing curve. |
+| `transition-delay` | Delay before the transition starts. |
 
-- Use `requestAnimationFrame` instead of `setInterval` for all JavaScript-driven animations.
-- Use the `timestamp` parameter to compute delta time for consistent animation speed regardless of frame rate.
-- Always cancel the animation loop with `cancelAnimationFrame()` when the animation completes or the component is destroyed.
-- The `jquery-requestAnimationFrame` plugin can replace jQuery's internal timer loop with `requestAnimationFrame` for jQuery animations.
+---
 
-**Constraints and Limitations:**
+### Syntax Rules
 
-- `requestAnimationFrame` is not supported in IE9 and below; a polyfill is required.
-- The callback runs on the main thread, so heavy JavaScript execution can still delay frames.
-- The frame rate is capped by the display's refresh rate (typically 60 Hz, but 120 Hz on some devices).
+1. **Transition only `transform` and `opacity`** for GPU‑accelerated, composite‑only animation.
+2. **Avoid transitioning layout properties** (`width`, `height`, `top`, `left`).
+3. **Use class toggling with jQuery** (`.toggleClass()`, `.addClass()`) to trigger transitions.
+4. **CSS transitions and CSS animations perform equivalently** for two‑state changes.
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
+---
 
-**Example 1: Custom Animation with `requestAnimationFrame`**
+### Constraints and Limitations
+
+- **Transitions cannot animate `auto` values**.
+- **Transitions require a property change**; they do not support multi‑step sequences (use CSS animations for that).
+- **Transitioning `transform` with jQuery `.css()` may not trigger GPU acceleration** if the element is not promoted to a layer.
+
+---
+
+### Annotated Code Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>requestAnimationFrame Demo</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <style>
-    .box { width: 100px; height: 100px; background: #007bff; position: absolute; top: 50px; left: 50px; will-change: transform; }
+    .box {
+      width: 100px; height: 100px;
+      background: steelblue;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .box.active {
+      transform: translateX(100px) scale(1.2);
+      opacity: 0.6;
+    }
   </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
 </head>
 <body>
-  <div class="box" id="box"></div>
+  <div class="box"></div>
 
   <script>
-    $(function() {
-      var $box = $("#box");
-      var startTime = null;
-      var duration = 1000;
-      var startX = 50;
-      var endX = 400;
-
-      function animate(timestamp) {
-        // Step 1: Initialize start time on first frame
-        if (startTime === null) startTime = timestamp;
-
-        // Step 2: Compute progress (0 to 1)
-        var elapsed = timestamp - startTime;
-        var progress = Math.min(elapsed / duration, 1);
-
-        // Step 3: Apply easing and update transform
-        var eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-        var currentX = startX + (endX - startX) * eased;
-        $box.css("transform", "translateX(" + currentX + "px)");
-
-        // Step 4: Continue the loop
-        if (progress < 1) {
-          requestAnimationFrame(animate);
-        }
-      }
-
-      requestAnimationFrame(animate);
+    // Step 1: Toggle the class to trigger the transition
+    $(".box").on("click", function () {
+      $(this).toggleClass("active");
     });
   </script>
 </body>
 </html>
 ```
 
-**Expected Output:** The box slides smoothly from x=50 to x=400 over 1000ms using the `requestAnimationFrame` loop. The animation is synchronized with the browser's repaint cycle and uses `transform` for GPU acceleration.
+**Expected Output**
+Clicking the box slides it 100px to the right, scales it to 1.2x, and fades it to 60% opacity. Clicking again reverses the transition. The animation is smooth because it uses `transform` and `opacity`.
 
-**Why this output:** The `requestAnimationFrame` callback is invoked before each repaint. The `timestamp` parameter is used to compute the elapsed time and progress, ensuring consistent animation speed regardless of frame rate fluctuations.
-
-### Real-World Cases
-
-- **Custom animation libraries:** Velocity.js and GSAP use `requestAnimationFrame` internally for smooth animation.
-- **Canvas animations:** Games and data visualizations use `requestAnimationFrame` for smooth rendering.
-- **Scroll-linked animations:** Parallax and sticky headers use `requestAnimationFrame` to update positions in sync with scrolling.
-- **jQuery animation enhancement:** The `jquery-requestAnimationFrame` plugin replaces jQuery's timer loop for smoother jQuery animations.
+**Why this output occurs**: The `transition` property tells the browser to interpolate changes to `transform` and `opacity` over 0.3 seconds. Toggling the `active` class changes the values, and the browser animates the transition.
 
 ---
 
-## Enhanced Topic: Animation Queue Management — Using `.stop(true, true)` to Flush Accumulated Queues
+### Real‑World Cases
+
+- **Hover effects**: Buttons that fade or slide on hover.
+- **Accordion panels**: Smoothly expanding and collapsing with `max-height` transitions (though `transform` is preferred for performance).
+- **Modal open/close**: Fading and scaling in with `opacity` and `transform`.
+
+---
+
+## Core Concept 3: jQuery Animations
 
 ### Definitions
 
-**Core Definition:** Animation queue management is the practice of controlling the sequence and accumulation of jQuery animations using methods like `.stop()`, `.finish()`, and `.clearQueue()`, particularly `.stop(true, true)` to instantly flush accumulated, lagging animation queues during rapid user actions.
+**Core Definition**
+jQuery animations are effects driven by jQuery's `.animate()` method (and its shorthand methods like `.fadeIn()`, `.slideDown()`), which change CSS properties over time using JavaScript timers on the CPU, without native GPU acceleration for most properties.
 
-**Technical Definition:** jQuery maintains an animation queue (`fx` by default) for each element. When multiple animations are applied to the same element, they are queued and executed sequentially. If a user triggers animations faster than they complete (e.g., rapid hovering over a dropdown), the queue can accumulate dozens of pending animations, causing the element to lag behind the user's actions. The `.stop(clearQueue, jumpToEnd)` method stops the currently running animation; `clearQueue` (first parameter) removes all remaining queued animations; `jumpToEnd` (second parameter) immediately jumps the current animation to its final state. Therefore, `.stop(true, true)` stops the current animation, clears the queue, and jumps to the final state — putting the element into a known, completed state. `.stop(true, false)` stops and clears the queue but leaves the element at its current position, which is useful for reversing animations (e.g., hover in/out).
+**Technical Definition**
+jQuery's `.animate(properties [, duration ] [, easing ] [, complete ])` method interpolates numeric CSS properties from their current value to a target value. Historically, jQuery drives the animation loop with `setTimeout`/`setInterval` at an interval defined by `jQuery.fx.interval` (default 13 ms, approximately 76 fps). This timer‑based approach is **not synchronised with the display's refresh rate**, can miss frames, and runs entirely on the CPU. jQuery cannot animate `transform` properties without plugins. As of jQuery 3.0, `requestAnimationFrame` is used when available, improving synchronisation, but jQuery animations still cannot match the GPU‑accelerated smoothness of CSS animations for `transform` and `opacity`. jQuery animations are also CPU‑intensive and can cause memory pressure due to garbage collection.
 
-**Beginner-Friendly Explanation:** Imagine you are clicking a button rapidly to open and close a menu. Each click adds an animation to the queue. After 10 clicks, the menu has 10 animations waiting to run, so it keeps moving long after you stopped clicking. `.stop(true, true)` is like saying "Stop everything, throw away the waiting animations, and put the menu in its final position right now."
+**Beginner‑Friendly Explanation**
+jQuery animations are the classic `$(".box").animate({ left: "100px" })` style effects. They work by repeatedly changing CSS properties in a JavaScript loop. This is convenient and works in old browsers, but it is slow compared to CSS. jQuery uses a timer that ticks about every 13 milliseconds, which is not always in sync with the screen. On mobile devices or with many elements, jQuery animations can look choppy. They are best reserved for situations where CSS cannot do the job or where broad browser compatibility is required.
+
+---
 
 ### Purposes
 
-- To prevent animation queues from accumulating during rapid user interactions.
-- To put animated elements into a known, stable state immediately.
-- To avoid the visual lag caused by queued animations executing long after the user's action.
-- To enable smooth reversing animations (hover in/out) using `.stop(true, false)`.
-- To clear animation queues when a component is destroyed to prevent memory leaks.
+- **To animate properties that CSS cannot animate** (e.g., `scrollTop`, numeric values not expressible as CSS transitions).
+- **To provide a fallback** for browsers that do not support CSS transitions/animations.
+- **To leverage jQuery's easing functions and chaining** for complex sequences.
+- **To animate non‑DOM objects** (custom properties) in some cases.
+- **To maintain compatibility** with legacy codebases that rely on jQuery effects.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax:**
 ```javascript
-$(element).stop(true, true).animate({ ... }, duration);
-```
-
-| Method Call | clearQueue | jumpToEnd | Behavior |
-|-------------|------------|-----------|----------|
-| `.stop()` | false | false | Stops current animation, leaves it mid-state, queue remains |
-| `.stop(true)` | true | false | Stops current animation, clears queue, leaves mid-state |
-| `.stop(false, true)` | false | true | Stops current animation, jumps to end, queue remains |
-| `.stop(true, true)` | true | true | Stops current animation, clears queue, jumps to end |
-
-**Complete General Syntax (Reversing Hover Animation):**
-```javascript
-$("#menu").hover(
-    function() {
-        $(this).stop(true, false).slideDown(200);
-    },
-    function() {
-        $(this).stop(true, false).slideUp(200);
-    }
+$( selector ).animate(
+  properties,      // object of CSS properties and target values
+  duration,        // "slow", "fast", or milliseconds
+  easing,          // "swing" or "linear" (or plugin easings)
+  complete         // callback function
 );
 ```
 
-**Syntax Rules:**
+**Example**: `$(".box").animate({ left: "100px", opacity: 0.5 }, 500, "swing", function(){ … });`
 
-- Call `.stop(true, true)` before starting a new animation on the same element to flush the queue.
-- Use `.stop(true, false)` for hover animations where the element should reverse from its current position.
-- Use `.stop(true, true)` when the element should jump to its final state immediately.
-- `.finish()` is similar to `.stop(true, true)` but only affects the specified queue (default: `fx`); `.stop(true, true)` clears every queue.
+---
 
-**Constraints and Limitations:**
+### Syntax Rules
 
-- `.stop(true, true)` may cause a visual jump if the element is mid-animation; this is intentional but can be jarring.
-- `.stop(true, false)` leaves the element at its current position, which may be desirable for reversals but may also leave it in an unstable state if not followed by another animation.
-- `.finish()` has inconsistent behavior with `queue: false` animations; use `.stop(true, true)` for broader queue clearing.
+1. **jQuery `.animate()` cannot animate `transform`** without a plugin; use CSS transitions for transforms.
+2. **Animate `opacity`** is possible but CPU‑bound; CSS `opacity` transitions are GPU‑accelerated.
+3. **Stop queued animations** with `.stop(true, true)` to prevent a backlog when events fire rapidly.
+4. **Adjust `jQuery.fx.interval`** (default 13 ms) to trade smoothness for CPU usage.
+5. **Use `requestAnimationFrame`** via a plugin (e.g., `jquery.requestAnimationFrame`) for older jQuery versions.
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
+---
 
-**Example 1: Queue Accumulation vs. `.stop(true, true)`**
+### Constraints and Limitations
+
+- **jQuery animations do not use the GPU** for most properties; they are CPU‑bound.
+- **Timer‑based loops are imprecise** and can cause jank.
+- **Concurrent jQuery animations degrade performance rapidly**.
+- **Animating layout properties** (`width`, `height`, `top`, `left`) triggers reflow on every frame.
+- **jQuery 3.0+ uses `requestAnimationFrame`** when available, improving synchronisation but not GPU acceleration.
+
+---
+
+### Annotated Code Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>Queue Management Demo</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <style>
-    #panel { width: 300px; height: 100px; background: #007bff; color: #fff; display: none; }
+    .box { width: 100px; height: 100px; background: steelblue; position: relative; }
   </style>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
 </head>
 <body>
-  <button id="toggle">Toggle Panel</button>
-  <div id="panel">Panel Content</div>
-  <p id="log"></p>
+  <div class="box"></div>
 
   <script>
-    $(function() {
-      // Step 1: Without stop — queue accumulates
-      var counter = 0;
-      $("#toggle").click(function() {
-        counter++;
-        if (counter <= 5) {
-          // Rapid clicks without stop
-          $("#panel").slideToggle(300);
-        } else {
-          // After 5 clicks, switch to stop(true, true)
-          $("#panel").stop(true, true).slideToggle(300);
-        }
-        $("#log").text("Clicks: " + counter + " | Queue: " + $("#panel").queue("fx").length);
-      });
+    // Step 1: Trigger a jQuery animation on click
+    $(".box").on("click", function () {
+      $(this).animate({ left: "200px", opacity: 0.5 }, 600);
     });
   </script>
 </body>
 </html>
 ```
 
-**Expected Output:** With the first five rapid clicks, the queue length increases as animations accumulate. After switching to `.stop(true, true)`, the queue is cleared before each new animation, so the queue length stays at 0 or 1.
+**Expected Output**
+Clicking the box moves it 200px to the right while fading it to 50% opacity over 600 ms. The animation is CPU‑driven and may appear less smooth than a CSS transition, especially on mobile devices.
 
-**Why this output:** Without `.stop()`, each `.slideToggle()` call adds an animation to the queue, which executes sequentially. With `.stop(true, true)`, the current animation is stopped, the queue is cleared, and the panel jumps to its final state before the new animation begins.
+**Why this output occurs**: jQuery's `.animate()` changes `left` and `opacity` on a timer loop. Changing `left` triggers layout on each frame, and the timer is not synchronised with the display, so the animation is more expensive and less smooth than a CSS equivalent.
 
-### Real-World Cases
+---
 
-- **Dropdown menus:** Using `.stop(true, true)` on hover to prevent queue accumulation from rapid mouse movements.
-- **Accordions:** Using `.stop(true, true)` when toggling panels rapidly.
-- **Tab panels:** Using `.stop(true, true)` when switching tabs quickly.
-- **Plugin destruction:** Calling `.stop(true, true)` on all animated elements before removing a plugin instance.
+### Real‑World Cases
+
+- **Legacy compatibility**: Animating properties on older browsers that lack CSS transition support.
+- **Custom easing**: Using jQuery's easing plugin for effects not expressible in CSS.
+- **Scroll animations**: Animating `scrollTop` (which CSS cannot do) with `.animate({ scrollTop: … })`.
+
+---
+
+## Core Concept 4: requestAnimationFrame
+
+### Definitions
+
+**Core Definition**
+`requestAnimationFrame` (rAF) is a browser API that schedules a callback to run immediately before the next repaint, allowing JavaScript‑driven animations to synchronise with the display's refresh rate and avoid the imprecision of `setTimeout`/`setInterval`.
+
+**Technical Definition**
+`window.requestAnimationFrame(callback)` queues a callback that the browser invokes before the next repaint. The callback receives a high‑resolution timestamp. The browser controls the timing, typically aligning with the display's refresh rate (e.g., 60 Hz → ~16.7 ms per frame). If the system cannot keep up, the browser may throttle the callback to a lower rate (e.g., 30 fps) to maintain consistency. rAF pauses when the tab is in the background, conserving CPU and battery. jQuery 3.0+ uses `requestAnimationFrame` internally when available, but for older versions or custom animations, rAF can be used directly or via plugins such as `jquery.requestAnimationFrame` and `jquery-requestAnimationFrame`.
+
+**Beginner‑Friendly Explanation**
+`requestAnimationFrame` is like telling the browser: “Before you draw the next frame, run my function.” This keeps your JavaScript animation in sync with the screen, so it looks smooth. The old approach used `setInterval` to run your code every few milliseconds, but that could be out of step with the screen, causing stutter. With rAF, the browser calls your code at the right moment, and it automatically slows down or pauses when the tab is not visible, saving battery.
+
+---
+
+### Purposes
+
+- **To synchronise JavaScript animations with the display's refresh rate**.
+- **To replace `setTimeout`/`setInterval` loops** for smoother, more efficient animation.
+- **To automatically throttle or pause animations** in background tabs.
+- **To improve frame consistency** and reduce jank.
+- **To provide a high‑resolution timestamp** for time‑based animation calculations.
+
+---
+
+### Syntax Rules and Structure
+
+#### Basic rAF Loop
+
+```javascript
+function animate(timestamp) {
+  // Update animation state based on timestamp
+  requestAnimationFrame(animate);
+}
+requestAnimationFrame(animate);
+```
+
+#### rAF with jQuery (via plugin)
+
+```javascript
+// Include jquery.requestanimationframe.js
+// jQuery animations will use rAF automatically
+```
+
+---
+
+### Constraints and Limitations
+
+- **rAF does not guarantee 60 fps**; it adapts to system capability.
+- **rAF callbacks must be lightweight**; heavy work can cause frames to drop.
+- **rAF does not automatically use the GPU** for property animation; it only schedules the callback.
+- **jQuery 3.0+ includes rAF**; older versions require a plugin.
+
+---
+
+### Annotated Code Example
+
+```javascript
+// Step 1: Define an animation state
+var start = null;
+var element = document.querySelector(".box");
+var duration = 600;
+var targetX = 200;
+
+// Step 2: rAF animation loop
+function step(timestamp) {
+  if (!start) start = timestamp;
+  var progress = Math.min((timestamp - start) / duration, 1);
+  element.style.transform = "translateX(" + (progress * targetX) + "px)";
+  if (progress < 1) {
+    requestAnimationFrame(step);
+  }
+}
+
+// Step 3: Start the animation
+requestAnimationFrame(step);
+```
+
+**Expected Output**
+The box slides 200px to the right over 600 ms, smoothly synchronised with the display's refresh rate. The animation pauses automatically if the tab is backgrounded.
+
+**Why this output occurs**: `requestAnimationFrame` schedules `step` before each repaint. The `transform` property is used, which is composited by the GPU. The progress is calculated based on the timestamp, ensuring time‑based (not frame‑count‑based) animation.
+
+---
+
+### Real‑World Cases
+
+- **Custom JavaScript animations**: Smooth movement, scaling, or rotation using `transform`.
+- **Scroll‑linked animations**: Updating parallax effects on each frame.
+- **Canvas animations**: Redrawing the canvas in sync with the display.
+- **Games**: Frame‑synchronised game loops.
+
+---
+
+## Core Concept 5: Hardware Acceleration
+
+### Definitions
+
+**Core Definition**
+Hardware acceleration is the browser's use of the GPU (Graphics Processing Unit) to perform compositing and rendering work that would otherwise run on the CPU, resulting in smoother animations and lower CPU usage — particularly for animations of `transform` and `opacity`.
+
+**Technical Definition**
+Modern browsers promote elements to their own **compositor layers** when certain conditions are met (e.g., 3D transforms, `will-change: transform`, `opacity` changes, `filter`). Layer promotion allows the GPU to animate the layer's position, scale, and opacity without recalculating layout or repainting the element's contents. The CSS properties currently eligible for GPU acceleration include `opacity`, `filter`, and `transform` by default; `background-color` and `clip-path` are being added. Promoting too many elements to layers consumes GPU memory and can degrade performance, so `will-change` should be used sparingly and precisely.
+
+**Beginner‑Friendly Explanation**
+Hardware acceleration means letting the graphics card (GPU) do the work instead of the main processor (CPU). The GPU is very good at moving, scaling, and fading things smoothly. When you animate `transform` or `opacity`, the browser can hand that work to the GPU, making the animation smooth even on phones. You can give the browser a hint to prepare for this by using `will-change`, but you should not overdo it — promoting too many elements wastes memory.
+
+---
+
+### Purposes
+
+- **To offload animation work from the CPU to the GPU** for smoother performance.
+- **To enable composite‑only animations** that skip layout and paint.
+- **To hint the browser to prepare for upcoming animations** via `will-change`.
+- **To avoid reflow and repaint** during animation by using `transform` and `opacity`.
+- **To improve performance on mobile devices** with limited CPU resources.
+
+---
+
+### Syntax Rules and Structure
+
+| Technique | Example | Effect |
+|---|---|---|
+| Animate `transform` | `transform: translateX(100px)` | GPU‑accelerated compositing |
+| Animate `opacity` | `opacity: 0.5` | GPU‑accelerated compositing |
+| Use 3D transform | `transform: translate3d(100px, 0, 0)` | Forces layer promotion |
+| Use `will-change` | `will-change: transform` | Hints the browser to promote the element |
+| Avoid layout properties | `width`, `height`, `top`, `left` | Triggers reflow, not composited |
+
+---
+
+### Constraints and Limitations
+
+- **Only `transform`, `opacity`, and `filter` are reliably GPU‑accelerated** by default.
+- **`will-change` should be used sparingly**; applying it to many elements creates excessive layers and memory pressure.
+- **Layer promotion has a memory cost**; too many layers can degrade performance.
+- **jQuery `.animate()` cannot leverage GPU acceleration for `transform`** without a plugin.
+
+---
+
+### Annotated Code Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <style>
+    .box {
+      width: 100px; height: 100px;
+      background: steelblue;
+      will-change: transform;       /* hint for GPU promotion */
+      transition: transform 0.3s ease;
+    }
+    .box.active {
+      transform: translate3d(100px, 0, 0); /* 3D forces GPU layer */
+    }
+  </style>
+</head>
+<body>
+  <div class="box"></div>
+
+  <script>
+    $(".box").on("click", function () {
+      $(this).toggleClass("active");
+    });
+  </script>
+</body>
+</html>
+```
+
+**Expected Output**
+Clicking the box slides it 100px to the right using `translate3d`, which forces GPU layer promotion. The animation is composited by the GPU and is smoother than a `left`‑based animation.
+
+**Why this output occurs**: `will-change: transform` hints the browser to prepare a GPU layer. `translate3d` triggers layer promotion. The `transition` animates the transform, which is handled by the compositor without layout or paint.
+
+---
+
+### Real‑World Cases
+
+- **Smooth hover effects**: Animating `transform` and `opacity` with `will-change` on interactive elements.
+- **Mobile menus**: Sliding panels using `translate3d` for GPU‑accelerated movement.
+- **Parallax effects**: Using `transform` on background layers to avoid reflow.
+
+---
+
+## Core Concept 6: Animation Best Practices
+
+### Definitions
+
+**Core Definition**
+jQuery animation best practices are the consolidated conventions — preferring CSS for `transform` and `opacity`, using `requestAnimationFrame` for JavaScript animation, avoiding jQuery `.animate()` for performance‑critical effects, stopping queued animations, and measuring with browser tools — that produce smooth, efficient, and maintainable animations.
+
+**Technical Definition**
+Best practices synthesise the individual techniques: (1) **prefer CSS transitions and animations** for `transform` and `opacity`, as they are GPU‑accelerated and browser‑managed; (2) **avoid jQuery `.animate()` for layout‑triggering properties** and for `transform`, which it cannot animate without plugins; (3) **use `requestAnimationFrame`** for custom JavaScript animations, especially for scroll‑linked or canvas‑based effects; (4) **use `will-change` sparingly** to hint GPU promotion; (5) **stop animations** with `.stop(true, true)` to prevent queue buildup when events fire rapidly; (6) **limit concurrent animations** and animate as few elements as possible; (7) **use `transform` and `opacity`** exclusively for smooth 60 fps animation; and (8) **measure with DevTools Performance panel** to verify frame rates and identify jank.
+
+**Beginner‑Friendly Explanation**
+Best practices are the habits that make animations look smooth and use less battery. Use CSS whenever you can — it is the fastest and smoothest option. Avoid jQuery's `.animate()` for movement and fading; use CSS transitions instead. If you must use JavaScript, use `requestAnimationFrame` so it syncs with the screen. Do not try to animate width, height, or position properties — those are slow. Clean up animations when they are no longer needed. And if you are not sure whether an animation is smooth, record it in the browser's performance tools and look at the frame rate.
+
+---
+
+### Purposes
+
+- **To provide a single actionable checklist** for smooth, efficient animations.
+- **To avoid the most common performance pitfalls** (jQuery `.animate()` for movement, animating layout properties, unbounded animation queues).
+- **To balance performance with development effort and browser compatibility**.
+- **To establish a baseline for code reviews and performance audits**.
+
+---
+
+### Syntax Rules and Structure
+
+| Practice | Recommended | Avoid |
+|---|---|---|
+| Engine | CSS transitions/animations | jQuery `.animate()` for `transform`/`opacity` |
+| Properties | `transform`, `opacity` | `width`, `height`, `top`, `left` |
+| JS timing | `requestAnimationFrame` | `setTimeout`/`setInterval` |
+| GPU hint | `will-change: transform` (sparingly) | Excessive `will-change` |
+| Queue control | `.stop(true, true)` before re‑trigger | Queueing endless animations |
+| Concurrency | Fewer simultaneous animations | Many concurrent jQuery animations |
+| Measurement | DevTools Performance panel | Guessing without data |
+
+---
+
+### Constraints and Limitations
+
+- **CSS animations cannot animate `auto` values** or `scrollTop`.
+- **`will-change` has a memory cost**; overuse can degrade performance.
+- **Browser support for some CSS features may vary**; provide fallbacks if necessary.
+- **jQuery `.animate()` may still be necessary** for legacy compatibility or non‑CSS‑expressible properties.
+
+---
+
+### Annotated Code Example (Consolidated)
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <style>
+    .panel {
+      width: 100px; height: 100px;
+      background: steelblue;
+      will-change: transform;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .panel.open {
+      transform: translate3d(0, 100px, 0);
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel"></div>
+
+  <script>
+    // ✅ CSS transition triggered by class toggle (GPU-accelerated)
+    $(".panel").on("click", function () {
+      $(this).toggleClass("open");
+    });
+
+    // ✅ If a JS-driven animation is needed, use requestAnimationFrame
+    function rAFAnimate(el, targetOpacity, duration) {
+      var start = null;
+      function step(ts) {
+        if (!start) start = ts;
+        var progress = Math.min((ts - start) / duration, 1);
+        el.style.opacity = 1 - (1 - targetOpacity) * progress;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    // rAFAnimate(document.querySelector(".panel"), 0.5, 300);
+  </script>
+</body>
+</html>
+```
+
+**Expected Output**
+Clicking the panel slides it down 100px and fades it to 50% opacity using a CSS transition. The animation is smooth because it uses `transform` and `opacity` with `will-change` and GPU‑accelerated compositing.
+
+**Why this output occurs**: The CSS `transition` handles the interpolation natively. `will-change: transform` hints GPU promotion, and `translate3d` forces a composited layer. The `requestAnimationFrame` example (commented out) demonstrates the correct JavaScript approach if CSS is not suitable.
+
+---
+
+### Real‑World Cases
+
+- **Code reviews**: A checklist ensures that animations follow established performance patterns.
+- **Legacy migration**: Replacing jQuery `.animate()` calls with CSS transitions for `transform` and `opacity`.
+- **Performance audits**: Using DevTools to identify layout‑triggering animations and refactoring them to composite‑only properties.
 
 ---
 
 ## References
 
-- jQuery .animate() Documentation — https://api.jquery.com/animate/
-- jQuery .stop() Documentation — https://api.jquery.com/stop/
-- jQuery .finish() Documentation — https://api.jquery.com/finish/
-- jQuery .clearQueue() Documentation — https://api.jquery.com/clearQueue/
-- jQuery :animated Selector — https://api.jquery.com/animated-selector/
-- Animations and Performance — web.dev — https://web.dev/articles/animations-and-performance
-- CSS vs. JS Animation: Which is Faster? — David Walsh — https://davidwalsh.name/css-js-animation
-- Preventing Layout Thrashing — Wilson Page — http://wilsonpage.co.uk/preventing-layout-thrashing/
-- jQuery Animation Performance Optimization — OSC — https://my.oschina.net
-- gsap.com — Animating with transforms instead of top/left — https://gsap.com/community/
-- Stack Overflow — jQuery .animate() choppy performance — https://stackoverflow.com/questions/9178927
-- Stack Overflow — jQuery scrollTop animation choppy in Chrome — https://stackoverflow.com/questions/25885500
-- Stack Overflow — Can someone explain the difference between .stop() properties? — https://stackoverflow.com/questions/8090752
-- jQuery Bug Tracker — #14753: finish() and stop(true, true) inconsistency — https://bugs.jquery.com/ticket/14753/
-- jquery-requestAnimationFrame Plugin — https://github.com/gnarf/jquery-requestAnimationFrame
-- MDN Web Docs — requestAnimationFrame() — https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
-- MDN Web Docs — will-change — https://developer.mozilla.org/en-US/docs/Web/CSS/will-change
-- CSS-Tricks — Using requestAnimationFrame — https://css-tricks.com/using-requestanimationframe/
+- CSS and JavaScript animation performance | MDN — https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/CSS_JavaScript_animation_performance
+- jQuery.animate poor performance vs CSS animations | Stack Overflow — https://stackoverflow.com/revisions/30038654/1
+- Jquery / CSS animation performance | Stack Overflow — https://stackoverflow.com/feeds/question/26438668
+- Easily Improving jQuery Animations | SitePoint — https://www.sitepoint.com/easily-improving-jquery-animations/
+- use requestAnimationFrame instead of setInterval for animations, when available | jQuery Bug Tracker #8101 — https://bugs.jquery.com/ticket/8101/
+- jQuery.fx.interval Property | W3Schools — https://www.w3schools.com/jquery/jquery_ref_effects.asp
+- jQuery stop() animation queue performance | jQuery Bug Tracker — https://bugs.jquery.com/ticket/3497
+- CSS will-change hardware acceleration | Chrome for Developers — https://developer.chrome.com/blog/hardware-accelerated-animations
+- JQuery .animate Really Choppy in Chrome Extension | Stack Overflow — https://stackoverflow.com/questions/43624261/jquery-animate-really-choppy-in-chrome-extension
+- Performant CSS Animations | Wealthfront Engineering — https://eng.wealthfront.com/2015/05/19/performant-css-animations/
+- jquery.requestanimationframe | npm — https://www.npmjs.com/package/jquery.requestanimationframe
+- Animations and Add-on Libraries | BrightSign Documentation — https://docs.brightsign.biz/develop/animations-and-add-on-libraries
+- Animate Only Transform and Opacity | GitHub — https://github.com/facebook/react-native/issues/48057
+- Hardware acceleration updates | Chrome for Developers — https://developer.chrome.com/blog/hardware-accelerated-animations

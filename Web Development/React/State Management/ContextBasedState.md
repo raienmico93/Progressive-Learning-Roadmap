@@ -1,4 +1,4 @@
-# React Context-Based State Management: A Comprehensive Programming Cheat Sheet
+# React Context API — Comprehensive Programming Cheat Sheet
 
 ---
 
@@ -6,963 +6,1144 @@
 
 ### Definitions
 
-**Core Definition:** React Context-based state management is the practice of using React's built-in Context API—comprising `createContext`, `Provider`, and `useContext`—to share state across a component tree without passing props through every intermediate level, while managing performance through value memoisation, context splitting, and provider composition.
+**Core Definition:** Context API is React's built-in mechanism for passing data through the component tree without manually threading props through every intermediate component.
 
-**Technical Definition:** React Context is a dependency-injection mechanism that allows a parent component to make data available to any component in the tree below it, regardless of depth, without explicitly threading props through intermediate components. The API consists of three parts: `createContext(defaultValue)` creates a context object that represents the kind of information that can be provided or read; `<SomeContext value={...}>` (or `<SomeContext.Provider>` in older React versions) provides a value to all descendants inside it; and `useContext(SomeContext)` reads and subscribes to the nearest provider's value above the calling component. When a provider's `value` changes, React automatically re-renders all components that read that context, using `Object.is` comparison to determine whether the value has actually changed. Context is designed to share data that can be considered "global" for a tree of React components, such as the current authenticated user, theme, or preferred language. However, Context is a broadcast mechanism, not an optimisation tool: throwing everything into a single context, failing to split state from actions, ignoring memo boundaries, and misunderstanding when Context triggers re-renders are the real performance pitfalls.
+**Technical Definition:** Context provides a way to share values — theme, authenticated user, locale, cart — that are considered “global” for a subtree of React components. A context object is created with `createContext`, supplied to a subtree via a provider, and read by any descendant with `useContext` (or `use` in React 19). When the provider's `value` changes, React re-renders every component that reads that context, comparing previous and next values by reference (`Object.is`). Context is a **broadcast mechanism**, not a state manager: it carries values but does not hold or optimize them.
 
-**Beginner-Friendly Explanation:** Imagine a family group chat. Instead of each sibling asking the parent to relay a message, the parent posts the message in the group chat, and all siblings can read it directly. The parent does not have to pass the message through each sibling individually—any sibling in the group can see it. That is Context: a shared channel that any component in the tree can tap into, no matter how deep it is. But if the group chat is used for everything—birthday plans, grocery lists, homework help, and emergency alerts—then every message notification becomes noise for everyone. The key is to use separate, focused group chats (multiple contexts) rather than one giant one.
+**Beginner-Friendly Explanation:** Context is React's way of avoiding “prop drilling” — passing the same prop through five components that do not use it just so the sixth can. You put the value in a provider at the top, and any component below can read it directly. The catch is that when the value changes, everyone reading it re-renders, so it works best for data that changes rarely, like a theme or a logged-in user.
 
 ### Key Characteristics
 
-- **Prop Drilling Elimination:** Context allows data to "teleport" to deeply nested components without passing props through every intermediate level.
-- **Explicit Subscription:** Only components that call `useContext` for a given context re-render when that context's value changes; intermediate components that do not consume the context are unaffected.
-- **Reference Equality Trigger:** Context re-renders are triggered by reference changes, not value changes. Passing a new object or array literal as the provider value causes all consumers to re-render even if the content is identical.
-- **Broadcast, Not Optimisation:** Context is a broadcast mechanism; it does not optimise re-renders. Splitting contexts, memoising values, and separating state from dispatch are the primary optimisation strategies.
-- **Provider Composition:** Multiple single-purpose contexts can be composed into a provider tree that enforces a predictable data hierarchy without creating "provider hell".
-- **Reducer Integration:** Context pairs naturally with `useReducer` for complex state logic, with the reducer's state and dispatch placed into separate contexts to prevent write-only components from re-rendering on every state change.
+- **Prop-drilling alternative:** Eliminates intermediate prop passing for genuinely shared data.
+- **Broadcast, not state:** Context does not hold state; it carries a value supplied by a provider.
+- **Nearest-provider semantics:** A consumer reads from the closest matching provider above it.
+- **Reference-based comparison:** React compares context values by identity; a new object every render re-renders all consumers.
+- **No built-in selector:** Every consumer re-renders when the value changes, even if it only uses a small slice.
+- **Custom-hook encapsulation:** The recommended pattern is to hide the raw context and expose a hook that throws without a provider.
+- **React 19 simplification:** Context can be rendered directly as `<Context value={...}>`, and `use(Context)` can be called conditionally.
 
 ### Prerequisites
 
-- Solid understanding of React function components, JSX, and props.
-- Familiarity with the `useState` and `useReducer` Hooks.
-- Working knowledge of the component tree hierarchy and prop drilling.
-- Basic understanding of React's render cycle and re-render triggers.
-- Awareness of JavaScript reference equality and `Object.is` comparison.
+- React function components, props, and `useState`.
+- JavaScript closures and reference equality.
+- Basic understanding of component trees.
+- Familiarity with `useReducer` (for the reducer + context pattern).
 
 ### Related Programming Areas
 
-- **State Management:** Coordinating state across disparate branches of the component tree.
-- **Performance Optimisation:** Mitigating re-render cascades through memoisation and context splitting.
-- **Dependency Injection:** Providing shared dependencies (theme, auth, locale) to deeply nested components.
-- **Component Composition:** Layering multiple providers cleanly to enforce a data hierarchy.
-- **Feature-Sliced Design:** Scoping context to feature boundaries to prevent over-coupling.
-
-### Core Concepts / Features
-
-1. Providers (The Broadcast Mechanism)
-2. Context Values (The Payload Data)
-3. Provider Composition (Layering and Nesting)
-4. Context Performance Considerations (Re-render Mitigation)
+- **State Management** — Context is one tool among local state, URL state, and server state.
+- **Performance** — splitting, memoization, and selector patterns.
+- **React 19** — `use()` and the simplified provider syntax.
+- **Server Components** — Context works differently across the server/client boundary.
 
 ---
 
-## Core Concept 1: Providers (The Broadcast Mechanism)
+## 1. Context API
 
 ### Definitions
 
-**Core Definition:** A Provider is a specialised React element generated by `createContext` that broadcasts a structural value down to any descendant component wrapped inside it, regardless of depth.
+**Core Definition:** The Context API is React's built-in system for broadcasting a value to a subtree without passing props through every level.
 
-**Technical Definition:** The Provider is a React component attached to every context object created by `createContext`. It accepts a `value` prop and makes that value available to all descendants in the tree below it. In React 19 and later, you can render `<SomeContext value={...}>` directly; in older versions, you use `<SomeContext.Provider value={...}>`. The provider does not hold state itself—it is a conduit. When the `value` prop changes, React triggers a re-render of all components that read that context via `useContext`, starting from the provider that received the different value. The previous and next values are compared with `Object.is`; if the reference is the same, no re-render occurs. The provider must be placed above the component that calls `useContext`; a provider returned from the same component that calls `useContext` does not affect that component's call.
+**Technical Definition:** Context solves the problem of sharing data that a wide part of the application needs and that changes rarely — theme, signed-in user, language, cart. One component **provides** the value, and any component below it **reads** it. The component reading gets the value of the **nearest** provider above it; with no provider, it sees the default value given to `createContext`. React automatically re-renders all children that use a particular context starting from the provider that receives a different value, comparing previous and next values with a reference check.
 
-**Beginner-Friendly Explanation:** A Provider is like a radio tower. It broadcasts a signal (the value) that any radio (consumer component) within range (the subtree) can pick up. You can have multiple towers broadcasting different signals (multiple contexts), and each radio can tune into the specific station it wants. If the tower changes its broadcast, all radios tuned to that station will update—but radios tuned to other stations will not.
+**Beginner-Friendly Explanation:** Context is the built-in way to share a value with many components without passing it through each one. You create a context, wrap part of the tree in a provider, and read it anywhere below.
 
 ### Purposes
 
-- To broadcast a value to all descendants in a subtree without passing props through intermediate components.
-- To scope the availability of a context value—only components inside the provider can access it.
-- To enable nested providers for the same context, where inner providers override outer ones for their subtree.
-- To serve as the subscription point that triggers re-renders in consumer components when the value changes.
-- To compose with other providers to establish a predictable data hierarchy.
+- To avoid prop drilling for data needed by deeply nested components.
+- To share genuinely app-wide values (theme, auth, locale) without a state library.
+- To compose providers for different concerns and keep component APIs clean.
+- To provide a simple, dependency-free alternative for low-frequency shared state.
+- To enable custom hooks that encapsulate context access and enforce provider presence.
 
 ### Syntax Rules and Structure
 
 **General Syntax (React 19+):**
-```jsx
-import { createContext, useState } from 'react';
+
+```tsx
+import { createContext, useContext, useState } from 'react';
 
 const ThemeContext = createContext('light');
 
 function App() {
   const [theme, setTheme] = useState('light');
-
   return (
     <ThemeContext value={theme}>
       <Page />
     </ThemeContext>
   );
 }
+
+function Page() {
+  const theme = useContext(ThemeContext);
+  return <div className={theme}>…</div>;
+}
 ```
 
 **Component Breakdown:**
-- `createContext('light')`: Creates the context with a default value of `'light'`.
-- `<ThemeContext value={theme}>`: Renders the context as a provider (React 19+ syntax).
-- `<Page />`: All descendants of `Page` can read the context value via `useContext`.
 
-**General Syntax (React 18 and earlier):**
-```jsx
+| Element | Description |
+|---------|-------------|
+| `createContext(defaultValue)` | Creates a context object; default is a static “last resort” fallback. |
+| `<ThemeContext value={...}>` | React 19 provider syntax; `<ThemeContext.Provider>` is legacy but still works. |
+| `useContext(ThemeContext)` | Reads the nearest provider's value; cannot be called conditionally. |
+| `use(ThemeContext)` | React 19 alternative; can be called conditionally. |
+
+**Syntax Rules:**
+
+1. Call `createContext` outside any component.
+2. Wrap the consuming subtree in a provider; the nearest provider wins.
+3. Read with `useContext` (or `use` in React 19).
+4. The value can be of any type.
+5. React compares values by reference (`Object.is`).
+
+**Constraints and Limitations:**
+
+- Every consumer re-renders when the value changes; there is no built-in selector.
+- A new object/function created on every provider render re-renders all consumers.
+- Context is not a replacement for server-state caching or frequently changing state.
+
+### Multiple Annotated Complete Step by Step Code Examples
+
+#### Example 1: Basic Theme Context
+
+```tsx
+import { createContext, useContext, useState } from 'react';
+
+const ThemeContext = createContext<'light' | 'dark'>('light');
+
+function App() {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  return (
+    <ThemeContext value={theme}>
+      <Toolbar />
+      <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
+        Toggle theme
+      </button>
+    </ThemeContext>
+  );
+}
+
+function Toolbar() {
+  return <ThemedButton />;
+}
+
+function ThemedButton() {
+  const theme = useContext(ThemeContext);
+  return <button className={theme}>Themed</button>;
+}
+```
+
+**Expected Output:** Clicking “Toggle theme” switches the button's class between `light` and `dark`. `Toolbar` does not receive a `theme` prop.
+
+**Why this output:** `ThemedButton` reads the nearest provider's value. Changing `theme` updates the context value, and React re-renders `ThemedButton`. `Toolbar` is not a consumer, so it does not re-render from the context change.
+
+#### Example 2: Custom Hook with Provider Guard
+
+```tsx
+import { createContext, useContext, type ReactNode } from 'react';
+
+type CartContextValue = { items: string[]; addItem: (item: string) => void };
+
+const CartContext = createContext<CartContextValue | null>(null);
+
+export function useCart() {
+  const cart = useContext(CartContext);
+  if (cart === null) {
+    throw new Error('useCart must be used within CartProvider.');
+  }
+  return cart;
+}
+
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<string[]>([]);
+  const value = useMemo(() => ({
+    items,
+    addItem: (item: string) => setItems((prev) => [...prev, item]),
+  }), [items]);
+
+  return <CartContext value={value}>{children}</CartContext>;
+}
+```
+
+**Expected Output:** Calling `useCart()` outside a provider throws a clear error. Inside the provider, it returns the cart value.
+
+**Why this output:** The context default is `null`, and the custom hook checks for `null` and throws. The raw context is not exported, forcing consumers through the guarded hook.
+
+### Real-World Cases
+
+- **Theme management:** Light/dark mode read by many components.
+- **Authentication:** Current user and permissions.
+- **Localisation:** Language and locale settings.
+- **Shopping cart:** Shared cart state for a subtree.
+
+### References
+
+- React — createContext — https://react.dev/reference/react/createContext
+- React — Passing Data Deeply with Context — https://react.dev/learn/passing-data-deeply-with-context
+- Context (virastack academy) — https://github.com/virastack/academy/blob/6a28815094da2825f46e17325d6dcc85902dbe6c/content/en/react/context.md
+- Get to Know React's New Context API — https://www.w3reference.com/blog/get-to-know-react-s-new-context-api/
+
+---
+
+## 2. `React.createContext`
+
+### Definitions
+
+**Core Definition:** `createContext` is the React function that creates a context object components can provide or read.
+
+**Technical Definition:** `createContext(defaultValue)` is called outside any component. It returns a context object that represents **which** context other components read or provide. The object itself holds no information. The `defaultValue` is used only when no matching provider exists above the reader; it is a static “last resort” fallback and never changes over time. If there is no meaningful default, pass `null`.
+
+**Beginner-Friendly Explanation:** `createContext` creates the context itself. You give it a fallback value, and it gives you back an object you will later use to provide and read values.
+
+### Purposes
+
+- To create a context object for a specific concern.
+- To define a static fallback for components used without a provider.
+- To enable type-safe context with TypeScript generics.
+- To separate concerns by creating one context per domain.
+
+### Syntax Rules and Structure
+
+```tsx
+import { createContext } from 'react';
+
+const ThemeContext = createContext('light');
+const AuthContext = createContext<User | null>(null);
+```
+
+**Syntax Rules:**
+
+1. Call `createContext` at module scope, never inside a component.
+2. Pass `null` when there is no meaningful default value.
+3. The default value is static and never changes.
+4. Use a TypeScript generic to type the context value.
+
+**Constraints and Limitations:**
+
+- The default value is not a substitute for a provider; it is a fallback.
+- A context object does not hold state.
+
+### Annotated Code Examples
+
+```tsx
+import { createContext } from 'react';
+
+type Theme = 'light' | 'dark';
+const ThemeContext = createContext<Theme>('light');
+
+// No meaningful default
+type AuthContextValue = { user: { name: string } | null; login: () => void };
+const AuthContext = createContext<AuthContextValue | null>(null);
+```
+
+**Expected Output:** `ThemeContext` has a meaningful fallback; `AuthContext` defaults to `null` so a custom hook can throw without a provider.
+
+**Why this output:** `createContext` stores the default for the no-provider case only. The `null` default forces explicit provider presence when paired with a guard hook.
+
+### Real-World Cases
+
+- **Theme context:** `createContext<'light' | 'dark'>('light')`.
+- **Auth context:** `createContext<Auth | null>(null)`.
+- **Locale context:** `createContext('en')`.
+
+### References
+
+- React — createContext: Parameters — https://react.dev/reference/react/createContext#parameters
+- React — createContext (React 18) — https://18.react.dev/reference/react/createContext
+
+---
+
+## 3. Context Provider
+
+### Definitions
+
+**Core Definition:** A context provider is the component that supplies a context value to every component inside it, no matter how deep.
+
+**Technical Definition:** The provider is written as `<SomeContext value={...}>` in React 19 (and `<SomeContext.Provider value={...}>` in React 18 and earlier). It accepts a `value` prop of any type. A component calling `useContext(SomeContext)` inside the provider receives the value of the **innermost** corresponding provider above it. When the provider's `value` changes, React re-renders every consumer below that provider.
+
+**Beginner-Friendly Explanation:** The provider is where you put the value in. Everything wrapped inside it can read that value.
+
+### Purposes
+
+- To supply a context value to a subtree.
+- To scope a value to a part of the application.
+- To override an outer provider's value for a nested subtree.
+- To compose multiple providers for different concerns.
+
+### Syntax Rules and Structure
+
+**React 19+:**
+
+```tsx
+<ThemeContext value={theme}>
+  <Page />
+</ThemeContext>
+```
+
+**React 18 and earlier:**
+
+```tsx
 <ThemeContext.Provider value={theme}>
   <Page />
 </ThemeContext.Provider>
 ```
 
-**Component Breakdown:**
-- `<ThemeContext.Provider value={theme}>`: The legacy provider syntax, still supported in React 19.
-
-**General Syntax (Nested Providers for the Same Context):**
-```jsx
-<ThemeContext value="light">
-  <Page />           {/* reads "light" */}
-  <ThemeContext value="dark">
-    <Sidebar />      {/* reads "dark" */}
-  </ThemeContext>
-</ThemeContext>
-```
-
-**Component Breakdown:**
-- The inner `<ThemeContext value="dark">` overrides the outer provider for its subtree.
-- `Sidebar` reads `"dark"` because it finds the closest provider above it.
-
 **Syntax Rules:**
-- Call `createContext` outside of any component; never call it inside a component body.
-- In React 19+, render `<SomeContext value={...}>` directly; in older versions, use `<SomeContext.Provider value={...}>`.
-- The provider must be placed above the component that calls `useContext`; a provider inside the same component does not affect that component's `useContext` call.
-- Use nested providers for the same context to scope different values to different subtrees.
-- Always provide a meaningful `value`; avoid passing `undefined` as the value, as it will fall back to the default value from `createContext`.
+
+1. React 19 renders `<Context>` directly as the provider.
+2. `<Context.Provider>` still works but is legacy.
+3. The `value` can be any type.
+4. The innermost matching provider wins.
+5. Changing the `value` reference re-renders all consumers.
 
 **Constraints and Limitations:**
-- The provider's `value` prop is compared by reference (`Object.is`); passing a new object or array literal on every render causes all consumers to re-render unnecessarily.
-- The provider does not optimise re-renders—it broadcasts to all consumers regardless of whether they use the specific part of the value that changed.
-- Deeply nested providers for the same context can make it difficult to trace which value a component receives.
-- Context works only if the `SomeContext` object used to provide and the one used to read are exactly the same object (`===`); duplicate module instances break context.
 
-### Annotated Code Example: Theme Provider with Toggle
+- A new object or function created on every provider render causes all consumers to re-render.
+- Deeply nested providers of the same context create “provider hell” if not composed.
 
-```jsx
-import { createContext, useContext, useState, useMemo } from 'react';
+### Annotated Code Examples
 
-// Step 1: Create the context
-const ThemeContext = createContext(null);
-
-// Step 2: Create a provider component with memoised value
-function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
-
-  // Memoise the value to prevent unnecessary consumer re-renders
-  const value = useMemo(
-    () => ({ theme, setTheme }),
-    [theme]
-  );
-
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}
-
-// Custom hook for safe consumption
-function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-}
-
-// Consumer component: deeply nested
-function ThemedButton() {
-  const { theme, setTheme } = useTheme();
-
-  return (
-    <button
-      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-      style={{
-        background: theme === 'dark' ? '#333' : '#fff',
-        color: theme === 'dark' ? '#fff' : '#333',
-      }}
-    >
-      Switch to {theme === 'light' ? 'dark' : 'light'} mode
-    </button>
-  );
-}
-
-// Intermediate component: does NOT consume the context
-function Toolbar() {
-  return (
-    <div>
-      <ThemedButton />
-    </div>
-  );
-}
-
-// App: wraps the tree with the provider
-export default function App() {
-  return (
-    <ThemeProvider>
-      <h1>Theme Switcher</h1>
-      <Toolbar />
-    </ThemeProvider>
-  );
-}
-```
-
-**Expected Output:** A heading "Theme Switcher" and a button labelled "Switch to dark mode". Clicking the button changes the theme to dark, updating the button's background to dark and text to white, and changing the label to "Switch to light mode".
-
-**Why This Output Occurs:** The `ThemeProvider` owns the `theme` state and provides it via `ThemeContext.Provider`. The `value` object is memoised with `useMemo`, so it only changes when `theme` changes. `ThemedButton` is a deeply nested descendant (rendered inside `Toolbar`) and consumes the context with `useTheme()`. `Toolbar` is an intermediate component that does not use the context at all—it simply renders its children. When the button calls `setTheme('dark')`, the provider's value changes, and `ThemedButton` re-renders with the new theme. `Toolbar` does not re-render because it does not consume the context.
-
-### Real-World Cases
-
-- **Theme switching:** A `ThemeProvider` broadcasts the current theme and a toggle function to all components in the app.
-- **User authentication:** An `AuthProvider` broadcasts the current user and login/logout functions to the entire app.
-- **Locale/internationalisation:** A `LocaleProvider` broadcasts the current language and translation function to all components.
-- **Shopping cart:** A `CartProvider` broadcasts cart items and add/remove functions to product pages and the cart sidebar.
-- **Feature flags:** A `FeatureFlagProvider` broadcasts enabled/disabled flags to components throughout the app.
-
-### References
-
-- React Official Documentation – createContext: https://vi.react.dev/reference/react/createContext
-- React Official Documentation – Passing Data Deeply with Context: https://18.react.dev/learn/passing-data-deeply-with-context
-- React Official Documentation – useContext: https://18.react.dev/reference/react/useContext
-- React Official Documentation – Context (Legacy): https://legacy.reactjs.org/docs/context.html
-
----
-
-## Core Concept 2: Context Values (The Payload Data)
-
-### Definitions
-
-**Core Definition:** A context value is the payload data or state-update handles passed explicitly to a Provider, which exposes them to all downstream consumer components via the `useContext` Hook.
-
-**Technical Definition:** The context value is the argument passed to the provider's `value` prop. It can be of any type: a primitive (string, number, boolean), an object containing multiple fields, or a function (such as a state setter or dispatch function). When a component calls `useContext(SomeContext)`, React searches the component tree upward for the nearest matching provider and returns its `value`. If no provider is found, the default value passed to `createContext` is returned. The value is compared between renders using `Object.is`; if the reference is unchanged, consumers do not re-render. This makes value stability critical: passing a new object literal on every render (`value={{ theme, setTheme }}`) creates a new reference each time, causing all consumers to re-render even if `theme` has not changed. The solution is to memoise the value with `useMemo` or split the context into multiple contexts.
-
-**Beginner-Friendly Explanation:** The context value is the message the radio tower broadcasts. It can be a simple message (a string), a complex message (an object with many fields), or even a walkie-talkie (a function that lets you talk back). The important thing is that if you change the message, everyone listening will update. But if you just re-record the same message in a new package, everyone still thinks it is a new message and updates unnecessarily. Memoising the value is like saying: "Only re-record the message if the actual content has changed."
-
-### Purposes
-
-- To carry the actual data (theme, user, locale, cart items) that consumers need.
-- To provide state-update handles (setters, dispatch functions) so consumers can request changes.
-- To bundle related values into a single object for convenience (with the caveat of needing memoisation).
-- To expose a stable dispatch function from `useReducer` in its own context, so write-only components do not re-render on state changes.
-- To provide a stable API for consumers through custom hooks that read the context.
-
-### Syntax Rules and Structure
-
-**General Syntax (Primitive Value):**
-```jsx
-const ThemeContext = createContext('light');
-
-<ThemeContext value="dark">
-  <Page />
-</ThemeContext>
-```
-
-**Component Breakdown:**
-- `value="dark"`: A primitive string value.
-- Consumers receive `"dark"` when they call `useContext(ThemeContext)`.
-
-**General Syntax (Object Value — Memoised):**
-```jsx
-const value = useMemo(() => ({ theme, setTheme }), [theme]);
-
-<ThemeContext.Provider value={value}>
-  <Page />
-</ThemeContext.Provider>
-```
-
-**Component Breakdown:**
-- `useMemo(() => ({ theme, setTheme }), [theme])`: Memoises the object so it only changes when `theme` changes.
-- `value={value}`: The memoised object is passed to the provider.
-
-**General Syntax (Separate State and Dispatch Contexts):**
-```jsx
-const TasksContext = createContext(null);
-const TasksDispatchContext = createContext(null);
-
-function TasksProvider({ children }) {
-  const [tasks, dispatch] = useReducer(tasksReducer, []);
-
-  return (
-    <TasksContext.Provider value={tasks}>
-      <TasksDispatchContext.Provider value={dispatch}>
-        {children}
-      </TasksDispatchContext.Provider>
-    </TasksContext.Provider>
-  );
-}
-```
-
-**Component Breakdown:**
-- `TasksContext` holds the state (`tasks`).
-- `TasksDispatchContext` holds the `dispatch` function, which is a stable reference from `useReducer`.
-- Components that only dispatch actions consume `TasksDispatchContext` and do not re-render when `tasks` changes.
-
-**Syntax Rules:**
-- Pass the value directly to the provider: `<SomeContext value={value}>`.
-- Memoise object values with `useMemo` and function values with `useCallback` to maintain reference stability.
-- Split state and dispatch into separate contexts to prevent write-only components from re-rendering on state changes.
-- Use `null` or `undefined` as the default value for contexts that will always have a provider, and create a custom hook that throws a clear error if used outside the provider.
-- Never pass a new object literal directly as the value without memoisation; this causes all consumers to re-render on every provider render.
-
-**Constraints and Limitations:**
-- All consumers of a context re-render when the value reference changes, even if they only use a small part of the value.
-- Context values should be kept small and stable; combining unrelated concerns into one context creates a "mega context" that causes unnecessary re-renders.
-- The default value from `createContext` is a static fallback; it does not update over time.
-- Using `undefined` as the default value and throwing in a custom hook is a recommended pattern for catching provider misuse.
-
-### Annotated Code Example: Task Manager with Split State and Dispatch Contexts
-
-```jsx
-import { createContext, useContext, useReducer } from 'react';
-
-// Step 1: Create two separate contexts
-const TasksContext = createContext(null);
-const TasksDispatchContext = createContext(null);
-
-// Reducer for task state management
-function tasksReducer(tasks, action) {
-  switch (action.type) {
-    case 'added':
-      return [...tasks, { id: action.id, text: action.text, done: false }];
-    case 'toggled':
-      return tasks.map(t =>
-        t.id === action.id ? { ...t, done: !t.done } : t
-      );
-    case 'deleted':
-      return tasks.filter(t => t.id !== action.id);
-    default:
-      throw new Error('Unknown action: ' + action.type);
-  }
-}
-
-// Provider component: provides state and dispatch via separate contexts
-export function TasksProvider({ children }) {
-  const [tasks, dispatch] = useReducer(tasksReducer, []);
-
-  return (
-    <TasksContext.Provider value={tasks}>
-      <TasksDispatchContext.Provider value={dispatch}>
-        {children}
-      </TasksDispatchContext.Provider>
-    </TasksContext.Provider>
-  );
-}
-
-// Custom hooks for consuming each context
-export function useTasks() {
-  const context = useContext(TasksContext);
-  if (context === undefined) {
-    throw new Error('useTasks must be used within TasksProvider');
-  }
-  return context;
-}
-
-export function useTasksDispatch() {
-  const context = useContext(TasksDispatchContext);
-  if (context === undefined) {
-    throw new Error('useTasksDispatch must be used within TasksProvider');
-  }
-  return context;
-}
-
-// Consumer 1: reads tasks (re-renders when tasks change)
-function TaskList() {
-  const tasks = useTasks();
-
-  return (
-    <ul>
-      {tasks.map(task => (
-        <li key={task.id}>
-          {task.text} {task.done ? '✓' : ''}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// Consumer 2: dispatches actions (does NOT re-render when tasks change)
-function AddTask() {
-  const dispatch = useTasksDispatch();
-  let nextId = 3;
-
-  return (
-    <button onClick={() => {
-      dispatch({ type: 'added', id: nextId++, text: 'New Task' });
-    }}>
-      Add Task
-    </button>
-  );
-}
-
-// App: wraps the tree with the provider
-export default function TaskApp() {
-  return (
-    <TasksProvider>
-      <h1>Task Manager</h1>
-      <TaskList />
-      <AddTask />
-    </TasksProvider>
-  );
-}
-```
-
-**Expected Output:** A heading "Task Manager", an empty task list, and an "Add Task" button. Clicking "Add Task" adds a new task to the list. The `AddTask` component does not re-render when tasks are added because it only consumes the dispatch context, which has a stable reference.
-
-**Why This Output Occurs:** The `tasks` state and `dispatch` function are provided via two separate contexts. `TaskList` reads `tasks` via `useTasks()`, and `AddTask` calls `dispatch` via `useTasksDispatch()`. When `AddTask` dispatches an action, the reducer updates the `tasks` state, the `TasksContext.Provider` value changes, and `TaskList` re-renders with the new task. `AddTask` does not re-render because it consumes only `TasksDispatchContext`, whose value (`dispatch`) is a stable reference from `useReducer` and never changes.
-
-### Real-World Cases
-
-- **Task management:** Separating task state from dispatch so form components do not re-render on every task update.
-- **Game loops:** Separating game state from dispatch so action buttons do not re-render on every tick.
-- **Theme switching:** Providing the theme value and toggle function in a memoised object.
-- **Authentication:** Providing the current user and login/logout functions in a memoised object.
-- **Shopping carts:** Separating cart items from cart actions (add, remove, update quantity).
-
-### References
-
-- React Official Documentation – Scaling Up with Reducer and Context: https://18.react.dev/learn/scaling-up-with-reducer-and-context
-- React Official Documentation – useContext: https://18.react.dev/reference/react/useContext
-- CodeSignal – Splitting State and Dispatch: https://codesignal.com/learn/courses/performance-optimization-and-rendering-strategies/lessons/splitting-state-and-dispatch
-- Vercel – REACT_STABLE_CONTEXT_PROVIDER_VALUE: https://vercel-docs.vercel.sh/docs/conformance/rules/REACT_STABLE_CONTEXT_PROVIDER_VALUE
-
----
-
-## Core Concept 3: Provider Composition (Layering and Nesting)
-
-### Definitions
-
-**Core Definition:** Provider composition is the pattern of layering and nesting multiple single-purpose context providers cleanly to enforce a predictable data hierarchy and avoid massive, monolithic context files.
-
-**Technical Definition:** Provider composition is the architectural practice of organising multiple context providers into a structured hierarchy, typically by creating a single composition component (e.g., `AppProviders`) that nests each single-purpose provider in a deliberate order. Each provider handles one concern—theme, authentication, notifications, locale—and the composition component establishes the dependency order between them. Without composition, multiple providers create "provider hell" or "wrapper hell": a deeply nested hierarchy of providers that makes code harder to read and maintain. The composition pattern solves this by encapsulating the nesting in a single component, so the root `App` component remains clean. Domain-specific provider compositions can also be created for feature-scoped subtrees, wrapping only the part of the tree that needs those contexts.
-
-**Beginner-Friendly Explanation:** Imagine you are setting up a house with multiple utilities: electricity, water, gas, internet, and cable. You could run all the pipes and wires individually to every room, creating a tangled mess in the basement (provider hell). Instead, you install a single utility panel that connects everything in the right order—electricity first, then internet, then cable—and run one organised bundle to the rest of the house. That is provider composition: you bundle all your context providers into one clean component, and the rest of your app just plugs into that bundle.
-
-### Purposes
-
-- To organise multiple contexts into a single, readable composition component.
-- To establish a deliberate dependency order between providers (e.g., auth before theme, because theme may depend on user preferences).
-- To avoid "provider hell" caused by deeply nested inline providers in the root component.
-- To enable domain-specific provider compositions for feature-scoped subtrees.
-- To make it easy to add, remove, or reorder providers without editing the root component.
-- To keep the root `App` component clean and focused on routing and layout.
-
-### Syntax Rules and Structure
-
-**General Syntax (Without Composition — Provider Hell):**
-```jsx
+```tsx
 function App() {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
   return (
-    <ThemeProvider>
-      <UserProvider>
-        <NotificationProvider>
-          <LanguageProvider>
-            <AppContent />
-          </LanguageProvider>
-        </NotificationProvider>
-      </UserProvider>
-    </ThemeProvider>
+    <ThemeContext value={theme}>
+      <Toolbar />
+      <button onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}>
+        Toggle
+      </button>
+    </ThemeContext>
   );
 }
 ```
 
-**Component Breakdown:**
-- Multiple nested providers in the root component create a "pyramid of doom" that is hard to read and maintain.
+**Expected Output:** All consumers inside the provider read the current theme; clicking Toggle updates them.
 
-**General Syntax (With Composition — AppProviders):**
-```jsx
-// AppProviders.jsx
-import { ThemeProvider } from './ThemeContext';
-import { UserProvider } from './UserContext';
-import { NotificationProvider } from './NotificationContext';
-import { LanguageProvider } from './LanguageContext';
-
-export function AppProviders({ children }) {
-  return (
-    <ThemeProvider>
-      <UserProvider>
-        <NotificationProvider>
-          <LanguageProvider>
-            {children}
-          </LanguageProvider>
-        </NotificationProvider>
-      </UserProvider>
-    </ThemeProvider>
-  );
-}
-```
-
-**Component Breakdown:**
-- `AppProviders`: A single composition component that encapsulates the provider hierarchy.
-- `{children}`: The rest of the application renders inside all providers.
-- The root `App` becomes: `<AppProviders><AppContent /></AppProviders>`.
-
-**General Syntax (Domain-Specific Provider Composition):**
-```jsx
-// CheckoutProviders.jsx — scoped to the checkout feature
-export function CheckoutProviders({ children }) {
-  return (
-    <PaymentProvider>
-      <ShippingProvider>
-        <CheckoutFormProvider>
-          {children}
-        </CheckoutFormProvider>
-      </ShippingProvider>
-    </PaymentProvider>
-  );
-}
-```
-
-**Component Breakdown:**
-- `CheckoutProviders`: A feature-scoped composition that wraps only the checkout subtree.
-- Other parts of the app are not affected by these providers.
-
-**Syntax Rules:**
-- Create a single `AppProviders` component that nests all app-wide providers.
-- Use the root `App` component only to render `<AppProviders>` and the router/layout.
-- Create domain-specific provider compositions (e.g., `CheckoutProviders`, `DashboardProviders`) for feature-scoped subtrees.
-- Order providers deliberately: providers that other providers depend on should be outermost.
-- Keep each provider single-purpose; do not combine unrelated concerns into one provider.
-- Use the composition component to make it easy to add, remove, or reorder providers.
-
-**Constraints and Limitations:**
-- Provider composition does not reduce re-renders; it only improves organisation and readability.
-- The order of providers matters when providers depend on each other (e.g., a theme provider that reads the user's locale from a locale provider must be nested inside it).
-- Domain-specific compositions add a small amount of indirection; ensure the composition is discoverable.
-- Over-composing (creating a composition for every feature) can lead to too many layers of indirection.
-
-### Annotated Code Example: Composing App-Wide Providers
-
-```jsx
-// --- ThemeContext.jsx ---
-import { createContext, useContext, useState, useMemo } from 'react';
-
-const ThemeContext = createContext(null);
-
-export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
-  const value = useMemo(() => ({ theme, setTheme }), [theme]);
-
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) throw new Error('useTheme must be used within ThemeProvider');
-  return context;
-}
-```
-
-```jsx
-// --- UserContext.jsx ---
-import { createContext, useContext, useState, useMemo } from 'react';
-
-const UserContext = createContext(null);
-
-export function UserProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const value = useMemo(() => ({ user, setUser }), [user]);
-
-  return (
-    <UserContext.Provider value={value}>
-      {children}
-    </UserContext.Provider>
-  );
-}
-
-export function useUser() {
-  const context = useContext(UserContext);
-  if (!context) throw new Error('useUser must be used within UserProvider');
-  return context;
-}
-```
-
-```jsx
-// --- NotificationContext.jsx ---
-import { createContext, useContext, useState, useMemo } from 'react';
-
-const NotificationContext = createContext(null);
-
-export function NotificationProvider({ children }) {
-  const [notifications, setNotifications] = useState([]);
-  const value = useMemo(
-    () => ({ notifications, setNotifications }),
-    [notifications]
-  );
-
-  return (
-    <NotificationContext.Provider value={value}>
-      {children}
-    </NotificationContext.Provider>
-  );
-}
-
-export function useNotifications() {
-  const context = useContext(NotificationContext);
-  if (!context) throw new Error('useNotifications must be used within NotificationProvider');
-  return context;
-}
-```
-
-```jsx
-// --- AppProviders.jsx ---
-import { ThemeProvider } from './ThemeContext';
-import { UserProvider } from './UserContext';
-import { NotificationProvider } from './NotificationContext';
-
-export function AppProviders({ children }) {
-  return (
-    <ThemeProvider>
-      <UserProvider>
-        <NotificationProvider>
-          {children}
-        </NotificationProvider>
-      </UserProvider>
-    </ThemeProvider>
-  );
-}
-```
-
-```jsx
-// --- App.jsx ---
-import { AppProviders } from './AppProviders';
-
-export default function App() {
-  return (
-    <AppProviders>
-      <MainLayout />
-    </AppProviders>
-  );
-}
-```
-
-**Expected Output:** The application renders normally, with all app-wide contexts (theme, user, notifications) available to any component in the tree. The root `App` component is clean and focused on layout, and the provider hierarchy is encapsulated in a single `AppProviders` component.
-
-**Why This Output Occurs:** Each context is defined in its own module with a single-purpose provider and a custom hook. The `AppProviders` component nests them in a deliberate order (Theme → User → Notification). The root `App` simply wraps the application in `<AppProviders>`. This composition pattern keeps the root component clean and makes it easy to add, remove, or reorder providers without touching the root component.
+**Why this output:** The provider supplies `theme`. When `theme` changes, React re-renders every component reading `ThemeContext`.
 
 ### Real-World Cases
 
-- **E-commerce:** `AppProviders` wraps theme, user, cart, and notification providers; `CheckoutProviders` adds payment and shipping providers for the checkout subtree.
-- **Dashboard:** `AppProviders` wraps auth, theme, and notification providers; `DashboardProviders` adds filter and widget providers for the dashboard subtree.
-- **SaaS applications:** `AppProviders` wraps auth, theme, locale, and feature-flag providers.
-- **Multi-tenant applications:** `AppProviders` wraps tenant, user, and permission providers.
-- **Admin panels:** `AdminProviders` adds audit-log and permission providers for admin-only routes.
+- **App-wide theme:** Wrapping the root layout.
+- **Authenticated area:** Wrapping only the authenticated subtree.
+- **Multi-tenant apps:** Providing a tenant context at a route boundary.
 
 ### References
 
-- Compile-N-Run – React Context Composition: https://github.com/Compile-N-Run/Compile-N-Run/blob/5e277f39f3e5b8b740aba0789e01e388911932ce/docs/framework/react/12-react-advanced-patterns/4-react-context-composition.mdx
-- React Official Documentation – Scaling Up with Reducer and Context: https://18.react.dev/learn/scaling-up-with-reducer-and-context
-- Feature-Sliced Design – React's Context API: Friend or Architectural Foe?: https://feature-sliced.design/blog/context-api-performance
-- react-providers-tree – npm: https://www.npmjs.com/package/react-providers-tree
+- React — createContext: Provider — https://react.dev/reference/react/createContext#provider
+- Context (virastack) — https://github.com/virastack/academy/blob/6a28815094da2825f46e17325d6dcc85902dbe6c/content/en/react/context.md
 
 ---
 
-## Core Concept 4: Context Performance Considerations (Re-render Mitigation)
+## 4. Context Consumer
 
 ### Definitions
 
-**Core Definition:** Context performance considerations are the practices and patterns used to mitigate the performance cost of broad re-renders across all consumer components whenever a context value's reference changes, primarily through value memoisation, context splitting, and provider composition.
+**Core Definition:** A context consumer is the component or hook that reads a context value from the nearest provider above it.
 
-**Technical Definition:** Context is a broadcast mechanism, not an optimisation tool. When a provider's `value` prop changes—as determined by `Object.is` comparison—React automatically re-renders all components that read that context, regardless of whether they use the specific part of the value that changed. This creates two primary performance pitfalls: (1) **reference instability**, where new object or array literals are passed as the value on every render, causing all consumers to re-render even when the content is identical; and (2) **mega context**, where unrelated concerns (user data, theme, UI state, notifications) are combined into a single context, so changing any one value re-renders all consumers of the entire context. The solutions are: **value memoisation** (wrapping object values in `useMemo` and function values in `useCallback`), **context splitting** (separating unrelated concerns into separate contexts), **state-dispatch separation** (placing `useReducer`'s state and dispatch in different contexts so write-only components do not re-render on state changes), and **memo boundaries** (using `React.memo` on intermediate components that do not consume the context).
+**Technical Definition:** The modern way to consume context is `useContext(SomeContext)` (or `use(SomeContext)` in React 19). The legacy `<SomeContext.Consumer>` render-prop component still works but is rarely used and not recommended for new code. The consumer receives the value of the nearest provider above it, or the default value if no provider exists.
 
-**Beginner-Friendly Explanation:** Imagine a company-wide email list. Every time someone sends an email, everyone on the list gets a notification—even if the email is only relevant to one department. That is a mega context. The solution is to create separate email lists for each department (splitting contexts) and to only send emails when there is actually new information (memoising values). If you send the same email again just because you opened your email client, everyone gets a useless notification. Memoisation is like saying: "Only send the email if the content has actually changed."
+**Beginner-Friendly Explanation:** The consumer is how you read the value. Today you use `useContext`; the old `<Consumer>` render prop is legacy.
 
 ### Purposes
 
-- To prevent unnecessary re-renders caused by new object or array literals passed as context values.
-- To isolate re-renders so that a change in one context does not re-render consumers of unrelated contexts.
-- To prevent write-only components (those that only dispatch actions) from re-rendering on every state change.
-- To keep the provider value small and stable, so consumers only re-render when genuinely relevant data changes.
-- To use memo boundaries to prevent intermediate components from re-rendering unnecessarily.
+- To read a context value in a component.
+- To subscribe the component to context changes.
+- To access the nearest provider's value.
+- To replace legacy render-prop consumers with a hook.
 
 ### Syntax Rules and Structure
 
-**Pitfall 1: Unstable Value References (Anti-Pattern)**
-```jsx
-// ❌ Bad: new object literal on every render
-function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
+**Modern:**
 
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+```tsx
+const theme = useContext(ThemeContext);
+```
+
+**Legacy (not recommended):**
+
+```tsx
+<ThemeContext.Consumer>
+  {theme => <button className={theme} />}
+</ThemeContext.Consumer>
+```
+
+**Syntax Rules:**
+
+1. `useContext` is the recommended consumer.
+2. `use` can also read context in React 19 and can be called conditionally.
+3. The legacy `Consumer` uses a render prop and re-runs when the value changes.
+4. Only components that call `useContext` re-render on context change.
+
+**Constraints and Limitations:**
+
+- `useContext` cannot be called inside conditions or loops.
+- The legacy `Consumer` cannot be used with hooks.
+
+### Annotated Code Examples
+
+```tsx
+function ThemedButton() {
+  const theme = useContext(ThemeContext);
+  return <button className={theme}>Click</button>;
+}
+```
+
+**Expected Output:** The button's class reflects the nearest provider's theme; it re-renders only when the theme changes.
+
+**Why this output:** `useContext` subscribes the component to the context. React re-renders it when the provider's value changes.
+
+### Real-World Cases
+
+- **Theme consumers:** Buttons and badges reading the theme.
+- **Auth consumers:** Menus and avatars reading the current user.
+- **Locale consumers:** Formatters reading the current locale.
+
+### References
+
+- React — createContext: Consumer — https://react.dev/reference/react/createContext#consumer
+- React — useContext — https://react.dev/reference/react/useContext
+
+---
+
+## 5. `useContext`
+
+### Definitions
+
+**Core Definition:** `useContext` is the React Hook that reads and subscribes to a context value from the nearest provider above the calling component.
+
+**Technical Definition:** `const value = useContext(SomeContext)` returns the current context value. React searches upward from the calling component and returns the value of the innermost matching provider; if none exists, it returns the default value from `createContext`. React automatically re-renders the component when the context value changes. `useContext` must be called at the top level of a component or custom Hook and cannot be called conditionally.
+
+**Beginner-Friendly Explanation:** `useContext` is how a component reads a context. You pass it the context object, and it gives you the current value.
+
+### Purposes
+
+- To read a context value without prop drilling.
+- To subscribe the component to context changes.
+- To access the nearest provider's value.
+- To encapsulate context access in a custom hook.
+
+### Syntax Rules and Structure
+
+```tsx
+const value = useContext(SomeContext);
+```
+
+**Syntax Rules:**
+
+1. Call at the top level of a component or custom Hook.
+2. Cannot be called inside conditions or loops.
+3. React compares context values by reference.
+4. The nearest provider wins.
+5. In React 19, `use(Context)` is an alternative that **can** be called conditionally.
+
+**Constraints and Limitations:**
+
+- No selector support: every consumer re-renders when the value changes.
+- Cannot read a provider in the same component that renders it.
+
+### Annotated Code Examples
+
+```tsx
+function UserName() {
+  const { user } = useContext(AuthContext);
+  return <span>{user?.name ?? 'Guest'}</span>;
+}
+```
+
+**Expected Output:** The user's name renders from the nearest auth provider, or “Guest” if there is no user.
+
+**Why this output:** `useContext` reads the auth value. If the user changes, the component re-renders.
+
+### Real-World Cases
+
+- **Auth-aware components:** Reading the current user.
+- **Theme-aware components:** Reading the theme.
+- **Locale-aware components:** Reading the locale.
+
+### References
+
+- React — useContext — https://react.dev/reference/react/useContext
+- React 19 Context improvements — https://github.com/fusengine/agents/blob/main/plugins/react-expert/skills/react-19/references/context-improvements.md
+
+---
+
+## 6. Context Value
+
+### Definitions
+
+**Core Definition:** The context value is the data supplied by the provider and read by consumers.
+
+**Technical Definition:** The `value` prop can be of any type: a primitive, object, array, function, or JSX. React compares the previous and next values with `Object.is`. If the value is a new object or function reference on every render, all consumers re-render even if the contents are unchanged. Values should therefore be stabilised with `useMemo` (objects) or `useCallback` (functions) when they are not primitives.
+
+**Beginner-Friendly Explanation:** The context value is what you put into the provider and what consumers read. It can be anything, but if you create a new object every time, consumers will re-render unnecessarily.
+
+### Purposes
+
+- To supply data to consumers.
+- To share state and actions together.
+- To enable theming and configuration.
+- To support functions as context values (e.g., `dispatch`, `login`).
+
+### Syntax Rules and Structure
+
+```tsx
+<SomeContext value={{ user, theme }}>
+  {children}
+</SomeContext>
+```
+
+**Syntax Rules:**
+
+1. The value can be any type.
+2. React compares by reference (`Object.is`).
+3. Wrap object values in `useMemo` and function values in `useCallback`.
+4. Split state and actions into separate contexts when performance matters.
+
+**Constraints and Limitations:**
+
+- A new object/function reference on every render re-renders all consumers.
+- Large context values make selective consumption harder.
+
+### Annotated Code Examples
+
+```tsx
+const value = useMemo(() => ({ user, setUser }), [user]);
+return <UserContext value={value}>{children}</UserContext>;
+```
+
+**Expected Output:** The context value only changes when `user` changes; consumers do not re-render on unrelated parent renders.
+
+**Why this output:** `useMemo` keeps the object reference stable until `user` changes.
+
+### Real-World Cases
+
+- **Auth value:** `{ user, login, logout }`.
+- **Theme value:** `{ theme, setTheme }`.
+- **Dispatch value:** `dispatch` from `useReducer` (stable reference).
+
+### References
+
+- React — Passing Data Deeply with Context — https://react.dev/learn/passing-data-deeply-with-context
+- Vercel — REACT_STABLE_CONTEXT_PROVIDER_VALUE — https://vercel.com/docs/conformance/rules/react_stable_context_provider_value
+- rslint — jsx-no-constructed-context-values — https://github.com/web-infra-dev/rslint/blob/bca18898f54c441205d6384ab02a7d3cf7982631/internal/plugins/react/rules/jsx_no_constructed_context_values/jsx_no_constructed_context_values.md
+
+---
+
+## 7. Context Default Value
+
+### Definitions
+
+**Core Definition:** The context default value is the fallback returned by `useContext` when there is no matching provider above the reading component.
+
+**Technical Definition:** The `defaultValue` passed to `createContext` is used only when a component reads the context but no matching provider exists above it. It is a static “last resort” fallback and never changes. If there is no meaningful default, pass `null`. A common pattern is to default to `null`, keep the context unexported, and expose a custom hook that throws when the context is `null`.
+
+**Beginner-Friendly Explanation:** The default is what you get if you forgot to wrap the component in a provider. It is a safety net, not the normal way to supply data.
+
+### Purposes
+
+- To provide a fallback when no provider exists.
+- To avoid crashes when a component is used standalone.
+- To force explicit provider presence by defaulting to `null` and throwing.
+- To document the expected shape of the value.
+
+### Syntax Rules and Structure
+
+```tsx
+const ThemeContext = createContext('light');
+const AuthContext = createContext<Auth | null>(null);
+```
+
+**Syntax Rules:**
+
+1. Use a meaningful default only when standalone use makes sense.
+2. Use `null` when no meaningful default exists.
+3. The default is static and never changes.
+4. Pair a `null` default with a guard hook that throws.
+
+**Constraints and Limitations:**
+
+- The default is not a substitute for a provider.
+- A non-null default can hide a missing provider and cause subtle bugs.
+
+### Annotated Code Examples
+
+```tsx
+const CartContext = createContext<CartContextValue | null>(null);
+
+export function useCart() {
+  const cart = useContext(CartContext);
+  if (cart === null) {
+    throw new Error('useCart must be used within CartProvider.');
+  }
+  return cart;
+}
+```
+
+**Expected Output:** Using `useCart` outside the provider throws a clear error instead of silently receiving a default value.
+
+**Why this output:** The default is `null`; the guard hook converts a missing provider into an explicit error.
+
+### Real-World Cases
+
+- **Auth context:** `null` default with a guard hook.
+- **Theme context:** `'light'` default for standalone components.
+- **Locale context:** `'en'` default.
+
+### References
+
+- React — createContext: defaultValue — https://react.dev/reference/react/createContext#parameters
+- Context (virastack): custom hook pattern — https://github.com/virastack/academy/blob/6a28815094da2825f46e17325d6dcc85902dbe6c/content/en/react/context.md#1
+
+---
+
+## 8. Context Nesting
+
+### Definitions
+
+**Core Definition:** Context nesting is placing multiple providers inside one another to supply different contexts to different subtrees.
+
+**Technical Definition:** React allows providers to be nested. Each provider supplies its own context value to the components below it. When providers of the **same** context are nested, the innermost provider's value overrides the outer one for its subtree. Nesting different contexts allows independent data to be shared at different levels. Deep nesting of the same context creates “provider hell” and should be avoided.
+
+**Beginner-Friendly Explanation:** You can put providers inside other providers. Each one supplies its own data, and the closest provider wins.
+
+### Purposes
+
+- To scope multiple contexts to a subtree.
+- To override a context value for a nested region.
+- To compose independent providers for different concerns.
+- To avoid one giant provider.
+
+### Syntax Rules and Structure
+
+```tsx
+<ThemeContext value="dark">
+  <AuthContext value={user}>
+    <CartContext value={cart}>
       {children}
-    </ThemeContext.Provider>
-  );
-}
-// Every render of ThemeProvider creates a new { theme, setTheme } object,
-// causing ALL consumers to re-render even when theme hasn't changed.
+    </CartContext>
+  </AuthContext>
+</ThemeContext>
 ```
 
-**Solution 1: Memoise the Value with `useMemo`**
-```jsx
-// ✅ Good: memoised value
-function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
+**Syntax Rules:**
 
-  const value = useMemo(() => ({ theme, setTheme }), [theme]);
+1. Different contexts can be nested freely.
+2. The innermost provider of the same context wins.
+3. Compose providers into a single `AppProviders` component to reduce nesting in the app tree.
+4. Avoid deeply nested same-context providers unless intentionally overriding.
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
-}
-```
+**Constraints and Limitations:**
 
-**Component Breakdown:**
-- `useMemo(() => ({ theme, setTheme }), [theme])`: The value object is only recreated when `theme` changes.
-- Consumers only re-render when `theme` actually changes.
+- Deep nesting creates “provider hell”.
+- The innermost same-context provider completely shadows the outer one.
 
-**Pitfall 2: Mega Context (Anti-Pattern)**
-```jsx
-// ❌ Bad: everything in one context
-const AppContext = createContext(null);
+### Annotated Code Examples
 
-function AppProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [theme, setTheme] = useState('light');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const value = useMemo(() => ({
-    user, setUser,
-    theme, setTheme,
-    sidebarOpen, setSidebarOpen,
-  }), [user, theme, sidebarOpen]);
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
-}
-// Changing ANY value re-renders ALL consumers.
-```
-
-**Solution 2: Split into Separate Contexts**
-```jsx
-// ✅ Good: separate contexts for separate concerns
-const UserContext = createContext(null);
-const ThemeContext = createContext(null);
-const UIContext = createContext(null);
-
+```tsx
 function AppProviders({ children }) {
   return (
-    <UserProvider>
-      <ThemeProvider>
-        <UIProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CartProvider>
           {children}
-        </UIProvider>
-      </ThemeProvider>
-    </UserProvider>
+        </CartProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 ```
 
-**Component Breakdown:**
-- `UserContext`, `ThemeContext`, and `UIContext` are separate contexts.
-- Changing the theme re-renders only theme consumers, not user or UI consumers.
+**Expected Output:** All three contexts are available to `children`; the app tree stays clean.
 
-**Pitfall 3: State and Dispatch in the Same Context (Anti-Pattern)**
-```jsx
-// ❌ Bad: state and dispatch in the same context
-const TasksContext = createContext(null);
-
-function TasksProvider({ children }) {
-  const [tasks, dispatch] = useReducer(tasksReducer, []);
-
-  const value = useMemo(() => ({ tasks, dispatch }), [tasks]);
-
-  return <TasksContext.Provider value={value}>{children}</TasksContext.Provider>;
-}
-// Components that only dispatch actions still re-render when tasks changes.
-```
-
-**Solution 3: Split State and Dispatch into Separate Contexts**
-```jsx
-// ✅ Good: separate state and dispatch contexts
-const TasksContext = createContext(null);
-const TasksDispatchContext = createContext(null);
-
-function TasksProvider({ children }) {
-  const [tasks, dispatch] = useReducer(tasksReducer, []);
-
-  return (
-    <TasksContext.Provider value={tasks}>
-      <TasksDispatchContext.Provider value={dispatch}>
-        {children}
-      </TasksDispatchContext.Provider>
-    </TasksContext.Provider>
-  );
-}
-```
-
-**Component Breakdown:**
-- `dispatch` from `useReducer` is a stable reference and never changes.
-- Components that only consume `TasksDispatchContext` do not re-render when `tasks` changes.
-
-**Syntax Rules:**
-- Always memoise object values with `useMemo` and function values with `useCallback` before passing them to a provider.
-- Split unrelated concerns into separate contexts; never combine user data, theme, and UI state into one context.
-- Separate `useReducer`'s state and dispatch into different contexts; dispatch is a stable reference and should not trigger re-renders.
-- Keep context values small and stable; instead of `value={{ user, permissions, theme, locale }}`, use separate contexts for each concern.
-- Use `React.memo` on intermediate components that do not consume the context to prevent them from re-rendering when the provider re-renders.
-- Use custom hooks (`useTheme`, `useUser`) that call `useContext` and throw a clear error if used outside the provider.
-
-**Constraints and Limitations:**
-- `useMemo` is a performance optimisation, not a semantic guarantee; React may discard memoised values in the future.
-- Splitting contexts adds more providers to the composition, but this is a manageable trade-off for performance.
-- Context re-renders cannot be prevented for consumers that genuinely need the changed value; the goal is to isolate re-renders to the smallest possible set of components.
-- Even with memoisation, context is not suitable for high-frequency updates (e.g., mouse position, scroll position); use refs or external stores with selectors for those cases.
-
-### Annotated Code Example: Optimised Task Manager with Split Contexts and Memoisation
-
-```jsx
-import { createContext, useContext, useReducer, useMemo, useCallback } from 'react';
-
-// Step 1: Create separate contexts for state and dispatch
-const TasksContext = createContext(null);
-const TasksDispatchContext = createContext(null);
-
-function tasksReducer(tasks, action) {
-  switch (action.type) {
-    case 'added':
-      return [...tasks, { id: action.id, text: action.text, done: false }];
-    case 'toggled':
-      return tasks.map(t =>
-        t.id === action.id ? { ...t, done: !t.done } : t
-      );
-    case 'deleted':
-      return tasks.filter(t => t.id !== action.id);
-    default:
-      throw new Error('Unknown action: ' + action.type);
-  }
-}
-
-// Step 2: Provider with separate state and dispatch contexts
-function TasksProvider({ children }) {
-  const [tasks, dispatch] = useReducer(tasksReducer, []);
-
-  return (
-    <TasksContext.Provider value={tasks}>
-      <TasksDispatchContext.Provider value={dispatch}>
-        {children}
-      </TasksDispatchContext.Provider>
-    </TasksContext.Provider>
-  );
-}
-
-// Step 3: Custom hooks for safe consumption
-function useTasks() {
-  const context = useContext(TasksContext);
-  if (context === undefined) {
-    throw new Error('useTasks must be used within TasksProvider');
-  }
-  return context;
-}
-
-function useTasksDispatch() {
-  const context = useContext(TasksDispatchContext);
-  if (context === undefined) {
-    throw new Error('useTasksDispatch must be used within TasksProvider');
-  }
-  return context;
-}
-
-// Consumer 1: reads tasks (re-renders when tasks change)
-function TaskList() {
-  const tasks = useTasks();
-
-  return (
-    <ul>
-      {tasks.map(task => (
-        <li key={task.id}>
-          {task.text} {task.done ? '✓' : ''}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// Consumer 2: dispatches actions (does NOT re-render when tasks change)
-function AddTask() {
-  const dispatch = useTasksDispatch();
-  let nextId = 3;
-
-  return (
-    <button onClick={() => {
-      dispatch({ type: 'added', id: nextId++, text: 'New Task' });
-    }}>
-      Add Task
-    </button>
-  );
-}
-
-// Intermediate component wrapped in React.memo
-const TaskStats = React.memo(function TaskStats() {
-  // This component does not consume the context, so it does not re-render
-  // when tasks change — but React.memo prevents it from re-rendering
-  // when the parent re-renders for other reasons.
-  return <p>Task statistics</p>;
-});
-
-// App: wraps the tree with the provider
-export default function TaskApp() {
-  return (
-    <TasksProvider>
-      <h1>Task Manager</h1>
-      <TaskList />
-      <AddTask />
-      <TaskStats />
-    </TasksProvider>
-  );
-}
-```
-
-**Expected Output:** A heading "Task Manager", an empty task list, an "Add Task" button, and "Task statistics". Clicking "Add Task" adds a new task to the list. The `AddTask` component does not re-render when tasks are added because it only consumes the dispatch context, which is a stable reference. The `TaskStats` component does not re-render because it is memoised and does not consume the context.
-
-**Why This Output Occurs:** The `tasks` state and `dispatch` function are provided via two separate contexts. `TaskList` reads `tasks` via `useTasks()`, and `AddTask` calls `dispatch` via `useTasksDispatch()`. When `AddTask` dispatches an action, the reducer updates the `tasks` state, the `TasksContext.Provider` value changes, and `TaskList` re-renders with the new task. `AddTask` does not re-render because it consumes only `TasksDispatchContext`, whose value (`dispatch`) is a stable reference from `useReducer`. `TaskStats` is wrapped in `React.memo` and does not consume any context, so it does not re-render when the provider's value changes.
+**Why this output:** The providers are composed into one wrapper. Nesting different contexts is fine; the wrapper hides the boilerplate.
 
 ### Real-World Cases
 
-- **Task management:** Separating task state from dispatch so form components do not re-render on every task update.
-- **Game loops:** Separating game state from dispatch so action buttons do not re-render on every tick.
-- **Theme switching:** Memoising the theme value object so consumers only re-render when the theme actually changes.
-- **Dashboard filters:** Splitting filter state from filter actions so the filter panel does not re-render when data changes.
-- **Chat applications:** Separating message state from message actions so the message input does not re-render on every incoming message.
+- **Application root:** Theme, auth, and locale providers.
+- **Route-level scoping:** A tenant provider around a route.
+- **Testing:** Overriding a context value for a specific test.
 
 ### References
 
-- React Official Documentation – useContext (Caveats): https://18.react.dev/reference/react/useContext
-- Steve Kinney – Context API Performance Pitfalls: https://stevekinney.com/courses/react-performance/context-api-performance-pitfalls
-- CodeSignal – Splitting State and Dispatch: https://codesignal.com/learn/courses/performance-optimization-and-rendering-strategies/lessons/splitting-state-and-dispatch
-- Vercel – REACT_STABLE_CONTEXT_PROVIDER_VALUE: https://vercel-docs.vercel.sh/docs/conformance/rules/REACT_STABLE_CONTEXT_PROVIDER_VALUE
-- Feature-Sliced Design – React's Context API: Friend or Architectural Foe?: https://feature-sliced.design/blog/context-api-performance
-- LogRocket – React Context tutorial: Complete guide with practical examples: https://blog.logrocket.com/react-context-tutorial/
+- React — Passing Data Deeply with Context — https://react.dev/learn/passing-data-deeply-with-context
+- Context (virastack) — https://github.com/virastack/academy/blob/6a28815094da2825f46e17325d6dcc85902dbe6c/content/en/react/context.md
 
 ---
 
-## Comparison and Decision Guidance
+## 9. Context Composition
 
-| Aspect | Single Context | Split Contexts | State + Dispatch Split | Provider Composition |
-|---|---|---|---|---|
-| **Re-render scope** | All consumers on any value change | Only consumers of the changed context | Only state consumers on state change; dispatch consumers never re-render | Does not affect re-renders; improves organisation |
-| **Value stability** | Requires `useMemo` on the entire value object | Each context memoised independently | Dispatch is inherently stable | N/A |
-| **Best for** | Simple, rarely changing data | Multiple related but independent concerns | Reducer-based state management | Multiple app-wide providers |
-| **Complexity** | Low | Medium | Medium | Low |
-| **Performance risk** | High (mega context) | Low | Very low | None (organisational) |
+### Definitions
 
-**Decision Guidance:**
-- **Start with a single context** for simple, rarely changing values (theme, locale). Memoise the value object.
-- **Split into separate contexts** when the context contains unrelated concerns (user data + theme + UI state). Each concern gets its own context.
-- **Separate state and dispatch** when using `useReducer` with Context. Put `state` and `dispatch` in different contexts to prevent write-only components from re-rendering on state changes.
-- **Use provider composition** to organise multiple providers into a single `AppProviders` component, keeping the root `App` clean.
-- **Use memo boundaries** (`React.memo`) on intermediate components that do not consume the context, so they are skipped when the provider re-renders.
-- **Consider external stores** (Zustand, Redux) when context performance becomes a bottleneck or when selector-based subscriptions are needed.
+**Core Definition:** Context composition is the practice of combining multiple focused contexts and providers to model different concerns, rather than using one monolithic context.
+
+**Technical Definition:** Composition means creating one context per concern (theme, auth, cart), nesting their providers, and letting each consumer read only the context it needs. It is the structural counterpart to context splitting: splitting is about **not** bundling unrelated values into one context; composition is about **how** multiple focused contexts are arranged and consumed together. A component that needs several contexts simply calls several hooks, or uses a `use` call for each.
+
+**Beginner-Friendly Explanation:** Composition means using several small contexts together instead of one giant one. Each component reads only the contexts it actually needs.
+
+### Purposes
+
+- To keep contexts narrow and independent.
+- To prevent one concern's updates from re-rendering consumers of another concern.
+- To compose providers at the application root cleanly.
+- To allow components to opt into only the contexts they need.
+
+### Syntax Rules and Structure
+
+```tsx
+function AppProviders({ children }) {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <CartProvider>{children}</CartProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+function Header() {
+  const theme = useTheme();
+  const { user } = useAuth();
+  return <header className={theme}>{user?.name}</header>;
+}
+```
+
+**Syntax Rules:**
+
+1. One context per independently changing concern.
+2. Compose providers in a single wrapper.
+3. Consumers call only the hooks they need.
+4. Do not bundle unrelated values into one context “for convenience”.
+
+**Constraints and Limitations:**
+
+- More contexts mean more provider components; compose them to keep the tree readable.
+- A component that needs many contexts becomes a heavy consumer; consider whether it should be split.
+
+### Annotated Code Examples
+
+```tsx
+function AppProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <NotificationProvider>{children}</NotificationProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+```
+
+**Expected Output:** A theme consumer re-renders only when the theme changes, not when notifications change.
+
+**Why this output:** Each provider has its own value and its own consumer set. Composition keeps the concerns independent.
+
+### Real-World Cases
+
+- **SaaS layout:** Theme, auth, and notification providers composed at the root.
+- **E-commerce:** Cart, currency, and auth providers.
+- **Multi-tenant apps:** Tenant, theme, and auth providers.
+
+### References
+
+- React — Passing Data Deeply with Context — https://react.dev/learn/passing-data-deeply-with-context
+- pproenca — Context optimization: split by concern — https://github.com/pproenca/dot-skills/blob/9c015c68df33adf461ea9fa7071c119ca0061a0a/skills/.curated/react/references/rstate-context-optimization.md#1
+
+---
+
+## 10. Context Performance
+
+### Definitions
+
+**Core Definition:** Context performance is the re-render cost incurred when a provider's value changes and every consumer re-renders.
+
+**Technical Definition:** Context is a **broadcast mechanism**, not an optimization. When a provider's `value` changes, React re-renders every component that reads that context, even if the component only uses a small, unchanged slice. React compares the previous and next values by reference (`Object.is`); a new object or function reference on every render causes all consumers to re-render unconditionally. Memoizing a consumer with `React.memo` does **not** prevent it from re-rendering when its context value changes. Context is therefore best for values that change rarely; frequently changing state should use a store with selectors.
+
+**Beginner-Friendly Explanation:** Context does not make rendering faster — it makes prop drilling easier. When the value changes, everyone reading it re-renders. If the value changes often, the whole subtree becomes slow.
+
+### Purposes
+
+- To understand why context changes cause re-renders.
+- To choose the right data for context (low-frequency values).
+- To identify re-render cascades before they become production problems.
+- To justify splitting and memoization when context is the right tool.
+
+### Syntax Rules and Structure
+
+**Performance characteristics:**
+
+| Characteristic | Behaviour |
+|----------------|-----------|
+| Value change | All consumers re-render |
+| Reference comparison | `Object.is` on the value |
+| Selector support | None built-in |
+| `React.memo` on consumer | Does **not** block context updates |
+| Best data | Low-frequency values (theme, auth, locale) |
+| Poor data | High-frequency values (form input, mouse position) |
+
+**Syntax Rules:**
+
+1. Put low-frequency values in context.
+2. Do not put per-keystroke state in context; use local state or a store.
+3. Split contexts by update frequency.
+4. Memoize the value and actions to avoid unnecessary changes.
+
+**Constraints and Limitations:**
+
+- Context has no built-in selector; every consumer receives the whole value.
+- `React.memo` cannot prevent a consumer from re-rendering when its context changes.
+
+### Annotated Code Examples
+
+```tsx
+// ❌ High-frequency context: every mouse move re-renders every consumer
+const MouseContext = createContext({ x: 0, y: 0 });
+
+function MouseProvider({ children }) {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => setPos({ x: e.clientX, y: e.clientY });
+    window.addEventListener('mousemove', onMove);
+    return () => window.removeEventListener('mousemove', onMove);
+  }, []);
+  return <MouseContext value={pos}>{children}</MouseContext>;
+}
+```
+
+**Expected Output:** Every mouse movement re-renders every consumer of `MouseContext`.
+
+**Why this output:** The value changes on every mousemove; every consumer re-renders. This is a poor fit for context.
+
+### Real-World Cases
+
+- **Theme:** Low-frequency; good fit.
+- **Auth:** Low-frequency; good fit.
+- **Mouse position:** High-frequency; use a ref, local state, or a store.
+- **Form input:** High-frequency; use local/form state.
+
+### References
+
+- Steve Kinney — Context API Performance Pitfalls — https://stevekinney.com/courses/react-performance/context-api-performance-pitfalls
+- Sharp Edges — Context render cascade — https://github.com/omer-metin/skills-for-antigravity/blob/e8dcf4e8737921a10088bd5c9eb65e81f74c051f/skills/state-management/references/sharp_edges.md
+- React — Passing Data Deeply with Context — https://react.dev/learn/passing-data-deeply-with-context
+
+---
+
+## 11. Context Splitting
+
+### Definitions
+
+**Core Definition:** Context splitting is the practice of dividing one large context into multiple focused contexts, each holding one independently changing piece of state.
+
+**Technical Definition:** A context whose value bundles many independent fields (`{ user, theme, notifications }`) re-renders **all** consumers whenever **any** field changes. Splitting means creating one context per concern (`UserContext`, `ThemeContext`, `NotificationContext`) and nesting their providers. Each consumer then reads only the context it needs and re-renders only when that specific context changes. Splitting is the primary structural fix for context re-render cascades when the data genuinely belongs in context.
+
+**Beginner-Friendly Explanation:** Splitting means using several small contexts instead of one big one. A theme consumer then re-renders only when the theme changes, not when the user or notifications change.
+
+### Purposes
+
+- To prevent unrelated context updates from re-rendering consumers.
+- To let consumers subscribe to only the slice they need.
+- To make context values narrow and independently changeable.
+- To improve performance without abandoning context.
+
+### Syntax Rules and Structure
+
+**❌ Fat context:**
+
+```tsx
+const AppContext = createContext({ user: null, theme: 'light', notifications: [] });
+```
+
+**✅ Split contexts:**
+
+```tsx
+const UserContext = createContext<User | null>(null);
+const ThemeContext = createContext<'light' | 'dark'>('light');
+const NotificationContext = createContext<Notification[]>([]);
+```
+
+**Syntax Rules:**
+
+1. One context per independently changing concern.
+2. Nest the providers; consumers read the context they need.
+3. Split **runtime** providers, not just TypeScript interfaces; a type-only split provides no re-render benefit.
+4. Split by update frequency: rarely changing (theme, auth) vs frequently changing (cart, notifications).
+
+**Constraints and Limitations:**
+
+- More contexts mean more providers; compose them.
+- Splitting is not a substitute for selectors when a single context genuinely bundles a large, frequently changing object.
+
+### Annotated Code Examples
+
+```tsx
+function AppProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <UserContext value={user}>
+      <ThemeContext value={theme}>
+        <NotificationContext value={notifications}>
+          {children}
+        </NotificationContext>
+      </ThemeContext>
+    </UserContext>
+  );
+}
+
+function ThemeButton() {
+  const theme = useContext(ThemeContext); // Only re-renders on theme change
+  return <button className={theme}>Toggle</button>;
+}
+```
+
+**Expected Output:** `ThemeButton` does not re-render when the user or notifications change.
+
+**Why this output:** `ThemeButton` reads only `ThemeContext`. The other providers' changes do not affect it.
+
+### Real-World Cases
+
+- **App shell:** User, theme, and notifications split into separate contexts.
+- **E-commerce:** Cart and auth split.
+- **Dashboards:** Filters and user preferences split.
+
+### References
+
+- pproenca — Context optimization: split fat contexts — https://github.com/pproenca/dot-skills/blob/9c015c68df33adf461ea9fa7071c119ca0061a0a/skills/.curated/react/references/rstate-context-optimization.md#1
+- Steve Kinney — Separating Actions from State with Two Contexts — https://stevekinney.com/courses/react-performance/separating-actions-from-state-with-two-contexts
+- FreeCodeCamp — Shared State Complexity in React — https://www.freecodecamp.org/news/shared-state-complexity-in-react-handbook/
+
+---
+
+## 12. Context Memoization
+
+### Definitions
+
+**Core Definition:** Context memoization is stabilising the context value with `useMemo` (objects) or `useCallback` (functions) so consumers do not re-render on every provider render.
+
+**Technical Definition:** React compares context values by reference. A provider that creates `value={{ user, theme }}` inline creates a new object on every render, causing all consumers to re-render even when the data is unchanged. Memoising the value with `useMemo` keyed on the actual changing parts keeps the reference stable. Similarly, functions passed in the value should be wrapped in `useCallback`. Memoising the **consumer** with `React.memo` is not sufficient: a context update still reaches it.
+
+**Beginner-Friendly Explanation:** Memoization means keeping the context value the same object between renders when its contents have not changed, so consumers do not re-render for no reason.
+
+### Purposes
+
+- To prevent consumers from re-rendering when the value's contents are unchanged.
+- To keep object and function references stable.
+- To complement splitting when a context must carry a composite value.
+- To avoid unnecessary re-renders from parent renders.
+
+### Syntax Rules and Structure
+
+```tsx
+const value = useMemo(() => ({ user, setUser }), [user]);
+const login = useCallback(async (credentials) => { /* ... */ }, []);
+```
+
+**Syntax Rules:**
+
+1. Wrap object values in `useMemo`.
+2. Wrap function values in `useCallback`.
+3. Include the actual changing parts in the dependency array.
+4. Do not rely on `React.memo` alone to block context updates.
+5. Prefer splitting over memoising a very large, frequently changing object.
+
+**Constraints and Limitations:**
+
+- `useMemo` is a performance hint, not a semantic guarantee.
+- Memoising a value that changes every render provides no benefit.
+
+### Annotated Code Examples
+
+```tsx
+function CartProvider({ children }: { children: React.ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([]);
+
+  const addItem = useCallback((item: CartItem) => {
+    setItems((prev) => [...prev, item]);
+  }, []);
+
+  const value = useMemo(() => ({ items, addItem }), [items, addItem]);
+
+  return <CartContext value={value}>{children}</CartContext>;
+}
+```
+
+**Expected Output:** Consumers re-render only when `items` changes, not on every `CartProvider` render.
+
+**Why this output:** `useCallback` stabilises `addItem`; `useMemo` stabilises the value object until `items` changes.
+
+### Real-World Cases
+
+- **Auth providers:** Stable `login` and `logout` callbacks.
+- **Cart providers:** Stable `addItem` and `removeItem`.
+- **Theme providers:** Stable `toggleTheme`.
+
+### References
+
+- Vercel — REACT_STABLE_CONTEXT_PROVIDER_VALUE — https://vercel.com/docs/conformance/rules/react_stable_context_provider_value
+- rslint — jsx-no-constructed-context-values — https://github.com/web-infra-dev/rslint/blob/bca18898f54c441205d6384ab02a7d3cf7982631/internal/plugins/react/rules/jsx_no_constructed_context_values/jsx_no_constructed_context_values.md
+- FreeCodeCamp — Shared State Complexity in React — https://www.freecodecamp.org/news/shared-state-complexity-in-react-handbook/
+
+---
+
+## 13. Context Best Practices
+
+### Definitions
+
+**Core Definition:** Context best practices are the guidelines for using context safely, performantly, and maintainably in React applications.
+
+**Technical Definition:** Best practices combine **provider guards** (custom hooks that throw when context is missing), **splitting by concern**, **memoising values**, **avoiding high-frequency state**, **composing providers**, **keeping the raw context private**, and **migrating to React 19 syntax** where appropriate. The overarching rule is: context is for low-frequency, genuinely shared data; local state, URL state, and server-state libraries handle their categories better.
+
+### Best Practices Table
+
+| Practice | Description |
+|----------|-------------|
+| **Custom hook with guard** | Default to `null`; throw if no provider; export the hook, not the raw context |
+| **Split by concern** | One context per independently changing value |
+| **Memoise the value** | `useMemo` for objects, `useCallback` for functions |
+| **Avoid high-frequency state** | Do not put form input or mouse position in context |
+| **Compose providers** | Nest providers in a single `AppProviders` wrapper |
+| **Keep context narrow** | Do not bundle unrelated values |
+| **Use React 19 syntax** | `<Context value={...}>` and `use(Context)` where appropriate |
+| **Lift before context** | Try props and `children` first; use context only when needed |
+| **Do not duplicate server state** | Use a query cache, not context, for server data |
+| **Test consumers** | Verify guard errors and re-render boundaries |
+
+### Annotated Code Examples
+
+**✅ Good Practices:**
+
+```tsx
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export function useAuth() {
+  const auth = useContext(AuthContext);
+  if (auth === null) throw new Error('useAuth must be used within AuthProvider');
+  return auth;
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const login = useCallback(async (credentials: Credentials) => {
+    setUser(await api.login(credentials));
+  }, []);
+  const value = useMemo(() => ({ user, login }), [user, login]);
+  return <AuthContext value={value}>{children}</AuthContext>;
+}
+```
+
+**❌ Bad Practices:**
+
+```tsx
+// ❌ Fat context with high-frequency state
+const AppContext = createContext({ user, theme, mouse, form, notifications });
+
+// ❌ Unmemoized value
+<AppContext value={{ user, theme }}>
+
+// ❌ Raw context exported without a guard
+export const AuthContext = createContext(null);
+
+// ❌ Provider without memoising callbacks
+<CartContext value={{ items, addItem: (i) => setItems([...items, i]) }}>
+```
+
+**Expected Output:** The good practices produce guarded, narrow, stable contexts. The bad practices cause re-render cascades, silent null values, and unnecessary renders.
+
+**Why this output:** Guards catch missing providers; splitting isolates updates; memoisation stabilises references; high-frequency state belongs elsewhere.
+
+### Real-World Cases
+
+- **All context-based applications:** These practices apply universally.
+- **Design systems:** Theme and auth providers with guards.
+- **SaaS apps:** Composed providers at the root.
+
+### References
+
+- Context (virastack): custom hook pattern — https://github.com/virastack/academy/blob/6a28815094da2825f46e17325d6dcc85902dbe6c/content/en/react/context.md#1
+- Steve Kinney — Context API Performance Pitfalls — https://stevekinney.com/courses/react-performance/context-api-performance-pitfalls
+- React 19 Context improvements — https://github.com/fusengine/agents/blob/main/plugins/react-expert/skills/react-19/references/context-improvements.md
+
+---
+
+## 14. Context Pitfalls
+
+### Definitions
+
+**Core Definition:** Context pitfalls are the common mistakes that cause unnecessary re-renders, silent failures, and maintenance problems when using context.
+
+**Technical Definition:** The canonical pitfalls are: **the mega context** (everything in one context), **not splitting state from actions**, **ignoring memo boundaries**, **misunderstanding when context triggers re-renders**, **unmemoised value objects**, **missing provider guards**, **using context for high-frequency state**, and **exporting the raw context**. Each pitfall has a specific remedy.
+
+### Common Pitfalls Table
+
+| Pitfall | Problem | Solution |
+|---------|---------|----------|
+| **Mega context** | Any change re-renders every consumer | Split by concern |
+| **State and actions together** | Action-only consumers re-render on state change | Two contexts: state and dispatch |
+| **Unmemoised value** | New object every render → all consumers re-render | `useMemo` / `useCallback` |
+| **`React.memo` on consumer** | Does not block context updates | Split or memoise the value |
+| **High-frequency state** | Re-render cascades on every keystroke/move | Local state or a store |
+| **No provider guard** | Silent `null` or default value | `null` default + throwing hook |
+| **Raw context exported** | Consumers bypass the guard | Export the hook, not the context |
+| **Provider inside the consumer** | `useContext` cannot see a provider in the same component | Move the provider above the consumer |
+| **Duplicated server state** | Context copied from a query cache goes stale | Use a query cache, not context |
+
+### Annotated Code Examples
+
+**Pitfall 1: Mega context**
+
+```tsx
+// ❌ Theme consumer re-renders when user or notifications change
+const AppContext = createContext({ user, theme, notifications });
+```
+
+**Pitfall 2: Unmemoised value**
+
+```tsx
+// ❌ New object every render → all consumers re-render
+<AppContext value={{ user, theme }} />
+```
+
+**Pitfall 3: No guard**
+
+```tsx
+// ❌ Silent null or default value
+const AuthContext = createContext(null);
+```
+
+**Expected Output:** The correct versions split, memoise, and guard; the incorrect versions re-render unnecessarily or fail silently.
+
+**Why this output:** Mega contexts and unmemoised values cause cascading re-renders; missing guards hide provider mistakes.
+
+### Real-World Cases
+
+- **Large apps:** Mega contexts are the most common source of “the app feels slow”.
+- **Design systems:** Unmemoised values cause every themed component to re-render.
+- **Auth:** Missing guards cause silent null dereferences.
+
+### References
+
+- Steve Kinney — Context API Performance Pitfalls — https://stevekinney.com/courses/react-performance/context-api-performance-pitfalls
+- Sharp Edges — Context render cascade — https://github.com/omer-metin/skills-for-antigravity/blob/e8dcf4e8737921a10088bd5c9eb65e81f74c051f/skills/state-management/references/sharp_edges.md
+- FreeCodeCamp — Shared State Complexity in React — https://www.freecodecamp.org/news/shared-state-complexity-in-react-handbook/
 
 ---
 
 ## References
 
-- React Official Documentation – Passing Data Deeply with Context: https://18.react.dev/learn/passing-data-deeply-with-context
-- React Official Documentation – createContext: https://vi.react.dev/reference/react/createContext
-- React Official Documentation – useContext: https://18.react.dev/reference/react/useContext
-- React Official Documentation – Scaling Up with Reducer and Context: https://18.react.dev/learn/scaling-up-with-reducer-and-context
-- React Official Documentation – Context (Legacy): https://legacy.reactjs.org/docs/context.html
-- React Official Documentation – Context (Mintlify): https://mintlify.wiki/facebook/react/advanced/context
-- Steve Kinney – Context API Performance Pitfalls: https://stevekinney.com/courses/react-performance/context-api-performance-pitfalls
-- CodeSignal – Splitting State and Dispatch: https://codesignal.com/learn/courses/performance-optimization-and-rendering-strategies/lessons/splitting-state-and-dispatch
-- Vercel – REACT_STABLE_CONTEXT_PROVIDER_VALUE: https://vercel-docs.vercel.sh/docs/conformance/rules/REACT_STABLE_CONTEXT_PROVIDER_VALUE
-- Feature-Sliced Design – React's Context API: Friend or Architectural Foe?: https://feature-sliced.design/blog/context-api-performance
-- LogRocket – React Context tutorial: Complete guide with practical examples: https://blog.logrocket.com/react-context-tutorial/
-- Compile-N-Run – React Context Composition: https://github.com/Compile-N-Run/Compile-N-Run/blob/5e277f39f3e5b8b740aba0789e01e388911932ce/docs/framework/react/12-react-advanced-patterns/4-react-context-composition.mdx
-- react-providers-tree – npm: https://www.npmjs.com/package/react-providers-tree
-- Syncfusion – React useState vs Context API: When to Use Them: https://www.syncfusion.com/
-- Xtivia – React Context API: Goodbye Prop Drilling: https://www.xtivia.com/
+- React — createContext — https://react.dev/reference/react/createContext
+- React — useContext — https://react.dev/reference/react/useContext
+- React — Passing Data Deeply with Context — https://react.dev/learn/passing-data-deeply-with-context
+- Context (virastack academy) — https://github.com/virastack/academy/blob/6a28815094da2825f46e17325d6dcc85902dbe6c/content/en/react/context.md
+- Context (virastack academy, alternate) — https://github.com/virastack/academy/blob/4e06ca19c061fe7ceb7fd1e93ae7e872f2a2098d/content/en/react/context.md
+- Steve Kinney — Context API Performance Pitfalls — https://stevekinney.com/courses/react-performance/context-api-performance-pitfalls
+- Steve Kinney — Separating Actions from State with Two Contexts — https://stevekinney.com/courses/react-performance/separating-actions-from-state-with-two-contexts
+- pproenca/dot-skills — Context optimization: split fat contexts — https://github.com/pproenca/dot-skills/blob/9c015c68df33adf461ea9fa7071c119ca0061a0a/skills/.curated/react/references/rstate-context-optimization.md
+- Sharp Edges — State Management — https://github.com/omer-metin/skills-for-antigravity/blob/e8dcf4e8737921a10088bd5c9eb65e81f74c051f/skills/state-management/references/sharp_edges.md
+- Vercel — REACT_STABLE_CONTEXT_PROVIDER_VALUE — https://vercel.com/docs/conformance/rules/react_stable_context_provider_value
+- rslint — jsx-no-constructed-context-values — https://github.com/web-infra-dev/rslint/blob/bca18898f54c441205d6384ab02a7d3cf7982631/internal/plugins/react/rules/jsx_no_constructed_context_values/jsx_no_constructed_context_values.md
+- FreeCodeCamp — Shared State Complexity in React — https://www.freecodecamp.org/news/shared-state-complexity-in-react-handbook/
+- Get to Know React's New Context API — https://www.w3reference.com/blog/get-to-know-react-s-new-context-api/
+- React 19 Context improvements (fusengine) — https://github.com/fusengine/agents/blob/main/plugins/react-expert/skills/react-19/references/context-improvements.md
+- React 19 context changes (botharness) — https://github.com/botharness/deepseekbot/blob/fce475b7ba199d0444a540c5014d6143fe9d62d5/.agents/skills/expo-upgrade/references/react-19.md
+- Context Selector pattern — https://raw.githubusercontent.com/mjmirza/patterns/refs/heads/main/patterns/13-frontend-ui/context-selector.md
