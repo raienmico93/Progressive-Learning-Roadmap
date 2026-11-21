@@ -6,777 +6,756 @@
 
 ### Definitions
 
-**Core Definition:** jQuery AJAX Performance is the discipline of designing and executing asynchronous HTTP requests in a manner that minimizes network latency, bandwidth consumption, server load, and main-thread processing time, thereby delivering a fast and responsive user experience.
+**Core Definition**
+jQuery AJAX performance is the practice of minimising the latency, bandwidth consumption, and main‑thread impact of asynchronous HTTP requests made through jQuery's `$.ajax()` and its shorthand methods, while maximising perceived responsiveness through techniques such as batching, caching, debouncing, throttling, and cancellation.
 
-**Technical Definition:** jQuery AJAX Performance encompasses the architectural and syntactic optimizations applied to `$.ajax()`, `$.get()`, `$.post()`, and the returned `jqXHR` object. These optimizations operate across four layers: (1) **Network layer** — reducing the number of requests, minimizing payload sizes, and leveraging HTTP caching; (2) **Scheduling layer** — debouncing, throttling, and cancelling requests to avoid redundant or outdated network activity; (3) **Execution layer** — using `$.when()` for parallel coordination, `abort()` for cancellation, and `requestIdleCallback()` for deferring non-essential work; and (4) **Rendering layer** — minimizing DOM manipulation when processing AJAX responses.
+**Technical Definition**
+AJAX performance in jQuery is governed by three interacting layers. **Network performance** encompasses HTTP method choice (GET vs. POST), payload size, compression, connection reuse, and browser‑level caching via `Cache-Control` and `ETag` headers. **Client‑side performance** concerns how often requests are initiated (debouncing and throttling), how duplicate or overlapping requests are managed (cancellation and request flags), and how responses are processed and rendered (DOM batching, promise chains). **Server‑side performance** determines how quickly and efficiently the backend responds, and can be improved through application‑level caching (Redis, Memcached), query optimisation, and batch endpoints. jQuery's `$.ajax()` provides options such as `cache`, `timeout`, `async`, and `dataType` that influence these layers, while `$.ajaxPrefilter()` allows global or per‑dataType modification of request behaviour before dispatch.
 
-**Beginner-Friendly Explanation:** Every time your web page asks the server for data — loading a list of products, checking for new messages, validating a form — that request takes time. If you make too many requests, send too much data, or keep asking for the same thing over and over, the page feels slow and wastes the user's bandwidth. This cheat sheet is about making AJAX requests smart: fewer requests, smaller payloads, smarter caching, and knowing when to cancel a request that is no longer needed.
+**Beginner‑Friendly Explanation**
+Every time a web page asks a server for data, it makes an AJAX request. If the page makes too many requests, sends too much data, or asks for the same thing repeatedly, the application feels slow and puts unnecessary strain on the server. jQuery AJAX performance is about making fewer, smaller, smarter requests: combining several small requests into one (batching), remembering responses so you do not ask twice (caching), waiting until the user pauses before searching (debouncing), limiting how often a request can fire (throttling), and cancelling requests that are no longer needed (cancellation). These habits keep pages responsive and servers healthy.
+
+---
 
 ### Key Characteristics
 
-- **The network is the bottleneck:** A single HTTP request incurs connection setup, DNS lookup, TLS handshake, and round-trip time; reducing request count is the highest-leverage optimization.
-- **Caching is a browser feature:** jQuery's `cache: true` only controls whether a cache-busting timestamp is appended; actual caching depends on HTTP response headers (`Cache-Control`, `ETag`, `Expires`).
-- **Debouncing and throttling are different tools:** Debouncing waits for a quiet period (ideal for search input); throttling caps execution frequency (ideal for scroll-linked requests).
-- **Aborting is client-side only:** `jqXHR.abort()` stops the browser from waiting for a response, but the server may continue processing the request.
-- **Payload size directly affects speed:** JSON overhead, uncompressed strings, and large images all increase transfer time.
-- **`requestIdleCallback` is not universally supported:** It is available in Chrome and Firefox but not Safari; a polyfill or `setTimeout` fallback is required.
+| Characteristic | Description |
+|---|---|
+| **Network‑bound primary cost** | AJAX performance is dominated by round‑trip latency and payload size; client‑side optimisations reduce the *number* of trips, not the speed of a single trip. |
+| **Asynchronous by default** | `async: true` is the default and must be maintained to keep the main thread responsive. |
+| **GET is faster and cacheable** | GET requests are generally faster than POST and can be cached by the browser; POST should be reserved for state‑changing operations. |
+| **Caching is layered** | Browser caching (HTTP headers), application‑level caching (`localStorage`, `sessionStorage`, IndexedDB), and server‑side caching (Redis, Memcached) all contribute. |
+| **Debouncing and throttling are complementary** | Debouncing waits for a pause; throttling limits frequency. The choice depends on whether the *final* or *regular* state matters. |
+| **Cancellation prevents stale responses** | `xhr.abort()` cancels a pending request, preventing outdated responses from overwriting newer data. |
+| **jQuery's jqXHR object enables control** | Every `$.ajax()` call returns a jqXHR object with methods such as `.abort()`, `.done()`, `.fail()`, and `.always()`. |
+
+---
 
 ### Prerequisites
 
-- Proficiency in jQuery fundamentals: `$.ajax()`, `$.get()`, `$.post()`, `$.when()`, and the `jqXHR` object.
-- Understanding of HTTP fundamentals: request methods, status codes, and caching headers.
-- Familiarity with debouncing and throttling concepts.
-- Awareness of the browser's event loop, `requestAnimationFrame`, and `requestIdleCallback`.
+- Working knowledge of jQuery's `$.ajax()`, `$.get()`, `$.post()`, and `$.getJSON()`.
+- Understanding of HTTP methods (GET, POST) and status codes.
+- Familiarity with JavaScript timers (`setTimeout`, `clearTimeout`) and callback functions.
+- Awareness of browser caching concepts (`Cache-Control`, `ETag`) and storage APIs (`localStorage`).
+
+---
 
 ### Related Programming Areas
 
-- **HTTP and Network Protocols:** The foundation of all AJAX communication.
-- **Browser Caching:** HTTP cache headers and the browser's cache storage.
-- **Event Performance:** Debouncing and throttling are shared concerns with event handling.
-- **DOM Performance:** Minimizing reflows when rendering AJAX responses.
-- **Server-Side Performance:** Faster server responses reduce the perceived cost of AJAX.
-
-### Core Concepts / Features
-
-This cheat sheet covers five core concepts and two enhanced topics: minimizing requests, request caching, appropriate payload sizes, debounced search requests, request cancellation, pre-fetching and background pre-loading, and idle-time processing.
+- **Network performance** — latency, bandwidth, compression, and connection management.
+- **Event performance** — debouncing and throttling are shared between event handling and AJAX.
+- **DOM performance** — how AJAX responses are rendered affects perceived speed.
+- **Memory management** — un‑cancelled requests and un‑cleared timers retain references.
+- **User experience** — perceived performance (optimistic UI, loading states) interacts with request timing.
 
 ---
 
-## Core Concept 1: Minimize Requests — Consolidating Background API Payloads and Data Batching Strategies
+### Core Concepts / Features (Index)
+
+1. Request Batching
+2. Request Caching
+3. Request Debouncing
+4. Request Throttling
+5. Request Cancellation
+6. AJAX Best Practices
+
+
+## Core Concept 1: Request Batching
 
 ### Definitions
 
-**Core Definition:** Minimizing requests is the practice of reducing the total number of HTTP requests made by a web application, primarily by consolidating multiple independent requests into a single request, or by caching data that does not change frequently so that repeated requests are unnecessary.
+**Core Definition**
+Request batching is the technique of combining multiple data‑fetching or data‑sending operations into a single HTTP request, or grouping multiple requests into controlled batches, to reduce the number of network round‑trips and the associated overhead of connection establishment and teardown.
 
-**Technical Definition:** Each HTTP request incurs overhead: DNS resolution, TCP connection establishment, TLS handshake (for HTTPS), request headers, and round-trip latency. When a page makes dozens of small AJAX requests — for example, fetching user data, notifications, and preferences from separate endpoints — the cumulative overhead can dominate the actual data transfer time. Consolidation strategies include: (1) **Batching** — combining multiple operations into a single HTTP request payload using a batch endpoint (e.g., OData's `/$batch` endpoint or a custom batch API); (2) **Parallel coordination** — using `$.when()` to fire multiple requests simultaneously and wait for all of them, which does not reduce the number of requests but reduces the total wall-clock time; and (3) **Client-side caching** — storing responses in `localStorage`, `sessionStorage`, or in-memory variables so that repeat visits to the same data source do not trigger new requests.
+**Technical Definition**
+Batching can occur at two levels. **Client‑side batching** combines multiple logical requests into one HTTP request by accumulating data (e.g., collecting IDs over a short window and sending them to a batch endpoint) or by using `$.when()` to coordinate multiple parallel requests whose results are processed together. **Server‑side batching** queues incoming requests and processes them in bulk (e.g., via a CRON job or a queue system), reducing per‑request overhead and enabling bulk database operations. Batching is distinct from **parallelism**: multiple asynchronous requests may execute concurrently, but they still consume separate connections and incur separate round‑trip costs. True batching reduces the *number* of HTTP transactions.
 
-**Beginner-Friendly Explanation:** Instead of making five separate phone calls to order five items, you write one email listing all five items. Batching requests is the same: instead of five separate AJAX calls, you send one request with all the information the server needs. This saves time because the connection setup and latency are paid only once.
-
-### Purposes
-
-- To reduce the total number of HTTP connections and the associated overhead (DNS, TCP, TLS, latency).
-- To lower server load by processing one larger request instead of many smaller ones.
-- To improve perceived performance by delivering all data in a single round-trip.
-- To conserve user bandwidth by eliminating redundant requests for data that has not changed.
-- To simplify application state management by centralizing data fetching in fewer, more predictable requests.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax (Batching with a Single Request):**
-```javascript
-$.ajax({
-    url: "/api/batch",
-    type: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({
-        requests: [
-            { method: "GET", url: "/api/user/1" },
-            { method: "GET", url: "/api/notifications" },
-            { method: "GET", url: "/api/preferences" }
-        ]
-    }),
-    success: function(response) {
-        // response contains results for all three requests
-    }
-});
-```
-
-**Complete General Syntax (Parallel Coordination with `$.when()`):**
-```javascript
-var request1 = $.ajax({ url: "/api/user/1" });
-var request2 = $.ajax({ url: "/api/notifications" });
-var request3 = $.ajax({ url: "/api/preferences" });
-
-$.when(request1, request2, request3).done(function(userData, notificationsData, preferencesData) {
-    // All three requests completed successfully
-    // Each callback argument is an array: [data, textStatus, jqXHR]
-});
-```
-
-| Component | Description |
-|-----------|-------------|
-| `$.ajax({ url: "/api/batch", type: "POST", ... })` | Sends a single request containing multiple operations. |
-| `$.when(req1, req2, req3)` | Coordinates multiple requests; resolves when all complete. |
-| `.done(function(data1, data2, data3) { ... })` | Callback receives results in the order the requests were passed. |
-
-**Syntax Rules:**
-
-- The batch endpoint must be designed to accept multiple operations in a single payload; this requires server-side support.
-- `$.when()` accepts any number of Deferred or Promise objects and returns a master Promise that resolves when all resolve or rejects when one rejects.
-- `$.when()` does not accept an array of Deferreds directly; use `$.when.apply(null, arrayOfRequests)` to spread an array.
-- Client-side caching should be used for data that changes infrequently; always provide a cache invalidation strategy.
-
-**Constraints and Limitations:**
-
-- Batching requires server-side API support; not all APIs provide batch endpoints.
-- `$.when()` rejects immediately if any of the requests fail, but the other requests continue to execute.
-- Client-side caching can serve stale data if not properly invalidated.
-- Parallel requests consume more simultaneous connections, which may be limited by the browser (typically 6 per domain).
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Batching Multiple Requests with `$.when()`**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Batch Requests Demo</title>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <p id="output"></p>
-
-  <script>
-    $(function() {
-      // Step 1: Fire three requests in parallel
-      var req1 = $.getJSON("https://jsonplaceholder.typicode.com/posts/1");
-      var req2 = $.getJSON("https://jsonplaceholder.typicode.com/posts/2");
-      var req3 = $.getJSON("https://jsonplaceholder.typicode.com/posts/3");
-
-      // Step 2: Coordinate with $.when()
-      $.when(req1, req2, req3).done(function(data1, data2, data3) {
-        // Step 3: Each argument is an array [data, textStatus, jqXHR]
-        var post1 = data1[0];
-        var post2 = data2[0];
-        var post3 = data3[0];
-
-        $("#output").html(
-          "Post 1: " + post1.title + "<br>" +
-          "Post 2: " + post2.title + "<br>" +
-          "Post 3: " + post3.title
-        );
-      }).fail(function() {
-        $("#output").text("One or more requests failed.");
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:** The titles of all three posts are displayed simultaneously. The total time is approximately the time of the slowest request, not the sum of all three.
-
-**Why this output:** `$.when()` coordinates the three parallel requests. The browser fires all three simultaneously, and the callback executes only when all three have resolved. This reduces wall-clock time compared to sequential requests.
-
-### Real-World Cases
-
-- **Dashboards:** Loading user data, notifications, and analytics in parallel using `$.when()`.
-- **E-commerce product pages:** Fetching product details, reviews, and recommendations in a single batch request.
-- **Social media feeds:** Loading posts, user profiles, and comments in parallel.
-- **Admin panels:** Fetching statistics, recent activity, and system health in one batch.
+**Beginner‑Friendly Explanation**
+Imagine you need to buy five items from five different stores. You could make five separate trips, or you could write one shopping list and make a single trip to a market that sells everything. Request batching is the shopping‑list approach: instead of sending ten small requests to the server, you collect what you need and send one larger request. This saves time and reduces the load on both the browser and the server.
 
 ---
 
-## Core Concept 2: Request Caching — Leveraging HTTP Cache Headers and jQuery's `cache: true`
-
-### Definitions
-
-**Core Definition:** Request caching is the practice of allowing the browser to store responses to AJAX requests and reuse them for subsequent identical requests, reducing network traffic and latency. jQuery's `cache: true` option controls whether a cache-busting timestamp is appended to GET request URLs; actual caching behavior is determined by the server's HTTP response headers.
-
-**Technical Definition:** jQuery's `cache` option (default: `true` for all dataTypes except `script` and `jsonp`) determines whether jQuery appends a `_=[TIMESTAMP]` query string parameter to GET requests. When `cache: true`, the timestamp is not appended, allowing the browser's native HTTP cache to store and serve the response if the server's headers permit it. When `cache: false`, jQuery appends the timestamp, making each request URL unique and bypassing the browser cache. Actual caching is controlled by HTTP response headers: `Cache-Control: max-age=3600` tells the browser to cache the response for 3600 seconds; `ETag` and `Last-Modified` enable conditional requests (304 Not Modified); `Expires` provides an absolute expiration date. For AJAX requests to be cached, the request must be a GET request (POST requests are never cached), and the server must send appropriate cache headers.
-
-**Beginner-Friendly Explanation:** The browser has a built-in storage room for web responses. When you request the same data twice, the browser can serve it from storage instead of asking the server again — if the server told the browser it was allowed to store it. jQuery's `cache: true` setting tells jQuery not to add a random number to the request URL, which would make the browser think it is a new request. But the real decision about caching is made by the server's response headers.
-
 ### Purposes
 
-- To reduce network traffic by serving repeat requests from the browser's cache.
-- To improve response time for frequently accessed, unchanging data.
-- To reduce server load by eliminating redundant requests.
-- To provide a better offline or low-connectivity experience when cached data is available.
-- To comply with HTTP caching semantics, ensuring that stale data is not served beyond its intended lifetime.
+- **To reduce the number of HTTP connections** and the overhead of connection establishment.
+- **To minimise server load** by processing bulk operations instead of many small ones.
+- **To improve perceived performance** by coordinating related requests and updating the UI once.
+- **To avoid browser connection limits** that throttle parallel requests.
+- **To simplify error handling** by dealing with one request instead of many.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax (jQuery `cache: true`):**
-```javascript
-$.ajax({
-    url: "/api/static-data",
+#### Client‑Side Batching via a Batch Endpoint
+
+```
+var pendingIds = [];
+var batchTimer;
+
+function queueId(id) {
+  pendingIds.push(id);
+  clearTimeout(batchTimer);
+  batchTimer = setTimeout(sendBatch, 100); // accumulate for 100ms
+}
+
+function sendBatch() {
+  if (!pendingIds.length) return;
+  var ids = pendingIds.join(",");
+  pendingIds = [];
+  $.ajax({
+    url: "/api/users/batch",
     type: "GET",
-    cache: true,  // Do not append cache-busting timestamp
-    success: function(data) {
-        // Data may be served from browser cache
-    }
-});
-```
-
-**Complete General Syntax (Setting Cache Headers on the Server):**
-```http
-Cache-Control: max-age=3600, public
-ETag: "abc123"
-Last-Modified: Wed, 21 Oct 2026 07:28:00 GMT
-```
-
-| Component | Description |
-|-----------|-------------|
-| `cache: true` | jQuery does not append `_=[TIMESTAMP]` to the URL. |
-| `cache: false` | jQuery appends `_=[TIMESTAMP]`, bypassing the browser cache. |
-| `Cache-Control: max-age=3600` | Response is cacheable for 3600 seconds. |
-| `ETag` | Enables conditional requests; server returns 304 if unchanged. |
-
-**Syntax Rules:**
-
-- Use `cache: true` for GET requests to static or infrequently changing data.
-- Use `cache: false` for requests that must always return fresh data (e.g., real-time updates).
-- The `cache` option only works with GET and HEAD requests; POST requests are never cached.
-- Set `cache: true` explicitly for `dataType: "script"` or `dataType: "jsonp"` if caching is desired, because the default is `false` for these types.
-- Server-side cache headers must be configured correctly for caching to work; `cache: true` alone does not guarantee caching.
-
-**Constraints and Limitations:**
-
-- `cache: true` only affects whether jQuery appends a timestamp; it does not force the browser to cache the response.
-- If the server sends `Cache-Control: no-cache` or `no-store`, the response will not be cached regardless of jQuery's setting.
-- Cached responses can become stale; use `ETag` and `Last-Modified` for conditional requests to validate freshness.
-- Browsers may impose their own cache size limits, evicting older entries.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Enabling Caching for a Static Endpoint**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>AJAX Caching Demo</title>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <button id="loadBtn">Load Data</button>
-  <p id="log"></p>
-
-  <script>
-    $(function() {
-      $("#loadBtn").click(function() {
-        var t0 = performance.now();
-
-        // Step 1: Request with caching enabled
-        $.ajax({
-          url: "https://jsonplaceholder.typicode.com/posts/1",
-          type: "GET",
-          cache: true,
-          success: function(data) {
-            var t1 = performance.now();
-            $("#log").append(
-              "Request completed in " + (t1 - t0).toFixed(2) + "ms. " +
-              "Title: " + data.title + "<br>"
-            );
-          }
-        });
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:** The first click makes a full network request. Subsequent clicks (within the cache lifetime) may complete significantly faster because the browser serves the response from its cache, provided the server sent appropriate cache headers. The log displays the response time for each click.
-
-**Why this output:** With `cache: true`, jQuery does not append a cache-busting timestamp. If the server's response headers permit caching (e.g., `Cache-Control: max-age=3600`), the browser stores the response and serves it for subsequent identical requests. The second request completes in near-zero time because no network round-trip occurs.
-
-### Real-World Cases
-
-- **Static reference data:** Caching country lists, currency rates, or configuration settings that change infrequently.
-- **User profile data:** Caching the current user's profile for the duration of a session.
-- **Product catalog pages:** Caching product listings that are updated periodically.
-- **Documentation sites:** Caching article content that is not frequently changed.
-
----
-
-## Core Concept 3: Appropriate Payload Sizes — Minimizing JSON Overhead and Compressing Data
-
-### Definitions
-
-**Core Definition:** Appropriate payload sizes refers to the practice of minimizing the amount of data transferred in AJAX requests and responses by removing redundant data, using compact data formats, enabling compression, and sending only the fields that the client actually needs.
-
-**Technical Definition:** The size of an AJAX payload directly affects transfer time, especially on slow or mobile connections. JSON, while convenient, has overhead: property names are repeated in every object, whitespace may be included, and nested structures can become verbose. Optimization strategies include: (1) **Field selection** — requesting only the fields needed (e.g., using a `fields` query parameter); (2) **Compact JSON** — removing whitespace and using short property names; (3) **Gzip/Brotli compression** — enabling server-side compression that can reduce JSON size by 70–90%; (4) **Dictionary encoding** — replacing repetitive categorical string values (e.g., "Enrolled", "Active") with numeric codes, which a recent study showed reduced payload size by over 12% in DataTables communication; and (5) **Pagination** — limiting the number of records returned per request.
-
-**Beginner-Friendly Explanation:** Sending data over the network is like mailing a package. If you fill the box with packing material (redundant data, whitespace, unnecessary fields), it takes longer to arrive and costs more to ship. Compressing the data is like vacuum-sealing the package — it takes up much less space. Sending only the fields you need is like sending only the items the recipient asked for, not the entire warehouse.
-
-### Purposes
-
-- To reduce transfer time by minimizing the number of bytes sent over the network.
-- To conserve user bandwidth, especially on mobile or metered connections.
-- To reduce server processing time for serialization and deserialization.
-- To improve the perceived responsiveness of data-heavy interfaces.
-- To reduce memory consumption on the client when parsing large JSON payloads.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax (Field Selection):**
-```javascript
-$.getJSON("/api/products?fields=id,name,price", function(data) {
-    // Only id, name, and price are returned
-});
-```
-
-**Complete General Syntax (Server-Side Compression):**
-```http
-# Server configuration (Apache)
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE application/json
-</IfModule>
-```
-
-**Complete General Syntax (Client Accepts Compression):**
-```javascript
-// Browsers automatically send Accept-Encoding: gzip, deflate, br
-// No jQuery configuration is needed
-$.getJSON("/api/products", function(data) { ... });
-```
-
-| Technique | Reduction | Implementation |
-|-----------|-----------|----------------|
-| Gzip compression | 70–90% | Server configuration |
-| Field selection | Variable | API design |
-| Short property names | 10–30% | API design |
-| Dictionary encoding | 12%+ | Server + client |
-| Pagination | 90%+ | API design |
-
-**Syntax Rules:**
-
-- Configure the server to compress JSON responses with Gzip or Brotli; browsers automatically include `Accept-Encoding` headers.
-- Use `jQuery.param()` with `traditional: true` for simple array serialization when building query strings.
-- For very large data sets, use pagination or streaming rather than sending everything in one response.
-- Avoid sending HTML fragments when JSON data would suffice; let the client render the markup.
-
-**Constraints and Limitations:**
-
-- Compression adds CPU overhead on the server; for very small responses, compression may not be worth it.
-- Field selection requires API support; not all APIs provide this feature.
-- Dictionary encoding requires synchronized dictionaries on the server and client, adding complexity.
-- Pagination introduces multiple requests; balance payload size against request count.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Reducing Payload with Field Selection and Compression**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Payload Optimization Demo</title>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <p id="log"></p>
-
-  <script>
-    $(function() {
-      // Step 1: Request only needed fields
-      // In a real API, this would use ?fields=id,name
-      $.getJSON("https://jsonplaceholder.typicode.com/posts/1", function(data) {
-        // Step 2: Build a compact object with only needed fields
-        var compact = {
-          id: data.id,
-          title: data.title
-        };
-
-        $("#log").text(
-          "Full response keys: " + Object.keys(data).length + " | " +
-          "Compact keys: " + Object.keys(compact).length
-        );
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:** The full response from JSONPlaceholder has 4 keys (`userId`, `id`, `title`, `body`). The compact object has only 2 keys (`id`, `title`). If the API supported field selection, the response size would be reduced accordingly.
-
-**Why this output:** By constructing a compact object with only the fields needed, the example demonstrates the principle of field selection. In a production API, the server would return only the requested fields, reducing the payload size at the source.
-
-### Real-World Cases
-
-- **DataTables server-side processing:** Using dictionary encoding to reduce repetitive categorical data in large tables.
-- **Mobile applications:** Compressing JSON responses to reduce data usage on metered connections.
-- **Real-time dashboards:** Sending only changed fields rather than the entire data set.
-- **E-commerce search:** Returning only product name, price, and thumbnail for search results, with full details loaded on demand.
-
----
-
-## Core Concept 4: Debounced Search Requests — Halting Unnecessary Keystroke Network Spam
-
-### Definitions
-
-**Core Definition:** Debounced search requests is the practice of delaying an AJAX request triggered by user input until the user has stopped typing for a specified quiet period, preventing a separate network request for every keystroke.
-
-**Technical Definition:** When a user types in a search box, the `input` or `keyup` event fires on every keystroke. If an AJAX request is made on each event, a single search query like "bicycles" would trigger eight requests (one per character), overwhelming the server and wasting bandwidth. Debouncing wraps the AJAX call in a function that clears any pending timer and sets a new one on each keystroke. The request is sent only when the timer completes without being cleared — i.e., when the user has paused typing for the specified delay (typically 250–500ms). This ensures that only the final query is sent to the server.
-
-**Beginner-Friendly Explanation:** Imagine you are dictating a sentence to a scribe. If the scribe writes down every sound you make — every "um," every pause, every false start — the page would be full of nonsense. Instead, the scribe waits until you finish speaking, then writes the complete sentence. Debouncing is the scribe waiting for you to finish typing before sending the search request.
-
-### Purposes
-
-- To prevent the server from being flooded with requests during rapid typing.
-- To reduce bandwidth consumption by sending only the final query, not every intermediate state.
-- To improve the perceived performance of search by reducing the number of pending requests.
-- To avoid race conditions where a slow response from an earlier keystroke arrives after a faster response from a later keystroke.
-- To provide a smoother user experience by not constantly updating results while the user is still typing.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax (Custom Debounce Implementation):**
-```javascript
-var debounceTimer;
-
-$("#search").on("input", function() {
-    clearTimeout(debounceTimer);
-    var query = $(this).val();
-    debounceTimer = setTimeout(function() {
-        if (query.length > 2) {
-            $.getJSON("/api/search?q=" + encodeURIComponent(query), function(data) {
-                // Render results
-            });
-        }
-    }, 300);
-});
-```
-
-| Component | Description |
-|-----------|-------------|
-| `clearTimeout(debounceTimer)` | Cancels the previous pending request timer. |
-| `setTimeout(function() { ... }, 300)` | Schedules the request after 300ms of inactivity. |
-| `query.length > 2` | Prevents requests for very short queries. |
-
-**Complete General Syntax (Underscore.js `_.debounce`):**
-```javascript
-$("#search").on("input", _.debounce(function() {
-    var query = $(this).val();
-    $.getJSON("/api/search?q=" + encodeURIComponent(query), function(data) {
-        // Render results
-    });
-}, 300));
-```
-
-**Syntax Rules:**
-
-- Use `input` rather than `keyup` for better support of paste, autofill, and mobile input.
-- The debounce delay should be tuned to the use case; 250–500ms is typical for search.
-- Combine debouncing with a minimum query length check to avoid sending trivial queries.
-- Always `clearTimeout` before setting a new timer to reset the quiet period.
-
-**Constraints and Limitations:**
-
-- Debouncing introduces a delay; for very fast typists, the delay may feel sluggish. Use 250ms rather than 500ms.
-- If the user types continuously without a pause longer than the debounce delay, no request is ever sent.
-- Debouncing does not cancel already-sent requests; combine with `abort()` to cancel in-flight requests when a new query is entered.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Debounced Search with Request Cancellation**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Debounced Search Demo</title>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-</head>
-<body>
-  <input type="text" id="search" placeholder="Search posts...">
-  <ul id="results"></ul>
-  <p id="log"></p>
-
-  <script>
-    $(function() {
-      var debounceTimer;
-      var currentRequest = null;
-
-      $("#search").on("input", function() {
-        var query = $(this).val().trim();
-
-        // Step 1: Clear the previous timer
-        clearTimeout(debounceTimer);
-
-        // Step 2: Cancel any in-flight request
-        if (currentRequest) {
-          currentRequest.abort();
-        }
-
-        // Step 3: Schedule the new request
-        debounceTimer = setTimeout(function() {
-          if (query.length < 2) {
-            $("#results").empty();
-            $("#log").text("Query too short.");
-            return;
-          }
-
-          $("#log").text("Searching for: " + query);
-          currentRequest = $.getJSON(
-            "https://jsonplaceholder.typicode.com/posts?title_like=" + encodeURIComponent(query)
-          ).done(function(data) {
-            var html = "";
-            $.each(data.slice(0, 5), function(i, post) {
-              html += "<li>" + post.title + "</li>";
-            });
-            $("#results").html(html || "<li>No results.</li>");
-          }).fail(function(jqXHR, textStatus) {
-            if (textStatus !== "abort") {
-              $("#log").text("Error: " + textStatus);
-            }
-          });
-        }, 300);
-      });
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:** Typing rapidly in the search box does not trigger a request on every keystroke. After the user pauses for 300ms, a single request is sent. If the user types again before the request completes, the previous request is aborted, and a new one is scheduled. The results list updates with the first five matching post titles.
-
-**Why this output:** The `clearTimeout` call resets the debounce timer on every keystroke. The `currentRequest.abort()` call cancels any in-flight request from a previous query. The `setTimeout` schedules the new request after 300ms of inactivity.
-
-### Real-World Cases
-
-- **E-commerce search:** Debouncing product search input to avoid overwhelming the search API.
-- **Autocomplete widgets:** Delaying suggestion requests until the user pauses typing.
-- **User lookup:** Debouncing username availability checks in registration forms.
-- **Filter panels:** Debouncing filter input in data tables.
-
----
-
-## Core Concept 5: Request Cancellation — Aborting Outdated Background Operations
-
-### Definitions
-
-**Core Definition:** Request cancellation is the practice of aborting an in-flight AJAX request when its result is no longer needed — for example, when the user has entered a new search query before the previous request completed — using the `jqXHR.abort()` method.
-
-**Technical Definition:** Every call to `$.ajax()`, `$.get()`, or `$.post()` returns a `jqXHR` object that implements the Promise interface and also exposes the native `XMLHttpRequest` `abort()` method. Calling `jqXHR.abort()` terminates the client-side wait for the response: the browser stops listening for the response, and the request's `.fail()` or `.error()` callbacks are invoked with `textStatus` equal to `"abort"`. The server may continue processing the request, but the client is no longer waiting for it. Aborting is essential for preventing race conditions: without cancellation, a slow response from an earlier request could arrive after a faster response from a later request, causing the UI to display outdated data.
-
-**Beginner-Friendly Explanation:** Imagine you order a pizza, then change your mind and order a different one. You call the restaurant and say "cancel the first order." The kitchen might already be making it, but you are no longer waiting for it. Aborting an AJAX request is the same: you stop waiting for the response, so a slow response from an old request does not overwrite the results of a newer request.
-
-### Purposes
-
-- To prevent race conditions where an outdated response overwrites a newer response.
-- To conserve user bandwidth by stopping the download of data that is no longer needed.
-- To free up browser connection slots (typically 6 per domain) for new requests.
-- To reduce server load by reducing the number of requests that complete.
-- To provide a more responsive experience by not waiting for stale data.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-```javascript
-var currentRequest = null;
-
-function search(query) {
-    // Abort the previous request if it exists
-    if (currentRequest) {
-        currentRequest.abort();
-    }
-
-    currentRequest = $.getJSON("/api/search?q=" + encodeURIComponent(query))
-        .done(function(data) {
-            // Render results
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            if (textStatus === "abort") {
-                // Request was aborted; ignore
-                return;
-            }
-            // Handle real errors
-        });
+    data: { ids: ids },
+    dataType: "json",
+    success: function (users) { /* process all users at once */ }
+  });
 }
 ```
 
-| Component | Description |
-|-----------|-------------|
-| `currentRequest` | A variable holding the most recent `jqXHR` object. |
-| `currentRequest.abort()` | Aborts the previous request. |
-| `textStatus === "abort"` | Detects that the failure was caused by an abort, not a real error. |
+#### Coordination with `$.when()`
 
-**Syntax Rules:**
+```javascript
+$.when(
+  $.ajax({ url: "/api/a" }),
+  $.ajax({ url: "/api/b" }),
+  $.ajax({ url: "/api/c" })
+).done(function (a, b, c) {
+  // all three responses available together
+});
+```
 
-- Store the `jqXHR` object returned by `$.ajax()`, `$.get()`, or `$.post()` in a variable.
-- Call `.abort()` on the stored object before starting a new request.
-- In the `.fail()` handler, check `textStatus === "abort"` to distinguish aborts from real errors.
-- Abort requests when the user navigates away from the page or closes a component.
-- Combine with debouncing for the most effective search optimization.
+---
 
-**Constraints and Limitations:**
+### Syntax Rules
 
-- `abort()` does not terminate the server-side process; the server may continue processing the request.
-- Some browsers may not immediately stop the request; the abort is client-side only.
-- Aborting a request triggers the `.fail()` callback with `textStatus === "abort"`; ensure this is handled gracefully.
-- If using PHP sessions, parallel AJAX requests may block each other; calling `session_write_close()` on the server can allow parallel processing.
+1. **Accumulate data over a short window** (e.g., 50–150 ms) before dispatching the batch request.
+2. **Design a server endpoint that accepts arrays or comma‑separated IDs** for batch queries.
+3. **Use `$.when()`** to coordinate multiple independent requests whose results must be processed together.
+4. **Avoid batching state‑changing operations** unless the server supports transactional bulk operations.
+5. **Clear pending timers** when the component is destroyed to prevent orphaned batches.
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
+---
 
-**Example 1: Aborting a Previous Request Before Starting a New One**
+### Constraints and Limitations
+
+- **Batching increases latency for the first item** in the batch (it must wait for the accumulation window).
+- **Very large batches can exceed server limits** or cause timeouts; cap batch size.
+- **`$.when()` does not reduce the number of HTTP requests**; it only coordinates their completion.
+- **Batching state changes** requires server‑side transactional support and careful error handling.
+
+---
+
+### Annotated Code Examples
+
+#### Example 1: Batching User Status Queries
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>Request Cancellation Demo</title>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <input type="text" id="query" placeholder="Type to search...">
-  <p id="log"></p>
+  <div id="userList"></div>
 
   <script>
-    $(function() {
-      var currentRequest = null;
+    // Step 1: Accumulate user IDs and batch the request
+    var pendingIds = [];
+    var batchTimer;
 
-      $("#query").on("input", function() {
-        var query = $(this).val();
+    function queueUserStatus(id) {
+      pendingIds.push(id);
+      clearTimeout(batchTimer);
+      batchTimer = setTimeout(fetchBatch, 120); // 120ms accumulation window
+    }
 
-        // Step 1: Abort the previous request
-        if (currentRequest) {
-          currentRequest.abort();
-          $("#log").text("Previous request aborted.");
+    // Step 2: Send a single request for all accumulated IDs
+    function fetchBatch() {
+      if (!pendingIds.length) return;
+      var ids = pendingIds.join(",");
+      pendingIds = [];
+
+      $.ajax({
+        url: "/api/users/status",
+        type: "GET",
+        data: { ids: ids },
+        dataType: "json",
+        success: function (statuses) {
+          $.each(statuses, function (id, status) {
+            $("#user-" + id).text(status);
+          });
         }
-
-        // Step 2: Start a new request
-        currentRequest = $.getJSON(
-          "https://jsonplaceholder.typicode.com/posts?title_like=" + encodeURIComponent(query)
-        ).done(function(data) {
-          $("#log").text("Received " + data.length + " results for: " + query);
-        }).fail(function(jqXHR, textStatus) {
-          if (textStatus === "abort") {
-            // Ignore abort errors
-            return;
-          }
-          $("#log").text("Error: " + textStatus);
-        });
       });
-    });
+    }
+
+    // Step 3: Simulate queuing users
+    for (var i = 1; i <= 20; i++) {
+      queueUserStatus(i);
+    }
   </script>
 </body>
 </html>
 ```
 
-**Expected Output:** Typing a query triggers a request. Typing again before the first request completes aborts the first request (logging "Previous request aborted") and starts a new one. Only the final query's results are displayed.
+**Expected Output**
+A single AJAX request is sent with `ids=1,2,3,…,20` instead of 20 separate requests. The server returns a status object, and the UI is updated for all users in one pass.
 
-**Why this output:** The `currentRequest` variable holds the most recent request. Before starting a new request, the previous one is aborted with `.abort()`. The `.fail()` handler checks `textStatus === "abort"` to ignore aborts.
-
-### Real-World Cases
-
-- **Live search:** Aborting outdated search requests when the user types a new query.
-- **Tab switching:** Aborting requests for a tab that the user has navigated away from.
-- **Filter changes:** Aborting requests when the user changes filters before the previous request completes.
-- **Page navigation:** Aborting all pending requests when the user navigates to a new page.
+**Why this output occurs**: The `queueUserStatus` function accumulates IDs and resets a 120 ms timer on each call. Only when the timer expires does `fetchBatch` send the combined list. This reduces 20 potential HTTP transactions to one.
 
 ---
 
-## Enhanced Topic: Pre-fetching and Background Pre-loading
+#### Example 2: Coordinating Parallel Requests with `$.when()`
+
+```javascript
+// Step 1: Fire three independent requests in parallel
+var requestA = $.ajax({ url: "/api/config", dataType: "json" });
+var requestB = $.ajax({ url: "/api/user", dataType: "json" });
+var requestC = $.ajax({ url: "/api/notifications", dataType: "json" });
+
+// Step 2: Process all responses together
+$.when(requestA, requestB, requestC).done(function (config, user, notifications) {
+  console.log("Config:", config[0]);
+  console.log("User:", user[0]);
+  console.log("Notifications:", notifications[0]);
+});
+```
+
+**Expected Output**
+All three responses are logged together after the slowest request completes.
+
+**Why this output occurs**: `$.when()` waits for all supplied promises (jqXHR objects) to resolve and passes their resolved values to the `done` callback in order. The requests still execute in parallel, but the UI update is batched into a single processing step.
+
+---
+
+### Real‑World Cases
+
+- **Social feeds**: Accumulating user IDs over a short window to fetch online statuses in one batch.
+- **E‑commerce carts**: Collecting product IDs and fetching prices/inventory in a single batch endpoint.
+- **Dashboard initialisation**: Using `$.when()` to load configuration, user data, and notifications in parallel before rendering.
+
+---
+
+## Core Concept 2: Request Caching
 
 ### Definitions
 
-**Core Definition:** Pre-fetching is the practice of proactively requesting data or assets that the user is likely to need next, before the user explicitly requests them, so that the response is already cached when the user navigates or interacts.
+**Core Definition**
+Request caching is the storage and reuse of previously fetched AJAX responses to avoid redundant network requests, reducing latency and server load by serving repeated queries from a local or intermediary cache.
 
-**Technical Definition:** Pre-fetching can be implemented at two levels: (1) **Browser-level pre-fetching** — using `<link rel="prefetch">` or `<link rel="preload">` to instruct the browser to download resources in the background; and (2) **Application-level pre-fetching** — using jQuery's `$.ajax()` or `$.getJSON()` to fetch data for a page or component that the user is likely to visit, storing the response in memory or in `localStorage`. jQuery Mobile provides built-in prefetching via the `data-prefetch` attribute on links: the framework loads the target page in the background after the primary page has loaded. Pre-fetching should be used judiciously, as it consumes bandwidth and server resources; it is most effective when the user is highly likely to need the pre-fetched data.
+**Technical Definition**
+jQuery's `$.ajax()` exposes a `cache` option (default: `true`, but `false` for `dataType: "script"` and `"jsonp"`). When `cache: false`, jQuery appends a timestamp parameter (`_={timestamp}`) to GET requests, forcing the browser to bypass its cache. **Browser‑level caching** is controlled by HTTP headers such as `Cache-Control` and `ETag`, which allow the browser to serve responses from its cache without contacting the server. **Application‑level caching** stores responses in `localStorage`, `sessionStorage`, or IndexedDB, providing a client‑side cache that survives page reloads and is independent of HTTP caching. **Server‑side caching** (Redis, Memcached) reduces database load for frequently requested data.
 
-**Beginner-Friendly Explanation:** Pre-fetching is like reading ahead in a book. You know the next chapter is coming, so you read it before you get there, and when you arrive, you are already prepared. Similarly, pre-fetching data means the browser already has it when the user clicks the link, so the page appears instantly.
+**Beginner‑Friendly Explanation**
+Caching is like keeping a copy of a document you have already fetched from a filing cabinet. If someone asks for the same document again, you hand them the copy instead of walking back to the cabinet. In web terms, the browser can store AJAX responses and reuse them, and you can also store data in the browser's local storage. The `cache` option in jQuery controls whether the browser is allowed to reuse a response or whether a fresh request must be made every time.
+
+---
 
 ### Purposes
 
-- To reduce perceived latency by having data already available when the user needs it.
-- To improve the user experience on navigation-heavy applications (e.g., photo galleries, multi-step forms).
-- To utilize idle network capacity by downloading resources when the connection is not busy.
-- To provide a smoother transition between pages or views.
-- To reduce the visual impact of loading spinners on pages the user is likely to visit.
+- **To eliminate redundant network requests** for data that has not changed.
+- **To reduce latency** by serving responses from a local cache.
+- **To decrease server load** by avoiding repeated database queries.
+- **To improve perceived performance** and offline resilience through application‑level caches.
+- **To control cache behaviour explicitly** via the `cache` option and HTTP headers.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax (jQuery Mobile `data-prefetch`):**
+| Approach | Mechanism | Example |
+|---|---|---|
+| Browser cache (enabled) | HTTP headers + `cache: true` | `$.ajax({ url: "/api/data", cache: true })` |
+| Browser cache (disabled) | Timestamp parameter | `$.ajax({ url: "/api/data", cache: false })` |
+| Application cache (localStorage) | Manual storage and retrieval | `localStorage.setItem("key", JSON.stringify(data))` |
+| Server‑side cache | Redis / Memcached | Transparent to client; configured on server |
+
+---
+
+### Syntax Rules
+
+1. **Use `cache: true` for GET requests** that return data which does not change frequently.
+2. **Use `cache: false` for dynamic or user‑specific data** that must be fresh.
+3. **Set `dataType: "script"` or `"jsonp"` disables caching by default**; override with `cache: true` if appropriate.
+4. **Application‑level caching should include expiry logic** (e.g., store a timestamp and re‑fetch after a TTL).
+5. **Combine browser caching with HTTP `Cache-Control` headers** for maximum effectiveness.
+
+---
+
+### Constraints and Limitations
+
+- **`cache: false` defeats the purpose of caching**; use it only when freshness is essential.
+- **Browser caching is not guaranteed**; users can clear their cache, and proxies may interfere.
+- **Application‑level caches consume storage**; large datasets can exceed `localStorage` quotas.
+- **Stale cache data can cause bugs**; always provide a way to invalidate or refresh the cache.
+
+---
+
+### Annotated Code Example
+
 ```html
-<a href="prefetchThisPage.html" data-prefetch>Next Page</a>
-```
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <div id="productList"></div>
 
-**Complete General Syntax (Application-Level Pre-fetching):**
-```javascript
-// Pre-fetch data for the next page
-var prefetchedData = null;
-$.getJSON("/api/next-page-data", function(data) {
-    prefetchedData = data;
-});
+  <script>
+    // Step 1: Check application-level cache first
+    var cached = localStorage.getItem("products");
 
-// When the user navigates, use the pre-fetched data
-function showNextPage() {
-    if (prefetchedData) {
-        renderPage(prefetchedData);
+    if (cached) {
+      // Step 2a: Use cached data
+      renderProducts(JSON.parse(cached));
+      console.log("Loaded from cache");
     } else {
-        $.getJSON("/api/next-page-data", function(data) {
-            renderPage(data);
-        });
+      // Step 2b: Fetch and cache
+      $.ajax({
+        url: "/api/products",
+        type: "GET",
+        dataType: "json",
+        cache: true,                     // allow browser caching
+        success: function (data) {
+          localStorage.setItem("products", JSON.stringify(data));
+          renderProducts(data);
+          console.log("Fetched and cached");
+        }
+      });
     }
+
+    function renderProducts(products) {
+      var html = "";
+      $.each(products, function (i, p) {
+        html += "<div>" + p.name + "</div>";
+      });
+      $("#productList").html(html);
+    }
+  </script>
+</body>
+</html>
+```
+
+**Expected Output**
+On the first visit, the console logs `Fetched and cached` and the products are rendered. On subsequent visits (within the cache TTL), the console logs `Loaded from cache` and no AJAX request is made.
+
+**Why this output occurs**: The code first checks `localStorage` for cached data. If present, it renders immediately without a network request. If absent, it fetches from the server and stores the result for future use. The `cache: true` option allows the browser's HTTP cache to serve the response if it is still fresh.
+
+---
+
+### Real‑World Cases
+
+- **Product catalogues**: Caching product lists in `localStorage` and refreshing after a TTL.
+- **User profiles**: Using `cache: true` for rarely changing profile data.
+- **Configuration data**: Caching application configuration fetched at startup.
+
+---
+
+## Core Concept 3: Request Debouncing
+
+### Definitions
+
+**Core Definition**
+Request debouncing is a technique that delays the dispatch of an AJAX request until a specified period of time has elapsed since the last triggering event, ensuring that only the final request in a burst is sent.
+
+**Technical Definition**
+Debouncing wraps the request‑initiating function in a timer that is reset on each new trigger. If the event fires again before the delay expires, the timer is cancelled and restarted. The request is therefore sent only after the event has **stopped firing** for the specified delay. This is ideal for scenarios where the **final state** is what matters — such as the final value of a search input after the user stops typing. Debouncing is distinct from throttling: throttling guarantees regular execution during a burst, while debouncing waits for silence.
+
+**Beginner‑Friendly Explanation**
+Debouncing is like an elevator door that waits a few seconds after the last person steps in before closing. If someone else approaches, the timer resets. If you are typing in a search box, you do not want to send a request for every single letter — you want to wait until you pause, then send one request with the complete text. Debouncing gives you that “wait until they stop” behaviour.
+
+---
+
+### Purposes
+
+- **To coalesce rapid bursts of requests** into a single request.
+- **To wait for the final input value** before searching or validating.
+- **To reduce server load** caused by keystroke‑level requests.
+- **To improve perceived performance** by avoiding unnecessary network activity.
+- **To prevent race conditions** caused by overlapping responses.
+
+---
+
+### Syntax Rules and Structure
+
+#### Debounce Wrapper
+
+```javascript
+function debounce(fn, delay) {
+  var timer;
+  return function () {
+    var context = this, args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      fn.apply(context, args);
+    }, delay);
+  };
 }
 ```
 
-| Technique | Mechanism | Best For |
-|-----------|-----------|----------|
-| `data-prefetch` | jQuery Mobile loads page in background | Multi-page mobile apps |
-| Application-level | jQuery AJAX request stores data in memory | SPAs, dashboards |
-| `<link rel="prefetch">` | Browser pre-fetches resource | Static assets |
+#### Usage with `$.ajax()`
 
-**Syntax Rules:**
+```javascript
+var search = debounce(function (query) {
+  $.ajax({
+    url: "/api/search",
+    type: "GET",
+    data: { q: query },
+    dataType: "json",
+    success: function (results) { render(results); }
+  });
+}, 300);
 
-- Pre-fetch only data that the user is highly likely to need; avoid wasting bandwidth on speculative requests.
-- Store pre-fetched data in a variable or cache with an expiration policy.
-- Use `$.mobile.loadPage()` for programmatic prefetching in jQuery Mobile.
-- Be mindful of mobile data plans; pre-fetching should be disabled or minimized on metered connections.
+$("#searchBox").on("input", function () {
+  search($(this).val());
+});
+```
 
-**Constraints and Limitations:**
+---
 
-- Pre-fetching consumes bandwidth even if the user never visits the pre-fetched page.
-- Pre-fetched data can become stale; implement a timeout or invalidation mechanism.
-- Server load increases with the number of speculative requests.
-- Some browsers limit the number of concurrent pre-fetch requests.
+### Syntax Rules
 
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
+1. **Choose a delay appropriate to the interaction**: 250–500 ms for search inputs, longer for expensive operations.
+2. **Clear the timer on each new event** to reset the delay.
+3. **Cancel the timer when the component is destroyed** to prevent orphaned requests.
+4. **Combine with a minimum length** (e.g., do not send until the query has at least 3 characters).
+5. **Use a proven implementation** (Lodash `_.debounce`, Ben Alman's plugin) for production code.
 
-**Example 1: Application-Level Pre-fetching with Cache**
+---
+
+### Constraints and Limitations
+
+- **Debouncing does not provide intermediate results** during a burst.
+- **A very long delay feels unresponsive**; balance against perceived speed.
+- **The timer must be managed** to avoid firing after teardown.
+
+---
+
+### Annotated Code Example
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>Pre-fetching Demo</title>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <button id="page1Btn">Go to Page 1</button>
-  <button id="page2Btn">Go to Page 2</button>
-  <div id="content"></div>
-  <p id="log"></p>
+  <input type="text" id="search" placeholder="Type to search…">
+  <div id="results"></div>
 
   <script>
-    $(function() {
-      // Step 1: Pre-fetch data for Page 2
-      var prefetchedPage2 = null;
+    // Step 1: Debounce implementation
+    function debounce(fn, delay) {
+      var timer;
+      return function () {
+        var context = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          fn.apply(context, args);
+        }, delay);
+      };
+    }
 
-      $.getJSON("https://jsonplaceholder.typicode.com/posts/2", function(data) {
-        prefetchedPage2 = data;
-        $("#log").text("Page 2 data pre-fetched.");
+    // Step 2: Debounced search request
+    var performSearch = debounce(function (query) {
+      if (query.length < 2) return;
+      console.log("Searching for:", query);
+      $.ajax({
+        url: "/api/search",
+        type: "GET",
+        data: { q: query },
+        dataType: "json",
+        success: function (data) {
+          $("#results").text(JSON.stringify(data));
+        }
       });
+    }, 300);
 
-      // Step 2: Navigate to Page 1 (normal request)
-      $("#page1Btn").click(function() {
-        $.getJSON("https://jsonplaceholder.typicode.com/posts/1", function(data) {
-          $("#content").html("<h2>" + data.title + "</h2><p>" + data.body + "</p>");
-          $("#log").text("Page 1 loaded (network request).");
-        });
+    // Step 3: Bind to input event
+    $("#search").on("input", function () {
+      performSearch($(this).val());
+    });
+  </script>
+</body>
+</html>
+```
+
+**Expected Output**
+Typing “hello” quickly produces a single console message after the user pauses for 300 ms:
+```
+Searching for: hello
+```
+If the user types additional characters after the pause, another debounced request fires.
+
+**Why this output occurs**: Each keystroke calls `performSearch`, which clears the previous timer and sets a new 300 ms timer. The AJAX request is dispatched only when the timer completes without interruption, ensuring that intermediate values do not trigger requests.
+
+---
+
+### Real‑World Cases
+
+- **Live search / autocomplete**: Waiting 300 ms after the last keystroke before sending a search request.
+- **Username availability checks**: Validating only after the user stops typing.
+- **Form auto‑save**: Saving draft content after a period of inactivity.
+
+---
+
+## Core Concept 4: Request Throttling
+
+### Definitions
+
+**Core Definition**
+Request throttling is a technique that limits the rate at which AJAX requests are dispatched, ensuring that at most one request is sent per specified time interval, regardless of how frequently the triggering event fires.
+
+**Technical Definition**
+Throttling enforces a **maximum frequency**. When the triggering event fires, the throttled function checks whether the interval since the last execution has elapsed. If not, the call is ignored; if yes, the request is dispatched and the timestamp is updated. Throttling is appropriate for events where **regular updates** are desired — such as scroll‑triggered data loading or periodic polling — rather than waiting for the event to stop. It differs from debouncing in that it does not delay execution until silence; it guarantees execution at a controlled rate during a sustained burst.
+
+**Beginner‑Friendly Explanation**
+Throttling is like a metered faucet: no matter how far you open the tap, water flows at a controlled maximum rate. If you are loading more items as the user scrolls, you do not want to fire a request for every pixel scrolled — you want to check at most once per second. Throttling ensures your requests happen at a steady, limited pace instead of as fast as the event fires.
+
+---
+
+### Purposes
+
+- **To limit the frequency of requests** triggered by high‑rate events (`scroll`, `resize`, rapid clicks).
+- **To prevent server overload** from event‑driven request storms.
+- **To maintain regular updates** during sustained interactions rather than waiting for silence.
+- **To smooth network usage** and reduce bandwidth consumption.
+- **To complement debouncing** for different interaction patterns.
+
+---
+
+### Syntax Rules and Structure
+
+#### Throttle Wrapper (Timestamp‑Based)
+
+```javascript
+function throttle(fn, interval) {
+  var lastCall = 0;
+  return function () {
+    var now = Date.now();
+    if (now - lastCall >= interval) {
+      lastCall = now;
+      fn.apply(this, arguments);
+    }
+  };
+}
+```
+
+#### Usage with `$.ajax()`
+
+```javascript
+var loadMore = throttle(function () {
+  $.ajax({
+    url: "/api/items",
+    type: "GET",
+    data: { page: nextPage },
+    dataType: "json",
+    success: function (data) { appendItems(data); }
+  });
+}, 1000);
+
+$(window).on("scroll", function () {
+  if (nearBottom()) loadMore();
+});
+```
+
+---
+
+### Syntax Rules
+
+1. **Choose an interval aligned with the operation**: 500–1000 ms for scroll‑triggered loads, 250–500 ms for rapid UI interactions.
+2. **Throttling does not guarantee the final state**; combine with debouncing if the last value must also be processed.
+3. **Reset the timestamp** when the component is re‑initialised.
+4. **Use `$.throttle` from a plugin** (e.g., Ben Alman's throttle/debounce) for production‑ready implementations.
+
+---
+
+### Constraints and Limitations
+
+- **Throttling can miss the final event** in a burst; debouncing is better when the final state matters.
+- **A very short interval offers little benefit**; choose a value that balances responsiveness and load.
+- **Throttling adds a small check overhead** per event, which is negligible for most applications.
+
+---
+
+### Annotated Code Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body style="height:2000px;">
+  <div id="status">Scroll to load more</div>
+
+  <script>
+    // Step 1: Throttle implementation (1000ms limit)
+    function throttle(fn, interval) {
+      var lastCall = 0;
+      return function () {
+        var now = Date.now();
+        if (now - lastCall >= interval) {
+          lastCall = now;
+          fn.apply(this, arguments);
+        }
+      };
+    }
+
+    // Step 2: Throttled scroll-triggered request
+    var loadMore = throttle(function () {
+      console.log("Request dispatched at:", new Date().toISOString());
+      $.ajax({
+        url: "/api/items",
+        type: "GET",
+        dataType: "json",
+        success: function (data) {
+          $("#status").text("Loaded " + data.length + " items");
+        }
       });
+    }, 1000);
 
-      // Step 3: Navigate to Page 2 (use pre-fetched data)
-      $("#page2Btn").click(function() {
-        if (prefetchedPage2) {
-          $("#content").html("<h2>" + prefetchedPage2.title + "</h2><p>" + prefetchedPage2.body + "</p>");
-          $("#log").text("Page 2 loaded (from pre-fetch cache).");
-        } else {
-          $.getJSON("https://jsonplaceholder.typicode.com/posts/2", function(data) {
-            $("#content").html("<h2>" + data.title + "</h2><p>" + data.body + "</p>");
-            $("#log").text("Page 2 loaded (network request).");
-          });
+    // Step 3: Bind to scroll
+    $(window).on("scroll", loadMore);
+  </script>
+</body>
+</html>
+```
+
+**Expected Output**
+As the user scrolls continuously, console messages appear at most once per second:
+```
+Request dispatched at: 2026-11-15T10:00:00.000Z
+Request dispatched at: 2026-11-15T10:00:01.000Z
+Request dispatched at: 2026-11-15T10:00:02.000Z
+```
+
+**Why this output occurs**: The `throttle` wrapper checks the elapsed time since the last dispatch. Scroll events within the 1000 ms window are ignored, so the request is sent at a controlled maximum rate.
+
+---
+
+### Real‑World Cases
+
+- **Infinite scroll**: Loading additional items at most once per second as the user scrolls.
+- **Live dashboards**: Polling an endpoint at a fixed interval regardless of how many update events occur.
+- **Rapid click prevention**: Limiting form submission attempts to once per second.
+
+---
+
+## Core Concept 5: Request Cancellation
+
+### Definitions
+
+**Core Definition**
+Request cancellation is the act of aborting a pending AJAX request before it completes, using the `abort()` method on the jqXHR object returned by `$.ajax()`, to prevent outdated responses from being processed and to free network resources.
+
+**Technical Definition**
+Every `$.ajax()` call returns a **jqXHR object** (a superset of the native `XMLHttpRequest`) that exposes an `.abort()` method. Calling `.abort()` cancels the request if it has been sent, triggering the `error` callback with a status of `"abort"` and suppressing the `success` callback. Cancellation is essential for preventing **race conditions** in search‑as‑you‑type scenarios, where a slower earlier response could overwrite a faster later response. jQuery's `$.ajaxPrefilter()` can be used to automatically abort previous requests to the same URL when a new one is initiated, providing a declarative cancellation strategy.
+
+**Beginner‑Friendly Explanation**
+Sometimes you send a request and then realise you no longer need the answer — for example, the user typed another letter in a search box before the previous request finished. If you let the old request continue, it might return after the newer one and show outdated results. Cancelling the old request tells the browser: “Never mind, stop working on that.” jQuery gives you an `abort()` method on every request object so you can cancel it cleanly.
+
+---
+
+### Purposes
+
+- **To prevent stale responses** from overwriting newer data.
+- **To avoid race conditions** in search‑as‑you‑type and filter interfaces.
+- **To free network and server resources** when a request is no longer needed.
+- **To improve perceived responsiveness** by discarding obsolete work.
+- **To implement request deduplication** and “latest‑wins” semantics.
+
+---
+
+### Syntax Rules and Structure
+
+#### Manual Cancellation
+
+```javascript
+var xhr = $.ajax({ url: "/api/search", data: { q: query } });
+
+// Later, if the request is no longer needed:
+xhr.abort();
+```
+
+#### Automatic Cancellation with `$.ajaxPrefilter()`
+
+```javascript
+var currentRequests = {};
+
+$.ajaxPrefilter(function (options, originalOptions, jqXHR) {
+  if (options.abortOnRetry) {
+    if (currentRequests[options.url]) {
+      currentRequests[options.url].abort();
+    }
+    currentRequests[options.url] = jqXHR;
+  }
+});
+```
+
+---
+
+### Syntax Rules
+
+1. **Store the jqXHR object** returned by `$.ajax()` so it can be aborted later.
+2. **Abort the previous request before sending a new one** in search‑as‑you‑type scenarios.
+3. **Handle the `abort` status** in the `error` callback to avoid treating it as a genuine failure.
+4. **Use `$.ajaxPrefilter()`** for declarative cancellation across multiple call sites.
+5. **Clear any associated timers** when aborting to prevent orphaned callbacks.
+
+---
+
+### Constraints and Limitations
+
+- **Aborting a request does not guarantee the server stops processing it**; the server may continue handling the request even after the client aborts.
+- **Aborted requests trigger the `error` callback** with `status === "abort"`; code must distinguish this from genuine failures.
+- **Aborting does not cancel dependent promise chains**; chain‑level cancellation requires additional handling.
+
+---
+
+### Annotated Code Example
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <input type="text" id="search" placeholder="Type to search…">
+
+  <script>
+    var currentRequest = null;
+
+    // Step 1: Bind to input and cancel the previous request
+    $("#search").on("input", function () {
+      var query = $(this).val();
+
+      // Step 2: Abort the pending request
+      if (currentRequest) {
+        currentRequest.abort();
+      }
+
+      // Step 3: Send a new request and store the jqXHR
+      currentRequest = $.ajax({
+        url: "/api/search",
+        type: "GET",
+        data: { q: query },
+        dataType: "json",
+        success: function (data) {
+          console.log("Results for:", query, data);
+          $("#results").text(JSON.stringify(data));
+        },
+        error: function (xhr, status) {
+          if (status === "abort") {
+            console.log("Request aborted:", query);
+          } else {
+            console.error("Request failed:", status);
+          }
+        },
+        complete: function () {
+          currentRequest = null; // clear the reference
         }
       });
     });
@@ -785,168 +764,173 @@ function showNextPage() {
 </html>
 ```
 
-**Expected Output:** When the page loads, the data for Page 2 is pre-fetched in the background. Clicking "Go to Page 1" makes a network request and displays Page 1's content. Clicking "Go to Page 2" displays Page 2's content instantly from the pre-fetched cache, with no network request.
+**Expected Output**
+Typing quickly produces logs such as:
+```
+Request aborted: hel
+Request aborted: hell
+Results for: hello [...]
+```
 
-**Why this output:** The `$.getJSON` call on page load pre-fetches Page 2's data into the `prefetchedPage2` variable. When the user clicks "Go to Page 2," the cached data is used immediately, avoiding a network round-trip.
-
-### Real-World Cases
-
-- **Photo galleries:** Pre-fetching the next and previous images so navigation is instant.
-- **Multi-step forms:** Pre-fetching the next step's data while the user completes the current step.
-- **E-commerce:** Pre-fetching product details when the user hovers over a product thumbnail.
-- **Documentation sites:** Pre-fetching the next article when the user scrolls near the bottom of the current one.
+**Why this output occurs**: Each keystroke aborts the previous pending request and stores the new jqXHR. Only the final request — the one that is not aborted — completes and logs results. The `error` callback distinguishes `"abort"` from genuine failures.
 
 ---
 
-## Enhanced Topic: Idle-Time Processing — Using `requestIdleCallback` for Non-Essential Network Updates
+### Real‑World Cases
+
+- **Search‑as‑you‑type**: Aborting the previous search request on every keystroke.
+- **Filter panels**: Cancelling in‑flight filter requests when the user changes criteria.
+- **Tab switching**: Aborting content‑loading requests for a tab the user has navigated away from.
+
+---
+
+## Core Concept 6: AJAX Best Practices
 
 ### Definitions
 
-**Core Definition:** Idle-time processing is the practice of deferring non-essential network requests and DOM updates until the browser's main thread is idle, using the `requestIdleCallback()` API, so that critical rendering and user interaction tasks are not delayed by background work.
+**Core Definition**
+jQuery AJAX best practices are the consolidated conventions — preferring GET for retrieval, caching responses, batching where possible, debouncing and throttling event‑driven requests, cancelling stale requests, handling errors and timeouts, keeping requests asynchronous, and minimising DOM manipulation after responses — that produce fast, reliable, and resource‑efficient asynchronous interactions.
 
-**Technical Definition:** `window.requestIdleCallback(callback)` schedules a callback function to run during the browser's idle periods — the time between the browser finishing layout, paint, and compositing for a frame and the next vertical sync (v-sync). The callback receives an `IdleDeadline` object with `timeRemaining()` (milliseconds available in the current idle period) and `didTimeout` (whether the optional `timeout` was reached). Idle callbacks should perform non-critical, low-priority work such as logging analytics events, pre-fetching data for future pages, or updating non-visible UI elements. Crucially, `requestIdleCallback` callbacks should **not** modify the DOM directly, because DOM mutations during idle time can invalidate the layout that was just completed; use `requestAnimationFrame` for DOM writes. Browser support is limited: Chrome and Firefox support it, but Safari does not, so a polyfill or fallback is required.
+**Technical Definition**
+Best practices synthesise the individual techniques: (1) **use GET for data retrieval** and POST only for state changes; (2) **limit payload size** through selective data transfer and compression; (3) **cache responses** at the browser, application, and server levels; (4) **batch requests** to reduce HTTP connection overhead; (5) **debounce or throttle** event‑driven requests according to whether the final or regular state matters; (6) **abort stale requests** to prevent race conditions; (7) **handle errors and set timeouts** to avoid indefinite hangs; (8) **keep requests asynchronous** (`async: true`); and (9) **minimise and batch DOM updates** after responses arrive.
 
-**Beginner-Friendly Explanation:** Think of the browser's main thread as a chef in a kitchen. During rush hour (when the user is interacting with the page), the chef is busy cooking orders (rendering frames, handling events). But there are brief moments of downtime between orders. `requestIdleCallback` lets you say "when the chef has a spare moment, please also do this small task" — like pre-heating the oven for the next order. The chef only does it when there is time, so it never delays the critical orders.
+**Beginner‑Friendly Explanation**
+Best practices are the habits that make AJAX fast and reliable. Ask for data with GET, not POST, unless you are changing something on the server. Do not send or receive more data than you need. Let the browser and your application remember responses so you do not ask twice. If you are making many small requests, combine them. If a request is triggered by typing or scrolling, wait or limit how often it fires. If a response is no longer needed, cancel it. Always handle errors and set a timeout. And when the data comes back, update the page in as few steps as possible. These habits keep applications responsive and servers happy.
+
+---
 
 ### Purposes
 
-- To defer non-essential network requests (analytics, pre-fetching) until the main thread is idle.
-- To avoid competing with critical rendering and interaction tasks for main-thread time.
-- To improve the Time to Interactive (TTI) metric by deferring background work.
-- To provide a smoother user experience during heavy page rendering.
-- To batch low-priority DOM updates without causing layout thrashing.
+- **To provide a single actionable checklist** for efficient AJAX.
+- **To avoid the most common performance and correctness pitfalls** (duplicate requests, stale data, unbounded payloads, synchronous requests).
+- **To balance speed, reliability, and maintainability**.
+- **To establish a baseline for code reviews and performance audits**.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax:**
-```javascript
-requestIdleCallback(function(deadline) {
-    while (deadline.timeRemaining() > 0 && taskQueue.length > 0) {
-        var task = taskQueue.shift();
-        task();
-    }
-    // Optionally schedule more work if the queue is not empty
-    if (taskQueue.length > 0) {
-        requestIdleCallback(processTasks);
-    }
-}, { timeout: 2000 });
-```
+| Practice | Recommended | Avoid |
+|---|---|---|
+| HTTP method | GET for retrieval, POST for changes | POST for read‑only queries |
+| Payload | Minimal, compressed | Large, uncompressed payloads |
+| Caching | `cache: true` + HTTP headers | `cache: false` everywhere |
+| Request frequency | Debounce / throttle | Request per keystroke / scroll |
+| Stale requests | `xhr.abort()` | Letting old responses overwrite new |
+| Error handling | `error` callback + timeout | Ignoring failures |
+| Async | `async: true` (default) | `async: false` |
+| DOM updates | Batch after response | Per‑item DOM writes |
 
-| Component | Description |
-|-----------|-------------|
-| `requestIdleCallback(callback)` | Schedules the callback for an idle period. |
-| `deadline.timeRemaining()` | Milliseconds remaining in the current idle period. |
-| `{ timeout: 2000 }` | Forces execution after 2000ms even if no idle period occurs. |
-| `cancelIdleCallback(id)` | Cancels a scheduled idle callback. |
+---
 
-**Complete General Syntax (Non-Essential AJAX in Idle Time):**
-```javascript
-requestIdleCallback(function(deadline) {
-    if (deadline.timeRemaining() > 10) {
-        // Send non-critical analytics data
-        $.ajax({
-            url: "/api/analytics",
-            type: "POST",
-            data: { event: "page_view", page: window.location.pathname }
-        });
-    }
-}, { timeout: 3000 });
-```
+### Constraints and Limitations
 
-**Syntax Rules:**
+- **Best practices are context‑dependent**; a one‑off configuration request may not need caching or batching.
+- **Debouncing and throttling add complexity**; apply them where the event frequency justifies it.
+- **Aborting requests does not guarantee server‑side cancellation**; design APIs to be idempotent where possible.
 
-- Use `requestIdleCallback` for non-critical tasks: analytics logging, pre-fetching data, pre-loading images.
-- Do **not** use `requestIdleCallback` for DOM modifications that affect layout; use `requestAnimationFrame` for those.
-- The `timeout` option ensures that the callback eventually runs even if the browser never becomes idle.
-- Check `deadline.timeRemaining()` before starting work; if insufficient time remains, defer the work.
-- Provide a polyfill for Safari: `window.requestIdleCallback = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); }`.
+---
 
-**Constraints and Limitations:**
-
-- Safari does not support `requestIdleCallback`; a polyfill or `setTimeout` fallback is required.
-- Idle periods are typically short (0.5–10ms), so tasks should be small and interruptible.
-- DOM mutations in idle callbacks can cause layout thrashing; reserve them for `requestAnimationFrame`.
-- The API is experimental and the specification is still evolving.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Deferring Analytics Requests to Idle Time**
+### Annotated Code Example (Consolidated)
 
 ```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>requestIdleCallback Demo</title>
-  <script src="https://code.jquery.com/jquery-4.0.0.js"></script>
-  <script>
-    // Polyfill for browsers that do not support requestIdleCallback
-    window.requestIdleCallback = window.requestIdleCallback || function(cb) {
-      var start = Date.now();
-      return setTimeout(function() {
-        cb({
-          didTimeout: false,
-          timeRemaining: function() {
-            return Math.max(0, 50 - (Date.now() - start));
-          }
-        });
-      }, 1);
-    };
-  </script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <button id="actionBtn">Perform Action</button>
-  <p id="log"></p>
+  <input type="text" id="search" placeholder="Search…">
+  <div id="results"></div>
 
   <script>
-    $(function() {
-      // Step 1: Critical action — immediate
-      $("#actionBtn").click(function() {
-        $("#log").text("Action performed. Analytics scheduled for idle time.");
+    // ✅ BEST PRACTICES CONSOLIDATED
+    var currentRequest = null;
+    var cache = {};
 
-        // Step 2: Schedule non-critical analytics for idle time
-        requestIdleCallback(function(deadline) {
-          if (deadline.timeRemaining() > 10) {
-            // Simulate sending analytics data
-            $("#log").append("<br>Analytics sent during idle time. " +
-              "Time remaining: " + deadline.timeRemaining().toFixed(1) + "ms");
-          }
-        }, { timeout: 2000 });
+    function debounce(fn, delay) {
+      var timer;
+      return function () {
+        var context = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () { fn.apply(context, args); }, delay);
+      };
+    }
+
+    var search = debounce(function (query) {
+      if (query.length < 2) return;
+
+      // ✅ CACHING: check application-level cache
+      if (cache[query]) {
+        render(cache[query]);
+        return;
+      }
+
+      // ✅ CANCELLATION: abort stale request
+      if (currentRequest) currentRequest.abort();
+
+      // ✅ GET for retrieval, cache enabled, timeout set, async
+      currentRequest = $.ajax({
+        url: "/api/search",
+        type: "GET",
+        data: { q: query },
+        dataType: "json",
+        cache: true,
+        timeout: 5000,
+        success: function (data) {
+          cache[query] = data;              // ✅ store in cache
+          render(data);
+        },
+        error: function (xhr, status) {
+          if (status !== "abort") console.error("Search failed:", status);
+        },
+        complete: function () { currentRequest = null; }
       });
+    }, 300);
+
+    function render(data) {
+      // ✅ BATCH DOM update
+      var html = "";
+      $.each(data, function (i, item) { html += "<div>" + item + "</div>"; });
+      $("#results").html(html);
+    }
+
+    $("#search").on("input", function () {
+      search($(this).val());
     });
   </script>
 </body>
 </html>
 ```
 
-**Expected Output:** Clicking the button immediately logs "Action performed" and schedules the analytics request. When the browser has idle time (or after the 2000ms timeout), the analytics data is sent, and the log is updated with the time remaining.
+**Expected Output**
+Typing “hello” after a 300 ms pause produces a single request. If “hello” was searched before, the cached result is rendered immediately without a network request. Stale requests from earlier keystrokes are aborted. The results are rendered in a single DOM update.
 
-**Why this output:** The critical user action (button click) executes immediately. The non-critical analytics request is deferred to `requestIdleCallback`, which runs when the main thread is idle or after the timeout. This prevents the analytics request from competing with the user's interaction for main-thread time.
+**Why this output occurs**: The example combines debouncing (300 ms), caching (application‑level `cache` object), cancellation (`currentRequest.abort()`), GET with `cache: true`, a timeout, error handling that distinguishes abort from failure, and batched DOM rendering — each corresponding to a best practice.
 
-### Real-World Cases
+---
 
-- **Analytics logging:** Deferring page view, click, and scroll analytics to idle time.
-- **Pre-fetching:** Pre-loading data for likely next pages during idle periods.
-- **Third-party scripts:** Loading non-essential third-party scripts (chat widgets, tracking pixels) during idle time.
-- **DOM updates:** Batching non-visible DOM updates (e.g., updating a hidden panel) during idle periods.
+### Real‑World Cases
+
+- **Code reviews**: A checklist ensures that new AJAX code follows established performance patterns.
+- **Legacy refactoring**: Identifying per‑keystroke requests and repeated uncached fetches as candidates for debouncing and caching.
+- **API client design**: Building a reusable request layer that applies best practices consistently across an application.
 
 ---
 
 ## References
 
-- Master jQuery AJAX: Complete Guide to Asynchronous Requests — https://www.sitepoint.com/use-jquerys-ajax-function/
-- jQuery Ajax Request and Caching — Microsoft Learn — https://learn.microsoft.com/en-us/previous-versions/aspnet/dn385750(v=vs.108)
-- Ben Alman — jQuery throttle / debounce Plugin — http://benalman.com/projects/jquery-throttle-debounce-plugin/
-- jQuery .abort() Documentation — https://api.jquery.com/jQuery.ajax/
-- jQuery Mobile Docs — Prefetching & caching pages — https://demos.jquerymobile.com/1.4.5/pages/page-cache/
-- MDN Web Docs — requestIdleCallback() — https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback
-- jQuery .when() Documentation — https://api.jquery.com/jQuery.when/
-- batchcall — npm — https://www.jsdelivr.com/package/npm/batchcall
-- Adaptive Categorical Dictionary Implementation for Payload Reduction in AJAX Server-side DataTables Communication — https://jurnal.umsu.ac.id/index.php/jcositte/article/download/26015/14121
-- jQuery Learning Center — jQuery.ajax() — https://learn.jquery.com/ajax/jquery-ajax-methods/
-- MDN Web Docs — HTTP Caching — https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
-- W3C — XMLHttpRequest Standard — https://xhr.spec.whatwg.org/
-- Google Developers — Render-blocking CSS — https://developer.chrome.com/docs/lighthouse/performance/render-blocking-resources/
-- web.dev — Passive event listeners — https://web.dev/articles/uses-passive-event-listeners
-- jQuery Bug Tracker — #12828: Ajax cache option does not work as expected — https://bugs.jquery.com/ticket/12828/
-- Stack Overflow — Abort Ajax requests using jQuery — https://stackoverflow.com/questions/446594/abort-ajax-requests-using-jquery
+- Master jQuery AJAX: Complete Guide to Asynchronous Requests | SitePoint — https://www.sitepoint.com/use-jquerys-ajax-function/
+- Avoiding duplicate AJAX requests | Rishan Digital — https://rishandigital.com/jquery/avoiding-duplicate-ajax-requests/
+- Abort Ajax requests using jQuery | Stack Overflow — https://stackoverflow.com/revisions/39576297-767b-4e70-ba74-d8aa88c505aa/view-source
+- jQuery Ajax 请求优化与实战技巧 | OSCHINA — https://my.oschina.net/emacs_7998781/blog/19365085
+- jquery ajax request and caching | Microsoft Learn — https://learn.microsoft.com/ro-ro/archive/msdn-technet-forums/e69accf6-7f75-4d79-805b-d8cc74e2312c
+- jQuery autocomplete too many db requests | Stack Overflow — https://stackoverflow.com/feeds/question/41347261
+- jQuery.ajaxPrefilter() | jQuery API Documentation — https://api.jquery.com/jQuery.ajaxPrefilter/
+- Queue Ajax Calls Performantly | WordPress.org — https://eu.wordpress.org/plugins/queue-ajax-calls-performantly/
+- jQuery.ajax() | jQuery API Documentation — https://api.jquery.com/jQuery.ajax/
+- jQuery.ajaxSetup() | jQuery API Documentation — https://api.jquery.com/jQuery.ajaxSetup/
+- Ben Alman: jQuery throttle / debounce plugin — http://benalman.com/projects/jquery-throttle-debounce-plugin/
+- Lodash: `_.debounce()` — https://lodash.com/docs/4.17.2#debounce
+- Lodash: `_.throttle()` — https://lodash.com/docs/4.17.2#throttle
+- MDN: HTTP caching — https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching

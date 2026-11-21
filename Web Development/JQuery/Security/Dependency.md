@@ -6,563 +6,628 @@
 
 ### Definitions
 
-**Core Definition:** jQuery Dependency Security is the discipline of managing the jQuery library, its plugins, and their transitive dependencies in a manner that minimizes the risk of introducing known vulnerabilities into a web application, while ensuring that security patches are applied promptly and that third-party code loaded from external sources is verified for integrity.
+**Core Definition**
+jQuery dependency security is the discipline of ensuring that the jQuery library and every plugin, shim, and vendored copy it depends on are free from known vulnerabilities, are obtained from trustworthy sources, are updated to patched versions, and are continuously monitored through software composition analysis (SCA) and static analysis (SAST) so that the application does not inherit exploitable flaws from its third-party code.
 
-**Technical Definition:** jQuery Dependency Security encompasses the lifecycle management of jQuery and its ecosystem — version selection, upgrade planning, vulnerability monitoring, supply-chain auditing, obsolete dependency removal, and Subresource Integrity (SRI) enforcement. It addresses risks arising from: (1) known CVEs in outdated jQuery versions (e.g., CVE-2019-11358 prototype pollution, CVE-2020-11022/11023 XSS); (2) unmaintained or malicious third-party plugins; (3) transitive dependencies introduced by plugins; (4) CDN-hosted assets that can be tampered with; and (5) polyfills and legacy shims that expand the attack surface without providing current value.
+**Technical Definition**
+Dependency security for jQuery operates across four domains. **Vulnerability awareness** requires knowing the CVEs that affect jQuery core and its ecosystem — chiefly prototype pollution in `$.extend()` (CVE-2019-11358, fixed in 3.4.0) and XSS via `htmlPrefilter` (CVE-2020-11022 and CVE-2020-11023, fixed in 3.5.0). **Update management** requires moving declared dependencies to patched versions (the current stable 3.x line is 3.7.x, and jQuery 4.0.0 was released in January 2026). **Migration tooling** — the jQuery Migrate plugin — re-adds deprecated behaviours so legacy code can run on newer jQuery, but it must be treated as temporary scaffolding, not a permanent substitute for upgrading. **Dependency scanning** uses SCA tools (`npm audit`, OSV-Scanner, Snyk) to match lockfile versions against advisory databases, and SAST tools (Semgrep) to detect insecure usage patterns in application code. The persistent challenge is that vulnerable jQuery copies survive in bundled CMS themes, vendored admin panels, and transitive npm dependencies that package-manager scanners often do not see.
 
-**Beginner-Friendly Explanation:** jQuery is a tool that millions of websites use. Like any tool, it gets updated over time — sometimes because new features are added, but often because security holes are discovered and fixed. Dependency security means: using a version of jQuery that has the important fixes, checking that the plugins you add do not bring their own security problems, watching for new vulnerabilities, removing tools you no longer need, and verifying that the copy of jQuery you load from a CDN is exactly what you expect it to be.
+**Beginner-Friendly Explanation**
+jQuery is a dependency — a piece of software your application relies on. Like any dependency, it can have security holes. When a hole is discovered, the jQuery team releases a fixed version. Dependency security is about three things: **knowing** which holes affect the version you are using, **updating** to a version that has the fixes, and **scanning** your project regularly to make sure no old, vulnerable copy has sneaked in unnoticed. The tricky part is that jQuery copies hide everywhere — inside WordPress themes, in `vendor/` folders, behind CDN links, and buried in other packages. A vulnerability fixed in 2019 can still show up in a scan in 2026 because someone’s theme still ships jQuery 3.3.1. Dependency security is the process of finding and fixing those copies before an attacker does.
+
+---
 
 ### Key Characteristics
 
-- **jQuery has a long CVE history:** Multiple prototype pollution and XSS vulnerabilities have been discovered and patched over the years, and older versions remain widely deployed in legacy systems.
-- **The 3.x branch is the current security baseline:** jQuery 4.0 was released in January 2026 with Trusted Types support and modern CSP compatibility; the 3.x branch receives critical security patches only.
-- **Plugin dependencies are the weakest link:** jQuery itself has few direct dependencies, but plugins often pull in chains of transitive dependencies that may contain vulnerabilities.
-- **CDN loading without SRI is a supply-chain risk:** Roughly three out of four websites load jQuery, often via CDNs with no SRI or version pinning.
-- **Obsolete polyfills and plugins increase attack surface:** Removing dead code reduces the number of components that can be exploited.
+| Characteristic | Description |
+|---|---|
+| **Two CVEs dominate real scan results** | CVE-2019-11358 (prototype pollution in `$.extend()`, fixed in 3.4.0) and CVE-2020-11022/11023 (XSS via `htmlPrefilter`, fixed in 3.5.0) account for most jQuery findings in SCA reports. |
+| **Patched versions exist** | Upgrading to jQuery ≥ 3.5.0 (and preferably the latest 3.7.x or 4.0.0) remediates both CVE families. |
+| **Bundled copies evade SCA** | Vendored jQuery files inside CMS themes and admin panels are invisible to `npm audit` and often missed by Snyk unless the scanner inventories static assets. |
+| **jQuery Migrate signals debt, not safety** | Teams that rely on jQuery Migrate frequently remain on jQuery 1.12 or 2.x, which carry the XSS flaws fixed in 3.5.0. |
+| **SCA and SAST are complementary** | SCA matches dependency versions against CVEs; SAST finds insecure usage (e.g., `.html()` with untrusted data) that no version bump can fix. |
+| **jQuery 4.0 adds Trusted Types support** | The 2026 major release improves CSP compatibility and removes long-deprecated APIs, but requires migration effort. |
+
+---
 
 ### Prerequisites
 
-- Proficiency in jQuery fundamentals: selectors, AJAX, DOM manipulation, and plugin usage.
-- Understanding of web application security concepts (XSS, prototype pollution, supply-chain attacks).
-- Familiarity with package managers (npm, yarn) and dependency management concepts.
-- Awareness of browser security features (CSP, SRI, Trusted Types).
+- Working knowledge of `package.json`, lockfiles (`package-lock.json`, `yarn.lock`), and semantic versioning.
+- Familiarity with jQuery’s role in the application and how it is loaded (npm, CDN, or vendored file).
+- Awareness of CVE identifiers and severity scoring (CVSS).
+- Access to a terminal for running SCA tools and a code repository for SAST.
+
+---
 
 ### Related Programming Areas
 
-- **Software Supply Chain Security:** Managing third-party components and their transitive dependencies.
-- **Vulnerability Management:** Continuous monitoring and patching of known CVEs.
-- **Web Application Security (OWASP Top 10):** XSS and injection are the primary risks mitigated by dependency security.
-- **Build Tooling and CI/CD:** Automating security audits as part of the build pipeline.
-- **Content Security Policy (CSP):** Modern jQuery versions integrate with CSP and Trusted Types.
-
-### Core Concepts / Features
-
-This cheat sheet covers five core concepts and one enhanced topic: keeping jQuery updated, checking plugin dependencies, vulnerability monitoring, removing obsolete libraries, SRI implementation, and automated security auditing.
+- **Plugin security** — plugins carry their own CVEs and may bundle vulnerable jQuery copies.
+- **XSS prevention** — the jQuery CVEs are XSS-class vulnerabilities; remediation requires both upgrading and safe coding practices.
+- **Software supply chain security** — SBOM generation, provenance verification, and dependency pinning.
+- **CI/CD security** — automated SCA and SAST gates on every build.
+- **Content Security Policy (CSP)** — defence in depth that limits the impact of a compromised dependency.
 
 ---
 
-## Core Concept 1: Keeping jQuery Updated — Patching Historical Prototype Pollution and XSS Flaws
+### Core Concepts / Features (Index)
+
+1. Dependency Vulnerabilities
+2. jQuery Vulnerabilities
+3. jQuery Updates
+4. jQuery Migrate
+5. Dependency Scanning
+6. Dependency Security Best Practices
+
+
+## Core Concept 1: Dependency Vulnerabilities
 
 ### Definitions
 
-**Core Definition:** Keeping jQuery updated is the practice of upgrading the jQuery library to the latest stable version (or at minimum the latest security-patched version of the 3.x branch) to permanently address historical vulnerabilities such as prototype pollution in `$.extend()` and XSS bypasses in DOM manipulation methods.
+**Core Definition**
+A dependency vulnerability is a security flaw in a third-party library, framework, or plugin that an application relies on, which can be exploited to compromise the application even though the application’s own code is not directly at fault.
 
-**Technical Definition:** jQuery has accumulated a series of security vulnerabilities over its long history. The most significant are: **CVE-2019-11358** — prototype pollution in `jQuery.extend(true, ...)` (deep merge) that allows an attacker to inject a `__proto__` key and pollute `Object.prototype`; fixed in jQuery 3.4.0. **CVE-2020-11022** — XSS in the `htmlPrefilter()` method when passing HTML from untrusted sources, even after sanitization; fixed in jQuery 3.5.0. **CVE-2020-11023** — XSS in DOM manipulation methods when passing HTML containing `<option>` elements from untrusted sources; fixed in jQuery 3.5.0. **CVE-2020-7656** — XSS via improper script handling. jQuery 4.0.0, released January 2026, adds Trusted Types support for CSP compliance and removes legacy polyfills and deprecated APIs.
+**Technical Definition**
+Dependency vulnerabilities are tracked as CVEs (Common Vulnerabilities and Exposures) and scored with CVSS (Common Vulnerability Scoring System). In the jQuery ecosystem, the most consequential dependency vulnerabilities are **prototype pollution** (CVE-2019-11358) and **DOM-based XSS** via `htmlPrefilter` (CVE-2020-11022 and CVE-2020-11023). A dependency vulnerability is **reachable** if the application actually invokes the vulnerable code path with attacker-influenced data; SCA tools report the vulnerability, but reachability analysis determines whether it is exploitable in context. Dependency vulnerabilities persist because vulnerable versions are **transitive** (pulled in by other packages), **vendored** (copied into static assets), or **abandoned** (no patched release will ever be issued).
 
-**Beginner-Friendly Explanation:** jQuery has had security bugs over the years, just like any software. The bugs have been fixed in newer versions, but older versions are still running on many websites. Keeping jQuery updated means using a version where these known bugs are already fixed, so attackers cannot exploit them.
+**Beginner-Friendly Explanation**
+A dependency vulnerability is a hole in someone else’s code that you inherited by using their library. You did not write the hole, but you are exposed to it. The two jQuery holes that matter most are: (1) a bug in `$.extend()` that lets an attacker poison shared objects (prototype pollution), and (2) a bug in how jQuery cleans up HTML strings that lets an attacker sneak in a script even after you sanitised it (XSS). Both were fixed years ago, but old copies still exist. The key insight is that a vulnerability only matters if the vulnerable code is actually used with attacker-controlled data — so knowing **which** version you have and **whether** you call the vulnerable function is the foundation of dependency security.
+
+---
 
 ### Purposes
 
-- To eliminate known security vulnerabilities that have been patched in newer jQuery versions.
-- To benefit from modern security features such as Trusted Types and CSP compatibility introduced in jQuery 4.0.
-- To reduce the risk of prototype pollution attacks that can lead to XSS and authorization bypass.
-- To comply with security best practices and audit requirements that mandate patching known CVEs.
-- To prepare for the eventual removal of deprecated APIs and legacy browser support.
+- **To recognise that inherited code carries inherited risk**.
+- **To distinguish declared dependencies from transitive and vendored copies**.
+- **To assess reachability** — whether the vulnerable code path is actually invoked.
+- **To prioritise remediation** based on severity, reachability, and exploitability.
+- **To motivate continuous scanning** rather than one-time audits.
+
+---
 
 ### Syntax Rules and Structure
 
-**Version Upgrade Path:**
+| Dependency Type | Visibility to SCA | Typical Example |
+|---|---|---|
+| **Direct npm dependency** | Visible in `package.json` / lockfile | `"jquery": "3.3.1"` |
+| **Transitive npm dependency** | Visible in lockfile; may not be declared | `some-ui-lib` depends on `jquery@<3.4.0` |
+| **Vendored / bundled copy** | Invisible to package-manager SCA | `themes/legacy/js/jquery-3.3.1.min.js` |
+| **CDN-pinned script tag** | Invisible to SCA | `<script src=".../jquery-3.3.1.min.js">` |
 
-| Current Version | Recommended Action |
-|-----------------|-------------------|
-| jQuery 1.x | Upgrade to 3.7.x, then plan for 4.x |
-| jQuery 2.x | Upgrade to 3.7.x, then plan for 4.x |
-| jQuery 3.x (< 3.5.0) | Upgrade to 3.5.0+ immediately (critical XSS fixes) |
-| jQuery 3.x (≥ 3.5.0) | Upgrade to 3.7.1 (latest 3.x) |
-| jQuery 4.x | Current version; monitor for patches |
+---
 
-**Complete General Syntax (CDN Upgrade):**
-```html
-<!-- Before: vulnerable version -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+### Constraints and Limitations
 
-<!-- After: patched version with SRI -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs"
-        crossorigin="anonymous"></script>
+- **Not every reported vulnerability is exploitable** in your context; reachability matters.
+- **Transitive dependencies can pin vulnerable versions** even when your direct dependency is current.
+- **Vendored copies require manual inventory**; no package manager will flag them.
+
+---
+
+### Annotated Code Example (Identifying a Vulnerable Dependency)
+
+```bash
+# Step 1: Check the declared version and resolved lockfile version
+npm ls jquery
+# my-app@1.0.0
+# └── jquery@3.3.1          ← vulnerable to CVE-2019-11358
+
+# Step 2: Search for vendored copies that SCA cannot see
+grep -rn "jQuery v3\." --include="*.js" vendor/ themes/ static/
+# themes/legacy/js/jquery.js:1:/*! jQuery v3.3.1
+
+# Step 3: Confirm the version at runtime (browser console)
+# console.log(jQuery.fn.jquery);  →  "3.3.1"
 ```
 
-**Syntax Rules:**
+**Expected Output**
+The declared dependency resolves to 3.3.1, and a vendored copy of 3.3.1 exists in the legacy theme. Both are below the 3.4.0 fix threshold for prototype pollution.
 
-- Upgrade to jQuery 3.5.0 or later immediately if running any version between 1.0.3 and 3.5.0, because CVE-2020-11022 and CVE-2020-11023 are critical XSS vulnerabilities.
-- Use the jQuery Migrate plugin to identify deprecated API usage before upgrading to 4.x.
-- Test thoroughly after upgrading, especially form focus handling, `.toggleClass(true|false)`, and `.css("width", 100)` numeric pixel assumptions.
-- For legacy applications that cannot upgrade immediately, use DOMPurify with `SAFE_FOR_JQUERY` to sanitize HTML before passing it to jQuery methods.
+**Why this output occurs**: `npm ls` shows the resolved version from the lockfile; `grep` discovers files that are outside the package manager’s view. Both must be remediated.
 
-**Constraints and Limitations:**
-
-- Upgrading from 1.x or 2.x to 3.x may break plugins that depend on removed APIs (e.g., `jQuery.trim`, `jQuery.isArray`, `jQuery.parseJSON`).
-- jQuery 4.0 removes support for IE 10 and older; IE 11 support is planned for removal in jQuery 5.0.
-- Some legacy plugins may not be compatible with jQuery 4.x; audit plugin compatibility before upgrading.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Detecting Vulnerable jQuery Version**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>jQuery Version Check</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-</head>
-<body>
-  <p id="log"></p>
-
-  <script>
-    $(function() {
-      // Step 1: Read the jQuery version
-      var version = $.fn.jquery;
-      var parts = version.split(".").map(Number);
-
-      // Step 2: Check if the version is vulnerable
-      var isVulnerable = false;
-      if (parts[0] === 1 || parts[0] === 2) {
-        isVulnerable = true;
-      } else if (parts[0] === 3 && parts[1] < 5) {
-        isVulnerable = true; // CVE-2020-11022/11023
-      }
-
-      // Step 3: Display the result
-      $("#log").html(
-        "jQuery version: " + version + "<br>" +
-        (isVulnerable
-          ? "⚠️ VULNERABLE: Upgrade to jQuery 3.5.0+ immediately."
-          : "✅ Version is not affected by known critical CVEs.")
-      );
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-jQuery version: 3.7.1
-✅ Version is not affected by known critical CVEs.
-```
-
-**Why this output:** The script reads `$.fn.jquery` (which returns the jQuery version string) and checks whether the major version is 1 or 2 (always vulnerable) or the major version is 3 with a minor version below 5 (vulnerable to CVE-2020-11022/11023). jQuery 3.7.1 passes the check.
+---
 
 ### Real-World Cases
 
-- **Enterprise applications:** Auditing all jQuery instances and upgrading to 3.7.x or 4.0.
-- **WordPress sites:** Using the Enable jQuery Migrate Helper plugin to identify and fix deprecated API usage.
-- **Legacy CMS platforms:** Bundled jQuery copies inside CMS themes and admin panels are a common source of unpatched vulnerabilities.
-- **SPA frameworks:** Ensuring the jQuery version used by legacy plugins is not vulnerable.
+- **Enterprise codebases in 2026**: CVE-2019-11358 resurfaces in SCA scans because bundled jQuery copies never left production.
+- **WordPress themes and plugins**: A large share of plugin-bundled jQuery copies predate 3.4.0 and are rarely updated independently.
+- **Transitive npm dependencies**: Build tooling and older UI libraries pin `jquery@<3.4.0`, propagating the vulnerability invisibly.
 
 ---
 
-## Core Concept 2: Checking Plugin Dependencies — Auditing the Supply Chain
+## Core Concept 2: jQuery Vulnerabilities
 
 ### Definitions
 
-**Core Definition:** Checking plugin dependencies is the practice of auditing the third-party jQuery plugins and wrappers used in a project to identify their direct and transitive dependencies, assess their maintenance status, and detect any known vulnerabilities introduced through the dependency chain.
+**Core Definition**
+jQuery vulnerabilities are specific, published security flaws in the jQuery library itself — as opposed to flaws in plugins or application code — that can be exploited when the application uses the vulnerable version in an affected way.
 
-**Technical Definition:** jQuery itself has few direct dependencies, but projects using jQuery often pull in plugins (e.g., jQuery UI, DataTables, Select2) that declare their own dependencies. A jQuery plugin such as `jquery-ui-extended` might depend on jQuery (direct), moment.js (for date handling), and timezone-data.js (transitive through moment.js). According to Black Duck's OSSRA report, 64% of open source components are transitive dependencies, and 81% of codebases contain high- or critical-risk vulnerabilities, nearly half of which were introduced by transitive dependencies. Auditing involves: identifying all declared dependencies in `package.json`, scanning for vulnerabilities in transitive dependencies, and checking whether each plugin is actively maintained.
+**Technical Definition**
+Two CVE families account for the overwhelming majority of jQuery core findings. **CVE-2019-11358** (prototype pollution) affects jQuery versions before 3.4.0. When `jQuery.extend(true, target, source)` performs a deep merge, it does not reject `__proto__` or `constructor.prototype` keys. An attacker who can influence the source object — via a JSON body, query string, or config payload — can inject a `__proto__` key and pollute `Object.prototype`, corrupting behaviour for every object in the application. Impact ranges from denial of service to client-side XSS to authorisation bypass in Node.js code that imports jQuery. **CVE-2020-11022 and CVE-2020-11023** (XSS via `htmlPrefilter`) affect jQuery versions from 1.2 up to but not including 3.5.0. The `htmlPrefilter` routine normalises HTML strings before they are inserted by `.html()`, `.append()`, `.prepend()`, `.before()`, `.after()`, and `.replaceWith()`. Under specific conditions, HTML that was already sanitised could be re-interpreted by the browser to execute a script. CISA added CVE-2020-11023 to its Known Exploited Vulnerabilities catalog. Both families are fixed in jQuery 3.5.0 and later.
 
-**Beginner-Friendly Explanation:** When you add a jQuery plugin to your project, you are not just adding that plugin — you are also adding everything that plugin depends on. A date picker plugin might depend on a date library, which depends on a timezone database. Any of those could have a security problem. Checking plugin dependencies means tracing that chain and making sure everything is safe and maintained.
+**Beginner-Friendly Explanation**
+jQuery has had two serious security problems. The first is **prototype pollution**: jQuery has a function called `$.extend()` that merges objects together. If an attacker can control one of the objects being merged, they can sneak in a special key called `__proto__` that changes the behaviour of every object in the application — like changing the rules of the game for everyone. The second is **XSS via `htmlPrefilter`**: jQuery cleans up HTML strings before inserting them into the page, but the cleaning was imperfect. An attacker could craft HTML that looked safe after cleaning but still executed a script when the browser parsed it. Both were fixed in jQuery 3.5.0. If you are on an older version, you are exposed — even if you sanitise your HTML, because the bug is in jQuery’s own processing.
+
+---
 
 ### Purposes
 
-- To identify vulnerabilities introduced through transitive dependencies that are not visible in the project's direct `package.json`.
-- To assess whether a plugin is actively maintained and receives security updates.
-- To detect malicious packages that masquerade as legitimate jQuery plugins.
-- To comply with software composition analysis (SCA) requirements and license audits.
-- To make informed decisions about whether to keep, replace, or remove a plugin.
+- **To know exactly which jQuery versions are affected** by each CVE.
+- **To understand the exploit mechanism** so that reachability can be assessed.
+- **To identify the fixed versions** (3.4.0 for prototype pollution; 3.5.0 for XSS).
+- **To recognise that sanitisation alone does not fix the XSS CVEs** — upgrading is mandatory.
+- **To communicate the risk** to stakeholders using CVE identifiers and severity scores.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax (npm Audit):**
+| CVE | Vulnerability | Affected Range | Fixed In | Impact |
+|---|---|---|---|---|
+| **CVE-2019-11358** | Prototype pollution in `$.extend(true, …)` | `< 3.4.0` | **3.4.0** | DoS, XSS, authorisation bypass |
+| **CVE-2020-11022** | XSS via `htmlPrefilter` (option/style) | `1.2 – 3.4.x` | **3.5.0** | DOM-based XSS |
+| **CVE-2020-11023** | XSS via `htmlPrefilter` (self-closing tags) | `1.2 – 3.4.x` | **3.5.0** | Persistent XSS (CISA KEV) |
+
+---
+
+### Constraints and Limitations
+
+- **The XSS CVEs affect sanitised HTML**; upstream sanitisation does not mitigate the flaw because the bug is in jQuery’s internal rewriting.
+- **Prototype pollution’s impact depends on downstream usage**; a polluted property only causes harm if the application reads it in a security-sensitive context.
+- **jQuery 4.0 does not introduce new core CVEs**; it adds Trusted Types support and removes deprecated APIs.
+
+---
+
+### Annotated Code Example (Prototype Pollution Demonstration)
+
+```javascript
+// Step 1: Simulate vulnerable jQuery.extend deep merge (< 3.4.0)
+function vulnerableExtend(target, source) {
+  for (var key in source) {
+    if (typeof source[key] === "object" && source[key] !== null) {
+      target[key] = vulnerableExtend(target[key] || {}, source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+// Step 2: Attacker-controlled payload (e.g., from JSON.parse of request body)
+var payload = JSON.parse('{"__proto__": {"isAdmin": true}}');
+
+// Step 3: Trigger the merge
+vulnerableExtend({}, payload);
+
+// Step 4: Every object now inherits the polluted property
+console.log({}.isAdmin);                    // true
+console.log(Object.prototype.isAdmin);      // true
+```
+
+**Expected Output**
+```
+true
+true
+```
+
+**Why this output occurs**: The merge copies the `__proto__` key, which refers to `Object.prototype`. The assignment pollutes the prototype, making `isAdmin` visible on every object. The fix in jQuery 3.4.0 adds a check that rejects `__proto__` keys during merges.
+
+---
+
+### Real-World Cases
+
+- **Node.js applications importing jQuery**: Prototype pollution can lead to authorisation bypass in server-side code.
+- **Comment fields and WYSIWYG editors**: CVE-2020-11022/11023 enable stored XSS even when input is sanitised.
+- **Drupal and Backdrop CMS**: CVE-2019-11358 affected these platforms through bundled jQuery.
+
+---
+
+## Core Concept 3: jQuery Updates
+
+### Definitions
+
+**Core Definition**
+jQuery updates are the controlled process of moving the jQuery dependency from a vulnerable or outdated version to a patched, supported version — typically the latest 3.7.x release or jQuery 4.0.0 — while verifying compatibility with the application’s plugins and code.
+
+**Technical Definition**
+jQuery updates address three concerns. **Security updates** remediate known CVEs: upgrading to ≥ 3.4.0 fixes prototype pollution, and upgrading to ≥ 3.5.0 fixes the `htmlPrefilter` XSS flaws. **Compatibility updates** align jQuery with the application’s plugin ecosystem; jQuery 4.0.0 removes long-deprecated APIs (`jQuery.trim`, `jQuery.isArray`, `jQuery.parseJSON`, `jQuery.now`, `jQuery.isFunction`) and drops support for IE10 and earlier, so plugins that rely on those APIs may break. **Lifecycle updates** move the application onto a supported release line: the 3.x line remains supported for applications that need older-browser compatibility, while 4.x is the forward path. The update should be performed in a branch, with the lockfile committed, the test suite run, and staging verification completed before production deployment.
+
+**Beginner-Friendly Explanation**
+Updating jQuery is not just pressing “upgrade.” You need to move to a version that has the security fixes — 3.5.0 at minimum, and preferably 3.7.x or 4.0.0. But you also need to make sure your plugins still work. jQuery 4.0 removed some old functions that plugins might still use, so an update can break things if you are not careful. The safe approach is: read the changelog, update in a branch, run your tests, check your plugins, and deploy gradually. The goal is to get off the vulnerable versions without breaking the application.
+
+---
+
+### Purposes
+
+- **To remediate CVE-2019-11358 and CVE-2020-11022/11023** by moving to ≥ 3.5.0.
+- **To move onto a supported release line** (3.7.x or 4.0.0).
+- **To verify plugin compatibility** before and after the update.
+- **To maintain a reproducible dependency graph** through lockfile discipline.
+- **To reduce accumulated technical debt** from outdated dependencies.
+
+---
+
+### Syntax Rules and Structure
+
+#### npm / Yarn Update Commands
+
 ```bash
+# Check the current and latest versions
+npm outdated jquery
+
+# Update to the latest 3.x release
+npm install jquery@3.7.1
+
+# Or update to jQuery 4.0.0 (requires compatibility testing)
+npm install jquery@4.0.0
+
+# Run tests and audit
+npm test
 npm audit
-npm audit --audit-level=moderate
-npm audit fix
 ```
 
-**Complete General Syntax (Retire.js):**
-```bash
-# Install Retire.js
-npm install -g retire
+#### Runtime Version Verification
 
-# Scan a directory
-retire --path ./node_modules
-
-# Scan a URL
-retire --path https://code.jquery.com/jquery-1.11.3.min.js
+```javascript
+// In the browser console
+console.log(jQuery.fn.jquery);   // e.g. "3.7.1"
 ```
 
-**Complete General Syntax (Snyk):**
-```bash
-# Install Snyk
-npm install -g snyk
+---
 
-# Test for vulnerabilities
+### Constraints and Limitations
+
+- **jQuery 4.0.0 is a major upgrade** with breaking changes for deprecated APIs and older browsers; test thoroughly.
+- **Plugins may not yet support jQuery 4.0**; the 3.7.x line is the safer choice for applications with heavy plugin dependencies.
+- **Updates do not fix vendored copies**; each copy must be updated separately.
+
+---
+
+### Annotated Code Example (Update Workflow)
+
+```bash
+# Step 1: Identify current version and CVEs
+npm ls jquery
+# jquery@3.3.1  →  CVE-2019-11358 (prototype pollution)
+
+# Step 2: Read the changelog for the target version
+# 3.4.0: prototype pollution fix
+# 3.5.0: htmlPrefilter XSS fixes (CVE-2020-11022/11023)
+# 3.7.1: current stable 3.x release
+
+# Step 3: Update to the latest 3.x
+npm install jquery@3.7.1
+
+# Step 4: Run the test suite
+npm test
+
+# Step 5: Verify in the browser
+# console.log(jQuery.fn.jquery);  →  "3.7.1"
+
+# Step 6: Audit the lockfile
+npm audit
+```
+
+**Expected Output**
+The dependency is updated to 3.7.1, which includes the fixes for both CVE families. Tests pass, and `npm audit` reports no direct jQuery vulnerabilities.
+
+**Why this output occurs**: Version 3.7.1 is above the 3.5.0 threshold for both the prototype pollution and XSS fixes. The test suite verifies that the application still works.
+
+---
+
+### Real-World Cases
+
+- **WordPress core**: Upgrading from jQuery 3.6.x to 3.7.x or 4.0.0 requires verifying plugin compatibility with deprecated APIs.
+- **Enterprise applications**: Staged rollouts with lockfile pinning ensure that updates are reproducible and reversible.
+- **CDN-pinned applications**: The `<script>` tag must be updated to point to the new version; a lockfile alone does not help.
+
+---
+
+## Core Concept 4: jQuery Migrate
+
+### Definitions
+
+**Core Definition**
+jQuery Migrate is a compatibility shim that re-adds deprecated or removed jQuery APIs so that older code can continue to run on newer jQuery releases, logging console warnings when deprecated behaviour is used.
+
+**Technical Definition**
+jQuery Migrate is designed as a **temporary migration aid**, not a permanent dependency. When jQuery removed or changed APIs across major versions (1.x → 3.x → 4.x), existing code broke. jQuery Migrate re-adds those behaviours and emits warnings such as `JQMIGRATE: jQuery.fn.attr('checked') might be used instead of .prop()`. The intended workflow is: add the shim, watch the warnings, fix each call site, then remove the shim. The security risk is that teams use Migrate as an excuse to stay on outdated jQuery versions. Projects that ship `jquery-migrate` are frequently the same projects still running jQuery 1.12 or 2.x, which carry the XSS flaws fixed in 3.5.0. The WordPress **Enable jQuery Migrate Helper** plugin has its own vulnerability, CVE-2026-3279, which allows unauthorised modification of data due to a missing capability check on its `downgrade_jquery_version()` function, enabling a downgrade from 3.7.1 to the legacy 1.12.4-wp release.
+
+**Beginner-Friendly Explanation**
+jQuery Migrate is a temporary translator. When jQuery changes, old code that uses removed functions stops working. Migrate brings those functions back and prints a warning each time they are used. The idea is to use the warnings as a to-do list: fix each one, then remove Migrate. But many teams never finish. They leave Migrate in place and keep using old jQuery — which means they keep the old security holes. Migrate itself is not malicious, but it is a red flag: if you see it in your dependency tree, it usually means the upgrade was never completed. The right end state is modern jQuery with no Migrate, or no jQuery at all.
+
+---
+
+### Purposes
+
+- **To provide a temporary bridge** from old jQuery code to a newer release.
+- **To surface deprecated API usage** through console warnings.
+- **To guide a staged migration** rather than a risky big-bang upgrade.
+- **To serve as a diagnostic signal** that an application may be on a vulnerable jQuery version.
+- **To enable incremental remediation** of plugin and application code.
+
+---
+
+### Syntax Rules and Structure
+
+#### Including jQuery Migrate (Development Only)
+
+```html
+<!-- Development: include Migrate to surface warnings -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-migrate-3.5.2.min.js"></script>
+
+<!-- Production: remove Migrate after warnings are fixed -->
+```
+
+#### Checking Resolved Versions
+
+```bash
+npm ls jquery jquery-migrate
+# my-app@1.0.0
+# ├── jquery@3.7.1
+# └── jquery-migrate@3.5.2   ← investigate whether this is still needed
+```
+
+---
+
+### Constraints and Limitations
+
+- **Migrate should not ship to production** long-term; it masks the need to upgrade.
+- **Migrate’s presence correlates with outdated jQuery**; treat it as a signal for review.
+- **The WordPress Enable jQuery Migrate Helper plugin has its own CVE** (CVE-2026-3279).
+
+---
+
+### Annotated Code Example (Migration Workflow)
+
+```javascript
+// Step 1: Run the application with Migrate in development
+// Console output:
+// JQMIGRATE: jQuery.fn.attr('checked') might be used instead of .prop()
+
+// Step 2: Fix the deprecated usage
+// ❌ OLD
+$("input").attr("checked", true);
+// ✅ NEW
+$("input").prop("checked", true);
+
+// Step 3: Repeat until no warnings remain
+
+// Step 4: Remove Migrate from the page and from package.json
+// npm uninstall jquery-migrate
+
+// Step 5: Verify the application still works
+// $ npm test
+```
+
+**Expected Output**
+After fixing all warnings and removing Migrate, the console is clean, and the application runs on modern jQuery without the shim.
+
+**Why this output occurs**: Migrate’s warnings identify the exact call sites that need remediation. Once those are fixed, the shim is no longer required.
+
+---
+
+### Real-World Cases
+
+- **WordPress sites**: The Enable jQuery Migrate Helper plugin is widely used; its CVE-2026-3279 illustrates the risk of relying on migration tooling that itself becomes a vulnerability.
+- **Legacy enterprise applications**: Migrate enables staged upgrades, but the end state must be Migrate-free.
+- **Plugin ecosystems**: Plugins that log Migrate warnings need updates before jQuery 4.0 adoption.
+
+---
+
+## Core Concept 5: Dependency Scanning
+
+### Definitions
+
+**Core Definition**
+Dependency scanning is the automated process of identifying the open-source components an application uses, matching their versions against known vulnerability databases, and producing a prioritised list of findings with remediation guidance.
+
+**Technical Definition**
+Dependency scanning is implemented through **Software Composition Analysis (SCA)** tools. The main scanner families are: **native audits** (`npm audit`, `yarn audit`, `pip-audit`) that use the ecosystem’s own advisory feed; **OSV-Scanner** (Google’s open-source scanner using the OSV.dev database, which aggregates advisories across ecosystems); and **Snyk** (commercial, with its own vulnerability database and monitoring alerts). Scanners should read **lockfiles**, not loose manifests, because the lockfile captures the exact resolved versions including transitive dependencies. **Reachability analysis** determines whether the vulnerable code path is actually invoked, reducing false positives. **SAST** (e.g., Semgrep) complements SCA by finding insecure usage patterns — such as `.html()` with untrusted data — that no version bump can fix.
+
+**Beginner-Friendly Explanation**
+Dependency scanning is the automated version of “checking the recall list.” You give a tool your lockfile, and it tells you which of your dependencies have known vulnerabilities. There are several tools: `npm audit` is built into npm and uses the npm advisory database; OSV-Scanner is free and covers many ecosystems; Snyk is commercial but has more detailed fix advice. The tools do not agree perfectly — each database carries some advisories the others miss — so the recommended approach is to run one native audit plus one cross-ecosystem scanner. Scanning is not a one-time event: new CVEs are published continuously, so it must run on every build and on a schedule.
+
+---
+
+### Purposes
+
+- **To detect known CVEs in declared and transitive dependencies**.
+- **To inventory bundled and vendored copies** that package managers cannot see.
+- **To prioritise remediation** using severity, reachability, and fix availability.
+- **To enforce dependency policy** in CI/CD pipelines.
+- **To generate SBOMs** for supply chain transparency.
+
+---
+
+### Syntax Rules and Structure
+
+#### Scanner Commands
+
+```bash
+# Native audit (Node.js)
+npm audit
+
+# OSV-Scanner (cross-ecosystem)
+osv-scanner --lockfile=package-lock.json
+
+# Snyk (commercial)
 snyk test
 
-# Monitor for new vulnerabilities
-snyk monitor
+# Semgrep (SAST for jQuery patterns)
+semgrep --config "p/jquery" .
 ```
 
-| Tool | Scope | Best For |
-|------|-------|----------|
-| `npm audit` | npm dependencies | Node.js projects with `package.json` |
-| Retire.js | JS libraries (jQuery, Bootstrap, Angular) | Front-end libraries, CDN-loaded scripts |
-| Snyk | Multi-language dependencies | CI/CD integration, detailed remediation |
-| OWASP Dependency-Check | Multi-language dependencies | Enterprise SCA |
-
-**Syntax Rules:**
-
-- Run `npm audit` after every `npm install` to catch newly discovered vulnerabilities.
-- Use Retire.js to scan for outdated client-side libraries that may be loaded via CDN and not tracked by npm.
-- Integrate Snyk or `npm audit` into the CI/CD pipeline to fail builds when high-severity vulnerabilities are detected.
-- Review the maintenance status of each plugin: check the last commit date, open issues, and release frequency.
-- Be cautious of plugins that have not been updated in over a year; they may contain unpatched vulnerabilities.
-
-**Constraints and Limitations:**
-
-- `npm audit` only knows about dependencies in `node_modules`; it does not detect vendored copies of jQuery in a `static/vendor/` folder.
-- Retire.js relies on its curated database, which may not cover every plugin.
-- Transitive dependencies can be deeply nested and difficult to trace without automated tooling.
-- Malicious packages may not be flagged by vulnerability scanners until after they are reported.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Auditing a Project with npm Audit**
+#### Inventorying Vendored Copies
 
 ```bash
-# Step 1: Install dependencies
-npm install jquery jquery-ui datatables.net
+# Find jQuery files anywhere in the repository
+grep -rn "jQuery v" --include="*.js" .
 
-# Step 2: Run the audit
+# Search for CDN-pinned script tags
+grep -rn "jquery-[0-9]" --include="*.html" .
+```
+
+---
+
+### Constraints and Limitations
+
+- **SCA tools miss vendored files**; manual inventory is required.
+- **Native audits and OSV/Snyk have different coverage**; run more than one.
+- **Reachability analysis is not universally available**; triage findings manually when needed.
+- **Scanning is point-in-time**; new CVEs require re-scanning.
+
+---
+
+### Annotated Code Example (SCA Workflow)
+
+```bash
+# Step 1: Run native audit
 npm audit
+# High  Prototype Pollution in jquery  <3.4.0
+# High  XSS in jquery htmlPrefilter   <3.5.0
 
-# Expected output (example):
-# found 2 vulnerabilities (1 moderate, 1 high)
-#   High: Prototype Pollution in jquery@3.4.1
-#   Moderate: XSS in datatables.net@1.10.20
+# Step 2: Run cross-ecosystem scanner
+osv-scanner --lockfile=package-lock.json
+# jquery@3.3.1  CVE-2019-11358  fixed in 3.4.0
+# jquery@3.3.1  CVE-2020-11022  fixed in 3.5.0
+
+# Step 3: Inventory vendored copies
+grep -rn "jQuery v3\." --include="*.js" themes/ vendor/
+# themes/legacy/js/jquery.js:1:/*! jQuery v3.3.1  ← remediate separately
+
+# Step 4: Triage and remediate
+# - Upgrade npm jquery to 3.7.1
+# - Replace vendored 3.3.1 copy in legacy theme
+# - Re-run scans
 ```
 
-**Expected Output:** The audit reports vulnerabilities in jQuery 3.4.1 (prototype pollution) and DataTables 1.10.20 (XSS). The developer can then upgrade to patched versions.
+**Expected Output**
+```
+jquery@3.3.1  →  CVE-2019-11358  →  fixed in 3.4.0
+jquery@3.3.1  →  CVE-2020-11022  →  fixed in 3.5.0
+Vendored copy: themes/legacy/js/jquery.js (3.3.1)
+```
 
-**Why this output:** `npm audit` analyses the dependency tree and cross-references against the npm advisory database. It reports the severity, the affected package, and the recommended fix.
-
-### Real-World Cases
-
-- **Enterprise SCA:** Black Duck's report found jQuery to be the most frequent source of vulnerabilities, with eight of the top ten high-risk vulnerabilities found in jQuery.
-- **Malicious packages:** The `jquery.currencies` package was removed from npm after being identified as malicious; the `jquery-bindings` package was compromised in a supply chain attack in November 2025.
-- **Trojanized jQuery Migrate:** In June 2025, a corrupted version of jQuery Migrate was discovered hiding malware in post-build minified bundles.
+**Why this output occurs**: The native audit and OSV-Scanner both match the lockfile version against their respective databases. The `grep` step discovers the vendored copy that SCA could not see.
 
 ---
 
-## Core Concept 3: Vulnerability Monitoring — Continuous Automated Security Audits
+### Real-World Cases
+
+- **Enterprise CI/CD**: Automated SCA on every pull request catches regressions before deployment.
+- **WordPress security plugins**: Scanners flag jQuery Colorbox and jQuery Hover Footnotes CVEs when those plugins are in the inventory.
+- **SBOM generation**: OSV-Scanner and Syft produce CycloneDX or SPDX reports for supply chain transparency.
+
+---
+
+## Core Concept 6: Dependency Security Best Practices
 
 ### Definitions
 
-**Core Definition:** Vulnerability monitoring is the practice of continuously scanning a project's dependencies for known vulnerabilities using automated tools such as npm audit, Snyk, or Retire.js, and receiving alerts when new vulnerabilities are discovered in packages the project uses.
+**Core Definition**
+jQuery dependency security best practices are the consolidated conventions — knowing your versions, upgrading past the CVE thresholds, treating Migrate as temporary, running complementary SCA and SAST, inventorying vendored copies, and pinning production dependencies — that together minimise the risk inherited from jQuery and its ecosystem.
 
-**Technical Definition:** Vulnerability monitoring operates on two levels: (1) **On-demand scanning** — running tools like `npm audit` or `retire` manually or as part of the build process; and (2) **Continuous monitoring** — using services like Snyk Monitor or GitHub Dependabot to receive alerts when new CVEs are published for dependencies in the project. Retire.js is specifically designed for JavaScript libraries, with a curated database covering jQuery, Bootstrap, Angular, and hundreds of npm packages. Snyk provides detailed vulnerability descriptions and remediation advice, and integrates with CI/CD pipelines.
+**Technical Definition**
+Best practices synthesise the individual controls: (1) **know the resolved versions** of jQuery and jQuery Migrate from the lockfile, not the manifest range; (2) **upgrade to ≥ 3.5.0** (preferably the latest 3.7.x or 4.0.0) to remediate both CVE families; (3) **use jQuery Migrate only as a temporary development aid** and remove it before production; (4) **run SCA on every build** — one native audit plus one cross-ecosystem scanner; (5) **run SAST** to find insecure jQuery usage patterns that version updates cannot fix; (6) **inventory vendored and CDN-pinned copies** that SCA cannot see; (7) **pin production dependencies** and use `npm ci` for reproducible installs; and (8) **generate an SBOM** for supply chain transparency.
 
-**Beginner-Friendly Explanation:** New security vulnerabilities are discovered all the time — even in software that was previously considered safe. Vulnerability monitoring means having a system that watches for these discoveries and tells you when a package you use has a problem, so you can update it before attackers exploit it.
+**Beginner-Friendly Explanation**
+Best practices are the habits that keep dependency risk under control. Know what version you are actually running — not what `package.json` says, but what the lockfile resolved. Upgrade past 3.5.0 so both jQuery security holes are fixed. Use Migrate to help you migrate, not as a permanent crutch. Scan your dependencies on every build with more than one tool. Scan your code for unsafe patterns. Find the copies of jQuery hiding in themes and vendor folders. Pin your production versions so you know exactly what ships. And keep an inventory (SBOM) so you can respond quickly when the next CVE is announced.
+
+---
 
 ### Purposes
 
-- To receive timely alerts when new vulnerabilities are discovered in dependencies.
-- To automate the detection of vulnerable jQuery versions and plugins in CI/CD pipelines.
-- To maintain an up-to-date inventory of all dependencies and their security status.
-- To reduce the window of exposure between vulnerability disclosure and patching.
-- To comply with security policies that require continuous monitoring.
+- **To provide a single actionable checklist** for jQuery dependency security.
+- **To prevent the recurrence of CVE-2019-11358 and CVE-2020-11022/11023**.
+- **To detect vendored copies that SCA misses**.
+- **To integrate dependency security into CI/CD** rather than treating it as a one-time audit.
+- **To establish a baseline for code reviews and supply chain audits**.
+
+---
 
 ### Syntax Rules and Structure
 
-**Complete General Syntax (CI/CD Integration):**
-```yaml
-# GitHub Actions example
-- name: Run security audit
-  run: |
-    npm audit --audit-level=high
-    npx snyk test --severity-threshold=high
-```
+| Practice | Recommended | Avoid |
+|---|---|---|
+| **Version awareness** | `npm ls jquery` from lockfile | Trusting `package.json` ranges |
+| **Upgrade target** | jQuery ≥ 3.5.0 (3.7.x or 4.0.0) | Staying below 3.5.0 |
+| **jQuery Migrate** | Temporary development aid | Shipping Migrate to production long-term |
+| **SCA** | `npm audit` + OSV-Scanner or Snyk | No dependency scanning |
+| **SAST** | Semgrep jQuery rules | Manual review only |
+| **Vendored copies** | Manual `grep` inventory | Assuming SCA sees everything |
+| **Lockfile** | Commit, use `npm ci` | Loose manifests in CI |
+| **SBOM** | CycloneDX or SPDX | No component inventory |
 
-| Tool | Monitoring Type | Integration |
-|------|----------------|-------------|
-| `npm audit` | On-demand | CLI, CI/CD |
-| Snyk | Continuous | CLI, CI/CD, GitHub, IDE |
-| Retire.js | On-demand | CLI, Burp/ZAP extensions, Chrome extension |
-| Dependabot | Continuous | GitHub |
+---
 
-**Syntax Rules:**
+### Constraints and Limitations
 
-- Run `npm audit` in CI/CD and fail the build if high-severity vulnerabilities are found.
-- Use Snyk Monitor (`snyk monitor`) to continuously track dependencies and receive alerts.
-- Use Retire.js with its `--path` option to scan both local files and CDN URLs.
-- Configure the audit tool to exclude development-only dependencies if they do not affect production security.
+- **Best practices are context-dependent**; a small static site may not need a full SBOM.
+- **jQuery 4.0 adoption requires plugin compatibility testing**; the 3.7.x line remains valid for legacy ecosystems.
+- **Automation is essential**; manual scans decay.
 
-**Constraints and Limitations:**
+---
 
-- Vulnerability databases may have false positives or lag behind disclosures.
-- `npm audit` only covers npm-managed dependencies; vendored libraries require manual scanning.
-- Continuous monitoring services may require API keys and network access to external services.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Retire.js Scanning a CDN-Loaded jQuery**
+### Annotated Code Example (Consolidated)
 
 ```bash
-# Step 1: Install Retire.js
-npm install -g retire
+# 1. Know the resolved versions
+npm ls jquery jquery-migrate
+# jquery@3.3.1  → vulnerable
+# jquery-migrate@3.5.2  → investigate
 
-# Step 2: Scan a CDN-hosted jQuery version
-retire --path https://code.jquery.com/jquery-3.3.1.min.js
+# 2. Upgrade past the CVE thresholds
+npm install jquery@3.7.1
 
-# Expected output:
-# jquery
-#   ↳ 3.3.1
-#     Severity: High
-#     CVE: CVE-2019-11358
-#     Summary: Prototype Pollution
-#     Info: https://github.com/jquery/jquery/pull/4333
+# 3. Remove Migrate if no longer needed
+npm uninstall jquery-migrate
+
+# 4. Inventory vendored copies
+grep -rn "jQuery v3\." --include="*.js" themes/ vendor/
+# → update or replace any copy below 3.5.0
+
+# 5. Run SCA and SAST in CI
+npm audit
+osv-scanner --lockfile=package-lock.json
+semgrep --config "p/jquery" .
+
+# 6. Commit the lockfile and use npm ci in CI
+npm ci
 ```
 
-**Expected Output:** Retire.js identifies jQuery 3.3.1 as vulnerable to CVE-2019-11358 (prototype pollution) and reports the severity and remediation information.
+**Expected Output**
+```
+jquery@3.7.1          ← remediated
+jquery-migrate removed
+Vendored 3.3.1 copy   ← flagged for manual update
+SCA/SAST              ← no high-severity findings
+```
 
-**Why this output:** Retire.js maintains a database of known vulnerable library versions and their CVEs. It scans the specified path (local file or URL) and matches the detected library version against the database.
-
-### Real-World Cases
-
-- **GitHub Dependabot:** Automatically creates pull requests when a vulnerable dependency is detected.
-- **Snyk in CI:** Fails the build when a high-severity vulnerability is introduced by a new dependency.
-- **Retire.js Chrome extension:** Scans websites in real time to detect vulnerable JavaScript libraries.
-- **Enterprise security dashboards:** Aggregate vulnerability data from multiple projects.
+**Why this output occurs**: Upgrading to 3.7.1 clears CVE-2019-11358 and CVE-2020-11022/11023. Removing Migrate eliminates the compatibility shim. The `grep` step finds the vendored copy that SCA cannot see. CI enforcement prevents regressions.
 
 ---
 
-## Core Concept 4: Removing Obsolete Libraries — Minimizing Attack Surface
-
-### Definitions
-
-**Core Definition:** Removing obsolete libraries is the practice of decommissioning redundant code bases, dead plugins, unused polyfills, and deprecated shims to reduce the number of components that could contain vulnerabilities and minimize the overall attack surface of the application.
-
-**Technical Definition:** jQuery 4.0 removed polyfills for older JavaScript features, the Sizzle selector engine, JSONP, and many deprecated APIs, relying on native implementations in supported browsers. Projects migrating to jQuery 4.x should audit their codebase for usage of these removed features and either replace them with native alternatives or remove them entirely. Additionally, jQuery Migrate — while useful during upgrades — should be removed once the migration is complete, as it re-introduces deprecated behavior that may have security implications. According to practical migration guidance, the recommended approach is: upgrade to 3.6.x first, add jQuery Migrate 4.0 to surface warnings, fix all warnings, and then remove Migrate before switching to 4.x.
-
-**Beginner-Friendly Explanation:** Over time, websites accumulate extra tools — plugins that are no longer used, polyfills for browsers that no longer exist, and compatibility shims that were only needed during an upgrade. Every extra piece of code is a potential security risk. Removing obsolete libraries is like cleaning out your garage: you get rid of things you no longer need, and there is less clutter to worry about.
-
-### Purposes
-
-- To reduce the number of components that could contain vulnerabilities.
-- To eliminate deprecated APIs that may have known security weaknesses.
-- To remove polyfills that are no longer needed, reducing code size and potential attack surface.
-- To comply with modern browser requirements and prepare for jQuery 4.x compatibility.
-- To simplify the codebase and make security auditing more manageable.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax (Removing jQuery Migrate):**
-```html
-<!-- Before: jQuery Migrate included -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://code.jquery.com/jquery-migrate-3.4.1.min.js"></script>
-
-<!-- After: Migrate removed once warnings are resolved -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-```
-
-**Migration Checklist:**
-
-| Step | Action |
-|------|--------|
-| 1 | Upgrade to jQuery 3.6.x (latest 3.x) |
-| 2 | Add jQuery Migrate 4.0 and fix all console warnings |
-| 3 | Remove jQuery Migrate |
-| 4 | Upgrade to jQuery 4.x |
-| 5 | Remove unused plugins and polyfills |
-
-**Syntax Rules:**
-
-- Never remove jQuery Migrate until all deprecation warnings have been resolved.
-- Audit the codebase for usage of removed APIs (`jQuery.trim`, `jQuery.isArray`, `jQuery.parseJSON`, `jQuery.now`, `jQuery.isFunction`).
-- Replace `.toggleClass(true|false)` with explicit `.addClass()` / `.removeClass()`.
-- Replace numeric `.css("width", 100)` with explicit units (`.css("width", "100px")`).
-- Remove polyfills for features that are natively supported in the project's target browsers.
-
-**Constraints and Limitations:**
-
-- Removing a plugin may break functionality if the plugin is still in use; audit usage before removing.
-- Some polyfills may still be needed for older browsers that are within the project's support matrix.
-- jQuery 4.0 removal of Sizzle and JSONP may break plugins that depend on those features.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Auditing for Deprecated API Usage**
-
-Step 1: Scan the codebase for deprecated APIs
-(This would typically be done with a tool like grep or a linter)
-
-Deprecated APIs to search for:
-- jQuery.trim()     → String.prototype.trim
-- jQuery.isArray()  → Array.isArray
-- jQuery.parseJSON() → JSON.parse
-- jQuery.now()      → Date.now
-- jQuery.isFunction() → typeof
-
-Step 2: Replace deprecated APIs with native equivalents
-```js
-// Before:
-var trimmed = jQuery.trim(input);
-
-// After:
-var trimmed = String(input).trim();
-```
-```js
-// Before:
-var arr = jQuery.isArray(value);
-
-// After:
-var arr = Array.isArray(value);
-```
-```js
-// Before:
-var obj = jQuery.parseJSON(jsonString);
-
-// After:
-var obj = JSON.parse(jsonString);
-```
-
-**Expected Output:** After replacing all deprecated APIs, the codebase is compatible with jQuery 4.x and jQuery Migrate can be removed.
-
-**Why this output:** jQuery 4.0 removed these deprecated utilities. Replacing them with native JavaScript equivalents ensures compatibility and eliminates the dependency on the Migrate shim.
-
 ### Real-World Cases
 
-- **WordPress:** The Enable jQuery Migrate Helper plugin can downgrade jQuery versions, but has its own vulnerability (CVE-2026-3279) due to missing capability checks.
-- **Splunk:** Provides an Internal Library Settings page to restrict access to jQuery versions older than 3.5.
-- **Enterprise migration:** The recommended approach is to use jQuery Migrate to surface warnings, fix them, and then remove Migrate before upgrading to 4.x.
-
----
-
-## Enhanced Topic: Subresource Integrity (SRI) Implementation — Enforcing Cryptographic Hash Checks
-
-### Definitions
-
-**Core Definition:** Subresource Integrity (SRI) is a browser security feature that allows a script or stylesheet loaded from an external source (typically a CDN) to be verified against a cryptographic hash, ensuring that the resource has not been tampered with. If the hash does not match, the browser refuses to execute the resource.
-
-**Technical Definition:** SRI is implemented via the `integrity` attribute on `<script>` or `<link>` elements. The attribute value is a base64-encoded cryptographic hash (typically SHA-384) prefixed by the algorithm name (e.g., `sha384-`). When the browser fetches the resource, it computes the hash of the response body and compares it to the value in the `integrity` attribute. If they do not match, the browser blocks the resource and reports a network error. CDNs must serve resources with the `Access-Control-Allow-Origin` header to support SRI. SRI is a W3C standard supported by all modern browsers.
-
-**Beginner-Friendly Explanation:** When you load jQuery from a CDN, you are trusting that the CDN will deliver the correct file. If an attacker compromises the CDN, they could modify the jQuery file to include malicious code. SRI lets you specify a "fingerprint" of the correct file. The browser checks the fingerprint before running the script. If the file has been changed, the browser refuses to run it.
-
-### Purposes
-
-- To protect against supply-chain attacks that compromise CDN-hosted resources.
-- To ensure that the exact version of jQuery (or any library) that was tested is the version that runs in the user's browser.
-- To provide a browser-enforced integrity check that does not depend on the CDN's security.
-- To comply with security best practices and CSP requirements that recommend SRI.
-- To mitigate the risk of malicious code injection through third-party CDNs.
-
-### Syntax Rules and Structure
-
-**Complete General Syntax:**
-```html
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs"
-        crossorigin="anonymous"></script>
-```
-
-| Component | Description |
-|-----------|-------------|
-| `src` | The URL of the resource. |
-| `integrity` | The base64-encoded hash, prefixed by the algorithm (e.g., `sha384-`). |
-| `crossorigin="anonymous"` | Required for cross-origin SRI; tells the browser not to send credentials. |
-
-**Generating a Hash:**
-```bash
-curl -s https://code.jquery.com/jquery-3.7.1.min.js | \
-  openssl dgst -sha384 -binary | \
-  openssl base64 -A
-```
-
-**Syntax Rules:**
-
-- The `integrity` attribute is required for SRI; the `crossorigin` attribute is required for cross-origin resources.
-- Use SHA-384 (recommended) or SHA-256; SHA-1 is not supported.
-- The hash must match the exact bytes of the resource; even a whitespace change will cause a mismatch.
-- CDNs must set `Access-Control-Allow-Origin` for SRI to work cross-origin.
-- Use a hash generator tool like srihash.org to generate the correct `integrity` value.
-
-**Constraints and Limitations:**
-
-- SRI hashes must be updated when the resource is updated; this requires a build process or manual updating.
-- SRI does not protect against server-side compromise of the origin server, only CDN tampering.
-- Some older browsers do not support SRI; the resource loads without verification in those browsers.
-- SRI does not prevent the CDN from serving a different (valid) version of the file if the URL is not version-pinned.
-
-### Multiple Annotated Complete Step by Step Code Examples and Their Expected Outputs
-
-**Example 1: Loading jQuery with SRI**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>SRI Demo</title>
-  <!-- Step 1: Load jQuery with SRI from the official CDN -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-          integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs"
-          crossorigin="anonymous"></script>
-</head>
-<body>
-  <p id="log"></p>
-
-  <script>
-    $(function() {
-      // Step 2: Verify that jQuery loaded successfully
-      if (typeof jQuery !== "undefined") {
-        $("#log").text("jQuery " + $.fn.jquery + " loaded with SRI verification.");
-      } else {
-        $("#log").text("jQuery failed to load (SRI hash mismatch or network error).");
-      }
-    });
-  </script>
-</body>
-</html>
-```
-
-**Expected Output:**
-```
-jQuery 3.7.1 loaded with SRI verification.
-```
-
-**Why this output:** The browser fetches jQuery 3.7.1 from `code.jquery.com`, computes the SHA-384 hash of the response, and compares it to the value in the `integrity` attribute. If they match, the script executes; if not, the browser blocks it. The script then verifies that jQuery is available and displays its version.
-
-### Real-World Cases
-
-- **Official jQuery CDN:** `code.jquery.com` provides SRI hashes for all jQuery versions.
-- **cdnjs and jsDelivr:** Both support SRI and provide hash values for their hosted libraries.
-- **Google Hosted Libraries:** Provides SRI hashes for jQuery and other libraries.
-- **Enterprise security policies:** Many organizations require SRI for all externally loaded scripts.
+- **Code reviews**: A checklist ensures that new jQuery dependencies meet version thresholds.
+- **CI/CD pipelines**: Automated SCA and SAST gates block vulnerable dependencies from reaching production.
+- **Legacy modernization**: Replacing bundled jQuery 1.x copies with 3.7.x or 4.0.0 is a common remediation project.
 
 ---
 
 ## References
 
-- jQuery Prototype Pollution: CVE-2019-11358 Re-Emerges — Safeguard — https://safeguard.sh/resources/blog/jquery-prototype-pollution-vulnerability-re-emerges
-- jQuery 3.3.1 Prototype Pollution & XSS Exploit — Exploit Database — https://www.exploit-db.com/exploits/52141
-- jQuery 3.5.0 Released! — Official jQuery Blog — https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/
-- CVE-2020-11023 — CIRCL Vulnerability Lookup — https://vulnerability.circl.lu/vuln/cve-2020-11023
-- jQuery 4.0 Released — heise.de — https://www.heise.de
-- jQuery End of Life (EOL) Dates & Support Status — EOL.Wiki — https://eol.wiki
-- Subresource Integrity (SRI) Implementation — MDN — https://mdn.org.cn/en-US/docs/Web/Security/Practical_implementation_guides/SRI
-- Subresource Integrity — developer.typescripts.org — https://developer.typescripts.org/en-US/docs/Web/Security/Practical_implementation_guides/SRI
-- jQuery CDN Supply Chain Risk Analysis — Safeguard — https://safeguard.sh/resources/blog/jquery-cdn-supply-chain-risk-analysis
-- Hidden Malware Discovered in jQuery Migrate — Trellix — https://www.trellix.com
-- GMS-2025-495: jquery-bindings contains malware — GitLab Advisories — https://advisories.gitlab.com
-- Black Duck OSSRA Report — Black Duck — https://www.blackduck.com
-- JavaScript安全审计 — php.cn — https://www.php.cn/faq/1771922.html
-- Retire.js Chrome Extension — Chrome Web Store — https://chromewebstore.google.com
-- npm audit — npm Documentation — https://docs.npmjs.com/cli/v10/commands/npm-audit
-- Splunk jQuery Upgrade Readiness — Splunk Documentation — https://docs.splunk.com
-- jQuery 4.0 Migration Guide — biton.co.jp — https://www.biton.co.jp/blog_61.html
-- CVE-2026-3279 Enable jQuery Migrate Helper — VulDB — https://vuldb.com
-- jQuery Migrate: A Practical Security Guide — Safeguard — https://safeguard.sh/resources/blog/jquery-migrate-practical-security-guide
-- OWASP Dependency-Check — OWASP — https://owasp.org/www-project-dependency-check/
+- jQuery 4.0.0 Released | jQuery Blog — https://blog.jquery.com/2026/01/17/jquery-4-0-0/
+- jQuery Prototype Pollution: CVE-2019-11358 Re-Emerges | Safeguard — https://safeguard.sh/resources/blog/jquery-prototype-pollution-vulnerability-re-emerges
+- CVE-2020-11022: XSS in jQuery via htmlPrefilter | Safeguard — https://safeguard.sh/resources/blog/cve-2020-11022-xss-in-jquery-via-htmlprefilter
+- jQuery 3.6.0 Vulnerabilities: What Scanners Flag & Fixes | Safeguard — https://safeguard.sh/resources/blog/jquery-3-6-0-vulnerabilities-guide
+- jQuery Migrate: A Practical Security Guide | Safeguard — https://safeguard.sh/resources/blog/jquery-migrate
+- CVE-2026-3279 (Enable jQuery Migrate Helper) | NVD — https://nvd.nist.gov/vuln/detail/CVE-2026-3279
+- OSV-Scanner — https://google.github.io/osv-scanner/
+- Snyk CLI — https://github.com/snyk/snyk
+- OWASP Dependency-Check — https://owasp.org/www-project-dependency-check/
+- OWASP SCA Audit Play — https://github.com/owasp/secure-agent-playbook
+- npm audit documentation — https://docs.npmjs.com/cli/commands/audit
+- Semgrep jQuery rules — https://semgrep.dev
+- CISA Known Exploited Vulnerabilities (CVE-2020-11023) — https://www.cisa.gov/known-exploited-vulnerabilities-catalog

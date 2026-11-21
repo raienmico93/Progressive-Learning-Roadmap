@@ -861,6 +861,35 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 ---
 
+# JSON and Data Processing
+- [**JSON Fundamentals**](/Web%20Development/JQuery/JSON/JSON.md)
+  - Objects
+  - Arrays
+  - Strings
+  - Numbers
+  - Boolean values
+  - Null
+
+- [**Serialization, Parsing, and Transformation**](/Web%20Development/JQuery/JSON/JSONProcessing.md)
+  - `JSON.parse()`
+  - Defensive programming
+  - `JSON.stringify()`
+  - Manipulating JSON structures before rendering
+
+- [**Iteration and Data Processing**](/Web%20Development/JQuery/JSON/IterationAndDataProcessing.md)
+  - Iterating array collections
+  - Safe Deep Property Access
+  - Dynamic Key-Value Pairs
+
+- [**Rendering JSON into the DOM**](/Web%20Development/JQuery/JSON/RenderingJSON.md)
+  - Dynamic lists
+  - Tables
+  - Cards
+  - Conditional rendering
+  - Empty-state handling
+
+---
+
 # VIII. Utilities
 
 - [**49. jQuery Utilities**](/Web%20Development/JQuery/Utilities/Utilities.md)
@@ -1086,7 +1115,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # X. jQuery UI
 
-- **58. jQuery UI Fundamentals**
+- [**58. jQuery UI Fundamentals**](/Web%20Development/JQuery/UI/UI.md)
   - jQuery UI
   - jQuery UI installation
   - jQuery UI themes
@@ -1096,7 +1125,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - jQuery UI utilities
   - jQuery UI best practices
 
-- **59. jQuery UI Interactions**
+- [**59. jQuery UI Interactions**](/Web%20Development/JQuery/UI/Interactions.md)
   - Draggable
   - Droppable
   - Resizable
@@ -1184,6 +1213,33 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 ---
 
+# jQuery with HTML and CSS
+
+- [**Dynamic UI Construction**](/Web%20Development/JQuery/HTML%20and%20CSS/DynamicUI.md)
+  - Navigation menus
+  - Tabs
+  - Accordions
+  - Modals
+  - Dropdowns
+  - Tooltips
+  - Carousels
+
+* [**Class-Based UI State**](/Web%20Development/JQuery/HTML%20and%20CSS/ClassBasedUI.md)
+  - Active states
+  - Visibility states
+  - Disabled states
+  - Validation states
+  - Loading states
+
+- [**Responsive Interfaces**](/Web%20Development/JQuery/HTML%20and%20CSS/ResponsiveInterfaces.md)
+  - Resize handling
+  - Responsive behavior
+  - CSS media queries
+  - JavaScript-controlled responsive logic
+  - Avoiding excessive JS layout logic
+
+---
+
 # XII. Performance
 
 - [**66. Performance Fundamentals**](/Web%20Development/JQuery/Performance%20Optimization/Performance.md)
@@ -1236,7 +1292,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Hardware acceleration
   - Animation best practices
 
-- **71. AJAX Performance**
+- [**71. AJAX Performance**](/Web%20Development/JQuery/Performance%20Optimization/AJAX.md)
   - Request batching
   - Request caching
   - Request debouncing
@@ -1244,7 +1300,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Request cancellation
   - AJAX best practices
 
-- **72. Memory Performance**
+- [**72. Memory Performance**](/Web%20Development/JQuery/Performance%20Optimization/Memory.md)
   - Memory leaks
   - Event listener leaks
   - Data leaks
@@ -1253,7 +1309,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Memory profiling
   - Memory best practices
 
-- **73. Performance Profiling**
+- [**73. Performance Profiling**](/Web%20Development/JQuery/Performance%20Optimization/Profiling.md)
   - Browser DevTools
   - Performance panel
   - Memory panel
@@ -1266,7 +1322,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # XIII. Security
 
-- **74. Security Fundamentals**
+- [**74. Security Fundamentals**](/Web%20Development/JQuery/Security/Security.md)
   - Security
   - Threat modeling
   - Attack surface
@@ -1275,7 +1331,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Secure defaults
   - Security best practices
 
-- **75. XSS Prevention**
+- [**75. XSS Prevention**](/Web%20Development/JQuery/Security/XSSPrevention.md)
   - XSS
   - Reflected XSS
   - Stored XSS
@@ -1295,7 +1351,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - DOMPurify
   - XSS prevention best practices
 
-- **76. CSRF Prevention**
+- [**76. CSRF Prevention**](/Web%20Development/JQuery/Security/CSRF.md)
   - CSRF
   - CSRF tokens
   - AJAX CSRF
@@ -1304,7 +1360,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Referer validation
   - CSRF prevention best practices
 
-- **77. AJAX Security**
+- [**77. AJAX Security**](/Web%20Development/JQuery/Security/AJAX.md)
   - AJAX security
   - CORS
   - JSONP security
@@ -1313,14 +1369,14 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Authorization
   - AJAX security best practices
 
-- **78. Plugin Security**
+- [**78. Plugin Security**](/Web%20Development/JQuery/Security/Plugin.md)
   - Plugin security
   - Plugin vulnerabilities
   - Plugin auditing
   - Plugin updates
   - Plugin security best practices
 
-- **79. Dependency Security**
+- [**79. Dependency Security**](/Web%20Development/JQuery/Security/Dependency.md)
   - Dependency vulnerabilities
   - jQuery vulnerabilities
   - jQuery updates
@@ -1328,7 +1384,13 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Dependency scanning
   - Dependency security best practices
 
-- **80. Secure Coding Practices**
+- [**Input Security**](/Web%20Development/JQuery/Security/Input.md)
+  - Client-side validation
+  - Server-side validation
+  - Sanitization
+  - Trusted versus untrusted data
+
+- [**80. Secure Coding Practices**](/Web%20Development/JQuery/Security/SecureCodingPractices.md)
   - Input validation
   - Output encoding
   - Least privilege
@@ -1342,7 +1404,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # XIV. jQuery with Modern Frameworks
 
-- **81. jQuery in React**
+- [**81. jQuery in React**](/Web%20Development/JQuery/Modern%20Frameworks/React.md)
   - jQuery in React
   - React refs
   - `useEffect`
@@ -1354,7 +1416,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Integration best practices
   - When to avoid jQuery in React
 
-- **82. jQuery in Vue**
+- [**82. jQuery in Vue**](/Web%20Development/JQuery/Modern%20Frameworks/Vue.md)
   - jQuery in Vue
   - Vue refs
   - Vue lifecycle hooks
@@ -1366,7 +1428,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Integration best practices
   - When to avoid jQuery in Vue
 
-- **83. jQuery in Angular**
+- [**83. jQuery in Angular**](/Web%20Development/JQuery/Modern%20Frameworks/Angular.md)
   - jQuery in Angular
   - Angular ElementRef
   - Angular lifecycle hooks
@@ -1378,7 +1440,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Integration best practices
   - When to avoid jQuery in Angular
 
-- **84. jQuery in Svelte**
+- [**84. jQuery in Svelte**](/Web%20Development/JQuery/Modern%20Frameworks/Svelte.md)
   - jQuery in Svelte
   - Svelte bindings
   - Svelte lifecycle
@@ -1387,7 +1449,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Integration challenges
   - Integration best practices
 
-- **85. jQuery in Alpine.js**
+- [**85. jQuery in Alpine.js**](/Web%20Development/JQuery/Modern%20Frameworks/AlpineJS.md)
   - jQuery in Alpine.js
   - Alpine directives
   - DOM manipulation
@@ -1395,7 +1457,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Integration challenges
   - Integration best practices
 
-- **86. jQuery in htmx**
+- [**86. jQuery in htmx**](/Web%20Development/JQuery/Modern%20Frameworks/htmx.md)
   - jQuery in htmx
   - htmx attributes
   - DOM manipulation
@@ -1403,7 +1465,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Integration challenges
   - Integration best practices
 
-- **87. jQuery in Livewire**
+- [**87. jQuery in Livewire**](/Web%20Development/JQuery/Modern%20Frameworks/Livewire.md)
   - jQuery in Livewire
   - Livewire lifecycle
   - DOM manipulation
@@ -1411,7 +1473,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Integration challenges
   - Integration best practices
 
-- **88. jQuery in Inertia.js**
+- [**88. jQuery in Inertia.js**](/Web%20Development/JQuery/Modern%20Frameworks/InertiaJS.md)
   - jQuery in Inertia
   - Inertia lifecycle
   - DOM manipulation
@@ -1419,7 +1481,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Integration challenges
   - Integration best practices
 
-- **89. Migration Strategies**
+- [**89. Migration Strategies**](/Web%20Development/JQuery/Modern%20Frameworks/MigrationStrategies.md)
   - jQuery to vanilla JavaScript
   - jQuery to React
   - jQuery to Vue
@@ -1435,7 +1497,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
 
 # XV. Legacy Modernization
 
-- **90. Legacy jQuery Code**
+- [**90. Legacy jQuery Code**](/Web%20Development/JQuery/Legacy%20Modernization/LegacyjQueryCode.md)
   - Legacy jQuery code
   - jQuery spaghetti code
   - jQuery anti-patterns
@@ -1445,7 +1507,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - jQuery migration
   - Legacy modernization best practices
 
-- **91. jQuery to Vanilla JavaScript**
+- [**91. jQuery to Vanilla JavaScript**](/Web%20Development/JQuery/Legacy%20Modernization/jQueryToVanilla.md)
   - Selectors
   - DOM manipulation
   - Events
@@ -1456,7 +1518,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Migration tools
   - Migration best practices
 
-- **92. jQuery to Modern Frameworks**
+- [**92. jQuery to Modern Frameworks**](/Web%20Development/JQuery/Legacy%20Modernization/jQueryToModern.md)
   - Migration planning
   - Migration strategy
   - Incremental migration
@@ -1465,7 +1527,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Testing
   - Migration best practices
 
-- **93. jQuery Version Migration**
+- [**93. jQuery Version Migration**](/Web%20Development/JQuery/Legacy%20Modernization/jQueryVersionMigration.md)
   - jQuery 1.x to 2.x
   - jQuery 2.x to 3.x
   - jQuery 3.x to 4.x
@@ -1474,7 +1536,7 @@ jQuery is best learned as more than "a library for DOM shortcuts." The progressi
   - Breaking changes
   - Migration best practices
 
-- **94. jQuery Deprecation**
+- [**94. jQuery Deprecation**](/Web%20Development/JQuery/Legacy%20Modernization/jQueryDeprecation.md)
   - Deprecated methods
   - Removed methods
   - Deprecation warnings

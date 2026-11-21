@@ -135,37 +135,36 @@ CREATE DATABASE database_name
 
 #### Multiple Annotated Complete Step-by-Step Code Examples
 
-##### Example 1: PostgreSQL – Create a database with an explicit owner and encoding
+##### Example 1: PostgreSQL – Create a database <!-- with an explicit owner and encoding -->
 
 ```sql
 -- Step 1: Connect as a superuser or a role with CREATEDB privilege.
 -- (Connection is assumed to be already established.)
 
--- Step 2: Create a new database named "analytics_db"
---         owned by the role "analyst", using UTF-8 encoding.
-CREATE DATABASE analytics_db
-    WITH OWNER = analyst
-         ENCODING = 'UTF8'
-         LC_COLLATE = 'en_US.UTF-8'
-         LC_CTYPE = 'en_US.UTF-8'
-         CONNECTION LIMIT = 50;
+-- Step 2: Create a new database named "analytics_db" owned by the role "analyst", using UTF-8 encoding.
+CREATE DATABASE analytics_db;
 ```
-
+<!--
+   WITH OWNER = analyst
+        ENCODING = 'UTF8'
+        LC_COLLATE = 'en_US.UTF-8'
+        LC_CTYPE = 'en_US.UTF-8'
+        CONNECTION LIMIT = 50;
+-->
 **Expected output** (psql client):
 
 ```text
 CREATE DATABASE
 ```
 
-**Why this output appears**: PostgreSQL returns the command tag `CREATE DATABASE` when the statement succeeds. The database is created by cloning `template1` and applying the specified owner, encoding, locale, and connection limit.
+**Why this output appears**: PostgreSQL returns the command tag `CREATE DATABASE` when the statement succeeds. <!--The database is created by cloning `template1` and applying the specified owner, encoding, locale, and connection limit. -->
 
 ##### Example 2: MySQL – Create a database with a specific character set and collation
 
 ```sql
 -- Step 1: Connect to the MySQL server as a user with CREATE privilege.
 
--- Step 2: Create the database only if it does not already exist,
---         using utf8mb4 and a case-insensitive collation.
+-- Step 2: Create the database only if it does not already exist, using utf8mb4 and a case-insensitive collation.
 CREATE DATABASE IF NOT EXISTS school_db
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;

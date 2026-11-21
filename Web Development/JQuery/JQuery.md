@@ -596,7 +596,7 @@ This roadmap presents jQuery as a progressive learning path, beginning with Java
   * Cards
   * Conditional rendering
   * Empty-state handling
-
+ 
 ---
 
 # XI. jQuery Utilities
